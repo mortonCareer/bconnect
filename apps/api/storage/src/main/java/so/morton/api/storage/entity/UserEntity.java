@@ -1,8 +1,12 @@
+package so.morton.api.storage.entity;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import so.morton.api.storage.value.Role;
+import so.morton.api.storage.value.Trade;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -75,5 +79,18 @@ public class UserEntity extends BaseEntity {
 
     private boolean isValidTrade() {
         return trades.contains(primaryTrade);
+    }
+
+    public void update(String name, String phone, String picture, Trade primaryTrade,
+                       Set<Trade> trades, int experience, String headline, String about, Address address) {
+        this.name = name;
+        this.phone = phone;
+        this.picture = picture;
+        this.primaryTrade = primaryTrade;
+        this.trades = trades != null ? trades : new HashSet<>();
+        this.experience = experience;
+        this.headline = headline;
+        this.about = about;
+        this.address = address;
     }
 }

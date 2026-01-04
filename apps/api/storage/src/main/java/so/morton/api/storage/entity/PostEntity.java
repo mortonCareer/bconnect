@@ -1,4 +1,4 @@
-package io.gongbang.api.infrastructure.model;
+package so.morton.api.storage.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -15,11 +15,11 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostEntity extends BaseEntity {
 
-    @JoinColumn(name = "author_id", nullable = true)
-    private Long author_id;
+    @Column(name = "author_id")
+    private Long authorId;
 
-    @JoinColumn(name = "task_id", nullable = true)
-    private Long task_id;
+    @Column(name = "task_id")
+    private Long taskId;
 
     @ElementCollection
     @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
@@ -29,9 +29,14 @@ public class PostEntity extends BaseEntity {
     private String content;
 
     @Builder
-    public PostEntity(UserEntity author, TaskEntity task, List<String> images, String content) {
-        this.author = author.id;
-        this.task = task.id;
+    public PostEntity(Long authorId, Long taskId, List<String> images, String content) {
+        this.authorId = authorId;
+        this.taskId = taskId;
+        this.images = images != null ? images : new ArrayList<>();
+        this.content = content;
+    }
+
+    public void update(List<String> images, String content) {
         this.images = images != null ? images : new ArrayList<>();
         this.content = content;
     }

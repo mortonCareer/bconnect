@@ -1,4 +1,4 @@
-package io.gongbang.api.infrastructure.model;
+package so.morton.api.storage.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -14,15 +14,14 @@ import java.math.BigDecimal;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Address {
-
     @Column(length = 5)
-    private int zipcode;
+    private String zipcode;
 
     private String city;
 
     private String state;
 
-    private String streetAddress;
+    private String street;
 
     private String detail;
 

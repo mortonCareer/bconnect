@@ -1,4 +1,12 @@
-enum class Trade(val displayName: String) {
+package so.morton.api.storage.value;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public enum Trade {
     DESIGN("설계"),
     DEMOLITION("철거, 확장"),
     MASONRY("미장, 조적, 방수"),
@@ -8,5 +16,7 @@ enum class Trade(val displayName: String) {
     FLOORING("타일, 줄눈, 바닥, 마루, 장판"),
     FURNITURE("가구, 주방, 싱크대, 욕실"),
     TRANSPORT("운송, 중장비, 양중, 곰방"),
-    CLEANING("청소, 간판, 수리")
+    CLEANING("청소, 간판, 수리");
+
+    private final String description;
 }
