@@ -92,3 +92,6 @@ out/
 ### Environments ###
 *.env
 *.properties
+
+### Claude Code ###
+.claude/
