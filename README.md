@@ -36,16 +36,11 @@ morton/
 ```bash
 # 의존성 설치
 pnpm install
-
-# 개발 서버 실행
-pnpm dev
 ```
 
 ### 스크립트
 
 ```bash
-pnpm dev          # 개발 서버
-pnpm build        # 프로덕션 빌드
 pnpm lint         # ESLint
 pnpm format       # Prettier 포맷팅
 pnpm format:check # 포맷 검사
