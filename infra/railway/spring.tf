@@ -80,13 +80,3 @@ resource "railway_variable" "api_sns_enabled" {
 
   depends_on = [railway_variable.api_s3_bucket]
 }
-
-# Nixpacks JDK Version
-resource "railway_variable" "api_nixpacks_jdk" {
-  name           = "NIXPACKS_JDK_VERSION"
-  value          = "17"
-  service_id     = railway_service.api.id
-  environment_id = railway_project.morton.default_environment.id
-
-  depends_on = [railway_variable.api_sns_enabled]
-}
