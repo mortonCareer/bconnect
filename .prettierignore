@@ -3,3 +3,4 @@ pnpm-lock.yaml
 dist
 node_modules
 postcss.config.mjs
+apps/api
