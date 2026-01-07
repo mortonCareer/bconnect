@@ -1,15 +1,15 @@
-# 애플리케이션용 IAM 유저 생성
+# 애플리케이션용 IAM 유저
 resource "aws_iam_user" "app_user" {
   name = "morton-app-storage-user"
   path = "/system/"
 }
 
-# 액세스 키 생성
+# 액세스 키
 resource "aws_iam_access_key" "app_key" {
   user = aws_iam_user.app_user.name
 }
 
-# S3 접근 권한 정책 생성
+# S3 접근 권한 정책
 resource "aws_iam_policy" "s3_access" {
   name        = "MortonAppStorageAccess"
   path        = "/"

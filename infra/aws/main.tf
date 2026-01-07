@@ -7,6 +7,7 @@ resource "aws_s3_bucket" "tfstate" {
   }
 }
 
+# 테라폼 상태 관리용 버킷(버전 관리 활성화)
 resource "aws_s3_bucket_versioning" "tfstate_versioning" {
   bucket = aws_s3_bucket.tfstate.id
 
