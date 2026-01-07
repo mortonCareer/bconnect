@@ -1,8 +1,8 @@
 # A project that is connected to a git repository.
 # Deployments will be created automatically
 # on every branch push and merges onto the Production Branch.
-resource "vercel_project" "morton" {
-  name      = "morton"
+resource "vercel_project" "morton-web" {
+  name      = "morton-web"
   framework = "nextjs"
 
   git_repository = {
