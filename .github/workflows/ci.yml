@@ -7,9 +7,33 @@ on:
     branches: [main]
 
 jobs:
-  ci:
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      career: ${{ steps.filter.outputs.career }}
+      works: ${{ steps.filter.outputs.works }}
+    steps:
+      - uses: actions/checkout@v6
 
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            career:
+              - 'apps/career/**'
+              - 'packages/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+            works:
+              - 'apps/works/**'
+              - 'packages/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+
+  ci-career:
+    needs: changes
+    if: ${{ needs.changes.outputs.career == 'true' }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
@@ -24,10 +48,36 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm lint --filter=career
 
       - name: Format check
         run: pnpm format:check
 
       - name: Build
-        run: pnpm build
+        run: pnpm build --filter=career
+
+  ci-works:
+    needs: changes
+    if: ${{ needs.changes.outputs.works == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint --filter=works
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Build
+        run: pnpm build --filter=works
