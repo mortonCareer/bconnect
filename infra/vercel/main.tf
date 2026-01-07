@@ -8,14 +8,6 @@ terraform {
       version = "~> 2.0"
     }
   }
-
-  backend "s3" {
-    bucket       = "morton-terraform-state"
-    key          = "terraform/state/vercel.tfstate"
-    region       = "ap-northeast-2"
-    encrypt      = true
-    use_lockfile = true
-  }
 }
 
 provider "vercel" {
