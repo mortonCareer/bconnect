@@ -1,27 +1,19 @@
 resource "railway_service" "postgres" {
-  name       = "postgres"
+  name       = "Postgres"
   project_id = railway_project.morton.id
 
   source_image = "ghcr.io/railwayapp-templates/postgres-ssl:17"
-}
 
-resource "railway_service_domain" "postgres_domain" {
-  service_id = railway_service.postgres.id
-  environment_id = railway_project.morton.default_environment.id
-  domain = "" # Railway automatically assigns a domain
-}
+  # Volume은 아직 Terraform으로 생성 불가하여 GUI에서 수동 생성 필요
+  # GUI를 통해 생성된 Volume을 Terraform이 관리하지 않도록 설정
+  lifecycle {
+    ignore_changes = [volume]
+  }
 
-resource "railway_tcp_proxy" "postgres_proxy" {
-  service_id = railway_service.postgres.id
-  environment_id = railway_project.morton.default_environment.id
-  application_port = 5432
-}
-
-resource "railway_volume" "postgres_volume" {
-  name       = "pg-data"
-  project_id = railway_project.morton.id
-  service_id = railway_service.postgres.id
-  mount_path = "/var/lib/postgresql/data"
+  volume = {
+    mount_path = "/var/lib/postgresql/data"
+    name       = "postgres-volume"
+  }
 }
 
 resource "railway_variable" "postgres_user" {
