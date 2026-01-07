@@ -12,6 +12,7 @@ bootJar.enabled = false
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
 
     group = 'so.morton'

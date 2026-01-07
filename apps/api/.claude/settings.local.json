@@ -3,7 +3,10 @@
     "allow": [
       "Bash(tree:*)",
       "Bash(find:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(dir:*)",
+      "Bash(./gradlew build:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []
