@@ -17,7 +17,8 @@
 ```
 morton/
 ├── apps/
-│   ├── web/              # Next.js 웹앱 (PWA)
+│   ├── career/           # Next.js 웹앱 (PWA): 기술자 작업물 업로드 및 일감 매칭
+│   ├── works/            # Next.js 웹앱 (PWA): 업체 구인 공고 등록 및 기술자 매칭, 공정표 관리
 │   └── api/              # Spring Boot (별도 빌드)
 ├── packages/
 │   └── ui/               # 공통 UI 컴포넌트
