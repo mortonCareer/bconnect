@@ -1,8 +1,5 @@
-# A project that is connected to a git repository.
-# Deployments will be created automatically
-# on every branch push and merges onto the Production Branch.
-resource "vercel_project" "morton-web" {
-  name      = "${var.project_name}-web"
+resource "vercel_project" "morton-career" {
+  name      = "${var.project_name}-career"
   framework = "nextjs"
 
   git_repository = {
@@ -18,11 +15,11 @@ resource "vercel_project" "morton-web" {
 
   skew_protection = "12 hours"
 
-  root_directory = "apps/web"
+  root_directory = "apps/career"
 }
 
 resource "vercel_project_environment_variable" "api_url" {
-  project_id = vercel_project.morton-web.id
+  project_id = vercel_project.morton-career.id
   key        = "NEXT_PUBLIC_API_URL"
   value      = var.api_url
   target     = ["production", "preview", "development"]
