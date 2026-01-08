@@ -29,10 +29,10 @@ resource "vercel_project_environment_variable" "career_api_url" {
 }
 
 # ===========================================================================
-# Vercel Project for Morton Works Application
+# Vercel Project for Morton Plan Application
 # ===========================================================================
-resource "vercel_project" "morton-works" {
-  name      = "${var.project_name}-works"
+resource "vercel_project" "morton-plan" {
+  name      = "${var.project_name}-plan"
   framework = "nextjs"
 
   git_repository = {
@@ -48,11 +48,11 @@ resource "vercel_project" "morton-works" {
 
   skew_protection = "12 hours"
 
-  root_directory = "apps/works"
+  root_directory = "apps/plan"
 }
 
 resource "vercel_project_environment_variable" "works_api_url" {
-  project_id = vercel_project.morton-works.id
+  project_id = vercel_project.morton-plan.id
   key        = "NEXT_PUBLIC_API_URL"
   value      = var.api_url
   target     = ["production", "preview", "development"]
