@@ -2,6 +2,7 @@
 
 import { QueryClientProvider, ReactQueryDevtools, getQueryClient } from '@morton/api-client'
 import type { ReactNode } from 'react'
+import '../env'
 
 export function Providers({ children }: { children: ReactNode }) {
   const queryClient = getQueryClient()

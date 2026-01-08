@@ -17,6 +17,7 @@ jobs:
       career: ${{ steps.filter.outputs.career }}
       works: ${{ steps.filter.outputs.works }}
       api: ${{ steps.filter.outputs.api }}
+      plan: ${{ steps.filter.outputs.plan }}
     steps:
       - uses: actions/checkout@v6
 
@@ -29,8 +30,8 @@ jobs:
               - 'packages/**'
               - 'package.json'
               - 'pnpm-lock.yaml'
-            works:
-              - 'apps/works/**'
+            plan:
+              - 'apps/plan/**'
               - 'packages/**'
               - 'package.json'
               - 'pnpm-lock.yaml'
@@ -63,9 +64,9 @@ jobs:
       - name: Build
         run: pnpm --filter morton-career build
 
-  ci-works:
+  ci-plan:
     needs: changes
-    if: ${{ needs.changes.outputs.works == 'true' }}
+    if: ${{ needs.changes.outputs.plan == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -81,7 +82,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm --filter morton-works lint
+        run: pnpm --filter morton-plan lint
 
       - name: Format check
         run: pnpm format:check
@@ -114,3 +115,4 @@ jobs:
         run: |
           cd apps/api
           ./gradlew test --no-daemon
+        run: pnpm --filter morton-plan build
