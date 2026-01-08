@@ -34,9 +34,22 @@ export const commonSchemas = {
 export function validateEnv<T extends z.ZodRawShape>(
   schema: z.ZodObject<T>
 ): z.infer<z.ZodObject<T>> {
+  // Next.js 빌드 타임(SSG) 중에는 환경 변수 검증 스킵
+  // 빌드는 process.env.NEXT_PHASE가 설정되어 있거나
+  // 브라우저 환경이 아닌 곳에서 실행됨
+  const isBuildTime =
+    typeof window === 'undefined' &&
+    (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production')
+
   const parsed = schema.safeParse(process.env)
 
   if (!parsed.success) {
+    if (isBuildTime) {
+      // 빌드 타임에는 경고만 출력하고 빈 객체 반환
+      console.warn('⚠️  Environment variables not set during build time')
+      return {} as unknown as z.infer<z.ZodObject<T>>
+    }
+
     console.error('❌ Invalid environment variables:')
     console.error(JSON.stringify(parsed.error.format(), null, 2))
     throw new Error('Invalid environment variables')
