@@ -19,6 +19,11 @@ resource "vercel_project" "morton-career" {
   skew_protection = "12 hours"
 
   root_directory = "apps/career"
+
+  # Preview deployments are publicly accessible (no Vercel authentication required)
+  vercel_authentication = {
+    deployment_type = "only_production"
+  }
 }
 
 resource "vercel_project_environment_variable" "career_api_url" {
@@ -49,6 +54,11 @@ resource "vercel_project" "morton-plan" {
   skew_protection = "12 hours"
 
   root_directory = "apps/plan"
+
+  # Preview deployments are publicly accessible (no Vercel authentication required)
+  vercel_authentication = {
+    deployment_type = "only_production"
+  }
 }
 
 resource "vercel_project_environment_variable" "works_api_url" {

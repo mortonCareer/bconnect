@@ -1,0 +1,8 @@
+app:
+  database-url: jdbc:h2:mem:testdb
+  database-username: sa
+  database-password: password
+  aws-access-key-id: test-access-key-id
+  aws-secret-access-key: test-secret-access-key
+  aws-region: ap-northeast-2
+  aws-s3-bucket: test-bucket
