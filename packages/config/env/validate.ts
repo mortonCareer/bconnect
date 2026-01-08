@@ -29,7 +29,7 @@ export const commonSchemas = {
  *   NEXT_PUBLIC_FEATURE_FLAG: z.string().optional(),
  * })
  *
- * // 기본 사용 (SKIP_ENV_VALIDATION 환경 변수로 제어 가능)
+ * // 기본 사용 (빌드 타임에 자동 스킵)
  * export const env = validateEnv(envSchema)
  *
  * // 명시적으로 skip
@@ -43,13 +43,14 @@ export function validateEnv<T extends z.ZodRawShape>(
   options?: {
     /**
      * Skip validation entirely (useful for Docker builds, CI, lint, etc.)
-     * Defaults to true when SKIP_ENV_VALIDATION=true is set
+     * Defaults to true when npm_lifecycle_event is 'build' or SKIP_ENV_VALIDATION=true
      */
     skipValidation?: boolean
   }
 ): z.infer<z.ZodObject<T>> {
-  // SKIP_ENV_VALIDATION 환경 변수로 전역 제어 가능 (T3 Env 패턴)
-  const shouldSkip = options?.skipValidation ?? !!process.env.SKIP_ENV_VALIDATION
+  // 빌드 타임에는 검증 스킵, 런타임에만 검증
+  const isBuildTime = process.env.npm_lifecycle_event === 'build'
+  const shouldSkip = options?.skipValidation ?? isBuildTime ?? !!process.env.SKIP_ENV_VALIDATION
 
   if (shouldSkip) {
     console.warn('⚠️  Environment variable validation skipped')
