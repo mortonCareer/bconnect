@@ -98,7 +98,7 @@ variable "s3_bucket_name" {
 # Domain
 # =============================================================================
 
-variable "api_domain" {
-  description = "Custom domain for API (e.g., api.morton.com)"
+variable "domain" {
+  description = "Root domain for the project (e.g., bconnect.to)"
   type        = string
 }

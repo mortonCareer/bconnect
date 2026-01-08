@@ -15,5 +15,5 @@ output "postgres_service_id" {
 
 output "api_domain" {
   description = "API custom domain"
-  value       = var.api_domain # railway_custom_domain.api.domain
+  value       = "api.${var.domain}"
 }

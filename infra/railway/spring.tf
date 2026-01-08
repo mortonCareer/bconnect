@@ -108,3 +108,12 @@ resource "railway_variable" "api_jdk_version" {
 
   depends_on = [railway_variable.api_sns_enabled]
 }
+
+# ===========================================================================
+# Custom Domain for API
+# ===========================================================================
+resource "railway_custom_domain" "api" {
+  service_id     = railway_service.api.id
+  environment_id = railway_project.morton.default_environment.id
+  domain         = "api.${var.domain}"
+}

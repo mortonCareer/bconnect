@@ -29,8 +29,22 @@ resource "vercel_project" "morton-career" {
 resource "vercel_project_environment_variable" "career_api_url" {
   project_id = vercel_project.morton-career.id
   key        = "NEXT_PUBLIC_API_URL"
-  value      = var.api_url
+  value      = "https://api.${var.domain}"
   target     = ["production", "preview", "development"]
+}
+
+# ===========================================================================
+# Domain Configuration for Career
+# ===========================================================================
+resource "vercel_project_domain" "career_root" {
+  project_id = vercel_project.morton-career.id
+  domain     = var.domain
+}
+
+resource "vercel_project_domain" "career_www" {
+  project_id = vercel_project.morton-career.id
+  domain     = "www.${var.domain}"
+  redirect   = vercel_project_domain.career_root.domain
 }
 
 # ===========================================================================
@@ -61,9 +75,17 @@ resource "vercel_project" "morton-plan" {
   }
 }
 
-resource "vercel_project_environment_variable" "works_api_url" {
+resource "vercel_project_environment_variable" "plan_api_url" {
   project_id = vercel_project.morton-plan.id
   key        = "NEXT_PUBLIC_API_URL"
-  value      = var.api_url
+  value      = "https://api.${var.domain}"
   target     = ["production", "preview", "development"]
+}
+
+# ===========================================================================
+# Domain Configuration for Plan
+# ===========================================================================
+resource "vercel_project_domain" "plan" {
+  project_id = vercel_project.morton-plan.id
+  domain     = "plan.${var.domain}"
 }
