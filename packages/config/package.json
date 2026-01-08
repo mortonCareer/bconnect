@@ -7,7 +7,8 @@
     "./eslint/next": "./eslint/next.js",
     "./eslint/base": "./eslint/base.js",
     "./tsconfig/next": "./tsconfig/next.json",
-    "./tsconfig/base": "./tsconfig/base.json"
+    "./tsconfig/base": "./tsconfig/base.json",
+    "./env": "./env/validate.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
@@ -16,5 +17,8 @@
     "globals": "^16.2.0",
     "typescript": "^5",
     "typescript-eslint": "^8.33.0"
+  },
+  "dependencies": {
+    "zod": "^4.3.5"
   }
 }
