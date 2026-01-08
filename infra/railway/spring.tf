@@ -80,3 +80,13 @@ resource "railway_variable" "api_sns_enabled" {
 
   depends_on = [railway_variable.api_s3_bucket]
 }
+
+# Railpack JDK version
+resource "railway_variable" "api_jdk_version" {
+  name           = "RAILPACK_JDK_VERSION"
+  value          = "17"
+  service_id     = railway_service.api.id
+  environment_id = railway_project.morton.default_environment.id
+
+  depends_on = [railway_variable.api_sns_enabled]
+}
