@@ -16,7 +16,7 @@ class AppPropertiesTest {
     @Test
     void shouldFailWhenDatabaseUrlIsBlank() {
         // given
-        AppProperties props = new AppProperties("", "user", "pass");
+        AppProperties props = new AppProperties("", "user", "pass", "key", "secret", "region", "bucket");
 
         // when
         Set<ConstraintViolation<AppProperties>> violations = validator.validate(props);
@@ -30,7 +30,7 @@ class AppPropertiesTest {
     @Test
     void shouldFailWhenDatabaseUsernameIsBlank() {
         // given
-        AppProperties props = new AppProperties("url", "", "pass");
+        AppProperties props = new AppProperties("url", "", "pass", "key", "secret", "region", "bucket");
 
         // when
         Set<ConstraintViolation<AppProperties>> violations = validator.validate(props);
@@ -44,7 +44,7 @@ class AppPropertiesTest {
     @Test
     void shouldFailWhenDatabasePasswordIsBlank() {
         // given
-        AppProperties props = new AppProperties("url", "user", "");
+        AppProperties props = new AppProperties("url", "user", "", "key", "secret", "region", "bucket");
 
         // when
         Set<ConstraintViolation<AppProperties>> violations = validator.validate(props);
@@ -56,21 +56,57 @@ class AppPropertiesTest {
     }
 
     @Test
-    void shouldFailWhenAllFieldsAreBlank() {
+    void shouldFailWhenAwsAccessKeyIsBlank() {
         // given
-        AppProperties props = new AppProperties("", "", "");
+        AppProperties props = new AppProperties("url", "user", "pass", "", "secret", "region", "bucket");
 
         // when
         Set<ConstraintViolation<AppProperties>> violations = validator.validate(props);
 
         // then
-        assertThat(violations).hasSize(3);
+        assertThat(violations).hasSize(1);
+        assertThat(violations.iterator().next().getMessage())
+                .isEqualTo("AWS_ACCESS_KEY_ID is required");
+    }
+
+    @Test
+    void shouldFailWhenAwsSecretKeyIsBlank() {
+        // given
+        AppProperties props = new AppProperties("url", "user", "pass", "key", "", "region", "bucket");
+
+        // when
+        Set<ConstraintViolation<AppProperties>> violations = validator.validate(props);
+
+        // then
+        assertThat(violations).hasSize(1);
+        assertThat(violations.iterator().next().getMessage())
+                .isEqualTo("AWS_SECRET_ACCESS_KEY is required");
+    }
+
+    @Test
+    void shouldFailWhenAllFieldsAreBlank() {
+        // given
+        AppProperties props = new AppProperties("", "", "", "", "", "", "");
+
+        // when
+        Set<ConstraintViolation<AppProperties>> violations = validator.validate(props);
+
+        // then
+        assertThat(violations).hasSize(7);
     }
 
     @Test
     void shouldPassWhenAllFieldsAreProvided() {
         // given
-        AppProperties props = new AppProperties("jdbc:postgresql://localhost/db", "user", "pass");
+        AppProperties props = new AppProperties(
+                "jdbc:postgresql://localhost/db",
+                "user",
+                "pass",
+                "AKIAIOSFODNN7EXAMPLE",
+                "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+                "ap-northeast-2",
+                "my-bucket"
+        );
 
         // when
         Set<ConstraintViolation<AppProperties>> violations = validator.validate(props);

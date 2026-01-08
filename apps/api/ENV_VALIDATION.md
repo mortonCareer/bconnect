@@ -6,9 +6,18 @@ Spring Boot 애플리케이션 시작 시점에 필수 환경 변수를 검증�
 
 ## 필수 환경 변수
 
+### Database
+
 - `DATABASE_URL`: 데이터베이스 연결 URL
 - `DATABASE_USERNAME`: 데이터베이스 사용자명
 - `DATABASE_PASSWORD`: 데이터베이스 비밀번호
+
+### AWS S3
+
+- `AWS_ACCESS_KEY_ID`: AWS IAM 액세스 키 ID
+- `AWS_SECRET_ACCESS_KEY`: AWS IAM 시크릿 액세스 키
+- `AWS_REGION`: AWS 리전 (예: ap-northeast-2)
+- `AWS_S3_BUCKET`: S3 버킷 이름
 
 ## 작동 방식
 
@@ -19,6 +28,7 @@ Spring Boot 애플리케이션 시작 시점에 필수 환경 변수를 검증�
 ## 코드 구조
 
 ### [AppProperties.java](core/src/main/java/so/morton/api/config/AppProperties.java)
+
 ```java
 @Validated
 @ConfigurationProperties(prefix = "app")
@@ -30,16 +40,33 @@ public record AppProperties(
     String databaseUsername,
 
     @NotBlank(message = "DATABASE_PASSWORD is required")
-    String databasePassword
+    String databasePassword,
+
+    @NotBlank(message = "AWS_ACCESS_KEY_ID is required")
+    String awsAccessKeyId,
+
+    @NotBlank(message = "AWS_SECRET_ACCESS_KEY is required")
+    String awsSecretAccessKey,
+
+    @NotBlank(message = "AWS_REGION is required")
+    String awsRegion,
+
+    @NotBlank(message = "AWS_S3_BUCKET is required")
+    String awsS3Bucket
 ) {}
 ```
 
 ### [application.yaml](core/src/main/resources/application.yaml)
+
 ```yaml
 app:
   database-url: ${DATABASE_URL:}
   database-username: ${DATABASE_USERNAME:}
   database-password: ${DATABASE_PASSWORD:}
+  aws-access-key-id: ${AWS_ACCESS_KEY_ID:}
+  aws-secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
+  aws-region: ${AWS_REGION:}
+  aws-s3-bucket: ${AWS_S3_BUCKET:}
 ```
 
 `${ENV_VAR:}` 문법:
@@ -68,10 +95,15 @@ Binding validation errors on app
 ```
 
 ### 로컬 실행 (환경 변수 설정)
+
 ```bash
 export DATABASE_URL=jdbc:postgresql://localhost:5432/mydb
 export DATABASE_USERNAME=myuser
 export DATABASE_PASSWORD=mypass
+export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+export AWS_REGION=ap-northeast-2
+export AWS_S3_BUCKET=my-bucket
 ./gradlew :core:bootRun
 ```
 

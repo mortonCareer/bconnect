@@ -14,6 +14,18 @@ public record AppProperties(
     String databaseUsername,
 
     @NotBlank(message = "DATABASE_PASSWORD is required")
-    String databasePassword
+    String databasePassword,
+
+    @NotBlank(message = "AWS_ACCESS_KEY_ID is required")
+    String awsAccessKeyId,
+
+    @NotBlank(message = "AWS_SECRET_ACCESS_KEY is required")
+    String awsSecretAccessKey,
+
+    @NotBlank(message = "AWS_REGION is required")
+    String awsRegion,
+
+    @NotBlank(message = "AWS_S3_BUCKET is required")
+    String awsS3Bucket
 ) {
 }
