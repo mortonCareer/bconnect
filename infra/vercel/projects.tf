@@ -22,7 +22,7 @@ resource "vercel_project" "morton-career" {
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
-    deployment_type = "only_production"
+    deployment_type = "none"
   }
 }
 
@@ -57,7 +57,7 @@ resource "vercel_project" "morton-plan" {
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
-    deployment_type = "only_production"
+    deployment_type = "none"
   }
 }
 
