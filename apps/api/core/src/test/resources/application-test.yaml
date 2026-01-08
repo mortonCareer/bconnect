@@ -1,0 +1,4 @@
+app:
+  database-url: jdbc:h2:mem:testdb
+  database-username: sa
+  database-password: password

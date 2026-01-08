@@ -1,3 +1,8 @@
 spring:
   application:
     name: api
+
+app:
+  database-url: ${DATABASE_URL:}
+  database-username: ${DATABASE_USERNAME:}
+  database-password: ${DATABASE_PASSWORD:}
