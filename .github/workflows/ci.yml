@@ -16,6 +16,7 @@ jobs:
     outputs:
       career: ${{ steps.filter.outputs.career }}
       plan: ${{ steps.filter.outputs.plan }}
+      api: ${{ steps.filter.outputs.api }}
     steps:
       - uses: actions/checkout@v6
 
@@ -33,6 +34,8 @@ jobs:
               - 'packages/**'
               - 'package.json'
               - 'pnpm-lock.yaml'
+            api:
+              - 'apps/api/**'
 
   ci-career:
     needs: changes
@@ -85,3 +88,29 @@ jobs:
 
       - name: Build
         run: pnpm --filter morton-plan build
+
+  ci-api:
+    needs: changes
+    if: ${{ needs.changes.outputs.api == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x apps/api/gradlew
+
+      - name: Build with Gradle
+        run: |
+          cd apps/api
+          ./gradlew build --no-daemon
+
+      - name: Run tests
+        run: |
+          cd apps/api
+          ./gradlew test --no-daemon
