@@ -1,0 +1,15 @@
+# Production profile configuration
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+
+management:
+  metrics:
+    enable:
+      # ProcessorMetrics fails in Railway container environment due to cgroup compatibility issue
+      # Error: Cannot invoke "jdk.internal.platform.CgroupInfo.getMountPoint()" because "anyController" is null
+      # This is a known issue with Micrometer + Java 17 in certain containerized environments
+      process: false
+      system: false

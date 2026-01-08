@@ -15,13 +15,31 @@ resource "railway_variable" "api_database_url" {
   environment_id = railway_project.morton.default_environment.id
 }
 
+resource "railway_variable" "api_database_username" {
+  name           = "DATABASE_USERNAME"
+  value          = var.db_user
+  service_id     = railway_service.api.id
+  environment_id = railway_project.morton.default_environment.id
+
+  depends_on = [railway_variable.api_database_url]
+}
+
+resource "railway_variable" "api_database_password" {
+  name           = "DATABASE_PASSWORD"
+  value          = var.db_password
+  service_id     = railway_service.api.id
+  environment_id = railway_project.morton.default_environment.id
+
+  depends_on = [railway_variable.api_database_username]
+}
+
 resource "railway_variable" "api_spring_profiles" {
   name           = "SPRING_PROFILES_ACTIVE"
   value          = var.spring_profile
   service_id     = railway_service.api.id
   environment_id = railway_project.morton.default_environment.id
 
-  depends_on = [railway_variable.api_database_url]
+  depends_on = [railway_variable.api_database_password]
 }
 
 # JWT
@@ -63,7 +81,7 @@ resource "railway_variable" "api_aws_region" {
 }
 
 resource "railway_variable" "api_s3_bucket" {
-  name           = "S3_BUCKET_NAME"
+  name           = "AWS_S3_BUCKET"
   value          = var.s3_bucket_name
   service_id     = railway_service.api.id
   environment_id = railway_project.morton.default_environment.id
@@ -79,4 +97,14 @@ resource "railway_variable" "api_sns_enabled" {
   environment_id = railway_project.morton.default_environment.id
 
   depends_on = [railway_variable.api_s3_bucket]
+}
+
+# Railpack JDK version
+resource "railway_variable" "api_jdk_version" {
+  name           = "RAILPACK_JDK_VERSION"
+  value          = "17"
+  service_id     = railway_service.api.id
+  environment_id = railway_project.morton.default_environment.id
+
+  depends_on = [railway_variable.api_sns_enabled]
 }
