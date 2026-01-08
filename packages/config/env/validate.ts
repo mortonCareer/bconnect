@@ -15,6 +15,7 @@ export const commonSchemas = {
  * 프로세스 시작 시 호출하여 환경 변수를 검증합니다
  *
  * @param schema - zod 스키마 객체
+ * @param options - 검증 옵션
  * @throws {Error} 환경 변수가 유효하지 않을 경우
  * @returns 검증되고 타입이 지정된 환경 변수 객체
  *
@@ -28,28 +29,36 @@ export const commonSchemas = {
  *   NEXT_PUBLIC_FEATURE_FLAG: z.string().optional(),
  * })
  *
+ * // 기본 사용 (SKIP_ENV_VALIDATION 환경 변수로 제어 가능)
  * export const env = validateEnv(envSchema)
+ *
+ * // 명시적으로 skip
+ * export const env = validateEnv(envSchema, {
+ *   skipValidation: process.env.npm_lifecycle_event === 'lint'
+ * })
  * ```
  */
 export function validateEnv<T extends z.ZodRawShape>(
-  schema: z.ZodObject<T>
+  schema: z.ZodObject<T>,
+  options?: {
+    /**
+     * Skip validation entirely (useful for Docker builds, CI, lint, etc.)
+     * Defaults to true when SKIP_ENV_VALIDATION=true is set
+     */
+    skipValidation?: boolean
+  }
 ): z.infer<z.ZodObject<T>> {
-  // Next.js 빌드 타임(SSG) 중에는 환경 변수 검증 스킵
-  // 빌드는 process.env.NEXT_PHASE가 설정되어 있거나
-  // 브라우저 환경이 아닌 곳에서 실행됨
-  const isBuildTime =
-    typeof window === 'undefined' &&
-    (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production')
+  // SKIP_ENV_VALIDATION 환경 변수로 전역 제어 가능 (T3 Env 패턴)
+  const shouldSkip = options?.skipValidation ?? !!process.env.SKIP_ENV_VALIDATION
+
+  if (shouldSkip) {
+    console.warn('⚠️  Environment variable validation skipped')
+    return process.env as unknown as z.infer<z.ZodObject<T>>
+  }
 
   const parsed = schema.safeParse(process.env)
 
   if (!parsed.success) {
-    if (isBuildTime) {
-      // 빌드 타임에는 경고만 출력하고 빈 객체 반환
-      console.warn('⚠️  Environment variables not set during build time')
-      return {} as unknown as z.infer<z.ZodObject<T>>
-    }
-
     console.error('❌ Invalid environment variables:')
     console.error(JSON.stringify(parsed.error.format(), null, 2))
     throw new Error('Invalid environment variables')
