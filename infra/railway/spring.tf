@@ -10,7 +10,7 @@ resource "railway_service" "api" {
 # Database connection
 resource "railway_variable" "api_database_url" {
   name           = "DATABASE_URL"
-  value          = "postgresql://${var.db_user}:${var.db_password}@$${${railway_service.postgres.name}.RAILWAY_PRIVATE_DOMAIN}:5432/${var.db_name}"
+  value          = "jdbc:postgresql://${var.db_user}:${var.db_password}@$${{${railway_service.postgres.name}.RAILWAY_PRIVATE_DOMAIN}}:5432/${var.db_name}"
   service_id     = railway_service.api.id
   environment_id = railway_project.morton.default_environment.id
 }
