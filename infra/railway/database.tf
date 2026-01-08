@@ -17,25 +17,25 @@ resource "railway_service" "postgres" {
 }
 
 resource "railway_variable" "postgres_user" {
-  name         = "POSTGRES_USER"
-  value        = var.db_user
-  service_id   = railway_service.postgres.id
+  name           = "POSTGRES_USER"
+  value          = var.db_user
+  service_id     = railway_service.postgres.id
   environment_id = railway_project.morton.default_environment.id
 }
 
 resource "railway_variable" "postgres_password" {
-  name         = "POSTGRES_PASSWORD"
-  value        = var.db_password
-  service_id   = railway_service.postgres.id
+  name           = "POSTGRES_PASSWORD"
+  value          = var.db_password
+  service_id     = railway_service.postgres.id
   environment_id = railway_project.morton.default_environment.id
 
   depends_on = [railway_variable.postgres_user]
 }
 
 resource "railway_variable" "postgres_db" {
-  name         = "POSTGRES_DB"
-  value        = var.db_name
-  service_id   = railway_service.postgres.id
+  name           = "POSTGRES_DB"
+  value          = var.db_name
+  service_id     = railway_service.postgres.id
   environment_id = railway_project.morton.default_environment.id
 
   depends_on = [railway_variable.postgres_password]

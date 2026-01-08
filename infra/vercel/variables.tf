@@ -4,8 +4,8 @@ variable "vercel_api_token" {
   sensitive   = true
 }
 
-variable "api_url" {
-  description = "Backend API URL (from Railway)"
+variable "domain" {
+  description = "Root domain for the project (e.g., bconnect.to)"
   type        = string
 }
 
