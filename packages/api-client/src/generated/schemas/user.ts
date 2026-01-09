@@ -4,9 +4,13 @@
  * Morton API
  * OpenAPI spec version: 1.0.0
  */
+import type { UserRole } from './userRole'
 
 export interface User {
   id?: number
+  phone?: string
   username?: string
   name?: string
+  picture?: string
+  role?: UserRole
 }

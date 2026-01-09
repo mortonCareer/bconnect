@@ -7,6 +7,85 @@ servers:
   - url: http://localhost:8080
 
 paths:
+  # =====================
+  # Auth Endpoints
+  # =====================
+  /api/v1/auth/send-code:
+    post:
+      operationId: sendVerificationCode
+      tags: [Auth]
+      summary: Send SMS verification code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendCodeRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendCodeResponse'
+
+  /api/v1/auth/verify-code:
+    post:
+      operationId: verifyCode
+      tags: [Auth]
+      summary: Verify SMS code and get tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyCodeRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /api/v1/auth/refresh:
+    post:
+      operationId: refreshToken
+      tags: [Auth]
+      summary: Refresh access token using refresh token cookie
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+
+  /api/v1/auth/logout:
+    post:
+      operationId: logout
+      tags: [Auth]
+      summary: Logout and invalidate refresh token
+      responses:
+        '200':
+          description: OK
+
+  /api/v1/auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [Auth]
+      summary: Get current authenticated user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  # =====================
+  # User Endpoints
+  # =====================
   /api/v1/users:
     get:
       operationId: getUsers
@@ -83,16 +162,69 @@ paths:
 
 components:
   schemas:
+    # =====================
+    # Auth Schemas
+    # =====================
+    SendCodeRequest:
+      type: object
+      required: [phone]
+      properties:
+        phone:
+          type: string
+          description: Phone number in E.164 format (e.g., +821012345678)
+
+    SendCodeResponse:
+      type: object
+      properties:
+        expiresAt:
+          type: string
+          format: date-time
+          description: When the verification code expires
+
+    VerifyCodeRequest:
+      type: object
+      required: [phone, code]
+      properties:
+        phone:
+          type: string
+        code:
+          type: string
+          description: 6-digit verification code
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    RefreshResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+
+    # =====================
+    # User Schemas
+    # =====================
     User:
       type: object
       properties:
         id:
           type: integer
           format: int64
+        phone:
+          type: string
         username:
           type: string
         name:
           type: string
+        picture:
+          type: string
+        role:
+          type: string
+          enum: [USER, ADMIN]
 
     CreateUserRequest:
       type: object
