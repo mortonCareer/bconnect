@@ -22,10 +22,478 @@ import type {
   UseSuspenseQueryResult,
 } from '@tanstack/react-query'
 
-import type { CreateUserRequest, UpdateUserRequest, User } from './schemas'
+import type {
+  AuthResponse,
+  CreateUserRequest,
+  RefreshResponse,
+  SendCodeRequest,
+  SendCodeResponse,
+  UpdateUserRequest,
+  User,
+  VerifyCodeRequest,
+} from './schemas'
 
 import { customFetch } from '../client'
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1]
+
+/**
+ * @summary Send SMS OTP code
+ */
+export const sendOtp = (
+  sendCodeRequest: SendCodeRequest,
+  options?: SecondParameter<typeof customFetch>,
+  signal?: AbortSignal
+) => {
+  return customFetch<SendCodeResponse>(
+    {
+      url: `/api/v1/auth/otp/send`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: sendCodeRequest,
+      signal,
+    },
+    options
+  )
+}
+
+export const getSendOtpMutationOptions = <TError = unknown, TContext = unknown>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof sendOtp>>,
+    TError,
+    { data: SendCodeRequest },
+    TContext
+  >
+  request?: SecondParameter<typeof customFetch>
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof sendOtp>>,
+  TError,
+  { data: SendCodeRequest },
+  TContext
+> => {
+  const mutationKey = ['sendOtp']
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined }
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof sendOtp>>,
+    { data: SendCodeRequest }
+  > = (props) => {
+    const { data } = props ?? {}
+
+    return sendOtp(data, requestOptions)
+  }
+
+  return { mutationFn, ...mutationOptions }
+}
+
+export type SendOtpMutationResult = NonNullable<Awaited<ReturnType<typeof sendOtp>>>
+export type SendOtpMutationBody = SendCodeRequest
+export type SendOtpMutationError = unknown
+
+/**
+ * @summary Send SMS OTP code
+ */
+export const useSendOtp = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof sendOtp>>,
+      TError,
+      { data: SendCodeRequest },
+      TContext
+    >
+    request?: SecondParameter<typeof customFetch>
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof sendOtp>>,
+  TError,
+  { data: SendCodeRequest },
+  TContext
+> => {
+  const mutationOptions = getSendOtpMutationOptions(options)
+
+  return useMutation(mutationOptions, queryClient)
+}
+
+/**
+ * @summary Verify OTP code and get tokens
+ */
+export const verifyOtp = (
+  verifyCodeRequest: VerifyCodeRequest,
+  options?: SecondParameter<typeof customFetch>,
+  signal?: AbortSignal
+) => {
+  return customFetch<AuthResponse>(
+    {
+      url: `/api/v1/auth/otp/verify`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: verifyCodeRequest,
+      signal,
+    },
+    options
+  )
+}
+
+export const getVerifyOtpMutationOptions = <TError = unknown, TContext = unknown>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof verifyOtp>>,
+    TError,
+    { data: VerifyCodeRequest },
+    TContext
+  >
+  request?: SecondParameter<typeof customFetch>
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof verifyOtp>>,
+  TError,
+  { data: VerifyCodeRequest },
+  TContext
+> => {
+  const mutationKey = ['verifyOtp']
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined }
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof verifyOtp>>,
+    { data: VerifyCodeRequest }
+  > = (props) => {
+    const { data } = props ?? {}
+
+    return verifyOtp(data, requestOptions)
+  }
+
+  return { mutationFn, ...mutationOptions }
+}
+
+export type VerifyOtpMutationResult = NonNullable<Awaited<ReturnType<typeof verifyOtp>>>
+export type VerifyOtpMutationBody = VerifyCodeRequest
+export type VerifyOtpMutationError = unknown
+
+/**
+ * @summary Verify OTP code and get tokens
+ */
+export const useVerifyOtp = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof verifyOtp>>,
+      TError,
+      { data: VerifyCodeRequest },
+      TContext
+    >
+    request?: SecondParameter<typeof customFetch>
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof verifyOtp>>,
+  TError,
+  { data: VerifyCodeRequest },
+  TContext
+> => {
+  const mutationOptions = getVerifyOtpMutationOptions(options)
+
+  return useMutation(mutationOptions, queryClient)
+}
+
+/**
+ * @summary Refresh access token using refresh token cookie
+ */
+export const refreshToken = (
+  options?: SecondParameter<typeof customFetch>,
+  signal?: AbortSignal
+) => {
+  return customFetch<RefreshResponse>(
+    { url: `/api/v1/auth/refresh`, method: 'POST', signal },
+    options
+  )
+}
+
+export const getRefreshTokenMutationOptions = <TError = unknown, TContext = unknown>(options?: {
+  mutation?: UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError, void, TContext>
+  request?: SecondParameter<typeof customFetch>
+}): UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError, void, TContext> => {
+  const mutationKey = ['refreshToken']
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined }
+
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof refreshToken>>, void> = () => {
+    return refreshToken(requestOptions)
+  }
+
+  return { mutationFn, ...mutationOptions }
+}
+
+export type RefreshTokenMutationResult = NonNullable<Awaited<ReturnType<typeof refreshToken>>>
+
+export type RefreshTokenMutationError = unknown
+
+/**
+ * @summary Refresh access token using refresh token cookie
+ */
+export const useRefreshToken = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError, void, TContext>
+    request?: SecondParameter<typeof customFetch>
+  },
+  queryClient?: QueryClient
+): UseMutationResult<Awaited<ReturnType<typeof refreshToken>>, TError, void, TContext> => {
+  const mutationOptions = getRefreshTokenMutationOptions(options)
+
+  return useMutation(mutationOptions, queryClient)
+}
+
+/**
+ * @summary Logout and invalidate refresh token
+ */
+export const logout = (options?: SecondParameter<typeof customFetch>, signal?: AbortSignal) => {
+  return customFetch<void>({ url: `/api/v1/auth/logout`, method: 'POST', signal }, options)
+}
+
+export const getLogoutMutationOptions = <TError = unknown, TContext = unknown>(options?: {
+  mutation?: UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError, void, TContext>
+  request?: SecondParameter<typeof customFetch>
+}): UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError, void, TContext> => {
+  const mutationKey = ['logout']
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined }
+
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof logout>>, void> = () => {
+    return logout(requestOptions)
+  }
+
+  return { mutationFn, ...mutationOptions }
+}
+
+export type LogoutMutationResult = NonNullable<Awaited<ReturnType<typeof logout>>>
+
+export type LogoutMutationError = unknown
+
+/**
+ * @summary Logout and invalidate refresh token
+ */
+export const useLogout = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError, void, TContext>
+    request?: SecondParameter<typeof customFetch>
+  },
+  queryClient?: QueryClient
+): UseMutationResult<Awaited<ReturnType<typeof logout>>, TError, void, TContext> => {
+  const mutationOptions = getLogoutMutationOptions(options)
+
+  return useMutation(mutationOptions, queryClient)
+}
+
+/**
+ * @summary Get current authenticated user
+ */
+export const getCurrentUser = (
+  options?: SecondParameter<typeof customFetch>,
+  signal?: AbortSignal
+) => {
+  return customFetch<User>({ url: `/api/v1/auth/me`, method: 'GET', signal }, options)
+}
+
+export const getGetCurrentUserQueryKey = () => {
+  return [`/api/v1/auth/me`] as const
+}
+
+export const getGetCurrentUserQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>>
+  request?: SecondParameter<typeof customFetch>
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {}
+
+  const queryKey = queryOptions?.queryKey ?? getGetCurrentUserQueryKey()
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCurrentUser>>> = ({ signal }) =>
+    getCurrentUser(requestOptions, signal)
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCurrentUser>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCurrentUserQueryResult = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>
+export type GetCurrentUserQueryError = unknown
+
+export function useGetCurrentUser<
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCurrentUser>>,
+          TError,
+          Awaited<ReturnType<typeof getCurrentUser>>
+        >,
+        'initialData'
+      >
+    request?: SecondParameter<typeof customFetch>
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCurrentUser<
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCurrentUser>>,
+          TError,
+          Awaited<ReturnType<typeof getCurrentUser>>
+        >,
+        'initialData'
+      >
+    request?: SecondParameter<typeof customFetch>
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCurrentUser<
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>>
+    request?: SecondParameter<typeof customFetch>
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get current authenticated user
+ */
+
+export function useGetCurrentUser<
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>>
+    request?: SecondParameter<typeof customFetch>
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetCurrentUserQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>
+  }
+
+  query.queryKey = queryOptions.queryKey
+
+  return query
+}
+
+export const getGetCurrentUserSuspenseQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseSuspenseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>
+  >
+  request?: SecondParameter<typeof customFetch>
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {}
+
+  const queryKey = queryOptions?.queryKey ?? getGetCurrentUserQueryKey()
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCurrentUser>>> = ({ signal }) =>
+    getCurrentUser(requestOptions, signal)
+
+  return { queryKey, queryFn, ...queryOptions } as UseSuspenseQueryOptions<
+    Awaited<ReturnType<typeof getCurrentUser>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCurrentUserSuspenseQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCurrentUser>>
+>
+export type GetCurrentUserSuspenseQueryError = unknown
+
+export function useGetCurrentUserSuspense<
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseSuspenseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>
+    >
+    request?: SecondParameter<typeof customFetch>
+  },
+  queryClient?: QueryClient
+): UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCurrentUserSuspense<
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseSuspenseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>
+    >
+    request?: SecondParameter<typeof customFetch>
+  },
+  queryClient?: QueryClient
+): UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCurrentUserSuspense<
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseSuspenseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>
+    >
+    request?: SecondParameter<typeof customFetch>
+  },
+  queryClient?: QueryClient
+): UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get current authenticated user
+ */
+
+export function useGetCurrentUserSuspense<
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseSuspenseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>
+    >
+    request?: SecondParameter<typeof customFetch>
+  },
+  queryClient?: QueryClient
+): UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetCurrentUserSuspenseQueryOptions(options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as UseSuspenseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> }
+
+  query.queryKey = queryOptions.queryKey
+
+  return query
+}
 
 export const getUsers = (options?: SecondParameter<typeof customFetch>, signal?: AbortSignal) => {
   return customFetch<User[]>({ url: `/api/v1/users`, method: 'GET', signal }, options)

@@ -9,16 +9,17 @@ resource "aws_iam_access_key" "app_key" {
   user = aws_iam_user.app_user.name
 }
 
-# S3 접근 권한 정책
-resource "aws_iam_policy" "s3_access" {
-  name        = "MortonAppStorageAccess"
+# S3 + SNS 접근 권한 정책
+resource "aws_iam_policy" "app_access" {
+  name        = "MortonAppAccess"
   path        = "/"
-  description = "Allows access to the app storage S3 bucket"
+  description = "Allows access to S3 bucket and SNS for SMS OTP"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
+        Sid    = "S3Access"
         Effect = "Allow"
         Action = [
           "s3:PutObject",
@@ -30,13 +31,21 @@ resource "aws_iam_policy" "s3_access" {
           aws_s3_bucket.app_storage.arn,
           "${aws_s3_bucket.app_storage.arn}/*"
         ]
+      },
+      {
+        Sid    = "SNSAccess"
+        Effect = "Allow"
+        Action = [
+          "sns:Publish"
+        ]
+        Resource = ["*"]
       }
     ]
   })
 }
 
 # 유저에게 정책 연결
-resource "aws_iam_user_policy_attachment" "app_s3_attach" {
+resource "aws_iam_user_policy_attachment" "app_access_attach" {
   user       = aws_iam_user.app_user.name
-  policy_arn = aws_iam_policy.s3_access.arn
+  policy_arn = aws_iam_policy.app_access.arn
 }
