@@ -24,9 +24,13 @@
 ## 실행
 
 1. **기존 PR 확인**: `gh pr list --head <현재브랜치>` 실행
-   - PR이 이미 존재하면 → `gh pr view`로 기존 내용 확인 후 `gh pr edit`로 업데이트
+   - PR이 이미 존재하면 → `gh pr view`로 기존 내용 확인 후 업데이트
    - PR이 없으면 → 새로 생성
 2. `git diff main...HEAD`로 변경 파일 분석
 3. 백엔드 관련 파일 포함 여부 확인
 4. 적절한 레이블 결정
-5. `gh pr create` 또는 `gh pr edit` 실행 (--reviewer, --label 옵션 포함)
+5. PR 생성/수정 실행 (--reviewer, --label 옵션 포함)
+
+## PR 수정 시 주의
+
+`gh pr edit`에서 GraphQL 에러 발생 시 → `gh api`로 REST API 직접 호출
