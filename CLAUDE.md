@@ -10,13 +10,14 @@ Morton is a job matching platform connecting contractors and skilled workers (ì—
 
 ```bash
 # Development
-pnpm dev              # Run both career and works apps
+pnpm dev              # Run both career and plan apps
 pnpm dev:career       # Run career app only (port 3000)
-pnpm dev:works        # Run works app only
+pnpm dev:plan         # Run plan app only (port 3001)
 
 # Build
 pnpm build            # Build all apps
 pnpm build:career     # Build career app only
+pnpm build:plan       # Build plan app only
 
 # Lint & Format
 pnpm lint             # ESLint all apps
@@ -41,7 +42,7 @@ cd apps/api
 ### Monorepo Structure
 
 - `apps/career` - Next.js PWA for workers: portfolio upload, job matching
-- `apps/works` - Next.js PWA for contractors: job posting, schedule management
+- `apps/plan` - Next.js PWA for contractors: job posting, schedule management
 - `apps/api` - Spring Boot backend (separately built with Gradle)
 - `apps/mock-server` - Development mock API server
 - `packages/ui` - Shared UI components with Tailwind CSS v4

@@ -31,7 +31,7 @@
 
 **Scope (선택):**
 
-- `career`, `works`, `api`, `ui`, `config`, `infra` 등
+- `career`, `plan`, `api`, `ui`, `config`, `infra` 등
 
 ### Body (한글)
 
