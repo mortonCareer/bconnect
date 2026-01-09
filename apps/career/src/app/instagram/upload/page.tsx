@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 interface ParsedPost {
   id: string
@@ -118,7 +118,8 @@ export default function InstagramUploadPage() {
           Instagram에서 다운로드한 <strong>ZIP 파일</strong>을 그대로 업로드하세요.
           <br />
           <span className="text-sm text-gray-400">
-            (설정 → 계정 센터 → 내 정보 및 권한 → 정보 다운로드 → JSON 형식)
+            (설정 → 계정 센터 → 내 정보 및 권한 → 내 정보 내보내기 → 내보내기 만들기 → 기기로
+            내보내기 → 형식: JSON → 내보내기 시작 → 5~10분 후 이메일 확인)
           </span>
         </p>
 
