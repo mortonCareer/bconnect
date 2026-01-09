@@ -21,18 +21,19 @@
 4. $ARGUMENTS를 기반으로 브랜치명 생성
    - 인자가 없으면 작업 내용 질문
    - 인자에서 적절한 prefix 결정 (feat/, fix/ 등)
+   - **이슈 번호가 있으면 포함** (`#123` → `feat/#123-설명`)
    - kebab-case로 변환
 5. `git checkout -b 브랜치명` 실행
 
 ## 예시
 
 ```
-/branch 로그인 기능 추가
-→ feat/add-login
+/branch #29 로그인 기능 추가
+→ feat/#29-add-login
 
 /branch 버튼 클릭 안됨
 → fix/button-click
 
-/branch CI 파이프라인 개선
-→ chore/improve-ci
+/branch #30
+→ (이슈 #30 내용 조회 후 브랜치명 생성)
 ```
