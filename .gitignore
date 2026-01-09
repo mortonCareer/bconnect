@@ -94,3 +94,6 @@ bin/
 ### Claude Code ###
 .claude/
 .mcp.json
+
+### Lambda build artifacts ###
+infra/aws/lambda/**/function.zip

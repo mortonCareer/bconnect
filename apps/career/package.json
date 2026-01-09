@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.965.0",
     "@morton/api-client": "workspace:*",
     "@morton/ui": "workspace:*",
     "next": "16.1.1",
