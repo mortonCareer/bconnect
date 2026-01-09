@@ -48,12 +48,21 @@ export function validateEnv<T extends z.ZodRawShape>(
     skipValidation?: boolean
   }
 ): z.infer<z.ZodObject<T>> {
-  // 빌드 타임에는 검증 스킵, 런타임에만 검증
+  // 클라이언트 사이드에서는 검증 스킵 (NEXT_PUBLIC_* 외 접근 불가)
+  const isClient = typeof window !== 'undefined'
+  // 빌드 타임에는 검증 스킵
   const isBuildTime = process.env.npm_lifecycle_event === 'build'
-  const shouldSkip = options?.skipValidation ?? isBuildTime ?? !!process.env.SKIP_ENV_VALIDATION
+
+  const shouldSkip =
+    options?.skipValidation === true ||
+    isClient ||
+    isBuildTime ||
+    process.env.SKIP_ENV_VALIDATION === 'true'
 
   if (shouldSkip) {
-    console.warn('⚠️  Environment variable validation skipped')
+    if (!isClient) {
+      console.warn('⚠️  Environment variable validation skipped')
+    }
     return process.env as unknown as z.infer<z.ZodObject<T>>
   }
 
