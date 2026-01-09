@@ -92,7 +92,7 @@ bin/
 *.properties
 
 ### Claude Code ###
-.claude/
+.claude/settings.local.json
 .mcp.json
 
 ### Lambda build artifacts ###
