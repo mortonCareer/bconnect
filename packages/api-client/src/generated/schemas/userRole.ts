@@ -5,9 +5,14 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+/**
+ * User role (null for new users who haven't selected a role)
+ * @nullable
+ */
+export type UserRole = (typeof UserRole)[keyof typeof UserRole] | null
 
 export const UserRole = {
-  USER: 'USER',
+  TECHNICIAN: 'TECHNICIAN',
+  COMPANY: 'COMPANY',
   ADMIN: 'ADMIN',
 } as const

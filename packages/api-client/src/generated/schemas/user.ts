@@ -12,5 +12,9 @@ export interface User {
   username?: string
   name?: string
   picture?: string
+  /**
+   * User role (null for new users who haven't selected a role)
+   * @nullable
+   */
   role?: UserRole
 }

@@ -37,16 +37,16 @@ import { customFetch } from '../client'
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1]
 
 /**
- * @summary Send SMS verification code
+ * @summary Send SMS OTP code
  */
-export const sendVerificationCode = (
+export const sendOtp = (
   sendCodeRequest: SendCodeRequest,
   options?: SecondParameter<typeof customFetch>,
   signal?: AbortSignal
 ) => {
   return customFetch<SendCodeResponse>(
     {
-      url: `/api/v1/auth/send-code`,
+      url: `/api/v1/auth/otp/send`,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       data: sendCodeRequest,
@@ -56,24 +56,21 @@ export const sendVerificationCode = (
   )
 }
 
-export const getSendVerificationCodeMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
+export const getSendOtpMutationOptions = <TError = unknown, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof sendVerificationCode>>,
+    Awaited<ReturnType<typeof sendOtp>>,
     TError,
     { data: SendCodeRequest },
     TContext
   >
   request?: SecondParameter<typeof customFetch>
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof sendVerificationCode>>,
+  Awaited<ReturnType<typeof sendOtp>>,
   TError,
   { data: SendCodeRequest },
   TContext
 > => {
-  const mutationKey = ['sendVerificationCode']
+  const mutationKey = ['sendOtp']
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
@@ -81,30 +78,28 @@ export const getSendVerificationCodeMutationOptions = <
     : { mutation: { mutationKey }, request: undefined }
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof sendVerificationCode>>,
+    Awaited<ReturnType<typeof sendOtp>>,
     { data: SendCodeRequest }
   > = (props) => {
     const { data } = props ?? {}
 
-    return sendVerificationCode(data, requestOptions)
+    return sendOtp(data, requestOptions)
   }
 
   return { mutationFn, ...mutationOptions }
 }
 
-export type SendVerificationCodeMutationResult = NonNullable<
-  Awaited<ReturnType<typeof sendVerificationCode>>
->
-export type SendVerificationCodeMutationBody = SendCodeRequest
-export type SendVerificationCodeMutationError = unknown
+export type SendOtpMutationResult = NonNullable<Awaited<ReturnType<typeof sendOtp>>>
+export type SendOtpMutationBody = SendCodeRequest
+export type SendOtpMutationError = unknown
 
 /**
- * @summary Send SMS verification code
+ * @summary Send SMS OTP code
  */
-export const useSendVerificationCode = <TError = unknown, TContext = unknown>(
+export const useSendOtp = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof sendVerificationCode>>,
+      Awaited<ReturnType<typeof sendOtp>>,
       TError,
       { data: SendCodeRequest },
       TContext
@@ -113,27 +108,27 @@ export const useSendVerificationCode = <TError = unknown, TContext = unknown>(
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof sendVerificationCode>>,
+  Awaited<ReturnType<typeof sendOtp>>,
   TError,
   { data: SendCodeRequest },
   TContext
 > => {
-  const mutationOptions = getSendVerificationCodeMutationOptions(options)
+  const mutationOptions = getSendOtpMutationOptions(options)
 
   return useMutation(mutationOptions, queryClient)
 }
 
 /**
- * @summary Verify SMS code and get tokens
+ * @summary Verify OTP code and get tokens
  */
-export const verifyCode = (
+export const verifyOtp = (
   verifyCodeRequest: VerifyCodeRequest,
   options?: SecondParameter<typeof customFetch>,
   signal?: AbortSignal
 ) => {
   return customFetch<AuthResponse>(
     {
-      url: `/api/v1/auth/verify-code`,
+      url: `/api/v1/auth/otp/verify`,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       data: verifyCodeRequest,
@@ -143,21 +138,21 @@ export const verifyCode = (
   )
 }
 
-export const getVerifyCodeMutationOptions = <TError = unknown, TContext = unknown>(options?: {
+export const getVerifyOtpMutationOptions = <TError = unknown, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof verifyCode>>,
+    Awaited<ReturnType<typeof verifyOtp>>,
     TError,
     { data: VerifyCodeRequest },
     TContext
   >
   request?: SecondParameter<typeof customFetch>
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof verifyCode>>,
+  Awaited<ReturnType<typeof verifyOtp>>,
   TError,
   { data: VerifyCodeRequest },
   TContext
 > => {
-  const mutationKey = ['verifyCode']
+  const mutationKey = ['verifyOtp']
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
@@ -165,28 +160,28 @@ export const getVerifyCodeMutationOptions = <TError = unknown, TContext = unknow
     : { mutation: { mutationKey }, request: undefined }
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof verifyCode>>,
+    Awaited<ReturnType<typeof verifyOtp>>,
     { data: VerifyCodeRequest }
   > = (props) => {
     const { data } = props ?? {}
 
-    return verifyCode(data, requestOptions)
+    return verifyOtp(data, requestOptions)
   }
 
   return { mutationFn, ...mutationOptions }
 }
 
-export type VerifyCodeMutationResult = NonNullable<Awaited<ReturnType<typeof verifyCode>>>
-export type VerifyCodeMutationBody = VerifyCodeRequest
-export type VerifyCodeMutationError = unknown
+export type VerifyOtpMutationResult = NonNullable<Awaited<ReturnType<typeof verifyOtp>>>
+export type VerifyOtpMutationBody = VerifyCodeRequest
+export type VerifyOtpMutationError = unknown
 
 /**
- * @summary Verify SMS code and get tokens
+ * @summary Verify OTP code and get tokens
  */
-export const useVerifyCode = <TError = unknown, TContext = unknown>(
+export const useVerifyOtp = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof verifyCode>>,
+      Awaited<ReturnType<typeof verifyOtp>>,
       TError,
       { data: VerifyCodeRequest },
       TContext
@@ -195,12 +190,12 @@ export const useVerifyCode = <TError = unknown, TContext = unknown>(
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof verifyCode>>,
+  Awaited<ReturnType<typeof verifyOtp>>,
   TError,
   { data: VerifyCodeRequest },
   TContext
 > => {
-  const mutationOptions = getVerifyCodeMutationOptions(options)
+  const mutationOptions = getVerifyOtpMutationOptions(options)
 
   return useMutation(mutationOptions, queryClient)
 }

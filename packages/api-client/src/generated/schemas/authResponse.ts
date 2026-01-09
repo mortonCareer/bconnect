@@ -8,5 +8,7 @@ import type { User } from './user'
 
 export interface AuthResponse {
   accessToken?: string
+  /** True if user was newly registered */
+  isNew?: boolean
   user?: User
 }

@@ -1,8 +1,22 @@
 import { createServer } from 'http'
 
 const users = [
-  { id: 1, phone: '+821012345678', username: 'kim', name: '김철수', picture: null, role: 'USER' },
-  { id: 2, phone: '+821087654321', username: 'lee', name: '이영희', picture: null, role: 'USER' },
+  {
+    id: 1,
+    phone: '+821012345678',
+    username: 'kim',
+    name: '김철수',
+    picture: null,
+    role: 'TECHNICIAN',
+  },
+  {
+    id: 2,
+    phone: '+821087654321',
+    username: 'lee',
+    name: '이영희',
+    picture: null,
+    role: 'COMPANY',
+  },
   { id: 3, phone: '+821011112222', username: 'park', name: '박민수', picture: null, role: 'ADMIN' },
 ]
 
@@ -65,8 +79,8 @@ const server = createServer(async (req, res) => {
   // Auth Endpoints
   // =====================
 
-  // POST /api/v1/auth/send-code
-  if (url === '/api/v1/auth/send-code' && method === 'POST') {
+  // POST /api/v1/auth/otp/send
+  if (url === '/api/v1/auth/otp/send' && method === 'POST') {
     const body = await parseBody(req)
     const { phone } = body
 
@@ -94,8 +108,8 @@ const server = createServer(async (req, res) => {
     return
   }
 
-  // POST /api/v1/auth/verify-code
-  if (url === '/api/v1/auth/verify-code' && method === 'POST') {
+  // POST /api/v1/auth/otp/verify
+  if (url === '/api/v1/auth/otp/verify' && method === 'POST') {
     const body = await parseBody(req)
     const { phone, code } = body
 
@@ -128,14 +142,16 @@ const server = createServer(async (req, res) => {
 
     // 사용자 찾기 또는 생성
     let user = users.find((u) => u.phone === phone)
+    let isNew = false
     if (!user) {
+      isNew = true
       user = {
         id: users.length + 1,
         phone,
         username: null,
         name: null,
         picture: null,
-        role: 'USER',
+        role: null, // 신규 가입자는 role이 null
       }
       users.push(user)
     }
@@ -149,10 +165,10 @@ const server = createServer(async (req, res) => {
       `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=604800; SameSite=Lax`
     )
 
-    console.log(`[Auth] User logged in: ${phone}`)
+    console.log(`[Auth] User ${isNew ? 'registered and ' : ''}logged in: ${phone}`)
 
     res.writeHead(200)
-    res.end(JSON.stringify({ success: true, data: { accessToken, user } }))
+    res.end(JSON.stringify({ success: true, data: { accessToken, isNew, user } }))
     return
   }
 
@@ -231,8 +247,8 @@ const server = createServer(async (req, res) => {
 
 server.listen(8080, () => {
   console.log('Mock server running on http://localhost:8080')
-  console.log('Auth test: POST /api/v1/auth/send-code with { "phone": "+821012345678" }')
+  console.log('Auth test: POST /api/v1/auth/otp/send with { "phone": "+821012345678" }')
   console.log(
-    'Then: POST /api/v1/auth/verify-code with { "phone": "+821012345678", "code": "123456" }'
+    'Then: POST /api/v1/auth/otp/verify with { "phone": "+821012345678", "code": "123456" }'
   )
 })

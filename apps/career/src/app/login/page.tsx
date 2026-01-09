@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSendVerificationCode, useVerifyCode } from '@morton/api-client'
+import { useSendOtp, useVerifyOtp } from '@morton/api-client'
 import { useAuthStore } from '../../stores/auth-store'
 
 export default function LoginPage() {
@@ -13,8 +13,8 @@ export default function LoginPage() {
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  const sendCodeMutation = useSendVerificationCode()
-  const verifyCodeMutation = useVerifyCode()
+  const sendCodeMutation = useSendOtp()
+  const verifyCodeMutation = useVerifyOtp()
 
   const formatPhoneNumber = (value: string) => {
     const numbers = value.replace(/\D/g, '')

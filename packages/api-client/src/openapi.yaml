@@ -10,11 +10,11 @@ paths:
   # =====================
   # Auth Endpoints
   # =====================
-  /api/v1/auth/send-code:
+  /api/v1/auth/otp/send:
     post:
-      operationId: sendVerificationCode
+      operationId: sendOtp
       tags: [Auth]
-      summary: Send SMS verification code
+      summary: Send SMS OTP code
       requestBody:
         required: true
         content:
@@ -29,11 +29,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/SendCodeResponse'
 
-  /api/v1/auth/verify-code:
+  /api/v1/auth/otp/verify:
     post:
-      operationId: verifyCode
+      operationId: verifyOtp
       tags: [Auth]
-      summary: Verify SMS code and get tokens
+      summary: Verify OTP code and get tokens
       requestBody:
         required: true
         content:
@@ -196,6 +196,9 @@ components:
       properties:
         accessToken:
           type: string
+        isNew:
+          type: boolean
+          description: True if user was newly registered
         user:
           $ref: '#/components/schemas/User'
 
@@ -224,7 +227,9 @@ components:
           type: string
         role:
           type: string
-          enum: [USER, ADMIN]
+          enum: [TECHNICIAN, COMPANY, ADMIN]
+          nullable: true
+          description: User role (null for new users who haven't selected a role)
 
     CreateUserRequest:
       type: object
