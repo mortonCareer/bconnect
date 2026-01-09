@@ -13,8 +13,8 @@ def main():
 
     command = data.get("tool_input", {}).get("command", "")
 
-    # git commit이 아니면 통과
-    if "git commit" not in command:
+    # git commit 명령이 아니면 통과 (gh pr create 등 다른 명령 제외)
+    if not re.match(r'^git commit\b', command.strip()):
         sys.exit(0)
 
     # 커밋 메시지 추출
