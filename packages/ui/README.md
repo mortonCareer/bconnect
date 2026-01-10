@@ -5,7 +5,7 @@ Morton 공용 UI 컴포넌트 패키지. [shadcn/ui](https://ui.shadcn.com) 기�
 ## 사용법
 
 ```tsx
-import { Button, Input, Card } from '@morton/ui'
+import { Input } from '@morton/ui'
 import '@morton/ui/styles'
 ```
 
