@@ -86,6 +86,17 @@ export default function SignupAuthPage() {
   const isPhoneValid = isValidPhoneNumber(phone)
   const isCodeValid = code.length === 6
 
+  // 엔터키 submit 핸들러
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      if (step === 'phone' && isPhoneValid && !sendCodeMutation.isPending) {
+        handleSendCode()
+      } else if (step === 'otp' && isCodeValid && !verifyCodeMutation.isPending) {
+        handleVerifyCode()
+      }
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       {/* Top Bar */}
@@ -114,6 +125,7 @@ export default function SignupAuthPage() {
               placeholder="010-1234-5678"
               value={phone}
               onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
+              onKeyDown={handleKeyDown}
               disabled={step === 'otp'}
               className="w-full bg-transparent text-base leading-[1.6] text-[#1B1B1B] placeholder:text-[#9C9C9C] focus:outline-none disabled:opacity-50"
             />
@@ -131,6 +143,7 @@ export default function SignupAuthPage() {
                 maxLength={6}
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onKeyDown={handleKeyDown}
                 className="w-full bg-transparent text-base leading-[1.6] text-[#1B1B1B] placeholder:text-[#9C9C9C] focus:outline-none"
               />
               <div className="flex shrink-0 items-center gap-2.5 text-sm">

@@ -1,16 +1,11 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { Button } from '@morton/ui'
+import Link from 'next/link'
+import { buttonVariants } from '@morton/ui'
 import { useAuthStore } from '@/stores/auth-store'
 
 export default function SignupCompletePage() {
-  const router = useRouter()
   const user = useAuthStore((state) => state.user)
-
-  const handleStart = () => {
-    router.push('/')
-  }
 
   // 사용자 이름 (없으면 기본값)
   const userName = user?.name || '회원'
@@ -48,9 +43,9 @@ export default function SignupCompletePage() {
 
       {/* Fixed Start Button */}
       <div className="fixed inset-x-0 bottom-0 bg-white px-4 pb-8 pt-4">
-        <Button variant="primary" size="full" onClick={handleStart}>
+        <Link href="/" className={buttonVariants({ variant: 'primary', size: 'full' })}>
           시작하기
-        </Button>
+        </Link>
       </div>
     </div>
   )
