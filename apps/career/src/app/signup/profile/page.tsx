@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { BackButton, ProgressBar, Button } from '@morton/ui'
+import { BackButton, ProgressBar, Button, cn } from '@morton/ui'
 
 type ConstructionField =
   | 'tile'
@@ -138,15 +138,17 @@ export default function SignupProfilePage() {
                 <button
                   key={field.id}
                   onClick={() => toggleField(field.id)}
-                  className={`flex flex-col items-center gap-2 rounded-[10px] border p-2 transition-colors ${
+                  className={cn(
+                    'flex flex-col items-center gap-2 rounded-[10px] border p-2 transition-colors',
                     isSelected ? 'border-[#386DFF] bg-[#EAEFFF]' : 'border-[#E5E7EB] bg-white'
-                  }`}
+                  )}
                 >
                   <span className="text-lg">{field.emoji}</span>
                   <span
-                    className={`text-sm font-medium ${
+                    className={cn(
+                      'text-sm font-medium',
                       isSelected ? 'text-[#386DFF]' : 'text-[#9C9C9C]'
-                    }`}
+                    )}
                   >
                     {field.label}
                   </span>
@@ -191,11 +193,12 @@ export default function SignupProfilePage() {
                 <button
                   key={option.id}
                   onClick={() => setExperience(option.id)}
-                  className={`flex h-[30px] items-center justify-center rounded-lg border px-3.5 py-[3px] text-sm font-medium transition-colors ${
+                  className={cn(
+                    'flex h-[30px] items-center justify-center rounded-lg border px-3.5 py-[3px] text-sm font-medium transition-colors',
                     isSelected
                       ? 'border-[#386DFF] bg-[#EAEFFF] font-semibold text-[#386DFF]'
                       : 'border-[#E5E7EB] text-[#9C9C9C]'
-                  }`}
+                  )}
                 >
                   {option.label}
                 </button>
