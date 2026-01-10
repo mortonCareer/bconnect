@@ -4,6 +4,7 @@
 
 - [x] Phase 1 완료 (2024-01-10)
 - [x] Phase 2 완료 (2024-01-10)
+- [x] Phase 3 완료 (2024-01-10)
 
 ---
 
@@ -33,13 +34,13 @@
 
 ---
 
-## Phase 3: 핵심 컴포넌트 추가
+## Phase 3: 핵심 컴포넌트 추가 ✅
 
-- [ ] Input
-- [ ] Card
-- [ ] Form (react-hook-form 연동)
-- [ ] Label
-- [ ] Dialog/Modal
+- [x] Input
+- [x] Label
+- [x] Card
+- [x] Dialog
+- [ ] Form (react-hook-form 연동) - 추후 필요시 추가
 
 ---
 
@@ -67,7 +68,11 @@ packages/ui/
 ├── src/
 │   ├── components/
 │   │   ├── ui/           # shadcn 컴포넌트들
-│   │   │   └── Button.tsx ✅
+│   │   │   ├── Button.tsx ✅
+│   │   │   ├── Input.tsx ✅
+│   │   │   ├── Label.tsx ✅
+│   │   │   ├── Card.tsx ✅
+│   │   │   └── Dialog.tsx ✅
 │   │   └── index.ts      # export
 │   ├── lib/
 │   │   └── utils.ts      # cn() 함수 ✅
@@ -106,5 +111,6 @@ packages/ui/
 ## 메모
 
 - Tailwind v4 + React 19 + Next.js 16 환경
-- shadcn CLI가 모노레포 인식 못해서 수동 설정함
+- shadcn CLI를 packages/ui에서 실행 (components.json, tsconfig.json 추가)
 - OKLCH 색상 포맷 사용 중
+- CLI가 생성한 `src/lib/utils` import → 상대경로 `../../lib/utils`로 수정 필요
