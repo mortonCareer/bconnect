@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { BackButton, ProgressBar, Button } from '@morton/ui'
 
 type ConstructionField =
   | 'tile'
@@ -90,35 +91,8 @@ export default function SignupProfilePage() {
     <div className="flex min-h-screen flex-col bg-white">
       {/* Top Bar */}
       <header className="flex h-[60px] items-center justify-between px-4 py-5">
-        <button
-          onClick={() => router.back()}
-          className="flex size-5 items-center justify-center"
-          aria-label="뒤로가기"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12.5 15L7.5 10L12.5 5"
-              stroke="#9C9C9C"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-
-        {/* Progress Bar - Step 3 of 3 */}
-        <div className="flex h-[3px] w-[330px] gap-1">
-          <div className="h-full flex-1 rounded-full bg-[#386DFF]" />
-          <div className="h-full flex-1 rounded-full bg-[#386DFF]" />
-          <div className="h-full flex-1 rounded-full bg-[#386DFF]" />
-        </div>
-
+        <BackButton onClick={() => router.back()} />
+        <ProgressBar step={3} total={3} />
         <div className="size-5" />
       </header>
 
@@ -249,13 +223,16 @@ export default function SignupProfilePage() {
 
       {/* Fixed Submit Button */}
       <div className="fixed inset-x-0 bottom-0 bg-white px-4 pb-8 pt-4">
-        <button
+        <Button
+          variant="primary"
+          size="full"
           onClick={handleSubmit}
-          disabled={!isValid || isLoading}
-          className="flex h-[50px] w-full items-center justify-center rounded-lg bg-[#386DFF] text-sm font-semibold leading-[1.6] text-white transition-colors disabled:bg-[#F4F4F4] disabled:text-[#9C9C9C]"
+          disabled={!isValid}
+          isLoading={isLoading}
+          loadingText="저장 중..."
         >
-          {isLoading ? '저장 중...' : '완료'}
-        </button>
+          완료
+        </Button>
       </div>
     </div>
   )

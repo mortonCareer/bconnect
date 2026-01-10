@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { Button } from '@morton/ui'
 import { useAuthStore } from '@/stores/auth-store'
 
 export default function SignupCompletePage() {
@@ -47,12 +48,9 @@ export default function SignupCompletePage() {
 
       {/* Fixed Start Button */}
       <div className="fixed inset-x-0 bottom-0 bg-white px-4 pb-8 pt-4">
-        <button
-          onClick={handleStart}
-          className="flex h-[50px] w-full items-center justify-center rounded-lg bg-[#386DFF] text-sm font-semibold leading-[1.6] text-white transition-colors"
-        >
+        <Button variant="primary" size="full" onClick={handleStart}>
           시작하기
-        </button>
+        </Button>
       </div>
     </div>
   )

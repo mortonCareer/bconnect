@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSendOtp, useVerifyOtp } from '@morton/api-client'
 import { formatPhoneNumber, toE164, isValidPhoneNumber } from '@morton/config/phone'
+import { BackButton, ProgressBar, Button } from '@morton/ui'
 import { useAuthStore } from '@/stores/auth-store'
 
 type Step = 'phone' | 'otp'
@@ -89,33 +90,8 @@ export default function SignupAuthPage() {
     <div className="flex min-h-screen flex-col bg-white">
       {/* Top Bar */}
       <header className="flex h-[60px] items-center justify-between px-4 py-5">
-        <button
-          onClick={() => (step === 'otp' ? setStep('phone') : router.back())}
-          className="flex size-5 items-center justify-center"
-          aria-label="뒤로가기"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12.5 15L7.5 10L12.5 5"
-              stroke="#9C9C9C"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        {/* Progress Bar */}
-        <div className="flex h-[3px] w-[330px] gap-1">
-          <div className="h-full flex-1 rounded-full bg-[#386DFF]" />
-          <div className="h-full flex-1 rounded-full bg-[#E5E7EB]" />
-          <div className="h-full flex-1 rounded-full bg-[#E5E7EB]" />
-        </div>
+        <BackButton onClick={() => (step === 'otp' ? setStep('phone') : router.back())} />
+        <ProgressBar step={1} total={3} />
         <div className="size-5" /> {/* Spacer */}
       </header>
 
@@ -182,21 +158,27 @@ export default function SignupAuthPage() {
 
         {/* Submit Button */}
         {step === 'phone' ? (
-          <button
+          <Button
+            variant="outline"
+            size="full"
             onClick={handleSendCode}
-            disabled={!isPhoneValid || sendCodeMutation.isPending}
-            className="flex h-[50px] items-center justify-center rounded-lg border border-[#386DFF] text-sm font-semibold leading-[1.6] text-[#386DFF] transition-colors disabled:border-transparent disabled:bg-[#F4F4F4] disabled:text-[#9C9C9C]"
+            disabled={!isPhoneValid}
+            isLoading={sendCodeMutation.isPending}
+            loadingText="발송 중..."
           >
-            {sendCodeMutation.isPending ? '발송 중...' : '다음'}
-          </button>
+            다음
+          </Button>
         ) : (
-          <button
+          <Button
+            variant="primary"
+            size="full"
             onClick={handleVerifyCode}
-            disabled={!isCodeValid || verifyCodeMutation.isPending}
-            className="flex h-[50px] items-center justify-center rounded-lg bg-[#386DFF] text-sm font-medium leading-[1.6] text-white transition-colors disabled:bg-[#F4F4F4] disabled:text-[#9C9C9C]"
+            disabled={!isCodeValid}
+            isLoading={verifyCodeMutation.isPending}
+            loadingText="확인 중..."
           >
-            {verifyCodeMutation.isPending ? '확인 중...' : '다음으로'}
-          </button>
+            다음으로
+          </Button>
         )}
       </main>
     </div>
