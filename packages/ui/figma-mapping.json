@@ -1,9 +1,36 @@
 {
-  "description": "Figma 컴포넌트 ↔ 코드 매핑 (개발자 관리)",
+  "description": "Figma 컴포넌트 & 페이지 ↔ 코드 매핑 (개발자 관리)",
   "components": {
     "Input": {
       "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=568-3084",
       "codePath": "src/components/ui/Input.tsx"
+    }
+  },
+  "pages": {
+    "signup/auth": {
+      "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=574-4649",
+      "codePath": "apps/career/src/app/signup/auth/page.tsx",
+      "states": [
+        { "name": "phone", "nodeId": "574-4649" },
+        { "name": "otp", "nodeId": "574-4660" },
+        { "name": "otp-error", "nodeId": "574-4675" }
+      ]
+    },
+    "signup/username": {
+      "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=574-4544",
+      "codePath": "apps/career/src/app/signup/username/page.tsx",
+      "states": [
+        { "name": "default", "nodeId": "574-4544" },
+        { "name": "error", "nodeId": "574-4518" }
+      ]
+    },
+    "signup/profile": {
+      "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=574-4554",
+      "codePath": "apps/career/src/app/signup/profile/page.tsx"
+    },
+    "signup/complete": {
+      "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=574-4643",
+      "codePath": "apps/career/src/app/signup/complete/page.tsx"
     }
   }
 }

@@ -35,12 +35,20 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <Link
-            href="/login"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            로그인
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/signup/auth"
+              className="rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+            >
+              회원가입
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              로그인
+            </Link>
+          </div>
         )}
       </div>
 
