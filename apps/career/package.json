@@ -10,11 +10,13 @@
   },
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.965.0",
+    "@hookform/resolvers": "5.2.0",
     "@morton/api-client": "workspace:*",
     "@morton/ui": "workspace:*",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-hook-form": "^7.70.0",
     "zod": "^4.3.5",
     "zustand": "^5.0.9"
   },

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSendOtp, useVerifyOtp } from '@morton/api-client'
+import { useSendOtp, useVerifyOtp, ApiError } from '@morton/api-client'
 import { formatPhoneNumber, toE164, isValidPhoneNumber } from '@morton/config/phone'
 import { BackButton, ProgressBar, Button } from '@morton/ui'
 import { useAuthStore } from '@/stores/auth-store'
@@ -53,8 +53,21 @@ export default function SignupAuthPage() {
         setRemainingTime(Math.floor((expiresAt.getTime() - now.getTime()) / 1000))
       }
       setStep('otp')
-    } catch {
-      setError('인증번호 발송에 실패했습니다.')
+    } catch (err) {
+      if (err instanceof ApiError) {
+        switch (err.code) {
+          case 'OTP_RATE_LIMIT':
+            setError('인증번호 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.')
+            break
+          case 'INVALID_PHONE':
+            setError('유효하지 않은 전화번호입니다.')
+            break
+          default:
+            setError(err.message || '인증번호 발송에 실패했습니다.')
+        }
+      } else {
+        setError('인증번호 발송에 실패했습니다.')
+      }
     }
   }, [phone, setPhoneNumber, setCodeSent, sendCodeMutation])
 
@@ -71,8 +84,24 @@ export default function SignupAuthPage() {
         login(result.user, result.accessToken)
         router.push('/signup/username')
       }
-    } catch {
-      setError('올바르지 않은 인증번호입니다.')
+    } catch (err) {
+      if (err instanceof ApiError) {
+        switch (err.code) {
+          case 'OTP_INVALID':
+            setError('올바르지 않은 인증번호입니다.')
+            break
+          case 'OTP_EXPIRED':
+            setError('인증번호가 만료되었습니다. 재요청해주세요.')
+            break
+          case 'OTP_MAX_ATTEMPTS':
+            setError('인증 시도 횟수를 초과했습니다. 새로운 인증번호를 요청해주세요.')
+            break
+          default:
+            setError(err.message || '인증에 실패했습니다.')
+        }
+      } else {
+        setError('인증에 실패했습니다.')
+      }
     }
   }, [phone, code, login, router, verifyCodeMutation])
 
