@@ -1,25 +1,9 @@
 {
   "description": "Figma 컴포넌트 ↔ 코드 매핑 (개발자 관리)",
   "components": {
-    "Button": {
-      "figmaUrl": null,
-      "codePath": "src/components/ui/Button.tsx"
-    },
     "Input": {
       "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=568-3084",
       "codePath": "src/components/ui/Input.tsx"
-    },
-    "Label": {
-      "figmaUrl": null,
-      "codePath": "src/components/ui/Label.tsx"
-    },
-    "Card": {
-      "figmaUrl": null,
-      "codePath": "src/components/ui/Card.tsx"
-    },
-    "Dialog": {
-      "figmaUrl": null,
-      "codePath": "src/components/ui/Dialog.tsx"
     }
   }
 }

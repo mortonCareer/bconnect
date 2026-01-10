@@ -9,16 +9,6 @@ import { Button, Input, Card } from '@morton/ui'
 import '@morton/ui/styles'
 ```
 
-## 컴포넌트
-
-| 컴포넌트 | 설명                                                         |
-| -------- | ------------------------------------------------------------ |
-| Button   | 버튼 (default, secondary, destructive, outline, ghost, link) |
-| Input    | 텍스트 입력                                                  |
-| Label    | 폼 라벨                                                      |
-| Card     | 카드 컨테이너                                                |
-| Dialog   | 모달 다이얼로그                                              |
-
 ## Figma 연동
 
 Figma MCP를 활용한 단방향 디자인 동기화 워크플로우.
@@ -56,12 +46,6 @@ Figma → Claude (MCP) → 코드 생성/수정
 | `/add-component <name>`   | shadcn 컴포넌트 추가            |
 | `/figma-sync <name\|url>` | Figma 디자인 동기화             |
 | `/design-tokens <url>`    | Figma Variables → CSS Variables |
-
-## 컨벤션
-
-- 파일명: UpperCamelCase (`Button.tsx`)
-- 스타일: Tailwind CSS v4 + OKLCH 색상
-- CSS Variables: `globals.css`에서 관리
 
 ## 디렉토리 구조
 
