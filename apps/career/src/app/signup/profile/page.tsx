@@ -2,38 +2,10 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { BackButton, ProgressBar, Button, cn } from '@morton/ui'
-
-type ConstructionField =
-  | 'tile'
-  | 'wallpaper'
-  | 'flooring'
-  | 'carpentry'
-  | 'demolition'
-  | 'cleaning'
-  | 'electrical'
-  | 'plumbing'
-
-type ExperienceLevel = 'newcomer' | '1-3' | '3-5' | '5-10' | '10+'
-
-const FIELD_OPTIONS: { id: ConstructionField; emoji: string; label: string }[] = [
-  { id: 'tile', emoji: '🪨', label: '타일' },
-  { id: 'wallpaper', emoji: '🎨', label: '도배' },
-  { id: 'flooring', emoji: '🪵', label: '마루/장판' },
-  { id: 'carpentry', emoji: '🪚', label: '목공' },
-  { id: 'demolition', emoji: '🔨', label: '철거' },
-  { id: 'cleaning', emoji: '🧹', label: '청소' },
-  { id: 'electrical', emoji: '⚡', label: '전기' },
-  { id: 'plumbing', emoji: '🔧', label: '설비' },
-]
-
-const EXPERIENCE_OPTIONS: { id: ExperienceLevel; label: string }[] = [
-  { id: 'newcomer', label: '신입' },
-  { id: '1-3', label: '1~3년' },
-  { id: '3-5', label: '3~5년' },
-  { id: '5-10', label: '5~10년' },
-  { id: '10+', label: '10년 이상' },
-]
+import { BackButton, ProgressBar, Button } from '@morton/ui'
+import { FieldSelector, ExperienceSelector } from './components'
+import { FIELD_OPTIONS, EXPERIENCE_OPTIONS } from './constants'
+import type { ConstructionField, ExperienceLevel } from './types'
 
 export default function SignupProfilePage() {
   const router = useRouter()
@@ -48,17 +20,13 @@ export default function SignupProfilePage() {
   const toggleField = (field: ConstructionField) => {
     setSelectedFields((prev) => {
       if (prev.includes(field)) {
-        // 선택 해제
         const newFields = prev.filter((f) => f !== field)
-        // 대표 분야가 해제된 경우 초기화
         if (primaryField === field) {
           setPrimaryField(newFields[0] || null)
         }
         return newFields
       } else if (prev.length < 3) {
-        // 최대 3개까지 선택 가능
         const newFields = [...prev, field]
-        // 첫 선택 시 대표 분야로 설정
         if (!primaryField) {
           setPrimaryField(field)
         }
@@ -75,8 +43,6 @@ export default function SignupProfilePage() {
 
     try {
       // TODO: API 호출로 프로필 저장
-      // await saveProfile({ name, fields: selectedFields, primaryField, experience, affiliation })
-
       router.push('/signup/complete')
     } catch {
       // 에러 처리
@@ -131,31 +97,7 @@ export default function SignupProfilePage() {
               대표 시공분야는 최대 3개까지 선택 가능해요.
             </p>
           </div>
-          <div className="grid grid-cols-4 gap-2">
-            {FIELD_OPTIONS.map((field) => {
-              const isSelected = selectedFields.includes(field.id)
-              return (
-                <button
-                  key={field.id}
-                  onClick={() => toggleField(field.id)}
-                  className={cn(
-                    'flex flex-col items-center gap-2 rounded-[10px] border p-2 transition-colors',
-                    isSelected ? 'border-[#386DFF] bg-[#EAEFFF]' : 'border-[#E5E7EB] bg-white'
-                  )}
-                >
-                  <span className="text-lg">{field.emoji}</span>
-                  <span
-                    className={cn(
-                      'text-sm font-medium',
-                      isSelected ? 'text-[#386DFF]' : 'text-[#9C9C9C]'
-                    )}
-                  >
-                    {field.label}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
+          <FieldSelector options={FIELD_OPTIONS} selected={selectedFields} onToggle={toggleField} />
         </div>
 
         {/* Primary Field */}
@@ -186,25 +128,11 @@ export default function SignupProfilePage() {
           <label className="text-sm leading-[1.6] text-[#1B1B1B]">
             경력<span className="text-[#FF4242]">*</span>
           </label>
-          <div className="flex flex-wrap gap-2">
-            {EXPERIENCE_OPTIONS.map((option) => {
-              const isSelected = experience === option.id
-              return (
-                <button
-                  key={option.id}
-                  onClick={() => setExperience(option.id)}
-                  className={cn(
-                    'flex h-[30px] items-center justify-center rounded-lg border px-3.5 py-[3px] text-sm font-medium transition-colors',
-                    isSelected
-                      ? 'border-[#386DFF] bg-[#EAEFFF] font-semibold text-[#386DFF]'
-                      : 'border-[#E5E7EB] text-[#9C9C9C]'
-                  )}
-                >
-                  {option.label}
-                </button>
-              )
-            })}
-          </div>
+          <ExperienceSelector
+            options={EXPERIENCE_OPTIONS}
+            selected={experience}
+            onSelect={setExperience}
+          />
         </div>
 
         {/* Affiliation */}
