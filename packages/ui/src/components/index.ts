@@ -1,2 +1,2 @@
 // @morton/ui - Components
-export { Button, type ButtonProps } from './Button'
+export { Button, buttonVariants } from './ui/button'
