@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSendOtp, useVerifyOtp } from '@morton/api-client'
-import { useAuthStore } from '../../../stores/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 
 type Step = 'phone' | 'otp'
 

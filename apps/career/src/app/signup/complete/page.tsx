@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '../../../stores/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 
 export default function SignupCompletePage() {
   const router = useRouter()

@@ -65,6 +65,54 @@ get_metadata(fileKey, nodeId)
 - 상태 관리 코드 추가 (useState, useReducer 등)
 - Tailwind 클래스로 스타일링
 
+## 코드 생성 규칙 (필수)
+
+### 네비게이션
+
+- **`router.push()` 사용 금지** → `next/link`의 `Link` 컴포넌트 사용
+- 프리렌더링 최적화를 위해 Link 사용 권장
+
+### 이미지
+
+- **`<img>` 태그 사용 금지** → `next/image`의 `Image` 컴포넌트 사용
+- 이미지 최적화 자동 적용
+
+### 컴포넌트화 규칙
+
+- **한 페이지 내 2회 이상 사용**: 해당 페이지의 `components/` 폴더로 분리
+  - 예: `signup/auth/components/PhoneInput.tsx`
+- **두 페이지 이상에서 공통 사용**: `packages/ui`로 추출
+  - 예: `packages/ui/src/components/Button.tsx`
+
+### 폴더 구조 (Feature-based)
+
+```
+signup/auth/
+├── page.tsx           # 라우트 엔트리 (최대 3단계 중첩)
+├── components/        # 페이지 전용 컴포넌트
+│   ├── PhoneStep.tsx
+│   └── OtpStep.tsx
+├── hooks/             # 페이지 전용 훅
+│   └── useAuthForm.ts
+└── utils/             # 페이지 전용 유틸
+    └── phoneFormat.ts
+```
+
+### TODO 관리
+
+- 추가 작업 필요 시 해당 폴더에 `TODO.md` 생성
+- API 연동, 상태 관리 등 미완성 부분 기록
+
+### 스타일 파일 수정
+
+- **`globals.css` 수정 금지** - 반드시 개발자 검토 후 진행
+- 새로운 컬러/변수 추가 시 개발자에게 제안 후 승인 받기
+
+### 계획 수립
+
+- 코드 생성 전 계획을 먼저 수립
+- 개발자에게 검토 요청 후 진행
+
 ## 상태별 처리
 
 매핑 파일에 `states` 배열이 있으면:
