@@ -3,6 +3,7 @@
 ## 현재 상태
 
 - [x] Phase 1 완료 (2024-01-10)
+- [x] Phase 2 완료 (2024-01-10)
 
 ---
 
@@ -17,7 +18,22 @@
 
 ---
 
-## Phase 2: 핵심 컴포넌트 추가
+## Phase 2: Claude 커맨드 + 파일명 컨벤션 ✅
+
+### Claude 커맨드
+
+- [x] `/add-component` - shadcn 컴포넌트 추가
+- [x] `/figma-sync` - Figma 디자인 동기화
+- [x] `/design-tokens` - Figma Variables → CSS Variables
+- [x] `/code-connect` - Figma Code Connect 매핑
+
+### 파일명 컨벤션
+
+- [x] UpperCamelCase로 통일 (예: `Button.tsx`)
+
+---
+
+## Phase 3: 핵심 컴포넌트 추가
 
 - [ ] Input
 - [ ] Card
@@ -27,7 +43,7 @@
 
 ---
 
-## Phase 3: Figma 연동
+## Phase 4: Figma 연동
 
 - [ ] 디자이너에게 shadcn Figma 라이브러리 공유
   - 링크: <https://www.figma.com/community/file/1342715840824755935>
@@ -37,7 +53,7 @@
 
 ---
 
-## Phase 4: 앱 마이그레이션
+## Phase 5: 앱 마이그레이션
 
 - [ ] career 앱에서 기존 컴포넌트 → shadcn 전환
 - [ ] plan 앱에서 shadcn 컴포넌트 사용
@@ -51,7 +67,7 @@ packages/ui/
 ├── src/
 │   ├── components/
 │   │   ├── ui/           # shadcn 컴포넌트들
-│   │   │   └── button.tsx ✅
+│   │   │   └── Button.tsx ✅
 │   │   └── index.ts      # export
 │   ├── lib/
 │   │   └── utils.ts      # cn() 함수 ✅
