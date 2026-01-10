@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+@source "../../apps/career/src/**/*.tsx";
+@source "../components/**/*.tsx";
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

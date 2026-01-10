@@ -1,3 +1,2 @@
 // @morton/ui - Components
-// Export components here as they are created
-export {}
+export { Button, type ButtonProps } from './Button'
