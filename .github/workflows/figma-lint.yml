@@ -1,0 +1,187 @@
+name: Figma Lint
+
+on:
+  # Figma Webhook (FILE_VERSION_UPDATE) 수신
+  repository_dispatch:
+    types: [figma-version-update]
+
+  # 수동 실행
+  workflow_dispatch:
+    inputs:
+      figma_url:
+        description: 'Figma URL to lint'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Extract Figma info
+        id: figma
+        run: |
+          if [ "${{ github.event_name }}" == "repository_dispatch" ]; then
+            FILE_KEY="${{ github.event.client_payload.file_key }}"
+            FILE_NAME="${{ github.event.client_payload.file_name }}"
+            VERSION_ID="${{ github.event.client_payload.version_id }}"
+            TRIGGERED_BY="${{ github.event.client_payload.triggered_by.handle }}"
+          else
+            # workflow_dispatch - URL에서 추출
+            FIGMA_URL="${{ inputs.figma_url }}"
+            FILE_KEY=$(echo "$FIGMA_URL" | sed -n 's|.*figma.com/design/\([^/]*\)/.*|\1|p')
+            FILE_NAME="manual-trigger"
+            VERSION_ID="latest"
+            TRIGGERED_BY="manual"
+          fi
+
+          echo "file_key=$FILE_KEY" >> $GITHUB_OUTPUT
+          echo "file_name=$FILE_NAME" >> $GITHUB_OUTPUT
+          echo "version_id=$VERSION_ID" >> $GITHUB_OUTPUT
+          echo "triggered_by=$TRIGGERED_BY" >> $GITHUB_OUTPUT
+
+      - name: Figma Lint via API
+        id: lint
+        env:
+          FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
+        run: |
+          FILE_KEY="${{ steps.figma.outputs.file_key }}"
+
+          # Figma API로 파일 정보 가져오기
+          RESPONSE=$(curl -s -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN" \
+            "https://api.figma.com/v1/files/$FILE_KEY?depth=2")
+
+          # 린트 결과 저장
+          LINT_RESULTS=""
+          ERRORS=0
+          WARNINGS=0
+
+          # 1. 컬러 변수 사용 검사 (로컬 스타일 vs 변수)
+          LOCAL_STYLES=$(echo "$RESPONSE" | jq '.styles | length // 0')
+          if [ "$LOCAL_STYLES" -gt 0 ]; then
+            LINT_RESULTS+="⚠️ 로컬 스타일 $LOCAL_STYLES개 발견 - Variables 사용 권장\n"
+            WARNINGS=$((WARNINGS + 1))
+          fi
+
+          # 2. 컴포넌트 사용 검사
+          COMPONENTS=$(echo "$RESPONSE" | jq '.components | length // 0')
+          if [ "$COMPONENTS" -eq 0 ]; then
+            LINT_RESULTS+="ℹ️ 컴포넌트가 없습니다\n"
+          else
+            LINT_RESULTS+="✅ 컴포넌트 $COMPONENTS개 사용 중\n"
+          fi
+
+          # 3. 페이지 이름 컨벤션 검사
+          PAGES=$(echo "$RESPONSE" | jq -r '.document.children[].name')
+          while IFS= read -r page; do
+            if [[ ! "$page" =~ ^[가-힣a-zA-Z]+/.+ ]]; then
+              if [[ "$page" != "Cover" && "$page" != "---" ]]; then
+                LINT_RESULTS+="⚠️ 페이지 이름 컨벤션 미준수: '$page'\n"
+                WARNINGS=$((WARNINGS + 1))
+              fi
+            fi
+          done <<< "$PAGES"
+
+          # 결과 요약
+          if [ $ERRORS -gt 0 ]; then
+            SUMMARY="❌ 린트 실패: $ERRORS 에러, $WARNINGS 경고"
+            STATUS="failure"
+          elif [ $WARNINGS -gt 0 ]; then
+            SUMMARY="⚠️ 린트 경고: $WARNINGS 경고"
+            STATUS="warning"
+          else
+            SUMMARY="✅ 린트 통과"
+            STATUS="success"
+          fi
+
+          echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+          echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
+
+          # 멀티라인 결과 저장
+          {
+            echo "results<<EOF"
+            echo -e "$LINT_RESULTS"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Post results to Slack
+        if: ${{ vars.SLACK_WEBHOOK_URL != '' }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ vars.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-type: application/json' \
+            -d @- << EOF
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "Figma Lint 결과",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*파일:*\n${{ steps.figma.outputs.file_name }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*트리거:*\n${{ steps.figma.outputs.triggered_by }}"
+                  }
+                ]
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*결과:*\n${{ steps.lint.outputs.summary }}\n\n${{ steps.lint.outputs.results }}"
+                }
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "<https://www.figma.com/file/${{ steps.figma.outputs.file_key }}|Figma에서 보기>"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+
+      - name: Create issue on failure
+        if: ${{ steps.lint.outputs.errors > 0 }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "🎨 Figma Lint 실패: ${{ steps.figma.outputs.file_name }}" \
+            --body "## Figma 린트 결과
+
+          **파일:** ${{ steps.figma.outputs.file_name }}
+          **버전:** ${{ steps.figma.outputs.version_id }}
+          **트리거:** ${{ steps.figma.outputs.triggered_by }}
+
+          ### 결과
+          ${{ steps.lint.outputs.summary }}
+
+          ### 상세
+          ${{ steps.lint.outputs.results }}
+
+          ### 링크
+          - [Figma 파일 보기](https://www.figma.com/file/${{ steps.figma.outputs.file_key }})
+          " \
+            --label "design,lint"
