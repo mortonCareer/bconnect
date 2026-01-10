@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSendOtp, useVerifyOtp } from '@morton/api-client'
+import { formatPhoneNumber, toE164, isValidPhoneNumber } from '@morton/config/phone'
 import { useAuthStore } from '@/stores/auth-store'
 
 type Step = 'phone' | 'otp'
@@ -19,23 +20,6 @@ export default function SignupAuthPage() {
 
   const sendCodeMutation = useSendOtp()
   const verifyCodeMutation = useVerifyOtp()
-
-  // 전화번호 포맷팅 (010-1234-5678)
-  const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, '')
-    if (numbers.length <= 3) return numbers
-    if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`
-    return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`
-  }
-
-  // E.164 형식 변환
-  const toE164 = (phoneNumber: string) => {
-    const numbers = phoneNumber.replace(/\D/g, '')
-    if (numbers.startsWith('0')) {
-      return '+82' + numbers.slice(1)
-    }
-    return '+82' + numbers
-  }
 
   // 타이머
   useEffect(() => {
@@ -98,7 +82,7 @@ export default function SignupAuthPage() {
     await handleSendCode()
   }, [handleSendCode])
 
-  const isPhoneValid = phone.replace(/\D/g, '').length >= 10
+  const isPhoneValid = isValidPhoneNumber(phone)
   const isCodeValid = code.length === 6
 
   return (
