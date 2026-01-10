@@ -24,9 +24,8 @@
 ### Claude 커맨드
 
 - [x] `/add-component` - shadcn 컴포넌트 추가
-- [x] `/figma-sync` - Figma 디자인 동기화
+- [x] `/figma-sync` - Figma MCP로 디자인 읽어서 코드 생성
 - [x] `/design-tokens` - Figma Variables → CSS Variables
-- [x] `/code-connect` - Figma Code Connect 매핑
 
 ### 파일명 컨벤션
 
@@ -44,13 +43,46 @@
 
 ---
 
-## Phase 4: Figma 연동
+## Phase 4: Figma 연동 (MCP 기반)
+
+### 워크플로우
+
+```text
+Figma → AI (MCP) → 코드 생성
+```
+
+### 설정
+
+- [x] Figma MCP 연동 완료
+- [x] 컴포넌트 매핑 파일 생성 (`packages/ui/figma-mapping.json`)
+
+### 할 일
 
 - [ ] 디자이너에게 shadcn Figma 라이브러리 공유
   - 링크: <https://www.figma.com/community/file/1342715840824755935>
-- [ ] Code Connect 매핑 파일 작성 (Button.figma.tsx 등)
+- [ ] 디자이너가 컴포넌트 완성 시 개발자에게 Figma URL 전달 → 매핑 파일 업데이트
 - [ ] Variables 커스터마이징 (브랜드 컬러 적용)
   - 현재: `color/red` (#FF4242) → `--primary`로 매핑 필요
+
+### 사용법
+
+1. 디자이너가 Figma 컴포넌트 URL 공유
+2. 개발자가 `figma-mapping.json`에 URL 추가
+3. `/figma-sync [컴포넌트명]` 또는 `/figma-sync [URL]` 실행
+4. AI가 매핑 정보 기반으로 Figma 읽어서 코드 생성/수정
+
+### 매핑 파일 구조
+
+```json
+{
+  "components": {
+    "Button": {
+      "figmaUrl": "https://www.figma.com/design/xxx?node-id=123-456",
+      "codePath": "src/components/ui/Button.tsx"
+    }
+  }
+}
+```
 
 ---
 
@@ -78,6 +110,7 @@ packages/ui/
 │   │   └── utils.ts      # cn() 함수 ✅
 │   └── styles/
 │       └── globals.css   # CSS Variables ✅
+├── figma-mapping.json    # Figma ↔ 코드 매핑 ✅
 └── package.json
 ```
 
@@ -114,3 +147,4 @@ packages/ui/
 - shadcn CLI를 packages/ui에서 실행 (components.json, tsconfig.json 추가)
 - OKLCH 색상 포맷 사용 중
 - CLI가 생성한 `src/lib/utils` import → 상대경로 `../../lib/utils`로 수정 필요
+- **Code Connect 사용 안 함** - Figma MCP로 단방향(Figma → AI → 코드) 워크플로우 사용

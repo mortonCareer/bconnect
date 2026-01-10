@@ -1,7 +1,0 @@
-{
-  "$schema": "https://raw.githubusercontent.com/figma/code-connect/refs/heads/main/cli-schema.json",
-  "codeConnect": {
-    "include": ["packages/ui/src/**/*.tsx"],
-    "parser": "react"
-  }
-}
