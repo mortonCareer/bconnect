@@ -90,7 +90,3 @@ bin/
 ### Environments ###
 *.env
 *.properties
-
-### Claude Code ###
-.claude/
-.mcp.json
