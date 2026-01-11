@@ -1,6 +1,6 @@
 ---
 description: 참조된 코드의 Git 히스토리 분석. 변경 이력, 작성자, 관련 커밋 확인.
-argument-hint: [file-path]
+argument-hint: [file-path|keyword]
 ---
 
 # Git 히스토리 분석: $ARGUMENTS
@@ -19,5 +19,5 @@ argument-hint: [file-path]
 - 파일: [파일 경로]
 - 총 커밋: N개
 - 주요 작성자: [작성자 목록]
-- 주요 변경 이력: [커밋 해시] - [메시지] ([작성자], [날짜])
+- 주요 변경 이력: [커밋 해시] - [메시지] ([작성자])
 - 보고: [코드 변경 패턴 또는 특이사항]

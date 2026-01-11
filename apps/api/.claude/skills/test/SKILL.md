@@ -23,9 +23,9 @@ allowed-tools:
 - 예외 처리 작성
 
 ## Output Format
-1. 성공/실패 시나리오
-2. 예외 목록: 예외 코드 및 처리 방법
-3. 테스트 목록 (DisplayName)
+- 테스트 시나리오: [성공/실패]
+- 예외 처리: [코드, 처리 방법]
+- 테스트 목록: [DisplayName]
 
 ## Constraints
 - 주요 로직 커버리지 확보
