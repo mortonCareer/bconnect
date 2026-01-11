@@ -24,8 +24,8 @@ API 설계 및 Controller/DTO 작성 가이드입니다.
 - DTO & Controller 작성
 
 ## Output Format
-1. API: 엔드포인트, 메서드, 파라미터
-2. DTO: 파일명
+- API 스펙: [메서드, 경로, 파라미터]
+- 작성 클래스: [파일명]
 
 ## Constraints
 - DTO 유효성 검사 필수
