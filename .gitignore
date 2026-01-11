@@ -91,9 +91,5 @@ bin/
 *.env
 *.properties
 
-### Claude Code ###
-.claude/settings.local.json
-.mcp.json
-
 ### Lambda build artifacts ###
 infra/aws/lambda/**/function.zip
