@@ -31,8 +31,13 @@ if echo "$file_path" | grep -q "\.tf$"; then
   fi
 fi
 
-# 3. TSX 파일 수정 시 → Tailwind 하드코딩 값 검사
+# 3. TSX/JSX 파일 수정 시 → Prettier 포맷팅 + Tailwind 하드코딩 값 검사
 if echo "$file_path" | grep -qE "\.(tsx|jsx)$"; then
+  # Prettier로 import 순서 정렬 및 포맷팅
+  if command -v pnpm &> /dev/null; then
+    pnpm prettier --write "$file_path" 2>/dev/null
+  fi
+
   # 하드코딩된 Tailwind arbitrary value 패턴 검사
   # 예: [#386DFF], [50px], [1.6], [100%], [2rem], [calc(100%-20px)] 등
   hardcoded_values=$(grep -oE '\[[^"\]]+\]' "$file_path" 2>/dev/null | \
