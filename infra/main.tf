@@ -39,4 +39,8 @@ module "vercel" {
   project_name  = var.project_name
   github_repo   = var.github_repo
   github_branch = var.github_branch
+
+  aws_access_key_id     = module.aws.access_key_id
+  aws_secret_access_key = module.aws.secret_access_key
+  aws_region            = var.aws_region
 }

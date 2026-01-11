@@ -33,6 +33,27 @@ resource "vercel_project_environment_variable" "career_api_url" {
   target     = ["production", "preview", "development"]
 }
 
+resource "vercel_project_environment_variable" "career_aws_access_key_id" {
+  project_id = vercel_project.morton-career.id
+  key        = "AWS_ACCESS_KEY_ID"
+  value      = var.aws_access_key_id
+  target     = ["production", "preview"]
+}
+
+resource "vercel_project_environment_variable" "career_aws_secret_access_key" {
+  project_id = vercel_project.morton-career.id
+  key        = "AWS_SECRET_ACCESS_KEY"
+  value      = var.aws_secret_access_key
+  target     = ["production", "preview"]
+}
+
+resource "vercel_project_environment_variable" "career_aws_region" {
+  project_id = vercel_project.morton-career.id
+  key        = "AWS_REGION"
+  value      = var.aws_region
+  target     = ["production", "preview"]
+}
+
 # ===========================================================================
 # Domain Configuration for Career
 # ===========================================================================

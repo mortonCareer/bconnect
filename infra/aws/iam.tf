@@ -49,3 +49,27 @@ resource "aws_iam_user_policy_attachment" "app_access_attach" {
   user       = aws_iam_user.app_user.name
   policy_arn = aws_iam_policy.app_access.arn
 }
+
+# Lambda invoke 권한 정책
+resource "aws_iam_policy" "lambda_invoke" {
+  name        = "MortonLambdaInvoke"
+  path        = "/"
+  description = "Allows invoking Lambda functions"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "lambda:InvokeFunction"
+        Resource = "arn:aws:lambda:${var.aws_region}:*:function:instagram-parser"
+      }
+    ]
+  })
+}
+
+# 유저에게 Lambda 정책 연결
+resource "aws_iam_user_policy_attachment" "app_lambda_attach" {
+  user       = aws_iam_user.app_user.name
+  policy_arn = aws_iam_policy.lambda_invoke.arn
+}
