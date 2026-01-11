@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { buttonVariants } from '@morton/ui'
+import { buttonVariants, CheckIcon } from '@morton/ui'
 import { useAuthStore } from '@/stores/auth-store'
 
 export default function SignupCompletePage() {
@@ -23,21 +23,7 @@ export default function SignupCompletePage() {
 
         {/* Check Icon */}
         <div className="mt-8 flex size-[100px] items-center justify-center rounded-full bg-[#386DFF]">
-          <svg
-            width="50"
-            height="50"
-            viewBox="0 0 50 50"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12.5 25L21.875 34.375L37.5 15.625"
-              stroke="white"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <CheckIcon className="text-white" />
         </div>
       </main>
 

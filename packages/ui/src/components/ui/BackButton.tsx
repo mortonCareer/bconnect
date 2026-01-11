@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { cn } from '../../lib/utils'
+import { ChevronLeftIcon } from '../../icons'
 
 interface BackButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /**
@@ -24,21 +25,7 @@ function BackButton({ className, strokeColor = '#9C9C9C', onClick, ...props }: B
       aria-label="뒤로가기"
       {...props}
     >
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M12.5 15L7.5 10L12.5 5"
-          stroke={strokeColor}
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <ChevronLeftIcon style={{ color: strokeColor }} />
     </button>
   )
 }
