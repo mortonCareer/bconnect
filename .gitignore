@@ -91,5 +91,8 @@ bin/
 *.env
 *.properties
 
+### ETC ###
+nul
+
 ### Lambda build artifacts ###
 infra/aws/lambda/**/function.zip
