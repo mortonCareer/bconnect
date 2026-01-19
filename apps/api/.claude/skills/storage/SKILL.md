@@ -18,7 +18,7 @@ allowed-tools:
 ERD 기반 Entity 및 Repository 작성 가이드입니다.
 
 ## 작업
-- ERD 문서 참고
+- 클래스 다이어그램 참고
 - Flyway 마이그레이션 파일 참고
 - Entity & Repository 작성
 

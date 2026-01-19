@@ -11,7 +11,7 @@
 - 단위 테스트 코드 작성
 
 ## Skills
-- `storage` - ERD 문서 참고, Entity & Repository 작성
+- `storage` - 클래스 다이어그램 참고, Entity & Repository 작성
 - `interface` - Domain & Service 인터페이스 설계
 - `implement` - Domain & Service 구현
 

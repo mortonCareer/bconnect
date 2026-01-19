@@ -1,9 +1,12 @@
 # 가이드라인
-- 최소한의 핵심 기능(Quick Start)에 먼저 집중한다.
-- 과도한 설계를 지양하고, 단순함과 명확함을 우선한다.
-- 수정 또는 신규 구현 시, 더 이상 사용되지 않는 로직 관련 레거시 코드를 제거한다.
+- 요청한 내용이 아닌 과도한 설계 · 구현을 지양하고, 필요한 경우 명확하게 하기 위한 질문을 하세요.
+- 복잡한 문제는 단계별로 생각하고 추론 과정을 보여주며, 구체적인 예시를 사용하세요.
+- 코드를 작성할 때는 Quick Start 수준으로 핵심 기능만 간결하게 작성하고, 구체적인 입출력 예시를 사용하세요.
+- 수정 또는 신규 구현 시, 더 이상 사용되지 않는 로직 관련 레거시 코드를 제거합니다.
+- 이전 대화 내용을 바탕으로 체크리스트를 작성 · 관리합니다.
 
 # 주요 문서
 - API 문서: https://www.notion.so/morton-so/2e0965d2888b807f9c99e789a33b76fb
 - DDD 문서: https://www.figma.com/board/ZL3oqoiYjbekZ5lkGUaztN/-Morton--%EA%B8%B0%ED%9A%8D---%EC%82%AC%EC%97%85?node-id=55-116&t=CyPKrz4hJfc1gTlu-1
-- ERD 문서: https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj/-Morton--%EA%B0%9C%EB%B0%9C?node-id=0-1&t=HIGmuRzPqyiAMVhG-1
+- 클래스 다이어그램: https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj/-Morton--%EA%B0%9C%EB%B0%9C?node-id=0-1&t=HIGmuRzPqyiAMVhG-1
+- 아키텍처 다이어그램: https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj/-Morton--%EA%B0%9C%EB%B0%9C?node-id=267-953&t=lbbqR1APr7Pd0iRb-1

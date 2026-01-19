@@ -5,10 +5,29 @@
       "Bash(find:*)",
       "Bash(cat:*)",
       "Bash(dir:*)",
+      "Bash(ls:*)",
+      "Bash(xargs:*)",
+      "WebSearch",
       "Bash(./gradlew build:*)",
-      "WebSearch"
+      "Bash(./gradlew test:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm format:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)"
     ],
     "deny": [],
     "ask": []
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/available-checker.sh"
+          }
+        ]
+      }
+    ]
   }
 }

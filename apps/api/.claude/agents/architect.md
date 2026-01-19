@@ -17,6 +17,7 @@
 
 ## Reference
 - DDD 문서
+- 아키텍처 다이어그램
 
 ## Constraints
 - 순환 의존성 금지
