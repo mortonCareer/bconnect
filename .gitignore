@@ -93,6 +93,7 @@ bin/
 
 ### ETC ###
 nul
+.mcp.json
 
 ### Lambda build artifacts ###
 infra/aws/lambda/**/function.zip
