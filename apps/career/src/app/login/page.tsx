@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSendOtp, useVerifyOtp } from '@morton/api-client'
-import { useAuthStore } from '../../stores/auth-store'
+import { formatPhoneNumber, toE164, isValidPhoneNumber } from '@morton/config/phone'
+import { useAuthStore } from '@/stores/auth-store'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -15,21 +16,6 @@ export default function LoginPage() {
 
   const sendCodeMutation = useSendOtp()
   const verifyCodeMutation = useVerifyOtp()
-
-  const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, '')
-    if (numbers.length <= 3) return numbers
-    if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`
-    return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`
-  }
-
-  const toE164 = (phone: string) => {
-    const numbers = phone.replace(/\D/g, '')
-    if (numbers.startsWith('0')) {
-      return '+82' + numbers.slice(1)
-    }
-    return '+82' + numbers
-  }
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -152,7 +138,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={phone.replace(/\D/g, '').length < 10 || sendCodeMutation.isPending}
+            disabled={!isValidPhoneNumber(phone) || sendCodeMutation.isPending}
             className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {sendCodeMutation.isPending ? '발송 중...' : '인증번호 받기'}

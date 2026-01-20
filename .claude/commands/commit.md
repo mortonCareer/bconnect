@@ -1,3 +1,8 @@
+---
+env:
+  SKIP_CLAUDE_HOOKS: '1'
+---
+
 # 커밋 생성
 
 변경사항을 lint/format 후 커밋합니다.

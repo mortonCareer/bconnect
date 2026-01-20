@@ -96,3 +96,6 @@ nul
 
 ### Lambda build artifacts ###
 infra/aws/lambda/**/function.zip
+
+### Generated code ###
+packages/api-client/src/generated/

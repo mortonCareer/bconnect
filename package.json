@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "postinstall": "pnpm api:generate",
     "prepare": "husky",
     "dev": "pnpm --filter morton-career --filter morton-plan dev",
     "dev:career": "pnpm --filter morton-career dev",

@@ -42,7 +42,7 @@ cd apps/api
 ### Monorepo Structure
 
 - `apps/career` - Next.js PWA for workers: portfolio upload, job matching
-- `apps/plan` - Next.js PWA for contractors: job posting, schedule management
+- `apps/plan` - Next.js web app for contractors: job posting, schedule management
 - `apps/api` - Spring Boot backend (separately built with Gradle)
 - `apps/mock-server` - Development mock API server
 - `packages/ui` - Shared UI components with Tailwind CSS v4

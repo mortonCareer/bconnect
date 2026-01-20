@@ -8,7 +8,8 @@
     "./eslint/base": "./eslint/base.js",
     "./tsconfig/next": "./tsconfig/next.json",
     "./tsconfig/base": "./tsconfig/base.json",
-    "./env": "./env/validate.ts"
+    "./env": "./env/validate.ts",
+    "./phone": "./phone/index.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
@@ -20,6 +21,7 @@
     "typescript-eslint": "^8.33.0"
   },
   "dependencies": {
+    "libphonenumber-js": "^1.12.33",
     "zod": "^4.3.5"
   }
 }
