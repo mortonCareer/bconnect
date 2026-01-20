@@ -13,6 +13,7 @@
     "@hookform/resolvers": "5.2.0",
     "@morton/api-client": "workspace:*",
     "@morton/ui": "workspace:*",
+    "@vercel/otel": "^2.1.0",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",

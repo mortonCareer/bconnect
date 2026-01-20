@@ -10,3 +10,6 @@ app:
   aws-secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
   aws-region: ${AWS_REGION:}
   aws-s3-bucket: ${AWS_S3_BUCKET:}
+  cors:
+    allowed-origins:
+      - ${CORS_ALLOWED_ORIGIN:http://localhost:3000}

@@ -15,14 +15,8 @@ subprojects {
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
 
-    // Default all submodules to build a plain JAR (library-style).
-    // Executable Spring Boot modules (e.g. :core) should override this.
-    tasks.named('bootJar') {
-        enabled = false
-    }
-    tasks.named('jar') {
-        enabled = true
-    }
+    bootJar.enabled = false
+    jar.enabled = true
 
     group = 'so.morton'
     version = '0.0.1-SNAPSHOT'
