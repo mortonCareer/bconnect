@@ -4,9 +4,10 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { BackButton, ProgressBar, Button } from '@morton/ui'
+import { Button } from '@morton/ui'
 import { useSignupStore } from '@/stores/signup-store'
 import { usernameSchema, type UsernameFormData } from './schema'
+import { SignupHeader, FormInput, FormError } from '../_components'
 
 export default function SignupUsernamePage() {
   const router = useRouter()
@@ -41,12 +42,7 @@ export default function SignupUsernamePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      {/* Top Bar */}
-      <header className="flex h-[60px] items-center justify-between px-4 py-5">
-        <BackButton onClick={() => router.back()} />
-        <ProgressBar step={2} total={3} />
-        <div className="size-5" />
-      </header>
+      <SignupHeader step={2} onBack={() => router.back()} />
 
       {/* Content */}
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col gap-6 px-4 pt-3">
@@ -58,28 +54,23 @@ export default function SignupUsernamePage() {
             입력해 주세요
           </h1>
 
-          {error ? (
-            <p className="text-sm leading-[1.6] text-[#FF4242]">{error}</p>
-          ) : (
-            <p className="text-sm leading-[1.6] text-[#777]">
-              사용자 이름은 숫자, 영어, 밑줄 및 마침표만 포함할 수 있습니다.
-              <br />한 번 설정되면 변경할 수 없습니다.
-            </p>
-          )}
+          <p className="text-sm leading-[1.6] text-[#9C9C9C]">
+            사용자 이름은 숫자, 영어, 밑줄 및 마침표만 포함할 수 있습니다.
+            <br />한 번 설정되면 변경할 수 없습니다.
+          </p>
+          <FormError message={error} />
 
           {/* Username Input */}
-          <div className="flex h-[50px] items-center rounded-lg border border-[#E5E7EB] px-3 py-[7px]">
-            <input
-              type="text"
-              placeholder="내용을 입력해주세요"
-              {...register('username', {
-                onChange: (e) => {
-                  e.target.value = e.target.value.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase()
-                },
-              })}
-              className="w-full bg-transparent text-base leading-[1.6] text-[#1B1B1B] placeholder:text-[#9C9C9C] focus:outline-none"
-            />
-          </div>
+          <FormInput
+            type="text"
+            placeholder="내용을 입력해주세요"
+            error={!!error}
+            {...register('username', {
+              onChange: (e) => {
+                e.target.value = e.target.value.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase()
+              },
+            })}
+          />
         </div>
 
         {/* Submit Button */}

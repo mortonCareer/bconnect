@@ -3,9 +3,10 @@
 import { useAuthStore } from '@/stores/auth-store'
 import { ApiError, ErrorCode, useSendOtp, useVerifyOtp } from '@morton/api-client'
 import { formatPhoneNumber, isValidPhoneNumber, toE164 } from '@morton/config/phone'
-import { BackButton, Button, ProgressBar } from '@morton/ui'
+import { Button } from '@morton/ui'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
+import { FormInput, OtpTimer, SignupHeader, FormError } from '../_components'
 
 type Step = 'phone' | 'otp'
 
@@ -17,26 +18,10 @@ export default function SignupAuthPage() {
   const [phone, setPhone] = useState('')
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [remainingTime, setRemainingTime] = useState<number>(0)
+  const [expiresAt, setExpiresAt] = useState<string | null>(null)
 
   const sendCodeMutation = useSendOtp()
   const verifyCodeMutation = useVerifyOtp()
-
-  // 타이머
-  useEffect(() => {
-    if (remainingTime <= 0) return
-    const timer = setInterval(() => {
-      setRemainingTime((prev) => prev - 1)
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [remainingTime])
-
-  // 타이머 포맷 (m:ss)
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
 
   // 인증번호 발송
   const handleSendCode = useCallback(async () => {
@@ -48,9 +33,7 @@ export default function SignupAuthPage() {
       const result = await sendCodeMutation.mutateAsync({ data: { phone: e164Phone } })
       if (result.expiresAt) {
         setCodeSent(result.expiresAt)
-        const expiresAt = new Date(result.expiresAt)
-        const now = new Date()
-        setRemainingTime(Math.floor((expiresAt.getTime() - now.getTime()) / 1000))
+        setExpiresAt(result.expiresAt)
       }
       setStep('otp')
     } catch (err) {
@@ -128,12 +111,7 @@ export default function SignupAuthPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      {/* Top Bar */}
-      <header className="flex h-[60px] items-center justify-between px-4 py-5">
-        <BackButton onClick={() => (step === 'otp' ? setStep('phone') : router.back())} />
-        <ProgressBar step={1} total={3} />
-        <div className="size-5" /> {/* Spacer */}
-      </header>
+      <SignupHeader step={1} onBack={() => (step === 'otp' ? setStep('phone') : router.back())} />
 
       {/* Content */}
       <main className="flex flex-1 flex-col gap-6 px-4 pt-3">
@@ -147,49 +125,38 @@ export default function SignupAuthPage() {
           </p>
 
           {/* Phone Input */}
-          <div className="flex h-[50px] items-center rounded-lg border border-[#E5E7EB] px-3 py-[7px]">
-            <input
-              type="tel"
-              inputMode="numeric"
-              placeholder="010-1234-5678"
-              value={phone}
-              onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
-              onKeyDown={handleKeyDown}
-              disabled={step === 'otp'}
-              className="w-full bg-transparent text-base leading-[1.6] text-[#1B1B1B] placeholder:text-[#9C9C9C] focus:outline-none disabled:opacity-50"
-            />
-          </div>
+          <FormInput
+            type="tel"
+            inputMode="numeric"
+            placeholder="010-1234-5678"
+            value={phone}
+            onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
+            onKeyDown={handleKeyDown}
+            disabled={step === 'otp'}
+          />
         </div>
 
         {/* OTP Section (step === 'otp') */}
         {step === 'otp' && (
           <div className="flex flex-col gap-2">
-            <div className="flex h-[50px] items-center justify-between rounded-lg border border-[#E5E7EB] px-3 py-[7px]">
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="숫자 6자리"
-                maxLength={6}
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                onKeyDown={handleKeyDown}
-                className="w-full bg-transparent text-base leading-[1.6] text-[#1B1B1B] placeholder:text-[#9C9C9C] focus:outline-none"
-              />
-              <div className="flex shrink-0 items-center gap-2.5 text-sm">
-                {remainingTime > 0 && (
-                  <span className="text-[#9C9C9C]">{formatTime(remainingTime)}</span>
-                )}
-                <button
-                  onClick={handleResend}
-                  disabled={sendCodeMutation.isPending}
-                  className="font-medium text-[#386DFF] disabled:opacity-50"
-                >
-                  재요청
-                </button>
-              </div>
-            </div>
+            <FormInput
+              type="text"
+              inputMode="numeric"
+              placeholder="숫자 6자리"
+              maxLength={6}
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              onKeyDown={handleKeyDown}
+              rightElement={
+                <OtpTimer
+                  expiresAt={expiresAt}
+                  onResend={handleResend}
+                  isResending={sendCodeMutation.isPending}
+                />
+              }
+            />
             {error ? (
-              <p className="text-sm leading-[1.6] text-[#FF4242]">{error}</p>
+              <FormError message={error} />
             ) : (
               <p className="text-sm leading-[1.6] text-[#9C9C9C]">
                 타인에게 인증번호를 공유하지 마세요.

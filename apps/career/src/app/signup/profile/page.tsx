@@ -4,8 +4,9 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { BackButton, ProgressBar, Button } from '@morton/ui'
+import { Button } from '@morton/ui'
 import { useSignupStore } from '@/stores/signup-store'
+import { SignupHeader, FormInput, FormLabel, FormError } from '../_components'
 import { FieldSelector, ExperienceSelector } from './components'
 import { FIELD_OPTIONS, EXPERIENCE_OPTIONS } from './constants'
 import { profileSchema, type ProfileFormData } from './schema'
@@ -96,12 +97,7 @@ export default function SignupProfilePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      {/* Top Bar */}
-      <header className="flex h-[60px] items-center justify-between px-4 py-5">
-        <BackButton onClick={() => router.back()} />
-        <ProgressBar step={3} total={3} />
-        <div className="size-5" />
-      </header>
+      <SignupHeader step={3} onBack={() => router.back()} />
 
       {/* Content */}
       <form
@@ -116,44 +112,24 @@ export default function SignupProfilePage() {
 
         {/* Name Input */}
         <div className="flex flex-col gap-3">
-          <label className="text-sm leading-[1.6] text-[#1B1B1B]">
-            이름<span className="text-[#FF4242]">*</span>
-          </label>
-          <div className="flex h-[50px] items-center rounded-lg border border-[#E5E7EB] px-3 py-[7px]">
-            <input
-              type="text"
-              placeholder="내용을 입력해주세요"
-              {...register('name')}
-              className="w-full bg-transparent text-base leading-[1.6] text-[#1B1B1B] placeholder:text-[#9C9C9C] focus:outline-none"
-            />
-          </div>
-          {errors.name && (
-            <p className="text-sm leading-[1.6] text-[#FF4242]">{errors.name.message}</p>
-          )}
+          <FormLabel required>이름</FormLabel>
+          <FormInput type="text" placeholder="내용을 입력해주세요" {...register('name')} />
+          <FormError message={errors.name?.message} />
         </div>
 
         {/* Construction Fields */}
         <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
-            <label className="text-sm leading-[1.6] text-[#1B1B1B]">
-              시공분야<span className="text-[#FF4242]">*</span>
-            </label>
-            <p className="text-xs leading-[1.6] text-[#9C9C9C]">
-              대표 시공분야는 최대 3개까지 선택 가능해요.
-            </p>
-          </div>
+          <FormLabel required description="대표 시공분야는 최대 3개까지 선택 가능해요.">
+            시공분야
+          </FormLabel>
           <FieldSelector options={FIELD_OPTIONS} selected={selectedFields} onToggle={toggleField} />
-          {errors.fields && (
-            <p className="text-sm leading-[1.6] text-[#FF4242]">{errors.fields.message}</p>
-          )}
+          <FormError message={errors.fields?.message} />
         </div>
 
         {/* Primary Field */}
         {selectedFields.length > 0 && (
           <div className="flex flex-col gap-3">
-            <label className="text-sm leading-[1.6] text-[#1B1B1B]">
-              대표분야<span className="text-[#FF4242]">*</span>
-            </label>
+            <FormLabel required>대표분야</FormLabel>
             <Controller
               name="primaryField"
               control={control}
@@ -179,9 +155,7 @@ export default function SignupProfilePage() {
 
         {/* Experience */}
         <div className="flex flex-col gap-3">
-          <label className="text-sm leading-[1.6] text-[#1B1B1B]">
-            경력<span className="text-[#FF4242]">*</span>
-          </label>
+          <FormLabel required>경력</FormLabel>
           <Controller
             name="experience"
             control={control}
@@ -193,22 +167,13 @@ export default function SignupProfilePage() {
               />
             )}
           />
-          {errors.experience && (
-            <p className="text-sm leading-[1.6] text-[#FF4242]">{errors.experience.message}</p>
-          )}
+          <FormError message={errors.experience?.message} />
         </div>
 
         {/* Affiliation */}
         <div className="flex flex-col gap-3">
-          <label className="text-sm leading-[1.6] text-[#1B1B1B]">소속</label>
-          <div className="flex h-[50px] items-center rounded-lg border border-[#E5E7EB] px-3 py-[7px]">
-            <input
-              type="text"
-              placeholder="소속을 입력해주세요"
-              {...register('affiliation')}
-              className="w-full bg-transparent text-base leading-[1.6] text-[#1B1B1B] placeholder:text-[#9C9C9C] focus:outline-none"
-            />
-          </div>
+          <FormLabel>소속</FormLabel>
+          <FormInput type="text" placeholder="소속을 입력해주세요" {...register('affiliation')} />
         </div>
       </form>
 

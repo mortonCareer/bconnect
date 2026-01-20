@@ -2,10 +2,16 @@
 """
 Bash 명령 실행 전 검증 hook.
 git/gh 명령을 차단하고 스킬 사용을 강제합니다.
+SKIP_CLAUDE_HOOKS=1 환경변수로 스킵 가능합니다.
 """
 import json
 import sys
 import re
+import os
+
+# 환경변수로 훅 스킵
+if os.environ.get("SKIP_CLAUDE_HOOKS") == "1":
+    sys.exit(0)
 
 # 차단할 명령 패턴과 대응 스킬
 BLOCKED_COMMANDS = [
@@ -25,6 +31,7 @@ BLOCKED_COMMANDS = [
         "description": "PR 생성"
     },
 ]
+
 
 def main():
     try:
