@@ -276,7 +276,7 @@ Skills automate common workflows and ensure consistency. Located in `.claude/ski
 
 - `issue-management` - GitHub Issue 생성 및 관리, 레이블 자동 적용, 담당자 할당
 - `branch-from-issue` - 이슈 기반 브랜치 생성 (feature/#-description)
-- `commit-convention` - Conventional Commits 검증 및 생성
+- `commit` - 변경사항 자동 커밋 (Conventional Commits 형식, "커밋해줘" 시 자동 활성화)
 - `pr-from-issue` - 이슈 기반 PR 생성, 리뷰어 자동 할당
 - `notion-task-sync` - Notion 보드 동기화 (구현 예정)
 
