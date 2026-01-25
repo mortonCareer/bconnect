@@ -98,6 +98,12 @@ function isCommonColor(fill) {
 function checkNaming(node, path, nodeId) {
   if (!node.name) return null
 
+  // Instance는 제외 (원본 컴포넌트에서 체크됨)
+  // Instance ID 형식: I617:4276;331:3051 (I로 시작하고 세미콜론 포함)
+  if (nodeId && nodeId.startsWith('I') && nodeId.includes(';')) {
+    return null
+  }
+
   // 기본 이름 체크 (Frame 123, Group 456 등)
   if (/^(Frame|Group|Rectangle|Ellipse|Vector)\s+\d+$/.test(node.name)) {
     return {
