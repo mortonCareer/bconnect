@@ -25,6 +25,27 @@ try {
   process.exit(1)
 }
 
+// Figma 파일 URL 추출 (packages/ui/figma-mapping.json에서)
+let figmaFileKey = 'EFXofON7gTFbmbE2kB31SS' // 기본값
+try {
+  const mappingPath = path.join(__dirname, '../../../packages/ui/figma-mapping.json')
+  if (fs.existsSync(mappingPath)) {
+    const mapping = JSON.parse(fs.readFileSync(mappingPath, 'utf8'))
+    const firstUrl = Object.values(mapping.pages || {})[0]?.figmaUrl
+    if (firstUrl) {
+      const match = firstUrl.match(/figma\.com\/design\/([^?]+)/)
+      if (match) figmaFileKey = match[1]
+    }
+  }
+} catch (e) {
+  // figma-mapping.json 없으면 기본값 사용
+}
+
+// Figma URL 생성 함수
+function getFigmaUrl(nodeId) {
+  return `https://www.figma.com/design/${figmaFileKey}?node-id=${encodeURIComponent(nodeId)}`
+}
+
 // 이슈 수집
 const issues = {
   naming: [],
@@ -34,7 +55,7 @@ const issues = {
 }
 
 // 네이밍 검증
-function checkNaming(node, path) {
+function checkNaming(node, path, nodeId) {
   if (!node.name) return null
 
   // 기본 이름 체크 (Frame 123, Group 456 등)
@@ -43,6 +64,7 @@ function checkNaming(node, path) {
       severity: 'warning',
       category: '네이밍',
       path: path,
+      nodeId: nodeId,
       issue: `기본 이름 사용: "${node.name}"`,
       suggestion: '설명적인 이름으로 변경 권장 (예: NavigationBar, MenuIcon)',
     }
@@ -54,6 +76,7 @@ function checkNaming(node, path) {
       severity: 'info',
       category: '네이밍',
       path: path,
+      nodeId: nodeId,
       issue: `컴포넌트에 한글 사용: "${node.name}"`,
       suggestion: '영문 사용 권장 (재사용성 및 코드 통합 용이)',
     }
@@ -65,6 +88,7 @@ function checkNaming(node, path) {
       severity: 'info',
       category: '네이밍',
       path: path,
+      nodeId: nodeId,
       issue: `케밥/스네이크 케이스: "${node.name}"`,
       suggestion: 'PascalCase 또는 Space 구분 권장',
     }
@@ -74,13 +98,14 @@ function checkNaming(node, path) {
 }
 
 // Auto Layout 검증
-function checkAutoLayout(node, path) {
+function checkAutoLayout(node, path, nodeId) {
   if (node.type === 'FRAME' && !node.layoutMode) {
     if (node.children && node.children.length > 2) {
       return {
         severity: 'warning',
         category: 'Auto Layout',
         path: path,
+        nodeId: nodeId,
         issue: 'Auto Layout 미사용',
         suggestion: 'Auto Layout 적용 권장 (반응형 대응, 유지보수 용이)',
       }
@@ -90,7 +115,7 @@ function checkAutoLayout(node, path) {
 }
 
 // 색상 검증
-function checkColors(node, path) {
+function checkColors(node, path, nodeId) {
   if (node.fills && Array.isArray(node.fills) && node.fills.length > 0) {
     const hasHardcodedColor = node.fills.some(
       (fill) => fill.type === 'SOLID' && !fill.styleId && fill.visible !== false
@@ -100,6 +125,7 @@ function checkColors(node, path) {
         severity: 'info',
         category: '색상 스타일',
         path: path,
+        nodeId: nodeId,
         issue: '하드코딩된 색상 사용',
         suggestion: 'Color Styles 적용 권장 (일관성 유지)',
       }
@@ -109,12 +135,13 @@ function checkColors(node, path) {
 }
 
 // 깊이 검증
-function checkDepth(node, depth, path) {
+function checkDepth(node, depth, path, nodeId) {
   if (depth > 5) {
     return {
       severity: 'warning',
       category: '레이어 깊이',
       path: path,
+      nodeId: nodeId,
       depth: depth,
       issue: `레이어 깊이 ${depth} (권장: 3-4 depth)`,
       suggestion: '구조 단순화 필요 (불필요한 그룹핑 제거)',
@@ -126,18 +153,19 @@ function checkDepth(node, depth, path) {
 // 노드 순회 및 검증
 function checkNode(node, depth = 0, path = '') {
   const currentPath = path ? `${path} > ${node.name}` : node.name
+  const nodeId = node.id
 
   // 각 항목 검증
-  const namingIssue = checkNaming(node, currentPath)
+  const namingIssue = checkNaming(node, currentPath, nodeId)
   if (namingIssue) issues.naming.push(namingIssue)
 
-  const autoLayoutIssue = checkAutoLayout(node, currentPath)
+  const autoLayoutIssue = checkAutoLayout(node, currentPath, nodeId)
   if (autoLayoutIssue) issues.autoLayout.push(autoLayoutIssue)
 
-  const colorIssue = checkColors(node, currentPath)
+  const colorIssue = checkColors(node, currentPath, nodeId)
   if (colorIssue) issues.hardcodedColors.push(colorIssue)
 
-  const depthIssue = checkDepth(node, depth, currentPath)
+  const depthIssue = checkDepth(node, depth, currentPath, nodeId)
   if (depthIssue) issues.depth.push(depthIssue)
 
   // 자식 노드 순회
@@ -213,7 +241,11 @@ ${
 ${issues.naming
   .filter((i) => i.issue.includes('기본 이름'))
   .slice(0, 5)
-  .map((i) => `- \`${i.path.split(' > ').pop()}\` → 설명적인 이름 권장`)
+  .map((i) => {
+    const name = i.path.split(' > ').pop()
+    const url = getFigmaUrl(i.nodeId)
+    return `- [\`${name}\`](${url}) → 설명적인 이름 권장`
+  })
   .join('\n')}
 
 ✅ **개선 방법**
@@ -236,7 +268,11 @@ Auto Layout 미적용 화면에서는 반응형 대응이 어렵습니다.
 **해당 화면 (상위 ${Math.min(5, issues.autoLayout.length)}개):**
 ${issues.autoLayout
   .slice(0, 5)
-  .map((i, idx) => `${idx + 1}. \`${i.path.split(' > ').slice(-2).join(' > ')}\``)
+  .map((i, idx) => {
+    const name = i.path.split(' > ').slice(-2).join(' > ')
+    const url = getFigmaUrl(i.nodeId)
+    return `${idx + 1}. [\`${name}\`](${url})`
+  })
   .join('\n')}
 
 ✅ **개선 방법**
@@ -259,7 +295,11 @@ ${
 **주요 영역 (상위 ${Math.min(5, issues.hardcodedColors.length)}개):**
 ${issues.hardcodedColors
   .slice(0, 5)
-  .map((i, idx) => `${idx + 1}. \`${i.path.split(' > ').slice(-2).join(' > ')}\``)
+  .map((i, idx) => {
+    const name = i.path.split(' > ').slice(-2).join(' > ')
+    const url = getFigmaUrl(i.nodeId)
+    return `${idx + 1}. [\`${name}\`](${url})`
+  })
   .join('\n')}
 
 ✅ **개선 방법**
@@ -285,9 +325,11 @@ ${
 **최대 깊이 (상위 ${Math.min(3, issues.depth.length)}개):**
 ${issues.depth
   .slice(0, 3)
-  .map(
-    (i, idx) => `${idx + 1}. ${i.depth} depth - \`${i.path.split(' > ').slice(-3).join(' > ')}\``
-  )
+  .map((i, idx) => {
+    const name = i.path.split(' > ').slice(-3).join(' > ')
+    const url = getFigmaUrl(i.nodeId)
+    return `${idx + 1}. ${i.depth} depth - [\`${name}\`](${url})`
+  })
   .join('\n')}
 
 ✅ **개선 방법**
