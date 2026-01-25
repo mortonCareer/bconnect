@@ -1,9 +1,0 @@
-This is a test file to verify the commit approval hook.
-
-Testing commit approval process:
-1. Create this test file
-2. Stage it with git add
-3. Attempt to commit
-4. Hook should intercept and show summary
-5. User approves
-6. Commit proceeds with COMMIT_APPROVED=1
