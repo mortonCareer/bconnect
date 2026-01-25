@@ -338,7 +338,8 @@ ${issues.autoLayout.length > 50 ? '- Auto Layout 미적용 화면 다수 → 점
 
 console.log(report)
 
-// 파일로 저장 (선택사항)
-const outputPath = '/tmp/figma-lint-report.md'
+// 파일로 저장
+const skillDir = path.dirname(__filename)
+const outputPath = path.join(skillDir, 'figma-lint-report.md')
 fs.writeFileSync(outputPath, report)
 console.log(`\n📄 보고서 저장: ${outputPath}\n`)
