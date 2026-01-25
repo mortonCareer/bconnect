@@ -20,56 +20,81 @@ Figma 디자인 파일의 품질을 검증하고 개선 사항을 제안합니�
 
 ### 1. 네이밍 컨벤션
 
-**프레임/컴포넌트 이름:**
+#### 화면 (Screen/Page Frame)
 
-✅ **좋은 예:**
+✅ **권장 패턴**: `[기능]/[화면]-[순서]-[상태]`
 
-```
-Button/Primary
-Button/Secondary
-Card/Default
-Card/Highlighted
-Icon/Close
-Icon/Menu
-```
-
-❌ **나쁜 예:**
+**좋은 예:**
 
 ```
-button1
-버튼 (한글)
-btn-primary (케밥케이스)
-BUTTON_PRIMARY (스네이크케이스)
-Frame 123 (기본 이름)
+회원가입/본인인증-00-전화번호 입력
+회원가입/ID입력-04-ID입력(에러)
+내정보/본인화면-01-소개
+홈/피드-01
 ```
 
-**규칙:**
+**특징:**
 
-- PascalCase 사용 (`Button`, `CardHeader`)
-- `/`로 계층 구분 (`Button/Primary`, `Icon/Close`)
-- 영문만 사용 (한글, 특수문자 금지)
-- 설명적인 이름 (`Frame 1` → `HeroSection`)
+- 한글 사용 가능 (화면명은 디자이너가 이해하기 쉽게)
+- `/`로 기능 구분
+- `-`로 순서와 상태 구분
+- `()`로 세부 상태 표시
+
+#### 컴포넌트/컨테이너
+
+✅ **권장**: 영문 사용
+
+**좋은 예:**
+
+```
+Header Container
+Form Container
+StatusBar
+Button
+Input
+Navigation
+```
+
+**특징:**
+
+- 영문 PascalCase 또는 Space 구분
+- `Container` 접미사로 컨테이너 명시
+- 재사용 가능한 이름
+
+#### 기본 이름
+
+⚠️ **지양**: Figma 자동 생성 이름
+
+**개선 필요:**
+
+```
+Frame 2147229913 → NavigationBar
+Group 456 → FilterButtonGroup
+Rectangle 789 → Divider
+```
+
+✅ **권장**: 설명적인 이름으로 변경
 
 ### 2. 컴포넌트 구조
 
-**Auto Layout 사용:**
+**Auto Layout:**
 
-✅ **필수 사용:**
+✅ **적용 권장:**
 
 - 모든 레이아웃 프레임
 - 간격이 일정한 요소들
 - 반응형이 필요한 영역
 
-❌ **사용 금지:**
+⚠️ **사용 지양:**
 
-- 절대 위치 (Absolute positioning)
-- 하드코딩된 사이즈 (Auto Layout으로 해결 가능한 경우)
+- 절대 위치 (Absolute positioning) - 유지보수 어려움
+- 하드코딩된 사이즈 - Auto Layout으로 대체 가능
 
-**깊이 제한:**
+**레이어 깊이:**
 
-- 최대 레이어 깊이: 3-4 depth
-- 불필요한 그룹핑 제거
-- Flatten 가능한 Vector는 Flatten 처리
+- 권장: 3-4 depth 이하
+- 불필요한 그룹핑 최소화
+- Flatten 가능한 Vector는 Flatten 처리 권장
 
 **예시:**
 
@@ -95,32 +120,32 @@ Card
 
 **Color Styles:**
 
-- ✅ 모든 색상은 Color Styles 사용
-- ❌ 하드코딩된 Hex 코드 금지
+- ✅ Color Styles 사용 권장 (디자인 일관성 유지)
+- ⚠️ 하드코딩된 Hex 코드 지양
 
-**검증:**
+**예시:**
 
 ```
-Fill: #000000 (하드코딩) → ❌
-Fill: Text/Primary (Style) → ✅
+Fill: #000000 (하드코딩) → ⚠️ 일관성 관리 어려움
+Fill: Text/Primary (Style) → ✅ 권장
 ```
 
 **Text Styles:**
 
-- ✅ 모든 텍스트는 Text Styles 사용
-- ❌ 직접 폰트/사이즈 지정 금지
+- ✅ Text Styles 사용 권장 (타이포그래피 일관성)
+- ⚠️ 직접 폰트/사이즈 지정 지양
 
-**검증:**
+**예시:**
 
 ```
-Font: Inter 16px Bold (직접 지정) → ❌
-Text Style: Heading/H3 (Style) → ✅
+Font: Inter 16px Bold (직접 지정) → ⚠️ 유지보수 어려움
+Text Style: Heading/H3 (Style) → ✅ 권장
 ```
 
 **Spacing:**
 
-- ✅ 4px, 8px, 12px, 16px, 24px, 32px, 48px, 64px
-- ❌ 임의의 값 (5px, 13px, 27px 등)
+- ✅ 권장: 4px, 8px, 12px, 16px, 24px, 32px, 48px, 64px
+- ⚠️ 지양: 임의의 값 (5px, 13px, 27px 등) - 일관성 저하
 
 ### 4. Variants 사용
 
@@ -135,10 +160,10 @@ Properties:
 - State: Default, Hover, Disabled
 ```
 
-**검증:**
+**권장 사항:**
 
-- ✅ 관련 컴포넌트는 Variants로 묶음
-- ❌ 개별 컴포넌트로 분리
+- ✅ 관련 컴포넌트는 Variants로 묶기 (관리 편의성)
+- ⚠️ 개별 컴포넌트로 분리 지양 (중복 발생)
 
 ### 5. 접근성 (Accessibility)
 
@@ -153,7 +178,7 @@ Properties:
 ```
 ✅ 흰색 배경 (#FFFFFF) + 검은색 텍스트 (#000000) = 21:1
 ✅ 파란색 배경 (#3B82F6) + 흰색 텍스트 (#FFFFFF) = 8.6:1
-❌ 연한 회색 배경 (#F3F4F6) + 회색 텍스트 (#9CA3AF) = 2.9:1 (불합격)
+⚠️ 연한 회색 배경 (#F3F4F6) + 회색 텍스트 (#9CA3AF) = 2.9:1 (개선 필요)
 ```
 
 **폰트 크기:**
@@ -169,9 +194,48 @@ Properties:
 
 ---
 
+## AI 에이전트 실행 가이드
+
+### 사용자가 "Figma 린트" 또는 "피그마 린트" 요청 시:
+
+**Step 1: Figma 파일 정보 확인**
+
+```bash
+# .env에서 토큰 확인
+cat .env | grep FIGMA_ACCESS_TOKEN
+
+# figma-mapping.json에서 파일 키 추출
+cat packages/ui/figma-mapping.json | jq -r '.pages | .[].figmaUrl' | head -1
+# 파일 키: EFXofON7gTFbmbE2kB31SS
+```
+
+**Step 2: Figma API로 파일 다운로드**
+
+```bash
+curl -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN" \
+  "https://api.figma.com/v1/files/EFXofON7gTFbmbE2kB31SS" \
+  -o /tmp/figma-file.json 2>/dev/null
+```
+
+**Step 3: 린트 스크립트 실행**
+
+```bash
+node .claude/skills/figma-lint/lint.cjs \
+  --file /tmp/figma-file.json \
+  --page "Sprint 1"
+```
+
+**Step 4: 한글 보고서 출력**
+
+- 마크다운 형식의 한글 보고서
+- 우선순위별 이슈 분류 (긴급/높음/중간)
+- 개선 예시 포함
+
+---
+
 ## 검증 프로세스
 
-### 자동 검증
+### 자동 검증 (개발자용)
 
 Figma API를 통해 자동으로 검증:
 
