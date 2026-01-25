@@ -46,6 +46,8 @@ cd apps/api && ./gradlew test --tests ClassName  # Run single test class
 cd apps/api && ./gradlew test --tests ClassName.testMethodName  # Run single test
 ```
 
+**For QA processes and testing guidelines, see [docs/QA_AND_TESTING.md](./docs/QA_AND_TESTING.md)**
+
 ### API Client
 
 ```bash
@@ -256,9 +258,39 @@ mutate({ userId: '123', name: 'John' })
 - Define schema in `src/env.ts` per app
 - Validation skipped during build (SKIP_ENV_VALIDATION=true)
 
-## Git Workflow
+## Workflow & Processes
 
-### Commit Messages
+For detailed process guides, see the `docs/` directory:
+
+- **[Team](./docs/TEAM.md)** - Team roles, GitHub/Notion mapping, collaboration process
+- **[Development Workflow](./docs/DEVELOPMENT_WORKFLOW.md)** - API spec, API client generation, Mock API (MSW)
+- **[Git Workflow](./docs/GIT_WORKFLOW.md)** - Issue-based development, branch strategy, commit conventions, PR process
+- **[QA & Testing](./docs/QA_AND_TESTING.md)** - QA process, test coverage, bug classification
+- **[Deployment](./docs/DEPLOYMENT.md)** - Deployment environments, process, infrastructure
+
+### Available Skills
+
+Skills automate common workflows and ensure consistency. Located in `.claude/skills/`:
+
+**Git Workflow (5 skills):**
+
+- `issue-management` - GitHub Issue 생성 및 관리, 레이블 자동 적용, 담당자 할당
+- `branch-from-issue` - 이슈 기반 브랜치 생성 (feature/#-description)
+- `commit-convention` - Conventional Commits 검증 및 생성
+- `pr-from-issue` - 이슈 기반 PR 생성, 리뷰어 자동 할당
+- `notion-task-sync` - Notion 보드 동기화 (구현 예정)
+
+**Figma Integration (3 skills):**
+
+- `figma-to-component` - Figma → React 컴포넌트 자동 생성
+- `figma-lint` - Figma 디자인 품질 검증
+- `figma-sync` - Figma ↔ 코드베이스 동기화
+
+**Environment (1 skill):**
+
+- `env-config` - 환경 변수 관리 및 동기화
+
+### Quick Reference: Commit Messages
 
 Follow Conventional Commits:
 
