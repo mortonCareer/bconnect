@@ -36,12 +36,25 @@ node .claude/skills/figma-lint/lint.cjs \
 cat /tmp/figma-lint-report.md
 ```
 
+## 검증 대상 페이지
+
+✅ **검증 O:**
+
+- Sprint 페이지 (Sprint 1, Sprint 2 등)
+- Final, Dev 등 완성본 페이지
+
+❌ **검증 X:**
+
+- 와이어프레임 (Wireframe)
+- References & Drafts
+- Assets & Design System
+
 ## 검증 항목
 
 - **네이밍 컨벤션**: 화면명, 컴포넌트명, 기본 이름 사용 여부
 - **Auto Layout**: 미적용 화면 체크
-- **색상 스타일**: 하드코딩된 색상 사용 여부
-- **레이어 깊이**: 과도한 그룹핑 체크
+- **색상 스타일**: 하드코딩된 색상 (흰색/검은색 제외)
+- **레이어 깊이**: 과도한 그룹핑 체크 (5 depth 이상)
 
 ## 보고서 형식
 

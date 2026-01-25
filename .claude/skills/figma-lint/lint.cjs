@@ -54,6 +54,46 @@ const issues = {
   depth: [],
 }
 
+// 검증 제외할 페이지 (레퍼런스, 와이어프레임 등)
+const EXCLUDED_PAGES = [
+  '와이어프레임',
+  'References & Drafts',
+  'Assets & Design System',
+  'References',
+  'Wireframe',
+  'Draft',
+]
+
+// 검증 완화할 색상 (흰색, 검은색 등 기본 색상)
+const COMMON_COLORS = ['#FFFFFF', '#000000', '#FFFFFFFF', '#000000FF']
+
+// Ready for Dev 체크 함수
+function isReadyForDev(node) {
+  // 노드 이름에 "Ready", "Dev", "완료" 등이 포함되어 있는지 확인
+  if (node.name) {
+    const readyMarkers = ['Ready', 'ready', 'Dev', 'dev', '완료', '개발', 'Final', 'final']
+    if (readyMarkers.some((marker) => node.name.includes(marker))) {
+      return true
+    }
+  }
+  // 기본적으로 Sprint 페이지는 검증 대상
+  return false
+}
+
+// 색상이 흰색/검은색 등 기본 색상인지 체크
+function isCommonColor(fill) {
+  if (!fill || fill.type !== 'SOLID') return false
+  const { r, g, b, a = 1 } = fill.color || {}
+
+  // 흰색 체크 (RGB 거의 1)
+  if (r > 0.98 && g > 0.98 && b > 0.98) return true
+
+  // 검은색 체크 (RGB 거의 0)
+  if (r < 0.02 && g < 0.02 && b < 0.02) return true
+
+  return false
+}
+
 // 네이밍 검증
 function checkNaming(node, path, nodeId) {
   if (!node.name) return null
@@ -117,16 +157,18 @@ function checkAutoLayout(node, path, nodeId) {
 // 색상 검증
 function checkColors(node, path, nodeId) {
   if (node.fills && Array.isArray(node.fills) && node.fills.length > 0) {
-    const hasHardcodedColor = node.fills.some(
-      (fill) => fill.type === 'SOLID' && !fill.styleId && fill.visible !== false
+    // 흰색/검은색 제외하고 하드코딩된 색상 체크
+    const hasNonCommonHardcodedColor = node.fills.some(
+      (fill) =>
+        fill.type === 'SOLID' && !fill.styleId && fill.visible !== false && !isCommonColor(fill)
     )
-    if (hasHardcodedColor && node.type !== 'VECTOR' && node.type !== 'LINE') {
+    if (hasNonCommonHardcodedColor && node.type !== 'VECTOR' && node.type !== 'LINE') {
       return {
         severity: 'info',
         category: '색상 스타일',
         path: path,
         nodeId: nodeId,
-        issue: '하드코딩된 색상 사용',
+        issue: '하드코딩된 색상 사용 (흰색/검은색 제외)',
         suggestion: 'Color Styles 적용 권장 (일관성 유지)',
       }
     }
@@ -185,6 +227,14 @@ if (pageName) {
   }
 } else {
   targetPage = data.document.children[0]
+}
+
+// 제외 페이지 체크
+if (EXCLUDED_PAGES.some((excluded) => targetPage.name.includes(excluded))) {
+  console.log(`\n⚠️  "${targetPage.name}" 페이지는 검증 대상이 아닙니다.`)
+  console.log(`검증 대상: Sprint, Final, Dev 페이지만 검증합니다.\n`)
+  console.log(`사용 가능한 페이지: ${data.document.children.map((p) => p.name).join(', ')}`)
+  process.exit(0)
 }
 
 // 린트 실행

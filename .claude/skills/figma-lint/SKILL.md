@@ -14,6 +14,22 @@ Figma 디자인 파일의 품질을 검증하고 개선 사항을 제안합니�
 - 디자인 시스템 일관성 검증
 - 퍼블리싱 준비 확인
 
+## 검증 대상 페이지
+
+✅ **검증함:**
+
+- Sprint 페이지 (Sprint 1, Sprint 2 등)
+- Final, Dev 등 완성본 페이지
+
+❌ **검증 안 함:**
+
+- 와이어프레임 (Wireframe)
+- References & Drafts
+- Assets & Design System
+- 레퍼런스 자료 페이지
+
+**이유:** 초기 작업물이나 레퍼런스는 엄격한 규칙이 필요하지 않습니다.
+
 ---
 
 ## 검증 항목
@@ -121,14 +137,18 @@ Card
 **Color Styles:**
 
 - ✅ Color Styles 사용 권장 (디자인 일관성 유지)
-- ⚠️ 하드코딩된 Hex 코드 지양
+- ⚠️ 하드코딩된 색상 지양 (단, 흰색/검은색 제외)
 
 **예시:**
 
 ```
-Fill: #000000 (하드코딩) → ⚠️ 일관성 관리 어려움
-Fill: Text/Primary (Style) → ✅ 권장
+Fill: #3B82F6 (파란색 하드코딩) → ⚠️ Color Style로 관리 권장
+Fill: #FFFFFF (흰색) → ✅ 허용 (기본 색상)
+Fill: #000000 (검은색) → ✅ 허용 (기본 색상)
+Fill: Primary/Blue (Style) → ✅ 권장
 ```
+
+**참고:** 흰색(`#FFFFFF`)과 검은색(`#000000`)은 워낙 자주 사용되므로 하드코딩을 허용합니다.
 
 **Text Styles:**
 
