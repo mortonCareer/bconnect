@@ -6,18 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-skills.py",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/validate-commit.sh",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/validate-branch.sh",
-            "timeout": 10
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/require-commit-approval.py",
+            "timeout": 15
           }
         ]
       }
