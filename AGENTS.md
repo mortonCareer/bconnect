@@ -283,7 +283,7 @@ Skills automate common workflows and ensure consistency. Located in `.claude/ski
 **Figma Integration (3 skills):**
 
 - `figma-to-component` - Figma → React 컴포넌트 자동 생성
-- `figma-lint` - Figma 디자인 품질 검증
+- `figma-lint` - ~~Figma 디자인 품질 검증~~ [DEPRECATED - 디자이너 작업 스타일과 불일치]
 - `figma-sync` - Figma ↔ 코드베이스 동기화
 
 **Environment (1 skill):**

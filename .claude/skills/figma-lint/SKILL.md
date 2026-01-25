@@ -1,10 +1,19 @@
 ---
 name: figma-lint
-description: Figma 디자인 품질 검증. 네이밍 컨벤션, 컴포넌트 구조, 디자인 토큰 사용, 접근성 체크
+description: '[DEPRECATED] Figma 디자인 품질 검증. 디자이너 작업 스타일과 맞지 않아 사용 중단'
 allowed-tools: Bash, Read, Write, Grep
+deprecated: true
 ---
 
-# Figma Lint
+# Figma Lint [DEPRECATED]
+
+> ⚠️ **이 스킬은 더 이상 사용되지 않습니다.**
+>
+> **중단 이유:** 디자이너의 작업 스타일(프레임 중첩 등)이 스킬에서 가정한 규칙과 달라서 현실적으로 사용이 어렵습니다.
+>
+> **대안:** 필요 시 Figma 플러그인(Design Lint, Stark 등) 사용 권장
+
+---
 
 Figma 디자인 파일의 품질을 검증하고 개선 사항을 제안합니다.
 
