@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Button } from '@morton/ui'
+import { Button, Tag } from '@morton/ui'
 
 interface ComponentPreview {
   name: string
@@ -20,6 +20,12 @@ const components: ComponentPreview[] = [
         다음
       </Button>
     ),
+  },
+  {
+    name: 'Tag',
+    description: '태그 컴포넌트 (Morton 디자인 시스템)',
+    href: '/showcase/tag',
+    preview: <Tag variant="selected">도배</Tag>,
   },
 ]
 
