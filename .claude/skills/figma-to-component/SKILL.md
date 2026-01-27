@@ -177,16 +177,6 @@ FIGMA_ACCESS_TOKEN=figd_xxxxxxxxxxxxx
 - Component: "Primary Button"
 - Node ID: `123:456`
 
-**실행:**
-
-```bash
-# Figma에서 컴포넌트 정보 가져오기
-figma-to-component \
-  --file ABC123 \
-  --node 123:456 \
-  --output packages/ui/components/ui/Button.tsx
-```
-
 **생성되는 파일:**
 
 ```
