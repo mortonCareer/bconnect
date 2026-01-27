@@ -61,6 +61,16 @@ export default function Home() {
           Instagram 데이터 업로드
         </Link>
       </div>
+
+      <div className="mt-8">
+        <h2 className="mb-4 text-xl font-semibold">디자인 시스템</h2>
+        <Link
+          href="/showcase"
+          className="inline-block rounded-lg border border-gray-300 px-6 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+        >
+          컴포넌트 쇼케이스
+        </Link>
+      </div>
     </div>
   )
 }

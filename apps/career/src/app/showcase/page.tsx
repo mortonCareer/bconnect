@@ -14,12 +14,16 @@ const components: ComponentPreview[] = [
   {
     name: 'Button',
     description: '버튼 컴포넌트 (Morton 디자인 시스템)',
-    href: '/figma-test/button',
-    preview: <Button variant="primary" size="sm">다음</Button>,
+    href: '/showcase/button',
+    preview: (
+      <Button variant="primary" size="sm">
+        다음
+      </Button>
+    ),
   },
 ]
 
-export default function FigmaTestPage() {
+export default function ShowcasePage() {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-6xl">
@@ -57,7 +61,12 @@ export default function FigmaTestPage() {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </div>
             </Link>

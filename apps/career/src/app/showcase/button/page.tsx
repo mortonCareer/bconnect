@@ -9,11 +9,16 @@ export default function ButtonDetailPage() {
       <div className="mx-auto max-w-4xl">
         {/* Back Navigation */}
         <Link
-          href="/figma-test"
+          href="/showcase"
           className="mb-6 inline-flex items-center text-sm text-gray-500 hover:text-[#386DFF]"
         >
           <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
           컴포넌트 목록
         </Link>
@@ -37,22 +42,30 @@ export default function ButtonDetailPage() {
                 <tbody className="divide-y">
                   <tr>
                     <td className="p-3">활성</td>
-                    <td className="p-3"><code className="rounded bg-gray-100 px-1">variant="primary"</code></td>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">variant="primary"</code>
+                    </td>
                     <td className="p-3">파란색 배경 (#386DFF), 흰색 텍스트</td>
                   </tr>
                   <tr>
                     <td className="p-3">비활성</td>
-                    <td className="p-3"><code className="rounded bg-gray-100 px-1">variant="secondary"</code></td>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">variant="secondary"</code>
+                    </td>
                     <td className="p-3">회색 배경 (#F4F4F4), 회색 텍스트</td>
                   </tr>
                   <tr>
                     <td className="p-3">활성_stroke</td>
-                    <td className="p-3"><code className="rounded bg-gray-100 px-1">variant="outline"</code></td>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">variant="outline"</code>
+                    </td>
                     <td className="p-3">파란색 테두리, 파란색 텍스트</td>
                   </tr>
                   <tr>
                     <td className="p-3">비활성_stroke</td>
-                    <td className="p-3"><code className="rounded bg-gray-100 px-1">variant="ghost"</code></td>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">variant="ghost"</code>
+                    </td>
                     <td className="p-3">회색 테두리, 회색 텍스트</td>
                   </tr>
                 </tbody>
@@ -62,39 +75,59 @@ export default function ButtonDetailPage() {
 
           {/* Variants - Default Size */}
           <section className="mb-12">
-            <h2 className="mb-4 text-xl font-semibold text-gray-800">Variants (Default Size: 360x50)</h2>
+            <h2 className="mb-4 text-xl font-semibold text-gray-800">
+              Variants (Default Size: 360x50)
+            </h2>
             <div className="space-y-6">
               <div className="rounded-lg border p-6">
                 <p className="mb-3 text-sm font-medium text-gray-500">Primary - 활성</p>
-                <Button variant="primary" size="default">다음</Button>
+                <Button variant="primary" size="default">
+                  다음
+                </Button>
               </div>
 
               <div className="rounded-lg border p-6">
                 <p className="mb-3 text-sm font-medium text-gray-500">Secondary - 비활성</p>
-                <Button variant="secondary" size="default">다음</Button>
+                <Button variant="secondary" size="default">
+                  다음
+                </Button>
               </div>
 
               <div className="rounded-lg border p-6">
                 <p className="mb-3 text-sm font-medium text-gray-500">Outline - 활성_stroke</p>
-                <Button variant="outline" size="default">다음</Button>
+                <Button variant="outline" size="default">
+                  다음
+                </Button>
               </div>
 
               <div className="rounded-lg border p-6">
                 <p className="mb-3 text-sm font-medium text-gray-500">Ghost - 비활성_stroke</p>
-                <Button variant="ghost" size="default">다음</Button>
+                <Button variant="ghost" size="default">
+                  다음
+                </Button>
               </div>
             </div>
           </section>
 
           {/* Variants - Small Size */}
           <section className="mb-12">
-            <h2 className="mb-4 text-xl font-semibold text-gray-800">Variants (Small Size: 206x40)</h2>
+            <h2 className="mb-4 text-xl font-semibold text-gray-800">
+              Variants (Small Size: 206x40)
+            </h2>
             <div className="rounded-lg border p-6">
               <div className="flex flex-wrap gap-4">
-                <Button variant="primary" size="sm">다음</Button>
-                <Button variant="secondary" size="sm">다음</Button>
-                <Button variant="outline" size="sm">다음</Button>
-                <Button variant="ghost" size="sm">다음</Button>
+                <Button variant="primary" size="sm">
+                  다음
+                </Button>
+                <Button variant="secondary" size="sm">
+                  다음
+                </Button>
+                <Button variant="outline" size="sm">
+                  다음
+                </Button>
+                <Button variant="ghost" size="sm">
+                  다음
+                </Button>
               </div>
             </div>
           </section>
@@ -103,8 +136,12 @@ export default function ButtonDetailPage() {
           <section className="mb-12">
             <h2 className="mb-4 text-xl font-semibold text-gray-800">Full Width</h2>
             <div className="space-y-4 rounded-lg border p-6">
-              <Button variant="primary" size="full">전체 너비 버튼</Button>
-              <Button variant="outline" size="full">전체 너비 아웃라인</Button>
+              <Button variant="primary" size="full">
+                전체 너비 버튼
+              </Button>
+              <Button variant="outline" size="full">
+                전체 너비 아웃라인
+              </Button>
             </div>
           </section>
 
@@ -127,7 +164,7 @@ export default function ButtonDetailPage() {
           <section>
             <h2 className="mb-4 text-xl font-semibold text-gray-800">Usage</h2>
             <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
-{`import { Button } from '@morton/ui'
+              {`import { Button } from '@morton/ui'
 
 // Primary (활성)
 <Button variant="primary">다음</Button>
