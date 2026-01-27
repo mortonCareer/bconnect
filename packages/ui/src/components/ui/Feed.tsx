@@ -143,13 +143,7 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
             className="flex h-4 w-4 flex-shrink-0 items-center justify-center"
             aria-label="더보기"
           >
-            <svg
-              width="5.067"
-              height="9.6"
-              viewBox="0 0 5.067 9.6"
-              fill="none"
-              className="-rotate-90"
-            >
+            <svg width="5.067" height="9.6" viewBox="0 0 5.067 9.6" fill="none">
               <path
                 d="M0.5 0.5 L4.567 4.8 L0.5 9.1"
                 stroke="#1B1B1B"
