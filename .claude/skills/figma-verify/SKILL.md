@@ -59,6 +59,7 @@ npx playwright screenshot --device="iPhone 13" http://localhost:3000/page mobile
 두 스크린샷을 비교하여 차이점을 분석합니다.
 
 **비교 항목:**
+
 - 크기 (width, height)
 - 색상 (배경, 텍스트, 테두리)
 - 간격 (padding, margin, gap)
@@ -69,6 +70,7 @@ npx playwright screenshot --device="iPhone 13" http://localhost:3000/page mobile
 ### 4. 수정 및 재검증
 
 차이점이 발견되면:
+
 1. 해당 스타일 속성 수정
 2. 브라우저 새로고침 (자동 Hot Reload)
 3. 새 스크린샷 캡처
@@ -100,6 +102,7 @@ npx playwright screenshot \
 ### Button 컴포넌트 검증 예시
 
 **입력:**
+
 ```
 Figma URL: https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS/?node-id=187-607
 컴포넌트: packages/ui/src/components/ui/Button.tsx
@@ -107,6 +110,7 @@ Figma URL: https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS/?node-id=187-607
 ```
 
 **프로세스:**
+
 1. Figma에서 Button 스크린샷 획득 (MCP)
 2. Playwright로 /figma-test/button 페이지 스크린샷 캡처
 3. 비교 분석:
@@ -120,6 +124,7 @@ Figma URL: https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS/?node-id=187-607
 ### 차이점 발견 시
 
 **비교 결과:**
+
 ```
 ❌ 차이점 발견:
 - height: Figma 50px vs 렌더링 40px
@@ -127,6 +132,7 @@ Figma URL: https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS/?node-id=187-607
 ```
 
 **수정:**
+
 ```typescript
 // Button.tsx 수정
 size: {
@@ -135,6 +141,7 @@ size: {
 ```
 
 **재검증:**
+
 ```bash
 # 스크린샷 다시 캡처
 npx playwright screenshot http://localhost:3000/figma-test/button /tmp/browser-button.png
@@ -175,6 +182,7 @@ npx playwright install chromium
 검증 시 확인해야 할 항목:
 
 ### 레이아웃
+
 - [ ] 너비 (width)
 - [ ] 높이 (height)
 - [ ] 패딩 (padding)
@@ -182,18 +190,21 @@ npx playwright install chromium
 - [ ] 갭 (gap)
 
 ### 색상
+
 - [ ] 배경색 (background-color)
 - [ ] 텍스트 색상 (color)
 - [ ] 테두리 색상 (border-color)
 - [ ] hover 상태 색상
 
 ### 타이포그래피
+
 - [ ] 폰트 크기 (font-size)
 - [ ] 폰트 두께 (font-weight)
 - [ ] 줄 높이 (line-height)
 - [ ] 글자 간격 (letter-spacing)
 
 ### 테두리 & 효과
+
 - [ ] 테두리 반경 (border-radius)
 - [ ] 테두리 두께 (border-width)
 - [ ] 그림자 (box-shadow)
@@ -203,12 +214,14 @@ npx playwright install chromium
 ## 주의사항
 
 ### DO
+
 - Figma 스크린샷과 동일한 viewport 크기에서 비교
 - 모든 variant 상태 검증 (default, hover, disabled 등)
 - 다양한 텍스트 길이로 테스트
 - `data-testid` 사용하여 정확한 요소 선택
 
 ### DON'T
+
 - 안티앨리어싱 차이를 버그로 간주하지 않기
 - 1px 미만의 미세한 차이에 과도하게 집착하지 않기
 - 브라우저별 렌더링 차이를 Figma 불일치로 오해하지 않기

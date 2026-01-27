@@ -43,28 +43,30 @@ export default function ButtonDetailPage() {
                   <tr>
                     <td className="p-3">활성</td>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">variant="primary"</code>
+                      <code className="rounded bg-gray-100 px-1">variant=&quot;primary&quot;</code>
                     </td>
                     <td className="p-3">파란색 배경 (#386DFF), 흰색 텍스트</td>
                   </tr>
                   <tr>
                     <td className="p-3">비활성</td>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">variant="secondary"</code>
+                      <code className="rounded bg-gray-100 px-1">
+                        variant=&quot;secondary&quot;
+                      </code>
                     </td>
                     <td className="p-3">회색 배경 (#F4F4F4), 회색 텍스트</td>
                   </tr>
                   <tr>
                     <td className="p-3">활성_stroke</td>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">variant="outline"</code>
+                      <code className="rounded bg-gray-100 px-1">variant=&quot;outline&quot;</code>
                     </td>
                     <td className="p-3">파란색 테두리, 파란색 텍스트</td>
                   </tr>
                   <tr>
                     <td className="p-3">비활성_stroke</td>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">variant="ghost"</code>
+                      <code className="rounded bg-gray-100 px-1">variant=&quot;ghost&quot;</code>
                     </td>
                     <td className="p-3">회색 테두리, 회색 텍스트</td>
                   </tr>
