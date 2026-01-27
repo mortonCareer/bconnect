@@ -1,5 +1,4 @@
 // @morton/ui - Components
 export { Button, buttonVariants } from './ui/Button'
-export { BackButton } from './ui/BackButton'
-export { ProgressBar } from './ui/ProgressBar'
+export { TopBar, topBarVariants } from './ui/TopBar'
 export { Tag, tagVariants } from './ui/Tag'
