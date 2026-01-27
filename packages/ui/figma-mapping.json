@@ -14,6 +14,23 @@
       ],
       "sizes": ["default", "sm", "full"]
     },
+    "Input": {
+      "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=189-626",
+      "codePath": "src/components/ui/Input.tsx",
+      "createdAt": "2026-01-27",
+      "lastSyncedAt": "2026-01-27",
+      "variants": [
+        { "name": "default", "nodeId": "189-625", "description": "입력 전" },
+        { "name": "error", "description": "에러 상태" },
+        { "name": "error+message", "nodeId": "617-4420", "description": "에러 상태 + 하단 메시지" }
+      ]
+    },
+    "OtpInput": {
+      "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=331-3851",
+      "codePath": "src/components/ui/OtpInput.tsx",
+      "createdAt": "2026-01-27",
+      "lastSyncedAt": "2026-01-27"
+    },
     "Tag": {
       "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=188-1010",
       "codePath": "src/components/ui/Tag.tsx",
