@@ -26,11 +26,11 @@ const buttonVariants = cva(
       },
       size: {
         // default: 360x50
-        default: 'h-button-default w-button-default px-4',
+        default: 'h-[50px] w-[360px] px-4',
         // small: 206x40
-        sm: 'h-button-sm w-button-sm px-3',
+        sm: 'h-[40px] w-[206px] px-3',
         // full width
-        full: 'h-button-default w-full px-4',
+        full: 'h-[50px] w-full px-4',
       },
     },
     defaultVariants: {
