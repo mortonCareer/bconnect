@@ -43,6 +43,8 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   children?: React.ReactNode
+  isLoading?: boolean
+  loadingText?: string
 }
 
 /**
@@ -70,10 +72,15 @@ export interface ButtonProps
  * ```
  */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, children, ...props }, ref) => {
+  ({ className, variant, size, children, isLoading, loadingText, disabled, ...props }, ref) => {
     return (
-      <button className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>
-        {children}
+      <button
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        disabled={disabled || isLoading}
+        {...props}
+      >
+        {isLoading ? loadingText || '로딩 중...' : children}
       </button>
     )
   }
