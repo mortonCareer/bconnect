@@ -258,6 +258,70 @@ mutate({ userId: '123', name: 'John' })
 - Define schema in `src/env.ts` per app
 - Validation skipped during build (SKIP_ENV_VALIDATION=true)
 
+## Git Commit Policy
+
+**IMPORTANT**: Agents must get user approval before committing changes.
+
+### Commit Approval Process
+
+All `git commit` commands are intercepted by the `require-commit-approval.py` hook:
+
+1. **Change Analysis**: Hook analyzes `git status` and `git diff --stat`
+2. **Summary Display**: Shows commit message, changed files, and line statistics
+3. **Approval Wait**: Blocks commit and waits for user response
+4. **Approved Commit**: Agent re-runs with `COMMIT_APPROVED=1` environment variable
+
+### Example Output
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 커밋 전 확인
+
+메시지: feat(career): add profile upload (#123)
+
+변경 파일 (3개):
+  M  apps/career/src/components/Profile.tsx
+  M  apps/career/src/api/user.ts
+  A  apps/career/src/types/profile.ts
+
+  3 files changed, 86 insertions(+), 17 deletions(-)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️  커밋하시겠습니까? (yes/no)
+```
+
+### Approval Keywords
+
+- **Approve**: "yes", "확인", "커밋 승인", "ㅇㅇ", "go"
+- **Reject**: "no", "취소", "수정 필요"
+
+### Agent Workflow
+
+```bash
+# 1. Agent attempts commit
+git commit -m "feat: add feature"
+
+# 2. Hook blocks and shows summary
+# [Summary output]
+
+# 3. User approves: "yes"
+
+# 4. Agent re-runs with approval flag
+COMMIT_APPROVED=1 git commit -m "feat: add feature"
+
+# 5. Hook passes, commit succeeds
+```
+
+### Bypassing the Hook (Manual Use)
+
+If you need to commit directly without approval:
+
+```bash
+COMMIT_APPROVED=1 git commit -m "message"
+```
+
+---
+
 ## Workflow & Processes
 
 For detailed process guides, see the `docs/` directory:

@@ -50,6 +50,12 @@
 
 /* Tailwind v4 Theme */
 @theme inline {
+  /* Button sizes */
+  --width-button-default: 360px;
+  --width-button-sm: 206px;
+  --height-button-default: 50px;
+  --height-button-sm: 40px;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
