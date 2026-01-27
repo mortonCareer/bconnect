@@ -22,7 +22,9 @@ const feedVariants = cva('flex flex-col gap-3 items-stretch', {
 })
 
 export interface FeedProps
-  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof feedVariants> {
+  extends
+    Omit<React.HTMLAttributes<HTMLDivElement>, 'content' | 'onToggle'>,
+    VariantProps<typeof feedVariants> {
   /**
    * 프로필 정보
    */
