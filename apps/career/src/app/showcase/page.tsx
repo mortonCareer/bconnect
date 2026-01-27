@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Button, Tag, Input } from '@morton/ui'
+import { Button, Tag, Input, Feed } from '@morton/ui'
 
 interface ComponentPreview {
   name: string
@@ -32,6 +32,34 @@ const components: ComponentPreview[] = [
     description: '텍스트 입력 컴포넌트 (Morton 디자인 시스템)',
     href: '/showcase/input',
     preview: <Input placeholder="내용을 입력해주세요" className="w-48" />,
+  },
+  {
+    name: 'Feed',
+    description: '피드 컴포넌트 (Morton 디자인 시스템)',
+    href: '/showcase/feed',
+    preview: (
+      <div className="w-48 scale-[0.4] origin-center">
+        <Feed
+          profile={{
+            image:
+              'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop',
+            name: '이송목',
+            location: '경기도',
+            jobType: '준기공',
+            specialty: '도배',
+            bio: '안녕하세요, 도배 준기공 이송목입니다.',
+          }}
+          content={{
+            image:
+              'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop',
+            company: '서정 건축',
+            duration: '4일 소요',
+            timestamp: '3일 전',
+            description: '골프장 전원주택 도배 시공을 진행하였습니다.',
+          }}
+        />
+      </div>
+    ),
   },
 ]
 
