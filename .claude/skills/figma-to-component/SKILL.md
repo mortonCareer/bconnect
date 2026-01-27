@@ -95,6 +95,8 @@ Figma 스타일 속성을 Tailwind CSS 클래스로 변환합니다.
 
 생성되는 컴포넌트는 프로젝트의 shadcn/ui 스타일을 따릅니다.
 
+> **필수:** 컴포넌트 생성 시 반드시 [UX_PRINCIPLES.md](./UX_PRINCIPLES.md)를 참조하여 인터랙션 스타일을 적용합니다.
+
 **컴포넌트 구조:**
 
 ```typescript
@@ -103,8 +105,12 @@ import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
+// UX 원칙 적용: UX_PRINCIPLES.md 참조
 const buttonVariants = cva(
-  'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors',
+  'inline-flex items-center justify-center rounded-md text-sm font-medium ' +
+  'cursor-pointer transition-all active:scale-[0.98] ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ' +
+  'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -342,15 +348,17 @@ curl https://api.figma.com/v1/files/:file_key \
 컴포넌트 생성 후:
 
 1. 생성된 코드 리뷰
-2. Props 타입 확인 및 보완
-3. Accessibility 속성 추가 (aria-\*, role 등)
-4. Storybook 스토리 작성 (선택)
-5. 테스트 작성 (선택)
+2. [UX 인터랙션 원칙](./UX_PRINCIPLES.md) 적용 확인
+3. Props 타입 확인 및 보완
+4. Accessibility 속성 추가 (aria-\*, role 등)
+5. Storybook 스토리 작성 (선택)
+6. 테스트 작성 (선택)
 
 ---
 
 ## 참고 문서
 
+- [UX 인터랙션 원칙](./UX_PRINCIPLES.md) - 컴포넌트 생성 시 필수 적용
 - [Figma API Documentation](https://www.figma.com/developers/api)
 - [shadcn/ui](https://ui.shadcn.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
