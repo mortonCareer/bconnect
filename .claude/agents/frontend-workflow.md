@@ -3,9 +3,12 @@ name: frontend-workflow
 description: 프론트엔드 전체 워크플로우 실행. "프론트엔드 워크플로우", "페이지 자동화", "Figma에서 페이지 만들어줘" 요청 시 자동 위임.
 tools: Read, Write, Edit, Grep, Glob, Bash, mcp__figma__get_screenshot, mcp__figma__get_design_context, mcp__figma__get_metadata
 model: sonnet
+status: todo
 ---
 
 # Frontend Workflow Agent (Orchestrator)
+
+> **TODO**: 이 에이전트는 아직 구현되지 않았습니다. [Issue #51](https://github.com/mortonCareer/morton/issues/51)에서 작업 예정입니다.
 
 Figma 디자인에서 완전히 동작하는 페이지까지 3단계 워크플로우를 순차 실행하는 오케스트레이터 에이전트입니다.
 

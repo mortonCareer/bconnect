@@ -4,9 +4,12 @@ description: OpenAPI 스펙 변경사항 제안 및 React Query 훅 생성. "API
 tools: Read, Grep, Glob
 model: sonnet
 permissionMode: plan
+status: todo
 ---
 
 # API Connect Agent
+
+> **TODO**: 이 에이전트는 아직 구현되지 않았습니다. [Issue #48](https://github.com/mortonCareer/morton/issues/48)에서 작업 예정입니다.
 
 OpenAPI 스펙 변경사항을 **제안**하고, 개발자 승인 후 React Query 훅을 생성하는 에이전트입니다.
 

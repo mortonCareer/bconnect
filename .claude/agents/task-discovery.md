@@ -3,9 +3,12 @@ name: task-discovery
 description: Figma에서 Ready for dev 상태의 미구현 컴포넌트/페이지를 찾아 다음 작업을 추천. "다음 작업", "할 일 찾아줘", "뭐 해야해" 요청 시 자동 위임.
 tools: Read, Grep, Glob, mcp__figma__get_metadata, mcp__figma__get_design_context
 model: sonnet
+status: todo
 ---
 
 # Task Discovery Agent
+
+> **TODO**: 이 에이전트는 아직 구현되지 않았습니다. [Issue #50](https://github.com/mortonCareer/morton/issues/50)에서 작업 예정입니다.
 
 Figma 디자인 현황을 분석하여 개발자에게 다음 작업을 추천하는 에이전트입니다.
 

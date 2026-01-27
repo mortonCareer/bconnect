@@ -3,9 +3,12 @@ name: ui-api-bind
 description: 퍼블리싱된 UI에 API 훅을 연결. "UI API 연결", "바인딩", "form API 연결" 요청 시 자동 위임.
 tools: Read, Write, Edit, Grep, Glob
 model: sonnet
+status: todo
 ---
 
 # UI-API Bind Agent
+
+> **TODO**: 이 에이전트는 아직 구현되지 않았습니다. [Issue #49](https://github.com/mortonCareer/morton/issues/49)에서 작업 예정입니다.
 
 퍼블리싱된 UI 컴포넌트/페이지에 API 훅을 연결하여 완전한 기능을 구현하는 에이전트입니다.
 
