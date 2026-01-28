@@ -58,9 +58,7 @@ const Tab = React.forwardRef<HTMLDivElement, TabProps>(
               <span
                 className={cn(
                   'text-sm leading-[1.6] pb-[10px]',
-                  isActive
-                    ? 'text-[#386DFF] font-semibold'
-                    : 'text-[#A5A5A5] font-medium'
+                  isActive ? 'text-[#386DFF] font-semibold' : 'text-[#A5A5A5] font-medium'
                 )}
               >
                 {item.label}
