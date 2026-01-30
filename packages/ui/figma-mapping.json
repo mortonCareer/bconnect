@@ -79,6 +79,17 @@
         { "name": "default", "nodeId": "346-6161", "description": "기본 - 제목 + 액션 버튼" },
         { "name": "home", "nodeId": "352-2632", "description": "홈 - 필터 + 채팅 아이콘" }
       ]
+    },
+    "ChatMessage": {
+      "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=364-4504",
+      "codePath": "src/components/ui/ChatMessage.tsx",
+      "createdAt": "2026-01-30",
+      "lastSyncedAt": "2026-01-30",
+      "variants": [
+        { "name": "mine", "nodeId": "364-4497", "description": "내 채팅 - 파란색 버블, 오른쪽 정렬" },
+        { "name": "typing", "nodeId": "364-4512", "description": "입력 중 - 타이핑 인디케이터" },
+        { "name": "theirs", "nodeId": "364-4579", "description": "상대 채팅 - 회색 버블, 프로필+닉네임" }
+      ]
     }
   },
   "pages": {

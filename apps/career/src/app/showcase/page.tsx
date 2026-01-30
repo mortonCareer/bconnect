@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Button, Tag, Input, Feed, TopBar } from '@morton/ui'
+import { Button, Tag, Input, Feed, TopBar, ChatMessage } from '@morton/ui'
 
 interface ComponentPreview {
   name: string
@@ -70,6 +70,12 @@ const components: ComponentPreview[] = [
         <TopBar variant="progress" step={2} totalSteps={3} />
       </div>
     ),
+  },
+  {
+    name: 'ChatMessage',
+    description: '채팅 메시지 컴포넌트 (Morton 디자인 시스템)',
+    href: '/showcase/chat-message',
+    preview: <ChatMessage variant="mine" message="안녕하세요" timestamp="오후 2:09" />,
   },
 ]
 
