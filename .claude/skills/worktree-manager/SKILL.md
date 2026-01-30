@@ -131,11 +131,11 @@ git branch -d <branch-name>
 
 ## 연동 스킬
 
-| 시점 | 스킬 | 역할 |
-|------|------|------|
+| 시점          | 스킬              | 역할                                            |
+| ------------- | ----------------- | ----------------------------------------------- |
 | 워크트리 생성 | branch-from-issue | `feat/<issue>-<desc>` 또는 `fix/<issue>-<desc>` |
-| 커밋 | commit | Conventional Commits + 이슈 번호 |
-| PR 생성 | pr-from-issue | `Closes #<issue>` 자동 포함 |
+| 커밋          | commit            | Conventional Commits + 이슈 번호                |
+| PR 생성       | pr-from-issue     | `Closes #<issue>` 자동 포함                     |
 
 ---
 

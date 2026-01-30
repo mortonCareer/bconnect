@@ -198,12 +198,12 @@ model: sonnet
 
 ## 컨벤션 강제 메커니즘
 
-| 작업 | 자동 호출 스킬 | 강제되는 컨벤션 |
+| 작업        | 자동 호출 스킬    | 강제되는 컨벤션                  |
 | ----------- | ----------------- | -------------------------------- |
-| 이슈 생성 | issue-management | 레이블, 담당자 자동 적용 |
-| 브랜치 생성 | branch-from-issue | `<type>/<issue>-<desc>` 형식 |
-| 커밋 | commit | Conventional Commits + 이슈 번호 |
-| PR 생성 | pr-from-issue | `Closes #<issue>` 자동 포함 |
+| 이슈 생성   | issue-management  | 레이블, 담당자 자동 적용         |
+| 브랜치 생성 | branch-from-issue | `<type>/<issue>-<desc>` 형식     |
+| 커밋        | commit            | Conventional Commits + 이슈 번호 |
+| PR 생성     | pr-from-issue     | `Closes #<issue>` 자동 포함      |
 
 ---
 

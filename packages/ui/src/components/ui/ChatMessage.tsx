@@ -27,8 +27,7 @@ const chatBubbleVariants = cva(
 )
 
 export interface ChatMessageProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof chatBubbleVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof chatBubbleVariants> {
   /** 메시지 내용 (typing variant에서는 무시됨) */
   message?: string
   /** 타임스탬프 (예: "오후 2:09") */
@@ -98,7 +97,11 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
               </span>
             )}
             <div className={chatBubbleVariants({ variant })}>
-              {variant === 'typing' ? <TypingDots /> : <span className="break-words">{message}</span>}
+              {variant === 'typing' ? (
+                <TypingDots />
+              ) : (
+                <span className="break-words">{message}</span>
+              )}
             </div>
           </div>
           {variant === 'theirs' && timestamp && (
