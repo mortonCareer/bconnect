@@ -98,6 +98,20 @@
           "description": "상대 채팅 - 회색 버블, 프로필+닉네임"
         }
       ]
+    },
+    "ChatListItem": {
+      "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=407-3666",
+      "codePath": "src/components/ui/ChatListItem.tsx",
+      "createdAt": "2026-01-30",
+      "lastSyncedAt": "2026-01-30",
+      "variants": [
+        {
+          "name": "default",
+          "nodeId": "407-3666",
+          "description": "기본 - 프로필+태그+미리보기+chevron"
+        },
+        { "name": "badge", "nodeId": "364-4254", "description": "뱃지 - 시간+읽지않은수 뱃지 포함" }
+      ]
     }
   },
   "pages": {
