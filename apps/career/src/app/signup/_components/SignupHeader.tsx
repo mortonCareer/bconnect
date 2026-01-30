@@ -1,6 +1,6 @@
 'use client'
 
-import { BackButton, ProgressBar } from '@morton/ui'
+import { TopBar } from '@morton/ui'
 
 interface SignupHeaderProps {
   step: number
@@ -9,11 +9,5 @@ interface SignupHeaderProps {
 }
 
 export function SignupHeader({ step, total = 3, onBack }: SignupHeaderProps) {
-  return (
-    <header className="flex h-[60px] items-center justify-between px-4 py-5">
-      <BackButton onClick={onBack} />
-      <ProgressBar step={step} total={total} />
-      <div className="size-5" /> {/* Spacer for alignment */}
-    </header>
-  )
+  return <TopBar variant="progress" step={step} totalSteps={total} onBack={onBack} />
 }

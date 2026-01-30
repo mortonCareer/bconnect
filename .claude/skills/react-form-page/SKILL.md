@@ -232,13 +232,11 @@ import { Controller } from 'react-hook-form'
 
 ```typescript
 <div className="flex min-h-screen flex-col bg-white">
-  {/* 헤더: 고정 높이 */}
-  <header className="flex h-14 items-center px-5">
-    <BackButton />
-  </header>
+  {/* TopBar: 회원가입 플로우 (진행바) */}
+  <TopBar variant="progress" step={2} totalSteps={5} onBack={() => router.back()} />
 
-  {/* 진행률 표시 (선택) */}
-  <ProgressBar current={2} total={5} />
+  {/* 또는 일반 페이지 헤더 */}
+  {/* <TopBar variant="default" title="프로필 설정" onBack={() => router.back()} /> */}
 
   {/* 메인 콘텐츠: 유동 높이 */}
   <main className="flex-1 px-5 py-6">

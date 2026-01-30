@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Button, Tag, Input, Feed } from '@morton/ui'
+import { Button, Tag, Input, Feed, TopBar } from '@morton/ui'
 
 interface ComponentPreview {
   name: string
@@ -58,6 +58,16 @@ const components: ComponentPreview[] = [
             description: '골프장 전원주택 도배 시공을 진행하였습니다.',
           }}
         />
+      </div>
+    ),
+  },
+  {
+    name: 'TopBar',
+    description: '상단 네비게이션 바 (진행바, 기본, 홈)',
+    href: '/showcase/topbar',
+    preview: (
+      <div className="w-full">
+        <TopBar variant="progress" step={2} totalSteps={3} />
       </div>
     ),
   },

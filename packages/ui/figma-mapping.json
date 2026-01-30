@@ -68,6 +68,17 @@
           "description": "본문 내용"
         }
       }
+    },
+    "TopBar": {
+      "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=189-720",
+      "codePath": "src/components/ui/TopBar.tsx",
+      "createdAt": "2026-01-27",
+      "lastSyncedAt": "2026-01-27",
+      "variants": [
+        { "name": "progress", "nodeId": "331-3014", "description": "진행바 - 회원가입 플로우" },
+        { "name": "default", "nodeId": "346-6161", "description": "기본 - 제목 + 액션 버튼" },
+        { "name": "home", "nodeId": "352-2632", "description": "홈 - 필터 + 채팅 아이콘" }
+      ]
     }
   },
   "pages": {
