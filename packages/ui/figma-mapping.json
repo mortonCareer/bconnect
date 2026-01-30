@@ -41,6 +41,33 @@
         { "name": "selected", "nodeId": "188-1011", "description": "선택 - 파란색 배경/테두리" },
         { "name": "filter", "nodeId": "352-3876", "description": "필터 삭제 - X 아이콘 포함" }
       ]
+    },
+    "Feed": {
+      "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=352-2767",
+      "codePath": "src/components/ui/Feed.tsx",
+      "createdAt": "2026-01-27",
+      "lastSyncedAt": "2026-01-27",
+      "variants": [
+        { "name": "collapsed", "nodeId": "352-2768", "description": "접힘 - 본문 1줄 + 더보기" },
+        { "name": "expanded", "nodeId": "398-3264", "description": "펼침 - 전체 본문 + 접기" }
+      ],
+      "props": {
+        "profile": {
+          "image": "프로필 이미지 URL",
+          "name": "이름",
+          "location": "지역",
+          "jobType": "직종",
+          "specialty": "전문분야",
+          "bio": "자기소개"
+        },
+        "content": {
+          "image": "작업 이미지 URL",
+          "company": "회사명",
+          "duration": "소요일",
+          "timestamp": "작성일",
+          "description": "본문 내용"
+        }
+      }
     }
   },
   "pages": {
