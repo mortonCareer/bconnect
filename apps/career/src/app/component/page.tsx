@@ -1,6 +1,6 @@
 'use client'
 
-import { Input } from './Input'
+import { Input } from '@morton/ui'
 
 export default function ComponentPage() {
   return (
