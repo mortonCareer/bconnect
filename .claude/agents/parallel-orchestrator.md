@@ -14,6 +14,7 @@ model: sonnet
 - **이슈1 - 브랜치1 - PR1**: 각 이슈는 독립된 워크트리에서 작업
 - **컨벤션 강제**: 모든 단계에서 기존 스킬 규칙 자동 적용
 - **스킬 누락 방지**: 오케스트레이터가 워크플로우 전체 관리
+- **⚠️ 실행 주체**: 이 문서를 읽는 **상위 에이전트(메인 Claude)**가 각 단계에서 **반드시 `Skill` 도구를 사용**하여 해당 스킬을 호출해야 한다. `gh issue create` 등 CLI를 직접 사용하지 않는다.
 
 ---
 
@@ -39,9 +40,9 @@ model: sonnet
 
 ## 워크플로우
 
-### 전체 흐름
+### 단일 작업 흐름
 
-```
+```text
 작업 요청
     │
     ├─ 이슈 번호 있음 ────────────────────┐
@@ -49,14 +50,14 @@ model: sonnet
     ├─ 이슈 번호 없음                      │
     │       │                             │
     │       ▼                             │
-    │   [1] issue-management              │
+    │   [1] Skill("issue-management")     │
     │       ├─ 이슈 생성                  │
     │       ├─ 레이블 자동 적용            │
     │       └─ 담당자 할당                 │
     │       │                             │
     │       ▼                             ▼
-    └───────────────▶ [2] worktree-manager
-                          ├─ 브랜치 생성 (branch-from-issue 규칙)
+    └───────────────▶ [2] Skill("worktree-manager")
+                          ├─ 브랜치 생성 (feat/<issue>-<desc>)
                           ├─ 워크트리 생성
                           ├─ 설정 파일 복사
                           └─ 의존성 설치
@@ -65,14 +66,42 @@ model: sonnet
                       [3] 작업 진행...
                           │
                           ▼
-                      [4] commit (요청 시)
+                      [4] Skill("commit")
                           ├─ Conventional Commits 강제
                           └─ 이슈 번호 자동 포함
                           │
                           ▼
-                      [5] pr-from-issue (요청 시)
+                      [5] Skill("pr-from-issue")
                           ├─ 이슈 기반 PR 생성
                           └─ Closes #N 자동 포함
+```
+
+### 병렬 작업 흐름 (N개 이슈 동시 처리)
+
+```text
+N개 작업 요청
+    │
+    ▼
+[1] Skill("issue-management") × N
+    ├─ 이슈 N건 순차 생성 (레이블, 담당자 자동 적용)
+    │
+    ▼
+[2] git worktree add × N (병렬 생성)
+    ├─ 각 이슈별 독립 워크트리
+    ├─ 브랜치: feat/<issue>-<desc>
+    │
+    ▼
+[3] Task 에이전트 × N (병렬 실행)
+    ├─ 각 워크트리에서 독립 작업
+    │
+    ▼
+[4] Skill("commit") × N (각 워크트리에서)
+    │
+    ▼
+[5] Skill("pr-from-issue") × N (각 워크트리에서)
+    │
+    ▼
+[6] git worktree remove × N (정리)
 ```
 
 ---
@@ -230,6 +259,7 @@ model: sonnet
 - 이슈 없이 직접 브랜치 생성
 - 컨벤션 무시하고 직접 커밋
 - 동일 이슈로 중복 워크트리 생성
+- 스킬 없이 직접 CLI로 이슈/PR 생성 (`gh issue create`, `gh pr create` 직접 사용 금지)
 
 ---
 

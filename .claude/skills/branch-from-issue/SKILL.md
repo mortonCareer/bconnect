@@ -1,6 +1,6 @@
 ---
 name: branch-from-issue
-description: GitHub Issue 번호 기반으로 브랜치 자동 생성. feature/#-description 또는 fix/#-description 형식으로 브랜치 생성 및 체크아웃
+description: GitHub Issue 번호 기반으로 브랜치 자동 생성. feat/#-description 또는 fix/#-description 형식으로 브랜치 생성 및 체크아웃
 allowed-tools: Bash, Read, Grep
 ---
 
@@ -21,22 +21,22 @@ GitHub Issue 번호를 기반으로 작업 브랜치를 자동 생성합니다.
 
 ### 타입 선택
 
-| 타입      | 사용 시기        |
-| --------- | ---------------- |
-| `feature` | 새로운 기능 개발 |
-| `fix`     | 버그 수정        |
+| 타입   | 사용 시기        |
+| ------ | ---------------- |
+| `feat` | 새로운 기능 개발 |
+| `fix`  | 버그 수정        |
 
 ### 예시
 
 ```bash
 # 이슈 #123: Add user profile upload
-feature/123-add-profile-upload
+feat/123-add-profile-upload
 
 # 이슈 #456: Fix login redirect loop
 fix/456-login-redirect-loop
 
 # 이슈 #789: Update API error handling
-feature/789-update-error-handling
+feat/789-update-error-handling
 ```
 
 ## 브랜치 생성 프로세스
@@ -46,7 +46,7 @@ feature/789-update-error-handling
    └─ gh issue view <issue-number>
 
 2. 브랜치 타입 결정
-   └─ 레이블 확인 (bug → fix, 기타 → feature)
+   └─ 레이블 확인 (bug → fix, 기타 → feat)
 
 3. main 브랜치 최신화
    └─ git checkout main
@@ -80,12 +80,12 @@ git checkout main
 git pull origin main
 
 # 3. 브랜치 생성
-git checkout -b feature/123-add-profile-upload
+git checkout -b feat/123-add-profile-upload
 ```
 
 **결과**:
 
-- 브랜치: `feature/123-add-profile-upload`
+- 브랜치: `feat/123-add-profile-upload`
 - base: `main`
 
 ### 예시 2: 버그 수정
@@ -130,7 +130,7 @@ ISSUE_LABELS=$(gh issue view $ISSUE_NUMBER --json labels -q '.labels[].name')
 if echo "$ISSUE_LABELS" | grep -q "bug"; then
   TYPE="fix"
 else
-  TYPE="feature"
+  TYPE="feat"
 fi
 
 # description 생성 (제목에서 추출, 소문자, 공백 → 하이픈)
@@ -180,14 +180,14 @@ chmod +x branch-from-issue.sh
 
 ```bash
 # 좋은 예
-feature/123-add-profile-upload
+feat/123-add-profile-upload
 fix/456-login-redirect
-feature/789-update-error-handling
+feat/789-update-error-handling
 
 # 나쁜 예
-feature/add-profile  # 이슈 번호 없음
-Feature/123-Add-Profile-Upload  # 대문자 사용
-feature/123-add-profile-image-upload-feature-with-s3-integration  # 너무 김
+feat/add-profile  # 이슈 번호 없음
+Feat/123-Add-Profile-Upload  # 대문자 사용
+feat/123-add-profile-image-upload-feat-with-s3-integration  # 너무 김
 fix/bug  # 이슈 번호 및 설명 부족
 ```
 
@@ -214,14 +214,14 @@ gh issue develop 123 --checkout
 ### 브랜치가 이미 존재할 때
 
 ```bash
-# 에러: fatal: A branch named 'feature/123-...' already exists.
+# 에러: fatal: A branch named 'feat/123-...' already exists.
 
 # 해결 1: 기존 브랜치로 체크아웃
-git checkout feature/123-add-profile-upload
+git checkout feat/123-add-profile-upload
 
 # 해결 2: 브랜치 삭제 후 재생성 (주의!)
-git branch -D feature/123-add-profile-upload
-git checkout -b feature/123-add-profile-upload
+git branch -D feat/123-add-profile-upload
+git checkout -b feat/123-add-profile-upload
 ```
 
 ### main이 오래되었을 때
@@ -244,7 +244,7 @@ git stash
 # 2. 올바른 브랜치 생성
 git checkout main
 git pull origin main
-git checkout -b feature/123-add-profile-upload
+git checkout -b feat/123-add-profile-upload
 
 # 3. 변경사항 복원
 git stash pop

@@ -17,7 +17,7 @@ GitHub Issue 정보를 기반으로 Pull Request를 자동 생성합니다.
 
 ```
 1. 현재 브랜치에서 이슈 번호 추출
-   └─ feature/123-add-profile-upload → #123
+   └─ feat/123-add-profile-upload → #123
 
 2. 이슈 정보 가져오기
    └─ gh issue view 123
@@ -126,7 +126,7 @@ fi
 
 ### 예시 1: 기능 개발 PR
 
-**현재 브랜치**: `feature/123-add-profile-upload`
+**현재 브랜치**: `feat/123-add-profile-upload`
 
 **이슈 정보** (#123):
 
@@ -268,7 +268,7 @@ gh pr create \
 # 현재 브랜치에서 이슈 번호 추출
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-if [[ $BRANCH =~ ^(feature|fix)/([0-9]+)-(.+)$ ]]; then
+if [[ $BRANCH =~ ^(feat|fix)/([0-9]+)-(.+)$ ]]; then
   TYPE=${BASH_REMATCH[1]}
   ISSUE=${BASH_REMATCH[2]}
   DESC=${BASH_REMATCH[3]}
@@ -277,12 +277,7 @@ else
   exit 1
 fi
 
-# feature → feat 변환
-if [ "$TYPE" = "feature" ]; then
-  COMMIT_TYPE="feat"
-else
-  COMMIT_TYPE="$TYPE"
-fi
+COMMIT_TYPE="$TYPE"
 
 # 이슈 정보 가져오기
 ISSUE_TITLE=$(gh issue view $ISSUE --json title -q .title)
@@ -418,7 +413,7 @@ PR 생성 전 확인 사항:
 gh pr create
 
 # 제목과 본문 지정
-gh pr create --title "feat: add feature" --body "description"
+gh pr create --title "feat: add feat" --body "description"
 
 # draft PR
 gh pr create --draft
@@ -511,7 +506,7 @@ git checkout main
 git pull origin main
 
 # 작업 브랜치로 돌아가기
-git checkout feature/123-add-profile-upload
+git checkout feat/123-add-profile-upload
 
 # main 변경사항 가져오기
 git rebase main
