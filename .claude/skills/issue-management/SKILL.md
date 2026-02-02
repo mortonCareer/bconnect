@@ -40,6 +40,7 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 - `📋 api-spec` - API 스펙 설계
 - `🎨 publishing` - 퍼블리싱
 - `☁️ infra` - 인프라
+- `🔧 chore` - 설정, 문서, CI/CD, 스킬/에이전트 수정
 
 ### 2. Bug Report (버그 리포트)
 
@@ -96,16 +97,17 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 
 ## 레이블 자동 적용 규칙
 
-| 키워드                       | 레이블            |
-| ---------------------------- | ----------------- |
-| API 스펙, openapi.yaml       | `📋 api-spec`     |
-| 퍼블리싱, UI 마크업, HTML    | `🎨 publishing`   |
-| Spring Boot, Java, Backend   | `⚙️ BE`           |
-| Next.js, React, Frontend     | `💻 FE`           |
-| Vercel, Railway, AWS, 인프라 | `☁️ infra`        |
-| 버그 + API 응답              | `🐛 bug:BE`       |
-| 버그 + 화면, UI              | `🐛 bug:FE`       |
-| 버그 + 스펙                  | `🐛 bug:api-spec` |
+| 키워드                                      | 레이블            |
+| ------------------------------------------- | ----------------- |
+| API 스펙, openapi.yaml                      | `📋 api-spec`     |
+| 퍼블리싱, UI 마크업, HTML                   | `🎨 publishing`   |
+| Spring Boot, Java, Backend                  | `⚙️ BE`           |
+| Next.js, React, Frontend                    | `💻 FE`           |
+| Vercel, Railway, AWS, 인프라                | `☁️ infra`        |
+| 설정, 문서, CI/CD, 스킬, 에이전트, .claude/ | `🔧 chore`        |
+| 버그 + API 응답                             | `🐛 bug:BE`       |
+| 버그 + 화면, UI                             | `🐛 bug:FE`       |
+| 버그 + 스펙                                 | `🐛 bug:api-spec` |
 
 ## 담당자 할당 규칙
 
@@ -118,6 +120,7 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 | `⚙️ BE`           | CEO                            |
 | `💻 FE`           | CTO                            |
 | `☁️ infra`        | CTO                            |
+| `🔧 chore`        | CTO                            |
 | `🐛 bug:api-spec` | 둘이 논의                      |
 | `🐛 bug:BE`       | CEO                            |
 | `🐛 bug:FE`       | CTO                            |
