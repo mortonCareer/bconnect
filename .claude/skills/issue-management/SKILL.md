@@ -206,9 +206,9 @@ gh issue view 123
 
 이슈 생성 후:
 
-1. **branch-from-issue** 스킬로 브랜치 생성
+1. **worktree-manager** 스킬로 워크트리+브랜치 생성
 2. 작업 진행
-3. **commit-convention** 스킬로 커밋
+3. **commit** 스킬로 커밋
 4. **pr-from-issue** 스킬로 PR 생성
 
 ## 참고 문서

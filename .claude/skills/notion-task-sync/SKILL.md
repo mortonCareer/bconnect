@@ -147,7 +147,7 @@ await notion.pages.create({
 
 ### 2. 브랜치 생성 → In Progress
 
-**트리거**: `branch-from-issue` 스킬 실행 후
+**트리거**: `worktree-manager` 스킬 실행 후
 
 **Notion API 호출**:
 

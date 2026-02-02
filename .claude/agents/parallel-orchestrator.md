@@ -11,19 +11,20 @@ model: sonnet
 
 ## 핵심 원칙
 
-- **이슈1 - 브랜치1 - PR1**: 각 이슈는 독립된 워크트리에서 작업
+- **워크트리 필수**: 모든 작업은 반드시 워크트리에서 진행한다. `git checkout -b`로 메인 레포에서 직접 브랜치를 생성하지 않는다.
+- **이슈1 - 워크트리1 - 브랜치1 - PR1**: 각 이슈는 독립된 워크트리에서 작업
 - **컨벤션 강제**: 모든 단계에서 기존 스킬 규칙 자동 적용
 - **스킬 누락 방지**: 오케스트레이터가 워크플로우 전체 관리
-- **⚠️ 실행 주체**: 이 문서를 읽는 **상위 에이전트(메인 Claude)**가 각 단계에서 **반드시 `Skill` 도구를 사용**하여 해당 스킬을 호출해야 한다. `gh issue create` 등 CLI를 직접 사용하지 않는다.
+- **⚠️ 실행 주체**: 이 문서를 읽는 **상위 에이전트(메인 Claude)**가 각 단계에서 **반드시 `Skill` 도구를 사용**하여 해당 스킬을 호출해야 한다. `gh issue create`, `git checkout -b` 등 CLI를 직접 사용하지 않는다.
 
 ---
 
 ## 역할
 
-1. 이슈 생성 (issue-management 스킬 호출)
-2. 워크트리 생성 (worktree-manager 스킬 호출)
-3. 커밋 컨벤션 강제 (commit 스킬 호출)
-4. PR 생성 (pr-from-issue 스킬 호출)
+1. 이슈 생성 → `Skill("issue-management")`
+2. 워크트리 + 브랜치 생성 → `Skill("worktree-manager")` (`git worktree add -b`로 워크트리와 브랜치 동시 생성)
+3. 커밋 → `Skill("commit")`
+4. PR 생성 → `Skill("pr-from-issue")`
 
 ---
 
@@ -57,16 +58,16 @@ model: sonnet
     │       │                             │
     │       ▼                             ▼
     └───────────────▶ [2] Skill("worktree-manager")
-                          ├─ 브랜치 생성 (feat/<issue>-<desc>)
-                          ├─ 워크트리 생성
-                          ├─ 설정 파일 복사
-                          └─ 의존성 설치
+                          ├─ 워크트리 생성 (/home/json/morton-worktrees/)
+                          ├─ 브랜치 생성 (feat/<issue>-<desc>, GIT_WORKFLOW.md 규칙)
+                          ├─ 설정 파일 복사 (.env, .claude/)
+                          └─ 의존성 설치 (pnpm install)
                           │
                           ▼
-                      [3] 작업 진행...
+                      [3] 작업 진행... (워크트리 디렉토리에서)
                           │
                           ▼
-                      [4] Skill("commit")
+                      [4] Skill("commit") (워크트리 cwd에서 실행)
                           ├─ Conventional Commits 강제
                           └─ 이슈 번호 자동 포함
                           │
@@ -227,22 +228,22 @@ N개 작업 요청
 
 ## 컨벤션 강제 메커니즘
 
-| 작업        | 자동 호출 스킬    | 강제되는 컨벤션                  |
-| ----------- | ----------------- | -------------------------------- |
-| 이슈 생성   | issue-management  | 레이블, 담당자 자동 적용         |
-| 브랜치 생성 | branch-from-issue | `<type>/<issue>-<desc>` 형식     |
-| 커밋        | commit            | Conventional Commits + 이슈 번호 |
-| PR 생성     | pr-from-issue     | `Closes #<issue>` 자동 포함      |
+| 작업                   | 자동 호출 스킬   | 강제되는 컨벤션                                                                |
+| ---------------------- | ---------------- | ------------------------------------------------------------------------------ |
+| 이슈 생성              | issue-management | 레이블, 담당자 자동 적용                                                       |
+| 워크트리 + 브랜치 생성 | worktree-manager | 워크트리 독립 디렉토리 + `<type>/<issue>-<desc>` 브랜치 (GIT_WORKFLOW.md 참조) |
+| 커밋                   | commit           | Conventional Commits + 이슈 번호                                               |
+| PR 생성                | pr-from-issue    | `Closes #<issue>` 자동 포함                                                    |
 
 ---
 
-## 참조 스킬
+## 참조
 
 - [Issue Management](../.claude/skills/issue-management/SKILL.md)
-- [Branch from Issue](../.claude/skills/branch-from-issue/SKILL.md)
 - [Worktree Manager](../.claude/skills/worktree-manager/SKILL.md)
 - [Commit](../.claude/skills/commit/SKILL.md)
 - [PR from Issue](../.claude/skills/pr-from-issue/SKILL.md)
+- [Git Workflow](../../docs/GIT_WORKFLOW.md) - 브랜치 네이밍 규칙
 
 ---
 
@@ -257,6 +258,7 @@ N개 작업 요청
 ### DON'T
 
 - 이슈 없이 직접 브랜치 생성
+- **메인 레포에서 `git checkout -b`로 브랜치만 생성** (반드시 `Skill("worktree-manager")`로 워크트리+브랜치 동시 생성)
 - 컨벤션 무시하고 직접 커밋
 - 동일 이슈로 중복 워크트리 생성
 - 스킬 없이 직접 CLI로 이슈/PR 생성 (`gh issue create`, `gh pr create` 직접 사용 금지)

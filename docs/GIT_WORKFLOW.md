@@ -74,7 +74,7 @@ git checkout -b feat/123-add-profile-upload
 
 **자동화 스킬 사용:**
 
-`branch-from-issue` 스킬을 사용하면 이슈 번호를 입력하는 것만으로 자동으로 브랜치를 생성합니다.
+`worktree-manager` 스킬을 사용하면 이슈 번호를 입력하는 것만으로 워크트리와 브랜치를 자동 생성합니다.
 
 ---
 
@@ -356,13 +356,13 @@ GitHub Issue 생성 및 관리 자동화
 - 레이블 자동 적용
 - 담당자 할당
 
-### 2. branch-from-issue
+### 2. worktree-manager
 
-이슈 기반 브랜치 생성 자동화
+Git worktree 기반 병렬 작업 관리
 
-- 이슈 번호 입력
-- `feat/#-description` 형식으로 브랜치 생성
-- 자동 체크아웃
+- 이슈 번호 기반 워크트리+브랜치 동시 생성
+- `feat/#-description` 형식 브랜치 네이밍 (위 브랜치 전략 참조)
+- 워크트리 목록 조회 및 삭제
 
 ### 3. commit-convention
 

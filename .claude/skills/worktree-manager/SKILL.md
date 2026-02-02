@@ -10,9 +10,15 @@ Git worktree를 활용하여 여러 이슈를 병렬로 작업할 수 있도록 
 
 ## 핵심 원칙
 
-- **이슈1 - 브랜치1 - PR1**: 각 이슈는 독립된 워크트리에서 작업
-- **컨벤션 강제**: branch-from-issue 스킬 규칙 적용
+- **이슈1 - 워크트리1 - 브랜치1 - PR1**: 각 이슈는 독립된 워크트리에서 작업
+- **브랜치 네이밍**: [Git Workflow](../../../docs/GIT_WORKFLOW.md)의 브랜치 전략 섹션 참조
 - **독립 실행**: 각 워크트리에서 별도 터미널로 병렬 작업
+
+---
+
+## 브랜치 네이밍 규칙
+
+> 상세 규칙은 [docs/GIT_WORKFLOW.md](../../../docs/GIT_WORKFLOW.md)를 참조합니다.
 
 ---
 
@@ -40,17 +46,17 @@ Git worktree를 활용하여 여러 이슈를 병렬로 작업할 수 있도록 
 # 1. 이슈 정보 확인
 gh issue view <issue-number> --json title,labels
 
-# 2. 브랜치 타입 결정 (branch-from-issue 규칙)
+# 2. 브랜치 타입 결정
 # - bug 레이블 → fix
 # - 기타 → feat
 
-# 3. 브랜치명 생성
+# 3. 브랜치명 생성 (GIT_WORKFLOW.md 규칙)
 # <type>/<issue-number>-<short-description>
 
 # 4. main 최신화
 git -C /home/json/morton fetch origin main
 
-# 5. 워크트리 생성
+# 5. 워크트리 + 브랜치 동시 생성
 mkdir -p /home/json/morton-worktrees
 git worktree add \
   /home/json/morton-worktrees/<branch-name-with-hyphens> \
@@ -104,7 +110,7 @@ gh pr list --head <branch-name> --json number,state
 
 | 이슈 | 브랜치 | 경로 | PR |
 |------|--------|------|----|
-| #57 | feat/57-input-component | morton | - |
+| #57 | feat/57-input-component | morton-worktrees/feat-57 | - |
 | #58 | fix/58-button-variant | morton-worktrees/fix-58 | #59 |
 
 총 2개 작업 중
@@ -131,11 +137,10 @@ git branch -d <branch-name>
 
 ## 연동 스킬
 
-| 시점          | 스킬              | 역할                                            |
-| ------------- | ----------------- | ----------------------------------------------- |
-| 워크트리 생성 | branch-from-issue | `feat/<issue>-<desc>` 또는 `fix/<issue>-<desc>` |
-| 커밋          | commit            | Conventional Commits + 이슈 번호                |
-| PR 생성       | pr-from-issue     | `Closes #<issue>` 자동 포함                     |
+| 시점    | 스킬          | 역할                             |
+| ------- | ------------- | -------------------------------- |
+| 커밋    | commit        | Conventional Commits + 이슈 번호 |
+| PR 생성 | pr-from-issue | `Closes #<issue>` 자동 포함      |
 
 ---
 
@@ -151,6 +156,7 @@ git branch -d <branch-name>
 
 - 동일 이슈로 중복 워크트리 생성
 - 머지 전 워크트리 삭제
+- 메인 레포에서 `git checkout -b`로 직접 브랜치 생성
 
 ---
 
@@ -165,6 +171,6 @@ git branch -d <branch-name>
 
 ## 참고 문서
 
-- [Branch from Issue](../branch-from-issue/SKILL.md)
+- [Git Workflow](../../../docs/GIT_WORKFLOW.md) - 브랜치 전략 및 네이밍
 - [Commit](../commit/SKILL.md)
 - [PR from Issue](../pr-from-issue/SKILL.md)
