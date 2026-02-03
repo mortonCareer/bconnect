@@ -69,25 +69,10 @@ GitHub Issue 정보를 기반으로 Pull Request를 자동 생성합니다.
 
 ## PR 본문 템플릿
 
-```markdown
-## Summary
+> **SSoT**: PR 본문 템플릿의 원본은 [.github/pull_request_template.md](../../../.github/pull_request_template.md)에 있습니다.
+> PR 생성 시 해당 템플릿을 읽어서 본문을 채워 넣으세요.
 
-[기능/버그에 대한 간단한 설명]
-
-## Changes
-
-- [변경사항 1]
-- [변경사항 2]
-- [변경사항 3]
-
-## Test
-
-- [ ] 로컬에서 테스트 완료
-- [ ] 에러 케이스 확인
-- [ ] 반응형 동작 확인 (모바일/데스크톱)
-
-Closes #123
-```
+템플릿 구조: Summary → Changes → Test → Screenshots → `Closes #이슈번호`
 
 ---
 
