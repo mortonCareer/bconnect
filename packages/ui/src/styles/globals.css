@@ -120,10 +120,95 @@
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
+
+  /* Morton Typography - SemiBold */
+  --text-sb-24: 1.5rem;
+  --text-sb-24--line-height: 1.4;
+  --text-sb-20: 1.25rem;
+  --text-sb-20--line-height: 1.4;
+  --text-sb-16: 1rem;
+  --text-sb-16--line-height: 1.4;
+  --text-sb-14: 0.875rem;
+  --text-sb-14--line-height: 1.8;
+  --text-sb-12: 0.75rem;
+  --text-sb-12--line-height: 1.6;
+
+  /* Morton Typography - Medium */
+  --text-m-16: 1rem;
+  --text-m-16--line-height: 1.6;
+  --text-m-14: 0.875rem;
+  --text-m-14--line-height: 1.8;
+  --text-m-12: 0.75rem;
+  --text-m-12--line-height: 1.6;
+
+  /* Morton Typography - Regular */
+  --text-r-16: 1rem;
+  --text-r-16--line-height: 1.6;
+  --text-r-14: 0.875rem;
+  --text-r-14--line-height: 1.6;
+  --text-r-12: 0.75rem;
+  --text-r-12--line-height: 1.6;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+/* Morton Typography Utilities */
+@utility text-sb-24 {
+  font-size: 1.5rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+@utility text-sb-20 {
+  font-size: 1.25rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+@utility text-sb-16 {
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+@utility text-sb-14 {
+  font-size: 0.875rem;
+  line-height: 1.8;
+  font-weight: 600;
+}
+@utility text-sb-12 {
+  font-size: 0.75rem;
+  line-height: 1.6;
+  font-weight: 600;
+}
+@utility text-m-16 {
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 500;
+}
+@utility text-m-14 {
+  font-size: 0.875rem;
+  line-height: 1.8;
+  font-weight: 500;
+}
+@utility text-m-12 {
+  font-size: 0.75rem;
+  line-height: 1.6;
+  font-weight: 500;
+}
+@utility text-r-16 {
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 400;
+}
+@utility text-r-14 {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  font-weight: 400;
+}
+@utility text-r-12 {
+  font-size: 0.75rem;
+  line-height: 1.6;
+  font-weight: 400;
 }
