@@ -59,7 +59,7 @@ model: sonnet
     │       ▼                             ▼
     └───────────────▶ [2] Skill("worktree-manager")
                           ├─ 워크트리 생성 (/home/json/morton-worktrees/)
-                          ├─ 브랜치 생성 (feat/<issue>-<desc>, GIT_WORKFLOW.md 규칙)
+                          ├─ 브랜치 생성 (feat/<issue>-<description>, GIT_WORKFLOW.md 규칙)
                           ├─ 설정 파일 복사 (.env, .claude/)
                           └─ 의존성 설치 (pnpm install)
                           │
@@ -89,20 +89,18 @@ N개 작업 요청
     ▼
 [2] git worktree add × N (병렬 생성)
     ├─ 각 이슈별 독립 워크트리
-    ├─ 브랜치: feat/<issue>-<desc>
+    ├─ 브랜치: feat/<issue>-<description>
     │
     ▼
 [3] Task 에이전트 × N (병렬 실행)
     ├─ 각 워크트리에서 독립 작업
+    ├─ Skill("commit") 포함
     │
     ▼
-[4] Skill("commit") × N (각 워크트리에서)
+[4] Skill("pr-from-issue") × N (각 워크트리에서)
     │
     ▼
-[5] Skill("pr-from-issue") × N (각 워크트리에서)
-    │
-    ▼
-[6] git worktree remove × N (정리)
+[5] git worktree remove × N (정리)
 ```
 
 ---
@@ -228,12 +226,12 @@ N개 작업 요청
 
 ## 컨벤션 강제 메커니즘
 
-| 작업                   | 자동 호출 스킬   | 강제되는 컨벤션                                                                |
-| ---------------------- | ---------------- | ------------------------------------------------------------------------------ |
-| 이슈 생성              | issue-management | 레이블, 담당자 자동 적용                                                       |
-| 워크트리 + 브랜치 생성 | worktree-manager | 워크트리 독립 디렉토리 + `<type>/<issue>-<desc>` 브랜치 (GIT_WORKFLOW.md 참조) |
-| 커밋                   | commit           | Conventional Commits + 이슈 번호                                               |
-| PR 생성                | pr-from-issue    | `Closes #<issue>` 자동 포함                                                    |
+| 작업                   | 자동 호출 스킬   | 강제되는 컨벤션                                                                       |
+| ---------------------- | ---------------- | ------------------------------------------------------------------------------------- |
+| 이슈 생성              | issue-management | 레이블, 담당자 자동 적용                                                              |
+| 워크트리 + 브랜치 생성 | worktree-manager | 워크트리 독립 디렉토리 + `<type>/<issue>-<description>` 브랜치 (GIT_WORKFLOW.md 참조) |
+| 커밋                   | commit           | Conventional Commits + 이슈 번호                                                      |
+| PR 생성                | pr-from-issue    | `Closes #<issue>` 자동 포함                                                           |
 
 ---
 
