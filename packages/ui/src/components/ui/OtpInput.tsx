@@ -48,18 +48,18 @@ const OtpInput = React.forwardRef<HTMLInputElement, OtpInputProps>(
           pattern="[0-9]*"
           ref={ref}
           data-slot="otp-input"
-          className="flex-1 bg-transparent text-base leading-[1.6] font-sans text-morton-gray-900 placeholder:text-morton-gray-500 outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex-1 bg-transparent text-base text-morton-gray-900 placeholder:text-morton-gray-500 outline-none disabled:cursor-not-allowed disabled:opacity-50"
           {...props}
         />
         <div className="flex items-center gap-[10px] text-sm shrink-0">
           {remainingTime > 0 && (
-            <span className="font-sans text-morton-gray-500">{formatTime(remainingTime)}</span>
+            <span className="text-morton-gray-500">{formatTime(remainingTime)}</span>
           )}
           <button
             type="button"
             onClick={onResend}
             disabled={resendDisabled}
-            className="font-sans font-medium text-morton-primary hover:text-morton-primary-hover disabled:opacity-50 disabled:cursor-not-allowed"
+            className="font-medium text-morton-primary hover:text-morton-primary-hover disabled:opacity-50 disabled:cursor-not-allowed"
           >
             재요청
           </button>

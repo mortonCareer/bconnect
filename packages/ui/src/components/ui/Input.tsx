@@ -10,7 +10,7 @@ import { cn } from '../../lib/utils'
  * Figma: https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=189-626
  */
 const inputVariants = cva(
-  'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border bg-transparent text-base leading-[1.6] font-sans outline-none transition-colors placeholder:text-morton-gray-500 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+  'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border bg-transparent text-base outline-none transition-colors placeholder:text-morton-gray-500 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -69,7 +69,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       return (
         <div className="flex w-full flex-col items-start gap-2">
           {inputElement}
-          <p className="text-sm leading-[1.6] font-sans text-morton-error">{errorMessage}</p>
+          <p className="text-sm text-morton-error">{errorMessage}</p>
         </div>
       )
     }

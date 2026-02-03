@@ -8,23 +8,20 @@ import { cn } from '../../lib/utils'
  * - theirs: 상대 채팅 - 회색 버블, 프로필+닉네임
  * - typing: 입력 중 - 프로필+닉네임+타이핑 인디케이터
  */
-const chatBubbleVariants = cva(
-  'inline-flex items-center px-[16px] font-sans text-[14px] leading-[1.2]',
-  {
-    variants: {
-      variant: {
-        mine: 'bg-morton-primary text-white rounded-tl-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px]',
-        theirs:
-          'bg-morton-gray-100 text-morton-gray-900 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[12px] max-w-[180px]',
-        typing:
-          'bg-morton-gray-100 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px] h-[40px]',
-      },
+const chatBubbleVariants = cva('inline-flex items-center px-[16px] text-r-14', {
+  variants: {
+    variant: {
+      mine: 'bg-morton-primary text-white rounded-tl-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px]',
+      theirs:
+        'bg-morton-gray-100 text-morton-gray-900 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[12px] max-w-[180px]',
+      typing:
+        'bg-morton-gray-100 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px] h-[40px]',
     },
-    defaultVariants: {
-      variant: 'mine',
-    },
-  }
-)
+  },
+  defaultVariants: {
+    variant: 'mine',
+  },
+})
 
 export interface ChatMessageProps
   extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof chatBubbleVariants> {
@@ -66,11 +63,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
     if (variant === 'mine') {
       return (
         <div ref={ref} className={cn('flex items-end justify-end gap-[8px]', className)} {...props}>
-          {timestamp && (
-            <span className="text-[12px] leading-[1.4] text-morton-gray-700 font-sans">
-              {timestamp}
-            </span>
-          )}
+          {timestamp && <span className="text-r-12 text-morton-gray-700">{timestamp}</span>}
           <div className={chatBubbleVariants({ variant })}>
             <span>{message}</span>
           </div>
@@ -91,11 +84,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
         {/* 닉네임 + 버블 + 타임스탬프 */}
         <div className="flex items-end gap-[8px]">
           <div className="flex flex-col gap-[4px]">
-            {nickname && (
-              <span className="text-[12px] font-medium leading-[1.4] text-morton-gray-900 font-sans">
-                {nickname}
-              </span>
-            )}
+            {nickname && <span className="text-m-12 text-morton-gray-900">{nickname}</span>}
             <div className={chatBubbleVariants({ variant })}>
               {variant === 'typing' ? (
                 <TypingDots />
@@ -105,9 +94,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
             </div>
           </div>
           {variant === 'theirs' && timestamp && (
-            <span className="text-[12px] leading-[1.4] text-morton-gray-700 font-sans">
-              {timestamp}
-            </span>
+            <span className="text-r-12 text-morton-gray-700">{timestamp}</span>
           )}
         </div>
       </div>

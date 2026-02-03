@@ -35,10 +35,7 @@ export interface TabProps {
 const Tab = React.forwardRef<HTMLDivElement, TabProps>(
   ({ items, activeKey, onChange, className }, ref) => {
     return (
-      <div
-        ref={ref}
-        className={cn('flex w-full border-b border-morton-gray-300 font-sans', className)}
-      >
+      <div ref={ref} className={cn('flex w-full border-b border-morton-gray-300', className)}>
         {items.map((item) => {
           const isActive = item.key === activeKey
 
@@ -54,7 +51,7 @@ const Tab = React.forwardRef<HTMLDivElement, TabProps>(
             >
               <span
                 className={cn(
-                  'text-sm leading-[1.6] pb-[10px]',
+                  'text-sm pb-[10px]',
                   isActive
                     ? 'text-morton-primary font-semibold'
                     : 'text-morton-gray-500 font-medium'

@@ -10,7 +10,7 @@ import { XIcon } from '../../icons/XIcon'
  * - filter (필터 삭제): 파란색 배경/테두리 + X 아이콘
  */
 const tagVariants = cva(
-  'inline-flex items-center justify-center rounded-lg border text-sm leading-[1.6] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morton-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white cursor-pointer active:scale-[0.98] font-sans',
+  'inline-flex items-center justify-center rounded-lg border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morton-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white cursor-pointer active:scale-[0.98]',
   {
     variants: {
       variant: {
