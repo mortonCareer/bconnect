@@ -10,16 +10,16 @@ import { cn } from '../../lib/utils'
  * Figma: https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=189-626
  */
 const inputVariants = cva(
-  'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border bg-transparent text-base leading-[1.6] font-[Pretendard_Variable] outline-none transition-colors placeholder:text-[#A5A5A5] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+  'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border bg-transparent text-base leading-[1.6] font-sans outline-none transition-colors placeholder:text-morton-gray-500 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
         // 기본 상태
         default:
-          'border-[#E5E5E5] text-[#1B1B1B] focus:border-[#386DFF] focus:ring-1 focus:ring-[#386DFF]',
+          'border-morton-gray-300 text-morton-gray-900 focus:border-morton-primary focus:ring-1 focus:ring-morton-primary',
         // 에러 상태
         error:
-          'border-destructive text-[#1B1B1B] focus:border-destructive focus:ring-1 focus:ring-destructive/50',
+          'border-destructive text-morton-gray-900 focus:border-destructive focus:ring-1 focus:ring-destructive/50',
       },
     },
     defaultVariants: {
@@ -69,9 +69,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       return (
         <div className="flex w-full flex-col items-start gap-2">
           {inputElement}
-          <p className="text-sm leading-[1.6] font-[Pretendard_Variable] text-[#FF4242]">
-            {errorMessage}
-          </p>
+          <p className="text-sm leading-[1.6] font-sans text-morton-error">{errorMessage}</p>
         </div>
       )
     }

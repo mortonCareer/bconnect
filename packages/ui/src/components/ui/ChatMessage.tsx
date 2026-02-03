@@ -9,15 +9,15 @@ import { cn } from '../../lib/utils'
  * - typing: 입력 중 - 프로필+닉네임+타이핑 인디케이터
  */
 const chatBubbleVariants = cva(
-  'inline-flex items-center px-[16px] font-[Pretendard_Variable] text-[14px] leading-[1.2]',
+  'inline-flex items-center px-[16px] font-sans text-[14px] leading-[1.2]',
   {
     variants: {
       variant: {
-        mine: 'bg-[#386DFF] text-white rounded-tl-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px]',
+        mine: 'bg-morton-primary text-white rounded-tl-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px]',
         theirs:
-          'bg-[#F4F4F4] text-[#1B1B1B] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[12px] max-w-[180px]',
+          'bg-morton-gray-100 text-morton-gray-900 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[12px] max-w-[180px]',
         typing:
-          'bg-[#F4F4F4] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px] h-[40px]',
+          'bg-morton-gray-100 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px] h-[40px]',
       },
     },
     defaultVariants: {
@@ -67,7 +67,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
       return (
         <div ref={ref} className={cn('flex items-end justify-end gap-[8px]', className)} {...props}>
           {timestamp && (
-            <span className="text-[12px] leading-[1.4] text-[#7B7B7B] font-[Pretendard_Variable]">
+            <span className="text-[12px] leading-[1.4] text-morton-gray-700 font-sans">
               {timestamp}
             </span>
           )}
@@ -82,7 +82,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
     return (
       <div ref={ref} className={cn('flex items-start gap-[8px]', className)} {...props}>
         {/* 프로필 이미지 */}
-        <div className="size-[40px] shrink-0 overflow-hidden rounded-full bg-[#F4F4F4]">
+        <div className="size-[40px] shrink-0 overflow-hidden rounded-full bg-morton-gray-100">
           {profileImage && (
             <img src={profileImage} alt={nickname || ''} className="size-full object-cover" />
           )}
@@ -92,7 +92,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
         <div className="flex items-end gap-[8px]">
           <div className="flex flex-col gap-[4px]">
             {nickname && (
-              <span className="text-[12px] font-medium leading-[1.4] text-[#1B1B1B] font-[Pretendard_Variable]">
+              <span className="text-[12px] font-medium leading-[1.4] text-morton-gray-900 font-sans">
                 {nickname}
               </span>
             )}
@@ -105,7 +105,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
             </div>
           </div>
           {variant === 'theirs' && timestamp && (
-            <span className="text-[12px] leading-[1.4] text-[#7B7B7B] font-[Pretendard_Variable]">
+            <span className="text-[12px] leading-[1.4] text-morton-gray-700 font-sans">
               {timestamp}
             </span>
           )}
@@ -123,7 +123,7 @@ function TypingDots() {
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className="size-[8px] rounded-full bg-[#386DFF] animate-bounce"
+          className="size-[8px] rounded-full bg-morton-primary animate-bounce"
           style={{ animationDelay: `${i * 0.15}s`, animationDuration: '0.6s' }}
         />
       ))}

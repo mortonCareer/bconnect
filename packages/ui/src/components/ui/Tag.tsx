@@ -10,17 +10,18 @@ import { XIcon } from '../../icons/XIcon'
  * - filter (필터 삭제): 파란색 배경/테두리 + X 아이콘
  */
 const tagVariants = cva(
-  'inline-flex items-center justify-center rounded-lg border text-sm leading-[1.6] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#386DFF] focus-visible:ring-offset-2 focus-visible:ring-offset-white cursor-pointer active:scale-[0.98] font-[Pretendard_Variable]',
+  'inline-flex items-center justify-center rounded-lg border text-sm leading-[1.6] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morton-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white cursor-pointer active:scale-[0.98] font-sans',
   {
     variants: {
       variant: {
         // 기본 - 회색 테두리
         default:
-          'border-[#E5E5E5] bg-transparent text-[#A5A5A5] font-medium hover:border-[#C5C5C5]',
+          'border-morton-gray-300 bg-transparent text-morton-gray-500 font-medium hover:border-morton-gray-500',
         // 선택 - 파란색 배경/테두리
-        selected: 'border-[#386DFF] bg-[#EAEFFF] text-[#386DFF] font-semibold',
+        selected: 'border-morton-primary bg-morton-primary-sub text-morton-primary font-semibold',
         // 필터 삭제 - 파란색 배경/테두리 + X 아이콘
-        filter: 'border-[#386DFF] bg-[#EAEFFF] text-[#386DFF] font-semibold gap-1',
+        filter:
+          'border-morton-primary bg-morton-primary-sub text-morton-primary font-semibold gap-1',
       },
       size: {
         // default: h-40px, px-14px

@@ -3,8 +3,25 @@
 @source "../../apps/career/src/**/*.tsx";
 @source "../components/**/*.tsx";
 
-/* shadcn/ui CSS Variables - Light Mode */
+/* Morton Design System - Color Tokens */
 :root {
+  /* Primary Colors */
+  --morton-primary: #386dff;
+  --morton-primary-sub: #eaefff;
+  --morton-primary-hover: #2858e0;
+
+  /* Grayscale */
+  --morton-gray-900: #1b1b1b;
+  --morton-gray-700: #7b7b7b;
+  --morton-gray-500: #a5a5a5;
+  --morton-gray-300: #e5e5e5;
+  --morton-gray-100: #f4f4f4;
+
+  /* Semantic Colors */
+  --morton-error: #ff4242;
+  --morton-white: #ffffff;
+
+  /* shadcn/ui compatibility */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -50,6 +67,19 @@
 
 /* Tailwind v4 Theme */
 @theme inline {
+  /* Morton Design System Colors */
+  --color-morton-primary: var(--morton-primary);
+  --color-morton-primary-sub: var(--morton-primary-sub);
+  --color-morton-primary-hover: var(--morton-primary-hover);
+  --color-morton-gray-900: var(--morton-gray-900);
+  --color-morton-gray-700: var(--morton-gray-700);
+  --color-morton-gray-500: var(--morton-gray-500);
+  --color-morton-gray-300: var(--morton-gray-300);
+  --color-morton-gray-100: var(--morton-gray-100);
+  --color-morton-error: var(--morton-error);
+  --color-morton-white: var(--morton-white);
+
+  /* shadcn/ui compatibility */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -68,16 +98,32 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  /* Radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Typography - Pretendard */
+  --font-sans:
+    'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+
+  /* Font sizes matching Figma */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.25rem; /* 20px */
+  --font-size-xl: 1.5rem; /* 24px */
+
+  /* Font weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
