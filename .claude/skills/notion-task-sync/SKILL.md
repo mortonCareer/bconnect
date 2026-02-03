@@ -147,7 +147,7 @@ await notion.pages.create({
 
 ### 2. 브랜치 생성 → In Progress
 
-**트리거**: `branch-from-issue` 스킬 실행 후
+**트리거**: `worktree-manager` 스킬 실행 후
 
 **Notion API 호출**:
 
@@ -258,7 +258,7 @@ export async function updateTaskStatus(pageId: string, status: string) {
 #!/bin/bash
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-if [[ $BRANCH =~ ^(feature|fix)/([0-9]+) ]]; then
+if [[ $BRANCH =~ ^(feat|fix)/([0-9]+) ]]; then
   ISSUE=${BASH_REMATCH[2]}
   node scripts/notion-sync.js update-status $ISSUE "In Progress"
 fi
@@ -315,7 +315,7 @@ Git 작업 시 자동으로 실행:
 gh issue create --title "Add feature"
 
 # 브랜치 생성 → Notion In Progress
-git checkout -b feature/123-add-feature
+git checkout -b feat/123-add-feature
 
 # PR 생성 → Notion QA
 gh pr create

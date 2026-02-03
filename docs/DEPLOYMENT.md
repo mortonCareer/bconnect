@@ -24,8 +24,8 @@ dev (개발 및 QA)  →  prod (프로덕션)
 - **배포 플랫폼**: Vercel (Frontend), Railway (Backend)
 - **데이터**: 테스트 데이터 또는 Mock API
 - **URL 예시**:
-  - `https://morton-career-git-feature-123-<team>.vercel.app`
-  - `https://morton-plan-git-feature-123-<team>.vercel.app`
+  - `https://morton-career-git-feat-123-<team>.vercel.app`
+  - `https://morton-plan-git-feat-123-<team>.vercel.app`
 
 ### prod 환경 (프로덕션)
 

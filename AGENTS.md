@@ -2,6 +2,20 @@
 
 Guide for coding agents working in the Morton codebase.
 
+## SSoT (Single Source of Truth) 원칙
+
+상세 규칙은 `docs/` 또는 `.github/`에 원본을 두고, 스킬(`.claude/skills/`)과 에이전트(`.claude/agents/`)는 해당 문서를 **참조**만 합니다. 규칙을 인라인으로 복제하지 않습니다.
+
+| 규칙 종류      | 원본 위치                          | 참조하는 곳                          |
+| -------------- | ---------------------------------- | ------------------------------------ |
+| 브랜치 네이밍  | `docs/GIT_WORKFLOW.md`             | worktree-manager 스킬                |
+| 이슈 템플릿    | `.github/ISSUE_TEMPLATE/`          | issue-management 스킬                |
+| PR 템플릿      | `.github/pull_request_template.md` | pr-from-issue 스킬                   |
+| 커밋 컨벤션    | `docs/GIT_WORKFLOW.md`             | commit 스킬                          |
+| 팀 역할/담당자 | `docs/TEAM.md`                     | issue-management, pr-from-issue 스킬 |
+
+**규칙 변경 시**: 원본 문서만 수정하면 스킬/에이전트가 자동으로 최신 규칙을 따릅니다.
+
 ## Project Overview
 
 Morton is a job matching platform (업체-기술자 연결 구인구직 플랫폼) built as a pnpm monorepo with Next.js apps and Spring Boot backend.
@@ -299,7 +313,7 @@ All `git commit` commands are intercepted by the `require-commit-approval.py` ho
 
 ```bash
 # 1. Agent attempts commit
-git commit -m "feat: add feature"
+git commit -m "feat: add feat"
 
 # 2. Hook blocks and shows summary
 # [Summary output]
@@ -307,7 +321,7 @@ git commit -m "feat: add feature"
 # 3. User approves: "yes"
 
 # 4. Agent re-runs with approval flag
-COMMIT_APPROVED=1 git commit -m "feat: add feature"
+COMMIT_APPROVED=1 git commit -m "feat: add feat"
 
 # 5. Hook passes, commit succeeds
 ```
@@ -339,7 +353,7 @@ Skills automate common workflows and ensure consistency. Located in `.claude/ski
 **Git Workflow (5 skills):**
 
 - `issue-management` - GitHub Issue 생성 및 관리, 레이블 자동 적용, 담당자 할당
-- `branch-from-issue` - 이슈 기반 브랜치 생성 (feature/#-description)
+- `worktree-manager` - Git worktree 기반 워크트리+브랜치 생성, 목록, 삭제
 - `commit` - 변경사항 자동 커밋 (Conventional Commits 형식, "커밋해줘" 시 자동 활성화)
 - `pr-from-issue` - 이슈 기반 PR 생성, 리뷰어 자동 할당
 - `notion-task-sync` - Notion 보드 동기화 (구현 예정)

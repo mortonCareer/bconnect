@@ -237,7 +237,7 @@ WIP
 
 ## AI 에이전트 실행 가이드
 
-### 사용자가 "커밋해줘" 요청 시:
+### 사용자가 "커밋해줘" 요청 시
 
 ```bash
 # Step 1: 변경사항 분석 (병렬 실행)
@@ -250,7 +250,7 @@ git log -5 --oneline      # 최근 커밋 스타일 확인
 # - 적절한 type 결정 (feat/fix/docs/refactor/chore/test/style)
 # - scope 결정 (career/plan/api/ui/config/infra)
 # - 50자 이내 description 작성 (소문자, 현재형, 명령문)
-# - 현재 브랜치에서 이슈 번호 추출 (feature/123-xxx → #123)
+# - 현재 브랜치에서 이슈 번호 추출 (feat/123-xxx → #123)
 
 # Step 3: 스테이징 및 커밋 (순차 실행)
 git add .
@@ -290,7 +290,7 @@ const description = summarizeChanges(changes)
 // - 마침표 없음
 
 // 5. 이슈 번호 추출
-const branch = getCurrentBranch() // feature/123-add-profile-upload
+const branch = getCurrentBranch() // feat/123-add-profile-upload
 const issueNumber = extractIssueNumber(branch) // #123
 
 // 6. 최종 메시지
@@ -406,7 +406,7 @@ git rebase -i HEAD~3
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 # 브랜치에서 이슈 번호와 타입 추출
-if [[ $BRANCH =~ ^(feature|fix)/([0-9]+)-(.+)$ ]]; then
+if [[ $BRANCH =~ ^(feat|fix)/([0-9]+)-(.+)$ ]]; then
   TYPE=${BASH_REMATCH[1]}
   ISSUE=${BASH_REMATCH[2]}
   DESC=${BASH_REMATCH[3]}

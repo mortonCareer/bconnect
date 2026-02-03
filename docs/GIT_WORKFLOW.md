@@ -9,7 +9,7 @@ Morton 프로젝트의 Git 및 GitHub 사용 가이드입니다.
 ```
 GitHub Issue 생성 (#123)
     ↓
-feature/123-description 브랜치 생성
+feat/123-description 브랜치 생성
     ↓
 작업 진행 + 커밋
     ↓
@@ -44,7 +44,7 @@ main 브랜치 머지
 **브랜치 네이밍:**
 
 ```
-feature/#-short-description  # 새 기능
+feat/#-short-description  # 새 기능
 fix/#-short-description      # 버그 수정
 ```
 
@@ -52,7 +52,7 @@ fix/#-short-description      # 버그 수정
 
 ```bash
 # 이슈 #123: Add user profile upload
-feature/123-add-profile-upload
+feat/123-add-profile-upload
 
 # 이슈 #456: Fix login redirect loop
 fix/456-login-redirect-loop
@@ -67,14 +67,14 @@ git checkout main
 git pull origin main
 
 # 3. 브랜치 생성 및 체크아웃
-git checkout -b feature/123-add-profile-upload
+git checkout -b feat/123-add-profile-upload
 
 # 4. 작업 진행...
 ```
 
 **자동화 스킬 사용:**
 
-`branch-from-issue` 스킬을 사용하면 이슈 번호를 입력하는 것만으로 자동으로 브랜치를 생성합니다.
+`worktree-manager` 스킬을 사용하면 이슈 번호를 입력하는 것만으로 워크트리와 브랜치를 자동 생성합니다.
 
 ---
 
@@ -119,7 +119,7 @@ GitHub Issue 생성 + 레이블 적용
     ↓
 담당자 할당
     ↓
-feature/# 또는 fix/# 브랜치 생성
+feat/# 또는 fix/# 브랜치 생성
     ↓
 작업 진행 및 커밋
     ↓
@@ -269,7 +269,7 @@ Closes #123
 
 ```bash
 # 1. 변경사항 푸시
-git push origin feature/123-add-profile-upload
+git push origin feat/123-add-profile-upload
 
 # 2. GitHub에서 PR 생성
 # 또는 gh CLI 사용:
@@ -328,8 +328,8 @@ GitHub PR 댓글에 링크 추가
 ### 프리뷰 URL 예시
 
 ```
-https://morton-career-git-feature-123-add-profile-upload-<team>.vercel.app
-https://morton-plan-git-feature-123-add-profile-upload-<team>.vercel.app
+https://morton-career-git-feat-123-add-profile-upload-<team>.vercel.app
+https://morton-plan-git-feat-123-add-profile-upload-<team>.vercel.app
 ```
 
 ### QA on Preview
@@ -352,17 +352,17 @@ Git 워크플로우를 자동화하는 5가지 스킬이 있습니다:
 
 GitHub Issue 생성 및 관리 자동화
 
-- 템플릿 선택 (bug/feature/task)
+- 템플릿 선택 (bug/feat/task)
 - 레이블 자동 적용
 - 담당자 할당
 
-### 2. branch-from-issue
+### 2. worktree-manager
 
-이슈 기반 브랜치 생성 자동화
+Git worktree 기반 병렬 작업 관리
 
-- 이슈 번호 입력
-- `feature/#-description` 형식으로 브랜치 생성
-- 자동 체크아웃
+- 이슈 번호 기반 워크트리+브랜치 동시 생성
+- `feat/#-description` 형식 브랜치 네이밍 (위 브랜치 전략 참조)
+- 워크트리 목록 조회 및 삭제
 
 ### 3. commit-convention
 
@@ -423,7 +423,7 @@ git checkout main
 git pull origin main
 
 # 2. 작업 브랜치로 돌아가기
-git checkout feature/123-add-profile-upload
+git checkout feat/123-add-profile-upload
 
 # 3. main 변경사항 가져오기
 git rebase main
@@ -431,7 +431,7 @@ git rebase main
 git merge main
 
 # 4. 충돌 해결 후 푸시
-git push origin feature/123-add-profile-upload --force-with-lease
+git push origin feat/123-add-profile-upload --force-with-lease
 ```
 
 ### PR 프리뷰가 안 뜰 때
