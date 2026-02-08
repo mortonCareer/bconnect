@@ -58,19 +58,7 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 
 ## 담당자 할당 규칙
 
-> GitHub 사용자명 매핑은 **[docs/TEAM.md](../../../docs/TEAM.md)** 참조
-
-| 작업 유형         | 담당자                         |
-| ----------------- | ------------------------------ |
-| `📋 api-spec`     | 둘이 논의 (CTO 작성, CEO 리뷰) |
-| `🎨 publishing`   | CTO                            |
-| `⚙️ BE`           | CEO                            |
-| `💻 FE`           | CTO                            |
-| `☁️ infra`        | CTO                            |
-| `🔧 chore`        | CTO                            |
-| `🐛 bug:api-spec` | 둘이 논의                      |
-| `🐛 bug:BE`       | CEO                            |
-| `🐛 bug:FE`       | CTO                            |
+> **SSoT**: 담당자 할당 규칙과 GitHub 사용자명 매핑은 [docs/TEAM.md](../../../docs/TEAM.md)의 "GitHub 작업 매핑" 섹션을 참조하세요.
 
 ## 사용 예시
 
