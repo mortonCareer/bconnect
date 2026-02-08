@@ -45,7 +45,7 @@ function ChatIcon({ className, count }: { className?: string; count?: number }) 
         />
       </svg>
       {count !== undefined && count > 0 && (
-        <div className="absolute -right-[7.5px] -top-[3.5px] flex min-w-[15px] items-center justify-center rounded-full bg-[#FF4242] px-1">
+        <div className="absolute -right-[7.5px] -top-[3.5px] flex min-w-[15px] items-center justify-center rounded-full bg-morton-error px-1">
           <span className="text-[10px] font-bold leading-[15px] text-white">
             {count > 99 ? '99+' : count}
           </span>
@@ -61,7 +61,10 @@ function ProgressBarInline({ step, total }: { step: number; total: number }) {
       {Array.from({ length: total }, (_, i) => (
         <div
           key={i}
-          className={cn('h-full flex-1 rounded-full', i < step ? 'bg-[#386DFF]' : 'bg-[#E5E7EB]')}
+          className={cn(
+            'h-full flex-1 rounded-full',
+            i < step ? 'bg-morton-primary' : 'bg-[#E5E7EB]'
+          )}
         />
       ))}
     </div>
@@ -127,14 +130,12 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             >
               <ChevronLeftIcon className="text-[#9C9C9C]" />
             </button>
-            <p className="font-[Pretendard_Variable] text-[16px] font-semibold leading-[1.6] text-[#1B1B1B]">
-              {title}
-            </p>
+            <p className="text-sb-16 text-morton-gray-900">{title}</p>
             {showAction ? (
               <button
                 type="button"
                 onClick={onAction}
-                className="font-[Pretendard_Variable] text-[16px] font-semibold leading-[1.6] text-[#386DFF] transition-all active:scale-[0.95]"
+                className="text-sb-16 text-morton-primary transition-all active:scale-[0.95]"
               >
                 {actionLabel}
               </button>

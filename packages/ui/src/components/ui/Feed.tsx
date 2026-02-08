@@ -111,28 +111,18 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
             <div className="flex flex-col justify-center">
               {/* 이름 + 지역/직종/전문분야 */}
               <div className="flex items-center gap-2.5">
-                <p className="font-[Pretendard_Variable] text-[16px] font-semibold leading-[1.6] text-[#1B1B1B]">
-                  {profile.name}
-                </p>
+                <p className="text-sb-16 text-morton-gray-900">{profile.name}</p>
                 <div className="flex items-center gap-2">
-                  <span className="font-[Pretendard_Variable] text-[12px] font-medium leading-[1.6] text-[#A5A5A5]">
-                    {profile.location}
-                  </span>
-                  <div className="h-2 w-0 rotate-90 border-t border-[#E5E5E5]" />
-                  <span className="font-[Pretendard_Variable] text-[12px] font-medium leading-[1.6] text-[#A5A5A5]">
-                    {profile.jobType}
-                  </span>
-                  <div className="h-2 w-0 rotate-90 border-t border-[#E5E5E5]" />
-                  <span className="font-[Pretendard_Variable] text-[12px] font-medium leading-[1.6] text-[#A5A5A5]">
-                    {profile.specialty}
-                  </span>
+                  <span className="text-m-12 text-morton-gray-500">{profile.location}</span>
+                  <div className="h-2 w-0 rotate-90 border-t border-morton-gray-300" />
+                  <span className="text-m-12 text-morton-gray-500">{profile.jobType}</span>
+                  <div className="h-2 w-0 rotate-90 border-t border-morton-gray-300" />
+                  <span className="text-m-12 text-morton-gray-500">{profile.specialty}</span>
                 </div>
               </div>
               {/* 자기소개 */}
               <div className="flex items-center">
-                <p className="font-[Pretendard_Variable] text-[12px] font-medium leading-[1.6] text-[#A5A5A5]">
-                  {profile.bio}
-                </p>
+                <p className="text-m-12 text-morton-gray-500">{profile.bio}</p>
               </div>
             </div>
           </div>
@@ -171,18 +161,18 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
             <div className="flex items-center justify-center gap-2.5">
               <p
                 className={cn(
-                  'font-[Pretendard_Variable] text-[12px] font-normal text-[#7B7B7B]',
+                  'text-r-12 text-morton-gray-700',
                   isExpanded ? 'leading-[1.6]' : 'leading-[21.6px]'
                 )}
               >
                 {content.company}
               </p>
               <div className="flex h-[13px] w-0 rotate-90 items-center justify-center">
-                <div className="h-0 w-[13px] border-t border-[#E5E5E5]" />
+                <div className="h-0 w-[13px] border-t border-morton-gray-300" />
               </div>
               <p
                 className={cn(
-                  'font-[Pretendard_Variable] text-[12px] font-normal text-[#7B7B7B]',
+                  'text-r-12 text-morton-gray-700',
                   isExpanded ? 'leading-[1.6]' : 'leading-[21.6px]'
                 )}
               >
@@ -192,7 +182,7 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
             <div className="flex items-center justify-center">
               <p
                 className={cn(
-                  'font-[Pretendard_Variable] text-[12px] font-normal text-[#7B7B7B]',
+                  'text-r-12 text-morton-gray-700',
                   isExpanded ? 'leading-[1.6]' : 'leading-[21.6px]'
                 )}
               >
@@ -210,7 +200,7 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
           >
             <p
               className={cn(
-                'font-[Pretendard_Variable] text-[16px] font-medium text-[#1B1B1B]',
+                'text-m-16 text-morton-gray-900',
                 isExpanded
                   ? 'min-w-full w-[min-content] whitespace-pre-wrap leading-[1.6]'
                   : 'truncate leading-[25.2px]'
@@ -222,7 +212,7 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
               type="button"
               onClick={handleToggle}
               className={cn(
-                'font-[Pretendard_Variable] text-[12px] font-normal text-[#7B7B7B] underline decoration-solid',
+                'text-r-12 text-morton-gray-700 underline decoration-solid',
                 isExpanded ? 'leading-[25.2px]' : ''
               )}
             >
