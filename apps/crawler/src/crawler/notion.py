@@ -120,7 +120,10 @@ async def update_technician(page_id: str, tech: Technician) -> None:
     # 기존 블록 삭제 후 새 블록 추가
     existing_blocks = await notion.blocks.children.list(block_id=page_id)
     for block in existing_blocks["results"]:
-        await notion.blocks.delete(block_id=block["id"])
+        try:
+            await notion.blocks.delete(block_id=block["id"])
+        except Exception:
+            log.debug("블록 삭제 실패 (무시): %s", block["id"])
 
     body_markdown = _build_body_markdown(tech)
     new_blocks = _markdown_to_blocks(body_markdown)

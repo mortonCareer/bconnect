@@ -26,12 +26,14 @@ async def test():
     print(f"\n=== Step 2: 프로필 탐색 ({item['bloggername']}) ===")
     profile = await explore_blogger(item["link"])
     print(f"  블로그 제목: {profile.get('blog_title', '-')}")
+    print(f"  블로그 홈: {profile.get('blog_home_url', '-')}")
     print(f"  프로필 소개: {profile.get('profile_intro', '-')[:200]}")
+    print(f"  메인 배너: {profile.get('banner_image_url', '-')[:80]}")
     print(f"  본문 길이: {len(profile['about'])}자")
     print(f"  연락처: {profile.get('phone', '-')}")
     print(f"  이메일: {profile.get('email', '-')}")
     print(f"  인스타: {profile.get('instagram', '-')}")
-    print(f"  커버 이미지: {profile.get('cover_image_url', '-')[:80]}")
+    print(f"  게시글 이미지: {profile.get('cover_image_url', '-')[:80]}")
     print(f"  출처: {profile['source_urls']}")
 
     # Step 3: 분류 (프로필 소개 + 게시글 본문 종합)
@@ -60,6 +62,8 @@ async def test():
         or profile.get("blogger_name")
         or item["bloggername"]
     )
+    cover_image_url = profile.get("banner_image_url") or profile.get("cover_image_url", "")
+    detail_url = profile.get("blog_home_url") or item["link"]
     tech = Technician(
         name=name,
         rank=result["rank"],
@@ -72,8 +76,8 @@ async def test():
         email=profile.get("email", ""),
         channels=["네이버블로그"],
         source_urls=profile["source_urls"],
-        detail_url=item["link"],
-        cover_image_url=profile.get("cover_image_url", ""),
+        detail_url=detail_url,
+        cover_image_url=cover_image_url,
     )
     page_id = await save_technician(tech)
     print(f"  저장 완료: {page_id}")

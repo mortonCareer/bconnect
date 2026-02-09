@@ -52,6 +52,15 @@ async def process_blog_result(item: dict) -> Technician | None:
         or blogger_name
     )
 
+    # 커버 이미지: 메인 배너 → 게시글 og:image 순 폴백
+    cover_image_url = (
+        profile.get("banner_image_url")
+        or profile.get("cover_image_url", "")
+    )
+
+    # 자세히보기: 블로그 홈 → 게시글 URL 순 폴백
+    detail_url = profile.get("blog_home_url") or blog_url
+
     tech = Technician(
         name=name,
         rank=classification["rank"],
@@ -64,8 +73,8 @@ async def process_blog_result(item: dict) -> Technician | None:
         email=profile.get("email", ""),
         channels=["네이버블로그"],
         source_urls=profile["source_urls"],
-        detail_url=blog_url,
-        cover_image_url=profile.get("cover_image_url", ""),
+        detail_url=detail_url,
+        cover_image_url=cover_image_url,
     )
 
     return tech
