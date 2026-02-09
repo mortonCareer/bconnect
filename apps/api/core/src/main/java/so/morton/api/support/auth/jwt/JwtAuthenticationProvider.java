@@ -1,4 +1,4 @@
-package so.morton.api.support.auth;
+package so.morton.api.support.auth.jwt;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

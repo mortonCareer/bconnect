@@ -1,4 +1,4 @@
-package so.morton.api.support.auth;
+package so.morton.api.support.auth.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import so.morton.api.support.auth.AuthenticationTypeMismatchException;
 
 import java.io.IOException;
 import java.util.HashMap;

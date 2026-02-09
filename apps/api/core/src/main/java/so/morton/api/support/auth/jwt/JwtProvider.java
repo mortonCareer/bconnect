@@ -1,4 +1,4 @@
-package so.morton.api.support.auth;
+package so.morton.api.support.auth.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -9,6 +9,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import so.morton.api.support.auth.User;
+import so.morton.api.support.auth.UserService;
 
 import javax.crypto.SecretKey;
 import java.util.ArrayList;

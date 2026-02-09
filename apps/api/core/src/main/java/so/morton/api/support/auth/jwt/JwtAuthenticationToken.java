@@ -1,4 +1,4 @@
-package so.morton.api.support.auth;
+package so.morton.api.support.auth.jwt;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -7,8 +7,8 @@ import org.springframework.util.Assert;
 import java.util.Collection;
 import java.util.Collections;
 
-import static so.morton.api.support.auth.JwtType.ACCESS;
-import static so.morton.api.support.auth.JwtType.REFRESH;
+import static so.morton.api.support.auth.jwt.JwtType.ACCESS;
+import static so.morton.api.support.auth.jwt.JwtType.REFRESH;
 
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 

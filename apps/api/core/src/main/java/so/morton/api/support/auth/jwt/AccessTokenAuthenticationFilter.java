@@ -1,4 +1,4 @@
-package so.morton.api.support.auth;
+package so.morton.api.support.auth.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,7 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 import static lombok.AccessLevel.PROTECTED;
-import static so.morton.api.support.auth.JwtUtils.resolveBearerToken;
+import static so.morton.api.support.auth.jwt.JwtUtils.resolveBearerToken;
 
 /**
  * Resolve and validate access token

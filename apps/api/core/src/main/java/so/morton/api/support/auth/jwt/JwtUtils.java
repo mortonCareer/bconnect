@@ -1,8 +1,9 @@
-package so.morton.api.support.auth;
+package so.morton.api.support.auth.jwt;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
+import so.morton.api.support.auth.BearerTokenNotValidException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
