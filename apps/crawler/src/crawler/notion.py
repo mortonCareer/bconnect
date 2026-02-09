@@ -5,7 +5,7 @@ from notion_client import AsyncClient
 from crawler.config import settings
 from crawler.models import Technician
 
-notion = AsyncClient(auth=settings.notion_token)
+notion = AsyncClient(auth=settings.notion_token, notion_version="2022-06-28")
 
 
 async def find_duplicate(tech: Technician) -> str | None:
@@ -15,21 +15,20 @@ async def find_duplicate(tech: Technician) -> str | None:
     """
     db_id = settings.notion_database_id
 
-    for prop, value in [
-        ("사업자등록번호", tech.business_number),
-        ("연락처", tech.phone),
-        ("이메일", tech.email),
-    ]:
+    filters = [
+        ("사업자등록번호", tech.business_number, {"property": "사업자등록번호", "rich_text": {"equals": tech.business_number}}),
+        ("연락처", tech.phone, {"property": "연락처", "phone_number": {"equals": tech.phone}}),
+        ("이메일", tech.email, {"property": "이메일", "email": {"equals": tech.email}}),
+    ]
+
+    for _prop, value, filt in filters:
         if not value:
             continue
 
-        results = await notion.databases.query(
-            database_id=db_id,
-            filter={"property": prop, "rich_text": {"equals": value}}
-            if prop == "사업자등록번호"
-            else {"property": prop, "phone_number": {"equals": value}}
-            if prop == "연락처"
-            else {"property": prop, "email": {"equals": value}},
+        results = await notion.request(
+            path=f"databases/{db_id}/query",
+            method="POST",
+            body={"filter": filt},
         )
 
         if results["results"]:
@@ -93,10 +92,12 @@ async def save_technician(tech: Technician) -> str:
     return page["id"]
 
 
-def _markdown_to_blocks(md: str) -> list[dict]:
-    """간단한 마크다운을 노션 블록으로 변환한다."""
+def _markdown_to_blocks(md: str, max_blocks: int = 95) -> list[dict]:
+    """간단한 마크다운을 노션 블록으로 변환한다 (최대 100블록 제한)."""
     blocks = []
     for line in md.split("\n"):
+        if len(blocks) >= max_blocks:
+            break
         if line.startswith("## "):
             blocks.append({
                 "object": "block",
@@ -106,9 +107,11 @@ def _markdown_to_blocks(md: str) -> list[dict]:
         elif line.startswith("---"):
             blocks.append({"object": "block", "type": "divider", "divider": {}})
         elif line.strip():
+            # 노션 rich_text 최대 2000자
+            content = line[:2000]
             blocks.append({
                 "object": "block",
                 "type": "paragraph",
-                "paragraph": {"rich_text": [{"text": {"content": line}}]},
+                "paragraph": {"rich_text": [{"text": {"content": content}}]},
             })
     return blocks

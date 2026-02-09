@@ -3,7 +3,7 @@
 import asyncio
 import logging
 
-from crawler.channels.naver_blog import search_blogs, fetch_blog_post
+from crawler.channels.naver_blog import search_blogs, explore_blogger, build_search_queries
 from crawler.classifier import classify
 from crawler.models import Technician
 from crawler.notion import save_technician
@@ -13,35 +13,37 @@ log = logging.getLogger(__name__)
 
 
 async def process_blog_result(item: dict) -> Technician | None:
-    """검색 결과 1건을 파이프라인에 통과시킨다."""
+    """검색 결과 1건 → 블로거 프로필 탐색 → 분류 → Technician 생성."""
     blog_url = item["link"]
     blogger_name = item.get("bloggername", "")
 
-    log.info("파싱 중: %s (%s)", blogger_name, blog_url)
+    log.info("탐색 중: %s (%s)", blogger_name, blog_url)
 
     try:
-        post = await fetch_blog_post(blog_url)
+        profile = await explore_blogger(blog_url)
     except Exception:
-        log.warning("파싱 실패: %s", blog_url, exc_info=True)
+        log.warning("탐색 실패: %s", blog_url, exc_info=True)
         return None
 
-    if not post["about"]:
+    if not profile["about"]:
         log.info("본문 없음, 건너뜀: %s", blog_url)
         return None
 
     # LLM 분류
     classification = await classify(
         name=blogger_name,
-        about=post["about"],
+        about=profile["about"],
     )
 
     tech = Technician(
         name=blogger_name,
         rank=classification["rank"],
         trades=classification["trades"],
-        about=post["about"],
+        about=profile["about"][:2000],
+        phone=profile.get("phone", ""),
+        email=profile.get("email", ""),
         channels=["네이버블로그"],
-        source_urls=[post["source_url"]],
+        source_urls=profile["source_urls"],
         detail_url=blog_url,
     )
 
@@ -76,12 +78,45 @@ async def run_pipeline(query: str, count: int = 10) -> list[str]:
     return saved_ids
 
 
+async def run_full(keywords: list[str] | None = None, per_query: int = 5) -> list[str]:
+    """전체 키워드로 파이프라인을 실행한다."""
+    queries = build_search_queries(keywords)
+    log.info("총 %d개 쿼리 실행 예정", len(queries))
+
+    all_ids = []
+    for i, q in enumerate(queries, 1):
+        log.info("[%d/%d] %s", i, len(queries), q)
+        ids = await run_pipeline(q, count=per_query)
+        all_ids.extend(ids)
+
+    log.info("전체 완료: %d건 저장", len(all_ids))
+    return all_ids
+
+
 def main():
-    """CLI 진입점."""
+    """CLI 진입점.
+
+    Usage:
+        crawler                          # 단일 테스트 쿼리
+        crawler "타일 시공업체 서울"       # 지정 쿼리
+        crawler --full                   # 전체 키워드 실행
+        crawler --full --per-query 3     # 키워드당 3건
+    """
     import sys
 
-    query = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else "인테리어 시공업체 수도권"
-    asyncio.run(run_pipeline(query, count=10))
+    args = sys.argv[1:]
+
+    if "--full" in args:
+        per_query = 5
+        if "--per-query" in args:
+            idx = args.index("--per-query")
+            per_query = int(args[idx + 1])
+        asyncio.run(run_full(per_query=per_query))
+    elif args:
+        query = " ".join(args)
+        asyncio.run(run_pipeline(query, count=10))
+    else:
+        asyncio.run(run_pipeline("타일 시공업체 수도권", count=3))
 
 
 if __name__ == "__main__":

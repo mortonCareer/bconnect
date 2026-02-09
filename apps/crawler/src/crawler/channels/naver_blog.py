@@ -1,6 +1,7 @@
-"""네이버 블로그 채널 — 검색 API로 후보 발견 → 본문 파싱."""
+"""네이버 블로그 채널 — 검색 API로 후보 발견 → 블로거 프로필 탐색 → 본문 파싱."""
 
 import re
+import logging
 from urllib.parse import urlparse, parse_qs
 
 import httpx
@@ -8,6 +9,8 @@ from bs4 import BeautifulSoup
 
 from crawler.config import settings
 from crawler.models import Technician
+
+log = logging.getLogger(__name__)
 
 NAVER_SEARCH_URL = "https://openapi.naver.com/v1/search/blog.json"
 
@@ -88,15 +91,107 @@ def _extract_blogger_name(soup: BeautifulSoup) -> str:
     return nick.get_text(strip=True) if nick else ""
 
 
-# TODO: 장수 — 검색 쿼리 전략
-# 어떤 검색어 조합으로 기술자를 찾을지 결정 필요.
-# 예시:
-#   - "{시공분야} 시공업체 수도권" (분야별 검색)
-#   - "인테리어 시공 반장 포트폴리오" (직급 키워드)
-#   - "타일 시공 업체 서울" (지역+분야 조합)
-#
-# build_search_queries() 함수를 구현하면 파이프라인에서 자동으로 호출합니다.
+def extract_blog_id(blog_url: str) -> str | None:
+    """블로그 URL에서 블로거 ID를 추출한다."""
+    parsed = urlparse(blog_url)
+    host = parsed.hostname or ""
+    if "blog.naver.com" not in host:
+        return None
+    parts = parsed.path.strip("/").split("/")
+    return parts[0] if parts else None
 
-def build_search_queries() -> list[str]:
-    """크롤링에 사용할 검색 쿼리 목록을 생성한다."""
-    raise NotImplementedError("검색 쿼리 전략을 구현해주세요")
+
+async def fetch_blogger_posts(blog_id: str, count: int = 5) -> list[str]:
+    """블로거의 최근 글 목록 URL을 가져온다 (RSS 활용)."""
+    rss_url = f"https://rss.blog.naver.com/{blog_id}.xml"
+    async with httpx.AsyncClient(follow_redirects=True) as client:
+        try:
+            resp = await client.get(rss_url)
+            resp.raise_for_status()
+        except Exception:
+            log.warning("RSS 가져오기 실패: %s", blog_id)
+            return []
+
+    soup = BeautifulSoup(resp.text, "xml")
+    links = []
+    for item in soup.find_all("item")[:count]:
+        link = item.find("link")
+        if link and link.string:
+            links.append(link.string.strip())
+    return links
+
+
+# 연락처 패턴: 010-XXXX-XXXX 또는 01012345678
+_PHONE_RE = re.compile(r"01[016789][-.\s]?\d{3,4}[-.\s]?\d{4}")
+# 이메일 패턴
+_EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
+# 인스타그램 패턴
+_INSTA_RE = re.compile(r"instagram\.com/([a-zA-Z0-9_.]+)")
+
+
+def extract_contact_info(text: str) -> dict:
+    """텍스트에서 연락처, 이메일, 인스타 계정을 추출한다."""
+    phones = _PHONE_RE.findall(text)
+    emails = _EMAIL_RE.findall(text)
+    instas = _INSTA_RE.findall(text)
+    return {
+        "phone": phones[0].replace("-", "").replace(".", "").replace(" ", "") if phones else "",
+        "email": emails[0] if emails else "",
+        "instagram": instas[0] if instas else "",
+    }
+
+
+async def explore_blogger(blog_url: str) -> dict:
+    """블로거의 여러 글을 탐색하여 프로필 정보를 종합한다.
+
+    검색 결과 글 + 최근 글에서 연락처/소개 정보를 수집한다.
+
+    Returns:
+        {"about": str, "phone": str, "email": str, "instagram": str,
+         "blogger_name": str, "source_urls": [str]}
+    """
+    blog_id = extract_blog_id(blog_url)
+    if not blog_id:
+        post = await fetch_blog_post(blog_url)
+        contact = extract_contact_info(post["about"])
+        return {**post, **contact, "source_urls": [blog_url]}
+
+    # 검색 결과 글 파싱
+    main_post = await fetch_blog_post(blog_url)
+    all_text = main_post["about"]
+    source_urls = [blog_url]
+
+    # 블로거의 다른 글도 탐색 (연락처/소개 찾기)
+    other_urls = await fetch_blogger_posts(blog_id, count=5)
+    for url in other_urls:
+        if url == blog_url:
+            continue
+        try:
+            post = await fetch_blog_post(url)
+            text = post["about"]
+            # 연락처가 있는 글이면 텍스트 수집
+            contact = extract_contact_info(text)
+            if contact["phone"] or contact["email"] or contact["instagram"]:
+                all_text += "\n" + text
+                source_urls.append(url)
+                log.info("연락처 발견: %s → %s", url, contact)
+                break  # 하나 찾으면 충분
+        except Exception:
+            continue
+
+    contact = extract_contact_info(all_text)
+    return {
+        "about": main_post["about"],
+        "blogger_name": main_post["blogger_name"],
+        "source_urls": source_urls,
+        **contact,
+    }
+
+
+def build_search_queries(keywords: list[str] | None = None) -> list[str]:
+    """검색 키워드 × 쿼리 템플릿으로 검색 쿼리 목록을 생성한다."""
+    from crawler.models import SEARCH_KEYWORDS
+
+    keywords = keywords or SEARCH_KEYWORDS
+    templates = ["{kw} 시공업체 수도권", "{kw} 시공 전문 서울 경기"]
+    return [t.format(kw=kw) for kw in keywords for t in templates]
