@@ -10,6 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
     "httpx>=0.28",
     "beautifulsoup4>=4.13",
+    "anthropic>=0.40",
     "openai>=1.60",
     "notion-client>=2.2",
     "pydantic>=2.10",

@@ -29,22 +29,30 @@ async def process_blog_result(item: dict) -> Technician | None:
         log.info("본문 없음, 건너뜀: %s", blog_url)
         return None
 
-    # LLM 분류
+    # LLM 분류 (업체명, 시공분야, 직급, 지역, 주소)
+    headline = item.get("description", "")
     classification = await classify(
         name=blogger_name,
         about=profile["about"],
+        headline=headline,
     )
 
+    # classify()가 추출한 업체명 우선, 없으면 블로그 닉네임 폴백
+    name = classification.get("name") or profile.get("blogger_name") or blogger_name
+
     tech = Technician(
-        name=blogger_name,
+        name=name,
         rank=classification["rank"],
         trades=classification["trades"],
+        region=classification.get("region", ""),
+        address=classification.get("address", ""),
         about=profile["about"][:2000],
         phone=profile.get("phone", ""),
         email=profile.get("email", ""),
         channels=["네이버블로그"],
         source_urls=profile["source_urls"],
         detail_url=blog_url,
+        cover_image_url=profile.get("cover_image_url", ""),
     )
 
     return tech

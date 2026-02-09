@@ -1,84 +1,72 @@
-"""기술자 분류 — LLM 또는 키워드 매칭 폴백."""
+"""기술자 분류 — LLM(Anthropic/OpenAI) 또는 수동 JSON 모드."""
 
 import json
 import logging
+from pathlib import Path
 
 from crawler.config import settings
-from crawler.models import TRADES, RANKS, SEARCH_KEYWORDS
+from crawler.models import TRADES, RANKS
 
 log = logging.getLogger(__name__)
 
-# 검색 키워드 → SSOT 매핑 (키워드 매칭 폴백용)
-_KEYWORD_TO_TRADE: dict[str, str] = {
-    "설계": "설계",
-    "철거": "철거/확장", "확장": "철거/확장",
-    "토공": "기타", "포장": "기타", "보링": "기타", "발파": "기타", "측량": "설계",
-    "내선전기": "전기", "외선전기": "전기",
-    "건축배관": "배관", "상하수도배관": "배관",
-    "건축기계설비": "설비", "보일러": "설비", "공조": "설비",
-    "조적": "조적",
-    "형틀목공": "목공", "건축목공": "목공", "경량철골": "기타",
-    "창호": "창호", "샷시": "창호", "유리": "창호",
-    "방수": "방수", "미장": "미장", "견출": "미장",
-    "단열": "단열", "보온": "단열", "패널조립": "단열", "수장": "기타",
-    "타일": "타일", "줄눈": "줄눈",
-    "도장": "도장", "도배": "도배",
-    "필름": "필름·시트", "시트": "필름·시트",
-    "마루": "마루", "장판": "장판",
-    "실리콘": "기타", "코킹": "기타", "지붕잇기": "기타",
-    "철근": "기타", "콘크리트": "기타", "강구조": "기타", "철골": "기타", "비계": "기타",
-    "석공": "기타", "금속": "기타", "철공": "기타", "용접": "기타",
-    "제관": "기타", "함석": "기타", "판금": "기타", "덕트": "기타",
-    "싱크대": "싱크대", "가구": "가구", "에어컨": "에어컨", "위생도기": "설비",
-    "조경": "기타", "소방": "기타", "정보통신": "기타", "안전관리": "기타",
-    "건설기계운전": "기타", "양중": "양중/곰방", "곰방": "양중/곰방", "목도": "양중/곰방",
-    "운송": "운송", "청소": "청소", "보통인부": "보통인부",
-}
-
-# 반장 판별 키워드
-_BOSS_KEYWORDS = ["공사", "건설", "대표", "팀장", "반장", "직원", "인력"]
+# 지역 옵션
+REGIONS = ["서울", "경기도", "인천", "충청도", "전라도", "경상도", "강원도", "제주도"]
 
 SYSTEM_PROMPT = """\
 당신은 한국 건설/인테리어 업계 전문가입니다.
-주어진 기술자 정보를 분석하여 시공분야와 직급을 판별합니다.
+주어진 기술자(업체) 정보를 분석하여 구조화된 데이터를 추출합니다.
 
-## 시공분야 (최대 3개 선택)
+## 추출 항목
+
+### 1. name (업체명)
+- 블로그 닉네임이 아닌 **실제 상호명/업체명**을 본문에서 찾아 추출
+- 예: "바른정타일", "케이종합공사"
+- 찾을 수 없으면 빈 문자열
+
+### 2. trades (시공분야, 최대 3개)
+아래 목록에서만 선택:
 {trades}
+- 본문의 **주력 시공분야**를 기준으로 선택 (단순 언급이 아닌 실제 수행 업무)
+- 매칭 불가 시 "기타"
 
-## 직급 판별 기준
-- 반장: 팀을 운영하는 경우 (예: "OO공사", 직원 보유 언급, 팀장/대표)
-- 기공: 기본값 (판별 불가 시)
-- 준기공: 명시적 단서가 있는 경우에만
-- 조공: 명시적 단서가 있는 경우에만
+### 3. rank (직급)
+- 반장: 팀/업체를 운영 (예: "OO공사", 대표, 팀장, 직원 보유)
+- 기공: 기본값
+- 준기공/조공: 명시적 단서가 있을 때만
 
-## 응답 형식 (JSON)
-{{"trades": ["시공분야1", "시공분야2"], "rank": "기공"}}
+### 4. region (지역)
+아래 목록에서 선택: {regions}
+- 시공 가능 지역이나 소재지 기준
+- 여러 지역이면 주요 지역 1개
 
-반드시 위 목록에 있는 값만 사용하세요.
-매칭되지 않으면 trades에 "기타"를 포함하세요.
-""".format(trades=", ".join(TRADES))
+### 5. address (주소)
+- 본문에 구체적 주소가 있으면 추출
+- 없으면 빈 문자열
+
+## 응답 형식 (JSON만, 설명 없이)
+{{"name": "", "trades": [], "rank": "기공", "region": "", "address": ""}}
+""".format(trades=", ".join(TRADES), regions=", ".join(REGIONS))
+
+# 수동 모드 파일 경로
+PENDING_FILE = Path("pending_classification.json")
+CLASSIFIED_FILE = Path("classified.json")
 
 
-def _classify_by_keywords(name: str, about: str, headline: str = "") -> dict:
-    """키워드 매칭으로 분류 (LLM 폴백)."""
-    text = f"{name} {headline} {about}".lower()
+def _empty_result() -> dict:
+    """빈 분류 결과."""
+    return {"name": "", "trades": ["기타"], "rank": "기공", "region": "", "address": ""}
 
-    # 시공분야 매칭
-    found_trades: list[str] = []
-    for keyword, trade in _KEYWORD_TO_TRADE.items():
-        if keyword in text and trade not in found_trades:
-            found_trades.append(trade)
-    if not found_trades:
-        found_trades = ["기타"]
 
-    # 직급 판별
-    rank = "기공"
-    for kw in _BOSS_KEYWORDS:
-        if kw in text:
-            rank = "반장"
-            break
-
-    return {"trades": found_trades[:3], "rank": rank}
+def _validate_result(result: dict) -> dict:
+    """LLM 결과를 검증하고 정규화한다."""
+    result["trades"] = [t for t in result.get("trades", []) if t in TRADES][:3]
+    if not result["trades"]:
+        result["trades"] = ["기타"]
+    result["rank"] = result.get("rank", "기공") if result.get("rank") in RANKS else "기공"
+    result.setdefault("name", "")
+    result.setdefault("region", "")
+    result.setdefault("address", "")
+    return result
 
 
 async def classify(
@@ -86,25 +74,51 @@ async def classify(
     about: str,
     headline: str = "",
 ) -> dict:
-    """기술자 텍스트 정보를 분석하여 시공분야와 직급을 반환한다.
+    """기술자 텍스트 정보를 분석하여 분류 결과를 반환한다.
 
-    LLM API 키가 없으면 키워드 매칭 폴백을 사용한다.
+    우선순위: Anthropic API → OpenAI API → 수동 JSON 모드
     """
-    # LLM 사용 가능하면 LLM으로 분류
+    if settings.anthropic_api_key:
+        return await _classify_with_anthropic(name, about, headline)
+
     if settings.openai_api_key and settings.openai_api_key != "skip":
-        return await _classify_with_llm(name, about, headline)
+        return await _classify_with_openai(name, about, headline)
 
-    # 폴백: 키워드 매칭
-    log.info("LLM 미설정 — 키워드 매칭 폴백 사용")
-    return _classify_by_keywords(name, about, headline)
+    log.info("LLM 미설정 — 수동 분류 모드 (pending_classification.json 확인)")
+    return _empty_result()
 
 
-async def _classify_with_llm(name: str, about: str, headline: str = "") -> dict:
+async def _classify_with_anthropic(name: str, about: str, headline: str = "") -> dict:
+    """Anthropic Claude API로 분류."""
+    import anthropic
+
+    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
+    user_content = f"업체명(블로그닉네임): {name}\n한줄소개: {headline}\n소개:\n{about}"
+
+    resp = await client.messages.create(
+        model=settings.anthropic_model,
+        max_tokens=512,
+        system=SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": user_content}],
+        temperature=0.1,
+    )
+
+    text = resp.content[0].text.strip()
+    # JSON 블록 추출 (```json ... ``` 감싸기 대응)
+    if text.startswith("```"):
+        text = text.split("```")[1]
+        if text.startswith("json"):
+            text = text[4:]
+    result = json.loads(text)
+    return _validate_result(result)
+
+
+async def _classify_with_openai(name: str, about: str, headline: str = "") -> dict:
     """OpenAI API로 분류."""
     from openai import AsyncOpenAI
 
     client = AsyncOpenAI(api_key=settings.openai_api_key)
-    user_content = f"업체명: {name}\n한줄소개: {headline}\n소개:\n{about}"
+    user_content = f"업체명(블로그닉네임): {name}\n한줄소개: {headline}\n소개:\n{about}"
 
     resp = await client.chat.completions.create(
         model=settings.openai_model,
@@ -117,6 +131,19 @@ async def _classify_with_llm(name: str, about: str, headline: str = "") -> dict:
     )
 
     result = json.loads(resp.choices[0].message.content)
-    result["trades"] = [t for t in result.get("trades", []) if t in TRADES][:3]
-    result["rank"] = result.get("rank", "기공") if result.get("rank") in RANKS else "기공"
-    return result
+    return _validate_result(result)
+
+
+async def save_pending(items: list[dict]) -> Path:
+    """크롤링 결과를 수동 분류용 JSON으로 저장한다."""
+    PENDING_FILE.write_text(json.dumps(items, ensure_ascii=False, indent=2))
+    log.info("수동 분류 대기: %s (%d건)", PENDING_FILE, len(items))
+    return PENDING_FILE
+
+
+def load_classified() -> list[dict] | None:
+    """수동 분류 완료된 JSON을 로드한다."""
+    if not CLASSIFIED_FILE.exists():
+        return None
+    data = json.loads(CLASSIFIED_FILE.read_text())
+    return [_validate_result(item) for item in data]

@@ -57,7 +57,7 @@ async def fetch_blog_post(blog_url: str) -> dict:
     """블로그 본문을 파싱하여 소개 텍스트와 메타정보를 추출한다.
 
     Returns:
-        {"about": str, "source_url": str, "blogger_name": str}
+        {"about": str, "source_url": str, "blogger_name": str, "cover_image_url": str}
     """
     content_url = _extract_post_content_url(blog_url) or blog_url
 
@@ -66,6 +66,10 @@ async def fetch_blog_post(blog_url: str) -> dict:
         resp.raise_for_status()
 
     soup = BeautifulSoup(resp.text, "html.parser")
+
+    # 커버 이미지: og:image 메타 태그
+    og_img = soup.select_one('meta[property="og:image"]')
+    cover_image_url = og_img["content"] if og_img and og_img.get("content") else ""
 
     # 본문 영역 추출 (네이버 블로그 구조)
     content_area = (
@@ -76,12 +80,27 @@ async def fetch_blog_post(blog_url: str) -> dict:
 
     about = ""
     if content_area:
-        about = content_area.get_text(separator="\n", strip=True)
+        # 노이즈 요소 제거 (외부 링크 카드, 스크립트, 위젯 등)
+        for tag in content_area.select("script, style, iframe, div.se-oglink"):
+            tag.decompose()
+
+        raw = content_area.get_text(separator="\n", strip=True)
+        # ZWSP 제거 + 오픈톡/카카오톡 위젯 텍스트 필터링
+        lines = []
+        for line in raw.split("\n"):
+            stripped = line.strip("\u200b \t")
+            if not stripped:
+                continue
+            if re.search(r"(오픈채팅|카카오톡 상담|네이버톡톡|톡톡 상담)", stripped):
+                continue
+            lines.append(stripped)
+        about = "\n".join(lines)
 
     return {
         "about": about,
         "source_url": blog_url,
         "blogger_name": _extract_blogger_name(soup),
+        "cover_image_url": cover_image_url,
     }
 
 
@@ -148,13 +167,13 @@ async def explore_blogger(blog_url: str) -> dict:
 
     Returns:
         {"about": str, "phone": str, "email": str, "instagram": str,
-         "blogger_name": str, "source_urls": [str]}
+         "blogger_name": str, "cover_image_url": str, "source_urls": [str]}
     """
     blog_id = extract_blog_id(blog_url)
     if not blog_id:
         post = await fetch_blog_post(blog_url)
         contact = extract_contact_info(post["about"])
-        return {**post, **contact, "source_urls": [blog_url]}
+        return {**post, **contact, "source_urls": [blog_url], "cover_image_url": post["cover_image_url"]}
 
     # 검색 결과 글 파싱
     main_post = await fetch_blog_post(blog_url)
@@ -183,6 +202,7 @@ async def explore_blogger(blog_url: str) -> dict:
     return {
         "about": main_post["about"],
         "blogger_name": main_post["blogger_name"],
+        "cover_image_url": main_post["cover_image_url"],
         "source_urls": source_urls,
         **contact,
     }

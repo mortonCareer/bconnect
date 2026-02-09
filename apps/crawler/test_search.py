@@ -29,26 +29,35 @@ async def test():
     print(f"  연락처: {profile.get('phone', '-')}")
     print(f"  이메일: {profile.get('email', '-')}")
     print(f"  인스타: {profile.get('instagram', '-')}")
+    print(f"  커버 이미지: {profile.get('cover_image_url', '-')[:80]}")
     print(f"  출처: {profile['source_urls']}")
 
     # Step 3: 분류
     print("\n=== Step 3: 분류 ===")
-    result = await classify(name=item["bloggername"], about=profile["about"])
+    headline = item.get("description", "")
+    result = await classify(name=item["bloggername"], about=profile["about"], headline=headline)
+    print(f"  업체명: {result.get('name', '-')}")
     print(f"  시공분야: {result['trades']}")
     print(f"  직급: {result['rank']}")
+    print(f"  지역: {result.get('region', '-')}")
+    print(f"  주소: {result.get('address', '-')}")
 
-    # Step 4: 노션 저장
+    # Step 4: 노션 저장 (중복 시 업데이트)
     print("\n=== Step 4: 노션 저장 ===")
+    name = result.get("name") or profile.get("blogger_name") or item["bloggername"]
     tech = Technician(
-        name=item["bloggername"],
+        name=name,
         rank=result["rank"],
         trades=result["trades"],
+        region=result.get("region", ""),
+        address=result.get("address", ""),
         about=profile["about"][:2000],
         phone=profile.get("phone", ""),
         email=profile.get("email", ""),
         channels=["네이버블로그"],
         source_urls=profile["source_urls"],
         detail_url=item["link"],
+        cover_image_url=profile.get("cover_image_url", ""),
     )
     page_id = await save_technician(tech)
     print(f"  저장 완료: {page_id}")

@@ -11,8 +11,10 @@ class Settings(BaseSettings):
     naver_client_id: str
     naver_client_secret: str
 
-    # OpenAI
-    openai_api_key: str
+    # LLM (Anthropic 우선, OpenAI 폴백)
+    anthropic_api_key: str = ""
+    anthropic_model: str = "claude-sonnet-4-5-20250929"
+    openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
 
     # Notion
