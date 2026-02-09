@@ -110,6 +110,36 @@ def _extract_blogger_name(soup: BeautifulSoup) -> str:
     return nick.get_text(strip=True) if nick else ""
 
 
+async def fetch_blog_profile(blog_id: str) -> dict:
+    """모바일 블로그 메인에서 프로필 소개와 블로그 제목을 추출한다.
+
+    Returns:
+        {"profile_intro": str, "blog_title": str}
+    """
+    url = f"https://m.blog.naver.com/{blog_id}"
+    headers = {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)"}
+    async with httpx.AsyncClient(follow_redirects=True, headers=headers) as client:
+        try:
+            resp = await client.get(url)
+            resp.raise_for_status()
+        except Exception:
+            log.warning("블로그 프로필 가져오기 실패: %s", blog_id)
+            return {"profile_intro": "", "blog_title": ""}
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    og_desc = soup.select_one('meta[property="og:description"]')
+    profile_intro = og_desc["content"].strip() if og_desc and og_desc.get("content") else ""
+
+    og_title = soup.select_one('meta[property="og:title"]')
+    blog_title = og_title["content"].strip() if og_title and og_title.get("content") else ""
+    # " : 네이버 블로그" 접미사 제거
+    if blog_title.endswith(" : 네이버 블로그"):
+        blog_title = blog_title[:-len(" : 네이버 블로그")]
+
+    return {"profile_intro": profile_intro, "blog_title": blog_title}
+
+
 def extract_blog_id(blog_url: str) -> str | None:
     """블로그 URL에서 블로거 ID를 추출한다."""
     parsed = urlparse(blog_url)
@@ -161,26 +191,38 @@ def extract_contact_info(text: str) -> dict:
 
 
 async def explore_blogger(blog_url: str) -> dict:
-    """블로거의 여러 글을 탐색하여 프로필 정보를 종합한다.
+    """블로거의 프로필 + 여러 글을 종합하여 업체 정보를 수집한다.
 
-    검색 결과 글 + 최근 글에서 연락처/소개 정보를 수집한다.
+    정보 수집 순서:
+    1. 블로그 프로필 소개 (모바일 og:description) — 업체 자기소개
+    2. 검색 결과 게시글 — 시공 사례
+    3. RSS 최근 글 탐색 — 연락처/추가 정보
 
     Returns:
-        {"about": str, "phone": str, "email": str, "instagram": str,
-         "blogger_name": str, "cover_image_url": str, "source_urls": [str]}
+        {"about": str, "profile_intro": str, "phone": str, "email": str,
+         "instagram": str, "blogger_name": str, "blog_title": str,
+         "cover_image_url": str, "source_urls": [str]}
     """
     blog_id = extract_blog_id(blog_url)
     if not blog_id:
         post = await fetch_blog_post(blog_url)
         contact = extract_contact_info(post["about"])
-        return {**post, **contact, "source_urls": [blog_url], "cover_image_url": post["cover_image_url"]}
+        return {
+            **post, **contact,
+            "profile_intro": "",
+            "blog_title": "",
+            "source_urls": [blog_url],
+        }
 
-    # 검색 결과 글 파싱
+    # 1. 블로그 프로필 소개 (업체가 직접 작성한 자기소개)
+    profile = await fetch_blog_profile(blog_id)
+
+    # 2. 검색 결과 게시글 파싱
     main_post = await fetch_blog_post(blog_url)
-    all_text = main_post["about"]
+    all_text = profile["profile_intro"] + "\n" + main_post["about"]
     source_urls = [blog_url]
 
-    # 블로거의 다른 글도 탐색 (연락처/소개 찾기)
+    # 3. RSS 최근 글 탐색 (연락처/추가 정보)
     other_urls = await fetch_blogger_posts(blog_id, count=5)
     for url in other_urls:
         if url == blog_url:
@@ -188,19 +230,21 @@ async def explore_blogger(blog_url: str) -> dict:
         try:
             post = await fetch_blog_post(url)
             text = post["about"]
-            # 연락처가 있는 글이면 텍스트 수집
             contact = extract_contact_info(text)
             if contact["phone"] or contact["email"] or contact["instagram"]:
                 all_text += "\n" + text
                 source_urls.append(url)
                 log.info("연락처 발견: %s → %s", url, contact)
-                break  # 하나 찾으면 충분
+                break
         except Exception:
             continue
 
+    # 프로필 소개에서도 연락처 추출
     contact = extract_contact_info(all_text)
     return {
         "about": main_post["about"],
+        "profile_intro": profile["profile_intro"],
+        "blog_title": profile["blog_title"],
         "blogger_name": main_post["blogger_name"],
         "cover_image_url": main_post["cover_image_url"],
         "source_urls": source_urls,

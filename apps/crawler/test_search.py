@@ -25,6 +25,8 @@ async def test():
     item = items[0]
     print(f"\n=== Step 2: 프로필 탐색 ({item['bloggername']}) ===")
     profile = await explore_blogger(item["link"])
+    print(f"  블로그 제목: {profile.get('blog_title', '-')}")
+    print(f"  프로필 소개: {profile.get('profile_intro', '-')[:200]}")
     print(f"  본문 길이: {len(profile['about'])}자")
     print(f"  연락처: {profile.get('phone', '-')}")
     print(f"  이메일: {profile.get('email', '-')}")
@@ -32,10 +34,18 @@ async def test():
     print(f"  커버 이미지: {profile.get('cover_image_url', '-')[:80]}")
     print(f"  출처: {profile['source_urls']}")
 
-    # Step 3: 분류
+    # Step 3: 분류 (프로필 소개 + 게시글 본문 종합)
     print("\n=== Step 3: 분류 ===")
-    headline = item.get("description", "")
-    result = await classify(name=item["bloggername"], about=profile["about"], headline=headline)
+    profile_intro = profile.get("profile_intro", "")
+    combined_about = ""
+    if profile_intro:
+        combined_about += f"[블로그 프로필 소개]\n{profile_intro}\n\n"
+    combined_about += f"[게시글 본문]\n{profile['about']}"
+    result = await classify(
+        name=item["bloggername"],
+        about=combined_about,
+        headline=profile.get("blog_title", ""),
+    )
     print(f"  업체명: {result.get('name', '-')}")
     print(f"  시공분야: {result['trades']}")
     print(f"  직급: {result['rank']}")
@@ -44,13 +54,19 @@ async def test():
 
     # Step 4: 노션 저장 (중복 시 업데이트)
     print("\n=== Step 4: 노션 저장 ===")
-    name = result.get("name") or profile.get("blogger_name") or item["bloggername"]
+    name = (
+        result.get("name")
+        or profile.get("blog_title")
+        or profile.get("blogger_name")
+        or item["bloggername"]
+    )
     tech = Technician(
         name=name,
         rank=result["rank"],
         trades=result["trades"],
         region=result.get("region", ""),
         address=result.get("address", ""),
+        headline=profile.get("profile_intro", "")[:500],
         about=profile["about"][:2000],
         phone=profile.get("phone", ""),
         email=profile.get("email", ""),

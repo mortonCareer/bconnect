@@ -25,20 +25,32 @@ async def process_blog_result(item: dict) -> Technician | None:
         log.warning("탐색 실패: %s", blog_url, exc_info=True)
         return None
 
-    if not profile["about"]:
+    profile_intro = profile.get("profile_intro", "")
+    if not profile["about"] and not profile_intro:
         log.info("본문 없음, 건너뜀: %s", blog_url)
         return None
 
-    # LLM 분류 (업체명, 시공분야, 직급, 지역, 주소)
-    headline = item.get("description", "")
+    # LLM 분류: 프로필 소개 + 게시글 본문을 종합하여 판단
+    # profile_intro = 블로거가 작성한 업체 자기소개 (정확도 높음)
+    # about = 검색된 게시글 본문 (시공 사례)
+    combined_about = ""
+    if profile_intro:
+        combined_about += f"[블로그 프로필 소개]\n{profile_intro}\n\n"
+    combined_about += f"[게시글 본문]\n{profile['about']}"
+
     classification = await classify(
         name=blogger_name,
-        about=profile["about"],
-        headline=headline,
+        about=combined_about,
+        headline=profile.get("blog_title", ""),
     )
 
-    # classify()가 추출한 업체명 우선, 없으면 블로그 닉네임 폴백
-    name = classification.get("name") or profile.get("blogger_name") or blogger_name
+    # 업체명: classify 결과 → blog_title → blogger_name 순 폴백
+    name = (
+        classification.get("name")
+        or profile.get("blog_title")
+        or profile.get("blogger_name")
+        or blogger_name
+    )
 
     tech = Technician(
         name=name,
@@ -46,6 +58,7 @@ async def process_blog_result(item: dict) -> Technician | None:
         trades=classification["trades"],
         region=classification.get("region", ""),
         address=classification.get("address", ""),
+        headline=profile_intro[:500],
         about=profile["about"][:2000],
         phone=profile.get("phone", ""),
         email=profile.get("email", ""),
