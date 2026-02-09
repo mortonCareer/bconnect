@@ -1,0 +1,27 @@
+[project]
+name = "crawler"
+version = "0.1.0"
+description = "기술자 크롤링 파이프라인 — 채널별 기술자 정보 수집 → 노션 DB 저장"
+readme = "README.md"
+authors = [
+    { name = "JSON", email = "manamana32321@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28",
+    "beautifulsoup4>=4.13",
+    "openai>=1.60",
+    "notion-client>=2.2",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+]
+
+[project.optional-dependencies]
+browser = ["playwright>=1.49"]
+
+[project.scripts]
+crawler = "crawler.main:main"
+
+[build-system]
+requires = ["uv_build>=0.10.0,<0.11.0"]
+build-backend = "uv_build"
