@@ -93,6 +93,8 @@ bin/
 
 ### ETC ###
 nul
+*.pdf
+*.sisyphus
 
 ### Lambda build artifacts ###
 infra/aws/lambda/**/function.zip

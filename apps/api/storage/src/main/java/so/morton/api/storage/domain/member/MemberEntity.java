@@ -80,6 +80,7 @@ public class MemberEntity extends BaseEntity {
         this.about = about;
         this.address = address;
     }
+
     public void update(String name, String phone, String picture, Trade primaryTrade,
                        Set<Trade> trades, int experience, String headline, String about, Address address) {
         this.name = name;

@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@EntityScan(basePackages = "so.morton.api.storage.entity")
-@EnableJpaRepositories(basePackages = "so.morton.api.storage.repository")
+@EntityScan(basePackages = "so.morton.api.storage.domain")
+@EnableJpaRepositories(basePackages = "so.morton.api.storage.domain")
 public class StorageJpaConfig {
 }

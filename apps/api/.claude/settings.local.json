@@ -13,7 +13,10 @@
       "Bash(pnpm lint:*)",
       "Bash(pnpm format:*)",
       "Bash(git log:*)",
-      "Bash(git show:*)"
+      "Bash(git show:*)",
+      "WebFetch(domain:notion.so)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:notion.site)"
     ],
     "deny": [],
     "ask": []
