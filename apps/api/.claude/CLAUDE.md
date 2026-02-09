@@ -4,9 +4,11 @@
 - 코드를 작성할 때는 Quick Start 수준으로 핵심 기능만 간결하게 작성하고, 구체적인 입출력 예시를 사용하세요.
 - 수정 또는 신규 구현 시, 더 이상 사용되지 않는 로직 관련 레거시 코드를 제거합니다.
 - 이전 대화 내용을 바탕으로 체크리스트를 작성 · 관리합니다.
+- 작성된 계획은 반드시 사용자에게 검토받으세요
 
 # 주요 문서
 - API 문서: https://www.notion.so/morton-so/2e0965d2888b807f9c99e789a33b76fb
 - DDD 문서: https://www.figma.com/board/ZL3oqoiYjbekZ5lkGUaztN/-Morton--%EA%B8%B0%ED%9A%8D---%EC%82%AC%EC%97%85?node-id=55-116&t=CyPKrz4hJfc1gTlu-1
 - 클래스 다이어그램: https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj/-Morton--%EA%B0%9C%EB%B0%9C?node-id=0-1&t=HIGmuRzPqyiAMVhG-1
-- 아키텍처 다이어그램: https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj/-Morton--%EA%B0%9C%EB%B0%9C?node-id=267-953&t=lbbqR1APr7Pd0iRb-1
+- 아키텍처 다이어그램: https://www.notion.so/morton-so/BE-2ed965d2888b8091afaff1e4de127d44
+- 유효성 검사 문서: https://finepine.notion.site/1858efefbaf880c0bbf8c238ae01e65a
