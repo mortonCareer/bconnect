@@ -52,9 +52,10 @@ async def process_blog_result(item: dict) -> Technician | None:
         or blogger_name
     )
 
-    # 커버 이미지: 메인 배너 → 게시글 og:image 순 폴백
+    # 커버 이미지: 메인 배너 → 프로필 이미지 → 게시글 og:image 순 폴백
     cover_image_url = (
         profile.get("banner_image_url")
+        or profile.get("profile_image_url")
         or profile.get("cover_image_url", "")
     )
 

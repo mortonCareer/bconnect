@@ -62,7 +62,7 @@ async def test():
         or profile.get("blogger_name")
         or item["bloggername"]
     )
-    cover_image_url = profile.get("banner_image_url") or profile.get("cover_image_url", "")
+    cover_image_url = profile.get("banner_image_url") or profile.get("profile_image_url") or profile.get("cover_image_url", "")
     detail_url = profile.get("blog_home_url") or item["link"]
     tech = Technician(
         name=name,

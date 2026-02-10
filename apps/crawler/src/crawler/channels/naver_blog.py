@@ -111,7 +111,11 @@ def _extract_blogger_name(soup: BeautifulSoup) -> str:
 
 
 async def fetch_blog_profile(blog_id: str) -> dict:
-    """모바일 블로그 메인에서 프로필 소개와 블로그 제목을 추출한다.
+    """모바일 블로그 메인에서 프로필 소개·프로필 이미지·블로그 제목을 추출한다.
+
+    소개글: DOM ``p.desc__Sxw5t`` (전체 텍스트) → 폴백 og:description
+    프로필 이미지: ``img[src*="blogpfthumb"]`` → 폴백 og:image
+    블로그 제목: og:title (``" : 네이버 블로그"`` 접미사 제거)
 
     Returns:
         {"profile_intro": str, "blog_title": str, "profile_image_url": str}
@@ -128,17 +132,27 @@ async def fetch_blog_profile(blog_id: str) -> dict:
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    og_desc = soup.select_one('meta[property="og:description"]')
-    profile_intro = og_desc["content"].strip() if og_desc and og_desc.get("content") else ""
+    # 소개글: DOM 직접 파싱 (잘리지 않는 전체 텍스트) → og:description 폴백
+    desc_el = soup.select_one("p.desc__Sxw5t")
+    if desc_el:
+        profile_intro = desc_el.get_text(strip=True)
+    else:
+        og_desc = soup.select_one('meta[property="og:description"]')
+        profile_intro = og_desc["content"].strip() if og_desc and og_desc.get("content") else ""
 
+    # 블로그 제목
     og_title = soup.select_one('meta[property="og:title"]')
     blog_title = og_title["content"].strip() if og_title and og_title.get("content") else ""
-    # " : 네이버 블로그" 접미사 제거
     if blog_title.endswith(" : 네이버 블로그"):
         blog_title = blog_title[:-len(" : 네이버 블로그")]
 
-    og_img = soup.select_one('meta[property="og:image"]')
-    profile_image_url = og_img["content"].strip() if og_img and og_img.get("content") else ""
+    # 프로필 이미지: blogpfthumb img (블로거가 설정한 프로필 사진) → og:image 폴백
+    pf_img = soup.select_one('img[src*="blogpfthumb"]')
+    if pf_img and pf_img.get("src"):
+        profile_image_url = pf_img["src"]
+    else:
+        og_img = soup.select_one('meta[property="og:image"]')
+        profile_image_url = og_img["content"].strip() if og_img and og_img.get("content") else ""
 
     return {
         "profile_intro": profile_intro,
@@ -215,19 +229,35 @@ async def fetch_blogger_posts(blog_id: str, count: int = 5) -> list[str]:
 _PHONE_RE = re.compile(r"01[016789][-.\s]?\d{3,4}[-.\s]?\d{4}")
 # 이메일 패턴
 _EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
-# 인스타그램 패턴
-_INSTA_RE = re.compile(r"instagram\.com/([a-zA-Z0-9_.]+)")
+# 인스타그램: URL 또는 "인스타 : 아이디" 형태
+_INSTA_RE = re.compile(
+    r"instagram\.com/([a-zA-Z0-9_.]+)"
+    r"|인스타(?:그램)?[\s:：]+@?([a-zA-Z0-9_.]+)",
+    re.IGNORECASE,
+)
+# 유튜브: URL 또는 "유튜브 : 채널명" 형태
+_YOUTUBE_RE = re.compile(
+    r"youtube\.com/(?:@|channel/|c/)?([a-zA-Z0-9_.\-가-힣]+)"
+    r"|유튜브[\s:：]+@?([a-zA-Z0-9_.\-가-힣]+)",
+    re.IGNORECASE,
+)
 
 
 def extract_contact_info(text: str) -> dict:
-    """텍스트에서 연락처, 이메일, 인스타 계정을 추출한다."""
+    """텍스트에서 연락처, 이메일, 인스타, 유튜브 계정을 추출한다."""
     phones = _PHONE_RE.findall(text)
     emails = _EMAIL_RE.findall(text)
-    instas = _INSTA_RE.findall(text)
+    # 인스타: 두 그룹 중 매칭된 것 사용
+    insta_matches = _INSTA_RE.findall(text)
+    insta = next((g1 or g2 for g1, g2 in insta_matches), "") if insta_matches else ""
+    # 유튜브: 두 그룹 중 매칭된 것 사용
+    yt_matches = _YOUTUBE_RE.findall(text)
+    youtube = next((g1 or g2 for g1, g2 in yt_matches), "") if yt_matches else ""
     return {
         "phone": phones[0].replace("-", "").replace(".", "").replace(" ", "") if phones else "",
         "email": emails[0] if emails else "",
-        "instagram": instas[0] if instas else "",
+        "instagram": insta,
+        "youtube": youtube,
     }
 
 
@@ -235,16 +265,10 @@ async def explore_blogger(blog_url: str) -> dict:
     """블로거의 프로필 + 배너 + 여러 글을 종합하여 업체 정보를 수집한다.
 
     정보 수집 순서:
-    1. 블로그 프로필 소개 (모바일 og:description) — 업체 자기소개
+    1. 블로그 프로필 (모바일 DOM) — 소개글·프로필 이미지·블로그 제목
     2. 블로그 메인 배너 (데스크톱 #blog-title CSS) — 대표 이미지
     3. 검색 결과 게시글 — 시공 사례
     4. RSS 최근 글 탐색 — 연락처/추가 정보
-
-    Returns:
-        {"about": str, "profile_intro": str, "phone": str, "email": str,
-         "instagram": str, "blogger_name": str, "blog_title": str,
-         "blog_home_url": str, "banner_image_url": str,
-         "cover_image_url": str, "source_urls": [str]}
     """
     blog_id = extract_blog_id(blog_url)
     if not blog_id:
@@ -256,6 +280,7 @@ async def explore_blogger(blog_url: str) -> dict:
             "blog_title": "",
             "blog_home_url": "",
             "banner_image_url": "",
+            "profile_image_url": "",
             "source_urls": [blog_url],
         }
 
@@ -298,6 +323,7 @@ async def explore_blogger(blog_url: str) -> dict:
         "blog_home_url": blog_home_url,
         "blogger_name": main_post["blogger_name"],
         "banner_image_url": banner_image_url,
+        "profile_image_url": profile["profile_image_url"],
         "cover_image_url": main_post["cover_image_url"],
         "source_urls": source_urls,
         **contact,
