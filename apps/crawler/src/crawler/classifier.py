@@ -81,6 +81,9 @@ def _empty_result() -> dict:
     }
 
 
+_BUSINESS_KEYWORDS = ("인테리어", "건설", "시공", "공사", "건축", "설비", "타일", "도장", "방수", "전기", "배관", "설계", "철거", "조경", "소방", "도배")
+
+
 def _validate_result(result: dict) -> dict:
     """LLM 결과를 검증하고 정규화한다."""
     result["trades"] = [t for t in result.get("trades", []) if t in TRADES][:3]
@@ -96,6 +99,9 @@ def _validate_result(result: dict) -> dict:
     # phone: 숫자 이외 문자 제거
     raw_phone = result.get("phone", "")
     result["phone"] = raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else ""
+    # rank 보정: 업체 단서가 있으면 반장으로 승격
+    if result.get("business_number") or any(kw in result.get("name", "") for kw in _BUSINESS_KEYWORDS):
+        result["rank"] = "반장"
     return result
 
 
