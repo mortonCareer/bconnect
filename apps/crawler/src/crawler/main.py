@@ -3,10 +3,10 @@
 import asyncio
 import logging
 
-from crawler.channels.naver_blog import search_blogs, explore_blogger, build_search_queries
+from crawler.channels.naver_blog import search_blogs, explore_blogger, build_search_queries, extract_blog_id
 from crawler.classifier import classify
 from crawler.models import Technician
-from crawler.notion import save_technician
+from crawler.notion import save_technician, find_duplicate_by_url
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
@@ -16,6 +16,15 @@ async def process_blog_result(item: dict) -> Technician | None:
     """검색 결과 1건 → 블로거 프로필 탐색 → 분류 → Technician 생성."""
     blog_url = item["link"]
     blogger_name = item.get("bloggername", "")
+
+    # 크롤링/LLM 전에 URL로 먼저 중복 체크 (비용 절약)
+    blog_id = extract_blog_id(blog_url)
+    if blog_id:
+        detail_url = f"https://blog.naver.com/{blog_id}"
+        existing = await find_duplicate_by_url(detail_url)
+        if existing:
+            log.info("이미 등록됨, 건너뜀: %s (%s)", blogger_name, blog_id)
+            return None
 
     log.info("탐색 중: %s (%s)", blogger_name, blog_url)
 

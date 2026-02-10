@@ -294,28 +294,36 @@ async def explore_blogger(blog_url: str) -> dict:
 
     # 3. 검색 결과 게시글 파싱
     main_post = await fetch_blog_post(blog_url)
-    all_text = profile["profile_intro"] + "\n" + main_post["about"]
     source_urls = [blog_url]
 
-    # 4. RSS 최근 글 탐색 (연락처/추가 정보)
-    other_urls = await fetch_blogger_posts(blog_id, count=5)
-    for url in other_urls:
-        if url == blog_url:
-            continue
-        try:
-            post = await fetch_blog_post(url)
-            text = post["about"]
-            contact = extract_contact_info(text)
-            if contact["phone"] or contact["email"] or contact["instagram"]:
-                all_text += "\n" + text
-                source_urls.append(url)
-                log.info("연락처 발견: %s → %s", url, contact)
-                break
-        except Exception:
-            continue
+    # 연락처 추출: 소개글 → 게시글 본문 → RSS 최근 글 순 폴백
+    contact = extract_contact_info(profile["profile_intro"])
 
-    # 프로필 소개에서도 연락처 추출
-    contact = extract_contact_info(all_text)
+    # 소개글에서 못 찾은 필드를 게시글 본문에서 보충
+    post_contact = extract_contact_info(main_post["about"])
+    for key in ("phone", "email", "instagram", "youtube"):
+        if not contact[key] and post_contact[key]:
+            contact[key] = post_contact[key]
+
+    # 아직 연락처 부족하면 RSS 최근 글에서 보충
+    if not contact["phone"] and not contact["email"]:
+        other_urls = await fetch_blogger_posts(blog_id, count=5)
+        for url in other_urls:
+            if url == blog_url:
+                continue
+            try:
+                post = await fetch_blog_post(url)
+                rss_contact = extract_contact_info(post["about"])
+                for key in ("phone", "email", "instagram", "youtube"):
+                    if not contact[key] and rss_contact[key]:
+                        contact[key] = rss_contact[key]
+                if contact["phone"] or contact["email"]:
+                    source_urls.append(url)
+                    log.info("연락처 발견 (RSS 폴백): %s → %s", url, rss_contact)
+                    break
+            except Exception:
+                continue
+
     return {
         "about": main_post["about"],
         "profile_intro": profile["profile_intro"],
