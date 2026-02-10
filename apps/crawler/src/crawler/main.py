@@ -15,6 +15,9 @@ from crawler.progress import create_progress, print_summary, console
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
+# 동시 처리 제한: 네이버 스크래핑 + LLM + 노션 API 동시 요청 수
+CONCURRENCY = 5
+
 
 async def process_blog_result(
     item: dict,
@@ -51,6 +54,10 @@ async def process_blog_result(
             if report:
                 report.add_synced(blog_url, blogger_name)
             return None
+
+    # 병렬 처리 시 같은 blog_id 이중 진입 방지: 탐색 전에 선점
+    if blog_id and seen_blog_ids is not None:
+        seen_blog_ids.add(blog_id)
 
     log.info("탐색 중: %s (%s)", blogger_name, blog_url)
 
@@ -132,9 +139,6 @@ async def process_blog_result(
         cover_image_url=cover_image_url,
     )
 
-    if blog_id and seen_blog_ids is not None:
-        seen_blog_ids.add(blog_id)
-
     return tech
 
 
@@ -181,41 +185,49 @@ async def run_pipeline(
     if report:
         report.total_searched += len(items)
 
-    saved_ids = []
-    for item in items:
-        tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force)
+    sem = asyncio.Semaphore(CONCURRENCY)
+    saved_ids: list[str] = []
+
+    async def _handle(item: dict) -> None:
+        async with sem:
+            tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force)
         if tech is None:
-            continue
+            return
+
+        blog_url = item["link"]
+        blogger_name = item.get("bloggername", "")
 
         if dry_run:
             log.info("dry-run: %s (저장 건너뜀)", tech.name)
             if report:
                 report.technicians.append(tech.model_dump())
                 report.add_saved(
-                    blog_url=item["link"], blogger_name=item.get("bloggername", ""),
+                    blog_url=blog_url, blogger_name=blogger_name,
                     tech_name=tech.name, rank=tech.rank, trades=tech.trades,
                     phone=tech.phone, page_id="",
                     region=tech.region, address=tech.address, email=tech.email,
                 )
-            continue
+            return
 
         try:
             page_id = await save_technician(tech, force=force)
         except Exception as exc:
-            log.warning("저장 실패: %s", item["link"], exc_info=True)
+            log.warning("저장 실패: %s", blog_url, exc_info=True)
             if report:
-                report.add_failed(item["link"], item.get("bloggername", ""), "저장", str(exc))
-            continue
+                report.add_failed(blog_url, blogger_name, "저장", str(exc))
+            return
 
         log.info("저장 완료: %s → %s", tech.name, page_id)
         saved_ids.append(page_id)
         if report:
             report.add_saved(
-                blog_url=item["link"], blogger_name=item.get("bloggername", ""),
+                blog_url=blog_url, blogger_name=blogger_name,
                 tech_name=tech.name, rank=tech.rank, trades=tech.trades,
                 phone=tech.phone, page_id=page_id,
                 region=tech.region, address=tech.address, email=tech.email,
             )
+
+    await asyncio.gather(*[_handle(item) for item in items])
 
     log.info("파이프라인 완료: %d/%d건 저장", len(saved_ids), len(items))
     return saved_ids
@@ -295,61 +307,43 @@ REPORTS_DIR = Path("reports")
 
 
 def main():
-    """CLI 진입점.
+    """CLI 진입점."""
+    import argparse
 
-    Usage:
-        crawler                          # 단일 테스트 쿼리
-        crawler "타일 시공업체 서울"       # 지정 쿼리
-        crawler --full                   # 전체 키워드 실행
-        crawler --full --per-query 3     # 키워드당 3건
-        crawler --dry-run "도배 시공업체" # 노션 저장 없이 분류까지만
-        crawler --force "타일 시공업체"   # 기존 업체도 재크롤링하여 덮어쓰기
-        crawler --from-file reports/xxx.json  # 검수한 JSON에서 노션 저장
-    """
-    import sys
-
-    args = sys.argv[1:]
-    dry_run = "--dry-run" in args
-    if dry_run:
-        args.remove("--dry-run")
-    force = "--force" in args
-    if force:
-        args.remove("--force")
-    from_file = None
-    if "--from-file" in args:
-        idx = args.index("--from-file")
-        from_file = Path(args[idx + 1])
-        args.pop(idx + 1)
-        args.pop(idx)
+    parser = argparse.ArgumentParser(
+        prog="crawler",
+        description="네이버 블로그 기술자 크롤링 파이프라인",
+    )
+    parser.add_argument("query", nargs="*", help="검색 쿼리 (기본: '타일 시공업체 수도권')")
+    parser.add_argument("--full", action="store_true", help="전체 키워드 실행 (136쿼리)")
+    parser.add_argument("--per-query", type=int, default=5, help="쿼리당 수집 수 (기본: 5)")
+    parser.add_argument("--dry-run", action="store_true", help="노션 저장 없이 분류까지만 수행")
+    parser.add_argument("--force", action="store_true", help="기존 업체도 재크롤링하여 덮어쓰기")
+    parser.add_argument("--from-file", type=Path, metavar="JSON", help="검수한 JSON에서 노션 저장")
+    args = parser.parse_args()
 
     llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
     report = PipelineReport()
     report.llm_model = llm_model
 
-    if dry_run:
+    if args.dry_run:
         console.print("[yellow]dry-run 모드: 노션 저장 건너뜀[/yellow]")
-    if force:
+    if args.force:
         console.print("[yellow]force 모드: 기존 업체 데이터 덮어쓰기[/yellow]")
-    if from_file:
-        console.print(f"[yellow]파일 임포트: {from_file}[/yellow]")
+    if args.from_file:
+        console.print(f"[yellow]파일 임포트: {args.from_file}[/yellow]")
 
     try:
-        if from_file:
-            report = asyncio.run(run_from_file(from_file, force=force))
-        elif "--full" in args:
-            per_query = 5
-            if "--per-query" in args:
-                idx = args.index("--per-query")
-                per_query = int(args[idx + 1])
-            report = asyncio.run(run_full(per_query=per_query, dry_run=dry_run, force=force))
+        if args.from_file:
+            report = asyncio.run(run_from_file(args.from_file, force=args.force))
+        elif args.full:
+            report = asyncio.run(run_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force))
         else:
-            count = 10
-            query = " ".join(args) if args else "타일 시공업체 수도권"
-            if not args:
-                count = 3
+            query = " ".join(args.query) if args.query else "타일 시공업체 수도권"
+            count = 10 if args.query else 3
             report.mode = "단일 쿼리"
             report.per_query = count
-            asyncio.run(run_pipeline(query, count=count, report=report, dry_run=dry_run, force=force))
+            asyncio.run(run_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force))
     except KeyboardInterrupt:
         console.print("\n[yellow]중단됨 — 부분 보고서 저장 중...[/yellow]")
     except Exception as exc:

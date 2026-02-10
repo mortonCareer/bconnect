@@ -1,8 +1,10 @@
 """노션 DB 싱크 — 중복 체크 + 레코드 생성/업데이트."""
 
+import asyncio
 import logging
 from datetime import datetime, timezone
 
+import httpx
 from notion_client import AsyncClient
 
 from crawler.config import settings
@@ -10,7 +12,29 @@ from crawler.models import Technician
 
 log = logging.getLogger(__name__)
 
-notion = AsyncClient(auth=settings.notion_token, notion_version="2022-06-28")
+MAX_RETRIES = 3
+BASE_DELAY = 1.0  # 초
+
+
+class _RetryTransport(httpx.AsyncHTTPTransport):
+    """429 응답 시 지수 백오프로 재시도하는 httpx 트랜스포트."""
+
+    async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
+        for attempt in range(MAX_RETRIES + 1):
+            response = await super().handle_async_request(request)
+            if response.status_code != 429 or attempt == MAX_RETRIES:
+                return response
+            retry_after = float(response.headers.get("Retry-After", BASE_DELAY * (2 ** attempt)))
+            log.warning("노션 429 — %.1f초 후 재시도 (%d/%d)", retry_after, attempt + 1, MAX_RETRIES)
+            await asyncio.sleep(retry_after)
+        return response  # unreachable but satisfies type checker
+
+
+notion = AsyncClient(
+    auth=settings.notion_token,
+    notion_version="2022-06-28",
+    client=httpx.AsyncClient(transport=_RetryTransport()),
+)
 
 
 async def find_duplicate(tech: Technician) -> str | None:
