@@ -65,7 +65,8 @@ LLM이 수집된 텍스트를 분석하여 구조화된 데이터를 추출한�
 - **파일**: `notion.py` → `save_technician()`
 - **동작**:
   - 신규: 페이지 생성 + 본문 블록 (Markdown → Notion blocks 변환) + 커버 이미지
-  - 기존: 빈 필드만 채우는 enrichment (기존 값 덮어쓰지 않음), 채널·싱크 시점은 항상 갱신
+  - 기존 (기본): 빈 필드만 채우는 enrichment (기존 값 덮어쓰지 않음), 채널·싱크 시점은 항상 갱신
+  - 기존 (`--force`): 모든 필드를 새 데이터로 덮어쓰기, 채널은 누적 유지
 
 ### 6. 연락처 신뢰도 판별
 
@@ -96,6 +97,10 @@ uv run crawler --full --per-query 3
 # dry-run: 노션 저장 없이 검색 → 탐색 → 분류까지만 실행
 uv run crawler --dry-run "도배 시공업체 서울"
 uv run crawler --dry-run --full --per-query 3
+
+# force: 이미 등록된 업체도 재크롤링하여 모든 필드 덮어쓰기
+uv run crawler --force "타일 시공업체 수도권"
+uv run crawler --force --full --per-query 3
 
 # 특정 키워드만 실행 (Python)
 uv run python -c "
@@ -171,4 +176,4 @@ uv run pytest tests/ -v
 - **노션 API 레이트 리밋**: 초당 3요청. 대량 저장 시 429 에러 가능
 - **LLM 비용**: `--full --per-query 5`로 전체 실행 시 신규 업체 수에 비례. 보고서의 비용 추정 확인
 - **개인정보**: 수집된 연락처는 `source_urls`로 출처를 추적. 개인정보보호법 준수 필요
-- **중복 실행 안전**: 동일 파이프라인을 여러 번 돌려도 기존 데이터를 덮어쓰지 않음 (enrichment만)
+- **중복 실행 안전**: 동일 파이프라인을 여러 번 돌려도 기존 데이터를 덮어쓰지 않음 (enrichment만). `--force`를 쓰면 의도적으로 덮어쓰기 가능

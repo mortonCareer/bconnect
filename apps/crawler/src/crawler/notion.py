@@ -106,14 +106,15 @@ def _build_body_markdown(tech: Technician) -> str:
     return "\n\n".join(body_parts)
 
 
-async def save_technician(tech: Technician) -> str:
+async def save_technician(tech: Technician, force: bool = False) -> str:
     """기술자 레코드를 노션 DB에 저장하고 page_id를 반환한다.
 
     중복이 있으면 업데이트하고 기존 page_id를 반환한다.
+    force=True면 기존 필드를 덮어쓴다.
     """
     existing = await find_duplicate(tech)
     if existing:
-        await update_technician(existing, tech)
+        await update_technician(existing, tech, force=force)
         return existing
 
     properties = _build_properties(tech)
@@ -152,12 +153,12 @@ def _read_prop(props: dict, name: str) -> str:
     return ""
 
 
-async def update_technician(page_id: str, tech: Technician) -> None:
-    """기존 레코드를 보강(enrich) 방식으로 업데이트한다.
+async def update_technician(page_id: str, tech: Technician, force: bool = False) -> None:
+    """기존 레코드를 업데이트한다.
 
-    - 빈 필드만 새 데이터로 채운다
-    - 채널(multi_select)은 누적한다
-    - 본문(소개글)은 새 데이터가 더 길면 교체한다
+    - force=False (기본): 빈 필드만 새 데이터로 채운다 (enrichment)
+    - force=True: 모든 필드를 새 데이터로 덮어쓴다
+    - 채널(multi_select)은 항상 누적한다
     """
     page = await notion.pages.retrieve(page_id=page_id)
     existing = page["properties"]
@@ -168,29 +169,31 @@ async def update_technician(page_id: str, tech: Technician) -> None:
         merged_channels = list(dict.fromkeys(existing_channels + tech.channels))
         tech = tech.model_copy(update={"channels": merged_channels})
 
-    # 빈 필드만 새 값으로 채우는 속성 빌드
     new_properties = _build_properties(tech)
-    enrich_properties = {}
 
-    for prop_name, new_val in new_properties.items():
-        old_val = _read_prop(existing, prop_name)
-        # 항상 갱신: 채널(누적), 마지막 싱크(현재 시각)
-        if prop_name in ("채널", "마지막 싱크"):
-            enrich_properties[prop_name] = new_val
-            continue
-        # 기존 값이 비어있으면 새 값으로 채움
-        if not old_val:
-            enrich_properties[prop_name] = new_val
+    if force:
+        # force 모드: 모든 필드 덮어쓰기
+        update_properties = new_properties
+    else:
+        # enrichment 모드: 빈 필드만 채우기
+        update_properties = {}
+        for prop_name, new_val in new_properties.items():
+            old_val = _read_prop(existing, prop_name)
+            if prop_name in ("채널", "마지막 싱크"):
+                update_properties[prop_name] = new_val
+                continue
+            if not old_val:
+                update_properties[prop_name] = new_val
 
     cover = {}
     existing_cover = page.get("cover")
-    if not existing_cover and tech.cover_image_url:
+    if (force or not existing_cover) and tech.cover_image_url:
         cover = {"cover": {"type": "external", "external": {"url": tech.cover_image_url}}}
 
-    if enrich_properties or cover:
-        await notion.pages.update(page_id=page_id, properties=enrich_properties, **cover)
+    if update_properties or cover:
+        await notion.pages.update(page_id=page_id, properties=update_properties, **cover)
 
-    # 본문: 새 소개글이 기존보다 길면 교체
+    # 본문: force면 항상 교체, 아니면 새 소개글이 더 길 때만
     body_markdown = _build_body_markdown(tech)
     new_blocks = _markdown_to_blocks(body_markdown)
     if new_blocks:
@@ -201,7 +204,8 @@ async def update_technician(page_id: str, tech: Technician) -> None:
             if b["type"] in ("paragraph", "heading_2")
         )
         new_text = tech.headline or ""
-        if len(new_text) > len(existing_text):
+        should_replace = force or len(new_text) > len(existing_text)
+        if should_replace:
             for block in existing_blocks["results"]:
                 try:
                     await notion.blocks.delete(block_id=block["id"])
@@ -209,7 +213,8 @@ async def update_technician(page_id: str, tech: Technician) -> None:
                     log.debug("블록 삭제 실패 (무시): %s", block["id"])
             await notion.blocks.children.append(block_id=page_id, children=new_blocks)
 
-    log.info("노션 레코드 보강: %s → %s", tech.name, page_id)
+    mode = "덮어쓰기" if force else "보강"
+    log.info("노션 레코드 %s: %s → %s", mode, tech.name, page_id)
 
 
 def _markdown_to_blocks(md: str, max_blocks: int = 95) -> list[dict]:

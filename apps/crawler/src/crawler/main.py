@@ -21,6 +21,7 @@ async def process_blog_result(
     seen_blog_ids: set[str] | None = None,
     report: PipelineReport | None = None,
     dry_run: bool = False,
+    force: bool = False,
 ) -> Technician | None:
     """검색 결과 1건 → 블로거 프로필 탐색 → 분류 → Technician 생성."""
     blog_url = item["link"]
@@ -29,6 +30,7 @@ async def process_blog_result(
     blog_id = extract_blog_id(blog_url)
 
     # 메모리 중복 체크: 같은 실행 내 이미 처리한 blog_id는 즉시 스킵
+    # force 모드에서도 같은 실행 내 중복은 스킵 (무한루프 방지)
     if blog_id and seen_blog_ids is not None and blog_id in seen_blog_ids:
         log.info("이미 처리됨 (메모리), 건너뜀: %s (%s)", blogger_name, blog_id)
         if report:
@@ -37,7 +39,8 @@ async def process_blog_result(
 
     # 노션 DB 중복 체크: 크롤링/LLM 전에 URL로 스킵 (비용 절약)
     # dry_run 모드에서는 노션 조회 자체를 건너뜀
-    if blog_id and not dry_run:
+    # force 모드에서는 중복이 있어도 스킵하지 않고 재크롤링
+    if blog_id and not dry_run and not force:
         detail_url = f"https://blog.naver.com/{blog_id}"
         existing = await find_duplicate_by_url(detail_url)
         if existing:
@@ -138,6 +141,7 @@ async def process_blog_result(
 async def run_pipeline(
     query: str, count: int = 10, seen_blog_ids: set[str] | None = None,
     report: PipelineReport | None = None, dry_run: bool = False,
+    force: bool = False,
 ) -> list[str]:
     """단일 검색어로 파이프라인을 실행한다.
 
@@ -147,6 +151,7 @@ async def run_pipeline(
         seen_blog_ids: 실행 내 이미 처리한 blog_id (쿼리 간 공유)
         report: 실행 보고서 누적기
         dry_run: True면 노션 저장을 건너뛰고 분류까지만 수행
+        force: True면 이미 등록된 업체도 재크롤링하여 덮어쓴다
 
     Returns:
         저장된 노션 page_id 목록 (dry_run 시 빈 리스트)
@@ -178,7 +183,7 @@ async def run_pipeline(
 
     saved_ids = []
     for item in items:
-        tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run)
+        tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force)
         if tech is None:
             continue
 
@@ -194,7 +199,7 @@ async def run_pipeline(
             continue
 
         try:
-            page_id = await save_technician(tech)
+            page_id = await save_technician(tech, force=force)
         except Exception as exc:
             log.warning("저장 실패: %s", item["link"], exc_info=True)
             if report:
@@ -215,7 +220,7 @@ async def run_pipeline(
     return saved_ids
 
 
-async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_run: bool = False) -> PipelineReport:
+async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_run: bool = False, force: bool = False) -> PipelineReport:
     """전체 키워드로 파이프라인을 실행한다."""
     queries = build_search_queries(keywords)
 
@@ -236,7 +241,7 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_ru
         )
         for i, q in enumerate(queries, 1):
             progress.update(task_all, description=f"[{i}/{len(queries)}] {q[:30]}")
-            ids = await run_pipeline(q, count=per_query, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run)
+            ids = await run_pipeline(q, count=per_query, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force)
             all_ids.extend(ids)
             progress.advance(task_all)
             # 레이트 리밋 방지: 쿼리 간 0.5초 딜레이
@@ -260,6 +265,7 @@ def main():
         crawler --full                   # 전체 키워드 실행
         crawler --full --per-query 3     # 키워드당 3건
         crawler --dry-run "도배 시공업체" # 노션 저장 없이 분류까지만
+        crawler --force "타일 시공업체"   # 기존 업체도 재크롤링하여 덮어쓰기
     """
     import sys
 
@@ -267,6 +273,9 @@ def main():
     dry_run = "--dry-run" in args
     if dry_run:
         args.remove("--dry-run")
+    force = "--force" in args
+    if force:
+        args.remove("--force")
 
     llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
     report = PipelineReport()
@@ -274,6 +283,8 @@ def main():
 
     if dry_run:
         console.print("[yellow]dry-run 모드: 노션 저장 건너뜀[/yellow]")
+    if force:
+        console.print("[yellow]force 모드: 기존 업체 데이터 덮어쓰기[/yellow]")
 
     try:
         if "--full" in args:
@@ -281,7 +292,7 @@ def main():
             if "--per-query" in args:
                 idx = args.index("--per-query")
                 per_query = int(args[idx + 1])
-            report = asyncio.run(run_full(per_query=per_query, dry_run=dry_run))
+            report = asyncio.run(run_full(per_query=per_query, dry_run=dry_run, force=force))
         else:
             count = 10
             query = " ".join(args) if args else "타일 시공업체 수도권"
@@ -289,7 +300,7 @@ def main():
                 count = 3
             report.mode = "단일 쿼리"
             report.per_query = count
-            asyncio.run(run_pipeline(query, count=count, report=report, dry_run=dry_run))
+            asyncio.run(run_pipeline(query, count=count, report=report, dry_run=dry_run, force=force))
     except KeyboardInterrupt:
         console.print("\n[yellow]중단됨 — 부분 보고서 저장 중...[/yellow]")
     except Exception as exc:
