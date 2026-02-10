@@ -330,7 +330,7 @@ async def explore_blogger(blog_url: str) -> dict:
 
     # 아직 연락처 부족하면 RSS 최근 글에서 보충 (병렬 fetch)
     if not contact["phone"] and not contact["email"]:
-        other_urls = await fetch_blogger_posts(blog_id, count=5)
+        other_urls = await fetch_blogger_posts(blog_id, count=20)
         other_urls = [u for u in other_urls if u != blog_url]
 
         async def _safe_fetch(u: str) -> tuple[str, dict | None]:

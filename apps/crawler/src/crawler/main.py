@@ -4,11 +4,11 @@ import asyncio
 import logging
 from pathlib import Path
 
-from crawler.channels.naver_blog import search_blogs, explore_blogger, build_search_queries, extract_blog_id
+from crawler.channels.naver_blog import search_blogs, explore_blogger, build_search_queries, extract_blog_id, extract_contact_info
 from crawler.classifier import classify
 from crawler.config import settings
 from crawler.models import Technician
-from crawler.notion import save_technician, find_duplicate_by_url, touch_synced_at
+from crawler.notion import save_technician, find_duplicate_by_url, touch_synced_at, find_pages_missing_phone, update_phone
 from crawler.report import PipelineReport
 from crawler.progress import create_progress, print_summary, console
 
@@ -303,6 +303,69 @@ async def run_from_file(file_path: Path, force: bool = False) -> PipelineReport:
     return report
 
 
+async def run_fill_phones() -> PipelineReport:
+    """노션 DB에서 연락처 빈 레코드를 찾아 재탐색한다. LLM 호출 없이 정규식만 사용."""
+    pages = await find_pages_missing_phone()
+    log.info("연락처 누락 레코드: %d건", len(pages))
+
+    report = PipelineReport()
+    report.mode = "연락처 보충"
+    report.total_searched = len(pages)
+
+    sem = asyncio.Semaphore(CONCURRENCY)
+    filled = 0
+
+    async def _handle(page: dict) -> None:
+        nonlocal filled
+        page_id = page["page_id"]
+        detail_url = page["detail_url"]
+        name = page["name"]
+
+        if not detail_url:
+            report.add_skipped(detail_url, name, "URL 없음")
+            return
+
+        async with sem:
+            try:
+                profile = await explore_blogger(detail_url)
+            except Exception as exc:
+                log.warning("탐색 실패: %s", detail_url, exc_info=True)
+                report.add_failed(detail_url, name, "탐색", str(exc))
+                return
+
+        phone = profile.get("phone", "")
+        if not phone:
+            report.add_skipped(detail_url, name, "연락처 없음")
+            return
+
+        try:
+            await update_phone(page_id, phone)
+        except Exception as exc:
+            log.warning("업데이트 실패: %s", detail_url, exc_info=True)
+            report.add_failed(detail_url, name, "저장", str(exc))
+            return
+
+        filled += 1
+        log.info("연락처 보충: %s → %s", name, phone)
+        report.add_saved(
+            blog_url=detail_url, blogger_name=name,
+            tech_name=name, rank="", trades=[], phone=phone, page_id=page_id,
+        )
+
+    progress = create_progress()
+    with progress:
+        task = progress.add_task(f"연락처 보충 ({len(pages)}건)", total=len(pages))
+        # 10개씩 배치 처리 (진행률 업데이트용)
+        batch_size = 10
+        for i in range(0, len(pages), batch_size):
+            batch = pages[i:i + batch_size]
+            await asyncio.gather(*[_handle(p) for p in batch])
+            progress.advance(task, len(batch))
+
+    log.info("연락처 보충 완료: %d/%d건", filled, len(pages))
+    return report
+
+
 REPORTS_DIR = Path("reports")
 
 
@@ -320,6 +383,7 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="노션 저장 없이 분류까지만 수행")
     parser.add_argument("--force", action="store_true", help="기존 업체도 재크롤링하여 덮어쓰기")
     parser.add_argument("--from-file", type=Path, metavar="JSON", help="검수한 JSON에서 노션 저장")
+    parser.add_argument("--fill-phones", action="store_true", help="연락처 빈 레코드를 재탐색하여 보충")
     args = parser.parse_args()
 
     llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
@@ -332,9 +396,15 @@ def main():
         console.print("[yellow]force 모드: 기존 업체 데이터 덮어쓰기[/yellow]")
     if args.from_file:
         console.print(f"[yellow]파일 임포트: {args.from_file}[/yellow]")
+    if args.fill_phones:
+        console.print("[yellow]연락처 보충 모드: 빈 레코드 재탐색[/yellow]")
 
     try:
-        if args.from_file:
+        if args.fill_phones:
+            logging.getLogger().setLevel(logging.WARNING)
+            report = asyncio.run(run_fill_phones())
+            logging.getLogger().setLevel(logging.INFO)
+        elif args.from_file:
             report = asyncio.run(run_from_file(args.from_file, force=args.force))
         elif args.full:
             report = asyncio.run(run_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force))
