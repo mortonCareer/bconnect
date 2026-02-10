@@ -18,6 +18,9 @@ class ItemResult:
     rank: str = ""
     trades: list[str] = field(default_factory=list)
     phone: str = ""
+    region: str = ""
+    address: str = ""
+    email: str = ""
     page_id: str = ""
     # failed일 때만 채워짐
     error: str = ""
@@ -44,11 +47,13 @@ class PipelineReport:
     def add_saved(
         self, blog_url: str, blogger_name: str, tech_name: str,
         rank: str, trades: list[str], phone: str, page_id: str,
+        region: str = "", address: str = "", email: str = "",
     ) -> None:
         self.items.append(ItemResult(
             blog_url=blog_url, blogger_name=blogger_name, status="saved",
             tech_name=tech_name, rank=rank, trades=trades,
-            phone=phone, page_id=page_id,
+            phone=phone, region=region, address=address, email=email,
+            page_id=page_id,
         ))
 
     def add_synced(self, blog_url: str, blogger_name: str) -> None:
@@ -109,6 +114,29 @@ class PipelineReport:
             return self.input_tokens * 0.25e-6 + self.output_tokens * 1.25e-6
         return 0.0
 
+    def _compute_fill_rates(self) -> dict:
+        """신규 저장 항목의 필드 채움률을 계산한다."""
+        saved = [i for i in self.items if i.status == "saved"]
+        if not saved:
+            return {}
+        total = len(saved)
+        field_checks = [
+            ("업체명", lambda i: bool(i.tech_name)),
+            ("시공분야", lambda i: bool(i.trades)),
+            ("지역", lambda i: bool(i.region)),
+            ("연락처", lambda i: bool(i.phone)),
+            ("주소", lambda i: bool(i.address)),
+            ("이메일", lambda i: bool(i.email)),
+        ]
+        return {
+            "total": total,
+            "fields": [
+                {"field": label, "filled": sum(1 for i in saved if check(i)),
+                 "rate": round(sum(1 for i in saved if check(i)) / total * 100, 1)}
+                for label, check in field_checks
+            ],
+        }
+
     # --- 출력 ---
 
     def to_markdown(self) -> str:
@@ -161,6 +189,33 @@ class PipelineReport:
                 f"| 예상 비용 | ${cost:.4f} |",
             ]
 
+        # 필드 채움률
+        saved = [i for i in self.items if i.status == "saved"]
+        if saved:
+            field_checks = [
+                ("업체명", lambda i: bool(i.tech_name)),
+                ("시공분야", lambda i: bool(i.trades)),
+                ("지역", lambda i: bool(i.region)),
+                ("연락처", lambda i: bool(i.phone)),
+                ("주소", lambda i: bool(i.address)),
+                ("이메일", lambda i: bool(i.email)),
+            ]
+            total = len(saved)
+            fill_data = []
+            for label, check in field_checks:
+                filled = sum(1 for i in saved if check(i))
+                fill_data.append((label, filled, total))
+            # 채움률 낮은 순 정렬
+            fill_data.sort(key=lambda x: x[1] / x[2])
+            lines += [
+                "", f"## 필드 채움률 (신규 저장 {total}건)",
+                "| 필드 | 채움 | 채움률 |",
+                "|------|------|--------|",
+            ]
+            for label, filled, tot in fill_data:
+                rate = filled / tot * 100
+                lines.append(f"| {label} | {filled} | {rate:.0f}% |")
+
         # 에러 로그
         failed = [i for i in self.items if i.status == "failed"]
         if failed:
@@ -199,6 +254,7 @@ class PipelineReport:
                 "output_tokens": self.output_tokens,
                 "estimated_cost_usd": round(self._estimate_cost(), 6),
             },
+            "field_fill_rates": self._compute_fill_rates(),
             "items": [asdict(i) for i in self.items],
         }
 

@@ -194,6 +194,7 @@ async def run_pipeline(
                 blog_url=item["link"], blogger_name=item.get("bloggername", ""),
                 tech_name=tech.name, rank=tech.rank, trades=tech.trades,
                 phone=tech.phone, page_id=page_id,
+                region=tech.region, address=tech.address, email=tech.email,
             )
 
     log.info("파이프라인 완료: %d/%d건 저장", len(saved_ids), len(items))
