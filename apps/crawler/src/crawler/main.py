@@ -2,47 +2,99 @@
 
 import asyncio
 import logging
+from pathlib import Path
 
-from crawler.channels.naver_blog import search_blogs, explore_blogger, build_search_queries
+from crawler.channels.naver_blog import search_blogs, explore_blogger, build_search_queries, extract_blog_id, extract_contact_info
 from crawler.classifier import classify
+from crawler.config import settings
 from crawler.models import Technician
-from crawler.notion import save_technician
+from crawler.notion import save_technician, find_duplicate_by_url, touch_synced_at, find_pages_missing_phone, update_phone
+from crawler.report import PipelineReport
+from crawler.progress import create_progress, print_summary, console
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
+# 동시 처리 제한: 네이버 스크래핑 + LLM + 노션 API 동시 요청 수
+CONCURRENCY = 5
 
-async def process_blog_result(item: dict) -> Technician | None:
+
+async def process_blog_result(
+    item: dict,
+    seen_blog_ids: set[str] | None = None,
+    report: PipelineReport | None = None,
+    dry_run: bool = False,
+    force: bool = False,
+) -> Technician | None:
     """검색 결과 1건 → 블로거 프로필 탐색 → 분류 → Technician 생성."""
     blog_url = item["link"]
     blogger_name = item.get("bloggername", "")
+
+    blog_id = extract_blog_id(blog_url)
+
+    # 메모리 중복 체크: 같은 실행 내 이미 처리한 blog_id는 즉시 스킵
+    # force 모드에서도 같은 실행 내 중복은 스킵 (무한루프 방지)
+    if blog_id and seen_blog_ids is not None and blog_id in seen_blog_ids:
+        log.info("이미 처리됨 (메모리), 건너뜀: %s (%s)", blogger_name, blog_id)
+        if report:
+            report.add_skipped(blog_url, blogger_name, "메모리 중복")
+        return None
+
+    # 노션 DB 중복 체크: 크롤링/LLM 전에 URL로 스킵 (비용 절약)
+    # dry_run 모드에서는 노션 조회 자체를 건너뜀
+    # force 모드에서는 중복이 있어도 스킵하지 않고 재크롤링
+    if blog_id and not dry_run and not force:
+        detail_url = f"https://blog.naver.com/{blog_id}"
+        existing = await find_duplicate_by_url(detail_url)
+        if existing:
+            await touch_synced_at(existing)
+            if seen_blog_ids is not None:
+                seen_blog_ids.add(blog_id)
+            log.info("이미 등록됨, 싱크 시점 갱신: %s (%s)", blogger_name, blog_id)
+            if report:
+                report.add_synced(blog_url, blogger_name)
+            return None
+
+    # 병렬 처리 시 같은 blog_id 이중 진입 방지: 탐색 전에 선점
+    if blog_id and seen_blog_ids is not None:
+        seen_blog_ids.add(blog_id)
 
     log.info("탐색 중: %s (%s)", blogger_name, blog_url)
 
     try:
         profile = await explore_blogger(blog_url)
-    except Exception:
+    except Exception as exc:
         log.warning("탐색 실패: %s", blog_url, exc_info=True)
+        if report:
+            report.add_failed(blog_url, blogger_name, "탐색", str(exc))
         return None
 
     profile_intro = profile.get("profile_intro", "")
     if not profile["about"] and not profile_intro:
         log.info("본문 없음, 건너뜀: %s", blog_url)
+        if report:
+            report.add_skipped(blog_url, blogger_name, "본문 없음")
         return None
 
     # LLM 분류: 프로필 소개 + 게시글 본문을 종합하여 판단
-    # profile_intro = 블로거가 작성한 업체 자기소개 (정확도 높음)
-    # about = 검색된 게시글 본문 (시공 사례)
     combined_about = ""
     if profile_intro:
         combined_about += f"[블로그 프로필 소개]\n{profile_intro}\n\n"
     combined_about += f"[게시글 본문]\n{profile['about']}"
 
-    classification = await classify(
-        name=blogger_name,
-        about=combined_about,
-        headline=profile.get("blog_title", ""),
-    )
+    try:
+        classification, usage = await classify(
+            name=blogger_name,
+            about=combined_about,
+            headline=profile.get("blog_title", ""),
+        )
+        if report:
+            report.add_llm_usage(usage["input_tokens"], usage["output_tokens"])
+    except Exception as exc:
+        log.warning("분류 실패: %s", blog_url, exc_info=True)
+        if report:
+            report.add_failed(blog_url, blogger_name, "분류", str(exc))
+        return None
 
     # 업체명: classify 결과 → blog_title → blogger_name 순 폴백
     name = (
@@ -52,6 +104,25 @@ async def process_blog_result(item: dict) -> Technician | None:
         or blogger_name
     )
 
+    # 커버 이미지: 메인 배너 → 프로필 이미지 → 게시글 og:image 순 폴백
+    cover_image_url = (
+        profile.get("banner_image_url")
+        or profile.get("profile_image_url")
+        or profile.get("cover_image_url", "")
+    )
+
+    # 자세히보기: 블로그 홈 → 게시글 URL 순 폴백
+    detail_url = profile.get("blog_home_url") or blog_url
+
+    # 연락처: 프로필 소개글 출처면 신뢰, 게시글 출처면 LLM 우선
+    phone_source = profile.get("phone_source", "")
+    regex_phone = profile.get("phone", "")
+    llm_phone = classification.get("phone", "")
+    if phone_source == "profile":
+        phone = regex_phone  # 프로필 소개글 → 본인 번호, 신뢰
+    else:
+        phone = llm_phone or regex_phone  # LLM 판별 우선, 없으면 정규식 폴백
+
     tech = Technician(
         name=name,
         rank=classification["rank"],
@@ -60,84 +131,298 @@ async def process_blog_result(item: dict) -> Technician | None:
         address=classification.get("address", ""),
         headline=profile_intro[:500],
         about=profile["about"][:2000],
-        phone=profile.get("phone", ""),
+        phone=phone,
         email=profile.get("email", ""),
         channels=["네이버블로그"],
         source_urls=profile["source_urls"],
-        detail_url=blog_url,
-        cover_image_url=profile.get("cover_image_url", ""),
+        detail_url=detail_url,
+        cover_image_url=cover_image_url,
     )
 
     return tech
 
 
-async def run_pipeline(query: str, count: int = 10) -> list[str]:
+async def run_pipeline(
+    query: str, count: int = 10, seen_blog_ids: set[str] | None = None,
+    report: PipelineReport | None = None, dry_run: bool = False,
+    force: bool = False,
+) -> list[str]:
     """단일 검색어로 파이프라인을 실행한다.
 
     Args:
         query: 네이버 검색 쿼리
         count: 수집할 결과 수
+        seen_blog_ids: 실행 내 이미 처리한 blog_id (쿼리 간 공유)
+        report: 실행 보고서 누적기
+        dry_run: True면 노션 저장을 건너뛰고 분류까지만 수행
+        force: True면 이미 등록된 업체도 재크롤링하여 덮어쓴다
 
     Returns:
-        저장된 노션 page_id 목록
+        저장된 노션 page_id 목록 (dry_run 시 빈 리스트)
     """
+    if seen_blog_ids is None:
+        seen_blog_ids = set()
+
+    if report:
+        report.queries.append(query)
+
     log.info("검색 시작: '%s' (최대 %d건)", query, count)
-    items = await search_blogs(query, display=count)
+    # 네이버 API display 최대 100 → 페이지네이션
+    items: list[dict] = []
+    page_size = min(count, 100)
+    start = 1
+    while len(items) < count:
+        page = await search_blogs(query, display=page_size, start=start)
+        if not page:
+            break
+        items.extend(page)
+        start += len(page)
+        if len(page) < page_size:
+            break
+    items = items[:count]
     log.info("검색 결과: %d건", len(items))
 
-    saved_ids = []
-    for item in items:
-        tech = await process_blog_result(item)
-        if tech is None:
-            continue
+    if report:
+        report.total_searched += len(items)
 
-        page_id = await save_technician(tech)
+    sem = asyncio.Semaphore(CONCURRENCY)
+    saved_ids: list[str] = []
+
+    async def _handle(item: dict) -> None:
+        async with sem:
+            tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force)
+        if tech is None:
+            return
+
+        blog_url = item["link"]
+        blogger_name = item.get("bloggername", "")
+
+        if dry_run:
+            log.info("dry-run: %s (저장 건너뜀)", tech.name)
+            if report:
+                report.technicians.append(tech.model_dump())
+                report.add_saved(
+                    blog_url=blog_url, blogger_name=blogger_name,
+                    tech_name=tech.name, rank=tech.rank, trades=tech.trades,
+                    phone=tech.phone, page_id="",
+                    region=tech.region, address=tech.address, email=tech.email,
+                )
+            return
+
+        try:
+            page_id = await save_technician(tech, force=force)
+        except Exception as exc:
+            log.warning("저장 실패: %s", blog_url, exc_info=True)
+            if report:
+                report.add_failed(blog_url, blogger_name, "저장", str(exc))
+            return
+
         log.info("저장 완료: %s → %s", tech.name, page_id)
         saved_ids.append(page_id)
+        if report:
+            report.add_saved(
+                blog_url=blog_url, blogger_name=blogger_name,
+                tech_name=tech.name, rank=tech.rank, trades=tech.trades,
+                phone=tech.phone, page_id=page_id,
+                region=tech.region, address=tech.address, email=tech.email,
+            )
+
+    await asyncio.gather(*[_handle(item) for item in items])
 
     log.info("파이프라인 완료: %d/%d건 저장", len(saved_ids), len(items))
     return saved_ids
 
 
-async def run_full(keywords: list[str] | None = None, per_query: int = 5) -> list[str]:
+async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_run: bool = False, force: bool = False) -> PipelineReport:
     """전체 키워드로 파이프라인을 실행한다."""
     queries = build_search_queries(keywords)
-    log.info("총 %d개 쿼리 실행 예정", len(queries))
 
+    report = PipelineReport()
+    report.mode = "전체 키워드"
+    report.per_query = per_query
+    report.llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
+
+    # progress bar 모드: INFO 로그 억제, rich가 표시
+    logging.getLogger().setLevel(logging.WARNING)
+
+    seen_blog_ids: set[str] = set()
     all_ids = []
-    for i, q in enumerate(queries, 1):
-        log.info("[%d/%d] %s", i, len(queries), q)
-        ids = await run_pipeline(q, count=per_query)
-        all_ids.extend(ids)
+    progress = create_progress()
+    with progress:
+        task_all = progress.add_task(
+            f"전체 ({len(queries)} 쿼리)", total=len(queries),
+        )
+        for i, q in enumerate(queries, 1):
+            progress.update(task_all, description=f"[{i}/{len(queries)}] {q[:30]}")
+            ids = await run_pipeline(q, count=per_query, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force)
+            all_ids.extend(ids)
+            progress.advance(task_all)
+            # 레이트 리밋 방지: 쿼리 간 0.5초 딜레이
+            if i < len(queries):
+                await asyncio.sleep(0.5)
 
-    log.info("전체 완료: %d건 저장", len(all_ids))
-    return all_ids
+    # 로그 레벨 복원
+    logging.getLogger().setLevel(logging.INFO)
+    return report
+
+
+async def run_from_file(file_path: Path, force: bool = False) -> PipelineReport:
+    """dry-run 보고서 JSON에서 Technician 데이터를 읽어 노션에 저장한다."""
+    import json
+
+    data = json.loads(file_path.read_text(encoding="utf-8"))
+    technicians_data = data.get("technicians", [])
+    if not technicians_data:
+        raise ValueError(f"파일에 technicians 데이터가 없습니다: {file_path}")
+
+    report = PipelineReport()
+    report.mode = "파일 임포트"
+    report.llm_model = data.get("params", {}).get("llm_model", "")
+
+    log.info("파일 임포트: %s (%d건)", file_path, len(technicians_data))
+    saved_ids = []
+    for tech_data in technicians_data:
+        tech = Technician(**tech_data)
+        try:
+            page_id = await save_technician(tech, force=force)
+        except Exception as exc:
+            log.warning("저장 실패: %s", tech.name, exc_info=True)
+            report.add_failed(tech.detail_url, tech.name, "저장", str(exc))
+            continue
+
+        log.info("저장 완료: %s → %s", tech.name, page_id)
+        saved_ids.append(page_id)
+        report.add_saved(
+            blog_url=tech.detail_url, blogger_name=tech.name,
+            tech_name=tech.name, rank=tech.rank, trades=tech.trades,
+            phone=tech.phone, page_id=page_id,
+            region=tech.region, address=tech.address, email=tech.email,
+        )
+
+    log.info("임포트 완료: %d/%d건 저장", len(saved_ids), len(technicians_data))
+    return report
+
+
+async def run_fill_phones() -> PipelineReport:
+    """노션 DB에서 연락처 빈 레코드를 찾아 재탐색한다. LLM 호출 없이 정규식만 사용."""
+    pages = await find_pages_missing_phone()
+    log.info("연락처 누락 레코드: %d건", len(pages))
+
+    report = PipelineReport()
+    report.mode = "연락처 보충"
+    report.total_searched = len(pages)
+
+    sem = asyncio.Semaphore(CONCURRENCY)
+    filled = 0
+
+    async def _handle(page: dict) -> None:
+        nonlocal filled
+        page_id = page["page_id"]
+        detail_url = page["detail_url"]
+        name = page["name"]
+
+        if not detail_url:
+            report.add_skipped(detail_url, name, "URL 없음")
+            return
+
+        async with sem:
+            try:
+                profile = await explore_blogger(detail_url)
+            except Exception as exc:
+                log.warning("탐색 실패: %s", detail_url, exc_info=True)
+                report.add_failed(detail_url, name, "탐색", str(exc))
+                return
+
+        phone = profile.get("phone", "")
+        if not phone:
+            report.add_skipped(detail_url, name, "연락처 없음")
+            return
+
+        try:
+            await update_phone(page_id, phone)
+        except Exception as exc:
+            log.warning("업데이트 실패: %s", detail_url, exc_info=True)
+            report.add_failed(detail_url, name, "저장", str(exc))
+            return
+
+        filled += 1
+        log.info("연락처 보충: %s → %s", name, phone)
+        report.add_saved(
+            blog_url=detail_url, blogger_name=name,
+            tech_name=name, rank="", trades=[], phone=phone, page_id=page_id,
+        )
+
+    progress = create_progress()
+    with progress:
+        task = progress.add_task(f"연락처 보충 ({len(pages)}건)", total=len(pages))
+        # 10개씩 배치 처리 (진행률 업데이트용)
+        batch_size = 10
+        for i in range(0, len(pages), batch_size):
+            batch = pages[i:i + batch_size]
+            await asyncio.gather(*[_handle(p) for p in batch])
+            progress.advance(task, len(batch))
+
+    log.info("연락처 보충 완료: %d/%d건", filled, len(pages))
+    return report
+
+
+REPORTS_DIR = Path("reports")
 
 
 def main():
-    """CLI 진입점.
+    """CLI 진입점."""
+    import argparse
 
-    Usage:
-        crawler                          # 단일 테스트 쿼리
-        crawler "타일 시공업체 서울"       # 지정 쿼리
-        crawler --full                   # 전체 키워드 실행
-        crawler --full --per-query 3     # 키워드당 3건
-    """
-    import sys
+    parser = argparse.ArgumentParser(
+        prog="crawler",
+        description="네이버 블로그 기술자 크롤링 파이프라인",
+    )
+    parser.add_argument("query", nargs="*", help="검색 쿼리 (기본: '타일 시공업체 수도권')")
+    parser.add_argument("--full", action="store_true", help="전체 키워드 실행 (136쿼리)")
+    parser.add_argument("--per-query", type=int, default=5, help="쿼리당 수집 수 (기본: 5)")
+    parser.add_argument("--dry-run", action="store_true", help="노션 저장 없이 분류까지만 수행")
+    parser.add_argument("--force", action="store_true", help="기존 업체도 재크롤링하여 덮어쓰기")
+    parser.add_argument("--from-file", type=Path, metavar="JSON", help="검수한 JSON에서 노션 저장")
+    parser.add_argument("--fill-phones", action="store_true", help="연락처 빈 레코드를 재탐색하여 보충")
+    args = parser.parse_args()
 
-    args = sys.argv[1:]
+    llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
+    report = PipelineReport()
+    report.llm_model = llm_model
 
-    if "--full" in args:
-        per_query = 5
-        if "--per-query" in args:
-            idx = args.index("--per-query")
-            per_query = int(args[idx + 1])
-        asyncio.run(run_full(per_query=per_query))
-    elif args:
-        query = " ".join(args)
-        asyncio.run(run_pipeline(query, count=10))
-    else:
-        asyncio.run(run_pipeline("타일 시공업체 수도권", count=3))
+    if args.dry_run:
+        console.print("[yellow]dry-run 모드: 노션 저장 건너뜀[/yellow]")
+    if args.force:
+        console.print("[yellow]force 모드: 기존 업체 데이터 덮어쓰기[/yellow]")
+    if args.from_file:
+        console.print(f"[yellow]파일 임포트: {args.from_file}[/yellow]")
+    if args.fill_phones:
+        console.print("[yellow]연락처 보충 모드: 빈 레코드 재탐색[/yellow]")
+
+    try:
+        if args.fill_phones:
+            logging.getLogger().setLevel(logging.WARNING)
+            report = asyncio.run(run_fill_phones())
+            logging.getLogger().setLevel(logging.INFO)
+        elif args.from_file:
+            report = asyncio.run(run_from_file(args.from_file, force=args.force))
+        elif args.full:
+            report = asyncio.run(run_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force))
+        else:
+            query = " ".join(args.query) if args.query else "타일 시공업체 수도권"
+            count = 10 if args.query else 3
+            report.mode = "단일 쿼리"
+            report.per_query = count
+            asyncio.run(run_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force))
+    except KeyboardInterrupt:
+        console.print("\n[yellow]중단됨 — 부분 보고서 저장 중...[/yellow]")
+    except Exception as exc:
+        console.print(f"\n[red]오류: {exc}[/red]")
+        report.add_failed("", "", "파이프라인", str(exc))
+
+    md_path = report.save(REPORTS_DIR)
+    print_summary(report)
+    console.print(f"보고서: [link=file://{md_path.resolve()}]{md_path}[/link]")
 
 
 if __name__ == "__main__":

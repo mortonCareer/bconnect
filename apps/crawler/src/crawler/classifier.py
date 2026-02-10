@@ -43,8 +43,14 @@ SYSTEM_PROMPT = """\
 - 본문에 구체적 주소가 있으면 추출
 - 없으면 빈 문자열
 
+### 6. phone (연락처)
+- 블로그 운영자/업체 본인의 대표 연락처만 추출
+- 시공 사례 속 고객 번호, 협력업체 번호, 제조사 번호는 제외
+- 형식: 숫자만 (예: "01012345678")
+- 확실하지 않으면 빈 문자열
+
 ## 응답 형식 (JSON만, 설명 없이)
-{{"name": "", "trades": [], "rank": "기공", "region": "", "address": ""}}
+{{"name": "", "trades": [], "rank": "기공", "region": "", "address": "", "phone": ""}}
 """.format(trades=", ".join(TRADES), regions=", ".join(REGIONS))
 
 # 수동 모드 파일 경로
@@ -54,7 +60,7 @@ CLASSIFIED_FILE = Path("classified.json")
 
 def _empty_result() -> dict:
     """빈 분류 결과."""
-    return {"name": "", "trades": ["기타"], "rank": "기공", "region": "", "address": ""}
+    return {"name": "", "trades": ["기타"], "rank": "기공", "region": "", "address": "", "phone": ""}
 
 
 def _validate_result(result: dict) -> dict:
@@ -66,17 +72,26 @@ def _validate_result(result: dict) -> dict:
     result.setdefault("name", "")
     result.setdefault("region", "")
     result.setdefault("address", "")
+    # phone: 숫자 이외 문자 제거
+    raw_phone = result.get("phone", "")
+    result["phone"] = raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else ""
     return result
+
+
+_NO_USAGE = {"input_tokens": 0, "output_tokens": 0}
 
 
 async def classify(
     name: str,
     about: str,
     headline: str = "",
-) -> dict:
-    """기술자 텍스트 정보를 분석하여 분류 결과를 반환한다.
+) -> tuple[dict, dict]:
+    """기술자 텍스트 정보를 분석하여 (분류 결과, 토큰 사용량)을 반환한다.
 
     우선순위: Anthropic API → OpenAI API → 수동 JSON 모드
+
+    Returns:
+        (classification, usage) — usage = {"input_tokens": int, "output_tokens": int}
     """
     if settings.anthropic_api_key:
         return await _classify_with_anthropic(name, about, headline)
@@ -85,10 +100,10 @@ async def classify(
         return await _classify_with_openai(name, about, headline)
 
     log.info("LLM 미설정 — 수동 분류 모드 (pending_classification.json 확인)")
-    return _empty_result()
+    return _empty_result(), _NO_USAGE
 
 
-async def _classify_with_anthropic(name: str, about: str, headline: str = "") -> dict:
+async def _classify_with_anthropic(name: str, about: str, headline: str = "") -> tuple[dict, dict]:
     """Anthropic Claude API로 분류."""
     import anthropic
 
@@ -110,10 +125,11 @@ async def _classify_with_anthropic(name: str, about: str, headline: str = "") ->
         if text.startswith("json"):
             text = text[4:]
     result = json.loads(text)
-    return _validate_result(result)
+    usage = {"input_tokens": resp.usage.input_tokens, "output_tokens": resp.usage.output_tokens}
+    return _validate_result(result), usage
 
 
-async def _classify_with_openai(name: str, about: str, headline: str = "") -> dict:
+async def _classify_with_openai(name: str, about: str, headline: str = "") -> tuple[dict, dict]:
     """OpenAI API로 분류."""
     from openai import AsyncOpenAI
 
@@ -131,7 +147,11 @@ async def _classify_with_openai(name: str, about: str, headline: str = "") -> di
     )
 
     result = json.loads(resp.choices[0].message.content)
-    return _validate_result(result)
+    usage = {
+        "input_tokens": resp.usage.prompt_tokens,
+        "output_tokens": resp.usage.completion_tokens,
+    }
+    return _validate_result(result), usage
 
 
 async def save_pending(items: list[dict]) -> Path:
