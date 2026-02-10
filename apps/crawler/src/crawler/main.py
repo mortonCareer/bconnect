@@ -118,7 +118,19 @@ async def run_pipeline(
         seen_blog_ids = set()
 
     log.info("검색 시작: '%s' (최대 %d건)", query, count)
-    items = await search_blogs(query, display=count)
+    # 네이버 API display 최대 100 → 페이지네이션
+    items: list[dict] = []
+    page_size = min(count, 100)
+    start = 1
+    while len(items) < count:
+        page = await search_blogs(query, display=page_size, start=start)
+        if not page:
+            break
+        items.extend(page)
+        start += len(page)
+        if len(page) < page_size:
+            break
+    items = items[:count]
     log.info("검색 결과: %d건", len(items))
 
     saved_ids = []
