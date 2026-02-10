@@ -15,6 +15,16 @@ log = logging.getLogger(__name__)
 
 NAVER_SEARCH_URL = "https://openapi.naver.com/v1/search/blog.json"
 
+# 모듈 공유 httpx 클라이언트 — 커넥션 풀 재사용
+_client: httpx.AsyncClient | None = None
+
+
+def _get_client() -> httpx.AsyncClient:
+    global _client
+    if _client is None or _client.is_closed:
+        _client = httpx.AsyncClient(follow_redirects=True, timeout=15.0)
+    return _client
+
 
 async def search_blogs(query: str, display: int = 10, start: int = 1) -> list[dict]:
     """네이버 검색 API로 블로그 검색 결과를 가져온다.
@@ -22,17 +32,17 @@ async def search_blogs(query: str, display: int = 10, start: int = 1) -> list[di
     Returns:
         [{"title", "link", "description", "bloggername", "bloggerlink"}, ...]
     """
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            NAVER_SEARCH_URL,
-            params={"query": query, "display": display, "start": start, "sort": "sim"},
-            headers={
-                "X-Naver-Client-Id": settings.naver_client_id,
-                "X-Naver-Client-Secret": settings.naver_client_secret,
-            },
-        )
-        resp.raise_for_status()
-        return resp.json()["items"]
+    client = _get_client()
+    resp = await client.get(
+        NAVER_SEARCH_URL,
+        params={"query": query, "display": display, "start": start, "sort": "sim"},
+        headers={
+            "X-Naver-Client-Id": settings.naver_client_id,
+            "X-Naver-Client-Secret": settings.naver_client_secret,
+        },
+    )
+    resp.raise_for_status()
+    return resp.json()["items"]
 
 
 def _extract_post_content_url(blog_url: str) -> str | None:
@@ -62,9 +72,9 @@ async def fetch_blog_post(blog_url: str) -> dict:
     """
     content_url = _extract_post_content_url(blog_url) or blog_url
 
-    async with httpx.AsyncClient(follow_redirects=True) as client:
-        resp = await client.get(content_url)
-        resp.raise_for_status()
+    client = _get_client()
+    resp = await client.get(content_url)
+    resp.raise_for_status()
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
@@ -122,14 +132,14 @@ async def fetch_blog_profile(blog_id: str) -> dict:
         {"profile_intro": str, "blog_title": str, "profile_image_url": str}
     """
     url = f"https://m.blog.naver.com/{blog_id}"
-    headers = {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)"}
-    async with httpx.AsyncClient(follow_redirects=True, headers=headers) as client:
-        try:
-            resp = await client.get(url)
-            resp.raise_for_status()
-        except Exception:
-            log.warning("블로그 프로필 가져오기 실패: %s", blog_id)
-            return {"profile_intro": "", "blog_title": "", "profile_image_url": ""}
+    mobile_ua = {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)"}
+    client = _get_client()
+    try:
+        resp = await client.get(url, headers=mobile_ua)
+        resp.raise_for_status()
+    except Exception:
+        log.warning("블로그 프로필 가져오기 실패: %s", blog_id)
+        return {"profile_intro": "", "blog_title": "", "profile_image_url": ""}
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
@@ -176,13 +186,13 @@ async def fetch_blog_banner(blog_id: str) -> str:
         f"https://blog.naver.com/PostList.naver"
         f"?blogId={blog_id}&widgetTypeCall=true&noTrackingCode=true&directAccess=true"
     )
-    async with httpx.AsyncClient(follow_redirects=True) as client:
-        try:
-            resp = await client.get(url)
-            resp.raise_for_status()
-        except Exception:
-            log.warning("블로그 배너 가져오기 실패: %s", blog_id)
-            return ""
+    client = _get_client()
+    try:
+        resp = await client.get(url)
+        resp.raise_for_status()
+    except Exception:
+        log.warning("블로그 배너 가져오기 실패: %s", blog_id)
+        return ""
 
     match = _BANNER_RE.search(resp.text)
     if not match:
@@ -209,13 +219,13 @@ def extract_blog_id(blog_url: str) -> str | None:
 async def fetch_blogger_posts(blog_id: str, count: int = 5) -> list[str]:
     """블로거의 최근 글 목록 URL을 가져온다 (RSS 활용)."""
     rss_url = f"https://rss.blog.naver.com/{blog_id}.xml"
-    async with httpx.AsyncClient(follow_redirects=True) as client:
-        try:
-            resp = await client.get(rss_url)
-            resp.raise_for_status()
-        except Exception:
-            log.warning("RSS 가져오기 실패: %s", blog_id)
-            return []
+    client = _get_client()
+    try:
+        resp = await client.get(rss_url)
+        resp.raise_for_status()
+    except Exception:
+        log.warning("RSS 가져오기 실패: %s", blog_id)
+        return []
 
     soup = BeautifulSoup(resp.text, "xml")
     links = []
