@@ -8,7 +8,7 @@ from crawler.channels.naver_blog import search_blogs, search_local, explore_blog
 from crawler.classifier import classify
 from crawler.config import settings
 from crawler.models import Technician
-from crawler.notion import save_technician, find_duplicate_by_url, touch_synced_at, find_pages_needing_enrichment
+from crawler.notion import save_technician, update_technician, find_duplicate_by_url, touch_synced_at, find_pages_needing_enrichment
 from crawler.report import PipelineReport
 from crawler.progress import create_progress, print_summary, console
 
@@ -366,7 +366,7 @@ async def run_enrich() -> PipelineReport:
     report.llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
     report.total_searched = len(pages)
 
-    sem = asyncio.Semaphore(CONCURRENCY * 2)  # enrich는 I/O 위주라 동시성 높임
+    sem = asyncio.Semaphore(CONCURRENCY * 4)  # enrich는 I/O 위주, 429 미발생 확인
     enriched = 0
 
     # 빈 필드명 → Technician 속성 매핑
@@ -470,7 +470,7 @@ async def run_enrich() -> PipelineReport:
             )
 
             try:
-                await save_technician(tech, force=False)
+                await update_technician(page_id, tech, force=False)
             except Exception as exc:
                 log.warning("저장 실패: %s", detail_url, exc_info=True)
                 report.add_failed(detail_url, name, "저장", str(exc))
