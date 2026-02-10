@@ -190,6 +190,7 @@ async def run_pipeline(
         if dry_run:
             log.info("dry-run: %s (저장 건너뜀)", tech.name)
             if report:
+                report.technicians.append(tech.model_dump())
                 report.add_saved(
                     blog_url=item["link"], blogger_name=item.get("bloggername", ""),
                     tech_name=tech.name, rank=tech.rank, trades=tech.trades,
@@ -253,6 +254,43 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_ru
     return report
 
 
+async def run_from_file(file_path: Path, force: bool = False) -> PipelineReport:
+    """dry-run 보고서 JSON에서 Technician 데이터를 읽어 노션에 저장한다."""
+    import json
+
+    data = json.loads(file_path.read_text(encoding="utf-8"))
+    technicians_data = data.get("technicians", [])
+    if not technicians_data:
+        raise ValueError(f"파일에 technicians 데이터가 없습니다: {file_path}")
+
+    report = PipelineReport()
+    report.mode = "파일 임포트"
+    report.llm_model = data.get("params", {}).get("llm_model", "")
+
+    log.info("파일 임포트: %s (%d건)", file_path, len(technicians_data))
+    saved_ids = []
+    for tech_data in technicians_data:
+        tech = Technician(**tech_data)
+        try:
+            page_id = await save_technician(tech, force=force)
+        except Exception as exc:
+            log.warning("저장 실패: %s", tech.name, exc_info=True)
+            report.add_failed(tech.detail_url, tech.name, "저장", str(exc))
+            continue
+
+        log.info("저장 완료: %s → %s", tech.name, page_id)
+        saved_ids.append(page_id)
+        report.add_saved(
+            blog_url=tech.detail_url, blogger_name=tech.name,
+            tech_name=tech.name, rank=tech.rank, trades=tech.trades,
+            phone=tech.phone, page_id=page_id,
+            region=tech.region, address=tech.address, email=tech.email,
+        )
+
+    log.info("임포트 완료: %d/%d건 저장", len(saved_ids), len(technicians_data))
+    return report
+
+
 REPORTS_DIR = Path("reports")
 
 
@@ -266,6 +304,7 @@ def main():
         crawler --full --per-query 3     # 키워드당 3건
         crawler --dry-run "도배 시공업체" # 노션 저장 없이 분류까지만
         crawler --force "타일 시공업체"   # 기존 업체도 재크롤링하여 덮어쓰기
+        crawler --from-file reports/xxx.json  # 검수한 JSON에서 노션 저장
     """
     import sys
 
@@ -276,6 +315,12 @@ def main():
     force = "--force" in args
     if force:
         args.remove("--force")
+    from_file = None
+    if "--from-file" in args:
+        idx = args.index("--from-file")
+        from_file = Path(args[idx + 1])
+        args.pop(idx + 1)
+        args.pop(idx)
 
     llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
     report = PipelineReport()
@@ -285,9 +330,13 @@ def main():
         console.print("[yellow]dry-run 모드: 노션 저장 건너뜀[/yellow]")
     if force:
         console.print("[yellow]force 모드: 기존 업체 데이터 덮어쓰기[/yellow]")
+    if from_file:
+        console.print(f"[yellow]파일 임포트: {from_file}[/yellow]")
 
     try:
-        if "--full" in args:
+        if from_file:
+            report = asyncio.run(run_from_file(from_file, force=force))
+        elif "--full" in args:
             per_query = 5
             if "--per-query" in args:
                 idx = args.index("--per-query")

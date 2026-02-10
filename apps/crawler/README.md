@@ -102,6 +102,12 @@ uv run crawler --dry-run --full --per-query 3
 uv run crawler --force "타일 시공업체 수도권"
 uv run crawler --force --full --per-query 3
 
+# 2단계 워크플로우: 검수 후 저장
+# 1) dry-run으로 크롤링+분류 (보고서 JSON에 전체 데이터 저장)
+uv run crawler --dry-run "타일 시공업체 수도권"
+# 2) reports/xxx.json 검수 → 불필요한 항목 삭제 → 저장
+uv run crawler --from-file reports/2025-02-10_123456.json
+
 # 특정 키워드만 실행 (Python)
 uv run python -c "
 import asyncio

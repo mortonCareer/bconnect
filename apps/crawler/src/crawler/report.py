@@ -43,6 +43,8 @@ class PipelineReport:
     llm_calls: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
+    # dry-run 시 전체 Technician 데이터 보존 (--from-file 임포트용)
+    technicians: list[dict] = field(default_factory=list)
 
     def add_saved(
         self, blog_url: str, blogger_name: str, tech_name: str,
@@ -256,6 +258,7 @@ class PipelineReport:
             },
             "field_fill_rates": self._compute_fill_rates(),
             "items": [asdict(i) for i in self.items],
+            **({"technicians": self.technicians} if self.technicians else {}),
         }
 
     def save(self, directory: Path) -> Path:
