@@ -19,4 +19,10 @@ public class UserService implements UserDetailsService {
             .map(entity -> new User(entity.getId(), entity.getUsername(), entity.getRole().name()))
             .orElseThrow(() -> new UsernameNotFoundException(username));
     }
+
+    public UserDetails loadUserByPhone(@NonNull String phone) throws UsernameNotFoundException {
+        return memberRepository.findByPhone(phone)
+            .map(entity -> new User(entity.getId(), entity.getUsername(), entity.getRole().name()))
+            .orElseThrow(() -> new UsernameNotFoundException(phone));
+    }
 }

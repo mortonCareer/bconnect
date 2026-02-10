@@ -14,7 +14,7 @@ public record User(
     String role
 ) implements UserDetails {
 
-    private static final String ROLE_PREFIX = "ROLE_";
+    public static final String ROLE_PREFIX = "ROLE_";
 
     @Override @NonNull
     public Collection<? extends GrantedAuthority> getAuthorities() {

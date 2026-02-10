@@ -6,6 +6,6 @@ import java.util.Optional;
 
 public interface OtpRepository extends JpaRepository<OtpEntity, Long> {
 
-    Optional<OtpEntity> findByUsername(String username);
+    Optional<OtpEntity> findByPhone(String phone);
 
 }

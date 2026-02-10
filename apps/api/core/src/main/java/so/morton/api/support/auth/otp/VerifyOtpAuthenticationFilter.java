@@ -36,21 +36,17 @@ public class VerifyOtpAuthenticationFilter extends AbstractAuthenticationProcess
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
-        String phone = obtainPhone(request);
-        phone = (phone != null) ? phone.trim() : "";
-        String code = obtainPhone(request);
-        code = (code != null) ? code.trim() : "";
-        OtpAuthenticationToken authRequest = new OtpAuthenticationToken(phone, code);
-        setDetails(request, authRequest);
-        return this.getAuthenticationManager().authenticate(authRequest);
-    }
+        try {
+            JsonNode body = objectMapper.readTree(request.getInputStream());
+            String phone = body.has("phone") ? body.get("phone").asText().trim() : "";
+            String code = body.has("code") ? body.get("code").asText().trim() : "";
 
-    protected String obtainPhone(HttpServletRequest request) {
-        return request.getParameter("phone");
-    }
-
-    protected String obtainCode(HttpServletRequest request) {
-        return request.getParameter("code");
+            OtpAuthenticationToken authRequest = new OtpAuthenticationToken(phone, code);
+            setDetails(request, authRequest);
+            return this.getAuthenticationManager().authenticate(authRequest);
+        } catch (IOException e) {
+            throw new AuthenticationServiceException("인증 요청 본문 파싱에 실패했습니다", e);
+        }
     }
 
     protected void setDetails(HttpServletRequest request, OtpAuthenticationToken authRequest) {

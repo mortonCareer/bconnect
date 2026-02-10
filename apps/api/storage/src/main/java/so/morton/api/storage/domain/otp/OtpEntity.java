@@ -16,14 +16,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OtpEntity extends BaseEntity {
 
-    @Column(nullable = false, unique = true)
-    private String username;
-
     @Column(nullable = false)
     private String phone;
 
     @Column(nullable = false)
-    private String otp;
+    private String code;
 
     @Column(nullable = false)
     private int dailyCount;
@@ -34,5 +31,22 @@ public class OtpEntity extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime expiredAt;
 
-    // TODO: 생성자, 업데이트 메서드
+    public OtpEntity(String phone, String code, LocalDateTime expiredAt) {
+        this.phone = phone;
+        this.code = code;
+        this.dailyCount = 1;
+        this.attemptCount = 0;
+        this.expiredAt = expiredAt;
+    }
+
+    public void update(String code, int dailyCount, LocalDateTime expiredAt) {
+        this.code = code;
+        this.dailyCount = dailyCount;
+        this.attemptCount = 0;
+        this.expiredAt = expiredAt;
+    }
+
+    public void incrementAttemptCount() {
+        this.attemptCount++;
+    }
 }

@@ -17,11 +17,13 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Transactional
 public class OtpService {
-    public static final int EXPIRY_SECONDS = 180;
-    public static final int MAX_DAILY_COUNT = 10;
-    public static final int MAX_ATTEMPTS = 5;
+    private static final int EXPIRY_SECONDS = 180;
+    private static final int MAX_DAILY_COUNT = 10;
+    private static final int MAX_ATTEMPTS = 5;
 
     private static final SecureRandom RANDOM = new SecureRandom();
+    private static final String CODE_FORMAT = "%06d";
+    private static final int CODE_BOUND = 1_000_000;
 
     private final OtpRepository otpRepository;
     private final SmsProvider smsProvider;
@@ -32,15 +34,18 @@ public class OtpService {
 
         otpRepository.findByPhone(phone)
                 .ifPresentOrElse(
-                        entity -> {
-                            Otp otp = Otp.of(entity);
-                            if (otp.isDailyLimitReached() && isSameDay(entity)) {
+                        saved -> {
+                            if (saved.getDailyCount() >= MAX_DAILY_COUNT) {
                                 throw new CodeException(AuthExceptionCode.OTP_RATE_LIMIT);
                             }
-                            int newDailyCount = isSameDay(entity) ? entity.getDailyCount() + 1 : 1;
-                            entity.update(code, newDailyCount, 0, expiredAt);
+
+                            int newDailyCount;
+                            if (isToday(saved.getModifiedAt())) newDailyCount = saved.getDailyCount() + 1;
+                            else newDailyCount = 1;
+
+                            saved.update(code, newDailyCount, expiredAt);
                         },
-                        () -> otpRepository.save(new OtpEntity(phone, code, 1, expiredAt))
+                        () -> otpRepository.save(new OtpEntity(phone, code, expiredAt))
                 );
 
         smsProvider.send(phone, code);
@@ -50,26 +55,26 @@ public class OtpService {
         OtpEntity entity = otpRepository.findByPhone(phone)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_OTP));
 
-        Otp otp = Otp.of(entity);
+        entity.incrementAttemptCount();
 
-        if (otp.isMaxAttempts()) {
-            throw new CodeException(AuthExceptionCode.OTP_MAX_ATTEMPTS);
-        }
-        if (otp.isExpired()) {
+        if (entity.getExpiredAt().isBefore(LocalDateTime.now())) {
             throw new CodeException(AuthExceptionCode.OTP_EXPIRED);
         }
-        if (!otp.matches(code)) {
-            entity.incrementAttempt();
+
+        if (entity.getAttemptCount() >= MAX_ATTEMPTS) {
+            throw new CodeException(AuthExceptionCode.OTP_MAX_ATTEMPTS);
+        }
+
+        if (!entity.getCode().equals(code)) {
             throw new CodeException(AuthExceptionCode.INVALID_OTP);
         }
     }
 
     private String generateCode() {
-        return String.format("%06d", RANDOM.nextInt(1_000_000));
+        return String.format(CODE_FORMAT, RANDOM.nextInt(CODE_BOUND));
     }
 
-    private boolean isSameDay(OtpEntity entity) {
-        return entity.getModifiedAt() != null
-                && entity.getModifiedAt().toLocalDate().equals(LocalDate.now());
+    private boolean isToday(LocalDateTime date) {
+        return date != null && date.toLocalDate().equals(LocalDate.now());
     }
 }
