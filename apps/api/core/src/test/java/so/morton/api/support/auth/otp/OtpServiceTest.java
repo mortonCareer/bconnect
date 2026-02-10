@@ -57,7 +57,8 @@ class OtpServiceTest {
     @DisplayName("send: 기존 OTP 업데이트")
     void send_기존OTP_업데이트() {
         // given
-        OtpEntity entity = new OtpEntity(PHONE, CODE, 3, LocalDateTime.now().plusMinutes(3));
+        OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
+        entity.update(CODE, 3, LocalDateTime.now().plusMinutes(3));
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when
@@ -73,7 +74,8 @@ class OtpServiceTest {
     @DisplayName("send: 일일 제한 초과 시 예외")
     void send_일일_제한_초과시_예외() {
         // given
-        OtpEntity entity = new OtpEntity(PHONE, CODE, 10, LocalDateTime.now().plusMinutes(3));
+        OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
+        entity.update(CODE, 10, LocalDateTime.now().plusMinutes(3));
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
@@ -88,7 +90,8 @@ class OtpServiceTest {
     @DisplayName("send: 날짜 변경 시 dailyCount 리셋")
     void send_날짜_변경시_dailyCount_리셋() {
         // given
-        OtpEntity entity = new OtpEntity(PHONE, CODE, 5, LocalDateTime.now().plusMinutes(3));
+        OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
+        entity.update(CODE, 5, LocalDateTime.now().plusMinutes(3));
         ReflectionTestUtils.setField(entity, "modifiedAt", LocalDateTime.now().minusDays(1));
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
@@ -104,7 +107,7 @@ class OtpServiceTest {
     @DisplayName("verify: 성공")
     void verify_성공() {
         // given
-        OtpEntity entity = new OtpEntity(PHONE, CODE, 1, LocalDateTime.now().plusMinutes(3));
+        OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
@@ -128,7 +131,7 @@ class OtpServiceTest {
     @DisplayName("verify: 만료 예외")
     void verify_만료_예외() {
         // given
-        OtpEntity entity = new OtpEntity(PHONE, CODE, 1, LocalDateTime.now().minusMinutes(1));
+        OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().minusMinutes(1));
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
@@ -142,8 +145,8 @@ class OtpServiceTest {
     @DisplayName("verify: 시도 초과 예외")
     void verify_시도초과_예외() {
         // given
-        OtpEntity entity = new OtpEntity(PHONE, CODE, 1, LocalDateTime.now().plusMinutes(3));
-        entity.update(CODE, 1, 5, LocalDateTime.now().plusMinutes(3));
+        OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
+        ReflectionTestUtils.setField(entity, "attemptCount", 5);
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
@@ -157,7 +160,7 @@ class OtpServiceTest {
     @DisplayName("verify: 코드 불일치 예외 및 attemptCount 증가")
     void verify_코드불일치_예외_attemptCount증가() {
         // given
-        OtpEntity entity = new OtpEntity(PHONE, CODE, 1, LocalDateTime.now().plusMinutes(3));
+        OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
