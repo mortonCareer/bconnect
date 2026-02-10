@@ -366,7 +366,7 @@ async def run_enrich() -> PipelineReport:
     report.llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
     report.total_searched = len(pages)
 
-    sem = asyncio.Semaphore(CONCURRENCY)
+    sem = asyncio.Semaphore(CONCURRENCY * 2)  # enrich는 I/O 위주라 동시성 높임
     enriched = 0
 
     # 빈 필드명 → Technician 속성 매핑
@@ -500,11 +500,12 @@ async def run_enrich() -> PipelineReport:
     progress = create_progress()
     with progress:
         task = progress.add_task(f"필드 보강 ({len(pages)}건)", total=len(pages))
-        batch_size = 10
-        for i in range(0, len(pages), batch_size):
-            batch = pages[i:i + batch_size]
-            await asyncio.gather(*[_handle(p, progress, task) for p in batch])
-            progress.advance(task, len(batch))
+
+        async def _wrap(page: dict) -> None:
+            await _handle(page, progress, task)
+            progress.advance(task)
+
+        await asyncio.gather(*[_wrap(p) for p in pages])
 
     log.info("보강 완료: %d/%d건", enriched, len(pages))
     return report
