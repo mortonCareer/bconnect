@@ -369,14 +369,24 @@ async def run_enrich() -> PipelineReport:
     sem = asyncio.Semaphore(CONCURRENCY)
     enriched = 0
 
-    async def _handle(page: dict) -> None:
+    # 빈 필드명 → Technician 속성 매핑
+    _field_to_attr = {
+        "연락처": "phone", "주소": "address", "이메일": "email",
+        "대표자": "representative", "사업자등록번호": "business_number",
+    }
+
+    async def _handle(page: dict, progress, task_id) -> None:
         nonlocal enriched
         page_id = page["page_id"]
         detail_url = page["detail_url"]
         name = page["name"]
+        empty_fields: list[str] = page.get("empty_fields", [])
+
+        progress.update(task_id, description=f"보강: {name[:20]}")
 
         if not detail_url:
             report.add_skipped(detail_url, name, "URL 없음")
+            progress.console.print(f"  [dim]- {name} — 건너뜀 (URL 없음)[/dim]")
             return
 
         async with sem:
@@ -386,11 +396,13 @@ async def run_enrich() -> PipelineReport:
             except Exception as exc:
                 log.warning("탐색 실패: %s", detail_url, exc_info=True)
                 report.add_failed(detail_url, name, "탐색", str(exc))
+                progress.console.print(f"  [red]x {name} — 탐색 실패[/red]")
                 return
 
             profile_intro = profile.get("profile_intro", "")
             if not profile["about"] and not profile_intro:
                 report.add_skipped(detail_url, name, "본문 없음")
+                progress.console.print(f"  [dim]- {name} — 건너뜀 (본문 없음)[/dim]")
                 return
 
             # 2) LLM 분류
@@ -410,6 +422,7 @@ async def run_enrich() -> PipelineReport:
             except Exception as exc:
                 log.warning("분류 실패: %s", detail_url, exc_info=True)
                 report.add_failed(detail_url, name, "분류", str(exc))
+                progress.console.print(f"  [red]x {name} — 분류 실패[/red]")
                 return
 
             # 3) 연락처/주소 보충
@@ -461,6 +474,7 @@ async def run_enrich() -> PipelineReport:
             except Exception as exc:
                 log.warning("저장 실패: %s", detail_url, exc_info=True)
                 report.add_failed(detail_url, name, "저장", str(exc))
+                progress.console.print(f"  [red]x {name} — 저장 실패[/red]")
                 return
 
             enriched += 1
@@ -472,13 +486,24 @@ async def run_enrich() -> PipelineReport:
                 region=tech.region, address=address, email=email,
             )
 
+            # 보강 결과 표시: 빈 필드 중 채워진 것 / 못 채운 것
+            filled = [f for f in empty_fields if getattr(tech, _field_to_attr.get(f, ""), "")]
+            still_empty = [f for f in empty_fields if f not in filled]
+            parts = []
+            if filled:
+                parts.append(f"[green]{', '.join(filled)}[/green]")
+            if still_empty:
+                parts.append(f"[dim]{', '.join(still_empty)} 못 찾음[/dim]")
+            result_str = " / ".join(parts) if parts else "변경 없음"
+            progress.console.print(f"  [green]v[/green] {tech_name} — {result_str}")
+
     progress = create_progress()
     with progress:
         task = progress.add_task(f"필드 보강 ({len(pages)}건)", total=len(pages))
         batch_size = 10
         for i in range(0, len(pages), batch_size):
             batch = pages[i:i + batch_size]
-            await asyncio.gather(*[_handle(p) for p in batch])
+            await asyncio.gather(*[_handle(p, progress, task) for p in batch])
             progress.advance(task, len(batch))
 
     log.info("보강 완료: %d/%d건", enriched, len(pages))

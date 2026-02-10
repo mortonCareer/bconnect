@@ -96,7 +96,7 @@ async def find_pages_missing_phone() -> list[dict]:
 
 
 async def find_pages_needing_enrichment() -> list[dict]:
-    """빈 필드가 1개 이상인 레코드를 조회한다. (page_id, detail_url, name)"""
+    """빈 필드가 1개 이상인 레코드를 조회한다. (page_id, detail_url, name, empty_fields)"""
     db_id = settings.notion_database_id
     pages: list[dict] = []
     start_cursor = None
@@ -122,7 +122,21 @@ async def find_pages_needing_enrichment() -> list[dict]:
             props = page["properties"]
             detail_url = _read_prop(props, "자세히보기")
             name = _read_prop(props, "업체명")
-            pages.append({"page_id": page["id"], "detail_url": detail_url, "name": name})
+            empty_fields = []
+            if not _read_prop(props, "연락처"):
+                empty_fields.append("연락처")
+            if not _read_prop(props, "주소"):
+                empty_fields.append("주소")
+            if not _read_prop(props, "이메일"):
+                empty_fields.append("이메일")
+            if not _read_prop(props, "대표자"):
+                empty_fields.append("대표자")
+            if not _read_prop(props, "사업자등록번호"):
+                empty_fields.append("사업자등록번호")
+            pages.append({
+                "page_id": page["id"], "detail_url": detail_url,
+                "name": name, "empty_fields": empty_fields,
+            })
         if not results.get("has_more"):
             break
         start_cursor = results["next_cursor"]
