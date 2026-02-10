@@ -95,6 +95,40 @@ async def find_pages_missing_phone() -> list[dict]:
     return pages
 
 
+async def find_pages_needing_enrichment() -> list[dict]:
+    """빈 필드가 1개 이상인 레코드를 조회한다. (page_id, detail_url, name)"""
+    db_id = settings.notion_database_id
+    pages: list[dict] = []
+    start_cursor = None
+    while True:
+        body: dict = {
+            "filter": {"or": [
+                {"property": "연락처", "phone_number": {"is_empty": True}},
+                {"property": "주소", "rich_text": {"is_empty": True}},
+                {"property": "이메일", "email": {"is_empty": True}},
+                {"property": "대표자", "rich_text": {"is_empty": True}},
+                {"property": "사업자등록번호", "rich_text": {"is_empty": True}},
+            ]},
+            "page_size": 100,
+        }
+        if start_cursor:
+            body["start_cursor"] = start_cursor
+        results = await notion.request(
+            path=f"databases/{db_id}/query",
+            method="POST",
+            body=body,
+        )
+        for page in results["results"]:
+            props = page["properties"]
+            detail_url = _read_prop(props, "자세히보기")
+            name = _read_prop(props, "업체명")
+            pages.append({"page_id": page["id"], "detail_url": detail_url, "name": name})
+        if not results.get("has_more"):
+            break
+        start_cursor = results["next_cursor"]
+    return pages
+
+
 async def find_duplicate_by_url(url: str) -> str | None:
     """URL(자세히보기)로만 중복 체크한다. 크롤링 전 빠른 스킵용."""
     if not url:
