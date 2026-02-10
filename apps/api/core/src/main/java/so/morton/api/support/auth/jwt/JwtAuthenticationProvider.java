@@ -3,11 +3,13 @@ package so.morton.api.support.auth.jwt;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.Assert;
+import so.morton.api.support.auth.otp.SessionService;
 
 import java.util.Objects;
 
@@ -19,6 +21,7 @@ import java.util.Objects;
 public class JwtAuthenticationProvider implements AuthenticationProvider {
 
     private final UserDetailsService userDetailsService;
+    private final SessionService sessionService;
 
     private final JwtProvider jwtProvider;
 
@@ -32,6 +35,10 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         String username = jwtProvider.getUsername(token);
         JwtType type = JwtType.valueOf(jwtProvider.getTokenType(token).toUpperCase());
         UserDetails user = this.userDetailsService.loadUserByUsername(username);
+
+        if (!sessionService.existByRefreshToken(token)) {
+            throw new BadCredentialsException("세션이 만료되었습니다.");
+        }
 
         return new JwtAuthenticationToken(user, token, type, user.getAuthorities());
     }

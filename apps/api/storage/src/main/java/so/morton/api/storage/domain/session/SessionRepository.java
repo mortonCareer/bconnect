@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface SessionRepository extends JpaRepository<SessionEntity, Long> {
 
-    Optional<SessionEntity> findByRefreshToken(String refreshToken);
+    boolean existByRefreshToken(String refreshToken);
 
     Optional<SessionEntity> findByUsername(String username);
 
