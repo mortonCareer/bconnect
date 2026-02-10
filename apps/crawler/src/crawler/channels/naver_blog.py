@@ -26,23 +26,34 @@ def _get_client() -> httpx.AsyncClient:
     return _client
 
 
-async def search_blogs(query: str, display: int = 10, start: int = 1) -> list[dict]:
+async def search_blogs(
+    query: str, display: int = 10, start: int = 1, *, _retries: int = 3,
+) -> list[dict]:
     """네이버 검색 API로 블로그 검색 결과를 가져온다.
+
+    429(레이트 리밋) 시 지수 백오프로 재시도한다.
 
     Returns:
         [{"title", "link", "description", "bloggername", "bloggerlink"}, ...]
     """
     client = _get_client()
-    resp = await client.get(
-        NAVER_SEARCH_URL,
-        params={"query": query, "display": display, "start": start, "sort": "sim"},
-        headers={
-            "X-Naver-Client-Id": settings.naver_client_id,
-            "X-Naver-Client-Secret": settings.naver_client_secret,
-        },
-    )
-    resp.raise_for_status()
-    return resp.json()["items"]
+    for attempt in range(_retries):
+        resp = await client.get(
+            NAVER_SEARCH_URL,
+            params={"query": query, "display": display, "start": start, "sort": "sim"},
+            headers={
+                "X-Naver-Client-Id": settings.naver_client_id,
+                "X-Naver-Client-Secret": settings.naver_client_secret,
+            },
+        )
+        if resp.status_code == 429 and attempt < _retries - 1:
+            wait = 2 ** attempt
+            log.warning("레이트 리밋 (429), %d초 후 재시도...", wait)
+            await asyncio.sleep(wait)
+            continue
+        resp.raise_for_status()
+        return resp.json()["items"]
+    return []
 
 
 def _extract_post_content_url(blog_url: str) -> str | None:

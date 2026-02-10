@@ -146,6 +146,9 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5) -> lis
         log.info("[%d/%d] %s", i, len(queries), q)
         ids = await run_pipeline(q, count=per_query, seen_blog_ids=seen_blog_ids)
         all_ids.extend(ids)
+        # 레이트 리밋 방지: 쿼리 간 0.5초 딜레이
+        if i < len(queries):
+            await asyncio.sleep(0.5)
 
     log.info("전체 완료: %d건 저장", len(all_ids))
     return all_ids
