@@ -112,7 +112,8 @@ class PipelineReport:
     # --- 출력 ---
 
     def to_markdown(self) -> str:
-        ended_at = datetime.now(timezone.utc)
+        self._ended_at = datetime.now(timezone.utc)
+        ended_at = self._ended_at
         duration = (ended_at - self.started_at).total_seconds()
         kst_started = self.started_at.strftime("%Y-%m-%d %H:%M:%S")
         kst_ended = ended_at.strftime("%Y-%m-%d %H:%M:%S")

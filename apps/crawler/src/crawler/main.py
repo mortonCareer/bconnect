@@ -10,6 +10,7 @@ from crawler.config import settings
 from crawler.models import Technician
 from crawler.notion import save_technician, find_duplicate_by_url, touch_synced_at
 from crawler.report import PipelineReport
+from crawler.progress import create_progress, print_summary, console
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
@@ -193,24 +194,33 @@ async def run_pipeline(
 async def run_full(keywords: list[str] | None = None, per_query: int = 5) -> PipelineReport:
     """전체 키워드로 파이프라인을 실행한다."""
     queries = build_search_queries(keywords)
-    log.info("총 %d개 쿼리 실행 예정", len(queries))
 
     report = PipelineReport()
     report.mode = "전체 키워드"
     report.per_query = per_query
     report.llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
 
+    # progress bar 모드: INFO 로그 억제, rich가 표시
+    logging.getLogger().setLevel(logging.WARNING)
+
     seen_blog_ids: set[str] = set()
     all_ids = []
-    for i, q in enumerate(queries, 1):
-        log.info("[%d/%d] %s", i, len(queries), q)
-        ids = await run_pipeline(q, count=per_query, seen_blog_ids=seen_blog_ids, report=report)
-        all_ids.extend(ids)
-        # 레이트 리밋 방지: 쿼리 간 0.5초 딜레이
-        if i < len(queries):
-            await asyncio.sleep(0.5)
+    progress = create_progress()
+    with progress:
+        task_all = progress.add_task(
+            f"전체 ({len(queries)} 쿼리)", total=len(queries),
+        )
+        for i, q in enumerate(queries, 1):
+            progress.update(task_all, description=f"[{i}/{len(queries)}] {q[:30]}")
+            ids = await run_pipeline(q, count=per_query, seen_blog_ids=seen_blog_ids, report=report)
+            all_ids.extend(ids)
+            progress.advance(task_all)
+            # 레이트 리밋 방지: 쿼리 간 0.5초 딜레이
+            if i < len(queries):
+                await asyncio.sleep(0.5)
 
-    log.info("전체 완료: %d건 저장", len(all_ids))
+    # 로그 레벨 복원
+    logging.getLogger().setLevel(logging.INFO)
     return report
 
 
@@ -231,26 +241,33 @@ def main():
     args = sys.argv[1:]
 
     llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
+    report = PipelineReport()
+    report.llm_model = llm_model
 
-    if "--full" in args:
-        per_query = 5
-        if "--per-query" in args:
-            idx = args.index("--per-query")
-            per_query = int(args[idx + 1])
-        report = asyncio.run(run_full(per_query=per_query))
-    else:
-        count = 10
-        query = " ".join(args) if args else "타일 시공업체 수도권"
-        if not args:
-            count = 3
-        report = PipelineReport()
-        report.mode = "단일 쿼리"
-        report.per_query = count
-        report.llm_model = llm_model
-        asyncio.run(run_pipeline(query, count=count, report=report))
+    try:
+        if "--full" in args:
+            per_query = 5
+            if "--per-query" in args:
+                idx = args.index("--per-query")
+                per_query = int(args[idx + 1])
+            report = asyncio.run(run_full(per_query=per_query))
+        else:
+            count = 10
+            query = " ".join(args) if args else "타일 시공업체 수도권"
+            if not args:
+                count = 3
+            report.mode = "단일 쿼리"
+            report.per_query = count
+            asyncio.run(run_pipeline(query, count=count, report=report))
+    except KeyboardInterrupt:
+        console.print("\n[yellow]중단됨 — 부분 보고서 저장 중...[/yellow]")
+    except Exception as exc:
+        console.print(f"\n[red]오류: {exc}[/red]")
+        report.add_failed("", "", "파이프라인", str(exc))
 
     md_path = report.save(REPORTS_DIR)
-    log.info("보고서 저장: %s", md_path)
+    print_summary(report)
+    console.print(f"보고서: [link=file://{md_path.resolve()}]{md_path}[/link]")
 
 
 if __name__ == "__main__":
