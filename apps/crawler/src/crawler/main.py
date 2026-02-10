@@ -12,17 +12,25 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 log = logging.getLogger(__name__)
 
 
-async def process_blog_result(item: dict) -> Technician | None:
+async def process_blog_result(item: dict, seen_blog_ids: set[str] | None = None) -> Technician | None:
     """검색 결과 1건 → 블로거 프로필 탐색 → 분류 → Technician 생성."""
     blog_url = item["link"]
     blogger_name = item.get("bloggername", "")
 
-    # 크롤링/LLM 전에 URL로 먼저 중복 체크 (비용 절약)
     blog_id = extract_blog_id(blog_url)
+
+    # 메모리 중복 체크: 같은 실행 내 이미 처리한 blog_id는 즉시 스킵
+    if blog_id and seen_blog_ids is not None and blog_id in seen_blog_ids:
+        log.info("이미 처리됨 (메모리), 건너뜀: %s (%s)", blogger_name, blog_id)
+        return None
+
+    # 노션 DB 중복 체크: 크롤링/LLM 전에 URL로 스킵 (비용 절약)
     if blog_id:
         detail_url = f"https://blog.naver.com/{blog_id}"
         existing = await find_duplicate_by_url(detail_url)
         if existing:
+            if seen_blog_ids is not None:
+                seen_blog_ids.add(blog_id)
             log.info("이미 등록됨, 건너뜀: %s (%s)", blogger_name, blog_id)
             return None
 
@@ -87,26 +95,35 @@ async def process_blog_result(item: dict) -> Technician | None:
         cover_image_url=cover_image_url,
     )
 
+    if blog_id and seen_blog_ids is not None:
+        seen_blog_ids.add(blog_id)
+
     return tech
 
 
-async def run_pipeline(query: str, count: int = 10) -> list[str]:
+async def run_pipeline(
+    query: str, count: int = 10, seen_blog_ids: set[str] | None = None,
+) -> list[str]:
     """단일 검색어로 파이프라인을 실행한다.
 
     Args:
         query: 네이버 검색 쿼리
         count: 수집할 결과 수
+        seen_blog_ids: 실행 내 이미 처리한 blog_id (쿼리 간 공유)
 
     Returns:
         저장된 노션 page_id 목록
     """
+    if seen_blog_ids is None:
+        seen_blog_ids = set()
+
     log.info("검색 시작: '%s' (최대 %d건)", query, count)
     items = await search_blogs(query, display=count)
     log.info("검색 결과: %d건", len(items))
 
     saved_ids = []
     for item in items:
-        tech = await process_blog_result(item)
+        tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids)
         if tech is None:
             continue
 
@@ -123,10 +140,11 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5) -> lis
     queries = build_search_queries(keywords)
     log.info("총 %d개 쿼리 실행 예정", len(queries))
 
+    seen_blog_ids: set[str] = set()
     all_ids = []
     for i, q in enumerate(queries, 1):
         log.info("[%d/%d] %s", i, len(queries), q)
-        ids = await run_pipeline(q, count=per_query)
+        ids = await run_pipeline(q, count=per_query, seen_blog_ids=seen_blog_ids)
         all_ids.extend(ids)
 
     log.info("전체 완료: %d건 저장", len(all_ids))

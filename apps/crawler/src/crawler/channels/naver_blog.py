@@ -1,5 +1,6 @@
 """네이버 블로그 채널 — 검색 API로 후보 발견 → 블로거 프로필 탐색 → 본문 파싱."""
 
+import asyncio
 import re
 import logging
 from urllib.parse import urlparse, parse_qs
@@ -286,14 +287,12 @@ async def explore_blogger(blog_url: str) -> dict:
 
     blog_home_url = f"https://blog.naver.com/{blog_id}"
 
-    # 1. 블로그 프로필 소개 (업체가 직접 작성한 자기소개)
-    profile = await fetch_blog_profile(blog_id)
-
-    # 2. 블로그 메인 배너 이미지
-    banner_image_url = await fetch_blog_banner(blog_id)
-
-    # 3. 검색 결과 게시글 파싱
-    main_post = await fetch_blog_post(blog_url)
+    # 1-3. 프로필·배너·게시글을 병렬 수집 (독립적 요청)
+    profile, banner_image_url, main_post = await asyncio.gather(
+        fetch_blog_profile(blog_id),
+        fetch_blog_banner(blog_id),
+        fetch_blog_post(blog_url),
+    )
     source_urls = [blog_url]
 
     # 연락처 추출: 소개글 → 게시글 본문 → RSS 최근 글 순 폴백
