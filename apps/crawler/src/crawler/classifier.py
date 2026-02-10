@@ -40,8 +40,10 @@ SYSTEM_PROMPT = """\
 - 여러 지역이면 주요 지역 1개
 
 ### 5. address (주소)
-- 본문에 구체적 주소가 있으면 추출
-- 없으면 빈 문자열
+- 사업장/사무실 소재지 주소를 추출
+- 패턴 예시: "서울시 강남구 역삼동 123-4", "경기도 수원시 팔달구", "서울 마포구"
+- 시공 현장 주소가 아닌 **업체 소재지**를 우선
+- "서울/경기 시공 가능" 같은 서비스 지역은 address가 아닌 region으로
 
 ### 6. phone (연락처)
 - 블로그 운영자/업체 본인의 대표 연락처만 추출
@@ -49,8 +51,21 @@ SYSTEM_PROMPT = """\
 - 형식: 숫자만 (예: "01012345678")
 - 확실하지 않으면 빈 문자열
 
+### 7. email (이메일)
+- 업체/기술자 본인의 이메일 주소
+- 찾을 수 없으면 빈 문자열
+
+### 8. representative (대표자)
+- 대표자/대표이사 이름
+- "OOO 대표", "대표이사 OOO" 등의 패턴에서 추출
+- 찾을 수 없으면 빈 문자열
+
+### 9. business_number (사업자등록번호)
+- "000-00-00000" 형식의 사업자등록번호
+- 찾을 수 없으면 빈 문자열
+
 ## 응답 형식 (JSON만, 설명 없이)
-{{"name": "", "trades": [], "rank": "기공", "region": "", "address": "", "phone": ""}}
+{{"name": "", "trades": [], "rank": "기공", "region": "", "address": "", "phone": "", "email": "", "representative": "", "business_number": ""}}
 """.format(trades=", ".join(TRADES), regions=", ".join(REGIONS))
 
 # 수동 모드 파일 경로
@@ -60,7 +75,13 @@ CLASSIFIED_FILE = Path("classified.json")
 
 def _empty_result() -> dict:
     """빈 분류 결과."""
-    return {"name": "", "trades": ["기타"], "rank": "기공", "region": "", "address": "", "phone": ""}
+    return {
+        "name": "", "trades": ["기타"], "rank": "기공", "region": "",
+        "address": "", "phone": "", "email": "", "representative": "", "business_number": "",
+    }
+
+
+_BUSINESS_KEYWORDS = ("인테리어", "건설", "시공", "공사", "건축", "설비", "타일", "도장", "방수", "전기", "배관", "설계", "철거", "조경", "소방", "도배")
 
 
 def _validate_result(result: dict) -> dict:
@@ -72,9 +93,15 @@ def _validate_result(result: dict) -> dict:
     result.setdefault("name", "")
     result.setdefault("region", "")
     result.setdefault("address", "")
+    result.setdefault("email", "")
+    result.setdefault("representative", "")
+    result.setdefault("business_number", "")
     # phone: 숫자 이외 문자 제거
     raw_phone = result.get("phone", "")
     result["phone"] = raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else ""
+    # rank 보정: 업체 단서가 있으면 반장으로 승격
+    if result.get("business_number") or any(kw in result.get("name", "") for kw in _BUSINESS_KEYWORDS):
+        result["rank"] = "반장"
     return result
 
 

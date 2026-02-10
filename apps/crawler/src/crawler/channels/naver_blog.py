@@ -14,6 +14,7 @@ from crawler.models import Technician
 log = logging.getLogger(__name__)
 
 NAVER_SEARCH_URL = "https://openapi.naver.com/v1/search/blog.json"
+NAVER_LOCAL_URL = "https://openapi.naver.com/v1/search/local.json"
 
 # 모듈 공유 httpx 클라이언트 — 커넥션 풀 재사용
 _client: httpx.AsyncClient | None = None
@@ -31,29 +32,77 @@ async def search_blogs(
 ) -> list[dict]:
     """네이버 검색 API로 블로그 검색 결과를 가져온다.
 
-    429(레이트 리밋) 시 지수 백오프로 재시도한다.
+    429(레이트 리밋) 및 일시적 오류(타임아웃, 5xx) 시 지수 백오프로 재시도한다.
 
     Returns:
         [{"title", "link", "description", "bloggername", "bloggerlink"}, ...]
     """
     client = _get_client()
+    last_exc: Exception | None = None
     for attempt in range(_retries):
+        try:
+            resp = await client.get(
+                NAVER_SEARCH_URL,
+                params={"query": query, "display": display, "start": start, "sort": "sim"},
+                headers={
+                    "X-Naver-Client-Id": settings.naver_client_id,
+                    "X-Naver-Client-Secret": settings.naver_client_secret,
+                },
+            )
+        except (httpx.TimeoutException, httpx.ConnectError) as exc:
+            last_exc = exc
+            wait = 2 ** attempt
+            log.warning("검색 요청 실패 (%s), %d초 후 재시도 (%d/%d)", type(exc).__name__, wait, attempt + 1, _retries)
+            await asyncio.sleep(wait)
+            continue
+
+        if resp.status_code in (429, 500, 502, 503) and attempt < _retries - 1:
+            wait = 2 ** attempt
+            log.warning("검색 HTTP %d, %d초 후 재시도 (%d/%d)", resp.status_code, wait, attempt + 1, _retries)
+            await asyncio.sleep(wait)
+            continue
+        resp.raise_for_status()
+        return resp.json()["items"]
+
+    if last_exc:
+        raise last_exc
+    return []
+
+
+async def search_local(query: str) -> dict | None:
+    """네이버 지역검색 API로 업체 정보를 조회한다.
+
+    Returns:
+        {"telephone": str, "address": str, "road_address": str, "title": str} 또는 None
+    """
+    client = _get_client()
+    try:
         resp = await client.get(
-            NAVER_SEARCH_URL,
-            params={"query": query, "display": display, "start": start, "sort": "sim"},
+            NAVER_LOCAL_URL,
+            params={"query": query, "display": 1},
             headers={
                 "X-Naver-Client-Id": settings.naver_client_id,
                 "X-Naver-Client-Secret": settings.naver_client_secret,
             },
         )
-        if resp.status_code == 429 and attempt < _retries - 1:
-            wait = 2 ** attempt
-            log.warning("레이트 리밋 (429), %d초 후 재시도...", wait)
-            await asyncio.sleep(wait)
-            continue
         resp.raise_for_status()
-        return resp.json()["items"]
-    return []
+    except Exception:
+        log.debug("지역검색 실패: %s", query)
+        return None
+
+    items = resp.json().get("items", [])
+    if not items:
+        return None
+
+    item = items[0]
+    # HTML 태그 제거 (<b> 등)
+    title = re.sub(r"<[^>]+>", "", item.get("title", ""))
+    return {
+        "title": title,
+        "telephone": item.get("telephone", ""),
+        "address": item.get("address", ""),
+        "road_address": item.get("roadAddress", ""),
+    }
 
 
 def _extract_post_content_url(blog_url: str) -> str | None:

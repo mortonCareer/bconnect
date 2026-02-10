@@ -16,6 +16,7 @@ dependencies = [
     "pydantic>=2.10",
     "pydantic-settings>=2.7",
     "rich>=14.3.2",
+    "lxml>=5.0",
 ]
 
 [project.optional-dependencies]
