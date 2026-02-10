@@ -1,6 +1,8 @@
 package so.morton.api.support.auth;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,13 +11,21 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import so.morton.api.config.CorsProperties;
+import so.morton.api.support.auth.jwt.AccessTokenAuthenticationFilter;
+import so.morton.api.support.auth.jwt.JwtAuthenticationProvider;
+import so.morton.api.support.auth.jwt.JwtProvider;
+import so.morton.api.support.auth.jwt.RefreshTokenAuthenticationFilter;
+import so.morton.api.support.auth.otp.OtpAuthenticationProvider;
+import so.morton.api.support.auth.otp.OtpService;
+import so.morton.api.support.auth.otp.SessionService;
+import so.morton.api.support.auth.otp.VerifyOtpAuthenticationFilter;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,14 +42,17 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManagerBean(
-            UserDetailsService userService,
+            UserService userService,
             PasswordEncoder passwordEncoder,
-            JwtProvider jwtProvider) {
+            JwtProvider jwtProvider,
+            OtpService otpService,
+            SessionService sessionService) {
 
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userService);
         authProvider.setPasswordEncoder(passwordEncoder);
-        JwtAuthenticationProvider jwtAuthenticationProvider = new JwtAuthenticationProvider(userService, jwtProvider);
-        return new ProviderManager(authProvider, jwtAuthenticationProvider);
+        JwtAuthenticationProvider jwtAuthenticationProvider = new JwtAuthenticationProvider(userService, sessionService, jwtProvider);
+        OtpAuthenticationProvider otpAuthenticationProvider = new OtpAuthenticationProvider(otpService, userService);
+        return new ProviderManager(authProvider, jwtAuthenticationProvider, otpAuthenticationProvider);
     }
 
     @Bean
@@ -50,10 +63,16 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(
             HttpSecurity http,
+            AuthenticationManager authenticationManager,
             AccessTokenAuthenticationFilter accessTokenAuthenticationFilter,
             RefreshTokenAuthenticationFilter refreshTokenAuthenticationFilter,
-            UsernamePasswordAuthenticationSuccessHandler usernamePasswordAuthenticationSuccessHandler
+            @Qualifier("VerifyOtpAuthenticationSuccessHandler") AuthenticationSuccessHandler verifyOtpSuccessHandler
     ) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        VerifyOtpAuthenticationFilter verifyOtpFilter = new VerifyOtpAuthenticationFilter(authenticationManager, objectMapper);
+        verifyOtpFilter.setAuthenticationSuccessHandler(verifyOtpSuccessHandler);
+
         http
                 .sessionManagement(sc -> sc.sessionCreationPolicy(STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -68,14 +87,15 @@ public class SecurityConfig {
                     config.setMaxAge(3600L);
                     return config;
                 }))
-                .formLogin(fc -> fc
-                        .successHandler(usernamePasswordAuthenticationSuccessHandler))
+                .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(arc -> arc
                         .requestMatchers(GET).permitAll()
                         .requestMatchers(POST, "/v1/users").permitAll()
+                        .requestMatchers("/auth/otp/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterAfter(accessTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(refreshTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterAfter(refreshTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(verifyOtpFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
