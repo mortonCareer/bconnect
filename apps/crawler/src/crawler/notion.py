@@ -1,6 +1,7 @@
 """노션 DB 싱크 — 중복 체크 + 레코드 생성/업데이트."""
 
 import logging
+from datetime import datetime, timezone
 
 from notion_client import AsyncClient
 
@@ -54,6 +55,14 @@ async def find_duplicate_by_url(url: str) -> str | None:
     return results["results"][0]["id"] if results["results"] else None
 
 
+async def touch_synced_at(page_id: str) -> None:
+    """마지막 싱크 시점만 갱신한다. 크롤링/LLM 비용 없이 타임스탬프만 업데이트."""
+    await notion.pages.update(
+        page_id=page_id,
+        properties={"마지막 싱크": {"date": {"start": datetime.now(timezone.utc).isoformat()}}},
+    )
+
+
 def _build_properties(tech: Technician) -> dict:
     """Technician → 노션 DB 속성 dict 변환."""
     properties: dict = {
@@ -81,6 +90,8 @@ def _build_properties(tech: Technician) -> dict:
         properties["인증"] = {"multi_select": [{"name": c} for c in tech.credentials]}
     if tech.detail_url:
         properties["자세히보기"] = {"url": tech.detail_url}
+
+    properties["마지막 싱크"] = {"date": {"start": datetime.now(timezone.utc).isoformat()}}
 
     return properties
 
@@ -163,8 +174,8 @@ async def update_technician(page_id: str, tech: Technician) -> None:
 
     for prop_name, new_val in new_properties.items():
         old_val = _read_prop(existing, prop_name)
-        # 누적 필드: 채널
-        if prop_name == "채널":
+        # 항상 갱신: 채널(누적), 마지막 싱크(현재 시각)
+        if prop_name in ("채널", "마지막 싱크"):
             enrich_properties[prop_name] = new_val
             continue
         # 기존 값이 비어있으면 새 값으로 채움

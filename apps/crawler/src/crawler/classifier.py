@@ -69,14 +69,20 @@ def _validate_result(result: dict) -> dict:
     return result
 
 
+_NO_USAGE = {"input_tokens": 0, "output_tokens": 0}
+
+
 async def classify(
     name: str,
     about: str,
     headline: str = "",
-) -> dict:
-    """기술자 텍스트 정보를 분석하여 분류 결과를 반환한다.
+) -> tuple[dict, dict]:
+    """기술자 텍스트 정보를 분석하여 (분류 결과, 토큰 사용량)을 반환한다.
 
     우선순위: Anthropic API → OpenAI API → 수동 JSON 모드
+
+    Returns:
+        (classification, usage) — usage = {"input_tokens": int, "output_tokens": int}
     """
     if settings.anthropic_api_key:
         return await _classify_with_anthropic(name, about, headline)
@@ -85,10 +91,10 @@ async def classify(
         return await _classify_with_openai(name, about, headline)
 
     log.info("LLM 미설정 — 수동 분류 모드 (pending_classification.json 확인)")
-    return _empty_result()
+    return _empty_result(), _NO_USAGE
 
 
-async def _classify_with_anthropic(name: str, about: str, headline: str = "") -> dict:
+async def _classify_with_anthropic(name: str, about: str, headline: str = "") -> tuple[dict, dict]:
     """Anthropic Claude API로 분류."""
     import anthropic
 
@@ -110,10 +116,11 @@ async def _classify_with_anthropic(name: str, about: str, headline: str = "") ->
         if text.startswith("json"):
             text = text[4:]
     result = json.loads(text)
-    return _validate_result(result)
+    usage = {"input_tokens": resp.usage.input_tokens, "output_tokens": resp.usage.output_tokens}
+    return _validate_result(result), usage
 
 
-async def _classify_with_openai(name: str, about: str, headline: str = "") -> dict:
+async def _classify_with_openai(name: str, about: str, headline: str = "") -> tuple[dict, dict]:
     """OpenAI API로 분류."""
     from openai import AsyncOpenAI
 
@@ -131,7 +138,11 @@ async def _classify_with_openai(name: str, about: str, headline: str = "") -> di
     )
 
     result = json.loads(resp.choices[0].message.content)
-    return _validate_result(result)
+    usage = {
+        "input_tokens": resp.usage.prompt_tokens,
+        "output_tokens": resp.usage.completion_tokens,
+    }
+    return _validate_result(result), usage
 
 
 async def save_pending(items: list[dict]) -> Path:

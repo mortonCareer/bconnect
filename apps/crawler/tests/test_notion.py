@@ -52,6 +52,12 @@ class TestBuildProperties:
         names = [c["name"] for c in props["채널"]["multi_select"]]
         assert names == ["네이버블로그", "인스타그램"]
 
+    def test_synced_at_always_present(self):
+        tech = _make_tech()
+        props = _build_properties(tech)
+        assert "마지막 싱크" in props
+        assert "start" in props["마지막 싱크"]["date"]
+
 
 class TestBuildBodyMarkdown:
     def test_headline_only(self):

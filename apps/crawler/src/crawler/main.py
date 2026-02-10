@@ -2,17 +2,24 @@
 
 import asyncio
 import logging
+from pathlib import Path
 
 from crawler.channels.naver_blog import search_blogs, explore_blogger, build_search_queries, extract_blog_id
 from crawler.classifier import classify
+from crawler.config import settings
 from crawler.models import Technician
-from crawler.notion import save_technician, find_duplicate_by_url
+from crawler.notion import save_technician, find_duplicate_by_url, touch_synced_at
+from crawler.report import PipelineReport
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
 
-async def process_blog_result(item: dict, seen_blog_ids: set[str] | None = None) -> Technician | None:
+async def process_blog_result(
+    item: dict,
+    seen_blog_ids: set[str] | None = None,
+    report: PipelineReport | None = None,
+) -> Technician | None:
     """검색 결과 1건 → 블로거 프로필 탐색 → 분류 → Technician 생성."""
     blog_url = item["link"]
     blogger_name = item.get("bloggername", "")
@@ -22,6 +29,8 @@ async def process_blog_result(item: dict, seen_blog_ids: set[str] | None = None)
     # 메모리 중복 체크: 같은 실행 내 이미 처리한 blog_id는 즉시 스킵
     if blog_id and seen_blog_ids is not None and blog_id in seen_blog_ids:
         log.info("이미 처리됨 (메모리), 건너뜀: %s (%s)", blogger_name, blog_id)
+        if report:
+            report.add_skipped(blog_url, blogger_name, "메모리 중복")
         return None
 
     # 노션 DB 중복 체크: 크롤링/LLM 전에 URL로 스킵 (비용 절약)
@@ -29,37 +38,50 @@ async def process_blog_result(item: dict, seen_blog_ids: set[str] | None = None)
         detail_url = f"https://blog.naver.com/{blog_id}"
         existing = await find_duplicate_by_url(detail_url)
         if existing:
+            await touch_synced_at(existing)
             if seen_blog_ids is not None:
                 seen_blog_ids.add(blog_id)
-            log.info("이미 등록됨, 건너뜀: %s (%s)", blogger_name, blog_id)
+            log.info("이미 등록됨, 싱크 시점 갱신: %s (%s)", blogger_name, blog_id)
+            if report:
+                report.add_synced(blog_url, blogger_name)
             return None
 
     log.info("탐색 중: %s (%s)", blogger_name, blog_url)
 
     try:
         profile = await explore_blogger(blog_url)
-    except Exception:
+    except Exception as exc:
         log.warning("탐색 실패: %s", blog_url, exc_info=True)
+        if report:
+            report.add_failed(blog_url, blogger_name, "탐색", str(exc))
         return None
 
     profile_intro = profile.get("profile_intro", "")
     if not profile["about"] and not profile_intro:
         log.info("본문 없음, 건너뜀: %s", blog_url)
+        if report:
+            report.add_skipped(blog_url, blogger_name, "본문 없음")
         return None
 
     # LLM 분류: 프로필 소개 + 게시글 본문을 종합하여 판단
-    # profile_intro = 블로거가 작성한 업체 자기소개 (정확도 높음)
-    # about = 검색된 게시글 본문 (시공 사례)
     combined_about = ""
     if profile_intro:
         combined_about += f"[블로그 프로필 소개]\n{profile_intro}\n\n"
     combined_about += f"[게시글 본문]\n{profile['about']}"
 
-    classification = await classify(
-        name=blogger_name,
-        about=combined_about,
-        headline=profile.get("blog_title", ""),
-    )
+    try:
+        classification, usage = await classify(
+            name=blogger_name,
+            about=combined_about,
+            headline=profile.get("blog_title", ""),
+        )
+        if report:
+            report.add_llm_usage(usage["input_tokens"], usage["output_tokens"])
+    except Exception as exc:
+        log.warning("분류 실패: %s", blog_url, exc_info=True)
+        if report:
+            report.add_failed(blog_url, blogger_name, "분류", str(exc))
+        return None
 
     # 업체명: classify 결과 → blog_title → blogger_name 순 폴백
     name = (
@@ -103,6 +125,7 @@ async def process_blog_result(item: dict, seen_blog_ids: set[str] | None = None)
 
 async def run_pipeline(
     query: str, count: int = 10, seen_blog_ids: set[str] | None = None,
+    report: PipelineReport | None = None,
 ) -> list[str]:
     """단일 검색어로 파이프라인을 실행한다.
 
@@ -110,12 +133,16 @@ async def run_pipeline(
         query: 네이버 검색 쿼리
         count: 수집할 결과 수
         seen_blog_ids: 실행 내 이미 처리한 blog_id (쿼리 간 공유)
+        report: 실행 보고서 누적기
 
     Returns:
         저장된 노션 page_id 목록
     """
     if seen_blog_ids is None:
         seen_blog_ids = set()
+
+    if report:
+        report.queries.append(query)
 
     log.info("검색 시작: '%s' (최대 %d건)", query, count)
     # 네이버 API display 최대 100 → 페이지네이션
@@ -133,37 +160,59 @@ async def run_pipeline(
     items = items[:count]
     log.info("검색 결과: %d건", len(items))
 
+    if report:
+        report.total_searched += len(items)
+
     saved_ids = []
     for item in items:
-        tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids)
+        tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report)
         if tech is None:
             continue
 
-        page_id = await save_technician(tech)
+        try:
+            page_id = await save_technician(tech)
+        except Exception as exc:
+            log.warning("저장 실패: %s", item["link"], exc_info=True)
+            if report:
+                report.add_failed(item["link"], item.get("bloggername", ""), "저장", str(exc))
+            continue
+
         log.info("저장 완료: %s → %s", tech.name, page_id)
         saved_ids.append(page_id)
+        if report:
+            report.add_saved(
+                blog_url=item["link"], blogger_name=item.get("bloggername", ""),
+                tech_name=tech.name, rank=tech.rank, trades=tech.trades,
+                phone=tech.phone, page_id=page_id,
+            )
 
     log.info("파이프라인 완료: %d/%d건 저장", len(saved_ids), len(items))
     return saved_ids
 
 
-async def run_full(keywords: list[str] | None = None, per_query: int = 5) -> list[str]:
+async def run_full(keywords: list[str] | None = None, per_query: int = 5) -> PipelineReport:
     """전체 키워드로 파이프라인을 실행한다."""
     queries = build_search_queries(keywords)
     log.info("총 %d개 쿼리 실행 예정", len(queries))
+
+    report = PipelineReport()
+    report.llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
 
     seen_blog_ids: set[str] = set()
     all_ids = []
     for i, q in enumerate(queries, 1):
         log.info("[%d/%d] %s", i, len(queries), q)
-        ids = await run_pipeline(q, count=per_query, seen_blog_ids=seen_blog_ids)
+        ids = await run_pipeline(q, count=per_query, seen_blog_ids=seen_blog_ids, report=report)
         all_ids.extend(ids)
         # 레이트 리밋 방지: 쿼리 간 0.5초 딜레이
         if i < len(queries):
             await asyncio.sleep(0.5)
 
     log.info("전체 완료: %d건 저장", len(all_ids))
-    return all_ids
+    return report
+
+
+REPORTS_DIR = Path("reports")
 
 
 def main():
@@ -184,12 +233,18 @@ def main():
         if "--per-query" in args:
             idx = args.index("--per-query")
             per_query = int(args[idx + 1])
-        asyncio.run(run_full(per_query=per_query))
-    elif args:
-        query = " ".join(args)
-        asyncio.run(run_pipeline(query, count=10))
+        report = asyncio.run(run_full(per_query=per_query))
     else:
-        asyncio.run(run_pipeline("타일 시공업체 수도권", count=3))
+        report = PipelineReport()
+        report.llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
+        if args:
+            query = " ".join(args)
+            asyncio.run(run_pipeline(query, count=10, report=report))
+        else:
+            asyncio.run(run_pipeline("타일 시공업체 수도권", count=3, report=report))
+
+    md_path = report.save(REPORTS_DIR)
+    log.info("보고서 저장: %s", md_path)
 
 
 if __name__ == "__main__":
