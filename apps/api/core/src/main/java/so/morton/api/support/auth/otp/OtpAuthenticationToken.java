@@ -44,14 +44,6 @@ public class OtpAuthenticationToken extends AbstractAuthenticationToken {
         return this.principal;
     }
 
-    public boolean isSendRequest() {
-        return this.credentials == null;
-    }
-
-    public boolean isVerifyRequest() {
-        return this.credentials != null;
-    }
-
     @Override
     public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
         Assert.isTrue(!isAuthenticated,

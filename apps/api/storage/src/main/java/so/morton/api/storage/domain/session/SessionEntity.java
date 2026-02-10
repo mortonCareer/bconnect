@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import so.morton.api.storage.support.BaseEntity;
@@ -25,5 +26,17 @@ public class SessionEntity extends BaseEntity {
     @Column(name = "refresh_token")
     private String refreshToken; // TODO: encrypted
 
-    // TODO: 생성자, 업데이트 메서드
+    @Builder
+    public SessionEntity(String username, String agent, String ip, String refreshToken) {
+        this.username = username;
+        this.agent = agent;
+        this.ip = ip;
+        this.refreshToken = refreshToken;
+    }
+
+    public void update(String agent, String ip, String refreshToken) {
+        this.agent = agent;
+        this.ip = ip;
+        this.refreshToken = refreshToken;
+    }
 }
