@@ -4,7 +4,7 @@ import asyncio
 import logging
 from pathlib import Path
 
-from crawler.channels.naver_blog import search_blogs, explore_blogger, build_search_queries, extract_blog_id, extract_contact_info
+from crawler.channels.naver_blog import search_blogs, search_local, explore_blogger, build_search_queries, extract_blog_id, extract_contact_info
 from crawler.classifier import classify
 from crawler.config import settings
 from crawler.models import Technician
@@ -142,16 +142,35 @@ async def process_blog_result(
     else:
         phone = llm_phone or regex_phone  # LLM 판별 우선, 없으면 정규식 폴백
 
+    # 이메일: LLM → 정규식 폴백
+    email = classification.get("email", "") or profile.get("email", "")
+    address = classification.get("address", "")
+
+    # 네이버 지역검색으로 부족한 필드 보충
+    if name and (not phone or not address):
+        place = await search_local(name)
+        if place:
+            if not phone and place["telephone"]:
+                raw = place["telephone"].replace("-", "").replace(" ", "")
+                if raw.startswith("01") or raw.startswith("02") or raw.startswith("0"):
+                    phone = raw
+                    log.info("지역검색 연락처 보충: %s → %s", name, phone)
+            if not address and (place["road_address"] or place["address"]):
+                address = place["road_address"] or place["address"]
+                log.info("지역검색 주소 보충: %s → %s", name, address)
+
     tech = Technician(
         name=name,
         rank=classification["rank"],
         trades=classification["trades"],
         region=classification.get("region", ""),
-        address=classification.get("address", ""),
+        address=address,
+        representative=classification.get("representative", ""),
+        business_number=classification.get("business_number", ""),
         headline=profile_intro[:500],
         about=profile["about"][:2000],
         phone=phone,
-        email=profile.get("email", ""),
+        email=email,
         channels=["네이버블로그"],
         source_urls=profile["source_urls"],
         detail_url=detail_url,

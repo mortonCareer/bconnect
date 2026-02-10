@@ -14,6 +14,7 @@ from crawler.models import Technician
 log = logging.getLogger(__name__)
 
 NAVER_SEARCH_URL = "https://openapi.naver.com/v1/search/blog.json"
+NAVER_LOCAL_URL = "https://openapi.naver.com/v1/search/local.json"
 
 # 모듈 공유 httpx 클라이언트 — 커넥션 풀 재사용
 _client: httpx.AsyncClient | None = None
@@ -66,6 +67,42 @@ async def search_blogs(
     if last_exc:
         raise last_exc
     return []
+
+
+async def search_local(query: str) -> dict | None:
+    """네이버 지역검색 API로 업체 정보를 조회한다.
+
+    Returns:
+        {"telephone": str, "address": str, "road_address": str, "title": str} 또는 None
+    """
+    client = _get_client()
+    try:
+        resp = await client.get(
+            NAVER_LOCAL_URL,
+            params={"query": query, "display": 1},
+            headers={
+                "X-Naver-Client-Id": settings.naver_client_id,
+                "X-Naver-Client-Secret": settings.naver_client_secret,
+            },
+        )
+        resp.raise_for_status()
+    except Exception:
+        log.debug("지역검색 실패: %s", query)
+        return None
+
+    items = resp.json().get("items", [])
+    if not items:
+        return None
+
+    item = items[0]
+    # HTML 태그 제거 (<b> 등)
+    title = re.sub(r"<[^>]+>", "", item.get("title", ""))
+    return {
+        "title": title,
+        "telephone": item.get("telephone", ""),
+        "address": item.get("address", ""),
+        "road_address": item.get("roadAddress", ""),
+    }
 
 
 def _extract_post_content_url(blog_url: str) -> str | None:
