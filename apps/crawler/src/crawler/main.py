@@ -15,8 +15,27 @@ from crawler.progress import create_progress, print_summary, console
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
+REPORTS_DIR = Path("reports")
+
 # 동시 처리 제한: 네이버 스크래핑 + LLM + 노션 API 동시 요청 수
 CONCURRENCY = 5
+# --full 모드에서 동시에 실행할 쿼리 수
+QUERY_CONCURRENCY = 3
+
+
+def setup_file_logging() -> None:
+    """reports/ 디렉토리에 파일 로거를 추가한다.
+
+    콘솔 로그가 억제돼도 디버그 로그가 파일에 보존된다.
+    """
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    from datetime import datetime, timezone
+
+    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H%M%S")
+    handler = logging.FileHandler(REPORTS_DIR / f"{stamp}.log", encoding="utf-8")
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
+    logging.getLogger().addHandler(handler)
 
 
 async def process_blog_result(
@@ -234,7 +253,11 @@ async def run_pipeline(
 
 
 async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_run: bool = False, force: bool = False) -> PipelineReport:
-    """전체 키워드로 파이프라인을 실행한다."""
+    """전체 키워드로 파이프라인을 실행한다.
+
+    쿼리를 QUERY_CONCURRENCY개씩 병렬 실행하여 전체 소요 시간을 단축한다.
+    개별 쿼리 실패 시 최대 2회 재시도하고, 그래도 실패하면 건너뛴다.
+    """
     queries = build_search_queries(keywords)
 
     report = PipelineReport()
@@ -242,27 +265,38 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_ru
     report.per_query = per_query
     report.llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
 
-    # progress bar 모드: INFO 로그 억제, rich가 표시
-    logging.getLogger().setLevel(logging.WARNING)
-
     seen_blog_ids: set[str] = set()
-    all_ids = []
+    completed = 0
+    query_sem = asyncio.Semaphore(QUERY_CONCURRENCY)
+
+    async def _run_query(q: str) -> None:
+        nonlocal completed
+        async with query_sem:
+            for attempt in range(3):
+                try:
+                    await run_pipeline(
+                        q, count=per_query, seen_blog_ids=seen_blog_ids,
+                        report=report, dry_run=dry_run, force=force,
+                    )
+                    break
+                except Exception as exc:
+                    if attempt < 2:
+                        wait = 2 ** attempt
+                        log.warning("쿼리 실패 '%s' (%s), %d초 후 재시도 (%d/3)", q, exc, wait, attempt + 1)
+                        await asyncio.sleep(wait)
+                    else:
+                        log.error("쿼리 포기 '%s': %s", q, exc)
+                        report.add_failed("", "", "쿼리", f"{q}: {exc}")
+            completed += 1
+            progress.update(task_all, completed=completed)
+
     progress = create_progress()
     with progress:
         task_all = progress.add_task(
             f"전체 ({len(queries)} 쿼리)", total=len(queries),
         )
-        for i, q in enumerate(queries, 1):
-            progress.update(task_all, description=f"[{i}/{len(queries)}] {q[:30]}")
-            ids = await run_pipeline(q, count=per_query, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force)
-            all_ids.extend(ids)
-            progress.advance(task_all)
-            # 레이트 리밋 방지: 쿼리 간 0.5초 딜레이
-            if i < len(queries):
-                await asyncio.sleep(0.5)
+        await asyncio.gather(*[_run_query(q) for q in queries])
 
-    # 로그 레벨 복원
-    logging.getLogger().setLevel(logging.INFO)
     return report
 
 
@@ -366,9 +400,6 @@ async def run_fill_phones() -> PipelineReport:
     return report
 
 
-REPORTS_DIR = Path("reports")
-
-
 def main():
     """CLI 진입점."""
     import argparse
@@ -386,6 +417,8 @@ def main():
     parser.add_argument("--fill-phones", action="store_true", help="연락처 빈 레코드를 재탐색하여 보충")
     args = parser.parse_args()
 
+    setup_file_logging()
+
     llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
     report = PipelineReport()
     report.llm_model = llm_model
@@ -399,11 +432,14 @@ def main():
     if args.fill_phones:
         console.print("[yellow]연락처 보충 모드: 빈 레코드 재탐색[/yellow]")
 
+    # 프로그레스 바 모드: 콘솔 로그 억제 (파일 로그는 유지됨)
+    suppress_console = args.full or args.fill_phones
+    if suppress_console:
+        logging.getLogger().setLevel(logging.WARNING)
+
     try:
         if args.fill_phones:
-            logging.getLogger().setLevel(logging.WARNING)
             report = asyncio.run(run_fill_phones())
-            logging.getLogger().setLevel(logging.INFO)
         elif args.from_file:
             report = asyncio.run(run_from_file(args.from_file, force=args.force))
         elif args.full:
@@ -419,6 +455,9 @@ def main():
     except Exception as exc:
         console.print(f"\n[red]오류: {exc}[/red]")
         report.add_failed("", "", "파이프라인", str(exc))
+    finally:
+        if suppress_console:
+            logging.getLogger().setLevel(logging.INFO)
 
     md_path = report.save(REPORTS_DIR)
     print_summary(report)
