@@ -102,6 +102,15 @@ async def process_blog_result(
     # 자세히보기: 블로그 홈 → 게시글 URL 순 폴백
     detail_url = profile.get("blog_home_url") or blog_url
 
+    # 연락처: 프로필 소개글 출처면 신뢰, 게시글 출처면 LLM 우선
+    phone_source = profile.get("phone_source", "")
+    regex_phone = profile.get("phone", "")
+    llm_phone = classification.get("phone", "")
+    if phone_source == "profile":
+        phone = regex_phone  # 프로필 소개글 → 본인 번호, 신뢰
+    else:
+        phone = llm_phone or regex_phone  # LLM 판별 우선, 없으면 정규식 폴백
+
     tech = Technician(
         name=name,
         rank=classification["rank"],
@@ -110,7 +119,7 @@ async def process_blog_result(
         address=classification.get("address", ""),
         headline=profile_intro[:500],
         about=profile["about"][:2000],
-        phone=profile.get("phone", ""),
+        phone=phone,
         email=profile.get("email", ""),
         channels=["네이버블로그"],
         source_urls=profile["source_urls"],

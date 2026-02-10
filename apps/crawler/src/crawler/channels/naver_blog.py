@@ -318,12 +318,15 @@ async def explore_blogger(blog_url: str) -> dict:
 
     # 연락처 추출: 소개글 → 게시글 본문 → RSS 최근 글 순 폴백
     contact = extract_contact_info(profile["profile_intro"])
+    phone_source = "profile" if contact["phone"] else ""
 
     # 소개글에서 못 찾은 필드를 게시글 본문에서 보충
     post_contact = extract_contact_info(main_post["about"])
     for key in ("phone", "email", "instagram", "youtube"):
         if not contact[key] and post_contact[key]:
             contact[key] = post_contact[key]
+            if key == "phone":
+                phone_source = "post"
 
     # 아직 연락처 부족하면 RSS 최근 글에서 보충 (병렬 fetch)
     if not contact["phone"] and not contact["email"]:
@@ -344,6 +347,8 @@ async def explore_blogger(blog_url: str) -> dict:
             for key in ("phone", "email", "instagram", "youtube"):
                 if not contact[key] and rss_contact[key]:
                     contact[key] = rss_contact[key]
+                    if key == "phone":
+                        phone_source = "post"
             if contact["phone"] or contact["email"]:
                 source_urls.append(url)
                 log.info("연락처 발견 (RSS 폴백): %s → %s", url, rss_contact)
@@ -359,6 +364,7 @@ async def explore_blogger(blog_url: str) -> dict:
         "profile_image_url": profile["profile_image_url"],
         "cover_image_url": main_post["cover_image_url"],
         "source_urls": source_urls,
+        "phone_source": phone_source,  # "profile" | "post" | ""
         **contact,
     }
 

@@ -43,8 +43,14 @@ SYSTEM_PROMPT = """\
 - 본문에 구체적 주소가 있으면 추출
 - 없으면 빈 문자열
 
+### 6. phone (연락처)
+- 블로그 운영자/업체 본인의 대표 연락처만 추출
+- 시공 사례 속 고객 번호, 협력업체 번호, 제조사 번호는 제외
+- 형식: 숫자만 (예: "01012345678")
+- 확실하지 않으면 빈 문자열
+
 ## 응답 형식 (JSON만, 설명 없이)
-{{"name": "", "trades": [], "rank": "기공", "region": "", "address": ""}}
+{{"name": "", "trades": [], "rank": "기공", "region": "", "address": "", "phone": ""}}
 """.format(trades=", ".join(TRADES), regions=", ".join(REGIONS))
 
 # 수동 모드 파일 경로
@@ -54,7 +60,7 @@ CLASSIFIED_FILE = Path("classified.json")
 
 def _empty_result() -> dict:
     """빈 분류 결과."""
-    return {"name": "", "trades": ["기타"], "rank": "기공", "region": "", "address": ""}
+    return {"name": "", "trades": ["기타"], "rank": "기공", "region": "", "address": "", "phone": ""}
 
 
 def _validate_result(result: dict) -> dict:
@@ -66,6 +72,9 @@ def _validate_result(result: dict) -> dict:
     result.setdefault("name", "")
     result.setdefault("region", "")
     result.setdefault("address", "")
+    # phone: 숫자 이외 문자 제거
+    raw_phone = result.get("phone", "")
+    result["phone"] = raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else ""
     return result
 
 
