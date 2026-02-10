@@ -93,6 +93,10 @@ uv run crawler --full
 # 키워드당 수집 수 조절
 uv run crawler --full --per-query 3
 
+# dry-run: 노션 저장 없이 검색 → 탐색 → 분류까지만 실행
+uv run crawler --dry-run "도배 시공업체 서울"
+uv run crawler --dry-run --full --per-query 3
+
 # 특정 키워드만 실행 (Python)
 uv run python -c "
 import asyncio
