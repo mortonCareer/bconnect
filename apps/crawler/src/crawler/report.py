@@ -32,6 +32,9 @@ class PipelineReport:
     queries: list[str] = field(default_factory=list)
     items: list[ItemResult] = field(default_factory=list)
     total_searched: int = 0
+    # 실행 파라미터
+    mode: str = ""  # "단일 쿼리" | "전체 키워드"
+    per_query: int = 0
     # LLM 비용 추적
     llm_model: str = ""
     llm_calls: int = 0
@@ -131,11 +134,17 @@ class PipelineReport:
             f"| 실패 | {self.failed_count}건 |",
         ]
 
-        # 쿼리 목록
-        if self.queries:
-            lines += ["", "### 검색 쿼리"]
-            for i, q in enumerate(self.queries, 1):
-                lines.append(f"{i}. {q}")
+        # 실행 파라미터
+        queries_str = ", ".join(self.queries) if self.queries else "-"
+        lines += [
+            "", "## 실행 파라미터",
+            "| 항목 | 값 |",
+            "|------|-----|",
+            f"| 실행 모드 | {self.mode} |",
+            f"| 검색 쿼리 | {queries_str} |",
+            f"| 쿼리당 수집 | {self.per_query}건 |",
+            f"| LLM 모델 | {self.llm_model} |",
+        ]
 
         # 비용 추정
         if self.llm_calls > 0:
@@ -169,6 +178,11 @@ class PipelineReport:
     def to_json(self) -> dict:
         return {
             "started_at": self.started_at.isoformat(),
+            "params": {
+                "mode": self.mode,
+                "per_query": self.per_query,
+                "llm_model": self.llm_model,
+            },
             "queries": self.queries,
             "total_searched": self.total_searched,
             "summary": {

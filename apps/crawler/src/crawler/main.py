@@ -196,6 +196,8 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5) -> Pip
     log.info("총 %d개 쿼리 실행 예정", len(queries))
 
     report = PipelineReport()
+    report.mode = "전체 키워드"
+    report.per_query = per_query
     report.llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
 
     seen_blog_ids: set[str] = set()
@@ -228,6 +230,8 @@ def main():
 
     args = sys.argv[1:]
 
+    llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
+
     if "--full" in args:
         per_query = 5
         if "--per-query" in args:
@@ -235,13 +239,15 @@ def main():
             per_query = int(args[idx + 1])
         report = asyncio.run(run_full(per_query=per_query))
     else:
+        count = 10
+        query = " ".join(args) if args else "타일 시공업체 수도권"
+        if not args:
+            count = 3
         report = PipelineReport()
-        report.llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
-        if args:
-            query = " ".join(args)
-            asyncio.run(run_pipeline(query, count=10, report=report))
-        else:
-            asyncio.run(run_pipeline("타일 시공업체 수도권", count=3, report=report))
+        report.mode = "단일 쿼리"
+        report.per_query = count
+        report.llm_model = llm_model
+        asyncio.run(run_pipeline(query, count=count, report=report))
 
     md_path = report.save(REPORTS_DIR)
     log.info("보고서 저장: %s", md_path)
