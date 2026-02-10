@@ -304,24 +304,29 @@ async def explore_blogger(blog_url: str) -> dict:
         if not contact[key] and post_contact[key]:
             contact[key] = post_contact[key]
 
-    # 아직 연락처 부족하면 RSS 최근 글에서 보충
+    # 아직 연락처 부족하면 RSS 최근 글에서 보충 (병렬 fetch)
     if not contact["phone"] and not contact["email"]:
         other_urls = await fetch_blogger_posts(blog_id, count=5)
-        for url in other_urls:
-            if url == blog_url:
-                continue
+        other_urls = [u for u in other_urls if u != blog_url]
+
+        async def _safe_fetch(u: str) -> tuple[str, dict | None]:
             try:
-                post = await fetch_blog_post(url)
-                rss_contact = extract_contact_info(post["about"])
-                for key in ("phone", "email", "instagram", "youtube"):
-                    if not contact[key] and rss_contact[key]:
-                        contact[key] = rss_contact[key]
-                if contact["phone"] or contact["email"]:
-                    source_urls.append(url)
-                    log.info("연락처 발견 (RSS 폴백): %s → %s", url, rss_contact)
-                    break
+                return u, await fetch_blog_post(u)
             except Exception:
+                return u, None
+
+        rss_results = await asyncio.gather(*(_safe_fetch(u) for u in other_urls))
+        for url, post in rss_results:
+            if post is None:
                 continue
+            rss_contact = extract_contact_info(post["about"])
+            for key in ("phone", "email", "instagram", "youtube"):
+                if not contact[key] and rss_contact[key]:
+                    contact[key] = rss_contact[key]
+            if contact["phone"] or contact["email"]:
+                source_urls.append(url)
+                log.info("연락처 발견 (RSS 폴백): %s → %s", url, rss_contact)
+                break
 
     return {
         "about": main_post["about"],
