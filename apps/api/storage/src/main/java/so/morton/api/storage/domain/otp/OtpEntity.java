@@ -49,4 +49,8 @@ public class OtpEntity extends BaseEntity {
     public void incrementAttemptCount() {
         this.attemptCount++;
     }
+
+    public void invalidate() {
+        this.expiredAt = LocalDateTime.MIN;
+    }
 }

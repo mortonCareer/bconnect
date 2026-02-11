@@ -16,7 +16,7 @@ public class SessionService {
     private final SessionRepository sessionRepository;
 
     public boolean existByRefreshToken(String refreshToken) {
-        return sessionRepository.existByRefreshToken(refreshToken);
+        return sessionRepository.existsByRefreshToken(refreshToken);
     }
 
     public void upsert(String username, String agent, String ip, String refreshToken) {

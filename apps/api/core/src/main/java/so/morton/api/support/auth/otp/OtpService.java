@@ -20,6 +20,7 @@ public class OtpService {
     private static final int EXPIRY_SECONDS = 180;
     private static final int MAX_DAILY_COUNT = 10;
     private static final int MAX_ATTEMPTS = 5;
+    private static final int RATE_LIMIT_SECONDS = 60;
 
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final String CODE_FORMAT = "%06d";
@@ -36,6 +37,10 @@ public class OtpService {
                 .ifPresentOrElse(
                         saved -> {
                             if (saved.getDailyCount() >= MAX_DAILY_COUNT) {
+                                throw new CodeException(AuthExceptionCode.OTP_DAILY_LIMIT);
+                            }
+
+                            if (saved.getModifiedAt() != null && saved.getModifiedAt().plusSeconds(RATE_LIMIT_SECONDS).isAfter(LocalDateTime.now())) {
                                 throw new CodeException(AuthExceptionCode.OTP_RATE_LIMIT);
                             }
 
@@ -52,22 +57,24 @@ public class OtpService {
     }
 
     public void verify(String phone, String code) {
-        OtpEntity entity = otpRepository.findByPhone(phone)
+        OtpEntity otp = otpRepository.findByPhone(phone)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_OTP));
 
-        entity.incrementAttemptCount();
+        otp.incrementAttemptCount();
 
-        if (entity.getExpiredAt().isBefore(LocalDateTime.now())) {
+        if (otp.getExpiredAt().isBefore(LocalDateTime.now())) {
             throw new CodeException(AuthExceptionCode.OTP_EXPIRED);
         }
 
-        if (entity.getAttemptCount() >= MAX_ATTEMPTS) {
+        if (otp.getAttemptCount() >= MAX_ATTEMPTS) {
             throw new CodeException(AuthExceptionCode.OTP_MAX_ATTEMPTS);
         }
 
-        if (!entity.getCode().equals(code)) {
+        if (!otp.getCode().equals(code)) {
             throw new CodeException(AuthExceptionCode.INVALID_OTP);
         }
+
+        otp.invalidate();
     }
 
     private String generateCode() {
