@@ -36,7 +36,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         JwtType type = JwtType.valueOf(jwtProvider.getTokenType(token).toUpperCase());
         UserDetails user = this.userDetailsService.loadUserByUsername(username);
 
-        if (!sessionService.existByRefreshToken(token)) {
+        if (type == JwtType.REFRESH && !sessionService.existByRefreshToken(token)) {
             throw new BadCredentialsException("세션이 만료되었습니다.");
         }
 

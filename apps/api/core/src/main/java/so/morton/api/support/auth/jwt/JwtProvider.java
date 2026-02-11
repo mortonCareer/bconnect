@@ -166,15 +166,11 @@ public class JwtProvider {
                     .getPayload();
         } catch (ExpiredJwtException ex) {
             log.error("Expired token: {}", ex.getMessage());
-        } catch (UnsupportedJwtException ex) {
-            log.error("Unsupported token: {}", ex.getMessage());
+            throw new JwtException("Expired token", ex);
         } catch (JwtException | IllegalArgumentException ex) {
             log.error("Invalid token: {}", ex.getMessage());
-        } catch (Exception ex) {
-            log.error("Server error: {}", ex.getMessage());
+            throw new JwtException("Invalid token", ex);
         }
-
-        throw new JwtException("Invalid token");
     }
 
     public boolean isTokenExpired(String token) {
