@@ -156,11 +156,15 @@ async def search_instagram(
             if username:
                 title = _HTML_TAG_RE.sub("", item.get("title", ""))
                 description = _HTML_TAG_RE.sub("", item.get("description", ""))
+                full_name = _parse_full_name_from_title(title)
+                bio = _parse_bio_from_description(description) if description else ""
                 filtered.append({
                     "title": title,
                     "link": link,
                     "description": description,
                     "username": username,
+                    "full_name": full_name,
+                    "bio": bio,
                 })
         return filtered
 
