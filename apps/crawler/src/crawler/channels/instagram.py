@@ -15,6 +15,22 @@ NAVER_WEB_SEARCH_URL = "https://openapi.naver.com/v1/search/webkr.json"
 
 _GOOGLEBOT_UA = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
 
+# --- Circuit breaker: 연속 차단 감지 ---
+
+_BLOCK_THRESHOLD = 10  # 연속 N건 차단 시 전체 중단
+_consecutive_blocks = 0
+
+
+class InstagramBlockedError(Exception):
+    """Instagram이 Googlebot UA를 차단했을 때 발생."""
+
+
+def reset_block_counter() -> None:
+    """차단 카운터를 초기화한다. 파이프라인 시작 시 호출."""
+    global _consecutive_blocks
+    _consecutive_blocks = 0
+
+
 # --- 모듈 공유 싱글턴 ---
 
 _client: httpx.AsyncClient | None = None
@@ -195,6 +211,19 @@ async def explore_profile(username: str) -> dict:
         log.info("인스타 프로필 HTTP %d: %s", resp.status_code, username)
         return _empty_profile(username)
 
+    # 로그인 페이지로 리다이렉트된 경우 (Googlebot UA 차단)
+    global _consecutive_blocks
+    if "accounts/login" in str(resp.url):
+        _consecutive_blocks += 1
+        log.warning("인스타 차단 감지 (로그인 리다이렉트): %s (%d연속)", username, _consecutive_blocks)
+        if _consecutive_blocks >= _BLOCK_THRESHOLD:
+            raise InstagramBlockedError(
+                f"Instagram 차단 — 연속 {_consecutive_blocks}건 로그인 리다이렉트"
+            )
+        return _empty_profile(username)
+
+    _consecutive_blocks = 0  # 성공 시 리셋
+
     soup = BeautifulSoup(resp.text, "lxml")
 
     # og:title → full_name
@@ -246,7 +275,7 @@ def build_search_queries(keywords: list[str] | None = None) -> list[str]:
 
     keywords = keywords or SEARCH_KEYWORDS
     templates = [
-        "{kw} 인스타 시공업체 site:instagram.com",
-        "{kw} 인스타그램 시공 site:instagram.com",
+        "{kw} 시공업체 site:instagram.com",
+        "{kw} 시공 전문 site:instagram.com",
     ]
     return [t.format(kw=kw) for kw in keywords for t in templates]

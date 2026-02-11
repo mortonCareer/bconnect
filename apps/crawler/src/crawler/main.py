@@ -8,11 +8,12 @@ from crawler.channels.naver_blog import search_blogs, search_local, explore_blog
 from crawler.channels.instagram import (
     search_instagram, explore_profile as explore_instagram_profile,
     build_search_queries as build_instagram_queries, extract_username as extract_instagram_username,
+    InstagramBlockedError, reset_block_counter,
 )
 from crawler.classifier import classify
 from crawler.config import settings
 from crawler.models import Technician
-from crawler.notion import save_technician, update_technician, find_duplicate_by_url, touch_synced_at, find_pages_needing_enrichment
+from crawler.notion import save_technician, update_technician, find_duplicate_by_url, touch_synced_at, find_pages_needing_enrichment, validate_schema
 from crawler.report import PipelineReport
 from crawler.progress import create_progress, print_summary, console
 
@@ -192,6 +193,7 @@ async def process_instagram_result(
     report: PipelineReport | None = None,
     dry_run: bool = False,
     force: bool = False,
+    on_status: object = None,
 ) -> Technician | None:
     """인스타그램 검색 결과 1건 → 프로필 탐색 → 분류 → Technician 생성."""
     link = item["link"]
@@ -228,6 +230,8 @@ async def process_instagram_result(
         seen_usernames.add(username)
 
     log.info("인스타 탐색 중: %s", username)
+    if on_status:
+        on_status(f"탐색: @{username}")
 
     try:
         profile = await explore_instagram_profile(username)
@@ -251,6 +255,8 @@ async def process_instagram_result(
         about += f"\n\n[검색 결과]\n{search_title}\n{search_desc}"
 
     # LLM 분류
+    if on_status:
+        on_status(f"분류: @{username}")
     try:
         classification, usage = await classify(
             name=profile.get("full_name", "") or username,
@@ -447,7 +453,7 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_ru
 async def run_instagram_pipeline(
     query: str, count: int = 10, seen_usernames: set[str] | None = None,
     report: PipelineReport | None = None, dry_run: bool = False,
-    force: bool = False,
+    force: bool = False, on_status: object = None,
 ) -> list[str]:
     """단일 검색어로 인스타그램 파이프라인을 실행한다."""
     if seen_usernames is None:
@@ -481,7 +487,7 @@ async def run_instagram_pipeline(
         async with sem:
             tech = await process_instagram_result(
                 item, seen_usernames=seen_usernames, report=report,
-                dry_run=dry_run, force=force,
+                dry_run=dry_run, force=force, on_status=on_status,
             )
         if tech is None:
             return
@@ -501,6 +507,8 @@ async def run_instagram_pipeline(
                 )
             return
 
+        if on_status:
+            on_status(f"저장: {tech.name[:15]}")
         try:
             page_id = await save_technician(tech, force=force)
         except Exception as exc:
@@ -531,6 +539,7 @@ async def run_instagram_full(
 ) -> PipelineReport:
     """전체 키워드로 인스타그램 파이프라인을 실행한다."""
     queries = build_instagram_queries(keywords)
+    reset_block_counter()
 
     report = PipelineReport()
     report.mode = "인스타그램 전체 키워드"
@@ -539,17 +548,31 @@ async def run_instagram_full(
 
     seen_usernames: set[str] = set()
     completed = 0
+    blocked = False
     query_sem = asyncio.Semaphore(QUERY_CONCURRENCY)
 
+    progress = create_progress()
+
     async def _run_query(q: str) -> None:
-        nonlocal completed
+        nonlocal completed, blocked
+        if blocked:
+            completed += 1
+            progress.update(task_all, completed=completed)
+            return
         async with query_sem:
             for attempt in range(3):
                 try:
                     await run_instagram_pipeline(
                         q, count=per_query, seen_usernames=seen_usernames,
                         report=report, dry_run=dry_run, force=force,
+                        on_status=lambda text: progress.update(task_status, description=text),
                     )
+                    break
+                except InstagramBlockedError as exc:
+                    blocked = True
+                    log.error("Instagram 차단 감지 — 파이프라인 중단: %s", exc)
+                    progress.update(task_status, description="[red]차단 감지 — 중단[/red]")
+                    report.add_failed("", "", "차단", str(exc))
                     break
                 except Exception as exc:
                     if attempt < 2:
@@ -562,12 +585,13 @@ async def run_instagram_full(
             completed += 1
             progress.update(task_all, completed=completed)
 
-    progress = create_progress()
     with progress:
         task_all = progress.add_task(
             f"인스타그램 ({len(queries)} 쿼리)", total=len(queries),
         )
+        task_status = progress.add_task("대기 중...", total=None)
         await asyncio.gather(*[_run_query(q) for q in queries])
+        progress.update(task_status, description="완료", visible=False)
 
     return report
 
@@ -815,6 +839,15 @@ def main():
     suppress_console = args.full or args.enrich
     if suppress_console:
         logging.getLogger().setLevel(logging.WARNING)
+
+    # 노션 DB 스키마 검증 (dry-run 제외)
+    if not args.dry_run:
+        schema_errors = asyncio.run(validate_schema())
+        if schema_errors:
+            console.print("[red]노션 DB 스키마 불일치:[/red]")
+            for err in schema_errors:
+                console.print(f"  [red]• {err}[/red]")
+            raise SystemExit(1)
 
     try:
         if args.enrich:

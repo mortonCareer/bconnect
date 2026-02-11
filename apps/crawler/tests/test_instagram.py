@@ -56,7 +56,7 @@ class TestBuildSearchQueries:
     def test_default_keywords(self):
         queries = build_search_queries(["타일", "줄눈"])
         assert len(queries) == 4  # 2 keywords × 2 templates
-        assert any("타일" in q and "인스타" in q for q in queries)
+        assert any("타일" in q and "시공" in q for q in queries)
         assert all("site:instagram.com" in q for q in queries)
 
     def test_single_keyword(self):
