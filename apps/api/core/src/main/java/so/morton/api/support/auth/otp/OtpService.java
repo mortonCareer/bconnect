@@ -56,6 +56,7 @@ public class OtpService {
         smsProvider.send(phone, code);
     }
 
+    @Transactional(noRollbackFor = CodeException.class)
     public void verify(String phone, String code) {
         OtpEntity otp = otpRepository.findByPhone(phone)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_OTP));
