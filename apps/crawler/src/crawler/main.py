@@ -229,17 +229,39 @@ async def process_instagram_result(
     if seen_usernames is not None:
         seen_usernames.add(username)
 
-    log.info("인스타 탐색 중: %s", username)
-    if on_status:
-        on_status(f"탐색: @{username}")
+    # 1단계: 네이버 스니펫에서 파싱된 데이터 확인
+    snippet_bio = item.get("bio", "")
+    snippet_name = item.get("full_name", "")
 
-    try:
-        profile = await explore_instagram_profile(username)
-    except Exception as exc:
-        log.warning("인스타 탐색 실패: %s", username, exc_info=True)
-        if report:
-            report.add_failed(link, username, "탐색", str(exc))
-        return None
+    if snippet_bio:
+        # 스니펫만으로 충분 — Instagram 직접 접근 스킵
+        log.info("스니펫 데이터 사용 (탐색 스킵): %s", username)
+        if on_status:
+            on_status(f"스니펫: @{username}")
+        contact = extract_contact_info(snippet_bio)
+        profile = {
+            "about": f"[프로필 소개]\n{snippet_bio}",
+            "headline": snippet_bio[:500],
+            "full_name": snippet_name,
+            "profile_pic_url": "",
+            "source_urls": [instagram_url],
+            "phone": contact["phone"],
+            "email": contact["email"],
+        }
+    else:
+        # 스니펫 부족 — Instagram 프로필 직접 접근
+        log.info("인스타 탐색 중: %s", username)
+        if on_status:
+            on_status(f"탐색: @{username}")
+        try:
+            profile = await explore_instagram_profile(username)
+        except InstagramBlockedError:
+            raise
+        except Exception as exc:
+            log.warning("인스타 탐색 실패: %s", username, exc_info=True)
+            if report:
+                report.add_failed(link, username, "탐색", str(exc))
+            return None
 
     if not profile["about"] and not profile["headline"]:
         log.info("프로필 정보 없음, 건너뜀: %s", username)
@@ -247,7 +269,7 @@ async def process_instagram_result(
             report.add_skipped(link, username, "프로필 정보 없음")
         return None
 
-    # 검색 결과 컨텍스트 보충 (meta 태그 bio가 짧을 수 있으므로)
+    # 검색 결과 컨텍스트 보충
     about = profile["about"]
     search_title = item.get("title", "")
     search_desc = item.get("description", "")
@@ -482,13 +504,21 @@ async def run_instagram_pipeline(
 
     sem = asyncio.Semaphore(INSTA_CONCURRENCY)
     saved_ids: list[str] = []
+    _blocked = False
 
     async def _handle(item: dict) -> None:
-        async with sem:
-            tech = await process_instagram_result(
-                item, seen_usernames=seen_usernames, report=report,
-                dry_run=dry_run, force=force, on_status=on_status,
-            )
+        nonlocal _blocked
+        if _blocked:
+            return
+        try:
+            async with sem:
+                tech = await process_instagram_result(
+                    item, seen_usernames=seen_usernames, report=report,
+                    dry_run=dry_run, force=force, on_status=on_status,
+                )
+        except InstagramBlockedError:
+            _blocked = True
+            raise
         if tech is None:
             return
 
