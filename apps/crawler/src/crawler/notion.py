@@ -37,6 +37,40 @@ notion = AsyncClient(
 )
 
 
+# 코드에서 사용하는 노션 DB 프로퍼티 → 타입 매핑
+REQUIRED_PROPERTIES: dict[str, str] = {
+    "업체명": "title",
+    "구분": "select",
+    "시공분야": "multi_select",
+    "채널": "multi_select",
+    "대표자": "rich_text",
+    "지역": "select",
+    "주소": "rich_text",
+    "연락처": "phone_number",
+    "이메일": "email",
+    "사업자등록번호": "rich_text",
+    "경력": "number",
+    "인증": "multi_select",
+    "자세히보기": "url",
+    "최종 수집 일시": "date",
+}
+
+
+async def validate_schema() -> list[str]:
+    """노션 DB 스키마를 검증하고 문제가 있는 프로퍼티 목록을 반환한다."""
+    db = await notion.databases.retrieve(database_id=settings.notion_database_id)
+    db_props = db["properties"]
+
+    errors = []
+    for name, expected_type in REQUIRED_PROPERTIES.items():
+        if name not in db_props:
+            errors.append(f"'{name}' 프로퍼티 없음")
+        elif db_props[name]["type"] != expected_type:
+            errors.append(f"'{name}' 타입 불일치 (기대: {expected_type}, 실제: {db_props[name]['type']})")
+
+    return errors
+
+
 async def find_duplicate(tech: Technician) -> str | None:
     """중복 레코드가 있으면 page_id를 반환한다.
 
@@ -161,16 +195,16 @@ async def update_phone(page_id: str, phone: str) -> None:
         page_id=page_id,
         properties={
             "연락처": {"phone_number": phone},
-            "마지막 싱크": {"date": {"start": datetime.now(timezone.utc).isoformat()}},
+            "최종 수집 일시": {"date": {"start": datetime.now(timezone.utc).isoformat()}},
         },
     )
 
 
 async def touch_synced_at(page_id: str) -> None:
-    """마지막 싱크 시점만 갱신한다. 크롤링/LLM 비용 없이 타임스탬프만 업데이트."""
+    """최종 수집 일시 시점만 갱신한다. 크롤링/LLM 비용 없이 타임스탬프만 업데이트."""
     await notion.pages.update(
         page_id=page_id,
-        properties={"마지막 싱크": {"date": {"start": datetime.now(timezone.utc).isoformat()}}},
+        properties={"최종 수집 일시": {"date": {"start": datetime.now(timezone.utc).isoformat()}}},
     )
 
 
@@ -202,7 +236,7 @@ def _build_properties(tech: Technician) -> dict:
     if tech.detail_url:
         properties["자세히보기"] = {"url": tech.detail_url}
 
-    properties["마지막 싱크"] = {"date": {"start": datetime.now(timezone.utc).isoformat()}}
+    properties["최종 수집 일시"] = {"date": {"start": datetime.now(timezone.utc).isoformat()}}
 
     return properties
 
@@ -290,7 +324,7 @@ async def update_technician(page_id: str, tech: Technician, force: bool = False)
         update_properties = {}
         for prop_name, new_val in new_properties.items():
             old_val = _read_prop(existing, prop_name)
-            if prop_name in ("채널", "마지막 싱크"):
+            if prop_name in ("채널", "최종 수집 일시"):
                 update_properties[prop_name] = new_val
                 continue
             if not old_val:

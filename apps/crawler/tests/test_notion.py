@@ -55,8 +55,8 @@ class TestBuildProperties:
     def test_synced_at_always_present(self):
         tech = _make_tech()
         props = _build_properties(tech)
-        assert "마지막 싱크" in props
-        assert "start" in props["마지막 싱크"]["date"]
+        assert "최종 수집 일시" in props
+        assert "start" in props["최종 수집 일시"]["date"]
 
 
 class TestBuildBodyMarkdown:

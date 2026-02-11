@@ -5,10 +5,15 @@ import logging
 from pathlib import Path
 
 from crawler.channels.naver_blog import search_blogs, search_local, explore_blogger, build_search_queries, extract_blog_id, extract_contact_info
+from crawler.channels.instagram import (
+    search_instagram, explore_profile as explore_instagram_profile,
+    build_search_queries as build_instagram_queries, extract_username as extract_instagram_username,
+    InstagramBlockedError, reset_block_counter,
+)
 from crawler.classifier import classify
 from crawler.config import settings
 from crawler.models import Technician
-from crawler.notion import save_technician, update_technician, find_duplicate_by_url, touch_synced_at, find_pages_needing_enrichment
+from crawler.notion import save_technician, update_technician, find_duplicate_by_url, touch_synced_at, find_pages_needing_enrichment, validate_schema
 from crawler.report import PipelineReport
 from crawler.progress import create_progress, print_summary, console
 
@@ -21,6 +26,8 @@ REPORTS_DIR = Path("reports")
 CONCURRENCY = 5
 # --full 모드에서 동시에 실행할 쿼리 수
 QUERY_CONCURRENCY = 3
+# 인스타그램 동시 요청 수 (로그인 없이 제한 엄격)
+INSTA_CONCURRENCY = 3
 
 
 def setup_file_logging() -> None:
@@ -180,6 +187,130 @@ async def process_blog_result(
     return tech
 
 
+async def process_instagram_result(
+    item: dict,
+    seen_usernames: set[str] | None = None,
+    report: PipelineReport | None = None,
+    dry_run: bool = False,
+    force: bool = False,
+    on_status: object = None,
+) -> Technician | None:
+    """인스타그램 검색 결과 1건 → 프로필 탐색 → 분류 → Technician 생성."""
+    link = item["link"]
+    username = item.get("username") or extract_instagram_username(link)
+
+    if not username:
+        log.info("인스타 사용자명 추출 실패, 건너뜀: %s", link)
+        if report:
+            report.add_skipped(link, "", "사용자명 없음")
+        return None
+
+    # 메모리 중복 체크
+    if seen_usernames is not None and username in seen_usernames:
+        log.info("이미 처리됨 (메모리), 건너뜀: %s", username)
+        if report:
+            report.add_skipped(link, username, "메모리 중복")
+        return None
+
+    # 노션 DB 중복 체크
+    instagram_url = f"https://www.instagram.com/{username}/"
+    if not dry_run and not force:
+        existing = await find_duplicate_by_url(instagram_url)
+        if existing:
+            await touch_synced_at(existing)
+            if seen_usernames is not None:
+                seen_usernames.add(username)
+            log.info("이미 등록됨, 싱크 시점 갱신: %s", username)
+            if report:
+                report.add_synced(link, username)
+            return None
+
+    # 선점
+    if seen_usernames is not None:
+        seen_usernames.add(username)
+
+    log.info("인스타 탐색 중: %s", username)
+    if on_status:
+        on_status(f"탐색: @{username}")
+
+    try:
+        profile = await explore_instagram_profile(username)
+    except Exception as exc:
+        log.warning("인스타 탐색 실패: %s", username, exc_info=True)
+        if report:
+            report.add_failed(link, username, "탐색", str(exc))
+        return None
+
+    if not profile["about"] and not profile["headline"]:
+        log.info("프로필 정보 없음, 건너뜀: %s", username)
+        if report:
+            report.add_skipped(link, username, "프로필 정보 없음")
+        return None
+
+    # 검색 결과 컨텍스트 보충 (meta 태그 bio가 짧을 수 있으므로)
+    about = profile["about"]
+    search_title = item.get("title", "")
+    search_desc = item.get("description", "")
+    if search_title or search_desc:
+        about += f"\n\n[검색 결과]\n{search_title}\n{search_desc}"
+
+    # LLM 분류
+    if on_status:
+        on_status(f"분류: @{username}")
+    try:
+        classification, usage = await classify(
+            name=profile.get("full_name", "") or username,
+            about=about,
+            headline=profile.get("headline", ""),
+        )
+        if report:
+            report.add_llm_usage(usage["input_tokens"], usage["output_tokens"])
+    except Exception as exc:
+        log.warning("분류 실패: %s", username, exc_info=True)
+        if report:
+            report.add_failed(link, username, "분류", str(exc))
+        return None
+
+    name = classification.get("name") or profile.get("full_name") or username
+
+    # 연락처: bio regex → LLM → search_local 보충
+    phone = classification.get("phone", "") or profile.get("phone", "")
+    email = classification.get("email", "") or profile.get("email", "")
+    address = classification.get("address", "")
+
+    if name and (not phone or not address):
+        place = await search_local(name)
+        if place:
+            if not phone and place["telephone"]:
+                raw = place["telephone"].replace("-", "").replace(" ", "")
+                if raw.startswith("0"):
+                    phone = raw
+                    log.info("지역검색 연락처 보충: %s → %s", name, phone)
+            if not address and (place["road_address"] or place["address"]):
+                address = place["road_address"] or place["address"]
+                log.info("지역검색 주소 보충: %s → %s", name, address)
+
+    tech = Technician(
+        name=name,
+        rank=classification["rank"],
+        trades=classification["trades"],
+        region=classification.get("region", ""),
+        address=address,
+        representative=classification.get("representative", ""),
+        business_number=classification.get("business_number", ""),
+        headline=profile["headline"][:500],
+        about=profile["about"][:2000],
+        phone=phone,
+        email=email,
+        channels=["인스타그램"],
+        source_urls=profile["source_urls"],
+        detail_url=instagram_url,
+        cover_image_url=profile.get("profile_pic_url", ""),
+    )
+
+    return tech
+
+
 async def run_pipeline(
     query: str, count: int = 10, seen_blog_ids: set[str] | None = None,
     report: PipelineReport | None = None, dry_run: bool = False,
@@ -319,6 +450,152 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_ru
     return report
 
 
+async def run_instagram_pipeline(
+    query: str, count: int = 10, seen_usernames: set[str] | None = None,
+    report: PipelineReport | None = None, dry_run: bool = False,
+    force: bool = False, on_status: object = None,
+) -> list[str]:
+    """단일 검색어로 인스타그램 파이프라인을 실행한다."""
+    if seen_usernames is None:
+        seen_usernames = set()
+
+    if report:
+        report.queries.append(query)
+
+    log.info("인스타 검색 시작: '%s' (최대 %d건)", query, count)
+    items: list[dict] = []
+    page_size = min(count, 100)
+    start = 1
+    while len(items) < count:
+        page = await search_instagram(query, display=page_size, start=start)
+        if not page:
+            break
+        items.extend(page)
+        start += len(page)
+        if len(page) < page_size:
+            break
+    items = items[:count]
+    log.info("인스타 검색 결과: %d건", len(items))
+
+    if report:
+        report.total_searched += len(items)
+
+    sem = asyncio.Semaphore(INSTA_CONCURRENCY)
+    saved_ids: list[str] = []
+
+    async def _handle(item: dict) -> None:
+        async with sem:
+            tech = await process_instagram_result(
+                item, seen_usernames=seen_usernames, report=report,
+                dry_run=dry_run, force=force, on_status=on_status,
+            )
+        if tech is None:
+            return
+
+        link = item["link"]
+        username = item.get("username", "")
+
+        if dry_run:
+            log.info("dry-run: %s (저장 건너뜀)", tech.name)
+            if report:
+                report.technicians.append(tech.model_dump())
+                report.add_saved(
+                    blog_url=link, blogger_name=username,
+                    tech_name=tech.name, rank=tech.rank, trades=tech.trades,
+                    phone=tech.phone, page_id="",
+                    region=tech.region, address=tech.address, email=tech.email,
+                )
+            return
+
+        if on_status:
+            on_status(f"저장: {tech.name[:15]}")
+        try:
+            page_id = await save_technician(tech, force=force)
+        except Exception as exc:
+            log.warning("저장 실패: %s", link, exc_info=True)
+            if report:
+                report.add_failed(link, username, "저장", str(exc))
+            return
+
+        log.info("저장 완료: %s → %s", tech.name, page_id)
+        saved_ids.append(page_id)
+        if report:
+            report.add_saved(
+                blog_url=link, blogger_name=username,
+                tech_name=tech.name, rank=tech.rank, trades=tech.trades,
+                phone=tech.phone, page_id=page_id,
+                region=tech.region, address=tech.address, email=tech.email,
+            )
+
+    await asyncio.gather(*[_handle(item) for item in items])
+
+    log.info("인스타 파이프라인 완료: %d/%d건 저장", len(saved_ids), len(items))
+    return saved_ids
+
+
+async def run_instagram_full(
+    keywords: list[str] | None = None, per_query: int = 5,
+    dry_run: bool = False, force: bool = False,
+) -> PipelineReport:
+    """전체 키워드로 인스타그램 파이프라인을 실행한다."""
+    queries = build_instagram_queries(keywords)
+    reset_block_counter()
+
+    report = PipelineReport()
+    report.mode = "인스타그램 전체 키워드"
+    report.per_query = per_query
+    report.llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
+
+    seen_usernames: set[str] = set()
+    completed = 0
+    blocked = False
+    query_sem = asyncio.Semaphore(QUERY_CONCURRENCY)
+
+    progress = create_progress()
+
+    async def _run_query(q: str) -> None:
+        nonlocal completed, blocked
+        if blocked:
+            completed += 1
+            progress.update(task_all, completed=completed)
+            return
+        async with query_sem:
+            for attempt in range(3):
+                try:
+                    await run_instagram_pipeline(
+                        q, count=per_query, seen_usernames=seen_usernames,
+                        report=report, dry_run=dry_run, force=force,
+                        on_status=lambda text: progress.update(task_status, description=text),
+                    )
+                    break
+                except InstagramBlockedError as exc:
+                    blocked = True
+                    log.error("Instagram 차단 감지 — 파이프라인 중단: %s", exc)
+                    progress.update(task_status, description="[red]차단 감지 — 중단[/red]")
+                    report.add_failed("", "", "차단", str(exc))
+                    break
+                except Exception as exc:
+                    if attempt < 2:
+                        wait = 2 ** attempt
+                        log.warning("인스타 쿼리 실패 '%s' (%s), %d초 후 재시도 (%d/3)", q, exc, wait, attempt + 1)
+                        await asyncio.sleep(wait)
+                    else:
+                        log.error("인스타 쿼리 포기 '%s': %s", q, exc)
+                        report.add_failed("", "", "쿼리", f"{q}: {exc}")
+            completed += 1
+            progress.update(task_all, completed=completed)
+
+    with progress:
+        task_all = progress.add_task(
+            f"인스타그램 ({len(queries)} 쿼리)", total=len(queries),
+        )
+        task_status = progress.add_task("대기 중...", total=None)
+        await asyncio.gather(*[_run_query(q) for q in queries])
+        progress.update(task_status, description="완료", visible=False)
+
+    return report
+
+
 async def run_from_file(file_path: Path, force: bool = False) -> PipelineReport:
     """dry-run 보고서 JSON에서 Technician 데이터를 읽어 노션에 저장한다."""
     import json
@@ -390,16 +667,25 @@ async def run_enrich() -> PipelineReport:
             return
 
         async with sem:
-            # 1) 크롤링
+            # 1) 채널별 크롤링 디스패치
+            is_instagram = "instagram.com" in detail_url
             try:
-                profile = await explore_blogger(detail_url)
+                if is_instagram:
+                    ig_username = extract_instagram_username(detail_url)
+                    if not ig_username:
+                        report.add_skipped(detail_url, name, "인스타 사용자명 추출 실패")
+                        progress.console.print(f"  [dim]- {name} — 건너뜀 (사용자명 없음)[/dim]")
+                        return
+                    profile = await explore_instagram_profile(ig_username)
+                else:
+                    profile = await explore_blogger(detail_url)
             except Exception as exc:
                 log.warning("탐색 실패: %s", detail_url, exc_info=True)
                 report.add_failed(detail_url, name, "탐색", str(exc))
                 progress.console.print(f"  [red]x {name} — 탐색 실패[/red]")
                 return
 
-            profile_intro = profile.get("profile_intro", "")
+            profile_intro = profile.get("profile_intro", "") or profile.get("headline", "")
             if not profile["about"] and not profile_intro:
                 report.add_skipped(detail_url, name, "본문 없음")
                 progress.console.print(f"  [dim]- {name} — 건너뜀 (본문 없음)[/dim]")
@@ -416,7 +702,7 @@ async def run_enrich() -> PipelineReport:
                 classification, usage = await classify(
                     name=name,
                     about=combined_about,
-                    headline=profile.get("blog_title", ""),
+                    headline=profile.get("blog_title", "") or profile.get("headline", ""),
                 )
                 report.add_llm_usage(usage["input_tokens"], usage["output_tokens"])
             except Exception as exc:
@@ -451,6 +737,8 @@ async def run_enrich() -> PipelineReport:
                         log.info("지역검색 주소 보충: %s → %s", tech_name, address)
 
             # 4) Technician 구성 + enrichment 저장
+            channels = ["인스타그램"] if is_instagram else ["네이버블로그"]
+            cover = profile.get("profile_pic_url", "") if is_instagram else profile.get("banner_image", "")
             tech = Technician(
                 name=tech_name,
                 rank=classification["rank"],
@@ -463,10 +751,10 @@ async def run_enrich() -> PipelineReport:
                 about=profile["about"][:2000],
                 phone=phone,
                 email=email,
-                channels=["네이버블로그"],
+                channels=channels,
                 source_urls=profile["source_urls"],
                 detail_url=detail_url,
-                cover_image_url=profile.get("banner_image", ""),
+                cover_image_url=cover,
             )
 
             try:
@@ -517,15 +805,16 @@ def main():
 
     parser = argparse.ArgumentParser(
         prog="crawler",
-        description="네이버 블로그 기술자 크롤링 파이프라인",
+        description="기술자 크롤링 파이프라인 — 네이버 블로그 / 인스타그램",
     )
     parser.add_argument("query", nargs="*", help="검색 쿼리 (기본: '타일 시공업체 수도권')")
-    parser.add_argument("--full", action="store_true", help="전체 키워드 실행 (136쿼리)")
+    parser.add_argument("--full", action="store_true", help="전체 키워드 실행")
     parser.add_argument("--per-query", type=int, default=5, help="쿼리당 수집 수 (기본: 5)")
     parser.add_argument("--dry-run", action="store_true", help="노션 저장 없이 분류까지만 수행")
     parser.add_argument("--force", action="store_true", help="기존 업체도 재크롤링하여 덮어쓰기")
     parser.add_argument("--from-file", type=Path, metavar="JSON", help="검수한 JSON에서 노션 저장")
     parser.add_argument("--enrich", action="store_true", help="빈 필드가 있는 기존 레코드를 재크롤링+LLM으로 보강")
+    parser.add_argument("--instagram", action="store_true", help="인스타그램 채널 크롤링")
     args = parser.parse_args()
 
     setup_file_logging()
@@ -543,16 +832,36 @@ def main():
     if args.enrich:
         console.print("[yellow]필드 보강 모드: 빈 필드 있는 레코드 재크롤링+LLM[/yellow]")
 
+    if args.instagram:
+        console.print("[cyan]채널: 인스타그램[/cyan]")
+
     # 프로그레스 바 모드: 콘솔 로그 억제 (파일 로그는 유지됨)
     suppress_console = args.full or args.enrich
     if suppress_console:
         logging.getLogger().setLevel(logging.WARNING)
+
+    # 노션 DB 스키마 검증 (dry-run 제외)
+    if not args.dry_run:
+        schema_errors = asyncio.run(validate_schema())
+        if schema_errors:
+            console.print("[red]노션 DB 스키마 불일치:[/red]")
+            for err in schema_errors:
+                console.print(f"  [red]• {err}[/red]")
+            raise SystemExit(1)
 
     try:
         if args.enrich:
             report = asyncio.run(run_enrich())
         elif args.from_file:
             report = asyncio.run(run_from_file(args.from_file, force=args.force))
+        elif args.instagram and args.full:
+            report = asyncio.run(run_instagram_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force))
+        elif args.instagram:
+            query = " ".join(args.query) if args.query else "타일 시공 인스타그램 site:instagram.com"
+            count = 10 if args.query else 3
+            report.mode = "인스타그램 단일 쿼리"
+            report.per_query = count
+            asyncio.run(run_instagram_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force))
         elif args.full:
             report = asyncio.run(run_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force))
         else:
