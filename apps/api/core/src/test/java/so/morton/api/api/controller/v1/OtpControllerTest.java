@@ -13,12 +13,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import so.morton.api.api.controller.v1.request.SendOtpRequest;
 import so.morton.api.support.AuthExceptionCode;
 import so.morton.api.support.CodeException;
+import so.morton.api.support.CommonExceptionCode;
 import so.morton.api.support.auth.otp.OtpService;
 
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static so.morton.api.support.TestUtils.errorResponse;
+import static so.morton.api.support.TestUtils.successResponse;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -44,7 +46,7 @@ class OtpControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(successResponse());
     }
 
     @Test
@@ -60,9 +62,7 @@ class OtpControllerTest {
         mockMvc.perform(post("/auth/otp/send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.error").value(AuthExceptionCode.OTP_RATE_LIMIT.name()));
+                .andExpect(errorResponse(AuthExceptionCode.OTP_RATE_LIMIT));
     }
 
     @Test
@@ -78,9 +78,7 @@ class OtpControllerTest {
         mockMvc.perform(post("/auth/otp/send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.error").value(AuthExceptionCode.OTP_DAILY_LIMIT.name()));
+                .andExpect(errorResponse(AuthExceptionCode.OTP_DAILY_LIMIT));
     }
 
     @Test
@@ -93,6 +91,6 @@ class OtpControllerTest {
         mockMvc.perform(post("/auth/otp/send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andExpect(status().is5xxServerError());
+                .andExpect(errorResponse(CommonExceptionCode.NOT_VALID));
     }
 }

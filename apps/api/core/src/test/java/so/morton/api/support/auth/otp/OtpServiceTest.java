@@ -10,14 +10,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 import so.morton.api.storage.domain.otp.OtpEntity;
 import so.morton.api.storage.domain.otp.OtpRepository;
 import so.morton.api.support.AuthExceptionCode;
-import so.morton.api.support.CodeException;
 import so.morton.api.support.sms.SmsProvider;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static so.morton.api.support.CodeExceptionAssert.assertCodeException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -81,10 +80,8 @@ class OtpServiceTest {
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
-        assertThatThrownBy(() -> otpService.send(PHONE))
-                .isInstanceOf(CodeException.class)
-                .satisfies(ex -> assertThat(((CodeException) ex).getExceptionCode())
-                        .isEqualTo(AuthExceptionCode.OTP_DAILY_LIMIT));
+        assertCodeException(() -> otpService.send(PHONE))
+                .hasExceptionCode(AuthExceptionCode.OTP_DAILY_LIMIT);
         verify(smsProvider, never()).send(anyString(), anyString());
     }
 
@@ -114,12 +111,10 @@ class OtpServiceTest {
          ReflectionTestUtils.setField(entity, "modifiedAt", LocalDateTime.now().minusSeconds(30));
          when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
-         // when & then
-         assertThatThrownBy(() -> otpService.send(PHONE))
-                 .isInstanceOf(CodeException.class)
-                 .satisfies(ex -> assertThat(((CodeException) ex).getExceptionCode())
-                         .isEqualTo(AuthExceptionCode.OTP_RATE_LIMIT));
-         verify(smsProvider, never()).send(anyString(), anyString());
+          // when & then
+          assertCodeException(() -> otpService.send(PHONE))
+                  .hasExceptionCode(AuthExceptionCode.OTP_RATE_LIMIT);
+          verify(smsProvider, never()).send(anyString(), anyString());
      }
 
     @Test
@@ -140,10 +135,8 @@ class OtpServiceTest {
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> otpService.verify(PHONE, CODE))
-                .isInstanceOf(CodeException.class)
-                .satisfies(ex -> assertThat(((CodeException) ex).getExceptionCode())
-                        .isEqualTo(AuthExceptionCode.INVALID_OTP));
+        assertCodeException(() -> otpService.verify(PHONE, CODE))
+                .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
     }
 
     @Test
@@ -154,10 +147,8 @@ class OtpServiceTest {
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
-        assertThatThrownBy(() -> otpService.verify(PHONE, CODE))
-                .isInstanceOf(CodeException.class)
-                .satisfies(ex -> assertThat(((CodeException) ex).getExceptionCode())
-                        .isEqualTo(AuthExceptionCode.OTP_EXPIRED));
+        assertCodeException(() -> otpService.verify(PHONE, CODE))
+                .hasExceptionCode(AuthExceptionCode.OTP_EXPIRED);
     }
 
     @Test
@@ -169,10 +160,8 @@ class OtpServiceTest {
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
-        assertThatThrownBy(() -> otpService.verify(PHONE, CODE))
-                .isInstanceOf(CodeException.class)
-                .satisfies(ex -> assertThat(((CodeException) ex).getExceptionCode())
-                        .isEqualTo(AuthExceptionCode.OTP_MAX_ATTEMPTS));
+        assertCodeException(() -> otpService.verify(PHONE, CODE))
+                .hasExceptionCode(AuthExceptionCode.OTP_MAX_ATTEMPTS);
     }
 
     @Test
@@ -183,10 +172,8 @@ class OtpServiceTest {
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
-        assertThatThrownBy(() -> otpService.verify(PHONE, "000000"))
-                .isInstanceOf(CodeException.class)
-                .satisfies(ex -> assertThat(((CodeException) ex).getExceptionCode())
-                        .isEqualTo(AuthExceptionCode.INVALID_OTP));
+        assertCodeException(() -> otpService.verify(PHONE, "000000"))
+                .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
 
         assertThat(entity.getAttemptCount()).isEqualTo(1);
     }
