@@ -1,12 +1,12 @@
 ---
 name: 버그 리포트
 about: 버그를 제보해주세요
-title: '[Bug] '
-labels: bug
+title: 'bug: '
+labels: ''
 assignees: ''
 ---
 
-## 버그 설명
+## 문제
 
 <!-- 어떤 버그인지 설명해주세요 -->
 
@@ -26,9 +26,9 @@ assignees: ''
 
 ## 환경
 
-- OS:
+- URL:
 - 브라우저:
-- 버전:
+- 디바이스:
 
 ## 스크린샷
 

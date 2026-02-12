@@ -163,6 +163,45 @@ paths:
 components:
   schemas:
     # =====================
+    # Error Schemas
+    # =====================
+    ErrorCode:
+      type: string
+      enum:
+        # Auth errors
+        - INVALID_PHONE
+        - OTP_RATE_LIMIT
+        - OTP_INVALID
+        - OTP_EXPIRED
+        - OTP_MAX_ATTEMPTS
+        - UNAUTHORIZED
+        - TOKEN_EXPIRED
+        - TOKEN_INVALID
+        # User errors
+        - USER_NOT_FOUND
+        - USERNAME_TAKEN
+        - USERNAME_INVALID
+        # Validation errors
+        - VALIDATION_ERROR
+        - BAD_REQUEST
+        # Server errors
+        - INTERNAL_ERROR
+
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error details (e.g., validation errors)
+
+    # =====================
     # Auth Schemas
     # =====================
     SendCodeRequest:

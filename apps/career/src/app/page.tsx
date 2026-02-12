@@ -35,12 +35,20 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <Link
-            href="/login"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            로그인
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/signup/auth"
+              className="rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+            >
+              회원가입
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              로그인
+            </Link>
+          </div>
         )}
       </div>
 
@@ -51,6 +59,16 @@ export default function Home() {
           className="inline-block rounded-lg bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
         >
           Instagram 데이터 업로드
+        </Link>
+      </div>
+
+      <div className="mt-8">
+        <h2 className="mb-4 text-xl font-semibold">디자인 시스템</h2>
+        <Link
+          href="/showcase"
+          className="inline-block rounded-lg border border-gray-300 px-6 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+        >
+          컴포넌트 쇼케이스
         </Link>
       </div>
     </div>
