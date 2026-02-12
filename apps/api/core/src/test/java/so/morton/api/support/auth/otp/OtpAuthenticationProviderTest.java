@@ -19,6 +19,8 @@ import so.morton.api.support.auth.UserService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
+import static so.morton.api.storage.value.Role.GUEST;
+import static so.morton.api.support.auth.User.ROLE_PREFIX;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("OtpAuthenticationProvider 테스트")
@@ -37,8 +39,8 @@ class OtpAuthenticationProviderTest {
     private static final String CODE = "123456";
 
     @Test
-    @DisplayName("인증 요청 성공 시 인증된 토큰을 반환한다")
-    void authenticate_verifyRequest_성공() {
+    @DisplayName("가입자를 인증하면 사용자 기반 토큰을 반환한다")
+    void authenticate_registeredUser() {
         // given
         OtpAuthenticationToken token = new OtpAuthenticationToken(PHONE, CODE);
         User testUser = new User(1L, PHONE, "GUEST");
@@ -54,12 +56,12 @@ class OtpAuthenticationProviderTest {
         assertThat(result.getPrincipal()).isInstanceOf(User.class);
         assertThat(result.getAuthorities())
                 .extracting(Object::toString)
-                .containsExactly("ROLE_GUEST");
+                .containsExactly(ROLE_PREFIX + GUEST);
     }
 
     @Test
-    @DisplayName("미가입자 인증 성공 시 phone을 principal로 GUEST 권한 토큰을 반환한다")
-    void authenticate_verifyRequest_미가입자_phone반환() {
+    @DisplayName("미가입자를 인증하면 전화번호 기반 토큰을 반환한다")
+    void authenticate_unregisteredUser() {
         // given
         OtpAuthenticationToken token = new OtpAuthenticationToken(PHONE, CODE);
 
@@ -75,12 +77,12 @@ class OtpAuthenticationProviderTest {
         assertThat(result.getPrincipal()).isEqualTo(PHONE);
         assertThat(result.getAuthorities())
                 .extracting(Object::toString)
-                .containsExactly("ROLE_GUEST");
+                .containsExactly(ROLE_PREFIX + GUEST);
     }
 
     @Test
-    @DisplayName("OTP 검증 실패 시 AuthenticationServiceException으로 변환한다")
-    void authenticate_verifyRequest_otpService예외전파() {
+    @DisplayName("OTP 검증이 실패하면 예외를 던진다")
+    void authenticate_invalidOtp() {
         // given
         OtpAuthenticationToken token = new OtpAuthenticationToken(PHONE, CODE);
         CodeException codeException = new CodeException(AuthExceptionCode.INVALID_OTP);
@@ -93,26 +95,39 @@ class OtpAuthenticationProviderTest {
                 .hasCause(codeException);
     }
 
-    @Test
-    @DisplayName("발송 요청은 지원하지 않으며 IllegalStateException을 던진다")
-    void authenticate_sendRequest_예외() {
-        // given
-        OtpAuthenticationToken token = new OtpAuthenticationToken(PHONE, null);
+     @Test
+     @DisplayName("인증 코드가 없으면 예외를 던진다")
+     void authenticate_nullCode() {
+         // given
+         OtpAuthenticationToken token = new OtpAuthenticationToken(PHONE, null);
 
-        // when & then
-        assertThatThrownBy(() -> otpAuthenticationProvider.authenticate(token))
-                .isInstanceOf(IllegalStateException.class);
-    }
+         // when & then
+         assertThatThrownBy(() -> otpAuthenticationProvider.authenticate(token))
+                 .isInstanceOf(IllegalStateException.class)
+                 .hasMessage("OTP code is required for authentication");
+     }
+
+     @Test
+     @DisplayName("지원하지 않는 토큰 타입을 전달하면 예외를 던진다")
+     void authenticate_unsupportedToken() {
+         // given
+         Authentication wrongToken = UsernamePasswordAuthenticationToken.unauthenticated("user", "pass");
+
+         // when & then
+         assertThatThrownBy(() -> otpAuthenticationProvider.authenticate(wrongToken))
+                 .isInstanceOf(IllegalArgumentException.class)
+                 .hasMessageContaining("Only OtpAuthenticationToken is supported");
+     }
 
     @Test
-    @DisplayName("OtpAuthenticationToken을 지원한다")
-    void supports_OtpAuthenticationToken() {
+    @DisplayName("OTP 토큰 타입이면 지원한다")
+    void supports_otpToken() {
         assertThat(otpAuthenticationProvider.supports(OtpAuthenticationToken.class)).isTrue();
     }
 
     @Test
-    @DisplayName("다른 Authentication 토큰은 지원하지 않는다")
-    void supports_다른토큰() {
+    @DisplayName("다른 토큰 타입이면 지원하지 않는다")
+    void supports_otherToken() {
         assertThat(otpAuthenticationProvider.supports(UsernamePasswordAuthenticationToken.class)).isFalse();
     }
 }

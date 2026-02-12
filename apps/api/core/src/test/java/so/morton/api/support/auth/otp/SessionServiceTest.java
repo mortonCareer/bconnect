@@ -25,8 +25,8 @@ class SessionServiceTest {
     private SessionService sessionService;
 
     @Test
-    @DisplayName("기존 세션이 없으면 새로운 세션을 생성한다")
-    void saveSession_whenNoExisting_createsNew() {
+    @DisplayName("기존 세션이 없으면 새로 생성한다")
+    void upsert_newSession() {
         // given
         String username = "testuser";
         String agent = "Mozilla/5.0";
@@ -39,34 +39,31 @@ class SessionServiceTest {
         sessionService.upsert(username, agent, ip, refreshToken);
 
         // then
-        verify(sessionRepository).findByUsername(username);
         verify(sessionRepository).save(any(SessionEntity.class));
     }
 
-    @Test
-    @DisplayName("기존 세션이 있으면 업데이트한다")
-    void saveSession_whenExisting_updatesExisting() {
-        // given
-        String username = "testuser";
-        String agent = "Mozilla/5.0";
-        String ip = "127.0.0.1";
-        String refreshToken = "refresh-token-123";
+     @Test
+     @DisplayName("기존 세션이 있으면 정보를 갱신한다")
+     void upsert_existingSession() {
+         // given
+         String username = "testuser";
+         String agent = "Mozilla/5.0";
+         String ip = "127.0.0.1";
+         String refreshToken = "refresh-token-123";
 
-        SessionEntity existingSession = SessionEntity.builder()
-                .username(username)
-                .agent("old-agent")
-                .ip("old-ip")
-                .refreshToken("old-token")
-                .build();
+         SessionEntity existingSession = SessionEntity.builder()
+                 .username(username)
+                 .agent("old-agent")
+                 .ip("old-ip")
+                 .refreshToken("old-token")
+                 .build();
 
-        when(sessionRepository.findByUsername(username)).thenReturn(Optional.of(existingSession));
+         when(sessionRepository.findByUsername(username)).thenReturn(Optional.of(existingSession));
 
-        // when
-        sessionService.upsert(username, agent, ip, refreshToken);
+         // when
+         sessionService.upsert(username, agent, ip, refreshToken);
 
-        // then
-        verify(sessionRepository).findByUsername(username);
-        verify(sessionRepository, never()).save(any(SessionEntity.class));
-        // update() method will be called on the existing entity
-    }
+         // then
+         verify(sessionRepository, never()).save(any(SessionEntity.class));
+     }
 }

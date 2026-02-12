@@ -34,8 +34,8 @@ class OtpControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    @DisplayName("OTP 발송 성공 시 200 응답")
-    void sendOtp_성공_200() throws Exception {
+    @DisplayName("OTP 발송을 요청하면 성공 응답을 반환한다")
+    void send_success() throws Exception {
         // given
         SendOtpRequest request = new SendOtpRequest("01012345678");
 
@@ -48,8 +48,8 @@ class OtpControllerTest {
     }
 
     @Test
-    @DisplayName("일일 발송 제한 초과 시 429 응답")
-    void sendOtp_rateLimit_429() throws Exception {
+    @DisplayName("재전송 대기 시간 이내에 요청하면 예외 응답을 반환한다")
+    void send_rateLimited() throws Exception {
         // given
         doThrow(new CodeException(AuthExceptionCode.OTP_RATE_LIMIT))
                 .when(otpService).send("01012345678");
@@ -60,17 +60,36 @@ class OtpControllerTest {
         mockMvc.perform(post("/auth/otp/send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isTooManyRequests());
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value(AuthExceptionCode.OTP_RATE_LIMIT.name()));
     }
 
     @Test
-    @DisplayName("phone이 비어있으면 요청이 거부된다")
-    void sendOtp_빈phone_거부() throws Exception {
+    @DisplayName("일일 발송 한도를 초과하면 예외 응답을 반환한다")
+    void send_dailyLimitExceeded() throws Exception {
+        // given
+        doThrow(new CodeException(AuthExceptionCode.OTP_DAILY_LIMIT))
+                .when(otpService).send("01012345678");
+
+        SendOtpRequest request = new SendOtpRequest("01012345678");
+
+        // when & then
+        mockMvc.perform(post("/auth/otp/send")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value(AuthExceptionCode.OTP_DAILY_LIMIT.name()));
+    }
+
+    @Test
+    @DisplayName("전화번호가 비어있으면 예외 응답을 반환한다")
+    void send_emptyPhone() throws Exception {
         // given
         String body = "{\"phone\":\"\"}";
 
         // when & then
-        // @NotBlank 검증 실패 → MethodArgumentNotValidException → 500 (ApiControllerAdvice에서 별도 처리 없음)
         mockMvc.perform(post("/auth/otp/send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
