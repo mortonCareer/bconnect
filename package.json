@@ -17,6 +17,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "api:generate": "pnpm --filter @morton/api-client generate",
+    "storybook": "pnpm --filter @morton/storybook storybook",
+    "build-storybook": "pnpm --filter @morton/storybook build-storybook",
     "figma:connect": "figma connect publish",
     "figma:connect:dry": "figma connect publish --dry-run"
   },

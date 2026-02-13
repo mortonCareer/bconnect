@@ -1,0 +1,24 @@
+{
+  "name": "@morton/storybook",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "dependencies": {
+    "@morton/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "^10.2.0",
+    "@storybook/addon-themes": "^10.2.0",
+    "@storybook/react-vite": "^10.2.0",
+    "@tailwindcss/vite": "^4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "storybook": "^10.2.0",
+    "tailwindcss": "^4",
+    "vite": "^6",
+    "typescript": "^5"
+  }
+}
