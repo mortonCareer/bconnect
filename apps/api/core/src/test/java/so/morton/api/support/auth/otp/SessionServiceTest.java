@@ -6,12 +6,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import so.morton.api.storage.domain.session.SessionEntity;
 import so.morton.api.storage.domain.session.SessionRepository;
 
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -20,6 +22,9 @@ class SessionServiceTest {
 
     @Mock
     private SessionRepository sessionRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private SessionService sessionService;
@@ -33,12 +38,14 @@ class SessionServiceTest {
         String ip = "127.0.0.1";
         String refreshToken = "refresh-token-123";
 
+        when(passwordEncoder.encode(refreshToken)).thenReturn("encoded-token");
         when(sessionRepository.findByUsername(username)).thenReturn(Optional.empty());
 
         // when
         sessionService.upsert(username, agent, ip, refreshToken);
 
         // then
+        verify(passwordEncoder).encode(refreshToken);
         verify(sessionRepository).save(any(SessionEntity.class));
     }
 
@@ -58,12 +65,14 @@ class SessionServiceTest {
                  .refreshToken("old-token")
                  .build();
 
+         when(passwordEncoder.encode(refreshToken)).thenReturn("encoded-token");
          when(sessionRepository.findByUsername(username)).thenReturn(Optional.of(existingSession));
 
          // when
          sessionService.upsert(username, agent, ip, refreshToken);
 
          // then
+         verify(passwordEncoder).encode(refreshToken);
          verify(sessionRepository, never()).save(any(SessionEntity.class));
      }
 }

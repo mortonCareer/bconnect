@@ -24,7 +24,7 @@ public class SessionEntity extends BaseEntity {
     private String ip;
 
     @Column(name = "refresh_token")
-    private String refreshToken; // TODO: encrypted
+    private String refreshToken;
 
     @Builder
     public SessionEntity(String username, String agent, String ip, String refreshToken) {
