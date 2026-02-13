@@ -1,6 +1,6 @@
 package so.morton.api.support.auth.jwt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,6 +30,7 @@ public class RefreshTokenAuthenticationSuccessHandler implements AuthenticationS
 
     private static final String ACCESS_TOKEN_KEY = "access_token";
 
+    private final ObjectMapper objectMapper;
     private final JwtProvider jwtProvider;
 
     @Override
@@ -48,8 +49,7 @@ public class RefreshTokenAuthenticationSuccessHandler implements AuthenticationS
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put(ACCESS_TOKEN_KEY, accessToken);
 
-            ObjectMapper mapper = new ObjectMapper();
-            response.getWriter().write(mapper.writeValueAsString(responseBody));
+            response.getWriter().write(objectMapper.writeValueAsString(responseBody));
         }
     }
 }

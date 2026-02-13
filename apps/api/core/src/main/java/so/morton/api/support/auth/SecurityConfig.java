@@ -1,13 +1,12 @@
 package so.morton.api.support.auth;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -15,7 +14,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import so.morton.api.config.CorsProperties;
 import so.morton.api.support.auth.jwt.AccessTokenAuthenticationFilter;
@@ -41,18 +40,15 @@ public class SecurityConfig {
     private final CorsProperties corsProperties;
 
     @Bean
-    public AuthenticationManager authenticationManagerBean(
+    public AuthenticationManager authenticationManager(
             UserService userService,
-            PasswordEncoder passwordEncoder,
             JwtProvider jwtProvider,
             OtpService otpService,
             SessionService sessionService) {
 
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userService);
-        authProvider.setPasswordEncoder(passwordEncoder);
         JwtAuthenticationProvider jwtAuthenticationProvider = new JwtAuthenticationProvider(userService, sessionService, jwtProvider);
         OtpAuthenticationProvider otpAuthenticationProvider = new OtpAuthenticationProvider(otpService, userService);
-        return new ProviderManager(authProvider, jwtAuthenticationProvider, otpAuthenticationProvider);
+        return new ProviderManager(jwtAuthenticationProvider, otpAuthenticationProvider);
     }
 
     @Bean
@@ -64,12 +60,11 @@ public class SecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(
             HttpSecurity http,
             AuthenticationManager authenticationManager,
+            ObjectMapper objectMapper,
             AccessTokenAuthenticationFilter accessTokenAuthenticationFilter,
             RefreshTokenAuthenticationFilter refreshTokenAuthenticationFilter,
             @Qualifier("VerifyOtpAuthenticationSuccessHandler") AuthenticationSuccessHandler verifyOtpSuccessHandler
     ) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-
         VerifyOtpAuthenticationFilter verifyOtpFilter = new VerifyOtpAuthenticationFilter(authenticationManager, objectMapper);
         verifyOtpFilter.setAuthenticationSuccessHandler(verifyOtpSuccessHandler);
 
@@ -93,9 +88,9 @@ public class SecurityConfig {
                         .requestMatchers(POST, "/v1/users").permitAll()
                         .requestMatchers("/auth/otp/**").permitAll()
                         .anyRequest().authenticated())
-                .addFilterAfter(accessTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(refreshTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(verifyOtpFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterAfter(verifyOtpFilter, LogoutFilter.class)
+                .addFilterAfter(accessTokenAuthenticationFilter, LogoutFilter.class)
+                .addFilterAfter(refreshTokenAuthenticationFilter, LogoutFilter.class);
 
         return http.build();
     }

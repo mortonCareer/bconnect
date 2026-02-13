@@ -1,6 +1,6 @@
 package so.morton.api.support.auth.otp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,6 +38,7 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
     private static final String ACCESS_TOKEN_KEY = "access_token";
     private static final String REFRESH_TOKEN_KEY = "refresh_token";
 
+    private final ObjectMapper objectMapper;
     private final JwtProvider jwtProvider;
     private final SessionService sessionService;
 
@@ -66,8 +67,7 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
             responseBody.put(REFRESH_TOKEN_KEY, refreshToken);
 
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            ObjectMapper mapper = new ObjectMapper();
-            response.getWriter().write(mapper.writeValueAsString(responseBody));
+            response.getWriter().write(objectMapper.writeValueAsString(responseBody));
         } else {
             String phone = (String) authToken.getPrincipal();
             if (log.isDebugEnabled()) {
