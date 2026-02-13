@@ -14,6 +14,9 @@ import org.springframework.security.web.servlet.util.matcher.PathPatternRequestM
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
+
+import so.morton.api.storage.support.Regex;
 
 /**
  * OTP 검증 요청 처리 필터
@@ -25,6 +28,9 @@ public class VerifyOtpAuthenticationFilter extends AbstractAuthenticationProcess
 
     private static final RequestMatcher DEFAULT_PATH_REQUEST_MATCHER = PathPatternRequestMatcher.withDefaults()
             .matcher(HttpMethod.POST, "/auth/otp/verify");
+
+    private static final Pattern PHONE_PATTERN = Pattern.compile(Regex.PHONE);
+    private static final Pattern OTP_CODE_PATTERN = Pattern.compile(Regex.OTP_CODE);
 
     private final ObjectMapper objectMapper;
 
@@ -38,8 +44,16 @@ public class VerifyOtpAuthenticationFilter extends AbstractAuthenticationProcess
             throws AuthenticationException {
         try {
             JsonNode body = objectMapper.readTree(request.getInputStream());
-            String phone = body.has("phone") ? body.get("phone").asText().trim() : "";
-            String code = body.has("code") ? body.get("code").asText().trim() : "";
+            String phone = body.has("phone") ? body.get("phone").asString().trim() : "";
+            String code = body.has("code") ? body.get("code").asString().trim() : "";
+
+            if (!PHONE_PATTERN.matcher(phone).matches()) {
+                throw new AuthenticationServiceException("유효하지 않은 전화번호 형식입니다");
+            }
+
+            if (!OTP_CODE_PATTERN.matcher(code).matches()) {
+                throw new AuthenticationServiceException("유효하지 않은 인증코드 형식입니다");
+            }
 
             OtpAuthenticationToken authRequest = new OtpAuthenticationToken(phone, code);
             setDetails(request, authRequest);

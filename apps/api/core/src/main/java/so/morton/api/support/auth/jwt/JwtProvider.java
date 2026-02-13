@@ -75,7 +75,7 @@ public class JwtProvider {
         String authorities = user.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
-                .map(authority -> authority.substring(5))
+                .map(authority -> authority.substring(AUTHORITY_PREFIX.length()))
                 .collect(Collectors.joining(AUTHORITIES_DELIMITER));
 
         Date now = new Date();
@@ -104,9 +104,11 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String refreshAccessToken(String refreshToken) {
-        if (validateToken(refreshToken) && isRefreshToken(refreshToken)) {
-            String username = getUsername(refreshToken);
+    public String refreshAccessToken(String token) {
+        validateToken(token);
+
+        if (isRefreshToken(token)) {
+            String username = getUsername(token);
             UserDetails user = userService.loadUserByUsername(username);
             return generateAccessToken(user);
         }
@@ -114,23 +116,8 @@ public class JwtProvider {
         throw new JwtException("Invalid refresh token");
     }
 
-    public String generateAccessToken(User user) {
-        Date now = new Date();
-        Date expiration = new Date(now.getTime() + accessTokenExpiration);
-
-        return Jwts.builder()
-                .subject(user.username())
-                .claim(SCOPE_CLAIM_KEY, user.role())
-                .claim(TOKEN_TYPE_CLAIM_KEY, ACCESS_TOKEN_TYPE)
-                .issuedAt(now)
-                .expiration(expiration)
-                .signWith(secret, HS256)
-                .compact();
-    }
-
-    public boolean validateToken(String token) {
+    public void validateToken(String token) {
         getClaims(token);
-        return true;
     }
 
     public String getUsername(String token) {
@@ -147,10 +134,6 @@ public class JwtProvider {
             grantedAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_PREFIX + authority));
         }
         return grantedAuthorities;
-    }
-
-    public Date getExpiration(String token) {
-        return getClaims(token).getExpiration();
     }
 
     public String getTokenType(String token) {
@@ -171,11 +154,6 @@ public class JwtProvider {
             log.error("Invalid token: {}", ex.getMessage());
             throw new JwtException("Invalid token", ex);
         }
-    }
-
-    public boolean isTokenExpired(String token) {
-        Date expiration = getExpiration(token);
-        return expiration != null && expiration.before(new Date());
     }
 
     public boolean isAccessToken(String token) {
