@@ -341,7 +341,7 @@ async def process_instagram_result(
 async def run_pipeline(
     query: str, count: int = 10, seen_blog_ids: set[str] | None = None,
     report: PipelineReport | None = None, dry_run: bool = False,
-    force: bool = False,
+    force: bool = False, direct: bool = False,
 ) -> list[str]:
     """단일 검색어로 파이프라인을 실행한다.
 
@@ -406,7 +406,10 @@ async def run_pipeline(
             return
 
         try:
-            page_id = await save_technician(tech, force=force)
+            if direct:
+                page_id = await save_technician(tech, force=force)
+            else:
+                page_id = await save_to_review(tech)
         except Exception as exc:
             log.warning("저장 실패: %s", blog_url, exc_info=True)
             if report:
@@ -429,7 +432,7 @@ async def run_pipeline(
     return saved_ids
 
 
-async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_run: bool = False, force: bool = False) -> PipelineReport:
+async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_run: bool = False, force: bool = False, direct: bool = False) -> PipelineReport:
     """전체 키워드로 파이프라인을 실행한다.
 
     쿼리를 QUERY_CONCURRENCY개씩 병렬 실행하여 전체 소요 시간을 단축한다.
@@ -453,7 +456,7 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_ru
                 try:
                     await run_pipeline(
                         q, count=per_query, seen_blog_ids=seen_blog_ids,
-                        report=report, dry_run=dry_run, force=force,
+                        report=report, dry_run=dry_run, force=force, direct=direct,
                     )
                     break
                 except Exception as exc:
@@ -480,7 +483,7 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_ru
 async def run_instagram_pipeline(
     query: str, count: int = 10, seen_usernames: set[str] | None = None,
     report: PipelineReport | None = None, dry_run: bool = False,
-    force: bool = False, on_status: object = None,
+    force: bool = False, on_status: object = None, direct: bool = False,
 ) -> list[str]:
     """단일 검색어로 인스타그램 파이프라인을 실행한다."""
     if seen_usernames is None:
@@ -545,7 +548,10 @@ async def run_instagram_pipeline(
         if on_status:
             on_status(f"저장: {tech.name[:15]}")
         try:
-            page_id = await save_technician(tech, force=force)
+            if direct:
+                page_id = await save_technician(tech, force=force)
+            else:
+                page_id = await save_to_review(tech)
         except Exception as exc:
             log.warning("저장 실패: %s", link, exc_info=True)
             if report:
@@ -570,7 +576,7 @@ async def run_instagram_pipeline(
 
 async def run_instagram_full(
     keywords: list[str] | None = None, per_query: int = 5,
-    dry_run: bool = False, force: bool = False,
+    dry_run: bool = False, force: bool = False, direct: bool = False,
 ) -> PipelineReport:
     """전체 키워드로 인스타그램 파이프라인을 실행한다."""
     queries = build_instagram_queries(keywords)
@@ -601,6 +607,7 @@ async def run_instagram_full(
                         q, count=per_query, seen_usernames=seen_usernames,
                         report=report, dry_run=dry_run, force=force,
                         on_status=lambda text: progress.update(task_status, description=text),
+                        direct=direct,
                     )
                     break
                 except InstagramBlockedError as exc:
@@ -903,6 +910,8 @@ def main():
     parser.add_argument("--from-file", type=Path, metavar="JSON", help="검수한 JSON에서 노션 저장")
     parser.add_argument("--enrich", action="store_true", help="빈 필드가 있는 기존 레코드를 재크롤링+LLM으로 보강")
     parser.add_argument("--instagram", action="store_true", help="인스타그램 채널 크롤링")
+    parser.add_argument("--approve", action="store_true", help="검수 DB 승인 건을 프로덕션 DB로 이동")
+    parser.add_argument("--direct", action="store_true", help="검수 DB 거치지 않고 프로덕션 DB 직접 저장")
     args = parser.parse_args()
 
     setup_file_logging()
@@ -923,41 +932,59 @@ def main():
     if args.instagram:
         console.print("[cyan]채널: 인스타그램[/cyan]")
 
+    if args.approve:
+        console.print("[cyan]검수 승인 모드: 승인 건 → 프로덕션 DB 이동[/cyan]")
+    if args.direct:
+        console.print("[yellow]direct 모드: 프로덕션 DB 직접 저장[/yellow]")
+
     # 프로그레스 바 모드: 콘솔 로그 억제 (파일 로그는 유지됨)
-    suppress_console = args.full or args.enrich
+    suppress_console = args.full or args.enrich or args.approve
     if suppress_console:
         logging.getLogger().setLevel(logging.WARNING)
 
     # 노션 DB 스키마 검증 (dry-run 제외)
     if not args.dry_run:
-        schema_errors = asyncio.run(validate_schema())
-        if schema_errors:
-            console.print("[red]노션 DB 스키마 불일치:[/red]")
-            for err in schema_errors:
-                console.print(f"  [red]• {err}[/red]")
-            raise SystemExit(1)
+        # 검수 DB 스키마 검증 (approve 모드 또는 기본 모드)
+        if args.approve or not args.direct:
+            review_errors = asyncio.run(validate_review_schema())
+            if review_errors:
+                console.print("[red]검수 DB 스키마 불일치:[/red]")
+                for err in review_errors:
+                    console.print(f"  [red]• {err}[/red]")
+                raise SystemExit(1)
+
+        # 프로덕션 DB 스키마 검증 (approve, direct, enrich 모드)
+        if args.approve or args.direct or args.enrich:
+            schema_errors = asyncio.run(validate_schema())
+            if schema_errors:
+                console.print("[red]노션 DB 스키마 불일치:[/red]")
+                for err in schema_errors:
+                    console.print(f"  [red]• {err}[/red]")
+                raise SystemExit(1)
 
     try:
-        if args.enrich:
+        if args.approve:
+            report = asyncio.run(run_approve())
+        elif args.enrich:
             report = asyncio.run(run_enrich())
         elif args.from_file:
             report = asyncio.run(run_from_file(args.from_file, force=args.force))
         elif args.instagram and args.full:
-            report = asyncio.run(run_instagram_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force))
+            report = asyncio.run(run_instagram_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force, direct=args.direct))
         elif args.instagram:
             query = " ".join(args.query) if args.query else "타일 시공 인스타그램 site:instagram.com"
             count = 10 if args.query else 3
             report.mode = "인스타그램 단일 쿼리"
             report.per_query = count
-            asyncio.run(run_instagram_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force))
+            asyncio.run(run_instagram_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force, direct=args.direct))
         elif args.full:
-            report = asyncio.run(run_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force))
+            report = asyncio.run(run_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force, direct=args.direct))
         else:
             query = " ".join(args.query) if args.query else "타일 시공업체 수도권"
             count = 10 if args.query else 3
             report.mode = "단일 쿼리"
             report.per_query = count
-            asyncio.run(run_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force))
+            asyncio.run(run_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force, direct=args.direct))
     except KeyboardInterrupt:
         console.print("\n[yellow]중단됨 — 부분 보고서 저장 중...[/yellow]")
     except Exception as exc:
