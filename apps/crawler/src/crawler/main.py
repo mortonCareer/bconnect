@@ -13,7 +13,12 @@ from crawler.channels.instagram import (
 from crawler.classifier import classify
 from crawler.config import settings
 from crawler.models import Technician
-from crawler.notion import save_technician, update_technician, find_duplicate_by_url, touch_synced_at, find_pages_needing_enrichment, validate_schema
+from crawler.notion import (
+    save_technician, save_to_review, update_technician,
+    find_duplicate_by_url, touch_synced_at,
+    find_pages_needing_enrichment, find_approved, move_to_production,
+    validate_schema, validate_review_schema,
+)
 from crawler.report import PipelineReport
 from crawler.progress import create_progress, print_summary, console
 
@@ -826,6 +831,59 @@ async def run_enrich() -> PipelineReport:
         await asyncio.gather(*[_wrap(p) for p in pages])
 
     log.info("보강 완료: %d/%d건", enriched, len(pages))
+    return report
+
+
+async def run_approve() -> PipelineReport:
+    """검수 DB에서 승인된 레코드를 프로덕션 DB로 이동한다."""
+    pages = await find_approved()
+    log.info("승인 건: %d건", len(pages))
+
+    report = PipelineReport()
+    report.mode = "검수 승인"
+    report.total_searched = len(pages)
+
+    if not pages:
+        log.info("승인된 레코드가 없습니다")
+        return report
+
+    sem = asyncio.Semaphore(CONCURRENCY)
+    moved = 0
+
+    progress = create_progress()
+    with progress:
+        task = progress.add_task(f"프로덕션 이동 ({len(pages)}건)", total=len(pages))
+
+        async def _handle(page: dict) -> None:
+            nonlocal moved
+            props = page["properties"]
+            name_prop = props.get("업체명", {}).get("title", [])
+            name = name_prop[0]["plain_text"] if name_prop and name_prop[0].get("plain_text") else "이름없음"
+
+            async with sem:
+                try:
+                    page_id, status = await move_to_production(page)
+                except Exception as exc:
+                    log.warning("이동 실패: %s", name, exc_info=True)
+                    report.add_failed("", name, "이동", str(exc))
+                    progress.console.print(f"  [red]x {name} — 이동 실패[/red]")
+                    progress.advance(task)
+                    return
+
+            moved += 1
+            action = "업데이트" if status == "updated" else "신규생성"
+            log.info("이동 완료: %s → %s (%s)", name, page_id, action)
+            report.add_saved(
+                blog_url="", blogger_name=name,
+                tech_name=name, rank="", trades=[],
+                phone="", page_id=page_id,
+            )
+            progress.console.print(f"  [green]v[/green] {name} → {action}")
+            progress.advance(task)
+
+        await asyncio.gather(*[_handle(p) for p in pages])
+
+    log.info("승인 이동 완료: %d/%d건", moved, len(pages))
     return report
 
 
