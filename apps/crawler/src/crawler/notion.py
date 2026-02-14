@@ -399,3 +399,65 @@ def _markdown_to_blocks(md: str, max_blocks: int = 95) -> list[dict]:
                 "paragraph": {"rich_text": [{"text": {"content": content}}]},
             })
     return blocks
+
+
+# ── 검수 DB 함수 ──────────────────────────────────────────────
+
+
+async def find_review_duplicate(tech: Technician) -> str | None:
+    """검수 DB에서 중복 레코드를 찾는다. detail_url 기준."""
+    review_db_id = settings.notion_review_database_id
+    if not review_db_id or not tech.detail_url:
+        return None
+
+    results = await notion.request(
+        path=f"databases/{review_db_id}/query",
+        method="POST",
+        body={"filter": {"property": "자세히보기", "url": {"equals": tech.detail_url}}},
+    )
+    return results["results"][0]["id"] if results["results"] else None
+
+
+async def save_to_review(tech: Technician) -> str:
+    """기술자 레코드를 검수 DB에 저장하고 page_id를 반환한다.
+
+    중복이 있으면 업데이트하고 기존 page_id를 반환한다.
+    새 레코드는 검수상태=대기중으로 생성된다.
+    """
+    review_db_id = settings.notion_review_database_id
+
+    existing = await find_review_duplicate(tech)
+    if existing:
+        await update_technician(existing, tech, force=False)
+        return existing
+
+    properties = _build_review_properties(tech, review_status="대기중")
+    body_markdown = _build_body_markdown(tech)
+
+    page = await notion.pages.create(
+        parent={"database_id": review_db_id},
+        properties=properties,
+        children=_markdown_to_blocks(body_markdown),
+        **({"cover": {"type": "external", "external": {"url": tech.cover_image_url}}} if tech.cover_image_url else {}),
+    )
+
+    return page["id"]
+
+
+async def validate_review_schema() -> list[str]:
+    """검수 DB 스키마를 검증하고 문제가 있는 프로퍼티 목록을 반환한다."""
+    review_db_id = settings.notion_review_database_id
+    if not review_db_id:
+        return ["NOTION_REVIEW_DATABASE_ID가 설정되지 않았습니다"]
+
+    db = await notion.databases.retrieve(database_id=review_db_id)
+    db_props = db["properties"]
+
+    errors = []
+    for name, expected_type in REVIEW_REQUIRED_PROPERTIES.items():
+        if name not in db_props:
+            errors.append(f"검수 DB: '{name}' 프로퍼티 없음")
+        elif db_props[name]["type"] != expected_type:
+            errors.append(f"검수 DB: '{name}' 타입 불일치 (기대: {expected_type}, 실제: {db_props[name]['type']})")
+
+    return errors
