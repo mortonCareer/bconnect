@@ -1,7 +1,7 @@
 """notion 모듈 단위 테스트 — 순수 로직 함수만 검증."""
 
 from crawler.models import Technician
-from crawler.notion import _build_properties, _build_body_markdown, _markdown_to_blocks
+from crawler.notion import _build_properties, _build_body_markdown, _markdown_to_blocks, _build_review_properties
 
 
 def _make_tech(**kwargs) -> Technician:
@@ -107,3 +107,23 @@ class TestMarkdownToBlocks:
         blocks = _markdown_to_blocks(long_text)
         content = blocks[0]["paragraph"]["rich_text"][0]["text"]["content"]
         assert len(content) == 2000
+
+
+class TestBuildReviewProperties:
+    def test_includes_review_status(self):
+        tech = _make_tech()
+        props = _build_review_properties(tech)
+        assert props["검수상태"]["select"]["name"] == "대기중"
+
+    def test_includes_all_production_fields(self):
+        tech = _make_tech(phone="01012345678", email="a@b.com")
+        props = _build_review_properties(tech)
+        assert "업체명" in props
+        assert "연락처" in props
+        assert "이메일" in props
+        assert "검수상태" in props
+
+    def test_custom_review_status(self):
+        tech = _make_tech()
+        props = _build_review_properties(tech, review_status="승인")
+        assert props["검수상태"]["select"]["name"] == "승인"

@@ -241,6 +241,20 @@ def _build_properties(tech: Technician) -> dict:
     return properties
 
 
+REVIEW_REQUIRED_PROPERTIES: dict[str, str] = {
+    **REQUIRED_PROPERTIES,
+    "검수상태": "select",
+    "거절사유": "rich_text",
+}
+
+
+def _build_review_properties(tech: Technician, review_status: str = "대기중") -> dict:
+    """Technician → 검수 DB 속성 dict 변환. 프로덕션 속성 + 검수상태."""
+    properties = _build_properties(tech)
+    properties["검수상태"] = {"select": {"name": review_status}}
+    return properties
+
+
 def _build_body_markdown(tech: Technician) -> str:
     """Technician → 페이지 본문 마크다운 변환."""
     body_parts = []
