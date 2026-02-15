@@ -14,7 +14,7 @@ paths:
     post:
       operationId: sendOtp
       tags: [Auth]
-      summary: Send SMS OTP code
+      summary: SMS 인증코드를 발송합니다
       requestBody:
         required: true
         content:
@@ -27,13 +27,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SendCodeResponse'
+                $ref: '#/components/schemas/SendOtpData'
 
   /api/v1/auth/otp/verify:
     post:
       operationId: verifyOtp
       tags: [Auth]
-      summary: Verify OTP code and get tokens
+      summary: 인증코드를 검증합니다 (로그인 또는 회원가입 분기)
       requestBody:
         required: true
         content:
@@ -46,50 +46,55 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
+                oneOf:
+                  - $ref: '#/components/schemas/VerifyOtpLoginData'
+                  - $ref: '#/components/schemas/VerifyOtpSignupData'
+                discriminator:
+                  propertyName: registered
 
   /api/v1/auth/refresh:
     post:
       operationId: refreshToken
       tags: [Auth]
-      summary: Refresh access token using refresh token cookie
+      summary: 리프레시 토큰으로 액세스 토큰을 갱신합니다
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RefreshResponse'
+                $ref: '#/components/schemas/RefreshData'
 
   /api/v1/auth/logout:
     post:
       operationId: logout
       tags: [Auth]
-      summary: Logout and invalidate refresh token
+      summary: 로그아웃하고 리프레시 토큰을 무효화합니다
       responses:
         '200':
           description: OK
 
   /api/v1/auth/me:
     get:
-      operationId: getCurrentUser
+      operationId: getCurrentMember
       tags: [Auth]
-      summary: Get current authenticated user
+      summary: 현재 로그인한 회원 정보를 조회합니다
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Member'
 
   # =====================
-  # User Endpoints
+  # Member Endpoints
   # =====================
-  /api/v1/users:
+  /api/v1/members:
     get:
-      operationId: getUsers
-      tags: [Users]
+      operationId: getMembers
+      tags: [Members]
+      summary: 회원 목록을 조회합니다
       responses:
         '200':
           description: OK
@@ -98,31 +103,33 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/User'
+                  $ref: '#/components/schemas/Member'
 
     post:
-      operationId: createUser
-      tags: [Users]
+      operationId: createMember
+      tags: [Members]
+      summary: 새 회원을 등록합니다
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateUserRequest'
+              $ref: '#/components/schemas/CreateMemberRequest'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Member'
 
-  /api/v1/users/{userId}:
+  /api/v1/members/{memberId}:
     get:
-      operationId: getUser
-      tags: [Users]
+      operationId: getMember
+      tags: [Members]
+      summary: 회원 정보를 조회합니다
       parameters:
-        - name: userId
+        - name: memberId
           in: path
           required: true
           schema:
@@ -134,13 +141,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Member'
 
     put:
-      operationId: updateUser
-      tags: [Users]
+      operationId: updateMember
+      tags: [Members]
+      summary: 회원 정보를 수정합니다
       parameters:
-        - name: userId
+        - name: memberId
           in: path
           required: true
           schema:
@@ -151,17 +159,330 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUserRequest'
+              $ref: '#/components/schemas/UpdateMemberRequest'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Member'
+
+  # =====================
+  # Post Endpoints
+  # =====================
+  /api/v1/posts:
+    get:
+      operationId: getPosts
+      tags: [Posts]
+      summary: 게시글 목록을 조회합니다 (작성자, 작업별 필터 가능)
+      parameters:
+        - name: authorId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: taskId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+
+    post:
+      operationId: createPost
+      tags: [Posts]
+      summary: 새 게시글을 작성합니다
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+  /api/v1/posts/{postId}:
+    get:
+      operationId: getPost
+      tags: [Posts]
+      summary: 게시글을 조회합니다
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+    put:
+      operationId: updatePost
+      tags: [Posts]
+      summary: 게시글을 수정합니다
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+    delete:
+      operationId: deletePost
+      tags: [Posts]
+      summary: 게시글을 삭제합니다
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+
+  # =====================
+  # Task Endpoints
+  # =====================
+  /api/v1/tasks:
+    get:
+      operationId: getTasks
+      tags: [Tasks]
+      summary: 작업 목록을 조회합니다
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+
+    post:
+      operationId: createTask
+      tags: [Tasks]
+      summary: 새 작업을 생성합니다
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+  /api/v1/tasks/{taskId}:
+    get:
+      operationId: getTask
+      tags: [Tasks]
+      summary: 작업을 조회합니다
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+    put:
+      operationId: updateTask
+      tags: [Tasks]
+      summary: 작업을 수정합니다
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+    delete:
+      operationId: deleteTask
+      tags: [Tasks]
+      summary: 작업을 삭제합니다
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+
+  # =====================
+  # Chat Endpoints
+  # =====================
+  /api/v1/chats:
+    get:
+      operationId: getMyChats
+      tags: [Chats]
+      summary: 내 채팅방 목록을 조회합니다
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chat'
+
+  /api/v1/chats/{chatId}:
+    get:
+      operationId: getChat
+      tags: [Chats]
+      summary: 채팅방을 조회합니다
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+
+  /api/v1/chats/{chatId}/messages:
+    get:
+      operationId: getChatMessages
+      tags: [Chats]
+      summary: 채팅방의 메시지 목록을 조회합니다
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
 
 components:
   schemas:
+    # =====================
+    # Common
+    # =====================
+    Address:
+      type: object
+      properties:
+        zipcode:
+          type: string
+          pattern: '\d{5}'
+        city:
+          type: string
+        state:
+          type: string
+        street:
+          type: string
+        detail:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+
+    Role:
+      type: string
+      enum:
+        - GUEST
+        - ARCHITECT
+        - CONTRACTOR
+        - FOREMAN
+        - WORKER
+        - ADMIN
+
+    Trade:
+      type: string
+      enum:
+        - DESIGN
+        - DEMOLITION
+        - MASONRY
+        - PLUMBING
+        - CARPENTRY
+        - PAINTING
+        - FLOORING
+        - FURNITURE
+        - TRANSPORT
+        - CLEANING
+
     # =====================
     # Auth Schemas
     # =====================
@@ -171,15 +492,14 @@ components:
       properties:
         phone:
           type: string
-          description: Phone number in E.164 format (e.g., +821012345678)
+          pattern: '\d{10,11}'
 
-    SendCodeResponse:
+    SendOtpData:
       type: object
       properties:
         expiresAt:
           type: string
           format: date-time
-          description: When the verification code expires
 
     VerifyCodeRequest:
       type: object
@@ -187,61 +507,327 @@ components:
       properties:
         phone:
           type: string
+          pattern: '\d{10,11}'
         code:
           type: string
-          description: 6-digit verification code
+          pattern: '\d{6}'
 
-    AuthResponse:
+    VerifyOtpLoginData:
       type: object
+      required: [registered, accessToken, refreshToken]
       properties:
-        accessToken:
-          type: string
-        isNew:
+        registered:
           type: boolean
-          description: True if user was newly registered
-        user:
-          $ref: '#/components/schemas/User'
+          enum: [true]
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
 
-    RefreshResponse:
+    VerifyOtpSignupData:
+      type: object
+      required: [registered, signupToken]
+      properties:
+        registered:
+          type: boolean
+          enum: [false]
+        signupToken:
+          type: string
+
+    RefreshData:
       type: object
       properties:
         accessToken:
           type: string
 
     # =====================
-    # User Schemas
+    # Member Schemas
     # =====================
-    User:
+    Member:
       type: object
       properties:
         id:
           type: integer
           format: int64
-        phone:
-          type: string
         username:
           type: string
         name:
+          type: string
+        phone:
           type: string
         picture:
           type: string
+        primaryTrade:
+          $ref: '#/components/schemas/Trade'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+        experience:
+          type: integer
         role:
+          $ref: '#/components/schemas/Role'
+        crew:
           type: string
-          enum: [TECHNICIAN, COMPANY, ADMIN]
           nullable: true
-          description: User role (null for new users who haven't selected a role)
+        headline:
+          type: string
+          nullable: true
+        about:
+          type: string
+          nullable: true
+        address:
+          $ref: '#/components/schemas/Address'
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
 
-    CreateUserRequest:
+    CreateMemberRequest:
       type: object
-      required: [username, name]
+      required: [username, name, phone, picture, primaryTrade, trades, experience, role]
       properties:
+        signupToken:
+          type: string
         username:
           type: string
         name:
           type: string
+        phone:
+          type: string
+          pattern: '\d{10,11}'
+        picture:
+          type: string
+        primaryTrade:
+          $ref: '#/components/schemas/Trade'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+        experience:
+          type: integer
+        role:
+          $ref: '#/components/schemas/Role'
+        headline:
+          type: string
+        about:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
 
-    UpdateUserRequest:
+    UpdateMemberRequest:
       type: object
       properties:
         name:
           type: string
+        phone:
+          type: string
+          pattern: '\d{10,11}'
+        picture:
+          type: string
+        primaryTrade:
+          $ref: '#/components/schemas/Trade'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+        experience:
+          type: integer
+        headline:
+          type: string
+        about:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+
+    # =====================
+    # Post Schemas
+    # =====================
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        authorId:
+          type: integer
+          format: int64
+        taskId:
+          type: integer
+          format: int64
+        images:
+          type: array
+          items:
+            type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    CreatePostRequest:
+      type: object
+      required: [authorId, taskId, content]
+      properties:
+        authorId:
+          type: integer
+          format: int64
+        taskId:
+          type: integer
+          format: int64
+        images:
+          type: array
+          items:
+            type: string
+        content:
+          type: string
+
+    UpdatePostRequest:
+      type: object
+      properties:
+        images:
+          type: array
+          items:
+            type: string
+        content:
+          type: string
+
+    # =====================
+    # Task Schemas
+    # =====================
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        company:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        taskTitle:
+          type: string
+        eventTitle:
+          type: string
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    CreateTaskRequest:
+      type: object
+      required: [company, taskTitle, eventTitle, start, end]
+      properties:
+        company:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        taskTitle:
+          type: string
+        eventTitle:
+          type: string
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        company:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        taskTitle:
+          type: string
+        eventTitle:
+          type: string
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+
+    # =====================
+    # Chat Schemas
+    # =====================
+    Chat:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        participantIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+        lastMessage:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Message'
+        unreadCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        chatId:
+          type: integer
+          format: int64
+        senderId:
+          type: integer
+          format: int64
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
