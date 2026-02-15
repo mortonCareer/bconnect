@@ -25,7 +25,6 @@ import static io.jsonwebtoken.Jwts.SIG.HS256;
  */
 @Slf4j
 @Component
-// TODO: thread safe 판단 기준이 무엇인지
 public class JwtProvider {
     private static final String SCOPE_CLAIM_KEY = "scope";
     private static final String TOKEN_TYPE_CLAIM_KEY = "type";

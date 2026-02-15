@@ -15,7 +15,9 @@ import org.springframework.http.HttpStatus;
         OTP_MAX_ATTEMPTS("A005", HttpStatus.BAD_REQUEST, "인증 시도 횟수를 초과했습니다."),
         INVALID_REFRESH_TOKEN("A006", HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
         INVALID_ACCESS_TOKEN("A007", HttpStatus.UNAUTHORIZED, "유효하지 않은 액세스 토큰입니다."),
-        SESSION_EXPIRED("A008", HttpStatus.UNAUTHORIZED, "세션이 만료되었습니다.");
+        SESSION_EXPIRED("A008", HttpStatus.UNAUTHORIZED, "세션이 만료되었습니다."),
+        INVALID_SIGNUP_TOKEN("A009", HttpStatus.BAD_REQUEST, "유효하지 않은 가입 토큰입니다."),
+        SIGNUP_TOKEN_EXPIRED("A010", HttpStatus.BAD_REQUEST, "가입 토큰이 만료되었습니다.");
 
     private final String code;
     private final HttpStatus status;
