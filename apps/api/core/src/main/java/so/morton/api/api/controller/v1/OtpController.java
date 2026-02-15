@@ -11,7 +11,7 @@ import so.morton.api.support.auth.otp.OtpService;
 import so.morton.api.support.response.ApiResponse;
 
 @RestController
-@RequestMapping("/auth/otp")
+@RequestMapping("/api/v1/auth/otp")
 @RequiredArgsConstructor
 public class OtpController {
 

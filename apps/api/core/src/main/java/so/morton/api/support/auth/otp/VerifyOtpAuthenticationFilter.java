@@ -20,14 +20,14 @@ import so.morton.api.storage.support.Regex;
 
 /**
  * OTP 검증 요청 처리 필터
- * - POST /auth/otp/verify
+ * - POST /api/v1/auth/otp/verify
  *
  * @see org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
  */
 public class VerifyOtpAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private static final RequestMatcher DEFAULT_PATH_REQUEST_MATCHER = PathPatternRequestMatcher.withDefaults()
-            .matcher(HttpMethod.POST, "/auth/otp/verify");
+            .matcher(HttpMethod.POST, "/api/v1/auth/otp/verify");
 
     private static final Pattern PHONE_PATTERN = Pattern.compile(Regex.PHONE);
     private static final Pattern OTP_CODE_PATTERN = Pattern.compile(Regex.OTP_CODE);

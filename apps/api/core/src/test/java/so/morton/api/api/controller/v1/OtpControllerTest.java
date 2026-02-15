@@ -42,7 +42,7 @@ class OtpControllerTest {
         SendOtpRequest request = new SendOtpRequest("01012345678");
 
         // when & then
-        mockMvc.perform(post("/auth/otp/send")
+        mockMvc.perform(post("/api/v1/auth/otp/send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -59,7 +59,7 @@ class OtpControllerTest {
         SendOtpRequest request = new SendOtpRequest("01012345678");
 
         // when & then
-        mockMvc.perform(post("/auth/otp/send")
+        mockMvc.perform(post("/api/v1/auth/otp/send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(errorResponse(AuthExceptionCode.OTP_RATE_LIMIT));
@@ -75,7 +75,7 @@ class OtpControllerTest {
         SendOtpRequest request = new SendOtpRequest("01012345678");
 
         // when & then
-        mockMvc.perform(post("/auth/otp/send")
+        mockMvc.perform(post("/api/v1/auth/otp/send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(errorResponse(AuthExceptionCode.OTP_DAILY_LIMIT));
@@ -88,7 +88,7 @@ class OtpControllerTest {
         String body = "{\"phone\":\"\"}";
 
         // when & then
-        mockMvc.perform(post("/auth/otp/send")
+        mockMvc.perform(post("/api/v1/auth/otp/send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(errorResponse(CommonExceptionCode.NOT_VALID));

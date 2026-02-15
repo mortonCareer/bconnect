@@ -38,7 +38,7 @@ public class RefreshTokenAuthenticationFilter extends OncePerRequestFilter {
     private final AuthenticationManager authenticationManager;
 
     private final RequestMatcher requiresAuthenticationRequestMatcher = PathPatternRequestMatcher.withDefaults()
-            .matcher(HttpMethod.POST, "/v1/token");
+            .matcher(HttpMethod.POST, "/api/v1/auth/token");
 
     private final AuthenticationSuccessHandler successHandler;
 
