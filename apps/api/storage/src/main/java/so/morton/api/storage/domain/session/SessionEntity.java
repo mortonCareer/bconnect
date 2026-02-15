@@ -21,10 +21,14 @@ public class SessionEntity extends BaseEntity {
     @Column(nullable = false)
     private String agent;
 
+    @Column(nullable = false)
     private String ip;
 
-    @Column(name = "refresh_token")
+    @Column(nullable = false)
     private String refreshToken;
+
+    @Column(nullable = false)
+    private boolean revoked;
 
     @Builder
     public SessionEntity(String username, String agent, String ip, String refreshToken) {
@@ -32,11 +36,16 @@ public class SessionEntity extends BaseEntity {
         this.agent = agent;
         this.ip = ip;
         this.refreshToken = refreshToken;
+        this.revoked = false;
     }
 
     public void update(String agent, String ip, String refreshToken) {
         this.agent = agent;
         this.ip = ip;
         this.refreshToken = refreshToken;
+    }
+
+    public void revoke() {
+        this.revoked = true;
     }
 }

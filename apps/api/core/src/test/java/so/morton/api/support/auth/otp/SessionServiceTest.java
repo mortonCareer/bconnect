@@ -7,13 +7,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import so.morton.api.storage.domain.member.MemberEntity;
+import so.morton.api.storage.domain.member.MemberRepository;
 import so.morton.api.storage.domain.session.SessionEntity;
 import so.morton.api.storage.domain.session.SessionRepository;
+import so.morton.api.storage.value.Role;
+import so.morton.api.storage.value.Trade;
+import so.morton.api.support.sms.SmsProvider;
 
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,34 +30,54 @@ class SessionServiceTest {
     private SessionRepository sessionRepository;
 
     @Mock
+    private MemberRepository memberRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private SmsProvider smsProvider;
 
     @InjectMocks
     private SessionService sessionService;
 
+    private static final String PHONE = "01012345678";
+
     @Test
-    @DisplayName("기존 세션이 없으면 새로 생성한다")
-    void upsert_newSession() {
+    @DisplayName("기존 세션이 없으면 새로 생성하고 SMS를 발송한다")
+    void login_newSession() {
         // given
         String username = "testuser";
         String agent = "Mozilla/5.0";
         String ip = "127.0.0.1";
         String refreshToken = "refresh-token-123";
 
+        MemberEntity member = MemberEntity.builder()
+                .username(username)
+                .name("test")
+                .phone(PHONE)
+                .picture("")
+                .primaryTrade(Trade.CARPENTRY)
+                .experience(0)
+                .role(Role.WORKER)
+                .build();
+
         when(passwordEncoder.encode(refreshToken)).thenReturn("encoded-token");
         when(sessionRepository.findByUsername(username)).thenReturn(Optional.empty());
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(member));
 
         // when
-        sessionService.upsert(username, agent, ip, refreshToken);
+        sessionService.login(username, agent, ip, refreshToken);
 
         // then
         verify(passwordEncoder).encode(refreshToken);
         verify(sessionRepository).save(any(SessionEntity.class));
+        verify(smsProvider).send(eq(PHONE), anyString());
     }
 
      @Test
      @DisplayName("기존 세션이 있으면 정보를 갱신한다")
-     void upsert_existingSession() {
+     void login_existingSession() {
          // given
          String username = "testuser";
          String agent = "Mozilla/5.0";
@@ -69,7 +95,7 @@ class SessionServiceTest {
          when(sessionRepository.findByUsername(username)).thenReturn(Optional.of(existingSession));
 
          // when
-         sessionService.upsert(username, agent, ip, refreshToken);
+         sessionService.login(username, agent, ip, refreshToken);
 
          // then
          verify(passwordEncoder).encode(refreshToken);

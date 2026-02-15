@@ -8,20 +8,18 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import so.morton.api.support.auth.AuthenticationTypeMismatchException;
+import so.morton.api.support.response.ApiResponse;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import static lombok.AccessLevel.PROTECTED;
 
-/**
- * Refresh access token
- */
 @Slf4j
 @Component
 @Qualifier("RefreshTokenAuthenticationSuccessHandler")
@@ -34,22 +32,24 @@ public class RefreshTokenAuthenticationSuccessHandler implements AuthenticationS
     private final JwtProvider jwtProvider;
 
     @Override
-    public void onAuthenticationSuccess(@NonNull HttpServletRequest request,@NonNull HttpServletResponse response,@NonNull Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(@NonNull HttpServletRequest request,
+                                        @NonNull HttpServletResponse response,
+                                        @NonNull Authentication authentication) throws IOException, ServletException {
         if (!(authentication instanceof JwtAuthenticationToken authToken)) {
-            throw new AuthenticationTypeMismatchException("Authentication must of type" + JwtAuthenticationToken.class.getName());
+            throw new AuthenticationTypeMismatchException("Authentication must be of type " + JwtAuthenticationToken.class.getName());
         }
 
         if (authToken.isRefreshToken()) {
             if (log.isDebugEnabled()) {
-                log.debug("Generate refresh token");
+                log.debug("Generate access token from refresh token");
             }
 
             String accessToken = jwtProvider.generateAccessToken(authentication);
 
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put(ACCESS_TOKEN_KEY, accessToken);
-
-            response.getWriter().write(objectMapper.writeValueAsString(responseBody));
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write(objectMapper.writeValueAsString(
+                    ApiResponse.success(Map.of(ACCESS_TOKEN_KEY, accessToken))
+            ));
         }
     }
 }

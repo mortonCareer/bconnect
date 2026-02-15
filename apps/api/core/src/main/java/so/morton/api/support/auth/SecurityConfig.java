@@ -85,8 +85,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(arc -> arc
                         .requestMatchers(GET).permitAll()
-                        .requestMatchers(POST, "/v1/users").permitAll()
-                        .requestMatchers("/auth/otp/**").permitAll()
+                        .requestMatchers(POST, "/api/v1/members").permitAll()
+                        .requestMatchers("/api/v1/auth/otp/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterAfter(verifyOtpFilter, LogoutFilter.class)
                 .addFilterAfter(accessTokenAuthenticationFilter, LogoutFilter.class)
