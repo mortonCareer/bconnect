@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+import { UploadCloudIcon } from '@morton/ui'
 
 interface ParsedPost {
   id: string
@@ -132,19 +133,7 @@ export default function InstagramUploadPage() {
             className="hidden"
             disabled={loading}
           />
-          <svg
-            className="mb-2 h-10 w-10 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-            />
-          </svg>
+          <UploadCloudIcon size={40} className="mb-2 text-gray-400" />
           <span className="text-gray-600">클릭하여 Instagram ZIP 파일 선택</span>
           <span className="mt-1 text-xs text-gray-400">instagram-*.zip</span>
         </label>

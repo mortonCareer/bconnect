@@ -6,8 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/validate-commit.py",
-            "timeout": 10
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/require-commit-approval.py",
+            "timeout": 15
           }
         ]
       }

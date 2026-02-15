@@ -31,4 +31,36 @@ if echo "$file_path" | grep -q "\.tf$"; then
   fi
 fi
 
+# 3. TSX/JSX 파일 수정 시 → Prettier 포맷팅 + Tailwind 하드코딩 값 검사
+if echo "$file_path" | grep -qE "\.(tsx|jsx)$"; then
+  # Prettier로 import 순서 정렬 및 포맷팅
+  if command -v pnpm &> /dev/null; then
+    pnpm prettier --write "$file_path" 2>/dev/null
+  fi
+
+  # 하드코딩된 Tailwind arbitrary value 패턴 검사
+  # 예: [#386DFF], [50px], [1.6], [100%], [2rem], [calc(100%-20px)] 등
+  hardcoded_values=$(grep -oE '\[[^"\]]+\]' "$file_path" 2>/dev/null | \
+    grep -E '^\[(#[0-9A-Fa-f]{3,8}|[0-9]+(\.[0-9]+)?(px|rem|em|%|vh|vw|dvh|dvw|svh|svw)?|calc\(.*\))\]$' | \
+    sort -u)
+
+  if [ -n "$hardcoded_values" ]; then
+    echo "⚠️  하드코딩된 Tailwind 값이 발견되었습니다: $file_path"
+    echo "   발견된 값: $(echo $hardcoded_values | tr '\n' ' ')"
+    echo "   → Tailwind 테마 변수 사용을 권장합니다"
+    echo "   → 컬러: bg-morton-blue, text-morton-text 등"
+    echo "   → 크기: spacing 테마 변수 사용 권장"
+  fi
+fi
+
+# 4. Markdown 파일 수정 시 → Prettier 자동 포맷팅
+if echo "$file_path" | grep -qE "\.md$"; then
+  if command -v pnpm &> /dev/null; then
+    pnpm prettier --write "$file_path" 2>/dev/null
+    if [ $? -eq 0 ]; then
+      echo "✅ Markdown 파일이 포맷팅되었습니다: $file_path"
+    fi
+  fi
+fi
+
 exit 0
