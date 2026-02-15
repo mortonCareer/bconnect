@@ -38,7 +38,7 @@ public class OtpAuthenticationProvider implements AuthenticationProvider {
         }
         
         try {
-            otpService.verify(phone, code);
+            otpService.verifyCode(phone, code);
         } catch (CodeException e) {
             throw new AuthenticationServiceException("OTP verification failed", e);
         }

@@ -8,4 +8,6 @@ public interface OtpRepository extends JpaRepository<OtpEntity, Long> {
 
     Optional<OtpEntity> findByPhone(String phone);
 
+    Optional<OtpEntity> findBySignupToken(String signupToken);
+    
 }

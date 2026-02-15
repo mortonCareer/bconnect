@@ -47,13 +47,8 @@ public class VerifyOtpAuthenticationFilter extends AbstractAuthenticationProcess
             String phone = body.has("phone") ? body.get("phone").asString().trim() : "";
             String code = body.has("code") ? body.get("code").asString().trim() : "";
 
-            if (!PHONE_PATTERN.matcher(phone).matches()) {
-                throw new AuthenticationServiceException("유효하지 않은 전화번호 형식입니다");
-            }
-
-            if (!OTP_CODE_PATTERN.matcher(code).matches()) {
-                throw new AuthenticationServiceException("유효하지 않은 인증코드 형식입니다");
-            }
+            if (!PHONE_PATTERN.matcher(phone).matches()) throw new AuthenticationServiceException("유효하지 않은 전화번호 형식입니다");
+            if (!OTP_CODE_PATTERN.matcher(code).matches()) throw new AuthenticationServiceException("유효하지 않은 인증코드 형식입니다");
 
             OtpAuthenticationToken authRequest = new OtpAuthenticationToken(phone, code);
             setDetails(request, authRequest);

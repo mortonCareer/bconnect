@@ -54,7 +54,7 @@ class OtpControllerTest {
     void send_rateLimited() throws Exception {
         // given
         doThrow(new CodeException(AuthExceptionCode.OTP_RATE_LIMIT))
-                .when(otpService).send("01012345678");
+                .when(otpService).sendCode("01012345678");
 
         SendOtpRequest request = new SendOtpRequest("01012345678");
 
@@ -70,7 +70,7 @@ class OtpControllerTest {
     void send_dailyLimitExceeded() throws Exception {
         // given
         doThrow(new CodeException(AuthExceptionCode.OTP_DAILY_LIMIT))
-                .when(otpService).send("01012345678");
+                .when(otpService).sendCode("01012345678");
 
         SendOtpRequest request = new SendOtpRequest("01012345678");
 

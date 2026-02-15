@@ -23,34 +23,51 @@ public class OtpEntity extends BaseEntity {
     private String code;
 
     @Column(nullable = false)
+    private LocalDateTime codeExpiredAt;
+
+    @Column(nullable = false)
     private int dailyCount;
 
     @Column(nullable = false)
     private int attemptCount;
 
-    @Column(nullable = false)
-    private LocalDateTime expiredAt;
+    private String signupToken;
 
-    public OtpEntity(String phone, String code, LocalDateTime expiredAt) {
+    private LocalDateTime signupTokenExpiredAt;
+
+    public OtpEntity(String phone, String code, LocalDateTime codeExpiredAt) {
         this.phone = phone;
         this.code = code;
+        this.codeExpiredAt = codeExpiredAt;
         this.dailyCount = 1;
         this.attemptCount = 0;
-        this.expiredAt = expiredAt;
     }
 
-    public void update(String code, int dailyCount, LocalDateTime expiredAt) {
+    public void generateCode(String code, LocalDateTime codeExpiredAt) {
         this.code = code;
-        this.dailyCount = dailyCount;
+        this.codeExpiredAt = codeExpiredAt;
+        this.dailyCount++;
         this.attemptCount = 0;
-        this.expiredAt = expiredAt;
+    }
+
+    public void generateToken(String signupToken, LocalDateTime signupTokenExpiredAt) {
+        this.signupToken = signupToken;
+        this.signupTokenExpiredAt = signupTokenExpiredAt;
     }
 
     public void incrementAttemptCount() {
         this.attemptCount++;
     }
 
-    public void invalidate() {
-        this.expiredAt = LocalDateTime.MIN;
+    public void resetDailyCount() {
+        this.dailyCount = 0;
+    }
+
+    public void invalidateCode() {
+        this.codeExpiredAt = LocalDateTime.MIN;
+    }
+
+    public void invalidateToken() {
+        this.signupTokenExpiredAt =  LocalDateTime.MIN;
     }
 }

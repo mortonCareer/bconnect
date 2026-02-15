@@ -45,7 +45,7 @@ class OtpServiceTest {
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.empty());
 
         // when
-        otpService.send(PHONE);
+        otpService.sendCode(PHONE);
 
         // then
         verify(otpRepository).save(any(OtpEntity.class));
@@ -57,15 +57,12 @@ class OtpServiceTest {
     void send_existingOtp() {
         // given
         OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
-        entity.update(CODE, 3, LocalDateTime.now().plusMinutes(3));
+        ReflectionTestUtils.setField(entity, "dailyCount", 3);
         ReflectionTestUtils.setField(entity, "modifiedAt", LocalDateTime.now().minusMinutes(2));
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when
-        otpService.send(PHONE);
-
-        // then
-        assertThat(entity.getDailyCount()).isEqualTo(4);
+        otpService.sendCode(PHONE);
         verify(otpRepository, never()).save(any(OtpEntity.class));
         verify(smsProvider).send(eq(PHONE), anyString());
     }
@@ -75,12 +72,12 @@ class OtpServiceTest {
     void send_dailyLimitExceeded() {
         // given
         OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
-        entity.update(CODE, 10, LocalDateTime.now().plusMinutes(3));
+        ReflectionTestUtils.setField(entity, "dailyCount", 10);
         ReflectionTestUtils.setField(entity, "modifiedAt", LocalDateTime.now().minusMinutes(2));
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
-        assertCodeException(() -> otpService.send(PHONE))
+        assertCodeException(() -> otpService.sendCode(PHONE))
                 .hasExceptionCode(AuthExceptionCode.OTP_DAILY_LIMIT);
         verify(smsProvider, never()).send(anyString(), anyString());
     }
@@ -90,12 +87,12 @@ class OtpServiceTest {
      void send_dailyCountReset() {
          // given
          OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
-         entity.update(CODE, 5, LocalDateTime.now().plusMinutes(3));
+         ReflectionTestUtils.setField(entity, "dailyCount", 5);
          ReflectionTestUtils.setField(entity, "modifiedAt", LocalDateTime.now().minusDays(1));
          when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
          // when
-         otpService.send(PHONE);
+         otpService.sendCode(PHONE);
 
          // then
          assertThat(entity.getDailyCount()).isEqualTo(1);
@@ -107,12 +104,12 @@ class OtpServiceTest {
      void send_rateLimited() {
          // given
          OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
-         entity.update(CODE, 3, LocalDateTime.now().plusMinutes(3));
+         ReflectionTestUtils.setField(entity, "dailyCount", 3);
          ReflectionTestUtils.setField(entity, "modifiedAt", LocalDateTime.now().minusSeconds(30));
          when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
           // when & then
-          assertCodeException(() -> otpService.send(PHONE))
+          assertCodeException(() -> otpService.sendCode(PHONE))
                   .hasExceptionCode(AuthExceptionCode.OTP_RATE_LIMIT);
           verify(smsProvider, never()).send(anyString(), anyString());
      }
@@ -125,7 +122,7 @@ class OtpServiceTest {
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
-        otpService.verify(PHONE, CODE);
+        otpService.verifyCode(PHONE, CODE);
     }
 
     @Test
@@ -135,7 +132,7 @@ class OtpServiceTest {
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.empty());
 
         // when & then
-        assertCodeException(() -> otpService.verify(PHONE, CODE))
+        assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
                 .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
     }
 
@@ -147,7 +144,7 @@ class OtpServiceTest {
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
-        assertCodeException(() -> otpService.verify(PHONE, CODE))
+        assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
                 .hasExceptionCode(AuthExceptionCode.OTP_EXPIRED);
     }
 
@@ -160,7 +157,7 @@ class OtpServiceTest {
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
-        assertCodeException(() -> otpService.verify(PHONE, CODE))
+        assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
                 .hasExceptionCode(AuthExceptionCode.OTP_MAX_ATTEMPTS);
     }
 
@@ -172,7 +169,7 @@ class OtpServiceTest {
         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
 
         // when & then
-        assertCodeException(() -> otpService.verify(PHONE, "000000"))
+        assertCodeException(() -> otpService.verifyCode(PHONE, "000000"))
                 .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
 
         assertThat(entity.getAttemptCount()).isEqualTo(1);

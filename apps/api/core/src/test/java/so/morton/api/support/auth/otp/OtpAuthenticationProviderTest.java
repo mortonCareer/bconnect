@@ -45,7 +45,7 @@ class OtpAuthenticationProviderTest {
         OtpAuthenticationToken token = new OtpAuthenticationToken(PHONE, CODE);
         User testUser = new User(1L, PHONE, "GUEST");
 
-        doNothing().when(otpService).verify(PHONE, CODE);
+        doNothing().when(otpService).verifyCode(PHONE, CODE);
         when(userService.loadUserByPhone(PHONE)).thenReturn(testUser);
 
         // when
@@ -65,7 +65,7 @@ class OtpAuthenticationProviderTest {
         // given
         OtpAuthenticationToken token = new OtpAuthenticationToken(PHONE, CODE);
 
-        doNothing().when(otpService).verify(PHONE, CODE);
+        doNothing().when(otpService).verifyCode(PHONE, CODE);
         when(userService.loadUserByPhone(PHONE))
                 .thenThrow(new UsernameNotFoundException(PHONE));
 
@@ -87,7 +87,7 @@ class OtpAuthenticationProviderTest {
         OtpAuthenticationToken token = new OtpAuthenticationToken(PHONE, CODE);
         CodeException codeException = new CodeException(AuthExceptionCode.INVALID_OTP);
 
-        doThrow(codeException).when(otpService).verify(PHONE, CODE);
+        doThrow(codeException).when(otpService).verifyCode(PHONE, CODE);
 
         // when & then
         assertThatThrownBy(() -> otpAuthenticationProvider.authenticate(token))
