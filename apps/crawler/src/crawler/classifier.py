@@ -138,7 +138,7 @@ async def _classify_with_anthropic(name: str, about: str, headline: str = "") ->
     """Anthropic Claude API로 분류."""
     import anthropic
 
-    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
+    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=5)
     user_content = f"업체명(블로그닉네임): {name}\n한줄소개: {headline}\n소개:\n{about}"
 
     resp = await client.messages.create(
@@ -164,7 +164,7 @@ async def _classify_with_openai(name: str, about: str, headline: str = "") -> tu
     """OpenAI API로 분류."""
     from openai import AsyncOpenAI
 
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    client = AsyncOpenAI(api_key=settings.openai_api_key, max_retries=5)
     user_content = f"업체명(블로그닉네임): {name}\n한줄소개: {headline}\n소개:\n{about}"
 
     resp = await client.chat.completions.create(
@@ -259,7 +259,7 @@ async def _vision_with_anthropic(image_data: str, media_type: str) -> tuple[dict
     """Anthropic Claude Vision으로 이미지 텍스트 추출."""
     import anthropic
 
-    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
+    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=5)
     try:
         resp = await client.messages.create(
             model=settings.anthropic_model,
@@ -288,7 +288,7 @@ async def _vision_with_openai(image_data: str, media_type: str) -> tuple[dict | 
     """OpenAI Vision으로 이미지 텍스트 추출."""
     from openai import AsyncOpenAI
 
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    client = AsyncOpenAI(api_key=settings.openai_api_key, max_retries=5)
     try:
         resp = await client.chat.completions.create(
             model=settings.openai_model,
