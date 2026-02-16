@@ -205,11 +205,15 @@ async def fetch_blog_profile(blog_id: str) -> dict:
 
     # 소개글: DOM 직접 파싱 (잘리지 않는 전체 텍스트) → og:description 폴백
     desc_el = soup.select_one("p.desc__Sxw5t")
+    if not desc_el:
+        desc_el = soup.select_one("div.intro_text") or soup.select_one("p.desc")
     if desc_el:
-        profile_intro = desc_el.get_text(strip=True)
+        profile_intro = desc_el.get_text(separator="\n", strip=True)
     else:
         og_desc = soup.select_one('meta[property="og:description"]')
         profile_intro = og_desc["content"].strip() if og_desc and og_desc.get("content") else ""
+        if profile_intro:
+            log.debug("프로필 소개 og:description 폴백 (잘림 가능): %s", blog_id)
 
     # 블로그 제목
     og_title = soup.select_one('meta[property="og:title"]')

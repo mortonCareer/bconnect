@@ -129,6 +129,13 @@ async def process_blog_result(
             report.add_failed(blog_url, blogger_name, "분류", str(exc))
         return None
 
+    # 전문업자 필터: 일반인/DIY 블로거 스킵
+    if not classification.get("is_professional", True):
+        log.info("비전문업자, 건너뜀: %s (%s)", blogger_name, blog_url)
+        if report:
+            report.add_skipped(blog_url, blogger_name, "비전문업자")
+        return None
+
     # 업체명: classify 결과 → blog_title → blogger_name 순 폴백
     name = (
         classification.get("name")
@@ -172,6 +179,28 @@ async def process_blog_result(
             if not address and (place["road_address"] or place["address"]):
                 address = place["road_address"] or place["address"]
                 log.info("지역검색 주소 보충: %s → %s", name, address)
+
+    # 배너 이미지 Vision 보충: 연락처/사업자정보 부족 시에만
+    banner_url = profile.get("banner_image_url", "")
+    if banner_url and (not phone or not classification.get("business_number")):
+        from crawler.classifier import extract_text_from_image
+        try:
+            vision_data, vision_usage = await extract_text_from_image(banner_url)
+            if report:
+                report.add_llm_usage(vision_usage["input_tokens"], vision_usage["output_tokens"])
+            if not phone and vision_data.get("phone"):
+                phone = vision_data["phone"]
+                log.info("Vision 연락처 보충: %s → %s", name, phone)
+            if not email and vision_data.get("email"):
+                email = vision_data["email"]
+            if not classification.get("business_number") and vision_data.get("business_number"):
+                classification["business_number"] = vision_data["business_number"]
+            if not classification.get("representative") and vision_data.get("representative"):
+                classification["representative"] = vision_data["representative"]
+            if not address and vision_data.get("address"):
+                address = vision_data["address"]
+        except Exception as exc:
+            log.warning("Vision 추출 실패: %s", banner_url, exc_info=True)
 
     tech = Technician(
         name=name,
@@ -298,6 +327,13 @@ async def process_instagram_result(
         log.warning("분류 실패: %s", username, exc_info=True)
         if report:
             report.add_failed(link, username, "분류", str(exc))
+        return None
+
+    # 전문업자 필터: 일반인/DIY 블로거 스킵
+    if not classification.get("is_professional", True):
+        log.info("비전문업자, 건너뜀: %s (%s)", username, link)
+        if report:
+            report.add_skipped(link, username, "비전문업자")
         return None
 
     name = classification.get("name") or profile.get("full_name") or username
