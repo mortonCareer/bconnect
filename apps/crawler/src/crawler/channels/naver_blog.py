@@ -280,6 +280,40 @@ async def fetch_blog_banner(blog_id: str) -> str:
     return banner_url
 
 
+async def fetch_business_info(blog_id: str) -> dict:
+    """네이버 인증 사업자정보 API를 조회한다.
+
+    등록된 블로그만 데이터를 반환하며, 미등록 시 빈 dict.
+    반환 키: business_name, representative, address, phone, email, business_number
+    """
+    url = f"https://m.blog.naver.com/api/blogs/{blog_id}/business-info"
+    headers = {
+        "Referer": f"https://m.blog.naver.com/{blog_id}",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)",
+    }
+    client = _get_client()
+    try:
+        resp = await client.get(url, headers=headers)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception:
+        return {}
+
+    if not data.get("isSuccess") or not data.get("result", {}).get("existBusinessInfo"):
+        return {}
+
+    bv = data["result"]["businessView"]
+    raw_phone = bv.get("phone", "")
+    return {
+        "business_name": bv.get("businessName", ""),
+        "representative": bv.get("ceo", ""),
+        "address": bv.get("address", ""),
+        "phone": raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else "",
+        "email": bv.get("email", ""),
+        "business_number": bv.get("businessLicenseNo", ""),
+    }
+
+
 def extract_blog_id(blog_url: str) -> str | None:
     """블로그 URL에서 블로거 ID를 추출한다."""
     parsed = urlparse(blog_url)
@@ -371,11 +405,12 @@ async def explore_blogger(blog_url: str) -> dict:
 
     blog_home_url = f"https://blog.naver.com/{blog_id}"
 
-    # 1-3. 프로필·배너·게시글을 병렬 수집 (독립적 요청)
-    profile, banner_image_url, main_post = await asyncio.gather(
+    # 1-4. 프로필·배너·게시글·사업자정보를 병렬 수집 (독립적 요청)
+    profile, banner_image_url, main_post, biz_info = await asyncio.gather(
         fetch_blog_profile(blog_id),
         fetch_blog_banner(blog_id),
         fetch_blog_post(blog_url),
+        fetch_business_info(blog_id),
     )
     source_urls = [blog_url]
 
@@ -417,6 +452,9 @@ async def explore_blogger(blog_url: str) -> dict:
                 log.info("연락처 발견 (RSS 폴백): %s → %s", url, rss_contact)
                 break
 
+    if biz_info:
+        log.info("사업자정보 발견: %s (%s)", biz_info.get("business_name"), blog_id)
+
     return {
         "about": main_post["about"],
         "profile_intro": profile["profile_intro"],
@@ -428,6 +466,7 @@ async def explore_blogger(blog_url: str) -> dict:
         "cover_image_url": main_post["cover_image_url"],
         "source_urls": source_urls,
         "phone_source": phone_source,  # "profile" | "post" | ""
+        "business_info": biz_info,  # 네이버 인증 사업자정보 (빈 dict이면 미등록)
         **contact,
     }
 

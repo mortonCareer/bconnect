@@ -202,6 +202,22 @@ async def process_blog_result(
         except Exception as exc:
             log.warning("Vision 추출 실패: %s", banner_url, exc_info=True)
 
+    # 네이버 인증 사업자정보 — 1순위 덮어쓰기 (인증 데이터)
+    biz = profile.get("business_info") or {}
+    if biz:
+        if biz.get("phone"):
+            phone = biz["phone"]
+        if biz.get("email"):
+            email = biz["email"]
+        if biz.get("address"):
+            address = biz["address"]
+        if biz.get("business_name"):
+            name = biz["business_name"]
+        if biz.get("representative"):
+            classification["representative"] = biz["representative"]
+        if biz.get("business_number"):
+            classification["business_number"] = biz["business_number"]
+
     tech = Technician(
         name=name,
         rank=classification["rank"],
