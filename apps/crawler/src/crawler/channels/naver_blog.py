@@ -229,10 +229,20 @@ async def fetch_blog_profile(blog_id: str) -> dict:
         og_img = soup.select_one('meta[property="og:image"]')
         profile_image_url = og_img["content"].strip() if og_img and og_img.get("content") else ""
 
+    # 배너 이미지: 모바일 blog_cover 배경 이미지 (데스크톱 CSS 폴백용)
+    banner_image_url = ""
+    cover_el = soup.select_one('div[class*="blog_cover"]')
+    if cover_el:
+        style = cover_el.get("style", "")
+        m = re.search(r"background-image\s*:\s*url\(([^)]+)\)", style)
+        if m and "pstatic.net" in m.group(1):
+            banner_image_url = m.group(1)
+
     return {
         "profile_intro": profile_intro,
         "blog_title": blog_title,
         "profile_image_url": profile_image_url,
+        "banner_image_url": banner_image_url,
     }
 
 
@@ -263,8 +273,8 @@ async def fetch_blog_banner(blog_id: str) -> str:
         return ""
 
     banner_url = match.group(1)
-    # blogfiles.pstatic.net URL이 아니면 기본 스킨 이미지이므로 무시
-    if "blogfiles.pstatic.net" not in banner_url:
+    # pstatic.net 도메인이 아니면 기본 스킨 이미지이므로 무시
+    if "pstatic.net" not in banner_url:
         return ""
 
     return banner_url
@@ -413,7 +423,7 @@ async def explore_blogger(blog_url: str) -> dict:
         "blog_title": profile["blog_title"],
         "blog_home_url": blog_home_url,
         "blogger_name": main_post["blogger_name"],
-        "banner_image_url": banner_image_url,
+        "banner_image_url": banner_image_url or profile.get("banner_image_url", ""),
         "profile_image_url": profile["profile_image_url"],
         "cover_image_url": main_post["cover_image_url"],
         "source_urls": source_urls,
