@@ -1,6 +1,7 @@
 """네이버 블로그 채널 — 검색 API로 후보 발견 → 블로거 프로필 탐색 → 본문 파싱."""
 
 import asyncio
+import json
 import re
 import logging
 from urllib.parse import urlparse, parse_qs
@@ -181,6 +182,32 @@ def _extract_blogger_name(soup: BeautifulSoup) -> str:
     return nick.get_text(strip=True) if nick else ""
 
 
+def _parse_business_info_from_html(html: str, blog_id: str) -> dict:
+    """모바일 페이지 __INITIAL_STATE__에서 사업자정보를 추출한다."""
+    match = re.search(r"window\.__INITIAL_STATE__\s*=\s*(.+?);\s*\n", html)
+    if not match:
+        return {}
+
+    raw = match.group(1)
+    state = None
+    for end in range(len(raw), max(0, len(raw) - 200), -1):
+        try:
+            state = json.loads(raw[:end])
+            break
+        except json.JSONDecodeError:
+            continue
+
+    if not state:
+        return {}
+
+    biz = state.get("blogHome", {}).get("blogBusinessInfo", {}).get(blog_id, {}).get("data", {})
+    if not biz.get("existBusinessInfo"):
+        return {}
+
+    bv = biz.get("businessView", {})
+    return _normalize_business_view(bv) if bv else {}
+
+
 async def fetch_blog_profile(blog_id: str) -> dict:
     """모바일 블로그 메인에서 프로필 소개·프로필 이미지·블로그 제목을 추출한다.
 
@@ -238,11 +265,15 @@ async def fetch_blog_profile(blog_id: str) -> dict:
         if m and "pstatic.net" in m.group(1):
             banner_image_url = m.group(1)
 
+    # 사업자정보: __INITIAL_STATE__ JSON에서 추출 (API 폴백용)
+    business_info_html = _parse_business_info_from_html(resp.text, blog_id)
+
     return {
         "profile_intro": profile_intro,
         "blog_title": blog_title,
         "profile_image_url": profile_image_url,
         "banner_image_url": banner_image_url,
+        "business_info_html": business_info_html,
     }
 
 
@@ -280,12 +311,26 @@ async def fetch_blog_banner(blog_id: str) -> str:
     return banner_url
 
 
-async def fetch_business_info(blog_id: str) -> dict:
-    """네이버 인증 사업자정보 API를 조회한다.
+def _normalize_business_view(bv: dict) -> dict:
+    """businessView 원시 응답을 정규화된 dict로 변환한다."""
+    raw_phone = bv.get("phone", "")
+    return {
+        "business_name": bv.get("businessName", ""),
+        "representative": bv.get("ceo", ""),
+        "address": bv.get("address", ""),
+        "phone": raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else "",
+        "email": bv.get("email", ""),
+        "business_number": bv.get("businessLicenseNo", ""),
+    }
 
+
+async def fetch_business_info(blog_id: str, html_fallback: dict | None = None) -> dict:
+    """네이버 인증 사업자정보를 조회한다 (API → HTML 폴백).
+
+    html_fallback: fetch_blog_profile()에서 미리 파싱한 사업자정보 dict.
     등록된 블로그만 데이터를 반환하며, 미등록 시 빈 dict.
-    반환 키: business_name, representative, address, phone, email, business_number
     """
+    # 1차: 전용 API
     url = f"https://m.blog.naver.com/api/blogs/{blog_id}/business-info"
     headers = {
         "Referer": f"https://m.blog.naver.com/{blog_id}",
@@ -296,22 +341,17 @@ async def fetch_business_info(blog_id: str) -> dict:
         resp = await client.get(url, headers=headers)
         resp.raise_for_status()
         data = resp.json()
+        if data.get("isSuccess") and data.get("result", {}).get("existBusinessInfo"):
+            return _normalize_business_view(data["result"]["businessView"])
     except Exception:
-        return {}
+        pass
 
-    if not data.get("isSuccess") or not data.get("result", {}).get("existBusinessInfo"):
-        return {}
+    # 2차: HTML 폴백 (fetch_blog_profile에서 미리 파싱된 결과)
+    if html_fallback:
+        log.debug("사업자정보 HTML 폴백 사용: %s", blog_id)
+        return html_fallback
 
-    bv = data["result"]["businessView"]
-    raw_phone = bv.get("phone", "")
-    return {
-        "business_name": bv.get("businessName", ""),
-        "representative": bv.get("ceo", ""),
-        "address": bv.get("address", ""),
-        "phone": raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else "",
-        "email": bv.get("email", ""),
-        "business_number": bv.get("businessLicenseNo", ""),
-    }
+    return {}
 
 
 def extract_blog_id(blog_url: str) -> str | None:
@@ -405,12 +445,16 @@ async def explore_blogger(blog_url: str) -> dict:
 
     blog_home_url = f"https://blog.naver.com/{blog_id}"
 
-    # 1-4. 프로필·배너·게시글·사업자정보를 병렬 수집 (독립적 요청)
-    profile, banner_image_url, main_post, biz_info = await asyncio.gather(
+    # 1-3. 프로필·배너·게시글을 병렬 수집 (독립적 요청)
+    profile, banner_image_url, main_post = await asyncio.gather(
         fetch_blog_profile(blog_id),
         fetch_blog_banner(blog_id),
         fetch_blog_post(blog_url),
-        fetch_business_info(blog_id),
+    )
+
+    # 4. 사업자정보: API 시도 → 실패 시 profile에서 파싱한 HTML 폴백 사용
+    biz_info = await fetch_business_info(
+        blog_id, html_fallback=profile.get("business_info_html"),
     )
     source_urls = [blog_url]
 
