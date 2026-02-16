@@ -56,6 +56,7 @@ async def process_blog_result(
     report: PipelineReport | None = None,
     dry_run: bool = False,
     force: bool = False,
+    direct: bool = False,
 ) -> Technician | None:
     """검색 결과 1건 → 블로거 프로필 탐색 → 분류 → Technician 생성."""
     blog_url = item["link"]
@@ -74,7 +75,8 @@ async def process_blog_result(
     # 노션 DB 중복 체크: 크롤링/LLM 전에 URL로 스킵 (비용 절약)
     # dry_run 모드에서는 노션 조회 자체를 건너뜀
     # force 모드에서는 중복이 있어도 스킵하지 않고 재크롤링
-    if blog_id and not dry_run and not force:
+    # 검수 모드(direct=False)에서는 프로덕션 DB 중복과 무관하게 검수 DB에 저장
+    if blog_id and not dry_run and not force and direct:
         detail_url = f"https://blog.naver.com/{blog_id}"
         existing = await find_duplicate_by_url(detail_url)
         if existing:
@@ -386,7 +388,7 @@ async def run_pipeline(
 
     async def _handle(item: dict) -> None:
         async with sem:
-            tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force)
+            tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force, direct=direct)
         if tech is None:
             return
 
@@ -942,49 +944,56 @@ def main():
     if suppress_console:
         logging.getLogger().setLevel(logging.WARNING)
 
-    # 노션 DB 스키마 검증 (dry-run 제외)
-    if not args.dry_run:
-        # 검수 DB 스키마 검증 (approve 모드 또는 기본 모드)
-        if args.approve or not args.direct:
-            review_errors = asyncio.run(validate_review_schema())
-            if review_errors:
-                console.print("[red]검수 DB 스키마 불일치:[/red]")
-                for err in review_errors:
-                    console.print(f"  [red]• {err}[/red]")
-                raise SystemExit(1)
+    async def _run() -> PipelineReport:
+        nonlocal report
 
-        # 프로덕션 DB 스키마 검증 (approve, direct, enrich 모드)
-        if args.approve or args.direct or args.enrich:
-            schema_errors = asyncio.run(validate_schema())
-            if schema_errors:
-                console.print("[red]노션 DB 스키마 불일치:[/red]")
-                for err in schema_errors:
-                    console.print(f"  [red]• {err}[/red]")
-                raise SystemExit(1)
+        # 노션 DB 스키마 검증 (dry-run 제외)
+        if not args.dry_run:
+            # 검수 DB 스키마 검증 (approve 모드 또는 기본 모드)
+            if args.approve or not args.direct:
+                review_errors = await validate_review_schema()
+                if review_errors:
+                    console.print("[red]검수 DB 스키마 불일치:[/red]")
+                    for err in review_errors:
+                        console.print(f"  [red]• {err}[/red]")
+                    raise SystemExit(1)
 
-    try:
+            # 프로덕션 DB 스키마 검증 (approve, direct, enrich 모드)
+            if args.approve or args.direct or args.enrich:
+                schema_errors = await validate_schema()
+                if schema_errors:
+                    console.print("[red]노션 DB 스키마 불일치:[/red]")
+                    for err in schema_errors:
+                        console.print(f"  [red]• {err}[/red]")
+                    raise SystemExit(1)
+
         if args.approve:
-            report = asyncio.run(run_approve())
+            report = await run_approve()
         elif args.enrich:
-            report = asyncio.run(run_enrich())
+            report = await run_enrich()
         elif args.from_file:
-            report = asyncio.run(run_from_file(args.from_file, force=args.force))
+            report = await run_from_file(args.from_file, force=args.force)
         elif args.instagram and args.full:
-            report = asyncio.run(run_instagram_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force, direct=args.direct))
+            report = await run_instagram_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force, direct=args.direct)
         elif args.instagram:
             query = " ".join(args.query) if args.query else "타일 시공 인스타그램 site:instagram.com"
             count = 10 if args.query else 3
             report.mode = "인스타그램 단일 쿼리"
             report.per_query = count
-            asyncio.run(run_instagram_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force, direct=args.direct))
+            await run_instagram_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force, direct=args.direct)
         elif args.full:
-            report = asyncio.run(run_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force, direct=args.direct))
+            report = await run_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force, direct=args.direct)
         else:
             query = " ".join(args.query) if args.query else "타일 시공업체 수도권"
             count = 10 if args.query else 3
             report.mode = "단일 쿼리"
             report.per_query = count
-            asyncio.run(run_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force, direct=args.direct))
+            await run_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force, direct=args.direct)
+
+        return report
+
+    try:
+        report = asyncio.run(_run())
     except KeyboardInterrupt:
         console.print("\n[yellow]중단됨 — 부분 보고서 저장 중...[/yellow]")
     except Exception as exc:
