@@ -577,28 +577,8 @@ components:
           type: string
         picture:
           type: string
-        primaryTrade:
-          $ref: '#/components/schemas/Trade'
-        trades:
-          type: array
-          items:
-            $ref: '#/components/schemas/Trade'
-          uniqueItems: true
-        experience:
-          type: integer
         role:
           $ref: '#/components/schemas/Role'
-        crew:
-          type: string
-          nullable: true
-        headline:
-          type: string
-          nullable: true
-        about:
-          type: string
-          nullable: true
-        address:
-          $ref: '#/components/schemas/Address'
         createdAt:
           type: string
           format: date-time
@@ -608,7 +588,7 @@ components:
 
     RegisterMemberRequest:
       type: object
-      required: [username, name, phone, picture, primaryTrade, trades, experience, role]
+      required: [username, name, phone, picture, role]
       properties:
         signupToken:
           type: string
@@ -621,23 +601,8 @@ components:
           pattern: '\d{10,11}'
         picture:
           type: string
-        primaryTrade:
-          $ref: '#/components/schemas/Trade'
-        trades:
-          type: array
-          items:
-            $ref: '#/components/schemas/Trade'
-          uniqueItems: true
-        experience:
-          type: integer
         role:
           $ref: '#/components/schemas/Role'
-        headline:
-          type: string
-        about:
-          type: string
-        address:
-          $ref: '#/components/schemas/Address'
 
     UpdateMemberRequest:
       type: object
@@ -649,21 +614,6 @@ components:
           pattern: '\d{10,11}'
         picture:
           type: string
-        primaryTrade:
-          $ref: '#/components/schemas/Trade'
-        trades:
-          type: array
-          items:
-            $ref: '#/components/schemas/Trade'
-          uniqueItems: true
-        experience:
-          type: integer
-        headline:
-          type: string
-        about:
-          type: string
-        address:
-          $ref: '#/components/schemas/Address'
 
     # =====================
     # Post Schemas
