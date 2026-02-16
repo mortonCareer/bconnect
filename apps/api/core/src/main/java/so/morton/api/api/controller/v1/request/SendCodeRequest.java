@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import so.morton.api.storage.support.Regex;
 
-public record SendOtpRequest(
+public record SendCodeRequest(
         @NotBlank
         @Pattern(regexp = Regex.PHONE)
         String phone

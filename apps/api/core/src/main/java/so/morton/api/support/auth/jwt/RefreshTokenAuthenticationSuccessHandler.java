@@ -12,11 +12,11 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import so.morton.api.api.controller.v1.response.RefreshTokenResponse;
 import so.morton.api.support.auth.AuthenticationTypeMismatchException;
 import so.morton.api.support.response.ApiResponse;
 
 import java.io.IOException;
-import java.util.Map;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -25,8 +25,6 @@ import static lombok.AccessLevel.PROTECTED;
 @Qualifier("RefreshTokenAuthenticationSuccessHandler")
 @RequiredArgsConstructor(access = PROTECTED)
 public class RefreshTokenAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
-
-    private static final String ACCESS_TOKEN_KEY = "access_token";
 
     private final ObjectMapper objectMapper;
     private final JwtProvider jwtProvider;
@@ -48,7 +46,7 @@ public class RefreshTokenAuthenticationSuccessHandler implements AuthenticationS
 
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getWriter().write(objectMapper.writeValueAsString(
-                    ApiResponse.success(Map.of(ACCESS_TOKEN_KEY, accessToken))
+                    ApiResponse.success(new RefreshTokenResponse(accessToken))
             ));
         }
     }

@@ -1,6 +1,5 @@
 package so.morton.api.support.auth.otp;
 
-import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,6 +11,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import so.morton.api.api.controller.v1.request.VerifyCodeRequest;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
@@ -43,9 +43,9 @@ public class VerifyOtpAuthenticationFilter extends AbstractAuthenticationProcess
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
         try {
-            JsonNode body = objectMapper.readTree(request.getInputStream());
-            String phone = body.has("phone") ? body.get("phone").asString().trim() : "";
-            String code = body.has("code") ? body.get("code").asString().trim() : "";
+            VerifyCodeRequest body = objectMapper.readValue(request.getInputStream(), VerifyCodeRequest.class);
+            String phone = body.phone() != null ? body.phone().trim() : "";
+            String code = body.code() != null ? body.code().trim() : "";
 
             if (!PHONE_PATTERN.matcher(phone).matches()) throw new AuthenticationServiceException("유효하지 않은 전화번호 형식입니다");
             if (!OTP_CODE_PATTERN.matcher(code).matches()) throw new AuthenticationServiceException("유효하지 않은 인증코드 형식입니다");

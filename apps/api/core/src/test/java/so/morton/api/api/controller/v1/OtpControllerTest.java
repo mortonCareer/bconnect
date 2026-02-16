@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import so.morton.api.api.controller.v1.request.SendOtpRequest;
+import so.morton.api.api.controller.v1.request.SendCodeRequest;
 import so.morton.api.support.AuthExceptionCode;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
@@ -39,7 +39,7 @@ class OtpControllerTest {
     @DisplayName("OTP 발송을 요청하면 성공 응답을 반환한다")
     void send_success() throws Exception {
         // given
-        SendOtpRequest request = new SendOtpRequest("01012345678");
+        SendCodeRequest request = new SendCodeRequest("01012345678");
 
         // when & then
         mockMvc.perform(post("/api/v1/auth/otp/send")
@@ -56,7 +56,7 @@ class OtpControllerTest {
         doThrow(new CodeException(AuthExceptionCode.OTP_RATE_LIMIT))
                 .when(otpService).sendCode("01012345678");
 
-        SendOtpRequest request = new SendOtpRequest("01012345678");
+        SendCodeRequest request = new SendCodeRequest("01012345678");
 
         // when & then
         mockMvc.perform(post("/api/v1/auth/otp/send")
@@ -72,7 +72,7 @@ class OtpControllerTest {
         doThrow(new CodeException(AuthExceptionCode.OTP_DAILY_LIMIT))
                 .when(otpService).sendCode("01012345678");
 
-        SendOtpRequest request = new SendOtpRequest("01012345678");
+        SendCodeRequest request = new SendCodeRequest("01012345678");
 
         // when & then
         mockMvc.perform(post("/api/v1/auth/otp/send")

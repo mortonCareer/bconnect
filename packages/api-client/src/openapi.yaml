@@ -27,7 +27,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SendOtpData'
+                $ref: '#/components/schemas/SendOtpResponse'
 
   /api/v1/auth/otp/verify:
     post:
@@ -47,8 +47,8 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/VerifyOtpLoginData'
-                  - $ref: '#/components/schemas/VerifyOtpSignupData'
+                  - $ref: '#/components/schemas/VerifyOtpLoginResponse'
+                  - $ref: '#/components/schemas/VerifyOtpSignupResponse'
                 discriminator:
                   propertyName: registered
 
@@ -63,7 +63,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RefreshData'
+                $ref: '#/components/schemas/RefreshTokenResponse'
 
   /api/v1/auth/logout:
     post:
@@ -106,7 +106,7 @@ paths:
                   $ref: '#/components/schemas/Member'
 
     post:
-      operationId: createMember
+      operationId: registerMember
       tags: [Members]
       summary: 새 회원을 등록합니다
       requestBody:
@@ -114,7 +114,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateMemberRequest'
+              $ref: '#/components/schemas/RegisterMemberRequest'
       responses:
         '200':
           description: OK
@@ -472,16 +472,36 @@ components:
     Trade:
       type: string
       enum:
+        # 기반 공정
         - DESIGN
         - DEMOLITION
-        - MASONRY
+        - ELECTRICAL
         - PLUMBING
+        - MECHANICAL
+        # 구조 공정
+        - MASONRY
         - CARPENTRY
+        - GLAZING
+        - WATERPROOFING
+        - PLASTERING
+        - INSULATION
+        # 마감 공정
+        - TILING
+        - GROUTING
         - PAINTING
-        - FLOORING
+        - WALLPAPER
+        - FILM_SHEET
+        - HARDWOOD
+        - VINYL
+        # 설치
+        - SINK
         - FURNITURE
+        - AIR_CONDITIONING
+        # 현장지원
+        - HOISTING
         - TRANSPORT
         - CLEANING
+        - GENERAL_LABOR
 
     # =====================
     # Auth Schemas
@@ -494,7 +514,7 @@ components:
           type: string
           pattern: '\d{10,11}'
 
-    SendOtpData:
+    SendOtpResponse:
       type: object
       properties:
         expiresAt:
@@ -512,7 +532,7 @@ components:
           type: string
           pattern: '\d{6}'
 
-    VerifyOtpLoginData:
+    VerifyOtpLoginResponse:
       type: object
       required: [registered, accessToken, refreshToken]
       properties:
@@ -524,7 +544,7 @@ components:
         refreshToken:
           type: string
 
-    VerifyOtpSignupData:
+    VerifyOtpSignupResponse:
       type: object
       required: [registered, signupToken]
       properties:
@@ -534,7 +554,7 @@ components:
         signupToken:
           type: string
 
-    RefreshData:
+    RefreshTokenResponse:
       type: object
       properties:
         accessToken:
@@ -586,7 +606,7 @@ components:
           type: string
           format: date-time
 
-    CreateMemberRequest:
+    RegisterMemberRequest:
       type: object
       required: [username, name, phone, picture, primaryTrade, trades, experience, role]
       properties:
