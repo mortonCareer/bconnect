@@ -20,21 +20,15 @@ public class MemberService {
 
     @Transactional
     public Member create(RegisterMemberRequest request) {
-        MemberEntity entity = MemberEntity.builder()
+        MemberEntity member = MemberEntity.builder()
                 .username(request.username())
                 .name(request.name())
                 .phone(request.phone())
                 .picture(request.picture())
-                .primaryTrade(request.primaryTrade())
-                .trades(request.trades())
-                .experience(request.experience())
                 .role(request.role())
-                .headline(request.headline())
-                .about(request.about())
-                .address(request.address())
                 .build();
 
-        MemberEntity saved = memberRepository.save(entity);
+        MemberEntity saved = memberRepository.save(member);
         return Member.of(saved);
     }
 
@@ -45,31 +39,25 @@ public class MemberService {
 
     @Transactional
     public Member update(Long memberId, UpdateMemberRequest request) {
-        MemberEntity entity = memberRepository.findById(memberId)
+        MemberEntity member = memberRepository.findById(memberId)
                 .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        entity.update(
+        member.update(
                 request.name(),
                 request.phone(),
-                request.picture(),
-                request.primaryTrade(),
-                request.trades(),
-                request.experience(),
-                request.headline(),
-                request.about(),
-                request.address()
+                request.picture()
         );
 
-        return Member.of(entity);
+        return Member.of(member);
     }
 
     @Transactional
     public void delete(Long memberId) {
-        MemberEntity entity = memberRepository.findById(memberId)
+        MemberEntity member = memberRepository.findById(memberId)
                 .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        entity.delete();
+        member.delete();
     }
 }

@@ -93,6 +93,8 @@ bin/
 
 ### ETC ###
 nul
+*.pdf
+*.sisyphus
 .mcp.json
 
 ### Lambda build artifacts ###

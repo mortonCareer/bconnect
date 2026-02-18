@@ -10,6 +10,11 @@
 - 문서화 (JavaDoc)
 - 단위 테스트 코드 작성
 
+## Guide
+- 테스트 성공시 HTTP 코드와 응답 본문을 검증한다
+- 테스트 실패시 예외 코드를 검증한다
+- 메서드명은 영문으로, DisplayName은 한글로 작성한다
+
 ## Skills
 - `storage` - 클래스 다이어그램 참고, Entity & Repository 작성
 - `interface` - Domain & Service 인터페이스 설계

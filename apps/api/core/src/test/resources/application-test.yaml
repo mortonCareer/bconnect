@@ -6,3 +6,6 @@ app:
   aws-secret-access-key: test-secret-access-key
   aws-region: ap-northeast-2
   aws-s3-bucket: test-bucket
+
+jwt:
+  secret: test-secret-key-for-jwt-authentication-minimum-256-bits

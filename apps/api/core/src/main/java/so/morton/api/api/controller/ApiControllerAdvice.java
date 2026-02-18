@@ -3,6 +3,7 @@ package so.morton.api.api.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import so.morton.api.support.CodeException;
@@ -13,6 +14,14 @@ import so.morton.api.support.response.ApiResponse;
 public class ApiControllerAdvice {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+        log.warn("Validation failed: {}", e.getMessage());
+        return ResponseEntity
+                .status(CommonExceptionCode.NOT_VALID.getStatus())
+                .body(ApiResponse.error(CommonExceptionCode.NOT_VALID));
+    }
 
     @ExceptionHandler(CodeException.class)
     public ResponseEntity<ApiResponse<Void>> handleCodeException(CodeException e) {
