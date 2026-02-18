@@ -2,6 +2,12 @@ spring:
   application:
     name: api
 
+management:
+  metrics:
+    enable:
+      process: false
+      system: false
+
 app:
   database-url: ${DATABASE_URL:}
   database-username: ${DATABASE_USERNAME:}
