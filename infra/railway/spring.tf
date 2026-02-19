@@ -109,6 +109,16 @@ resource "railway_variable" "api_jdk_version" {
   depends_on = [railway_variable.api_sns_enabled]
 }
 
+# JDK 17 + Railway 컨테이너 cgroup v2 호환성 문제 대응
+resource "railway_variable" "api_java_tool_options" {
+  name           = "JAVA_TOOL_OPTIONS"
+  value          = "-XX:-UseContainerSupport"
+  service_id     = railway_service.api.id
+  environment_id = railway_project.morton.default_environment.id
+
+  depends_on = [railway_variable.api_jdk_version]
+}
+
 # ===========================================================================
 # Custom Domain for API
 # ===========================================================================
