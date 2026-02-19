@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@morton/ui'
+import { ApiError, useRegisterMember, Role } from '@morton/api-client'
+import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import { SignupHeader, FormInput, FormLabel, FormError } from '../_components'
 import { FieldSelector, ExperienceSelector } from './components'
@@ -14,7 +16,9 @@ import type { ConstructionField } from './types'
 
 export default function SignupProfilePage() {
   const router = useRouter()
-  const { formData, setProfile } = useSignupStore()
+  const { login } = useAuthStore()
+  const registerMemberMutation = useRegisterMember()
+  const { formData } = useSignupStore()
 
   const {
     register,
@@ -65,33 +69,29 @@ export default function SignupProfilePage() {
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
-      // Store에 프로필 데이터 저장
-      setProfile({
-        name: data.name,
-        fields: data.fields,
-        primaryField: data.primaryField,
-        experience: data.experience,
-        affiliation: data.affiliation || '',
+      const result = await registerMemberMutation.mutateAsync({
+        data: {
+          signupToken: formData.signupToken,
+          username: formData.username,
+          name: data.name,
+          phone: formData.phone.replace(/^\+82/, '0'),
+          picture: '',
+          role: Role.WORKER,
+        },
       })
 
-      // 전체 회원가입 데이터 확인
-      const signupData = {
-        // username 페이지에서 저장한 데이터
-        username: formData.username,
-        // profile 페이지에서 입력한 데이터
-        name: data.name,
-        fields: data.fields,
-        primaryField: data.primaryField,
-        experience: data.experience,
-        affiliation: data.affiliation || '',
-      }
-      console.log('=== 회원가입 완료 데이터 ===')
-      console.log(signupData)
+      // 회원가입 성공 — 로그인 처리
+      login(result, '')
 
-      // TODO: API 호출로 프로필 저장
+      // signup store 초기화
+      useSignupStore.getState().reset()
+
       router.push('/signup/complete')
-    } catch {
-      // 에러 처리
+    } catch (err) {
+      if (err instanceof ApiError) {
+        // 에러 처리 — 현재 페이지에서 표시
+        console.error('Registration failed:', err.code, err.message)
+      }
     }
   }
 
@@ -184,7 +184,7 @@ export default function SignupProfilePage() {
           variant="primary"
           size="full"
           disabled={!isValid}
-          isLoading={isSubmitting}
+          isLoading={isSubmitting || registerMemberMutation.isPending}
           loadingText="저장 중..."
           onClick={handleSubmit(onSubmit)}
         >
