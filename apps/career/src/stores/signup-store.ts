@@ -27,6 +27,7 @@ type ExperienceLevel = 'newcomer' | '1-3' | '3-5' | '5-10' | '10+'
 interface SignupFormData {
   phone: string
   username: string
+  signupToken: string
   name: string
   fields: ConstructionField[]
   primaryField: ConstructionField | null
@@ -38,13 +39,15 @@ interface SignupState {
   formData: SignupFormData
   setPhone: (phone: string) => void
   setUsername: (username: string) => void
-  setProfile: (profile: Partial<Omit<SignupFormData, 'phone' | 'username'>>) => void
+  setSignupToken: (token: string) => void
+  setProfile: (profile: Partial<Omit<SignupFormData, 'phone' | 'username' | 'signupToken'>>) => void
   reset: () => void
 }
 
 const initialFormData: SignupFormData = {
   phone: '',
   username: '',
+  signupToken: '',
   name: '',
   fields: [],
   primaryField: null,
@@ -63,6 +66,11 @@ export const useSignupStore = create<SignupState>()((set) => ({
   setUsername: (username) =>
     set((state) => ({
       formData: { ...state.formData, username },
+    })),
+
+  setSignupToken: (signupToken) =>
+    set((state) => ({
+      formData: { ...state.formData, signupToken },
     })),
 
   setProfile: (profile) =>
