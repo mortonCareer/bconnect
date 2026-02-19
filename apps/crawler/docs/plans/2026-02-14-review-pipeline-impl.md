@@ -15,6 +15,7 @@
 ### Task 1: config.py — 검수 DB ID 설정 추가
 
 **Files:**
+
 - Modify: `src/crawler/config.py:20-22`
 
 **Step 1: 환경변수 추가**
@@ -58,10 +59,12 @@ git commit -m "feat(crawler): add NOTION_REVIEW_DATABASE_ID config"
 ### Task 2: notion.py — 검수 DB 헬퍼 함수들 (TDD)
 
 **Files:**
+
 - Modify: `src/crawler/notion.py`
 - Modify: `tests/test_notion.py`
 
 이 태스크에서는 3개의 새 함수를 추가한다:
+
 1. `_build_review_properties()` — 검수 DB용 속성 dict 생성 (기존 + 검수상태)
 2. `REVIEW_REQUIRED_PROPERTIES` — 검수 DB 스키마 정의
 3. `validate_review_schema()` — 검수 DB 스키마 검증
@@ -140,6 +143,7 @@ git commit -m "feat(crawler): add _build_review_properties for review DB"
 ### Task 3: notion.py — save_to_review() & find_review_duplicate()
 
 **Files:**
+
 - Modify: `src/crawler/notion.py`
 
 이 함수들은 Notion API를 호출하므로 단위 테스트 없이 구현한다 (기존 `save_technician`/`find_duplicate` 패턴과 동일).
@@ -228,6 +232,7 @@ git commit -m "feat(crawler): add save_to_review and find_review_duplicate"
 ### Task 4: notion.py — find_approved() & move_to_production()
 
 **Files:**
+
 - Modify: `src/crawler/notion.py`
 
 #### Step 1: `find_approved()` 구현
@@ -370,9 +375,10 @@ git commit -m "feat(crawler): add find_approved and move_to_production"
 
 ---
 
-### Task 5: notion.py — _review_page_to_technician 테스트 (TDD)
+### Task 5: notion.py — \_review_page_to_technician 테스트 (TDD)
 
 **Files:**
+
 - Modify: `tests/test_notion.py`
 
 #### Step 1: 테스트 작성
@@ -451,6 +457,7 @@ git commit -m "test(crawler): add _review_page_to_technician tests"
 ### Task 6: main.py — run_approve() 함수
 
 **Files:**
+
 - Modify: `src/crawler/main.py`
 
 #### Step 1: import 추가
@@ -536,6 +543,7 @@ git commit -m "feat(crawler): add run_approve for review-to-production migration
 ### Task 7: main.py — 파이프라인 저장 대상 변경 + CLI 인자
 
 **Files:**
+
 - Modify: `src/crawler/main.py`
 
 #### Step 1: `run_pipeline()` 내 `save_technician` → 분기 처리
@@ -668,6 +676,7 @@ Notion MCP 도구로 DB 속성 추가가 가능한지 확인한다.
 불가능하면 사용자에게 Notion UI에서 수동 설정을 안내한다.
 
 필요한 속성:
+
 - 이름 → 업체명으로 rename (title)
 - 검수상태 (select): 대기중, 승인, 거절
 - 거절사유 (rich_text)
