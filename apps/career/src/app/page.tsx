@@ -7,7 +7,7 @@ import { useAuthStore } from '../stores/auth-store'
 
 export default function Home() {
   const router = useRouter()
-  const { user, isAuthenticated, logout: logoutStore } = useAuthStore()
+  const { member, isAuthenticated, logout: logoutStore } = useAuthStore()
   const logoutMutation = useLogout()
 
   const handleLogout = async () => {
@@ -26,7 +26,7 @@ export default function Home() {
         <h1 className="text-3xl font-bold">Career</h1>
         {isAuthenticated ? (
           <div className="flex items-center gap-4">
-            <span className="text-gray-600">{user?.name || user?.phone || '사용자'}님</span>
+            <span className="text-gray-600">{member?.name || member?.phone || '사용자'}님</span>
             <button
               onClick={handleLogout}
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
