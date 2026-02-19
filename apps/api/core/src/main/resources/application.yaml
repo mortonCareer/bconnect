@@ -19,3 +19,6 @@ app:
   cors:
     allowed-origins:
       - ${CORS_ALLOWED_ORIGIN:http://localhost:3000}
+    allowed-origin-patterns:
+      - https://morton-career*.vercel.app
+      - https://morton-plan*.vercel.app
