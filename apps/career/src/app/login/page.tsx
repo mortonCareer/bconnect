@@ -44,7 +44,7 @@ export default function LoginPage() {
       const result = await verifyCodeMutation.mutateAsync({
         data: { phone: phoneNumber, code },
       })
-      if (result.registered) {
+      if ('accessToken' in result) {
         // 기존 회원 — 바로 로그인
         login({ phone: phoneNumber }, result.accessToken)
         router.push('/')

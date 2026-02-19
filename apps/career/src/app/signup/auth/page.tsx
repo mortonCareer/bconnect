@@ -65,7 +65,7 @@ export default function SignupAuthPage() {
       const result = await verifyCodeMutation.mutateAsync({
         data: { phone: e164Phone, code },
       })
-      if (result.registered) {
+      if ('accessToken' in result) {
         // 이미 가입된 회원 — 로그인 처리 후 홈으로
         login({ phone: e164Phone }, result.accessToken)
         router.push('/')
