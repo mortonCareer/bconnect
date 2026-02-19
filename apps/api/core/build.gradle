@@ -9,6 +9,9 @@ dependencies {
     implementation project(':support')
     implementation project(':storage')
 
+    // MetricsConfig에서 ProcessorMetrics graceful degradation에 필요
+    implementation 'io.micrometer:micrometer-core'
+
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
