@@ -1,6 +1,7 @@
 """네이버 블로그 채널 — 검색 API로 후보 발견 → 블로거 프로필 탐색 → 본문 파싱."""
 
 import asyncio
+import json
 import re
 import logging
 from urllib.parse import urlparse, parse_qs
@@ -181,6 +182,32 @@ def _extract_blogger_name(soup: BeautifulSoup) -> str:
     return nick.get_text(strip=True) if nick else ""
 
 
+def _parse_business_info_from_html(html: str, blog_id: str) -> dict:
+    """모바일 페이지 __INITIAL_STATE__에서 사업자정보를 추출한다."""
+    match = re.search(r"window\.__INITIAL_STATE__\s*=\s*(.+?);\s*\n", html)
+    if not match:
+        return {}
+
+    raw = match.group(1)
+    state = None
+    for end in range(len(raw), max(0, len(raw) - 200), -1):
+        try:
+            state = json.loads(raw[:end])
+            break
+        except json.JSONDecodeError:
+            continue
+
+    if not state:
+        return {}
+
+    biz = state.get("blogHome", {}).get("blogBusinessInfo", {}).get(blog_id, {}).get("data", {})
+    if not biz.get("existBusinessInfo"):
+        return {}
+
+    bv = biz.get("businessView", {})
+    return _normalize_business_view(bv) if bv else {}
+
+
 async def fetch_blog_profile(blog_id: str) -> dict:
     """모바일 블로그 메인에서 프로필 소개·프로필 이미지·블로그 제목을 추출한다.
 
@@ -205,11 +232,15 @@ async def fetch_blog_profile(blog_id: str) -> dict:
 
     # 소개글: DOM 직접 파싱 (잘리지 않는 전체 텍스트) → og:description 폴백
     desc_el = soup.select_one("p.desc__Sxw5t")
+    if not desc_el:
+        desc_el = soup.select_one("div.intro_text") or soup.select_one("p.desc")
     if desc_el:
-        profile_intro = desc_el.get_text(strip=True)
+        profile_intro = desc_el.get_text(separator="\n", strip=True)
     else:
         og_desc = soup.select_one('meta[property="og:description"]')
         profile_intro = og_desc["content"].strip() if og_desc and og_desc.get("content") else ""
+        if profile_intro:
+            log.debug("프로필 소개 og:description 폴백 (잘림 가능): %s", blog_id)
 
     # 블로그 제목
     og_title = soup.select_one('meta[property="og:title"]')
@@ -225,10 +256,24 @@ async def fetch_blog_profile(blog_id: str) -> dict:
         og_img = soup.select_one('meta[property="og:image"]')
         profile_image_url = og_img["content"].strip() if og_img and og_img.get("content") else ""
 
+    # 배너 이미지: 모바일 blog_cover 배경 이미지 (데스크톱 CSS 폴백용)
+    banner_image_url = ""
+    cover_el = soup.select_one('div[class*="blog_cover"]')
+    if cover_el:
+        style = cover_el.get("style", "")
+        m = re.search(r"background-image\s*:\s*url\(([^)]+)\)", style)
+        if m and "pstatic.net" in m.group(1):
+            banner_image_url = m.group(1)
+
+    # 사업자정보: __INITIAL_STATE__ JSON에서 추출 (API 폴백용)
+    business_info_html = _parse_business_info_from_html(resp.text, blog_id)
+
     return {
         "profile_intro": profile_intro,
         "blog_title": blog_title,
         "profile_image_url": profile_image_url,
+        "banner_image_url": banner_image_url,
+        "business_info_html": business_info_html,
     }
 
 
@@ -259,11 +304,54 @@ async def fetch_blog_banner(blog_id: str) -> str:
         return ""
 
     banner_url = match.group(1)
-    # blogfiles.pstatic.net URL이 아니면 기본 스킨 이미지이므로 무시
-    if "blogfiles.pstatic.net" not in banner_url:
+    # pstatic.net 도메인이 아니면 기본 스킨 이미지이므로 무시
+    if "pstatic.net" not in banner_url:
         return ""
 
     return banner_url
+
+
+def _normalize_business_view(bv: dict) -> dict:
+    """businessView 원시 응답을 정규화된 dict로 변환한다."""
+    raw_phone = bv.get("phone", "")
+    return {
+        "business_name": bv.get("businessName", ""),
+        "representative": bv.get("ceo", ""),
+        "address": bv.get("address", ""),
+        "phone": raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else "",
+        "email": bv.get("email", ""),
+        "business_number": bv.get("businessLicenseNo", ""),
+    }
+
+
+async def fetch_business_info(blog_id: str, html_fallback: dict | None = None) -> dict:
+    """네이버 인증 사업자정보를 조회한다 (API → HTML 폴백).
+
+    html_fallback: fetch_blog_profile()에서 미리 파싱한 사업자정보 dict.
+    등록된 블로그만 데이터를 반환하며, 미등록 시 빈 dict.
+    """
+    # 1차: 전용 API
+    url = f"https://m.blog.naver.com/api/blogs/{blog_id}/business-info"
+    headers = {
+        "Referer": f"https://m.blog.naver.com/{blog_id}",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)",
+    }
+    client = _get_client()
+    try:
+        resp = await client.get(url, headers=headers)
+        resp.raise_for_status()
+        data = resp.json()
+        if data.get("isSuccess") and data.get("result", {}).get("existBusinessInfo"):
+            return _normalize_business_view(data["result"]["businessView"])
+    except Exception:
+        pass
+
+    # 2차: HTML 폴백 (fetch_blog_profile에서 미리 파싱된 결과)
+    if html_fallback:
+        log.debug("사업자정보 HTML 폴백 사용: %s", blog_id)
+        return html_fallback
+
+    return {}
 
 
 def extract_blog_id(blog_url: str) -> str | None:
@@ -363,6 +451,11 @@ async def explore_blogger(blog_url: str) -> dict:
         fetch_blog_banner(blog_id),
         fetch_blog_post(blog_url),
     )
+
+    # 4. 사업자정보: API 시도 → 실패 시 profile에서 파싱한 HTML 폴백 사용
+    biz_info = await fetch_business_info(
+        blog_id, html_fallback=profile.get("business_info_html"),
+    )
     source_urls = [blog_url]
 
     # 연락처 추출: 소개글 → 게시글 본문 → RSS 최근 글 순 폴백
@@ -403,17 +496,21 @@ async def explore_blogger(blog_url: str) -> dict:
                 log.info("연락처 발견 (RSS 폴백): %s → %s", url, rss_contact)
                 break
 
+    if biz_info:
+        log.info("사업자정보 발견: %s (%s)", biz_info.get("business_name"), blog_id)
+
     return {
         "about": main_post["about"],
         "profile_intro": profile["profile_intro"],
         "blog_title": profile["blog_title"],
         "blog_home_url": blog_home_url,
         "blogger_name": main_post["blogger_name"],
-        "banner_image_url": banner_image_url,
+        "banner_image_url": banner_image_url or profile.get("banner_image_url", ""),
         "profile_image_url": profile["profile_image_url"],
         "cover_image_url": main_post["cover_image_url"],
         "source_urls": source_urls,
         "phone_source": phone_source,  # "profile" | "post" | ""
+        "business_info": biz_info,  # 네이버 인증 사업자정보 (빈 dict이면 미등록)
         **contact,
     }
 

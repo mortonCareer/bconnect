@@ -241,6 +241,20 @@ def _build_properties(tech: Technician) -> dict:
     return properties
 
 
+REVIEW_REQUIRED_PROPERTIES: dict[str, str] = {
+    **REQUIRED_PROPERTIES,
+    "검수상태": "select",
+    "거절사유": "rich_text",
+}
+
+
+def _build_review_properties(tech: Technician, review_status: str = "대기중") -> dict:
+    """Technician → 검수 DB 속성 dict 변환. 프로덕션 속성 + 검수상태."""
+    properties = _build_properties(tech)
+    properties["검수상태"] = {"select": {"name": review_status}}
+    return properties
+
+
 def _build_body_markdown(tech: Technician) -> str:
     """Technician → 페이지 본문 마크다운 변환."""
     body_parts = []
@@ -385,3 +399,177 @@ def _markdown_to_blocks(md: str, max_blocks: int = 95) -> list[dict]:
                 "paragraph": {"rich_text": [{"text": {"content": content}}]},
             })
     return blocks
+
+
+# ── 검수 DB 함수 ──────────────────────────────────────────────
+
+
+async def find_review_duplicate(tech: Technician) -> str | None:
+    """검수 DB에서 중복 레코드를 찾는다. detail_url 기준."""
+    review_db_id = settings.notion_review_database_id
+    if not review_db_id or not tech.detail_url:
+        return None
+
+    results = await notion.request(
+        path=f"databases/{review_db_id}/query",
+        method="POST",
+        body={"filter": {"property": "자세히보기", "url": {"equals": tech.detail_url}}},
+    )
+    return results["results"][0]["id"] if results["results"] else None
+
+
+async def save_to_review(tech: Technician) -> str:
+    """기술자 레코드를 검수 DB에 저장하고 page_id를 반환한다.
+
+    중복이 있으면 업데이트하고 기존 page_id를 반환한다.
+    새 레코드는 검수상태=대기중으로 생성된다.
+    """
+    review_db_id = settings.notion_review_database_id
+
+    existing = await find_review_duplicate(tech)
+    if existing:
+        await update_technician(existing, tech, force=False)
+        return existing
+
+    properties = _build_review_properties(tech, review_status="대기중")
+    body_markdown = _build_body_markdown(tech)
+
+    page = await notion.pages.create(
+        parent={"database_id": review_db_id},
+        properties=properties,
+        children=_markdown_to_blocks(body_markdown),
+        **({"cover": {"type": "external", "external": {"url": tech.cover_image_url}}} if tech.cover_image_url else {}),
+    )
+
+    return page["id"]
+
+
+async def validate_review_schema() -> list[str]:
+    """검수 DB 스키마를 검증하고 문제가 있는 프로퍼티 목록을 반환한다."""
+    review_db_id = settings.notion_review_database_id
+    if not review_db_id:
+        return ["NOTION_REVIEW_DATABASE_ID가 설정되지 않았습니다"]
+
+    db = await notion.databases.retrieve(database_id=review_db_id)
+    db_props = db["properties"]
+
+    errors = []
+    for name, expected_type in REVIEW_REQUIRED_PROPERTIES.items():
+        if name not in db_props:
+            errors.append(f"검수 DB: '{name}' 프로퍼티 없음")
+        elif db_props[name]["type"] != expected_type:
+            errors.append(f"검수 DB: '{name}' 타입 불일치 (기대: {expected_type}, 실제: {db_props[name]['type']})")
+
+    return errors
+
+
+def _review_page_to_technician(props: dict) -> Technician:
+    """검수 DB 페이지 속성을 Technician 모델로 변환한다."""
+    trades = _read_prop(props, "시공분야")
+    if not isinstance(trades, list):
+        trades = [trades] if trades else []
+
+    channels = _read_prop(props, "채널")
+    if not isinstance(channels, list):
+        channels = [channels] if channels else []
+
+    credentials = _read_prop(props, "인증")
+    if not isinstance(credentials, list):
+        credentials = [credentials] if credentials else []
+
+    return Technician(
+        name=_read_prop(props, "업체명") or "이름 없음",
+        representative=_read_prop(props, "대표자") or "",
+        rank=_read_prop(props, "구분") or "기공",
+        trades=trades,
+        region=_read_prop(props, "지역") or "",
+        address=_read_prop(props, "주소") or "",
+        phone=_read_prop(props, "연락처") or "",
+        email=_read_prop(props, "이메일") or "",
+        business_number=_read_prop(props, "사업자등록번호") or "",
+        experience=_read_prop(props, "경력"),
+        credentials=credentials,
+        detail_url=_read_prop(props, "자세히보기") or "",
+        channels=channels,
+    )
+
+
+async def find_approved() -> list[dict]:
+    """검수 DB에서 검수상태=승인인 레코드를 모두 가져온다."""
+    review_db_id = settings.notion_review_database_id
+    pages: list[dict] = []
+    start_cursor = None
+
+    while True:
+        body: dict = {
+            "filter": {"property": "검수상태", "select": {"equals": "승인"}},
+            "page_size": 100,
+        }
+        if start_cursor:
+            body["start_cursor"] = start_cursor
+
+        results = await notion.request(
+            path=f"databases/{review_db_id}/query",
+            method="POST",
+            body=body,
+        )
+
+        for page in results["results"]:
+            pages.append({
+                "page_id": page["id"],
+                "properties": page["properties"],
+                "cover": page.get("cover"),
+            })
+
+        if not results.get("has_more"):
+            break
+        start_cursor = results["next_cursor"]
+
+    return pages
+
+
+async def move_to_production(review_page: dict) -> tuple[str, str]:
+    """검수 DB 승인 건을 프로덕션 DB로 복사한다.
+
+    Returns:
+        (page_id, status) — status는 "created" | "updated"
+    """
+    props = review_page["properties"]
+    tech = _review_page_to_technician(props)
+
+    # 검수 DB 페이지 본문 블록 읽기
+    review_page_id = review_page["page_id"]
+    blocks_result = await notion.blocks.children.list(block_id=review_page_id)
+    body_blocks = []
+    for block in blocks_result["results"]:
+        btype = block["type"]
+        if btype in ("paragraph", "heading_2", "divider"):
+            body_blocks.append({
+                "object": "block",
+                "type": btype,
+                btype: block[btype],
+            })
+
+    # 커버 이미지
+    cover = review_page.get("cover")
+    if cover and cover.get("type") == "external":
+        tech = tech.model_copy(update={"cover_image_url": cover["external"]["url"]})
+
+    # 프로덕션 DB 중복 체크
+    existing = await find_duplicate(tech)
+    if existing:
+        await update_technician(existing, tech, force=True)
+        return existing, "updated"
+
+    # 새로 생성
+    prod_properties = _build_properties(tech)
+    create_kwargs = {
+        "parent": {"database_id": settings.notion_database_id},
+        "properties": prod_properties,
+        "children": body_blocks if body_blocks else _markdown_to_blocks(_build_body_markdown(tech)),
+    }
+    if tech.cover_image_url:
+        create_kwargs["cover"] = {"type": "external", "external": {"url": tech.cover_image_url}}
+
+    page = await notion.pages.create(**create_kwargs)
+    return page["id"], "created"

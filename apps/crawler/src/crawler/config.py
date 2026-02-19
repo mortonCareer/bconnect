@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     # Notion
     notion_token: str
     notion_database_id: str = "bc8b0266918d4d91b8171ba5203d0bdf"
+    notion_review_database_id: str = ""  # 검수 DB (비어있으면 검수 기능 비활성)
 
     # YouTube (optional)
     youtube_api_key: str = ""

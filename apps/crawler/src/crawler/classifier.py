@@ -30,9 +30,10 @@ SYSTEM_PROMPT = """\
 - 매칭 불가 시 "기타"
 
 ### 3. rank (직급)
-- 반장: 팀/업체를 운영 (예: "OO공사", 대표, 팀장, 직원 보유)
-- 기공: 기본값
+- 반장: 소개란에서 본인이 "반장", "팀장", "대표" 등으로 명시한 경우만
+- 기공: 기본값 — 확신 없으면 기공 유지
 - 준기공/조공: 명시적 단서가 있을 때만
+- 주의: 사업자등록번호·업체명만으로 반장 판단 금지
 
 ### 4. region (지역)
 아래 목록에서 선택: {regions}
@@ -64,8 +65,13 @@ SYSTEM_PROMPT = """\
 - "000-00-00000" 형식의 사업자등록번호
 - 찾을 수 없으면 빈 문자열
 
+### 10. is_professional (전문업자 여부)
+- true: 건설/인테리어 시공을 직접 수행하는 전문 기술자 또는 업체
+- false: DIY 블로거, 제품 리뷰어, 인테리어 정보 블로거, 일반인, 자재 판매만 하는 업체
+- 판단 기준: 직접 시공을 수행하는지, 팀/인력을 보유하는지, 시공 사례가 있는지
+
 ## 응답 형식 (JSON만, 설명 없이)
-{{"name": "", "trades": [], "rank": "기공", "region": "", "address": "", "phone": "", "email": "", "representative": "", "business_number": ""}}
+{{"name": "", "trades": [], "rank": "기공", "region": "", "address": "", "phone": "", "email": "", "representative": "", "business_number": "", "is_professional": true}}
 """.format(trades=", ".join(TRADES), regions=", ".join(REGIONS))
 
 # 수동 모드 파일 경로
@@ -78,10 +84,8 @@ def _empty_result() -> dict:
     return {
         "name": "", "trades": ["기타"], "rank": "기공", "region": "",
         "address": "", "phone": "", "email": "", "representative": "", "business_number": "",
+        "is_professional": True,
     }
-
-
-_BUSINESS_KEYWORDS = ("인테리어", "건설", "시공", "공사", "건축", "설비", "타일", "도장", "방수", "전기", "배관", "설계", "철거", "조경", "소방", "도배")
 
 
 def _validate_result(result: dict) -> dict:
@@ -99,9 +103,9 @@ def _validate_result(result: dict) -> dict:
     # phone: 숫자 이외 문자 제거
     raw_phone = result.get("phone", "")
     result["phone"] = raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else ""
-    # rank 보정: 업체 단서가 있으면 반장으로 승격
-    if result.get("business_number") or any(kw in result.get("name", "") for kw in _BUSINESS_KEYWORDS):
-        result["rank"] = "반장"
+    # 전문업자 여부 정규화
+    result.setdefault("is_professional", True)
+    result["is_professional"] = bool(result["is_professional"])
     return result
 
 
@@ -134,7 +138,7 @@ async def _classify_with_anthropic(name: str, about: str, headline: str = "") ->
     """Anthropic Claude API로 분류."""
     import anthropic
 
-    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
+    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=5)
     user_content = f"업체명(블로그닉네임): {name}\n한줄소개: {headline}\n소개:\n{about}"
 
     resp = await client.messages.create(
@@ -160,7 +164,7 @@ async def _classify_with_openai(name: str, about: str, headline: str = "") -> tu
     """OpenAI API로 분류."""
     from openai import AsyncOpenAI
 
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    client = AsyncOpenAI(api_key=settings.openai_api_key, max_retries=5)
     user_content = f"업체명(블로그닉네임): {name}\n한줄소개: {headline}\n소개:\n{about}"
 
     resp = await client.chat.completions.create(
@@ -179,6 +183,134 @@ async def _classify_with_openai(name: str, about: str, headline: str = "") -> tu
         "output_tokens": resp.usage.completion_tokens,
     }
     return _validate_result(result), usage
+
+
+VISION_PROMPT = """\
+이 이미지는 한국 건설/인테리어 업체의 블로그 배너입니다.
+이미지에 보이는 텍스트 정보를 추출하세요.
+
+추출할 항목 (보이는 것만):
+- phone: 전화번호 (숫자만, 예: "01012345678")
+- email: 이메일 주소
+- business_number: 사업자등록번호 (000-00-00000)
+- representative: 대표자 이름
+- address: 주소
+
+JSON만 응답 (설명 없이):
+{"phone": "", "email": "", "business_number": "", "representative": "", "address": ""}
+"""
+
+
+def _parse_json_response(text: str) -> dict | None:
+    """LLM 응답에서 JSON을 추출한다. 실패 시 None."""
+    text = text.strip()
+    if text.startswith("```"):
+        text = text.split("```")[1]
+        if text.startswith("json"):
+            text = text[4:]
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        return None
+
+
+async def extract_text_from_image(image_url: str) -> tuple[dict, dict]:
+    """배너 이미지에서 연락처·사업자정보를 Vision API로 추출한다.
+
+    classify()와 동일한 폴백 패턴: Anthropic → OpenAI → 스킵
+
+    Returns:
+        (extracted_dict, usage_dict) — 추출 실패 시 빈 dict
+    """
+    if not image_url:
+        return {}, _NO_USAGE
+
+    import base64
+    from crawler.channels.naver_blog import _get_client as _get_http_client
+
+    # 이미지 다운로드
+    try:
+        resp = await _get_http_client().get(image_url)
+        resp.raise_for_status()
+    except Exception:
+        log.warning("배너 이미지 다운로드 실패: %s", image_url)
+        return {}, _NO_USAGE
+
+    image_data = base64.standard_b64encode(resp.content).decode("utf-8")
+    media_type = resp.headers.get("content-type", "image/jpeg")
+
+    if settings.anthropic_api_key:
+        extracted, usage = await _vision_with_anthropic(image_data, media_type)
+    elif settings.openai_api_key and settings.openai_api_key != "skip":
+        extracted, usage = await _vision_with_openai(image_data, media_type)
+    else:
+        return {}, _NO_USAGE
+
+    if not extracted:
+        return {}, usage
+
+    # phone 정규화
+    raw_phone = extracted.get("phone", "")
+    extracted["phone"] = raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else ""
+    return extracted, usage
+
+
+async def _vision_with_anthropic(image_data: str, media_type: str) -> tuple[dict | None, dict]:
+    """Anthropic Claude Vision으로 이미지 텍스트 추출."""
+    import anthropic
+
+    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=5)
+    try:
+        resp = await client.messages.create(
+            model=settings.anthropic_model,
+            max_tokens=256,
+            messages=[{
+                "role": "user",
+                "content": [
+                    {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": image_data}},
+                    {"type": "text", "text": VISION_PROMPT},
+                ],
+            }],
+            temperature=0.0,
+        )
+    except Exception:
+        log.warning("Anthropic Vision API 호출 실패")
+        return None, _NO_USAGE
+
+    usage = {"input_tokens": resp.usage.input_tokens, "output_tokens": resp.usage.output_tokens}
+    extracted = _parse_json_response(resp.content[0].text)
+    if not extracted:
+        log.warning("Vision 응답 JSON 파싱 실패: %s", resp.content[0].text[:200])
+    return extracted, usage
+
+
+async def _vision_with_openai(image_data: str, media_type: str) -> tuple[dict | None, dict]:
+    """OpenAI Vision으로 이미지 텍스트 추출."""
+    from openai import AsyncOpenAI
+
+    client = AsyncOpenAI(api_key=settings.openai_api_key, max_retries=5)
+    try:
+        resp = await client.chat.completions.create(
+            model=settings.openai_model,
+            messages=[{
+                "role": "user",
+                "content": [
+                    {"type": "image_url", "image_url": {"url": f"data:{media_type};base64,{image_data}"}},
+                    {"type": "text", "text": VISION_PROMPT},
+                ],
+            }],
+            temperature=0.0,
+            max_tokens=256,
+        )
+    except Exception:
+        log.warning("OpenAI Vision API 호출 실패")
+        return None, _NO_USAGE
+
+    usage = {"input_tokens": resp.usage.prompt_tokens, "output_tokens": resp.usage.completion_tokens}
+    extracted = _parse_json_response(resp.choices[0].message.content)
+    if not extracted:
+        log.warning("Vision 응답 JSON 파싱 실패: %s", resp.choices[0].message.content[:200])
+    return extracted, usage
 
 
 async def save_pending(items: list[dict]) -> Path:
