@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuthStore } from '@/stores/auth-store'
+import { useSignupStore } from '@/stores/signup-store'
 import { ApiError, ErrorCode, useSendOtp, useVerifyOtp } from '@morton/api-client'
 import { formatPhoneNumber, isValidPhoneNumber, toE164 } from '@morton/config/phone'
 import { Button } from '@morton/ui'
@@ -13,6 +14,7 @@ type Step = 'phone' | 'otp'
 export default function SignupAuthPage() {
   const router = useRouter()
   const { setPhoneNumber, setCodeSent, login } = useAuthStore()
+  const { setSignupToken, setPhone: setSignupPhone } = useSignupStore()
 
   const [step, setStep] = useState<Step>('phone')
   const [phone, setPhone] = useState('')
@@ -63,8 +65,14 @@ export default function SignupAuthPage() {
       const result = await verifyCodeMutation.mutateAsync({
         data: { phone: e164Phone, code },
       })
-      if (result.accessToken && result.user) {
-        login(result.user, result.accessToken)
+      if (result.registered) {
+        // 이미 가입된 회원 — 로그인 처리 후 홈으로
+        login({ phone: e164Phone }, result.accessToken)
+        router.push('/')
+      } else {
+        // 신규 유저 — signupToken 저장 후 회원가입 진행
+        setSignupPhone(e164Phone)
+        setSignupToken(result.signupToken)
         router.push('/signup/username')
       }
     } catch (err) {
@@ -86,7 +94,7 @@ export default function SignupAuthPage() {
         setError('인증에 실패했습니다.')
       }
     }
-  }, [phone, code, login, router, verifyCodeMutation])
+  }, [phone, code, login, router, verifyCodeMutation, setSignupPhone, setSignupToken])
 
   // 재발송
   const handleResend = useCallback(async () => {
