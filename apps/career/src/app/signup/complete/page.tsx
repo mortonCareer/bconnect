@@ -5,10 +5,10 @@ import { buttonVariants, CheckIcon } from '@morton/ui'
 import { useAuthStore } from '@/stores/auth-store'
 
 export default function SignupCompletePage() {
-  const user = useAuthStore((state) => state.user)
+  const member = useAuthStore((state) => state.member)
 
   // 사용자 이름 (없으면 기본값)
-  const userName = user?.name || '회원'
+  const userName = member?.name || '회원'
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
