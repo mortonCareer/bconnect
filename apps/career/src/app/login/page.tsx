@@ -3,7 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSendOtp, useVerifyOtp } from '@morton/api-client'
-import { formatPhoneNumber, toE164, isValidPhoneNumber } from '@morton/config/phone'
+import {
+  formatPhoneNumber,
+  toE164,
+  toNationalNumber,
+  isValidPhoneNumber,
+} from '@morton/config/phone'
 import { useAuthStore } from '@/stores/auth-store'
 
 export default function LoginPage() {
@@ -25,7 +30,9 @@ export default function LoginPage() {
     setPhoneNumber(e164Phone)
 
     try {
-      const result = await sendCodeMutation.mutateAsync({ data: { phone: e164Phone } })
+      const result = await sendCodeMutation.mutateAsync({
+        data: { phone: toNationalNumber(phone) },
+      })
       if (result.expiresAt) {
         setCodeSent(result.expiresAt)
       }
@@ -42,7 +49,7 @@ export default function LoginPage() {
 
     try {
       const result = await verifyCodeMutation.mutateAsync({
-        data: { phone: phoneNumber, code },
+        data: { phone: toNationalNumber(phoneNumber), code },
       })
       if ('accessToken' in result) {
         // 기존 회원 — 바로 로그인

@@ -39,3 +39,13 @@ export function fromE164(e164Phone: string): string {
   if (!parsed) throw new Error('Invalid E.164 phone number')
   return parsed.formatNational()
 }
+
+/**
+ * 전화번호를 국내 숫자만 형식으로 변환 (01012345678)
+ * API 호출 시 사용 — 백엔드가 \d{10,11} 형식을 기대
+ */
+export function toNationalNumber(phoneNumber: string): string {
+  const parsed = parsePhoneNumber(phoneNumber, 'KR')
+  if (!parsed) throw new Error('Invalid phone number')
+  return `0${parsed.nationalNumber}`
+}
