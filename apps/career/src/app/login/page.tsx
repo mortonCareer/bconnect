@@ -44,9 +44,13 @@ export default function LoginPage() {
       const result = await verifyCodeMutation.mutateAsync({
         data: { phone: phoneNumber, code },
       })
-      if (result.accessToken && result.user) {
-        login(result.user, result.accessToken)
+      if ('accessToken' in result) {
+        // 기존 회원 — 바로 로그인
+        login({ phone: phoneNumber }, result.accessToken)
         router.push('/')
+      } else {
+        // 미가입 유저 — 회원가입 플로우로 이동
+        router.push('/signup/auth')
       }
     } catch {
       setError('인증번호가 올바르지 않습니다.')

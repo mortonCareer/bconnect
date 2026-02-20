@@ -93,6 +93,7 @@ type RequestConfig = {
   method: string
   headers?: Record<string, string>
   data?: unknown
+  params?: Record<string, unknown>
   signal?: AbortSignal
 }
 
@@ -105,6 +106,7 @@ export async function customFetch<T>(config: RequestConfig, _options?: RequestIn
       method: config.method,
       json: config.data,
       headers: config.headers,
+      searchParams: config.params as Record<string, string | number | boolean> | undefined,
       signal: config.signal,
     })
 

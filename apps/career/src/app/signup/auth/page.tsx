@@ -1,7 +1,8 @@
 'use client'
 
 import { useAuthStore } from '@/stores/auth-store'
-import { ApiError, ErrorCode, useSendOtp, useVerifyOtp } from '@morton/api-client'
+import { useSignupStore } from '@/stores/signup-store'
+import { ApiError, useSendOtp, useVerifyOtp } from '@morton/api-client'
 import { formatPhoneNumber, isValidPhoneNumber, toE164 } from '@morton/config/phone'
 import { Button } from '@morton/ui'
 import { useRouter } from 'next/navigation'
@@ -13,6 +14,7 @@ type Step = 'phone' | 'otp'
 export default function SignupAuthPage() {
   const router = useRouter()
   const { setPhoneNumber, setCodeSent, login } = useAuthStore()
+  const { setSignupToken, setPhone: setSignupPhone } = useSignupStore()
 
   const [step, setStep] = useState<Step>('phone')
   const [phone, setPhone] = useState('')
@@ -39,10 +41,10 @@ export default function SignupAuthPage() {
     } catch (err) {
       if (err instanceof ApiError) {
         switch (err.code) {
-          case ErrorCode.OTP_RATE_LIMIT:
+          case 'OTP_RATE_LIMIT':
             setError('인증번호 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.')
             break
-          case ErrorCode.INVALID_PHONE:
+          case 'INVALID_PHONE':
             setError('유효하지 않은 전화번호입니다.')
             break
           default:
@@ -63,20 +65,26 @@ export default function SignupAuthPage() {
       const result = await verifyCodeMutation.mutateAsync({
         data: { phone: e164Phone, code },
       })
-      if (result.accessToken && result.user) {
-        login(result.user, result.accessToken)
+      if ('accessToken' in result) {
+        // 이미 가입된 회원 — 로그인 처리 후 홈으로
+        login({ phone: e164Phone }, result.accessToken)
+        router.push('/')
+      } else {
+        // 신규 유저 — signupToken 저장 후 회원가입 진행
+        setSignupPhone(e164Phone)
+        setSignupToken(result.signupToken)
         router.push('/signup/username')
       }
     } catch (err) {
       if (err instanceof ApiError) {
         switch (err.code) {
-          case ErrorCode.OTP_INVALID:
+          case 'OTP_INVALID':
             setError('올바르지 않은 인증번호입니다.')
             break
-          case ErrorCode.OTP_EXPIRED:
+          case 'OTP_EXPIRED':
             setError('인증번호가 만료되었습니다. 재요청해주세요.')
             break
-          case ErrorCode.OTP_MAX_ATTEMPTS:
+          case 'OTP_MAX_ATTEMPTS':
             setError('인증 시도 횟수를 초과했습니다. 새로운 인증번호를 요청해주세요.')
             break
           default:
@@ -86,7 +94,7 @@ export default function SignupAuthPage() {
         setError('인증에 실패했습니다.')
       }
     }
-  }, [phone, code, login, router, verifyCodeMutation])
+  }, [phone, code, login, router, verifyCodeMutation, setSignupPhone, setSignupToken])
 
   // 재발송
   const handleResend = useCallback(async () => {

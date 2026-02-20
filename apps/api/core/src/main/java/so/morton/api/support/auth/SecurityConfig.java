@@ -75,6 +75,7 @@ public class SecurityConfig {
                 .cors(cc -> cc.configurationSource(req -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(corsProperties.allowedOrigins());
+                    config.setAllowedOriginPatterns(corsProperties.allowedOriginPatterns());
                     config.setAllowedMethods(Collections.singletonList("*"));
                     config.setAllowedHeaders(Collections.singletonList("*"));
                     config.setExposedHeaders(List.of("Authorization"));
