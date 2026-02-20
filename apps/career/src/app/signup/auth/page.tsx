@@ -3,7 +3,12 @@
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import { ApiError, useSendOtp, useVerifyOtp } from '@morton/api-client'
-import { formatPhoneNumber, isValidPhoneNumber, toE164 } from '@morton/config/phone'
+import {
+  formatPhoneNumber,
+  isValidPhoneNumber,
+  toE164,
+  toNationalNumber,
+} from '@morton/config/phone'
 import { Button } from '@morton/ui'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
@@ -32,7 +37,9 @@ export default function SignupAuthPage() {
     setPhoneNumber(e164Phone)
 
     try {
-      const result = await sendCodeMutation.mutateAsync({ data: { phone: e164Phone } })
+      const result = await sendCodeMutation.mutateAsync({
+        data: { phone: toNationalNumber(phone) },
+      })
       if (result.expiresAt) {
         setCodeSent(result.expiresAt)
         setExpiresAt(result.expiresAt)
@@ -63,7 +70,7 @@ export default function SignupAuthPage() {
 
     try {
       const result = await verifyCodeMutation.mutateAsync({
-        data: { phone: e164Phone, code },
+        data: { phone: toNationalNumber(phone), code },
       })
       if ('accessToken' in result) {
         // 이미 가입된 회원 — 로그인 처리 후 홈으로
