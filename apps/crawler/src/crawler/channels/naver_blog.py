@@ -313,12 +313,15 @@ async def fetch_blog_banner(blog_id: str) -> str:
 
 def _normalize_business_view(bv: dict) -> dict:
     """businessView 원시 응답을 정규화된 dict로 변환한다."""
+    from crawler.classifier import format_phone
+
     raw_phone = bv.get("phone", "")
+    digits = raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else ""
     return {
         "business_name": bv.get("businessName", ""),
         "representative": bv.get("ceo", ""),
         "address": bv.get("address", ""),
-        "phone": raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else "",
+        "phone": format_phone(digits),
         "email": bv.get("email", ""),
         "business_number": bv.get("businessLicenseNo", ""),
     }
@@ -404,6 +407,8 @@ _YOUTUBE_RE = re.compile(
 
 def extract_contact_info(text: str) -> dict:
     """텍스트에서 연락처, 이메일, 인스타, 유튜브 계정을 추출한다."""
+    from crawler.classifier import format_phone
+
     phones = _PHONE_RE.findall(text)
     emails = _EMAIL_RE.findall(text)
     # 인스타: 두 그룹 중 매칭된 것 사용
@@ -412,8 +417,9 @@ def extract_contact_info(text: str) -> dict:
     # 유튜브: 두 그룹 중 매칭된 것 사용
     yt_matches = _YOUTUBE_RE.findall(text)
     youtube = next((g1 or g2 for g1, g2 in yt_matches), "") if yt_matches else ""
+    raw = phones[0].replace("-", "").replace(".", "").replace(" ", "") if phones else ""
     return {
-        "phone": phones[0].replace("-", "").replace(".", "").replace(" ", "") if phones else "",
+        "phone": format_phone(raw),
         "email": emails[0] if emails else "",
         "instagram": insta,
         "youtube": youtube,
@@ -456,7 +462,7 @@ async def explore_blogger(blog_url: str) -> dict:
     biz_info = await fetch_business_info(
         blog_id, html_fallback=profile.get("business_info_html"),
     )
-    source_urls = [blog_url]
+    source_urls = [blog_home_url]
 
     # 연락처 추출: 소개글 → 게시글 본문 → RSS 최근 글 순 폴백
     contact = extract_contact_info(profile["profile_intro"])
@@ -492,7 +498,6 @@ async def explore_blogger(blog_url: str) -> dict:
                     if key == "phone":
                         phone_source = "post"
             if contact["phone"] or contact["email"]:
-                source_urls.append(url)
                 log.info("연락처 발견 (RSS 폴백): %s → %s", url, rss_contact)
                 break
 

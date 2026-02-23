@@ -10,7 +10,7 @@ from crawler.channels.instagram import (
     build_search_queries as build_instagram_queries, extract_username as extract_instagram_username,
     InstagramBlockedError, reset_block_counter,
 )
-from crawler.classifier import classify
+from crawler.classifier import classify, format_phone, infer_region_from_address, METRO_REGIONS
 from crawler.config import settings
 from crawler.models import Technician
 from crawler.notion import (
@@ -18,6 +18,8 @@ from crawler.notion import (
     find_duplicate_by_url, touch_synced_at,
     find_pages_needing_enrichment, find_approved, move_to_production,
     validate_schema, validate_review_schema,
+    find_all_review_pages, patch_review_page, read_page_blocks, update_block_text,
+    _read_prop,
 )
 from crawler.report import PipelineReport
 from crawler.progress import create_progress, print_summary, console
@@ -57,6 +59,7 @@ async def process_blog_result(
     dry_run: bool = False,
     force: bool = False,
     direct: bool = False,
+    metro_only: bool = False,
 ) -> Technician | None:
     """검색 결과 1건 → 블로거 프로필 탐색 → 분류 → Technician 생성."""
     blog_url = item["link"]
@@ -136,6 +139,14 @@ async def process_blog_result(
             report.add_skipped(blog_url, blogger_name, "비전문업자")
         return None
 
+    # 수도권 필터: --full 모드에서 비수도권 결과 스킵
+    region = classification.get("region", "")
+    if metro_only and region and region not in METRO_REGIONS:
+        log.info("비수도권, 건너뜀: %s (%s, 지역=%s)", blogger_name, blog_url, region)
+        if report:
+            report.add_skipped(blog_url, blogger_name, f"비수도권({region})")
+        return None
+
     # 업체명: classify 결과 → blog_title → blogger_name 순 폴백
     name = (
         classification.get("name")
@@ -173,8 +184,8 @@ async def process_blog_result(
         if place:
             if not phone and place["telephone"]:
                 raw = place["telephone"].replace("-", "").replace(" ", "")
-                if raw.startswith("01") or raw.startswith("02") or raw.startswith("0"):
-                    phone = raw
+                if raw.startswith("0"):
+                    phone = format_phone(raw)
                     log.info("지역검색 연락처 보충: %s → %s", name, phone)
             if not address and (place["road_address"] or place["address"]):
                 address = place["road_address"] or place["address"]
@@ -218,11 +229,19 @@ async def process_blog_result(
         if biz.get("business_number"):
             classification["business_number"] = biz["business_number"]
 
+    # 지역 보정: 주소에서 추론한 지역이 LLM 결과와 다르면 주소 기반으로 교체
+    region = classification.get("region", "")
+    if address:
+        addr_region = infer_region_from_address(address)
+        if addr_region and addr_region != region:
+            log.info("지역 보정: %s → %s (주소: %s)", region or "(없음)", addr_region, address[:30])
+            region = addr_region
+
     tech = Technician(
         name=name,
         rank=classification["rank"],
         trades=classification["trades"],
-        region=classification.get("region", ""),
+        region=region,
         address=address,
         representative=classification.get("representative", ""),
         business_number=classification.get("business_number", ""),
@@ -365,7 +384,7 @@ async def process_instagram_result(
             if not phone and place["telephone"]:
                 raw = place["telephone"].replace("-", "").replace(" ", "")
                 if raw.startswith("0"):
-                    phone = raw
+                    phone = format_phone(raw)
                     log.info("지역검색 연락처 보충: %s → %s", name, phone)
             if not address and (place["road_address"] or place["address"]):
                 address = place["road_address"] or place["address"]
@@ -395,7 +414,7 @@ async def process_instagram_result(
 async def run_pipeline(
     query: str, count: int = 10, seen_blog_ids: set[str] | None = None,
     report: PipelineReport | None = None, dry_run: bool = False,
-    force: bool = False, direct: bool = False,
+    force: bool = False, direct: bool = False, metro_only: bool = False,
 ) -> list[str]:
     """단일 검색어로 파이프라인을 실행한다.
 
@@ -440,7 +459,7 @@ async def run_pipeline(
 
     async def _handle(item: dict) -> None:
         async with sem:
-            tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force, direct=direct)
+            tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force, direct=direct, metro_only=metro_only)
         if tech is None:
             return
 
@@ -511,6 +530,7 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_ru
                     await run_pipeline(
                         q, count=per_query, seen_blog_ids=seen_blog_ids,
                         report=report, dry_run=dry_run, force=force, direct=direct,
+                        metro_only=True,
                     )
                     break
                 except Exception as exc:
@@ -826,7 +846,7 @@ async def run_enrich() -> PipelineReport:
                     if not phone and place["telephone"]:
                         raw = place["telephone"].replace("-", "").replace(" ", "")
                         if raw.startswith("0"):
-                            phone = raw
+                            phone = format_phone(raw)
                             log.info("지역검색 연락처 보충: %s → %s", tech_name, phone)
                     if not address and (place["road_address"] or place["address"]):
                         address = place["road_address"] or place["address"]
@@ -892,6 +912,122 @@ async def run_enrich() -> PipelineReport:
         await asyncio.gather(*[_wrap(p) for p in pages])
 
     log.info("보강 완료: %d/%d건", enriched, len(pages))
+    return report
+
+
+async def run_patch_review(dry_run: bool = False) -> PipelineReport:
+    """검수 DB 기존 데이터에 피드백 수정사항을 소급 적용한다.
+
+    1. 연락처 하이픈 포매팅
+    2. 구분(rank) "기공" → 비움
+    3. 지역 보정 (주소 기반)
+    4. 출처 URL → 블로그 홈 URL (본문 블록)
+    """
+    import re as _re
+
+    pages = await find_all_review_pages()
+    log.info("검수 DB 패치 대상: %d건", len(pages))
+
+    report = PipelineReport()
+    report.mode = "검수 DB 패치"
+    report.total_searched = len(pages)
+
+    patched = 0
+    sem = asyncio.Semaphore(CONCURRENCY)
+
+    progress = create_progress()
+    with progress:
+        task = progress.add_task(f"검수 DB 패치 ({len(pages)}건)", total=len(pages))
+
+        async def _handle(page: dict) -> None:
+            nonlocal patched
+            page_id = page["page_id"]
+            props = page["properties"]
+            name = _read_prop(props, "업체명") or "(이름없음)"
+
+            progress.update(task, description=f"패치: {name[:20]}")
+
+            updates: dict = {}
+            changes: list[str] = []
+
+            async with sem:
+                # 1. 연락처 하이픈 포매팅
+                phone = _read_prop(props, "연락처")
+                if phone:
+                    formatted = format_phone(phone)
+                    if formatted != phone:
+                        updates["연락처"] = {"phone_number": formatted}
+                        changes.append(f"연락처: {phone} → {formatted}")
+
+                # 2. 구분(rank) "기공" → 비움
+                rank = _read_prop(props, "구분")
+                if rank == "기공":
+                    updates["구분"] = {"select": None}
+                    changes.append("구분: 기공 → (비움)")
+
+                # 3. 지역 보정 (주소 기반)
+                address = _read_prop(props, "주소")
+                region = _read_prop(props, "지역")
+                if address:
+                    addr_region = infer_region_from_address(address)
+                    if addr_region and addr_region != region:
+                        updates["지역"] = {"select": {"name": addr_region}}
+                        changes.append(f"지역: {region or '(없음)'} → {addr_region}")
+
+                # 4. 출처 URL → 블로그 홈 (본문 블록)
+                source_changed = False
+                try:
+                    blocks = await read_page_blocks(page_id)
+                    for block in blocks:
+                        if block["type"] != "paragraph":
+                            continue
+                        rt = block.get("paragraph", {}).get("rich_text", [])
+                        if not rt:
+                            continue
+                        text = rt[0].get("plain_text", "")
+                        if not text.startswith("출처:"):
+                            continue
+                        # 게시글 URL → 블로그 홈 URL 변환
+                        new_text = text
+                        urls = _re.findall(r"https?://(?:m\.)?blog\.naver\.com/(\w+)/\d+", text)
+                        for blog_id in set(urls):
+                            # 게시글 URL 패턴을 블로그 홈으로 치환
+                            new_text = _re.sub(
+                                rf"https?://(?:m\.)?blog\.naver\.com/{blog_id}/\d+",
+                                f"https://blog.naver.com/{blog_id}",
+                                new_text,
+                            )
+                        if new_text != text:
+                            if not dry_run:
+                                await update_block_text(block["id"], new_text)
+                            source_changed = True
+                            changes.append(f"출처: 게시글→블로그홈")
+                except Exception as exc:
+                    log.warning("블록 읽기 실패: %s (%s)", name, exc)
+
+                if not changes:
+                    progress.advance(task)
+                    return
+
+                if dry_run:
+                    progress.console.print(f"  [yellow]dry-run[/yellow] {name} — {', '.join(changes)}")
+                else:
+                    if updates:
+                        await patch_review_page(page_id, updates)
+                    progress.console.print(f"  [green]v[/green] {name} — {', '.join(changes)}")
+
+                patched += 1
+                report.add_saved(
+                    blog_url="", blogger_name=name,
+                    tech_name=name, rank="", trades=[],
+                    phone="", page_id=page_id,
+                )
+
+            progress.advance(task)
+
+        await asyncio.gather(*[_handle(p) for p in pages])
+
+    log.info("패치 완료: %d/%d건 수정", patched, len(pages))
     return report
 
 
@@ -966,6 +1102,7 @@ def main():
     parser.add_argument("--instagram", action="store_true", help="인스타그램 채널 크롤링")
     parser.add_argument("--approve", action="store_true", help="검수 DB 승인 건을 프로덕션 DB로 이동")
     parser.add_argument("--direct", action="store_true", help="검수 DB 거치지 않고 프로덕션 DB 직접 저장")
+    parser.add_argument("--patch-review", action="store_true", help="검수 DB 기존 데이터에 피드백 수정사항 소급 적용")
     args = parser.parse_args()
 
     setup_file_logging()
@@ -986,13 +1123,15 @@ def main():
     if args.instagram:
         console.print("[cyan]채널: 인스타그램[/cyan]")
 
+    if args.patch_review:
+        console.print("[cyan]검수 DB 패치 모드: 기존 데이터에 피드백 수정사항 적용[/cyan]")
     if args.approve:
         console.print("[cyan]검수 승인 모드: 승인 건 → 프로덕션 DB 이동[/cyan]")
     if args.direct:
         console.print("[yellow]direct 모드: 프로덕션 DB 직접 저장[/yellow]")
 
     # 프로그레스 바 모드: 콘솔 로그 억제 (파일 로그는 유지됨)
-    suppress_console = args.full or args.enrich or args.approve
+    suppress_console = args.full or args.enrich or args.approve or args.patch_review
     if suppress_console:
         logging.getLogger().setLevel(logging.WARNING)
 
@@ -1001,8 +1140,8 @@ def main():
 
         # 노션 DB 스키마 검증 (dry-run 제외)
         if not args.dry_run:
-            # 검수 DB 스키마 검증 (approve 모드 또는 기본 모드)
-            if args.approve or not args.direct:
+            # 검수 DB 스키마 검증 (approve, patch-review 모드 또는 기본 모드)
+            if args.approve or args.patch_review or not args.direct:
                 review_errors = await validate_review_schema()
                 if review_errors:
                     console.print("[red]검수 DB 스키마 불일치:[/red]")
@@ -1019,7 +1158,9 @@ def main():
                         console.print(f"  [red]• {err}[/red]")
                     raise SystemExit(1)
 
-        if args.approve:
+        if args.patch_review:
+            report = await run_patch_review(dry_run=args.dry_run)
+        elif args.approve:
             report = await run_approve()
         elif args.enrich:
             report = await run_enrich()

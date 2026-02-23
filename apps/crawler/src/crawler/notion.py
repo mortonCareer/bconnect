@@ -212,10 +212,11 @@ def _build_properties(tech: Technician) -> dict:
     """Technician → 노션 DB 속성 dict 변환."""
     properties: dict = {
         "업체명": {"title": [{"text": {"content": tech.name}}]},
-        "구분": {"select": {"name": tech.rank}},
         "시공분야": {"multi_select": [{"name": t} for t in tech.trades]},
         "채널": {"multi_select": [{"name": c} for c in tech.channels]},
     }
+    if tech.rank:
+        properties["구분"] = {"select": {"name": tech.rank}}
 
     if tech.representative:
         properties["대표자"] = {"rich_text": [{"text": {"content": tech.representative}}]}
@@ -243,15 +244,15 @@ def _build_properties(tech: Technician) -> dict:
 
 REVIEW_REQUIRED_PROPERTIES: dict[str, str] = {
     **REQUIRED_PROPERTIES,
-    "검수상태": "select",
+    "상태": "status",
     "거절사유": "rich_text",
 }
 
 
 def _build_review_properties(tech: Technician, review_status: str = "대기중") -> dict:
-    """Technician → 검수 DB 속성 dict 변환. 프로덕션 속성 + 검수상태."""
+    """Technician → 검수 DB 속성 dict 변환. 프로덕션 속성 + 검수."""
     properties = _build_properties(tech)
-    properties["검수상태"] = {"select": {"name": review_status}}
+    properties["상태"] = {"status": {"name": review_status}}
     return properties
 
 
@@ -422,7 +423,7 @@ async def save_to_review(tech: Technician) -> str:
     """기술자 레코드를 검수 DB에 저장하고 page_id를 반환한다.
 
     중복이 있으면 업데이트하고 기존 page_id를 반환한다.
-    새 레코드는 검수상태=대기중으로 생성된다.
+    새 레코드는 검수=대기중으로 생성된다.
     """
     review_db_id = settings.notion_review_database_id
 
@@ -480,7 +481,7 @@ def _review_page_to_technician(props: dict) -> Technician:
     return Technician(
         name=_read_prop(props, "업체명") or "이름 없음",
         representative=_read_prop(props, "대표자") or "",
-        rank=_read_prop(props, "구분") or "기공",
+        rank=_read_prop(props, "구분") or "",
         trades=trades,
         region=_read_prop(props, "지역") or "",
         address=_read_prop(props, "주소") or "",
@@ -494,15 +495,64 @@ def _review_page_to_technician(props: dict) -> Technician:
     )
 
 
+async def find_all_review_pages() -> list[dict]:
+    """검수 DB 전체 레코드를 가져온다. (패치/마이그레이션용)"""
+    review_db_id = settings.notion_review_database_id
+    pages: list[dict] = []
+    start_cursor = None
+
+    while True:
+        body: dict = {"page_size": 100}
+        if start_cursor:
+            body["start_cursor"] = start_cursor
+
+        results = await notion.request(
+            path=f"databases/{review_db_id}/query",
+            method="POST",
+            body=body,
+        )
+
+        for page in results["results"]:
+            pages.append({
+                "page_id": page["id"],
+                "properties": page["properties"],
+            })
+
+        if not results.get("has_more"):
+            break
+        start_cursor = results["next_cursor"]
+
+    return pages
+
+
+async def patch_review_page(page_id: str, properties: dict) -> None:
+    """검수 DB 페이지의 속성만 업데이트한다. (패치용)"""
+    await notion.pages.update(page_id=page_id, properties=properties)
+
+
+async def read_page_blocks(page_id: str) -> list[dict]:
+    """페이지의 블록(본문)을 읽어온다."""
+    result = await notion.blocks.children.list(block_id=page_id)
+    return result["results"]
+
+
+async def update_block_text(block_id: str, new_text: str) -> None:
+    """paragraph 블록의 텍스트를 교체한다."""
+    await notion.blocks.update(
+        block_id=block_id,
+        paragraph={"rich_text": [{"text": {"content": new_text[:2000]}}]},
+    )
+
+
 async def find_approved() -> list[dict]:
-    """검수 DB에서 검수상태=승인인 레코드를 모두 가져온다."""
+    """검수 DB에서 상태=승인인 레코드를 모두 가져온다."""
     review_db_id = settings.notion_review_database_id
     pages: list[dict] = []
     start_cursor = None
 
     while True:
         body: dict = {
-            "filter": {"property": "검수상태", "select": {"equals": "승인"}},
+            "filter": {"property": "상태", "status": {"equals": "승인"}},
             "page_size": 100,
         }
         if start_cursor:

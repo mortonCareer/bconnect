@@ -113,7 +113,7 @@ class TestBuildReviewProperties:
     def test_includes_review_status(self):
         tech = _make_tech()
         props = _build_review_properties(tech)
-        assert props["검수상태"]["select"]["name"] == "대기중"
+        assert props["상태"]["status"]["name"] == "대기중"
 
     def test_includes_all_production_fields(self):
         tech = _make_tech(phone="01012345678", email="a@b.com")
@@ -121,12 +121,12 @@ class TestBuildReviewProperties:
         assert "업체명" in props
         assert "연락처" in props
         assert "이메일" in props
-        assert "검수상태" in props
+        assert "상태" in props
 
     def test_custom_review_status(self):
         tech = _make_tech()
         props = _build_review_properties(tech, review_status="승인")
-        assert props["검수상태"]["select"]["name"] == "승인"
+        assert props["상태"]["status"]["name"] == "승인"
 
 
 class TestReviewPageToTechnician:
@@ -175,6 +175,6 @@ class TestReviewPageToTechnician:
         }
         tech = _review_page_to_technician(props)
         assert tech.name == "최소업체"
-        assert tech.rank == "기공"
+        assert tech.rank == ""
         assert tech.trades == []
         assert tech.phone == ""
