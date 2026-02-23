@@ -433,6 +433,60 @@ paths:
                 items:
                   $ref: '#/components/schemas/Message'
 
+  # =====================
+  # Profile Endpoints
+  # =====================
+  /api/v1/profiles/me:
+    get:
+      operationId: getMyProfile
+      tags: [Profiles]
+      summary: 내 프로필을 조회합니다
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+
+    put:
+      operationId: updateMyProfile
+      tags: [Profiles]
+      summary: 내 프로필을 수정합니다
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+
+  /api/v1/profiles/{profileId}:
+    get:
+      operationId: getProfile
+      tags: [Profiles]
+      summary: 프로필을 조회합니다
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+
 components:
   schemas:
     # =====================
@@ -614,6 +668,61 @@ components:
           pattern: '\d{10,11}'
         picture:
           type: string
+
+    # =====================
+    # Profile Schemas
+    # =====================
+    Profile:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        primaryTrade:
+          $ref: '#/components/schemas/Trade'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+        experience:
+          type: integer
+        headline:
+          type: string
+          nullable: true
+        about:
+          type: string
+          nullable: true
+        address:
+          $ref: '#/components/schemas/Address'
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        primaryTrade:
+          $ref: '#/components/schemas/Trade'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+        experience:
+          type: integer
+        headline:
+          type: string
+        about:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
 
     # =====================
     # Post Schemas
