@@ -277,15 +277,22 @@ async def fetch_blog_profile(blog_id: str) -> dict:
     }
 
 
-# #blog-title CSS에서 배너 이미지 URL 추출 패턴
-_BANNER_RE = re.compile(r"#blog-title\s*\{[^}]*?url\(([^)]+)\)")
+# 커스텀 스킨 CSS에서 배너/Footer 이미지 URL 추출 패턴
+_SKIN_IMAGE_PATTERNS = [
+    ("banner", re.compile(r"#blog-title\s*\{[^}]*?url\(([^)]+)\)")),
+    ("banner", re.compile(r"#head-skin\s*\{[^}]*?url\(([^)]+)\)")),
+    ("footer", re.compile(r"#whole-footer\s*\{[^}]*?url\(([^)]+)\)")),
+]
 
 
-async def fetch_blog_banner(blog_id: str) -> str:
-    """데스크톱 블로그 메인의 커스텀 배너 이미지 URL을 추출한다.
+async def fetch_blog_skin_images(blog_id: str) -> dict[str, str]:
+    """데스크톱 블로그의 커스텀 스킨 이미지 URL을 추출한다.
 
-    PostList iframe의 CSS #blog-title background-image에서 추출.
-    배너가 없는 블로그는 빈 문자열을 반환한다.
+    PostList iframe CSS에서 배너(#blog-title, #head-skin)와
+    Footer(#whole-footer) background-image를 추출.
+
+    Returns:
+        {"banner": "...", "footer": "..."} — 없으면 빈 문자열
     """
     url = (
         f"https://blog.naver.com/PostList.naver"
@@ -296,19 +303,28 @@ async def fetch_blog_banner(blog_id: str) -> str:
         resp = await client.get(url)
         resp.raise_for_status()
     except Exception:
-        log.warning("블로그 배너 가져오기 실패: %s", blog_id)
-        return ""
+        log.warning("블로그 스킨 이미지 가져오기 실패: %s", blog_id)
+        return {"banner": "", "footer": ""}
 
-    match = _BANNER_RE.search(resp.text)
-    if not match:
-        return ""
+    html = resp.text
+    result: dict[str, str] = {"banner": "", "footer": ""}
 
-    banner_url = match.group(1)
-    # pstatic.net 도메인이 아니면 기본 스킨 이미지이므로 무시
-    if "pstatic.net" not in banner_url:
-        return ""
+    for kind, pattern in _SKIN_IMAGE_PATTERNS:
+        if result[kind]:
+            continue  # 이미 찾은 종류는 스킵 (첫 매치 우선)
+        match = pattern.search(html)
+        if match:
+            img_url = match.group(1)
+            if "blogfiles.pstatic.net" in img_url:
+                result[kind] = img_url
 
-    return banner_url
+    return result
+
+
+async def fetch_blog_banner(blog_id: str) -> str:
+    """하위호환: 배너 이미지 URL만 반환."""
+    images = await fetch_blog_skin_images(blog_id)
+    return images["banner"]
 
 
 def _normalize_business_view(bv: dict) -> dict:
@@ -445,18 +461,21 @@ async def explore_blogger(blog_url: str) -> dict:
             "blog_title": "",
             "blog_home_url": "",
             "banner_image_url": "",
+            "footer_image_url": "",
             "profile_image_url": "",
             "source_urls": [blog_url],
         }
 
     blog_home_url = f"https://blog.naver.com/{blog_id}"
 
-    # 1-3. 프로필·배너·게시글을 병렬 수집 (독립적 요청)
-    profile, banner_image_url, main_post = await asyncio.gather(
+    # 1-3. 프로필·스킨 이미지·게시글을 병렬 수집 (독립적 요청)
+    profile, skin_images, main_post = await asyncio.gather(
         fetch_blog_profile(blog_id),
-        fetch_blog_banner(blog_id),
+        fetch_blog_skin_images(blog_id),
         fetch_blog_post(blog_url),
     )
+    banner_image_url = skin_images["banner"]
+    footer_image_url = skin_images["footer"]
 
     # 4. 사업자정보: API 시도 → 실패 시 profile에서 파싱한 HTML 폴백 사용
     biz_info = await fetch_business_info(
@@ -511,6 +530,7 @@ async def explore_blogger(blog_url: str) -> dict:
         "blog_home_url": blog_home_url,
         "blogger_name": main_post["blogger_name"],
         "banner_image_url": banner_image_url or profile.get("banner_image_url", ""),
+        "footer_image_url": footer_image_url,
         "profile_image_url": profile["profile_image_url"],
         "cover_image_url": main_post["cover_image_url"],
         "source_urls": source_urls,

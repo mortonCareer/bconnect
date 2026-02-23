@@ -191,27 +191,36 @@ async def process_blog_result(
                 address = place["road_address"] or place["address"]
                 log.info("지역검색 주소 보충: %s → %s", name, address)
 
-    # 배너 이미지 Vision 보충: 연락처/사업자정보 부족 시에만
-    banner_url = profile.get("banner_image_url", "")
-    if banner_url and (not phone or not classification.get("business_number")):
+    # 스킨 이미지 Vision 보충: 배너 → Footer 순으로 부족한 정보 채우기
+    skin_urls = [
+        ("배너", profile.get("banner_image_url", "")),
+        ("Footer", profile.get("footer_image_url", "")),
+    ]
+    if not phone or not classification.get("business_number"):
         from crawler.classifier import extract_text_from_image
-        try:
-            vision_data, vision_usage = await extract_text_from_image(banner_url)
-            if report:
-                report.add_llm_usage(vision_usage["input_tokens"], vision_usage["output_tokens"])
-            if not phone and vision_data.get("phone"):
-                phone = vision_data["phone"]
-                log.info("Vision 연락처 보충: %s → %s", name, phone)
-            if not email and vision_data.get("email"):
-                email = vision_data["email"]
-            if not classification.get("business_number") and vision_data.get("business_number"):
-                classification["business_number"] = vision_data["business_number"]
-            if not classification.get("representative") and vision_data.get("representative"):
-                classification["representative"] = vision_data["representative"]
-            if not address and vision_data.get("address"):
-                address = vision_data["address"]
-        except Exception as exc:
-            log.warning("Vision 추출 실패: %s", banner_url, exc_info=True)
+        for label, img_url in skin_urls:
+            if not img_url:
+                continue
+            try:
+                vision_data, vision_usage = await extract_text_from_image(img_url)
+                if report:
+                    report.add_llm_usage(vision_usage["input_tokens"], vision_usage["output_tokens"])
+                if not phone and vision_data.get("phone"):
+                    phone = vision_data["phone"]
+                    log.info("Vision(%s) 연락처 보충: %s → %s", label, name, phone)
+                if not email and vision_data.get("email"):
+                    email = vision_data["email"]
+                if not classification.get("business_number") and vision_data.get("business_number"):
+                    classification["business_number"] = vision_data["business_number"]
+                if not classification.get("representative") and vision_data.get("representative"):
+                    classification["representative"] = vision_data["representative"]
+                if not address and vision_data.get("address"):
+                    address = vision_data["address"]
+            except Exception:
+                log.warning("Vision(%s) 추출 실패: %s", label, img_url, exc_info=True)
+            # 이미 핵심 정보(전화, 사업자번호) 모두 확보되면 중단
+            if phone and classification.get("business_number"):
+                break
 
     # 네이버 인증 사업자정보 — 1순위 덮어쓰기 (인증 데이터)
     biz = profile.get("business_info") or {}
