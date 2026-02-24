@@ -1,11 +1,6 @@
 'use client'
 
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '@morton/ui'
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@morton/ui'
 import type { CheckItem } from './types'
 import { CATEGORY_GROUPS } from './constants'
 import { StatusBadge } from './StatusBadge'
@@ -44,18 +39,11 @@ export function DetailSection({ checkItems, registrationNumber }: DetailSectionP
                   <AccordionTrigger className="gap-3">
                     <div className="flex flex-1 flex-col gap-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sb-16 text-morton-gray-900">
-                          {item.label}
-                        </span>
-                        <StatusBadge
-                          status={item.status}
-                          statusType={item.statusType}
-                        />
+                        <span className="text-sb-16 text-morton-gray-900">{item.label}</span>
+                        <StatusBadge status={item.status} statusType={item.statusType} />
                       </div>
                       {item.description && (
-                        <span className="text-r-12 text-morton-gray-500">
-                          {item.description}
-                        </span>
+                        <span className="text-r-12 text-morton-gray-500">{item.description}</span>
                       )}
                     </div>
                   </AccordionTrigger>

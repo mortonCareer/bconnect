@@ -3,11 +3,7 @@
 import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Input } from '@morton/ui'
-import {
-  formatRegistrationNumber,
-  extractDigits,
-  isValidRegistrationNumber,
-} from './constants'
+import { formatRegistrationNumber, extractDigits, isValidRegistrationNumber } from './constants'
 
 interface SearchBarProps {
   defaultValue?: string
@@ -15,9 +11,7 @@ interface SearchBarProps {
 
 export function SearchBar({ defaultValue }: SearchBarProps) {
   const router = useRouter()
-  const [value, setValue] = useState(
-    defaultValue ? formatRegistrationNumber(defaultValue) : ''
-  )
+  const [value, setValue] = useState(defaultValue ? formatRegistrationNumber(defaultValue) : '')
   const [isLoading, setIsLoading] = useState(false)
 
   const digits = extractDigits(value)

@@ -1,9 +1,6 @@
 import type { Metadata } from 'next'
 import { fetchBusinessVerification } from './_components/fetch-business'
-import {
-  formatRegistrationNumber,
-  isValidRegistrationNumber,
-} from './_components/constants'
+import { formatRegistrationNumber, isValidRegistrationNumber } from './_components/constants'
 import { SearchBar } from './_components/SearchBar'
 import { TipBanner } from './_components/TipBanner'
 import { CompanyHeader } from './_components/CompanyHeader'
@@ -20,15 +17,13 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   if (!q || !isValidRegistrationNumber(q)) {
     return {
       title: '원클릭 조회 - Morton',
-      description:
-        '사업자등록번호로 면허, 임금체불, 보험 현황을 한번에 조회하세요.',
+      description: '사업자등록번호로 면허, 임금체불, 보험 현황을 한번에 조회하세요.',
     }
   }
 
   return {
     title: `사업자 조회 ${formatRegistrationNumber(q)} - Morton`,
-    description:
-      '사업자등록번호로 면허, 임금체불, 보험 현황을 한번에 조회하세요.',
+    description: '사업자등록번호로 면허, 임금체불, 보험 현황을 한번에 조회하세요.',
   }
 }
 
@@ -55,10 +50,7 @@ export default async function OneClickPage({ searchParams }: PageProps) {
           <>
             <CompanyHeader company={result.company} />
             <SummarySection checkItems={result.checkItems} />
-            <DetailSection
-              checkItems={result.checkItems}
-              registrationNumber={q!}
-            />
+            <DetailSection checkItems={result.checkItems} registrationNumber={q!} />
           </>
         )}
       </main>

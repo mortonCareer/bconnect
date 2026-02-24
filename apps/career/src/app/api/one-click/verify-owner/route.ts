@@ -13,17 +13,10 @@ export async function POST(request: Request) {
       )
     }
 
-    const result = await fetchOwnerVerification(
-      registrationNumber,
-      ownerName,
-      openDate
-    )
+    const result = await fetchOwnerVerification(registrationNumber, ownerName, openDate)
 
     return NextResponse.json(result)
   } catch {
-    return NextResponse.json(
-      { valid: false, message: '진위확인에 실패했습니다.' },
-      { status: 500 }
-    )
+    return NextResponse.json({ valid: false, message: '진위확인에 실패했습니다.' }, { status: 500 })
   }
 }

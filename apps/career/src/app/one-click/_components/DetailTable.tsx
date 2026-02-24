@@ -17,9 +17,7 @@ export function DetailTable({ details }: DetailTableProps) {
           <div className="w-[200px] shrink-0 px-3 py-2 text-r-14 text-morton-gray-500">
             {detail.key}
           </div>
-          <div className="flex-1 px-3 py-2 text-r-14 text-morton-gray-900">
-            {detail.value}
-          </div>
+          <div className="flex-1 px-3 py-2 text-r-14 text-morton-gray-900">{detail.value}</div>
         </div>
       ))}
     </div>

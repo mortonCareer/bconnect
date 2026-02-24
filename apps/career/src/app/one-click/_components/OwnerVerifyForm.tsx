@@ -80,9 +80,7 @@ export function OwnerVerifyForm({ registrationNumber }: OwnerVerifyFormProps) {
       </div>
 
       {result && (
-        <p
-          className={`mt-2 text-r-12 ${result.valid ? 'text-[#2E7D32]' : 'text-morton-error'}`}
-        >
+        <p className={`mt-2 text-r-12 ${result.valid ? 'text-[#2E7D32]' : 'text-morton-error'}`}>
           {result.message}
         </p>
       )}

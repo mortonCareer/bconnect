@@ -10,9 +10,7 @@ export function CompanyHeader({ company }: CompanyHeaderProps) {
     <div className="flex items-start justify-between">
       <div className="flex items-baseline gap-3">
         <h2 className="text-sb-24 text-morton-gray-900">{company.name}</h2>
-        <span className="text-r-14 text-morton-gray-500">
-          {company.registrationNumber}
-        </span>
+        <span className="text-r-14 text-morton-gray-500">{company.registrationNumber}</span>
       </div>
       <ShareButton />
     </div>

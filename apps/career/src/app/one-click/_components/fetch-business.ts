@@ -46,7 +46,12 @@ function mapNtsStatusToCheckItem(item: NtsStatusItem): CheckItem {
       { key: '납세자상태', value: item.b_stt || '-' },
       { key: '과세유형', value: item.tax_type || '-' },
       ...(item.end_dt
-        ? [{ key: '폐업일', value: `${item.end_dt.slice(0, 4)}.${item.end_dt.slice(4, 6)}.${item.end_dt.slice(6)}` }]
+        ? [
+            {
+              key: '폐업일',
+              value: `${item.end_dt.slice(0, 4)}.${item.end_dt.slice(4, 6)}.${item.end_dt.slice(6)}`,
+            },
+          ]
         : []),
     ],
   }
@@ -90,9 +95,7 @@ async function _fetchBusinessVerification(
   }
 
   // 2) 나머지 9개는 mock 유지
-  const mockItems = MOCK_VERIFY_RESULT.checkItems.filter(
-    (item) => item.id !== 'BUSINESS_STATUS'
-  )
+  const mockItems = MOCK_VERIFY_RESULT.checkItems.filter((item) => item.id !== 'BUSINESS_STATUS')
 
   return {
     company: {
