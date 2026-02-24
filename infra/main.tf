@@ -43,4 +43,6 @@ module "vercel" {
   aws_access_key_id     = module.aws.access_key_id
   aws_secret_access_key = module.aws.secret_access_key
   aws_region            = var.aws_region
+
+  nts_api_service_key = var.nts_api_service_key
 }

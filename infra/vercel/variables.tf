@@ -43,3 +43,10 @@ variable "aws_region" {
   type        = string
   default     = "ap-northeast-2"
 }
+
+# 국세청 사업자등록정보 API (data.go.kr)
+variable "nts_api_service_key" {
+  description = "국세청 사업자등록정보 API 서비스키 (data.go.kr)"
+  type        = string
+  sensitive   = true
+}

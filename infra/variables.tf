@@ -96,3 +96,13 @@ variable "vercel_api_token" {
   type        = string
   sensitive   = true
 }
+
+# =============================================================================
+# External API Keys
+# =============================================================================
+
+variable "nts_api_service_key" {
+  description = "국세청 사업자등록정보 API 서비스키 (data.go.kr)"
+  type        = string
+  sensitive   = true
+}

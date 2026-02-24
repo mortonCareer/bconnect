@@ -54,6 +54,13 @@ resource "vercel_project_environment_variable" "career_aws_region" {
   target     = ["production", "preview"]
 }
 
+resource "vercel_project_environment_variable" "career_nts_api_service_key" {
+  project_id = vercel_project.morton-career.id
+  key        = "NTS_API_SERVICE_KEY"
+  value      = var.nts_api_service_key
+  target     = ["production", "preview"]
+}
+
 # ===========================================================================
 # Domain Configuration for Career
 # ===========================================================================
