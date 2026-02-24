@@ -113,7 +113,7 @@ class TestBuildReviewProperties:
     def test_includes_review_status(self):
         tech = _make_tech()
         props = _build_review_properties(tech)
-        assert props["상태"]["status"]["name"] == "대기중"
+        assert props["상태"]["status"]["name"] == "시작 전"
 
     def test_includes_all_production_fields(self):
         tech = _make_tech(phone="01012345678", email="a@b.com")

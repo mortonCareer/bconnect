@@ -516,7 +516,7 @@ async def run_pipeline(
     return saved_ids
 
 
-async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_run: bool = False, force: bool = False, direct: bool = False) -> PipelineReport:
+async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_run: bool = False, force: bool = False, direct: bool = False, use_vision: bool = False) -> PipelineReport:
     """전체 키워드로 파이프라인을 실행한다.
 
     쿼리를 QUERY_CONCURRENCY개씩 병렬 실행하여 전체 소요 시간을 단축한다.
@@ -541,7 +541,7 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_ru
                     await run_pipeline(
                         q, count=per_query, seen_blog_ids=seen_blog_ids,
                         report=report, dry_run=dry_run, force=force, direct=direct,
-                        metro_only=True, skip_vision=True,
+                        metro_only=True, skip_vision=not use_vision,
                     )
                     break
                 except Exception as exc:
@@ -760,7 +760,7 @@ async def run_from_file(file_path: Path, force: bool = False) -> PipelineReport:
     return report
 
 
-async def run_enrich() -> PipelineReport:
+async def run_enrich(use_vision: bool = True) -> PipelineReport:
     """노션 DB에서 빈 필드가 있는 레코드를 찾아 재크롤링+LLM 분류로 보강한다."""
     pages = await find_pages_needing_enrichment()
     log.info("보강 대상 레코드: %d건", len(pages))
@@ -863,7 +863,52 @@ async def run_enrich() -> PipelineReport:
                         address = place["road_address"] or place["address"]
                         log.info("지역검색 주소 보충: %s → %s", tech_name, address)
 
-            # 4) Technician 구성 + enrichment 저장
+            # 4) Vision 보충: 배너/Footer 이미지에서 누락 정보 추출
+            if use_vision and not is_instagram and (not phone or not classification.get("business_number")):
+                from crawler.classifier import extract_text_from_image
+                skin_urls = [
+                    ("배너", profile.get("banner_image_url", "")),
+                    ("Footer", profile.get("footer_image_url", "")),
+                ]
+                for label, img_url in skin_urls:
+                    if not img_url:
+                        continue
+                    try:
+                        vision_data, vision_usage = await extract_text_from_image(img_url)
+                        report.add_llm_usage(vision_usage["input_tokens"], vision_usage["output_tokens"])
+                        if not phone and vision_data.get("phone"):
+                            phone = vision_data["phone"]
+                            log.info("Vision(%s) 연락처 보충: %s → %s", label, tech_name, phone)
+                        if not email and vision_data.get("email"):
+                            email = vision_data["email"]
+                        if not classification.get("business_number") and vision_data.get("business_number"):
+                            classification["business_number"] = vision_data["business_number"]
+                        if not classification.get("representative") and vision_data.get("representative"):
+                            classification["representative"] = vision_data["representative"]
+                        if not address and vision_data.get("address"):
+                            address = vision_data["address"]
+                    except Exception:
+                        log.warning("Vision(%s) 추출 실패: %s", label, img_url, exc_info=True)
+                    if phone and classification.get("business_number"):
+                        break
+
+            # 네이버 인증 사업자정보 — 1순위 덮어쓰기
+            biz = profile.get("business_info") or {}
+            if biz:
+                if biz.get("phone"):
+                    phone = biz["phone"]
+                if biz.get("email"):
+                    email = biz["email"]
+                if biz.get("address"):
+                    address = biz["address"]
+                if biz.get("business_name"):
+                    tech_name = biz["business_name"]
+                if biz.get("representative"):
+                    classification["representative"] = biz["representative"]
+                if biz.get("business_number"):
+                    classification["business_number"] = biz["business_number"]
+
+            # 5) Technician 구성 + enrichment 저장
             channels = ["인스타그램"] if is_instagram else ["네이버블로그"]
             cover = profile.get("profile_pic_url", "") if is_instagram else profile.get("banner_image", "")
             tech = Technician(
@@ -1114,7 +1159,18 @@ def main():
     parser.add_argument("--approve", action="store_true", help="검수 DB 승인 건을 프로덕션 DB로 이동")
     parser.add_argument("--direct", action="store_true", help="검수 DB 거치지 않고 프로덕션 DB 직접 저장")
     parser.add_argument("--patch-review", action="store_true", help="검수 DB 기존 데이터에 피드백 수정사항 소급 적용")
+    vision_group = parser.add_mutually_exclusive_group()
+    vision_group.add_argument("--vision", action="store_true", default=None, help="배너/Footer 이미지 Vision OCR 강제 활성화")
+    vision_group.add_argument("--no-vision", action="store_true", help="Vision OCR 비활성화")
     args = parser.parse_args()
+
+    # Vision 기본값: --full이면 OFF, 나머지 ON
+    if args.vision:
+        use_vision = True
+    elif args.no_vision:
+        use_vision = False
+    else:
+        use_vision = not args.full  # full은 기본 OFF, 나머지 ON
 
     setup_file_logging()
 
@@ -1126,6 +1182,7 @@ def main():
         console.print("[yellow]dry-run 모드: 노션 저장 건너뜀[/yellow]")
     if args.force:
         console.print("[yellow]force 모드: 기존 업체 데이터 덮어쓰기[/yellow]")
+    console.print(f"[cyan]Vision OCR: {'ON' if use_vision else 'OFF'}[/cyan]")
     if args.from_file:
         console.print(f"[yellow]파일 임포트: {args.from_file}[/yellow]")
     if args.enrich:
@@ -1174,7 +1231,7 @@ def main():
         elif args.approve:
             report = await run_approve()
         elif args.enrich:
-            report = await run_enrich()
+            report = await run_enrich(use_vision=use_vision)
         elif args.from_file:
             report = await run_from_file(args.from_file, force=args.force)
         elif args.instagram and args.full:
@@ -1186,13 +1243,13 @@ def main():
             report.per_query = count
             await run_instagram_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force, direct=args.direct)
         elif args.full:
-            report = await run_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force, direct=args.direct)
+            report = await run_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force, direct=args.direct, use_vision=use_vision)
         else:
             query = " ".join(args.query) if args.query else "타일 시공업체 수도권"
             count = 10 if args.query else 3
             report.mode = "단일 쿼리"
             report.per_query = count
-            await run_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force, direct=args.direct)
+            await run_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force, direct=args.direct, skip_vision=not use_vision)
 
         return report
 

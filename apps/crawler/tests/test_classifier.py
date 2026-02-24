@@ -199,10 +199,10 @@ class TestParseJsonResponse:
 
 
 class TestExtractTextFromImage:
-    @pytest.mark.asyncio
-    async def test_returns_empty_on_no_url(self):
+    def test_returns_empty_on_no_url(self):
         """image_url이 비어있으면 빈 dict 반환."""
+        import asyncio
         from crawler.classifier import extract_text_from_image
-        result, usage = await extract_text_from_image("")
+        result, usage = asyncio.run(extract_text_from_image(""))
         assert result == {}
         assert usage == {"input_tokens": 0, "output_tokens": 0}

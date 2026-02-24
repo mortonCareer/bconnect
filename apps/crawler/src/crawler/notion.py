@@ -359,7 +359,7 @@ async def update_technician(page_id: str, tech: Technician, force: bool = False)
     if new_blocks:
         existing_blocks = await notion.blocks.children.list(block_id=page_id)
         existing_text = " ".join(
-            b.get(b["type"], {}).get("rich_text", [{}])[0].get("plain_text", "")
+            rt[0].get("plain_text", "") if (rt := b.get(b["type"], {}).get("rich_text")) else ""
             for b in existing_blocks["results"]
             if b["type"] in ("paragraph", "heading_2")
         )
