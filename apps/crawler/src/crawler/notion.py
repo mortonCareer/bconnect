@@ -249,7 +249,7 @@ REVIEW_REQUIRED_PROPERTIES: dict[str, str] = {
 }
 
 
-def _build_review_properties(tech: Technician, review_status: str = "대기중") -> dict:
+def _build_review_properties(tech: Technician, review_status: str = "시작 전") -> dict:
     """Technician → 검수 DB 속성 dict 변환. 프로덕션 속성 + 검수."""
     properties = _build_properties(tech)
     properties["상태"] = {"status": {"name": review_status}}
@@ -432,7 +432,7 @@ async def save_to_review(tech: Technician) -> str:
         await update_technician(existing, tech, force=False)
         return existing
 
-    properties = _build_review_properties(tech, review_status="대기중")
+    properties = _build_review_properties(tech, review_status="시작 전")
     body_markdown = _build_body_markdown(tech)
 
     page = await notion.pages.create(
