@@ -30,9 +30,9 @@ log = logging.getLogger(__name__)
 REPORTS_DIR = Path("reports")
 
 # 동시 처리 제한: 네이버 스크래핑 + LLM + 노션 API 동시 요청 수
-CONCURRENCY = 5
+CONCURRENCY = 3
 # --full 모드에서 동시에 실행할 쿼리 수
-QUERY_CONCURRENCY = 3
+QUERY_CONCURRENCY = 1
 # 인스타그램 동시 요청 수 (로그인 없이 제한 엄격)
 INSTA_CONCURRENCY = 3
 
@@ -60,6 +60,7 @@ async def process_blog_result(
     force: bool = False,
     direct: bool = False,
     metro_only: bool = False,
+    skip_vision: bool = False,
 ) -> Technician | None:
     """검색 결과 1건 → 블로거 프로필 탐색 → 분류 → Technician 생성."""
     blog_url = item["link"]
@@ -196,7 +197,7 @@ async def process_blog_result(
         ("배너", profile.get("banner_image_url", "")),
         ("Footer", profile.get("footer_image_url", "")),
     ]
-    if not phone or not classification.get("business_number"):
+    if not skip_vision and (not phone or not classification.get("business_number")):
         from crawler.classifier import extract_text_from_image
         for label, img_url in skin_urls:
             if not img_url:
@@ -424,6 +425,7 @@ async def run_pipeline(
     query: str, count: int = 10, seen_blog_ids: set[str] | None = None,
     report: PipelineReport | None = None, dry_run: bool = False,
     force: bool = False, direct: bool = False, metro_only: bool = False,
+    skip_vision: bool = False,
 ) -> list[str]:
     """단일 검색어로 파이프라인을 실행한다.
 
@@ -468,7 +470,7 @@ async def run_pipeline(
 
     async def _handle(item: dict) -> None:
         async with sem:
-            tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force, direct=direct, metro_only=metro_only)
+            tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force, direct=direct, metro_only=metro_only, skip_vision=skip_vision)
         if tech is None:
             return
 
@@ -539,7 +541,7 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_ru
                     await run_pipeline(
                         q, count=per_query, seen_blog_ids=seen_blog_ids,
                         report=report, dry_run=dry_run, force=force, direct=direct,
-                        metro_only=True,
+                        metro_only=True, skip_vision=True,
                     )
                     break
                 except Exception as exc:

@@ -1,5 +1,6 @@
 """기술자 분류 — LLM(Anthropic/OpenAI) 또는 수동 JSON 모드."""
 
+import asyncio
 import json
 import logging
 import re
@@ -9,6 +10,22 @@ from crawler.config import settings
 from crawler.models import TRADES, RANKS
 
 log = logging.getLogger(__name__)
+
+# LLM API 호출 제한 (TPM 200K 초과 방지: 동시 1개 + 호출 간 3초 간격)
+_llm_semaphore = asyncio.Semaphore(1)
+_llm_last_call: float = 0.0  # monotonic timestamp
+_LLM_INTERVAL = 3.0  # 호출 간 최소 간격 (초)
+
+
+async def _llm_throttle():
+    """LLM 호출 전 rate limit 대기."""
+    global _llm_last_call
+    import time
+    now = time.monotonic()
+    wait = _LLM_INTERVAL - (now - _llm_last_call)
+    if wait > 0:
+        await asyncio.sleep(wait)
+    _llm_last_call = time.monotonic()
 
 # 지역 옵션 (검수 DB 기준)
 REGIONS = [
@@ -198,11 +215,13 @@ async def classify(
     Returns:
         (classification, usage) — usage = {"input_tokens": int, "output_tokens": int}
     """
-    if settings.anthropic_api_key:
-        return await _classify_with_anthropic(name, about, headline)
+    async with _llm_semaphore:
+        await _llm_throttle()
+        if settings.anthropic_api_key:
+            return await _classify_with_anthropic(name, about, headline)
 
-    if settings.openai_api_key and settings.openai_api_key != "skip":
-        return await _classify_with_openai(name, about, headline)
+        if settings.openai_api_key and settings.openai_api_key != "skip":
+            return await _classify_with_openai(name, about, headline)
 
     log.info("LLM 미설정 — 수동 분류 모드 (pending_classification.json 확인)")
     return _empty_result(), _NO_USAGE

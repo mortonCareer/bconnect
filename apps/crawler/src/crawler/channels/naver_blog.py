@@ -20,6 +20,42 @@ NAVER_LOCAL_URL = "https://openapi.naver.com/v1/search/local.json"
 # 모듈 공유 httpx 클라이언트 — 커넥션 풀 재사용
 _client: httpx.AsyncClient | None = None
 
+# 네이버 웹 크롤링 스로틀 (429 방지: 동시 5개 + 요청 간 0.5초 간격)
+_naver_sem = asyncio.Semaphore(5)
+_naver_last_req: float = 0.0
+_NAVER_INTERVAL = 0.5  # 요청 간 최소 간격 (초)
+_NAVER_MAX_RETRIES = 3
+
+
+async def _naver_throttle():
+    """네이버 웹 요청 전 rate limit 대기."""
+    global _naver_last_req
+    import time
+    now = time.monotonic()
+    wait = _NAVER_INTERVAL - (now - _naver_last_req)
+    if wait > 0:
+        await asyncio.sleep(wait)
+    _naver_last_req = time.monotonic()
+
+
+async def _naver_get(url: str, **kwargs) -> httpx.Response:
+    """네이버 웹 요청 — 스로틀 + 429 재시도."""
+    for attempt in range(_NAVER_MAX_RETRIES):
+        async with _naver_sem:
+            await _naver_throttle()
+            client = _get_client()
+            resp = await client.get(url, **kwargs)
+        if resp.status_code == 429:
+            wait = 2 ** attempt * 3  # 3, 6, 12초
+            log.warning("네이버 429 — %s초 대기 후 재시도 (%d/%d)", wait, attempt + 1, _NAVER_MAX_RETRIES)
+            await asyncio.sleep(wait)
+            continue
+        resp.raise_for_status()
+        return resp
+    # 마지막 시도도 429면 예외
+    resp.raise_for_status()
+    return resp  # unreachable
+
 
 def _get_client() -> httpx.AsyncClient:
     global _client
@@ -133,9 +169,7 @@ async def fetch_blog_post(blog_url: str) -> dict:
     """
     content_url = _extract_post_content_url(blog_url) or blog_url
 
-    client = _get_client()
-    resp = await client.get(content_url)
-    resp.raise_for_status()
+    resp = await _naver_get(content_url)
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
@@ -220,10 +254,8 @@ async def fetch_blog_profile(blog_id: str) -> dict:
     """
     url = f"https://m.blog.naver.com/{blog_id}"
     mobile_ua = {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)"}
-    client = _get_client()
     try:
-        resp = await client.get(url, headers=mobile_ua)
-        resp.raise_for_status()
+        resp = await _naver_get(url, headers=mobile_ua)
     except Exception:
         log.warning("블로그 프로필 가져오기 실패: %s", blog_id)
         return {"profile_intro": "", "blog_title": "", "profile_image_url": ""}
@@ -298,10 +330,8 @@ async def fetch_blog_skin_images(blog_id: str) -> dict[str, str]:
         f"https://blog.naver.com/PostList.naver"
         f"?blogId={blog_id}&widgetTypeCall=true&noTrackingCode=true&directAccess=true"
     )
-    client = _get_client()
     try:
-        resp = await client.get(url)
-        resp.raise_for_status()
+        resp = await _naver_get(url)
     except Exception:
         log.warning("블로그 스킨 이미지 가져오기 실패: %s", blog_id)
         return {"banner": "", "footer": ""}
@@ -355,10 +385,8 @@ async def fetch_business_info(blog_id: str, html_fallback: dict | None = None) -
         "Referer": f"https://m.blog.naver.com/{blog_id}",
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)",
     }
-    client = _get_client()
     try:
-        resp = await client.get(url, headers=headers)
-        resp.raise_for_status()
+        resp = await _naver_get(url, headers=headers)
         data = resp.json()
         if data.get("isSuccess") and data.get("result", {}).get("existBusinessInfo"):
             return _normalize_business_view(data["result"]["businessView"])
@@ -386,10 +414,8 @@ def extract_blog_id(blog_url: str) -> str | None:
 async def fetch_blogger_posts(blog_id: str, count: int = 5) -> list[str]:
     """블로거의 최근 글 목록 URL을 가져온다 (RSS 활용)."""
     rss_url = f"https://rss.blog.naver.com/{blog_id}.xml"
-    client = _get_client()
     try:
-        resp = await client.get(rss_url)
-        resp.raise_for_status()
+        resp = await _naver_get(rss_url)
     except Exception:
         log.warning("RSS 가져오기 실패: %s", blog_id)
         return []
