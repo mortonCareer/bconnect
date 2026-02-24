@@ -206,29 +206,60 @@ paths:
     get:
       operationId: getPosts
       tags: [Posts]
-      summary: 게시글 목록을 조회합니다 (작성자, 작업별 필터 가능)
+      summary: 게시글 목록을 조회합니다 (필터, 커서 페이지네이션)
       parameters:
         - name: authorId
           in: query
           required: false
+          description: 작성자 ID로 필터링
           schema:
             type: integer
             format: int64
         - name: taskId
           in: query
           required: false
+          description: 작업 ID로 필터링
           schema:
             type: integer
             format: int64
+        - name: trade
+          in: query
+          required: false
+          description: 시공분야로 필터링
+          schema:
+            $ref: '#/components/schemas/Trade'
+        - name: minExperience
+          in: query
+          required: false
+          description: 최소 경력 (년)
+          schema:
+            type: integer
+        - name: maxExperience
+          in: query
+          required: false
+          description: 최대 경력 (년)
+          schema:
+            type: integer
+        - name: cursor
+          in: query
+          required: false
+          description: 페이지네이션 커서
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: 페이지 크기 (기본값 20)
+          schema:
+            type: integer
+            default: 20
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/PostPage'
 
     post:
       operationId: createPost
@@ -423,16 +454,28 @@ paths:
     get:
       operationId: getMyChats
       tags: [Chats]
-      summary: 내 채팅방 목록을 조회합니다
+      summary: 내 채팅방 목록을 조회합니다 (커서 페이지네이션)
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          description: 페이지네이션 커서
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: 페이지 크기 (기본값 20)
+          schema:
+            type: integer
+            default: 20
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Chat'
+                $ref: '#/components/schemas/ChatPage'
 
   /api/v1/chats/{chatId}:
     get:
@@ -458,7 +501,7 @@ paths:
     get:
       operationId: getChatMessages
       tags: [Chats]
-      summary: 채팅방의 메시지 목록을 조회합니다
+      summary: 채팅방의 메시지 목록을 조회합니다 (역방향 커서 페이지네이션)
       parameters:
         - name: chatId
           in: path
@@ -466,15 +509,26 @@ paths:
           schema:
             type: integer
             format: int64
+        - name: before
+          in: query
+          required: false
+          description: 이 커서 이전의 메시지를 조회
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: 페이지 크기 (기본값 30)
+          schema:
+            type: integer
+            default: 30
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Message'
+                $ref: '#/components/schemas/MessagePage'
 
   # =====================
   # Profile Endpoints
@@ -540,6 +594,18 @@ components:
     # =====================
     # Common
     # =====================
+    CursorPageMeta:
+      type: object
+      required: [hasMore]
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+          description: 다음 페이지 커서 (마지막 페이지면 null)
+        hasMore:
+          type: boolean
+          description: 다음 페이지 존재 여부
+
     Address:
       type: object
       properties:
@@ -800,6 +866,17 @@ components:
           type: string
           format: date-time
 
+    PostPage:
+      type: object
+      required: [items, meta]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
+        meta:
+          $ref: '#/components/schemas/CursorPageMeta'
+
     CreatePostRequest:
       type: object
       required: [authorId, taskId, content]
@@ -958,3 +1035,25 @@ components:
         modifiedAt:
           type: string
           format: date-time
+
+    ChatPage:
+      type: object
+      required: [items, meta]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chat'
+        meta:
+          $ref: '#/components/schemas/CursorPageMeta'
+
+    MessagePage:
+      type: object
+      required: [items, meta]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+        meta:
+          $ref: '#/components/schemas/CursorPageMeta'
