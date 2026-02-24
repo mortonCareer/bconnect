@@ -3,16 +3,18 @@ import 'server-only'
 import { unstable_cache } from 'next/cache'
 import type {
   CheckItem,
+  CheckItemId,
   KcomwelInsuranceItem,
   NtsStatusItem,
   VerifyBusinessResult,
   VerifyOwnerResult,
-  WageArrearsResponse,
 } from './types'
 import { MOCK_VERIFY_RESULT } from './mock-data'
 import { fetchNtsBusinessStatus, fetchNtsBusinessValidate } from './nts-client'
 import { fetchKcomwelInsurance } from './kcomwel-client'
-import { fetchWageArrears } from './work24-client'
+import { fetchFeiaCompanies } from './feia-client'
+import { fetchMoelDefaulters } from './moel-client'
+import { fetchKisconArrears, fetchKisconSubconLimit } from './kiscon-crawl-client'
 
 const CACHE_TTL = 3600 // 1시간
 
@@ -73,20 +75,25 @@ function mapNtsStatusToCheckItem(item: NtsStatusItem): CheckItem {
   }
 }
 
-function makeBusinessStatusErrorItem(registrationNumber: string): CheckItem {
+function makeErrorItem(
+  id: CheckItemId,
+  category: CheckItem['category'],
+  label: string,
+  source: string
+): CheckItem {
   return {
-    id: 'BUSINESS_STATUS',
-    category: 'BUSINESS_LICENSE',
-    label: '사업자 상태',
-    source: '국세청',
+    id,
+    category,
+    label,
+    source,
     status: '조회 실패',
     statusType: 'error',
-    description: '국세청 API 조회에 실패했습니다. 잠시 후 다시 시도해주세요.',
-    details: [{ key: '사업자등록번호', value: formatRegNo(registrationNumber) }],
+    description: `${source} 조회에 실패했습니다. 잠시 후 다시 시도해주세요.`,
+    details: [],
   }
 }
 
-// ─── Kcomwel Insurance → CheckItem 변환 ──────────────
+// ─── Kcomwel Insurance → CheckItem ──────────────────
 
 function mapKcomwelToCheckItem(items: KcomwelInsuranceItem[]): CheckItem {
   const hasRecords = items.length > 0
@@ -115,121 +122,226 @@ function mapKcomwelToCheckItem(items: KcomwelInsuranceItem[]): CheckItem {
   }
 }
 
-function makeInsuranceErrorItem(): CheckItem {
+// ─── FEIA → FIRE_LICENSE CheckItem ──────────────────
+
+function mapFeiaToCheckItem(items: Awaited<ReturnType<typeof fetchFeiaCompanies>>): CheckItem {
+  const hasRecords = items.length > 0
+  const first = items[0]
+
   return {
-    id: 'EMPLOYMENT_INSURANCE',
-    category: 'INSURANCE',
-    label: '고용/산재보험 현황',
-    source: '근로복지공단',
-    status: '조회 실패',
-    statusType: 'error',
-    description: '근로복지공단 API 조회에 실패했습니다. 잠시 후 다시 시도해주세요.',
-    details: [],
+    id: 'FIRE_LICENSE',
+    category: 'BUSINESS_LICENSE',
+    label: '소방시설업 면허',
+    source: '한국소방시설협회',
+    status: hasRecords ? '확인' : '미확인',
+    statusType: hasRecords ? 'positive' : 'neutral',
+    description: '한국소방시설협회 기준 소방시설업 면허 등록 현황이에요.',
+    details: hasRecords
+      ? [
+          { key: '업체명', value: first.entprsNameHangul || '-' },
+          { key: '대표자', value: first.ceoName || '-' },
+          { key: '주소', value: first.hdOffcAddr1 || '-' },
+          { key: '등록번호', value: first.licenseName || '-' },
+          { key: '구분', value: first.licenseDiv || '-' },
+        ]
+      : [],
   }
 }
 
-// ─── Work24 Wage Arrears → CheckItem 변환 (구조만) ────
+// ─── MOEL → WAGE_ARREARS CheckItem ─────────────────
 
-function mapWageArrearsToCheckItem(response: WageArrearsResponse): CheckItem {
-  const totalCount = response.response?.body?.totalCount ?? 0
-  const hasArrears = totalCount > 0
+function mapMoelToCheckItem(items: Awaited<ReturnType<typeof fetchMoelDefaulters>>): CheckItem {
+  const hasArrears = items.length > 0
 
   return {
     id: 'WAGE_ARREARS',
     category: 'WAGE_RESTRICTION',
     label: '임금체불 이력',
     source: '고용노동부',
-    status: hasArrears ? `${totalCount}건 확인` : '해당 없음',
+    status: hasArrears ? `${items.length}건 확인` : '해당 없음',
     statusType: hasArrears ? 'negative' : 'positive',
     description: '고용노동부 공표 체불사업주 명단이에요.',
-    details: [], // API 승인 후 상세 정보 추가
+    details: hasArrears
+      ? [
+          { key: '사업장명', value: items[0].companyName || '-' },
+          { key: '대표자', value: items[0].name || '-' },
+          { key: '체불액', value: items[0].arrearsAmount ? `${items[0].arrearsAmount}만원` : '-' },
+          { key: '업종', value: items[0].industry || '-' },
+          { key: '소재지', value: items[0].companyAddress || '-' },
+        ]
+      : [],
   }
 }
 
-function makeWageArrearsErrorItem(): CheckItem {
+// ─── KISCON 상습체불 → HABITUAL_ARREARS CheckItem ────
+
+function mapKisconArrearsToCheckItem(
+  items: Awaited<ReturnType<typeof fetchKisconArrears>>
+): CheckItem {
+  const hasArrears = items.length > 0
+
   return {
-    id: 'WAGE_ARREARS',
+    id: 'HABITUAL_ARREARS',
     category: 'WAGE_RESTRICTION',
-    label: '임금체불 이력',
-    source: '고용노동부',
-    status: '조회 실패',
-    statusType: 'error',
-    description: '고용24 API 조회에 실패했습니다. 잠시 후 다시 시도해주세요.',
-    details: [],
+    label: '상습체불 이력',
+    source: '국토교통부',
+    status: hasArrears ? `${items.length}건 확인` : '해당 없음',
+    statusType: hasArrears ? 'negative' : 'positive',
+    description: '국토교통부 공표 상습체불 명단이에요.',
+    details: hasArrears
+      ? [
+          { key: '업체명', value: items[0].companyName || '-' },
+          { key: '대표자', value: items[0].representative || '-' },
+          {
+            key: '체불금액',
+            value: items[0].arrearsAmount ? `${items[0].arrearsAmount}천원` : '-',
+          },
+          { key: '처분이력', value: items[0].penaltyHistory || '-' },
+          { key: '공표기간', value: items[0].publicationPeriod || '-' },
+        ]
+      : [],
+  }
+}
+
+// ─── KISCON 하도급 → SUBCONTRACT_RESTRICTION CheckItem ─
+
+function mapKisconSubconToCheckItem(
+  items: Awaited<ReturnType<typeof fetchKisconSubconLimit>>
+): CheckItem {
+  const hasRestriction = items.length > 0
+
+  return {
+    id: 'SUBCONTRACT_RESTRICTION',
+    category: 'WAGE_RESTRICTION',
+    label: '하도급 참여제한',
+    source: '국토교통부',
+    status: hasRestriction ? `${items.length}건 확인` : '해당 없음',
+    statusType: hasRestriction ? 'negative' : 'positive',
+    description: '국토교통부 공표 하도급법 위반 제재 명단을 확인해요.',
+    details: hasRestriction
+      ? [
+          { key: '상호명', value: items[0].companyName || '-' },
+          { key: '대표자', value: items[0].representative || '-' },
+          { key: '위반법령', value: items[0].violationType || '-' },
+          { key: '제한기간', value: `${items[0].restrictionStart} ~ ${items[0].restrictionEnd}` },
+          { key: '사업자번호', value: items[0].bizRegNo || '-' },
+        ]
+      : [],
   }
 }
 
 // ─── 사업자 통합 조회 ───────────────────────────────
 
-/** 실제 API로 연결된 항목 ID (mock에서 제외할 목록) */
-const REAL_API_ITEM_IDS = new Set(['BUSINESS_STATUS', 'EMPLOYMENT_INSURANCE'])
-
 /**
  * 사업자등록번호로 전체 조회 (서버 전용)
  *
- * - BUSINESS_STATUS: 국세청 상태조회 API
- * - EMPLOYMENT_INSURANCE: 근로복지공단 고용/산재보험 API
- * - WAGE_ARREARS: 고용24 API (env var 있을 때만, 없으면 mock)
- * - 나머지: mock 데이터
- * - 사업자번호별 1시간 캐싱 (unstable_cache)
+ * Phase 1: NTS + KCOMWEL + KISCON하도급 병렬 (사업자번호만 필요)
+ * Phase 2: FEIA + MOEL + KISCON상습체불 병렬 (회사명 필요 → Phase 1에서 획득)
+ * 나머지: mock 유지 (CONSTRUCTION_LICENSE, SPECIALTY_LICENSE, ELECTRICAL_LICENSE, RETIREMENT_FUND)
  */
 async function _fetchBusinessVerification(
   registrationNumber: string
 ): Promise<VerifyBusinessResult> {
-  // 1) NTS + KCOMWEL 병렬 호출
-  const [ntsResult, kcomwelResult] = await Promise.allSettled([
+  // ── Phase 1: 사업자번호로 직접 조회 가능한 API ──
+  const [ntsResult, kcomwelResult, subconResult] = await Promise.allSettled([
     fetchNtsBusinessStatus([registrationNumber]),
     fetchKcomwelInsurance(registrationNumber),
+    fetchKisconSubconLimit(registrationNumber),
   ])
 
-  // 2) NTS → BUSINESS_STATUS
+  // NTS → BUSINESS_STATUS
   let businessStatusItem: CheckItem
   if (ntsResult.status === 'fulfilled' && ntsResult.value.data?.[0]) {
     businessStatusItem = mapNtsStatusToCheckItem(ntsResult.value.data[0])
   } else {
-    const reason = ntsResult.status === 'rejected' ? ntsResult.reason : 'empty data'
-    console.error('NTS business status API failed:', reason)
-    businessStatusItem = makeBusinessStatusErrorItem(registrationNumber)
+    console.error('NTS API failed:', ntsResult.status === 'rejected' ? ntsResult.reason : 'empty')
+    businessStatusItem = {
+      ...makeErrorItem('BUSINESS_STATUS', 'BUSINESS_LICENSE', '사업자 상태', '국세청'),
+      details: [{ key: '사업자등록번호', value: formatRegNo(registrationNumber) }],
+    }
   }
 
-  // 3) KCOMWEL → EMPLOYMENT_INSURANCE
+  // KCOMWEL → EMPLOYMENT_INSURANCE + 회사명 추출
   let insuranceItem: CheckItem
   let companyName: string | undefined
   if (kcomwelResult.status === 'fulfilled') {
-    const kcomwelItems = kcomwelResult.value
-    insuranceItem = mapKcomwelToCheckItem(kcomwelItems)
-    if (kcomwelItems.length > 0 && kcomwelItems[0].saeopjangNm) {
-      companyName = kcomwelItems[0].saeopjangNm
+    insuranceItem = mapKcomwelToCheckItem(kcomwelResult.value)
+    if (kcomwelResult.value.length > 0 && kcomwelResult.value[0].saeopjangNm) {
+      companyName = kcomwelResult.value[0].saeopjangNm
     }
   } else {
-    console.error('Kcomwel insurance API failed:', kcomwelResult.reason)
-    insuranceItem = makeInsuranceErrorItem()
+    console.error('Kcomwel API failed:', kcomwelResult.reason)
+    insuranceItem = makeErrorItem(
+      'EMPLOYMENT_INSURANCE',
+      'INSURANCE',
+      '고용/산재보험 현황',
+      '근로복지공단'
+    )
   }
 
-  // 4) WAGE_ARREARS: env var 없으면 mock 유지 (silent)
-  const realItemsExclude = new Set(REAL_API_ITEM_IDS)
-  let wageArrearsItem: CheckItem | undefined
-  if (process.env.WORK24_API_SERVICE_KEY) {
-    try {
-      const wageResult = await fetchWageArrears(registrationNumber)
-      wageArrearsItem = mapWageArrearsToCheckItem(wageResult)
-      realItemsExclude.add('WAGE_ARREARS')
-    } catch (error) {
-      console.error('Work24 wage arrears API failed:', error)
-      wageArrearsItem = makeWageArrearsErrorItem()
-      realItemsExclude.add('WAGE_ARREARS')
+  // KISCON 하도급 → SUBCONTRACT_RESTRICTION
+  let subconItem: CheckItem
+  if (subconResult.status === 'fulfilled') {
+    subconItem = mapKisconSubconToCheckItem(subconResult.value)
+  } else {
+    console.error('KISCON subcon crawl failed:', subconResult.reason)
+    subconItem = makeErrorItem(
+      'SUBCONTRACT_RESTRICTION',
+      'WAGE_RESTRICTION',
+      '하도급 참여제한',
+      '국토교통부'
+    )
+  }
+
+  // ── Phase 2: 회사명 기반 조회 (회사명 없으면 skip → mock 유지) ──
+  const realItems = new Map<CheckItemId, CheckItem>([
+    ['BUSINESS_STATUS', businessStatusItem],
+    ['EMPLOYMENT_INSURANCE', insuranceItem],
+    ['SUBCONTRACT_RESTRICTION', subconItem],
+  ])
+
+  if (companyName) {
+    const [feiaResult, moelResult, arrearsResult] = await Promise.allSettled([
+      fetchFeiaCompanies(companyName),
+      fetchMoelDefaulters(companyName),
+      fetchKisconArrears(companyName),
+    ])
+
+    // FEIA → FIRE_LICENSE
+    if (feiaResult.status === 'fulfilled') {
+      realItems.set('FIRE_LICENSE', mapFeiaToCheckItem(feiaResult.value))
+    } else {
+      console.error('FEIA crawl failed:', feiaResult.reason)
+      realItems.set(
+        'FIRE_LICENSE',
+        makeErrorItem('FIRE_LICENSE', 'BUSINESS_LICENSE', '소방시설업 면허', '한국소방시설협회')
+      )
+    }
+
+    // MOEL → WAGE_ARREARS
+    if (moelResult.status === 'fulfilled') {
+      realItems.set('WAGE_ARREARS', mapMoelToCheckItem(moelResult.value))
+    } else {
+      console.error('MOEL crawl failed:', moelResult.reason)
+      realItems.set(
+        'WAGE_ARREARS',
+        makeErrorItem('WAGE_ARREARS', 'WAGE_RESTRICTION', '임금체불 이력', '고용노동부')
+      )
+    }
+
+    // KISCON 상습체불 → HABITUAL_ARREARS
+    if (arrearsResult.status === 'fulfilled') {
+      realItems.set('HABITUAL_ARREARS', mapKisconArrearsToCheckItem(arrearsResult.value))
+    } else {
+      console.error('KISCON arrears crawl failed:', arrearsResult.reason)
+      realItems.set(
+        'HABITUAL_ARREARS',
+        makeErrorItem('HABITUAL_ARREARS', 'WAGE_RESTRICTION', '상습체불 이력', '국토교통부')
+      )
     }
   }
 
-  // 5) 실제 연결된 항목을 Map에 모으고, mock 순서 기준으로 조합
-  const realItems = new Map<string, CheckItem>([
-    ['BUSINESS_STATUS', businessStatusItem],
-    ['EMPLOYMENT_INSURANCE', insuranceItem],
-  ])
-  if (wageArrearsItem) {
-    realItems.set('WAGE_ARREARS', wageArrearsItem)
-  }
-
+  // ── mock 순서 기준으로 조합 (연결된 항목은 실데이터, 나머지는 mock) ──
   const checkItems = MOCK_VERIFY_RESULT.checkItems.map(
     (mockItem) => realItems.get(mockItem.id) ?? mockItem
   )
