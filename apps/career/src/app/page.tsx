@@ -63,6 +63,16 @@ export default function Home() {
       </div>
 
       <div className="mt-8">
+        <h2 className="mb-4 text-xl font-semibold">원클릭 조회</h2>
+        <Link
+          href="/one-click"
+          className="inline-block rounded-lg bg-morton-primary px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
+        >
+          사업자 조회
+        </Link>
+      </div>
+
+      <div className="mt-8">
         <h2 className="mb-4 text-xl font-semibold">디자인 시스템</h2>
         <Link
           href="/showcase"
