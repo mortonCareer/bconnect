@@ -44,5 +44,6 @@ module "vercel" {
   aws_secret_access_key = module.aws.secret_access_key
   aws_region            = var.aws_region
 
-  nts_api_service_key = var.nts_api_service_key
+  nts_api_service_key    = var.nts_api_service_key
+  kcomwel_api_service_key = var.kcomwel_api_service_key
 }
