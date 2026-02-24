@@ -132,25 +132,3 @@ export interface KcomwelInsuranceItem {
   gyEopjongCd?: string // 고용보험 업종코드
   gyEopjongNm?: string // 고용보험 업종명
 }
-
-// ─── 고용24 임금체불 API Types ─────────────────────
-
-/** 임금체불 명단 조회 응답 항목 (API 승인 후 실제 필드로 교체) */
-export interface WageArrearsItem {
-  companyName: string
-  representativeName: string
-  arrearsAmount: string
-  publicationDate: string
-  region: string
-}
-
-/** 고용24 API 응답 래퍼 (API 승인 후 실제 구조로 교체) */
-export interface WageArrearsResponse {
-  response: {
-    header: { resultCode: string; resultMsg: string }
-    body: {
-      items: { item: WageArrearsItem | WageArrearsItem[] }
-      totalCount: number
-    }
-  }
-}

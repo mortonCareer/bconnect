@@ -9,7 +9,6 @@ import type {
   VerifyBusinessResult,
   VerifyOwnerResult,
 } from './types'
-import { MOCK_VERIFY_RESULT } from './mock-data'
 import { fetchNtsBusinessStatus, fetchNtsBusinessValidate } from './nts-client'
 import { fetchKcomwelInsurance } from './kcomwel-client'
 import { fetchFeiaCompanies } from './feia-client'
@@ -17,6 +16,65 @@ import { fetchMoelDefaulters } from './moel-client'
 import { fetchKisconArrears, fetchKisconSubconLimit } from './kiscon-crawl-client'
 
 const CACHE_TTL = 3600 // 1시간
+
+// ─── UI 표시 순서 + 미연결 항목 ─────────────────────
+
+const CHECK_ITEM_ORDER: CheckItemId[] = [
+  'BUSINESS_STATUS',
+  'CONSTRUCTION_LICENSE',
+  'SPECIALTY_LICENSE',
+  'ELECTRICAL_LICENSE',
+  'FIRE_LICENSE',
+  'WAGE_ARREARS',
+  'HABITUAL_ARREARS',
+  'SUBCONTRACT_RESTRICTION',
+  'RETIREMENT_FUND',
+  'EMPLOYMENT_INSURANCE',
+]
+
+/** 아직 데이터소스 연결 안 된 항목 — "준비 중" neutral 표시 */
+const PENDING_ITEMS: CheckItem[] = [
+  {
+    id: 'CONSTRUCTION_LICENSE',
+    category: 'BUSINESS_LICENSE',
+    label: '건설업 면허',
+    source: '국토교통부',
+    status: '준비 중',
+    statusType: 'neutral',
+    description: '국토교통부 건설업 면허 등록 현황 연결 준비 중이에요.',
+    details: [],
+  },
+  {
+    id: 'SPECIALTY_LICENSE',
+    category: 'BUSINESS_LICENSE',
+    label: '전문건설업 면허',
+    source: '대한전문건설협회',
+    status: '준비 중',
+    statusType: 'neutral',
+    description: '대한전문건설협회 전문건설업 면허 연결 준비 중이에요.',
+    details: [],
+  },
+  {
+    id: 'ELECTRICAL_LICENSE',
+    category: 'BUSINESS_LICENSE',
+    label: '전기공사업 면허',
+    source: '한국전기공사협회',
+    status: '준비 중',
+    statusType: 'neutral',
+    description: '한국전기공사협회 전기공사업 면허 연결 준비 중이에요.',
+    details: [],
+  },
+  {
+    id: 'RETIREMENT_FUND',
+    category: 'INSURANCE',
+    label: '퇴직공제 가입 공사 이력',
+    source: '건설근로자공제회',
+    status: '준비 중',
+    statusType: 'neutral',
+    description: '건설근로자공제회 퇴직공제 가입 현황 연결 준비 중이에요.',
+    details: [],
+  },
+]
 
 // ─── 헬퍼 ────────────────────────────────────────
 
@@ -341,14 +399,19 @@ async function _fetchBusinessVerification(
     }
   }
 
-  // ── mock 순서 기준으로 조합 (연결된 항목은 실데이터, 나머지는 mock) ──
-  const checkItems = MOCK_VERIFY_RESULT.checkItems.map(
-    (mockItem) => realItems.get(mockItem.id) ?? mockItem
-  )
+  // ── 미연결 항목은 "준비 중" 상태로 생성 ──
+  for (const item of PENDING_ITEMS) {
+    if (!realItems.has(item.id)) {
+      realItems.set(item.id, item)
+    }
+  }
+
+  // 고정 순서로 조합
+  const checkItems = CHECK_ITEM_ORDER.map((id) => realItems.get(id)!).filter(Boolean)
 
   return {
     company: {
-      name: companyName ?? MOCK_VERIFY_RESULT.company.name,
+      name: companyName ?? '-',
       registrationNumber: formatRegNo(registrationNumber),
     },
     checkItems,
