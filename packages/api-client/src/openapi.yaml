@@ -6,6 +6,9 @@ info:
 servers:
   - url: http://localhost:8080
 
+security:
+  - bearerAuth: []
+
 paths:
   # =====================
   # Auth Endpoints
@@ -14,6 +17,7 @@ paths:
     post:
       operationId: sendOtp
       tags: [Auth]
+      security: []
       summary: SMS 인증코드를 발송합니다
       requestBody:
         required: true
@@ -33,6 +37,7 @@ paths:
     post:
       operationId: verifyOtp
       tags: [Auth]
+      security: []
       summary: 인증코드를 검증합니다 (로그인 또는 회원가입 분기)
       requestBody:
         required: true
@@ -56,6 +61,7 @@ paths:
     post:
       operationId: refreshToken
       tags: [Auth]
+      security: []
       summary: 리프레시 토큰으로 액세스 토큰을 갱신합니다
       responses:
         '200':
@@ -108,6 +114,7 @@ paths:
     post:
       operationId: registerMember
       tags: [Members]
+      security: []
       summary: 새 회원을 등록합니다
       requestBody:
         required: true
@@ -484,6 +491,12 @@ paths:
                 $ref: '#/components/schemas/Profile'
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     # =====================
     # Common
