@@ -7,14 +7,15 @@ spring:
 
   jpa:
     open-in-view: false
-    hibernate:
-      ddl-auto: create-drop
+
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-    defer-datasource-initialization: true
 
+    hibernate:
+      ddl-auto: none
+    defer-datasource-initialization: true
   sql:
     init:
       mode: always

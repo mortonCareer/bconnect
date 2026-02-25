@@ -21,6 +21,7 @@ public class EnvironmentValidator {
             "DATABASE_USERNAME",
             "DATABASE_PASSWORD",
             "JWT_SECRET"
+            // TODO: AWS
     );
 
     private final Environment env;
