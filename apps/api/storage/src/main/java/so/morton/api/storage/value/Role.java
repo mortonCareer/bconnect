@@ -1,6 +1,7 @@
 package so.morton.api.storage.value;
 
 public enum Role {
+    GUEST,
     CLIENT,
     ARCHITECT,
     CONTRACTOR,
