@@ -20,11 +20,7 @@ public class EnvironmentValidator {
             "DATABASE_URL",
             "DATABASE_USERNAME",
             "DATABASE_PASSWORD",
-            "JWT_SECRET",
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-            "AWS_REGION",
-            "AWS_S3_BUCKET"
+            "JWT_SECRET"
     );
 
     private final Environment env;
@@ -49,10 +45,6 @@ public class EnvironmentValidator {
         log.info("DATABASE_URL: {}", maskUrl(env.getProperty("DATABASE_URL")));
         log.info("DATABASE_USERNAME: {}", env.getProperty("DATABASE_USERNAME"));
         log.info("DATABASE_PASSWORD: ***");
-        log.info("AWS_ACCESS_KEY_ID: {}", maskSecret(env.getProperty("AWS_ACCESS_KEY_ID")));
-        log.info("AWS_SECRET_ACCESS_KEY: ***");
-        log.info("AWS_REGION: {}", env.getProperty("AWS_REGION"));
-        log.info("AWS_S3_BUCKET: {}", env.getProperty("AWS_S3_BUCKET"));
         log.info("=".repeat(60));
     }
 

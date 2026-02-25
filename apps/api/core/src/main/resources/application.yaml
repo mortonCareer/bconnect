@@ -22,13 +22,14 @@ spring:
   flyway:
     enabled: false
 
-  cloud:
-    aws:
-      region:
-        static: ${AWS_REGION}
-      credentials:
-        access-key: ${AWS_ACCESS_KEY_ID}
-        secret-key: ${AWS_SECRET_ACCESS_KEY}
+  # aws (TODO)
+  # cloud:
+  #   aws:
+  #     region:
+  #       static: ${AWS_REGION}
+  #     credentials:
+  #       access-key: ${AWS_ACCESS_KEY_ID}
+  #       secret-key: ${AWS_SECRET_ACCESS_KEY}
 
 management:
   metrics:
