@@ -9,9 +9,6 @@ dependencies {
     implementation project(':support')
     implementation project(':storage')
 
-    // MetricsConfig에서 ProcessorMetrics graceful degradation에 필요
-    implementation 'io.micrometer:micrometer-core'
-
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -23,10 +20,24 @@ dependencies {
     // db
     implementation 'org.springframework.boot:spring-boot-h2console'
 
+    // aws
+    implementation 'software.amazon.awssdk:s3:2.42.0'
+    implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:4.0.0')
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
+
     // jwt
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
     runtimeOnly ("io.jsonwebtoken:jjwt-impl:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-orgjson:0.13.0")
+
+    // monitor
+    implementation 'io.micrometer:micrometer-core'
+
+    // test
+    testImplementation "org.testcontainers:testcontainers"
+    testImplementation "org.testcontainers:testcontainers-junit-jupiter"
+    testImplementation "org.testcontainers:testcontainers-mysql"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
