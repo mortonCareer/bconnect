@@ -12,6 +12,6 @@ public record CreateTaskRequest(
         String taskTitle,
         String eventTitle,
         Set<Trade> trades,
-        LocalDate start,
-        LocalDate end
+        LocalDate startDate,
+        LocalDate endDate
 ) {}
