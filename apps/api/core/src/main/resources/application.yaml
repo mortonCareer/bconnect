@@ -22,7 +22,7 @@ spring:
   flyway:
     enabled: false
 
-  # aws (TODO)
+  # TODO: aws
   # cloud:
   #   aws:
   #     region:

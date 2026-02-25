@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:tc:mysql:latest:///test
+    url: jdbc:tc:postgresql:latest:///test
 
 app:
   jwt:
