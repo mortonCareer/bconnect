@@ -14,8 +14,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-    // socketio
-    implementation 'com.corundumstudio.socketio:netty-socketio:2.0.12'
+    // TODO: socketio
+    // implementation 'com.corundumstudio.socketio:netty-socketio:2.0.12'
 
     // db
     implementation 'org.springframework.boot:spring-boot-h2console'

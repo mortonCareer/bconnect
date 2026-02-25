@@ -6,3 +6,7 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
+app:
+  jwt:
+    secret: test-secret-key-for-jwt-authentication-minimum-256-bits
