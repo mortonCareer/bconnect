@@ -3,7 +3,7 @@ package so.morton.api.support.auth.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import so.morton.api.config.AppProperties;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import so.morton.api.support.auth.User;
 import so.morton.api.support.auth.UserService;
 
+import java.time.Duration;
 import javax.crypto.SecretKey;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,18 +35,15 @@ public class JwtProvider {
     private static final String AUTHORITY_PREFIX = "ROLE_";
 
     private final SecretKey secret;
-    private final long accessTokenExpiration;
-    private final long refreshTokenExpiration;
+    private final Duration accessTokenExpiration;
+    private final Duration refreshTokenExpiration;
     private final UserService userService;
 
-    public JwtProvider(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.access-token-expiration:3600000}") long accessTokenExpiration,
-            @Value("${jwt.refresh-token-expiration:604800000}") long refreshTokenExpiration,
-            UserService userService) {
-        this.secret = Keys.hmacShaKeyFor(secret.getBytes());
-        this.accessTokenExpiration = accessTokenExpiration;
-        this.refreshTokenExpiration = refreshTokenExpiration;
+    public JwtProvider(AppProperties appProperties, UserService userService) {
+        AppProperties.Jwt properties = appProperties.jwt();
+        this.secret = Keys.hmacShaKeyFor(properties.secret().getBytes());
+        this.accessTokenExpiration = properties.accessTokenExpiration();
+        this.refreshTokenExpiration = properties.refreshTokenExpiration();
         this.userService = userService;
     }
 
@@ -58,7 +56,7 @@ public class JwtProvider {
                 .collect(Collectors.joining(AUTHORITIES_DELIMITER));
 
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + accessTokenExpiration);
+        Date expiration = new Date(now.getTime() + accessTokenExpiration.toMillis());
 
         return Jwts.builder()
                 .subject(username)
@@ -78,7 +76,7 @@ public class JwtProvider {
                 .collect(Collectors.joining(AUTHORITIES_DELIMITER));
 
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + accessTokenExpiration);
+        Date expiration = new Date(now.getTime() + accessTokenExpiration.toMillis());
 
         return Jwts.builder()
                 .subject(user.getUsername())
@@ -92,7 +90,7 @@ public class JwtProvider {
 
     public String generateRefreshToken(String username) {
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + refreshTokenExpiration);
+        Date expiration = new Date(now.getTime() + refreshTokenExpiration.toMillis());
 
         return Jwts.builder()
                 .subject(username)

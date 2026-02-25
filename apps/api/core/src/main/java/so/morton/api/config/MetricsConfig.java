@@ -7,11 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * 컨테이너 환경(Railway 등)에서 ProcessorMetrics cgroup 호환성 문제 대응.
- * JDK 17 + cgroup v2 환경에서 CgroupInfo.getMountPoint() NPE가 발생할 수 있어
- * 자동 설정 대신 직접 Bean을 등록하고, 실패 시 경고만 남긴다.
- */
 @Configuration
 public class MetricsConfig {
 
