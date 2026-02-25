@@ -43,3 +43,8 @@ app:
     allowed-origin-patterns:
       - https://morton-career*.vercel.app
       - https://morton-plan*.vercel.app
+
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-expiration: 1h
+    refresh-token-expiration: 7d
