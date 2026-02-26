@@ -85,6 +85,7 @@ public class SecurityConfig {
                 }))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(arc -> arc
+                        .requestMatchers(GET, "/api/v1/members/me").authenticated()
                         .requestMatchers(GET).permitAll()
                         .requestMatchers(POST, "/api/v1/members").permitAll()
                         .requestMatchers("/api/v1/auth/otp/**").permitAll()
