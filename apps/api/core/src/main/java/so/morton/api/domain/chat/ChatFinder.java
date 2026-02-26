@@ -6,7 +6,6 @@ import so.morton.api.storage.domain.chat.ParticipantEntity;
 import so.morton.api.storage.domain.chat.ChatRepository;
 import so.morton.api.storage.domain.chat.MessageRepository;
 import so.morton.api.storage.domain.chat.ParticipantRepository;
-import so.morton.api.storage.value.EntityStatus;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 
@@ -22,7 +21,7 @@ public class ChatFinder {
 
     public Chat find(Long chatId, Long memberId) {
         return chatRepository.findById(chatId)
-                .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
+                .filter(e -> !e.isDeleted())
                 .map(entity -> {
                     List<Long> participantIds = participantRepository.findByChatId(chatId)
                             .stream()

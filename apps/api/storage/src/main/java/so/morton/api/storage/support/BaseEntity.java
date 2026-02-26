@@ -6,7 +6,7 @@ import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import so.morton.api.storage.value.EntityStatus;
+
 
 import java.time.LocalDateTime;
 
@@ -27,10 +27,9 @@ public class BaseEntity {
     @Column(nullable = false)
     private LocalDateTime modifiedAt = LocalDateTime.now();
 
-    @Enumerated(EnumType.STRING)
-    private EntityStatus status = EntityStatus.ACTIVE;
+    private boolean deleted = false;
 
     public void delete() {
-        this.status = EntityStatus.DELETED;
+        this.deleted = true;
     }
 }

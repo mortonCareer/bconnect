@@ -7,7 +7,7 @@ import so.morton.api.api.controller.v1.request.RegisterMemberRequest;
 import so.morton.api.api.controller.v1.request.UpdateMemberRequest;
 import so.morton.api.storage.domain.member.MemberEntity;
 import so.morton.api.storage.domain.member.MemberRepository;
-import so.morton.api.storage.value.EntityStatus;
+
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 
@@ -40,7 +40,7 @@ public class MemberService {
     @Transactional
     public Member update(Long memberId, UpdateMemberRequest request) {
         MemberEntity member = memberRepository.findById(memberId)
-                .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
+                .filter(e -> !e.isDeleted())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         member.update(
@@ -55,7 +55,7 @@ public class MemberService {
     @Transactional
     public void delete(Long memberId) {
         MemberEntity member = memberRepository.findById(memberId)
-                .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
+                .filter(e -> !e.isDeleted())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         member.delete();

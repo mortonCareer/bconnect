@@ -7,7 +7,6 @@ import so.morton.api.api.controller.v1.request.CreatePostRequest;
 import so.morton.api.api.controller.v1.request.UpdatePostRequest;
 import so.morton.api.storage.domain.post.PostEntity;
 import so.morton.api.storage.domain.post.PostRepository;
-import so.morton.api.storage.value.EntityStatus;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 
@@ -40,7 +39,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public List<Post> getAll() {
-        return postRepository.findAllByStatus(EntityStatus.ACTIVE)
+        return postRepository.findAllByDeletedFalse()
                 .stream()
                 .map(Post::of)
                 .toList();
@@ -59,7 +58,7 @@ public class PostService {
     @Transactional
     public Post update(Long postId, Long userId, UpdatePostRequest request) {
         PostEntity entity = postRepository.findById(postId)
-                .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
+                .filter(e -> !e.isDeleted())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!entity.getAuthorId().equals(userId)) {
@@ -74,7 +73,7 @@ public class PostService {
     @Transactional
     public void delete(Long postId, Long userId) {
         PostEntity entity = postRepository.findById(postId)
-                .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
+                .filter(e -> !e.isDeleted())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!entity.getAuthorId().equals(userId)) {

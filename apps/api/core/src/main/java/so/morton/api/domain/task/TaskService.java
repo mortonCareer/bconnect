@@ -50,7 +50,7 @@ public class TaskService {
     @Transactional
     public Task update(Long taskId, Long userId, UpdateTaskRequest request) {
         TaskEntity entity = taskRepository.findById(taskId)
-                .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
+                .filter(e -> !e.isDeleted())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!entity.getForemanId().equals(userId)) {
@@ -73,10 +73,10 @@ public class TaskService {
     @Transactional
     public void delete(Long taskId, Long userId) {
         TaskEntity entity = taskRepository.findById(taskId)
-                .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
+                .filter(e -> !e.isDeleted())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!entity.getForemanId().equals(userId)) {
+        if (!entity.getProfileId().equals(profileId)) {
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
         }
 
