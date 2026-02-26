@@ -19,7 +19,7 @@ public class MemberService {
     private final MemberFinder memberFinder;
 
     @Transactional
-    public Member create(RegisterMemberRequest request) {
+    public Member register(RegisterMemberRequest request) {
         MemberEntity member = MemberEntity.builder()
                 .username(request.username())
                 .name(request.name())

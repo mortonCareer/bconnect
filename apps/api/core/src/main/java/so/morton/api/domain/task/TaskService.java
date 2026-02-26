@@ -21,8 +21,9 @@ public class TaskService {
     private final TaskFinder taskFinder;
 
     @Transactional
-    public Task create(CreateTaskRequest request) {
+    public Task create(Long foremanId, CreateTaskRequest request) {
         TaskEntity entity = TaskEntity.builder()
+                .foremanId(foremanId)
                 .company(request.company())
                 .address(request.address())
                 .taskTitle(request.taskTitle())
@@ -47,10 +48,14 @@ public class TaskService {
     }
 
     @Transactional
-    public Task update(Long taskId, UpdateTaskRequest request) {
+    public Task update(Long taskId, Long userId, UpdateTaskRequest request) {
         TaskEntity entity = taskRepository.findById(taskId)
                 .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        if (!entity.getForemanId().equals(userId)) {
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        }
 
         entity.update(
                 request.company(),
@@ -66,10 +71,14 @@ public class TaskService {
     }
 
     @Transactional
-    public void delete(Long taskId) {
+    public void delete(Long taskId, Long userId) {
         TaskEntity entity = taskRepository.findById(taskId)
                 .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        if (!entity.getForemanId().equals(userId)) {
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        }
 
         entity.delete();
     }

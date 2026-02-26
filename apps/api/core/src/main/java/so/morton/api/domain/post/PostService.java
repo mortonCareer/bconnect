@@ -21,9 +21,9 @@ public class PostService {
     private final PostFinder postFinder;
 
     @Transactional
-    public Post create(CreatePostRequest request) {
+    public Post create(Long authorId, CreatePostRequest request) {
         PostEntity entity = PostEntity.builder()
-                .authorId(request.authorId())
+                .authorId(authorId)
                 .taskId(request.taskId())
                 .images(request.images())
                 .content(request.content())
@@ -57,10 +57,14 @@ public class PostService {
     }
 
     @Transactional
-    public Post update(Long postId, UpdatePostRequest request) {
+    public Post update(Long postId, Long userId, UpdatePostRequest request) {
         PostEntity entity = postRepository.findById(postId)
                 .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        if (!entity.getAuthorId().equals(userId)) {
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        }
 
         entity.update(request.images(), request.content());
 
@@ -68,10 +72,14 @@ public class PostService {
     }
 
     @Transactional
-    public void delete(Long postId) {
+    public void delete(Long postId, Long userId) {
         PostEntity entity = postRepository.findById(postId)
                 .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        if (!entity.getAuthorId().equals(userId)) {
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        }
 
         entity.delete();
     }

@@ -19,6 +19,9 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TaskEntity extends BaseEntity {
 
+    @Column
+    private Long foremanId;
+
     @Column(nullable = false)
     private String company; // TODO: 삭제
 
@@ -51,8 +54,9 @@ public class TaskEntity extends BaseEntity {
     // status: TaskStatus
 
     @Builder
-    public TaskEntity(String company, Address address, String taskTitle, String eventTitle,
+    public TaskEntity(Long foremanId, String company, Address address, String taskTitle, String eventTitle,
                       Set<Trade> trades, LocalDate start, LocalDate end) {
+        this.foremanId = foremanId;
         this.company = company;
         this.address = address;
         this.taskTitle = taskTitle;
