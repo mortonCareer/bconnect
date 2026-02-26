@@ -10,7 +10,7 @@ import java.util.Set;
 
 public record TaskResponse(
         Long id,
-        Long foremanId,
+        Long profileId,
         String company,
         Address address,
         String taskTitle,
@@ -24,7 +24,7 @@ public record TaskResponse(
     public static TaskResponse of(Task task) {
         return new TaskResponse(
                 task.id(),
-                task.foremanId(),
+                task.profileId(),
                 task.company(),
                 task.address(),
                 task.taskTitle(),

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import so.morton.api.api.controller.v1.request.CreatePostRequest;
 import so.morton.api.api.controller.v1.request.UpdatePostRequest;
+import so.morton.api.domain.profile.ProfileFinder;
 import so.morton.api.storage.domain.post.PostEntity;
 import so.morton.api.storage.domain.post.PostRepository;
 import so.morton.api.support.CodeException;
@@ -18,11 +19,13 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostFinder postFinder;
+    private final ProfileFinder profileFinder;
 
     @Transactional
-    public Post create(Long authorId, CreatePostRequest request) {
+    public Post create(Long memberId, CreatePostRequest request) {
+        Long profileId = profileFinder.resolveId(memberId);
         PostEntity entity = PostEntity.builder()
-                .authorId(authorId)
+                .authorId(profileId)
                 .taskId(request.taskId())
                 .images(request.images())
                 .content(request.content())
@@ -45,23 +48,14 @@ public class PostService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
-    public List<Post> getByAuthor(Long authorId) {
-        return postFinder.findByAuthor(authorId);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Post> getByTask(Long taskId) {
-        return postFinder.findByTask(taskId);
-    }
-
     @Transactional
-    public Post update(Long postId, Long userId, UpdatePostRequest request) {
+    public Post update(Long postId, Long memberId, UpdatePostRequest request) {
+        Long profileId = profileFinder.resolveId(memberId);
         PostEntity entity = postRepository.findById(postId)
                 .filter(e -> !e.isDeleted())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!entity.getAuthorId().equals(userId)) {
+        if (!entity.getAuthorId().equals(profileId)) {
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
         }
 
@@ -71,12 +65,13 @@ public class PostService {
     }
 
     @Transactional
-    public void delete(Long postId, Long userId) {
+    public void delete(Long postId, Long memberId) {
+        Long profileId = profileFinder.resolveId(memberId);
         PostEntity entity = postRepository.findById(postId)
                 .filter(e -> !e.isDeleted())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!entity.getAuthorId().equals(userId)) {
+        if (!entity.getAuthorId().equals(profileId)) {
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
         }
 

@@ -20,7 +20,7 @@ import java.util.Set;
 public class TaskEntity extends BaseEntity {
 
     @Column
-    private Long foremanId;
+    private Long profileId;
 
     @Column(nullable = false)
     private String company; // TODO: 삭제
@@ -54,9 +54,9 @@ public class TaskEntity extends BaseEntity {
     // status: TaskStatus
 
     @Builder
-    public TaskEntity(Long foremanId, String company, Address address, String taskTitle, String eventTitle,
+    public TaskEntity(Long profileId, String company, Address address, String taskTitle, String eventTitle,
                       Set<Trade> trades, LocalDate start, LocalDate end) {
-        this.foremanId = foremanId;
+        this.profileId = profileId;
         this.company = company;
         this.address = address;
         this.taskTitle = taskTitle;
