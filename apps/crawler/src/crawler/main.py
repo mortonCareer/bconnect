@@ -760,10 +760,17 @@ async def run_from_file(file_path: Path, force: bool = False) -> PipelineReport:
     return report
 
 
-async def run_enrich(use_vision: bool = True) -> PipelineReport:
+async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineReport:
     """노션 DB에서 빈 필드가 있는 레코드를 찾아 재크롤링+LLM 분류로 보강한다."""
-    pages = await find_pages_needing_enrichment()
-    log.info("보강 대상 레코드: %d건", len(pages))
+    all_pages = await find_pages_needing_enrichment()
+    if channel == "blog":
+        pages = [p for p in all_pages if "instagram.com" not in (p.get("detail_url") or "")]
+    elif channel == "instagram":
+        pages = [p for p in all_pages if "instagram.com" in (p.get("detail_url") or "")]
+    else:
+        pages = all_pages
+    skipped = len(all_pages) - len(pages)
+    log.info("보강 대상 레코드: %d건%s", len(pages), f" ({skipped}건 채널 필터로 제외)" if skipped else "")
 
     report = PipelineReport()
     report.mode = "필드 보강"
@@ -1156,6 +1163,7 @@ def main():
     parser.add_argument("--from-file", type=Path, metavar="JSON", help="검수한 JSON에서 노션 저장")
     parser.add_argument("--enrich", action="store_true", help="빈 필드가 있는 기존 레코드를 재크롤링+LLM으로 보강")
     parser.add_argument("--instagram", action="store_true", help="인스타그램 채널 크롤링")
+    parser.add_argument("--channel", choices=["blog", "instagram", "all"], default="all", help="enrich 대상 채널 (기본: all)")
     parser.add_argument("--approve", action="store_true", help="검수 DB 승인 건을 프로덕션 DB로 이동")
     parser.add_argument("--direct", action="store_true", help="검수 DB 거치지 않고 프로덕션 DB 직접 저장")
     parser.add_argument("--patch-review", action="store_true", help="검수 DB 기존 데이터에 피드백 수정사항 소급 적용")
@@ -1231,7 +1239,7 @@ def main():
         elif args.approve:
             report = await run_approve()
         elif args.enrich:
-            report = await run_enrich(use_vision=use_vision)
+            report = await run_enrich(use_vision=use_vision, channel=args.channel)
         elif args.from_file:
             report = await run_from_file(args.from_file, force=args.force)
         elif args.instagram and args.full:
