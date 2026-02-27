@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import so.morton.api.storage.value.CoworkerStatus;
+import so.morton.api.storage.value.CoworkerUtils;
 
 @Entity
 @Table(name = "coworkers")
@@ -36,14 +37,11 @@ public class CoworkerEntity {
     public CoworkerEntity(Long fromId, Long toId) {
         this.fromId = fromId;
         this.toId = toId;
-        this.pair = pairOf(fromId, toId);
+        this.pair = CoworkerUtils.pairOf(fromId, toId);
     }
 
     public void accept() {
         this.status = CoworkerStatus.ACCEPTED;
     }
 
-    public static String pairOf(Long a, Long b) {
-        return Math.min(a, b) + "_" + Math.max(a, b);
-    }
 }
