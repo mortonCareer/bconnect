@@ -17,13 +17,12 @@ public class CredentialFinder {
 
     public Credential find(Long credentialId) {
         return credentialRepository.findById(credentialId)
-                .filter(e -> !e.isDeleted())
                 .map(Credential::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
     public List<Credential> findByProfileId(Long profileId) {
-        return credentialRepository.findByProfileIdAndDeletedFalse(profileId)
+        return credentialRepository.findByProfileId(profileId)
                 .stream()
                 .map(Credential::of)
                 .toList();

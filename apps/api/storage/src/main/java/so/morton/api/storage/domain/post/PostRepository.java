@@ -9,6 +9,4 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     List<PostEntity> findByAuthorId(Long authorId);
 
     List<PostEntity> findByTaskId(Long taskId);
-
-    List<PostEntity> findAllByDeletedFalse();
 }

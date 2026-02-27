@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface CredentialRepository extends JpaRepository<CredentialEntity, Long> {
 
-    List<CredentialEntity> findByProfileIdAndDeletedFalse(Long profileId);
+    List<CredentialEntity> findByProfileId(Long profileId);
 }

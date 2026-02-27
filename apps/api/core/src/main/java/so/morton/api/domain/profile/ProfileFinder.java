@@ -13,12 +13,12 @@ public class ProfileFinder {
     private final ProfileRepository profileRepository;
 
     public Profile findByMemberId(Long memberId) {
-        return profileRepository.findByMemberIdAndDeletedFalse(memberId)
+        return profileRepository.findByMemberId(memberId)
                 .map(Profile::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
-    public Long resolveId(Long memberId) {
-        return findByMemberId(memberId).id();
+    public boolean existsById(Long profileId) {
+        return profileRepository.findById(profileId).isPresent();
     }
 }

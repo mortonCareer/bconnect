@@ -17,7 +17,6 @@ public class PostFinder {
 
     public Post find(Long postId) {
         return postRepository.findById(postId)
-                .filter(e -> !e.isDeleted())
                 .map(Post::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
@@ -25,7 +24,6 @@ public class PostFinder {
     public List<Post> findByAuthorId(Long authorId) {
         return postRepository.findByAuthorId(authorId)
                 .stream()
-                .filter(e -> !e.isDeleted())
                 .map(Post::of)
                 .toList();
     }
@@ -33,7 +31,6 @@ public class PostFinder {
     public List<Post> findByTask(Long taskId) {
         return postRepository.findByTaskId(taskId)
                 .stream()
-                .filter(e -> !e.isDeleted())
                 .map(Post::of)
                 .toList();
     }

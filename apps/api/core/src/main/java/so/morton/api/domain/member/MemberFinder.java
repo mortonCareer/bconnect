@@ -17,20 +17,18 @@ public class MemberFinder {
 
     public Member find(Long memberId) {
         return memberRepository.findById(memberId)
-                .filter(e -> !e.isDeleted())
                 .map(Member::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
     public Member findByUsername(String username) {
         return memberRepository.findByUsername(username)
-                .filter(e -> !e.isDeleted())
                 .map(Member::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
     public List<Member> findAllActive() {
-        return memberRepository.findAllByDeletedFalse()
+        return memberRepository.findAll()
                 .stream()
                 .map(Member::of)
                 .toList();

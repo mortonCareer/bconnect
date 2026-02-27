@@ -17,13 +17,12 @@ public class TaskFinder {
 
     public Task find(Long taskId) {
         return taskRepository.findById(taskId)
-                .filter(e -> !e.isDeleted())
                 .map(Task::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
-    public List<Task> findAllActive() {
-        return taskRepository.findAllByDeletedFalse()
+    public List<Task> findAll() {
+        return taskRepository.findAll()
                 .stream()
                 .map(Task::of)
                 .toList();

@@ -21,7 +21,6 @@ public class ChatFinder {
 
     public Chat find(Long chatId, Long memberId) {
         return chatRepository.findById(chatId)
-                .filter(e -> !e.isDeleted())
                 .map(entity -> {
                     List<Long> participantIds = participantRepository.findByChatId(chatId)
                             .stream()

@@ -16,7 +16,6 @@ public class MessageFinder {
 
     public Message find(Long messageId) {
         return messageRepository.findById(messageId)
-                .filter(e -> !e.isDeleted())
                 .map(Message::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
@@ -24,7 +23,6 @@ public class MessageFinder {
     public List<Message> findByChat(Long chatId) {
         return messageRepository.findByChatId(chatId)
                 .stream()
-                .filter(e -> !e.isDeleted())
                 .map(Message::of)
                 .toList();
     }
