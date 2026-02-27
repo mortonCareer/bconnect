@@ -3,48 +3,47 @@ package so.morton.api.storage.domain.coworker;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import so.morton.api.storage.support.BaseEntity;
 import so.morton.api.storage.value.CoworkerStatus;
 
 @Entity
 @Table(name = "coworkers")
 @Getter
+@EqualsAndHashCode(of = "id")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CoworkerEntity extends BaseEntity {
+public class CoworkerEntity {
 
-    @Column(name = "from_id", nullable = false)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
     private Long fromId;
 
-    @Column(name = "to_id", nullable = false)
+    @Column(nullable = false)
     private Long toId;
-
-    @Column(unique = true)
-    private String pair;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CoworkerStatus status = CoworkerStatus.PENDING;
 
+    @Column(unique = true, nullable = false)
+    private String pair;
+
     @Builder
     public CoworkerEntity(Long fromId, Long toId) {
         this.fromId = fromId;
         this.toId = toId;
-        this.pair = buildPair(fromId, toId);
+        this.pair = pairOf(fromId, toId);
     }
 
     public void accept() {
         this.status = CoworkerStatus.ACCEPTED;
     }
 
-    public void deny() {
-        this.status = CoworkerStatus.DENIED;
-    }
-
-    private static String buildPair(Long a, Long b) {
-        long min = Math.min(a, b);
-        long max = Math.max(a, b);
-        return min + ":" + max;
+    public static String pairOf(Long a, Long b) {
+        return Math.min(a, b) + "_" + Math.max(a, b);
     }
 }

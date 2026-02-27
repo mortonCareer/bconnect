@@ -4,6 +4,7 @@ import so.morton.api.storage.domain.credential.CredentialEntity;
 import so.morton.api.storage.value.CredentialStatus;
 import so.morton.api.storage.value.CredentialType;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record Credential(
@@ -11,6 +12,7 @@ public record Credential(
     Long profileId,
     CredentialType type,
     CredentialStatus status,
+    LocalDate expiredAt,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
@@ -20,6 +22,7 @@ public record Credential(
                 entity.getProfileId(),
                 entity.getType(),
                 entity.getStatus(),
+                entity.getExpiredAt(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt()
         );

@@ -8,9 +8,12 @@ import java.util.Optional;
 
 public interface CoworkerRepository extends JpaRepository<CoworkerEntity, Long> {
 
-    List<CoworkerEntity> findByFromIdAndStatusAndDeletedFalse(Long fromId, CoworkerStatus status);
+    Optional<CoworkerEntity> findByPair(String pair);
 
-    List<CoworkerEntity> findByToIdAndStatusAndDeletedFalse(Long toId, CoworkerStatus status);
+    boolean existsByPairAndStatus(String pair, CoworkerStatus status);
 
-    Optional<CoworkerEntity> findByPairAndDeletedFalse(String pair);
+    List<CoworkerEntity> findByFromIdAndStatus(Long fromId, CoworkerStatus status);
+
+    List<CoworkerEntity> findByToIdAndStatus(Long toId, CoworkerStatus status);
+
 }

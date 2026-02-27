@@ -1,6 +1,7 @@
 package so.morton.api.storage.domain.credential;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,10 +27,13 @@ public class CredentialEntity extends BaseEntity {
     @Column(nullable = false)
     private CredentialStatus status = CredentialStatus.PENDING;
 
+    private LocalDate expiredAt;
+
     @Builder
     public CredentialEntity(Long profileId, CredentialType type) {
         this.profileId = profileId;
         this.type = type;
+        this.expiredAt = LocalDate.now().plus(type.getExpiration());
     }
 
     public void accept() {
