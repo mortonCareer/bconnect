@@ -8,25 +8,25 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "coworkers", uniqueConstraints = @UniqueConstraint(columnNames = {"min_id", "max_id"}))
+@Table(name = "coworker_requests", uniqueConstraints = @UniqueConstraint(columnNames = {"from_id", "to_id"}))
 @Getter
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CoworkerEntity {
+public class CoworkerRequestEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private Long minId;
+    private Long fromId;
 
     @Column(nullable = false)
-    private Long maxId;
+    private Long toId;
 
     @Builder
-    public CoworkerEntity(Long minId, Long maxId) {
-        this.minId = minId;
-        this.maxId = maxId;
+    public CoworkerRequestEntity(Long fromId, Long toId) {
+        this.fromId = fromId;
+        this.toId = toId;
     }
 }
