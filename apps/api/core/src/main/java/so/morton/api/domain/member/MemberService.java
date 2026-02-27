@@ -20,6 +20,12 @@ public class MemberService {
 
     @Transactional
     public Member register(RegisterMemberRequest request) {
+        memberRepository.findByUsername(request.username())
+                .ifPresent(e -> { throw new CodeException(MemberExceptionCode.DUPLICATE_USERNAME); });
+
+        memberRepository.findByPhone(request.phone())
+                .ifPresent(e -> { throw new CodeException(MemberExceptionCode.DUPLICATE_PHONE); });
+
         MemberEntity member = MemberEntity.builder()
                 .username(request.username())
                 .name(request.name())
@@ -40,13 +46,12 @@ public class MemberService {
     @Transactional
     public Member update(Long memberId, UpdateMemberRequest request) {
         MemberEntity member = memberRepository.findById(memberId)
-                .filter(e -> !e.isDeleted())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         member.update(
                 request.name(),
-                request.phone(),
-                request.picture()
+                request.picture(),
+                request.role()
         );
 
         return Member.of(member);
@@ -55,9 +60,8 @@ public class MemberService {
     @Transactional
     public void delete(Long memberId) {
         MemberEntity member = memberRepository.findById(memberId)
-                .filter(e -> !e.isDeleted())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        member.delete();
+        memberRepository.delete(member);
     }
 }
