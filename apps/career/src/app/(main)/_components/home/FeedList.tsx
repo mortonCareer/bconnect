@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useCallback } from 'react'
 import { Feed } from '@morton/ui'
-import { useFeedItems } from '../../../../hooks/useFeedItems'
-import { useFeedStore } from '../../../../stores/feed-store'
+import { useFeedItems } from '@/hooks/useFeedItems'
+import { useFeedStore } from '@/stores/feed-store'
 
 export function FeedList() {
   const selectedTrade = useFeedStore((s) => s.selectedTrade)

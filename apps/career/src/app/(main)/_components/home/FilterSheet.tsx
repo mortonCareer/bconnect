@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Tag } from '@morton/ui'
 import type { Trade } from '@morton/api-client'
-import { TRADE_LIST } from '../../../../lib/trade-labels'
-import { useFeedStore } from '../../../../stores/feed-store'
+import { TRADE_LIST } from '@/lib/trade-labels'
+import { useFeedStore } from '@/stores/feed-store'
 
 export function FilterSheet() {
   const isFilterOpen = useFeedStore((s) => s.isFilterOpen)

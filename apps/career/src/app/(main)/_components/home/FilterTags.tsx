@@ -1,8 +1,8 @@
 'use client'
 
 import { Tag } from '@morton/ui'
-import { useFeedStore } from '../../../../stores/feed-store'
-import { TRADE_LABELS } from '../../../../lib/trade-labels'
+import { useFeedStore } from '@/stores/feed-store'
+import { TRADE_LABELS } from '@/lib/trade-labels'
 
 export function FilterTags() {
   const selectedTrade = useFeedStore((s) => s.selectedTrade)

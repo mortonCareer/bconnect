@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@morton/ui'
 
 const NAV_ITEMS = [
-  { href: '/home', label: '홈', icon: HomeIcon },
+  { href: '/', label: '홈', icon: HomeIcon },
   { href: '/profile', label: '내정보', icon: ProfileIcon },
   { href: '/messages', label: '메시지', icon: MessageIcon },
 ] as const
@@ -17,7 +17,7 @@ export function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-morton-gray-200 bg-white">
       <div className="mx-auto flex h-14 max-w-screen-sm items-center justify-around">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname.startsWith(href)
+          const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href)
           return (
             <Link
               key={href}

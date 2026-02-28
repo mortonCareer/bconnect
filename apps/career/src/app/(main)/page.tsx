@@ -2,10 +2,10 @@
 
 import { useRouter } from 'next/navigation'
 import { TopBar } from '@morton/ui'
-import { useFeedStore } from '../../../stores/feed-store'
-import { FeedList } from './_components/FeedList'
-import { FilterSheet } from './_components/FilterSheet'
-import { FilterTags } from './_components/FilterTags'
+import { useFeedStore } from '@/stores/feed-store'
+import { FeedList } from './_components/home/FeedList'
+import { FilterSheet } from './_components/home/FilterSheet'
+import { FilterTags } from './_components/home/FilterTags'
 
 export default function HomePage() {
   const router = useRouter()
