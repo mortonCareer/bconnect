@@ -8,6 +8,12 @@ import * as cheerio from 'cheerio'
  * - 하도급참여제한대상자: https://kiscon.net/cis/coad_subcon_limit_list.asp
  */
 
+// kiscon.net은 User-Agent 없는 요청에 HTTP 410을 반환함 (Vercel 서버리스 환경 대응)
+const KISCON_HEADERS = {
+  'Content-Type': 'application/x-www-form-urlencoded',
+  'User-Agent': 'Mozilla/5.0 (compatible; MortonBot/1.0)',
+}
+
 // ─── 상습체불 ─────────────────────────────────
 
 export interface KisconArrearsItem {
@@ -33,7 +39,7 @@ const KISCON_ARREARS_URL = 'https://kiscon.net/cis/coad_arrearsnotice.asp'
 export async function fetchKisconArrears(companyName: string): Promise<KisconArrearsItem[]> {
   const response = await fetch(KISCON_ARREARS_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: KISCON_HEADERS,
     body: new URLSearchParams({ GotoPage: '1' }).toString(),
     cache: 'no-store',
     signal: AbortSignal.timeout(10_000),
@@ -114,7 +120,7 @@ export async function fetchKisconSubconLimit(
 ): Promise<KisconSubconLimitItem[]> {
   const response = await fetch(KISCON_SUBCON_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: KISCON_HEADERS,
     body: new URLSearchParams({
       GotoPage: '1',
       // 사업자번호로 검색
