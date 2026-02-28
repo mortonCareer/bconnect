@@ -3,14 +3,7 @@ package so.morton.api.api.controller.v1;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import so.morton.api.api.controller.v1.request.CreatePostRequest;
 import so.morton.api.api.controller.v1.request.UpdatePostRequest;
 import so.morton.api.api.controller.v1.response.PostResponse;
@@ -51,12 +44,12 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<PostResponse> update(
+    public ApiResponse<Void> update(
             @PathVariable Long id,
             @AuthenticationPrincipal User user,
             @RequestBody @Valid UpdatePostRequest request) {
-        Post post = postService.update(id, user.id(), request);
-        return ApiResponse.success(PostResponse.of(post));
+        postService.update(id, user.id(), request);
+        return ApiResponse.success(null);
     }
 
     @DeleteMapping("/{id}")
