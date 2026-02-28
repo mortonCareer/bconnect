@@ -1,12 +1,13 @@
 import 'server-only'
 
+import { cache } from 'react'
 import { unstable_cache } from 'next/cache'
 import type {
   CheckItem,
   CheckItemId,
+  CompanyInfo,
   KcomwelInsuranceItem,
   NtsStatusItem,
-  VerifyBusinessResult,
   VerifyOwnerResult,
 } from './types'
 import { fetchNtsBusinessStatus, fetchNtsBusinessValidate } from './nts-client'
@@ -15,64 +16,51 @@ import { fetchFeiaCompanies } from './feia-client'
 import { fetchMoelDefaulters } from './moel-client'
 import { fetchKisconArrears, fetchKisconSubconLimit } from './kiscon-crawl-client'
 
-// ─── UI 표시 순서 + 미연결 항목 ─────────────────────
+// ─── 캐시 설정 ───────────────────────────────────
 
-const CHECK_ITEM_ORDER: CheckItemId[] = [
-  'BUSINESS_STATUS',
-  'CONSTRUCTION_LICENSE',
-  'SPECIALTY_LICENSE',
-  'ELECTRICAL_LICENSE',
-  'FIRE_LICENSE',
-  'WAGE_ARREARS',
-  'HABITUAL_ARREARS',
-  'SUBCONTRACT_RESTRICTION',
-  'RETIREMENT_FUND',
-  'EMPLOYMENT_INSURANCE',
-]
+const CACHE_TTL = 3600
 
-/** 아직 데이터소스 연결 안 된 항목 — "준비 중" neutral 표시 */
-const PENDING_ITEMS: CheckItem[] = [
-  {
-    id: 'CONSTRUCTION_LICENSE',
-    category: 'BUSINESS_LICENSE',
-    label: '건설업 면허',
-    source: '국토교통부',
-    status: '준비 중',
-    statusType: 'neutral',
-    description: '국토교통부 건설업 면허 등록 현황 연결 준비 중이에요.',
-    details: [],
-  },
-  {
-    id: 'SPECIALTY_LICENSE',
-    category: 'BUSINESS_LICENSE',
-    label: '전문건설업 면허',
-    source: '대한전문건설협회',
-    status: '준비 중',
-    statusType: 'neutral',
-    description: '대한전문건설협회 전문건설업 면허 연결 준비 중이에요.',
-    details: [],
-  },
-  {
-    id: 'ELECTRICAL_LICENSE',
-    category: 'BUSINESS_LICENSE',
-    label: '전기공사업 면허',
-    source: '한국전기공사협회',
-    status: '준비 중',
-    statusType: 'neutral',
-    description: '한국전기공사협회 전기공사업 면허 연결 준비 중이에요.',
-    details: [],
-  },
-  {
-    id: 'RETIREMENT_FUND',
-    category: 'INSURANCE',
-    label: '퇴직공제 가입 공사 이력',
-    source: '건설근로자공제회',
-    status: '준비 중',
-    statusType: 'neutral',
-    description: '건설근로자공제회 퇴직공제 가입 현황 연결 준비 중이에요.',
-    details: [],
-  },
-]
+// 영속 캐시 (unstable_cache) — 요청 간 공유
+const cachedNts = unstable_cache(
+  (regNo: string) => fetchNtsBusinessStatus([regNo]),
+  ['one-click-nts'],
+  { revalidate: CACHE_TTL }
+)
+
+const cachedKcomwel = unstable_cache(fetchKcomwelInsurance, ['one-click-kcomwel'], {
+  revalidate: CACHE_TTL,
+})
+
+const cachedFeia = unstable_cache(fetchFeiaCompanies, ['one-click-feia'], {
+  revalidate: CACHE_TTL,
+})
+
+const cachedMoel = unstable_cache(fetchMoelDefaulters, ['one-click-moel'], {
+  revalidate: CACHE_TTL,
+})
+
+const cachedKisconArrears = unstable_cache(fetchKisconArrears, ['one-click-kiscon-arrears'], {
+  revalidate: CACHE_TTL,
+})
+
+const cachedKisconSubcon = unstable_cache(fetchKisconSubconLimit, ['one-click-kiscon-subcon'], {
+  revalidate: CACHE_TTL,
+})
+
+// 요청 내 dedup (React cache) — 여러 항목이 동시 호출해도 실제 API는 1번만 실행
+const getNtsData = cache(cachedNts)
+const getKcomwelData = cache(cachedKcomwel)
+
+/** NTS에서 사업자 등록 확인 (01=계속, 02=휴업, 03=폐업 → 등록됨) */
+async function isRegisteredBusiness(regNo: string): Promise<boolean> {
+  try {
+    const result = await getNtsData(regNo)
+    const sttCd = result.data?.[0]?.b_stt_cd
+    return ['01', '02', '03'].includes(sttCd)
+  } catch {
+    return false
+  }
+}
 
 // ─── 헬퍼 ────────────────────────────────────────
 
@@ -86,7 +74,61 @@ function formatDate(dateStr: string | undefined): string {
   return `${dateStr.slice(0, 4)}.${dateStr.slice(4, 6)}.${dateStr.slice(6)}`
 }
 
-// ─── NTS Status → CheckItem 변환 ────────────────────
+function makeErrorItem(
+  id: CheckItemId,
+  category: CheckItem['category'],
+  label: string,
+  source: string
+): CheckItem {
+  return {
+    id,
+    category,
+    label,
+    source,
+    status: '조회 실패',
+    statusType: 'error',
+    description: `${source} 조회에 실패했습니다. 잠시 후 다시 시도해주세요.`,
+    details: [],
+  }
+}
+
+function makeNoNameItem(
+  id: CheckItemId,
+  category: CheckItem['category'],
+  label: string,
+  source: string
+): CheckItem {
+  return {
+    id,
+    category,
+    label,
+    source,
+    status: '미확인',
+    statusType: 'neutral',
+    description: '사업장명을 확인할 수 없어 조회하지 못했어요.',
+    details: [],
+  }
+}
+
+/**
+ * 주소 기반 필터링 — 시/구 단위로 매칭하여 동명이인 회사 제거
+ * 매칭 실패 시 원본 반환 (과도한 필터링 방지)
+ */
+function filterByAddress<T>(items: T[], referenceAddr: string, addrKey: keyof T): T[] {
+  // 시/도 + 시/군/구 추출 (예: "서울특별시 강남구 ..." → ["서울특별시", "강남구"])
+  const tokens = referenceAddr.split(/\s+/).slice(0, 2)
+  if (tokens.length === 0) return items
+
+  const filtered = items.filter((item) => {
+    const addr = String(item[addrKey] || '')
+    return tokens.some((token) => addr.includes(token))
+  })
+
+  // 매칭 결과가 0이면 주소 포맷 차이일 수 있으므로 원본 유지
+  return filtered.length > 0 ? filtered : items
+}
+
+// ─── NTS Status → CheckItem ─────────────────────
 
 function resolveBusinessStatus(sttCd: string): {
   status: string
@@ -131,25 +173,7 @@ function mapNtsStatusToCheckItem(item: NtsStatusItem): CheckItem {
   }
 }
 
-function makeErrorItem(
-  id: CheckItemId,
-  category: CheckItem['category'],
-  label: string,
-  source: string
-): CheckItem {
-  return {
-    id,
-    category,
-    label,
-    source,
-    status: '조회 실패',
-    statusType: 'error',
-    description: `${source} 조회에 실패했습니다. 잠시 후 다시 시도해주세요.`,
-    details: [],
-  }
-}
-
-// ─── Kcomwel Insurance → CheckItem ──────────────────
+// ─── Kcomwel → CheckItem ────────────────────────
 
 function mapKcomwelToCheckItem(items: KcomwelInsuranceItem[]): CheckItem {
   const hasRecords = items.length > 0
@@ -178,7 +202,7 @@ function mapKcomwelToCheckItem(items: KcomwelInsuranceItem[]): CheckItem {
   }
 }
 
-// ─── FEIA → FIRE_LICENSE CheckItem ──────────────────
+// ─── FEIA → CheckItem ───────────────────────────
 
 function mapFeiaToCheckItem(items: Awaited<ReturnType<typeof fetchFeiaCompanies>>): CheckItem {
   const hasRecords = items.length > 0
@@ -204,7 +228,7 @@ function mapFeiaToCheckItem(items: Awaited<ReturnType<typeof fetchFeiaCompanies>
   }
 }
 
-// ─── MOEL → WAGE_ARREARS CheckItem ─────────────────
+// ─── MOEL → CheckItem ──────────────────────────
 
 function mapMoelToCheckItem(items: Awaited<ReturnType<typeof fetchMoelDefaulters>>): CheckItem {
   const hasArrears = items.length > 0
@@ -229,7 +253,7 @@ function mapMoelToCheckItem(items: Awaited<ReturnType<typeof fetchMoelDefaulters
   }
 }
 
-// ─── KISCON 상습체불 → HABITUAL_ARREARS CheckItem ────
+// ─── KISCON 상습체불 → CheckItem ────────────────
 
 function mapKisconArrearsToCheckItem(
   items: Awaited<ReturnType<typeof fetchKisconArrears>>
@@ -259,7 +283,7 @@ function mapKisconArrearsToCheckItem(
   }
 }
 
-// ─── KISCON 하도급 → SUBCONTRACT_RESTRICTION CheckItem ─
+// ─── KISCON 하도급 → CheckItem ──────────────────
 
 function mapKisconSubconToCheckItem(
   items: Awaited<ReturnType<typeof fetchKisconSubconLimit>>
@@ -286,180 +310,236 @@ function mapKisconSubconToCheckItem(
   }
 }
 
-// ─── 사업자 통합 조회 ───────────────────────────────
+// ─── 미연결 항목 (정적) ──────────────────────────
 
-/**
- * 사업자등록번호로 전체 조회 (서버 전용)
- *
- * Phase 1: NTS + KCOMWEL + KISCON하도급 병렬 (사업자번호만 필요)
- * Phase 2: FEIA + MOEL + KISCON상습체불 병렬 (회사명 필요 → Phase 1에서 획득)
- * 나머지: mock 유지 (CONSTRUCTION_LICENSE, SPECIALTY_LICENSE, ELECTRICAL_LICENSE, RETIREMENT_FUND)
- */
-const CACHE_TTL = 3600
+const PENDING_ITEMS: Record<string, CheckItem> = {
+  CONSTRUCTION_LICENSE: {
+    id: 'CONSTRUCTION_LICENSE',
+    category: 'BUSINESS_LICENSE',
+    label: '건설업 면허',
+    source: '국토교통부',
+    status: '준비 중',
+    statusType: 'neutral',
+    description: '국토교통부 건설업 면허 등록 현황 연결 준비 중이에요.',
+    details: [],
+  },
+  SPECIALTY_LICENSE: {
+    id: 'SPECIALTY_LICENSE',
+    category: 'BUSINESS_LICENSE',
+    label: '전문건설업 면허',
+    source: '대한전문건설협회',
+    status: '준비 중',
+    statusType: 'neutral',
+    description: '대한전문건설협회 전문건설업 면허 연결 준비 중이에요.',
+    details: [],
+  },
+  ELECTRICAL_LICENSE: {
+    id: 'ELECTRICAL_LICENSE',
+    category: 'BUSINESS_LICENSE',
+    label: '전기공사업 면허',
+    source: '한국전기공사협회',
+    status: '준비 중',
+    statusType: 'neutral',
+    description: '한국전기공사협회 전기공사업 면허 연결 준비 중이에요.',
+    details: [],
+  },
+  RETIREMENT_FUND: {
+    id: 'RETIREMENT_FUND',
+    category: 'INSURANCE',
+    label: '퇴직공제 가입 공사 이력',
+    source: '건설근로자공제회',
+    status: '준비 중',
+    statusType: 'neutral',
+    description: '건설근로자공제회 퇴직공제 가입 현황 연결 준비 중이에요.',
+    details: [],
+  },
+}
 
-async function _fetchBusinessVerification(
-  registrationNumber: string
-): Promise<VerifyBusinessResult> {
-  // ── Phase 1: 사업자번호로 직접 조회 가능한 API ──
-  const [ntsResult, kcomwelResult, subconResult] = await Promise.allSettled([
-    fetchNtsBusinessStatus([registrationNumber]),
-    fetchKcomwelInsurance(registrationNumber),
-    fetchKisconSubconLimit(registrationNumber),
-  ])
+// ─── 개별 항목 fetcher ──────────────────────────
 
-  // NTS → BUSINESS_STATUS
-  let businessStatusItem: CheckItem
-  if (ntsResult.status === 'fulfilled' && ntsResult.value.data?.[0]) {
-    businessStatusItem = mapNtsStatusToCheckItem(ntsResult.value.data[0])
-  } else {
-    console.error('NTS API failed:', ntsResult.status === 'rejected' ? ntsResult.reason : 'empty')
-    businessStatusItem = {
+async function fetchBusinessStatusItem(regNo: string): Promise<CheckItem> {
+  try {
+    const result = await getNtsData(regNo)
+    if (result.data?.[0]) return mapNtsStatusToCheckItem(result.data[0])
+    return {
       ...makeErrorItem('BUSINESS_STATUS', 'BUSINESS_LICENSE', '사업자 상태', '국세청'),
-      details: [{ key: '사업자등록번호', value: formatRegNo(registrationNumber) }],
+      details: [{ key: '사업자등록번호', value: formatRegNo(regNo) }],
+    }
+  } catch (e) {
+    console.error('NTS API failed:', e)
+    return {
+      ...makeErrorItem('BUSINESS_STATUS', 'BUSINESS_LICENSE', '사업자 상태', '국세청'),
+      details: [{ key: '사업자등록번호', value: formatRegNo(regNo) }],
     }
   }
+}
 
-  // KCOMWEL → EMPLOYMENT_INSURANCE + 회사명 추출
-  let insuranceItem: CheckItem
-  let companyName: string | undefined
-  if (kcomwelResult.status === 'fulfilled') {
-    insuranceItem = mapKcomwelToCheckItem(kcomwelResult.value)
-    if (kcomwelResult.value.length > 0 && kcomwelResult.value[0].saeopjangNm) {
-      companyName = kcomwelResult.value[0].saeopjangNm
-    }
-  } else {
-    console.error('Kcomwel API failed:', kcomwelResult.reason)
-    insuranceItem = makeErrorItem(
-      'EMPLOYMENT_INSURANCE',
-      'INSURANCE',
-      '고용/산재보험 현황',
-      '근로복지공단'
-    )
+async function fetchEmploymentInsuranceItem(regNo: string): Promise<CheckItem> {
+  if (!(await isRegisteredBusiness(regNo))) {
+    return makeNoNameItem('EMPLOYMENT_INSURANCE', 'INSURANCE', '고용/산재보험 현황', '근로복지공단')
   }
+  try {
+    const items = await getKcomwelData(regNo)
+    return mapKcomwelToCheckItem(items)
+  } catch (e) {
+    console.error('Kcomwel API failed:', e)
+    return makeErrorItem('EMPLOYMENT_INSURANCE', 'INSURANCE', '고용/산재보험 현황', '근로복지공단')
+  }
+}
 
-  // KISCON 하도급 → SUBCONTRACT_RESTRICTION
-  let subconItem: CheckItem
-  if (subconResult.status === 'fulfilled') {
-    subconItem = mapKisconSubconToCheckItem(subconResult.value)
-  } else {
-    console.error('KISCON subcon crawl failed:', subconResult.reason)
-    subconItem = makeErrorItem(
+async function fetchSubcontractRestrictionItem(regNo: string): Promise<CheckItem> {
+  if (!(await isRegisteredBusiness(regNo))) {
+    return makeNoNameItem(
       'SUBCONTRACT_RESTRICTION',
       'WAGE_RESTRICTION',
       '하도급 참여제한',
       '국토교통부'
     )
   }
-
-  // ── Phase 2: 회사명 기반 조회 (회사명 없으면 skip → mock 유지) ──
-  const realItems = new Map<CheckItemId, CheckItem>([
-    ['BUSINESS_STATUS', businessStatusItem],
-    ['EMPLOYMENT_INSURANCE', insuranceItem],
-    ['SUBCONTRACT_RESTRICTION', subconItem],
-  ])
-
-  if (companyName) {
-    const [feiaResult, moelResult, arrearsResult] = await Promise.allSettled([
-      fetchFeiaCompanies(companyName),
-      fetchMoelDefaulters(companyName),
-      fetchKisconArrears(companyName),
-    ])
-
-    // FEIA → FIRE_LICENSE
-    if (feiaResult.status === 'fulfilled') {
-      realItems.set('FIRE_LICENSE', mapFeiaToCheckItem(feiaResult.value))
-    } else {
-      console.error('FEIA crawl failed:', feiaResult.reason)
-      realItems.set(
-        'FIRE_LICENSE',
-        makeErrorItem('FIRE_LICENSE', 'BUSINESS_LICENSE', '소방시설업 면허', '한국소방시설협회')
-      )
-    }
-
-    // MOEL → WAGE_ARREARS
-    if (moelResult.status === 'fulfilled') {
-      realItems.set('WAGE_ARREARS', mapMoelToCheckItem(moelResult.value))
-    } else {
-      console.error('MOEL crawl failed:', moelResult.reason)
-      realItems.set(
-        'WAGE_ARREARS',
-        makeErrorItem('WAGE_ARREARS', 'WAGE_RESTRICTION', '임금체불 이력', '고용노동부')
-      )
-    }
-
-    // KISCON 상습체불 → HABITUAL_ARREARS
-    if (arrearsResult.status === 'fulfilled') {
-      realItems.set('HABITUAL_ARREARS', mapKisconArrearsToCheckItem(arrearsResult.value))
-    } else {
-      console.error('KISCON arrears crawl failed:', arrearsResult.reason)
-      realItems.set(
-        'HABITUAL_ARREARS',
-        makeErrorItem('HABITUAL_ARREARS', 'WAGE_RESTRICTION', '상습체불 이력', '국토교통부')
-      )
-    }
-  } else {
-    // 회사명을 확인할 수 없는 경우 — 회사명 기반 조회 항목은 "미확인" 처리
-    const noNameItems: CheckItem[] = [
-      {
-        id: 'FIRE_LICENSE',
-        category: 'BUSINESS_LICENSE',
-        label: '소방시설업 면허',
-        source: '한국소방시설협회',
-        status: '미확인',
-        statusType: 'neutral',
-        description: '사업장명을 확인할 수 없어 조회하지 못했어요.',
-        details: [],
-      },
-      {
-        id: 'WAGE_ARREARS',
-        category: 'WAGE_RESTRICTION',
-        label: '임금체불 이력',
-        source: '고용노동부',
-        status: '미확인',
-        statusType: 'neutral',
-        description: '사업장명을 확인할 수 없어 조회하지 못했어요.',
-        details: [],
-      },
-      {
-        id: 'HABITUAL_ARREARS',
-        category: 'WAGE_RESTRICTION',
-        label: '상습체불 이력',
-        source: '국토교통부',
-        status: '미확인',
-        statusType: 'neutral',
-        description: '사업장명을 확인할 수 없어 조회하지 못했어요.',
-        details: [],
-      },
-    ]
-    for (const item of noNameItems) {
-      realItems.set(item.id, item)
-    }
-  }
-
-  // ── 미연결 항목은 "준비 중" 상태로 생성 ──
-  for (const item of PENDING_ITEMS) {
-    if (!realItems.has(item.id)) {
-      realItems.set(item.id, item)
-    }
-  }
-
-  // 고정 순서로 조합
-  const checkItems = CHECK_ITEM_ORDER.map((id) => realItems.get(id)!).filter(Boolean)
-
-  return {
-    company: {
-      name: companyName ?? '-',
-      registrationNumber: formatRegNo(registrationNumber),
-    },
-    checkItems,
+  try {
+    const items = await cachedKisconSubcon(regNo)
+    return mapKisconSubconToCheckItem(items)
+  } catch (e) {
+    console.error('KISCON subcon crawl failed:', e)
+    return makeErrorItem(
+      'SUBCONTRACT_RESTRICTION',
+      'WAGE_RESTRICTION',
+      '하도급 참여제한',
+      '국토교통부'
+    )
   }
 }
 
-export const fetchBusinessVerification = unstable_cache(
-  _fetchBusinessVerification,
-  ['one-click-verify'],
-  { revalidate: CACHE_TTL }
+async function fetchFireLicenseItem(regNo: string): Promise<CheckItem> {
+  if (!(await isRegisteredBusiness(regNo))) {
+    return makeNoNameItem('FIRE_LICENSE', 'BUSINESS_LICENSE', '소방시설업 면허', '한국소방시설협회')
+  }
+
+  let companyName: string | undefined
+  try {
+    const kcomwel = await getKcomwelData(regNo)
+    companyName = kcomwel[0]?.saeopjangNm
+  } catch {
+    // KCOMWEL 실패 → 회사명 확인 불가
+  }
+
+  if (!companyName) {
+    return makeNoNameItem('FIRE_LICENSE', 'BUSINESS_LICENSE', '소방시설업 면허', '한국소방시설협회')
+  }
+
+  try {
+    const items = await cachedFeia(companyName)
+    return mapFeiaToCheckItem(items)
+  } catch (e) {
+    console.error('FEIA crawl failed:', e)
+    return makeErrorItem('FIRE_LICENSE', 'BUSINESS_LICENSE', '소방시설업 면허', '한국소방시설협회')
+  }
+}
+
+async function fetchWageArrearsItem(regNo: string): Promise<CheckItem> {
+  if (!(await isRegisteredBusiness(regNo))) {
+    return makeNoNameItem('WAGE_ARREARS', 'WAGE_RESTRICTION', '임금체불 이력', '고용노동부')
+  }
+
+  let companyName: string | undefined
+  let companyAddr: string | undefined
+  try {
+    const kcomwel = await getKcomwelData(regNo)
+    companyName = kcomwel[0]?.saeopjangNm
+    companyAddr = kcomwel[0]?.addr
+  } catch {
+    // KCOMWEL 실패 → 회사명 확인 불가
+  }
+
+  if (!companyName) {
+    return makeNoNameItem('WAGE_ARREARS', 'WAGE_RESTRICTION', '임금체불 이력', '고용노동부')
+  }
+
+  try {
+    let items = await cachedMoel(companyName)
+    // 동명이인 회사 필터링: KCOMWEL 주소와 시/구 단위 매칭
+    if (companyAddr && items.length > 1) {
+      items = filterByAddress(items, companyAddr, 'companyAddress')
+    }
+    return mapMoelToCheckItem(items)
+  } catch (e) {
+    console.error('MOEL crawl failed:', e)
+    return makeErrorItem('WAGE_ARREARS', 'WAGE_RESTRICTION', '임금체불 이력', '고용노동부')
+  }
+}
+
+async function fetchHabitualArrearsItem(regNo: string): Promise<CheckItem> {
+  if (!(await isRegisteredBusiness(regNo))) {
+    return makeNoNameItem('HABITUAL_ARREARS', 'WAGE_RESTRICTION', '상습체불 이력', '국토교통부')
+  }
+
+  let companyName: string | undefined
+  try {
+    const kcomwel = await getKcomwelData(regNo)
+    companyName = kcomwel[0]?.saeopjangNm
+  } catch {
+    // KCOMWEL 실패 → 회사명 확인 불가
+  }
+
+  if (!companyName) {
+    return makeNoNameItem('HABITUAL_ARREARS', 'WAGE_RESTRICTION', '상습체불 이력', '국토교통부')
+  }
+
+  try {
+    const items = await cachedKisconArrears(companyName)
+    return mapKisconArrearsToCheckItem(items)
+  } catch (e) {
+    console.error('KISCON arrears crawl failed:', e)
+    return makeErrorItem('HABITUAL_ARREARS', 'WAGE_RESTRICTION', '상습체불 이력', '국토교통부')
+  }
+}
+
+// ─── 공개 API ────────────────────────────────────
+
+/**
+ * 개별 CheckItem 조회 (per-item Suspense 스트리밍용)
+ * - React cache()로 같은 요청 내 dedup (SummarySection + DetailSection 동시 호출 시)
+ * - 내부 API 호출은 unstable_cache로 영속 캐시
+ */
+export const fetchCheckItemById = cache(
+  async (id: CheckItemId, regNo: string): Promise<CheckItem> => {
+    switch (id) {
+      case 'BUSINESS_STATUS':
+        return fetchBusinessStatusItem(regNo)
+      case 'EMPLOYMENT_INSURANCE':
+        return fetchEmploymentInsuranceItem(regNo)
+      case 'SUBCONTRACT_RESTRICTION':
+        return fetchSubcontractRestrictionItem(regNo)
+      case 'FIRE_LICENSE':
+        return fetchFireLicenseItem(regNo)
+      case 'WAGE_ARREARS':
+        return fetchWageArrearsItem(regNo)
+      case 'HABITUAL_ARREARS':
+        return fetchHabitualArrearsItem(regNo)
+      default:
+        return PENDING_ITEMS[id]
+    }
+  }
 )
+
+/**
+ * 회사 정보 조회 (CompanyHeader용)
+ * KCOMWEL에서 사업장명 추출
+ */
+export const getCompanyInfo = cache(async (regNo: string): Promise<CompanyInfo> => {
+  try {
+    const items = await getKcomwelData(regNo)
+    return {
+      name: items[0]?.saeopjangNm ?? '-',
+      registrationNumber: formatRegNo(regNo),
+    }
+  } catch {
+    return {
+      name: '-',
+      registrationNumber: formatRegNo(regNo),
+    }
+  }
+})
 
 // ─── 사업자 진위확인 ────────────────────────────────
 

@@ -1,5 +1,6 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import { fetchBusinessVerification } from './_clients/fetch-business'
+import { getCompanyInfo } from './_clients/fetch-business'
 import { formatRegistrationNumber, isValidRegistrationNumber } from './_components/constants'
 import { SearchBar } from './_components/SearchBar'
 import { TipBanner } from './_components/TipBanner'
@@ -27,10 +28,25 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   }
 }
 
+function CompanyHeaderSkeleton() {
+  return (
+    <div className="flex items-start justify-between">
+      <div className="flex items-baseline gap-3">
+        <div className="h-7 w-40 animate-pulse rounded bg-morton-gray-200" />
+        <div className="h-5 w-28 animate-pulse rounded bg-morton-gray-100" />
+      </div>
+    </div>
+  )
+}
+
+async function CompanyHeaderLoader({ registrationNumber }: { registrationNumber: string }) {
+  const company = await getCompanyInfo(registrationNumber)
+  return <CompanyHeader company={company} />
+}
+
 export default async function OneClickPage({ searchParams }: PageProps) {
   const { q } = await searchParams
   const isValid = q ? isValidRegistrationNumber(q) : false
-  const result = isValid ? await fetchBusinessVerification(q!) : null
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
@@ -46,11 +62,13 @@ export default async function OneClickPage({ searchParams }: PageProps) {
           </p>
         )}
 
-        {result && (
+        {isValid && (
           <>
-            <CompanyHeader company={result.company} />
-            <SummarySection checkItems={result.checkItems} />
-            <DetailSection checkItems={result.checkItems} registrationNumber={q!} />
+            <Suspense fallback={<CompanyHeaderSkeleton />}>
+              <CompanyHeaderLoader registrationNumber={q!} />
+            </Suspense>
+            <SummarySection registrationNumber={q!} />
+            <DetailSection registrationNumber={q!} />
           </>
         )}
       </main>

@@ -1,14 +1,34 @@
-import type { CheckItem } from '../_clients/types'
+import { Suspense } from 'react'
+import type { CheckItemId } from '../_clients/types'
+import { fetchCheckItemById } from '../_clients/fetch-business'
 import { CATEGORY_GROUPS } from './constants'
 import { SummaryRow } from './SummaryRow'
 
 interface SummarySectionProps {
-  checkItems: CheckItem[]
+  registrationNumber: string
 }
 
-export function SummarySection({ checkItems }: SummarySectionProps) {
-  const itemMap = new Map(checkItems.map((item) => [item.id, item]))
+function SummaryRowSkeleton() {
+  return (
+    <div className="flex items-center justify-between py-1.5">
+      <div className="h-4 w-32 animate-pulse rounded bg-morton-gray-200" />
+      <div className="h-5 w-16 animate-pulse rounded-full bg-morton-gray-200" />
+    </div>
+  )
+}
 
+async function SummaryItemLoader({
+  id,
+  registrationNumber,
+}: {
+  id: CheckItemId
+  registrationNumber: string
+}) {
+  const item = await fetchCheckItemById(id, registrationNumber)
+  return <SummaryRow item={item} />
+}
+
+export function SummarySection({ registrationNumber }: SummarySectionProps) {
   return (
     <div className="rounded-xl border border-morton-gray-300 bg-white">
       {CATEGORY_GROUPS.map((group) => (
@@ -17,11 +37,11 @@ export function SummarySection({ checkItems }: SummarySectionProps) {
             <span className="text-sb-14 text-morton-gray-700">{group.label}</span>
           </div>
           <div className="px-6">
-            {group.itemIds.map((itemId) => {
-              const item = itemMap.get(itemId)
-              if (!item) return null
-              return <SummaryRow key={itemId} item={item} />
-            })}
+            {group.itemIds.map((itemId) => (
+              <Suspense key={itemId} fallback={<SummaryRowSkeleton />}>
+                <SummaryItemLoader id={itemId} registrationNumber={registrationNumber} />
+              </Suspense>
+            ))}
           </div>
         </div>
       ))}

@@ -33,8 +33,8 @@ export async function fetchMoelDefaulters(companyName: string): Promise<MoelDefa
     body: new URLSearchParams({
       pageIndex: '1',
       pageUnit: '100',
-      schCol: 'compNm',
-      schTxt: companyName,
+      searchField: '2', // 1=성명, 2=사업장명, 3=주소, 4=전체
+      searchText: companyName,
     }).toString(),
     cache: 'no-store',
     signal: AbortSignal.timeout(10_000),
@@ -73,5 +73,10 @@ export async function fetchMoelDefaulters(companyName: string): Promise<MoelDefa
     })
   })
 
-  return items
+  // 회사명 매칭 필터링 (MOEL 검색이 부분 매칭이므로 동명이인 제거)
+  const normalized = companyName.replace(/\s/g, '')
+  return items.filter((item) => {
+    const itemName = item.companyName.replace(/\s/g, '')
+    return itemName.includes(normalized) || normalized.includes(itemName)
+  })
 }

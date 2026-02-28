@@ -38,7 +38,18 @@ export function extractDigits(value: string): string {
   return value.replace(/\D/g, '')
 }
 
-/** 사업자등록번호 유효성 검증 (10자리 숫자) */
+/** 사업자등록번호 유효성 검증 (10자리 숫자 + 체크섬) */
 export function isValidRegistrationNumber(value: string): boolean {
-  return /^\d{10}$/.test(extractDigits(value))
+  const digits = extractDigits(value)
+  if (!/^\d{10}$/.test(digits)) return false
+
+  const weights = [1, 3, 7, 1, 3, 7, 1, 3, 5]
+  let sum = 0
+  for (let i = 0; i < 9; i++) {
+    sum += Number(digits[i]) * weights[i]
+  }
+  sum += Math.floor((Number(digits[8]) * 5) / 10)
+  const checkDigit = (10 - (sum % 10)) % 10
+
+  return checkDigit === Number(digits[9])
 }

@@ -161,5 +161,9 @@ export async function fetchKisconSubconLimit(
     })
   })
 
-  return items
+  // 사업자번호 매칭 (사이트가 검색 실패 시 전체 목록을 반환하므로 필터링 필수)
+  return items.filter((item) => {
+    const itemBizNo = item.bizRegNo.replace(/[-\s]/g, '')
+    return itemBizNo === registrationNumber
+  })
 }
