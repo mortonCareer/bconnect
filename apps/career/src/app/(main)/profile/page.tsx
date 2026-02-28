@@ -3,8 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useGetCurrentMember, useGetMyProfile } from '@morton/api-client'
-import { Tab, TopBar } from '@morton/ui'
+import { Button, Tab, TopBar } from '@morton/ui'
+import { useFeedItems } from '@/hooks/useFeedItems'
 import { ProfileHeader } from './_components/ProfileHeader'
+import { StatsRow } from './_components/StatsRow'
 import { IntroSection } from './_components/IntroSection'
 import { WorksSection } from './_components/WorksSection'
 
@@ -19,13 +21,14 @@ export default function MyProfilePage() {
 
   const { data: member, isLoading: isMemberLoading } = useGetCurrentMember()
   const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
+  const { postCount } = useFeedItems({ authorId: profile?.id })
 
   const isLoading = isMemberLoading || isProfileLoading
 
   if (isLoading) {
     return (
       <div className="flex flex-col">
-        <TopBar variant="default" title="내 프로필" actionLabel="수정" showAction={false} />
+        <TopBar variant="default" title="내 프로필" showAction={false} />
         <div className="flex flex-1 items-center justify-center py-20">
           <p className="text-m-14 text-morton-gray-500">로딩 중...</p>
         </div>
@@ -37,25 +40,34 @@ export default function MyProfilePage() {
     <div className="flex flex-col">
       <TopBar
         variant="default"
-        title="내 프로필"
-        actionLabel="수정"
-        onAction={() => router.push('/profile/edit')}
+        title={member?.username ?? '내 프로필'}
+        showAction={false}
         onBack={() => router.back()}
       />
 
-      {/* 프로필 헤더 */}
       <ProfileHeader
         name={member?.name}
         picture={member?.picture}
-        role={member?.role}
-        primaryTrade={profile?.primaryTrade}
         city={profile?.address?.city}
+        headline={profile?.headline}
       />
 
-      {/* 탭 */}
+      <StatsRow
+        postCount={postCount}
+        trades={profile?.trades}
+        primaryTrade={profile?.primaryTrade}
+        experience={profile?.experience}
+        role={member?.role}
+      />
+
+      <div className="px-4 py-3">
+        <Button variant="outline" size="full" onClick={() => router.push('/profile/edit')}>
+          프로필 수정
+        </Button>
+      </div>
+
       <Tab items={TAB_ITEMS} activeKey={activeTab} onChange={setActiveTab} />
 
-      {/* 탭 콘텐츠 */}
       {activeTab === 'intro' && profile && <IntroSection profile={profile} />}
       {activeTab === 'intro' && !profile && (
         <div className="flex items-center justify-center py-20">

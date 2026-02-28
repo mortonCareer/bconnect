@@ -18,6 +18,7 @@ import { formatRelativeTime, formatDuration } from '../lib/format-time'
 
 export interface FeedItem {
   postId: number
+  memberId?: number
   profile: {
     image: string
     name: string
@@ -125,6 +126,7 @@ export function useFeedItems({ trade, authorId, limit = 20 }: UseFeedItemsOption
 
       return {
         postId: post.id!,
+        memberId: member.id,
         profile: {
           image: member.picture ?? '',
           name: member.name ?? '',
@@ -152,6 +154,7 @@ export function useFeedItems({ trade, authorId, limit = 20 }: UseFeedItemsOption
 
   return {
     feedItems,
+    postCount: allPosts.length,
     isLoading,
     isFetchingNextPage: postsQuery.isFetchingNextPage,
     hasNextPage: postsQuery.hasNextPage,
@@ -160,7 +163,7 @@ export function useFeedItems({ trade, authorId, limit = 20 }: UseFeedItemsOption
   }
 }
 
-function getRoleLabel(role: string): string {
+export function getRoleLabel(role: string): string {
   const labels: Record<string, string> = {
     GUEST: '게스트',
     ARCHITECT: '건축사',

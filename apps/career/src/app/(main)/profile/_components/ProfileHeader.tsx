@@ -1,33 +1,17 @@
 'use client'
 
-import type { Trade, Role } from '@morton/api-client'
-import { TRADE_LABELS } from '@/lib/trade-labels'
-
-const ROLE_LABELS: Record<string, string> = {
-  GUEST: '게스트',
-  ARCHITECT: '건축사',
-  CONTRACTOR: '시공사',
-  FOREMAN: '반장',
-  WORKER: '기술자',
-  ADMIN: '관리자',
-}
-
 interface ProfileHeaderProps {
   name?: string
   picture?: string
-  role?: Role
-  primaryTrade?: Trade
   city?: string
+  headline?: string | null
 }
 
-export function ProfileHeader({ name, picture, role, primaryTrade, city }: ProfileHeaderProps) {
-  const roleLabel = role ? (ROLE_LABELS[role] ?? '') : ''
-  const tradeLabel = primaryTrade ? (TRADE_LABELS[primaryTrade] ?? '') : ''
-
+export function ProfileHeader({ name, picture, city, headline }: ProfileHeaderProps) {
   return (
-    <div className="flex flex-col items-center gap-3 px-4 py-6">
-      {/* 프로필 이미지 */}
-      <div className="h-20 w-20 overflow-hidden rounded-full bg-morton-gray-300">
+    <div className="flex items-center gap-5 px-4 py-6">
+      {/* 아바타 */}
+      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full bg-morton-gray-300">
         {picture ? (
           <img src={picture} alt={name ?? '프로필'} className="h-full w-full object-cover" />
         ) : (
@@ -37,16 +21,13 @@ export function ProfileHeader({ name, picture, role, primaryTrade, city }: Profi
         )}
       </div>
 
-      {/* 이름 */}
-      <p className="text-sb-24 text-morton-gray-900">{name ?? '이름 없음'}</p>
-
-      {/* 역할 + 대표분야 + 지역 */}
-      <div className="flex items-center gap-2">
-        {roleLabel && <span className="text-m-14 text-morton-gray-500">{roleLabel}</span>}
-        {roleLabel && tradeLabel && <div className="h-3 w-px bg-morton-gray-300" />}
-        {tradeLabel && <span className="text-m-14 text-morton-gray-500">{tradeLabel}</span>}
-        {(roleLabel || tradeLabel) && city && <div className="h-3 w-px bg-morton-gray-300" />}
-        {city && <span className="text-m-14 text-morton-gray-500">{city}</span>}
+      {/* 이름 + 지역 + 한줄소개 */}
+      <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex items-baseline gap-2">
+          <span className="text-sb-20 text-morton-gray-900">{name ?? '이름 없음'}</span>
+          {city && <span className="text-r-12 text-morton-gray-500">{city}</span>}
+        </div>
+        {headline && <p className="truncate text-r-14 text-morton-gray-900">{headline}</p>}
       </div>
     </div>
   )

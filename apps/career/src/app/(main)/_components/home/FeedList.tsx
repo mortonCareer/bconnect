@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useCallback } from 'react'
+import Link from 'next/link'
 import { Feed } from '@morton/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { useFeedStore } from '@/stores/feed-store'
@@ -69,7 +70,13 @@ export function FeedList() {
   return (
     <div className="flex flex-col gap-4 px-4 py-2">
       {feedItems.map((item) => (
-        <Feed key={item.postId} profile={item.profile} content={item.content} />
+        <Feed
+          key={item.postId}
+          profile={item.profile}
+          content={item.content}
+          profileHref={item.memberId != null ? `/profile/${item.memberId}` : undefined}
+          LinkComponent={Link}
+        />
       ))}
 
       {/* Infinite scroll sentinel */}

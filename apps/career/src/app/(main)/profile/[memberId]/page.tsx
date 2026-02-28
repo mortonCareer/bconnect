@@ -3,8 +3,10 @@
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useGetMember, useGetProfile } from '@morton/api-client'
-import { Tab, TopBar } from '@morton/ui'
+import { Button, Tab, TopBar } from '@morton/ui'
+import { useFeedItems } from '@/hooks/useFeedItems'
 import { ProfileHeader } from '../_components/ProfileHeader'
+import { StatsRow } from '../_components/StatsRow'
 import { IntroSection } from '../_components/IntroSection'
 import { WorksSection } from '../_components/WorksSection'
 
@@ -31,6 +33,8 @@ export default function MemberProfilePage() {
   const { data: profile, isLoading: isProfileLoading } = useGetProfile(memberId, {
     query: { enabled: !isNaN(memberId) },
   })
+
+  const { postCount } = useFeedItems({ authorId: profile?.id })
 
   const isLoading = isMemberLoading || isProfileLoading
 
@@ -60,7 +64,7 @@ export default function MemberProfilePage() {
     <div className="flex flex-col">
       <TopBar
         variant="default"
-        title={member.name ?? '프로필'}
+        title={member.username ?? member.name ?? '프로필'}
         showAction={false}
         onBack={() => router.back()}
       />
@@ -68,10 +72,23 @@ export default function MemberProfilePage() {
       <ProfileHeader
         name={member.name}
         picture={member.picture}
-        role={member.role}
-        primaryTrade={profile?.primaryTrade}
         city={profile?.address?.city}
+        headline={profile?.headline}
       />
+
+      <StatsRow
+        postCount={postCount}
+        trades={profile?.trades}
+        primaryTrade={profile?.primaryTrade}
+        experience={profile?.experience}
+        role={member.role}
+      />
+
+      <div className="px-4 py-3">
+        <Button variant="outline" size="full" onClick={() => router.push('/messages')}>
+          메시지
+        </Button>
+      </div>
 
       <Tab items={TAB_ITEMS} activeKey={activeTab} onChange={setActiveTab} />
 
