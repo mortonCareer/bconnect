@@ -20,7 +20,7 @@ export async function GET() {
         searchText: '1248100998',
       }).toString(),
       cache: 'no-store',
-      signal: AbortSignal.timeout(10_000),
+      signal: AbortSignal.timeout(55_000),
     })
 
     results.status = response.status
