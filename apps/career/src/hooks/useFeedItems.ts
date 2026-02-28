@@ -134,7 +134,7 @@ export function useFeedItems({ trade, authorId, limit = 20 }: UseFeedItemsOption
           bio: profile.headline ?? '',
         },
         content: {
-          image: post.images?.[0] ?? '',
+          image: post.images?.[0] || '/placeholder-post.svg',
           company: task?.company ?? '',
           duration: task?.start && task?.end ? formatDuration(task.start, task.end) : '',
           timestamp: post.createdAt ? formatRelativeTime(post.createdAt) : '',

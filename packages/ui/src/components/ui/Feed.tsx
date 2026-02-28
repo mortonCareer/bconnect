@@ -130,7 +130,7 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
           {/* 더보기 버튼 (케밥 메뉴) */}
           <button
             type="button"
-            className="flex h-4 w-4 flex-shrink-0 items-center justify-center"
+            className="flex h-4 w-4 flex-shrink-0 cursor-pointer items-center justify-center hover:opacity-60"
             aria-label="더보기"
           >
             <svg width="5.067" height="9.6" viewBox="0 0 5.067 9.6" fill="none">
@@ -212,7 +212,7 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
               type="button"
               onClick={handleToggle}
               className={cn(
-                'text-r-12 text-morton-gray-700 underline decoration-solid',
+                'cursor-pointer text-r-12 text-morton-gray-700 underline decoration-solid hover:text-morton-gray-900',
                 isExpanded ? 'leading-[25.2px]' : ''
               )}
             >
