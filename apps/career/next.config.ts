@@ -1,5 +1,7 @@
 import type { NextConfig } from 'next'
 
-const nextConfig: NextConfig = {}
+const nextConfig: NextConfig = {
+  /* Vercel monorepo: apps/career */
+}
 
 export default nextConfig
