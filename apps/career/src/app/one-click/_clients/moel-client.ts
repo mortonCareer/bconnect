@@ -37,6 +37,7 @@ export async function fetchMoelDefaulters(companyName: string): Promise<MoelDefa
       schTxt: companyName,
     }).toString(),
     cache: 'no-store',
+    signal: AbortSignal.timeout(10_000),
   })
 
   if (!response.ok) {

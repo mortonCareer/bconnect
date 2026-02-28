@@ -41,6 +41,7 @@ export async function fetchFeiaCompanies(companyName: string): Promise<FeiaCompa
   const response = await fetch(url.toString(), {
     method: 'GET',
     cache: 'no-store',
+    signal: AbortSignal.timeout(10_000),
   })
 
   if (!response.ok) {

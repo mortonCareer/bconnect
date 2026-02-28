@@ -34,6 +34,7 @@ export async function fetchKisconArrears(companyName: string): Promise<KisconArr
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ GotoPage: '1' }).toString(),
     cache: 'no-store',
+    signal: AbortSignal.timeout(10_000),
   })
 
   if (!response.ok) {
@@ -102,6 +103,7 @@ export async function fetchKisconSubconLimit(
       searchText: registrationNumber,
     }).toString(),
     cache: 'no-store',
+    signal: AbortSignal.timeout(10_000),
   })
 
   if (!response.ok) {

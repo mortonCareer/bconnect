@@ -29,6 +29,7 @@ export async function fetchNtsBusinessStatus(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ b_no: registrationNumbers }),
     cache: 'no-store',
+    signal: AbortSignal.timeout(10_000),
   })
 
   if (!response.ok) {
@@ -64,6 +65,7 @@ export async function fetchNtsBusinessValidate(
       ],
     }),
     cache: 'no-store',
+    signal: AbortSignal.timeout(10_000),
   })
 
   if (!response.ok) {
