@@ -74,6 +74,29 @@ resource "vercel_project_environment_variable" "career_kcomwel_api_service_key" 
   comment    = "근로복지공단 고용/산재보험 API (data.go.kr) - 원클릭 조회"
 }
 
+# Vercel Cron 인증용 시크릿 (자동 생성)
+resource "random_password" "cron_secret" {
+  length  = 32
+  special = false
+}
+
+resource "vercel_project_environment_variable" "career_cron_secret" {
+  project_id = vercel_project.morton-career.id
+  key        = "CRON_SECRET"
+  value      = random_password.cron_secret.result
+  target     = ["production"]
+  comment    = "Vercel Cron 인증 시크릿 - 스키마 체크 크론잡"
+}
+
+resource "vercel_project_environment_variable" "career_slack_webhook_url" {
+  count      = var.slack_webhook_url != "" ? 1 : 0
+  project_id = vercel_project.morton-career.id
+  key        = "SLACK_WEBHOOK_URL"
+  value      = var.slack_webhook_url
+  target     = ["production"]
+  comment    = "Slack Incoming Webhook - 크롤링 스키마 변경 알림"
+}
+
 # ===========================================================================
 # Domain Configuration for Career
 # ===========================================================================

@@ -46,4 +46,6 @@ module "vercel" {
 
   nts_api_service_key    = var.nts_api_service_key
   kcomwel_api_service_key = var.kcomwel_api_service_key
+
+  slack_webhook_url = var.slack_webhook_url
 }

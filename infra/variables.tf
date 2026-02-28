@@ -112,3 +112,10 @@ variable "kcomwel_api_service_key" {
   type        = string
   sensitive   = true
 }
+
+variable "slack_webhook_url" {
+  description = "Slack Incoming Webhook URL - 크롤링 스키마 변경 알림용"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
