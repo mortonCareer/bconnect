@@ -6,6 +6,9 @@ info:
 servers:
   - url: http://localhost:8080
 
+security:
+  - bearerAuth: []
+
 paths:
   # =====================
   # Auth Endpoints
@@ -14,6 +17,7 @@ paths:
     post:
       operationId: sendOtp
       tags: [Auth]
+      security: []
       summary: SMS 인증코드를 발송합니다
       requestBody:
         required: true
@@ -28,11 +32,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SendOtpResponse'
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+        '429':
+          description: |
+            - `A001` 일일 발송 한도를 초과했습니다
+            - `A002` 재전송 대기 시간이 지나지 않았습니다
 
   /api/v1/auth/otp/verify:
     post:
       operationId: verifyOtp
       tags: [Auth]
+      security: []
       summary: 인증코드를 검증합니다 (로그인 또는 회원가입 분기)
       requestBody:
         required: true
@@ -51,11 +63,18 @@ paths:
                   - $ref: '#/components/schemas/VerifyOtpSignupResponse'
                 discriminator:
                   propertyName: registered
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+            - `A003` 유효하지 않은 인증번호입니다
+            - `A004` 인증번호가 만료되었습니다
+            - `A005` 인증 시도 횟수를 초과했습니다
 
   /api/v1/auth/refresh:
     post:
       operationId: refreshToken
       tags: [Auth]
+      security: []
       summary: 리프레시 토큰으로 액세스 토큰을 갱신합니다
       responses:
         '200':
@@ -64,6 +83,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RefreshTokenResponse'
+        '401':
+          description: |
+            - `A006` 유효하지 않은 리프레시 토큰입니다
 
   /api/v1/auth/logout:
     post:
@@ -108,6 +130,7 @@ paths:
     post:
       operationId: registerMember
       tags: [Members]
+      security: []
       summary: 새 회원을 등록합니다
       requestBody:
         required: true
@@ -122,6 +145,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Member'
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+            - `A009` 유효하지 않은 가입 토큰입니다
+            - `A010` 가입 토큰이 만료되었습니다
 
   /api/v1/members/{memberId}:
     get:
@@ -167,6 +195,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Member'
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
 
   # =====================
   # Post Endpoints
@@ -175,29 +206,60 @@ paths:
     get:
       operationId: getPosts
       tags: [Posts]
-      summary: 게시글 목록을 조회합니다 (작성자, 작업별 필터 가능)
+      summary: 게시글 목록을 조회합니다 (필터, 커서 페이지네이션)
       parameters:
         - name: authorId
           in: query
           required: false
+          description: 작성자 ID로 필터링
           schema:
             type: integer
             format: int64
         - name: taskId
           in: query
           required: false
+          description: 작업 ID로 필터링
           schema:
             type: integer
             format: int64
+        - name: trade
+          in: query
+          required: false
+          description: 시공분야로 필터링
+          schema:
+            $ref: '#/components/schemas/Trade'
+        - name: minExperience
+          in: query
+          required: false
+          description: 최소 경력 (년)
+          schema:
+            type: integer
+        - name: maxExperience
+          in: query
+          required: false
+          description: 최대 경력 (년)
+          schema:
+            type: integer
+        - name: cursor
+          in: query
+          required: false
+          description: 페이지네이션 커서
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: 페이지 크기 (기본값 20)
+          schema:
+            type: integer
+            default: 20
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/PostPage'
 
     post:
       operationId: createPost
@@ -216,6 +278,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Post'
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
 
   /api/v1/posts/{postId}:
     get:
@@ -261,6 +326,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Post'
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
 
     delete:
       operationId: deletePost
@@ -312,6 +380,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
 
   /api/v1/tasks/{taskId}:
     get:
@@ -357,6 +428,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
 
     delete:
       operationId: deleteTask
@@ -380,16 +454,28 @@ paths:
     get:
       operationId: getMyChats
       tags: [Chats]
-      summary: 내 채팅방 목록을 조회합니다
+      summary: 내 채팅방 목록을 조회합니다 (커서 페이지네이션)
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          description: 페이지네이션 커서
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: 페이지 크기 (기본값 20)
+          schema:
+            type: integer
+            default: 20
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Chat'
+                $ref: '#/components/schemas/ChatPage'
 
   /api/v1/chats/{chatId}:
     get:
@@ -415,9 +501,75 @@ paths:
     get:
       operationId: getChatMessages
       tags: [Chats]
-      summary: 채팅방의 메시지 목록을 조회합니다
+      summary: 채팅방의 메시지 목록을 조회합니다 (역방향 커서 페이지네이션)
       parameters:
         - name: chatId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: before
+          in: query
+          required: false
+          description: 이 커서 이전의 메시지를 조회
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: 페이지 크기 (기본값 30)
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessagePage'
+
+  # =====================
+  # Profile Endpoints
+  # =====================
+  /api/v1/profiles/me:
+    get:
+      operationId: getMyProfile
+      tags: [Profiles]
+      summary: 내 프로필을 조회합니다
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+
+    put:
+      operationId: updateMyProfile
+      tags: [Profiles]
+      summary: 내 프로필을 수정합니다
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+
+  /api/v1/profiles/{profileId}:
+    get:
+      operationId: getProfile
+      tags: [Profiles]
+      summary: 프로필을 조회합니다
+      parameters:
+        - name: profileId
           in: path
           required: true
           schema:
@@ -429,15 +581,31 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Message'
+                $ref: '#/components/schemas/Profile'
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     # =====================
     # Common
     # =====================
+    CursorPageMeta:
+      type: object
+      required: [hasMore]
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+          description: 다음 페이지 커서 (마지막 페이지면 null)
+        hasMore:
+          type: boolean
+          description: 다음 페이지 존재 여부
+
     Address:
       type: object
       properties:
@@ -616,6 +784,61 @@ components:
           type: string
 
     # =====================
+    # Profile Schemas
+    # =====================
+    Profile:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        primaryTrade:
+          $ref: '#/components/schemas/Trade'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+        experience:
+          type: integer
+        headline:
+          type: string
+          nullable: true
+        about:
+          type: string
+          nullable: true
+        address:
+          $ref: '#/components/schemas/Address'
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        primaryTrade:
+          $ref: '#/components/schemas/Trade'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+        experience:
+          type: integer
+        headline:
+          type: string
+        about:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+
+    # =====================
     # Post Schemas
     # =====================
     Post:
@@ -642,6 +865,17 @@ components:
         modifiedAt:
           type: string
           format: date-time
+
+    PostPage:
+      type: object
+      required: [items, meta]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
+        meta:
+          $ref: '#/components/schemas/CursorPageMeta'
 
     CreatePostRequest:
       type: object
@@ -801,3 +1035,25 @@ components:
         modifiedAt:
           type: string
           format: date-time
+
+    ChatPage:
+      type: object
+      required: [items, meta]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chat'
+        meta:
+          $ref: '#/components/schemas/CursorPageMeta'
+
+    MessagePage:
+      type: object
+      required: [items, meta]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+        meta:
+          $ref: '#/components/schemas/CursorPageMeta'
