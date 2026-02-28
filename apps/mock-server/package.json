@@ -1,0 +1,8 @@
+{
+  "name": "mock-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch server.js"
+  }
+}
