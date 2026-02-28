@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { fetchBusinessVerification } from './_components/fetch-business'
+import { fetchBusinessVerification } from './_clients/fetch-business'
 import { formatRegistrationNumber, isValidRegistrationNumber } from './_components/constants'
 import { SearchBar } from './_components/SearchBar'
 import { TipBanner } from './_components/TipBanner'

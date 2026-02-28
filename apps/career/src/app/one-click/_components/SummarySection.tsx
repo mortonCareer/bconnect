@@ -1,4 +1,4 @@
-import type { CheckItem } from './types'
+import type { CheckItem } from '../_clients/types'
 import { CATEGORY_GROUPS } from './constants'
 import { SummaryRow } from './SummaryRow'
 

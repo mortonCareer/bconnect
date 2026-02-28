@@ -1,7 +1,7 @@
 'use client'
 
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@morton/ui'
-import type { CheckItem } from './types'
+import type { CheckItem } from '../_clients/types'
 import { CATEGORY_GROUPS } from './constants'
 import { StatusBadge } from './StatusBadge'
 import { DetailTable } from './DetailTable'

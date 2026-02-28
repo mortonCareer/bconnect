@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button, Input } from '@morton/ui'
-import type { VerifyOwnerResult } from './types'
+import type { VerifyOwnerResult } from '../_clients/types'
 
 interface OwnerVerifyFormProps {
   registrationNumber: string
