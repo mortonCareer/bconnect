@@ -5,19 +5,39 @@ import { useRouter } from 'next/navigation'
 import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@morton/ui'
-import { ApiError, useRegisterMember, Role } from '@morton/api-client'
+import { ApiError, useRegisterMember, useUpdateMyProfile, Role, Trade } from '@morton/api-client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import { SignupHeader, FormInput, FormLabel, FormError } from '../_components'
 import { FieldSelector, ExperienceSelector } from './components'
 import { FIELD_OPTIONS, EXPERIENCE_OPTIONS } from './constants'
 import { profileSchema, type ProfileFormData } from './schema'
-import type { ConstructionField } from './types'
+import type { ConstructionField, ExperienceLevel } from './types'
+
+const FIELD_TO_TRADE: Record<ConstructionField, Trade> = {
+  tile: Trade.TILING,
+  wallpaper: Trade.WALLPAPER,
+  flooring: Trade.HARDWOOD,
+  carpentry: Trade.CARPENTRY,
+  demolition: Trade.DEMOLITION,
+  cleaning: Trade.CLEANING,
+  electrical: Trade.ELECTRICAL,
+  plumbing: Trade.PLUMBING,
+}
+
+const EXPERIENCE_TO_YEARS: Record<ExperienceLevel, number> = {
+  newcomer: 0,
+  '1-3': 2,
+  '3-5': 4,
+  '5-10': 7,
+  '10+': 15,
+}
 
 export default function SignupProfilePage() {
   const router = useRouter()
   const { login } = useAuthStore()
   const registerMemberMutation = useRegisterMember()
+  const updateProfileMutation = useUpdateMyProfile()
   const { formData } = useSignupStore()
 
   const {
@@ -82,6 +102,15 @@ export default function SignupProfilePage() {
 
       // 회원가입 성공 — 로그인 처리
       login(result, '')
+
+      // 프로필 데이터 저장 (시공분야/경력)
+      await updateProfileMutation.mutateAsync({
+        data: {
+          primaryTrade: FIELD_TO_TRADE[data.primaryField],
+          trades: data.fields.map((f) => FIELD_TO_TRADE[f]),
+          experience: EXPERIENCE_TO_YEARS[data.experience],
+        },
+      })
 
       // signup store 초기화
       useSignupStore.getState().reset()
