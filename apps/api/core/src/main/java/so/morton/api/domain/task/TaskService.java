@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import so.morton.api.api.controller.v1.request.CreateTaskRequest;
 import so.morton.api.api.controller.v1.request.UpdateTaskRequest;
+import so.morton.api.domain.profile.Profile;
 import so.morton.api.storage.domain.task.TaskEntity;
 import so.morton.api.storage.domain.task.TaskRepository;
 import so.morton.api.domain.profile.ProfileFinder;
@@ -24,9 +25,9 @@ public class TaskService {
 
     @Transactional
     public Task create(Long memberId, CreateTaskRequest request) {
-        Long profileId = profileFinder.resolveId(memberId);
-        TaskEntity entity = TaskEntity.builder()
-                .profileId(profileId)
+        Profile profile = profileFinder.getByMemberId(memberId);
+        TaskEntity task = TaskEntity.builder()
+                .profileId(profile.id())
                 .company(request.company())
                 .address(request.address())
                 .taskTitle(request.taskTitle())
@@ -36,7 +37,7 @@ public class TaskService {
                 .end(request.end())
                 .build();
 
-        TaskEntity saved = taskRepository.save(entity);
+        TaskEntity saved = taskRepository.save(task);
         return Task.of(saved);
     }
 
@@ -47,21 +48,19 @@ public class TaskService {
 
     @Transactional(readOnly = true)
     public List<Task> getAll() {
-        return taskFinder.findAllActive();
+        return taskFinder.findAll();
     }
 
     @Transactional
     public Task update(Long taskId, Long memberId, UpdateTaskRequest request) {
-        Long profileId = profileFinder.resolveId(memberId);
-        TaskEntity entity = taskRepository.findById(taskId)
-                .filter(e -> !e.isDeleted())
+        Profile profile = profileFinder.getByMemberId(memberId);
+        TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!entity.getProfileId().equals(profileId)) {
+        if (!task.getProfileId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
-        }
 
-        entity.update(
+        task.update(
                 request.company(),
                 request.address(),
                 request.taskTitle(),
@@ -70,21 +69,17 @@ public class TaskService {
                 request.start(),
                 request.end()
         );
-
-        return Task.of(entity);
+        return Task.of(task);
     }
 
     @Transactional
     public void delete(Long taskId, Long memberId) {
-        Long profileId = profileFinder.resolveId(memberId);
-        TaskEntity entity = taskRepository.findById(taskId)
-                .filter(e -> !e.isDeleted())
+        Profile profile = profileFinder.getByMemberId(memberId);
+        TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!entity.getProfileId().equals(profileId)) {
+        if (!task.getProfileId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
-        }
-
-        entity.delete();
+        taskRepository.delete(task);
     }
 }
