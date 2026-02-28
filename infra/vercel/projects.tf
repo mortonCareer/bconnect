@@ -20,6 +20,9 @@ resource "vercel_project" "morton-career" {
 
   root_directory = "apps/career"
 
+  # 모노레포: apps/career 또는 packages 변경 시에만 빌드
+  ignore_command = "git diff $VERCEL_GIT_PREVIOUS_SHA HEAD --quiet -- apps/career packages"
+
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
     deployment_type = "none"
@@ -132,6 +135,9 @@ resource "vercel_project" "morton-plan" {
   skew_protection = "12 hours"
 
   root_directory = "apps/plan"
+
+  # 모노레포: apps/plan 또는 packages 변경 시에만 빌드
+  ignore_command = "git diff $VERCEL_GIT_PREVIOUS_SHA HEAD --quiet -- apps/plan packages"
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
