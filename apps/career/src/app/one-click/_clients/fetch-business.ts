@@ -397,6 +397,43 @@ async function _fetchBusinessVerification(
         makeErrorItem('HABITUAL_ARREARS', 'WAGE_RESTRICTION', '상습체불 이력', '국토교통부')
       )
     }
+  } else {
+    // 회사명을 확인할 수 없는 경우 — 회사명 기반 조회 항목은 "미확인" 처리
+    const noNameItems: CheckItem[] = [
+      {
+        id: 'FIRE_LICENSE',
+        category: 'BUSINESS_LICENSE',
+        label: '소방시설업 면허',
+        source: '한국소방시설협회',
+        status: '미확인',
+        statusType: 'neutral',
+        description: '사업장명을 확인할 수 없어 조회하지 못했어요.',
+        details: [],
+      },
+      {
+        id: 'WAGE_ARREARS',
+        category: 'WAGE_RESTRICTION',
+        label: '임금체불 이력',
+        source: '고용노동부',
+        status: '미확인',
+        statusType: 'neutral',
+        description: '사업장명을 확인할 수 없어 조회하지 못했어요.',
+        details: [],
+      },
+      {
+        id: 'HABITUAL_ARREARS',
+        category: 'WAGE_RESTRICTION',
+        label: '상습체불 이력',
+        source: '국토교통부',
+        status: '미확인',
+        statusType: 'neutral',
+        description: '사업장명을 확인할 수 없어 조회하지 못했어요.',
+        details: [],
+      },
+    ]
+    for (const item of noNameItems) {
+      realItems.set(item.id, item)
+    }
   }
 
   // ── 미연결 항목은 "준비 중" 상태로 생성 ──
