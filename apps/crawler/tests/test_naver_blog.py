@@ -44,11 +44,11 @@ class TestExtractPostContentUrl:
 class TestExtractContactInfo:
     def test_phone_with_dashes(self):
         result = extract_contact_info("연락처: 010-1234-5678 입니다")
-        assert result["phone"] == "01012345678"
+        assert result["phone"] == "010-1234-5678"
 
     def test_phone_no_dashes(self):
         result = extract_contact_info("전화 01098765432 문의")
-        assert result["phone"] == "01098765432"
+        assert result["phone"] == "010-9876-5432"
 
     def test_email(self):
         result = extract_contact_info("이메일: test@example.com")
@@ -76,7 +76,7 @@ class TestExtractContactInfo:
 
     def test_multiple_phones_returns_first(self):
         result = extract_contact_info("010-1111-2222 또는 010-3333-4444")
-        assert result["phone"] == "01011112222"
+        assert result["phone"] == "010-1111-2222"
 
 
 class TestBuildSearchQueries:
