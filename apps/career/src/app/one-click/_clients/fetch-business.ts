@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { cacheLife, cacheTag } from 'next/cache'
+import { unstable_cache } from 'next/cache'
 import type {
   CheckItem,
   CheckItemId,
@@ -295,12 +295,11 @@ function mapKisconSubconToCheckItem(
  * Phase 2: FEIA + MOEL + KISCON상습체불 병렬 (회사명 필요 → Phase 1에서 획득)
  * 나머지: mock 유지 (CONSTRUCTION_LICENSE, SPECIALTY_LICENSE, ELECTRICAL_LICENSE, RETIREMENT_FUND)
  */
-export async function fetchBusinessVerification(
+const CACHE_TTL = 3600
+
+async function _fetchBusinessVerification(
   registrationNumber: string
 ): Promise<VerifyBusinessResult> {
-  'use cache'
-  cacheLife('hours')
-  cacheTag('one-click-verify')
   // ── Phase 1: 사업자번호로 직접 조회 가능한 API ──
   const [ntsResult, kcomwelResult, subconResult] = await Promise.allSettled([
     fetchNtsBusinessStatus([registrationNumber]),
@@ -418,6 +417,12 @@ export async function fetchBusinessVerification(
     checkItems,
   }
 }
+
+export const fetchBusinessVerification = unstable_cache(
+  _fetchBusinessVerification,
+  ['one-click-verify'],
+  { revalidate: CACHE_TTL }
+)
 
 // ─── 사업자 진위확인 ────────────────────────────────
 
