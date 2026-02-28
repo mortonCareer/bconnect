@@ -1,7 +1,15 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    cacheLife: {
+      hours: {
+        stale: 3600,
+        revalidate: 900,
+        expire: 86400,
+      },
+    },
+  },
 }
 
 export default nextConfig
