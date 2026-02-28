@@ -1,7 +1,8 @@
 'use client'
 
-import { useInfiniteQuery, useQueries } from '@tanstack/react-query'
 import {
+  useInfiniteQuery,
+  useQueries,
   getPosts,
   getProfile,
   getMember,

@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useLogout } from '@morton/api-client'
@@ -8,6 +9,12 @@ import { useAuthStore } from '../stores/auth-store'
 export default function Home() {
   const router = useRouter()
   const { member, isAuthenticated, logout: logoutStore } = useAuthStore()
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/home')
+    }
+  }, [isAuthenticated, router])
   const logoutMutation = useLogout()
 
   const handleLogout = async () => {
