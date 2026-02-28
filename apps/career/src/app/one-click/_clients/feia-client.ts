@@ -26,6 +26,11 @@ interface FeiaApiResponse {
 
 const FEIA_API_URL = 'https://feia.ekffa.or.kr/compSearch/complist.json'
 
+/** 법인 접미사 제거: (주), 주식회사, （주） 등 */
+function stripCorpSuffix(name: string): string {
+  return name.replace(/\(주\)|（주）|주식회사/g, '').replace(/\s/g, '')
+}
+
 /**
  * FEIA 소방시설업체 검색 (회사명 기준)
  *
@@ -54,5 +59,12 @@ export async function fetchFeiaCompanies(companyName: string): Promise<FeiaCompa
     throw new Error(`FEIA API returned error code: ${json.code}`)
   }
 
-  return json.data?.list ?? []
+  const items = json.data?.list ?? []
+
+  // 회사명 매칭 필터링 (FEIA API가 매칭 실패 시 기본 목록을 반환하므로)
+  const normalized = stripCorpSuffix(companyName)
+  return items.filter((item) => {
+    const itemName = stripCorpSuffix(item.entprsNameHangul)
+    return itemName.includes(normalized) || normalized.includes(itemName)
+  })
 }
