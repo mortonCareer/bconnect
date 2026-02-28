@@ -20,6 +20,9 @@ resource "vercel_project" "morton-career" {
 
   root_directory = "apps/career"
 
+  # Only build when career app or shared packages change
+  ignore_command = "git diff HEAD^ HEAD --quiet -- apps/career packages"
+
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
     deployment_type = "none"
@@ -96,6 +99,9 @@ resource "vercel_project" "morton-plan" {
   skew_protection = "12 hours"
 
   root_directory = "apps/plan"
+
+  # Only build when plan app or shared packages change
+  ignore_command = "git diff HEAD^ HEAD --quiet -- apps/plan packages"
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
