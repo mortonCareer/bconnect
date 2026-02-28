@@ -13,9 +13,9 @@ export interface MoelDefaulterItem {
   age: string // 나이
   companyName: string // 사업장명
   industry: string // 업종
-  companyAddress: string // 사업장주소
-  personalAddress: string // 주소
-  arrearsAmount: string // 체불액(만원)
+  personalAddress: string // 주소지(사업주)
+  companyAddress: string // 소재지(사업장)
+  arrearsAmount: string // 체불액(원)
 }
 
 const MOEL_DEFAULTER_URL = 'https://moel.go.kr/info/defaulter/defaulterList.do'
@@ -48,6 +48,15 @@ export async function fetchMoelDefaulters(companyName: string): Promise<MoelDefa
   const $ = cheerio.load(html)
   const items: MoelDefaulterItem[] = []
 
+  // 헤더 검증 — 사이트 구조 변경 감지
+  const headers = $('table thead th')
+    .map((_i, th) => $(th).text().trim())
+    .get()
+  const expectedHeaders = ['구분', '성명', '나이', '사업장명', '업종']
+  if (!expectedHeaders.every((h) => headers.some((actual) => actual.includes(h)))) {
+    throw new Error(`MOEL defaulter table schema changed: ${headers.join(', ')}`)
+  }
+
   $('table tbody tr').each((_i, row) => {
     const cells = $(row).find('td')
     if (cells.length < 8) return
@@ -58,8 +67,8 @@ export async function fetchMoelDefaulters(companyName: string): Promise<MoelDefa
       age: $(cells[2]).text().trim(),
       companyName: $(cells[3]).text().trim(),
       industry: $(cells[4]).text().trim(),
-      companyAddress: $(cells[5]).text().trim(),
-      personalAddress: $(cells[6]).text().trim(),
+      personalAddress: $(cells[5]).text().trim(),
+      companyAddress: $(cells[6]).text().trim(),
       arrearsAmount: $(cells[7]).text().trim(),
     })
   })

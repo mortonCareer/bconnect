@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { unstable_cache } from 'next/cache'
+import { cacheLife, cacheTag } from 'next/cache'
 import type {
   CheckItem,
   CheckItemId,
@@ -14,8 +14,6 @@ import { fetchKcomwelInsurance } from './kcomwel-client'
 import { fetchFeiaCompanies } from './feia-client'
 import { fetchMoelDefaulters } from './moel-client'
 import { fetchKisconArrears, fetchKisconSubconLimit } from './kiscon-crawl-client'
-
-const CACHE_TTL = 3600 // 1시간
 
 // ─── UI 표시 순서 + 미연결 항목 ─────────────────────
 
@@ -223,7 +221,7 @@ function mapMoelToCheckItem(items: Awaited<ReturnType<typeof fetchMoelDefaulters
       ? [
           { key: '사업장명', value: items[0].companyName || '-' },
           { key: '대표자', value: items[0].name || '-' },
-          { key: '체불액', value: items[0].arrearsAmount ? `${items[0].arrearsAmount}만원` : '-' },
+          { key: '체불액', value: items[0].arrearsAmount ? `${items[0].arrearsAmount}원` : '-' },
           { key: '업종', value: items[0].industry || '-' },
           { key: '소재지', value: items[0].companyAddress || '-' },
         ]
@@ -297,9 +295,12 @@ function mapKisconSubconToCheckItem(
  * Phase 2: FEIA + MOEL + KISCON상습체불 병렬 (회사명 필요 → Phase 1에서 획득)
  * 나머지: mock 유지 (CONSTRUCTION_LICENSE, SPECIALTY_LICENSE, ELECTRICAL_LICENSE, RETIREMENT_FUND)
  */
-async function _fetchBusinessVerification(
+export async function fetchBusinessVerification(
   registrationNumber: string
 ): Promise<VerifyBusinessResult> {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('one-click-verify')
   // ── Phase 1: 사업자번호로 직접 조회 가능한 API ──
   const [ntsResult, kcomwelResult, subconResult] = await Promise.allSettled([
     fetchNtsBusinessStatus([registrationNumber]),
@@ -417,12 +418,6 @@ async function _fetchBusinessVerification(
     checkItems,
   }
 }
-
-export const fetchBusinessVerification = unstable_cache(
-  _fetchBusinessVerification,
-  ['one-click-verify'],
-  { revalidate: CACHE_TTL }
-)
 
 // ─── 사업자 진위확인 ────────────────────────────────
 

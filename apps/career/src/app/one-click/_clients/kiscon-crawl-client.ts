@@ -45,18 +45,33 @@ export async function fetchKisconArrears(companyName: string): Promise<KisconArr
   const $ = cheerio.load(html)
   const items: KisconArrearsItem[] = []
 
-  // 테이블 행 파싱
-  $('table tbody tr').each((_i, row) => {
+  // 데이터 테이블 선택 (검색폼 테이블 제외)
+  const dataTable = $('table').filter((_i, el) => {
+    const firstTh = $(el).find('th').first().text().trim()
+    return firstTh === '연번'
+  })
+
+  // 헤더 검증 — 사이트 구조 변경 감지
+  const headers = dataTable
+    .find('th')
+    .map((_i, th) => $(th).text().trim())
+    .get()
+  const expectedHeaders = ['연번', '명칭', '처분이력', '체불금액', '공표기간']
+  if (!expectedHeaders.every((h) => headers.some((actual) => actual.includes(h)))) {
+    throw new Error(`KISCON arrears table schema changed: ${headers.join(', ')}`)
+  }
+
+  dataTable.find('tbody tr').each((_i, row) => {
     const cells = $(row).find('td')
-    if (cells.length < 6) return
+    if (cells.length < 10) return
 
     items.push({
       companyName: $(cells[1]).text().trim(),
-      address: $(cells[1]).find('br').length ? $(cells[1]).contents().last().text().trim() : '',
-      representative: $(cells[2]).text().trim(),
-      penaltyHistory: $(cells[3]).text().trim(),
-      arrearsAmount: $(cells[4]).text().trim(),
-      publicationPeriod: $(cells[5]).text().trim(),
+      address: $(cells[2]).text().trim(),
+      representative: $(cells[3]).text().trim(),
+      penaltyHistory: $(cells[6]).text().trim(),
+      arrearsAmount: $(cells[8]).text().trim(),
+      publicationPeriod: $(cells[9]).text().trim(),
     })
   })
 
@@ -114,9 +129,24 @@ export async function fetchKisconSubconLimit(
   const $ = cheerio.load(html)
   const items: KisconSubconLimitItem[] = []
 
-  $('table tbody tr').each((_i, row) => {
+  const dataTable = $('table').filter((_i, el) => {
+    const firstTh = $(el).find('th').first().text().trim()
+    return firstTh === '연번'
+  })
+
+  // 헤더 검증 — 사이트 구조 변경 감지
+  const headers = dataTable
+    .find('th')
+    .map((_i, th) => $(th).text().trim())
+    .get()
+  const expectedHeaders = ['연번', '위반법령', '상호', '법인번호', '사업자번호', '대표자']
+  if (!expectedHeaders.every((h) => headers.some((actual) => actual.includes(h)))) {
+    throw new Error(`KISCON subcon table schema changed: ${headers.join(', ')}`)
+  }
+
+  dataTable.find('tbody tr').each((_i, row) => {
     const cells = $(row).find('td')
-    if (cells.length < 9) return
+    if (cells.length < 10) return
 
     items.push({
       violationType: $(cells[1]).text().trim(),
