@@ -1,14 +1,25 @@
 import { NextResponse } from 'next/server'
+import { fetchNtsBusinessStatus } from '@/app/one-click/_clients/nts-client'
+import { fetchKcomwelInsurance } from '@/app/one-click/_clients/kcomwel-client'
+import { fetchFeiaCompanies } from '@/app/one-click/_clients/feia-client'
 import { fetchMoelDefaulters } from '@/app/one-click/_clients/moel-client'
 import {
   fetchKisconArrears,
   fetchKisconSubconLimit,
 } from '@/app/one-click/_clients/kiscon-crawl-client'
 
-const CRAWL_TARGETS = [
+// 더미 사업자번호 — 존재 여부와 무관하게 API 응답 자체를 검증
+const DUMMY_BIZ_NO = '0000000000'
+
+const HEALTH_TARGETS = [
+  // API 헬스체크
+  { name: 'NTS 사업자상태', fn: () => fetchNtsBusinessStatus([DUMMY_BIZ_NO]) },
+  { name: 'KCOMWEL 고용보험', fn: () => fetchKcomwelInsurance(DUMMY_BIZ_NO) },
+  { name: 'FEIA 소방시설업', fn: () => fetchFeiaCompanies('__health_check__') },
+  // 크롤링 스키마 검증
   { name: 'MOEL 체불사업주', fn: () => fetchMoelDefaulters('__schema_check__') },
   { name: 'KISCON 상습체불', fn: () => fetchKisconArrears('__schema_check__') },
-  { name: 'KISCON 하도급제한', fn: () => fetchKisconSubconLimit('0000000000') },
+  { name: 'KISCON 하도급제한', fn: () => fetchKisconSubconLimit(DUMMY_BIZ_NO) },
 ]
 
 async function sendSlackAlert(failures: string[]) {
@@ -19,7 +30,7 @@ async function sendSlackAlert(failures: string[]) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      text: `🚨 *크롤링 스키마 변경 감지*\n\n${failures.join('\n')}`,
+      text: `🚨 *원클릭 조회 헬스체크 실패*\n\n${failures.join('\n')}`,
     }),
   })
 }
@@ -31,12 +42,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const results = await Promise.allSettled(CRAWL_TARGETS.map((t) => t.fn()))
+  const results = await Promise.allSettled(HEALTH_TARGETS.map((t) => t.fn()))
 
   const failures: string[] = []
   results.forEach((result, i) => {
     if (result.status === 'rejected') {
-      failures.push(`❌ ${CRAWL_TARGETS[i].name}: ${result.reason?.message ?? result.reason}`)
+      failures.push(`❌ ${HEALTH_TARGETS[i].name}: ${result.reason?.message ?? result.reason}`)
     }
   })
 
@@ -47,6 +58,6 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    checked: CRAWL_TARGETS.map((t) => t.name),
+    checked: HEALTH_TARGETS.map((t) => t.name),
   })
 }
