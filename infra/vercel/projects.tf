@@ -31,6 +31,7 @@ resource "vercel_project_environment_variable" "career_api_url" {
   key        = "NEXT_PUBLIC_API_URL"
   value      = "https://api.${var.domain}"
   target     = ["production", "preview", "development"]
+  comment    = "Spring Boot API 서버 base URL"
 }
 
 resource "vercel_project_environment_variable" "career_aws_access_key_id" {
@@ -38,6 +39,7 @@ resource "vercel_project_environment_variable" "career_aws_access_key_id" {
   key        = "AWS_ACCESS_KEY_ID"
   value      = var.aws_access_key_id
   target     = ["production", "preview"]
+  comment    = "AWS IAM - S3/Lambda 접근용"
 }
 
 resource "vercel_project_environment_variable" "career_aws_secret_access_key" {
@@ -45,6 +47,7 @@ resource "vercel_project_environment_variable" "career_aws_secret_access_key" {
   key        = "AWS_SECRET_ACCESS_KEY"
   value      = var.aws_secret_access_key
   target     = ["production", "preview"]
+  comment    = "AWS IAM - S3/Lambda 접근용"
 }
 
 resource "vercel_project_environment_variable" "career_aws_region" {
@@ -52,6 +55,7 @@ resource "vercel_project_environment_variable" "career_aws_region" {
   key        = "AWS_REGION"
   value      = var.aws_region
   target     = ["production", "preview"]
+  comment    = "AWS 리전 (ap-northeast-2)"
 }
 
 resource "vercel_project_environment_variable" "career_nts_api_service_key" {
@@ -59,6 +63,38 @@ resource "vercel_project_environment_variable" "career_nts_api_service_key" {
   key        = "NTS_API_SERVICE_KEY"
   value      = var.nts_api_service_key
   target     = ["production", "preview"]
+  comment    = "국세청 사업자등록정보 API (data.go.kr) - 원클릭 조회"
+}
+
+resource "vercel_project_environment_variable" "career_kcomwel_api_service_key" {
+  project_id = vercel_project.morton-career.id
+  key        = "KCOMWEL_API_SERVICE_KEY"
+  value      = var.kcomwel_api_service_key
+  target     = ["production", "preview"]
+  comment    = "근로복지공단 고용/산재보험 API (data.go.kr) - 원클릭 조회"
+}
+
+# Vercel Cron 인증용 시크릿 (자동 생성)
+resource "random_password" "cron_secret" {
+  length  = 32
+  special = false
+}
+
+resource "vercel_project_environment_variable" "career_cron_secret" {
+  project_id = vercel_project.morton-career.id
+  key        = "CRON_SECRET"
+  value      = random_password.cron_secret.result
+  target     = ["production"]
+  comment    = "Vercel Cron 인증 시크릿 - 스키마 체크 크론잡"
+}
+
+resource "vercel_project_environment_variable" "career_slack_webhook_url" {
+  count      = var.slack_webhook_url != "" ? 1 : 0
+  project_id = vercel_project.morton-career.id
+  key        = "SLACK_WEBHOOK_URL"
+  value      = var.slack_webhook_url
+  target     = ["production"]
+  comment    = "Slack Incoming Webhook - 크롤링 스키마 변경 알림"
 }
 
 # ===========================================================================
@@ -108,6 +144,7 @@ resource "vercel_project_environment_variable" "plan_api_url" {
   key        = "NEXT_PUBLIC_API_URL"
   value      = "https://api.${var.domain}"
   target     = ["production", "preview", "development"]
+  comment    = "Spring Boot API 서버 base URL"
 }
 
 # ===========================================================================
