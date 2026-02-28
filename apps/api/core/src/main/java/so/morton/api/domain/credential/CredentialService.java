@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import so.morton.api.api.controller.v1.request.CreateCredentialRequest;
+import so.morton.api.domain.profile.Profile;
 import so.morton.api.domain.profile.ProfileFinder;
 import so.morton.api.storage.domain.credential.CredentialEntity;
 import so.morton.api.storage.domain.credential.CredentialRepository;
 
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
+import so.morton.api.support.auth.User;
 
 import java.util.List;
 
@@ -21,75 +23,60 @@ public class CredentialService {
     private final CredentialFinder credentialFinder;
     private final ProfileFinder profileFinder;
 
-    @Transactional
-    public Credential create(Long memberId, CreateCredentialRequest request) {
-        Long profileId = profileFinder.resolveId(memberId);
-
-        CredentialEntity entity = CredentialEntity.builder()
-                .profileId(profileId)
-                .type(request.type())
-                .build();
-
-        CredentialEntity saved = credentialRepository.save(entity);
-        return Credential.of(saved);
-    }
-
     @Transactional(readOnly = true)
-    public List<Credential> getByProfileId(Long profileId) {
+    public List<Credential> get(Long profileId) {
         return credentialFinder.findByProfileId(profileId);
     }
 
     @Transactional
-    public Credential renew(Long credentialId, Long memberId) {
-        Long profileId = profileFinder.resolveId(memberId);
+    public Credential create(User user, CreateCredentialRequest request) {
+        Profile profile = profileFinder.getByMemberId(user.id());
 
-        CredentialEntity entity = credentialRepository.findById(credentialId)
-                .filter(e -> !e.isDeleted())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        CredentialEntity entity = CredentialEntity.builder()
+                .profileId(profile.id())
+                .type(request.type())
+                .build();
 
-        if (!entity.getProfileId().equals(profileId)) {
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-        }
-
-        entity.renew();
-
+        credentialRepository.save(entity);
         return Credential.of(entity);
     }
 
     @Transactional
-    public void delete(Long credentialId, Long memberId) {
-        Long profileId = profileFinder.resolveId(memberId);
-
-        CredentialEntity entity = credentialRepository.findById(credentialId)
-                .filter(e -> !e.isDeleted())
+    public Credential renew(User user, Long id) {
+        Profile profile = profileFinder.getByMemberId(user.id());
+        CredentialEntity entity = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-
-        if (!entity.getProfileId().equals(profileId)) {
+        if (!entity.getProfileId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
-        }
 
-        entity.delete();
+        entity.renew();
+        return Credential.of(entity);
     }
 
     @Transactional
-    public Credential accept(Long credentialId) {
-        CredentialEntity entity = credentialRepository.findById(credentialId)
-                .filter(e -> !e.isDeleted())
+    public void delete(User user, Long id) {
+        Profile profile = profileFinder.getByMemberId(user.id());
+        CredentialEntity entity = credentialRepository.findById(id)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        if (!entity.getProfileId().equals(profile.id()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        credentialRepository.delete(entity);
+    }
+
+    @Transactional
+    public void accept(Long id) {
+        CredentialEntity entity = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         entity.accept();
-
-        return Credential.of(entity);
     }
 
     @Transactional
-    public Credential deny(Long credentialId) {
-        CredentialEntity entity = credentialRepository.findById(credentialId)
-                .filter(e -> !e.isDeleted())
+    public void deny(Long id) {
+        CredentialEntity entity = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         entity.deny();
-
-        return Credential.of(entity);
     }
 }

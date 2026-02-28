@@ -29,6 +29,8 @@ public class CredentialEntity extends BaseEntity {
 
     private LocalDate expiredAt;
 
+    // TODO 파일 첨부
+
     @Builder
     public CredentialEntity(Long profileId, CredentialType type) {
         this.profileId = profileId;
