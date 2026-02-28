@@ -11,21 +11,40 @@ from crawler.models import TRADES, RANKS
 
 log = logging.getLogger(__name__)
 
-# LLM API 호출 제한 (TPM 200K 초과 방지: 동시 1개 + 호출 간 3초 간격)
+# LLM API 호출 제한 (TPM 200K 초과 방지)
+# - 동시 1개 (세마포어)
+# - 텍스트 호출 간 3초, Vision 호출 간 8초 (이미지 토큰이 ~10K로 커서)
+# - 429 시 exponential backoff 재시도 (최대 3회)
 _llm_semaphore = asyncio.Semaphore(1)
 _llm_last_call: float = 0.0  # monotonic timestamp
-_LLM_INTERVAL = 3.0  # 호출 간 최소 간격 (초)
+_LLM_INTERVAL = 3.0  # 텍스트 호출 간 최소 간격 (초)
+_LLM_VISION_INTERVAL = 8.0  # Vision 호출 간 최소 간격 (초)
+_LLM_MAX_RETRIES = 3
 
 
-async def _llm_throttle():
+async def _llm_throttle(vision: bool = False):
     """LLM 호출 전 rate limit 대기."""
     global _llm_last_call
     import time
+    interval = _LLM_VISION_INTERVAL if vision else _LLM_INTERVAL
     now = time.monotonic()
-    wait = _LLM_INTERVAL - (now - _llm_last_call)
+    wait = interval - (now - _llm_last_call)
     if wait > 0:
         await asyncio.sleep(wait)
     _llm_last_call = time.monotonic()
+
+
+def _is_rate_limit_error(exc: Exception) -> bool:
+    """OpenAI/Anthropic 429 에러인지 판별."""
+    # openai.RateLimitError
+    err_type = type(exc).__name__
+    if err_type == "RateLimitError":
+        return True
+    # status_code 속성 확인
+    if hasattr(exc, "status_code") and exc.status_code == 429:
+        return True
+    # 문자열 폴백
+    return "429" in str(exc) and "rate limit" in str(exc).lower()
 
 # 지역 옵션 (검수 DB 기준)
 REGIONS = [
@@ -215,13 +234,21 @@ async def classify(
     Returns:
         (classification, usage) — usage = {"input_tokens": int, "output_tokens": int}
     """
-    async with _llm_semaphore:
-        await _llm_throttle()
-        if settings.anthropic_api_key:
-            return await _classify_with_anthropic(name, about, headline)
-
-        if settings.openai_api_key and settings.openai_api_key != "skip":
-            return await _classify_with_openai(name, about, headline)
+    for attempt in range(_LLM_MAX_RETRIES):
+        async with _llm_semaphore:
+            await _llm_throttle()
+            try:
+                if settings.anthropic_api_key:
+                    return await _classify_with_anthropic(name, about, headline)
+                if settings.openai_api_key and settings.openai_api_key != "skip":
+                    return await _classify_with_openai(name, about, headline)
+            except Exception as exc:
+                if _is_rate_limit_error(exc) and attempt < _LLM_MAX_RETRIES - 1:
+                    wait = 2 ** attempt * 5  # 5, 10, 20초
+                    log.warning("LLM 429 — %s초 대기 후 재시도 (%d/%d)", wait, attempt + 1, _LLM_MAX_RETRIES)
+                    await asyncio.sleep(wait)
+                    continue
+                raise
 
     log.info("LLM 미설정 — 수동 분류 모드 (pending_classification.json 확인)")
     return _empty_result(), _NO_USAGE
@@ -231,7 +258,7 @@ async def _classify_with_anthropic(name: str, about: str, headline: str = "") ->
     """Anthropic Claude API로 분류."""
     import anthropic
 
-    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=5)
+    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=0)
     user_content = f"업체명(블로그닉네임): {name}\n한줄소개: {headline}\n소개:\n{about}"
 
     resp = await client.messages.create(
@@ -257,7 +284,7 @@ async def _classify_with_openai(name: str, about: str, headline: str = "") -> tu
     """OpenAI API로 분류."""
     from openai import AsyncOpenAI
 
-    client = AsyncOpenAI(api_key=settings.openai_api_key, max_retries=5)
+    client = AsyncOpenAI(api_key=settings.openai_api_key, max_retries=0)
     user_content = f"업체명(블로그닉네임): {name}\n한줄소개: {headline}\n소개:\n{about}"
 
     resp = await client.chat.completions.create(
@@ -332,12 +359,25 @@ async def extract_text_from_image(image_url: str) -> tuple[dict, dict]:
     image_data = base64.standard_b64encode(resp.content).decode("utf-8")
     media_type = resp.headers.get("content-type", "image/jpeg")
 
-    if settings.anthropic_api_key:
-        extracted, usage = await _vision_with_anthropic(image_data, media_type)
-    elif settings.openai_api_key and settings.openai_api_key != "skip":
-        extracted, usage = await _vision_with_openai(image_data, media_type)
-    else:
-        return {}, _NO_USAGE
+    extracted, usage = None, _NO_USAGE
+    for attempt in range(_LLM_MAX_RETRIES):
+        async with _llm_semaphore:
+            await _llm_throttle(vision=True)
+            try:
+                if settings.anthropic_api_key:
+                    extracted, usage = await _vision_with_anthropic(image_data, media_type)
+                elif settings.openai_api_key and settings.openai_api_key != "skip":
+                    extracted, usage = await _vision_with_openai(image_data, media_type)
+                else:
+                    return {}, _NO_USAGE
+                break
+            except Exception as exc:
+                if _is_rate_limit_error(exc) and attempt < _LLM_MAX_RETRIES - 1:
+                    wait = 2 ** attempt * 5
+                    log.warning("Vision 429 — %s초 대기 후 재시도 (%d/%d)", wait, attempt + 1, _LLM_MAX_RETRIES)
+                    await asyncio.sleep(wait)
+                    continue
+                raise
 
     if not extracted:
         return {}, usage
@@ -353,23 +393,19 @@ async def _vision_with_anthropic(image_data: str, media_type: str) -> tuple[dict
     """Anthropic Claude Vision으로 이미지 텍스트 추출."""
     import anthropic
 
-    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=5)
-    try:
-        resp = await client.messages.create(
-            model=settings.anthropic_model,
-            max_tokens=256,
-            messages=[{
-                "role": "user",
-                "content": [
-                    {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": image_data}},
-                    {"type": "text", "text": VISION_PROMPT},
-                ],
-            }],
-            temperature=0.0,
-        )
-    except Exception:
-        log.warning("Anthropic Vision API 호출 실패")
-        return None, _NO_USAGE
+    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=0)
+    resp = await client.messages.create(
+        model=settings.anthropic_model,
+        max_tokens=256,
+        messages=[{
+            "role": "user",
+            "content": [
+                {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": image_data}},
+                {"type": "text", "text": VISION_PROMPT},
+            ],
+        }],
+        temperature=0.0,
+    )
 
     usage = {"input_tokens": resp.usage.input_tokens, "output_tokens": resp.usage.output_tokens}
     extracted = _parse_json_response(resp.content[0].text)
@@ -382,23 +418,19 @@ async def _vision_with_openai(image_data: str, media_type: str) -> tuple[dict | 
     """OpenAI Vision으로 이미지 텍스트 추출."""
     from openai import AsyncOpenAI
 
-    client = AsyncOpenAI(api_key=settings.openai_api_key, max_retries=5)
-    try:
-        resp = await client.chat.completions.create(
-            model=settings.openai_model,
-            messages=[{
-                "role": "user",
-                "content": [
-                    {"type": "image_url", "image_url": {"url": f"data:{media_type};base64,{image_data}"}},
-                    {"type": "text", "text": VISION_PROMPT},
-                ],
-            }],
-            temperature=0.0,
-            max_tokens=256,
-        )
-    except Exception:
-        log.warning("OpenAI Vision API 호출 실패")
-        return None, _NO_USAGE
+    client = AsyncOpenAI(api_key=settings.openai_api_key, max_retries=0)
+    resp = await client.chat.completions.create(
+        model=settings.openai_model,
+        messages=[{
+            "role": "user",
+            "content": [
+                {"type": "image_url", "image_url": {"url": f"data:{media_type};base64,{image_data}"}},
+                {"type": "text", "text": VISION_PROMPT},
+            ],
+        }],
+        temperature=0.0,
+        max_tokens=256,
+    )
 
     usage = {"input_tokens": resp.usage.prompt_tokens, "output_tokens": resp.usage.completion_tokens}
     extracted = _parse_json_response(resp.choices[0].message.content)
