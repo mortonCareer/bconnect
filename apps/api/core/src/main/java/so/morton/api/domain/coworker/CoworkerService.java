@@ -23,7 +23,7 @@ public class CoworkerService {
 
     @Transactional(readOnly = true)
     public List<Coworker> get(User user, Long targetId) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+        Profile profile = profileFinder.getByMemberId(user.id());
 
         if (profile.id().equals(targetId))
             return coworkerFinder.find(targetId);
@@ -35,7 +35,7 @@ public class CoworkerService {
 
     @Transactional
     public void delete(User user, Long id) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+        Profile profile = profileFinder.getByMemberId(user.id());
         CoworkerEntity coworker = coworkerRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CoworkerExceptionCode.NOT_FOUND));
 

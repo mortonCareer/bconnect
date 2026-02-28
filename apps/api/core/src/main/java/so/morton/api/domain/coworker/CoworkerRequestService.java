@@ -25,7 +25,7 @@ public class CoworkerRequestService {
 
     @Transactional
     public Long create(User user, Long targetId) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+        Profile profile = profileFinder.getByMemberId(user.id());
         Long profileId = profile.id();
 
         if (profileId.equals(targetId))
@@ -48,7 +48,7 @@ public class CoworkerRequestService {
 
     @Transactional
     public void accept(User user, Long id) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+        Profile profile = profileFinder.getByMemberId(user.id());
         CoworkerRequestEntity request = requestRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
 
@@ -68,7 +68,7 @@ public class CoworkerRequestService {
 
     @Transactional
     public void deny(User user, Long id) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+        Profile profile = profileFinder.getByMemberId(user.id());
         CoworkerRequestEntity request = requestRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
 
@@ -80,7 +80,7 @@ public class CoworkerRequestService {
 
     @Transactional
     public void cancel(User user, Long id) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+        Profile profile = profileFinder.getByMemberId(user.id());
         CoworkerRequestEntity request = requestRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
 
