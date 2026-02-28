@@ -34,6 +34,8 @@ function stripCorpSuffix(name: string): string {
 /**
  * FEIA 소방시설업체 검색 (회사명 기준)
  *
+ * @test positive '진주엠이씨' (regNo 6948102758) → 1건 이상 (2026-02-28)
+ * @test negative '이엔씨부강' (regNo 6138127726) → 빈 배열 (2026-02-28)
  * @param companyName 업체명 (KCOMWEL에서 가져온 사업장명)
  * @returns 매칭되는 업체 목록 (없으면 빈 배열)
  */

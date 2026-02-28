@@ -23,6 +23,8 @@ const MOEL_DEFAULTER_URL = 'https://moel.go.kr/info/defaulter/defaulterList.do'
 /**
  * 고용노동부 체불사업주 명단 검색 (사업장명 기준)
  *
+ * @test positive '예림섬유' (regNo 1273625149) → 1건 이상 (2026-02-28)
+ * @test negative '이엔씨부강' (regNo 6138127726) → 빈 배열 (2026-02-28)
  * @param companyName 검색할 사업장명
  * @returns 매칭 결과 (없으면 빈 배열)
  */

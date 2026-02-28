@@ -25,6 +25,8 @@ const KISCON_ARREARS_URL = 'https://kiscon.net/cis/coad_arrearsnotice.asp'
  * KISCON 상습체불건설사업자 명단 조회
  * 전체 건수가 적으므로(~12건) 전체 조회 후 회사명 매칭
  *
+ * @test positive '삼아종합건설' (regNo 1238141583) → 1건 이상 (2026-02-28)
+ * @test negative '이엔씨부강' (regNo 6138127726) → 빈 배열 (2026-02-28)
  * @param companyName 매칭할 회사명
  * @returns 매칭 결과 (없으면 빈 배열)
  */
@@ -102,6 +104,8 @@ const KISCON_SUBCON_URL = 'https://kiscon.net/cis/coad_subcon_limit_list.asp'
 /**
  * KISCON 하도급참여제한대상자 조회 (사업자번호 직접 검색)
  *
+ * @test positive 6138127726 → (주)이엔씨부강, 1건 이상 (2026-02-28)
+ * @test negative 6948102758 → 빈 배열 (2026-02-28)
  * @param registrationNumber 사업자등록번호 (10자리, 하이픈 없음)
  * @returns 매칭 결과 (없으면 빈 배열)
  */

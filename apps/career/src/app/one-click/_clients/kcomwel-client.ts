@@ -22,6 +22,8 @@ function getServiceKey(): string {
 /**
  * 근로복지공단 고용/산재보험 가입 사업장 조회 (XML 응답 → 파싱)
  *
+ * @test positive 6138127726 → (주)이엔씨부강, 보험 가입 확인 (2026-02-28)
+ * @test negative 5158511710 → 빈 배열 (폐업, KCOMWEL 미등록) (2026-02-28)
  * @param registrationNumber 사업자등록번호 (10자리, 하이픈 없음)
  * @returns 가입 사업장 항목 배열 (없으면 빈 배열)
  */
