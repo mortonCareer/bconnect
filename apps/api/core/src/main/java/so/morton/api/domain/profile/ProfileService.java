@@ -21,7 +21,10 @@ public class ProfileService {
 
     @Transactional
     public Profile create(Long memberId, CreateProfileRequest request) {
-        ProfileEntity entity = ProfileEntity.builder()
+        if (profileFinder.existsByMemberId(memberId))
+            throw new CodeException(ProfileExceptionCode.ALREADY_EXISTS);
+
+        ProfileEntity profile = ProfileEntity.builder()
                 .memberId(memberId)
                 .primaryTrade(request.primaryTrade())
                 .trades(request.trades())
@@ -31,41 +34,46 @@ public class ProfileService {
                 .address(request.address())
                 .build();
 
-        ProfileEntity saved = profileRepository.save(entity);
+        ProfileEntity saved = profileRepository.save(profile);
         return Profile.of(saved);
     }
 
-    @Transactional(readOnly = true)
-    public Profile get(Long profileId) {
-        return profileRepository.findByIdAndDeletedFalse(profileId)
-                .map(Profile::of)
+    @Transactional
+    public void update(Long memberId, UpdateProfileRequest request) {
+        ProfileEntity profile = profileRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-    }
 
-    @Transactional(readOnly = true)
-    public List<Profile> getAll() {
-        return profileRepository.findAllByDeletedFalse()
-                .stream()
-                .map(Profile::of)
-                .toList();
+        if (!profile.getMemberId().equals(memberId))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        profile.update(
+                request.primaryTrade(),
+                request.trades(),
+                request.experience(),
+                request.headline(),
+                request.address()
+        );
     }
 
     @Transactional
-    public Profile update(Long memberId, UpdateProfileRequest request) {
-        ProfileEntity entity = profileRepository.findByMemberIdAndDeletedFalse(memberId)
+    public void updateAbout(Long memberId, String about) {
+        ProfileEntity profile = profileRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        entity.update(request.primaryTrade(), request.trades(), request.experience(),
-                request.headline(), request.about(), request.address());
+        if (!profile.getMemberId().equals(memberId))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        return Profile.of(entity);
+        profile.updateAbout(about);
     }
 
     @Transactional
     public void delete(Long memberId) {
-        ProfileEntity entity = profileRepository.findByMemberIdAndDeletedFalse(memberId)
+        ProfileEntity profile = profileRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        entity.delete();
+        if (!profile.getMemberId().equals(memberId))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        profileRepository.delete(profile);
     }
 }

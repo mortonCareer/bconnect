@@ -55,12 +55,15 @@ public class ProfileEntity extends BaseEntity {
     }
 
     public void update(Trade primaryTrade, Set<Trade> trades, int experience,
-                       String headline, String about, Address address) {
+                       String headline, Address address) {
         this.primaryTrade = primaryTrade;
         this.trades = trades != null ? trades : new HashSet<>();
         this.experience = experience;
         this.headline = headline;
-        this.about = about;
         this.address = address;
+    }
+
+    public void updateAbout(String about) {
+        this.about = about;
     }
 }
