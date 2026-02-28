@@ -86,6 +86,11 @@ def format_phone(raw: str) -> str:
     if not raw:
         return ""
     digits = re.sub(r"\D", "", raw)
+
+    # 대표번호 8자리 (1588, 1566, 1577, 1800, 1899, 1644, 1833 등): XXXX-XXXX
+    if len(digits) == 8 and digits[0] == "1":
+        return f"{digits[:4]}-{digits[4:]}"
+
     if not digits.startswith("0") or len(digits) < 9:
         return raw
 
