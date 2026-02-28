@@ -106,10 +106,10 @@ paths:
 
 ```typescript
 // 성공
-{ success: true, data: T }
+{ success: true, data: T, error: null }
 
 // 실패
-{ success: false, error: { code: string, message: string } }
+{ success: false, data: null, error: { code: string, status: number, message: string, logLevel: string } }
 ```
 
 ---
