@@ -1,9 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useRef } from 'react'
-import Link from 'next/link'
-import { Feed } from '@morton/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
+import { WorkCard } from './WorkCard'
 
 interface WorksSectionProps {
   authorId: number
@@ -54,14 +53,16 @@ export function WorksSection({ authorId }: WorksSectionProps) {
   }
 
   return (
-    <div className="flex flex-col gap-6 px-4 py-6">
+    <div className="flex flex-col gap-6 py-6">
       {feedItems.map((item) => (
-        <Feed
+        <WorkCard
           key={item.postId}
-          profile={item.profile}
-          content={item.content}
-          profileHref={item.memberId != null ? `/profile/${item.memberId}` : undefined}
-          LinkComponent={Link}
+          image={item.content.image}
+          imageAlt={item.content.imageAlt}
+          company={item.content.company}
+          duration={item.content.duration}
+          timestamp={item.content.timestamp}
+          description={item.content.description}
         />
       ))}
       <div ref={observerRef} className="h-1" />
