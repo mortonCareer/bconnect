@@ -19,8 +19,8 @@ public record Task(
     String taskTitle,
     String eventTitle,
     Set<Trade> trades,
-    LocalDate startDate,
-    LocalDate endDate,
+    LocalDate start,
+    LocalDate end,
     // TODO: 추가
     // status: TaskStatus
     LocalDateTime createdAt,
@@ -35,8 +35,8 @@ public record Task(
                 entity.getTaskTitle(),
                 entity.getEventTitle(),
                 entity.getTrades(),
-                entity.getStartDate(),
-                entity.getEndDate(),
+                entity.getStart(),
+                entity.getEnd(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt()
         );

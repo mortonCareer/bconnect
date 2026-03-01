@@ -23,7 +23,7 @@ INSERT INTO sessions (id, username, agent, ip, refresh_token, revoked, created_a
 (3, 'junho',    'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', '121.134.78.55',  'rt_junho_m3n4o5p6q7r8',    false, TIMESTAMP '2026-02-25 11:00:00', TIMESTAMP '2026-02-25 11:00:00', 'ACTIVE');
 
 -- tasks: 인테리어 현장 작업
-INSERT INTO tasks (id, company, zipcode, city, state, street, detail, latitude, longitude, task_title, event_title, start_date, end_date, created_at, modified_at, status) VALUES
+INSERT INTO tasks (id, company, zipcode, city, state, street, detail, latitude, longitude, task_title, event_title, "start", "end", created_at, modified_at, status) VALUES
 (1, '드림인테리어', '06241', '서울특별시', '강남구',        '테헤란로 123',  '래미안 301호',    37.5012743, 127.0396857, '욕실 타일 시공', '강남 아파트 리모델링',   DATE '2026-03-01', DATE '2026-03-15', TIMESTAMP '2026-02-20 09:00:00', TIMESTAMP '2026-02-20 09:00:00', 'ACTIVE'),
 (2, '한빛건설',     '13494', '경기도',     '성남시 분당구', '판교역로 45',   '힐스테이트 B동',  37.3947138, 127.1112341, '전기 배선 공사', '분당 오피스텔 인테리어', DATE '2026-03-10', DATE '2026-03-20', TIMESTAMP '2026-02-21 09:00:00', TIMESTAMP '2026-02-21 09:00:00', 'ACTIVE'),
 (3, '서초디자인',   '06621', '서울특별시', '서초구',        '서초대로 78',   '상가 1층 전체',   37.4837121, 127.0325764, '철거 후 도장',   '서초 상가 리뉴얼',       DATE '2026-03-05', DATE '2026-03-25', TIMESTAMP '2026-02-22 09:00:00', TIMESTAMP '2026-02-22 09:00:00', 'ACTIVE');

@@ -43,8 +43,8 @@ public class TaskService {
                 .taskTitle(request.taskTitle())
                 .eventTitle(request.eventTitle())
                 .trades(request.trades())
-                .startDate(request.startDate())
-                .endDate(request.endDate())
+                .start(request.start())
+                .end(request.end())
                 .build();
 
         taskRepository.save(task);
@@ -66,8 +66,8 @@ public class TaskService {
                 request.taskTitle(),
                 request.eventTitle(),
                 request.trades(),
-                request.startDate(),
-                request.endDate()
+                request.start(),
+                request.end()
         );
     }
 
