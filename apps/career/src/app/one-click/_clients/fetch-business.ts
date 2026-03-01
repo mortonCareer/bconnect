@@ -51,17 +51,6 @@ const cachedKisconSubcon = unstable_cache(fetchKisconSubconLimit, ['one-click-ki
 const getNtsData = cache(cachedNts)
 const getKcomwelData = cache(cachedKcomwel)
 
-/** NTS에서 사업자 등록 확인 (01=계속, 02=휴업, 03=폐업 → 등록됨) */
-async function isRegisteredBusiness(regNo: string): Promise<boolean> {
-  try {
-    const result = await getNtsData(regNo)
-    const sttCd = result.data?.[0]?.b_stt_cd
-    return ['01', '02', '03'].includes(sttCd)
-  } catch {
-    return false
-  }
-}
-
 // ─── 헬퍼 ────────────────────────────────────────
 
 function formatRegNo(bNo: string): string {
@@ -375,9 +364,6 @@ async function fetchBusinessStatusItem(regNo: string): Promise<CheckItem> {
 }
 
 async function fetchEmploymentInsuranceItem(regNo: string): Promise<CheckItem> {
-  if (!(await isRegisteredBusiness(regNo))) {
-    return makeNoNameItem('EMPLOYMENT_INSURANCE', 'INSURANCE', '고용/산재보험 현황', '근로복지공단')
-  }
   try {
     const items = await getKcomwelData(regNo)
     return mapKcomwelToCheckItem(items)
@@ -388,14 +374,6 @@ async function fetchEmploymentInsuranceItem(regNo: string): Promise<CheckItem> {
 }
 
 async function fetchSubcontractRestrictionItem(regNo: string): Promise<CheckItem> {
-  if (!(await isRegisteredBusiness(regNo))) {
-    return makeNoNameItem(
-      'SUBCONTRACT_RESTRICTION',
-      'WAGE_RESTRICTION',
-      '하도급 참여제한',
-      '국토교통부'
-    )
-  }
   try {
     const items = await cachedKisconSubcon(regNo)
     return mapKisconSubconToCheckItem(items)
@@ -411,10 +389,6 @@ async function fetchSubcontractRestrictionItem(regNo: string): Promise<CheckItem
 }
 
 async function fetchFireLicenseItem(regNo: string): Promise<CheckItem> {
-  if (!(await isRegisteredBusiness(regNo))) {
-    return makeNoNameItem('FIRE_LICENSE', 'BUSINESS_LICENSE', '소방시설업 면허', '한국소방시설협회')
-  }
-
   let companyName: string | undefined
   try {
     const kcomwel = await getKcomwelData(regNo)
@@ -437,10 +411,6 @@ async function fetchFireLicenseItem(regNo: string): Promise<CheckItem> {
 }
 
 async function fetchWageArrearsItem(regNo: string): Promise<CheckItem> {
-  if (!(await isRegisteredBusiness(regNo))) {
-    return makeNoNameItem('WAGE_ARREARS', 'WAGE_RESTRICTION', '임금체불 이력', '고용노동부')
-  }
-
   let companyName: string | undefined
   let companyAddr: string | undefined
   try {
@@ -469,10 +439,6 @@ async function fetchWageArrearsItem(regNo: string): Promise<CheckItem> {
 }
 
 async function fetchHabitualArrearsItem(regNo: string): Promise<CheckItem> {
-  if (!(await isRegisteredBusiness(regNo))) {
-    return makeNoNameItem('HABITUAL_ARREARS', 'WAGE_RESTRICTION', '상습체불 이력', '국토교통부')
-  }
-
   let companyName: string | undefined
   try {
     const kcomwel = await getKcomwelData(regNo)
