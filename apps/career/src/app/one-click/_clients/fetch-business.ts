@@ -15,7 +15,8 @@ import { fetchNtsBusinessStatus, fetchNtsBusinessValidate } from './nts-client'
 import { fetchKcomwelInsurance } from './kcomwel-client'
 import { fetchFeiaCompanies } from './feia-client'
 import { fetchMoelDefaulters } from './moel-client'
-import { fetchKisconArrears, fetchKisconSubconLimit } from './kiscon-crawl-client'
+import { fetchKisconArrearsFromS3, fetchKisconSubconFromS3 } from './kiscon-s3-client'
+import type { KisconArrearsItem, KisconSubconLimitItem } from './kiscon-parser'
 
 // ─── 캐시 설정 ───────────────────────────────────
 
@@ -40,11 +41,11 @@ const cachedMoel = unstable_cache(fetchMoelDefaulters, ['one-click-moel'], {
   revalidate: CACHE_TTL,
 })
 
-const cachedKisconArrears = unstable_cache(fetchKisconArrears, ['one-click-kiscon-arrears'], {
+const cachedKisconArrears = unstable_cache(fetchKisconArrearsFromS3, ['one-click-kiscon-arrears'], {
   revalidate: CACHE_TTL,
 })
 
-const cachedKisconSubcon = unstable_cache(fetchKisconSubconLimit, ['one-click-kiscon-subcon'], {
+const cachedKisconSubcon = unstable_cache(fetchKisconSubconFromS3, ['one-click-kiscon-subcon'], {
   revalidate: CACHE_TTL,
 })
 
@@ -245,9 +246,7 @@ function mapMoelToCheckItem(items: Awaited<ReturnType<typeof fetchMoelDefaulters
 
 // ─── KISCON 상습체불 → CheckItem ────────────────
 
-function mapKisconArrearsToCheckItem(
-  items: Awaited<ReturnType<typeof fetchKisconArrears>>
-): CheckItem {
+function mapKisconArrearsToCheckItem(items: KisconArrearsItem[]): CheckItem {
   const hasArrears = items.length > 0
 
   return {
@@ -275,9 +274,7 @@ function mapKisconArrearsToCheckItem(
 
 // ─── KISCON 하도급 → CheckItem ──────────────────
 
-function mapKisconSubconToCheckItem(
-  items: Awaited<ReturnType<typeof fetchKisconSubconLimit>>
-): CheckItem {
+function mapKisconSubconToCheckItem(items: KisconSubconLimitItem[]): CheckItem {
   const hasRestriction = items.length > 0
 
   return {
