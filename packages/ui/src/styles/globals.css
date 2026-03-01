@@ -19,7 +19,6 @@
 
   /* Semantic Colors */
   --morton-error: #ff4242;
-  --morton-white: #ffffff;
 
   /* shadcn/ui compatibility */
   --background: oklch(1 0 0);
@@ -77,7 +76,6 @@
   --color-morton-gray-300: var(--morton-gray-300);
   --color-morton-gray-100: var(--morton-gray-100);
   --color-morton-error: var(--morton-error);
-  --color-morton-white: var(--morton-white);
 
   /* shadcn/ui compatibility */
   --color-background: var(--background);
