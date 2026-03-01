@@ -26,6 +26,7 @@ public class CredentialService {
 
     @Transactional(readOnly = true)
     public List<Credential> get(Long profileId) {
+        // TODO 각 타입별로 가장 최근에 승인된 인증서만 필터링한다
         return credentialFinder.findByProfileId(profileId);
     }
 
@@ -39,19 +40,6 @@ public class CredentialService {
                 .build();
 
         credentialRepository.save(entity);
-        return Credential.of(entity);
-    }
-
-    @Transactional
-    public Credential renew(User user, Long id) {
-        Profile profile = profileFinder.getByMemberId(user.id());
-        CredentialEntity entity = credentialRepository.findById(id)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-
-        if (!entity.getProfileId().equals(profile.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        entity.renew();
         return Credential.of(entity);
     }
 

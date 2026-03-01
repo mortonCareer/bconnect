@@ -36,14 +36,6 @@ public class CredentialController {
         return ApiResponse.success(saved.id());
     }
 
-    @PutMapping("/{id}")
-    public ApiResponse<Long> renew(
-            @AuthenticationPrincipal User user,
-            @PathVariable Long id) {
-        Credential saved = credentialService.renew(user, id);
-        return ApiResponse.success(saved.id());
-    }
-
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
             @AuthenticationPrincipal User user,

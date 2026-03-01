@@ -40,13 +40,10 @@ public class CredentialEntity extends BaseEntity {
 
     public void accept() {
         this.status = CredentialStatus.ACCEPTED;
+        this.expiredAt = LocalDate.now().plus(this.type.getExpiration());
     }
 
     public void deny() {
         this.status = CredentialStatus.DENIED;
-    }
-
-    public void renew() {
-        this.status = CredentialStatus.PENDING;
     }
 }
