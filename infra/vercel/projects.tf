@@ -92,6 +92,16 @@ resource "vercel_project_environment_variable" "career_cron_secret" {
   comment    = "Vercel Cron 인증 시크릿 - 스키마 체크 크론잡"
 }
 
+# Sentry 소스맵 업로드 (DSN·org·project는 코드에 하드코딩)
+resource "vercel_project_environment_variable" "career_sentry_auth_token" {
+  count      = var.sentry_auth_token != "" ? 1 : 0
+  project_id = vercel_project.morton-career.id
+  key        = "SENTRY_AUTH_TOKEN"
+  value      = var.sentry_auth_token
+  target     = ["production", "preview"]
+  comment    = "Sentry auth token - 소스맵 업로드"
+}
+
 resource "vercel_project_environment_variable" "career_slack_webhook_url" {
   count      = var.slack_webhook_url != "" ? 1 : 0
   project_id = vercel_project.morton-career.id
