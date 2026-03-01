@@ -1,0 +1,179 @@
+import 'server-only'
+
+import * as cheerio from 'cheerio'
+
+/**
+ * KISCON(키스콘) 크롤링 클라이언트
+ * - 상습체불건설사업자명단: https://kiscon.net/cis/coad_arrearsnotice.asp
+ * - 하도급참여제한대상자: https://kiscon.net/cis/coad_subcon_limit_list.asp
+ */
+
+// kiscon.net은 User-Agent 없는 요청에 HTTP 410을 반환함 (Vercel 서버리스 환경 대응)
+const KISCON_HEADERS = {
+  'Content-Type': 'application/x-www-form-urlencoded',
+  'User-Agent': 'Mozilla/5.0 (compatible; MortonBot/1.0)',
+}
+
+// ─── 상습체불 ─────────────────────────────────
+
+export interface KisconArrearsItem {
+  companyName: string // 법인/명칭
+  address: string // 주소
+  representative: string // 대표자
+  penaltyHistory: string // 처분이력
+  arrearsAmount: string // 체불금액(천원)
+  publicationPeriod: string // 공표기간
+}
+
+const KISCON_ARREARS_URL = 'https://kiscon.net/cis/coad_arrearsnotice.asp'
+
+/**
+ * KISCON 상습체불건설사업자 명단 조회
+ * 전체 건수가 적으므로(~12건) 전체 조회 후 회사명 매칭
+ *
+ * @test positive '삼아종합건설' (regNo 1238141583) → 1건 이상 (2026-02-28)
+ * @test negative '이엔씨부강' (regNo 6138127726) → 빈 배열 (2026-02-28)
+ * @param companyName 매칭할 회사명
+ * @returns 매칭 결과 (없으면 빈 배열)
+ */
+export async function fetchKisconArrears(companyName: string): Promise<KisconArrearsItem[]> {
+  const response = await fetch(KISCON_ARREARS_URL, {
+    method: 'POST',
+    headers: KISCON_HEADERS,
+    body: new URLSearchParams({ GotoPage: '1' }).toString(),
+    cache: 'no-store',
+    signal: AbortSignal.timeout(10_000),
+  })
+
+  if (!response.ok) {
+    throw new Error(`KISCON arrears page error: ${response.status}`)
+  }
+
+  const html = await response.text()
+  const $ = cheerio.load(html)
+  const items: KisconArrearsItem[] = []
+
+  // 데이터 테이블 선택 (검색폼 테이블 제외)
+  const dataTable = $('table').filter((_i, el) => {
+    const firstTh = $(el).find('th').first().text().trim()
+    return firstTh === '연번'
+  })
+
+  // 헤더 검증 — 사이트 구조 변경 감지
+  const headers = dataTable
+    .find('th')
+    .map((_i, th) => $(th).text().trim())
+    .get()
+  const expectedHeaders = ['연번', '명칭', '처분이력', '체불금액', '공표기간']
+  if (!expectedHeaders.every((h) => headers.some((actual) => actual.includes(h)))) {
+    throw new Error(`KISCON arrears table schema changed: ${headers.join(', ')}`)
+  }
+
+  dataTable.find('tbody tr').each((_i, row) => {
+    const cells = $(row).find('td')
+    if (cells.length < 10) return
+
+    items.push({
+      companyName: $(cells[1]).text().trim(),
+      address: $(cells[2]).text().trim(),
+      representative: $(cells[3]).text().trim(),
+      penaltyHistory: $(cells[6]).text().trim(),
+      arrearsAmount: $(cells[8]).text().trim(),
+      publicationPeriod: $(cells[9]).text().trim(),
+    })
+  })
+
+  // 회사명 포함 매칭 (정확 매칭이 어려우므로 부분 매칭)
+  const normalized = companyName.replace(/\s/g, '')
+  return items.filter((item) => {
+    const itemName = item.companyName.replace(/\s/g, '')
+    return itemName.includes(normalized) || normalized.includes(itemName)
+  })
+}
+
+// ─── 하도급참여제한 ──────────────────────────────
+
+export interface KisconSubconLimitItem {
+  violationType: string // 위반법령코드
+  companyName: string // 상호명
+  corpNo: string // 법인번호
+  bizRegNo: string // 사업자번호
+  representative: string // 대표자
+  restrictionStart: string // 제한시작일
+  restrictionEnd: string // 제한종료일
+  category: string // 분류
+  announcementDate: string // 공시일
+}
+
+const KISCON_SUBCON_URL = 'https://kiscon.net/cis/coad_subcon_limit_list.asp'
+
+/**
+ * KISCON 하도급참여제한대상자 조회 (사업자번호 직접 검색)
+ *
+ * @test positive 6138127726 → (주)이엔씨부강, 1건 이상 (2026-02-28)
+ * @test negative 6948102758 → 빈 배열 (2026-02-28)
+ * @param registrationNumber 사업자등록번호 (10자리, 하이픈 없음)
+ * @returns 매칭 결과 (없으면 빈 배열)
+ */
+export async function fetchKisconSubconLimit(
+  registrationNumber: string
+): Promise<KisconSubconLimitItem[]> {
+  const response = await fetch(KISCON_SUBCON_URL, {
+    method: 'POST',
+    headers: KISCON_HEADERS,
+    body: new URLSearchParams({
+      GotoPage: '1',
+      // 사업자번호로 검색
+      searchGubun: 'bizRegNo',
+      searchText: registrationNumber,
+    }).toString(),
+    cache: 'no-store',
+    signal: AbortSignal.timeout(10_000),
+  })
+
+  if (!response.ok) {
+    throw new Error(`KISCON subcon limit page error: ${response.status}`)
+  }
+
+  const html = await response.text()
+  const $ = cheerio.load(html)
+  const items: KisconSubconLimitItem[] = []
+
+  const dataTable = $('table').filter((_i, el) => {
+    const firstTh = $(el).find('th').first().text().trim()
+    return firstTh === '연번'
+  })
+
+  // 헤더 검증 — 사이트 구조 변경 감지
+  const headers = dataTable
+    .find('th')
+    .map((_i, th) => $(th).text().trim())
+    .get()
+  const expectedHeaders = ['연번', '위반법령', '상호', '법인번호', '사업자번호', '대표자']
+  if (!expectedHeaders.every((h) => headers.some((actual) => actual.includes(h)))) {
+    throw new Error(`KISCON subcon table schema changed: ${headers.join(', ')}`)
+  }
+
+  dataTable.find('tbody tr').each((_i, row) => {
+    const cells = $(row).find('td')
+    if (cells.length < 10) return
+
+    items.push({
+      violationType: $(cells[1]).text().trim(),
+      companyName: $(cells[2]).text().trim(),
+      corpNo: $(cells[3]).text().trim(),
+      bizRegNo: $(cells[4]).text().trim(),
+      representative: $(cells[5]).text().trim(),
+      restrictionStart: $(cells[6]).text().trim(),
+      restrictionEnd: $(cells[7]).text().trim(),
+      category: $(cells[8]).text().trim(),
+      announcementDate: $(cells[9]).text().trim(),
+    })
+  })
+
+  // 사업자번호 매칭 (사이트가 검색 실패 시 전체 목록을 반환하므로 필터링 필수)
+  return items.filter((item) => {
+    const itemBizNo = item.bizRegNo.replace(/[-\s]/g, '')
+    return itemBizNo === registrationNumber
+  })
+}

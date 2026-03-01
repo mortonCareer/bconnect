@@ -43,7 +43,7 @@ class Technician(BaseModel):
 
     name: str                          # 업체명
     representative: str = ""           # 대표자
-    rank: str = "기공"                  # 구분 (기본값: 기공)
+    rank: str = ""                     # 구분 (확신 없으면 비워둠)
     trades: list[str] = []             # 시공분야 (SSOT 기준)
     region: str = ""                   # 지역
     address: str = ""                  # 주소

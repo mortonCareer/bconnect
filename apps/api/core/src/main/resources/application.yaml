@@ -2,6 +2,36 @@ spring:
   application:
     name: api
 
+  profiles:
+    default: local
+
+  jpa:
+    open-in-view: false
+
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+    hibernate:
+      ddl-auto: none
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+
+  flyway:
+    enabled: false
+
+  # TODO: aws
+  # cloud:
+  #   aws:
+  #     region:
+  #       static: ${AWS_REGION}
+  #     credentials:
+  #       access-key: ${AWS_ACCESS_KEY_ID}
+  #       secret-key: ${AWS_SECRET_ACCESS_KEY}
+
 management:
   metrics:
     enable:
@@ -9,16 +39,14 @@ management:
       system: false
 
 app:
-  database-url: ${DATABASE_URL:}
-  database-username: ${DATABASE_USERNAME:}
-  database-password: ${DATABASE_PASSWORD:}
-  aws-access-key-id: ${AWS_ACCESS_KEY_ID:}
-  aws-secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
-  aws-region: ${AWS_REGION:}
-  aws-s3-bucket: ${AWS_S3_BUCKET:}
   cors:
     allowed-origins:
       - ${CORS_ALLOWED_ORIGIN:http://localhost:3000}
     allowed-origin-patterns:
       - https://morton-career*.vercel.app
       - https://morton-plan*.vercel.app
+
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-expiration: 1h
+    refresh-token-expiration: 7d

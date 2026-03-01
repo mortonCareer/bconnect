@@ -10,7 +10,7 @@ from crawler.channels.instagram import (
     build_search_queries as build_instagram_queries, extract_username as extract_instagram_username,
     InstagramBlockedError, reset_block_counter,
 )
-from crawler.classifier import classify
+from crawler.classifier import classify, format_phone, infer_region_from_address, METRO_REGIONS
 from crawler.config import settings
 from crawler.models import Technician
 from crawler.notion import (
@@ -18,6 +18,8 @@ from crawler.notion import (
     find_duplicate_by_url, touch_synced_at,
     find_pages_needing_enrichment, find_approved, move_to_production,
     validate_schema, validate_review_schema,
+    find_all_review_pages, patch_review_page, read_page_blocks, update_block_text,
+    _read_prop,
 )
 from crawler.report import PipelineReport
 from crawler.progress import create_progress, print_summary, console
@@ -28,9 +30,9 @@ log = logging.getLogger(__name__)
 REPORTS_DIR = Path("reports")
 
 # 동시 처리 제한: 네이버 스크래핑 + LLM + 노션 API 동시 요청 수
-CONCURRENCY = 5
+CONCURRENCY = 3
 # --full 모드에서 동시에 실행할 쿼리 수
-QUERY_CONCURRENCY = 3
+QUERY_CONCURRENCY = 1
 # 인스타그램 동시 요청 수 (로그인 없이 제한 엄격)
 INSTA_CONCURRENCY = 3
 
@@ -57,6 +59,8 @@ async def process_blog_result(
     dry_run: bool = False,
     force: bool = False,
     direct: bool = False,
+    metro_only: bool = False,
+    skip_vision: bool = False,
 ) -> Technician | None:
     """검색 결과 1건 → 블로거 프로필 탐색 → 분류 → Technician 생성."""
     blog_url = item["link"]
@@ -136,6 +140,14 @@ async def process_blog_result(
             report.add_skipped(blog_url, blogger_name, "비전문업자")
         return None
 
+    # 수도권 필터: --full 모드에서 비수도권 결과 스킵
+    region = classification.get("region", "")
+    if metro_only and region and region not in METRO_REGIONS:
+        log.info("비수도권, 건너뜀: %s (%s, 지역=%s)", blogger_name, blog_url, region)
+        if report:
+            report.add_skipped(blog_url, blogger_name, f"비수도권({region})")
+        return None
+
     # 업체명: classify 결과 → blog_title → blogger_name 순 폴백
     name = (
         classification.get("name")
@@ -173,34 +185,43 @@ async def process_blog_result(
         if place:
             if not phone and place["telephone"]:
                 raw = place["telephone"].replace("-", "").replace(" ", "")
-                if raw.startswith("01") or raw.startswith("02") or raw.startswith("0"):
-                    phone = raw
+                if raw.startswith("0"):
+                    phone = format_phone(raw)
                     log.info("지역검색 연락처 보충: %s → %s", name, phone)
             if not address and (place["road_address"] or place["address"]):
                 address = place["road_address"] or place["address"]
                 log.info("지역검색 주소 보충: %s → %s", name, address)
 
-    # 배너 이미지 Vision 보충: 연락처/사업자정보 부족 시에만
-    banner_url = profile.get("banner_image_url", "")
-    if banner_url and (not phone or not classification.get("business_number")):
+    # 스킨 이미지 Vision 보충: 배너 → Footer 순으로 부족한 정보 채우기
+    skin_urls = [
+        ("배너", profile.get("banner_image_url", "")),
+        ("Footer", profile.get("footer_image_url", "")),
+    ]
+    if not skip_vision and (not phone or not classification.get("business_number")):
         from crawler.classifier import extract_text_from_image
-        try:
-            vision_data, vision_usage = await extract_text_from_image(banner_url)
-            if report:
-                report.add_llm_usage(vision_usage["input_tokens"], vision_usage["output_tokens"])
-            if not phone and vision_data.get("phone"):
-                phone = vision_data["phone"]
-                log.info("Vision 연락처 보충: %s → %s", name, phone)
-            if not email and vision_data.get("email"):
-                email = vision_data["email"]
-            if not classification.get("business_number") and vision_data.get("business_number"):
-                classification["business_number"] = vision_data["business_number"]
-            if not classification.get("representative") and vision_data.get("representative"):
-                classification["representative"] = vision_data["representative"]
-            if not address and vision_data.get("address"):
-                address = vision_data["address"]
-        except Exception as exc:
-            log.warning("Vision 추출 실패: %s", banner_url, exc_info=True)
+        for label, img_url in skin_urls:
+            if not img_url:
+                continue
+            try:
+                vision_data, vision_usage = await extract_text_from_image(img_url)
+                if report:
+                    report.add_llm_usage(vision_usage["input_tokens"], vision_usage["output_tokens"])
+                if not phone and vision_data.get("phone"):
+                    phone = vision_data["phone"]
+                    log.info("Vision(%s) 연락처 보충: %s → %s", label, name, phone)
+                if not email and vision_data.get("email"):
+                    email = vision_data["email"]
+                if not classification.get("business_number") and vision_data.get("business_number"):
+                    classification["business_number"] = vision_data["business_number"]
+                if not classification.get("representative") and vision_data.get("representative"):
+                    classification["representative"] = vision_data["representative"]
+                if not address and vision_data.get("address"):
+                    address = vision_data["address"]
+            except Exception:
+                log.warning("Vision(%s) 추출 실패: %s", label, img_url, exc_info=True)
+            # 이미 핵심 정보(전화, 사업자번호) 모두 확보되면 중단
+            if phone and classification.get("business_number"):
+                break
 
     # 네이버 인증 사업자정보 — 1순위 덮어쓰기 (인증 데이터)
     biz = profile.get("business_info") or {}
@@ -218,11 +239,19 @@ async def process_blog_result(
         if biz.get("business_number"):
             classification["business_number"] = biz["business_number"]
 
+    # 지역 보정: 주소에서 추론한 지역이 LLM 결과와 다르면 주소 기반으로 교체
+    region = classification.get("region", "")
+    if address:
+        addr_region = infer_region_from_address(address)
+        if addr_region and addr_region != region:
+            log.info("지역 보정: %s → %s (주소: %s)", region or "(없음)", addr_region, address[:30])
+            region = addr_region
+
     tech = Technician(
         name=name,
         rank=classification["rank"],
         trades=classification["trades"],
-        region=classification.get("region", ""),
+        region=region,
         address=address,
         representative=classification.get("representative", ""),
         business_number=classification.get("business_number", ""),
@@ -365,7 +394,7 @@ async def process_instagram_result(
             if not phone and place["telephone"]:
                 raw = place["telephone"].replace("-", "").replace(" ", "")
                 if raw.startswith("0"):
-                    phone = raw
+                    phone = format_phone(raw)
                     log.info("지역검색 연락처 보충: %s → %s", name, phone)
             if not address and (place["road_address"] or place["address"]):
                 address = place["road_address"] or place["address"]
@@ -395,7 +424,8 @@ async def process_instagram_result(
 async def run_pipeline(
     query: str, count: int = 10, seen_blog_ids: set[str] | None = None,
     report: PipelineReport | None = None, dry_run: bool = False,
-    force: bool = False, direct: bool = False,
+    force: bool = False, direct: bool = False, metro_only: bool = False,
+    skip_vision: bool = False,
 ) -> list[str]:
     """단일 검색어로 파이프라인을 실행한다.
 
@@ -440,7 +470,7 @@ async def run_pipeline(
 
     async def _handle(item: dict) -> None:
         async with sem:
-            tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force, direct=direct)
+            tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force, direct=direct, metro_only=metro_only, skip_vision=skip_vision)
         if tech is None:
             return
 
@@ -486,7 +516,7 @@ async def run_pipeline(
     return saved_ids
 
 
-async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_run: bool = False, force: bool = False, direct: bool = False) -> PipelineReport:
+async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_run: bool = False, force: bool = False, direct: bool = False, use_vision: bool = False) -> PipelineReport:
     """전체 키워드로 파이프라인을 실행한다.
 
     쿼리를 QUERY_CONCURRENCY개씩 병렬 실행하여 전체 소요 시간을 단축한다.
@@ -511,6 +541,7 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_ru
                     await run_pipeline(
                         q, count=per_query, seen_blog_ids=seen_blog_ids,
                         report=report, dry_run=dry_run, force=force, direct=direct,
+                        metro_only=True, skip_vision=not use_vision,
                     )
                     break
                 except Exception as exc:
@@ -729,10 +760,17 @@ async def run_from_file(file_path: Path, force: bool = False) -> PipelineReport:
     return report
 
 
-async def run_enrich() -> PipelineReport:
+async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineReport:
     """노션 DB에서 빈 필드가 있는 레코드를 찾아 재크롤링+LLM 분류로 보강한다."""
-    pages = await find_pages_needing_enrichment()
-    log.info("보강 대상 레코드: %d건", len(pages))
+    all_pages = await find_pages_needing_enrichment()
+    if channel == "blog":
+        pages = [p for p in all_pages if "instagram.com" not in (p.get("detail_url") or "")]
+    elif channel == "instagram":
+        pages = [p for p in all_pages if "instagram.com" in (p.get("detail_url") or "")]
+    else:
+        pages = all_pages
+    skipped = len(all_pages) - len(pages)
+    log.info("보강 대상 레코드: %d건%s", len(pages), f" ({skipped}건 채널 필터로 제외)" if skipped else "")
 
     report = PipelineReport()
     report.mode = "필드 보강"
@@ -826,13 +864,58 @@ async def run_enrich() -> PipelineReport:
                     if not phone and place["telephone"]:
                         raw = place["telephone"].replace("-", "").replace(" ", "")
                         if raw.startswith("0"):
-                            phone = raw
+                            phone = format_phone(raw)
                             log.info("지역검색 연락처 보충: %s → %s", tech_name, phone)
                     if not address and (place["road_address"] or place["address"]):
                         address = place["road_address"] or place["address"]
                         log.info("지역검색 주소 보충: %s → %s", tech_name, address)
 
-            # 4) Technician 구성 + enrichment 저장
+            # 4) Vision 보충: 배너/Footer 이미지에서 누락 정보 추출
+            if use_vision and not is_instagram and (not phone or not classification.get("business_number")):
+                from crawler.classifier import extract_text_from_image
+                skin_urls = [
+                    ("배너", profile.get("banner_image_url", "")),
+                    ("Footer", profile.get("footer_image_url", "")),
+                ]
+                for label, img_url in skin_urls:
+                    if not img_url:
+                        continue
+                    try:
+                        vision_data, vision_usage = await extract_text_from_image(img_url)
+                        report.add_llm_usage(vision_usage["input_tokens"], vision_usage["output_tokens"])
+                        if not phone and vision_data.get("phone"):
+                            phone = vision_data["phone"]
+                            log.info("Vision(%s) 연락처 보충: %s → %s", label, tech_name, phone)
+                        if not email and vision_data.get("email"):
+                            email = vision_data["email"]
+                        if not classification.get("business_number") and vision_data.get("business_number"):
+                            classification["business_number"] = vision_data["business_number"]
+                        if not classification.get("representative") and vision_data.get("representative"):
+                            classification["representative"] = vision_data["representative"]
+                        if not address and vision_data.get("address"):
+                            address = vision_data["address"]
+                    except Exception:
+                        log.warning("Vision(%s) 추출 실패: %s", label, img_url, exc_info=True)
+                    if phone and classification.get("business_number"):
+                        break
+
+            # 네이버 인증 사업자정보 — 1순위 덮어쓰기
+            biz = profile.get("business_info") or {}
+            if biz:
+                if biz.get("phone"):
+                    phone = biz["phone"]
+                if biz.get("email"):
+                    email = biz["email"]
+                if biz.get("address"):
+                    address = biz["address"]
+                if biz.get("business_name"):
+                    tech_name = biz["business_name"]
+                if biz.get("representative"):
+                    classification["representative"] = biz["representative"]
+                if biz.get("business_number"):
+                    classification["business_number"] = biz["business_number"]
+
+            # 5) Technician 구성 + enrichment 저장
             channels = ["인스타그램"] if is_instagram else ["네이버블로그"]
             cover = profile.get("profile_pic_url", "") if is_instagram else profile.get("banner_image", "")
             tech = Technician(
@@ -892,6 +975,122 @@ async def run_enrich() -> PipelineReport:
         await asyncio.gather(*[_wrap(p) for p in pages])
 
     log.info("보강 완료: %d/%d건", enriched, len(pages))
+    return report
+
+
+async def run_patch_review(dry_run: bool = False) -> PipelineReport:
+    """검수 DB 기존 데이터에 피드백 수정사항을 소급 적용한다.
+
+    1. 연락처 하이픈 포매팅
+    2. 구분(rank) "기공" → 비움
+    3. 지역 보정 (주소 기반)
+    4. 출처 URL → 블로그 홈 URL (본문 블록)
+    """
+    import re as _re
+
+    pages = await find_all_review_pages()
+    log.info("검수 DB 패치 대상: %d건", len(pages))
+
+    report = PipelineReport()
+    report.mode = "검수 DB 패치"
+    report.total_searched = len(pages)
+
+    patched = 0
+    sem = asyncio.Semaphore(CONCURRENCY)
+
+    progress = create_progress()
+    with progress:
+        task = progress.add_task(f"검수 DB 패치 ({len(pages)}건)", total=len(pages))
+
+        async def _handle(page: dict) -> None:
+            nonlocal patched
+            page_id = page["page_id"]
+            props = page["properties"]
+            name = _read_prop(props, "업체명") or "(이름없음)"
+
+            progress.update(task, description=f"패치: {name[:20]}")
+
+            updates: dict = {}
+            changes: list[str] = []
+
+            async with sem:
+                # 1. 연락처 하이픈 포매팅
+                phone = _read_prop(props, "연락처")
+                if phone:
+                    formatted = format_phone(phone)
+                    if formatted != phone:
+                        updates["연락처"] = {"phone_number": formatted}
+                        changes.append(f"연락처: {phone} → {formatted}")
+
+                # 2. 구분(rank) "기공" → 비움
+                rank = _read_prop(props, "구분")
+                if rank == "기공":
+                    updates["구분"] = {"select": None}
+                    changes.append("구분: 기공 → (비움)")
+
+                # 3. 지역 보정 (주소 기반)
+                address = _read_prop(props, "주소")
+                region = _read_prop(props, "지역")
+                if address:
+                    addr_region = infer_region_from_address(address)
+                    if addr_region and addr_region != region:
+                        updates["지역"] = {"select": {"name": addr_region}}
+                        changes.append(f"지역: {region or '(없음)'} → {addr_region}")
+
+                # 4. 출처 URL → 블로그 홈 (본문 블록)
+                source_changed = False
+                try:
+                    blocks = await read_page_blocks(page_id)
+                    for block in blocks:
+                        if block["type"] != "paragraph":
+                            continue
+                        rt = block.get("paragraph", {}).get("rich_text", [])
+                        if not rt:
+                            continue
+                        text = rt[0].get("plain_text", "")
+                        if not text.startswith("출처:"):
+                            continue
+                        # 게시글 URL → 블로그 홈 URL 변환
+                        new_text = text
+                        urls = _re.findall(r"https?://(?:m\.)?blog\.naver\.com/(\w+)/\d+", text)
+                        for blog_id in set(urls):
+                            # 게시글 URL 패턴을 블로그 홈으로 치환
+                            new_text = _re.sub(
+                                rf"https?://(?:m\.)?blog\.naver\.com/{blog_id}/\d+",
+                                f"https://blog.naver.com/{blog_id}",
+                                new_text,
+                            )
+                        if new_text != text:
+                            if not dry_run:
+                                await update_block_text(block["id"], new_text)
+                            source_changed = True
+                            changes.append(f"출처: 게시글→블로그홈")
+                except Exception as exc:
+                    log.warning("블록 읽기 실패: %s (%s)", name, exc)
+
+                if not changes:
+                    progress.advance(task)
+                    return
+
+                if dry_run:
+                    progress.console.print(f"  [yellow]dry-run[/yellow] {name} — {', '.join(changes)}")
+                else:
+                    if updates:
+                        await patch_review_page(page_id, updates)
+                    progress.console.print(f"  [green]v[/green] {name} — {', '.join(changes)}")
+
+                patched += 1
+                report.add_saved(
+                    blog_url="", blogger_name=name,
+                    tech_name=name, rank="", trades=[],
+                    phone="", page_id=page_id,
+                )
+
+            progress.advance(task)
+
+        await asyncio.gather(*[_handle(p) for p in pages])
+
+    log.info("패치 완료: %d/%d건 수정", patched, len(pages))
     return report
 
 
@@ -964,9 +1163,22 @@ def main():
     parser.add_argument("--from-file", type=Path, metavar="JSON", help="검수한 JSON에서 노션 저장")
     parser.add_argument("--enrich", action="store_true", help="빈 필드가 있는 기존 레코드를 재크롤링+LLM으로 보강")
     parser.add_argument("--instagram", action="store_true", help="인스타그램 채널 크롤링")
+    parser.add_argument("--channel", choices=["blog", "instagram", "all"], default="all", help="enrich 대상 채널 (기본: all)")
     parser.add_argument("--approve", action="store_true", help="검수 DB 승인 건을 프로덕션 DB로 이동")
     parser.add_argument("--direct", action="store_true", help="검수 DB 거치지 않고 프로덕션 DB 직접 저장")
+    parser.add_argument("--patch-review", action="store_true", help="검수 DB 기존 데이터에 피드백 수정사항 소급 적용")
+    vision_group = parser.add_mutually_exclusive_group()
+    vision_group.add_argument("--vision", action="store_true", default=None, help="배너/Footer 이미지 Vision OCR 강제 활성화")
+    vision_group.add_argument("--no-vision", action="store_true", help="Vision OCR 비활성화")
     args = parser.parse_args()
+
+    # Vision 기본값: --full이면 OFF, 나머지 ON
+    if args.vision:
+        use_vision = True
+    elif args.no_vision:
+        use_vision = False
+    else:
+        use_vision = not args.full  # full은 기본 OFF, 나머지 ON
 
     setup_file_logging()
 
@@ -978,6 +1190,7 @@ def main():
         console.print("[yellow]dry-run 모드: 노션 저장 건너뜀[/yellow]")
     if args.force:
         console.print("[yellow]force 모드: 기존 업체 데이터 덮어쓰기[/yellow]")
+    console.print(f"[cyan]Vision OCR: {'ON' if use_vision else 'OFF'}[/cyan]")
     if args.from_file:
         console.print(f"[yellow]파일 임포트: {args.from_file}[/yellow]")
     if args.enrich:
@@ -986,13 +1199,15 @@ def main():
     if args.instagram:
         console.print("[cyan]채널: 인스타그램[/cyan]")
 
+    if args.patch_review:
+        console.print("[cyan]검수 DB 패치 모드: 기존 데이터에 피드백 수정사항 적용[/cyan]")
     if args.approve:
         console.print("[cyan]검수 승인 모드: 승인 건 → 프로덕션 DB 이동[/cyan]")
     if args.direct:
         console.print("[yellow]direct 모드: 프로덕션 DB 직접 저장[/yellow]")
 
     # 프로그레스 바 모드: 콘솔 로그 억제 (파일 로그는 유지됨)
-    suppress_console = args.full or args.enrich or args.approve
+    suppress_console = args.full or args.enrich or args.approve or args.patch_review
     if suppress_console:
         logging.getLogger().setLevel(logging.WARNING)
 
@@ -1001,8 +1216,8 @@ def main():
 
         # 노션 DB 스키마 검증 (dry-run 제외)
         if not args.dry_run:
-            # 검수 DB 스키마 검증 (approve 모드 또는 기본 모드)
-            if args.approve or not args.direct:
+            # 검수 DB 스키마 검증 (approve, patch-review 모드 또는 기본 모드)
+            if args.approve or args.patch_review or not args.direct:
                 review_errors = await validate_review_schema()
                 if review_errors:
                     console.print("[red]검수 DB 스키마 불일치:[/red]")
@@ -1019,10 +1234,12 @@ def main():
                         console.print(f"  [red]• {err}[/red]")
                     raise SystemExit(1)
 
-        if args.approve:
+        if args.patch_review:
+            report = await run_patch_review(dry_run=args.dry_run)
+        elif args.approve:
             report = await run_approve()
         elif args.enrich:
-            report = await run_enrich()
+            report = await run_enrich(use_vision=use_vision, channel=args.channel)
         elif args.from_file:
             report = await run_from_file(args.from_file, force=args.force)
         elif args.instagram and args.full:
@@ -1034,13 +1251,13 @@ def main():
             report.per_query = count
             await run_instagram_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force, direct=args.direct)
         elif args.full:
-            report = await run_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force, direct=args.direct)
+            report = await run_full(per_query=args.per_query, dry_run=args.dry_run, force=args.force, direct=args.direct, use_vision=use_vision)
         else:
             query = " ".join(args.query) if args.query else "타일 시공업체 수도권"
             count = 10 if args.query else 3
             report.mode = "단일 쿼리"
             report.per_query = count
-            await run_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force, direct=args.direct)
+            await run_pipeline(query, count=count, report=report, dry_run=args.dry_run, force=args.force, direct=args.direct, skip_vision=not use_vision)
 
         return report
 

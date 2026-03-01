@@ -1,4 +1,4 @@
-import type { CompanyInfo } from './types'
+import type { CompanyInfo } from '../_clients/types'
 import { ShareButton } from './ShareButton'
 
 interface CompanyHeaderProps {

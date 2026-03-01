@@ -1,7 +1,9 @@
 """기술자 분류 — LLM(Anthropic/OpenAI) 또는 수동 JSON 모드."""
 
+import asyncio
 import json
 import logging
+import re
 from pathlib import Path
 
 from crawler.config import settings
@@ -9,8 +11,118 @@ from crawler.models import TRADES, RANKS
 
 log = logging.getLogger(__name__)
 
-# 지역 옵션
-REGIONS = ["서울", "경기도", "인천", "충청도", "전라도", "경상도", "강원도", "제주도"]
+# LLM API 호출 제한 (TPM 200K 초과 방지)
+# - 동시 1개 (세마포어)
+# - 텍스트 호출 간 3초, Vision 호출 간 8초 (이미지 토큰이 ~10K로 커서)
+# - 429 시 exponential backoff 재시도 (최대 3회)
+_llm_semaphore = asyncio.Semaphore(1)
+_llm_last_call: float = 0.0  # monotonic timestamp
+_LLM_INTERVAL = 3.0  # 텍스트 호출 간 최소 간격 (초)
+_LLM_VISION_INTERVAL = 8.0  # Vision 호출 간 최소 간격 (초)
+_LLM_MAX_RETRIES = 3
+
+
+async def _llm_throttle(vision: bool = False):
+    """LLM 호출 전 rate limit 대기."""
+    global _llm_last_call
+    import time
+    interval = _LLM_VISION_INTERVAL if vision else _LLM_INTERVAL
+    now = time.monotonic()
+    wait = interval - (now - _llm_last_call)
+    if wait > 0:
+        await asyncio.sleep(wait)
+    _llm_last_call = time.monotonic()
+
+
+def _is_rate_limit_error(exc: Exception) -> bool:
+    """OpenAI/Anthropic 429 에러인지 판별."""
+    # openai.RateLimitError
+    err_type = type(exc).__name__
+    if err_type == "RateLimitError":
+        return True
+    # status_code 속성 확인
+    if hasattr(exc, "status_code") and exc.status_code == 429:
+        return True
+    # 문자열 폴백
+    return "429" in str(exc) and "rate limit" in str(exc).lower()
+
+# 지역 옵션 (검수 DB 기준)
+REGIONS = [
+    "서울", "경기도", "인천",
+    "충청도", "전라도", "경상도", "강원도", "제주도",
+    "전국", "광주", "울산", "부산", "세종", "대구", "대전",
+]
+
+# 수도권 필터링용
+METRO_REGIONS = {"서울", "경기도", "인천"}
+
+# 주소 → 지역 매핑 (지역 분류 보정용)
+_ADDRESS_REGION_MAP: dict[str, str] = {
+    "서울": "서울", "서울시": "서울", "서울특별시": "서울",
+    "경기": "경기도", "경기도": "경기도",
+    "인천": "인천", "인천시": "인천", "인천광역시": "인천",
+    "부산": "부산", "부산시": "부산", "부산광역시": "부산",
+    "대구": "대구", "대구시": "대구", "대구광역시": "대구",
+    "대전": "대전", "대전시": "대전", "대전광역시": "대전",
+    "광주": "광주", "광주시": "광주", "광주광역시": "광주",
+    "울산": "울산", "울산시": "울산", "울산광역시": "울산",
+    "세종": "세종", "세종시": "세종", "세종특별자치시": "세종",
+    "충북": "충청도", "충남": "충청도", "충청북도": "충청도", "충청남도": "충청도",
+    "전북": "전라도", "전남": "전라도", "전라북도": "전라도", "전라남도": "전라도",
+    "전북특별자치도": "전라도",
+    "경북": "경상도", "경남": "경상도", "경상북도": "경상도", "경상남도": "경상도",
+    "강원": "강원도", "강원도": "강원도", "강원특별자치도": "강원도",
+    "제주": "제주도", "제주도": "제주도", "제주특별자치도": "제주도",
+}
+
+
+def format_phone(raw: str) -> str:
+    """숫자만 있는 전화번호에 하이픈을 추가한다.
+
+    01012345678 → 010-1234-5678
+    0212345678  → 02-1234-5678
+    05512345678 → 055-1234-5678
+    """
+    if not raw:
+        return ""
+    digits = re.sub(r"\D", "", raw)
+
+    # 대표번호 8자리 (1588, 1566, 1577, 1800, 1899, 1644, 1833 등): XXXX-XXXX
+    if len(digits) == 8 and digits[0] == "1":
+        return f"{digits[:4]}-{digits[4:]}"
+
+    if not digits.startswith("0") or len(digits) < 9:
+        return raw
+
+    if digits.startswith("02"):
+        # 서울: 02-XXXX-XXXX (10자리) 또는 02-XXX-XXXX (9자리)
+        area, rest = digits[:2], digits[2:]
+    elif digits[:3] in ("010", "011", "016", "017", "018", "019", "070"):
+        # 모바일/인터넷전화(070): 0XX-XXXX-XXXX
+        area, rest = digits[:3], digits[3:]
+    elif digits[:3] == "050" and len(digits) >= 11:
+        # 인터넷전화(050X): 0507-XXXX-XXXX 등 (4자리 식별번호)
+        area, rest = digits[:4], digits[4:]
+    else:
+        # 지역번호 3자리: 031, 055 등
+        area, rest = digits[:3], digits[3:]
+
+    if len(rest) <= 4:
+        return f"{area}-{rest}"
+    mid = rest[:-4]
+    last = rest[-4:]
+    return f"{area}-{mid}-{last}"
+
+
+def infer_region_from_address(address: str) -> str:
+    """주소 문자열에서 시/도를 추출하여 REGIONS에 매핑한다."""
+    if not address:
+        return ""
+    # 첫 번째 토큰(시/도)으로 매핑 시도
+    for token in address.replace(",", " ").split():
+        if token in _ADDRESS_REGION_MAP:
+            return _ADDRESS_REGION_MAP[token]
+    return ""
 
 SYSTEM_PROMPT = """\
 당신은 한국 건설/인테리어 업계 전문가입니다.
@@ -31,8 +143,9 @@ SYSTEM_PROMPT = """\
 
 ### 3. rank (직급)
 - 반장: 소개란에서 본인이 "반장", "팀장", "대표" 등으로 명시한 경우만
-- 기공: 기본값 — 확신 없으면 기공 유지
+- 기공: 일반 기능공으로 명시적 단서가 있을 때
 - 준기공/조공: 명시적 단서가 있을 때만
+- **확신이 없으면 빈 문자열** (잘못 분류하느니 비워두는 것이 낫다)
 - 주의: 사업자등록번호·업체명만으로 반장 판단 금지
 
 ### 4. region (지역)
@@ -71,7 +184,7 @@ SYSTEM_PROMPT = """\
 - 판단 기준: 직접 시공을 수행하는지, 팀/인력을 보유하는지, 시공 사례가 있는지
 
 ## 응답 형식 (JSON만, 설명 없이)
-{{"name": "", "trades": [], "rank": "기공", "region": "", "address": "", "phone": "", "email": "", "representative": "", "business_number": "", "is_professional": true}}
+{{"name": "", "trades": [], "rank": "", "region": "", "address": "", "phone": "", "email": "", "representative": "", "business_number": "", "is_professional": true}}
 """.format(trades=", ".join(TRADES), regions=", ".join(REGIONS))
 
 # 수동 모드 파일 경로
@@ -82,7 +195,7 @@ CLASSIFIED_FILE = Path("classified.json")
 def _empty_result() -> dict:
     """빈 분류 결과."""
     return {
-        "name": "", "trades": ["기타"], "rank": "기공", "region": "",
+        "name": "", "trades": ["기타"], "rank": "", "region": "",
         "address": "", "phone": "", "email": "", "representative": "", "business_number": "",
         "is_professional": True,
     }
@@ -93,16 +206,18 @@ def _validate_result(result: dict) -> dict:
     result["trades"] = [t for t in result.get("trades", []) if t in TRADES][:3]
     if not result["trades"]:
         result["trades"] = ["기타"]
-    result["rank"] = result.get("rank", "기공") if result.get("rank") in RANKS else "기공"
+    rank = result.get("rank", "")
+    result["rank"] = rank if rank in RANKS else ""
     result.setdefault("name", "")
     result.setdefault("region", "")
     result.setdefault("address", "")
     result.setdefault("email", "")
     result.setdefault("representative", "")
     result.setdefault("business_number", "")
-    # phone: 숫자 이외 문자 제거
+    # phone: 숫자 추출 → 하이픈 포매팅
     raw_phone = result.get("phone", "")
-    result["phone"] = raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else ""
+    digits = raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else ""
+    result["phone"] = format_phone(digits)
     # 전문업자 여부 정규화
     result.setdefault("is_professional", True)
     result["is_professional"] = bool(result["is_professional"])
@@ -124,11 +239,21 @@ async def classify(
     Returns:
         (classification, usage) — usage = {"input_tokens": int, "output_tokens": int}
     """
-    if settings.anthropic_api_key:
-        return await _classify_with_anthropic(name, about, headline)
-
-    if settings.openai_api_key and settings.openai_api_key != "skip":
-        return await _classify_with_openai(name, about, headline)
+    for attempt in range(_LLM_MAX_RETRIES):
+        async with _llm_semaphore:
+            await _llm_throttle()
+            try:
+                if settings.anthropic_api_key:
+                    return await _classify_with_anthropic(name, about, headline)
+                if settings.openai_api_key and settings.openai_api_key != "skip":
+                    return await _classify_with_openai(name, about, headline)
+            except Exception as exc:
+                if _is_rate_limit_error(exc) and attempt < _LLM_MAX_RETRIES - 1:
+                    wait = 2 ** attempt * 5  # 5, 10, 20초
+                    log.warning("LLM 429 — %s초 대기 후 재시도 (%d/%d)", wait, attempt + 1, _LLM_MAX_RETRIES)
+                    await asyncio.sleep(wait)
+                    continue
+                raise
 
     log.info("LLM 미설정 — 수동 분류 모드 (pending_classification.json 확인)")
     return _empty_result(), _NO_USAGE
@@ -138,7 +263,7 @@ async def _classify_with_anthropic(name: str, about: str, headline: str = "") ->
     """Anthropic Claude API로 분류."""
     import anthropic
 
-    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=5)
+    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=0)
     user_content = f"업체명(블로그닉네임): {name}\n한줄소개: {headline}\n소개:\n{about}"
 
     resp = await client.messages.create(
@@ -164,7 +289,7 @@ async def _classify_with_openai(name: str, about: str, headline: str = "") -> tu
     """OpenAI API로 분류."""
     from openai import AsyncOpenAI
 
-    client = AsyncOpenAI(api_key=settings.openai_api_key, max_retries=5)
+    client = AsyncOpenAI(api_key=settings.openai_api_key, max_retries=0)
     user_content = f"업체명(블로그닉네임): {name}\n한줄소개: {headline}\n소개:\n{about}"
 
     resp = await client.chat.completions.create(
@@ -239,19 +364,33 @@ async def extract_text_from_image(image_url: str) -> tuple[dict, dict]:
     image_data = base64.standard_b64encode(resp.content).decode("utf-8")
     media_type = resp.headers.get("content-type", "image/jpeg")
 
-    if settings.anthropic_api_key:
-        extracted, usage = await _vision_with_anthropic(image_data, media_type)
-    elif settings.openai_api_key and settings.openai_api_key != "skip":
-        extracted, usage = await _vision_with_openai(image_data, media_type)
-    else:
-        return {}, _NO_USAGE
+    extracted, usage = None, _NO_USAGE
+    for attempt in range(_LLM_MAX_RETRIES):
+        async with _llm_semaphore:
+            await _llm_throttle(vision=True)
+            try:
+                if settings.anthropic_api_key:
+                    extracted, usage = await _vision_with_anthropic(image_data, media_type)
+                elif settings.openai_api_key and settings.openai_api_key != "skip":
+                    extracted, usage = await _vision_with_openai(image_data, media_type)
+                else:
+                    return {}, _NO_USAGE
+                break
+            except Exception as exc:
+                if _is_rate_limit_error(exc) and attempt < _LLM_MAX_RETRIES - 1:
+                    wait = 2 ** attempt * 5
+                    log.warning("Vision 429 — %s초 대기 후 재시도 (%d/%d)", wait, attempt + 1, _LLM_MAX_RETRIES)
+                    await asyncio.sleep(wait)
+                    continue
+                raise
 
     if not extracted:
         return {}, usage
 
-    # phone 정규화
+    # phone 정규화 + 하이픈 포매팅
     raw_phone = extracted.get("phone", "")
-    extracted["phone"] = raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else ""
+    digits = raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else ""
+    extracted["phone"] = format_phone(digits)
     return extracted, usage
 
 
@@ -259,23 +398,19 @@ async def _vision_with_anthropic(image_data: str, media_type: str) -> tuple[dict
     """Anthropic Claude Vision으로 이미지 텍스트 추출."""
     import anthropic
 
-    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=5)
-    try:
-        resp = await client.messages.create(
-            model=settings.anthropic_model,
-            max_tokens=256,
-            messages=[{
-                "role": "user",
-                "content": [
-                    {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": image_data}},
-                    {"type": "text", "text": VISION_PROMPT},
-                ],
-            }],
-            temperature=0.0,
-        )
-    except Exception:
-        log.warning("Anthropic Vision API 호출 실패")
-        return None, _NO_USAGE
+    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=0)
+    resp = await client.messages.create(
+        model=settings.anthropic_model,
+        max_tokens=256,
+        messages=[{
+            "role": "user",
+            "content": [
+                {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": image_data}},
+                {"type": "text", "text": VISION_PROMPT},
+            ],
+        }],
+        temperature=0.0,
+    )
 
     usage = {"input_tokens": resp.usage.input_tokens, "output_tokens": resp.usage.output_tokens}
     extracted = _parse_json_response(resp.content[0].text)
@@ -288,23 +423,19 @@ async def _vision_with_openai(image_data: str, media_type: str) -> tuple[dict | 
     """OpenAI Vision으로 이미지 텍스트 추출."""
     from openai import AsyncOpenAI
 
-    client = AsyncOpenAI(api_key=settings.openai_api_key, max_retries=5)
-    try:
-        resp = await client.chat.completions.create(
-            model=settings.openai_model,
-            messages=[{
-                "role": "user",
-                "content": [
-                    {"type": "image_url", "image_url": {"url": f"data:{media_type};base64,{image_data}"}},
-                    {"type": "text", "text": VISION_PROMPT},
-                ],
-            }],
-            temperature=0.0,
-            max_tokens=256,
-        )
-    except Exception:
-        log.warning("OpenAI Vision API 호출 실패")
-        return None, _NO_USAGE
+    client = AsyncOpenAI(api_key=settings.openai_api_key, max_retries=0)
+    resp = await client.chat.completions.create(
+        model=settings.openai_model,
+        messages=[{
+            "role": "user",
+            "content": [
+                {"type": "image_url", "image_url": {"url": f"data:{media_type};base64,{image_data}"}},
+                {"type": "text", "text": VISION_PROMPT},
+            ],
+        }],
+        temperature=0.0,
+        max_tokens=256,
+    )
 
     usage = {"input_tokens": resp.usage.prompt_tokens, "output_tokens": resp.usage.completion_tokens}
     extracted = _parse_json_response(resp.choices[0].message.content)

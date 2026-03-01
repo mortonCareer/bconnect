@@ -1,64 +1,57 @@
-'use client'
-
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@morton/ui'
-import type { CheckItem } from './types'
+import { Suspense } from 'react'
+import type { CheckItemId } from '../_clients/types'
+import { fetchCheckItemById } from '../_clients/fetch-business'
 import { CATEGORY_GROUPS } from './constants'
-import { StatusBadge } from './StatusBadge'
-import { DetailTable } from './DetailTable'
-import { OwnerVerifyForm } from './OwnerVerifyForm'
+import { AccordionShell, DetailAccordionItem } from './DetailAccordion'
 
 interface DetailSectionProps {
-  checkItems: CheckItem[]
   registrationNumber: string
 }
 
-export function DetailSection({ checkItems, registrationNumber }: DetailSectionProps) {
-  const itemMap = new Map(checkItems.map((item) => [item.id, item]))
+function DetailItemSkeleton() {
+  return (
+    <div className="border-b border-morton-gray-200 py-3 last:border-b-0">
+      <div className="flex items-center gap-2">
+        <div className="h-5 w-28 animate-pulse rounded bg-morton-gray-200" />
+        <div className="h-5 w-16 animate-pulse rounded-full bg-morton-gray-200" />
+      </div>
+      <div className="mt-1 h-3 w-48 animate-pulse rounded bg-morton-gray-100" />
+    </div>
+  )
+}
 
+async function DetailItemLoader({
+  id,
+  registrationNumber,
+}: {
+  id: CheckItemId
+  registrationNumber: string
+}) {
+  const item = await fetchCheckItemById(id, registrationNumber)
+  return <DetailAccordionItem item={item} registrationNumber={registrationNumber} />
+}
+
+export function DetailSection({ registrationNumber }: DetailSectionProps) {
   return (
     <div className="flex flex-col gap-8">
-      {CATEGORY_GROUPS.map((group) => {
-        const groupItems = group.itemIds
-          .map((id) => itemMap.get(id))
-          .filter((item): item is CheckItem => item != null)
+      {CATEGORY_GROUPS.map((group) => (
+        <section key={group.id}>
+          <h3 className="text-sb-20 text-morton-gray-900">{group.label}</h3>
+          {group.id === 'WAGE_RESTRICTION' && (
+            <p className="mt-1 text-r-12 text-morton-gray-500">
+              공표기간이 지난 정보는 표시되지 않습니다
+            </p>
+          )}
 
-        if (groupItems.length === 0) return null
-
-        return (
-          <section key={group.id}>
-            <h3 className="text-sb-20 text-morton-gray-900">{group.label}</h3>
-            {group.id === 'WAGE_RESTRICTION' && (
-              <p className="mt-1 text-r-12 text-morton-gray-500">
-                공표기간이 지난 정보는 표시되지 않습니다
-              </p>
-            )}
-
-            <Accordion type="multiple" className="mt-3">
-              {groupItems.map((item) => (
-                <AccordionItem key={item.id} value={item.id}>
-                  <AccordionTrigger className="gap-3">
-                    <div className="flex flex-1 flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sb-16 text-morton-gray-900">{item.label}</span>
-                        <StatusBadge status={item.status} statusType={item.statusType} />
-                      </div>
-                      {item.description && (
-                        <span className="text-r-12 text-morton-gray-500">{item.description}</span>
-                      )}
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <DetailTable details={item.details} />
-                    {item.id === 'BUSINESS_STATUS' && (
-                      <OwnerVerifyForm registrationNumber={registrationNumber} />
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </section>
-        )
-      })}
+          <AccordionShell className="mt-3">
+            {group.itemIds.map((itemId) => (
+              <Suspense key={itemId} fallback={<DetailItemSkeleton />}>
+                <DetailItemLoader id={itemId} registrationNumber={registrationNumber} />
+              </Suspense>
+            ))}
+          </AccordionShell>
+        </section>
+      ))}
     </div>
   )
 }

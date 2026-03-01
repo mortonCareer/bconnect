@@ -20,6 +20,42 @@ NAVER_LOCAL_URL = "https://openapi.naver.com/v1/search/local.json"
 # 모듈 공유 httpx 클라이언트 — 커넥션 풀 재사용
 _client: httpx.AsyncClient | None = None
 
+# 네이버 웹 크롤링 스로틀 (429 방지: 동시 5개 + 요청 간 0.5초 간격)
+_naver_sem = asyncio.Semaphore(5)
+_naver_last_req: float = 0.0
+_NAVER_INTERVAL = 0.5  # 요청 간 최소 간격 (초)
+_NAVER_MAX_RETRIES = 3
+
+
+async def _naver_throttle():
+    """네이버 웹 요청 전 rate limit 대기."""
+    global _naver_last_req
+    import time
+    now = time.monotonic()
+    wait = _NAVER_INTERVAL - (now - _naver_last_req)
+    if wait > 0:
+        await asyncio.sleep(wait)
+    _naver_last_req = time.monotonic()
+
+
+async def _naver_get(url: str, **kwargs) -> httpx.Response:
+    """네이버 웹 요청 — 스로틀 + 429 재시도."""
+    for attempt in range(_NAVER_MAX_RETRIES):
+        async with _naver_sem:
+            await _naver_throttle()
+            client = _get_client()
+            resp = await client.get(url, **kwargs)
+        if resp.status_code == 429:
+            wait = 2 ** attempt * 3  # 3, 6, 12초
+            log.warning("네이버 429 — %s초 대기 후 재시도 (%d/%d)", wait, attempt + 1, _NAVER_MAX_RETRIES)
+            await asyncio.sleep(wait)
+            continue
+        resp.raise_for_status()
+        return resp
+    # 마지막 시도도 429면 예외
+    resp.raise_for_status()
+    return resp  # unreachable
+
 
 def _get_client() -> httpx.AsyncClient:
     global _client
@@ -133,9 +169,7 @@ async def fetch_blog_post(blog_url: str) -> dict:
     """
     content_url = _extract_post_content_url(blog_url) or blog_url
 
-    client = _get_client()
-    resp = await client.get(content_url)
-    resp.raise_for_status()
+    resp = await _naver_get(content_url)
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
@@ -220,10 +254,8 @@ async def fetch_blog_profile(blog_id: str) -> dict:
     """
     url = f"https://m.blog.naver.com/{blog_id}"
     mobile_ua = {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)"}
-    client = _get_client()
     try:
-        resp = await client.get(url, headers=mobile_ua)
-        resp.raise_for_status()
+        resp = await _naver_get(url, headers=mobile_ua)
     except Exception:
         log.warning("블로그 프로필 가져오기 실패: %s", blog_id)
         return {"profile_intro": "", "blog_title": "", "profile_image_url": ""}
@@ -277,48 +309,65 @@ async def fetch_blog_profile(blog_id: str) -> dict:
     }
 
 
-# #blog-title CSS에서 배너 이미지 URL 추출 패턴
-_BANNER_RE = re.compile(r"#blog-title\s*\{[^}]*?url\(([^)]+)\)")
+# 커스텀 스킨 CSS에서 배너/Footer 이미지 URL 추출 패턴
+_SKIN_IMAGE_PATTERNS = [
+    ("banner", re.compile(r"#blog-title\s*\{[^}]*?url\(([^)]+)\)")),
+    ("banner", re.compile(r"#head-skin\s*\{[^}]*?url\(([^)]+)\)")),
+    ("footer", re.compile(r"#whole-footer\s*\{[^}]*?url\(([^)]+)\)")),
+]
 
 
-async def fetch_blog_banner(blog_id: str) -> str:
-    """데스크톱 블로그 메인의 커스텀 배너 이미지 URL을 추출한다.
+async def fetch_blog_skin_images(blog_id: str) -> dict[str, str]:
+    """데스크톱 블로그의 커스텀 스킨 이미지 URL을 추출한다.
 
-    PostList iframe의 CSS #blog-title background-image에서 추출.
-    배너가 없는 블로그는 빈 문자열을 반환한다.
+    PostList iframe CSS에서 배너(#blog-title, #head-skin)와
+    Footer(#whole-footer) background-image를 추출.
+
+    Returns:
+        {"banner": "...", "footer": "..."} — 없으면 빈 문자열
     """
     url = (
         f"https://blog.naver.com/PostList.naver"
         f"?blogId={blog_id}&widgetTypeCall=true&noTrackingCode=true&directAccess=true"
     )
-    client = _get_client()
     try:
-        resp = await client.get(url)
-        resp.raise_for_status()
+        resp = await _naver_get(url)
     except Exception:
-        log.warning("블로그 배너 가져오기 실패: %s", blog_id)
-        return ""
+        log.warning("블로그 스킨 이미지 가져오기 실패: %s", blog_id)
+        return {"banner": "", "footer": ""}
 
-    match = _BANNER_RE.search(resp.text)
-    if not match:
-        return ""
+    html = resp.text
+    result: dict[str, str] = {"banner": "", "footer": ""}
 
-    banner_url = match.group(1)
-    # pstatic.net 도메인이 아니면 기본 스킨 이미지이므로 무시
-    if "pstatic.net" not in banner_url:
-        return ""
+    for kind, pattern in _SKIN_IMAGE_PATTERNS:
+        if result[kind]:
+            continue  # 이미 찾은 종류는 스킵 (첫 매치 우선)
+        match = pattern.search(html)
+        if match:
+            img_url = match.group(1)
+            if "blogfiles.pstatic.net" in img_url:
+                result[kind] = img_url
 
-    return banner_url
+    return result
+
+
+async def fetch_blog_banner(blog_id: str) -> str:
+    """하위호환: 배너 이미지 URL만 반환."""
+    images = await fetch_blog_skin_images(blog_id)
+    return images["banner"]
 
 
 def _normalize_business_view(bv: dict) -> dict:
     """businessView 원시 응답을 정규화된 dict로 변환한다."""
+    from crawler.classifier import format_phone
+
     raw_phone = bv.get("phone", "")
+    digits = raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else ""
     return {
         "business_name": bv.get("businessName", ""),
         "representative": bv.get("ceo", ""),
         "address": bv.get("address", ""),
-        "phone": raw_phone.replace("-", "").replace(".", "").replace(" ", "") if raw_phone else "",
+        "phone": format_phone(digits),
         "email": bv.get("email", ""),
         "business_number": bv.get("businessLicenseNo", ""),
     }
@@ -336,10 +385,8 @@ async def fetch_business_info(blog_id: str, html_fallback: dict | None = None) -
         "Referer": f"https://m.blog.naver.com/{blog_id}",
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)",
     }
-    client = _get_client()
     try:
-        resp = await client.get(url, headers=headers)
-        resp.raise_for_status()
+        resp = await _naver_get(url, headers=headers)
         data = resp.json()
         if data.get("isSuccess") and data.get("result", {}).get("existBusinessInfo"):
             return _normalize_business_view(data["result"]["businessView"])
@@ -367,10 +414,8 @@ def extract_blog_id(blog_url: str) -> str | None:
 async def fetch_blogger_posts(blog_id: str, count: int = 5) -> list[str]:
     """블로거의 최근 글 목록 URL을 가져온다 (RSS 활용)."""
     rss_url = f"https://rss.blog.naver.com/{blog_id}.xml"
-    client = _get_client()
     try:
-        resp = await client.get(rss_url)
-        resp.raise_for_status()
+        resp = await _naver_get(rss_url)
     except Exception:
         log.warning("RSS 가져오기 실패: %s", blog_id)
         return []
@@ -404,6 +449,8 @@ _YOUTUBE_RE = re.compile(
 
 def extract_contact_info(text: str) -> dict:
     """텍스트에서 연락처, 이메일, 인스타, 유튜브 계정을 추출한다."""
+    from crawler.classifier import format_phone
+
     phones = _PHONE_RE.findall(text)
     emails = _EMAIL_RE.findall(text)
     # 인스타: 두 그룹 중 매칭된 것 사용
@@ -412,8 +459,9 @@ def extract_contact_info(text: str) -> dict:
     # 유튜브: 두 그룹 중 매칭된 것 사용
     yt_matches = _YOUTUBE_RE.findall(text)
     youtube = next((g1 or g2 for g1, g2 in yt_matches), "") if yt_matches else ""
+    raw = phones[0].replace("-", "").replace(".", "").replace(" ", "") if phones else ""
     return {
-        "phone": phones[0].replace("-", "").replace(".", "").replace(" ", "") if phones else "",
+        "phone": format_phone(raw),
         "email": emails[0] if emails else "",
         "instagram": insta,
         "youtube": youtube,
@@ -439,24 +487,27 @@ async def explore_blogger(blog_url: str) -> dict:
             "blog_title": "",
             "blog_home_url": "",
             "banner_image_url": "",
+            "footer_image_url": "",
             "profile_image_url": "",
             "source_urls": [blog_url],
         }
 
     blog_home_url = f"https://blog.naver.com/{blog_id}"
 
-    # 1-3. 프로필·배너·게시글을 병렬 수집 (독립적 요청)
-    profile, banner_image_url, main_post = await asyncio.gather(
+    # 1-3. 프로필·스킨 이미지·게시글을 병렬 수집 (독립적 요청)
+    profile, skin_images, main_post = await asyncio.gather(
         fetch_blog_profile(blog_id),
-        fetch_blog_banner(blog_id),
+        fetch_blog_skin_images(blog_id),
         fetch_blog_post(blog_url),
     )
+    banner_image_url = skin_images["banner"]
+    footer_image_url = skin_images["footer"]
 
     # 4. 사업자정보: API 시도 → 실패 시 profile에서 파싱한 HTML 폴백 사용
     biz_info = await fetch_business_info(
         blog_id, html_fallback=profile.get("business_info_html"),
     )
-    source_urls = [blog_url]
+    source_urls = [blog_home_url]
 
     # 연락처 추출: 소개글 → 게시글 본문 → RSS 최근 글 순 폴백
     contact = extract_contact_info(profile["profile_intro"])
@@ -492,7 +543,6 @@ async def explore_blogger(blog_url: str) -> dict:
                     if key == "phone":
                         phone_source = "post"
             if contact["phone"] or contact["email"]:
-                source_urls.append(url)
                 log.info("연락처 발견 (RSS 폴백): %s → %s", url, rss_contact)
                 break
 
@@ -506,6 +556,7 @@ async def explore_blogger(blog_url: str) -> dict:
         "blog_home_url": blog_home_url,
         "blogger_name": main_post["blogger_name"],
         "banner_image_url": banner_image_url or profile.get("banner_image_url", ""),
+        "footer_image_url": footer_image_url,
         "profile_image_url": profile["profile_image_url"],
         "cover_image_url": main_post["cover_image_url"],
         "source_urls": source_urls,

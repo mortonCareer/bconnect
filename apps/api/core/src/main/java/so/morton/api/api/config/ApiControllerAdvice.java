@@ -1,4 +1,4 @@
-package so.morton.api.api.controller;
+package so.morton.api.api.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

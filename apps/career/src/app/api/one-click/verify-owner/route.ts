@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { fetchOwnerVerification } from '@/app/one-click/_components/fetch-business'
+import { fetchOwnerVerification } from '@/app/one-click/_clients/fetch-business'
 
 export async function POST(request: Request) {
   try {
