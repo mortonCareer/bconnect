@@ -40,7 +40,7 @@ export async function GET() {
       const cause = e.cause
       results.cause =
         cause instanceof Error
-          ? { message: cause.message, code: (cause as Record<string, unknown>).code }
+          ? { message: cause.message, code: (cause as unknown as Record<string, unknown>).code }
           : String(cause)
     }
   }
