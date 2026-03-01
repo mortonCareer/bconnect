@@ -18,6 +18,27 @@ import { TopBar, Input, Tag } from '@morton/ui'
 import { TRADE_LABELS, TRADE_GROUPS } from '@/lib/trade-labels'
 import { profileEditSchema, type ProfileEditFormData } from './schema'
 
+const EXPERIENCE_OPTIONS = [
+  { id: 'newcomer', label: '신입', years: 0 },
+  { id: '1-3', label: '1~3년', years: 2 },
+  { id: '3-5', label: '3~5년', years: 4 },
+  { id: '5-10', label: '5~10년', years: 7 },
+  { id: '10+', label: '10년 이상', years: 15 },
+] as const
+
+function yearsToLevel(years: number | undefined): string | undefined {
+  if (years == null) return undefined
+  if (years === 0) return 'newcomer'
+  if (years <= 3) return '1-3'
+  if (years <= 5) return '3-5'
+  if (years <= 10) return '5-10'
+  return '10+'
+}
+
+function levelToYears(level: string): number {
+  return EXPERIENCE_OPTIONS.find((o) => o.id === level)?.years ?? 0
+}
+
 export default function ProfileEditPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -209,56 +230,77 @@ export default function ProfileEditPage() {
         </div>
 
         {/* 대표분야 */}
-        <Controller
-          name="trades"
-          control={control}
-          render={({ field: tradesField }) => {
-            const selectedTrades = tradesField.value ?? []
-            if (selectedTrades.length === 0) return <></>
-
-            return (
-              <div className="flex flex-col gap-[8px]">
-                <label className="text-m-16 text-morton-gray-900">
-                  대표분야 <span className="text-morton-error">*</span>
-                </label>
-                <Controller
-                  name="primaryTrade"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="flex flex-wrap gap-[8px]">
-                      {selectedTrades.map((tradeValue: string) => {
-                        const isPrimary = field.value === tradeValue
-                        return (
-                          <Tag
-                            key={tradeValue}
-                            variant={isPrimary ? 'selected' : 'default'}
-                            onClick={() => field.onChange(tradeValue)}
-                          >
-                            {TRADE_LABELS[tradeValue as Trade]}
-                          </Tag>
-                        )
-                      })}
-                    </div>
-                  )}
-                />
-              </div>
-            )
-          }}
-        />
+        {(watchedTrades ?? []).length > 0 && (
+          <div className="flex flex-col gap-[8px]">
+            <label className="text-m-16 text-morton-gray-900">
+              대표분야 <span className="text-morton-error">*</span>
+            </label>
+            <Controller
+              name="primaryTrade"
+              control={control}
+              render={({ field }) => (
+                <div className="relative w-fit">
+                  <select
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    className="flex h-[40px] appearance-none items-center rounded-[8px] border border-morton-gray-300 bg-white py-[3px] pl-[10px] pr-8 text-m-14 text-morton-gray-900"
+                  >
+                    {(watchedTrades ?? []).map((tradeValue: string) => (
+                      <option key={tradeValue} value={tradeValue}>
+                        {TRADE_LABELS[tradeValue as Trade]}
+                      </option>
+                    ))}
+                  </select>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    className="pointer-events-none absolute right-[10px] top-1/2 -translate-y-1/2"
+                  >
+                    <path
+                      d="M4 6L8 10L12 6"
+                      stroke="#1B1B1B"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              )}
+            />
+          </div>
+        )}
 
         {/* 경력 */}
         <div className="flex flex-col gap-[8px]">
           <label className="text-m-16 text-morton-gray-900">
             경력 <span className="text-morton-error">*</span>
           </label>
-          <Input
-            type="number"
-            placeholder="내용을 입력해주세요"
-            variant={errors.experience ? 'error' : 'default'}
-            errorMessage={errors.experience?.message}
-            {...register('experience', {
-              setValueAs: (v: string) => (v === '' ? undefined : Number(v)),
-            })}
+          <Controller
+            name="experience"
+            control={control}
+            render={({ field }) => (
+              <div className="flex flex-wrap items-center gap-2">
+                {EXPERIENCE_OPTIONS.map((option) => {
+                  const isSelected = yearsToLevel(field.value) === option.id
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => field.onChange(levelToYears(option.id))}
+                      className={`flex h-[40px] items-center justify-center rounded-[8px] border px-[14px] py-[3px] text-sm leading-[1.6] transition-colors ${
+                        isSelected
+                          ? 'border-morton-primary bg-morton-primary-sub font-semibold text-morton-primary'
+                          : 'border-morton-gray-300 font-medium text-morton-gray-500'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           />
         </div>
 

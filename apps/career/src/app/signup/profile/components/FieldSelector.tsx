@@ -1,28 +1,30 @@
 'use client'
 
 import { cn } from '@morton/ui'
-import type { ConstructionField, FieldCategory } from '../types'
+import type { Trade } from '@morton/api-client'
+import { TRADE_LABELS } from '@/lib/trade-labels'
+import type { TradeCategory } from '../types'
 
 interface FieldSelectorProps {
-  categories: FieldCategory[]
-  selected: ConstructionField[]
-  onToggle: (field: ConstructionField) => void
+  categories: TradeCategory[]
+  selected: string[]
+  onToggle: (trade: Trade) => void
 }
 
 export function FieldSelector({ categories, selected, onToggle }: FieldSelectorProps) {
   return (
     <div className="flex flex-col gap-3">
       {categories.map((category) => (
-        <div key={category.category} className="flex flex-col gap-3">
-          <p className="text-m-14 text-morton-gray-700">{category.category}</p>
+        <div key={category.label} className="flex flex-col gap-3">
+          <p className="text-m-14 text-morton-gray-700">{category.label}</p>
           <div className="flex flex-wrap gap-2">
-            {category.fields.map((field) => {
-              const isSelected = selected.includes(field.id)
+            {category.trades.map((trade) => {
+              const isSelected = selected.includes(trade)
               return (
                 <button
-                  key={field.id}
+                  key={trade}
                   type="button"
-                  onClick={() => onToggle(field.id)}
+                  onClick={() => onToggle(trade)}
                   className={cn(
                     'flex h-[40px] items-center justify-center rounded-[8px] border px-[14px] py-[3px] text-sm leading-[1.6] transition-colors',
                     isSelected
@@ -30,7 +32,7 @@ export function FieldSelector({ categories, selected, onToggle }: FieldSelectorP
                       : 'border-morton-gray-300 font-medium text-morton-gray-500'
                   )}
                 >
-                  {field.label}
+                  {TRADE_LABELS[trade]}
                 </button>
               )
             })}

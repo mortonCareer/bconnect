@@ -8,22 +8,12 @@ import { Button } from '@morton/ui'
 import { ApiError, useRegisterMember, useUpdateMyProfile, Role, Trade } from '@morton/api-client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
+import { TRADE_LABELS } from '@/lib/trade-labels'
 import { SignupHeader, FormInput, FormLabel, FormError } from '../_components'
 import { FieldSelector, ExperienceSelector } from './components'
-import { FIELD_OPTIONS, FIELD_CATEGORIES, EXPERIENCE_OPTIONS } from './constants'
+import { TRADE_CATEGORIES, EXPERIENCE_OPTIONS } from './constants'
 import { profileSchema, type ProfileFormData } from './schema'
-import type { ConstructionField, ExperienceLevel } from './types'
-
-const FIELD_TO_TRADE: Record<ConstructionField, Trade> = {
-  tile: Trade.TILING,
-  wallpaper: Trade.WALLPAPER,
-  flooring: Trade.HARDWOOD,
-  carpentry: Trade.CARPENTRY,
-  demolition: Trade.DEMOLITION,
-  cleaning: Trade.CLEANING,
-  electrical: Trade.ELECTRICAL,
-  plumbing: Trade.PLUMBING,
-}
+import type { ExperienceLevel } from './types'
 
 const EXPERIENCE_TO_YEARS: Record<ExperienceLevel, number> = {
   newcomer: 0,
@@ -68,22 +58,22 @@ export default function SignupProfilePage() {
     if (
       watchedFields &&
       watchedFields.length > 0 &&
-      !watchedFields.includes(watchedPrimaryField as ConstructionField)
+      !watchedFields.includes(watchedPrimaryField as string)
     ) {
       setValue('primaryField', watchedFields[0])
     }
   }, [watchedFields, watchedPrimaryField, setValue])
 
-  const toggleField = (field: ConstructionField) => {
+  const toggleField = (trade: Trade) => {
     const currentFields = selectedFields || []
-    if (currentFields.includes(field)) {
+    if (currentFields.includes(trade)) {
       setValue(
         'fields',
-        currentFields.filter((f) => f !== field),
+        currentFields.filter((f) => f !== trade),
         { shouldValidate: true }
       )
     } else if (currentFields.length < 3) {
-      setValue('fields', [...currentFields, field], { shouldValidate: true })
+      setValue('fields', [...currentFields, trade], { shouldValidate: true })
     }
   }
 
@@ -106,8 +96,8 @@ export default function SignupProfilePage() {
       // 프로필 데이터 저장 (시공분야/경력)
       await updateProfileMutation.mutateAsync({
         data: {
-          primaryTrade: FIELD_TO_TRADE[data.primaryField],
-          trades: data.fields.map((f) => FIELD_TO_TRADE[f]),
+          primaryTrade: data.primaryField as Trade,
+          trades: data.fields as Trade[],
           experience: EXPERIENCE_TO_YEARS[data.experience],
         },
       })
@@ -118,7 +108,6 @@ export default function SignupProfilePage() {
       router.push('/signup/complete')
     } catch (err) {
       if (err instanceof ApiError) {
-        // 에러 처리 — 현재 페이지에서 표시
         console.error('Registration failed:', err.code, err.message)
       }
     }
@@ -150,7 +139,7 @@ export default function SignupProfilePage() {
         <div className="flex flex-col gap-3">
           <FormLabel required>시공분야</FormLabel>
           <FieldSelector
-            categories={FIELD_CATEGORIES}
+            categories={TRADE_CATEGORIES}
             selected={selectedFields}
             onToggle={toggleField}
           />
@@ -171,14 +160,11 @@ export default function SignupProfilePage() {
                     onChange={field.onChange}
                     className="flex h-[40px] appearance-none items-center rounded-[8px] border border-morton-gray-300 bg-white py-[3px] pl-[10px] pr-8 text-m-14 text-morton-gray-900"
                   >
-                    {selectedFields.map((fieldId) => {
-                      const option = FIELD_OPTIONS.find((f) => f.id === fieldId)
-                      return (
-                        <option key={fieldId} value={fieldId}>
-                          {option?.label}
-                        </option>
-                      )
-                    })}
+                    {selectedFields.map((tradeValue) => (
+                      <option key={tradeValue} value={tradeValue}>
+                        {TRADE_LABELS[tradeValue as Trade]}
+                      </option>
+                    ))}
                   </select>
                   <svg
                     width="16"

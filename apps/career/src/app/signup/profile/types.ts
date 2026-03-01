@@ -1,24 +1,10 @@
-export type ConstructionField =
-  | 'tile'
-  | 'wallpaper'
-  | 'flooring'
-  | 'carpentry'
-  | 'demolition'
-  | 'cleaning'
-  | 'electrical'
-  | 'plumbing'
+import type { Trade } from '@morton/api-client'
 
 export type ExperienceLevel = 'newcomer' | '1-3' | '3-5' | '5-10' | '10+'
 
-export interface FieldOption {
-  id: ConstructionField
-  emoji: string
+export interface TradeCategory {
   label: string
-}
-
-export interface FieldCategory {
-  category: string
-  fields: FieldOption[]
+  trades: Trade[]
 }
 
 export interface ExperienceOption {
