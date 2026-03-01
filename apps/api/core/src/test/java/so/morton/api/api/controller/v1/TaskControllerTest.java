@@ -56,7 +56,7 @@ class TaskControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final User TEST_USER = new User(1L, "testuser", "WORKER");
+    private static final User TEST_USER = new User(1L, "testuser", "SKILLED");
 
     private static final Address SAMPLE_ADDRESS = new Address(
             "12345", "Seoul", "Gangnam", "Main St", "101", BigDecimal.ZERO, BigDecimal.ZERO);
@@ -140,7 +140,7 @@ class TaskControllerTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 일감 조회 시 에러를 반환한다")
+        @DisplayName("존재하지 않는 일감을 조회하면 에러 응답을 반환한다")
         void get_notFound() throws Exception {
             // given
             when(taskService.get(999L)).thenThrow(new CodeException(CommonExceptionCode.NOT_FOUND));

@@ -50,7 +50,7 @@ class PostControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final User TEST_USER = new User(1L, "testuser", "WORKER");
+    private static final User TEST_USER = new User(1L, "testuser", "SKILLED");
 
     private static final Post SAMPLE_POST = new Post(
             1L, 1L, 1L, List.of("img1.jpg"), "content",
@@ -127,7 +127,7 @@ class PostControllerTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 게시글 조회 시 에러를 반환한다")
+        @DisplayName("존재하지 않는 게시글을 조회하면 에러 응답을 반환한다")
         void get_notFound() throws Exception {
             // given
             when(postService.get(999L)).thenThrow(new CodeException(CommonExceptionCode.NOT_FOUND));

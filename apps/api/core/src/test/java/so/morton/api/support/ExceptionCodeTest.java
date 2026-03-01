@@ -44,7 +44,7 @@ class ExceptionCodeTest {
 
     @Test
     @DisplayName("ExceptionCode 중복 사용 확인")
-    void ExceptionCode_중복_사용_확인() {
+    void noDuplicateCode() {
         List<ExceptionCode> allCodes = allExceptionCodes();
 
         Map<String, Long> counts = allCodes.stream()
