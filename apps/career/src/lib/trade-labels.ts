@@ -32,3 +32,42 @@ export const TRADE_LIST = Object.entries(TRADE_LABELS).map(([value, label]) => (
   value: value as Trade,
   label,
 }))
+
+/** 시공분야 카테고리별 그룹 (Figma 디자인 기준) */
+export const TRADE_GROUPS: { label: string; trades: Trade[] }[] = [
+  {
+    label: '기반공정',
+    trades: [Trade.DESIGN, Trade.DEMOLITION, Trade.ELECTRICAL, Trade.PLUMBING, Trade.MECHANICAL],
+  },
+  {
+    label: '구조공정',
+    trades: [
+      Trade.MASONRY,
+      Trade.CARPENTRY,
+      Trade.GLAZING,
+      Trade.WATERPROOFING,
+      Trade.PLASTERING,
+      Trade.INSULATION,
+    ],
+  },
+  {
+    label: '마감공정',
+    trades: [
+      Trade.TILING,
+      Trade.GROUTING,
+      Trade.PAINTING,
+      Trade.WALLPAPER,
+      Trade.FILM_SHEET,
+      Trade.HARDWOOD,
+      Trade.VINYL,
+    ],
+  },
+  {
+    label: '설치',
+    trades: [Trade.SINK, Trade.FURNITURE, Trade.AIR_CONDITIONING],
+  },
+  {
+    label: '현장지원',
+    trades: [Trade.HOISTING, Trade.TRANSPORT, Trade.CLEANING, Trade.GENERAL_LABOR],
+  },
+]

@@ -15,7 +15,7 @@ import {
   Trade,
 } from '@morton/api-client'
 import { TopBar, Input, Tag } from '@morton/ui'
-import { TRADE_LIST } from '@/lib/trade-labels'
+import { TRADE_LABELS, TRADE_GROUPS } from '@/lib/trade-labels'
 import { profileEditSchema, type ProfileEditFormData } from './schema'
 
 export default function ProfileEditPage() {
@@ -159,48 +159,49 @@ export default function ProfileEditPage() {
         onBack={() => router.back()}
       />
 
-      <form className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-24 pt-3">
+      <form className="flex flex-1 flex-col gap-[24px] overflow-y-auto px-4 pb-24 pt-3">
         {/* 이름 */}
-        <div className="flex flex-col gap-2">
-          <label className="text-sb-16 text-morton-gray-900">이름</label>
+        <div className="flex flex-col gap-[8px]">
+          <label className="text-m-16 text-morton-gray-900">
+            이름 <span className="text-morton-error">*</span>
+          </label>
           <Input
-            placeholder="이름을 입력해주세요"
+            placeholder="내용을 입력해주세요"
             variant={errors.name ? 'error' : 'default'}
             errorMessage={errors.name?.message}
             {...register('name')}
           />
         </div>
 
-        {/* 전화번호 (읽기 전용) */}
-        <div className="flex flex-col gap-2">
-          <label className="text-sb-16 text-morton-gray-900">전화번호</label>
-          <Input placeholder="전화번호" disabled {...register('phone')} />
-        </div>
-
         {/* 시공분야 */}
-        <div className="flex flex-col gap-2">
-          <label className="text-sb-16 text-morton-gray-900">
-            시공분야
-            <span className="ml-1 text-m-12 text-morton-gray-500">(최대 3개)</span>
+        <div className="flex flex-col gap-[12px]">
+          <label className="text-m-16 text-morton-gray-900">
+            시공분야 <span className="text-morton-error">*</span>
           </label>
           <Controller
             name="trades"
             control={control}
             render={({ field }) => (
-              <div className="flex flex-wrap gap-2">
-                {TRADE_LIST.map((trade) => {
-                  const isSelected = field.value?.includes(trade.value) ?? false
-                  return (
-                    <Tag
-                      key={trade.value}
-                      variant={isSelected ? 'selected' : 'default'}
-                      size="sm"
-                      onClick={() => toggleTrade(trade.value)}
-                    >
-                      {trade.label}
-                    </Tag>
-                  )
-                })}
+              <div className="flex flex-col gap-[12px]">
+                {TRADE_GROUPS.map((group) => (
+                  <div key={group.label} className="flex flex-col gap-[12px]">
+                    <p className="text-m-14 text-morton-gray-700">{group.label}</p>
+                    <div className="flex flex-wrap gap-[8px]">
+                      {group.trades.map((tradeValue) => {
+                        const isSelected = field.value?.includes(tradeValue) ?? false
+                        return (
+                          <Tag
+                            key={tradeValue}
+                            variant={isSelected ? 'selected' : 'default'}
+                            onClick={() => toggleTrade(tradeValue)}
+                          >
+                            {TRADE_LABELS[tradeValue]}
+                          </Tag>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           />
@@ -216,24 +217,24 @@ export default function ProfileEditPage() {
             if (selectedTrades.length === 0) return <></>
 
             return (
-              <div className="flex flex-col gap-2">
-                <label className="text-sb-16 text-morton-gray-900">대표분야</label>
+              <div className="flex flex-col gap-[8px]">
+                <label className="text-m-16 text-morton-gray-900">
+                  대표분야 <span className="text-morton-error">*</span>
+                </label>
                 <Controller
                   name="primaryTrade"
                   control={control}
                   render={({ field }) => (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-[8px]">
                       {selectedTrades.map((tradeValue: string) => {
-                        const tradeItem = TRADE_LIST.find((t) => t.value === tradeValue)
                         const isPrimary = field.value === tradeValue
                         return (
                           <Tag
                             key={tradeValue}
                             variant={isPrimary ? 'selected' : 'default'}
-                            size="sm"
                             onClick={() => field.onChange(tradeValue)}
                           >
-                            {tradeItem?.label ?? tradeValue}
+                            {TRADE_LABELS[tradeValue as Trade]}
                           </Tag>
                         )
                       })}
@@ -246,11 +247,13 @@ export default function ProfileEditPage() {
         />
 
         {/* 경력 */}
-        <div className="flex flex-col gap-2">
-          <label className="text-sb-16 text-morton-gray-900">경력 (년)</label>
+        <div className="flex flex-col gap-[8px]">
+          <label className="text-m-16 text-morton-gray-900">
+            경력 <span className="text-morton-error">*</span>
+          </label>
           <Input
             type="number"
-            placeholder="경력 연수를 입력해주세요"
+            placeholder="내용을 입력해주세요"
             variant={errors.experience ? 'error' : 'default'}
             errorMessage={errors.experience?.message}
             {...register('experience', {
@@ -259,11 +262,11 @@ export default function ProfileEditPage() {
           />
         </div>
 
-        {/* 한 줄 소개 */}
-        <div className="flex flex-col gap-2">
-          <label className="text-sb-16 text-morton-gray-900">한 줄 소개</label>
+        {/* 한줄소개 */}
+        <div className="flex flex-col gap-[8px]">
+          <label className="text-m-16 text-morton-gray-900">한줄소개</label>
           <Input
-            placeholder="한 줄 소개를 입력해주세요"
+            placeholder="한줄소개를 입력해주세요 (최대 20글자)"
             variant={errors.headline ? 'error' : 'default'}
             errorMessage={errors.headline?.message}
             {...register('headline')}
@@ -271,22 +274,25 @@ export default function ProfileEditPage() {
         </div>
 
         {/* 소개 */}
-        <div className="flex flex-col gap-2">
-          <label className="text-sb-16 text-morton-gray-900">소개</label>
+        <div className="flex flex-col gap-[8px]">
+          <label className="text-r-14 text-morton-gray-900">소개</label>
           <textarea
             placeholder="자기소개를 입력해주세요"
             rows={4}
-            className="w-full resize-none rounded-lg border border-morton-gray-300 bg-transparent px-3 py-3 text-base text-morton-gray-900 outline-none transition-colors placeholder:text-morton-gray-500 focus:border-morton-primary focus:ring-1 focus:ring-morton-primary disabled:pointer-events-none disabled:opacity-50"
+            className="w-full resize-none rounded-lg border border-morton-gray-300 bg-transparent px-3 py-2 text-r-14 text-morton-gray-900 outline-none transition-colors placeholder:text-morton-gray-500 focus:border-morton-primary focus:ring-1 focus:ring-morton-primary disabled:pointer-events-none disabled:opacity-50"
             {...register('about')}
           />
           {errors.about && <p className="text-sm text-morton-error">{errors.about.message}</p>}
         </div>
 
         {/* 지역 */}
-        <div className="flex flex-col gap-2">
-          <label className="text-sb-16 text-morton-gray-900">지역</label>
+        <div className="flex flex-col gap-[8px]">
+          <label className="text-m-16 text-morton-gray-900">주소</label>
+          <p className="text-r-12 text-morton-gray-700">
+            정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요
+          </p>
           <Input
-            placeholder="지역을 입력해주세요 (예: 서울, 경기)"
+            placeholder="주소를 입력해주세요"
             variant={errors.city ? 'error' : 'default'}
             errorMessage={errors.city?.message}
             {...register('city')}

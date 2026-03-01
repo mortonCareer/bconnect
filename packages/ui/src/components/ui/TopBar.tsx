@@ -63,7 +63,7 @@ function ProgressBarInline({ step, total }: { step: number; total: number }) {
           key={i}
           className={cn(
             'h-full flex-1 rounded-full',
-            i < step ? 'bg-morton-primary' : 'bg-[#E5E7EB]'
+            i < step ? 'bg-morton-primary' : 'bg-morton-gray-300'
           )}
         />
       ))}

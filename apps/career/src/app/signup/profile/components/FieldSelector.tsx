@@ -1,41 +1,42 @@
 'use client'
 
 import { cn } from '@morton/ui'
-import type { ConstructionField, FieldOption } from '../types'
+import type { ConstructionField, FieldCategory } from '../types'
 
 interface FieldSelectorProps {
-  options: FieldOption[]
+  categories: FieldCategory[]
   selected: ConstructionField[]
   onToggle: (field: ConstructionField) => void
 }
 
-export function FieldSelector({ options, selected, onToggle }: FieldSelectorProps) {
+export function FieldSelector({ categories, selected, onToggle }: FieldSelectorProps) {
   return (
-    <div className="grid grid-cols-4 gap-2">
-      {options.map((field) => {
-        const isSelected = selected.includes(field.id)
-        return (
-          <button
-            key={field.id}
-            type="button"
-            onClick={() => onToggle(field.id)}
-            className={cn(
-              'flex flex-col items-center gap-2 rounded-[10px] border p-2 transition-colors',
-              isSelected ? 'border-[#386DFF] bg-[#EAEFFF]' : 'border-[#E5E7EB] bg-white'
-            )}
-          >
-            <span className="text-lg">{field.emoji}</span>
-            <span
-              className={cn(
-                'text-sm font-medium',
-                isSelected ? 'text-[#386DFF]' : 'text-[#9C9C9C]'
-              )}
-            >
-              {field.label}
-            </span>
-          </button>
-        )
-      })}
+    <div className="flex flex-col gap-3">
+      {categories.map((category) => (
+        <div key={category.category} className="flex flex-col gap-3">
+          <p className="text-m-14 text-morton-gray-700">{category.category}</p>
+          <div className="flex flex-wrap gap-2">
+            {category.fields.map((field) => {
+              const isSelected = selected.includes(field.id)
+              return (
+                <button
+                  key={field.id}
+                  type="button"
+                  onClick={() => onToggle(field.id)}
+                  className={cn(
+                    'flex h-[40px] items-center justify-center rounded-[8px] border px-[14px] py-[3px] text-sm leading-[1.6] transition-colors',
+                    isSelected
+                      ? 'border-morton-primary bg-morton-primary-sub font-semibold text-morton-primary'
+                      : 'border-morton-gray-300 font-medium text-morton-gray-500'
+                  )}
+                >
+                  {field.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

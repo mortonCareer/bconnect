@@ -1,4 +1,4 @@
-import type { FieldOption, ExperienceOption } from './types'
+import type { FieldOption, FieldCategory, ExperienceOption } from './types'
 
 export const FIELD_OPTIONS: FieldOption[] = [
   { id: 'tile', emoji: '🪨', label: '타일' },
@@ -9,6 +9,33 @@ export const FIELD_OPTIONS: FieldOption[] = [
   { id: 'cleaning', emoji: '🧹', label: '청소' },
   { id: 'electrical', emoji: '⚡', label: '전기' },
   { id: 'plumbing', emoji: '🔧', label: '설비' },
+]
+
+export const FIELD_CATEGORIES: FieldCategory[] = [
+  {
+    category: '기반공정',
+    fields: [
+      { id: 'demolition', emoji: '🔨', label: '철거' },
+      { id: 'electrical', emoji: '⚡', label: '전기' },
+      { id: 'plumbing', emoji: '🔧', label: '설비' },
+    ],
+  },
+  {
+    category: '구조공정',
+    fields: [{ id: 'carpentry', emoji: '🪚', label: '목공' }],
+  },
+  {
+    category: '마감공정',
+    fields: [
+      { id: 'tile', emoji: '🪨', label: '타일' },
+      { id: 'wallpaper', emoji: '🎨', label: '도배' },
+      { id: 'flooring', emoji: '🪵', label: '마루/장판' },
+    ],
+  },
+  {
+    category: '현장지원',
+    fields: [{ id: 'cleaning', emoji: '🧹', label: '청소' }],
+  },
 ]
 
 export const EXPERIENCE_OPTIONS: ExperienceOption[] = [

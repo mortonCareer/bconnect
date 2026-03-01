@@ -1,15 +1,23 @@
 'use client'
 
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { useInfiniteQuery, getMyChats, getGetMyChatsQueryKey } from '@morton/api-client'
-import type { ChatPage } from '@morton/api-client'
+import {
+  useInfiniteQuery,
+  useQueries,
+  getMyChats,
+  getGetMyChatsQueryKey,
+  getGetMemberQueryOptions,
+} from '@morton/api-client'
+import type { ChatPage, Member } from '@morton/api-client'
 import { ChatListItem, TopBar } from '@morton/ui'
 import { formatRelativeTime } from '@/lib/format-time'
+import { useAuthStore } from '@/stores/auth-store'
 
 export default function MessagesPage() {
   const router = useRouter()
   const observerRef = useRef<HTMLDivElement>(null)
+  const currentUserId = useAuthStore((s) => s.member?.id)
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery<ChatPage>({
@@ -44,6 +52,32 @@ export default function MessagesPage() {
 
   const chats = data?.pages.flatMap((page) => page.items) ?? []
 
+  // 각 채팅의 상대방 멤버 ID 추출
+  const otherMemberIds = useMemo(() => {
+    const ids = new Set<number>()
+    for (const chat of chats) {
+      const otherId = chat.participantIds?.find((id) => id !== currentUserId)
+      if (otherId != null) ids.add(otherId)
+    }
+    return [...ids]
+  }, [chats, currentUserId])
+
+  // 병렬 Member 조회
+  const memberQueries = useQueries({
+    queries: otherMemberIds.map((id) => ({
+      ...getGetMemberQueryOptions(id),
+      enabled: otherMemberIds.length > 0,
+    })),
+  })
+
+  const memberMap = useMemo(() => {
+    const map = new Map<number, Member>()
+    memberQueries.forEach((q, i) => {
+      if (q.data) map.set(otherMemberIds[i], q.data)
+    })
+    return map
+  }, [memberQueries, otherMemberIds])
+
   return (
     <div className="flex flex-col">
       <TopBar variant="default" title="메시지" showAction={false} />
@@ -58,21 +92,27 @@ export default function MessagesPage() {
         </div>
       ) : (
         <div className="flex flex-col">
-          {chats.map((chat) => (
-            <div
-              key={chat.id}
-              onClick={() => router.push(`/messages/${chat.id}`)}
-              className="cursor-pointer"
-            >
-              <ChatListItem
-                variant="badge"
-                name={chat.title ?? '채팅'}
-                lastMessage={chat.lastMessage?.content}
-                timestamp={chat.modifiedAt ? formatRelativeTime(chat.modifiedAt) : undefined}
-                unreadCount={chat.unreadCount}
-              />
-            </div>
-          ))}
+          {chats.map((chat) => {
+            const otherId = chat.participantIds?.find((id) => id !== currentUserId)
+            const otherMember = otherId != null ? memberMap.get(otherId) : undefined
+
+            return (
+              <div
+                key={chat.id}
+                onClick={() => router.push(`/messages/${chat.id}`)}
+                className="cursor-pointer"
+              >
+                <ChatListItem
+                  variant="badge"
+                  profileImage={otherMember?.picture}
+                  name={otherMember?.name ?? chat.title ?? '채팅'}
+                  lastMessage={chat.lastMessage?.content}
+                  timestamp={chat.modifiedAt ? formatRelativeTime(chat.modifiedAt) : undefined}
+                  unreadCount={chat.unreadCount}
+                />
+              </div>
+            )
+          })}
           <div ref={observerRef} className="h-1" />
           {isFetchingNextPage && (
             <div className="flex justify-center py-4">

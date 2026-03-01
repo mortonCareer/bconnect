@@ -16,6 +16,11 @@ export interface FieldOption {
   label: string
 }
 
+export interface FieldCategory {
+  category: string
+  fields: FieldOption[]
+}
+
 export interface ExperienceOption {
   id: ExperienceLevel
   label: string

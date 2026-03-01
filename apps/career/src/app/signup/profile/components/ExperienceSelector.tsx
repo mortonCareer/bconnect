@@ -11,7 +11,7 @@ interface ExperienceSelectorProps {
 
 export function ExperienceSelector({ options, selected, onSelect }: ExperienceSelectorProps) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       {options.map((option) => {
         const isSelected = selected === option.id
         return (
@@ -20,10 +20,10 @@ export function ExperienceSelector({ options, selected, onSelect }: ExperienceSe
             type="button"
             onClick={() => onSelect(option.id)}
             className={cn(
-              'flex h-[30px] items-center justify-center rounded-lg border px-3.5 py-[3px] text-sm font-medium transition-colors',
+              'flex h-[40px] items-center justify-center rounded-[8px] border px-[14px] py-[3px] text-sm leading-[1.6] transition-colors',
               isSelected
-                ? 'border-[#386DFF] bg-[#EAEFFF] font-semibold text-[#386DFF]'
-                : 'border-[#E5E7EB] text-[#9C9C9C]'
+                ? 'border-morton-primary bg-morton-primary-sub font-semibold text-morton-primary'
+                : 'border-morton-gray-300 font-medium text-morton-gray-500'
             )}
           >
             {option.label}
