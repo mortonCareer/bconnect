@@ -36,7 +36,7 @@ public class PostService {
 
     @Transactional
     public Post create(User user, CreatePostRequest request) {
-        Profile profile = profileFinder.getByMemberId(user.id());
+        Profile profile = profileFinder.findByMemberId(user.id());
         PostEntity post = PostEntity.builder()
                 .authorId(profile.id())
                 .taskId(request.taskId())
@@ -44,29 +44,29 @@ public class PostService {
                 .content(request.content())
                 .build();
 
-        PostEntity saved = postRepository.save(post);
-        return Post.of(saved);
+        postRepository.save(post);
+        return Post.of(post);
     }
 
     @Transactional
     public void update(User user, Long postId, String content) {
-        Profile profile = profileFinder.getByMemberId(user.id());
-        PostEntity post = postRepository.findById(postId)
+        Profile profile = profileFinder.findByMemberId(user.id());
+        PostEntity found = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (!post.getAuthorId().equals(profile.id()))
+        if (!found.getAuthorId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        post.update(content);
+        found.update(content);
     }
 
     @Transactional
     public void delete(User user, Long postId) {
-        Profile profile = profileFinder.getByMemberId(user.id());
-        PostEntity post = postRepository.findById(postId)
+        Profile profile = profileFinder.findByMemberId(user.id());
+        PostEntity found = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (!post.getAuthorId().equals(profile.id()))
+        if (!found.getAuthorId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        postRepository.delete(post);
+        postRepository.delete(found);
     }
 }

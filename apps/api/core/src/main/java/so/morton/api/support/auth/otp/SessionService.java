@@ -38,12 +38,11 @@ public class SessionService {
     }
 
     public void login(String username, String agent, String ip, String refreshToken) {
-        Optional<SessionEntity> optional = sessionRepository.findByUsername(username);
+        Optional<SessionEntity> found = sessionRepository.findByUsername(username);
         String encrypted = passwordEncoder.encode(refreshToken);
 
-        if (optional.isPresent()) {
-            SessionEntity found = optional.get();
-            found.update(agent, ip, encrypted);
+        if (found.isPresent()) {
+            found.get().update(agent, ip, encrypted);
         } else {
             sessionRepository.save(
                     SessionEntity.builder()
@@ -56,8 +55,8 @@ public class SessionService {
 
             // TODO: 새로운 기기에서 로그인시 세션 덮어쓰기 → RT 무효화
             memberRepository.findByUsername(username)
-                    .ifPresent(member -> smsProvider.send(
-                            member.getPhone(),
+                    .ifPresent(e -> smsProvider.send(
+                            e.getPhone(),
                             SmsTemplate.NEW_DEVICE_LOGIN
                     ));
         }

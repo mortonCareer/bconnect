@@ -20,7 +20,7 @@ public class MessageFinder {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
-    public List<Message> findByChat(Long chatId) {
+    public List<Message> findByChatId(Long chatId) {
         return messageRepository.findByChatId(chatId)
                 .stream()
                 .map(Message::of)

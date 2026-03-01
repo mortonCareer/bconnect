@@ -21,7 +21,7 @@ public class ChatFinder {
 
     public Chat find(Long chatId, Long memberId) {
         return chatRepository.findById(chatId)
-                .map(entity -> {
+                .map(found -> {
                     List<Long> participantIds = participantRepository.findByChatId(chatId)
                             .stream()
                             .map(ParticipantEntity::getMemberId)
@@ -32,18 +32,18 @@ public class ChatFinder {
                             .orElse(null);
 
                     int unreadCount = participantRepository.findByChatIdAndMemberId(chatId, memberId)
-                            .map(p -> (int) messageRepository.countByChatIdAndIdGreaterThan(chatId, p.getLastIdx()))
+                            .map(e -> (int) messageRepository.countByChatIdAndIdGreaterThan(chatId, e.getLastIdx()))
                             .orElse(0);
 
-                    return Chat.of(entity, participantIds, lastMessage, unreadCount);
+                    return Chat.of(found, participantIds, lastMessage, unreadCount);
                 })
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
-    public List<Chat> findByMember(Long memberId) {
+    public List<Chat> findByMemberId(Long memberId) {
         return participantRepository.findByMemberId(memberId)
                 .stream()
-                .map(participant -> find(participant.getChatId(), memberId))
+                .map(e -> find(e.getChatId(), memberId))
                 .toList();
     }
 }

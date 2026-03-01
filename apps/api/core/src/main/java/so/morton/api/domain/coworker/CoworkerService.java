@@ -22,8 +22,8 @@ public class CoworkerService {
     private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public List<Coworker> get(User user, Long targetId) {
-        Profile profile = profileFinder.getByMemberId(user.id());
+    public List<Coworker> getAll(User user, Long targetId) {
+        Profile profile = profileFinder.findByMemberId(user.id());
 
         if (profile.id().equals(targetId))
             return coworkerFinder.find(targetId);
@@ -35,13 +35,13 @@ public class CoworkerService {
 
     @Transactional
     public void delete(User user, Long id) {
-        Profile profile = profileFinder.getByMemberId(user.id());
-        CoworkerEntity coworker = coworkerRepository.findById(id)
+        Profile profile = profileFinder.findByMemberId(user.id());
+        CoworkerEntity found = coworkerRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CoworkerExceptionCode.NOT_FOUND));
 
-        if (!coworker.getMinId().equals(profile.id()) && !coworker.getMaxId().equals(profile.id()))
+        if (!found.getMinId().equals(profile.id()) && !found.getMaxId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        coworkerRepository.delete(coworker);
+        coworkerRepository.delete(found);
     }
 }

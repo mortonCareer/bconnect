@@ -39,16 +39,16 @@ public class MemberService {
                 .role(request.role())
                 .build();
 
-        MemberEntity saved = memberRepository.save(member);
-        return Member.of(saved);
+        memberRepository.save(member);
+        return Member.of(member);
     }
 
     @Transactional
     public void update(User user, UpdateMemberRequest request) {
-        MemberEntity member = memberRepository.findById(user.id())
+        MemberEntity found = memberRepository.findById(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        member.update(
+        found.update(
                 request.name(),
                 request.picture(),
                 request.role()
@@ -57,9 +57,9 @@ public class MemberService {
 
     @Transactional
     public void withdraw(User user) {
-        MemberEntity member = memberRepository.findById(user.id())
+        MemberEntity found = memberRepository.findById(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        memberRepository.delete(member);
+        memberRepository.delete(found);
     }
 }

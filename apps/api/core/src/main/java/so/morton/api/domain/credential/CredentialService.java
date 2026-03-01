@@ -25,49 +25,49 @@ public class CredentialService {
     private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public List<Credential> get(Long profileId) {
+    public List<Credential> getAll(Long profileId) {
         // TODO 각 타입별로 가장 최근에 승인된 인증서만 필터링한다
         return credentialFinder.findByProfileId(profileId);
     }
 
     @Transactional
     public Credential create(User user, CreateCredentialRequest request) {
-        Profile profile = profileFinder.getByMemberId(user.id());
+        Profile profile = profileFinder.findByMemberId(user.id());
 
-        CredentialEntity entity = CredentialEntity.builder()
+        CredentialEntity credential = CredentialEntity.builder()
                 .profileId(profile.id())
                 .type(request.type())
                 .build();
 
-        credentialRepository.save(entity);
-        return Credential.of(entity);
+        credentialRepository.save(credential);
+        return Credential.of(credential);
     }
 
     @Transactional
     public void delete(User user, Long id) {
-        Profile profile = profileFinder.getByMemberId(user.id());
-        CredentialEntity entity = credentialRepository.findById(id)
+        Profile profile = profileFinder.findByMemberId(user.id());
+        CredentialEntity found = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!entity.getProfileId().equals(profile.id()))
+        if (!found.getProfileId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        credentialRepository.delete(entity);
+        credentialRepository.delete(found);
     }
 
     @Transactional
     public void accept(Long id) {
-        CredentialEntity entity = credentialRepository.findById(id)
+        CredentialEntity found = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        entity.accept();
+        found.accept();
     }
 
     @Transactional
     public void deny(Long id) {
-        CredentialEntity entity = credentialRepository.findById(id)
+        CredentialEntity found = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        entity.deny();
+        found.deny();
     }
 }

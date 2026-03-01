@@ -22,7 +22,7 @@ public class CredentialController {
 
     @GetMapping
     public ApiResponse<List<CredentialResponse>> get(@RequestParam Long profileId) {
-        List<CredentialResponse> credentials = credentialService.get(profileId).stream()
+        List<CredentialResponse> credentials = credentialService.getAll(profileId).stream()
                 .map(CredentialResponse::of)
                 .toList();
         return ApiResponse.success(credentials);

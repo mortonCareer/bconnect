@@ -28,7 +28,7 @@ public class PostFinder {
                 .toList();
     }
 
-    public List<Post> findByTask(Long taskId) {
+    public List<Post> findByTaskId(Long taskId) {
         return postRepository.findByTaskId(taskId)
                 .stream()
                 .map(Post::of)

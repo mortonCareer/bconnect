@@ -17,7 +17,7 @@ public class ProfileFinder {
 
 
     @Transactional(readOnly = true)
-    public List<Profile> getAll() {
+    public List<Profile> findAll() {
         return profileRepository.findAll()
                 .stream()
                 .map(Profile::of)
@@ -25,14 +25,14 @@ public class ProfileFinder {
     }
 
     @Transactional(readOnly = true)
-    public Profile get(Long id) {
+    public Profile find(Long id) {
         return profileRepository.findById(id)
                 .map(Profile::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
-    public Profile getByMemberId(Long memberId) {
+    public Profile findByMemberId(Long memberId) {
         return profileRepository.findByMemberId(memberId)
                 .map(Profile::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));

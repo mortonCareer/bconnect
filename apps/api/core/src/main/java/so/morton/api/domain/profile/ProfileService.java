@@ -34,19 +34,19 @@ public class ProfileService {
                 .address(request.address())
                 .build();
 
-        ProfileEntity saved = profileRepository.save(profile);
-        return Profile.of(saved);
+        profileRepository.save(profile);
+        return Profile.of(profile);
     }
 
     @Transactional
     public void update(User user, UpdateProfileRequest request) {
-        ProfileEntity profile = profileRepository.findByMemberId(user.id())
+        ProfileEntity found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!profile.getMemberId().equals(user.id()))
+        if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        profile.update(
+        found.update(
                 request.primaryTrade(),
                 request.trades(),
                 request.experience(),
@@ -57,23 +57,23 @@ public class ProfileService {
 
     @Transactional
     public void updateAbout(User user, String about) {
-        ProfileEntity profile = profileRepository.findByMemberId(user.id())
+        ProfileEntity found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!profile.getMemberId().equals(user.id()))
+        if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        profile.updateAbout(about);
+        found.updateAbout(about);
     }
 
     @Transactional
     public void delete(User user) {
-        ProfileEntity profile = profileRepository.findByMemberId(user.id())
+        ProfileEntity found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!profile.getMemberId().equals(user.id()))
+        if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        profileRepository.delete(profile);
+        profileRepository.delete(found);
     }
 }

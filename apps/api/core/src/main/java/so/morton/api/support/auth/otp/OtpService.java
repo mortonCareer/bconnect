@@ -38,8 +38,7 @@ public class OtpService {
         otpRepository.findByPhone(phone)
                 .ifPresentOrElse(
                         found -> {
-                            if (!isToday(found.getModifiedAt())) found.resetDailyCount();
-
+                            if (!isToday(found.getModifiedAt())) found.reset();
                             if (found.getDailyCount() >= MAX_DAILY_COUNT) throw new CodeException(AuthExceptionCode.OTP_DAILY_LIMIT);
                             if (isWithinRateLimit(found)) throw new CodeException(AuthExceptionCode.OTP_RATE_LIMIT);
 
@@ -55,43 +54,43 @@ public class OtpService {
 
     @Transactional(noRollbackFor = CodeException.class)
     public void verifyCode(String phone, String code) {
-        OtpEntity otp = otpRepository.findByPhone(phone)
+        OtpEntity found = otpRepository.findByPhone(phone)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_OTP));
 
-        if (otp.getAttemptCount() >= MAX_ATTEMPTS) throw new CodeException(AuthExceptionCode.OTP_MAX_ATTEMPTS);
+        if (found.getAttemptCount() >= MAX_ATTEMPTS) throw new CodeException(AuthExceptionCode.OTP_MAX_ATTEMPTS);
 
-        otp.incrementAttemptCount();
+        found.attempt();
 
-        if (otp.getCodeExpiredAt().isBefore(LocalDateTime.now())) throw new CodeException(AuthExceptionCode.OTP_EXPIRED);
-        if (!otp.getCode().equals(code)) throw new CodeException(AuthExceptionCode.INVALID_OTP);
+        if (found.getCodeExpiredAt().isBefore(LocalDateTime.now())) throw new CodeException(AuthExceptionCode.OTP_EXPIRED);
+        if (!found.getCode().equals(code)) throw new CodeException(AuthExceptionCode.INVALID_OTP);
 
-        otp.invalidateCode();
+        found.invalidateCode();
     }
 
     public String generateToken(String phone) {
-        OtpEntity otp = otpRepository.findByPhone(phone)
+        OtpEntity found = otpRepository.findByPhone(phone)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_OTP));
 
         String token = java.util.UUID.randomUUID().toString();
-        LocalDateTime tokenExpiredAt = LocalDateTime.now().plusMinutes(SIGNUP_TOKEN_EXPIRY_MINUTES);
-        otp.generateToken(token, tokenExpiredAt);
+        LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(SIGNUP_TOKEN_EXPIRY_MINUTES);
+        found.generateToken(token, expiredAt);
 
         return token;
     }
 
     public void verifyToken(String token) {
-        OtpEntity otp = otpRepository.findBySignupToken(token)
+        OtpEntity found = otpRepository.findBySignupToken(token)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_SIGNUP_TOKEN));
 
-        if (otp.getSignupTokenExpiredAt().isBefore(LocalDateTime.now())) {
+        if (found.getSignupTokenExpiredAt().isBefore(LocalDateTime.now())) {
             throw new CodeException(AuthExceptionCode.SIGNUP_TOKEN_EXPIRED);
         }
 
-        otp.invalidateToken();
+        found.invalidateToken();
     }
 
-    private boolean isWithinRateLimit(OtpEntity otp) {
-        return otp.getModifiedAt().plusSeconds(RATE_LIMIT_SECONDS).isAfter(LocalDateTime.now());
+    private boolean isWithinRateLimit(OtpEntity found) {
+        return found.getModifiedAt().plusSeconds(RATE_LIMIT_SECONDS).isAfter(LocalDateTime.now());
     }
 
     private boolean isToday(LocalDateTime date) {

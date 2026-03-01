@@ -1,6 +1,9 @@
 package so.morton.api.support.auth.jwt;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +12,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import so.morton.api.support.auth.User;
 import so.morton.api.support.auth.UserService;
 
 import javax.crypto.SecretKey;
@@ -54,7 +56,7 @@ public class JwtProvider {
         String authorities = authentication.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
-                .map(authority -> authority.substring(5))
+                .map(auth -> auth.substring(AUTHORITY_PREFIX.length()))
                 .collect(Collectors.joining(AUTHORITIES_DELIMITER));
 
         Date now = new Date();
@@ -74,7 +76,7 @@ public class JwtProvider {
         String authorities = user.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
-                .map(authority -> authority.substring(AUTHORITY_PREFIX.length()))
+                .map(auth -> auth.substring(AUTHORITY_PREFIX.length()))
                 .collect(Collectors.joining(AUTHORITIES_DELIMITER));
 
         Date now = new Date();

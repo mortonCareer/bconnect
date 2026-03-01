@@ -24,8 +24,8 @@ public class CoworkerRequestService {
     private final ProfileFinder profileFinder;
 
     @Transactional
-    public Long create(User user, Long targetId) {
-        Profile profile = profileFinder.getByMemberId(user.id());
+    public CoworkerRequest create(User user, Long targetId) {
+        Profile profile = profileFinder.findByMemberId(user.id());
         Long profileId = profile.id();
 
         if (profileId.equals(targetId))
@@ -36,29 +36,29 @@ public class CoworkerRequestService {
             throw new CodeException(CoworkerExceptionCode.ALREADY_COWORKER);
 
         // accept
-        Optional<CoworkerRequestEntity> cross = requestRepository.findByFromIdAndToId(targetId, profileId);
-        cross.ifPresent(request -> accept(user, request.getId()));
+        Optional<CoworkerRequestEntity> reverse = requestRepository.findByFromIdAndToId(targetId, profileId);
+        reverse.ifPresent(request -> accept(user, request.getId()));
 
-        CoworkerRequestEntity request = CoworkerRequestEntity.builder()
+        CoworkerRequestEntity persisted = requestRepository.save(CoworkerRequestEntity.builder()
                 .fromId(profileId)
                 .toId(targetId)
-                .build();
-        return requestRepository.save(request).getId();
+                .build());
+        return CoworkerRequest.of(persisted);
     }
 
     @Transactional
     public void accept(User user, Long id) {
-        Profile profile = profileFinder.getByMemberId(user.id());
-        CoworkerRequestEntity request = requestRepository.findById(id)
+        Profile profile = profileFinder.findByMemberId(user.id());
+        CoworkerRequestEntity found = requestRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
 
-        if (!request.getToId().equals(profile.id()))
+        if (!found.getToId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        Long fromId = request.getFromId();
-        Long toId = request.getToId();
+        Long fromId = found.getFromId();
+        Long toId = found.getToId();
 
-        requestRepository.delete(request);
+        requestRepository.delete(found);
         CoworkerEntity coworker = CoworkerEntity.builder()
                 .minId(Math.min(fromId, toId))
                 .maxId(Math.max(fromId, toId))
@@ -68,25 +68,25 @@ public class CoworkerRequestService {
 
     @Transactional
     public void deny(User user, Long id) {
-        Profile profile = profileFinder.getByMemberId(user.id());
-        CoworkerRequestEntity request = requestRepository.findById(id)
+        Profile profile = profileFinder.findByMemberId(user.id());
+        CoworkerRequestEntity found = requestRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
 
-        if (!request.getToId().equals(profile.id()))
+        if (!found.getToId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        requestRepository.delete(request);
+        requestRepository.delete(found);
     }
 
     @Transactional
     public void cancel(User user, Long id) {
-        Profile profile = profileFinder.getByMemberId(user.id());
-        CoworkerRequestEntity request = requestRepository.findById(id)
+        Profile profile = profileFinder.findByMemberId(user.id());
+        CoworkerRequestEntity found = requestRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
 
-        if (!request.getFromId().equals(profile.id()))
+        if (!found.getFromId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        requestRepository.delete(request);
+        requestRepository.delete(found);
     }
 }

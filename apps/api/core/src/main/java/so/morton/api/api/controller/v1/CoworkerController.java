@@ -26,7 +26,7 @@ public class CoworkerController {
     public ApiResponse<List<CoworkerResponse>> get(
             @AuthenticationPrincipal User user,
             @RequestParam Long profileId) {
-        List<CoworkerResponse> coworkers = coworkerService.get(user, profileId).stream()
+        List<CoworkerResponse> coworkers = coworkerService.getAll(user, profileId).stream()
                 .map(CoworkerResponse::of)
                 .toList();
         return ApiResponse.success(coworkers);

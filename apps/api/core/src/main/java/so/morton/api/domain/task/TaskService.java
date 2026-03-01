@@ -35,7 +35,7 @@ public class TaskService {
 
     @Transactional
     public Task create(User user, CreateTaskRequest request) {
-        Profile profile = profileFinder.getByMemberId(user.id());
+        Profile profile = profileFinder.findByMemberId(user.id());
         TaskEntity task = TaskEntity.builder()
                 .profileId(profile.id())
                 .company(request.company())
@@ -47,20 +47,20 @@ public class TaskService {
                 .end(request.end())
                 .build();
 
-        TaskEntity saved = taskRepository.save(task);
-        return Task.of(saved);
+        taskRepository.save(task);
+        return Task.of(task);
     }
 
     @Transactional
     public void update(User user, Long taskId, UpdateTaskRequest request) {
-        Profile profile = profileFinder.getByMemberId(user.id());
-        TaskEntity task = taskRepository.findById(taskId)
+        Profile profile = profileFinder.findByMemberId(user.id());
+        TaskEntity found = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!task.getProfileId().equals(profile.id()))
+        if (!found.getProfileId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        task.update(
+        found.update(
                 request.company(),
                 request.address(),
                 request.taskTitle(),
@@ -73,12 +73,12 @@ public class TaskService {
 
     @Transactional
     public void delete(User user, Long taskId) {
-        Profile profile = profileFinder.getByMemberId(user.id());
-        TaskEntity task = taskRepository.findById(taskId)
+        Profile profile = profileFinder.findByMemberId(user.id());
+        TaskEntity found = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!task.getProfileId().equals(profile.id()))
+        if (!found.getProfileId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
-        taskRepository.delete(task);
+        taskRepository.delete(found);
     }
 }

@@ -27,7 +27,7 @@ public class MemberFinder {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
-    public List<Member> findAllActive() {
+    public List<Member> findAll() {
         return memberRepository.findAll()
                 .stream()
                 .map(Member::of)

@@ -34,7 +34,7 @@ public class ProfileController {
 
     @GetMapping
     public ApiResponse<List<ProfileResponse>> getAll() {
-        List<ProfileResponse> profiles = profileFinder.getAll().stream()
+        List<ProfileResponse> profiles = profileFinder.findAll().stream()
                 .map(ProfileResponse::of)
                 .toList();
         return ApiResponse.success(profiles);
@@ -42,7 +42,7 @@ public class ProfileController {
 
     @GetMapping("/{id}")
     public ApiResponse<ProfileResponse> get(@PathVariable Long id) {
-        Profile profile = profileFinder.get(id);
+        Profile profile = profileFinder.find(id);
         return ApiResponse.success(ProfileResponse.of(profile));
     }
 
