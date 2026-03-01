@@ -32,14 +32,6 @@ public class ProfileController {
     private final ProfileService profileService;
     private final ProfileFinder profileFinder;
 
-    @PostMapping
-    public ApiResponse<ProfileResponse> create(
-            @AuthenticationPrincipal User user,
-            @RequestBody @Valid CreateProfileRequest request) {
-        Profile profile = profileService.create(user.id(), request);
-        return ApiResponse.success(ProfileResponse.of(profile));
-    }
-
     @GetMapping
     public ApiResponse<List<ProfileResponse>> getAll() {
         List<ProfileResponse> profiles = profileFinder.getAll().stream()
@@ -54,11 +46,19 @@ public class ProfileController {
         return ApiResponse.success(ProfileResponse.of(profile));
     }
 
+    @PostMapping
+    public ApiResponse<ProfileResponse> create(
+            @AuthenticationPrincipal User user,
+            @RequestBody @Valid CreateProfileRequest request) {
+        Profile profile = profileService.create(user, request);
+        return ApiResponse.success(ProfileResponse.of(profile));
+    }
+
     @PutMapping("/me")
     public ApiResponse<Void> update(
             @AuthenticationPrincipal User user,
             @RequestBody @Valid UpdateProfileRequest request) {
-        profileService.update(user.id(), request);
+        profileService.update(user, request);
         return ApiResponse.success(null);
     }
 
@@ -66,14 +66,14 @@ public class ProfileController {
     public ApiResponse<Void> updateAbout(
             @AuthenticationPrincipal User user,
             @RequestBody UpdateProfileAboutRequest request) {
-        profileService.updateAbout(user.id(), request.about());
+        profileService.updateAbout(user, request.about());
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/me")
     public ApiResponse<Void> delete(
             @AuthenticationPrincipal User user) {
-        profileService.delete(user.id());
+        profileService.delete(user);
         return ApiResponse.success(null);
     }
 }

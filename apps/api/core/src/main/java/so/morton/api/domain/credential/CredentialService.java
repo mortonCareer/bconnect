@@ -8,6 +8,7 @@ import so.morton.api.domain.profile.Profile;
 import so.morton.api.domain.profile.ProfileFinder;
 import so.morton.api.storage.domain.credential.CredentialEntity;
 import so.morton.api.storage.domain.credential.CredentialRepository;
+import so.morton.api.storage.value.CredentialType;
 
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
@@ -46,6 +47,7 @@ public class CredentialService {
         Profile profile = profileFinder.getByMemberId(user.id());
         CredentialEntity entity = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
         if (!entity.getProfileId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
@@ -58,6 +60,7 @@ public class CredentialService {
         Profile profile = profileFinder.getByMemberId(user.id());
         CredentialEntity entity = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
         if (!entity.getProfileId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 

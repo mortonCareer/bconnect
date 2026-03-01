@@ -25,29 +25,29 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    @GetMapping("/me")
+    public ApiResponse<MemberResponse> get(@AuthenticationPrincipal User user) {
+        Member member = memberService.get(user);
+        return ApiResponse.success(MemberResponse.of(member));
+    }
+
     @PostMapping
     public ApiResponse<MemberResponse> register(@RequestBody @Valid RegisterMemberRequest request) {
         Member member = memberService.register(request);
         return ApiResponse.success(MemberResponse.of(member));
     }
 
-    @GetMapping("/me")
-    public ApiResponse<MemberResponse> getMe(@AuthenticationPrincipal User user) {
-        Member member = memberService.get(user.id());
-        return ApiResponse.success(MemberResponse.of(member));
-    }
-
     @PutMapping("/me")
-    public ApiResponse<MemberResponse> updateMe(
+    public ApiResponse<Void> update(
             @AuthenticationPrincipal User user,
             @RequestBody @Valid UpdateMemberRequest request) {
-        Member member = memberService.update(user.id(), request);
-        return ApiResponse.success(MemberResponse.of(member));
+        memberService.update(user, request);
+        return ApiResponse.success(null);
     }
 
     @DeleteMapping("/me")
-    public ApiResponse<Void> deleteMe(@AuthenticationPrincipal User user) {
-        memberService.delete(user.id());
+    public ApiResponse<Void> withdraw(@AuthenticationPrincipal User user) {
+        memberService.withdraw(user);
         return ApiResponse.success(null);
     }
 }

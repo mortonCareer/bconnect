@@ -21,14 +21,6 @@ public class PostController {
 
     private final PostService postService;
 
-    @PostMapping
-    public ApiResponse<PostResponse> create(
-            @AuthenticationPrincipal User user,
-            @RequestBody @Valid CreatePostRequest request) {
-        Post post = postService.create(user.id(), request);
-        return ApiResponse.success(PostResponse.of(post));
-    }
-
     @GetMapping
     public ApiResponse<List<PostResponse>> getAll() {
         List<PostResponse> posts = postService.getAll().stream()
@@ -43,20 +35,28 @@ public class PostController {
         return ApiResponse.success(PostResponse.of(post));
     }
 
+    @PostMapping
+    public ApiResponse<PostResponse> create(
+            @AuthenticationPrincipal User user,
+            @RequestBody @Valid CreatePostRequest request) {
+        Post post = postService.create(user, request);
+        return ApiResponse.success(PostResponse.of(post));
+    }
+
     @PutMapping("/{id}")
     public ApiResponse<Void> update(
-            @PathVariable Long id,
             @AuthenticationPrincipal User user,
+            @PathVariable Long id,
             @RequestBody @Valid UpdatePostRequest request) {
-        postService.update(id, user.id(), request);
+        postService.update(user, id, request.content());
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
-        postService.delete(id, user.id());
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
+        postService.delete(user, id);
         return ApiResponse.success(null);
     }
 }

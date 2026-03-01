@@ -9,7 +9,7 @@ import so.morton.api.storage.domain.profile.ProfileEntity;
 import so.morton.api.storage.domain.profile.ProfileRepository;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
-
+import so.morton.api.support.auth.User;
 import java.util.List;
 
 @Service
@@ -20,12 +20,12 @@ public class ProfileService {
     private final ProfileFinder profileFinder;
 
     @Transactional
-    public Profile create(Long memberId, CreateProfileRequest request) {
-        if (profileFinder.existsByMemberId(memberId))
+    public Profile create(User user, CreateProfileRequest request) {
+        if (profileFinder.existsByMemberId(user.id()))
             throw new CodeException(ProfileExceptionCode.ALREADY_EXISTS);
 
         ProfileEntity profile = ProfileEntity.builder()
-                .memberId(memberId)
+                .memberId(user.id())
                 .primaryTrade(request.primaryTrade())
                 .trades(request.trades())
                 .experience(request.experience())
@@ -39,11 +39,11 @@ public class ProfileService {
     }
 
     @Transactional
-    public void update(Long memberId, UpdateProfileRequest request) {
-        ProfileEntity profile = profileRepository.findByMemberId(memberId)
+    public void update(User user, UpdateProfileRequest request) {
+        ProfileEntity profile = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!profile.getMemberId().equals(memberId))
+        if (!profile.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         profile.update(
@@ -56,22 +56,22 @@ public class ProfileService {
     }
 
     @Transactional
-    public void updateAbout(Long memberId, String about) {
-        ProfileEntity profile = profileRepository.findByMemberId(memberId)
+    public void updateAbout(User user, String about) {
+        ProfileEntity profile = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!profile.getMemberId().equals(memberId))
+        if (!profile.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         profile.updateAbout(about);
     }
 
     @Transactional
-    public void delete(Long memberId) {
-        ProfileEntity profile = profileRepository.findByMemberId(memberId)
+    public void delete(User user) {
+        ProfileEntity profile = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!profile.getMemberId().equals(memberId))
+        if (!profile.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         profileRepository.delete(profile);

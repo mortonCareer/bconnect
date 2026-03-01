@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -76,7 +77,7 @@ class TaskControllerTest {
             CreateTaskRequest request = new CreateTaskRequest(
                     "Test Company", SAMPLE_ADDRESS, "Task Title", "Event Title",
                     Set.of(Trade.DESIGN), LocalDate.now(), LocalDate.now().plusDays(7));
-            when(taskService.create(eq(1L), any(CreateTaskRequest.class))).thenReturn(SAMPLE_TASK);
+            when(taskService.create(any(User.class), any(CreateTaskRequest.class))).thenReturn(SAMPLE_TASK);
 
             // when & then
             mockMvc.perform(post("/api/v1/tasks")
@@ -161,7 +162,7 @@ class TaskControllerTest {
             UpdateTaskRequest request = new UpdateTaskRequest(
                     "Updated Company", SAMPLE_ADDRESS, "Updated Title", "Updated Event",
                     Set.of(Trade.DESIGN), LocalDate.now(), LocalDate.now().plusDays(14));
-            when(taskService.update(eq(1L), eq(1L), any(UpdateTaskRequest.class))).thenReturn(SAMPLE_TASK);
+            doNothing().when(taskService).update(any(User.class), eq(1L), any(UpdateTaskRequest.class));
 
             // when & then
             mockMvc.perform(put("/api/v1/tasks/{id}", 1L)
@@ -179,8 +180,8 @@ class TaskControllerTest {
             UpdateTaskRequest request = new UpdateTaskRequest(
                     "Updated Company", SAMPLE_ADDRESS, "Updated Title", "Updated Event",
                     Set.of(Trade.DESIGN), LocalDate.now(), LocalDate.now().plusDays(14));
-            when(taskService.update(eq(1L), eq(1L), any(UpdateTaskRequest.class)))
-                    .thenThrow(new CodeException(CommonExceptionCode.FORBIDDEN));
+            doThrow(new CodeException(CommonExceptionCode.FORBIDDEN))
+                    .when(taskService).update(any(User.class), eq(1L), any(UpdateTaskRequest.class));
 
             // when & then
             mockMvc.perform(put("/api/v1/tasks/{id}", 1L)
@@ -219,7 +220,7 @@ class TaskControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(successResponse());
 
-            verify(taskService).delete(1L, 1L);
+            verify(taskService).delete(any(User.class), eq(1L));
         }
 
         @Test
@@ -227,7 +228,7 @@ class TaskControllerTest {
         void delete_forbidden() throws Exception {
             // given
             doThrow(new CodeException(CommonExceptionCode.FORBIDDEN))
-                    .when(taskService).delete(1L, 1L);
+                    .when(taskService).delete(any(User.class), eq(1L));
 
             // when & then
             mockMvc.perform(delete("/api/v1/tasks/{id}", 1L)

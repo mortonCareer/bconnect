@@ -7,16 +7,21 @@ import so.morton.api.api.controller.v1.request.RegisterMemberRequest;
 import so.morton.api.api.controller.v1.request.UpdateMemberRequest;
 import so.morton.api.storage.domain.member.MemberEntity;
 import so.morton.api.storage.domain.member.MemberRepository;
+import so.morton.api.support.auth.User;
 
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
-
 @Service
 @RequiredArgsConstructor
 public class MemberService {
 
     private final MemberRepository memberRepository;
     private final MemberFinder memberFinder;
+
+    @Transactional(readOnly = true)
+    public Member get(User user) {
+        return memberFinder.find(user.id());
+    }
 
     @Transactional
     public Member register(RegisterMemberRequest request) {
@@ -38,14 +43,9 @@ public class MemberService {
         return Member.of(saved);
     }
 
-    @Transactional(readOnly = true)
-    public Member get(Long memberId) {
-        return memberFinder.find(memberId);
-    }
-
     @Transactional
-    public Member update(Long memberId, UpdateMemberRequest request) {
-        MemberEntity member = memberRepository.findById(memberId)
+    public void update(User user, UpdateMemberRequest request) {
+        MemberEntity member = memberRepository.findById(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         member.update(
@@ -53,13 +53,11 @@ public class MemberService {
                 request.picture(),
                 request.role()
         );
-
-        return Member.of(member);
     }
 
     @Transactional
-    public void delete(Long memberId) {
-        MemberEntity member = memberRepository.findById(memberId)
+    public void withdraw(User user) {
+        MemberEntity member = memberRepository.findById(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         memberRepository.delete(member);

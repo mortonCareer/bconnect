@@ -28,14 +28,6 @@ public class TaskController {
 
     private final TaskService taskService;
 
-    @PostMapping
-    public ApiResponse<TaskResponse> create(
-            @AuthenticationPrincipal User user,
-            @RequestBody @Valid CreateTaskRequest request) {
-        Task task = taskService.create(user.id(), request);
-        return ApiResponse.success(TaskResponse.of(task));
-    }
-
     @GetMapping
     public ApiResponse<List<TaskResponse>> getAll() {
         List<TaskResponse> tasks = taskService.getAll().stream()
@@ -50,20 +42,28 @@ public class TaskController {
         return ApiResponse.success(TaskResponse.of(task));
     }
 
-    @PutMapping("/{id}")
-    public ApiResponse<TaskResponse> update(
-            @PathVariable Long id,
+    @PostMapping
+    public ApiResponse<TaskResponse> create(
             @AuthenticationPrincipal User user,
-            @RequestBody @Valid UpdateTaskRequest request) {
-        Task task = taskService.update(id, user.id(), request);
+            @RequestBody @Valid CreateTaskRequest request) {
+        Task task = taskService.create(user, request);
         return ApiResponse.success(TaskResponse.of(task));
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<Void> update(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateTaskRequest request) {
+        taskService.update(user, id, request);
+        return ApiResponse.success(null);
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
-        taskService.delete(id, user.id());
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
+        taskService.delete(user, id);
         return ApiResponse.success(null);
     }
 }

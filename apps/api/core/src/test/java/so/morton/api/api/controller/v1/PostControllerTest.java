@@ -66,7 +66,7 @@ class PostControllerTest {
         void create_success() throws Exception {
             // given
             CreatePostRequest request = new CreatePostRequest(1L, List.of("img1.jpg"), "content");
-            when(postService.create(eq(1L), any(CreatePostRequest.class))).thenReturn(SAMPLE_POST);
+            when(postService.create(any(User.class), any(CreatePostRequest.class))).thenReturn(SAMPLE_POST);
 
             // when & then
             mockMvc.perform(post("/api/v1/posts")
@@ -146,8 +146,7 @@ class PostControllerTest {
         @DisplayName("인증된 사용자가 게시글을 수정하면 성공 응답을 반환한다")
         void update_success() throws Exception {
             // given
-            UpdatePostRequest request = new UpdatePostRequest(List.of("new-img.jpg"), "updated content");
-            when(postService.update(eq(1L), eq(1L), any(UpdatePostRequest.class))).thenReturn(SAMPLE_POST);
+            UpdatePostRequest request = new UpdatePostRequest("updated content");
 
             // when & then
             mockMvc.perform(put("/api/v1/posts/{id}", 1L)
@@ -162,9 +161,9 @@ class PostControllerTest {
         @DisplayName("다른 사용자의 게시글을 수정하면 403을 반환한다")
         void update_forbidden() throws Exception {
             // given
-            UpdatePostRequest request = new UpdatePostRequest(List.of("new-img.jpg"), "updated content");
-            when(postService.update(eq(1L), eq(1L), any(UpdatePostRequest.class)))
-                    .thenThrow(new CodeException(CommonExceptionCode.FORBIDDEN));
+            UpdatePostRequest request = new UpdatePostRequest("updated content");
+            doThrow(new CodeException(CommonExceptionCode.FORBIDDEN))
+                    .when(postService).update(any(User.class), eq(1L), any(String.class));
 
             // when & then
             mockMvc.perform(put("/api/v1/posts/{id}", 1L)
@@ -178,7 +177,7 @@ class PostControllerTest {
         @DisplayName("인증 없이 게시글을 수정하면 403을 반환한다")
         void update_unauthenticated() throws Exception {
             // given
-            UpdatePostRequest request = new UpdatePostRequest(List.of("new-img.jpg"), "updated content");
+            UpdatePostRequest request = new UpdatePostRequest("updated content");
 
             // when & then
             mockMvc.perform(put("/api/v1/posts/{id}", 1L)
@@ -201,7 +200,7 @@ class PostControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(successResponse());
 
-            verify(postService).delete(1L, 1L);
+            verify(postService).delete(any(User.class), eq(1L));
         }
 
         @Test
@@ -209,7 +208,7 @@ class PostControllerTest {
         void delete_forbidden() throws Exception {
             // given
             doThrow(new CodeException(CommonExceptionCode.FORBIDDEN))
-                    .when(postService).delete(1L, 1L);
+                    .when(postService).delete(any(User.class), eq(1L));
 
             // when & then
             mockMvc.perform(delete("/api/v1/posts/{id}", 1L)

@@ -9,12 +9,12 @@ import so.morton.api.domain.profile.Profile;
 import so.morton.api.storage.domain.task.TaskEntity;
 import so.morton.api.storage.domain.task.TaskRepository;
 import so.morton.api.domain.profile.ProfileFinder;
+import so.morton.api.support.auth.User;
 
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 
 import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class TaskService {
@@ -23,9 +23,19 @@ public class TaskService {
     private final TaskFinder taskFinder;
     private final ProfileFinder profileFinder;
 
+    @Transactional(readOnly = true)
+    public Task get(Long taskId) {
+        return taskFinder.find(taskId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Task> getAll() {
+        return taskFinder.findAll();
+    }
+
     @Transactional
-    public Task create(Long memberId, CreateTaskRequest request) {
-        Profile profile = profileFinder.getByMemberId(memberId);
+    public Task create(User user, CreateTaskRequest request) {
+        Profile profile = profileFinder.getByMemberId(user.id());
         TaskEntity task = TaskEntity.builder()
                 .profileId(profile.id())
                 .company(request.company())
@@ -41,19 +51,9 @@ public class TaskService {
         return Task.of(saved);
     }
 
-    @Transactional(readOnly = true)
-    public Task get(Long taskId) {
-        return taskFinder.find(taskId);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Task> getAll() {
-        return taskFinder.findAll();
-    }
-
     @Transactional
-    public Task update(Long taskId, Long memberId, UpdateTaskRequest request) {
-        Profile profile = profileFinder.getByMemberId(memberId);
+    public void update(User user, Long taskId, UpdateTaskRequest request) {
+        Profile profile = profileFinder.getByMemberId(user.id());
         TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
@@ -69,12 +69,11 @@ public class TaskService {
                 request.start(),
                 request.end()
         );
-        return Task.of(task);
     }
 
     @Transactional
-    public void delete(Long taskId, Long memberId) {
-        Profile profile = profileFinder.getByMemberId(memberId);
+    public void delete(User user, Long taskId) {
+        Profile profile = profileFinder.getByMemberId(user.id());
         TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 

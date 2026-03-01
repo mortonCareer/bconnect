@@ -20,14 +20,6 @@ public class CredentialController {
 
     private final CredentialService credentialService;
 
-    @PostMapping
-    public ApiResponse<Long> create(
-            @AuthenticationPrincipal User user,
-            @RequestBody @Valid CreateCredentialRequest request) {
-        Credential saved = credentialService.create(user, request);
-        return ApiResponse.success(saved.id());
-    }
-
     @GetMapping
     public ApiResponse<List<CredentialResponse>> get(@RequestParam Long profileId) {
         List<CredentialResponse> credentials = credentialService.get(profileId).stream()
@@ -36,18 +28,26 @@ public class CredentialController {
         return ApiResponse.success(credentials);
     }
 
+    @PostMapping
+    public ApiResponse<Long> create(
+            @AuthenticationPrincipal User user,
+            @RequestBody @Valid CreateCredentialRequest request) {
+        Credential saved = credentialService.create(user, request);
+        return ApiResponse.success(saved.id());
+    }
+
     @PutMapping("/{id}")
     public ApiResponse<Long> renew(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
         Credential saved = credentialService.renew(user, id);
         return ApiResponse.success(saved.id());
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
         credentialService.delete(user, id);
         return ApiResponse.success(null);
     }
@@ -55,16 +55,16 @@ public class CredentialController {
     @PostMapping("/{id}/accept")
 
     public ApiResponse<Void> accept(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
         credentialService.accept(id);
         return ApiResponse.success(null);
     }
 
     @PostMapping("/{id}/deny")
     public ApiResponse<Void> deny(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
         credentialService.deny(id);
         return ApiResponse.success(null);
     }

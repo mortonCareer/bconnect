@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -99,7 +100,7 @@ class MemberControllerTest {
         @DisplayName("인증된 사용자가 내 정보를 조회하면 성공 응답을 반환한다")
         void getMe_success() throws Exception {
             // given
-            when(memberService.get(1L)).thenReturn(SAMPLE_MEMBER);
+            when(memberService.get(any(User.class))).thenReturn(SAMPLE_MEMBER);
 
             // when & then
             mockMvc.perform(get("/api/v1/members/me")
@@ -114,7 +115,7 @@ class MemberControllerTest {
         @DisplayName("존재하지 않는 사용자 조회 시 에러를 반환한다")
         void getMe_notFound() throws Exception {
             // given
-            when(memberService.get(1L)).thenThrow(new CodeException(CommonExceptionCode.NOT_FOUND));
+            when(memberService.get(any(User.class))).thenThrow(new CodeException(CommonExceptionCode.NOT_FOUND));
 
             // when & then
             mockMvc.perform(get("/api/v1/members/me")
@@ -139,8 +140,8 @@ class MemberControllerTest {
         @DisplayName("인증된 사용자가 내 정보를 수정하면 성공 응답을 반환한다")
         void updateMe_success() throws Exception {
             // given
-            UpdateMemberRequest request = new UpdateMemberRequest("새이름", "01099998888", "new-pic.jpg");
-            when(memberService.update(eq(1L), any(UpdateMemberRequest.class))).thenReturn(SAMPLE_MEMBER);
+            UpdateMemberRequest request = new UpdateMemberRequest("새이름", "new-pic.jpg", Role.WORKER);
+            doNothing().when(memberService).update(any(User.class), any(UpdateMemberRequest.class));
 
             // when & then
             mockMvc.perform(put("/api/v1/members/me")
@@ -155,7 +156,7 @@ class MemberControllerTest {
         @DisplayName("인증 없이 내 정보를 수정하면 401/403을 반환한다")
         void updateMe_unauthenticated() throws Exception {
             // given
-            UpdateMemberRequest request = new UpdateMemberRequest("새이름", "01099998888", "new-pic.jpg");
+            UpdateMemberRequest request = new UpdateMemberRequest("새이름", "new-pic.jpg", Role.WORKER);
 
             // when & then
             mockMvc.perform(put("/api/v1/members/me")
@@ -178,7 +179,7 @@ class MemberControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(successResponse());
 
-            verify(memberService).delete(1L);
+            verify(memberService).withdraw(any(User.class));
         }
 
         @Test

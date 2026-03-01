@@ -24,9 +24,8 @@ public class CoworkerController {
 
     @GetMapping
     public ApiResponse<List<CoworkerResponse>> get(
-            @RequestParam Long profileId,
-            @AuthenticationPrincipal User user) {
-
+            @AuthenticationPrincipal User user,
+            @RequestParam Long profileId) {
         List<CoworkerResponse> coworkers = coworkerService.get(user, profileId).stream()
                 .map(CoworkerResponse::of)
                 .toList();
@@ -35,8 +34,8 @@ public class CoworkerController {
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
         coworkerService.delete(user, id);
         return ApiResponse.success(null);
     }

@@ -30,24 +30,24 @@ public class CoworkerRequestController {
 
     @PostMapping("/{id}/accept")
     public ApiResponse<Void> accept(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
         coworkerRequestService.accept(user, id);
         return ApiResponse.success(null);
     }
 
     @PostMapping("/{id}/deny")
     public ApiResponse<Void> deny(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
         coworkerRequestService.deny(user, id);
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> cancel(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
         coworkerRequestService.cancel(user, id);
         return ApiResponse.success(null);
     }
