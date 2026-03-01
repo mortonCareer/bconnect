@@ -51,6 +51,17 @@ export function parseArrearsHtml(html: string): KisconArrearsItem[] {
   return items
 }
 
+/**
+ * 공표기간 만료 여부 판정 — "2024.01~2026.01" 형식
+ * 공표기간 종료 데이터는 사실적시 명예훼손 리스크 → 저장·조회 모두 제외
+ */
+export function isArrearsActive(item: KisconArrearsItem): boolean {
+  const match = item.publicationPeriod.match(/~\s*(\d{4})\.(\d{2})/)
+  if (!match) return true // 파싱 실패 시 보수적으로 포함
+  const endDate = new Date(Number(match[1]), Number(match[2]) - 1 + 1) // 종료월 다음달 1일
+  return endDate > new Date()
+}
+
 // ─── 하도급참여제한 ──────────────────────────────
 
 export interface KisconSubconLimitItem {
@@ -106,4 +117,15 @@ export function parseSubconLimitHtml(html: string): KisconSubconLimitItem[] {
   })
 
   return items
+}
+
+/**
+ * 제한종료일 만료 여부 판정 — "2025.03.01" 형식
+ * 제한기간 종료 데이터는 저장·조회 모두 제외
+ */
+export function isSubconActive(item: KisconSubconLimitItem): boolean {
+  const parts = item.restrictionEnd.match(/(\d{4})\.(\d{2})\.(\d{2})/)
+  if (!parts) return true // 파싱 실패 시 보수적으로 포함
+  const endDate = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]))
+  return endDate > new Date()
 }

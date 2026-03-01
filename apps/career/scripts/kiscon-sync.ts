@@ -10,7 +10,12 @@
  */
 
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { parseArrearsHtml, parseSubconLimitHtml } from '../src/app/one-click/_clients/kiscon-parser'
+import {
+  isArrearsActive,
+  isSubconActive,
+  parseArrearsHtml,
+  parseSubconLimitHtml,
+} from '../src/app/one-click/_clients/kiscon-parser'
 
 const S3_BUCKET = process.env.AWS_S3_BUCKET ?? 'morton-storage'
 const AWS_REGION = process.env.AWS_REGION ?? 'ap-northeast-2'
@@ -52,8 +57,11 @@ async function main() {
   // 상습체불 크롤링
   console.log('[kiscon-sync] 상습체불 크롤링...')
   const arrearsHtml = await fetchHtml(KISCON_ARREARS_URL, { GotoPage: '1' })
-  const arrearsItems = parseArrearsHtml(arrearsHtml)
-  console.log(`[kiscon-sync] 상습체불: ${arrearsItems.length}건`)
+  const arrearsAll = parseArrearsHtml(arrearsHtml)
+  const arrearsItems = arrearsAll.filter(isArrearsActive)
+  console.log(
+    `[kiscon-sync] 상습체불: ${arrearsAll.length}건 중 유효 ${arrearsItems.length}건 (만료 ${arrearsAll.length - arrearsItems.length}건 제외)`
+  )
 
   await uploadToS3('kiscon/arrears.json', {
     lastUpdated: now,
@@ -64,8 +72,11 @@ async function main() {
   // 하도급참여제한 크롤링
   console.log('[kiscon-sync] 하도급참여제한 크롤링...')
   const subconHtml = await fetchHtml(KISCON_SUBCON_URL, { GotoPage: '1' })
-  const subconItems = parseSubconLimitHtml(subconHtml)
-  console.log(`[kiscon-sync] 하도급참여제한: ${subconItems.length}건`)
+  const subconAll = parseSubconLimitHtml(subconHtml)
+  const subconItems = subconAll.filter(isSubconActive)
+  console.log(
+    `[kiscon-sync] 하도급참여제한: ${subconAll.length}건 중 유효 ${subconItems.length}건 (만료 ${subconAll.length - subconItems.length}건 제외)`
+  )
 
   await uploadToS3('kiscon/subcon-limits.json', {
     lastUpdated: now,

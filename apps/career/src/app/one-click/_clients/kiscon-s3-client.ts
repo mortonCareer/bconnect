@@ -1,7 +1,12 @@
 import 'server-only'
 
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import type { KisconArrearsItem, KisconSubconLimitItem } from './kiscon-parser'
+import {
+  type KisconArrearsItem,
+  type KisconSubconLimitItem,
+  isArrearsActive,
+  isSubconActive,
+} from './kiscon-parser'
 
 export type { KisconArrearsItem, KisconSubconLimitItem }
 
@@ -24,29 +29,6 @@ async function getS3Json<T>(key: string): Promise<KisconS3Data<T>> {
   const response = await s3.send(command)
   const body = await response.Body!.transformToString()
   return JSON.parse(body) as KisconS3Data<T>
-}
-
-// ─── 공표기간 만료 필터 ──────────────────────────
-
-/**
- * "2024.01~2026.01" → 종료 연월 추출 후 현재 날짜와 비교
- * 공표기간 종료 데이터는 사실적시 명예훼손 리스크 → 반드시 제외
- */
-function isArrearsActive(item: KisconArrearsItem): boolean {
-  const match = item.publicationPeriod.match(/~\s*(\d{4})\.(\d{2})/)
-  if (!match) return true // 파싱 실패 시 보수적으로 포함
-  const endDate = new Date(Number(match[1]), Number(match[2]) - 1 + 1) // 종료월 말일
-  return endDate > new Date()
-}
-
-/**
- * 제한종료일 "2025.03.01" → Date 변환 후 비교
- */
-function isSubconActive(item: KisconSubconLimitItem): boolean {
-  const parts = item.restrictionEnd.match(/(\d{4})\.(\d{2})\.(\d{2})/)
-  if (!parts) return true
-  const endDate = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]))
-  return endDate > new Date()
 }
 
 // ─── S3 데이터 freshness 체크 ────────────────────
