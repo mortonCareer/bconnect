@@ -14,12 +14,6 @@ public class MessageFinder {
 
     private final MessageRepository messageRepository;
 
-    public Message find(Long messageId) {
-        return messageRepository.findById(messageId)
-                .map(Message::of)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-    }
-
     public List<Message> findByChatId(Long chatId) {
         return messageRepository.findByChatId(chatId)
                 .stream()
