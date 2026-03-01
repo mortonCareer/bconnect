@@ -1,6 +1,7 @@
-# Reference
+# Code Convention
 
-> 프로젝트(`dev-practice-commerce`)의 코드베이스에서 도출된 패턴, 유형, 역할을 정리한 문서.
+> 본 프로젝트(`dev-practice-commerce`)의 코드베이스에서 도출된 패턴, 유형, 역할을 정리한 문서.
+> 예시 코드는 동일한 패턴의 Java 코드로 작성.
 
 ---
 
@@ -707,10 +708,11 @@ public class OrderResponse {
 
 ## 8. 유효성 검사 & 예외 처리
 
-### 8-1. 3계층 검증
+### 8-1. 4계층 검증
 
 | 계층 | 위치 | 역할 | 예시 |
 |------|------|------|------|
+| **0) Bean Validation** | Request DTO | 필수값·형식 검증 (`@Valid` + `@NotNull`, `@NotBlank` 등) | `@NotBlank String content` |
 | **1) Request** | `toXxx()` 내부 | 입력값 기본 검증 | `if (quantity <= 0) throw CoreException(INVALID_REQUEST)` |
 | **2) Service** | 서비스 메서드 | 비즈니스 규칙 검증 | `if (order.userId != user.id) throw CoreException(NOT_FOUND_DATA)` |
 | **3) Domain/Validator** | 전문 Validator | 정책 검증 | `ReviewPolicyValidator.validateNew()` — 주문 내역 기반 리뷰 가능 여부 |
@@ -1039,7 +1041,7 @@ public enum ErrorCode {
 
 ---
 
-## 부록. 새 코드 작성 체크리스트
+## 부록 1. 새 코드 작성 체크리스트
 
 ### 엔티티
 
@@ -1101,7 +1103,7 @@ public enum ErrorCode {
 | 2 | Request 변환 | `toXxx()` 메서드로 도메인 객체 반환 | 7-1 |
 | 3 | Response 생성 | `companion object { fun of() }` 팩토리 | 7-1 |
 | 4 | 입력 검증 | `CoreException(ErrorType.INVALID_REQUEST)` 통일 | 8-1 |
-| 5 | Bean Validation 금지 | `@Valid`, `@NotNull` 등 사용 금지 | 8-1 |
+| 5 | Bean Validation | `@Valid` + `@NotNull`, `@NotBlank` 등 사용 가능. Request DTO 필드에 적용 | 8-1 |
 
 ### 에러 타입
 
@@ -1123,4 +1125,135 @@ public enum ErrorCode {
 | 4 | 메서드명 | 한글 서술형 (`결제가_성공적으로_처리_되어야한다`) | 10-3 |
 | 5 | BigDecimal 비교 | `isEqualByComparingTo()` (`isEqualTo` 금지) | 10-5 |
 
+---
 
+## 부록 2. 인터페이스 패턴
+
+### Storage
+
+| 유형 | 선언 | 역할 | 금지 | 참조 |
+|------|------|------|------|------|
+| Entity | `@Entity class Xxx : BaseEntity()` | 상태 전이, 필드 캡슐화 | if/throw, 검증, 다른 엔티티 참조 | 3-1 |
+| Repository | `interface Xxx : JpaRepository<E, Long>` | Spring Data / JPQL 데이터 접근 | 비즈니스 로직, Hard Delete | 4-1 |
+
+**Entity 메서드**
+
+| 유형 | 시그니처 | 반환 | 규칙 | 참조 |
+|------|----------|------|------|------|
+| 상태 전이 | `paid()`, `canceled()`, `use()`, `revert()` | void | if/throw 금지 — 서비스가 검증 | 3-3, 8-3 |
+| 값 변경 | `applyXxx(value)`, `updateContent(content)` | void | 자동 보정 허용 (`value < 1 → 1`), throw 금지 | 3-3 |
+| 상태 조회 | `isXxx()`, `hasXxx()` | boolean | 자기 필드만 참조, 다른 엔티티 비교 금지 | 3-3 |
+
+**Repository 메서드**
+
+| 유형 | 시그니처 | 반환 | 규칙 | 참조 |
+|------|----------|------|------|------|
+| 단건 조회 | `findByXxxAndYyy()` | `Entity?` | Soft Delete 조건(`EntityStatus`) 포함 | 4-2 |
+| 목록 조회 | `findByXxxOrderByIdDesc()` | `List<Entity>` | 정렬은 메서드명에 명시 | 4-2 |
+| 페이징 조회 | `findByXxx(pageable)` | `Slice<Entity>` | `Page<T>` 금지 (COUNT 쿼리 없음) | 4-3 |
+| 집합 조회 | `findByIdInAndStatus()` | `List<Entity>` | ID 목록 기반 | 4-2 |
+| 커스텀 | `@Query("SELECT ...")` | 커스텀 | JPQL만 사용 (Native Query 미사용) | 4-3 |
+
+**파라미터 규칙**
+
+| 대상 | 허용 | 금지 |
+|------|------|------|
+| Entity 메서드 | 스칼라 값 (`Long`, `String`, `BigDecimal`, `Enum`) | 도메인 객체, 다른 Entity |
+| Repository 메서드 | 스칼라 ID + `Enum` + `Pageable` + `LocalDateTime` | 도메인 객체 |
+
+### Service
+
+| 유형 | 선언 | 역할 | @Tx | 금지 | 참조 |
+|------|------|------|-----|------|------|
+| Facade | `@Service class XxxService` | 전문 서비스 조합 | 선택 | Repository 직접 호출 | 5-2, 7-3 |
+| 단일 Service | `@Service class XxxService` | Repository + 비즈니스 로직 | ✅ | HTTP 코드, Response 생성 | 5-2, 7-3 |
+| Finder | `@Component class XxxFinder` | 조회 전용 (Q) | 없음 | 쓰기, 상태 변경 | 5-2, 7-3 |
+| Manager | `@Component class XxxManager` | 쓰기 전용 (C) | ✅ | 조회 목적 메서드 | 5-2, 7-3 |
+| Handler | `@Component class XxxHandler` | 부수 효과 (C) | ✅ | 비즈니스 의사결정 | 5-2, 7-3 |
+| Validator | `@Component class XxxValidator` | 정책 검증 (Q) | 없음 | 쓰기, 상태 변경 | 5-2, 7-3 |
+| Loader | `@Service class XxxLoader` | 배치 데이터 적재 (C) | ✅ | 실시간 처리 | 5-2 |
+| Calculator | `object XxxCalculator` | 순수 계산 (상태 없음) | — | 상태 보유, 외부 의존 | 11-1 |
+| Generator | `@Component class XxxGenerator` | 값/키 생성 | — | — | 11-1 |
+
+**메서드 (CQS)**
+
+| 접두사 | CQS | 반환 | 설명 | 참조 |
+|--------|-----|------|------|------|
+| `find` / `get` | Q | 도메인 객체 | 조회, 부수 효과 없음 | 5-3, 11-2 |
+| `create` / `add` | C+R | Long / String | 생성 → ID/Key 반환 | 5-3, 11-2 |
+| `update` / `modify` | C+R | Long | 수정 → ID 반환 | 11-2 |
+| `delete` / `remove` | C+R | Long / void | Soft Delete | 11-2 |
+| `cancel` | C+R | Long | 상태 복원 + 이력 기록 | 11-2 |
+| `success` / `fail` | C+R / C | Long / void | PG 콜백 처리 | 11-2 |
+| `earn` / `deduct` | C | void | 포인트 증감 | 11-2 |
+| `validate` | Q | 결과 / void | 정책 검증 (쓰기 없음) | 11-2 |
+| `download` / `process` / `loadTargets` | C | void | 리소스 획득 / 배치 적재 | 11-2 |
+| `calculate` / `transfer` | C+R | Int | 집계 / 이체 | 11-2 |
+
+**파라미터 규칙**: "조립한 것 → 도메인 객체" / "가리키는 것 → 스칼라 ID"
+
+| 유형 | 조건 | 예시 |
+|------|------|------|
+| 도메인 객체 | Request.toXxx()가 조립한 입력 | `NewOrder`, `AddCartItem`, `ReviewContent` |
+| 도메인 객체 | 행위 주체 | `User` |
+| 도메인 객체 | 복합 식별자 · 행위 명령 | `ReviewTarget(type, id)`, `CancelAction(orderKey)` |
+| 도메인 객체 | 이전 단계 조회 결과 · 계산 VO | `Order`, `PaymentDiscount` |
+| 스칼라 ID | 기존 리소스 참조 | `reviewId: Long`, `couponId: Long` |
+| 스칼라 값 | 외부 시스템 · 배치 파라미터 | `externalPaymentKey`, `settleDate` |
+
+### API
+
+| 유형 | 선언 | 역할 | 금지 | 참조 |
+|------|------|------|------|------|
+| Controller | `@RestController class XxxController` | Request → Service → Response | 비즈니스 로직, Repository 직접 호출 | 6-1, 7-3 |
+| Request | `data class XxxRequest` | 입력 바인딩 + `toXxx()` 변환 + Bean Validation (`@Valid`, `@NotNull` 등) | — | 7-1, 8-1 |
+| Response | `data class XxxResponse` | `companion object { fun of() }` 직렬화 | 비즈니스 로직 | 7-1 |
+
+**Controller 메서드**
+
+| HTTP | 흐름 | 응답 | 참조 |
+|------|------|------|------|
+| `@PostMapping` | `request.toXxx()` → `service.create()` | `ApiResponse<CreateXxxResponse>` | 6-2 |
+| `@GetMapping("/{id}")` | `service.getXxx()` → `Response.of()` | `ApiResponse<XxxResponse>` | 6-2 |
+| `@GetMapping` | `service.findXxx()` | `ApiResponse<PageResponse<XxxResponse>>` | 6-2 |
+| `@PutMapping("/{id}")` | `request.toXxx()` → `service.update()` | `ApiResponse<Any>` | 6-2 |
+| `@DeleteMapping("/{id}")` | `service.deleteXxx()` | `ApiResponse<Any>` | 6-2 |
+
+**Request / Response 메서드**
+
+| 클래스 | 메서드 | 규칙 | 참조 |
+|--------|--------|------|------|
+| Request | `toXxx()` | 입력 검증 → `CoreException(INVALID_REQUEST)` → 도메인 객체 반환 | 7-2, 8-1 |
+| Response | `of(domain)` | `companion object` 팩토리 → Response 생성 | 7-2 |
+
+**파라미터 규칙**
+
+| 출처 | 타입 | 변환 |
+|------|------|------|
+| ArgumentResolver | `User` | 서비스에 그대로 전달 |
+| `@RequestBody` | Request DTO | `request.toXxx()` → 도메인 객체 |
+| `@PathVariable` | `Long` / `String` | 서비스에 그대로 전달 또는 `toXxx()`에 주입 |
+| `@RequestParam` | 원시값 / `Enum` | 서비스에 그대로 전달 또는 도메인 객체 조립 |
+
+### Domain
+
+| 유형 | 선언 | 역할 | 금지 | 참조 |
+|------|------|------|------|------|
+| Domain 객체 | `data class Xxx` | 불변 전달 객체 (레이어 간 데이터 이동) | DB 직접 접근 | 7-1 |
+
+### 계층 경계 요약
+
+| 경계 | 넘어가는 것 | 넘어가지 않는 것 |
+|------|-----------|---------------|
+| HTTP → Controller | 원시값 (`Long`, `String`, `Enum`, JSON) | 도메인 객체 |
+| Controller → Service | `User` + 도메인 객체 + 스칼라 ID (Domain Command가 DTO 필드 단순 복사인 경우, Request DTO 직접 전달 가능) | — |
+| Service → Repository | 스칼라 ID + `Enum` + `Pageable` | 도메인 객체 |
+| Service → Entity 메서드 | 스칼라 값 (`Long`, `String`, `BigDecimal`, `Enum`) | 도메인 객체 |
+
+### 계층 경계 보충 규칙
+
+| 규칙 | 설명 |
+|------|------|
+| Service → Entity 직접 import | Service는 Entity를 직접 import하여 사용할 수 있다 |
+| Service → Request DTO 직접 import | Domain Command가 DTO 필드를 단순 복사하는 경우, Service는 Request DTO를 직접 매개변수로 받을 수 있다 |
+| BaseEntity `@SoftDelete` | BaseEntity에 `@SoftDelete` 어노테이션을 적용하여 Soft Delete를 자동화할 수 있다 |

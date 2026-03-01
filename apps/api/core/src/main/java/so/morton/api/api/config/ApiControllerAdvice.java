@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
+import org.springframework.boot.logging.LogLevel;
 import so.morton.api.support.response.ApiResponse;
 
 @RestControllerAdvice
@@ -17,7 +18,7 @@ public class ApiControllerAdvice {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
-        log.warn("Validation failed: {}", e.getMessage());
+        log.info("Validation failed: {}", e.getMessage());
         return ResponseEntity
                 .status(CommonExceptionCode.NOT_VALID.getStatus())
                 .body(ApiResponse.error(CommonExceptionCode.NOT_VALID));
@@ -25,10 +26,11 @@ public class ApiControllerAdvice {
 
     @ExceptionHandler(CodeException.class)
     public ResponseEntity<ApiResponse<Void>> handleCodeException(CodeException e) {
-        if (e.getExceptionCode().getStatus().is5xxServerError()) {
-            log.error("CodeException : {}", e.getMessage(), e);
-        } else {
-            log.warn("CodeException : {}", e.getMessage(), e);
+        LogLevel logLevel = e.getExceptionCode().getLogLevel();
+        switch (logLevel) {
+            case ERROR -> log.error("CodeException : {}", e.getMessage(), e);
+            case WARN -> log.warn("CodeException : {}", e.getMessage(), e);
+            case INFO -> log.info("CodeException : {}", e.getMessage());
         }
 
         return ResponseEntity

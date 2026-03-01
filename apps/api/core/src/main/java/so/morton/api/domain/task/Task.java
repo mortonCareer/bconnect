@@ -10,17 +10,17 @@ import java.util.Set;
 
 public record Task(
     Long id,
+    Long profileId,
     // TODO: 삭제
     String company,
     Address address,
     // TODO: 추가
     // projectId: Long [nullable]
-    // crewId: Long [nullable]
     String taskTitle,
     String eventTitle,
     Set<Trade> trades,
-    LocalDate startDate,
-    LocalDate endDate,
+    LocalDate start,
+    LocalDate end,
     // TODO: 추가
     // status: TaskStatus
     LocalDateTime createdAt,
@@ -29,13 +29,14 @@ public record Task(
     public static Task of(TaskEntity entity) {
         return new Task(
                 entity.getId(),
+                entity.getProfileId(),
                 entity.getCompany(),
                 entity.getAddress(),
                 entity.getTaskTitle(),
                 entity.getEventTitle(),
                 entity.getTrades(),
-                entity.getStartDate(),
-                entity.getEndDate(),
+                entity.getStart(),
+                entity.getEnd(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt()
         );

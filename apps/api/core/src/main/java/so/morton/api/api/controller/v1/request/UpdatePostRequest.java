@@ -1,8 +1,6 @@
 package so.morton.api.api.controller.v1.request;
 
-import java.util.List;
-
+import jakarta.validation.constraints.NotBlank;
 public record UpdatePostRequest(
-        List<String> images,
-        String content
+        @NotBlank String content
 ) {}

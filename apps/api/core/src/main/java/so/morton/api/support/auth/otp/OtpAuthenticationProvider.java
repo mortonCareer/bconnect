@@ -39,14 +39,14 @@ public class OtpAuthenticationProvider implements AuthenticationProvider {
         
         try {
             otpService.verifyCode(phone, code);
-        } catch (CodeException e) {
-            throw new AuthenticationServiceException("OTP verification failed", e);
+        } catch (CodeException ex) {
+            throw new AuthenticationServiceException("OTP verification failed", ex);
         }
 
         try {
             UserDetails user = userService.loadUserByPhone(phone);
             return new OtpAuthenticationToken(user, null, user.getAuthorities());
-        } catch (UsernameNotFoundException e) {
+        } catch (UsernameNotFoundException ex) {
             return new OtpAuthenticationToken(phone, null, List.of(new SimpleGrantedAuthority(ROLE_PREFIX + GUEST)));
         }
     }

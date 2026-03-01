@@ -19,6 +19,9 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TaskEntity extends BaseEntity {
 
+    @Column
+    private Long profileId;
+
     @Column(nullable = false)
     private String company; // TODO: 삭제
 
@@ -42,34 +45,35 @@ public class TaskEntity extends BaseEntity {
     private Set<Trade> trades = new HashSet<>();
 
     @Column(nullable = false)
-    private LocalDate startDate;
+    private LocalDate start;
 
     @Column(nullable = false)
-    private LocalDate endDate;
+    private LocalDate end;
 
     // TODO: 추가
     // status: TaskStatus
 
     @Builder
-    public TaskEntity(String company, Address address, String taskTitle, String eventTitle,
-                      Set<Trade> trades, LocalDate startDate, LocalDate endDate) {
+    public TaskEntity(Long profileId, String company, Address address, String taskTitle, String eventTitle,
+                      Set<Trade> trades, LocalDate start, LocalDate end) {
+        this.profileId = profileId;
         this.company = company;
         this.address = address;
         this.taskTitle = taskTitle;
         this.eventTitle = eventTitle;
         this.trades = trades != null ? trades : new HashSet<>();
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.start = start;
+        this.end = end;
     }
 
     public void update(String company, Address address, String taskTitle, String eventTitle,
-                       Set<Trade> trades, LocalDate startDate, LocalDate endDate) {
+                       Set<Trade> trades, LocalDate start, LocalDate end) {
         this.company = company;
         this.address = address;
         this.taskTitle = taskTitle;
         this.eventTitle = eventTitle;
         this.trades = trades != null ? trades : new HashSet<>();
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.start = start;
+        this.end = end;
     }
 }

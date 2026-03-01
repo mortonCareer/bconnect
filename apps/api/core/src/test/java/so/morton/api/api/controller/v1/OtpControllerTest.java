@@ -50,7 +50,7 @@ class OtpControllerTest {
     }
 
     @Test
-    @DisplayName("재전송 대기 시간 이내에 요청하면 예외 응답을 반환한다")
+    @DisplayName("재전송 대기 시간 이내에 요청하면 에러 응답을 반환한다")
     void send_rateLimited() throws Exception {
         // given
         doThrow(new CodeException(AuthExceptionCode.OTP_RATE_LIMIT))
@@ -66,7 +66,7 @@ class OtpControllerTest {
     }
 
     @Test
-    @DisplayName("일일 발송 한도를 초과하면 예외 응답을 반환한다")
+    @DisplayName("일일 발송 한도를 초과하면 에러 응답을 반환한다")
     void send_dailyLimitExceeded() throws Exception {
         // given
         doThrow(new CodeException(AuthExceptionCode.OTP_DAILY_LIMIT))
@@ -82,7 +82,7 @@ class OtpControllerTest {
     }
 
     @Test
-    @DisplayName("전화번호가 비어있으면 예외 응답을 반환한다")
+    @DisplayName("전화번호가 비어있으면 에러 응답을 반환한다")
     void send_emptyPhone() throws Exception {
         // given
         String body = "{\"phone\":\"\"}";

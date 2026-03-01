@@ -40,93 +40,10 @@ paths:
             - `A001` 일일 발송 한도를 초과했습니다
             - `A002` 재전송 대기 시간이 지나지 않았습니다
 
-  /api/v1/auth/otp/verify:
-    post:
-      operationId: verifyOtp
-      tags: [Auth]
-      security: []
-      summary: 인증코드를 검증합니다 (로그인 또는 회원가입 분기)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VerifyCodeRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/VerifyOtpLoginResponse'
-                  - $ref: '#/components/schemas/VerifyOtpSignupResponse'
-                discriminator:
-                  propertyName: registered
-        '400':
-          description: |
-            - `C001` 유효하지 않은 입력값입니다
-            - `A003` 유효하지 않은 인증번호입니다
-            - `A004` 인증번호가 만료되었습니다
-            - `A005` 인증 시도 횟수를 초과했습니다
-
-  /api/v1/auth/refresh:
-    post:
-      operationId: refreshToken
-      tags: [Auth]
-      security: []
-      summary: 리프레시 토큰으로 액세스 토큰을 갱신합니다
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RefreshTokenResponse'
-        '401':
-          description: |
-            - `A006` 유효하지 않은 리프레시 토큰입니다
-
-  /api/v1/auth/logout:
-    post:
-      operationId: logout
-      tags: [Auth]
-      summary: 로그아웃하고 리프레시 토큰을 무효화합니다
-      responses:
-        '200':
-          description: OK
-
-  /api/v1/auth/me:
-    get:
-      operationId: getCurrentMember
-      tags: [Auth]
-      summary: 현재 로그인한 회원 정보를 조회합니다
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Member'
-
   # =====================
   # Member Endpoints
   # =====================
   /api/v1/members:
-    get:
-      operationId: getMembers
-      tags: [Members]
-      summary: 회원 목록을 조회합니다
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Member'
-
     post:
       operationId: registerMember
       tags: [Members]
@@ -144,25 +61,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Member'
+                type: integer
+                format: int64
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
             - `A009` 유효하지 않은 가입 토큰입니다
             - `A010` 가입 토큰이 만료되었습니다
 
-  /api/v1/members/{memberId}:
+  /api/v1/members/me:
     get:
-      operationId: getMember
+      operationId: getMyMember
       tags: [Members]
-      summary: 회원 정보를 조회합니다
-      parameters:
-        - name: memberId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      summary: 내 회원 정보를 조회합니다
       responses:
         '200':
           description: OK
@@ -172,16 +83,9 @@ paths:
                 $ref: '#/components/schemas/Member'
 
     put:
-      operationId: updateMember
+      operationId: updateMyMember
       tags: [Members]
-      summary: 회원 정보를 수정합니다
-      parameters:
-        - name: memberId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      summary: 내 회원 정보를 수정합니다
       requestBody:
         required: true
         content:
@@ -191,13 +95,17 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Member'
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
+
+    delete:
+      operationId: withdrawMember
+      tags: [Members]
+      summary: 회원을 탈퇴합니다
+      responses:
+        '200':
+          description: OK
 
   # =====================
   # Post Endpoints
@@ -206,6 +114,7 @@ paths:
     get:
       operationId: getPosts
       tags: [Posts]
+      security: []
       summary: 게시글 목록을 조회합니다 (필터, 커서 페이지네이션)
       parameters:
         - name: authorId
@@ -277,7 +186,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                type: integer
+                format: int64
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -286,6 +196,7 @@ paths:
     get:
       operationId: getPost
       tags: [Posts]
+      security: []
       summary: 게시글을 조회합니다
       parameters:
         - name: postId
@@ -322,10 +233,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Post'
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -342,8 +249,8 @@ paths:
             type: integer
             format: int64
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
   # =====================
   # Task Endpoints
@@ -352,6 +259,7 @@ paths:
     get:
       operationId: getTasks
       tags: [Tasks]
+      security: []
       summary: 작업 목록을 조회합니다
       responses:
         '200':
@@ -379,7 +287,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
+                type: integer
+                format: int64
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -388,6 +297,7 @@ paths:
     get:
       operationId: getTask
       tags: [Tasks]
+      security: []
       summary: 작업을 조회합니다
       parameters:
         - name: taskId
@@ -424,10 +334,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Task'
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -444,108 +350,51 @@ paths:
             type: integer
             format: int64
       responses:
-        '204':
-          description: No Content
-
-  # =====================
-  # Chat Endpoints
-  # =====================
-  /api/v1/chats:
-    get:
-      operationId: getMyChats
-      tags: [Chats]
-      summary: 내 채팅방 목록을 조회합니다 (커서 페이지네이션)
-      parameters:
-        - name: cursor
-          in: query
-          required: false
-          description: 페이지네이션 커서
-          schema:
-            type: string
-        - name: limit
-          in: query
-          required: false
-          description: 페이지 크기 (기본값 20)
-          schema:
-            type: integer
-            default: 20
-      responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChatPage'
-
-  /api/v1/chats/{chatId}:
-    get:
-      operationId: getChat
-      tags: [Chats]
-      summary: 채팅방을 조회합니다
-      parameters:
-        - name: chatId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Chat'
-
-  /api/v1/chats/{chatId}/messages:
-    get:
-      operationId: getChatMessages
-      tags: [Chats]
-      summary: 채팅방의 메시지 목록을 조회합니다 (역방향 커서 페이지네이션)
-      parameters:
-        - name: chatId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: before
-          in: query
-          required: false
-          description: 이 커서 이전의 메시지를 조회
-          schema:
-            type: string
-        - name: limit
-          in: query
-          required: false
-          description: 페이지 크기 (기본값 30)
-          schema:
-            type: integer
-            default: 30
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MessagePage'
 
   # =====================
   # Profile Endpoints
   # =====================
-  /api/v1/profiles/me:
+  /api/v1/profiles:
     get:
-      operationId: getMyProfile
+      operationId: getProfiles
       tags: [Profiles]
-      summary: 내 프로필을 조회합니다
+      security: []
+      summary: 프로필 목록을 조회합니다
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Profile'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Profile'
 
+    post:
+      operationId: createProfile
+      tags: [Profiles]
+      summary: 새 프로필을 생성합니다
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProfileRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+
+  /api/v1/profiles/me:
     put:
       operationId: updateMyProfile
       tags: [Profiles]
@@ -557,16 +406,40 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateProfileRequest'
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
+
+    delete:
+      operationId: deleteMyProfile
+      tags: [Profiles]
+      summary: 내 프로필을 삭제합니다
+      responses:
+        '200':
+          description: OK
+
+  /api/v1/profiles/me/about:
+    patch:
+      operationId: updateMyProfileAbout
+      tags: [Profiles]
+      summary: 내 프로필 자기소개를 수정합니다
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileAboutRequest'
+      responses:
+        '200':
+          description: OK
 
   /api/v1/profiles/{profileId}:
     get:
       operationId: getProfile
       tags: [Profiles]
+      security: []
       summary: 프로필을 조회합니다
       parameters:
         - name: profileId
@@ -582,6 +455,219 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Profile'
+
+  # =====================
+  # Credential Endpoints
+  # =====================
+  /api/v1/credentials:
+    get:
+      operationId: getCredentials
+      tags: [Credentials]
+      security: []
+      summary: 자격증 목록을 조회합니다
+      parameters:
+        - name: profileId
+          in: query
+          required: true
+          description: 프로필 ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Credential'
+
+    post:
+      operationId: createCredential
+      tags: [Credentials]
+      summary: 자격증을 등록합니다
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCredentialRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+
+  /api/v1/credentials/{credentialId}:
+    delete:
+      operationId: deleteCredential
+      tags: [Credentials]
+      summary: 자격증을 삭제합니다
+      parameters:
+        - name: credentialId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+
+  /api/v1/credentials/{credentialId}/accept:
+    post:
+      operationId: acceptCredential
+      tags: [Credentials]
+      summary: 자격증을 승인합니다 (ADMIN)
+      parameters:
+        - name: credentialId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+
+  /api/v1/credentials/{credentialId}/deny:
+    post:
+      operationId: denyCredential
+      tags: [Credentials]
+      summary: 자격증을 거부합니다 (ADMIN)
+      parameters:
+        - name: credentialId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+
+  # =====================
+  # Coworker Endpoints
+  # =====================
+  /api/v1/coworkers:
+    get:
+      operationId: getCoworkers
+      tags: [Coworkers]
+      summary: 동료 목록을 조회합니다
+      parameters:
+        - name: profileId
+          in: query
+          required: true
+          description: 프로필 ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Coworker'
+
+  /api/v1/coworkers/{coworkerId}:
+    delete:
+      operationId: deleteCoworker
+      tags: [Coworkers]
+      summary: 동료를 삭제합니다
+      parameters:
+        - name: coworkerId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+
+  # =====================
+  # Coworker Request Endpoints
+  # =====================
+  /api/v1/coworker-requests:
+    post:
+      operationId: createCoworkerRequest
+      tags: [CoworkerRequests]
+      summary: 동료 요청을 보냅니다
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCoworkerRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+
+  /api/v1/coworker-requests/{id}:
+    delete:
+      operationId: cancelCoworkerRequest
+      tags: [CoworkerRequests]
+      summary: 동료 요청을 취소합니다
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+
+  /api/v1/coworker-requests/{id}/accept:
+    post:
+      operationId: acceptCoworkerRequest
+      tags: [CoworkerRequests]
+      summary: 동료 요청을 수락합니다
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+
+  /api/v1/coworker-requests/{id}/deny:
+    post:
+      operationId: denyCoworkerRequest
+      tags: [CoworkerRequests]
+      summary: 동료 요청을 거절합니다
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
 
 components:
   securitySchemes:
@@ -631,10 +717,13 @@ components:
       type: string
       enum:
         - GUEST
+        - CLIENT
         - ARCHITECT
         - CONTRACTOR
         - FOREMAN
-        - WORKER
+        - SKILLED
+        - SEMI_SKILLED
+        - HELPER
         - ADMIN
 
     Trade:
@@ -671,6 +760,30 @@ components:
         - CLEANING
         - GENERAL_LABOR
 
+    CredentialType:
+      type: string
+      enum:
+        # 사업자 및 면허
+        - IDENTITY_VERIFICATION
+        - SOLE_PROPRIETOR
+        - CONSTRUCTION_LICENSE
+        - SPECIALTY_CONSTRUCTION_LICENSE
+        # 증명서
+        - CAREER_CERTIFICATE
+        - SKILL_GRADE_CERTIFICATE
+        - OTHER_CERTIFICATE
+        # 자격증
+        - NATIONAL_TECHNICAL_QUALIFICATION
+        - SKILLED_TECHNICIAN
+        - OTHER_QUALIFICATION
+
+    CredentialStatus:
+      type: string
+      enum:
+        - PENDING
+        - ACCEPTED
+        - DENIED
+
     # =====================
     # Auth Schemas
     # =====================
@@ -688,45 +801,6 @@ components:
         expiresAt:
           type: string
           format: date-time
-
-    VerifyCodeRequest:
-      type: object
-      required: [phone, code]
-      properties:
-        phone:
-          type: string
-          pattern: '\d{10,11}'
-        code:
-          type: string
-          pattern: '\d{6}'
-
-    VerifyOtpLoginResponse:
-      type: object
-      required: [registered, accessToken, refreshToken]
-      properties:
-        registered:
-          type: boolean
-          enum: [true]
-        accessToken:
-          type: string
-        refreshToken:
-          type: string
-
-    VerifyOtpSignupResponse:
-      type: object
-      required: [registered, signupToken]
-      properties:
-        registered:
-          type: boolean
-          enum: [false]
-        signupToken:
-          type: string
-
-    RefreshTokenResponse:
-      type: object
-      properties:
-        accessToken:
-          type: string
 
     # =====================
     # Member Schemas
@@ -756,7 +830,7 @@ components:
 
     RegisterMemberRequest:
       type: object
-      required: [username, name, phone, picture, role]
+      required: [signupToken, username, name, phone, picture, role]
       properties:
         signupToken:
           type: string
@@ -774,14 +848,14 @@ components:
 
     UpdateMemberRequest:
       type: object
+      required: [name, role]
       properties:
         name:
           type: string
-        phone:
-          type: string
-          pattern: '\d{10,11}'
         picture:
           type: string
+        role:
+          $ref: '#/components/schemas/Role'
 
     # =====================
     # Profile Schemas
@@ -819,8 +893,9 @@ components:
           type: string
           format: date-time
 
-    UpdateProfileRequest:
+    CreateProfileRequest:
       type: object
+      required: [primaryTrade, trades, experience, address]
       properties:
         primaryTrade:
           $ref: '#/components/schemas/Trade'
@@ -837,6 +912,30 @@ components:
           type: string
         address:
           $ref: '#/components/schemas/Address'
+
+    UpdateProfileRequest:
+      type: object
+      required: [primaryTrade, trades, address]
+      properties:
+        primaryTrade:
+          $ref: '#/components/schemas/Trade'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+        experience:
+          type: integer
+        headline:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+
+    UpdateProfileAboutRequest:
+      type: object
+      properties:
+        about:
+          type: string
 
     # =====================
     # Post Schemas
@@ -879,11 +978,8 @@ components:
 
     CreatePostRequest:
       type: object
-      required: [authorId, taskId, content]
+      required: [images, content]
       properties:
-        authorId:
-          type: integer
-          format: int64
         taskId:
           type: integer
           format: int64
@@ -891,16 +987,14 @@ components:
           type: array
           items:
             type: string
+          minItems: 1
         content:
           type: string
 
     UpdatePostRequest:
       type: object
+      required: [content]
       properties:
-        images:
-          type: array
-          items:
-            type: string
         content:
           type: string
 
@@ -911,6 +1005,9 @@ components:
       type: object
       properties:
         id:
+          type: integer
+          format: int64
+        profileId:
           type: integer
           format: int64
         company:
@@ -941,7 +1038,7 @@ components:
 
     CreateTaskRequest:
       type: object
-      required: [company, taskTitle, eventTitle, start, end]
+      required: [company, address, taskTitle, eventTitle, trades, start, end]
       properties:
         company:
           type: string
@@ -965,6 +1062,7 @@ components:
 
     UpdateTaskRequest:
       type: object
+      required: [company, address, taskTitle, eventTitle, trades, start, end]
       properties:
         company:
           type: string
@@ -987,27 +1085,24 @@ components:
           format: date
 
     # =====================
-    # Chat Schemas
+    # Credential Schemas
     # =====================
-    Chat:
+    Credential:
       type: object
       properties:
         id:
           type: integer
           format: int64
-        title:
-          type: string
-        participantIds:
-          type: array
-          items:
-            type: integer
-            format: int64
-        lastMessage:
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/Message'
-        unreadCount:
+        profileId:
           type: integer
+          format: int64
+        type:
+          $ref: '#/components/schemas/CredentialType'
+        status:
+          $ref: '#/components/schemas/CredentialStatus'
+        expiredAt:
+          type: string
+          format: date
         createdAt:
           type: string
           format: date-time
@@ -1015,45 +1110,46 @@ components:
           type: string
           format: date-time
 
-    Message:
+    CreateCredentialRequest:
+      type: object
+      required: [type]
+      properties:
+        type:
+          $ref: '#/components/schemas/CredentialType'
+
+    # =====================
+    # Coworker Schemas
+    # =====================
+    Coworker:
       type: object
       properties:
         id:
           type: integer
           format: int64
-        chatId:
+        minId:
           type: integer
           format: int64
-        senderId:
+        maxId:
           type: integer
           format: int64
-        content:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        modifiedAt:
-          type: string
-          format: date-time
 
-    ChatPage:
+    CoworkerRequest:
       type: object
-      required: [items, meta]
       properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/Chat'
-        meta:
-          $ref: '#/components/schemas/CursorPageMeta'
+        id:
+          type: integer
+          format: int64
+        fromId:
+          type: integer
+          format: int64
+        toId:
+          type: integer
+          format: int64
 
-    MessagePage:
+    CreateCoworkerRequest:
       type: object
-      required: [items, meta]
+      required: [toId]
       properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/Message'
-        meta:
-          $ref: '#/components/schemas/CursorPageMeta'
+        toId:
+          type: integer
+          format: int64

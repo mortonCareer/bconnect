@@ -40,8 +40,8 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         if (type == JwtType.REFRESH) {
             try {
                 sessionService.verify(username, token);
-            } catch (CodeException e) {
-                throw new AuthenticationServiceException(e.getMessage(), e);
+            } catch (CodeException ex) {
+                throw new AuthenticationServiceException(ex.getMessage(), ex);
             }
         }
 

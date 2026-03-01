@@ -1,0 +1,30 @@
+package so.morton.api.api.controller.v1.response;
+
+import so.morton.api.domain.member.Member;
+import so.morton.api.storage.value.Role;
+
+import java.time.LocalDateTime;
+
+public record MemberResponse(
+        Long id,
+        String username,
+        String name,
+        String phone,
+        String picture,
+        Role role,
+        LocalDateTime createdAt,
+        LocalDateTime modifiedAt
+) {
+    public static MemberResponse of(Member member) {
+        return new MemberResponse(
+                member.id(),
+                member.username(),
+                member.name(),
+                member.phone(),
+                member.picture(),
+                member.role(),
+                member.createdAt(),
+                member.modifiedAt()
+        );
+    }
+}

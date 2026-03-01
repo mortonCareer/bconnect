@@ -2,15 +2,12 @@ package so.morton.api.domain.chat;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import so.morton.api.storage.domain.chat.ParticipantEntity;
-import so.morton.api.storage.domain.chat.ChatRepository;
-import so.morton.api.storage.domain.chat.MessageRepository;
-import so.morton.api.storage.domain.chat.ParticipantRepository;
-import so.morton.api.storage.value.EntityStatus;
-import so.morton.api.support.CodeException;
-import so.morton.api.support.CommonExceptionCode;
+import so.morton.api.storage.domain.chat.*;
+import so.morton.api.storage.domain.chat.MessageRepository.ChatUnreadCount;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -20,32 +17,39 @@ public class ChatFinder {
     private final ParticipantRepository participantRepository;
     private final MessageRepository messageRepository;
 
-    public Chat find(Long chatId, Long memberId) {
-        return chatRepository.findById(chatId)
-                .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
-                .map(entity -> {
-                    List<Long> participantIds = participantRepository.findByChatId(chatId)
-                            .stream()
-                            .map(ParticipantEntity::getMemberId)
-                            .toList();
+    public List<Chat> findAll(Long memberId) {
+        List<Long> chatIds = participantRepository.findByMemberId(memberId)
+                .stream().map(ParticipantEntity::getChatId).toList();
 
-                    Message lastMessage = messageRepository.findTopByChatIdOrderByIdDesc(chatId)
-                            .map(Message::of)
-                            .orElse(null);
+        if (chatIds.isEmpty()) return List.of();
 
-                    int unreadCount = participantRepository.findByChatIdAndMemberId(chatId, memberId)
-                            .map(p -> (int) messageRepository.countByChatIdAndIdGreaterThan(chatId, p.getLastIdx()))
-                            .orElse(0);
+        List<ChatEntity> chats = chatRepository.findAllById(chatIds);
 
-                    return Chat.of(entity, participantIds, lastMessage, unreadCount);
-                })
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-    }
-
-    public List<Chat> findByMember(Long memberId) {
-        return participantRepository.findByMemberId(memberId)
+        Map<Long, List<Long>> participantIds = participantRepository.findByChatIdIn(chatIds)
                 .stream()
-                .map(participant -> find(participant.getChatId(), memberId))
-                .toList();
+                .collect(Collectors.groupingBy(
+                        ParticipantEntity::getChatId,
+                        Collectors.mapping(ParticipantEntity::getMemberId, Collectors.toList())
+                ));
+
+        Map<Long, Message> lastMessages = messageRepository.findLatestMessagesByChatIdIn(chatIds)
+                .stream()
+                .collect(Collectors.toMap(MessageEntity::getChatId, Message::of));
+
+        Map<Long, Long> unreadCounts = messageRepository
+                .findUnreadCountByChatIdsAndMemberId(chatIds, memberId)
+                .stream()
+                .collect(Collectors.toMap(
+                        ChatUnreadCount::chatId,
+                        ChatUnreadCount::unreadCount
+                ));
+
+        return chats.stream()
+                .map(chat -> Chat.of(
+                        chat,
+                        participantIds.get(chat.getId()),
+                        lastMessages.get(chat.getId()),
+                        unreadCounts.getOrDefault(chat.getId(), 0L)
+                )).toList();
     }
 }

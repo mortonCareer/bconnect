@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -34,6 +35,7 @@ import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -85,9 +87,13 @@ public class SecurityConfig {
                 }))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(arc -> arc
-                        .requestMatchers(GET).permitAll()
-                        .requestMatchers(POST, "/api/v1/members").permitAll()
                         .requestMatchers("/api/v1/auth/otp/**").permitAll()
+                        .requestMatchers(POST, "/api/v1/members").permitAll()
+                        .requestMatchers(GET, "/api/v1/profiles", "/api/v1/profiles/{id}").permitAll()
+                        .requestMatchers(GET, "/api/v1/posts", "/api/v1/posts/{id}").permitAll()
+                        .requestMatchers(GET, "/api/v1/tasks", "/api/v1/tasks/{id}").permitAll()
+                        .requestMatchers(GET, "/api/v1/credentials").permitAll()
+                        .requestMatchers(POST, "/api/v1/credentials/*/accept", "/api/v1/credentials/*/deny").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterAfter(verifyOtpFilter, LogoutFilter.class)
                 .addFilterAfter(accessTokenAuthenticationFilter, LogoutFilter.class)
