@@ -34,6 +34,8 @@ public class CoworkerRequestService {
             throw new CodeException(CoworkerExceptionCode.TARGET_NOT_FOUND);
         if (coworkerRepository.existsByMinIdAndMaxId(Math.min(profileId, targetId), Math.max(profileId, targetId)))
             throw new CodeException(CoworkerExceptionCode.ALREADY_COWORKER);
+        if (requestRepository.findByFromIdAndToId(profileId, targetId).isPresent())
+            throw new CodeException(CoworkerExceptionCode.ALREADY_REQUESTED);
 
         // accept
         Optional<CoworkerRequestEntity> reverse = requestRepository.findByFromIdAndToId(targetId, profileId);

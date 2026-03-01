@@ -49,7 +49,7 @@ public class ChatFinder {
                         chat,
                         participantIds.get(chat.getId()),
                         lastMessages.get(chat.getId()),
-                        unreadCounts.get(chat.getId())
+                        unreadCounts.getOrDefault(chat.getId(), 0L)
                 )).toList();
     }
 }
