@@ -42,34 +42,34 @@ public class TaskEntity extends BaseEntity {
     private Set<Trade> trades = new HashSet<>();
 
     @Column(nullable = false)
-    private LocalDate start;
+    private LocalDate startDate;
 
     @Column(nullable = false)
-    private LocalDate end;
+    private LocalDate endDate;
 
     // TODO: 추가
     // status: TaskStatus
 
     @Builder
     public TaskEntity(String company, Address address, String taskTitle, String eventTitle,
-                      Set<Trade> trades, LocalDate start, LocalDate end) {
+                      Set<Trade> trades, LocalDate startDate, LocalDate endDate) {
         this.company = company;
         this.address = address;
         this.taskTitle = taskTitle;
         this.eventTitle = eventTitle;
         this.trades = trades != null ? trades : new HashSet<>();
-        this.start = start;
-        this.end = end;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     public void update(String company, Address address, String taskTitle, String eventTitle,
-                       Set<Trade> trades, LocalDate start, LocalDate end) {
+                       Set<Trade> trades, LocalDate startDate, LocalDate endDate) {
         this.company = company;
         this.address = address;
         this.taskTitle = taskTitle;
         this.eventTitle = eventTitle;
         this.trades = trades != null ? trades : new HashSet<>();
-        this.start = start;
-        this.end = end;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 }

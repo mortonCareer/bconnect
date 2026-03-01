@@ -16,7 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import so.morton.api.config.CorsProperties;
+import so.morton.api.config.AppProperties;
 import so.morton.api.support.auth.jwt.AccessTokenAuthenticationFilter;
 import so.morton.api.support.auth.jwt.JwtAuthenticationProvider;
 import so.morton.api.support.auth.jwt.JwtProvider;
@@ -37,7 +37,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CorsProperties corsProperties;
+    private final AppProperties appProperties;
 
     @Bean
     public AuthenticationManager authenticationManager(
@@ -74,8 +74,8 @@ public class SecurityConfig {
                 .headers(hc -> hc.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .cors(cc -> cc.configurationSource(req -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(corsProperties.allowedOrigins());
-                    config.setAllowedOriginPatterns(corsProperties.allowedOriginPatterns());
+                    config.setAllowedOrigins(appProperties.cors().allowedOrigins());
+                    config.setAllowedOriginPatterns(appProperties.cors().allowedOriginPatterns());
                     config.setAllowedMethods(Collections.singletonList("*"));
                     config.setAllowedHeaders(Collections.singletonList("*"));
                     config.setExposedHeaders(List.of("Authorization"));

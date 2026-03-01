@@ -1,29 +1,52 @@
 package so.morton.api.config;
 
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Profile;
+import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 @Component
+@Profile({"prod", "dev"})
 public class EnvironmentValidator {
 
-    private final AppProperties appProperties;
+    private static final Logger log = LoggerFactory.getLogger(EnvironmentValidator.class);
 
-    public EnvironmentValidator(AppProperties appProperties) {
-        this.appProperties = appProperties;
+    private static final List<String> REQUIRED_VARS = List.of(
+            "DATABASE_URL",
+            "DATABASE_USERNAME",
+            "DATABASE_PASSWORD",
+            "JWT_SECRET"
+            // TODO: AWS
+    );
+
+    private final Environment env;
+
+    public EnvironmentValidator(Environment env) {
+        this.env = env;
     }
 
     @PostConstruct
     public void validate() {
-        System.out.println("=".repeat(60));
-        System.out.println("Environment Variables Validated Successfully!");
-        System.out.println("DATABASE_URL: " + maskUrl(appProperties.databaseUrl()));
-        System.out.println("DATABASE_USERNAME: " + appProperties.databaseUsername());
-        System.out.println("DATABASE_PASSWORD: ***");
-        System.out.println("AWS_ACCESS_KEY_ID: " + maskSecret(appProperties.awsAccessKeyId()));
-        System.out.println("AWS_SECRET_ACCESS_KEY: ***");
-        System.out.println("AWS_REGION: " + appProperties.awsRegion());
-        System.out.println("AWS_S3_BUCKET: " + appProperties.awsS3Bucket());
-        System.out.println("=".repeat(60));
+        List<String> missing = REQUIRED_VARS.stream()
+                .filter(var -> !StringUtils.hasText(env.getProperty(var)))
+                .toList();
+
+        if (!missing.isEmpty()) {
+            throw new IllegalStateException(
+                    "필수 환경변수가 설정되지 않았습니다: " + missing);
+        }
+
+        log.info("=".repeat(60));
+        log.info("Environment Variables Validated Successfully!");
+        log.info("DATABASE_URL: {}", maskUrl(env.getProperty("DATABASE_URL")));
+        log.info("DATABASE_USERNAME: {}", env.getProperty("DATABASE_USERNAME"));
+        log.info("DATABASE_PASSWORD: ***");
+        log.info("=".repeat(60));
     }
 
     private String maskUrl(String url) {

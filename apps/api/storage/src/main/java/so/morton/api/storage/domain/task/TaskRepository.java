@@ -10,5 +10,4 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
 
     List<TaskEntity> findAllByStatus(EntityStatus status);
 
-    List<TaskEntity> findByStartBetween(LocalDate start, LocalDate end);
 }
