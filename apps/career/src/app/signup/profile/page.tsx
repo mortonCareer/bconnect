@@ -9,19 +9,11 @@ import { ApiError, useRegisterMember, useUpdateMyProfile, Role, Trade } from '@m
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import { TRADE_LABELS } from '@/lib/trade-labels'
+import { EXPERIENCE_TO_YEARS } from '@/lib/experience'
 import { SignupHeader, FormInput, FormLabel, FormError } from '../_components'
 import { FieldSelector, ExperienceSelector } from './components'
 import { TRADE_CATEGORIES, EXPERIENCE_OPTIONS } from './constants'
 import { profileSchema, type ProfileFormData } from './schema'
-import type { ExperienceLevel } from './types'
-
-const EXPERIENCE_TO_YEARS: Record<ExperienceLevel, number> = {
-  newcomer: 0,
-  '1-3': 2,
-  '3-5': 4,
-  '5-10': 7,
-  '10+': 15,
-}
 
 export default function SignupProfilePage() {
   const router = useRouter()

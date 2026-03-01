@@ -5,11 +5,18 @@ import Link from 'next/link'
 import { Feed } from '@morton/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { useFeedStore } from '@/stores/feed-store'
+import { EXPERIENCE_RANGES } from '@/lib/experience'
 
 export function FeedList() {
-  const selectedTrade = useFeedStore((s) => s.selectedTrade)
+  const primaryTrade = useFeedStore((s) => s.primaryTrade)
+  const selectedExperience = useFeedStore((s) => s.selectedExperience)
+
+  const expRange = selectedExperience ? EXPERIENCE_RANGES[selectedExperience] : undefined
+
   const { feedItems, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useFeedItems({
-    trade: selectedTrade,
+    trade: primaryTrade,
+    minExperience: expRange?.min,
+    maxExperience: expRange?.max,
   })
 
   const observerRef = useRef<HTMLDivElement | null>(null)

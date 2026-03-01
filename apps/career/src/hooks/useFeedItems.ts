@@ -39,15 +39,25 @@ export interface FeedItem {
 
 interface UseFeedItemsOptions {
   trade?: Trade | null
+  minExperience?: number
+  maxExperience?: number
   authorId?: number
   limit?: number
 }
 
-export function useFeedItems({ trade, authorId, limit = 20 }: UseFeedItemsOptions = {}) {
+export function useFeedItems({
+  trade,
+  minExperience,
+  maxExperience,
+  authorId,
+  limit = 20,
+}: UseFeedItemsOptions = {}) {
   const postsQuery = useInfiniteQuery({
     queryKey: [
       ...getGetPostsQueryKey({
         trade: trade ?? undefined,
+        minExperience,
+        maxExperience,
         authorId,
         limit,
       }),
@@ -56,6 +66,8 @@ export function useFeedItems({ trade, authorId, limit = 20 }: UseFeedItemsOption
     queryFn: ({ pageParam }) =>
       getPosts({
         trade: trade ?? undefined,
+        minExperience,
+        maxExperience,
         authorId,
         cursor: pageParam as string | undefined,
         limit,
