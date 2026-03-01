@@ -58,6 +58,14 @@ variable "kcomwel_api_service_key" {
   sensitive   = true
 }
 
+# Sentry 소스맵 업로드 (DSN·org·project는 코드에 하드코딩)
+variable "sentry_auth_token" {
+  description = "Sentry auth token - 소스맵 업로드"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 # Slack Incoming Webhook URL (크롤링 스키마 변경 알림)
 variable "slack_webhook_url" {
   description = "Slack Incoming Webhook URL - 크롤링 스키마 변경 알림용"

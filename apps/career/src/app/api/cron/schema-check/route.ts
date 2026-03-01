@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
 import { fetchNtsBusinessStatus } from '@/app/one-click/_clients/nts-client'
 import { fetchKcomwelInsurance } from '@/app/one-click/_clients/kcomwel-client'
@@ -42,20 +43,35 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const checkInId = Sentry.captureCheckIn(
+    { monitorSlug: 'one-click-schema-check', status: 'in_progress' },
+    {
+      schedule: { type: 'crontab', value: '0 0 * * *' },
+      checkinMargin: 5,
+      maxRuntime: 2,
+      timezone: 'Asia/Seoul',
+    }
+  )
+
   const results = await Promise.allSettled(HEALTH_TARGETS.map((t) => t.fn()))
 
   const failures: string[] = []
   results.forEach((result, i) => {
     if (result.status === 'rejected') {
       failures.push(`❌ ${HEALTH_TARGETS[i].name}: ${result.reason?.message ?? result.reason}`)
+      Sentry.captureException(result.reason, {
+        tags: { cron: 'schema-check', target: HEALTH_TARGETS[i].name },
+      })
     }
   })
 
   if (failures.length > 0) {
     await sendSlackAlert(failures)
+    Sentry.captureCheckIn({ checkInId, monitorSlug: 'one-click-schema-check', status: 'error' })
     return NextResponse.json({ ok: false, failures }, { status: 500 })
   }
 
+  Sentry.captureCheckIn({ checkInId, monitorSlug: 'one-click-schema-check', status: 'ok' })
   return NextResponse.json({
     ok: true,
     checked: HEALTH_TARGETS.map((t) => t.name),

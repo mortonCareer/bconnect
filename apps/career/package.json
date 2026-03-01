@@ -13,7 +13,7 @@
     "@hookform/resolvers": "5.2.0",
     "@morton/api-client": "workspace:*",
     "@morton/ui": "workspace:*",
-    "@vercel/otel": "^2.1.0",
+    "@sentry/nextjs": "^10.40.0",
     "cheerio": "^1.2.0",
     "fast-xml-parser": "^5.3.7",
     "next": "16.1.1",

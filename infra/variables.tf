@@ -119,3 +119,10 @@ variable "slack_webhook_url" {
   sensitive   = true
   default     = ""
 }
+
+variable "sentry_auth_token" {
+  description = "Sentry auth token - 소스맵 업로드"
+  type        = string
+  sensitive   = true
+  default     = ""
+}

@@ -1,5 +1,6 @@
 import 'server-only'
 
+import * as Sentry from '@sentry/nextjs'
 import { cache } from 'react'
 import { unstable_cache } from 'next/cache'
 import type {
@@ -355,6 +356,7 @@ async function fetchBusinessStatusItem(regNo: string): Promise<CheckItem> {
       details: [{ key: '사업자등록번호', value: formatRegNo(regNo) }],
     }
   } catch (e) {
+    Sentry.captureException(e, { tags: { source: 'nts' }, extra: { regNo } })
     console.error('NTS API failed:', e)
     return {
       ...makeErrorItem('BUSINESS_STATUS', 'BUSINESS_LICENSE', '사업자 상태', '국세청'),
@@ -368,6 +370,7 @@ async function fetchEmploymentInsuranceItem(regNo: string): Promise<CheckItem> {
     const items = await getKcomwelData(regNo)
     return mapKcomwelToCheckItem(items)
   } catch (e) {
+    Sentry.captureException(e, { tags: { source: 'kcomwel' }, extra: { regNo } })
     console.error('Kcomwel API failed:', e)
     return makeErrorItem('EMPLOYMENT_INSURANCE', 'INSURANCE', '고용/산재보험 현황', '근로복지공단')
   }
@@ -378,6 +381,7 @@ async function fetchSubcontractRestrictionItem(regNo: string): Promise<CheckItem
     const items = await cachedKisconSubcon(regNo)
     return mapKisconSubconToCheckItem(items)
   } catch (e) {
+    Sentry.captureException(e, { tags: { source: 'kiscon' }, extra: { regNo } })
     console.error('KISCON subcon crawl failed:', e)
     return makeErrorItem(
       'SUBCONTRACT_RESTRICTION',
@@ -405,6 +409,7 @@ async function fetchFireLicenseItem(regNo: string): Promise<CheckItem> {
     const items = await cachedFeia(companyName)
     return mapFeiaToCheckItem(items)
   } catch (e) {
+    Sentry.captureException(e, { tags: { source: 'feia' }, extra: { regNo } })
     console.error('FEIA crawl failed:', e)
     return makeErrorItem('FIRE_LICENSE', 'BUSINESS_LICENSE', '소방시설업 면허', '한국소방시설협회')
   }
@@ -433,6 +438,7 @@ async function fetchWageArrearsItem(regNo: string): Promise<CheckItem> {
     }
     return mapMoelToCheckItem(items)
   } catch (e) {
+    Sentry.captureException(e, { tags: { source: 'moel' }, extra: { regNo } })
     console.error('MOEL crawl failed:', e)
     return makeErrorItem('WAGE_ARREARS', 'WAGE_RESTRICTION', '임금체불 이력', '고용노동부')
   }
@@ -455,6 +461,7 @@ async function fetchHabitualArrearsItem(regNo: string): Promise<CheckItem> {
     const items = await cachedKisconArrears(companyName)
     return mapKisconArrearsToCheckItem(items)
   } catch (e) {
+    Sentry.captureException(e, { tags: { source: 'kiscon' }, extra: { regNo } })
     console.error('KISCON arrears crawl failed:', e)
     return makeErrorItem('HABITUAL_ARREARS', 'WAGE_RESTRICTION', '상습체불 이력', '국토교통부')
   }
@@ -535,6 +542,7 @@ export async function fetchOwnerVerification(
           : '입력하신 정보가 등록된 정보와 일치하지 않습니다.'),
     }
   } catch (error) {
+    Sentry.captureException(error, { tags: { source: 'nts' } })
     console.error('NTS validate API failed:', error)
     return { valid: false, message: '진위확인에 실패했습니다. 잠시 후 다시 시도해주세요.' }
   }
