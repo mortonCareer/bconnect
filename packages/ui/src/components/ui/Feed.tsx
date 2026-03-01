@@ -105,6 +105,15 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
     ref
   ) => {
     const [isExpanded, setIsExpanded] = React.useState(defaultExpanded)
+    const [isTruncated, setIsTruncated] = React.useState(false)
+    const textRef = React.useRef<HTMLParagraphElement>(null)
+
+    React.useEffect(() => {
+      if (isExpanded) return
+      const el = textRef.current
+      if (!el) return
+      setIsTruncated(el.scrollWidth > el.clientWidth)
+    }, [isExpanded, content.description])
 
     const handleToggle = () => {
       const newState = !isExpanded
@@ -228,29 +237,32 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
           <div
             className={cn(
               'flex w-full',
-              isExpanded ? 'flex-col items-end justify-center' : 'items-center justify-between'
+              isExpanded ? 'flex-col items-end justify-center' : 'items-center gap-2'
             )}
           >
             <p
+              ref={textRef}
               className={cn(
                 'text-m-16 text-morton-gray-900',
                 isExpanded
                   ? 'min-w-full w-[min-content] whitespace-pre-wrap leading-[1.6]'
-                  : 'truncate leading-[25.2px]'
+                  : 'min-w-0 flex-1 truncate leading-[25.2px]'
               )}
             >
-              {isExpanded ? content.description : `${content.description.slice(0, 25)}...`}
+              {content.description}
             </p>
-            <button
-              type="button"
-              onClick={handleToggle}
-              className={cn(
-                'cursor-pointer text-r-12 text-morton-gray-700 underline decoration-solid hover:text-morton-gray-900',
-                isExpanded ? 'leading-[25.2px]' : ''
-              )}
-            >
-              {isExpanded ? '접기' : '더보기'}
-            </button>
+            {(isExpanded || isTruncated) && (
+              <button
+                type="button"
+                onClick={handleToggle}
+                className={cn(
+                  'shrink-0 cursor-pointer text-r-12 text-morton-gray-700 underline decoration-solid hover:text-morton-gray-900',
+                  isExpanded ? 'leading-[25.2px]' : ''
+                )}
+              >
+                {isExpanded ? '접기' : '더보기'}
+              </button>
+            )}
           </div>
         </div>
       </div>

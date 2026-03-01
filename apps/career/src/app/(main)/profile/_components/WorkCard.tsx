@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from '@morton/ui'
 
 interface WorkCardProps {
@@ -21,6 +21,15 @@ export function WorkCard({
   description,
 }: WorkCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isTruncated, setIsTruncated] = useState(false)
+  const textRef = useRef<HTMLParagraphElement>(null)
+
+  useEffect(() => {
+    if (isExpanded) return
+    const el = textRef.current
+    if (!el) return
+    setIsTruncated(el.scrollWidth > el.clientWidth)
+  }, [isExpanded, description])
 
   return (
     <div className="flex flex-col">
@@ -46,6 +55,7 @@ export function WorkCard({
           className={cn('flex w-full', isExpanded ? 'flex-col items-end' : 'items-center gap-2')}
         >
           <p
+            ref={textRef}
             className={cn(
               'text-m-16 text-morton-gray-900',
               isExpanded ? 'w-full whitespace-pre-wrap' : 'min-w-0 flex-1 truncate'
@@ -53,13 +63,15 @@ export function WorkCard({
           >
             {description}
           </p>
-          <button
-            type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="shrink-0 cursor-pointer text-r-12 leading-[25.2px] text-morton-gray-700 underline hover:text-morton-gray-900"
-          >
-            {isExpanded ? '접기' : '더보기'}
-          </button>
+          {(isExpanded || isTruncated) && (
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="shrink-0 cursor-pointer text-r-12 leading-[25.2px] text-morton-gray-700 underline hover:text-morton-gray-900"
+            >
+              {isExpanded ? '접기' : '더보기'}
+            </button>
+          )}
         </div>
       </div>
     </div>
