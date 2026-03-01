@@ -6,22 +6,25 @@ import type { Trade } from '@morton/api-client'
 import { TRADE_GROUPS, TRADE_LABELS } from '@/lib/trade-labels'
 import { EXPERIENCE_OPTIONS } from '@/lib/experience'
 import type { ExperienceLevel } from '@/lib/experience'
-import { useFeedStore } from '@/stores/feed-store'
+import { useFilterParams } from '@/hooks/useFilterParams'
 
-export function FilterSheet() {
-  const isFilterOpen = useFeedStore((s) => s.isFilterOpen)
-  const setFilterOpen = useFeedStore((s) => s.setFilterOpen)
-  const storeSelectedTrades = useFeedStore((s) => s.selectedTrades)
-  const storePrimaryTrade = useFeedStore((s) => s.primaryTrade)
-  const storeSelectedExperience = useFeedStore((s) => s.selectedExperience)
-  const setSelectedTrades = useFeedStore((s) => s.setSelectedTrades)
-  const setPrimaryTrade = useFeedStore((s) => s.setPrimaryTrade)
-  const setSelectedExperience = useFeedStore((s) => s.setSelectedExperience)
+interface FilterSheetProps {
+  isOpen: boolean
+  onClose: () => void
+}
 
-  const [pendingTrades, setPendingTrades] = useState<Trade[]>(storeSelectedTrades)
-  const [pendingPrimary, setPendingPrimary] = useState<Trade | null>(storePrimaryTrade)
+export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
+  const {
+    trades: storeTrades,
+    primaryTrade: storePrimary,
+    experience: storeExperience,
+    applyFilters,
+  } = useFilterParams()
+
+  const [pendingTrades, setPendingTrades] = useState<Trade[]>(storeTrades)
+  const [pendingPrimary, setPendingPrimary] = useState<Trade | null>(storePrimary)
   const [pendingExperience, setPendingExperience] = useState<ExperienceLevel | null>(
-    storeSelectedExperience
+    storeExperience
   )
 
   // Two-phase rendering: mounted keeps DOM alive for exit animation
@@ -29,11 +32,11 @@ export function FilterSheet() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    if (isFilterOpen) {
+    if (isOpen) {
       setMounted(true)
-      setPendingTrades(storeSelectedTrades)
-      setPendingPrimary(storePrimaryTrade)
-      setPendingExperience(storeSelectedExperience)
+      setPendingTrades(storeTrades)
+      setPendingPrimary(storePrimary)
+      setPendingExperience(storeExperience)
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           setVisible(true)
@@ -44,7 +47,7 @@ export function FilterSheet() {
       const timer = setTimeout(() => setMounted(false), 300)
       return () => clearTimeout(timer)
     }
-  }, [isFilterOpen, storeSelectedTrades, storePrimaryTrade, storeSelectedExperience])
+  }, [isOpen, storeTrades, storePrimary, storeExperience])
 
   // Auto-set primary trade when trades change
   useEffect(() => {
@@ -56,10 +59,8 @@ export function FilterSheet() {
   }, [pendingTrades, pendingPrimary])
 
   const handleClose = () => {
-    setSelectedTrades(pendingTrades)
-    setPrimaryTrade(pendingPrimary)
-    setSelectedExperience(pendingExperience)
-    setFilterOpen(false)
+    applyFilters(pendingTrades, pendingPrimary, pendingExperience)
+    onClose()
   }
 
   const handleReset = () => {

@@ -1,15 +1,15 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { TopBar } from '@morton/ui'
-import { useFeedStore } from '@/stores/feed-store'
 import { FeedList } from './_components/home/FeedList'
 import { FilterSheet } from './_components/home/FilterSheet'
 import { FilterTags } from './_components/home/FilterTags'
 
 export default function HomePage() {
   const router = useRouter()
-  const setFilterOpen = useFeedStore((s) => s.setFilterOpen)
+  const [isFilterOpen, setFilterOpen] = useState(false)
 
   return (
     <div className="bg-white">
@@ -20,7 +20,7 @@ export default function HomePage() {
       />
       <FilterTags />
       <FeedList />
-      <FilterSheet />
+      <FilterSheet isOpen={isFilterOpen} onClose={() => setFilterOpen(false)} />
     </div>
   )
 }

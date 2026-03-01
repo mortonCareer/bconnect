@@ -1,15 +1,17 @@
 'use client'
 
 import { Tag } from '@morton/ui'
-import { useFeedStore } from '@/stores/feed-store'
 import { TRADE_LABELS } from '@/lib/trade-labels'
 import { EXPERIENCE_LABELS } from '@/lib/experience'
+import { useFilterParams } from '@/hooks/useFilterParams'
 
 export function FilterTags() {
-  const primaryTrade = useFeedStore((s) => s.primaryTrade)
-  const selectedExperience = useFeedStore((s) => s.selectedExperience)
-  const clearTrade = useFeedStore((s) => s.clearTrade)
-  const clearExperience = useFeedStore((s) => s.clearExperience)
+  const {
+    primaryTrade,
+    experience: selectedExperience,
+    clearTrade,
+    clearExperience,
+  } = useFilterParams()
 
   if (!primaryTrade && !selectedExperience) return null
 

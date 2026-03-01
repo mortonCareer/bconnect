@@ -4,14 +4,10 @@ import { useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { Feed } from '@morton/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
-import { useFeedStore } from '@/stores/feed-store'
-import { EXPERIENCE_RANGES } from '@/lib/experience'
+import { useFilterParams } from '@/hooks/useFilterParams'
 
 export function FeedList() {
-  const primaryTrade = useFeedStore((s) => s.primaryTrade)
-  const selectedExperience = useFeedStore((s) => s.selectedExperience)
-
-  const expRange = selectedExperience ? EXPERIENCE_RANGES[selectedExperience] : undefined
+  const { primaryTrade, expRange } = useFilterParams()
 
   const { feedItems, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useFeedItems({
     trade: primaryTrade,
