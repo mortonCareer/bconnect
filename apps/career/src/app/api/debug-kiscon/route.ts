@@ -1,24 +1,12 @@
 import { NextResponse } from 'next/server'
 
+export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
-export const maxDuration = 60
 
 export async function GET() {
   const url = 'https://kiscon.net/cis/coad_subcon_limit_list.asp'
   const results: Record<string, unknown> = {}
 
-  // Step 1: DNS + TCP connectivity test
-  try {
-    const dns = await import('dns')
-    const { promisify } = await import('util')
-    const resolve = promisify(dns.resolve4)
-    const ips = await resolve('kiscon.net')
-    results.dns = ips
-  } catch (e) {
-    results.dnsError = e instanceof Error ? e.message : String(e)
-  }
-
-  // Step 2: Fetch test
   try {
     const start = Date.now()
     const response = await fetch(url, {
@@ -33,7 +21,7 @@ export async function GET() {
         searchText: '1248100998',
       }).toString(),
       cache: 'no-store',
-      signal: AbortSignal.timeout(55_000),
+      signal: AbortSignal.timeout(15_000),
     })
 
     results.status = response.status
@@ -52,7 +40,7 @@ export async function GET() {
       const cause = e.cause
       results.cause =
         cause instanceof Error
-          ? { message: cause.message, code: (cause as NodeJS.ErrnoException).code }
+          ? { message: cause.message, code: (cause as Record<string, unknown>).code }
           : String(cause)
     }
   }
