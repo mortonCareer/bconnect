@@ -45,6 +45,7 @@ public class CredentialController {
         return ApiResponse.success(null);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/accept")
     public ApiResponse<Void> accept(
             @AuthenticationPrincipal User user,
@@ -53,6 +54,7 @@ public class CredentialController {
         return ApiResponse.success(null);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/deny")
     public ApiResponse<Void> deny(
             @AuthenticationPrincipal User user,
