@@ -47,11 +47,11 @@ public class ProfileController {
     }
 
     @PostMapping
-    public ApiResponse<ProfileResponse> create(
+    public ApiResponse<Long> create(
             @AuthenticationPrincipal User user,
             @RequestBody @Valid CreateProfileRequest request) {
         Profile profile = profileService.create(user, request);
-        return ApiResponse.success(ProfileResponse.of(profile));
+        return ApiResponse.success(profile.id());
     }
 
     @PutMapping("/me")

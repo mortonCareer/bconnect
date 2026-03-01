@@ -43,11 +43,11 @@ public class TaskController {
     }
 
     @PostMapping
-    public ApiResponse<TaskResponse> create(
+    public ApiResponse<Long> create(
             @AuthenticationPrincipal User user,
             @RequestBody @Valid CreateTaskRequest request) {
         Task task = taskService.create(user, request);
-        return ApiResponse.success(TaskResponse.of(task));
+        return ApiResponse.success(task.id());
     }
 
     @PutMapping("/{id}")

@@ -36,11 +36,11 @@ public class PostController {
     }
 
     @PostMapping
-    public ApiResponse<PostResponse> create(
+    public ApiResponse<Long> create(
             @AuthenticationPrincipal User user,
             @RequestBody @Valid CreatePostRequest request) {
         Post post = postService.create(user, request);
-        return ApiResponse.success(PostResponse.of(post));
+        return ApiResponse.success(post.id());
     }
 
     @PutMapping("/{id}")

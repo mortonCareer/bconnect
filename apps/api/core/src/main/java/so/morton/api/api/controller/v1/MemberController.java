@@ -32,9 +32,9 @@ public class MemberController {
     }
 
     @PostMapping
-    public ApiResponse<MemberResponse> register(@RequestBody @Valid RegisterMemberRequest request) {
+    public ApiResponse<Long> register(@RequestBody @Valid RegisterMemberRequest request) {
         Member member = memberService.register(request);
-        return ApiResponse.success(MemberResponse.of(member));
+        return ApiResponse.success(member.id());
     }
 
     @PutMapping("/me")

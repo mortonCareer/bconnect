@@ -1,6 +1,7 @@
 package so.morton.api.api.controller.v1;
 
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import so.morton.api.api.controller.v1.request.CreateCoworkerRequest;
 import so.morton.api.domain.coworker.CoworkerRequestService;
+import so.morton.api.domain.coworker.CoworkerRequest;
 import so.morton.api.support.auth.User;
 import so.morton.api.support.response.ApiResponse;
 
@@ -21,11 +23,11 @@ public class CoworkerRequestController {
     private final CoworkerRequestService coworkerRequestService;
 
     @PostMapping
-    public ApiResponse<Void> create(
+    public ApiResponse<Long> create(
             @AuthenticationPrincipal User user,
-            @RequestBody CreateCoworkerRequest request) {
-        coworkerRequestService.create(user, request.toId());
-        return ApiResponse.success(null);
+            @RequestBody @Valid CreateCoworkerRequest request) {
+        CoworkerRequest coworkerRequest = coworkerRequestService.create(user, request.toId());
+        return ApiResponse.success(coworkerRequest.id());
     }
 
     @PostMapping("/{id}/accept")

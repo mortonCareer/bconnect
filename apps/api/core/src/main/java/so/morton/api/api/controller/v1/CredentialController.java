@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import so.morton.api.api.controller.v1.request.CreateCredentialRequest;
 import so.morton.api.api.controller.v1.response.CredentialResponse;
 import so.morton.api.domain.credential.Credential;
@@ -45,7 +46,6 @@ public class CredentialController {
     }
 
     @PostMapping("/{id}/accept")
-
     public ApiResponse<Void> accept(
             @AuthenticationPrincipal User user,
             @PathVariable Long id) {
