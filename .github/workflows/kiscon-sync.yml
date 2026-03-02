@@ -24,6 +24,7 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        working-directory: .
 
       - name: Sync KISCON data to S3
         env:
