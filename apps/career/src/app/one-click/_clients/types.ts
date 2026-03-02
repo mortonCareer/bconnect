@@ -114,3 +114,21 @@ export interface NtsValidateResponse {
   request_cnt: number
   data: NtsValidateItem[]
 }
+
+// ─── 근로복지공단 API Types ──────────────────────
+
+/** 고용/산재보험 가입 사업장 조회 응답 항목 (XML 파싱, parseTagValue=false → 모두 string) */
+export interface KcomwelInsuranceItem {
+  saeopjangNm: string // 사업장명
+  addr: string // 주소
+  sangsiInwonCnt: string // 상시근로자수
+  seongripDt: string // 성립일자 (YYYYMMDD)
+  saeopjaDrno: string // 사업자등록번호
+  opaBoheomFg: string // 보험구분 (1=산재, 2=고용)
+  post: string // 우편번호
+  saeopFg?: string // 사업장구분
+  sjEopjongCd?: string // 산재보험 업종코드
+  sjEopjongNm?: string // 산재보험 업종명
+  gyEopjongCd?: string // 고용보험 업종코드
+  gyEopjongNm?: string // 고용보험 업종명
+}

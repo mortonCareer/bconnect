@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:latest:///test
+
+app:
+  jwt:
+    secret: test-secret-key-for-jwt-authentication-minimum-256-bits

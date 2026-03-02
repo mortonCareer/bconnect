@@ -137,7 +137,12 @@ class TestFormatPhone:
         assert format_phone("1234") == "1234"
 
     def test_non_zero_start(self):
-        assert format_phone("12345678") == "12345678"
+        assert format_phone("9876") == "9876"
+
+    def test_representative_number(self):
+        assert format_phone("15881234") == "1588-1234"
+        assert format_phone("18005678") == "1800-5678"
+        assert format_phone("16440487") == "1644-0487"
 
     def test_internet_phone_050x(self):
         assert format_phone("050713404655") == "0507-1340-4655"

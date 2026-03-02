@@ -44,5 +44,9 @@ module "vercel" {
   aws_secret_access_key = module.aws.secret_access_key
   aws_region            = var.aws_region
 
-  nts_api_service_key = var.nts_api_service_key
+  nts_api_service_key    = var.nts_api_service_key
+  kcomwel_api_service_key = var.kcomwel_api_service_key
+
+  slack_webhook_url  = var.slack_webhook_url
+  sentry_auth_token  = var.sentry_auth_token
 }

@@ -5,6 +5,7 @@ import so.morton.api.storage.support.Address;
 import so.morton.api.storage.value.Trade;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 public record Profile(
@@ -19,14 +20,14 @@ public record Profile(
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
-    public void validate() {
+    public Profile {
         if (!trades.contains(primaryTrade)) {
             throw new IllegalArgumentException("주 직종은 보유 직종에 포함되어야 합니다");
         }
     }
 
     public static Profile of(ProfileEntity entity) {
-        Profile profile = new Profile(
+        return new Profile(
                 entity.getId(),
                 entity.getMemberId(),
                 entity.getPrimaryTrade(),
@@ -38,7 +39,5 @@ public record Profile(
                 entity.getCreatedAt(),
                 entity.getModifiedAt()
         );
-        profile.validate();
-        return profile;
     }
 }

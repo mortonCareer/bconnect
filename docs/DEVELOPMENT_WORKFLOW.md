@@ -106,10 +106,10 @@ paths:
 
 ```typescript
 // 성공
-{ success: true, data: T }
+{ success: true, data: T, error: null }
 
 // 실패
-{ success: false, error: { code: string, message: string } }
+{ success: false, data: null, error: { code: string, status: number, message: string, logLevel: string } }
 ```
 
 ---
@@ -336,7 +336,7 @@ Day 7: QA
 
 - **Node.js**: v20+
 - **pnpm**: v9+
-- **Java**: JDK 17+ (Backend)
+- **Java**: JDK 21+ (Backend)
 - **VSCode 익스텐션**:
   - 42Crunch OpenAPI
   - ESLint

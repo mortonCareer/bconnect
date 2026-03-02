@@ -56,7 +56,7 @@ class SessionServiceTest {
                 .name("test")
                 .phone(PHONE)
                 .picture("")
-                .role(Role.WORKER)
+                .role(Role.FOREMAN)
                 .build();
 
         when(passwordEncoder.encode(refreshToken)).thenReturn("encoded-token");

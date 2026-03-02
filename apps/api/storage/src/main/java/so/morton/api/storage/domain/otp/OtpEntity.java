@@ -55,11 +55,11 @@ public class OtpEntity extends BaseEntity {
         this.signupTokenExpiredAt = signupTokenExpiredAt;
     }
 
-    public void incrementAttemptCount() {
+    public void attempt() {
         this.attemptCount++;
     }
 
-    public void resetDailyCount() {
+    public void reset() {
         this.dailyCount = 0;
     }
 

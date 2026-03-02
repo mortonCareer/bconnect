@@ -132,7 +132,9 @@ interface ButtonProps {
 }
 
 // Use type for unions/intersections
-type ApiResponse<T> = { success: true; data: T } | { success: false; error: ErrorData }
+type ApiResponse<T> =
+  | { success: true; data: T; error: null }
+  | { success: false; data: null; error: ExceptionCode }
 ```
 
 #### Path Aliases

@@ -50,3 +50,26 @@ variable "nts_api_service_key" {
   type        = string
   sensitive   = true
 }
+
+# 근로복지공단 고용/산재보험 API (data.go.kr)
+variable "kcomwel_api_service_key" {
+  description = "근로복지공단 고용/산재보험 API 서비스키 (data.go.kr)"
+  type        = string
+  sensitive   = true
+}
+
+# Sentry 소스맵 업로드 (DSN·org·project는 코드에 하드코딩)
+variable "sentry_auth_token" {
+  description = "Sentry auth token - 소스맵 업로드"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+# Slack Incoming Webhook URL (크롤링 스키마 변경 알림)
+variable "slack_webhook_url" {
+  description = "Slack Incoming Webhook URL - 크롤링 스키마 변경 알림용"
+  type        = string
+  sensitive   = true
+  default     = ""
+}

@@ -16,6 +16,8 @@ function getServiceKey(): string {
 /**
  * 국세청 사업자등록정보 상태조회
  *
+ * @test positive 6138127726 → 정상 운영 (b_stt_cd=01) (2026-02-28)
+ * @test negative 5158511710 → 폐업 (b_stt_cd=03) (2026-02-28)
  * @throws network error, non-2xx, missing env
  */
 export async function fetchNtsBusinessStatus(
@@ -29,6 +31,7 @@ export async function fetchNtsBusinessStatus(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ b_no: registrationNumbers }),
     cache: 'no-store',
+    signal: AbortSignal.timeout(10_000),
   })
 
   if (!response.ok) {
@@ -64,6 +67,7 @@ export async function fetchNtsBusinessValidate(
       ],
     }),
     cache: 'no-store',
+    signal: AbortSignal.timeout(10_000),
   })
 
   if (!response.ok) {

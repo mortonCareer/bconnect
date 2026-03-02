@@ -17,6 +17,7 @@ jobs:
       career: ${{ steps.filter.outputs.career }}
       plan: ${{ steps.filter.outputs.plan }}
       api: ${{ steps.filter.outputs.api }}
+      crawler: ${{ steps.filter.outputs.crawler }}
     steps:
       - uses: actions/checkout@v6
 
@@ -36,6 +37,8 @@ jobs:
               - 'pnpm-lock.yaml'
             api:
               - 'apps/api/**'
+            crawler:
+              - 'apps/crawler/**'
 
   ci-career:
     needs: changes
@@ -99,7 +102,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
           cache: 'gradle'
 
       - name: Grant execute permission for gradlew
@@ -114,3 +117,24 @@ jobs:
         run: |
           cd apps/api
           ./gradlew test --no-daemon
+
+  ci-crawler:
+    needs: changes
+    if: ${{ needs.changes.outputs.crawler == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/crawler
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Run tests
+        env:
+          NAVER_CLIENT_ID: dummy
+          NAVER_CLIENT_SECRET: dummy
+          NOTION_TOKEN: dummy
+        run: uv run --dev pytest tests/ -v

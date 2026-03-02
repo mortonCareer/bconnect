@@ -13,7 +13,9 @@
     "@hookform/resolvers": "5.2.2",
     "@morton/api-client": "workspace:*",
     "@morton/ui": "workspace:*",
-    "@vercel/otel": "^2.1.0",
+    "@sentry/nextjs": "^10.40.0",
+    "cheerio": "^1.2.0",
+    "fast-xml-parser": "^5.3.7",
     "next": "16.1.1",
     "nuqs": "^2.8.9",
     "react": "19.2.3",
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "@morton/config": "workspace:*",
+    "@types/cheerio": "^1.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

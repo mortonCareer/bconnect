@@ -4,34 +4,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import so.morton.api.api.controller.v1.request.CreatePostRequest;
-import so.morton.api.api.controller.v1.request.UpdatePostRequest;
+import so.morton.api.domain.profile.Profile;
+import so.morton.api.domain.profile.ProfileFinder;
+import so.morton.api.support.auth.User;
 import so.morton.api.storage.domain.post.PostEntity;
 import so.morton.api.storage.domain.post.PostRepository;
-import so.morton.api.storage.value.EntityStatus;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 
 import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
     private final PostFinder postFinder;
-
-    @Transactional
-    public Post create(CreatePostRequest request) {
-        PostEntity entity = PostEntity.builder()
-                .authorId(request.authorId())
-                .taskId(request.taskId())
-                .images(request.images())
-                .content(request.content())
-                .build();
-
-        PostEntity saved = postRepository.save(entity);
-        return Post.of(saved);
-    }
+    private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
     public Post get(Long postId) {
@@ -40,39 +28,45 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public List<Post> getAll() {
-        return postRepository.findAllByStatus(EntityStatus.ACTIVE)
+        return postRepository.findAll()
                 .stream()
                 .map(Post::of)
                 .toList();
     }
 
-    @Transactional(readOnly = true)
-    public List<Post> getByAuthor(Long authorId) {
-        return postFinder.findByAuthor(authorId);
-    }
+    @Transactional
+    public Post create(User user, CreatePostRequest request) {
+        Profile profile = profileFinder.findByMemberId(user.id());
+        PostEntity post = PostEntity.builder()
+                .authorId(profile.id())
+                .taskId(request.taskId())
+                .images(request.images())
+                .content(request.content())
+                .build();
 
-    @Transactional(readOnly = true)
-    public List<Post> getByTask(Long taskId) {
-        return postFinder.findByTask(taskId);
+        postRepository.save(post);
+        return Post.of(post);
     }
 
     @Transactional
-    public Post update(Long postId, UpdatePostRequest request) {
-        PostEntity entity = postRepository.findById(postId)
-                .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
+    public void update(User user, Long postId, String content) {
+        Profile profile = profileFinder.findByMemberId(user.id());
+        PostEntity found = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        if (!found.getAuthorId().equals(profile.id()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        entity.update(request.images(), request.content());
-
-        return Post.of(entity);
+        found.update(content);
     }
 
     @Transactional
-    public void delete(Long postId) {
-        PostEntity entity = postRepository.findById(postId)
-                .filter(e -> e.getStatus() == EntityStatus.ACTIVE)
+    public void delete(User user, Long postId) {
+        Profile profile = profileFinder.findByMemberId(user.id());
+        PostEntity found = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        if (!found.getAuthorId().equals(profile.id()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        entity.delete();
+        postRepository.delete(found);
     }
 }

@@ -37,8 +37,7 @@ public class PostEntity extends BaseEntity {
         this.content = content;
     }
 
-    public void update(List<String> images, String content) {
-        this.images = images != null ? images : new ArrayList<>();
+    public void update(String content) {
         this.content = content;
     }
 }
