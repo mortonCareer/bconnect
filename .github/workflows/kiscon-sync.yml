@@ -33,3 +33,12 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
         run: pnpm exec tsx scripts/kiscon-sync.ts
+
+      - name: Notify Slack on failure
+        if: failure()
+        run: |
+          curl -s -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d '{"text":"🚨 *KISCON Sync 실패*\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|워크플로우 로그 확인>"}'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
