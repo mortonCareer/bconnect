@@ -18,6 +18,7 @@ import {
   isSubconActive,
   parseArrearsHtml,
   parseSubconLimitHtml,
+  parseTotalCount,
 } from '../src/app/one-click/_clients/kiscon-parser'
 
 const S3_BUCKET = process.env.AWS_S3_BUCKET ?? 'morton-storage'
@@ -69,14 +70,46 @@ async function uploadToS3(key: string, data: unknown): Promise<void> {
   await s3.send(command)
 }
 
+/**
+ * 전체 페이지를 순회하여 모든 아이템 수집
+ * 1페이지 HTML에서 totalcnt를 읽고, pageSize로 총 페이지 수를 계산
+ */
+async function fetchAllPages<T>(
+  url: string,
+  baseBody: Record<string, string>,
+  parseHtml: (html: string) => T[]
+): Promise<T[]> {
+  const firstHtml = await fetchHtml(url, { ...baseBody, GotoPage: '1' })
+  const firstItems = parseHtml(firstHtml)
+  const totalCount = parseTotalCount(firstHtml)
+
+  if (totalCount === 0 || firstItems.length === 0) return firstItems
+
+  const pageSize = firstItems.length
+  const totalPages = Math.ceil(totalCount / pageSize)
+
+  if (totalPages <= 1) return firstItems
+
+  console.log(`[kiscon-sync]   총 ${totalCount}건, ${totalPages}페이지 (${pageSize}건/페이지)`)
+
+  const allItems = [...firstItems]
+  for (let page = 2; page <= totalPages; page++) {
+    const html = await fetchHtml(url, { ...baseBody, GotoPage: String(page) })
+    const items = parseHtml(html)
+    allItems.push(...items)
+    if (items.length < pageSize) break // 마지막 페이지
+  }
+
+  return allItems
+}
+
 async function main() {
   const now = new Date().toISOString()
   console.log(`[kiscon-sync] 시작: ${now}`)
 
-  // 상습체불 크롤링
+  // 상습체불 크롤링 (전체 페이지 순회)
   console.log('[kiscon-sync] 상습체불 크롤링...')
-  const arrearsHtml = await fetchHtml(KISCON_ARREARS_URL, { GotoPage: '1' })
-  const arrearsAll = parseArrearsHtml(arrearsHtml)
+  const arrearsAll = await fetchAllPages(KISCON_ARREARS_URL, {}, parseArrearsHtml)
   const arrearsItems = arrearsAll.filter(isArrearsActive)
   const arrearsChecksum = itemsHash(arrearsItems)
   console.log(
@@ -95,10 +128,9 @@ async function main() {
     console.log('[kiscon-sync] kiscon/arrears.json 업로드 완료')
   }
 
-  // 하도급참여제한 크롤링
+  // 하도급참여제한 크롤링 (전체 페이지 순회)
   console.log('[kiscon-sync] 하도급참여제한 크롤링...')
-  const subconHtml = await fetchHtml(KISCON_SUBCON_URL, { GotoPage: '1' })
-  const subconAll = parseSubconLimitHtml(subconHtml)
+  const subconAll = await fetchAllPages(KISCON_SUBCON_URL, {}, parseSubconLimitHtml)
   const subconItems = subconAll.filter(isSubconActive)
   const subconChecksum = itemsHash(subconItems)
   console.log(

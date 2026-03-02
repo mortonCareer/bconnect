@@ -1,5 +1,15 @@
 import * as cheerio from 'cheerio'
 
+/**
+ * KISCON HTML에서 totalcnt hidden field 값 추출
+ * `<input type="hidden" name="totalcnt" value="57">`
+ */
+export function parseTotalCount(html: string): number {
+  const $ = cheerio.load(html)
+  const totalcnt = $('input[name="totalcnt"]').val()
+  return totalcnt ? Number(totalcnt) : 0
+}
+
 // ─── 상습체불 ─────────────────────────────────
 
 export interface KisconArrearsItem {
