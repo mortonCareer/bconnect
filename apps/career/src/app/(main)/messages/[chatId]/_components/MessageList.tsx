@@ -5,7 +5,7 @@ import {
   useInfiniteQuery,
   getChatMessages,
   getGetChatMessagesQueryKey,
-  useGetMember,
+  useGetMembers,
 } from '@morton/api-client'
 import type { Message, MessagePage } from '@morton/api-client'
 import { ChatMessage } from '@morton/ui'
@@ -26,9 +26,8 @@ function SenderMessage({
   currentUserId: number | undefined
 }) {
   const isMine = message.senderId === currentUserId
-  const { data: sender } = useGetMember(message.senderId ?? 0, {
-    query: { enabled: !isMine && !!message.senderId },
-  })
+  const { data: members } = useGetMembers({ query: { enabled: !isMine && !!message.senderId } })
+  const sender = members?.find((m) => m.id === message.senderId)
 
   if (isMine) {
     return (
