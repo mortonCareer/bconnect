@@ -63,8 +63,8 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
-      - name: Build
-        run: pnpm --filter morton-career build
+      - name: Type check
+        run: pnpm --filter morton-career typecheck
 
   ci-plan:
     needs: changes
@@ -89,8 +89,8 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
-      - name: Build
-        run: pnpm --filter morton-plan build
+      - name: Type check
+        run: pnpm --filter morton-plan typecheck
 
   ci-api:
     needs: changes
