@@ -13,15 +13,15 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
     return (
       <div
         className={cn(
-          'flex h-[50px] items-center rounded-lg border border-[#E5E7EB] px-3 py-[7px]',
-          error && 'border-[#FF4242]',
+          'flex h-[50px] items-center rounded-[8px] border border-morton-gray-300 px-3 py-[7px]',
+          error && 'border-morton-error',
           props.disabled && 'opacity-50'
         )}
       >
         <input
           ref={ref}
           className={cn(
-            'w-full bg-transparent text-base leading-[1.6] text-[#1B1B1B] placeholder:text-[#9C9C9C] focus:outline-none disabled:cursor-not-allowed',
+            'w-full bg-transparent text-r-16 text-morton-gray-900 placeholder:text-morton-gray-500 focus:outline-none disabled:cursor-not-allowed',
             className
           )}
           {...props}

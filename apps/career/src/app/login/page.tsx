@@ -1,31 +1,36 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useSendOtp, useVerifyOtp } from '@morton/api-client'
+import { useAuthStore } from '@/stores/auth-store'
+import { ApiError, useSendOtp, useVerifyOtp } from '@morton/api-client'
 import {
   formatPhoneNumber,
+  isValidPhoneNumber,
   toE164,
   toNationalNumber,
-  isValidPhoneNumber,
 } from '@morton/config/phone'
-import { useAuthStore } from '@/stores/auth-store'
+import { Button, TopBar } from '@morton/ui'
+import { useRouter } from 'next/navigation'
+import { useCallback, useState } from 'react'
+import { FormInput, OtpTimer, FormError } from '../signup/_components'
+
+type Step = 'phone' | 'otp'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { authStep, phoneNumber, setPhoneNumber, setCodeSent, login } = useAuthStore()
+  const { setPhoneNumber, setCodeSent, login } = useAuthStore()
 
+  const [step, setStep] = useState<Step>('phone')
   const [phone, setPhone] = useState('')
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [expiresAt, setExpiresAt] = useState<string | null>(null)
 
   const sendCodeMutation = useSendOtp()
   const verifyCodeMutation = useVerifyOtp()
 
-  const handleSendCode = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // 인증번호 발송
+  const handleSendCode = useCallback(async () => {
     setError(null)
-
     const e164Phone = toE164(phone)
     setPhoneNumber(e164Phone)
 
@@ -35,127 +40,177 @@ export default function LoginPage() {
       })
       if (result.expiresAt) {
         setCodeSent(result.expiresAt)
+        setExpiresAt(result.expiresAt)
       }
-    } catch {
-      setError('인증번호 발송에 실패했습니다.')
+      setStep('otp')
+    } catch (err) {
+      if (err instanceof ApiError) {
+        switch (err.code) {
+          case 'OTP_RATE_LIMIT':
+            setError('인증번호 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.')
+            break
+          case 'INVALID_PHONE':
+            setError('유효하지 않은 전화번호입니다.')
+            break
+          default:
+            setError(err.message || '인증번호 발송에 실패했습니다.')
+        }
+      } else {
+        setError('인증번호 발송에 실패했습니다.')
+      }
     }
-  }
+  }, [phone, setPhoneNumber, setCodeSent, sendCodeMutation])
 
-  const handleVerifyCode = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // 인증번호 확인
+  const handleVerifyCode = useCallback(async () => {
     setError(null)
-
-    if (!phoneNumber) return
+    const e164Phone = toE164(phone)
 
     try {
       const result = await verifyCodeMutation.mutateAsync({
-        data: { phone: toNationalNumber(phoneNumber), code },
+        data: { phone: toNationalNumber(phone), code },
       })
       if ('accessToken' in result) {
         // 기존 회원 — 바로 로그인
-        login({ phone: phoneNumber }, result.accessToken)
+        login({ phone: e164Phone }, result.accessToken)
         router.push('/')
       } else {
         // 미가입 유저 — 회원가입 플로우로 이동
         router.push('/signup/auth')
       }
-    } catch {
-      setError('인증번호가 올바르지 않습니다.')
+    } catch (err) {
+      if (err instanceof ApiError) {
+        switch (err.code) {
+          case 'OTP_INVALID':
+            setError('올바르지 않은 인증번호입니다.')
+            break
+          case 'OTP_EXPIRED':
+            setError('인증번호가 만료되었습니다. 재요청해주세요.')
+            break
+          case 'OTP_MAX_ATTEMPTS':
+            setError('인증 시도 횟수를 초과했습니다. 새로운 인증번호를 요청해주세요.')
+            break
+          default:
+            setError(err.message || '인증에 실패했습니다.')
+        }
+      } else {
+        setError('인증에 실패했습니다.')
+      }
+    }
+  }, [phone, code, login, router, verifyCodeMutation])
+
+  // 재발송
+  const handleResend = useCallback(async () => {
+    setCode('')
+    setError(null)
+    await handleSendCode()
+  }, [handleSendCode])
+
+  const isPhoneValid = isValidPhoneNumber(phone)
+  const isCodeValid = code.length === 6
+
+  // 엔터키 submit 핸들러
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      if (step === 'phone' && isPhoneValid && !sendCodeMutation.isPending) {
+        handleSendCode()
+      } else if (step === 'otp' && isCodeValid && !verifyCodeMutation.isPending) {
+        handleVerifyCode()
+      }
     }
   }
 
-  if (authStep === 'code') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full space-y-8 p-8">
-          <div>
-            <h2 className="text-center text-3xl font-bold text-gray-900">인증번호 입력</h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
-              {phoneNumber}로 전송된 인증번호를 입력해주세요
-            </p>
-          </div>
-
-          <form className="mt-8 space-y-6" onSubmit={handleVerifyCode}>
-            <div>
-              <label htmlFor="code" className="sr-only">
-                인증번호
-              </label>
-              <input
-                id="code"
-                name="code"
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                required
-                className="appearance-none rounded-lg relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="000000"
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              />
-            </div>
-
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={code.length !== 6 || verifyCodeMutation.isPending}
-              className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {verifyCodeMutation.isPending ? '확인 중...' : '확인'}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => useAuthStore.getState().reset()}
-              className="w-full flex justify-center py-3 px-4 text-sm font-medium text-gray-600 hover:text-gray-900"
-            >
-              다른 번호로 로그인
-            </button>
-          </form>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8">
-        <div>
-          <h2 className="text-center text-3xl font-bold text-gray-900">로그인</h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            휴대폰 번호로 간편하게 로그인하세요
+    <div className="flex min-h-screen flex-col bg-white">
+      <TopBar
+        variant="default"
+        title="로그인"
+        showAction={false}
+        onBack={() => (step === 'otp' ? setStep('phone') : router.back())}
+      />
+
+      {/* Content */}
+      <main className="flex flex-1 flex-col gap-6 px-4 pt-3">
+        {/* Title Section */}
+        <div className="flex flex-col gap-4">
+          <h1 className="text-2xl font-semibold leading-[1.4] text-[#1B1B1B]">
+            휴대폰 번호로
+            <br />
+            <span className="text-[#386DFF]">간편하게 로그인</span>하세요
+          </h1>
+          <p className="text-sm leading-[1.6] text-[#9C9C9C]">
+            가입하신 휴대폰 번호를 입력해주세요.
           </p>
+
+          {/* Phone Input */}
+          <FormInput
+            type="tel"
+            inputMode="numeric"
+            placeholder="010-1234-5678"
+            value={phone}
+            onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
+            onKeyDown={handleKeyDown}
+            disabled={step === 'otp'}
+          />
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSendCode}>
-          <div>
-            <label htmlFor="phone" className="sr-only">
-              휴대폰 번호
-            </label>
-            <input
-              id="phone"
-              name="phone"
-              type="tel"
+        {/* OTP Section (step === 'otp') */}
+        {step === 'otp' && (
+          <div className="flex flex-col gap-2">
+            <FormInput
+              type="text"
               inputMode="numeric"
-              required
-              className="appearance-none rounded-lg relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="010-1234-5678"
-              value={phone}
-              onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
+              placeholder="숫자 6자리"
+              maxLength={6}
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              onKeyDown={handleKeyDown}
+              rightElement={
+                <OtpTimer
+                  expiresAt={expiresAt}
+                  onResend={handleResend}
+                  isResending={sendCodeMutation.isPending}
+                />
+              }
             />
+            {error ? (
+              <FormError message={error} />
+            ) : (
+              <p className="text-sm leading-[1.6] text-[#9C9C9C]">
+                타인에게 인증번호를 공유하지 마세요.
+              </p>
+            )}
           </div>
+        )}
 
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+        {/* Phone step error (shown outside OTP section) */}
+        {step === 'phone' && error && <FormError message={error} />}
 
-          <button
-            type="submit"
-            disabled={!isValidPhoneNumber(phone) || sendCodeMutation.isPending}
-            className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        {/* Submit Button */}
+        {step === 'phone' ? (
+          <Button
+            variant="outline"
+            size="full"
+            onClick={handleSendCode}
+            disabled={!isPhoneValid}
+            isLoading={sendCodeMutation.isPending}
+            loadingText="발송 중..."
           >
-            {sendCodeMutation.isPending ? '발송 중...' : '인증번호 받기'}
-          </button>
-        </form>
-      </div>
+            다음
+          </Button>
+        ) : (
+          <Button
+            variant="primary"
+            size="full"
+            onClick={handleVerifyCode}
+            disabled={!isCodeValid}
+            isLoading={verifyCodeMutation.isPending}
+            loadingText="확인 중..."
+          >
+            로그인
+          </Button>
+        )}
+      </main>
     </div>
   )
 }

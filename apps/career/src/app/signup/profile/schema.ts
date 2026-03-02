@@ -1,25 +1,14 @@
 import { z } from 'zod/v3'
 
-const constructionFieldSchema = z.enum([
-  'tile',
-  'wallpaper',
-  'flooring',
-  'carpentry',
-  'demolition',
-  'cleaning',
-  'electrical',
-  'plumbing',
-])
-
 const experienceLevelSchema = z.enum(['newcomer', '1-3', '3-5', '5-10', '10+'])
 
 export const profileSchema = z.object({
   name: z.string().min(1, '이름을 입력해주세요.').max(50, '이름은 50자 이내로 입력해주세요.'),
   fields: z
-    .array(constructionFieldSchema)
+    .array(z.string())
     .min(1, '시공분야를 1개 이상 선택해주세요.')
     .max(3, '시공분야는 최대 3개까지 선택 가능합니다.'),
-  primaryField: constructionFieldSchema,
+  primaryField: z.string(),
   experience: experienceLevelSchema,
   affiliation: z.string().optional(),
 })

@@ -5,19 +5,21 @@ import { useRouter } from 'next/navigation'
 import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@morton/ui'
-import { ApiError, useRegisterMember, Role } from '@morton/api-client'
+import { ApiError, useRegisterMember, useUpdateMyProfile, Role, Trade } from '@morton/api-client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
+import { TRADE_LABELS } from '@/lib/trade-labels'
+import { EXPERIENCE_TO_YEARS } from '@/lib/experience'
 import { SignupHeader, FormInput, FormLabel, FormError } from '../_components'
 import { FieldSelector, ExperienceSelector } from './components'
-import { FIELD_OPTIONS, EXPERIENCE_OPTIONS } from './constants'
+import { TRADE_CATEGORIES, EXPERIENCE_OPTIONS } from './constants'
 import { profileSchema, type ProfileFormData } from './schema'
-import type { ConstructionField } from './types'
 
 export default function SignupProfilePage() {
   const router = useRouter()
   const { login } = useAuthStore()
   const registerMemberMutation = useRegisterMember()
+  const updateProfileMutation = useUpdateMyProfile()
   const { formData } = useSignupStore()
 
   const {
@@ -48,22 +50,22 @@ export default function SignupProfilePage() {
     if (
       watchedFields &&
       watchedFields.length > 0 &&
-      !watchedFields.includes(watchedPrimaryField as ConstructionField)
+      !watchedFields.includes(watchedPrimaryField as string)
     ) {
       setValue('primaryField', watchedFields[0])
     }
   }, [watchedFields, watchedPrimaryField, setValue])
 
-  const toggleField = (field: ConstructionField) => {
+  const toggleField = (trade: Trade) => {
     const currentFields = selectedFields || []
-    if (currentFields.includes(field)) {
+    if (currentFields.includes(trade)) {
       setValue(
         'fields',
-        currentFields.filter((f) => f !== field),
+        currentFields.filter((f) => f !== trade),
         { shouldValidate: true }
       )
     } else if (currentFields.length < 3) {
-      setValue('fields', [...currentFields, field], { shouldValidate: true })
+      setValue('fields', [...currentFields, trade], { shouldValidate: true })
     }
   }
 
@@ -83,13 +85,21 @@ export default function SignupProfilePage() {
       // 회원가입 성공 — 로그인 처리
       login(result, '')
 
+      // 프로필 데이터 저장 (시공분야/경력)
+      await updateProfileMutation.mutateAsync({
+        data: {
+          primaryTrade: data.primaryField as Trade,
+          trades: data.fields as Trade[],
+          experience: EXPERIENCE_TO_YEARS[data.experience],
+        },
+      })
+
       // signup store 초기화
       useSignupStore.getState().reset()
 
       router.push('/signup/complete')
     } catch (err) {
       if (err instanceof ApiError) {
-        // 에러 처리 — 현재 페이지에서 표시
         console.error('Registration failed:', err.code, err.message)
       }
     }
@@ -102,16 +112,16 @@ export default function SignupProfilePage() {
       {/* Content */}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-24 pt-3"
+        className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-28 pt-3"
       >
-        <h1 className="text-2xl font-semibold leading-[1.4] text-[#1B1B1B]">
+        <h1 className="text-sb-24 text-black">
           기술자님의 시공분야와
           <br />
           역할을 선택해주세요
         </h1>
 
         {/* Name Input */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           <FormLabel required>이름</FormLabel>
           <FormInput type="text" placeholder="내용을 입력해주세요" {...register('name')} />
           <FormError message={errors.name?.message} />
@@ -119,35 +129,51 @@ export default function SignupProfilePage() {
 
         {/* Construction Fields */}
         <div className="flex flex-col gap-3">
-          <FormLabel required description="대표 시공분야는 최대 3개까지 선택 가능해요.">
-            시공분야
-          </FormLabel>
-          <FieldSelector options={FIELD_OPTIONS} selected={selectedFields} onToggle={toggleField} />
+          <FormLabel required>시공분야</FormLabel>
+          <FieldSelector
+            categories={TRADE_CATEGORIES}
+            selected={selectedFields}
+            onToggle={toggleField}
+          />
           <FormError message={errors.fields?.message} />
         </div>
 
         {/* Primary Field */}
         {selectedFields.length > 0 && (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             <FormLabel required>대표분야</FormLabel>
             <Controller
               name="primaryField"
               control={control}
               render={({ field }) => (
-                <select
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                  className="flex h-[30px] items-center rounded-lg border border-[#E5E7EB] bg-white px-2.5 text-sm font-medium text-[#1B1B1B]"
-                >
-                  {selectedFields.map((fieldId) => {
-                    const option = FIELD_OPTIONS.find((f) => f.id === fieldId)
-                    return (
-                      <option key={fieldId} value={fieldId}>
-                        {option?.label}
+                <div className="relative w-fit">
+                  <select
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    className="flex h-[40px] appearance-none items-center rounded-[8px] border border-morton-gray-300 bg-white py-[3px] pl-[10px] pr-8 text-m-14 text-morton-gray-900"
+                  >
+                    {selectedFields.map((tradeValue) => (
+                      <option key={tradeValue} value={tradeValue}>
+                        {TRADE_LABELS[tradeValue as Trade]}
                       </option>
-                    )
-                  })}
-                </select>
+                    ))}
+                  </select>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    className="pointer-events-none absolute right-[10px] top-1/2 -translate-y-1/2"
+                  >
+                    <path
+                      d="M4 6L8 10L12 6"
+                      stroke="#1B1B1B"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
               )}
             />
           </div>
@@ -171,14 +197,14 @@ export default function SignupProfilePage() {
         </div>
 
         {/* Affiliation */}
-        <div className="flex flex-col gap-3">
-          <FormLabel>소속</FormLabel>
-          <FormInput type="text" placeholder="소속을 입력해주세요" {...register('affiliation')} />
+        <div className="flex flex-col gap-2">
+          <FormLabel required>소속</FormLabel>
+          <FormInput type="text" placeholder="내용을 입력해주세요" {...register('affiliation')} />
         </div>
       </form>
 
       {/* Fixed Submit Button */}
-      <div className="fixed inset-x-0 bottom-0 bg-white px-4 pb-8 pt-4">
+      <div className="fixed inset-x-0 bottom-0 bg-white px-4 pb-[env(safe-area-inset-bottom,32px)] pt-4">
         <Button
           type="submit"
           variant="primary"

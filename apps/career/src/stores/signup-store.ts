@@ -1,36 +1,14 @@
 import { create } from 'zustand'
 
-/**
- * 시공분야 타입
- */
-type ConstructionField =
-  | 'tile'
-  | 'wallpaper'
-  | 'flooring'
-  | 'carpentry'
-  | 'demolition'
-  | 'cleaning'
-  | 'electrical'
-  | 'plumbing'
-
-/**
- * 경력 타입
- */
 type ExperienceLevel = 'newcomer' | '1-3' | '3-5' | '5-10' | '10+'
 
-/**
- * 회원가입 폼 데이터
- *
- * 멀티 페이지 폼에서 페이지 간 데이터 공유를 위한 최소한의 상태만 저장합니다.
- * 각 페이지의 validation은 React Hook Form이 담당합니다.
- */
 interface SignupFormData {
   phone: string
   username: string
   signupToken: string
   name: string
-  fields: ConstructionField[]
-  primaryField: ConstructionField | null
+  fields: string[]
+  primaryField: string | null
   experience: ExperienceLevel | null
   affiliation: string
 }

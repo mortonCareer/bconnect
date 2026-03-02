@@ -37,17 +37,20 @@ import { cn } from '../../lib/utils'
  * ```
  */
 
-const chatListItemVariants = cva('flex w-full items-center justify-between', {
-  variants: {
-    variant: {
-      default: 'h-[80px] border-b border-[#E5E5E5] px-[16px] py-[20px]',
-      badge: 'pb-[20px]',
+const chatListItemVariants = cva(
+  'flex w-full cursor-pointer items-center justify-between transition-colors hover:bg-gray-50',
+  {
+    variants: {
+      variant: {
+        default: 'h-[80px] border-b border-[#E5E5E5] px-[16px] py-[20px]',
+        badge: 'pb-[20px]',
+      },
     },
-  },
-  defaultVariants: {
-    variant: 'default',
-  },
-})
+    defaultVariants: {
+      variant: 'default',
+    },
+  }
+)
 
 export interface ChatListItemProps
   extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof chatListItemVariants> {

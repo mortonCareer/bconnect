@@ -63,7 +63,7 @@ function ProgressBarInline({ step, total }: { step: number; total: number }) {
           key={i}
           className={cn(
             'h-full flex-1 rounded-full',
-            i < step ? 'bg-morton-primary' : 'bg-[#E5E7EB]'
+            i < step ? 'bg-morton-primary' : 'bg-morton-gray-300'
           )}
         />
       ))}
@@ -111,7 +111,7 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             <button
               type="button"
               onClick={onBack}
-              className="flex size-5 items-center justify-center transition-all active:scale-[0.95]"
+              className="flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]"
               aria-label="뒤로가기"
             >
               <ChevronLeftIcon className="text-[#9C9C9C]" />
@@ -125,7 +125,7 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             <button
               type="button"
               onClick={onBack}
-              className="flex size-5 items-center justify-center transition-all active:scale-[0.95]"
+              className="flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]"
               aria-label="뒤로가기"
             >
               <ChevronLeftIcon className="text-[#9C9C9C]" />
@@ -149,7 +149,7 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             <button
               type="button"
               onClick={onFilter}
-              className="flex size-5 items-center justify-center transition-all active:scale-[0.95]"
+              className="flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]"
               aria-label="필터"
             >
               <FilterIcon />
@@ -158,7 +158,7 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             <button
               type="button"
               onClick={onChat}
-              className="flex items-center justify-center transition-all active:scale-[0.95]"
+              className="flex cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]"
               aria-label="채팅"
             >
               <ChatIcon count={chatCount} />
