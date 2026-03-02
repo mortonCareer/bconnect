@@ -2,7 +2,7 @@ import type { NextConfig } from 'next'
 import { withSentryConfig } from '@sentry/nextjs'
 
 const nextConfig: NextConfig = {
-  /* Vercel monorepo: apps/career */
+  // Vercel monorepo: apps/career
 }
 
 export default withSentryConfig(nextConfig, {
