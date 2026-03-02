@@ -35,7 +35,8 @@ export async function fetchNtsBusinessStatus(
   })
 
   if (!response.ok) {
-    throw new Error(`NTS status API error: ${response.status} ${response.statusText}`)
+    const body = await response.text().catch(() => '')
+    throw new Error(`NTS status API error: ${response.status} ${response.statusText} - ${body}`)
   }
 
   return response.json() as Promise<NtsStatusResponse>
@@ -71,7 +72,8 @@ export async function fetchNtsBusinessValidate(
   })
 
   if (!response.ok) {
-    throw new Error(`NTS validate API error: ${response.status} ${response.statusText}`)
+    const body = await response.text().catch(() => '')
+    throw new Error(`NTS validate API error: ${response.status} ${response.statusText} - ${body}`)
   }
 
   return response.json() as Promise<NtsValidateResponse>

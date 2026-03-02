@@ -52,7 +52,8 @@ export async function fetchFeiaCompanies(companyName: string): Promise<FeiaCompa
   })
 
   if (!response.ok) {
-    throw new Error(`FEIA API error: ${response.status} ${response.statusText}`)
+    const body = await response.text().catch(() => '')
+    throw new Error(`FEIA API error: ${response.status} ${response.statusText} - ${body}`)
   }
 
   const json: FeiaApiResponse = await response.json()
