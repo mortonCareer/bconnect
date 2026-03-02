@@ -33,6 +33,10 @@ spring:
   #       secret-key: ${AWS_SECRET_ACCESS_KEY}
 
 management:
+  endpoints:
+    web:
+      exposure:
+        include: health
   metrics:
     enable:
       process: false
