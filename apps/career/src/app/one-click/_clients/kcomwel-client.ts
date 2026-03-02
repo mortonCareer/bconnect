@@ -43,7 +43,10 @@ export async function fetchKcomwelInsurance(
   })
 
   if (!response.ok) {
-    throw new Error(`Kcomwel insurance API error: ${response.status} ${response.statusText}`)
+    const body = await response.text().catch(() => '')
+    throw new Error(
+      `Kcomwel insurance API error: ${response.status} ${response.statusText} - ${body}`
+    )
   }
 
   const text = await response.text()
