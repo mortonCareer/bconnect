@@ -1,18 +1,16 @@
 'use client'
 
+import { useMemo } from 'react'
 import {
   useInfiniteQuery,
   useQueries,
   getPosts,
-  getProfile,
-  getMember,
-  getTask,
+  useGetMembers,
   getGetPostsQueryKey,
   getGetProfileQueryOptions,
-  getGetMemberQueryOptions,
   getGetTaskQueryOptions,
 } from '@morton/api-client'
-import type { Post, Profile, Member, Task, Trade } from '@morton/api-client'
+import type { Profile, Member, Task, Trade } from '@morton/api-client'
 import { TRADE_LABELS } from '../lib/trade-labels'
 import { formatRelativeTime, formatDuration } from '../lib/format-time'
 
@@ -97,22 +95,16 @@ export function useFeedItems({
     if (q.data) profileMap.set(profileIds[i], q.data)
   })
 
-  const memberIds = [
-    ...new Set([...profileMap.values()].map((p) => p.memberId).filter(Boolean)),
-  ] as number[]
+  // 전체 Member 조회 후 매핑
+  const { data: allMembers, isLoading: isMembersLoading } = useGetMembers()
 
-  // 병렬 Member 조회
-  const memberQueries = useQueries({
-    queries: memberIds.map((id) => ({
-      ...getGetMemberQueryOptions(id),
-      enabled: memberIds.length > 0,
-    })),
-  })
-
-  const memberMap = new Map<number, Member>()
-  memberQueries.forEach((q, i) => {
-    if (q.data) memberMap.set(memberIds[i], q.data)
-  })
+  const memberMap = useMemo(() => {
+    const map = new Map<number, Member>()
+    allMembers?.forEach((m) => {
+      if (m.id) map.set(m.id, m)
+    })
+    return map
+  }, [allMembers])
 
   // 병렬 Task 조회
   const taskQueries = useQueries({
@@ -161,7 +153,7 @@ export function useFeedItems({
   const isLoading =
     postsQuery.isLoading ||
     profileQueries.some((q) => q.isLoading) ||
-    memberQueries.some((q) => q.isLoading) ||
+    isMembersLoading ||
     taskQueries.some((q) => q.isLoading)
 
   return {
@@ -178,10 +170,13 @@ export function useFeedItems({
 export function getRoleLabel(role: string): string {
   const labels: Record<string, string> = {
     GUEST: '게스트',
+    CLIENT: '의뢰인',
     ARCHITECT: '건축사',
     CONTRACTOR: '시공사',
     FOREMAN: '반장',
-    WORKER: '기술자',
+    SKILLED: '숙련공',
+    SEMI_SKILLED: '준숙련공',
+    HELPER: '보조',
     ADMIN: '관리자',
   }
   return labels[role] ?? role

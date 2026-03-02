@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useGetMember, useGetProfile } from '@morton/api-client'
+import { useGetMembers, useGetProfile } from '@morton/api-client'
 import { Button, Tab, TopBar } from '@morton/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { ProfileHeader } from '../_components/ProfileHeader'
@@ -22,12 +22,11 @@ export default function MemberProfilePage() {
   const [activeTab, setActiveTab] = useState('intro')
 
   const {
-    data: member,
+    data: members,
     isLoading: isMemberLoading,
     error: memberError,
-  } = useGetMember(memberId, {
-    query: { enabled: !isNaN(memberId) },
-  })
+  } = useGetMembers({ query: { enabled: !isNaN(memberId) } })
+  const member = members?.find((m) => m.id === memberId)
 
   // profileId = memberId (1:1 매핑)
   const { data: profile, isLoading: isProfileLoading } = useGetProfile(memberId, {

@@ -31,32 +31,33 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
   const [mounted, setMounted] = useState(false)
   const [visible, setVisible] = useState(false)
 
+  // Sync store → pending on open transition (render-time setState, avoids effect)
+  const [prevIsOpen, setPrevIsOpen] = useState(false)
+  if (isOpen && !prevIsOpen) {
+    setPrevIsOpen(true)
+    setMounted(true)
+    setPendingTrades(storeTrades)
+    setPendingPrimary(storePrimary)
+    setPendingExperience(storeExperience)
+  }
+  if (!isOpen && prevIsOpen) {
+    setPrevIsOpen(false)
+    setVisible(false)
+  }
+
+  // Animation only: rAF for enter, setTimeout for exit unmount
   useEffect(() => {
     if (isOpen) {
-      setMounted(true)
-      setPendingTrades(storeTrades)
-      setPendingPrimary(storePrimary)
-      setPendingExperience(storeExperience)
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           setVisible(true)
         })
       })
-    } else {
-      setVisible(false)
+    } else if (mounted) {
       const timer = setTimeout(() => setMounted(false), 300)
       return () => clearTimeout(timer)
     }
-  }, [isOpen, storeTrades, storePrimary, storeExperience])
-
-  // Auto-set primary trade when trades change
-  useEffect(() => {
-    if (pendingTrades.length > 0 && (!pendingPrimary || !pendingTrades.includes(pendingPrimary))) {
-      setPendingPrimary(pendingTrades[0])
-    } else if (pendingTrades.length === 0) {
-      setPendingPrimary(null)
-    }
-  }, [pendingTrades, pendingPrimary])
+  }, [isOpen, mounted])
 
   const handleClose = () => {
     applyFilters(pendingTrades, pendingPrimary, pendingExperience)
@@ -70,15 +71,20 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
   }
 
   const handleTradeToggle = (trade: Trade) => {
-    setPendingTrades((prev) => {
-      if (prev.includes(trade)) {
-        return prev.filter((t) => t !== trade)
-      }
-      if (prev.length < 3) {
-        return [...prev, trade]
-      }
-      return prev
-    })
+    const next = pendingTrades.includes(trade)
+      ? pendingTrades.filter((t) => t !== trade)
+      : pendingTrades.length < 3
+        ? [...pendingTrades, trade]
+        : pendingTrades
+
+    setPendingTrades(next)
+
+    // Auto-set primary trade
+    if (next.length > 0 && (!pendingPrimary || !next.includes(pendingPrimary))) {
+      setPendingPrimary(next[0])
+    } else if (next.length === 0) {
+      setPendingPrimary(null)
+    }
   }
 
   const handleExperienceClick = (level: ExperienceLevel) => {

@@ -7,7 +7,7 @@ import {
   useQueries,
   getMyChats,
   getGetMyChatsQueryKey,
-  getGetMemberQueryOptions,
+  useGetMembers,
   getGetProfileQueryOptions,
 } from '@morton/api-client'
 import type { ChatPage, Member, Profile } from '@morton/api-client'
@@ -65,21 +65,16 @@ export default function MessagesPage() {
     return [...ids]
   }, [chats, currentUserId])
 
-  // 병렬 Member 조회
-  const memberQueries = useQueries({
-    queries: otherMemberIds.map((id) => ({
-      ...getGetMemberQueryOptions(id),
-      enabled: otherMemberIds.length > 0,
-    })),
-  })
+  // 전체 Member 조회 후 매핑
+  const { data: allMembers } = useGetMembers()
 
   const memberMap = useMemo(() => {
     const map = new Map<number, Member>()
-    memberQueries.forEach((q, i) => {
-      if (q.data) map.set(otherMemberIds[i], q.data)
+    allMembers?.forEach((m) => {
+      if (m.id) map.set(m.id, m)
     })
     return map
-  }, [memberQueries, otherMemberIds])
+  }, [allMembers])
 
   // 병렬 Profile 조회 (memberId를 profileId로 사용)
   const profileQueries = useQueries({

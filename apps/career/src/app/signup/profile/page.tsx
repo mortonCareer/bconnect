@@ -6,6 +6,7 @@ import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@morton/ui'
 import { ApiError, useRegisterMember, useUpdateMyProfile, Role, Trade } from '@morton/api-client'
+import type { Member } from '@morton/api-client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import { TRADE_LABELS } from '@/lib/trade-labels'
@@ -71,19 +72,27 @@ export default function SignupProfilePage() {
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
-      const result = await registerMemberMutation.mutateAsync({
+      const memberId = await registerMemberMutation.mutateAsync({
         data: {
           signupToken: formData.signupToken,
           username: formData.username,
           name: data.name,
           phone: formData.phone.replace(/^\+82/, '0'),
           picture: '',
-          role: Role.WORKER,
+          role: Role.SKILLED,
         },
       })
 
-      // 회원가입 성공 — 로그인 처리
-      login(result, '')
+      // 회원가입 성공 — 로그인 처리 (registerMember returns memberId)
+      login(
+        {
+          id: memberId,
+          name: data.name,
+          username: formData.username,
+          role: Role.SKILLED,
+        } as Member,
+        ''
+      )
 
       // 프로필 데이터 저장 (시공분야/경력)
       await updateProfileMutation.mutateAsync({
@@ -91,6 +100,7 @@ export default function SignupProfilePage() {
           primaryTrade: data.primaryField as Trade,
           trades: data.fields as Trade[],
           experience: EXPERIENCE_TO_YEARS[data.experience],
+          address: {},
         },
       })
 

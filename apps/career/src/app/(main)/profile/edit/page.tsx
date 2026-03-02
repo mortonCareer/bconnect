@@ -8,8 +8,9 @@ import {
   useQueryClient,
   useGetCurrentMember,
   useGetMyProfile,
-  useUpdateMember,
+  useUpdateMyMember,
   useUpdateMyProfile,
+  useUpdateMyProfileAbout,
   getGetCurrentMemberQueryKey,
   getGetMyProfileQueryKey,
   Trade,
@@ -46,8 +47,9 @@ export default function ProfileEditPage() {
   const { data: member, isLoading: isMemberLoading } = useGetCurrentMember()
   const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
 
-  const updateMemberMutation = useUpdateMember()
+  const updateMemberMutation = useUpdateMyMember()
   const updateProfileMutation = useUpdateMyProfile()
+  const updateAboutMutation = useUpdateMyProfileAbout()
 
   const {
     register,
@@ -92,7 +94,11 @@ export default function ProfileEditPage() {
   const watchedPrimaryTrade = useWatch({ control, name: 'primaryTrade' })
 
   const isLoading = isMemberLoading || isProfileLoading
-  const isSaving = isSubmitting || updateMemberMutation.isPending || updateProfileMutation.isPending
+  const isSaving =
+    isSubmitting ||
+    updateMemberMutation.isPending ||
+    updateProfileMutation.isPending ||
+    updateAboutMutation.isPending
 
   const onSubmit = async (data: ProfileEditFormData) => {
     try {
@@ -102,8 +108,7 @@ export default function ProfileEditPage() {
       if (member?.id && data.name !== member.name) {
         promises.push(
           updateMemberMutation.mutateAsync({
-            memberId: member.id,
-            data: { name: data.name },
+            data: { name: data.name, role: member.role! },
           })
         )
       }
@@ -112,15 +117,23 @@ export default function ProfileEditPage() {
       promises.push(
         updateProfileMutation.mutateAsync({
           data: {
-            primaryTrade: data.primaryTrade as Trade | undefined,
-            trades: data.trades as Trade[] | undefined,
+            primaryTrade: data.primaryTrade as Trade,
+            trades: data.trades as Trade[],
             experience: data.experience,
-            headline: data.headline ?? undefined,
-            about: data.about ?? undefined,
-            address: data.city ? { city: data.city } : undefined,
+            headline: data.headline || undefined,
+            address: { city: data.city || undefined },
           },
         })
       )
+
+      // About 별도 업데이트
+      if (data.about != null) {
+        promises.push(
+          updateAboutMutation.mutateAsync({
+            data: { about: data.about || undefined },
+          })
+        )
+      }
 
       await Promise.all(promises)
 
