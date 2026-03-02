@@ -48,8 +48,8 @@ importers:
         specifier: ^3.965.0
         version: 3.965.0
       '@hookform/resolvers':
-        specifier: 5.2.0
-        version: 5.2.0(react-hook-form@7.70.0(react@19.2.3))
+        specifier: 5.2.2
+        version: 5.2.2(react-hook-form@7.70.0(react@19.2.3))
       '@morton/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
@@ -795,8 +795,8 @@ packages:
   '@gerrit0/mini-shiki@3.20.0':
     resolution: {integrity: sha512-Wa57i+bMpK6PGJZ1f2myxo3iO+K/kZikcyvH8NIqNNZhQUbDav7V9LQmWOXhf946mz5c1NZ19WMsGYiDKTryzQ==}
 
-  '@hookform/resolvers@5.2.0':
-    resolution: {integrity: sha512-3YI+VqxJQH6ryRWG+j3k+M19Wf37LeSKJDg6Vdjq6makLOqZGYn77iTaYLMLpVi/uHc1N6OTCmcxJwhOQV979g==}
+  '@hookform/resolvers@5.2.2':
+    resolution: {integrity: sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA==}
     peerDependencies:
       react-hook-form: ^7.55.0
 
@@ -5345,7 +5345,7 @@ snapshots:
       '@shikijs/types': 3.21.0
       '@shikijs/vscode-textmate': 10.0.2
 
-  '@hookform/resolvers@5.2.0(react-hook-form@7.70.0(react@19.2.3))':
+  '@hookform/resolvers@5.2.2(react-hook-form@7.70.0(react@19.2.3))':
     dependencies:
       '@standard-schema/utils': 0.3.0
       react-hook-form: 7.70.0(react@19.2.3)
