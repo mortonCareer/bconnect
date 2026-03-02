@@ -45,6 +45,7 @@
       "filter": { "nodeId": "352-2654" },
       "x": { "nodeId": "352-3878" },
       "image": { "nodeId": "364-5520" },
+      "send": { "nodeId": "407-3017" },
       "검색": { "nodeId": "634-5542" },
       "chevron-down": { "nodeId": "188-1120" },
       "chevron-right": { "nodeId": "352-2840" },

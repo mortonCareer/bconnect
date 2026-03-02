@@ -1,6 +1,7 @@
 import * as React from 'react'
-import { ImageIcon, SendHorizontal } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { ImageIcon } from '../../icons/ImageIcon'
+import { SendIcon } from '../../icons/SendIcon'
 
 /**
  * ChatInput variants:
@@ -86,11 +87,11 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
       >
         {/* 갤러리 아이콘 */}
         <button type="button" className="shrink-0" aria-label="갤러리">
-          <ImageIcon className="size-[24px] text-[#A5A5A5]" />
+          <ImageIcon size={24} className="text-morton-gray-500" />
         </button>
 
         {/* 입력 영역 */}
-        <div className="flex flex-1 items-center rounded-[12px] bg-[#F4F4F4] px-[16px] py-[9px]">
+        <div className="flex flex-1 items-center rounded-[12px] bg-morton-gray-100 px-[16px] py-[9px]">
           <input
             type="text"
             value={inputValue}
@@ -99,9 +100,9 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
             onKeyDown={handleKeyDown}
             disabled={disabled}
             className={cn(
-              'flex-1 bg-transparent font-[Pretendard_Variable] text-[14px] leading-[1.6] outline-none',
-              disabled ? 'text-[#A5A5A5]' : 'text-[#1B1B1B]',
-              'placeholder:text-[#A5A5A5]'
+              'flex-1 bg-transparent text-[0.875rem] leading-[1.6] font-normal outline-none',
+              disabled ? 'text-morton-gray-500' : 'text-morton-gray-900',
+              'placeholder:text-morton-gray-500'
             )}
           />
         </div>
@@ -112,12 +113,12 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           onClick={handleSendClick}
           disabled={!isActive}
           className={cn(
-            'flex size-[40px] shrink-0 items-center justify-center rounded-[20px] p-[8px]',
-            isActive ? 'bg-[#386DFF]' : 'bg-[#A5A5A5]'
+            'flex size-[40px] shrink-0 items-center justify-center rounded-full p-[8px]',
+            isActive ? 'bg-morton-primary' : 'bg-morton-gray-500'
           )}
           aria-label="전송"
         >
-          <SendHorizontal className="size-[24px] text-white" />
+          <SendIcon size={24} className="text-white" />
         </button>
       </div>
     )
