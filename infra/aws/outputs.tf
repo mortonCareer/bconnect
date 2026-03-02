@@ -19,3 +19,15 @@ output "secret_access_key" {
   value       = aws_iam_access_key.app_key.secret
   sensitive   = true
 }
+
+output "kiscon_sync_access_key_id" {
+  description = "Access key ID for KISCON sync IAM user"
+  value       = aws_iam_access_key.kiscon_sync_key.id
+  sensitive   = true
+}
+
+output "kiscon_sync_secret_access_key" {
+  description = "Secret access key for KISCON sync IAM user"
+  value       = aws_iam_access_key.kiscon_sync_key.secret
+  sensitive   = true
+}
