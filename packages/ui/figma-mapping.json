@@ -45,6 +45,7 @@
       "filter": { "nodeId": "352-2654" },
       "x": { "nodeId": "352-3878" },
       "image": { "nodeId": "364-5520" },
+      "send": { "nodeId": "407-3017" },
       "검색": { "nodeId": "634-5542" },
       "chevron-down": { "nodeId": "188-1120" },
       "chevron-right": { "nodeId": "352-2840" },
@@ -166,12 +167,20 @@
     },
     "ChatInput": {
       "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=364-5740",
-      "codePath": "apps/career/src/app/(main)/messages/[chatId]/_components/ChatInput.tsx",
-      "createdAt": "2026-03-01",
-      "lastSyncedAt": "2026-03-01",
+      "codePath": "src/components/ui/ChatInput.tsx",
+      "createdAt": "2026-01-30",
+      "lastSyncedAt": "2026-03-02",
       "variants": [
-        { "name": "default", "nodeId": "364-5734", "description": "기본 - 입력 가능" },
-        { "name": "disabled", "nodeId": "364-5741", "description": "비활성" }
+        {
+          "name": "default",
+          "nodeId": "364-5734",
+          "description": "기본 - 텍스트 입력됨, 파란 전송버튼"
+        },
+        {
+          "name": "disabled",
+          "nodeId": "364-5741",
+          "description": "비활성 - placeholder, 회색 전송버튼"
+        }
       ]
     },
     "Tab": {
