@@ -57,7 +57,8 @@ export default function ProfileEditPage() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ProfileEditFormData>({
-    resolver: zodResolver(profileEditSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- zod v4 + @hookform/resolvers 타입 호환 workaround
+    resolver: zodResolver(profileEditSchema as any),
     mode: 'onChange',
     defaultValues: {
       name: '',
