@@ -4,10 +4,7 @@ import { fetchNtsBusinessStatus } from '@/app/one-click/_clients/nts-client'
 import { fetchKcomwelInsurance } from '@/app/one-click/_clients/kcomwel-client'
 import { fetchFeiaCompanies } from '@/app/one-click/_clients/feia-client'
 import { fetchMoelDefaulters } from '@/app/one-click/_clients/moel-client'
-import {
-  fetchKisconArrears,
-  fetchKisconSubconLimit,
-} from '@/app/one-click/_clients/kiscon-crawl-client'
+import { checkKisconFreshness } from '@/app/one-click/_clients/kiscon-s3-client'
 
 // 더미 사업자번호 — 존재 여부와 무관하게 API 응답 자체를 검증
 const DUMMY_BIZ_NO = '0000000000'
@@ -19,8 +16,8 @@ const HEALTH_TARGETS = [
   { name: 'FEIA 소방시설업', fn: () => fetchFeiaCompanies('__health_check__') },
   // 크롤링 스키마 검증
   { name: 'MOEL 체불사업주', fn: () => fetchMoelDefaulters('__schema_check__') },
-  { name: 'KISCON 상습체불', fn: () => fetchKisconArrears('__schema_check__') },
-  { name: 'KISCON 하도급제한', fn: () => fetchKisconSubconLimit(DUMMY_BIZ_NO) },
+  // S3 데이터 freshness 체크 (14일 이내)
+  { name: 'KISCON S3 데이터', fn: () => checkKisconFreshness() },
 ]
 
 async function sendSlackAlert(failures: string[]) {
