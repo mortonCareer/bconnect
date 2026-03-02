@@ -4,6 +4,6 @@
 watchPatterns = ["apps/api/**"]
 
 [deploy]
-# healthcheckPath = "/health"
+healthcheckPath = "/actuator/health"
 healthcheckTimeout = 300
-restartPolicyType = "NEVER"
+restartPolicyType = "ON_FAILURE"
