@@ -32,6 +32,11 @@ spring:
   #       access-key: ${AWS_ACCESS_KEY_ID}
   #       secret-key: ${AWS_SECRET_ACCESS_KEY}
 
+sentry:
+  dsn: ${SENTRY_DSN:}
+  traces-sample-rate: 1.0
+  environment: ${SENTRY_ENVIRONMENT:local}
+
 management:
   endpoints:
     web:
