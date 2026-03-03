@@ -16,6 +16,7 @@ create table chats (
     title varchar(255) not null,
     created_at timestamp(6) not null,
     modified_at timestamp(6) not null,
+    deleted boolean default false not null,
     status varchar(255) check ((status in ('ACTIVE','DELETED'))),
     primary key (id)
 );
@@ -29,6 +30,7 @@ create table members (
     role varchar(255) not null check ((role in ('GUEST','CLIENT','ARCHITECT','CONTRACTOR','FOREMAN','SKILLED','SEMI_SKILLED','HELPER','ADMIN'))),
     created_at timestamp(6) not null,
     modified_at timestamp(6) not null,
+    deleted boolean default false not null,
     status varchar(255) check ((status in ('ACTIVE','DELETED'))),
     primary key (id)
 );
@@ -44,6 +46,7 @@ create table otps (
     signup_token_expired_at timestamp(6),
     created_at timestamp(6) not null,
     modified_at timestamp(6) not null,
+    deleted boolean default false not null,
     status varchar(255) check ((status in ('ACTIVE','DELETED'))),
     primary key (id)
 );
@@ -57,6 +60,7 @@ create table sessions (
     revoked boolean not null,
     created_at timestamp(6) not null,
     modified_at timestamp(6) not null,
+    deleted boolean default false not null,
     status varchar(255) check ((status in ('ACTIVE','DELETED'))),
     primary key (id)
 );
@@ -77,6 +81,7 @@ create table tasks (
     "end" date not null,
     created_at timestamp(6) not null,
     modified_at timestamp(6) not null,
+    deleted boolean default false not null,
     status varchar(255) check ((status in ('ACTIVE','DELETED'))),
     primary key (id)
 );
@@ -88,6 +93,7 @@ create table messages (
     content TEXT not null,
     created_at timestamp(6) not null,
     modified_at timestamp(6) not null,
+    deleted boolean default false not null,
     status varchar(255) check ((status in ('ACTIVE','DELETED'))),
     primary key (id)
 );
@@ -99,6 +105,7 @@ create table participants (
     last_idx bigint not null,
     created_at timestamp(6) not null,
     modified_at timestamp(6) not null,
+    deleted boolean default false not null,
     status varchar(255) check ((status in ('ACTIVE','DELETED'))),
     primary key (id)
 );
@@ -110,6 +117,7 @@ create table posts (
     content TEXT,
     created_at timestamp(6) not null,
     modified_at timestamp(6) not null,
+    deleted boolean default false not null,
     status varchar(255) check ((status in ('ACTIVE','DELETED'))),
     primary key (id)
 );
@@ -130,6 +138,7 @@ create table profiles (
     longitude numeric(10,7),
     created_at timestamp(6) not null,
     modified_at timestamp(6) not null,
+    deleted boolean default false not null,
     status varchar(255) check ((status in ('ACTIVE','DELETED'))),
     primary key (id)
 );
