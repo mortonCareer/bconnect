@@ -119,6 +119,25 @@ resource "railway_variable" "api_java_tool_options" {
   depends_on = [railway_variable.api_jdk_version]
 }
 
+# Sentry
+resource "railway_variable" "api_sentry_dsn" {
+  name           = "SENTRY_DSN"
+  value          = var.sentry_dsn
+  service_id     = railway_service.api.id
+  environment_id = railway_project.morton.default_environment.id
+
+  depends_on = [railway_variable.api_java_tool_options]
+}
+
+resource "railway_variable" "api_sentry_environment" {
+  name           = "SENTRY_ENVIRONMENT"
+  value          = "production"
+  service_id     = railway_service.api.id
+  environment_id = railway_project.morton.default_environment.id
+
+  depends_on = [railway_variable.api_sentry_dsn]
+}
+
 # ===========================================================================
 # Custom Domain for API
 # ===========================================================================

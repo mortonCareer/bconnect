@@ -49,7 +49,8 @@ nts_api_service_key    = "your-data-go-kr-service-key"
 kcomwel_api_service_key = "your-data-go-kr-service-key"
 
 # =============================================================================
-# Sentry (optional - 소스맵 업로드용)
+# Sentry
 # =============================================================================
 
 sentry_auth_token = ""
+sentry_dsn        = ""

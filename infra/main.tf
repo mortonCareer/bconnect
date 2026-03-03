@@ -28,6 +28,8 @@ module "railway" {
   s3_bucket_name        = var.s3_bucket_name
 
   domain = var.domain
+
+  sentry_dsn = var.sentry_dsn
 }
 
 module "vercel" {

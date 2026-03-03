@@ -109,6 +109,8 @@ jobs:
         run: chmod +x apps/api/gradlew
 
       - name: Build with Gradle
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           cd apps/api
           ./gradlew build --no-daemon
