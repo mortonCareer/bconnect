@@ -2,13 +2,13 @@ import { Trade } from '@morton/api-client'
 
 export const TRADE_LABELS: Record<Trade, string> = {
   [Trade.DESIGN]: '설계',
-  [Trade.DEMOLITION]: '철거',
+  [Trade.DEMOLITION]: '철거/확장',
   [Trade.ELECTRICAL]: '전기',
   [Trade.PLUMBING]: '배관',
-  [Trade.MECHANICAL]: '기계설비',
+  [Trade.MECHANICAL]: '설비',
   [Trade.MASONRY]: '조적',
   [Trade.CARPENTRY]: '목공',
-  [Trade.GLAZING]: '유리',
+  [Trade.GLAZING]: '창호',
   [Trade.WATERPROOFING]: '방수',
   [Trade.PLASTERING]: '미장',
   [Trade.INSULATION]: '단열',
@@ -22,10 +22,10 @@ export const TRADE_LABELS: Record<Trade, string> = {
   [Trade.SINK]: '싱크대',
   [Trade.FURNITURE]: '가구',
   [Trade.AIR_CONDITIONING]: '에어컨',
-  [Trade.HOISTING]: '양중',
-  [Trade.TRANSPORT]: '운반',
+  [Trade.HOISTING]: '양중/곰방',
+  [Trade.TRANSPORT]: '운송',
   [Trade.CLEANING]: '청소',
-  [Trade.GENERAL_LABOR]: '잡역',
+  [Trade.GENERAL_LABOR]: '보통인부',
 }
 
 export const TRADE_LIST = Object.entries(TRADE_LABELS).map(([value, label]) => ({

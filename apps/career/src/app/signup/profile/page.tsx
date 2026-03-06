@@ -4,16 +4,16 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@morton/ui'
+import { Button, Tag } from '@morton/ui'
 import { ApiError, useRegisterMember, useUpdateMyProfile, Role, Trade } from '@morton/api-client'
 import type { Member } from '@morton/api-client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
-import { TRADE_LABELS } from '@/lib/trade-labels'
-import { EXPERIENCE_TO_YEARS } from '@/lib/experience'
+import { TRADE_LABELS, TRADE_GROUPS } from '@/lib/trade-labels'
+import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
+import { EXPERIENCE_OPTIONS, EXPERIENCE_TO_YEARS } from '@/lib/experience'
+import type { ExperienceLevel } from '@/lib/experience'
 import { SignupHeader, FormInput, FormLabel, FormError } from '../_components'
-import { FieldSelector, ExperienceSelector } from './components'
-import { TRADE_CATEGORIES, EXPERIENCE_OPTIONS } from './constants'
 import { profileSchema, type ProfileFormData } from './schema'
 
 export default function SignupProfilePage() {
@@ -38,6 +38,9 @@ export default function SignupProfilePage() {
       primaryField: formData.primaryField || undefined,
       experience: formData.experience || undefined,
       affiliation: formData.affiliation || '',
+      role: undefined,
+      address: '',
+      headline: '',
     },
   })
 
@@ -72,6 +75,7 @@ export default function SignupProfilePage() {
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
+      const selectedRole = (data.role as Role) || Role.SKILLED
       const memberId = await registerMemberMutation.mutateAsync({
         data: {
           signupToken: formData.signupToken,
@@ -79,34 +83,33 @@ export default function SignupProfilePage() {
           name: data.name,
           phone: formData.phone.replace(/^\+82/, '0'),
           picture: '',
-          role: Role.SKILLED,
+          role: selectedRole,
         },
       })
 
-      // 회원가입 성공 — 로그인 처리 (registerMember returns memberId)
+      // 회원가입 성공 — 로그인 처리
       login(
         {
           id: memberId,
           name: data.name,
           username: formData.username,
-          role: Role.SKILLED,
+          role: selectedRole,
         } as Member,
         ''
       )
 
-      // 프로필 데이터 저장 (시공분야/경력)
+      // 프로필 데이터 저장 (시공분야/경력/주소/한줄소개)
       await updateProfileMutation.mutateAsync({
         data: {
           primaryTrade: data.primaryField as Trade,
           trades: data.fields as Trade[],
           experience: EXPERIENCE_TO_YEARS[data.experience],
-          address: {},
+          headline: data.headline || undefined,
+          address: data.address ? { street: data.address } : {},
         },
       })
 
-      // signup store 초기화
       useSignupStore.getState().reset()
-
       router.push('/signup/complete')
     } catch (err) {
       if (err instanceof ApiError) {
@@ -130,25 +133,36 @@ export default function SignupProfilePage() {
           역할을 선택해주세요
         </h1>
 
-        {/* Name Input */}
+        {/* 이름 */}
         <div className="flex flex-col gap-2">
           <FormLabel required>이름</FormLabel>
           <FormInput type="text" placeholder="내용을 입력해주세요" {...register('name')} />
           <FormError message={errors.name?.message} />
         </div>
 
-        {/* Construction Fields */}
+        {/* 시공분야 */}
         <div className="flex flex-col gap-3">
           <FormLabel required>시공분야</FormLabel>
-          <FieldSelector
-            categories={TRADE_CATEGORIES}
-            selected={selectedFields}
-            onToggle={toggleField}
-          />
+          {TRADE_GROUPS.map((group) => (
+            <div key={group.label} className="flex flex-col gap-3">
+              <p className="text-m-14 text-morton-gray-700">{group.label}</p>
+              <div className="flex flex-wrap gap-2">
+                {group.trades.map((trade) => (
+                  <Tag
+                    key={trade}
+                    variant={selectedFields.includes(trade) ? 'selected' : 'default'}
+                    onClick={() => toggleField(trade)}
+                  >
+                    {TRADE_LABELS[trade]}
+                  </Tag>
+                ))}
+              </div>
+            </div>
+          ))}
           <FormError message={errors.fields?.message} />
         </div>
 
-        {/* Primary Field */}
+        {/* 대표분야 */}
         {selectedFields.length > 0 && (
           <div className="flex flex-col gap-2">
             <FormLabel required>대표분야</FormLabel>
@@ -189,27 +203,76 @@ export default function SignupProfilePage() {
           </div>
         )}
 
-        {/* Experience */}
+        {/* 경력 */}
         <div className="flex flex-col gap-3">
           <FormLabel required>경력</FormLabel>
           <Controller
             name="experience"
             control={control}
             render={({ field }) => (
-              <ExperienceSelector
-                options={EXPERIENCE_OPTIONS}
-                selected={field.value || null}
-                onSelect={field.onChange}
-              />
+              <div className="flex flex-wrap gap-2">
+                {EXPERIENCE_OPTIONS.map((option) => (
+                  <Tag
+                    key={option.id}
+                    variant={field.value === option.id ? 'selected' : 'default'}
+                    onClick={() => field.onChange(option.id as ExperienceLevel)}
+                  >
+                    {option.label}
+                  </Tag>
+                ))}
+              </div>
             )}
           />
           <FormError message={errors.experience?.message} />
         </div>
 
-        {/* Affiliation */}
+        {/* 소속 */}
         <div className="flex flex-col gap-2">
           <FormLabel required>소속</FormLabel>
-          <FormInput type="text" placeholder="내용을 입력해주세요" {...register('affiliation')} />
+          <FormInput type="text" placeholder="소속을 입력해주세요" {...register('affiliation')} />
+        </div>
+
+        {/* 유형 */}
+        <div className="flex flex-col gap-2">
+          <FormLabel>유형</FormLabel>
+          <Controller
+            name="role"
+            control={control}
+            render={({ field }) => (
+              <div className="flex flex-wrap gap-2">
+                {SIGNUP_ROLES.map((role) => (
+                  <Tag
+                    key={role}
+                    variant={field.value === role ? 'selected' : 'default'}
+                    onClick={() => field.onChange(field.value === role ? undefined : role)}
+                  >
+                    {ROLE_LABELS[role]}
+                  </Tag>
+                ))}
+              </div>
+            )}
+          />
+        </div>
+
+        {/* 주소 */}
+        <div className="flex flex-col gap-2">
+          <FormLabel>주소</FormLabel>
+          <p className="text-r-12 text-morton-gray-700">
+            정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요
+          </p>
+          <FormInput type="text" placeholder="주소를 입력해주세요" {...register('address')} />
+        </div>
+
+        {/* 한줄소개 */}
+        <div className="flex flex-col gap-2">
+          <FormLabel>한줄소개</FormLabel>
+          <FormInput
+            type="text"
+            placeholder="한줄소개를 입력해주세요 (최대 20글자)"
+            maxLength={20}
+            {...register('headline')}
+          />
+          <FormError message={errors.headline?.message} />
         </div>
       </form>
 

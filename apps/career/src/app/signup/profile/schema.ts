@@ -11,6 +11,9 @@ export const profileSchema = z.object({
   primaryField: z.string(),
   experience: experienceLevelSchema,
   affiliation: z.string().optional(),
+  role: z.string().optional(),
+  address: z.string().optional(),
+  headline: z.string().max(20, '한줄소개는 최대 20글자까지 입력 가능합니다.').optional(),
 })
 
 export type ProfileFormData = z.infer<typeof profileSchema>
