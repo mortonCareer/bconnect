@@ -3,3 +3,9 @@ spring:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
+
+sentry:
+  dsn: ${SENTRY_DSN:}
+  send-default-pii: true
+  traces-sample-rate: 1.0 # TODO: 트래픽 증가 시 0.1~0.2로 낮출 것
+  environment: ${SENTRY_ENVIRONMENT:production}

@@ -126,3 +126,10 @@ variable "sentry_auth_token" {
   sensitive   = true
   default     = ""
 }
+
+variable "sentry_dsn" {
+  description = "Sentry DSN - API 에러 트래킹"
+  type        = string
+  sensitive   = true
+  default     = ""
+}

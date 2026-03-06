@@ -1,5 +1,13 @@
 plugins {
     id 'org.springframework.boot'
+    id 'io.sentry.jvm.gradle' version '6.1.0'
+}
+
+sentry {
+    includeSourceContext = true
+    org = "morton-2l"
+    projectName = "api"
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
 
 bootJar.enabled = true
