@@ -16,6 +16,8 @@ fi
 SHARED_FILES="
 .env
 apps/career/.env
+apps/career/.env.local
+apps/plan/.env
 apps/plan/.env.local
 apps/crawler/.env
 infra/terraform.tfvars
