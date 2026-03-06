@@ -120,6 +120,7 @@ resource "railway_variable" "api_java_tool_options" {
 }
 
 # Sentry
+# NOTE: depends_on 체이닝은 Railway API rate limit 회피를 위해 의도적으로 설정
 resource "railway_variable" "api_sentry_dsn" {
   name           = "SENTRY_DSN"
   value          = var.sentry_dsn
