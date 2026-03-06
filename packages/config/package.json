@@ -9,7 +9,8 @@
     "./tsconfig/next": "./tsconfig/next.json",
     "./tsconfig/base": "./tsconfig/base.json",
     "./env": "./env/validate.ts",
-    "./phone": "./phone/index.ts"
+    "./phone": "./phone/index.ts",
+    "./sentry": "./sentry/index.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
