@@ -82,10 +82,12 @@ echo "Monitor: ${MON_W}x${MON_H}+${MON_X}+${MON_Y}, half=$HALF_W"
 ## Step 1: Puppeteer Dev 브라우저 실행 (오른쪽)
 
 `/tmp/dev-browser.mjs` 생성 후 백그라운드 실행.
-환경변수 `MON_W`, `MON_H`, `MON_X`, `MON_Y`를 Step 0에서 전달받는다:
+환경변수 `MON_W`, `MON_H`, `MON_X`, `MON_Y`를 Step 0에서 전달받는다.
+HTTP 제어 서버(포트 19222)로 URL 네비게이션을 받는다:
 
 ```javascript
 import puppeteer from 'puppeteer';
+import http from 'http';
 
 // 환경변수에서 모니터 정보 읽기 (Step 0에서 파싱한 값)
 const monW = parseInt(process.env.MON_W || '1920');
@@ -93,6 +95,7 @@ const monH = parseInt(process.env.MON_H || '1080');
 const monX = parseInt(process.env.MON_X || '0');
 const monY = parseInt(process.env.MON_Y || '0');
 const halfW = Math.floor(monW / 2);
+const controlPort = parseInt(process.env.CONTROL_PORT || '19222');
 
 const browser = await puppeteer.launch({
   headless: false,
@@ -113,21 +116,31 @@ await session.send('Browser.setWindowBounds', {
 
 await page.goto(process.env.DEV_URL || 'http://localhost:3000');
 
-// stdin으로 URL 이동 명령 수신
-process.stdin.setEncoding('utf8');
-process.stdin.on('data', async (data) => {
-  const url = data.trim();
-  if (url === 'exit') {
+// HTTP 제어 서버
+const server = http.createServer(async (req, res) => {
+  const url = new URL(req.url, `http://localhost:${controlPort}`);
+  if (url.pathname === '/navigate') {
+    const target = url.searchParams.get('url');
+    if (target) {
+      await page.goto(target);
+      res.writeHead(200).end(`Navigated to: ${target}`);
+      console.log(`Navigated to: ${target}`);
+    } else {
+      res.writeHead(400).end('Missing url param');
+    }
+  } else if (url.pathname === '/exit') {
+    res.writeHead(200).end('Closing');
     await browser.close();
+    server.close();
     process.exit(0);
-  }
-  if (url) {
-    await page.goto(url);
-    console.log(`Navigated to: ${url}`);
+  } else {
+    res.writeHead(200).end('OK');
   }
 });
 
-console.log(`READY: Dev browser (right ${halfW}x${monH}+${monX + halfW}+${monY})`);
+server.listen(controlPort, () => {
+  console.log(`READY: Dev browser (right ${halfW}x${monH}+${monX + halfW}+${monY}), control: http://localhost:${controlPort}`);
+});
 ```
 
 실행:
@@ -142,7 +155,7 @@ MON_W=$MON_W MON_H=$MON_H MON_X=$MON_X MON_Y=$MON_Y node /tmp/dev-browser.mjs &
 
 ## Step 2: Playwright 창 배치 (왼쪽)
 
-Step 0에서 파싱한 값을 사용하여 Playwright MCP `browser_run_code`로 CDP 배치:
+Figma URL로 이동 후, Step 0에서 파싱한 값을 사용하여 Playwright MCP `browser_run_code`로 CDP 배치:
 
 ```javascript
 // browser_run_code에서 실행
@@ -166,8 +179,11 @@ await client.send('Browser.setWindowBounds', {
 
 각 이터레이션에서:
 
-1. **Figma 스크린샷**: `mcp__figma__get_screenshot` 또는 Playwright로 Figma 페이지 이동 (`browser_navigate`)
-2. **Dev 페이지 이동**: Puppeteer stdin에 URL 전달 (Bash `echo "http://localhost:3000/path" > /proc/<PID>/fd/0` 또는 named pipe)
+1. **Figma 이동**: Playwright `browser_navigate`로 Figma 노드 URL 이동
+2. **Dev 페이지 이동**: HTTP 제어로 Puppeteer 네비게이션
+   ```bash
+   curl -s "http://localhost:19222/navigate?url=http://localhost:3000/path"
+   ```
 3. **시각적 비교**: 사용자가 두 화면을 나란히 보며 차이점 확인
 4. **조정**: 차이점 발견 시 코드 수정 후 Dev 리로드
 
@@ -178,10 +194,10 @@ await client.send('Browser.setWindowBounds', {
 ## Step 4: 정리
 
 ```bash
-# Puppeteer 프로세스 종료
-echo "exit" > /proc/<PID>/fd/0
+# HTTP로 종료
+curl -s "http://localhost:19222/exit"
 # 또는
-kill <PID>
+kill $(pgrep -f 'dev-browser.mjs')
 ```
 
 Playwright는 `browser_close`로 정리.
@@ -208,3 +224,4 @@ Playwright는 `browser_close`로 정리.
 | 창 크기가 안 맞음 | 윈도우 매니저 간섭 | CDP `setWindowBounds` 재실행 |
 | BrokenPipeError | stdout에 `\| head` 파이프 | 파이프 제거, 백그라운드 실행 |
 | xrandr 없음 | Wayland-only 환경 | `wlr-randr` 또는 수동으로 해상도 지정 |
+| 19222 포트 충돌 | 다른 프로세스 사용 중 | `CONTROL_PORT=19223` 환경변수로 변경 |
