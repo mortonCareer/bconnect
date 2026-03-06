@@ -53,6 +53,7 @@ MCP 도구 사용 순서:
 3. **매핑 업데이트**: `.claude/skills/figma-mapping/SKILL.md`
 4. **쇼케이스 등록**: `.claude/skills/showcase-template/SKILL.md`
 5. **시각적 검증**: `.claude/skills/figma-verify/SKILL.md`
+6. **Split View 비교**: `.claude/skills/figma-compare/SKILL.md`
 
 #### 페이지 생성 시
 
@@ -60,6 +61,7 @@ MCP 도구 사용 순서:
 2. **페이지 코드**: `.claude/skills/react-form-page/SKILL.md`
 3. **매핑 업데이트**: `.claude/skills/figma-mapping/SKILL.md`
 4. **시각적 검증**: `.claude/skills/figma-verify/SKILL.md`
+5. **Split View 비교**: `.claude/skills/figma-compare/SKILL.md`
 
 ---
 
