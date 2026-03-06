@@ -16,7 +16,7 @@ export const TRADE_LABELS: Record<Trade, string> = {
   [Trade.GROUTING]: '줄눈',
   [Trade.PAINTING]: '도장',
   [Trade.WALLPAPER]: '도배',
-  [Trade.FILM_SHEET]: '필름시트',
+  [Trade.FILM_SHEET]: '필름/시트',
   [Trade.HARDWOOD]: '마루',
   [Trade.VINYL]: '장판',
   [Trade.SINK]: '싱크대',
