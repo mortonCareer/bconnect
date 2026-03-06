@@ -1,6 +1,6 @@
-# AGENTS.md
+# CLAUDE.md
 
-Guide for coding agents working in the Morton codebase.
+Guide for Claude Code working in the Morton codebase.
 
 ## SSoT (Single Source of Truth) 원칙
 
