@@ -2,6 +2,12 @@ provider "aws" {
   region = "ap-northeast-2"
 }
 
+resource "aws_iam_account_alias" "this" {
+  # "morton"은 다른 AWS 계정이 선점하여 사용 불가
+  # 로그인: https://morton-co.signin.aws.amazon.com/console
+  account_alias = "morton-co"
+}
+
 module "aws" {
   source         = "./aws"
   s3_bucket_name = var.s3_bucket_name
