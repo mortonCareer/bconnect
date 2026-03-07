@@ -25,6 +25,7 @@ public class ProfileEntity extends BaseEntity {
     @Column(nullable = false)
     private Trade primaryTrade;
 
+    // TODO: MappingTableEntity 분리
     @ElementCollection(targetClass = Trade.class)
     @CollectionTable(name = "profile_trades", joinColumns = @JoinColumn(name = "profile_id"))
     @Enumerated(EnumType.STRING)

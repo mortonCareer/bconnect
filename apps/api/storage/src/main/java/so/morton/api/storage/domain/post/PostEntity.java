@@ -22,6 +22,7 @@ public class PostEntity extends BaseEntity {
     @Column(name = "task_id")
     private Long taskId;
 
+    // TODO: MappingTableEntity 분리
     @ElementCollection
     @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
     private List<String> images = new ArrayList<>();

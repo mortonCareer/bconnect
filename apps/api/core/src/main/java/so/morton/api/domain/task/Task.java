@@ -3,6 +3,7 @@ package so.morton.api.domain.task;
 import so.morton.api.storage.support.Address;
 import so.morton.api.storage.domain.task.TaskEntity;
 import so.morton.api.storage.value.Trade;
+import org.hibernate.Hibernate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,6 +28,7 @@ public record Task(
     LocalDateTime modifiedAt
 ) {
     public static Task of(TaskEntity entity) {
+        Hibernate.initialize(entity.getTrades());
         return new Task(
                 entity.getId(),
                 entity.getProfileId(),

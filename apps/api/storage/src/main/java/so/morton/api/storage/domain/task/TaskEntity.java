@@ -38,6 +38,7 @@ public class TaskEntity extends BaseEntity {
     @Column(nullable = false)
     private String eventTitle;
 
+    // TODO: MappingTableEntity 분리
     @ElementCollection(targetClass = Trade.class)
     @CollectionTable(name = "task_trades", joinColumns = @JoinColumn(name = "task_id"))
     @Enumerated(EnumType.STRING)
