@@ -7,6 +7,7 @@ import so.morton.api.storage.value.Trade;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
+import org.hibernate.Hibernate;
 
 public record Profile(
     Long id,
@@ -27,6 +28,7 @@ public record Profile(
     }
 
     public static Profile of(ProfileEntity entity) {
+        Hibernate.initialize(entity.getTrades());
         return new Profile(
                 entity.getId(),
                 entity.getMemberId(),
