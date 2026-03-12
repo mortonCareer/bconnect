@@ -48,8 +48,9 @@ cd apps/api && ./gradlew test
 
 ### Monorepo Structure
 
-- `apps/career` - Worker PWA (Next.js 14 App Router)
-- `apps/plan` - Contractor web app (Next.js 14 App Router)
+- `apps/career` - Worker PWA (Next.js App Router)
+- `apps/plan` - Contractor web app (Next.js App Router)
+- `apps/crawler` - 기술자 크롤러 (Python, uv). `uv run crawler [args]`로 실행, `uv run --dev pytest tests/ -v`로 테스트
 - `apps/api` - Spring Boot backend (separate Gradle build)
 - `packages/ui` - Shared UI components with Tailwind v4
 - `packages/api-client` - Generated API client (orval + react-query)
