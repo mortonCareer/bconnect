@@ -4,7 +4,7 @@ Guide for Claude Code working in the Morton codebase.
 
 ## SSoT (Single Source of Truth) 원칙
 
-상세 규칙은 `docs/` 또는 `.github/`에 원본을 두고, 스킬(`.claude/skills/`)과 에이전트(`.claude/agents/`)는 해당 문서를 **참조**만 합니다. 규칙을 인라인으로 복제하지 않습니다.
+상세 규칙은 `docs/` 또는 `.github/`에 원본을 두고, 스킬(`.claude/skills/`)과 에이전트(`.claude/agents/`)는 해당 문서를 **참조**만 합니다.
 
 | 규칙 종류      | 원본 위치                          | 참조하는 곳                          |
 | -------------- | ---------------------------------- | ------------------------------------ |
@@ -14,383 +14,37 @@ Guide for Claude Code working in the Morton codebase.
 | 커밋 컨벤션    | `docs/GIT_WORKFLOW.md`             | commit 스킬                          |
 | 팀 역할/담당자 | `docs/TEAM.md`                     | issue-management, pr-from-issue 스킬 |
 
-**규칙 변경 시**: 원본 문서만 수정하면 스킬/에이전트가 자동으로 최신 규칙을 따릅니다.
-
 ## Project Overview
 
 Morton is a job matching platform (업체-기술자 연결 구인구직 플랫폼) built as a pnpm monorepo with Next.js apps and Spring Boot backend.
 
 ## Commands
 
-### Development
-
 ```bash
+# Development
 pnpm dev              # Run both career and plan apps
 pnpm dev:career       # Run career app (port 3000)
 pnpm dev:plan         # Run plan app (port 3001)
-```
 
-### Build
-
-```bash
+# Build
 pnpm build            # Build all Next.js apps
 pnpm build:career     # Build career app
 pnpm build:plan       # Build plan app
 
-# Backend (Spring Boot)
-cd apps/api && ./gradlew build
-```
-
-### Lint & Format
-
-```bash
+# Lint & Format
 pnpm lint             # ESLint all apps
-pnpm lint:career      # ESLint career app only
-pnpm lint:plan        # ESLint plan app only
 pnpm format           # Prettier format all
 pnpm format:check     # Check formatting without changes
-```
 
-### Testing
-
-```bash
-# Backend only (no frontend tests configured)
-cd apps/api && ./gradlew test              # Run all tests
-cd apps/api && ./gradlew test --tests ClassName  # Run single test class
-cd apps/api && ./gradlew test --tests ClassName.testMethodName  # Run single test
-```
-
-**For QA processes and testing guidelines, see [docs/QA_AND_TESTING.md](./docs/QA_AND_TESTING.md)**
-
-### API Client
-
-```bash
+# API Client
 pnpm api:generate     # Generate API client from OpenAPI spec (orval)
+
+# Backend
+cd apps/api && ./gradlew build
+cd apps/api && ./gradlew test
 ```
 
-## Code Style Guidelines
-
-### File Naming
-
-- Components: `UpperCamelCase.tsx` (e.g., `Button.tsx`, `SignupHeader.tsx`)
-- Utilities: `lowerCamelCase.ts` (e.g., `utils.ts`, `auth-store.ts`)
-- Constants: `constants.ts`
-- Types: `types.ts`
-- Schemas: `schema.ts`
-- Pages: `page.tsx` (Next.js App Router)
-
-### Import Order
-
-```typescript
-// 1. External dependencies
-import * as React from 'react'
-import { useForm } from 'react-hook-form'
-
-// 2. Internal packages
-import { Button } from '@morton/ui/components/ui/Button'
-import { api } from '@morton/api-client'
-
-// 3. Relative imports (grouped by type)
-import { cn } from '@/lib/utils'
-import { profileSchema } from './schema'
-import type { ProfileFormData } from './types'
-```
-
-### Formatting (Prettier)
-
-```json
-{
-  "singleQuote": true,
-  "semi": false,
-  "trailingComma": "es5",
-  "printWidth": 100
-}
-```
-
-- Runs automatically on pre-commit via lint-staged
-- Use single quotes for strings
-- No semicolons
-- ES5 trailing commas (objects, arrays, but not function params)
-- 100 character line width
-
-### TypeScript
-
-#### Strict Mode
-
-- All projects use TypeScript strict mode
-- No implicit `any` - explicitly type everything
-- Strict null checks enabled
-
-#### Type Definitions
-
-```typescript
-// Prefer interfaces for component props
-interface ButtonProps {
-  /** JSDoc for public APIs */
-  variant?: 'primary' | 'secondary'
-  children: React.ReactNode
-}
-
-// Use type for unions/intersections
-type ApiResponse<T> =
-  | { success: true; data: T; error: null }
-  | { success: false; data: null; error: ExceptionCode }
-```
-
-#### Path Aliases
-
-- `@/*` maps to `src/*` in each app
-- `@morton/ui`, `@morton/api-client`, `@morton/config` for packages
-
-### Component Patterns
-
-#### React Components
-
-```typescript
-'use client' // Only when needed (hooks, events, browser APIs)
-
-import * as React from 'react'
-import { cn } from '@/lib/utils'
-
-interface ComponentProps {
-  className?: string
-  // ... other props
-}
-
-/**
- * Korean description
- * English description
- */
-export function Component({ className, ...props }: ComponentProps) {
-  return (
-    <div className={cn('base-classes', className)} {...props}>
-      {/* Content */}
-    </div>
-  )
-}
-```
-
-#### forwardRef for Input Components
-
-```typescript
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, ...props }, ref) => {
-    return <input ref={ref} className={cn('...', className)} {...props} />
-  }
-)
-Input.displayName = 'Input'
-```
-
-### Styling
-
-- Tailwind CSS v4 for all styling
-- Use `cn()` utility to merge classes (from `clsx` + `tailwind-merge`)
-- No CSS modules or styled-components
-- Prefer inline Tailwind classes
-- Use `class-variance-authority` (cva) for component variants
-
-### State Management
-
-- **Server state**: React Query (via generated hooks from `@morton/api-client`)
-- **Client state**: Zustand stores (e.g., `auth-store.ts`, `signup-store.ts`)
-- **Form state**: react-hook-form + Zod validation
-
-### Error Handling
-
-#### Frontend
-
-```typescript
-// API errors throw custom ApiError class
-export class ApiError extends Error {
-  constructor(
-    public code: string,
-    message: string
-  ) {
-    super(message)
-    this.name = 'ApiError'
-  }
-}
-
-// React Query handles API errors automatically
-const { data, error } = useGetUserQuery()
-if (error) {
-  // Handle ApiError
-}
-
-// Form validation errors via Zod + react-hook-form
-const { errors } = useForm({
-  resolver: zodResolver(schema),
-})
-```
-
-#### Backend (Java)
-
-```java
-// Throw custom exceptions
-throw new CodeException(ExceptionCode.USER_NOT_FOUND);
-
-// Global handler formats response
-@RestControllerAdvice
-public class ApiControllerAdvice {
-  // Logs 5xx as error, 4xx as warn
-  @ExceptionHandler(CodeException.class)
-  public ResponseEntity<ApiResponse<Void>> handleCodeException(CodeException e) {
-    // ...
-  }
-}
-```
-
-### Naming Conventions
-
-- **Variables**: `camelCase` (e.g., `userData`, `isLoading`)
-- **Constants**: `UPPER_SNAKE_CASE` (e.g., `API_URL`, `MAX_RETRIES`)
-- **Functions**: `camelCase` (e.g., `getUserProfile`, `handleSubmit`)
-- **Components**: `PascalCase` (e.g., `Button`, `SignupForm`)
-- **Types/Interfaces**: `PascalCase` (e.g., `User`, `ApiResponse<T>`)
-- **Boolean props**: Prefix with `is`, `has`, `can`, `should` (e.g., `isLoading`, `hasError`)
-- **Unused variables**: Prefix with `_` (e.g., `_unused`)
-
-### API Client Usage
-
-```typescript
-// Import generated hooks
-import { useGetUserQuery, useUpdateUserMutation } from '@morton/api-client'
-
-// Query data
-const { data, isLoading, error } = useGetUserQuery({ userId: '123' })
-
-// Mutate data
-const { mutate, isPending } = useUpdateUserMutation()
-mutate({ userId: '123', name: 'John' })
-
-// Response is automatically unwrapped from ApiResponse<T>
-// Errors throw ApiError with code and message
-```
-
-### Environment Variables
-
-- Validate with Zod at runtime (see `packages/config/env`)
-- Use `NEXT_PUBLIC_*` prefix for client-accessible vars
-- Define schema in `src/env.ts` per app
-- Validation skipped during build (SKIP_ENV_VALIDATION=true)
-
-## Git Commit Policy
-
-**IMPORTANT**: Agents must get user approval before committing changes.
-
-### Commit Approval Process
-
-All `git commit` commands are intercepted by the `require-commit-approval.py` hook:
-
-1. **Change Analysis**: Hook analyzes `git status` and `git diff --stat`
-2. **Summary Display**: Shows commit message, changed files, and line statistics
-3. **Approval Wait**: Blocks commit and waits for user response
-4. **Approved Commit**: Agent re-runs with `COMMIT_APPROVED=1` environment variable
-
-### Example Output
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📝 커밋 전 확인
-
-메시지: feat(career): add profile upload (#123)
-
-변경 파일 (3개):
-  M  apps/career/src/components/Profile.tsx
-  M  apps/career/src/api/user.ts
-  A  apps/career/src/types/profile.ts
-
-  3 files changed, 86 insertions(+), 17 deletions(-)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️  커밋하시겠습니까? (yes/no)
-```
-
-### Approval Keywords
-
-- **Approve**: "yes", "확인", "커밋 승인", "ㅇㅇ", "go"
-- **Reject**: "no", "취소", "수정 필요"
-
-### Agent Workflow
-
-```bash
-# 1. Agent attempts commit
-git commit -m "feat: add feat"
-
-# 2. Hook blocks and shows summary
-# [Summary output]
-
-# 3. User approves: "yes"
-
-# 4. Agent re-runs with approval flag
-COMMIT_APPROVED=1 git commit -m "feat: add feat"
-
-# 5. Hook passes, commit succeeds
-```
-
-### Bypassing the Hook (Manual Use)
-
-If you need to commit directly without approval:
-
-```bash
-COMMIT_APPROVED=1 git commit -m "message"
-```
-
----
-
-## Workflow & Processes
-
-For detailed process guides, see the `docs/` directory:
-
-- **[Team](./docs/TEAM.md)** - Team roles, GitHub/Notion mapping, collaboration process
-- **[Development Workflow](./docs/DEVELOPMENT_WORKFLOW.md)** - API spec, API client generation, Mock API (MSW)
-- **[Git Workflow](./docs/GIT_WORKFLOW.md)** - Issue-based development, branch strategy, commit conventions, PR process
-- **[QA & Testing](./docs/QA_AND_TESTING.md)** - QA process, test coverage, bug classification
-- **[Deployment](./docs/DEPLOYMENT.md)** - Deployment environments, process, infrastructure
-
-### Available Skills
-
-Skills automate common workflows and ensure consistency. Located in `.claude/skills/`:
-
-**Git Workflow (5 skills):**
-
-- `issue-management` - GitHub Issue 생성 및 관리, 레이블 자동 적용, 담당자 할당
-- `worktree-manager` - Git worktree 기반 워크트리+브랜치 생성, 목록, 삭제
-- `commit` - 변경사항 자동 커밋 (Conventional Commits 형식, "커밋해줘" 시 자동 활성화)
-- `pr-from-issue` - 이슈 기반 PR 생성, 리뷰어 자동 할당
-- `notion-task-sync` - Notion 보드 동기화 (구현 예정)
-
-**Figma Integration (3 skills):**
-
-- `figma-to-component` - Figma → React 컴포넌트 자동 생성
-- `figma-lint` - ~~Figma 디자인 품질 검증~~ [DEPRECATED - 디자이너 작업 스타일과 불일치]
-- `figma-sync` - Figma ↔ 코드베이스 동기화
-
-**Environment (1 skill):**
-
-- `env-config` - 환경 변수 관리 및 동기화
-
-### Quick Reference: Commit Messages
-
-Follow Conventional Commits:
-
-```bash
-feat: add user profile upload
-fix: resolve token refresh loop
-docs: update API client usage
-chore: bump dependencies
-refactor: extract form validation logic
-```
-
-### Pre-commit Hooks (Husky + lint-staged)
-
-Automatically runs on `git commit`:
-
-1. ESLint --fix on `*.{js,jsx,ts,tsx}`
-2. Prettier --write on all files
-3. Commitlint checks commit message format
-
-## Architecture Notes
+## Architecture
 
 ### Monorepo Structure
 
@@ -407,3 +61,50 @@ Automatically runs on `git commit`:
 - **Authentication**: Phone OTP → tokens (access in memory, refresh in httpOnly cookie)
 - **Route Protection**: Middleware checks `refreshToken` cookie
 - **Public Routes**: Defined in `PUBLIC_EXACT` and `PUBLIC_PREFIX` arrays
+
+## Code Style
+
+Code style rules are in `.claude/rules/` and load automatically when working with matching files:
+
+- `frontend.md` — TypeScript, React, Tailwind, naming conventions (apps/career, apps/plan, packages/)
+- `commit-policy.md` — Commit approval hook, Conventional Commits
+
+## Git Workflow
+
+@docs/GIT_WORKFLOW.md
+
+## Workflow & Processes
+
+- @docs/TEAM.md — Team roles, GitHub/Notion mapping
+- @docs/DEVELOPMENT_WORKFLOW.md — API spec, API client generation, Mock API (MSW)
+- @docs/QA_AND_TESTING.md — QA process, test coverage, bug classification
+- @docs/DEPLOYMENT.md — Deployment environments, process, infrastructure
+
+## Available Skills
+
+Skills automate common workflows. Located in `.claude/skills/`:
+
+**Git Workflow:**
+
+- `issue-management` — GitHub Issue 생성/관리, 레이블 자동 적용
+- `worktree-manager` — Git worktree 기반 병렬 작업 관리
+- `commit` — Conventional Commits 형식 자동 커밋
+- `pr-from-issue` — 이슈 기반 PR 생성, 리뷰어 자동 할당
+- `notion-task-sync` — Notion 보드 동기화 (구현 예정)
+
+**Figma Integration:**
+
+- `figma-mapping` — Figma ↔ 코드 매핑 관리
+- `figma-tailwind` — Figma → Tailwind 변환 규칙
+- `figma-verify` — Figma vs 렌더링 시각 비교
+- `figma-compare` — Figma 스플릿 뷰 비교
+- `cva-component` — CVA 컴포넌트 템플릿
+
+**Templates:**
+
+- `react-form-page` — React Hook Form + Zod 페이지 템플릿
+- `showcase-template` — 컴포넌트 쇼케이스 페이지
+
+**Environment:**
+
+- `env-config` — 환경 변수 관리 및 동기화
