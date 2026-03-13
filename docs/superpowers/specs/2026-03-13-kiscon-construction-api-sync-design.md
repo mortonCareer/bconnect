@@ -11,6 +11,7 @@ Railway Postgres에 저장하고, career 앱의 원클릭 조회에서 사업자
 - 기존 KISCON S3 sync(상습체불/하도급)은 수십 건 규모 → JSON on S3로 충분
 - 건설업체정보는 **25만건** 규모 → 인덱싱 필요 → Postgres 선택
 - API는 사업자등록번호 검색을 지원하지 않음 → 전체 데이터 동기화 후 로컬 쿼리
+- API 응답의 `ncrMasterNum`은 정수(예: `4448103773`), 저장 시 10자리 TEXT로 정규화 (앞자리 0 보존)
 
 ## 데이터 소스
 
@@ -22,7 +23,7 @@ Railway Postgres에 저장하고, career 앱의 원클릭 조회에서 사업자
 - Base URL: `https://apis.data.go.kr/1613000/ConAdminInfoSvc1`
 - 인증: `serviceKey` query parameter (env: `KISCON_API_SERVICE_KEY`)
 - 응답: JSON (`_type=json`)
-- 제한: 개발계정 10,000건/일, 30 TPS
+- 제한: 개발계정 10,000 API 호출/일, 30 TPS (호출 횟수 기준, 레코드 수 아님)
 - 필수 파라미터: `sDate`, `eDate` (공시기간, YYYYMMDD), `pageNo`, `numOfRows`
 - 선택 파라미터: `ncrAreaName` (시도), `ncrAreaDetailName` (시군구)
 
@@ -39,11 +40,11 @@ Railway Postgres에 저장하고, career 앱의 원클릭 조회에서 사업자
 
 ## 아키텍처
 
-```
+```text
 ┌─ Sync Job (GitHub Actions, self-hosted runner) ────┐
 │                                                      │
 │  data.go.kr API → 페이지 순회 → Railway Postgres    │
-│  INSERT ... ON CONFLICT (ncr_gs_seq) DO NOTHING     │
+│  INSERT ... ON CONFLICT (ncr_gs_seq) DO UPDATE       │
 │                                                      │
 │  초기: 2003-01-01 ~ 현재 (1회)                       │
 │  이후: 직전 1주일 증분 (매주 월요일)                   │
@@ -64,21 +65,22 @@ Railway Postgres에 저장하고, career 앱의 원클릭 조회에서 사업자
 
 ### kiscon_registration
 
-| 컬럼             | 타입                 | 설명                           | API 필드            |
-| ---------------- | -------------------- | ------------------------------ | ------------------- |
-| `ncr_gs_seq`     | `BIGINT PRIMARY KEY` | 공시일련번호 (유니크 ID)       | `ncrGsSeq`          |
-| `biz_reg_no`     | `TEXT NOT NULL`      | 사업자등록번호                 | `ncrMasterNum`      |
-| `company_name`   | `TEXT`               | 업체명                         | `ncrGsKname`        |
-| `representative` | `TEXT`               | 대표자                         | `ncrGsMaster`       |
-| `trade_name`     | `TEXT`               | 등록업종                       | `ncrItemName`       |
-| `trade_reg_no`   | `TEXT`               | 업종등록번호                   | `ncrItemregno`      |
-| `address`        | `TEXT`               | 소재지                         | `ncrGsAddr`         |
-| `region`         | `TEXT`               | 시도                           | `ncrAreaName`       |
-| `region_detail`  | `TEXT`               | 시군구                         | `ncrAreaDetailName` |
-| `reg_date`       | `INTEGER`            | 등록일자 (YYYYMMDD)            | `ncrGsDate`         |
-| `announce_date`  | `INTEGER`            | 공시일자 (YYYYMMDD)            | `ncrGsRegdate`      |
-| `flag`           | `TEXT`               | 공시구분 (신규/정정/변경/철회) | `ncrGsFlag`         |
-| `phone`          | `TEXT`               | 전화번호                       | `ncrOffTel`         |
+| 컬럼             | 타입                                 | 설명                           | API 필드            |
+| ---------------- | ------------------------------------ | ------------------------------ | ------------------- |
+| `ncr_gs_seq`     | `BIGINT PRIMARY KEY`                 | 공시일련번호 (유니크 ID)       | `ncrGsSeq`          |
+| `biz_reg_no`     | `TEXT NOT NULL`                      | 사업자등록번호                 | `ncrMasterNum`      |
+| `company_name`   | `TEXT`                               | 업체명                         | `ncrGsKname`        |
+| `representative` | `TEXT`                               | 대표자                         | `ncrGsMaster`       |
+| `trade_name`     | `TEXT`                               | 등록업종                       | `ncrItemName`       |
+| `trade_reg_no`   | `TEXT`                               | 업종등록번호                   | `ncrItemregno`      |
+| `address`        | `TEXT`                               | 소재지                         | `ncrGsAddr`         |
+| `region`         | `TEXT`                               | 시도                           | `ncrAreaName`       |
+| `region_detail`  | `TEXT`                               | 시군구                         | `ncrAreaDetailName` |
+| `reg_date`       | `INTEGER`                            | 등록일자 (YYYYMMDD)            | `ncrGsDate`         |
+| `announce_date`  | `INTEGER`                            | 공시일자 (YYYYMMDD)            | `ncrGsRegdate`      |
+| `flag`           | `TEXT`                               | 공시구분 (신규/정정/변경/철회) | `ncrGsFlag`         |
+| `phone`          | `TEXT`                               | 전화번호                       | `ncrOffTel`         |
+| `synced_at`      | `TIMESTAMPTZ NOT NULL DEFAULT NOW()` | DB 삽입 시각                   | -                   |
 
 ```sql
 CREATE INDEX idx_kiscon_reg_biz_no ON kiscon_registration (biz_reg_no);
@@ -86,32 +88,33 @@ CREATE INDEX idx_kiscon_reg_biz_no ON kiscon_registration (biz_reg_no);
 
 ### kiscon_admin_penalty
 
-| 컬럼                | 타입                 | 설명                  | API 필드            |
-| ------------------- | -------------------- | --------------------- | ------------------- |
-| `ncr_gs_seq`        | `BIGINT PRIMARY KEY` | 공시일련번호          | `ncrGsSeq`          |
-| `biz_reg_no`        | `TEXT NOT NULL`      | 사업자등록번호        | `ncrMasterNum`      |
-| `company_name`      | `TEXT`               | 업체명                | `ncrAdmiKname`      |
-| `representative`    | `TEXT`               | 대표자                | `ncrAdmiMaster`     |
-| `trade_name`        | `TEXT`               | 처분업종              | `ncrItemName`       |
-| `trade_reg_no`      | `TEXT`               | 업종등록번호          | `ncrItemregno`      |
-| `address`           | `TEXT`               | 소재지                | `ncrAdmiAddr`       |
-| `region`            | `TEXT`               | 시도                  | `ncrAreaName`       |
-| `region_detail`     | `TEXT`               | 시군구                | `ncrAreaDetailName` |
-| `penalty_type`      | `TEXT`               | 행정처분명            | `ncrAdmiDename`     |
-| `violation_content` | `TEXT`               | 위반내용              | `ecodeAdmiCon`      |
-| `violation_detail`  | `TEXT`               | 위반내용(상세)        | `ncrAdmiReason`     |
-| `penalty_ground`    | `TEXT`               | 처분근거              | `ecodeAdmiGround`   |
-| `fine_amount`       | `BIGINT DEFAULT 0`   | 과징금                | `ncrAdmiFine`       |
-| `penalty_amount`    | `BIGINT DEFAULT 0`   | 과태료                | `ncrAdmiPenalty`    |
-| `stop_start_date`   | `TEXT`               | 영업정지시작일        | `ncrAdmiStopSdate`  |
-| `stop_end_date`     | `TEXT`               | 영업정지종료일        | `ncrAdmiStopEdate`  |
-| `cancel_date`       | `TEXT`               | 등록말소일            | `ncrAdmiCanceldate` |
-| `correction`        | `TEXT`               | 시정내용              | `ncrAdmiCorrect`    |
-| `penalty_date`      | `INTEGER`            | 처분일자 (YYYYMMDD)   | `ncrGsDate`         |
-| `announce_date`     | `INTEGER`            | 공시일자 (YYYYMMDD)   | `ncrGsRegdate`      |
-| `flag`              | `TEXT`               | 공시구분              | `ncrGsFlag`         |
-| `phone`             | `TEXT`               | 전화번호              | `ncrOffTel`         |
-| `has_injunction`    | `TEXT`               | 가처분 존재여부 (Y/N) | `ncrPdStatus`       |
+| 컬럼                | 타입                                 | 설명                  | API 필드            |
+| ------------------- | ------------------------------------ | --------------------- | ------------------- |
+| `ncr_gs_seq`        | `BIGINT PRIMARY KEY`                 | 공시일련번호          | `ncrGsSeq`          |
+| `biz_reg_no`        | `TEXT NOT NULL`                      | 사업자등록번호        | `ncrMasterNum`      |
+| `company_name`      | `TEXT`                               | 업체명                | `ncrAdmiKname`      |
+| `representative`    | `TEXT`                               | 대표자                | `ncrAdmiMaster`     |
+| `trade_name`        | `TEXT`                               | 처분업종              | `ncrItemName`       |
+| `trade_reg_no`      | `TEXT`                               | 업종등록번호          | `ncrItemregno`      |
+| `address`           | `TEXT`                               | 소재지                | `ncrAdmiAddr`       |
+| `region`            | `TEXT`                               | 시도                  | `ncrAreaName`       |
+| `region_detail`     | `TEXT`                               | 시군구                | `ncrAreaDetailName` |
+| `penalty_type`      | `TEXT`                               | 행정처분명            | `ncrAdmiDename`     |
+| `violation_content` | `TEXT`                               | 위반내용              | `ecodeAdmiCon`      |
+| `violation_detail`  | `TEXT`                               | 위반내용(상세)        | `ncrAdmiReason`     |
+| `penalty_ground`    | `TEXT`                               | 처분근거              | `ecodeAdmiGround`   |
+| `fine_amount`       | `BIGINT DEFAULT 0`                   | 과징금                | `ncrAdmiFine`       |
+| `penalty_amount`    | `BIGINT DEFAULT 0`                   | 과태료                | `ncrAdmiPenalty`    |
+| `stop_start_date`   | `TEXT`                               | 영업정지시작일        | `ncrAdmiStopSdate`  |
+| `stop_end_date`     | `TEXT`                               | 영업정지종료일        | `ncrAdmiStopEdate`  |
+| `cancel_date`       | `TEXT`                               | 등록말소일            | `ncrAdmiCanceldate` |
+| `correction`        | `TEXT`                               | 시정내용              | `ncrAdmiCorrect`    |
+| `penalty_date`      | `INTEGER`                            | 처분일자 (YYYYMMDD)   | `ncrGsDate`         |
+| `announce_date`     | `INTEGER`                            | 공시일자 (YYYYMMDD)   | `ncrGsRegdate`      |
+| `flag`              | `TEXT`                               | 공시구분              | `ncrGsFlag`         |
+| `phone`             | `TEXT`                               | 전화번호              | `ncrOffTel`         |
+| `has_injunction`    | `TEXT`                               | 가처분 존재여부 (Y/N) | `ncrPdStatus`       |
+| `synced_at`         | `TIMESTAMPTZ NOT NULL DEFAULT NOW()` | DB 삽입 시각          | -                   |
 
 ```sql
 CREATE INDEX idx_kiscon_admi_biz_no ON kiscon_admin_penalty (biz_reg_no);
@@ -134,18 +137,20 @@ CREATE INDEX idx_kiscon_admi_biz_no ON kiscon_admin_penalty (biz_reg_no);
 
 ### 로직
 
-```
+```text
 1. DB 연결 (RAILWAY_DATABASE_URL)
 2. 테이블 없으면 CREATE TABLE + INDEX
 3. sDate/eDate 결정 (증분 or 전체)
 4. GongsiReg 페이지 순회:
    a. numOfRows=1000, pageNo=1 → totalCount 확인
    b. 모든 페이지 순회 (100ms 딜레이, 30 TPS 준수)
-   c. 페이지당 INSERT ... ON CONFLICT DO NOTHING
-   d. 진행률 로그: "GongsiReg: page 5/204 (2.5%)"
+   c. 페이지당 INSERT ... ON CONFLICT (ncr_gs_seq) DO UPDATE SET flag, announce_date
+   d. 페이지 단위 retry (3회, exponential backoff)
+   e. 진행률 로그: "GongsiReg: page 5/204 (2.5%)"
 5. GongsiAdmi 동일하게 반복
-6. 결과 요약 로그 (inserted/skipped/total)
-7. DB 연결 종료
+6. 결과 요약 로그 (inserted/updated/total)
+7. Slack 알림 (성공: 건수 요약 / 실패: 에러 내용)
+8. DB 연결 종료
 ```
 
 ### API 호출 예산
@@ -163,7 +168,7 @@ CREATE INDEX idx_kiscon_admi_biz_no ON kiscon_admin_penalty (biz_reg_no);
 - 스케줄: 매주 월요일 00:00 UTC (09:00 KST)
 - 러너: `morton-runner` (self-hosted, ARC on k8s)
 - 수동 실행: `workflow_dispatch` (full 옵션 지원)
-- 실패 시: Slack 알림
+- Slack 알림: 성공 시 건수 요약, 실패 시 에러 내용
 
 ### 환경변수 (GitHub Secrets)
 
@@ -194,8 +199,8 @@ export async function fetchConstructionAdminPenalty(
 
 - 라이브러리: `postgres` (postgres.js)
 - 환경변수: `RAILWAY_DATABASE_URL`
-- 연결 옵션: `{ max: 3, idle_timeout: 20 }`
-- 모듈 스코프에서 싱글턴 인스턴스 생성
+- 연결 옵션: `{ max: 3, idle_timeout: 10, max_lifetime: 60 * 5 }`
+- 모듈 스코프에서 싱글턴 인스턴스 생성 (serverless 환경에 맞게 짧은 idle/lifetime)
 
 ### 캐싱
 
@@ -215,6 +220,7 @@ export async function fetchConstructionAdminPenalty(
 ### Railway (Terraform)
 
 `infra/railway/database.tf`에 TCP proxy (public networking) 설정 추가.
+TCP proxy 연결은 TLS 필수 (`?sslmode=require` in connection string).
 
 ### 환경변수 추가
 
