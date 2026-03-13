@@ -41,7 +41,7 @@ dependencies {
 
     // monitor
     implementation 'io.micrometer:micrometer-core'
-    implementation 'io.sentry:sentry-spring-boot-starter-jakarta:8.34.1'
+    implementation 'io.sentry:sentry-spring-boot-4:8.34.1'
 
     // test
     testImplementation "org.testcontainers:testcontainers"
