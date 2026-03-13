@@ -16,21 +16,21 @@
 
 ### New Files
 
-| File | Responsibility |
-|---|---|
-| `apps/career/src/lib/db.ts` | postgres.js 싱글턴 DB 연결 인스턴스 |
-| `apps/career/scripts/kiscon-construction-sync.ts` | data.go.kr API → Postgres 동기화 스크립트 |
-| `apps/career/src/app/one-click/_clients/kiscon-construction-client.ts` | DB 조회 클라이언트 (server-only) |
-| `.github/workflows/kiscon-construction-sync.yml` | 주간 크론 워크플로우 |
+| File                                                                   | Responsibility                            |
+| ---------------------------------------------------------------------- | ----------------------------------------- |
+| `apps/career/src/lib/db.ts`                                            | postgres.js 싱글턴 DB 연결 인스턴스       |
+| `apps/career/scripts/kiscon-construction-sync.ts`                      | data.go.kr API → Postgres 동기화 스크립트 |
+| `apps/career/src/app/one-click/_clients/kiscon-construction-client.ts` | DB 조회 클라이언트 (server-only)          |
+| `.github/workflows/kiscon-construction-sync.yml`                       | 주간 크론 워크플로우                      |
 
 ### Modified Files
 
-| File | Change |
-|---|---|
-| `apps/career/package.json` | `postgres` 의존성 추가 |
-| `apps/career/src/app/one-click/_clients/types.ts` | `KisconRegistrationItem`, `KisconAdminPenaltyItem` 타입 추가 |
+| File                                                       | Change                                                       |
+| ---------------------------------------------------------- | ------------------------------------------------------------ |
+| `apps/career/package.json`                                 | `postgres` 의존성 추가                                       |
+| `apps/career/src/app/one-click/_clients/types.ts`          | `KisconRegistrationItem`, `KisconAdminPenaltyItem` 타입 추가 |
 | `apps/career/src/app/one-click/_clients/fetch-business.ts` | CONSTRUCTION_LICENSE 통합 (PENDING_ITEMS 제거, fetcher 추가) |
-| `infra/railway/database.tf` | TCP proxy 설정 추가 |
+| `infra/railway/database.tf`                                | TCP proxy 설정 추가                                          |
 
 ---
 
@@ -332,7 +332,9 @@ async function fetchPage<T>(
     } catch (e) {
       lastError = e as Error
       const delay = Math.pow(2, attempt) * 1000
-      console.warn(`[retry] ${operation} page ${pageNo} attempt ${attempt + 1} failed, waiting ${delay}ms`)
+      console.warn(
+        `[retry] ${operation} page ${pageNo} attempt ${attempt + 1} failed, waiting ${delay}ms`
+      )
       await sleep(delay)
     }
   }
@@ -370,7 +372,12 @@ interface RawRegItem {
 async function syncRegistration(sDate: string, eDate: string): Promise<number> {
   let upserted = 0
 
-  const { items: firstItems, totalCount } = await fetchPage<RawRegItem>('GongsiReg', sDate, eDate, 1)
+  const { items: firstItems, totalCount } = await fetchPage<RawRegItem>(
+    'GongsiReg',
+    sDate,
+    eDate,
+    1
+  )
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
   console.log(`[GongsiReg] totalCount=${totalCount}, pages=${totalPages}`)
 
@@ -448,7 +455,12 @@ interface RawAdmiItem {
 async function syncAdminPenalty(sDate: string, eDate: string): Promise<number> {
   let upserted = 0
 
-  const { items: firstItems, totalCount } = await fetchPage<RawAdmiItem>('GongsiAdmi', sDate, eDate, 1)
+  const { items: firstItems, totalCount } = await fetchPage<RawAdmiItem>(
+    'GongsiAdmi',
+    sDate,
+    eDate,
+    1
+  )
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
   console.log(`[GongsiAdmi] totalCount=${totalCount}, pages=${totalPages}`)
 
@@ -604,7 +616,7 @@ git commit -m "feat(career): add KISCON construction API → Postgres sync scrip
 ```typescript
 import 'server-only'
 
-import { getDb } from '../../../../lib/db'
+import { getDb } from '../../../lib/db'
 import type { KisconRegistrationItem, KisconAdminPenaltyItem } from './types'
 
 /**
@@ -917,12 +929,14 @@ git commit -m "infra: add Railway Postgres TCP proxy for external access"
 - [ ] **Step 1: Add GitHub Secrets**
 
 GitHub repo Settings → Secrets → Actions:
+
 - `KISCON_API_SERVICE_KEY`: `3ba3461167dcbdd9c733b43457ddd5714589b3cec592ab0bae445d159e067710`
 - `RAILWAY_DATABASE_URL`: Railway TCP proxy URL (format: `postgresql://morton:<pw>@<host>:<port>/morton?sslmode=require`)
 
 - [ ] **Step 2: Add Vercel env var**
 
 Vercel Dashboard → career project → Settings → Environment Variables:
+
 - `RAILWAY_DATABASE_URL`: same value as GitHub Secret
 
 - [ ] **Step 3: Run initial full sync**

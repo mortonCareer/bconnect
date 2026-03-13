@@ -132,7 +132,7 @@ async function fetchPage<T>(
       }
 
       const body = data.response.body
-      if (!body.items || body.items === '') return { items: [], totalCount: body.totalCount }
+      if (!body.items) return { items: [], totalCount: body.totalCount }
 
       const raw = body.items.item
       const items = Array.isArray(raw) ? raw : [raw]
