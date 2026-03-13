@@ -4,7 +4,7 @@ plugins {
 }
 
 sentry {
-    includeSourceContext = true
+    includeSourceContext = System.getenv("SENTRY_AUTH_TOKEN") != null
     org = "morton-2l"
     projectName = "api"
     authToken = System.getenv("SENTRY_AUTH_TOKEN")
