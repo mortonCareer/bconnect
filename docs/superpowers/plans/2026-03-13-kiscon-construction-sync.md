@@ -587,7 +587,7 @@ main().catch(async (err) => {
 
 ```bash
 cd apps/career
-KISCON_API_SERVICE_KEY=3ba3461167dcbdd9c733b43457ddd5714589b3cec592ab0bae445d159e067710 \
+KISCON_API_SERVICE_KEY="<your-api-key>" \
 RAILWAY_DATABASE_URL="<railway-url>" \
 pnpm exec tsx scripts/kiscon-construction-sync.ts
 ```
@@ -930,7 +930,7 @@ git commit -m "infra: add Railway Postgres TCP proxy for external access"
 
 GitHub repo Settings → Secrets → Actions:
 
-- `KISCON_API_SERVICE_KEY`: `3ba3461167dcbdd9c733b43457ddd5714589b3cec592ab0bae445d159e067710`
+- `KISCON_API_SERVICE_KEY`: data.go.kr에서 발급받은 API 인증키
 - `RAILWAY_DATABASE_URL`: Railway TCP proxy URL (format: `postgresql://morton:<pw>@<host>:<port>/morton?sslmode=require`)
 
 - [ ] **Step 2: Add Vercel env var**

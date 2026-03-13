@@ -210,8 +210,18 @@ async function syncRegistration(sDate: string, eDate: string): Promise<number> {
     const result = await sql`
       INSERT INTO kiscon_registration ${sql(rows)}
       ON CONFLICT (ncr_gs_seq) DO UPDATE SET
-        flag = EXCLUDED.flag,
+        biz_reg_no = EXCLUDED.biz_reg_no,
+        company_name = EXCLUDED.company_name,
+        representative = EXCLUDED.representative,
+        trade_name = EXCLUDED.trade_name,
+        trade_reg_no = EXCLUDED.trade_reg_no,
+        address = EXCLUDED.address,
+        region = EXCLUDED.region,
+        region_detail = EXCLUDED.region_detail,
+        reg_date = EXCLUDED.reg_date,
         announce_date = EXCLUDED.announce_date,
+        flag = EXCLUDED.flag,
+        phone = EXCLUDED.phone,
         synced_at = NOW()
     `
     upserted += result.count
@@ -304,8 +314,29 @@ async function syncAdminPenalty(sDate: string, eDate: string): Promise<number> {
     const result = await sql`
       INSERT INTO kiscon_admin_penalty ${sql(rows)}
       ON CONFLICT (ncr_gs_seq) DO UPDATE SET
-        flag = EXCLUDED.flag,
+        biz_reg_no = EXCLUDED.biz_reg_no,
+        company_name = EXCLUDED.company_name,
+        representative = EXCLUDED.representative,
+        trade_name = EXCLUDED.trade_name,
+        trade_reg_no = EXCLUDED.trade_reg_no,
+        address = EXCLUDED.address,
+        region = EXCLUDED.region,
+        region_detail = EXCLUDED.region_detail,
+        penalty_type = EXCLUDED.penalty_type,
+        violation_content = EXCLUDED.violation_content,
+        violation_detail = EXCLUDED.violation_detail,
+        penalty_ground = EXCLUDED.penalty_ground,
+        fine_amount = EXCLUDED.fine_amount,
+        penalty_amount = EXCLUDED.penalty_amount,
+        stop_start_date = EXCLUDED.stop_start_date,
+        stop_end_date = EXCLUDED.stop_end_date,
+        cancel_date = EXCLUDED.cancel_date,
+        correction = EXCLUDED.correction,
+        penalty_date = EXCLUDED.penalty_date,
         announce_date = EXCLUDED.announce_date,
+        flag = EXCLUDED.flag,
+        phone = EXCLUDED.phone,
+        has_injunction = EXCLUDED.has_injunction,
         synced_at = NOW()
     `
     upserted += result.count

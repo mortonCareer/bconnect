@@ -358,6 +358,10 @@ function mapConstructionLicenseToCheckItem(
     details.push(
       { key: '행정처분', value: p.penalty_type || '-' },
       {
+        key: '과징금',
+        value: p.fine_amount ? `${p.fine_amount.toLocaleString()}원` : '-',
+      },
+      {
         key: '과태료',
         value: p.penalty_amount ? `${p.penalty_amount.toLocaleString()}원` : '-',
       },
