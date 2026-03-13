@@ -29,6 +29,7 @@ COMMIT_APPROVED=1 git commit -m "feat: add feature"
 ## Pre-commit Hooks (Husky + lint-staged)
 
 Automatically runs on `git commit`:
+
 1. ESLint --fix on `*.{js,jsx,ts,tsx}`
 2. Prettier --write on all files
 3. Commitlint checks commit message format

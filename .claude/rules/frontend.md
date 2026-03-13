@@ -1,10 +1,10 @@
 ---
 paths:
-  - "apps/career/**"
-  - "apps/plan/**"
-  - "packages/ui/**"
-  - "packages/api-client/**"
-  - "packages/config/**"
+  - 'apps/career/**'
+  - 'apps/plan/**'
+  - 'packages/ui/**'
+  - 'packages/api-client/**'
+  - 'packages/config/**'
 ---
 
 # Frontend Code Style
@@ -87,7 +87,10 @@ export function Component({ className, ...props }: ComponentProps) {
 ```typescript
 // API errors throw custom ApiError class
 export class ApiError extends Error {
-  constructor(public code: string, message: string) {
+  constructor(
+    public code: string,
+    message: string
+  ) {
     super(message)
     this.name = 'ApiError'
   }
