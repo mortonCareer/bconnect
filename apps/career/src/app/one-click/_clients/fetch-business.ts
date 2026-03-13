@@ -17,6 +17,11 @@ import { fetchFeiaCompanies } from './feia-client'
 import { fetchMoelDefaulters } from './moel-client'
 import { fetchKisconArrearsFromS3, fetchKisconSubconFromS3 } from './kiscon-s3-client'
 import type { KisconArrearsItem, KisconSubconLimitItem } from './kiscon-parser'
+import {
+  fetchConstructionLicense,
+  fetchConstructionAdminPenalty,
+} from './kiscon-construction-client'
+import type { KisconRegistrationItem, KisconAdminPenaltyItem } from './types'
 
 // ─── 캐시 설정 ───────────────────────────────────
 
@@ -48,6 +53,18 @@ const cachedKisconArrears = unstable_cache(fetchKisconArrearsFromS3, ['one-click
 const cachedKisconSubcon = unstable_cache(fetchKisconSubconFromS3, ['one-click-kiscon-subcon'], {
   revalidate: CACHE_TTL,
 })
+
+const cachedConstructionLicense = unstable_cache(
+  fetchConstructionLicense,
+  ['one-click-construction-license'],
+  { revalidate: CACHE_TTL }
+)
+
+const cachedConstructionPenalty = unstable_cache(
+  fetchConstructionAdminPenalty,
+  ['one-click-construction-penalty'],
+  { revalidate: CACHE_TTL }
+)
 
 // 요청 내 dedup (React cache) — 여러 항목이 동시 호출해도 실제 API는 1번만 실행
 const getNtsData = cache(cachedNts)
@@ -297,19 +314,72 @@ function mapKisconSubconToCheckItem(items: KisconSubconLimitItem[]): CheckItem {
   }
 }
 
-// ─── 미연결 항목 (정적) ──────────────────────────
+// ─── KISCON 건설업 면허 → CheckItem ─────────────
 
-const PENDING_ITEMS: Record<string, CheckItem> = {
-  CONSTRUCTION_LICENSE: {
+function mapConstructionLicenseToCheckItem(
+  regItems: KisconRegistrationItem[],
+  penaltyItems: KisconAdminPenaltyItem[]
+): CheckItem {
+  const hasLicense = regItems.length > 0
+  const hasPenalty = penaltyItems.length > 0
+  const first = regItems[0]
+
+  let status: string
+  let statusType: CheckItem['statusType']
+
+  if (!hasLicense) {
+    status = '미확인'
+    statusType = 'neutral'
+  } else if (hasPenalty) {
+    status = `등록 ${regItems.length}건 / 행정처분 ${penaltyItems.length}건`
+    statusType = 'negative'
+  } else {
+    status = `${regItems.length}건 확인`
+    statusType = 'positive'
+  }
+
+  const details: CheckItem['details'] = []
+
+  if (hasLicense) {
+    details.push(
+      { key: '업체명', value: first.company_name || '-' },
+      { key: '대표자', value: first.representative || '-' },
+      { key: '등록업종', value: first.trade_name || '-' },
+      {
+        key: '등록일',
+        value: first.reg_date ? formatDate(String(first.reg_date)) : '-',
+      },
+      { key: '소재지', value: first.address || '-' }
+    )
+  }
+
+  if (hasPenalty) {
+    const p = penaltyItems[0]
+    details.push(
+      { key: '행정처분', value: p.penalty_type || '-' },
+      {
+        key: '과태료',
+        value: p.penalty_amount ? `${p.penalty_amount.toLocaleString()}원` : '-',
+      },
+      { key: '위반내용', value: p.violation_content || '-' }
+    )
+  }
+
+  return {
     id: 'CONSTRUCTION_LICENSE',
     category: 'BUSINESS_LICENSE',
     label: '건설업 면허',
     source: '국토교통부',
-    status: '준비 중',
-    statusType: 'neutral',
-    description: '국토교통부 건설업 면허 등록 현황 연결 준비 중이에요.',
-    details: [],
-  },
+    status,
+    statusType,
+    description: '국토교통부 KISCON 기준 건설업 면허 등록 및 행정처분 현황이에요.',
+    details,
+  }
+}
+
+// ─── 미연결 항목 (정적) ──────────────────────────
+
+const PENDING_ITEMS: Record<string, CheckItem> = {
   SPECIALTY_LICENSE: {
     id: 'SPECIALTY_LICENSE',
     category: 'BUSINESS_LICENSE',
@@ -464,6 +534,20 @@ async function fetchHabitualArrearsItem(regNo: string): Promise<CheckItem> {
   }
 }
 
+async function fetchConstructionLicenseItem(regNo: string): Promise<CheckItem> {
+  try {
+    const [regItems, penaltyItems] = await Promise.all([
+      cachedConstructionLicense(regNo),
+      cachedConstructionPenalty(regNo),
+    ])
+    return mapConstructionLicenseToCheckItem(regItems, penaltyItems)
+  } catch (e) {
+    Sentry.captureException(e, { tags: { source: 'kiscon-construction' }, extra: { regNo } })
+    console.error('KISCON construction query failed:', e)
+    return makeErrorItem('CONSTRUCTION_LICENSE', 'BUSINESS_LICENSE', '건설업 면허', '국토교통부')
+  }
+}
+
 // ─── 공개 API ────────────────────────────────────
 
 /**
@@ -486,6 +570,8 @@ export const fetchCheckItemById = cache(
         return fetchWageArrearsItem(regNo)
       case 'HABITUAL_ARREARS':
         return fetchHabitualArrearsItem(regNo)
+      case 'CONSTRUCTION_LICENSE':
+        return fetchConstructionLicenseItem(regNo)
       default:
         return PENDING_ITEMS[id]
     }
