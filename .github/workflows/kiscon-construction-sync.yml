@@ -1,0 +1,54 @@
+name: KISCON Construction Sync
+
+on:
+  schedule:
+    # 매주 월요일 01:00 UTC (10:00 KST) — 기존 kiscon-sync와 1시간 차이
+    - cron: '0 1 * * 1'
+  workflow_dispatch:
+    inputs:
+      full:
+        description: 'Full sync (2003~present)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  sync:
+    runs-on: morton-runner
+    defaults:
+      run:
+        working-directory: apps/career
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: .
+
+      - name: Sync KISCON construction data to Postgres
+        env:
+          KISCON_API_SERVICE_KEY: ${{ secrets.KISCON_API_SERVICE_KEY }}
+          RAILWAY_DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ "${{ inputs.full }}" = "true" ]; then
+            pnpm exec tsx scripts/kiscon-construction-sync.ts --full
+          else
+            pnpm exec tsx scripts/kiscon-construction-sync.ts
+          fi
+
+      - name: Notify Slack on failure
+        if: failure()
+        run: |
+          curl -s -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d '{"text":"🚨 *KISCON Construction Sync 실패*\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|워크플로우 로그 확인>"}'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
