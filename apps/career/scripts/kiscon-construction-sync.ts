@@ -6,21 +6,21 @@
  * - GongsiAdmi (행정처분) → kiscon_admin_penalty
  *
  * 실행: pnpm exec tsx scripts/kiscon-construction-sync.ts [--full]
- * 환경변수: KISCON_API_SERVICE_KEY, RAILWAY_DATABASE_URL, SLACK_WEBHOOK_URL (선택)
+ * 환경변수: KISCON_API_SERVICE_KEY, DATABASE_URL, SLACK_WEBHOOK_URL (선택)
  */
 
 import postgres from 'postgres'
 
 // ─── 설정 ───────────────────────────────────────
 
-const DATABASE_URL = process.env.RAILWAY_DATABASE_URL
+const DATABASE_URL = process.env.DATABASE_URL
 const API_KEY = process.env.KISCON_API_SERVICE_KEY
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL
 const BASE_URL = 'https://apis.data.go.kr/1613000/ConAdminInfoSvc1'
 const PAGE_SIZE = 1000
 const REQUEST_DELAY_MS = 100
 
-if (!DATABASE_URL) throw new Error('RAILWAY_DATABASE_URL is required')
+if (!DATABASE_URL) throw new Error('DATABASE_URL is required')
 if (!API_KEY) throw new Error('KISCON_API_SERVICE_KEY is required')
 
 const sql = postgres(DATABASE_URL, { max: 5 })

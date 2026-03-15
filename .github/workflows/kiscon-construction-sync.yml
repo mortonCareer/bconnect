@@ -35,7 +35,7 @@ jobs:
       - name: Sync KISCON construction data to Postgres
         env:
           KISCON_API_SERVICE_KEY: ${{ secrets.KISCON_API_SERVICE_KEY }}
-          RAILWAY_DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           if [ "${{ inputs.full }}" = "true" ]; then

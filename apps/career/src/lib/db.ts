@@ -6,9 +6,9 @@ let _sql: ReturnType<typeof postgres> | null = null
 
 export function getDb() {
   if (!_sql) {
-    const url = process.env.RAILWAY_DATABASE_URL
+    const url = process.env.DATABASE_URL
     if (!url) {
-      throw new Error('RAILWAY_DATABASE_URL is not configured')
+      throw new Error('DATABASE_URL is not configured')
     }
     _sql = postgres(url, {
       max: 3,
