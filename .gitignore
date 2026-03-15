@@ -91,6 +91,10 @@ bin/
 *.env
 *.properties
 
+### Claude Code ###
+CLAUDE.local.md
+.claude/settings.local.json
+
 ### ETC ###
 nul
 *.pdf
