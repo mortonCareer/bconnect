@@ -118,7 +118,7 @@ async function fetchPage<T>(
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       const res = await fetch(url.toString(), {
-        signal: AbortSignal.timeout(15_000),
+        signal: AbortSignal.timeout(60_000),
       })
       if (!res.ok) {
         throw new Error(`HTTP ${res.status} ${res.statusText}`)
