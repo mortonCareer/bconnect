@@ -190,21 +190,25 @@ async function syncRegistration(sDate: string, eDate: string): Promise<number> {
   console.log(`[GongsiReg] totalCount=${totalCount}, pages=${totalPages}`)
 
   async function upsertBatch(items: RawRegItem[]): Promise<void> {
-    if (items.length === 0) return
-    const rows = items.map((r) => ({
+    // 사업자번호 없는 레코드는 조회 불가하므로 스킵
+    const valid = items.filter((r) => r.ncrMasterNum)
+    if (valid.length === 0) return
+    // API 응답에 동일 PK 중복 존재 가능 → 마지막 레코드만 유지
+    const deduped = [...new Map(valid.map((r) => [r.ncrGsSeq, r])).values()]
+    const rows = deduped.map((r) => ({
       ncr_gs_seq: r.ncrGsSeq,
       biz_reg_no: normalizeBizRegNo(r.ncrMasterNum),
-      company_name: r.ncrGsKname,
-      representative: r.ncrGsMaster,
-      trade_name: r.ncrItemName,
-      trade_reg_no: r.ncrItemregno,
-      address: r.ncrGsAddr,
-      region: r.ncrAreaName,
-      region_detail: r.ncrAreaDetailName,
-      reg_date: r.ncrGsDate,
-      announce_date: r.ncrGsRegdate,
-      flag: r.ncrGsFlag,
-      phone: r.ncrOffTel,
+      company_name: r.ncrGsKname ?? null,
+      representative: r.ncrGsMaster ?? null,
+      trade_name: r.ncrItemName ?? null,
+      trade_reg_no: r.ncrItemregno ?? null,
+      address: r.ncrGsAddr ?? null,
+      region: r.ncrAreaName ?? null,
+      region_detail: r.ncrAreaDetailName ?? null,
+      reg_date: r.ncrGsDate ?? null,
+      announce_date: r.ncrGsRegdate ?? null,
+      flag: r.ncrGsFlag ?? null,
+      phone: r.ncrOffTel ?? null,
     }))
 
     const result = await sql`
@@ -283,32 +287,35 @@ async function syncAdminPenalty(sDate: string, eDate: string): Promise<number> {
   console.log(`[GongsiAdmi] totalCount=${totalCount}, pages=${totalPages}`)
 
   async function upsertBatch(items: RawAdmiItem[]): Promise<void> {
-    if (items.length === 0) return
-    const rows = items.map((r) => ({
+    const valid = items.filter((r) => r.ncrMasterNum)
+    if (valid.length === 0) return
+    // API 응답에 동일 PK 중복 존재 가능 → 마지막 레코드만 유지
+    const deduped = [...new Map(valid.map((r) => [r.ncrGsSeq, r])).values()]
+    const rows = deduped.map((r) => ({
       ncr_gs_seq: r.ncrGsSeq,
       biz_reg_no: normalizeBizRegNo(r.ncrMasterNum),
-      company_name: r.ncrAdmiKname,
-      representative: r.ncrAdmiMaster,
-      trade_name: r.ncrItemName,
-      trade_reg_no: r.ncrItemregno,
-      address: r.ncrAdmiAddr,
-      region: r.ncrAreaName,
-      region_detail: r.ncrAreaDetailName,
-      penalty_type: r.ncrAdmiDename,
-      violation_content: r.ecodeAdmiCon,
-      violation_detail: r.ncrAdmiReason,
-      penalty_ground: r.ecodeAdmiGround,
-      fine_amount: r.ncrAdmiFine,
-      penalty_amount: r.ncrAdmiPenalty,
-      stop_start_date: r.ncrAdmiStopSdate,
-      stop_end_date: r.ncrAdmiStopEdate,
-      cancel_date: r.ncrAdmiCanceldate,
-      correction: r.ncrAdmiCorrect,
-      penalty_date: r.ncrGsDate,
-      announce_date: r.ncrGsRegdate,
-      flag: r.ncrGsFlag,
-      phone: r.ncrOffTel,
-      has_injunction: r.ncrPdStatus,
+      company_name: r.ncrAdmiKname ?? null,
+      representative: r.ncrAdmiMaster ?? null,
+      trade_name: r.ncrItemName ?? null,
+      trade_reg_no: r.ncrItemregno ?? null,
+      address: r.ncrAdmiAddr ?? null,
+      region: r.ncrAreaName ?? null,
+      region_detail: r.ncrAreaDetailName ?? null,
+      penalty_type: r.ncrAdmiDename ?? null,
+      violation_content: r.ecodeAdmiCon ?? null,
+      violation_detail: r.ncrAdmiReason ?? null,
+      penalty_ground: r.ecodeAdmiGround ?? null,
+      fine_amount: r.ncrAdmiFine ?? 0,
+      penalty_amount: r.ncrAdmiPenalty ?? 0,
+      stop_start_date: r.ncrAdmiStopSdate ?? null,
+      stop_end_date: r.ncrAdmiStopEdate ?? null,
+      cancel_date: r.ncrAdmiCanceldate ?? null,
+      correction: r.ncrAdmiCorrect ?? null,
+      penalty_date: r.ncrGsDate ?? null,
+      announce_date: r.ncrGsRegdate ?? null,
+      flag: r.ncrGsFlag ?? null,
+      phone: r.ncrOffTel ?? null,
+      has_injunction: r.ncrPdStatus ?? null,
     }))
 
     const result = await sql`
