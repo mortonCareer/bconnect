@@ -57,4 +57,5 @@ module "vercel" {
 
   slack_webhook_url  = var.slack_webhook_url
   sentry_auth_token  = var.sentry_auth_token
+  database_url       = var.database_url
 }

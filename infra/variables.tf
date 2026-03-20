@@ -133,3 +133,13 @@ variable "sentry_dsn" {
   sensitive   = true
   default     = ""
 }
+
+# =============================================================================
+# Database (Railway Postgres TCP Proxy)
+# =============================================================================
+
+variable "database_url" {
+  description = "Railway Postgres DATABASE_URL (TCP proxy) - KISCON 건설업체정보 조회"
+  type        = string
+  sensitive   = true
+}

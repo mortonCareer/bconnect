@@ -111,6 +111,14 @@ resource "vercel_project_environment_variable" "career_slack_webhook_url" {
   comment    = "Slack Incoming Webhook - 크롤링 스키마 변경 알림"
 }
 
+resource "vercel_project_environment_variable" "career_database_url" {
+  project_id = vercel_project.morton-career.id
+  key        = "DATABASE_URL"
+  value      = var.database_url
+  target     = ["production", "preview"]
+  comment    = "Railway Postgres - KISCON 건설업체정보 조회"
+}
+
 # ===========================================================================
 # Domain Configuration for Career
 # ===========================================================================

@@ -73,3 +73,10 @@ variable "slack_webhook_url" {
   sensitive   = true
   default     = ""
 }
+
+# Railway Postgres (외부 접속용 TCP proxy URL)
+variable "database_url" {
+  description = "Railway Postgres DATABASE_URL (TCP proxy)"
+  type        = string
+  sensitive   = true
+}
