@@ -57,6 +57,7 @@ xrandr --query | grep ' connected' | awk '{print NR": "$1, $3}'
 ```
 
 출력 예:
+
 ```
 1: XWAYLAND0 1920x1080+7+0
 2: XWAYLAND1 1920x1080+0+1080
@@ -86,61 +87,63 @@ echo "Monitor: ${MON_W}x${MON_H}+${MON_X}+${MON_Y}, half=$HALF_W"
 HTTP 제어 서버(포트 19222)로 URL 네비게이션을 받는다:
 
 ```javascript
-import puppeteer from 'puppeteer';
-import http from 'http';
+import puppeteer from 'puppeteer'
+import http from 'http'
 
 // 환경변수에서 모니터 정보 읽기 (Step 0에서 파싱한 값)
-const monW = parseInt(process.env.MON_W || '1920');
-const monH = parseInt(process.env.MON_H || '1080');
-const monX = parseInt(process.env.MON_X || '0');
-const monY = parseInt(process.env.MON_Y || '0');
-const halfW = Math.floor(monW / 2);
-const controlPort = parseInt(process.env.CONTROL_PORT || '19222');
+const monW = parseInt(process.env.MON_W || '1920')
+const monH = parseInt(process.env.MON_H || '1080')
+const monX = parseInt(process.env.MON_X || '0')
+const monY = parseInt(process.env.MON_Y || '0')
+const halfW = Math.floor(monW / 2)
+const controlPort = parseInt(process.env.CONTROL_PORT || '19222')
 
 const browser = await puppeteer.launch({
   headless: false,
   devtools: false,
   args: [`--window-size=${halfW},${monH}`, `--window-position=${monX + halfW},${monY}`],
   defaultViewport: { width: 393, height: 852 },
-});
+})
 
-const [page] = await browser.pages();
+const [page] = await browser.pages()
 
 // CDP로 창 위치/크기 강제 설정 (오른쪽 절반)
-const session = await page.createCDPSession();
-const { windowId } = await session.send('Browser.getWindowForTarget');
+const session = await page.createCDPSession()
+const { windowId } = await session.send('Browser.getWindowForTarget')
 await session.send('Browser.setWindowBounds', {
   windowId,
   bounds: { left: monX + halfW, top: monY, width: halfW, height: monH, windowState: 'normal' },
-});
+})
 
-await page.goto(process.env.DEV_URL || 'http://localhost:3000');
+await page.goto(process.env.DEV_URL || 'http://localhost:3000')
 
 // HTTP 제어 서버
 const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, `http://localhost:${controlPort}`);
+  const url = new URL(req.url, `http://localhost:${controlPort}`)
   if (url.pathname === '/navigate') {
-    const target = url.searchParams.get('url');
+    const target = url.searchParams.get('url')
     if (target) {
-      await page.goto(target);
-      res.writeHead(200).end(`Navigated to: ${target}`);
-      console.log(`Navigated to: ${target}`);
+      await page.goto(target)
+      res.writeHead(200).end(`Navigated to: ${target}`)
+      console.log(`Navigated to: ${target}`)
     } else {
-      res.writeHead(400).end('Missing url param');
+      res.writeHead(400).end('Missing url param')
     }
   } else if (url.pathname === '/exit') {
-    res.writeHead(200).end('Closing');
-    await browser.close();
-    server.close();
-    process.exit(0);
+    res.writeHead(200).end('Closing')
+    await browser.close()
+    server.close()
+    process.exit(0)
   } else {
-    res.writeHead(200).end('OK');
+    res.writeHead(200).end('OK')
   }
-});
+})
 
 server.listen(controlPort, () => {
-  console.log(`READY: Dev browser (right ${halfW}x${monH}+${monX + halfW}+${monY}), control: http://localhost:${controlPort}`);
-});
+  console.log(
+    `READY: Dev browser (right ${halfW}x${monH}+${monX + halfW}+${monY}), control: http://localhost:${controlPort}`
+  )
+})
 ```
 
 실행:
@@ -217,11 +220,11 @@ Playwright는 `browser_close`로 정리.
 
 ## 트러블슈팅
 
-| 증상 | 원인 | 해결 |
-|------|------|------|
-| 창이 모니터 밖에 표시 | xrandr 오프셋 불일치 | `xrandr --query \| grep connected` 확인 |
-| Puppeteer 설치 실패 | /tmp 권한 | `sudo npm install puppeteer` |
-| 창 크기가 안 맞음 | 윈도우 매니저 간섭 | CDP `setWindowBounds` 재실행 |
-| BrokenPipeError | stdout에 `\| head` 파이프 | 파이프 제거, 백그라운드 실행 |
-| xrandr 없음 | Wayland-only 환경 | `wlr-randr` 또는 수동으로 해상도 지정 |
-| 19222 포트 충돌 | 다른 프로세스 사용 중 | `CONTROL_PORT=19223` 환경변수로 변경 |
+| 증상                  | 원인                      | 해결                                    |
+| --------------------- | ------------------------- | --------------------------------------- |
+| 창이 모니터 밖에 표시 | xrandr 오프셋 불일치      | `xrandr --query \| grep connected` 확인 |
+| Puppeteer 설치 실패   | /tmp 권한                 | `sudo npm install puppeteer`            |
+| 창 크기가 안 맞음     | 윈도우 매니저 간섭        | CDP `setWindowBounds` 재실행            |
+| BrokenPipeError       | stdout에 `\| head` 파이프 | 파이프 제거, 백그라운드 실행            |
+| xrandr 없음           | Wayland-only 환경         | `wlr-randr` 또는 수동으로 해상도 지정   |
+| 19222 포트 충돌       | 다른 프로세스 사용 중     | `CONTROL_PORT=19223` 환경변수로 변경    |

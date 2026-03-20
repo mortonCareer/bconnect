@@ -40,3 +40,12 @@ resource "railway_variable" "postgres_db" {
 
   depends_on = [railway_variable.postgres_password]
 }
+
+# TCP proxy — 외부(Vercel, GitHub Actions)에서 Postgres 접근용
+# provider가 railway_tcp_proxy를 미지원할 경우 Railway GUI에서 수동 활성화:
+# Service → Settings → Networking → Public Networking → Enable TCP Proxy
+resource "railway_tcp_proxy" "postgres" {
+  service_id       = railway_service.postgres.id
+  environment_id   = railway_project.morton.default_environment.id
+  application_port = 5432
+}

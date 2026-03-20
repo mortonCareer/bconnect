@@ -132,3 +132,52 @@ export interface KcomwelInsuranceItem {
   gyEopjongCd?: string // 고용보험 업종코드
   gyEopjongNm?: string // 고용보험 업종명
 }
+
+// ─── KISCON 건설업체정보 API Types ───────────────
+
+/** 건설업체등록 레코드 (kiscon_registration 테이블) */
+export interface KisconRegistrationItem {
+  ncr_gs_seq: number
+  biz_reg_no: string
+  company_name: string | null
+  representative: string | null
+  trade_name: string | null
+  trade_reg_no: string | null
+  address: string | null
+  region: string | null
+  region_detail: string | null
+  reg_date: number | null
+  announce_date: number | null
+  flag: string | null
+  phone: string | null
+  synced_at: string
+}
+
+/** 행정처분 레코드 (kiscon_admin_penalty 테이블) */
+export interface KisconAdminPenaltyItem {
+  ncr_gs_seq: number
+  biz_reg_no: string
+  company_name: string | null
+  representative: string | null
+  trade_name: string | null
+  trade_reg_no: string | null
+  address: string | null
+  region: string | null
+  region_detail: string | null
+  penalty_type: string | null
+  violation_content: string | null
+  violation_detail: string | null
+  penalty_ground: string | null
+  fine_amount: number
+  penalty_amount: number
+  stop_start_date: string | null
+  stop_end_date: string | null
+  cancel_date: string | null
+  correction: string | null
+  penalty_date: number | null
+  announce_date: number | null
+  flag: string | null
+  phone: string | null
+  has_injunction: string | null
+  synced_at: string
+}

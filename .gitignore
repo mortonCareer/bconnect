@@ -109,3 +109,6 @@ packages/api-client/src/generated/
 
 ### Figma lint reports ###
 .claude/skills/figma-lint/figma-lint-report.md
+
+### AI agent artifacts ###
+docs/superpowers/
