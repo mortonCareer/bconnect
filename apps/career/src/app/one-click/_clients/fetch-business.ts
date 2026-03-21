@@ -484,10 +484,6 @@ function mapEcicToCheckItem(items: EcicCompanyItem[]): CheckItem {
   }
 }
 
-// ─── 미연결 항목 (정적) ──────────────────────────
-
-const PENDING_ITEMS: Record<string, CheckItem> = {}
-
 // ─── 개별 항목 fetcher ──────────────────────────
 
 async function fetchBusinessStatusItem(regNo: string): Promise<CheckItem> {
@@ -737,7 +733,7 @@ export const fetchCheckItemById = cache(
       case 'RETIREMENT_FUND':
         return fetchRetirementFundItem(regNo)
       default:
-        return PENDING_ITEMS[id] ?? makeErrorItem(id, 'BUSINESS_LICENSE', id, '알 수 없는 항목')
+        return makeErrorItem(id, 'BUSINESS_LICENSE', id, '알 수 없는 항목')
     }
   }
 )
