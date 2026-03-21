@@ -23,6 +23,8 @@ import {
 } from './kiscon-construction-client'
 import { fetchRetirementFundProjects } from './cwma-retirement-client'
 import type { CwmaRetirementItem } from './cwma-retirement-client'
+import { fetchEcicCompanies } from './ecic-client'
+import type { EcicCompanyItem } from './ecic-client'
 import type { KisconRegistrationItem, KisconAdminPenaltyItem } from './types'
 
 // ─── 캐시 설정 ───────────────────────────────────
@@ -73,6 +75,10 @@ const cachedRetirementFund = unstable_cache(
   ['one-click-retirement-fund'],
   { revalidate: CACHE_TTL }
 )
+
+const cachedEcic = unstable_cache(fetchEcicCompanies, ['one-click-ecic'], {
+  revalidate: CACHE_TTL,
+})
 
 // 요청 내 dedup (React cache) — 여러 항목이 동시 호출해도 실제 API는 1번만 실행
 const getNtsData = cache(cachedNts)
@@ -453,20 +459,34 @@ function mapRetirementFundToCheckItem(items: CwmaRetirementItem[]): CheckItem {
   }
 }
 
-// ─── 미연결 항목 (정적) ──────────────────────────
+// ─── ECIC 전기공사업 → CheckItem ────────────────
 
-const PENDING_ITEMS: Record<string, CheckItem> = {
-  ELECTRICAL_LICENSE: {
+function mapEcicToCheckItem(items: EcicCompanyItem[]): CheckItem {
+  const hasLicense = items.length > 0
+  const first = items[0]
+
+  return {
     id: 'ELECTRICAL_LICENSE',
     category: 'BUSINESS_LICENSE',
     label: '전기공사업 면허',
     source: '한국전기공사협회',
-    status: '준비 중',
-    statusType: 'neutral',
-    description: '한국전기공사협회 전기공사업 면허 연결 준비 중이에요.',
-    details: [],
-  },
+    status: hasLicense ? `${items.length}건 확인` : '미확인',
+    statusType: hasLicense ? 'positive' : 'neutral',
+    description: 'ECIC 기준 전기공사업 면허 등록 현황이에요.',
+    details: hasLicense
+      ? [
+          { key: '상호', value: first.companyName || '-' },
+          { key: '등록번호', value: first.registrationNo || '-' },
+          { key: '대표자', value: first.representative || '-' },
+          { key: '소재지', value: first.address || '-' },
+        ]
+      : [],
+  }
 }
+
+// ─── 미연결 항목 (정적) ──────────────────────────
+
+const PENDING_ITEMS: Record<string, CheckItem> = {}
 
 // ─── 개별 항목 fetcher ──────────────────────────
 
@@ -590,6 +610,22 @@ async function fetchHabitualArrearsItem(regNo: string): Promise<CheckItem> {
   }
 }
 
+async function fetchElectricalLicenseItem(regNo: string): Promise<CheckItem> {
+  try {
+    const items = await cachedEcic(regNo)
+    return mapEcicToCheckItem(items)
+  } catch (e) {
+    Sentry.captureException(e, { tags: { source: 'ecic' }, extra: { regNo } })
+    console.error('ECIC scrape failed:', e)
+    return makeErrorItem(
+      'ELECTRICAL_LICENSE',
+      'BUSINESS_LICENSE',
+      '전기공사업 면허',
+      '한국전기공사협회'
+    )
+  }
+}
+
 async function fetchConstructionLicenseItem(regNo: string): Promise<CheckItem> {
   try {
     const [regItems, penaltyItems] = await Promise.all([
@@ -692,6 +728,8 @@ export const fetchCheckItemById = cache(
         return fetchWageArrearsItem(regNo)
       case 'HABITUAL_ARREARS':
         return fetchHabitualArrearsItem(regNo)
+      case 'ELECTRICAL_LICENSE':
+        return fetchElectricalLicenseItem(regNo)
       case 'CONSTRUCTION_LICENSE':
         return fetchConstructionLicenseItem(regNo)
       case 'SPECIALTY_LICENSE':
@@ -699,7 +737,7 @@ export const fetchCheckItemById = cache(
       case 'RETIREMENT_FUND':
         return fetchRetirementFundItem(regNo)
       default:
-        return PENDING_ITEMS[id]
+        return PENDING_ITEMS[id] ?? makeErrorItem(id, 'BUSINESS_LICENSE', id, '알 수 없는 항목')
     }
   }
 )
