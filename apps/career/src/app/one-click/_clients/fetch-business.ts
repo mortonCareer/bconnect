@@ -21,6 +21,8 @@ import {
   fetchConstructionLicense,
   fetchConstructionAdminPenalty,
 } from './kiscon-construction-client'
+import { fetchRetirementFundProjects } from './cwma-retirement-client'
+import type { CwmaRetirementItem } from './cwma-retirement-client'
 import type { KisconRegistrationItem, KisconAdminPenaltyItem } from './types'
 
 // ─── 캐시 설정 ───────────────────────────────────
@@ -63,6 +65,12 @@ const cachedConstructionLicense = unstable_cache(
 const cachedConstructionPenalty = unstable_cache(
   fetchConstructionAdminPenalty,
   ['one-click-construction-penalty'],
+  { revalidate: CACHE_TTL }
+)
+
+const cachedRetirementFund = unstable_cache(
+  fetchRetirementFundProjects,
+  ['one-click-retirement-fund'],
   { revalidate: CACHE_TTL }
 )
 
@@ -408,6 +416,43 @@ function mapConstructionLicenseCheckItem(
   }
 }
 
+// ─── CWMA 퇴직공제 → CheckItem ──────────────────
+
+function formatIsoDate(dateStr: string | null): string {
+  if (!dateStr) return '-'
+  return dateStr.slice(0, 10) // YYYY-MM-DD
+}
+
+function mapRetirementFundToCheckItem(items: CwmaRetirementItem[]): CheckItem {
+  const hasProjects = items.length > 0
+  const first = items[0]
+
+  return {
+    id: 'RETIREMENT_FUND',
+    category: 'INSURANCE',
+    label: '퇴직공제 가입 공사 이력',
+    source: '건설근로자공제회',
+    status: hasProjects ? `${items.length}건 확인` : '미확인',
+    statusType: hasProjects ? 'positive' : 'neutral',
+    description: '건설근로자공제회 퇴직공제 의무가입 공사 참여 이력이에요.',
+    details: hasProjects
+      ? [
+          { key: '업체명', value: first.company_name || '-' },
+          { key: '최근 공사', value: first.project_name || '-' },
+          {
+            key: '공사금액',
+            value: first.total_amount ? `${first.total_amount}억원` : '-',
+          },
+          {
+            key: '공사기간',
+            value: `${formatIsoDate(first.start_date)} ~ ${formatIsoDate(first.end_date)}`,
+          },
+          { key: '발주처', value: first.client_org || '-' },
+        ]
+      : [],
+  }
+}
+
 // ─── 미연결 항목 (정적) ──────────────────────────
 
 const PENDING_ITEMS: Record<string, CheckItem> = {
@@ -419,16 +464,6 @@ const PENDING_ITEMS: Record<string, CheckItem> = {
     status: '준비 중',
     statusType: 'neutral',
     description: '한국전기공사협회 전기공사업 면허 연결 준비 중이에요.',
-    details: [],
-  },
-  RETIREMENT_FUND: {
-    id: 'RETIREMENT_FUND',
-    category: 'INSURANCE',
-    label: '퇴직공제 가입 공사 이력',
-    source: '건설근로자공제회',
-    status: '준비 중',
-    statusType: 'neutral',
-    description: '건설근로자공제회 퇴직공제 가입 현황 연결 준비 중이에요.',
     details: [],
   },
 }
@@ -581,6 +616,39 @@ async function fetchConstructionLicenseItem(regNo: string): Promise<CheckItem> {
   }
 }
 
+async function fetchRetirementFundItem(regNo: string): Promise<CheckItem> {
+  let companyName: string | undefined
+  try {
+    const kcomwel = await getKcomwelData(regNo)
+    companyName = kcomwel[0]?.saeopjangNm
+  } catch {
+    // KCOMWEL 실패 → 회사명 확인 불가
+  }
+
+  if (!companyName) {
+    return makeNoNameItem(
+      'RETIREMENT_FUND',
+      'INSURANCE',
+      '퇴직공제 가입 공사 이력',
+      '건설근로자공제회'
+    )
+  }
+
+  try {
+    const items = await cachedRetirementFund(companyName)
+    return mapRetirementFundToCheckItem(items)
+  } catch (e) {
+    Sentry.captureException(e, { tags: { source: 'cwma' }, extra: { regNo } })
+    console.error('CWMA retirement fund query failed:', e)
+    return makeErrorItem(
+      'RETIREMENT_FUND',
+      'INSURANCE',
+      '퇴직공제 가입 공사 이력',
+      '건설근로자공제회'
+    )
+  }
+}
+
 async function fetchSpecialtyLicenseItem(regNo: string): Promise<CheckItem> {
   try {
     const [regItems, penaltyItems] = await Promise.all([
@@ -628,6 +696,8 @@ export const fetchCheckItemById = cache(
         return fetchConstructionLicenseItem(regNo)
       case 'SPECIALTY_LICENSE':
         return fetchSpecialtyLicenseItem(regNo)
+      case 'RETIREMENT_FUND':
+        return fetchRetirementFundItem(regNo)
       default:
         return PENDING_ITEMS[id]
     }
