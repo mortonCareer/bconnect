@@ -72,6 +72,20 @@ const getKcomwelData = cache(cachedKcomwel)
 
 // ─── 헬퍼 ────────────────────────────────────────
 
+/** 종합건설업 업종 (건설산업기본법 시행령 별표 1) */
+const GENERAL_CONSTRUCTION_TRADES = [
+  '토목공사업',
+  '건축공사업',
+  '토목건축공사업',
+  '조경공사업',
+  '산업ㆍ환경설비공사업',
+] as const
+
+function isGeneralConstructionTrade(tradeName: string | null): boolean {
+  if (!tradeName) return false
+  return (GENERAL_CONSTRUCTION_TRADES as readonly string[]).includes(tradeName)
+}
+
 function formatRegNo(bNo: string): string {
   if (bNo.length !== 10) return bNo
   return `${bNo.slice(0, 3)}-${bNo.slice(3, 5)}-${bNo.slice(5)}`
@@ -316,7 +330,9 @@ function mapKisconSubconToCheckItem(items: KisconSubconLimitItem[]): CheckItem {
 
 // ─── KISCON 건설업 면허 → CheckItem ─────────────
 
-function mapConstructionLicenseToCheckItem(
+function mapConstructionLicenseCheckItem(
+  id: 'CONSTRUCTION_LICENSE' | 'SPECIALTY_LICENSE',
+  label: string,
   regItems: KisconRegistrationItem[],
   penaltyItems: KisconAdminPenaltyItem[]
 ): CheckItem {
@@ -351,6 +367,17 @@ function mapConstructionLicenseToCheckItem(
       },
       { key: '소재지', value: first.address || '-' }
     )
+
+    // 2건 이상이면 추가 업종 표시
+    if (regItems.length > 1) {
+      const others = regItems
+        .slice(1)
+        .map((r) => r.trade_name)
+        .filter(Boolean)
+      if (others.length > 0) {
+        details.push({ key: '추가 업종', value: others.join(', ') })
+      }
+    }
   }
 
   if (hasPenalty) {
@@ -370,13 +397,13 @@ function mapConstructionLicenseToCheckItem(
   }
 
   return {
-    id: 'CONSTRUCTION_LICENSE',
+    id,
     category: 'BUSINESS_LICENSE',
-    label: '건설업 면허',
+    label,
     source: '국토교통부',
     status,
     statusType,
-    description: '국토교통부 KISCON 기준 건설업 면허 등록 및 행정처분 현황이에요.',
+    description: `국토교통부 KISCON 기준 ${label} 등록 및 행정처분 현황이에요.`,
     details,
   }
 }
@@ -384,16 +411,6 @@ function mapConstructionLicenseToCheckItem(
 // ─── 미연결 항목 (정적) ──────────────────────────
 
 const PENDING_ITEMS: Record<string, CheckItem> = {
-  SPECIALTY_LICENSE: {
-    id: 'SPECIALTY_LICENSE',
-    category: 'BUSINESS_LICENSE',
-    label: '전문건설업 면허',
-    source: '대한전문건설협회',
-    status: '준비 중',
-    statusType: 'neutral',
-    description: '대한전문건설협회 전문건설업 면허 연결 준비 중이에요.',
-    details: [],
-  },
   ELECTRICAL_LICENSE: {
     id: 'ELECTRICAL_LICENSE',
     category: 'BUSINESS_LICENSE',
@@ -544,11 +561,44 @@ async function fetchConstructionLicenseItem(regNo: string): Promise<CheckItem> {
       cachedConstructionLicense(regNo),
       cachedConstructionPenalty(regNo),
     ])
-    return mapConstructionLicenseToCheckItem(regItems, penaltyItems)
+    const generalReg = regItems.filter((r) => isGeneralConstructionTrade(r.trade_name))
+    const generalPenalty = penaltyItems.filter((r) => isGeneralConstructionTrade(r.trade_name))
+    return mapConstructionLicenseCheckItem(
+      'CONSTRUCTION_LICENSE',
+      '종합건설업 면허',
+      generalReg,
+      generalPenalty
+    )
   } catch (e) {
     Sentry.captureException(e, { tags: { source: 'kiscon-construction' }, extra: { regNo } })
     console.error('KISCON construction query failed:', e)
-    return makeErrorItem('CONSTRUCTION_LICENSE', 'BUSINESS_LICENSE', '건설업 면허', '국토교통부')
+    return makeErrorItem(
+      'CONSTRUCTION_LICENSE',
+      'BUSINESS_LICENSE',
+      '종합건설업 면허',
+      '국토교통부'
+    )
+  }
+}
+
+async function fetchSpecialtyLicenseItem(regNo: string): Promise<CheckItem> {
+  try {
+    const [regItems, penaltyItems] = await Promise.all([
+      cachedConstructionLicense(regNo),
+      cachedConstructionPenalty(regNo),
+    ])
+    const specialtyReg = regItems.filter((r) => !isGeneralConstructionTrade(r.trade_name))
+    const specialtyPenalty = penaltyItems.filter((r) => !isGeneralConstructionTrade(r.trade_name))
+    return mapConstructionLicenseCheckItem(
+      'SPECIALTY_LICENSE',
+      '전문건설업 면허',
+      specialtyReg,
+      specialtyPenalty
+    )
+  } catch (e) {
+    Sentry.captureException(e, { tags: { source: 'kiscon-construction' }, extra: { regNo } })
+    console.error('KISCON specialty query failed:', e)
+    return makeErrorItem('SPECIALTY_LICENSE', 'BUSINESS_LICENSE', '전문건설업 면허', '국토교통부')
   }
 }
 
@@ -576,6 +626,8 @@ export const fetchCheckItemById = cache(
         return fetchHabitualArrearsItem(regNo)
       case 'CONSTRUCTION_LICENSE':
         return fetchConstructionLicenseItem(regNo)
+      case 'SPECIALTY_LICENSE':
+        return fetchSpecialtyLicenseItem(regNo)
       default:
         return PENDING_ITEMS[id]
     }
