@@ -29,6 +29,7 @@ jobs:
       - name: Sync CWMA retirement fund data to Postgres
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CWMA_CSV_URL: ${{ secrets.CWMA_CSV_URL }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: pnpm exec tsx scripts/cwma-retirement-sync.ts
 

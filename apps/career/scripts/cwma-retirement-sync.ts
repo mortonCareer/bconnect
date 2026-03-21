@@ -5,7 +5,7 @@
  * - cwma_retirement_fund 테이블에 전량 적재
  *
  * 실행: pnpm exec tsx scripts/cwma-retirement-sync.ts
- * 환경변수: DATABASE_URL, SLACK_WEBHOOK_URL (선택)
+ * 환경변수: DATABASE_URL, CWMA_CSV_URL, SLACK_WEBHOOK_URL (선택)
  */
 
 import postgres from 'postgres'
@@ -14,9 +14,8 @@ import postgres from 'postgres'
 
 const DATABASE_URL = process.env.DATABASE_URL
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL
-
-/** data.go.kr 퇴직공제 가입사업장 CSV 다운로드 URL */
 const CSV_URL =
+  process.env.CWMA_CSV_URL ||
   'https://www.data.go.kr/cmm/cmm/fileDownload.do?atchFileId=FILE_000000003611389&fileDetailSn=1&insertDataPrcus=N'
 
 const BATCH_SIZE = 500
