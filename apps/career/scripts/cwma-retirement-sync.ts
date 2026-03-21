@@ -31,7 +31,6 @@ async function ensureTable(): Promise<void> {
   await sql`
     CREATE TABLE IF NOT EXISTS cwma_retirement_fund (
       id                      SERIAL PRIMARY KEY,
-      seq_no                  TEXT NOT NULL,
       project_name            TEXT NOT NULL,
       total_amount            NUMERIC,
       start_date              DATE,
@@ -41,7 +40,7 @@ async function ensureTable(): Promise<void> {
       client_org              TEXT,
       address                 TEXT,
       synced_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      UNIQUE (seq_no, company_name, project_name)
+      UNIQUE (company_name, project_name, start_date)
     )
   `
   await sql`
@@ -75,7 +74,6 @@ export function normalizeCompanyName(name: string): string {
 // ─── CSV 다운로드 및 파싱 ───────────────────────
 
 interface CsvRow {
-  seqNo: string
   projectName: string
   totalAmount: string
   startDate: string
@@ -132,7 +130,6 @@ function parseCsvText(text: string): CsvRow[] {
     if (fields.length < 8) continue
 
     rows.push({
-      seqNo: fields[0],
       projectName: fields[1],
       totalAmount: fields[2],
       startDate: fields[3],
@@ -186,7 +183,6 @@ async function upsertRows(rows: CsvRow[]): Promise<number> {
     const dbRows = batch
       .filter((r) => r.companyName && r.projectName)
       .map((r) => ({
-        seq_no: r.seqNo,
         project_name: r.projectName,
         total_amount: r.totalAmount ? parseFloat(r.totalAmount) || null : null,
         start_date: r.startDate || null,
@@ -202,15 +198,14 @@ async function upsertRows(rows: CsvRow[]): Promise<number> {
     // dedup: 같은 배치 내 동일 키 → 마지막 것만 유지
     const deduped = [
       ...new Map(
-        dbRows.map((r) => [`${r.seq_no}|${r.company_name}|${r.project_name}`, r])
+        dbRows.map((r) => [`${r.company_name}|${r.project_name}|${r.start_date}`, r])
       ).values(),
     ]
 
     const result = await sql`
       INSERT INTO cwma_retirement_fund ${sql(deduped)}
-      ON CONFLICT (seq_no, company_name, project_name) DO UPDATE SET
+      ON CONFLICT (company_name, project_name, start_date) DO UPDATE SET
         total_amount = EXCLUDED.total_amount,
-        start_date = EXCLUDED.start_date,
         end_date = EXCLUDED.end_date,
         normalized_company_name = EXCLUDED.normalized_company_name,
         client_org = EXCLUDED.client_org,
