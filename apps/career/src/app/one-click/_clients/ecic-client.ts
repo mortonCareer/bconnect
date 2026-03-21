@@ -16,24 +16,18 @@ export interface EcicCompanyItem {
 
 const ECIC_URL = 'https://www.keca.or.kr/ecic/ad/ad0101.do'
 
-function formatBizRegNo(bNo: string): string {
-  if (bNo.length !== 10) return bNo
-  return `${bNo.slice(0, 3)}-${bNo.slice(3, 5)}-${bNo.slice(5)}`
-}
-
 /**
  * ECIC 전기공사업 면허 검색 (사업자등록번호 기준)
+ * ECIC은 하이픈 없는 10자리 숫자를 기대함
  *
  * @param bizRegNo 사업자등록번호 (10자리, 하이픈 없음)
  * @returns 매칭 결과 (없으면 빈 배열)
  */
 export async function fetchEcicCompanies(bizRegNo: string): Promise<EcicCompanyItem[]> {
-  const formatted = formatBizRegNo(bizRegNo)
-
   const url = new URL(ECIC_URL)
   url.searchParams.set('menuCd', '6047')
   url.searchParams.set('searchGubun', 'saupNo')
-  url.searchParams.set('searchText', formatted)
+  url.searchParams.set('searchText', bizRegNo)
 
   const response = await fetch(url.toString(), {
     headers: {
