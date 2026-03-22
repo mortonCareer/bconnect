@@ -42,3 +42,19 @@ jobs:
             -d '{"text":"🚨 *KISCON Sync 실패*\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|워크플로우 로그 확인>"}'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Report failure to GitHub Issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          WORKFLOW_NAME="KISCON Sync"
+          EXISTING=$(gh issue list --label "🚨 sync-failure" --state open --search "$WORKFLOW_NAME" --json number -q '.[0].number')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "재실패: $RUN_URL"
+          else
+            gh issue create --title "🚨 ${WORKFLOW_NAME} 실패" \
+              --label "🚨 sync-failure" \
+              --body "Run: $RUN_URL"
+          fi
