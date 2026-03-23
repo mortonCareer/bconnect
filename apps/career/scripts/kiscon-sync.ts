@@ -117,16 +117,15 @@ async function main() {
   )
 
   const existingArrearsHash = await getExistingHash('kiscon/arrears.json')
-  if (existingArrearsHash === arrearsChecksum) {
-    console.log('[kiscon-sync] 상습체불: 변경 없음 — 업로드 생략')
-  } else {
-    await uploadToS3('kiscon/arrears.json', {
-      lastUpdated: now,
-      checksum: arrearsChecksum,
-      items: arrearsItems,
-    })
-    console.log('[kiscon-sync] kiscon/arrears.json 업로드 완료')
-  }
+  const arrearsChanged = existingArrearsHash !== arrearsChecksum
+  await uploadToS3('kiscon/arrears.json', {
+    lastUpdated: now,
+    checksum: arrearsChecksum,
+    items: arrearsItems,
+  })
+  console.log(
+    `[kiscon-sync] kiscon/arrears.json 업로드 완료${arrearsChanged ? '' : ' (변경 없음, timestamp만 갱신)'}`
+  )
 
   // 하도급참여제한 크롤링 (전체 페이지 순회)
   console.log('[kiscon-sync] 하도급참여제한 크롤링...')
@@ -138,16 +137,15 @@ async function main() {
   )
 
   const existingSubconHash = await getExistingHash('kiscon/subcon-limits.json')
-  if (existingSubconHash === subconChecksum) {
-    console.log('[kiscon-sync] 하도급참여제한: 변경 없음 — 업로드 생략')
-  } else {
-    await uploadToS3('kiscon/subcon-limits.json', {
-      lastUpdated: now,
-      checksum: subconChecksum,
-      items: subconItems,
-    })
-    console.log('[kiscon-sync] kiscon/subcon-limits.json 업로드 완료')
-  }
+  const subconChanged = existingSubconHash !== subconChecksum
+  await uploadToS3('kiscon/subcon-limits.json', {
+    lastUpdated: now,
+    checksum: subconChecksum,
+    items: subconItems,
+  })
+  console.log(
+    `[kiscon-sync] kiscon/subcon-limits.json 업로드 완료${subconChanged ? '' : ' (변경 없음, timestamp만 갱신)'}`
+  )
 
   console.log(
     `[kiscon-sync] 완료 — 상습체불 ${arrearsItems.length}건, 하도급제한 ${subconItems.length}건`
