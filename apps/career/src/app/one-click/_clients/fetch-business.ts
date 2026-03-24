@@ -15,7 +15,7 @@ import { fetchNtsBusinessStatus, fetchNtsBusinessValidate } from './nts-client'
 import { fetchKcomwelInsurance } from './kcomwel-client'
 import { fetchFeiaCompanies } from './feia-client'
 import { fetchMoelDefaulters } from './moel-client'
-import { fetchKisconArrearsFromS3, fetchKisconSubconFromS3 } from './kiscon-s3-client'
+import { fetchKisconArrears, fetchKisconSubconLimits } from './kiscon-db-client'
 import type { KisconArrearsItem, KisconSubconLimitItem } from './kiscon-parser'
 import {
   fetchConstructionLicense,
@@ -50,11 +50,11 @@ const cachedMoel = unstable_cache(fetchMoelDefaulters, ['one-click-moel'], {
   revalidate: CACHE_TTL,
 })
 
-const cachedKisconArrears = unstable_cache(fetchKisconArrearsFromS3, ['one-click-kiscon-arrears'], {
+const cachedKisconArrears = unstable_cache(fetchKisconArrears, ['one-click-kiscon-arrears'], {
   revalidate: CACHE_TTL,
 })
 
-const cachedKisconSubcon = unstable_cache(fetchKisconSubconFromS3, ['one-click-kiscon-subcon'], {
+const cachedKisconSubcon = unstable_cache(fetchKisconSubconLimits, ['one-click-kiscon-subcon'], {
   revalidate: CACHE_TTL,
 })
 
