@@ -23,7 +23,7 @@ jobs:
             | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/pgdg.gpg
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends postgresql-client-17
-          pg_dump --version
+          /usr/lib/postgresql/17/bin/pg_dump --version
 
       - name: Dump database
         env:
@@ -31,11 +31,11 @@ jobs:
         run: |
           DUMP_FILE="morton-$(date -u +%Y-%m-%d).dump"
           echo "DUMP_FILE=${DUMP_FILE}" >> "$GITHUB_ENV"
-          pg_dump "$DATABASE_URL" --format=custom --file="$DUMP_FILE"
+          /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" --format=custom --file="$DUMP_FILE"
           ls -lh "$DUMP_FILE"
 
       - name: Verify dump integrity
-        run: pg_restore --list "$DUMP_FILE" > /dev/null
+        run: /usr/lib/postgresql/17/bin/pg_restore --list "$DUMP_FILE" > /dev/null
 
       - name: Upload to S3
         env:
