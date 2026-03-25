@@ -50,6 +50,7 @@ app:
     allowed-origin-patterns:
       - https://morton-career*.vercel.app
       - https://morton-plan*.vercel.app
+      - https://*.bconnect.to
 
   jwt:
     secret: ${JWT_SECRET}
