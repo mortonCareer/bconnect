@@ -33,7 +33,7 @@ public class CoolSmsSmsProvider implements SmsProvider {
 
         try {
             messageService.sendOne(new SingleMessageSendingRequest(sms));
-            log.info("SMS sent to {}", phone);
+            log.info("SMS sent to {}", maskPhone(phone));
         } catch (Exception e) {
             log.warn("SMS send failed, retrying: {}", e.getMessage());
             retrySend(sms, e);
@@ -43,10 +43,16 @@ public class CoolSmsSmsProvider implements SmsProvider {
     private void retrySend(Message sms, Exception original) {
         try {
             messageService.sendOne(new SingleMessageSendingRequest(sms));
-            log.info("SMS retry succeeded to {}", sms.getTo());
+            log.info("SMS retry succeeded to {}", maskPhone(sms.getTo()));
         } catch (Exception e) {
-            log.error("SMS retry also failed to {}: {}", sms.getTo(), e.getMessage());
-            throw new RuntimeException("SMS 발송 실패: " + sms.getTo(), e);
+            log.error("SMS retry also failed to {}: {}", maskPhone(sms.getTo()), e.getMessage());
+            e.addSuppressed(original);
+            throw new RuntimeException("SMS 발송 실패: " + maskPhone(sms.getTo()), e);
         }
+    }
+
+    private static String maskPhone(String phone) {
+        if (phone == null || phone.length() < 7) return "***";
+        return phone.substring(0, 3) + "****" + phone.substring(phone.length() - 4);
     }
 }
