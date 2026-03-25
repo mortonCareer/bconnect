@@ -39,6 +39,9 @@ dependencies {
     runtimeOnly ("io.jsonwebtoken:jjwt-impl:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-orgjson:0.13.0")
 
+    // sms
+    implementation 'net.nurigo:sdk:4.3.0'
+
     // monitor
     implementation 'io.micrometer:micrometer-core'
     implementation 'io.sentry:sentry-spring-boot-4:8.34.1'
