@@ -18,6 +18,7 @@ jobs:
       plan: ${{ steps.filter.outputs.plan }}
       api: ${{ steps.filter.outputs.api }}
       crawler: ${{ steps.filter.outputs.crawler }}
+      board: ${{ steps.filter.outputs.board }}
     steps:
       - uses: actions/checkout@v6
 
@@ -39,6 +40,11 @@ jobs:
               - 'apps/api/**'
             crawler:
               - 'apps/crawler/**'
+            board:
+              - 'apps/board/**'
+              - 'packages/config/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
 
   ci-career:
     needs: changes
@@ -140,3 +146,23 @@ jobs:
           NAVER_CLIENT_SECRET: dummy
           NOTION_TOKEN: dummy
         run: uv run --dev pytest tests/ -v
+
+  ci-board:
+    needs: changes
+    if: ${{ needs.changes.outputs.board == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm --filter morton-board typecheck

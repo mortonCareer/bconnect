@@ -9,11 +9,13 @@ export type BoardData = {
   rows: BoardRow[]
 }
 
+export type BoardPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+
 export type Photo = {
   id: string
   uri: string
   board: BoardData
-  boardPosition: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  boardPosition: BoardPosition
   description?: string
   createdAt: string
 }

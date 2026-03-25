@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { Alert, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
-import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router'
+import { Link, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import * as ImagePicker from 'expo-image-picker'
 import { colors } from '@/lib/colors'
 import {
@@ -133,6 +133,11 @@ export default function FolderDetailScreen() {
         />
 
         <View style={styles.bottomBar}>
+          <Link href={`/board/new?folderId=${id}`} asChild>
+            <Pressable style={styles.bottomButtonOutline}>
+              <Text style={styles.bottomButtonOutlineText}>📋 보드 작성</Text>
+            </Pressable>
+          </Link>
           <Pressable style={styles.bottomButton} onPress={handleTakePhoto}>
             <Text style={styles.bottomButtonText}>📷 촬영</Text>
           </Pressable>
@@ -213,6 +218,19 @@ const styles = StyleSheet.create({
   },
   bottomButtonText: {
     color: colors.white,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  bottomButtonOutline: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  bottomButtonOutlineText: {
+    color: colors.primary,
     fontSize: 15,
     fontWeight: '600',
   },

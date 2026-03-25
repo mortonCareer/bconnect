@@ -110,5 +110,14 @@ packages/api-client/src/generated/
 ### Figma lint reports ###
 .claude/skills/figma-lint/figma-lint-report.md
 
+### Expo / React Native ###
+.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
 ### AI agent artifacts ###
 docs/superpowers/
