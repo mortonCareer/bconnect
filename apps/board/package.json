@@ -1,0 +1,29 @@
+{
+  "name": "morton-board",
+  "version": "0.1.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "expo": "~55.0.8",
+    "expo-router": "~5.0.6",
+    "expo-status-bar": "~55.0.4",
+    "expo-image-picker": "~16.1.4",
+    "expo-media-library": "~17.1.6",
+    "react": "19.2.0",
+    "react-native": "0.83.2",
+    "@react-native-async-storage/async-storage": "2.1.2",
+    "react-native-safe-area-context": "5.4.0",
+    "react-native-screens": "~4.11.1"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "typescript": "~5.9.2"
+  },
+  "private": true
+}

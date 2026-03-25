@@ -18,7 +18,8 @@
     "format:check": "prettier --check .",
     "api:generate": "pnpm --filter @morton/api-client generate",
     "figma:connect": "figma connect publish",
-    "figma:connect:dry": "figma connect publish --dry-run"
+    "figma:connect:dry": "figma connect publish --dry-run",
+    "dev:board": "pnpm --filter morton-board start"
   },
   "packageManager": "pnpm@10.23.0",
   "devDependencies": {
