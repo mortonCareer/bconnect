@@ -1,0 +1,59 @@
+name: DB Backup
+
+on:
+  schedule:
+    # 매일 00:00 UTC (09:00 KST)
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo apt-get install -y --no-install-recommends gnupg lsb-release
+          echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/pgdg.gpg
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client-17
+          pg_dump --version
+
+      - name: Dump database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          DUMP_FILE="morton-$(date -u +%Y-%m-%d).dump"
+          echo "DUMP_FILE=${DUMP_FILE}" >> "$GITHUB_ENV"
+          pg_dump "$DATABASE_URL" --format=custom --file="$DUMP_FILE"
+          ls -lh "$DUMP_FILE"
+
+      - name: Verify dump integrity
+        run: pg_restore --list "$DUMP_FILE" > /dev/null
+
+      - name: Upload to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-northeast-2
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+        run: |
+          S3_KEY="db-backups/daily/${DUMP_FILE}"
+          aws s3 cp "$DUMP_FILE" "s3://${S3_BUCKET_NAME}/${S3_KEY}"
+          echo "✅ Uploaded to s3://${S3_BUCKET_NAME}/${S3_KEY}"
+
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          curl -s -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "{\"text\":\"🚨 *DB Backup 실패*\n<${RUN_URL}|워크플로우 로그 확인>\"}"
