@@ -20,7 +20,10 @@ public class EnvironmentValidator {
             "DATABASE_URL",
             "DATABASE_USERNAME",
             "DATABASE_PASSWORD",
-            "JWT_SECRET"
+            "JWT_SECRET",
+            "COOLSMS_API_KEY",
+            "COOLSMS_API_SECRET",
+            "COOLSMS_SENDER_NUMBER"
             // TODO: AWS
     );
 

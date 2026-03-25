@@ -55,3 +55,8 @@ app:
     secret: ${JWT_SECRET}
     access-token-expiration: 1h
     refresh-token-expiration: 7d
+
+  sms:
+    api-key: ${COOLSMS_API_KEY:}
+    api-secret: ${COOLSMS_API_SECRET:}
+    sender-number: ${COOLSMS_SENDER_NUMBER:}
