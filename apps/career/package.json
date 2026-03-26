@@ -17,7 +17,6 @@
     "@aws-sdk/client-lambda": "^3.965.0",
     "@aws-sdk/client-s3": "^3.965.0",
     "@capacitor/core": "^8.2.0",
-    "@capacitor/push-notifications": "^8.0.2",
     "@hookform/resolvers": "5.2.2",
     "@morton/api-client": "workspace:*",
     "@morton/ui": "workspace:*",

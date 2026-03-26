@@ -107,9 +107,6 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
-  /* In-app notification slide */
-  --animate-slide-down: slide-down 0.3s ease-out;
-
   /* Typography - Pretendard */
   --font-sans:
     'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
@@ -153,17 +150,6 @@
   --text-r-14--line-height: 1.6;
   --text-r-12: 0.75rem;
   --text-r-12--line-height: 1.6;
-}
-
-@keyframes slide-down {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
 }
 
 @keyframes accordion-down {
