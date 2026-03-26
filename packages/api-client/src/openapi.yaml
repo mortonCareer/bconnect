@@ -437,6 +437,25 @@ paths:
           description: OK
 
   # =====================
+  # Feed Endpoints
+  # =====================
+  /api/v1/feeds:
+    get:
+      operationId: getFeeds
+      tags: [Feeds]
+      security: []
+      summary: 피드 목록 조회
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Feed'
+
+  # =====================
   # Chat Endpoints
   # =====================
   /api/v1/chats:
