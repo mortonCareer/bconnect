@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'so.morton.career',
-  appName: 'Morton Career',
+  appName: '품앗이',
   webDir: 'out',
   server: {
     // 프로덕션에서는 로컬 번들을 사용하고,
@@ -11,11 +11,6 @@ const config: CapacitorConfig = {
       url: 'http://localhost:3000',
       cleartext: true,
     }),
-  },
-  plugins: {
-    PushNotifications: {
-      presentationOptions: ['badge', 'sound', 'alert'],
-    },
   },
 }
 
