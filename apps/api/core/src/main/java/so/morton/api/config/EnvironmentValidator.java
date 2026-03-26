@@ -21,9 +21,9 @@ public class EnvironmentValidator {
             "DATABASE_USERNAME",
             "DATABASE_PASSWORD",
             "JWT_SECRET",
-            "COOLSMS_API_KEY",
-            "COOLSMS_API_SECRET",
-            "COOLSMS_SENDER_NUMBER"
+            "SOLAPI_API_KEY",
+            "SOLAPI_API_SECRET",
+            "SOLAPI_SENDER_NUMBER"
             // TODO: AWS
     );
 

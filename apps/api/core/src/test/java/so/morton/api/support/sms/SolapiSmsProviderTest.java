@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CoolSmsSmsProviderTest {
+class SolapiSmsProviderTest {
 
     @Test
     void properties_바인딩_확인() {
@@ -17,7 +17,7 @@ class CoolSmsSmsProviderTest {
     @Test
     void 잘못된_API_키로_생성시_예외_또는_정상_초기화() {
         SmsProperties props = new SmsProperties("invalid", "invalid", "01012345678");
-        CoolSmsSmsProvider provider = new CoolSmsSmsProvider(props);
+        SolapiSmsProvider provider = new SolapiSmsProvider(props);
         assertThat(provider).isNotNull();
     }
 }

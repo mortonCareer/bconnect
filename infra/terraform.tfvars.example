@@ -49,6 +49,14 @@ nts_api_service_key    = "your-data-go-kr-service-key"
 kcomwel_api_service_key = "your-data-go-kr-service-key"
 
 # =============================================================================
+# Solapi (SMS)
+# =============================================================================
+
+solapi_api_key       = "your-solapi-api-key"
+solapi_api_secret    = "your-solapi-api-secret"
+solapi_sender_number = "01012345678"
+
+# =============================================================================
 # Sentry
 # =============================================================================
 

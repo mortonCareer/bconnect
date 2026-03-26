@@ -57,6 +57,6 @@ app:
     refresh-token-expiration: 7d
 
   sms:
-    api-key: ${COOLSMS_API_KEY:}
-    api-secret: ${COOLSMS_API_SECRET:}
-    sender-number: ${COOLSMS_SENDER_NUMBER:}
+    api-key: ${SOLAPI_API_KEY:}
+    api-secret: ${SOLAPI_API_SECRET:}
+    sender-number: ${SOLAPI_SENDER_NUMBER:}

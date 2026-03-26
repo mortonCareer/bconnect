@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Profile({"prod", "dev"})
-public class CoolSmsSmsProvider implements SmsProvider {
+public class SolapiSmsProvider implements SmsProvider {
 
-    private static final String API_URL = "https://api.coolsms.co.kr";
+    private static final String API_URL = "https://api.solapi.com";
 
     private final DefaultMessageService messageService;
     private final String senderNumber;
 
-    public CoolSmsSmsProvider(SmsProperties properties) {
+    public SolapiSmsProvider(SmsProperties properties) {
         this.messageService = NurigoApp.INSTANCE
                 .initialize(properties.apiKey(), properties.apiSecret(), API_URL);
         this.senderNumber = properties.senderNumber();
