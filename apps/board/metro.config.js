@@ -7,7 +7,12 @@ const monorepoRoot = path.resolve(projectRoot, '../..')
 
 const config = getDefaultConfig(projectRoot)
 
-config.watchFolders = [monorepoRoot]
+// Force Metro to use apps/board as the project root (not monorepo root)
+// This prevents pnpm workspace auto-detection from breaking the entry point
+config.projectRoot = projectRoot
+config.watchFolders = [projectRoot]
+
+// pnpm: resolve from both app and root node_modules
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(monorepoRoot, 'node_modules'),
