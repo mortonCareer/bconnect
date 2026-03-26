@@ -28,6 +28,13 @@ public class PostFinder {
                 .toList();
     }
 
+    public List<Post> findAll() {
+        return postRepository.findAll()
+                .stream()
+                .map(Post::of)
+                .toList();
+    }
+
     public List<Post> findByTaskId(Long taskId) {
         return postRepository.findByTaskId(taskId)
                 .stream()
