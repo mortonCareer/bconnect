@@ -5,21 +5,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import so.morton.api.config.IntegrationTest;
 import org.springframework.test.web.servlet.MockMvc;
 import so.morton.api.api.controller.v1.request.CreatePostRequest;
-import so.morton.api.api.controller.v1.request.UpdatePostRequest;
 import so.morton.api.domain.post.Post;
 import so.morton.api.domain.post.PostService;
 import so.morton.api.support.auth.User;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
+import so.morton.api.support.fixture.PostFactory;
+import so.morton.api.support.fixture.UserFactory;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -37,40 +35,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static so.morton.api.support.TestUtils.successResponse;
 import static so.morton.api.support.TestUtils.errorResponse;
 
-@ActiveProfiles("test")
-@SpringBootTest
-@AutoConfigureMockMvc
+@IntegrationTest
 class PostControllerTest {
 
-    @MockitoBean
-    private PostService postService;
-
-    @Autowired
-    private MockMvc mockMvc;
-
+    @MockitoBean private PostService postService;
+    @Autowired private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final User TEST_USER = new User(1L, "testuser", "SKILLED");
-
-    private static final Post SAMPLE_POST = new Post(
-            1L, 1L, 1L, List.of("img1.jpg"), "content",
-            LocalDateTime.now(), LocalDateTime.now()
-    );
+    private final Post post = PostFactory.create(1L, 1L, 1L);
 
     @Nested
     @DisplayName("POST /api/v1/posts")
     class CreatePost {
 
         @Test
-        @DisplayName("인증된 사용자가 게시글을 작성하면 성공 응답을 반환한다")
+        @DisplayName("작성 성공")
         void create_success() throws Exception {
             // given
-            CreatePostRequest request = new CreatePostRequest(1L, List.of("img1.jpg"), "content");
-            when(postService.create(any(User.class), any(CreatePostRequest.class))).thenReturn(SAMPLE_POST);
+            var request = PostFactory.createRequest();
+            when(postService.create(any(User.class), any(CreatePostRequest.class))).thenReturn(post);
 
             // when & then
             mockMvc.perform(post("/api/v1/posts")
-                            .with(user(TEST_USER))
+                            .with(user(UserFactory.FOREMAN_USER))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -78,16 +65,46 @@ class PostControllerTest {
         }
 
         @Test
-        @DisplayName("인증 없이 게시글을 작성하면 403을 반환한다")
+        @DisplayName("미인증 시 403")
         void create_unauthenticated() throws Exception {
             // given
-            CreatePostRequest request = new CreatePostRequest(1L, List.of("img1.jpg"), "content");
+            var request = PostFactory.createRequest();
 
             // when & then
             mockMvc.perform(post("/api/v1/posts")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("images 빈 리스트 시 400")
+        void create_emptyImages() throws Exception {
+            // given
+            String body = """
+                    {"taskId":1,"images":[],"content":"content"}""";
+
+            // when & then
+            mockMvc.perform(post("/api/v1/posts")
+                            .with(user(UserFactory.FOREMAN_USER))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(errorResponse(CommonExceptionCode.NOT_VALID));
+        }
+
+        @Test
+        @DisplayName("images null 시 400")
+        void create_nullImages() throws Exception {
+            // given
+            String body = """
+                    {"taskId":1,"content":"content"}""";
+
+            // when & then
+            mockMvc.perform(post("/api/v1/posts")
+                            .with(user(UserFactory.FOREMAN_USER))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(errorResponse(CommonExceptionCode.NOT_VALID));
         }
     }
 
@@ -96,10 +113,10 @@ class PostControllerTest {
     class GetAllPosts {
 
         @Test
-        @DisplayName("게시글 목록을 조회하면 성공 응답을 반환한다")
+        @DisplayName("목록 조회 성공")
         void getAll_success() throws Exception {
             // given
-            when(postService.getAll()).thenReturn(List.of(SAMPLE_POST));
+            when(postService.getAll()).thenReturn(List.of(post));
 
             // when & then
             mockMvc.perform(get("/api/v1/posts"))
@@ -113,10 +130,10 @@ class PostControllerTest {
     class GetPost {
 
         @Test
-        @DisplayName("게시글을 단건 조회하면 성공 응답을 반환한다")
+        @DisplayName("단건 조회 성공")
         void get_success() throws Exception {
             // given
-            when(postService.get(1L)).thenReturn(SAMPLE_POST);
+            when(postService.get(1L)).thenReturn(post);
 
             // when & then
             mockMvc.perform(get("/api/v1/posts/{id}", 1L))
@@ -127,7 +144,7 @@ class PostControllerTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 게시글을 조회하면 에러 응답을 반환한다")
+        @DisplayName("미존재 시 NOT_FOUND")
         void get_notFound() throws Exception {
             // given
             when(postService.get(999L)).thenThrow(new CodeException(CommonExceptionCode.NOT_FOUND));
@@ -143,14 +160,14 @@ class PostControllerTest {
     class UpdatePost {
 
         @Test
-        @DisplayName("인증된 사용자가 게시글을 수정하면 성공 응답을 반환한다")
+        @DisplayName("수정 성공")
         void update_success() throws Exception {
             // given
-            UpdatePostRequest request = new UpdatePostRequest("updated content");
+            var request = PostFactory.updateRequest();
 
             // when & then
             mockMvc.perform(put("/api/v1/posts/{id}", 1L)
-                            .with(user(TEST_USER))
+                            .with(user(UserFactory.FOREMAN_USER))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -158,26 +175,26 @@ class PostControllerTest {
         }
 
         @Test
-        @DisplayName("다른 사용자의 게시글을 수정하면 403을 반환한다")
+        @DisplayName("타인 수정 시 FORBIDDEN")
         void update_forbidden() throws Exception {
             // given
-            UpdatePostRequest request = new UpdatePostRequest("updated content");
+            var request = PostFactory.updateRequest();
             doThrow(new CodeException(CommonExceptionCode.FORBIDDEN))
                     .when(postService).update(any(User.class), eq(1L), any(String.class));
 
             // when & then
             mockMvc.perform(put("/api/v1/posts/{id}", 1L)
-                            .with(user(TEST_USER))
+                            .with(user(UserFactory.FOREMAN_USER))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(errorResponse(CommonExceptionCode.FORBIDDEN));
         }
 
         @Test
-        @DisplayName("인증 없이 게시글을 수정하면 403을 반환한다")
+        @DisplayName("미인증 시 403")
         void update_unauthenticated() throws Exception {
             // given
-            UpdatePostRequest request = new UpdatePostRequest("updated content");
+            var request = PostFactory.updateRequest();
 
             // when & then
             mockMvc.perform(put("/api/v1/posts/{id}", 1L)
@@ -192,11 +209,11 @@ class PostControllerTest {
     class DeletePost {
 
         @Test
-        @DisplayName("인증된 사용자가 게시글을 삭제하면 성공 응답을 반환한다")
+        @DisplayName("삭제 성공")
         void delete_success() throws Exception {
             // when & then
             mockMvc.perform(delete("/api/v1/posts/{id}", 1L)
-                            .with(user(TEST_USER)))
+                            .with(user(UserFactory.FOREMAN_USER)))
                     .andExpect(status().isOk())
                     .andExpect(successResponse());
 
@@ -204,7 +221,7 @@ class PostControllerTest {
         }
 
         @Test
-        @DisplayName("다른 사용자의 게시글을 삭제하면 403을 반환한다")
+        @DisplayName("타인 삭제 시 FORBIDDEN")
         void delete_forbidden() throws Exception {
             // given
             doThrow(new CodeException(CommonExceptionCode.FORBIDDEN))
@@ -212,12 +229,12 @@ class PostControllerTest {
 
             // when & then
             mockMvc.perform(delete("/api/v1/posts/{id}", 1L)
-                            .with(user(TEST_USER)))
+                            .with(user(UserFactory.FOREMAN_USER)))
                     .andExpect(errorResponse(CommonExceptionCode.FORBIDDEN));
         }
 
         @Test
-        @DisplayName("인증 없이 게시글을 삭제하면 403을 반환한다")
+        @DisplayName("미인증 시 403")
         void delete_unauthenticated() throws Exception {
             // when & then
             mockMvc.perform(delete("/api/v1/posts/{id}", 1L))

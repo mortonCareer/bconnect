@@ -5,27 +5,21 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import so.morton.api.config.IntegrationTest;
 import org.springframework.test.web.servlet.MockMvc;
 import so.morton.api.api.controller.v1.request.CreateTaskRequest;
 import so.morton.api.api.controller.v1.request.UpdateTaskRequest;
 import so.morton.api.domain.task.Task;
 import so.morton.api.domain.task.TaskService;
-import so.morton.api.storage.support.Address;
-import so.morton.api.storage.value.Trade;
 import so.morton.api.support.auth.User;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
+import so.morton.api.support.fixture.TaskFactory;
+import so.morton.api.support.fixture.UserFactory;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,45 +37,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static so.morton.api.support.TestUtils.successResponse;
 import static so.morton.api.support.TestUtils.errorResponse;
 
-@ActiveProfiles("test")
-@SpringBootTest
-@AutoConfigureMockMvc
+@IntegrationTest
 class TaskControllerTest {
 
-    @MockitoBean
-    private TaskService taskService;
-
-    @Autowired
-    private MockMvc mockMvc;
-
+    @MockitoBean private TaskService taskService;
+    @Autowired private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final User TEST_USER = new User(1L, "testuser", "SKILLED");
-
-    private static final Address SAMPLE_ADDRESS = new Address(
-            "12345", "Seoul", "Gangnam", "Main St", "101", BigDecimal.ZERO, BigDecimal.ZERO);
-
-    private static final Task SAMPLE_TASK = new Task(
-            1L, 1L, "Test Company", SAMPLE_ADDRESS, "Task Title", "Event Title",
-            Set.of(Trade.DESIGN), LocalDate.now(), LocalDate.now().plusDays(7),
-            LocalDateTime.now(), LocalDateTime.now());
+    private final Task task = TaskFactory.create(1L, 1L);
 
     @Nested
     @DisplayName("POST /api/v1/tasks")
     class CreateTask {
 
         @Test
-        @DisplayName("인증된 사용자가 일감을 작성하면 성공 응답을 반환한다")
+        @DisplayName("작성 성공")
         void create_success() throws Exception {
             // given
-            CreateTaskRequest request = new CreateTaskRequest(
-                    "Test Company", SAMPLE_ADDRESS, "Task Title", "Event Title",
-                    Set.of(Trade.DESIGN), LocalDate.now(), LocalDate.now().plusDays(7));
-            when(taskService.create(any(User.class), any(CreateTaskRequest.class))).thenReturn(SAMPLE_TASK);
+            var request = TaskFactory.createRequest();
+            when(taskService.create(any(User.class), any(CreateTaskRequest.class))).thenReturn(task);
 
             // when & then
             mockMvc.perform(post("/api/v1/tasks")
-                            .with(user(TEST_USER))
+                            .with(user(UserFactory.FOREMAN_USER))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -89,18 +67,61 @@ class TaskControllerTest {
         }
 
         @Test
-        @DisplayName("인증 없이 일감을 작성하면 403을 반환한다")
+        @DisplayName("미인증 시 403")
         void create_unauthenticated() throws Exception {
             // given
-            CreateTaskRequest request = new CreateTaskRequest(
-                    "Test Company", SAMPLE_ADDRESS, "Task Title", "Event Title",
-                    Set.of(Trade.DESIGN), LocalDate.now(), LocalDate.now().plusDays(7));
+            var request = TaskFactory.createRequest();
 
             // when & then
             mockMvc.perform(post("/api/v1/tasks")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("company 빈 문자열 시 400")
+        void create_blankCompany() throws Exception {
+            // given
+            String body = """
+                    {"company":"","address":{"zipCode":"00000","city":"city","state":"state","street":"street","detail":"detail","latitude":0,"longitude":0},"taskTitle":"title","eventTitle":"event","trades":["DESIGN"],"start":"2026-01-01","end":"2026-01-08"}""";
+
+            // when & then
+            mockMvc.perform(post("/api/v1/tasks")
+                            .with(user(UserFactory.FOREMAN_USER))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(errorResponse(CommonExceptionCode.NOT_VALID));
+        }
+
+        @Test
+        @DisplayName("start null 시 400")
+        void create_nullStart() throws Exception {
+            // given
+            String body = """
+                    {"company":"company","address":{"zipCode":"00000","city":"city","state":"state","street":"street","detail":"detail","latitude":0,"longitude":0},"taskTitle":"title","eventTitle":"event","trades":["DESIGN"],"end":"2026-01-08"}""";
+
+            // when & then
+            mockMvc.perform(post("/api/v1/tasks")
+                            .with(user(UserFactory.FOREMAN_USER))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(errorResponse(CommonExceptionCode.NOT_VALID));
+        }
+
+        @Test
+        @DisplayName("address null 시 400")
+        void create_nullAddress() throws Exception {
+            // given
+            String body = """
+                    {"company":"company","taskTitle":"title","eventTitle":"event","trades":["DESIGN"],"start":"2026-01-01","end":"2026-01-08"}""";
+
+            // when & then
+            mockMvc.perform(post("/api/v1/tasks")
+                            .with(user(UserFactory.FOREMAN_USER))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(errorResponse(CommonExceptionCode.NOT_VALID));
         }
     }
 
@@ -109,13 +130,14 @@ class TaskControllerTest {
     class GetAllTasks {
 
         @Test
-        @DisplayName("일감 목록을 조회하면 성공 응답을 반환한다")
+        @DisplayName("목록 조회 성공")
         void getAll_success() throws Exception {
             // given
-            when(taskService.getAll()).thenReturn(List.of(SAMPLE_TASK));
+            when(taskService.getAll(any(User.class))).thenReturn(List.of(task));
 
             // when & then
-            mockMvc.perform(get("/api/v1/tasks"))
+            mockMvc.perform(get("/api/v1/tasks")
+                            .with(user(UserFactory.FOREMAN_USER)))
                     .andExpect(status().isOk())
                     .andExpect(successResponse());
         }
@@ -126,21 +148,21 @@ class TaskControllerTest {
     class GetTask {
 
         @Test
-        @DisplayName("일감을 단건 조회하면 성공 응답을 반환한다")
+        @DisplayName("단건 조회 성공")
         void get_success() throws Exception {
             // given
-            when(taskService.get(1L)).thenReturn(SAMPLE_TASK);
+            when(taskService.get(1L)).thenReturn(task);
 
             // when & then
             mockMvc.perform(get("/api/v1/tasks/{id}", 1L))
                     .andExpect(status().isOk())
                     .andExpect(successResponse())
                     .andExpect(jsonPath("$.data.id").value(1))
-                    .andExpect(jsonPath("$.data.taskTitle").value("Task Title"));
+                    .andExpect(jsonPath("$.data.taskTitle").value("task"));
         }
 
         @Test
-        @DisplayName("존재하지 않는 일감을 조회하면 에러 응답을 반환한다")
+        @DisplayName("미존재 시 NOT_FOUND")
         void get_notFound() throws Exception {
             // given
             when(taskService.get(999L)).thenThrow(new CodeException(CommonExceptionCode.NOT_FOUND));
@@ -156,17 +178,15 @@ class TaskControllerTest {
     class UpdateTask {
 
         @Test
-        @DisplayName("인증된 사용자가 일감을 수정하면 성공 응답을 반환한다")
+        @DisplayName("수정 성공")
         void update_success() throws Exception {
             // given
-            UpdateTaskRequest request = new UpdateTaskRequest(
-                    "Updated Company", SAMPLE_ADDRESS, "Updated Title", "Updated Event",
-                    Set.of(Trade.DESIGN), LocalDate.now(), LocalDate.now().plusDays(14));
+            var request = TaskFactory.updateRequest();
             doNothing().when(taskService).update(any(User.class), eq(1L), any(UpdateTaskRequest.class));
 
             // when & then
             mockMvc.perform(put("/api/v1/tasks/{id}", 1L)
-                            .with(user(TEST_USER))
+                            .with(user(UserFactory.FOREMAN_USER))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -174,30 +194,26 @@ class TaskControllerTest {
         }
 
         @Test
-        @DisplayName("다른 사용자의 일감을 수정하면 403을 반환한다")
+        @DisplayName("타인 수정 시 FORBIDDEN")
         void update_forbidden() throws Exception {
             // given
-            UpdateTaskRequest request = new UpdateTaskRequest(
-                    "Updated Company", SAMPLE_ADDRESS, "Updated Title", "Updated Event",
-                    Set.of(Trade.DESIGN), LocalDate.now(), LocalDate.now().plusDays(14));
+            var request = TaskFactory.updateRequest();
             doThrow(new CodeException(CommonExceptionCode.FORBIDDEN))
                     .when(taskService).update(any(User.class), eq(1L), any(UpdateTaskRequest.class));
 
             // when & then
             mockMvc.perform(put("/api/v1/tasks/{id}", 1L)
-                            .with(user(TEST_USER))
+                            .with(user(UserFactory.FOREMAN_USER))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(errorResponse(CommonExceptionCode.FORBIDDEN));
         }
 
         @Test
-        @DisplayName("인증 없이 일감을 수정하면 403을 반환한다")
+        @DisplayName("미인증 시 403")
         void update_unauthenticated() throws Exception {
             // given
-            UpdateTaskRequest request = new UpdateTaskRequest(
-                    "Updated Company", SAMPLE_ADDRESS, "Updated Title", "Updated Event",
-                    Set.of(Trade.DESIGN), LocalDate.now(), LocalDate.now().plusDays(14));
+            var request = TaskFactory.updateRequest();
 
             // when & then
             mockMvc.perform(put("/api/v1/tasks/{id}", 1L)
@@ -212,11 +228,11 @@ class TaskControllerTest {
     class DeleteTask {
 
         @Test
-        @DisplayName("인증된 사용자가 일감을 삭제하면 성공 응답을 반환한다")
+        @DisplayName("삭제 성공")
         void delete_success() throws Exception {
             // when & then
             mockMvc.perform(delete("/api/v1/tasks/{id}", 1L)
-                            .with(user(TEST_USER)))
+                            .with(user(UserFactory.FOREMAN_USER)))
                     .andExpect(status().isOk())
                     .andExpect(successResponse());
 
@@ -224,7 +240,7 @@ class TaskControllerTest {
         }
 
         @Test
-        @DisplayName("다른 사용자의 일감을 삭제하면 403을 반환한다")
+        @DisplayName("타인 삭제 시 FORBIDDEN")
         void delete_forbidden() throws Exception {
             // given
             doThrow(new CodeException(CommonExceptionCode.FORBIDDEN))
@@ -232,12 +248,12 @@ class TaskControllerTest {
 
             // when & then
             mockMvc.perform(delete("/api/v1/tasks/{id}", 1L)
-                            .with(user(TEST_USER)))
+                            .with(user(UserFactory.FOREMAN_USER)))
                     .andExpect(errorResponse(CommonExceptionCode.FORBIDDEN));
         }
 
         @Test
-        @DisplayName("인증 없이 일감을 삭제하면 403을 반환한다")
+        @DisplayName("미인증 시 403")
         void delete_unauthenticated() throws Exception {
             // when & then
             mockMvc.perform(delete("/api/v1/tasks/{id}", 1L))
