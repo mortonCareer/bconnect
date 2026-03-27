@@ -20,7 +20,10 @@ public class EnvironmentValidator {
             "DATABASE_URL",
             "DATABASE_USERNAME",
             "DATABASE_PASSWORD",
-            "JWT_SECRET"
+            "JWT_SECRET",
+            "SOLAPI_API_KEY",
+            "SOLAPI_API_SECRET",
+            "SOLAPI_SENDER_NUMBER"
             // TODO: AWS
     );
 

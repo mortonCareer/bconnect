@@ -36,6 +36,10 @@ module "railway" {
   domain = var.domain
 
   sentry_dsn = var.sentry_dsn
+
+  solapi_api_key       = var.solapi_api_key
+  solapi_api_secret    = var.solapi_api_secret
+  solapi_sender_number = var.solapi_sender_number
 }
 
 module "vercel" {
@@ -52,10 +56,10 @@ module "vercel" {
   aws_secret_access_key = module.aws.secret_access_key
   aws_region            = var.aws_region
 
-  nts_api_service_key    = var.nts_api_service_key
+  nts_api_service_key     = var.nts_api_service_key
   kcomwel_api_service_key = var.kcomwel_api_service_key
 
-  slack_webhook_url  = var.slack_webhook_url
-  sentry_auth_token  = var.sentry_auth_token
-  database_url       = var.database_url
+  slack_webhook_url = var.slack_webhook_url
+  sentry_auth_token = var.sentry_auth_token
+  database_url      = var.database_url
 }
