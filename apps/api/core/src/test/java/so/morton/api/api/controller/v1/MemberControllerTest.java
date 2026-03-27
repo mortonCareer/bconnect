@@ -12,17 +12,22 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import so.morton.api.api.controller.v1.request.RegisterMemberRequest;
 import so.morton.api.api.controller.v1.request.UpdateMemberRequest;
+import so.morton.api.config.AppProperties;
 import so.morton.api.domain.member.Member;
 import so.morton.api.domain.member.MemberService;
 import so.morton.api.storage.value.Role;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 import so.morton.api.support.auth.User;
+import so.morton.api.support.auth.jwt.JwtProvider;
+import so.morton.api.support.auth.otp.OtpService;
+import so.morton.api.support.auth.otp.SessionService;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -38,6 +43,15 @@ class MemberControllerTest {
 
     @MockitoBean
     private MemberService memberService;
+
+    @MockitoBean
+    private JwtProvider jwtProvider;
+
+    @MockitoBean
+    private SessionService sessionService;
+
+    @MockitoBean
+    private OtpService otpService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -63,13 +77,17 @@ class MemberControllerTest {
                     "signup-token", "testuser", "홍길동", "01012345678", "pic.jpg", Role.SKILLED
             );
             when(memberService.register(any(RegisterMemberRequest.class))).thenReturn(SAMPLE_MEMBER);
+            when(jwtProvider.generateAccessToken(any(User.class))).thenReturn("test-access-token");
+            when(jwtProvider.generateRefreshToken(anyString())).thenReturn("test-refresh-token");
 
             // when & then
             mockMvc.perform(post("/api/v1/members")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
-                    .andExpect(successResponse());
+                    .andExpect(successResponse())
+                    .andExpect(jsonPath("$.data.memberId").value(1))
+                    .andExpect(jsonPath("$.data.accessToken").value("test-access-token"));
         }
 
         @Test

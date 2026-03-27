@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import so.morton.api.storage.domain.member.MemberEntity;
 import so.morton.api.storage.domain.member.MemberRepository;
 import so.morton.api.storage.domain.session.SessionEntity;
@@ -30,9 +29,6 @@ class SessionServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
 
     @Mock
     private SmsProvider smsProvider;
@@ -59,7 +55,6 @@ class SessionServiceTest {
                 .role(Role.FOREMAN)
                 .build();
 
-        when(passwordEncoder.encode(refreshToken)).thenReturn("encoded-token");
         when(sessionRepository.findByUsername(username)).thenReturn(Optional.empty());
         when(memberRepository.findByUsername(username)).thenReturn(Optional.of(member));
 
@@ -67,7 +62,6 @@ class SessionServiceTest {
         sessionService.login(username, agent, ip, refreshToken);
 
         // then
-        verify(passwordEncoder).encode(refreshToken);
         verify(sessionRepository).save(any(SessionEntity.class));
         verify(smsProvider).send(eq(PHONE), anyString());
     }
@@ -88,14 +82,12 @@ class SessionServiceTest {
                  .refreshToken("old-token")
                  .build();
 
-         when(passwordEncoder.encode(refreshToken)).thenReturn("encoded-token");
          when(sessionRepository.findByUsername(username)).thenReturn(Optional.of(existingSession));
 
          // when
          sessionService.login(username, agent, ip, refreshToken);
 
          // then
-         verify(passwordEncoder).encode(refreshToken);
          verify(sessionRepository, never()).save(any(SessionEntity.class));
      }
 }

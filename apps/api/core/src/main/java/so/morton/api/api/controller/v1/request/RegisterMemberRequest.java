@@ -11,6 +11,6 @@ public record RegisterMemberRequest(
         @NotBlank String username,
         @NotBlank String name,
         @NotBlank @Pattern(regexp = Regex.PHONE) String phone,
-        @NotBlank String picture,
+        @NotNull String picture,
         @NotNull Role role
 ) {}

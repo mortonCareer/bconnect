@@ -6,12 +6,12 @@ import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   useQueryClient,
-  useGetCurrentMember,
+  useGetMyMember,
   useGetMyProfile,
   useUpdateMyMember,
   useUpdateMyProfile,
   useUpdateMyProfileAbout,
-  getGetCurrentMemberQueryKey,
+  getGetMyMemberQueryKey,
   getGetMyProfileQueryKey,
   Trade,
 } from '@morton/api-client'
@@ -44,7 +44,7 @@ export default function ProfileEditPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const { data: member, isLoading: isMemberLoading } = useGetCurrentMember()
+  const { data: member, isLoading: isMemberLoading } = useGetMyMember()
   const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
 
   const updateMemberMutation = useUpdateMyMember()
@@ -139,7 +139,7 @@ export default function ProfileEditPage() {
 
       // 캐시 무효화
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: getGetCurrentMemberQueryKey() }),
+        queryClient.invalidateQueries({ queryKey: getGetMyMemberQueryKey() }),
         queryClient.invalidateQueries({ queryKey: getGetMyProfileQueryKey() }),
       ])
 

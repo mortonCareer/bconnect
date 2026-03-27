@@ -76,6 +76,7 @@ paths:
       tags: [Auth]
       security: []
       summary: 리프레시 토큰으로 액세스 토큰을 갱신합니다
+      description: httpOnly 쿠키(refreshToken)에서 리프레시 토큰을 읽습니다. credentials include 필요.
       responses:
         '200':
           description: OK
@@ -95,19 +96,6 @@ paths:
       responses:
         '200':
           description: OK
-
-  /api/v1/auth/me:
-    get:
-      operationId: getCurrentMember
-      tags: [Auth]
-      summary: 현재 로그인한 회원 정보를 조회합니다
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Member'
 
   # =====================
   # Member Endpoints
@@ -138,14 +126,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RegisterMemberRequest'
+      description: 회원 등록 후 accessToken 반환 + refreshToken httpOnly 쿠키 설정
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: integer
-                format: int64
+                $ref: '#/components/schemas/RegisterMemberResponse'
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -986,15 +974,14 @@ components:
           pattern: '\d{6}'
 
     VerifyOtpLoginResponse:
+      description: 로그인 성공 응답. refreshToken은 httpOnly 쿠키(refreshToken)로 전달됩니다.
       type: object
-      required: [registered, accessToken, refreshToken]
+      required: [registered, accessToken]
       properties:
         registered:
           type: boolean
           enum: [true]
         accessToken:
-          type: string
-        refreshToken:
           type: string
 
     VerifyOtpSignupResponse:
@@ -1010,6 +997,17 @@ components:
     RefreshTokenResponse:
       type: object
       properties:
+        accessToken:
+          type: string
+
+    RegisterMemberResponse:
+      description: 회원 등록 응답. refreshToken은 httpOnly 쿠키로 전달됩니다.
+      type: object
+      required: [memberId, accessToken]
+      properties:
+        memberId:
+          type: integer
+          format: int64
         accessToken:
           type: string
 
@@ -1123,7 +1121,7 @@ components:
 
     CreateProfileRequest:
       type: object
-      required: [primaryTrade, trades, experience, address]
+      required: [primaryTrade, trades, experience]
       properties:
         primaryTrade:
           $ref: '#/components/schemas/Trade'

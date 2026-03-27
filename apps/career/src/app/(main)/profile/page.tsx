@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useGetCurrentMember, useGetMyProfile } from '@morton/api-client'
+import { useGetMyMember, useGetMyProfile } from '@morton/api-client'
 import { Button, Tab, TopBar } from '@morton/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { ProfileHeader } from './_components/ProfileHeader'
@@ -19,7 +19,7 @@ export default function MyProfilePage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('intro')
 
-  const { data: member, isLoading: isMemberLoading } = useGetCurrentMember()
+  const { data: member, isLoading: isMemberLoading } = useGetMyMember()
   const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
   const { postCount } = useFeedItems({ authorId: profile?.id })
 
