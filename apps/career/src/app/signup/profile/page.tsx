@@ -106,7 +106,7 @@ export default function SignupProfilePage() {
             trades: data.fields as Trade[],
             experience: EXPERIENCE_TO_YEARS[data.experience],
             headline: data.headline || undefined,
-            address: data.address ? { street: data.address } : {},
+            address: data.address ? { street: data.address } : undefined,
           },
         })
       } catch (profileErr) {
