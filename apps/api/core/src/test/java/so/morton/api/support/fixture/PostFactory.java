@@ -1,23 +1,34 @@
 package so.morton.api.support.fixture;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import so.morton.api.api.controller.v1.request.CreatePostRequest;
+import so.morton.api.api.controller.v1.request.UpdatePostRequest;
+import so.morton.api.domain.post.Post;
 import so.morton.api.storage.domain.post.PostEntity;
-import so.morton.api.storage.domain.post.PostRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-@Component
 public class PostFactory {
 
-    @Autowired private PostRepository postRepository;
+    public static Post create(Long id, Long authorId, Long taskId) {
+        return new Post(id, authorId, taskId, List.of("image"), "content",
+                LocalDateTime.MIN, LocalDateTime.MIN);
+    }
 
-    public PostEntity create(Long authorId, Long taskId) {
-        return postRepository.save(PostEntity.builder()
+    public static PostEntity createEntity(Long authorId, Long taskId) {
+        return PostEntity.builder()
                 .authorId(authorId)
                 .taskId(taskId)
                 .images(List.of("image"))
                 .content("content")
-                .build());
+                .build();
+    }
+
+    public static CreatePostRequest createRequest() {
+        return new CreatePostRequest(1L, List.of("image"), "content");
+    }
+
+    public static UpdatePostRequest updateRequest() {
+        return new UpdatePostRequest("updated content");
     }
 }

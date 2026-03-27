@@ -1,19 +1,23 @@
 package so.morton.api.support.fixture;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import so.morton.api.api.controller.v1.request.CreateCoworkerRequest;
+import so.morton.api.domain.coworker.CoworkerRequest;
 import so.morton.api.storage.domain.coworker.CoworkerRequestEntity;
-import so.morton.api.storage.domain.coworker.CoworkerRequestRepository;
 
-@Component
 public class CoworkerRequestFactory {
 
-    @Autowired private CoworkerRequestRepository coworkerRequestRepository;
+    public static CoworkerRequest create(Long id, Long fromId, Long toId) {
+        return new CoworkerRequest(id, fromId, toId);
+    }
 
-    public CoworkerRequestEntity create(Long fromId, Long toId) {
-        return coworkerRequestRepository.save(CoworkerRequestEntity.builder()
+    public static CoworkerRequestEntity createEntity(Long fromId, Long toId) {
+        return CoworkerRequestEntity.builder()
                 .fromId(fromId)
                 .toId(toId)
-                .build());
+                .build();
+    }
+
+    public static CreateCoworkerRequest createRequest(Long toId) {
+        return new CreateCoworkerRequest(toId);
     }
 }

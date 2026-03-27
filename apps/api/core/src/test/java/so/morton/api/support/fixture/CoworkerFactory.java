@@ -1,19 +1,18 @@
 package so.morton.api.support.fixture;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import so.morton.api.domain.coworker.Coworker;
 import so.morton.api.storage.domain.coworker.CoworkerEntity;
-import so.morton.api.storage.domain.coworker.CoworkerRepository;
 
-@Component
 public class CoworkerFactory {
 
-    @Autowired private CoworkerRepository coworkerRepository;
+    public static Coworker create(Long id, Long minId, Long maxId) {
+        return new Coworker(id, minId, maxId);
+    }
 
-    public CoworkerEntity create(Long minId, Long maxId) {
-        return coworkerRepository.save(CoworkerEntity.builder()
+    public static CoworkerEntity createEntity(Long minId, Long maxId) {
+        return CoworkerEntity.builder()
                 .minId(minId)
                 .maxId(maxId)
-                .build());
+                .build();
     }
 }

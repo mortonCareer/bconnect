@@ -1,23 +1,45 @@
 package so.morton.api.support.fixture;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import so.morton.api.api.controller.v1.request.RegisterMemberRequest;
+import so.morton.api.api.controller.v1.request.UpdateMemberRequest;
+import so.morton.api.domain.member.Member;
 import so.morton.api.storage.domain.member.MemberEntity;
-import so.morton.api.storage.domain.member.MemberRepository;
 import so.morton.api.storage.value.Role;
 
-@Component
+import java.time.LocalDateTime;
+
 public class MemberFactory {
 
-    @Autowired private MemberRepository memberRepository;
+    public static Member create(Long id) {
+        return new Member(id, "username", "name", "phone", "picture", Role.FOREMAN,
+                LocalDateTime.MIN, LocalDateTime.MIN);
+    }
 
-    public MemberEntity create(String username, String phone) {
-        return memberRepository.save(MemberEntity.builder()
+    public static MemberEntity createEntity() {
+        return MemberEntity.builder()
+                .username("username")
+                .name("name")
+                .phone("phone")
+                .picture("picture")
+                .role(Role.FOREMAN)
+                .build();
+    }
+
+    public static MemberEntity createEntity(String username, String phone, Role role) {
+        return MemberEntity.builder()
                 .username(username)
                 .phone(phone)
                 .name("name")
                 .picture("picture")
-                .role(Role.SKILLED)
-                .build());
+                .role(role)
+                .build();
+    }
+
+    public static RegisterMemberRequest registerRequest() {
+        return new RegisterMemberRequest("signupToken", "username", "name", "01000000000", "picture", Role.FOREMAN);
+    }
+
+    public static UpdateMemberRequest updateRequest() {
+        return new UpdateMemberRequest("name", "picture", Role.CONTRACTOR);
     }
 }
