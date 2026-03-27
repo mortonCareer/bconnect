@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Tag } from '@morton/ui'
-import { ApiError, useRegisterMember, useUpdateMyProfile, Role, Trade } from '@morton/api-client'
+import { ApiError, useRegisterMember, useCreateProfile, Role, Trade } from '@morton/api-client'
 import type { Member } from '@morton/api-client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
@@ -20,7 +20,7 @@ export default function SignupProfilePage() {
   const router = useRouter()
   const { login } = useAuthStore()
   const registerMemberMutation = useRegisterMember()
-  const updateProfileMutation = useUpdateMyProfile()
+  const createProfileMutation = useCreateProfile()
   const { formData } = useSignupStore()
 
   const {
@@ -98,9 +98,9 @@ export default function SignupProfilePage() {
         result.accessToken
       )
 
-      // 프로필 데이터 저장 (시공분야/경력/주소/한줄소개)
+      // 프로필 데이터 생성 (시공분야/경력/주소/한줄소개)
       try {
-        await updateProfileMutation.mutateAsync({
+        await createProfileMutation.mutateAsync({
           data: {
             primaryTrade: data.primaryField as Trade,
             trades: data.fields as Trade[],
@@ -110,7 +110,7 @@ export default function SignupProfilePage() {
           },
         })
       } catch (profileErr) {
-        console.error('Profile update failed (non-blocking):', profileErr)
+        console.error('Profile creation failed (non-blocking):', profileErr)
       }
 
       useSignupStore.getState().reset()
