@@ -24,9 +24,6 @@ import so.morton.api.support.auth.AuthenticationTypeMismatchException;
 
 import java.io.IOException;
 
-import static so.morton.api.support.auth.jwt.JwtUtils.resolveBearerToken;
-
-
 /**
  * Resolve and validate refresh token
  */
@@ -58,7 +55,7 @@ public class RefreshTokenAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = resolveBearerToken(request);
+        String token = RefreshTokenCookieUtils.resolveRefreshToken(request);
         if (token == null) {
             filterChain.doFilter(request, response);
             return;

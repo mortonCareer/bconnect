@@ -76,6 +76,7 @@ paths:
       tags: [Auth]
       security: []
       summary: 리프레시 토큰으로 액세스 토큰을 갱신합니다
+      description: httpOnly 쿠키(refreshToken)에서 리프레시 토큰을 읽습니다. credentials include 필요.
       responses:
         '200':
           description: OK
@@ -986,15 +987,14 @@ components:
           pattern: '\d{6}'
 
     VerifyOtpLoginResponse:
+      description: 로그인 성공 응답. refreshToken은 httpOnly 쿠키(refreshToken)로 전달됩니다.
       type: object
-      required: [registered, accessToken, refreshToken]
+      required: [registered, accessToken]
       properties:
         registered:
           type: boolean
           enum: [true]
         accessToken:
-          type: string
-        refreshToken:
           type: string
 
     VerifyOtpSignupResponse:

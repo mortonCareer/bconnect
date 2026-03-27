@@ -12,9 +12,12 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 import so.morton.api.api.controller.v1.response.VerifyOtpLoginResponse;
 import so.morton.api.api.controller.v1.response.VerifyOtpSignupResponse;
+import org.springframework.core.env.Environment;
+import so.morton.api.config.AppProperties;
 import so.morton.api.support.auth.AuthenticationTypeMismatchException;
 import so.morton.api.support.auth.User;
 import so.morton.api.support.auth.jwt.JwtProvider;
+import so.morton.api.support.auth.jwt.RefreshTokenCookieUtils;
 import so.morton.api.support.response.ApiResponse;
 import tools.jackson.databind.ObjectMapper;
 
@@ -32,6 +35,8 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
     private final JwtProvider jwtProvider;
     private final OtpService otpService;
     private final SessionService sessionService;
+    private final AppProperties appProperties;
+    private final Environment environment;
 
     @Override
     public void onAuthenticationSuccess(@NonNull HttpServletRequest request,
@@ -55,7 +60,11 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
             String ip = request.getRemoteAddr();
             sessionService.login(user.getUsername(), agent, ip, refreshToken);
 
-            var data = new VerifyOtpLoginResponse(accessToken, refreshToken);
+            boolean isSecure = !environment.matchesProfiles("local");
+            RefreshTokenCookieUtils.addRefreshTokenCookie(
+                    response, refreshToken, appProperties.jwt().refreshTokenExpiration(), isSecure);
+
+            var data = new VerifyOtpLoginResponse(accessToken);
 
             response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.success(data)));
         } else {
