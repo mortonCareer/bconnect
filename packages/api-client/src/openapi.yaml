@@ -1205,6 +1205,86 @@ components:
       properties:
         content:
           type: string
+
+    # =====================
+    # Feed Schemas
+    # =====================
+    Feed:
+      type: object
+      required: [member, profile, post]
+      properties:
+        member:
+          $ref: '#/components/schemas/FeedMember'
+        profile:
+          $ref: '#/components/schemas/FeedProfile'
+        post:
+          $ref: '#/components/schemas/FeedPost'
+
+    FeedMember:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        name:
+          type: string
+        picture:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    FeedProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        primaryTrade:
+          $ref: '#/components/schemas/Trade'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+        experience:
+          type: integer
+        headline:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    FeedPost:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        images:
+          type: array
+          items:
+            type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
     # =====================
     # Task Schemas
     # =====================
