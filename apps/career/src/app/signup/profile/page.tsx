@@ -76,7 +76,7 @@ export default function SignupProfilePage() {
   const onSubmit = async (data: ProfileFormData) => {
     try {
       const selectedRole = (data.role as Role) || Role.SKILLED
-      const memberId = await registerMemberMutation.mutateAsync({
+      const result = await registerMemberMutation.mutateAsync({
         data: {
           signupToken: formData.signupToken,
           username: formData.username,
@@ -87,15 +87,15 @@ export default function SignupProfilePage() {
         },
       })
 
-      // 회원가입 성공 — 로그인 처리
+      // 회원가입 성공 — 로그인 처리 (BE가 accessToken + refreshToken 쿠키 발급)
       login(
         {
-          id: memberId,
+          id: result.memberId,
           name: data.name,
           username: formData.username,
           role: selectedRole,
         } as Member,
-        ''
+        result.accessToken
       )
 
       // 프로필 데이터 저장 (시공분야/경력/주소/한줄소개)

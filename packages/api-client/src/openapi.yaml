@@ -139,14 +139,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RegisterMemberRequest'
+      description: 회원 등록 후 accessToken 반환 + refreshToken httpOnly 쿠키 설정
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: integer
-                format: int64
+                $ref: '#/components/schemas/RegisterMemberResponse'
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -1010,6 +1010,17 @@ components:
     RefreshTokenResponse:
       type: object
       properties:
+        accessToken:
+          type: string
+
+    RegisterMemberResponse:
+      description: 회원 등록 응답. refreshToken은 httpOnly 쿠키로 전달됩니다.
+      type: object
+      required: [memberId, accessToken]
+      properties:
+        memberId:
+          type: integer
+          format: int64
         accessToken:
           type: string
 
