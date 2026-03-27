@@ -74,7 +74,7 @@ export const apiClient = ky.create({
     ],
     afterResponse: [
       async (request, options, response) => {
-        if (response.status === 401) {
+        if (response.status === 401 || response.status === 403) {
           const refreshed = await refreshAccessToken()
           if (refreshed) {
             request.headers.set('Authorization', `Bearer ${accessToken}`)
