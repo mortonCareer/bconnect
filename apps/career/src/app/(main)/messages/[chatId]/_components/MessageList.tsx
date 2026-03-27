@@ -58,7 +58,7 @@ export default function MessageList({ chatId, localMessages }: MessageListProps)
   const prevScrollHeightRef = useRef<number>(0)
   const isInitialLoadRef = useRef(true)
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useInfiniteQuery<MessagePage>({
       queryKey: getGetChatMessagesQueryKey(chatId),
       queryFn: ({ pageParam }) =>
@@ -134,6 +134,14 @@ export default function MessageList({ chatId, localMessages }: MessageListProps)
     return (
       <div className="flex flex-1 items-center justify-center">
         <p className="text-m-14 text-morton-gray-500">메시지를 불러오는 중...</p>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <p className="text-m-14 text-morton-gray-500">메시지를 불러올 수 없습니다</p>
       </div>
     )
   }
