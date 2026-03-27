@@ -97,19 +97,6 @@ paths:
         '200':
           description: OK
 
-  /api/v1/auth/me:
-    get:
-      operationId: getCurrentMember
-      tags: [Auth]
-      summary: 현재 로그인한 회원 정보를 조회합니다
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Member'
-
   # =====================
   # Member Endpoints
   # =====================
