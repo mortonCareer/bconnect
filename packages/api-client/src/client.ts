@@ -74,10 +74,14 @@ export const apiClient = ky.create({
     ],
     afterResponse: [
       async (request, options, response) => {
-        if (response.status === 401 || response.status === 403) {
+        if (
+          (response.status === 401 || response.status === 403) &&
+          !request.headers.get('X-Retry')
+        ) {
           const refreshed = await refreshAccessToken()
           if (refreshed) {
             request.headers.set('Authorization', `Bearer ${accessToken}`)
+            request.headers.set('X-Retry', '1')
             return ky(request, options)
           }
         }
