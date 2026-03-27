@@ -99,15 +99,19 @@ export default function SignupProfilePage() {
       )
 
       // 프로필 데이터 저장 (시공분야/경력/주소/한줄소개)
-      await updateProfileMutation.mutateAsync({
-        data: {
-          primaryTrade: data.primaryField as Trade,
-          trades: data.fields as Trade[],
-          experience: EXPERIENCE_TO_YEARS[data.experience],
-          headline: data.headline || undefined,
-          address: data.address ? { street: data.address } : {},
-        },
-      })
+      try {
+        await updateProfileMutation.mutateAsync({
+          data: {
+            primaryTrade: data.primaryField as Trade,
+            trades: data.fields as Trade[],
+            experience: EXPERIENCE_TO_YEARS[data.experience],
+            headline: data.headline || undefined,
+            address: data.address ? { street: data.address } : {},
+          },
+        })
+      } catch (profileErr) {
+        console.error('Profile update failed (non-blocking):', profileErr)
+      }
 
       useSignupStore.getState().reset()
       router.push('/signup/complete')
