@@ -1,4 +1,11 @@
-export { apiClient, customFetch, setAccessToken, getAccessToken, ApiError } from './client'
+export {
+  apiClient,
+  customFetch,
+  setAccessToken,
+  getAccessToken,
+  refreshAccessToken,
+  ApiError,
+} from './client'
 
 export { getQueryClient, queryClientConfig } from './query-client'
 

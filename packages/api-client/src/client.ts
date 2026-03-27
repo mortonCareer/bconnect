@@ -43,7 +43,7 @@ export class ApiError extends Error {
 }
 
 // 토큰 갱신 함수
-async function refreshAccessToken(): Promise<boolean> {
+export async function refreshAccessToken(): Promise<boolean> {
   try {
     const response = await ky.post(`${getBaseUrl()}/api/v1/auth/refresh`, {
       credentials: 'include',

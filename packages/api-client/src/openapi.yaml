@@ -1121,7 +1121,7 @@ components:
 
     CreateProfileRequest:
       type: object
-      required: [primaryTrade, trades, experience, address]
+      required: [primaryTrade, trades, experience]
       properties:
         primaryTrade:
           $ref: '#/components/schemas/Trade'
