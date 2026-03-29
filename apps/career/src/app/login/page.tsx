@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuthStore } from '@/stores/auth-store'
+import { useSignupStore } from '@/stores/signup-store'
 import { ApiError, useSendOtp, useVerifyOtp } from '@morton/api-client'
 import {
   formatPhoneNumber,
@@ -18,6 +19,7 @@ type Step = 'phone' | 'otp'
 export default function LoginPage() {
   const router = useRouter()
   const { setPhoneNumber, setCodeSent, login } = useAuthStore()
+  const { setPhone: setSignupPhone, setSignupToken } = useSignupStore()
 
   const [step, setStep] = useState<Step>('phone')
   const [phone, setPhone] = useState('')
@@ -75,8 +77,11 @@ export default function LoginPage() {
         login({ phone: e164Phone }, result.accessToken)
         router.push('/')
       } else {
-        // 미가입 유저 — 회원가입 플로우로 이동
-        router.push('/signup/auth')
+        // 미가입 유저 — signupToken 저장 후 회원가입 진행 (OTP 재인증 불필요)
+        const e164Phone = toE164(phone)
+        setSignupPhone(e164Phone)
+        setSignupToken(result.signupToken)
+        router.push('/signup/username')
       }
     } catch (err) {
       if (err instanceof ApiError) {
@@ -97,7 +102,7 @@ export default function LoginPage() {
         setError('인증에 실패했습니다.')
       }
     }
-  }, [phone, code, login, router, verifyCodeMutation])
+  }, [phone, code, login, router, verifyCodeMutation, setSignupPhone, setSignupToken])
 
   // 재발송
   const handleResend = useCallback(async () => {

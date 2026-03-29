@@ -4,23 +4,28 @@ import type { NextRequest } from 'next/server'
 const PUBLIC_EXACT = ['/']
 const PUBLIC_PREFIX = ['/login', '/signup', '/component', '/instagram', '/showcase', '/one-click']
 
+/** /profile/123 같은 타인 프로필은 public, /profile (내 프로필)과 /profile/edit는 보호 */
+const PUBLIC_PROFILE_PATTERN = /^\/profile\/\d+$/
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Public paths는 인증 체크 안함
-  if (PUBLIC_EXACT.includes(pathname) || PUBLIC_PREFIX.some((path) => pathname.startsWith(path))) {
+  if (
+    PUBLIC_EXACT.includes(pathname) ||
+    PUBLIC_PREFIX.some((path) => pathname.startsWith(path)) ||
+    PUBLIC_PROFILE_PATTERN.test(pathname)
+  ) {
     return NextResponse.next()
   }
 
-  // 클라이언트 사이드에서 Zustand로 인증 상태 관리하므로
-  // 미들웨어에서는 refreshToken 쿠키 존재 여부로만 체크
-  const refreshToken = request.cookies.get('refreshToken')
-
-  if (!refreshToken) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(loginUrl)
-  }
+  // TODO: 인증 보호 임시 해제 — 로그인 플로우 완성 후 복구
+  // const refreshToken = request.cookies.get('refreshToken')
+  // if (!refreshToken) {
+  //   const loginUrl = new URL('/login', request.url)
+  //   loginUrl.searchParams.set('redirect', pathname)
+  //   return NextResponse.redirect(loginUrl)
+  // }
 
   return NextResponse.next()
 }

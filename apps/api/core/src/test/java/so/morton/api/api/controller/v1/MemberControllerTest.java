@@ -10,6 +10,7 @@ import so.morton.api.config.IntegrationTest;
 import org.springframework.test.web.servlet.MockMvc;
 import so.morton.api.api.controller.v1.request.RegisterMemberRequest;
 import so.morton.api.api.controller.v1.request.UpdateMemberRequest;
+import so.morton.api.config.AppProperties;
 import so.morton.api.domain.member.Member;
 import so.morton.api.domain.member.MemberService;
 import so.morton.api.support.CodeException;
@@ -20,6 +21,7 @@ import so.morton.api.support.fixture.UserFactory;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -53,7 +55,9 @@ class MemberControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
-                    .andExpect(successResponse());
+                    .andExpect(successResponse())
+                    .andExpect(jsonPath("$.data.memberId").value(1))
+                    .andExpect(jsonPath("$.data.accessToken").value("test-access-token"));
         }
 
         @Test

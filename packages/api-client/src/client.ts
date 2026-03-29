@@ -43,7 +43,7 @@ export class ApiError extends Error {
 }
 
 // 토큰 갱신 함수
-async function refreshAccessToken(): Promise<boolean> {
+export async function refreshAccessToken(): Promise<boolean> {
   try {
     const response = await ky.post(`${getBaseUrl()}/api/v1/auth/refresh`, {
       credentials: 'include',
@@ -74,10 +74,14 @@ export const apiClient = ky.create({
     ],
     afterResponse: [
       async (request, options, response) => {
-        if (response.status === 401) {
+        if (
+          (response.status === 401 || response.status === 403) &&
+          !request.headers.get('X-Retry')
+        ) {
           const refreshed = await refreshAccessToken()
           if (refreshed) {
             request.headers.set('Authorization', `Bearer ${accessToken}`)
+            request.headers.set('X-Retry', '1')
             return ky(request, options)
           }
         }

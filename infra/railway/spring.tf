@@ -89,14 +89,32 @@ resource "railway_variable" "api_s3_bucket" {
   depends_on = [railway_variable.api_aws_region]
 }
 
-# AWS SNS (SMS)
-resource "railway_variable" "api_sns_enabled" {
-  name           = "AWS_SNS_ENABLED"
-  value          = "true"
+# Solapi (SMS)
+resource "railway_variable" "api_solapi_api_key" {
+  name           = "SOLAPI_API_KEY"
+  value          = var.solapi_api_key
   service_id     = railway_service.api.id
   environment_id = railway_project.morton.default_environment.id
 
   depends_on = [railway_variable.api_s3_bucket]
+}
+
+resource "railway_variable" "api_solapi_api_secret" {
+  name           = "SOLAPI_API_SECRET"
+  value          = var.solapi_api_secret
+  service_id     = railway_service.api.id
+  environment_id = railway_project.morton.default_environment.id
+
+  depends_on = [railway_variable.api_solapi_api_key]
+}
+
+resource "railway_variable" "api_solapi_sender_number" {
+  name           = "SOLAPI_SENDER_NUMBER"
+  value          = var.solapi_sender_number
+  service_id     = railway_service.api.id
+  environment_id = railway_project.morton.default_environment.id
+
+  depends_on = [railway_variable.api_solapi_api_secret]
 }
 
 # Railpack JDK version
@@ -106,7 +124,7 @@ resource "railway_variable" "api_jdk_version" {
   service_id     = railway_service.api.id
   environment_id = railway_project.morton.default_environment.id
 
-  depends_on = [railway_variable.api_sns_enabled]
+  depends_on = [railway_variable.api_solapi_sender_number]
 }
 
 # JDK 17 + Railway 컨테이너 cgroup v2 호환성 문제 대응

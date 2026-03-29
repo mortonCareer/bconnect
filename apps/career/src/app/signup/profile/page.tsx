@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Tag } from '@morton/ui'
-import { ApiError, useRegisterMember, useUpdateMyProfile, Role, Trade } from '@morton/api-client'
+import { ApiError, useRegisterMember, useCreateProfile, Role, Trade } from '@morton/api-client'
 import type { Member } from '@morton/api-client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
@@ -20,7 +20,7 @@ export default function SignupProfilePage() {
   const router = useRouter()
   const { login } = useAuthStore()
   const registerMemberMutation = useRegisterMember()
-  const updateProfileMutation = useUpdateMyProfile()
+  const createProfileMutation = useCreateProfile()
   const { formData } = useSignupStore()
 
   const {
@@ -76,7 +76,7 @@ export default function SignupProfilePage() {
   const onSubmit = async (data: ProfileFormData) => {
     try {
       const selectedRole = (data.role as Role) || Role.SKILLED
-      const memberId = await registerMemberMutation.mutateAsync({
+      const result = await registerMemberMutation.mutateAsync({
         data: {
           signupToken: formData.signupToken,
           username: formData.username,
@@ -87,27 +87,31 @@ export default function SignupProfilePage() {
         },
       })
 
-      // 회원가입 성공 — 로그인 처리
+      // 회원가입 성공 — 로그인 처리 (BE가 accessToken + refreshToken 쿠키 발급)
       login(
         {
-          id: memberId,
+          id: result.memberId,
           name: data.name,
           username: formData.username,
           role: selectedRole,
         } as Member,
-        ''
+        result.accessToken
       )
 
-      // 프로필 데이터 저장 (시공분야/경력/주소/한줄소개)
-      await updateProfileMutation.mutateAsync({
-        data: {
-          primaryTrade: data.primaryField as Trade,
-          trades: data.fields as Trade[],
-          experience: EXPERIENCE_TO_YEARS[data.experience],
-          headline: data.headline || undefined,
-          address: data.address ? { street: data.address } : {},
-        },
-      })
+      // 프로필 데이터 생성 (시공분야/경력/주소/한줄소개)
+      try {
+        await createProfileMutation.mutateAsync({
+          data: {
+            primaryTrade: data.primaryField as Trade,
+            trades: data.fields as Trade[],
+            experience: EXPERIENCE_TO_YEARS[data.experience],
+            headline: data.headline || undefined,
+            address: data.address ? { street: data.address } : undefined,
+          },
+        })
+      } catch (profileErr) {
+        console.error('Profile creation failed (non-blocking):', profileErr)
+      }
 
       useSignupStore.getState().reset()
       router.push('/signup/complete')

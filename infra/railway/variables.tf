@@ -105,6 +105,28 @@ variable "sentry_dsn" {
 }
 
 # =============================================================================
+# Solapi (SMS)
+# =============================================================================
+
+variable "solapi_api_key" {
+  description = "Solapi API Key for SMS sending"
+  type        = string
+  sensitive   = true
+}
+
+variable "solapi_api_secret" {
+  description = "Solapi API Secret for SMS sending"
+  type        = string
+  sensitive   = true
+}
+
+variable "solapi_sender_number" {
+  description = "Solapi registered sender phone number"
+  type        = string
+  sensitive   = true
+}
+
+# =============================================================================
 # Domain
 # =============================================================================
 
