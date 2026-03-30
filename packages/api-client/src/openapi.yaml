@@ -76,7 +76,6 @@ paths:
       tags: [Auth]
       security: []
       summary: 리프레시 토큰으로 액세스 토큰을 갱신합니다
-      description: httpOnly 쿠키(refreshToken)에서 리프레시 토큰을 읽습니다. credentials include 필요.
       responses:
         '200':
           description: OK
@@ -126,14 +125,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RegisterMemberRequest'
-      description: 회원 등록 후 accessToken 반환 + refreshToken httpOnly 쿠키 설정
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegisterMemberResponse'
+                type: integer
+                format: int64
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -878,6 +877,7 @@ components:
 
     Address:
       type: object
+      required: [zipcode, city, state, street, latitude, longitude]
       properties:
         zipcode:
           type: string
@@ -957,6 +957,7 @@ components:
 
     SendOtpResponse:
       type: object
+      required: [expiresAt]
       properties:
         expiresAt:
           type: string
@@ -974,14 +975,15 @@ components:
           pattern: '\d{6}'
 
     VerifyOtpLoginResponse:
-      description: 로그인 성공 응답. refreshToken은 httpOnly 쿠키(refreshToken)로 전달됩니다.
       type: object
-      required: [registered, accessToken]
+      required: [registered, accessToken, refreshToken]
       properties:
         registered:
           type: boolean
           enum: [true]
         accessToken:
+          type: string
+        refreshToken:
           type: string
 
     VerifyOtpSignupResponse:
@@ -996,18 +998,8 @@ components:
 
     RefreshTokenResponse:
       type: object
+      required: [accessToken]
       properties:
-        accessToken:
-          type: string
-
-    RegisterMemberResponse:
-      description: 회원 등록 응답. refreshToken은 httpOnly 쿠키로 전달됩니다.
-      type: object
-      required: [memberId, accessToken]
-      properties:
-        memberId:
-          type: integer
-          format: int64
         accessToken:
           type: string
 
@@ -1016,6 +1008,7 @@ components:
     # =====================
     Member:
       type: object
+      required: [id, username, name, phone, picture, role, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1070,6 +1063,7 @@ components:
     # =====================
     Profile:
       type: object
+      required: [id, memberId, primaryTrade, trades, experience, address, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1121,7 +1115,7 @@ components:
 
     CreateProfileRequest:
       type: object
-      required: [primaryTrade, trades, experience]
+      required: [primaryTrade, trades, experience, address]
       properties:
         primaryTrade:
           $ref: '#/components/schemas/Trade'
@@ -1149,6 +1143,7 @@ components:
     # =====================
     Post:
       type: object
+      required: [id, authorId, images, content, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1220,6 +1215,7 @@ components:
 
     FeedMember:
       type: object
+      required: [id, username, name, picture, role, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1241,6 +1237,7 @@ components:
 
     FeedProfile:
       type: object
+      required: [id, primaryTrade, trades, experience, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1266,6 +1263,7 @@ components:
 
     FeedPost:
       type: object
+      required: [id, images, content, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1288,6 +1286,7 @@ components:
     # =====================
     Task:
       type: object
+      required: [id, profileId, company, address, taskTitle, eventTitle, trades, start, end, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1374,6 +1373,7 @@ components:
     # =====================
     Chat:
       type: object
+      required: [id, title, participantIds, unreadCount, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1400,6 +1400,7 @@ components:
 
     Message:
       type: object
+      required: [id, chatId, senderId, content, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1470,6 +1471,7 @@ components:
 
     Credential:
       type: object
+      required: [id, profileId, type, status, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1503,6 +1505,7 @@ components:
     # =====================
     Coworker:
       type: object
+      required: [id, minId, maxId]
       properties:
         id:
           type: integer
@@ -1519,6 +1522,7 @@ components:
     # =====================
     CoworkerRequest:
       type: object
+      required: [id, fromId, toId]
       properties:
         id:
           type: integer
