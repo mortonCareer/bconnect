@@ -145,7 +145,7 @@ class OtpServiceTest {
 
         // when & then
         assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
-                .hasExceptionCode(AuthExceptionCode.OTP_EXPIRED);
+                .hasExceptionCode(AuthExceptionCode.OTP_REVOKED);
     }
 
     @Test
@@ -172,6 +172,6 @@ class OtpServiceTest {
         assertCodeException(() -> otpService.verifyCode(PHONE, "000000"))
                 .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
 
-        assertThat(entity.getAttemptCount()).isEqualTo(1);
+        assertThat(entity.getAttempts()).isEqualTo(1);
     }
 }
