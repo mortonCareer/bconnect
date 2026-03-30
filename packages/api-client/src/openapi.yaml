@@ -74,7 +74,8 @@ paths:
     post:
       operationId: refreshToken
       tags: [Auth]
-      security: []
+      security:
+        - cookieAuth: []
       summary: 토큰 갱신
       responses:
         '200':
@@ -800,6 +801,10 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: refreshToken
 
   schemas:
     # =====================
