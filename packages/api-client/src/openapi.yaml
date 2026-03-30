@@ -635,7 +635,7 @@ paths:
     post:
       operationId: acceptCredential
       tags: [Credentials]
-      summary: 인증뱃지 승인
+      summary: (ADMIN) 인증뱃지 승인
       parameters:
         - name: credentialId
           in: path
@@ -651,7 +651,7 @@ paths:
     post:
       operationId: denyCredential
       tags: [Credentials]
-      summary: 인증뱃지 거부
+      summary: (ADMIN) 인증뱃지 거부
       parameters:
         - name: credentialId
           in: path
@@ -1103,6 +1103,7 @@ components:
     # =====================
     Feed:
       type: object
+      required: [member, profile, post]
       properties:
         member:
           $ref: '#/components/schemas/FeedMember'
