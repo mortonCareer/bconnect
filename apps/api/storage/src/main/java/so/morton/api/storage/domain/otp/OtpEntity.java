@@ -38,12 +38,16 @@ public class OtpEntity extends BaseEntity {
     @Column(nullable = false)
     private int dailyCount;
 
+    @Column(nullable = false)
+    private LocalDateTime lastSentAt;
+
     public OtpEntity(String phone, String code, LocalDateTime expiredAt) {
         this.phone = phone;
         this.code = code;
         this.expiredAt = expiredAt;
         this.revoked = false;
         this.dailyCount = 1;
+        this.lastSentAt = LocalDateTime.now();
     }
 
     public void generateCode(String code, LocalDateTime expiredAt) {
@@ -51,6 +55,7 @@ public class OtpEntity extends BaseEntity {
         this.expiredAt = expiredAt;
         this.revoked = false;
         this.dailyCount++;
+        this.lastSentAt = LocalDateTime.now();
     }
 
     public void attempt() {
