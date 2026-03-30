@@ -77,11 +77,13 @@ public class OtpService {
         return token;
     }
 
-    public void verifyToken(String token) {
+    public void verifyToken(String phone, String token) {
         OtpEntity found = otpRepository.findByToken_Token(token)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_SIGNUP_TOKEN));
 
+        if (!found.getPhone().equals(phone)) throw new CodeException(AuthExceptionCode.INVALID_SIGNUP_TOKEN);
         if (found.getToken().isRevoked()) throw new CodeException(AuthExceptionCode.SIGNUP_TOKEN_REVOKED);
+        
         found.invalidateToken();
     }
 
