@@ -40,12 +40,6 @@ public class ProfileController {
         return ApiResponse.success(profiles);
     }
 
-    @GetMapping("/me")
-    public ApiResponse<ProfileResponse> getMyProfile(@AuthenticationPrincipal User user) {
-        Profile profile = profileFinder.findByMemberId(user.id());
-        return ApiResponse.success(ProfileResponse.of(profile));
-    }
-
     @GetMapping("/{id}")
     public ApiResponse<ProfileResponse> get(@PathVariable Long id) {
         Profile profile = profileFinder.find(id);

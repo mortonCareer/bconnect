@@ -12,5 +12,5 @@ public record CreateProfileRequest(
         @NotNull int experience,
         String headline,
         String about,
-        Address address
+        @NotNull Address address
 ) {}
