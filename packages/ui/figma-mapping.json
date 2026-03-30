@@ -2,6 +2,7 @@
   "description": "Figma 컴포넌트 & 페이지 ↔ 코드 매핑 (개발자 관리)",
   "figmaFileKey": "EFXofON7gTFbmbE2kB31SS",
   "sections": {
+    "스프린트1": { "nodeId": "603-4660", "description": "Sprint 1 - 작업물, 메시지" },
     "홈": { "nodeId": "621-4187" },
     "회원가입": { "nodeId": "620-4581" },
     "메시지": { "nodeId": "621-4188" },
@@ -313,6 +314,28 @@
       "createdAt": "2026-03-01",
       "lastSyncedAt": "2026-03-01",
       "states": [{ "name": "default", "nodeId": "658-9624" }]
+    },
+    "profile/works": {
+      "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=661-11967",
+      "codePath": null,
+      "createdAt": "2026-03-30",
+      "lastSyncedAt": "2026-03-30",
+      "status": "figma-only",
+      "description": "프로필 - 작업물 탭 상세 (내 정보)",
+      "states": [{ "name": "default", "nodeId": "661-11967" }]
+    },
+    "calendar": {
+      "figmaUrl": "https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=661-10826",
+      "codePath": null,
+      "createdAt": "2026-03-30",
+      "lastSyncedAt": "2026-03-30",
+      "status": "figma-only",
+      "description": "캘린더 (3개 상태)",
+      "states": [
+        { "name": "state1", "nodeId": "661-10826" },
+        { "name": "state2", "nodeId": "661-11029" },
+        { "name": "state3", "nodeId": "661-11232" }
+      ]
     }
   }
 }
