@@ -83,6 +83,8 @@ export interface TopBarProps
   onFilter?: () => void
   onChat?: () => void
   onBack?: () => void
+  /** backHref가 있으면 Link로 렌더링 (prefetch), 없으면 button + onBack */
+  backHref?: string
 }
 
 const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
@@ -100,36 +102,36 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       onFilter,
       onChat,
       onBack,
+      backHref,
       ...props
     },
     ref
   ) => {
+    const backButtonClass =
+      'flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
+
+    const BackButton = backHref ? (
+      <a href={backHref} className={backButtonClass} aria-label="뒤로가기">
+        <ChevronLeftIcon className="text-[#9C9C9C]" />
+      </a>
+    ) : (
+      <button type="button" onClick={onBack} className={backButtonClass} aria-label="뒤로가기">
+        <ChevronLeftIcon className="text-[#9C9C9C]" />
+      </button>
+    )
+
     return (
       <header ref={ref} className={cn(topBarVariants({ variant, className }))} {...props}>
         {variant === 'progress' && (
           <>
-            <button
-              type="button"
-              onClick={onBack}
-              className="flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]"
-              aria-label="뒤로가기"
-            >
-              <ChevronLeftIcon className="text-[#9C9C9C]" />
-            </button>
+            {BackButton}
             <ProgressBarInline step={step} total={totalSteps} />
             <div className="size-5" />
           </>
         )}
         {variant === 'default' && (
           <>
-            <button
-              type="button"
-              onClick={onBack}
-              className="flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]"
-              aria-label="뒤로가기"
-            >
-              <ChevronLeftIcon className="text-[#9C9C9C]" />
-            </button>
+            {BackButton}
             <p className="text-sb-16 text-morton-gray-900">{title}</p>
             {showAction ? (
               <button

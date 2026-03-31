@@ -473,6 +473,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/ChatPage'
 
+    post:
+      operationId: createChat
+      tags: [Chats]
+      summary: 채팅방을 생성합니다 (1:1 — 기존 채팅방이 있으면 재사용)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChatRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+
   /api/v1/chats/{chatId}:
     get:
       operationId: getChat
@@ -525,6 +546,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessagePage'
+
+    post:
+      operationId: sendMessage
+      tags: [Chats]
+      summary: 채팅방에 메시지를 전송합니다
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+
+  /api/v1/chats/{chatId}/read:
+    post:
+      operationId: markChatAsRead
+      tags: [Chats]
+      summary: 채팅방 읽음 처리 (마지막 읽은 메시지 업데이트)
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+
+  /api/v1/chats/unread-count:
+    get:
+      operationId: getUnreadCount
+      tags: [Chats]
+      summary: 전체 안 읽은 메시지 수를 조회합니다
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCount'
 
   # =====================
   # Profile Endpoints
@@ -1440,6 +1518,31 @@ components:
             $ref: '#/components/schemas/Message'
         meta:
           $ref: '#/components/schemas/CursorPageMeta'
+
+    CreateChatRequest:
+      type: object
+      required: [participantIds]
+      properties:
+        participantIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          minItems: 1
+          description: 채팅 참여자 profileId 목록
+
+    SendMessageRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+
+    UnreadCount:
+      type: object
+      properties:
+        count:
+          type: integer
 
     # =====================
     # Credential Schemas

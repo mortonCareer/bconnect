@@ -1,33 +1,36 @@
 'use client'
 
 import { useCallback, useEffect, useRef } from 'react'
-import {
-  useInfiniteQuery,
-  getChatMessages,
-  getGetChatMessagesQueryKey,
-  useGetMembers,
-} from '@morton/api-client'
+import Link from 'next/link'
+import { useInfiniteQuery, getChatMessages, getGetChatMessagesQueryKey } from '@morton/api-client'
 import type { Message, MessagePage } from '@morton/api-client'
-import { ChatMessage } from '@morton/ui'
+import { ChatMessage, ChatListItem } from '@morton/ui'
 import { useAuthStore } from '@/stores/auth-store'
 import { formatChatTime } from '@/lib/format-time'
+import { MOCK_CURRENT_USER_ID, mockParticipants, mockChats } from '@/mocks/chat-data'
 
 interface MessageListProps {
   chatId: number
-  localMessages: Message[]
 }
 
-/** 상대방 프로필을 해석해 닉네임/프로필 이미지를 반환하는 래퍼 */
-function SenderMessage({
-  message,
-  currentUserId,
-}: {
-  message: Message
-  currentUserId: number | undefined
-}) {
+/** 날짜 구분선 — Figma node 364:5574 */
+function DateSeparator({ date }: { date: string }) {
+  return (
+    <div className="flex items-center justify-center py-6">
+      <span className="text-r-14 text-[#606870]">{date}</span>
+    </div>
+  )
+}
+
+/** 날짜 문자열 → "2026년 3월 29일" */
+function formatDateLabel(dateStr: string): string {
+  const d = new Date(dateStr)
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${String(d.getDate()).padStart(2, '0')}일`
+}
+
+function SenderMessage({ message, currentUserId }: { message: Message; currentUserId: number }) {
   const isMine = message.senderId === currentUserId
-  const { data: members } = useGetMembers({ query: { enabled: !isMine && !!message.senderId } })
-  const sender = members?.find((m) => m.id === message.senderId)
+  const participant = message.senderId != null ? mockParticipants[message.senderId] : undefined
 
   if (isMine) {
     return (
@@ -44,14 +47,14 @@ function SenderMessage({
       variant="theirs"
       message={message.content}
       timestamp={message.createdAt ? formatChatTime(message.createdAt) : undefined}
-      nickname={sender?.name ?? '상대방'}
-      profileImage={sender?.picture}
+      nickname={participant?.name ?? '상대방'}
+      profileImage={participant?.profileImage}
     />
   )
 }
 
-export default function MessageList({ chatId, localMessages }: MessageListProps) {
-  const currentUserId = useAuthStore((s) => s.member?.id)
+export default function MessageList({ chatId }: MessageListProps) {
+  const currentUserId = useAuthStore((s) => s.member?.id) ?? MOCK_CURRENT_USER_ID
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const topObserverRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -76,7 +79,7 @@ export default function MessageList({ chatId, localMessages }: MessageListProps)
       .reverse()
       .flatMap((page) => page.items.slice().reverse()) ?? []
 
-  const allMessages = [...serverMessages, ...localMessages]
+  const allMessages = serverMessages
 
   // 초기 로드 시 스크롤을 맨 아래로
   useEffect(() => {
@@ -146,6 +149,11 @@ export default function MessageList({ chatId, localMessages }: MessageListProps)
     )
   }
 
+  // 상대방 프로필 정보
+  const chat = mockChats.find((c) => c.id === chatId)
+  const otherId = chat?.participantIds?.find((id) => id !== currentUserId)
+  const otherParticipant = otherId != null ? mockParticipants[otherId] : undefined
+
   return (
     <div ref={scrollContainerRef} className="flex flex-1 flex-col overflow-y-auto px-4 py-3">
       {/* 상단 관찰 영역 - 이전 메시지 로드 트리거 */}
@@ -156,14 +164,35 @@ export default function MessageList({ chatId, localMessages }: MessageListProps)
         </div>
       )}
 
-      <div className="flex flex-col gap-5">
-        {allMessages.map((message) => (
-          <SenderMessage
-            key={message.id ?? `local-${message.createdAt}`}
-            message={message}
-            currentUserId={currentUserId}
+      {/* 상대방 프로필 카드 → 프로필 상세로 이동 */}
+      {otherParticipant && otherId != null && (
+        <Link href={`/profile/${otherId}`} className="mb-4 block">
+          <ChatListItem
+            variant="default"
+            name={otherParticipant.name}
+            location={otherParticipant.location}
+            jobType={otherParticipant.jobType}
+            specialty={otherParticipant.specialty}
+            lastMessage={otherParticipant.about}
+            profileImage={otherParticipant.profileImage}
           />
-        ))}
+        </Link>
+      )}
+
+      <div className="flex flex-col gap-5">
+        {allMessages.map((message, index) => {
+          const prevMessage = index > 0 ? allMessages[index - 1] : null
+          const currentDate = message.createdAt ? formatDateLabel(message.createdAt) : null
+          const prevDate = prevMessage?.createdAt ? formatDateLabel(prevMessage.createdAt) : null
+          const showDateSeparator = currentDate && currentDate !== prevDate
+
+          return (
+            <div key={message.id ?? `local-${message.createdAt}`}>
+              {showDateSeparator && <DateSeparator date={currentDate} />}
+              <SenderMessage message={message} currentUserId={currentUserId} />
+            </div>
+          )
+        })}
       </div>
 
       {/* 하단 스크롤 앵커 */}
