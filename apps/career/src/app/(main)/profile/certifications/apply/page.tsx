@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   useQueryClient,
@@ -11,6 +10,7 @@ import {
   getGetCredentialsQueryKey,
 } from '@morton/api-client'
 import { Tab, TopBar } from '@morton/ui'
+import { useQueryState } from 'nuqs'
 import { MOCK_CREDENTIALS } from '../constants'
 import { OneClickTab } from './_components/OneClickTab'
 import { CertificateTab } from './_components/CertificateTab'
@@ -25,7 +25,7 @@ const TAB_ITEMS = [
 export default function CertificationApplyPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const [activeTab, setActiveTab] = useState('one-click')
+  const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'one-click' })
 
   const {
     data: profile,

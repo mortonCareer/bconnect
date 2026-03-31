@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import type { Credential, CredentialType } from '@morton/api-client'
 import { Button, Tag } from '@morton/ui'
-import { CredentialItem } from '../../_components/CredentialItem'
-import { formatDate } from '../../constants'
+import { getCredentialLabel, formatDate } from '../../constants'
 
 interface CertificateTabProps {
   credentials: Credential[]
@@ -25,10 +24,19 @@ const SUB_TAB_TYPE_MAP: Record<string, CredentialType> = {
   other: 'OTHER_CERTIFICATE',
 }
 
-const SUB_TAB_DESCRIPTIONS: Record<string, string> = {
-  career: '건설업 경력을 증명하는 서류를 제출해주세요.',
-  'skill-grade': '기능등급을 증명하는 서류를 제출해주세요.',
-  other: '기타 증명서를 파일로 제출해주세요.',
+const SUB_TAB_INFO: Record<string, { title: string; description: string }> = {
+  career: {
+    title: '경력증명서',
+    description: '건설근로자공제회에 등록된 건설업 경력 현황이에요.',
+  },
+  'skill-grade': {
+    title: '기능등급증명서',
+    description: '건설근로자공제회 기준 기능등급 현황이에요.',
+  },
+  other: {
+    title: '기타 증명서',
+    description: '다른 항목에 해당하지 않는 증명서에요. 검토 후 승인된 경우에 프로필에 반영돼요.',
+  },
 }
 
 export function CertificateTab({
@@ -42,14 +50,7 @@ export function CertificateTab({
 
   const currentType = SUB_TAB_TYPE_MAP[activeSubTab]
   const filteredCredentials = credentials.filter((c) => c.type === currentType)
-
-  const lastUpdated =
-    filteredCredentials.length > 0
-      ? filteredCredentials
-          .filter((c) => c.modifiedAt)
-          .sort((a, b) => new Date(b.modifiedAt!).getTime() - new Date(a.modifiedAt!).getTime())[0]
-          ?.modifiedAt
-      : null
+  const info = SUB_TAB_INFO[activeSubTab]
 
   return (
     <div className="flex flex-col gap-4 px-4 py-4">
@@ -67,29 +68,32 @@ export function CertificateTab({
         ))}
       </div>
 
-      {/* 설명 */}
-      <p className="text-m-14 text-morton-gray-700">{SUB_TAB_DESCRIPTIONS[activeSubTab]}</p>
+      {/* 타이틀 + 설명 */}
+      <div className="flex flex-col gap-1">
+        <h3 className="text-sb-16 text-morton-gray-900">{info.title}</h3>
+        <p className="text-r-12 text-morton-gray-700">
+          {info.description} <span className="text-morton-primary underline">자세히보기</span>
+        </p>
+      </div>
 
-      {/* 일반 서브탭 (경력증명서, 기능등급증명서) */}
-      {activeSubTab !== 'other' && (
+      {/* 버튼 영역 */}
+      {activeSubTab !== 'other' ? (
         <div className="flex flex-col gap-3">
-          <Button variant="outline" size="full" disabled>
+          <Button variant="outline" size="full">
             발급받기
           </Button>
           <Button variant="secondary" size="full" disabled>
             파일 업로드
           </Button>
+          <p className="text-center text-r-12 text-morton-gray-700">2026.02.21 업데이트됨</p>
         </div>
-      )}
-
-      {/* 그 외 서브탭 */}
-      {activeSubTab === 'other' && (
+      ) : (
         <div className="flex flex-col gap-3">
           <Button variant="secondary" size="full" disabled>
             파일 제출
           </Button>
           <textarea
-            className="h-24 w-full resize-none rounded-lg border border-morton-gray-300 px-3 py-2 text-sm text-morton-gray-900 placeholder:text-morton-gray-500 focus:border-morton-primary focus:outline-none focus:ring-1 focus:ring-morton-primary"
+            className="h-24 w-full resize-none rounded-lg border border-morton-gray-300 px-3 py-2 text-r-14 text-morton-gray-900 placeholder:text-morton-gray-500 focus:border-morton-primary focus:outline-none focus:ring-1 focus:ring-morton-primary"
             placeholder="검토시 참고할 내용을 작성해주세요..."
             value={otherNote}
             onChange={(e) => setOtherNote(e.target.value)}
@@ -108,24 +112,33 @@ export function CertificateTab({
         </div>
       )}
 
-      {/* 기존 인증 목록 */}
+      {/* 하단 인증 목록 — 심플 리스트 */}
       {filteredCredentials.length > 0 && (
         <div className="flex flex-col">
-          {lastUpdated && (
-            <p className="pb-2 text-r-12 text-morton-gray-500">
-              {formatDate(lastUpdated)} 업데이트됨
-            </p>
-          )}
-          <div className="flex flex-col divide-y divide-morton-gray-300 rounded-lg border border-morton-gray-300">
-            {filteredCredentials.map((credential) => (
-              <CredentialItem
-                key={credential.id}
-                credential={credential}
-                onDelete={onDelete}
-                isDeleting={isDeleting}
-              />
-            ))}
-          </div>
+          {filteredCredentials.map((credential) => (
+            <div
+              key={credential.id}
+              className="flex items-center justify-between border-b border-morton-gray-300 py-3"
+            >
+              <div className="flex items-baseline gap-2">
+                <span className="text-r-14 text-morton-gray-900">
+                  {credential.type ? getCredentialLabel(credential.type) : '알 수 없음'}
+                </span>
+                {credential.expiredAt && (
+                  <span className="text-r-10 text-morton-gray-700">
+                    {formatDate(credential.expiredAt)} 만료
+                  </span>
+                )}
+              </div>
+              <button
+                className="rounded border border-morton-gray-500 px-3 py-1 text-r-14 text-morton-gray-700"
+                onClick={() => onDelete(credential.id!)}
+                disabled={isDeleting}
+              >
+                삭제
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>
