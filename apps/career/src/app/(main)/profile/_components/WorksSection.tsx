@@ -57,6 +57,7 @@ export function WorksSection({ authorId }: WorksSectionProps) {
       {feedItems.map((item) => (
         <WorkCard
           key={item.postId}
+          postId={item.postId}
           image={item.content.image}
           imageAlt={item.content.imageAlt}
           company={item.content.company}

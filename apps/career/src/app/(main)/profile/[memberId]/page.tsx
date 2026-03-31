@@ -1,12 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useGetMembers, useGetProfile } from '@morton/api-client'
+import { useGetMembers, useGetProfile, useGetCoworkers } from '@morton/api-client'
 import { Button, Tab, TopBar } from '@morton/ui'
+import { useQueryState } from 'nuqs'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { ProfileHeader } from '../_components/ProfileHeader'
-import { StatsRow } from '../_components/StatsRow'
 import { IntroSection } from '../_components/IntroSection'
 import { WorksSection } from '../_components/WorksSection'
 
@@ -19,7 +18,7 @@ export default function MemberProfilePage() {
   const router = useRouter()
   const params = useParams<{ memberId: string }>()
   const memberId = Number(params.memberId)
-  const [activeTab, setActiveTab] = useState('intro')
+  const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'intro' })
 
   const {
     data: members,
@@ -28,12 +27,17 @@ export default function MemberProfilePage() {
   } = useGetMembers({ query: { enabled: !isNaN(memberId) } })
   const member = members?.find((m) => m.id === memberId)
 
-  // profileId = memberId (1:1 매핑)
   const { data: profile, isLoading: isProfileLoading } = useGetProfile(memberId, {
     query: { enabled: !isNaN(memberId) },
   })
 
   const { postCount } = useFeedItems({ authorId: profile?.id })
+  const { data: coworkers } = useGetCoworkers(
+    { profileId: profile?.id ?? 0 },
+    { query: { enabled: !!profile?.id } }
+  )
+  // TODO: 추천서 API 연동
+  const recommendationCount = 0
 
   const isLoading = isMemberLoading || isProfileLoading
 
@@ -73,14 +77,11 @@ export default function MemberProfilePage() {
         picture={member.picture}
         city={profile?.address?.city}
         headline={profile?.headline}
-      />
-
-      <StatsRow
-        postCount={postCount}
-        trades={profile?.trades}
         primaryTrade={profile?.primaryTrade}
         experience={profile?.experience}
-        role={member.role}
+        postCount={postCount}
+        coworkerCount={coworkers?.length}
+        recommendationCount={recommendationCount}
       />
 
       <div className="px-4 py-3">
