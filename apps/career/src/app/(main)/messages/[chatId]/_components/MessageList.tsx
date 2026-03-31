@@ -1,17 +1,20 @@
 'use client'
 
 import { useCallback, useEffect, useRef } from 'react'
-import Link from 'next/link'
-import { useInfiniteQuery, getChatMessages, getGetChatMessagesQueryKey } from '@morton/api-client'
+import {
+  useInfiniteQuery,
+  getChatMessages,
+  getGetChatMessagesQueryKey,
+  useGetMembers,
+} from '@morton/api-client'
 import type { Message, MessagePage } from '@morton/api-client'
-import { ChatMessage, ChatListItem } from '@morton/ui'
-// TODO: BE 채팅 API 완성 시 useAuthStore 복원
-// import { useAuthStore } from '@/stores/auth-store'
+import { ChatMessage } from '@morton/ui'
+import { useAuthStore } from '@/stores/auth-store'
 import { formatChatTime } from '@/lib/format-time'
-import { MOCK_CURRENT_USER_ID, mockParticipants, mockChats } from '@/mocks/chat-data'
 
 interface MessageListProps {
   chatId: number
+  localMessages: Message[]
 }
 
 /** 날짜 구분선 — Figma node 364:5574 */
@@ -29,9 +32,17 @@ function formatDateLabel(dateStr: string): string {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${String(d.getDate()).padStart(2, '0')}일`
 }
 
-function SenderMessage({ message, currentUserId }: { message: Message; currentUserId: number }) {
+/** 상대방 프로필을 해석해 닉네임/프로필 이미지를 반환하는 래퍼 */
+function SenderMessage({
+  message,
+  currentUserId,
+}: {
+  message: Message
+  currentUserId: number | undefined
+}) {
   const isMine = message.senderId === currentUserId
-  const participant = message.senderId != null ? mockParticipants[message.senderId] : undefined
+  const { data: members } = useGetMembers({ query: { enabled: !isMine && !!message.senderId } })
+  const sender = members?.find((m) => m.id === message.senderId)
 
   if (isMine) {
     return (
@@ -48,15 +59,14 @@ function SenderMessage({ message, currentUserId }: { message: Message; currentUs
       variant="theirs"
       message={message.content}
       timestamp={message.createdAt ? formatChatTime(message.createdAt) : undefined}
-      nickname={participant?.name ?? '상대방'}
-      profileImage={participant?.profileImage}
+      nickname={sender?.name ?? '상대방'}
+      profileImage={sender?.picture}
     />
   )
 }
 
-export default function MessageList({ chatId }: MessageListProps) {
-  // TODO: BE 채팅 API 완성 시 useAuthStore로 복원
-  const currentUserId = MOCK_CURRENT_USER_ID
+export default function MessageList({ chatId, localMessages }: MessageListProps) {
+  const currentUserId = useAuthStore((s) => s.member?.id)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const topObserverRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -81,7 +91,7 @@ export default function MessageList({ chatId }: MessageListProps) {
       .reverse()
       .flatMap((page) => page.items.slice().reverse()) ?? []
 
-  const allMessages = serverMessages
+  const allMessages = [...serverMessages, ...localMessages]
 
   // 초기 로드 시 스크롤을 맨 아래로
   useEffect(() => {
@@ -151,11 +161,6 @@ export default function MessageList({ chatId }: MessageListProps) {
     )
   }
 
-  // 상대방 프로필 정보
-  const chat = mockChats.find((c) => c.id === chatId)
-  const otherId = chat?.participantIds?.find((id) => id !== currentUserId)
-  const otherParticipant = otherId != null ? mockParticipants[otherId] : undefined
-
   return (
     <div ref={scrollContainerRef} className="flex flex-1 flex-col overflow-y-auto px-4 py-3">
       {/* 상단 관찰 영역 - 이전 메시지 로드 트리거 */}
@@ -164,21 +169,6 @@ export default function MessageList({ chatId }: MessageListProps) {
         <div className="flex justify-center py-2">
           <p className="text-r-12 text-morton-gray-400">이전 메시지 불러오는 중...</p>
         </div>
-      )}
-
-      {/* 상대방 프로필 카드 → 프로필 상세로 이동 */}
-      {otherParticipant && otherId != null && (
-        <Link href={`/profile/${otherId}`} className="mb-4 block">
-          <ChatListItem
-            variant="default"
-            name={otherParticipant.name}
-            location={otherParticipant.location}
-            jobType={otherParticipant.jobType}
-            specialty={otherParticipant.specialty}
-            lastMessage={otherParticipant.about}
-            profileImage={otherParticipant.profileImage}
-          />
-        </Link>
       )}
 
       <div className="flex flex-col gap-5">
