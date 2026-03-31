@@ -4,9 +4,10 @@ import { useState } from 'react'
 
 interface ChatInputProps {
   onSend: (content: string) => void
+  disabled?: boolean
 }
 
-export default function ChatInput({ onSend }: ChatInputProps) {
+export default function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [text, setText] = useState('')
 
   const handleSend = () => {
@@ -23,7 +24,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
     }
   }
 
-  const isDisabled = !text.trim()
+  const isDisabled = !text.trim() || !!disabled
 
   return (
     <div className="shrink-0 bg-white">

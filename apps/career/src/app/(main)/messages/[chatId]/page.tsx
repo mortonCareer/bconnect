@@ -1,11 +1,15 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useGetChat } from '@morton/api-client'
-import type { Message } from '@morton/api-client'
+import {
+  useGetChat,
+  useSendMessage,
+  useMarkChatAsRead,
+  useQueryClient,
+  getGetChatMessagesQueryKey,
+} from '@morton/api-client'
 import { TopBar } from '@morton/ui'
-import { useAuthStore } from '@/stores/auth-store'
 import MessageList from './_components/MessageList'
 import ChatInput from './_components/ChatInput'
 
@@ -13,31 +17,36 @@ export default function ChatRoomPage() {
   const params = useParams()
   const router = useRouter()
   const chatId = Number(params.chatId)
-  const currentUserId = useAuthStore((s) => s.member?.id)
+  const queryClient = useQueryClient()
 
   const { data: chat } = useGetChat(chatId, {
     query: { enabled: !!chatId },
   })
 
-  const [localMessages, setLocalMessages] = useState<Message[]>([])
+  // 읽음 처리 — 채팅방 진입 시
+  const { mutate: markAsRead } = useMarkChatAsRead()
+  useEffect(() => {
+    if (chatId) markAsRead({ chatId })
+  }, [chatId, markAsRead])
+
+  const { mutate: sendMessageMutate, isPending } = useSendMessage()
 
   const handleSend = useCallback(
     (content: string) => {
-      const newMessage: Message = {
-        id: Date.now(),
-        chatId,
-        senderId: currentUserId,
-        content,
-        createdAt: new Date().toISOString(),
-        modifiedAt: new Date().toISOString(),
-      }
-      setLocalMessages((prev) => [...prev, newMessage])
+      sendMessageMutate(
+        { chatId, data: { content } },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: getGetChatMessagesQueryKey(chatId) })
+          },
+        }
+      )
     },
-    [chatId, currentUserId]
+    [chatId, sendMessageMutate, queryClient]
   )
 
   return (
-    <div className="flex h-[calc(100dvh-56px)] flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       <TopBar
         variant="default"
         title={chat?.title ?? '채팅'}
@@ -45,9 +54,9 @@ export default function ChatRoomPage() {
         onBack={() => router.back()}
       />
 
-      <MessageList chatId={chatId} localMessages={localMessages} />
+      <MessageList chatId={chatId} />
 
-      <ChatInput onSend={handleSend} />
+      <ChatInput onSend={handleSend} disabled={isPending} />
     </div>
   )
 }

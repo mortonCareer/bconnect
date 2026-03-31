@@ -101,12 +101,23 @@ type RequestConfig = {
   signal?: AbortSignal
 }
 
+// 채팅 mock: Route Handler로 처리되는 경로 — 같은 origin으로 요청
+// TODO: BE 채팅 API 완성 시 이 배열과 아래 분기 로직 삭제
+const MOCK_PATHS = ['api/v1/chats']
+const isMockPath = (url: string) => MOCK_PATHS.some((p) => url.startsWith(p))
+
 export async function customFetch<T>(config: RequestConfig, _options?: RequestInit): Promise<T> {
   // ky prefixUrl은 슬래시로 시작하는 경로를 허용하지 않음
   const normalizedUrl = config.url.startsWith('/') ? config.url.slice(1) : config.url
 
+  // 채팅 mock 경로는 같은 origin(Next.js Route Handler)으로 요청
+  const client =
+    isMockPath(normalizedUrl) && typeof window !== 'undefined'
+      ? ky.create({ prefixUrl: window.location.origin, timeout: 30000, credentials: 'include' })
+      : apiClient
+
   try {
-    const response = await apiClient(normalizedUrl, {
+    const response = await client(normalizedUrl, {
       method: config.method,
       json: config.data,
       headers: config.headers,

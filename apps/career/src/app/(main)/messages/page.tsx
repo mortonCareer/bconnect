@@ -1,26 +1,15 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import {
-  useInfiniteQuery,
-  useQueries,
-  getMyChats,
-  getGetMyChatsQueryKey,
-  useGetMembers,
-  getGetProfileQueryOptions,
-} from '@morton/api-client'
-import type { ChatPage, Member, Profile } from '@morton/api-client'
+import { useCallback, useEffect, useRef } from 'react'
+import Link from 'next/link'
+import { useInfiniteQuery, getMyChats, getGetMyChatsQueryKey } from '@morton/api-client'
+import type { ChatPage } from '@morton/api-client'
 import { ChatListItem, TopBar } from '@morton/ui'
 import { formatRelativeTime } from '@/lib/format-time'
-import { TRADE_LABELS } from '@/lib/trade-labels'
-import { ROLE_LABELS } from '@/lib/role-labels'
-import { useAuthStore } from '@/stores/auth-store'
+import { MOCK_CURRENT_USER_ID, mockParticipants } from '@/mocks/chat-data'
 
 export default function MessagesPage() {
-  const router = useRouter()
   const observerRef = useRef<HTMLDivElement>(null)
-  const currentUserId = useAuthStore((s) => s.member?.id)
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery<ChatPage>({
@@ -55,46 +44,9 @@ export default function MessagesPage() {
 
   const chats = data?.pages.flatMap((page) => page.items) ?? []
 
-  // 각 채팅의 상대방 멤버 ID 추출
-  const otherMemberIds = useMemo(() => {
-    const ids = new Set<number>()
-    for (const chat of chats) {
-      const otherId = chat.participantIds?.find((id) => id !== currentUserId)
-      if (otherId != null) ids.add(otherId)
-    }
-    return [...ids]
-  }, [chats, currentUserId])
-
-  // 전체 Member 조회 후 매핑
-  const { data: allMembers } = useGetMembers()
-
-  const memberMap = useMemo(() => {
-    const map = new Map<number, Member>()
-    allMembers?.forEach((m) => {
-      if (m.id) map.set(m.id, m)
-    })
-    return map
-  }, [allMembers])
-
-  // 병렬 Profile 조회 (memberId를 profileId로 사용)
-  const profileQueries = useQueries({
-    queries: otherMemberIds.map((id) => ({
-      ...getGetProfileQueryOptions(id),
-      enabled: otherMemberIds.length > 0,
-    })),
-  })
-
-  const profileMap = useMemo(() => {
-    const map = new Map<number, Profile>()
-    profileQueries.forEach((q, i) => {
-      if (q.data) map.set(otherMemberIds[i], q.data)
-    })
-    return map
-  }, [profileQueries, otherMemberIds])
-
   return (
     <div className="flex flex-col">
-      <TopBar variant="default" title="메시지" showAction={false} />
+      <TopBar variant="default" title="메시지" showAction={false} backHref="/" />
 
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center py-20">
@@ -107,30 +59,23 @@ export default function MessagesPage() {
       ) : (
         <div className="flex flex-col">
           {chats.map((chat) => {
-            const otherId = chat.participantIds?.find((id) => id !== currentUserId)
-            const otherMember = otherId != null ? memberMap.get(otherId) : undefined
-            const otherProfile = otherId != null ? profileMap.get(otherId) : undefined
+            const otherId = chat.participantIds?.find((id) => id !== MOCK_CURRENT_USER_ID)
+            const participant = otherId != null ? mockParticipants[otherId] : undefined
 
             return (
-              <div
-                key={chat.id}
-                onClick={() => router.push(`/messages/${chat.id}`)}
-                className="cursor-pointer"
-              >
+              <Link key={chat.id} href={`/messages/${chat.id}`} className="block px-4">
                 <ChatListItem
                   variant="badge"
-                  profileImage={otherMember?.picture}
-                  name={otherMember?.name ?? chat.title ?? '채팅'}
-                  location={otherProfile?.address?.city}
-                  jobType={otherMember?.role ? ROLE_LABELS[otherMember.role] : undefined}
-                  specialty={
-                    otherProfile?.primaryTrade ? TRADE_LABELS[otherProfile.primaryTrade] : undefined
-                  }
+                  name={participant?.name ?? chat.title ?? '채팅'}
+                  location={participant?.location}
+                  jobType={participant?.jobType}
+                  specialty={participant?.specialty}
                   lastMessage={chat.lastMessage?.content}
                   timestamp={chat.modifiedAt ? formatRelativeTime(chat.modifiedAt) : undefined}
                   unreadCount={chat.unreadCount}
+                  profileImage={participant?.profileImage}
                 />
-              </div>
+              </Link>
             )
           })}
           <div ref={observerRef} className="h-1" />
