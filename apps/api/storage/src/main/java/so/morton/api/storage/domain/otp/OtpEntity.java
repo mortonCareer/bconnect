@@ -1,5 +1,7 @@
 package so.morton.api.storage.domain.otp;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -23,15 +25,19 @@ public class OtpEntity extends BaseEntity {
     @Column(nullable = false)
     private String code;
 
-    @Column(nullable = false)
+    @Column(name = "code_expired_at", nullable = false)
     private LocalDateTime expiredAt;
 
     @Column(nullable = false)
     private int attempts = 0;
 
-    @Column(nullable = false)
+    @Column(name = "code_revoked", nullable = false)
     private boolean revoked = true;
 
+    @AttributeOverrides({
+            @AttributeOverride(name = "expiredAt", column = @Column(name = "token_expired_at")),
+            @AttributeOverride(name = "revoked", column = @Column(name = "token_revoked"))
+    })
     @Embedded
     private SignupToken token;
 
