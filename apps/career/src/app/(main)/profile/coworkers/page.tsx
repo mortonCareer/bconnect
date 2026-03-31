@@ -46,7 +46,7 @@ export default function CoworkersPage() {
     data: myProfile,
     isLoading: isProfileLoading,
     isError: isProfileError,
-  } = useGetMyProfile()
+  } = useGetMyProfile({ query: { retry: false } })
   const myProfileId = myProfile?.id
 
   const { data: coworkers, isLoading: isCoworkersLoading } = useGetCoworkers(
