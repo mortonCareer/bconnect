@@ -37,6 +37,7 @@ public class CredentialService {
         CredentialEntity credential = CredentialEntity.builder()
                 .profileId(profile.id())
                 .type(request.type())
+                .expiredAt(request.expiredAt())
                 .build();
 
         credentialRepository.save(credential);
