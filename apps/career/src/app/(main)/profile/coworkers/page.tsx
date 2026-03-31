@@ -54,9 +54,11 @@ export default function CoworkersPage() {
     { query: { enabled: myProfileId != null } }
   )
 
-  // API 에러 시 mock 데이터 폴백
-  const useMock = isProfileError || (!isProfileLoading && !myProfileId)
-  const isLoading = !useMock && (isProfileLoading || isCoworkersLoading)
+  // API 에러 또는 빈 결과 시 mock 데이터 폴백
+  const hasRealCoworkers =
+    !isProfileError && !isCoworkersLoading && coworkers && coworkers.length > 0
+  const useMock = !hasRealCoworkers
+  const isLoading = !isProfileError && (isProfileLoading || (!!myProfileId && isCoworkersLoading))
 
   // mock일 때 검색 필터링
   const filteredMock = MOCK_COWORKERS.filter(
@@ -64,10 +66,9 @@ export default function CoworkersPage() {
   )
 
   // 실제 API: 각 동료의 profileId 추출
-  const coworkerProfileIds =
-    !useMock && coworkers && myProfileId != null
-      ? coworkers.map((c) => (c.minId === myProfileId ? c.maxId! : c.minId!))
-      : []
+  const coworkerProfileIds = hasRealCoworkers
+    ? coworkers.map((c) => (c.minId === myProfileId ? c.maxId! : c.minId!))
+    : []
 
   return (
     <div className="flex flex-col">
