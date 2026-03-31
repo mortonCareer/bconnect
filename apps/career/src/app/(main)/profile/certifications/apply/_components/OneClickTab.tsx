@@ -94,7 +94,7 @@ export function OneClickTab({ credentials, onDelete, isDeleting }: OneClickTabPr
               {formatDate(lastUpdated)} 업데이트됨
             </p>
           )}
-          <div className="flex flex-col divide-y divide-morton-gray-200 rounded-lg border border-morton-gray-200">
+          <div className="flex flex-col divide-y divide-morton-gray-300 rounded-lg border border-morton-gray-300">
             {oneClickCredentials.map((credential) => (
               <CredentialItem
                 key={credential.id}

@@ -114,7 +114,7 @@ export default function RecommendationsPage() {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-morton-gray-200">
+        <div className="flex flex-col divide-y divide-morton-gray-300">
           {recommendations.map((rec) => (
             <RecommendationCard key={rec.id} recommendation={rec} />
           ))}

@@ -73,7 +73,7 @@ export function IntroSection({ profile, credentials }: IntroSectionProps) {
           <span className="text-sb-16 text-morton-gray-900">소개</span>
           <button
             className="text-r-12 text-morton-primary underline"
-            onClick={() => router.push('/profile/edit')}
+            onClick={() => router.push('/profile/edit/about')}
           >
             편집
           </button>
@@ -114,10 +114,10 @@ export function IntroSection({ profile, credentials }: IntroSectionProps) {
             보낸 추천서
           </button>
         </div>
-        <div className="flex flex-col divide-y divide-morton-gray-200">
+        <div className="flex flex-col divide-y divide-morton-gray-300">
           {MOCK_RECOMMENDATIONS.map((rec) => (
             <div key={rec.id} className="flex gap-3 py-3">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-morton-gray-200">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-morton-gray-300">
                 <span className="text-r-12 text-morton-gray-500">이미지</span>
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-1">

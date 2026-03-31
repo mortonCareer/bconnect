@@ -93,7 +93,7 @@ export default function CertificationsPage() {
 
       {/* 인증 목록 */}
       {credentialsList.length > 0 ? (
-        <div className="flex flex-col divide-y divide-morton-gray-200">
+        <div className="flex flex-col divide-y divide-morton-gray-300">
           {credentialsList.map((credential) => (
             <CredentialItem
               key={credential.id}

@@ -115,7 +115,7 @@ export default function CoworkersPage() {
           <p className="text-m-14 text-morton-gray-500">로딩 중...</p>
         </div>
       ) : useMock ? (
-        <div className="flex flex-col divide-y divide-morton-gray-200">
+        <div className="flex flex-col divide-y divide-morton-gray-300">
           {filteredMock.map((coworker) => (
             <MockCoworkerCard key={coworker.id} coworker={coworker} />
           ))}
@@ -125,7 +125,7 @@ export default function CoworkersPage() {
           <p className="text-m-14 text-morton-gray-500">등록된 동료가 없습니다</p>
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-morton-gray-200">
+        <div className="flex flex-col divide-y divide-morton-gray-300">
           {coworkerProfileIds.map((profileId) => (
             <CoworkerCard key={profileId} profileId={profileId} />
           ))}
@@ -142,7 +142,7 @@ function MockCoworkerCard({
 }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-morton-gray-200">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-morton-gray-300">
         <span className="text-m-14 text-morton-gray-500">{coworker.name[0]}</span>
       </div>
       <div className="min-w-0 flex-1">
