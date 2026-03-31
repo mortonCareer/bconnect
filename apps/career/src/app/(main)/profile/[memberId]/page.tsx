@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useGetMembers, useGetProfile } from '@morton/api-client'
+import { useGetMembers, useGetProfile, useGetCoworkers } from '@morton/api-client'
 import { Button, Tab, TopBar } from '@morton/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { ProfileHeader } from '../_components/ProfileHeader'
@@ -34,6 +34,12 @@ export default function MemberProfilePage() {
   })
 
   const { postCount } = useFeedItems({ authorId: profile?.id })
+  const { data: coworkers } = useGetCoworkers(
+    { profileId: profile?.id ?? 0 },
+    { query: { enabled: !!profile?.id } }
+  )
+  // TODO: 추천서 API 연동
+  const recommendationCount = 0
 
   const isLoading = isMemberLoading || isProfileLoading
 
@@ -77,10 +83,8 @@ export default function MemberProfilePage() {
 
       <StatsRow
         postCount={postCount}
-        trades={profile?.trades}
-        primaryTrade={profile?.primaryTrade}
-        experience={profile?.experience}
-        role={member.role}
+        coworkerCount={coworkers?.length}
+        recommendationCount={recommendationCount}
       />
 
       <div className="px-4 py-3">
