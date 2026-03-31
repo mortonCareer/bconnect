@@ -11,6 +11,7 @@ import {
   getGetCredentialsQueryKey,
 } from '@morton/api-client'
 import { Tab, TopBar } from '@morton/ui'
+import { MOCK_CREDENTIALS } from '../constants'
 import { OneClickTab } from './_components/OneClickTab'
 import { CertificateTab } from './_components/CertificateTab'
 import { QualificationTab } from './_components/QualificationTab'
@@ -26,13 +27,16 @@ export default function CertificationApplyPage() {
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState('one-click')
 
-  const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
+  const { data: profile, isLoading: isProfileLoading, isError: isProfileError } = useGetMyProfile()
   const profileId = profile?.id
 
   const { data: credentials, isLoading: isCredentialsLoading } = useGetCredentials(
     { profileId: profileId! },
     { query: { enabled: !!profileId } }
   )
+
+  // API 에러 시 mock 데이터 폴백
+  const useMock = isProfileError || (!isProfileLoading && !profileId)
 
   const invalidateCredentials = () => {
     if (profileId) {
@@ -50,7 +54,7 @@ export default function CertificationApplyPage() {
     mutation: { onSuccess: invalidateCredentials },
   })
 
-  const isLoading = isProfileLoading || isCredentialsLoading
+  const isLoading = !useMock && (isProfileLoading || isCredentialsLoading)
 
   const handleDelete = (credentialId: number) => {
     deleteCredential({ credentialId })
@@ -74,7 +78,7 @@ export default function CertificationApplyPage() {
     )
   }
 
-  const credentialsList = credentials ?? []
+  const credentialsList = useMock ? MOCK_CREDENTIALS : (credentials ?? [])
 
   return (
     <div className="flex flex-col">

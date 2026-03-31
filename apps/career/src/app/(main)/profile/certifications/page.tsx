@@ -10,13 +10,13 @@ import {
 } from '@morton/api-client'
 import { Button, Tag, TopBar } from '@morton/ui'
 import { CredentialItem } from './_components/CredentialItem'
-import { getCredentialLabel } from './constants'
+import { getCredentialLabel, MOCK_CREDENTIALS } from './constants'
 
 export default function CertificationsPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
+  const { data: profile, isLoading: isProfileLoading, isError: isProfileError } = useGetMyProfile()
   const profileId = profile?.id
 
   const { data: credentials, isLoading: isCredentialsLoading } = useGetCredentials(
@@ -36,7 +36,10 @@ export default function CertificationsPage() {
     },
   })
 
-  const isLoading = isProfileLoading || isCredentialsLoading
+  // API 에러 시 mock 데이터 폴백
+  const useMock = isProfileError || (!isProfileLoading && !profileId)
+  const credentialsList = useMock ? MOCK_CREDENTIALS : (credentials ?? [])
+  const isLoading = !useMock && (isProfileLoading || isCredentialsLoading)
 
   const handleDelete = (credentialId: number) => {
     deleteCredential({ credentialId })
@@ -53,7 +56,7 @@ export default function CertificationsPage() {
     )
   }
 
-  const acceptedCredentials = credentials?.filter((c) => c.status === 'ACCEPTED') ?? []
+  const acceptedCredentials = credentialsList.filter((c) => c.status === 'ACCEPTED')
 
   return (
     <div className="flex flex-col">
@@ -85,9 +88,9 @@ export default function CertificationsPage() {
       </div>
 
       {/* 인증 목록 */}
-      {credentials && credentials.length > 0 ? (
+      {credentialsList.length > 0 ? (
         <div className="flex flex-col divide-y divide-morton-gray-200">
-          {credentials.map((credential) => (
+          {credentialsList.map((credential) => (
             <CredentialItem
               key={credential.id}
               credential={credential}

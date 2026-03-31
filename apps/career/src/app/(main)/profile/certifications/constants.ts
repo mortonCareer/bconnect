@@ -24,3 +24,33 @@ export function formatDate(dateString: string): string {
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}.${month}.${day}`
 }
+
+// TODO: API 연동 후 제거 — 발표용 mock 데이터
+export const MOCK_CREDENTIALS = [
+  {
+    id: 1,
+    type: 'IDENTITY_VERIFICATION' as const,
+    status: 'ACCEPTED' as const,
+    expiredAt: undefined,
+  },
+  { id: 2, type: 'SOLE_PROPRIETOR' as const, status: 'ACCEPTED' as const, expiredAt: '2026-09-21' },
+  {
+    id: 3,
+    type: 'SPECIALTY_CONSTRUCTION_LICENSE' as const,
+    status: 'ACCEPTED' as const,
+    expiredAt: '2027-09-21',
+  },
+  { id: 4, type: 'CAREER_CERTIFICATE' as const, status: 'ACCEPTED' as const, expiredAt: undefined },
+  {
+    id: 5,
+    type: 'SKILL_GRADE_CERTIFICATE' as const,
+    status: 'ACCEPTED' as const,
+    expiredAt: '2027-02-18',
+  },
+  {
+    id: 6,
+    type: 'NATIONAL_TECHNICAL_QUALIFICATION' as const,
+    status: 'ACCEPTED' as const,
+    expiredAt: '2026-02-18',
+  },
+]
