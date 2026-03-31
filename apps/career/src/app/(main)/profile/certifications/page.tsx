@@ -70,7 +70,7 @@ export default function CertificationsPage() {
       {acceptedCredentials.length > 0 && (
         <div className="flex flex-wrap gap-2 px-4 py-3">
           {acceptedCredentials.map((credential) => (
-            <Tag key={credential.id} variant="selected" size="sm">
+            <Tag key={credential.id} variant="default" size="sm">
               {credential.type ? getCredentialLabel(credential.type) : '알 수 없음'}
             </Tag>
           ))}
