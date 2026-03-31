@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { useInfiniteQuery, getChatMessages, getGetChatMessagesQueryKey } from '@morton/api-client'
 import type { Message, MessagePage } from '@morton/api-client'
 import { ChatMessage, ChatListItem } from '@morton/ui'
-import { useAuthStore } from '@/stores/auth-store'
+// TODO: BE 채팅 API 완성 시 useAuthStore 복원
+// import { useAuthStore } from '@/stores/auth-store'
 import { formatChatTime } from '@/lib/format-time'
 import { MOCK_CURRENT_USER_ID, mockParticipants, mockChats } from '@/mocks/chat-data'
 
@@ -54,7 +55,8 @@ function SenderMessage({ message, currentUserId }: { message: Message; currentUs
 }
 
 export default function MessageList({ chatId }: MessageListProps) {
-  const currentUserId = useAuthStore((s) => s.member?.id) ?? MOCK_CURRENT_USER_ID
+  // TODO: BE 채팅 API 완성 시 useAuthStore로 복원
+  const currentUserId = MOCK_CURRENT_USER_ID
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const topObserverRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
