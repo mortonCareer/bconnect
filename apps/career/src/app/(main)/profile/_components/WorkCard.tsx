@@ -33,24 +33,54 @@ export function WorkCard({
 
   return (
     <div className="flex flex-col">
-      {/* 풀 와이드 이미지 — 피그마: 고정 높이 220px */}
+      {/* 카드 헤더 — 건축주명 · 소요기간 + 날짜 + 액션 */}
+      <div className="flex items-center justify-between px-4 py-2">
+        <div className="flex items-center gap-1.5">
+          <span className="text-r-12 text-morton-gray-700">{company}</span>
+          {company && duration && (
+            <>
+              <span className="text-r-12 text-morton-gray-500">·</span>
+              <span className="text-r-12 text-morton-gray-700">{duration}</span>
+            </>
+          )}
+          {/* 인증 체크 아이콘 */}
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            className="text-morton-primary"
+          >
+            <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
+            <path
+              d="M5 8L7 10L11 6"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-r-12 text-morton-gray-500">{timestamp}</span>
+          {/* ⋮ 액션 버튼 */}
+          <button className="flex h-6 w-6 items-center justify-center text-morton-gray-500">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <circle cx="8" cy="3" r="1.5" />
+              <circle cx="8" cy="8" r="1.5" />
+              <circle cx="8" cy="13" r="1.5" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* 풀 와이드 이미지 */}
       <div className="relative h-[220px] w-full overflow-hidden">
         <img src={image} alt={imageAlt || description} className="h-full w-full object-cover" />
       </div>
 
-      {/* 컨텐츠 — 피그마: px-20, 이미지와 12px gap, 메타/본문 8px gap */}
-      <div className="flex flex-col gap-2 px-5 pt-3">
-        {/* 회사명 / 소요일 / 작성일 */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="text-r-12 leading-[21.6px] text-morton-gray-700">{company}</span>
-            {company && duration && <div className="h-[13px] w-px bg-morton-gray-300" />}
-            <span className="text-r-12 leading-[21.6px] text-morton-gray-700">{duration}</span>
-          </div>
-          <span className="text-r-12 leading-[21.6px] text-morton-gray-700">{timestamp}</span>
-        </div>
-
-        {/* 본문 + 더보기/접기 */}
+      {/* 본문 + 더보기/접기 */}
+      <div className="flex flex-col gap-2 px-4 pt-3 pb-4">
         <div
           className={cn('flex w-full', isExpanded ? 'flex-col items-end' : 'items-center gap-2')}
         >
