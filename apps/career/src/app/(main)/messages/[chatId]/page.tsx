@@ -46,7 +46,7 @@ export default function ChatRoomPage() {
   )
 
   return (
-    <div className="flex h-[calc(100dvh-60px)] flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       <TopBar
         variant="default"
         title={chat?.title ?? '채팅'}
