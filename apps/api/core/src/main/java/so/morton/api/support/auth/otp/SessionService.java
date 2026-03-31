@@ -1,7 +1,6 @@
 package so.morton.api.support.auth.otp;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import so.morton.api.storage.domain.member.MemberRepository;
@@ -9,6 +8,7 @@ import so.morton.api.storage.domain.session.SessionEntity;
 import so.morton.api.storage.domain.session.SessionRepository;
 import so.morton.api.support.AuthExceptionCode;
 import so.morton.api.support.CodeException;
+import so.morton.api.support.auth.AuthUtils;
 import so.morton.api.support.sms.SmsProvider;
 import so.morton.api.support.sms.SmsTemplate;
 
@@ -21,14 +21,13 @@ public class SessionService {
 
     private final SessionRepository sessionRepository;
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
     private final SmsProvider smsProvider;
 
     public void verify(String username, String refreshToken) {
         SessionEntity found = sessionRepository.findByUsername(username)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
 
-        if (!passwordEncoder.matches(refreshToken, found.getRefreshToken())) {
+        if (!AuthUtils.sha256(refreshToken).equals(found.getRefreshToken())) {
             throw new CodeException(AuthExceptionCode.INVALID_REFRESH_TOKEN);
         }
 
@@ -39,7 +38,7 @@ public class SessionService {
 
     public void login(String username, String agent, String ip, String refreshToken) {
         Optional<SessionEntity> found = sessionRepository.findByUsername(username);
-        String encrypted = passwordEncoder.encode(refreshToken);
+        String encrypted = AuthUtils.sha256(refreshToken);
 
         if (found.isPresent()) {
             found.get().update(agent, ip, encrypted);

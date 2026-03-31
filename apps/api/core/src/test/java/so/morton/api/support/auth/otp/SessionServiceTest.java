@@ -6,12 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import so.morton.api.storage.domain.member.MemberEntity;
 import so.morton.api.storage.domain.member.MemberRepository;
 import so.morton.api.storage.domain.session.SessionEntity;
 import so.morton.api.storage.domain.session.SessionRepository;
 import so.morton.api.storage.value.Role;
+import so.morton.api.support.auth.AuthUtils;
 import so.morton.api.support.sms.SmsProvider;
 
 import java.util.Optional;
@@ -30,9 +30,6 @@ class SessionServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
 
     @Mock
     private SmsProvider smsProvider;
@@ -59,7 +56,6 @@ class SessionServiceTest {
                 .role(Role.FOREMAN)
                 .build();
 
-        when(passwordEncoder.encode(refreshToken)).thenReturn("encoded-token");
         when(sessionRepository.findByUsername(username)).thenReturn(Optional.empty());
         when(memberRepository.findByUsername(username)).thenReturn(Optional.of(member));
 
@@ -67,35 +63,32 @@ class SessionServiceTest {
         sessionService.login(username, agent, ip, refreshToken);
 
         // then
-        verify(passwordEncoder).encode(refreshToken);
         verify(sessionRepository).save(any(SessionEntity.class));
         verify(smsProvider).send(eq(PHONE), anyString());
     }
 
-     @Test
-     @DisplayName("기존 세션이 있으면 정보를 갱신한다")
-     void login_existingSession() {
-         // given
-         String username = "testuser";
-         String agent = "Mozilla/5.0";
-         String ip = "127.0.0.1";
-         String refreshToken = "refresh-token-123";
+    @Test
+    @DisplayName("기존 세션이 있으면 정보를 갱신한다")
+    void login_existingSession() {
+        // given
+        String username = "testuser";
+        String agent = "Mozilla/5.0";
+        String ip = "127.0.0.1";
+        String refreshToken = "refresh-token-123";
 
-         SessionEntity existingSession = SessionEntity.builder()
-                 .username(username)
-                 .agent("old-agent")
-                 .ip("old-ip")
-                 .refreshToken("old-token")
-                 .build();
+        SessionEntity existingSession = SessionEntity.builder()
+                .username(username)
+                .agent("old-agent")
+                .ip("old-ip")
+                .refreshToken("old-token")
+                .build();
 
-         when(passwordEncoder.encode(refreshToken)).thenReturn("encoded-token");
-         when(sessionRepository.findByUsername(username)).thenReturn(Optional.of(existingSession));
+        when(sessionRepository.findByUsername(username)).thenReturn(Optional.of(existingSession));
 
-         // when
-         sessionService.login(username, agent, ip, refreshToken);
+        // when
+        sessionService.login(username, agent, ip, refreshToken);
 
-         // then
-         verify(passwordEncoder).encode(refreshToken);
-         verify(sessionRepository, never()).save(any(SessionEntity.class));
-     }
+        // then
+        verify(sessionRepository, never()).save(any(SessionEntity.class));
+    }
 }
