@@ -16,10 +16,6 @@ const nextConfig: NextConfig = {
       ],
     }
   },
-  // Capacitor 빌드 시 static export 사용 (CAPACITOR_BUILD=1)
-  ...(process.env.CAPACITOR_BUILD === '1' && {
-    output: 'export',
-  }),
 }
 
 export default withSentryConfig(nextConfig, sentryBuildOptions('career'))
