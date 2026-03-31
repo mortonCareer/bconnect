@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useGetProfile, useGetMembers } from '@morton/api-client'
 import { TRADE_LABELS } from '@/lib/trade-labels'
+import { getAvatarUrl } from '@/lib/avatar'
 import { getRoleLabel } from '@/hooks/useFeedItems'
 
 interface CoworkerCardProps {
@@ -45,14 +46,12 @@ export function CoworkerCard({ profileId }: CoworkerCardProps) {
       className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 transition-colors active:bg-morton-gray-100"
     >
       {/* 프로필 이미지 */}
-      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-morton-gray-300">
-        {picture ? (
-          <img src={picture} alt={name} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-sb-16 text-morton-gray-500">
-            {name.charAt(0)}
-          </div>
-        )}
+      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-morton-gray-100">
+        <img
+          src={picture || getAvatarUrl(name)}
+          alt={name}
+          className="h-full w-full object-cover"
+        />
       </div>
 
       {/* 이름 + 분야/역할 + 소개 */}

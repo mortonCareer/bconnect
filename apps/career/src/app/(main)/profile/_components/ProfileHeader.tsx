@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import type { Trade } from '@morton/api-client'
 import { TRADE_LABELS } from '@/lib/trade-labels'
+import { getAvatarUrl } from '@/lib/avatar'
 
 interface ProfileHeaderProps {
   name?: string
@@ -42,14 +43,12 @@ export function ProfileHeader({
       {/* 상단: 아바타 + StatsRow */}
       <div className="flex items-center gap-4">
         {/* 아바타 */}
-        <div className="h-[100px] w-[100px] shrink-0 overflow-hidden rounded-full bg-morton-gray-200">
-          {picture ? (
-            <img src={picture} alt={name ?? '프로필'} className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-r-12 text-morton-gray-500">
-              {name?.charAt(0) ?? '?'}
-            </div>
-          )}
+        <div className="h-[100px] w-[100px] shrink-0 overflow-hidden rounded-full bg-morton-gray-100">
+          <img
+            src={picture || getAvatarUrl(name ?? 'user')}
+            alt={name ?? '프로필'}
+            className="h-full w-full object-cover"
+          />
         </div>
 
         {/* StatsRow — 아바타 우측 */}

@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Tab, TopBar } from '@morton/ui'
+import { getAvatarUrl } from '@/lib/avatar'
 
 interface Recommendation {
   id: number
@@ -73,14 +74,13 @@ function RecommendationCard({ recommendation }: { recommendation: Recommendation
   return (
     <div className="flex gap-3 px-4 py-4">
       {/* 프로필 이미지 */}
-      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-morton-gray-300">
-        {profileImage ? (
-          <img src={profileImage} alt={name} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-sb-16 text-morton-gray-500">
-            {name.charAt(0)}
-          </div>
-        )}
+      {/* TODO: 실제 프로필 이미지 연동 시 DiceBear 폴백 제거 */}
+      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-morton-gray-100">
+        <img
+          src={profileImage || getAvatarUrl(name)}
+          alt={name}
+          className="h-full w-full object-cover"
+        />
       </div>
 
       {/* 이름 + 분야/역할 + 추천 내용 */}

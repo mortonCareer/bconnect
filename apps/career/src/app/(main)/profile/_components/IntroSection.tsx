@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import type { Credential, Profile } from '@morton/api-client'
 import { Tag } from '@morton/ui'
 import { getCredentialLabel } from '../certifications/constants'
+import { getAvatarUrl } from '@/lib/avatar'
 
 // TODO: 추천서 API 연동 — 현재 mock 데이터 사용
 const MOCK_RECOMMENDATIONS = [
@@ -117,8 +118,12 @@ export function IntroSection({ profile, credentials }: IntroSectionProps) {
         <div className="flex flex-col divide-y divide-morton-gray-300">
           {MOCK_RECOMMENDATIONS.map((rec) => (
             <div key={rec.id} className="flex gap-3 py-3">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-morton-gray-300">
-                <span className="text-r-12 text-morton-gray-500">이미지</span>
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-morton-gray-100">
+                <img
+                  src={getAvatarUrl(rec.name)}
+                  alt={rec.name}
+                  className="h-full w-full object-cover"
+                />
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <div className="flex items-baseline gap-1.5">

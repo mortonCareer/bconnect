@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useGetCoworkers, useGetMyProfile } from '@morton/api-client'
+import { getAvatarUrl } from '@/lib/avatar'
 import { TopBar } from '@morton/ui'
 import { CoworkerCard } from './_components/CoworkerCard'
 
@@ -142,8 +143,12 @@ function MockCoworkerCard({
 }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-morton-gray-300">
-        <span className="text-m-14 text-morton-gray-500">{coworker.name[0]}</span>
+      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-morton-gray-100">
+        <img
+          src={getAvatarUrl(coworker.name)}
+          alt={coworker.name}
+          className="h-full w-full object-cover"
+        />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-1.5">
