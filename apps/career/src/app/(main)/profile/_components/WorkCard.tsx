@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { cn } from '@morton/ui'
 
 interface WorkCardProps {
+  postId?: number
   image: string
   imageAlt?: string
   company: string
@@ -13,6 +15,7 @@ interface WorkCardProps {
 }
 
 export function WorkCard({
+  postId,
   image,
   imageAlt,
   company,
@@ -20,6 +23,7 @@ export function WorkCard({
   timestamp,
   description,
 }: WorkCardProps) {
+  const router = useRouter()
   const [isExpanded, setIsExpanded] = useState(false)
   const [isTruncated, setIsTruncated] = useState(false)
   const textRef = useRef<HTMLParagraphElement>(null)
@@ -64,7 +68,10 @@ export function WorkCard({
         <div className="flex items-center gap-2">
           <span className="text-r-12 text-morton-gray-500">{timestamp}</span>
           {/* ⋮ 액션 버튼 */}
-          <button className="flex h-6 w-6 items-center justify-center text-morton-gray-500">
+          <button
+            className="flex h-6 w-6 items-center justify-center text-morton-gray-500"
+            onClick={() => postId && router.push(`/profile/edit/work/${postId}`)}
+          >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
               <circle cx="8" cy="3" r="1.5" />
               <circle cx="8" cy="8" r="1.5" />
