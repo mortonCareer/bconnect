@@ -1,7 +1,6 @@
 'use client'
 
 import type { Credential } from '@morton/api-client'
-import { Button } from '@morton/ui'
 import { getCredentialLabel, formatDate } from '../constants'
 
 interface CredentialItemProps {
@@ -18,41 +17,46 @@ export function CredentialItem({ credential, onDelete, onRenew, isDeleting }: Cr
   return (
     <div className="flex items-center justify-between px-4 py-3">
       <div className="flex items-center gap-2">
-        <div className="flex size-5 items-center justify-center rounded-full bg-morton-primary">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path
-              d="M2.5 6L5 8.5L9.5 3.5"
-              stroke="white"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-m-14 text-morton-gray-900">{label}</span>
+        {/* 체크 아이콘 — outline 스타일 (Figma) */}
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          className="shrink-0 text-morton-primary"
+        >
+          <circle cx="10" cy="10" r="8.5" stroke="currentColor" strokeWidth="1.5" />
+          <path
+            d="M6.5 10L9 12.5L13.5 7.5"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        {/* 인증명 + 만료일 — 같은 줄 */}
+        <div className="flex items-baseline gap-2">
+          <span className="text-sb-14 text-morton-gray-900">{label}</span>
           {expiryText && <span className="text-r-12 text-morton-gray-500">{expiryText}</span>}
         </div>
       </div>
       <div className="flex items-center gap-2">
         {onRenew && credential.id !== undefined && (
-          <Button
-            variant="outline"
-            className="h-[32px] w-auto px-3 text-xs"
+          <button
+            className="rounded border border-morton-primary px-3 py-1 text-r-14 text-morton-primary"
             onClick={() => onRenew(credential.id!)}
           >
             갱신
-          </Button>
+          </button>
         )}
         {credential.id !== undefined && (
-          <Button
-            variant="ghost"
-            className="h-[32px] w-auto px-3 text-xs"
+          <button
+            className="rounded border border-morton-gray-500 px-3 py-1 text-r-14 text-morton-gray-500"
             onClick={() => onDelete(credential.id!)}
             disabled={isDeleting}
           >
             삭제
-          </Button>
+          </button>
         )}
       </div>
     </div>

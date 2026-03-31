@@ -59,7 +59,7 @@ export function OneClickTab({ credentials, onDelete, isDeleting }: OneClickTabPr
         <div className="flex flex-col gap-2">
           <label className="text-m-14 text-morton-gray-900">개업일자</label>
           <Input
-            placeholder="YYYY-MM-DD"
+            placeholder="0000-00-00"
             value={openDate}
             onChange={(e) => setOpenDate(e.target.value)}
           />
@@ -67,12 +67,11 @@ export function OneClickTab({ credentials, onDelete, isDeleting }: OneClickTabPr
       </div>
 
       <Button
-        variant="primary"
+        variant="secondary"
         size="full"
         onClick={handleSearch}
         isLoading={isSearching}
         loadingText="조회 중..."
-        disabled={!businessNumber || !ownerName || !openDate}
       >
         조회하기
       </Button>
