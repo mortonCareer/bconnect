@@ -24,13 +24,14 @@ public class TaskService {
     private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public Task get(Long taskId) {
-        return taskFinder.find(taskId);
+    public List<Task> getAll(User user) {
+        Profile profile = profileFinder.findByMemberId(user.id());
+        return taskFinder.findByProfileId(profile.id());
     }
 
     @Transactional(readOnly = true)
-    public List<Task> getAll() {
-        return taskFinder.findAll();
+    public Task get(Long taskId) {
+        return taskFinder.find(taskId);
     }
 
     @Transactional

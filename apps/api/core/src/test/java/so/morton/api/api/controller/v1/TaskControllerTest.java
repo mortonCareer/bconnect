@@ -105,19 +105,28 @@ class TaskControllerTest {
     }
 
     @Nested
-    @DisplayName("GET /api/v1/tasks")
-    class GetAllTasks {
+    @DisplayName("GET /api/v1/tasks/me")
+    class GetMyTasks {
 
         @Test
-        @DisplayName("일감 목록을 조회하면 성공 응답을 반환한다")
+        @DisplayName("인증된 사용자가 내 일감 목록을 조회하면 성공 응답을 반환한다")
         void getAll_success() throws Exception {
             // given
-            when(taskService.getAll()).thenReturn(List.of(SAMPLE_TASK));
+            when(taskService.getAll(any(User.class))).thenReturn(List.of(SAMPLE_TASK));
 
             // when & then
-            mockMvc.perform(get("/api/v1/tasks"))
+            mockMvc.perform(get("/api/v1/tasks/me")
+                            .with(user(TEST_USER)))
                     .andExpect(status().isOk())
                     .andExpect(successResponse());
+        }
+
+        @Test
+        @DisplayName("인증 없이 내 일감 목록을 조회하면 403을 반환한다")
+        void getAll_unauthenticated() throws Exception {
+            // when & then
+            mockMvc.perform(get("/api/v1/tasks/me"))
+                    .andExpect(status().isForbidden());
         }
     }
 
