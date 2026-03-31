@@ -15,7 +15,7 @@ spring:
         default_batch_fetch_size: 100
 
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
     defer-datasource-initialization: true
   sql:
     init:
