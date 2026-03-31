@@ -39,7 +39,7 @@ export default function MemberProfilePage() {
   // TODO: 추천서 API 연동
   const recommendationCount = 0
 
-  const isLoading = isMemberLoading || isProfileLoading
+  const isLoading = isProfileLoading || (isMemberLoading && !profile)
 
   if (isLoading) {
     return (
@@ -52,7 +52,7 @@ export default function MemberProfilePage() {
     )
   }
 
-  if (memberError || !member) {
+  if (!profile) {
     return (
       <div className="flex flex-col">
         <TopBar variant="default" title="프로필" showAction={false} onBack={() => router.back()} />
@@ -67,15 +67,15 @@ export default function MemberProfilePage() {
     <div className="flex flex-col">
       <TopBar
         variant="default"
-        title={member.username ?? member.name ?? '프로필'}
+        title={member?.username ?? member?.name ?? '프로필'}
         showAction={false}
         onBack={() => router.back()}
       />
 
       <ProfileHeader
-        name={member.name}
-        picture={member.picture}
-        city={profile?.address?.city}
+        name={member?.name}
+        picture={member?.picture}
+        city={profile.address?.city}
         headline={profile?.headline}
         primaryTrade={profile?.primaryTrade}
         experience={profile?.experience}
