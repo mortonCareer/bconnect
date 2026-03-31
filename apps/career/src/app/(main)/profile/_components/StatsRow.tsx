@@ -40,8 +40,8 @@ function StatItem({
   const Wrapper = onClick ? 'button' : 'div'
   return (
     <Wrapper className="flex flex-col items-center gap-1" onClick={onClick}>
-      <span className="text-sb-16">{value}</span>
-      <span className="text-r-12 text-morton-gray-500">{label}</span>
+      <span className="text-sb-16 text-morton-gray-900">{value}</span>
+      <span className="text-r-14 text-morton-gray-900">{label}</span>
     </Wrapper>
   )
 }

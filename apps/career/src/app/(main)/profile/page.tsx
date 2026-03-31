@@ -22,7 +22,7 @@ const MOCK_PROFILE = {
   experience: 3,
   headline: '안녕하세요, 타일 준기공 이송목입니다.',
   about:
-    '안녕하세요, 도배 준기공 이송목입니다. 수입타일을 전문으로 시공하고 있습니다.\n\n바닥, 벽면, 욕실 타일 모두 작업 가능하며, 줄눈 정밀도와 평탄 마감에 자신 있습니다.\n\n시공문의\n010-8335-8632\nlsm3645@g.skku.edu',
+    '안녕하세요, 도배 준기공 이송목입니다. 수입타일을 전문으로 시공하고 있습니다.\n\n바닥, 벽면, 욕실 타일 모두 작업 가능하며, 줄눈 정밀도와 평탄 마감에 자신 있습니다.\n\n시공문의\n010-8335-8632\nlsm3645@g.skku.edu\n\n#타일 #수입타일 #욕실타일 #바닥타일',
   address: { city: '경기도' },
 }
 import { ProfileHeader } from './_components/ProfileHeader'
