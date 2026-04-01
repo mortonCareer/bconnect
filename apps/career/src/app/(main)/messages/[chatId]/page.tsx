@@ -1,15 +1,11 @@
 'use client'
 
-import { useCallback, useEffect } from 'react'
+import { useCallback, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import {
-  useGetChat,
-  useSendMessage,
-  useMarkChatAsRead,
-  useQueryClient,
-  getGetChatMessagesQueryKey,
-} from '@morton/api-client'
+import { useGetChat } from '@morton/api-client'
+import type { Message } from '@morton/api-client'
 import { TopBar } from '@morton/ui'
+import { useAuthStore } from '@/stores/auth-store'
 import MessageList from './_components/MessageList'
 import ChatInput from './_components/ChatInput'
 
@@ -17,32 +13,27 @@ export default function ChatRoomPage() {
   const params = useParams()
   const router = useRouter()
   const chatId = Number(params.chatId)
-  const queryClient = useQueryClient()
+  const currentUserId = useAuthStore((s) => s.member?.id)
 
   const { data: chat } = useGetChat(chatId, {
     query: { enabled: !!chatId },
   })
 
-  // 읽음 처리 — 채팅방 진입 시
-  const { mutate: markAsRead } = useMarkChatAsRead()
-  useEffect(() => {
-    if (chatId) markAsRead({ chatId })
-  }, [chatId, markAsRead])
-
-  const { mutate: sendMessageMutate, isPending } = useSendMessage()
+  const [localMessages, setLocalMessages] = useState<Message[]>([])
 
   const handleSend = useCallback(
     (content: string) => {
-      sendMessageMutate(
-        { chatId, data: { content } },
-        {
-          onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: getGetChatMessagesQueryKey(chatId) })
-          },
-        }
-      )
+      const newMessage: Message = {
+        id: Date.now(),
+        chatId,
+        senderId: currentUserId,
+        content,
+        createdAt: new Date().toISOString(),
+        modifiedAt: new Date().toISOString(),
+      }
+      setLocalMessages((prev) => [...prev, newMessage])
     },
-    [chatId, sendMessageMutate, queryClient]
+    [chatId, currentUserId]
   )
 
   return (
@@ -54,9 +45,9 @@ export default function ChatRoomPage() {
         onBack={() => router.back()}
       />
 
-      <MessageList chatId={chatId} />
+      <MessageList chatId={chatId} localMessages={localMessages} />
 
-      <ChatInput onSend={handleSend} disabled={isPending} />
+      <ChatInput onSend={handleSend} />
     </div>
   )
 }
