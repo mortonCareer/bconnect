@@ -26,8 +26,7 @@ public class CredentialService {
 
     @Transactional(readOnly = true)
     public List<Credential> getAll(Long profileId) {
-        // TODO 각 타입별로 가장 최근에 승인된 인증서만 필터링한다
-        return credentialFinder.findByProfileId(profileId);
+        return credentialFinder.findFilteredByProfileId(profileId);
     }
 
     @Transactional
