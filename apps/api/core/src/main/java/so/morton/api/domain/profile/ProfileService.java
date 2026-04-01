@@ -10,7 +10,6 @@ import so.morton.api.storage.domain.profile.ProfileRepository;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 import so.morton.api.support.auth.User;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +22,9 @@ public class ProfileService {
     public Profile create(User user, CreateProfileRequest request) {
         if (profileFinder.existsByMemberId(user.id()))
             throw new CodeException(ProfileExceptionCode.ALREADY_EXISTS);
+
+        if (!request.trades().contains(request.primaryTrade()))
+            throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
         ProfileEntity profile = ProfileEntity.builder()
                 .memberId(user.id())
@@ -45,6 +47,9 @@ public class ProfileService {
 
         if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        if (!request.trades().contains(request.primaryTrade()))
+            throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
         found.update(
                 request.primaryTrade(),
