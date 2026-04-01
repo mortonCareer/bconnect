@@ -53,9 +53,10 @@ public class OtpService {
 
     @Transactional(noRollbackFor = CodeException.class)
     public void verifyCode(String phone, String code) {
-        OtpEntity found = otpRepository.findByPhone(phone)
+        OtpEntity found = otpRepository.findByCode(code)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_OTP));
 
+        if (!found.getPhone().equals(phone)) throw new CodeException(AuthExceptionCode.INVALID_OTP);
         if (found.getAttempts() >= MAX_ATTEMPTS) throw new CodeException(AuthExceptionCode.OTP_MAX_ATTEMPTS);
 
         found.attempt();
