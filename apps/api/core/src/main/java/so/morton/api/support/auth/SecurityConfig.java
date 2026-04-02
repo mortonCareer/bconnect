@@ -26,7 +26,6 @@ import so.morton.api.support.auth.otp.SessionService;
 import so.morton.api.support.auth.otp.VerifyOtpAuthenticationFilter;
 
 import java.util.Collections;
-import java.util.List;
 
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
@@ -73,7 +72,6 @@ public class SecurityConfig {
                     config.setAllowedOriginPatterns(appProperties.cors().allowedOriginPatterns());
                     config.setAllowedMethods(Collections.singletonList("*"));
                     config.setAllowedHeaders(Collections.singletonList("*"));
-                    config.setExposedHeaders(List.of("Authorization"));
                     config.setAllowCredentials(true);
                     config.setMaxAge(3600L);
                     return config;
