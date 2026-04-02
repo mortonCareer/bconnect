@@ -13,7 +13,7 @@ const chatBubbleVariants = cva('inline-flex items-center px-[16px] text-r-14', {
     variant: {
       mine: 'bg-morton-primary text-white rounded-tl-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px]',
       theirs:
-        'bg-morton-gray-100 text-morton-gray-900 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[12px] max-w-[180px]',
+        'bg-morton-gray-100 text-morton-gray-900 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[12px]',
       typing:
         'bg-morton-gray-100 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px] h-[40px]',
     },
@@ -63,9 +63,11 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
     if (variant === 'mine') {
       return (
         <div ref={ref} className={cn('flex items-end justify-end gap-[8px]', className)} {...props}>
-          {timestamp && <span className="text-r-12 text-morton-gray-700">{timestamp}</span>}
-          <div className={chatBubbleVariants({ variant })}>
-            <span>{message}</span>
+          {timestamp && (
+            <span className="shrink-0 text-r-12 text-morton-gray-700">{timestamp}</span>
+          )}
+          <div className={cn(chatBubbleVariants({ variant }), 'max-w-[55vw]')}>
+            <span className="break-words">{message}</span>
           </div>
         </div>
       )
@@ -83,7 +85,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
 
         {/* 닉네임 + 버블 + 타임스탬프 */}
         <div className="flex items-end gap-[8px]">
-          <div className="flex flex-col gap-[4px]">
+          <div className="flex max-w-[55vw] flex-col gap-[4px]">
             {nickname && <span className="text-m-12 text-morton-gray-900">{nickname}</span>}
             <div className={chatBubbleVariants({ variant })}>
               {variant === 'typing' ? (
@@ -94,7 +96,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
             </div>
           </div>
           {variant === 'theirs' && timestamp && (
-            <span className="text-r-12 text-morton-gray-700">{timestamp}</span>
+            <span className="shrink-0 text-r-12 text-morton-gray-700">{timestamp}</span>
           )}
         </div>
       </div>

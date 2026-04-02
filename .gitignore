@@ -99,7 +99,6 @@ CLAUDE.local.md
 nul
 *.pdf
 *.sisyphus
-.mcp.json
 
 ### Lambda build artifacts ###
 infra/aws/lambda/**/function.zip

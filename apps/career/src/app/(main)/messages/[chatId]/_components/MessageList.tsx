@@ -17,6 +17,21 @@ interface MessageListProps {
   localMessages: Message[]
 }
 
+/** 날짜 구분선 — Figma node 364:5574 */
+function DateSeparator({ date }: { date: string }) {
+  return (
+    <div className="flex items-center justify-center py-6">
+      <span className="text-r-14 text-[#606870]">{date}</span>
+    </div>
+  )
+}
+
+/** 날짜 문자열 → "2026년 3월 29일" */
+function formatDateLabel(dateStr: string): string {
+  const d = new Date(dateStr)
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${String(d.getDate()).padStart(2, '0')}일`
+}
+
 /** 상대방 프로필을 해석해 닉네임/프로필 이미지를 반환하는 래퍼 */
 function SenderMessage({
   message,
@@ -157,13 +172,19 @@ export default function MessageList({ chatId, localMessages }: MessageListProps)
       )}
 
       <div className="flex flex-col gap-5">
-        {allMessages.map((message) => (
-          <SenderMessage
-            key={message.id ?? `local-${message.createdAt}`}
-            message={message}
-            currentUserId={currentUserId}
-          />
-        ))}
+        {allMessages.map((message, index) => {
+          const prevMessage = index > 0 ? allMessages[index - 1] : null
+          const currentDate = message.createdAt ? formatDateLabel(message.createdAt) : null
+          const prevDate = prevMessage?.createdAt ? formatDateLabel(prevMessage.createdAt) : null
+          const showDateSeparator = currentDate && currentDate !== prevDate
+
+          return (
+            <div key={message.id ?? `local-${message.createdAt}`}>
+              {showDateSeparator && <DateSeparator date={currentDate} />}
+              <SenderMessage message={message} currentUserId={currentUserId} />
+            </div>
+          )
+        })}
       </div>
 
       {/* 하단 스크롤 앵커 */}
