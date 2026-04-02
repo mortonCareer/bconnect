@@ -10,6 +10,7 @@ import so.morton.api.api.controller.v1.response.CredentialResponse;
 import so.morton.api.domain.credential.Credential;
 import so.morton.api.domain.credential.CredentialService;
 import so.morton.api.support.auth.User;
+import so.morton.api.storage.value.CredentialType;
 import so.morton.api.support.response.ApiResponse;
 
 import java.util.List;
@@ -20,6 +21,11 @@ import java.util.List;
 public class CredentialController {
 
     private final CredentialService credentialService;
+
+    @GetMapping("/types")
+    public ApiResponse<CredentialType[]> getTypes() {
+        return ApiResponse.success(CredentialType.values());
+    }
 
     @GetMapping
     public ApiResponse<List<CredentialResponse>> get(@RequestParam Long profileId) {
