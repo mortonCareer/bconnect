@@ -101,6 +101,20 @@ paths:
   # Member Endpoints
   # =====================
   /api/v1/members:
+    get:
+      operationId: getMembers
+      tags: [Members]
+      summary: 회원 목록 조회
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Member'
+
     post:
       operationId: registerMember
       tags: [Members]
@@ -445,6 +459,26 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Chat'
+
+  /api/v1/chats/{chatId}:
+    get:
+      operationId: getChat
+      tags: [Chats]
+      summary: 채팅방 조회
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
 
   /api/v1/chats/{chatId}/messages:
     get:
