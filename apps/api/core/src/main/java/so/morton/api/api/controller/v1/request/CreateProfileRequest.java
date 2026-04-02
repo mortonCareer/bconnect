@@ -1,7 +1,7 @@
 package so.morton.api.api.controller.v1.request;
 
 import jakarta.validation.constraints.NotNull;
-4import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.PositiveOrZero;
 import so.morton.api.storage.support.Address;
 import so.morton.api.storage.value.Trade;
 
