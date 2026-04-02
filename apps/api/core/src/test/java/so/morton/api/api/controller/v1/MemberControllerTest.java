@@ -60,7 +60,7 @@ class MemberControllerTest {
         void create_success() throws Exception {
             // given
             RegisterMemberRequest request = new RegisterMemberRequest(
-                    "signup-token", "testuser", "홍길동", "01012345678", "pic.jpg", Role.SKILLED
+                    "signup-token", "testuser", "홍길동", "pic.jpg", Role.SKILLED
             );
             when(memberService.register(any(RegisterMemberRequest.class))).thenReturn(SAMPLE_MEMBER);
 
@@ -76,7 +76,7 @@ class MemberControllerTest {
         @DisplayName("필수 필드가 비어있으면 400을 반환한다")
         void create_invalidRequest() throws Exception {
             // given
-            String body = "{\"signupToken\":\"\",\"username\":\"\",\"name\":\"\",\"phone\":\"\",\"picture\":\"\"}";
+            String body = "{\"signupToken\":\"\",\"username\":\"\",\"name\":\"\",\"picture\":\"\"}";
 
             // when & then
             mockMvc.perform(post("/api/v1/members")
