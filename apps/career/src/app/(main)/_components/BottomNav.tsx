@@ -21,6 +21,9 @@ const NAV_ITEMS: NavItem[] = [
 export function BottomNav() {
   const pathname = usePathname()
 
+  // 채팅 상세 페이지에서는 BottomNav 숨김
+  if (/^\/messages\/\d+/.test(pathname)) return null
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-morton-gray-300 bg-white pb-[env(safe-area-inset-bottom)]">
       <div className="mx-auto flex h-[70px] max-w-screen-sm items-center justify-around">

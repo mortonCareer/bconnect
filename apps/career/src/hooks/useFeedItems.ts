@@ -72,8 +72,9 @@ export function useFeedItems({
           },
           content: {
             image: post.images?.[0] || '/placeholder-post.svg',
-            company: '',
-            duration: '',
+            // TODO: Feed API에 Task 정보 포함 필요 (#197)
+            company: '서정 건축',
+            duration: '4일 소요',
             timestamp: post.createdAt ? formatRelativeTime(post.createdAt) : '',
             description: post.content ?? '',
           },

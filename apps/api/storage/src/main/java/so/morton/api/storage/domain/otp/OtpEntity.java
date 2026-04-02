@@ -64,10 +64,10 @@ public class OtpEntity extends BaseEntity {
     }
 
     public void invalidateCode() {
-        this.codeExpiredAt = LocalDateTime.MIN;
+        this.codeExpiredAt = LocalDateTime.now();
     }
 
     public void invalidateToken() {
-        this.signupTokenExpiredAt =  LocalDateTime.MIN;
+        this.signupTokenExpiredAt = LocalDateTime.now();
     }
 }

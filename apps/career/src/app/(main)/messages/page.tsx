@@ -2,6 +2,8 @@
 
 import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
+import Link from 'next/link'
 import {
   useQueries,
   useGetMyChats,
@@ -17,6 +19,7 @@ import { useAuthStore } from '@/stores/auth-store'
 
 export default function MessagesPage() {
   const router = useRouter()
+  const observerRef = useRef<HTMLDivElement>(null)
   const currentUserId = useAuthStore((s) => s.member?.id)
 
   const { data: chats, isLoading } = useGetMyChats()
@@ -62,7 +65,7 @@ export default function MessagesPage() {
 
   return (
     <div className="flex flex-col">
-      <TopBar variant="default" title="메시지" showAction={false} />
+      <TopBar variant="default" title="메시지" showAction={false} backHref="/" />
 
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center py-20">
@@ -80,11 +83,7 @@ export default function MessagesPage() {
             const otherProfile = otherId != null ? profileMap.get(otherId) : undefined
 
             return (
-              <div
-                key={chat.id}
-                onClick={() => router.push(`/messages/${chat.id}`)}
-                className="cursor-pointer"
-              >
+              <Link key={chat.id} href={`/messages/${chat.id}`} className="block px-4">
                 <ChatListItem
                   variant="badge"
                   profileImage={otherMember?.picture}
@@ -98,7 +97,7 @@ export default function MessagesPage() {
                   timestamp={chat.modifiedAt ? formatRelativeTime(chat.modifiedAt) : undefined}
                   unreadCount={chat.unreadCount}
                 />
-              </div>
+              </Link>
             )
           })}
         </div>
