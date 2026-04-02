@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 import so.morton.api.api.controller.v1.response.RefreshTokenResponse;
 import so.morton.api.support.auth.AuthenticationTypeMismatchException;
+import so.morton.api.support.auth.otp.SessionService;
 import so.morton.api.support.response.ApiResponse;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ public class RefreshTokenAuthenticationSuccessHandler implements AuthenticationS
 
     private final ObjectMapper objectMapper;
     private final JwtProvider jwtProvider;
+    private final SessionService sessionService;
 
     @Override
     public void onAuthenticationSuccess(@NonNull HttpServletRequest request,
@@ -42,11 +44,14 @@ public class RefreshTokenAuthenticationSuccessHandler implements AuthenticationS
                 log.debug("Generate access token from refresh token");
             }
 
+            String username = authentication.getName();
             String accessToken = jwtProvider.generateAccessToken(authentication);
+            String refreshToken = jwtProvider.generateRefreshToken(username);
+            sessionService.rotate(username, refreshToken);
 
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getWriter().write(objectMapper.writeValueAsString(
-                    ApiResponse.success(new RefreshTokenResponse(accessToken))
+                    ApiResponse.success(new RefreshTokenResponse(accessToken, refreshToken))
             ));
         }
     }

@@ -45,6 +45,10 @@ public class SessionEntity extends BaseEntity {
         this.refreshToken = refreshToken;
     }
 
+    public void rotate(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
     public void revoke() {
         this.revoked = true;
     }

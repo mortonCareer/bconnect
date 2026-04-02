@@ -61,6 +61,13 @@ public class SessionService {
         }
     }
 
+    public void rotate(String username, String refreshToken) {
+        SessionEntity found = sessionRepository.findByUsername(username)
+                .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
+
+        found.rotate(AuthUtils.sha256(refreshToken));
+    }
+
     public void logout(String username) {
         SessionEntity found = sessionRepository.findByUsername(username)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
