@@ -45,10 +45,10 @@ public class TaskEntity extends BaseEntity {
     @Column(name = "trade")
     private Set<Trade> trades = new HashSet<>();
 
-    @Column(nullable = false)
+    @Column(name = "start_date", nullable = false)
     private LocalDate start;
 
-    @Column(nullable = false)
+    @Column(name = "end_date", nullable = false)
     private LocalDate end;
 
     // TODO: 추가
