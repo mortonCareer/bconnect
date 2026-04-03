@@ -103,7 +103,7 @@ class ProfileServiceTest {
         }
 
         @Test
-        @DisplayName("주 직종 미포함 시 IllegalArgumentException")
+        @DisplayName("주 직종 미포함 시 INVALID_PRIMARY_TRADE")
         void create_primaryTradeNotInTrades() {
             // given
             CreateProfileRequest request = new CreateProfileRequest(
@@ -118,8 +118,8 @@ class ProfileServiceTest {
             when(profileFinder.existsByMemberId(USER_ID)).thenReturn(false);
 
             // when & then
-            assertThatThrownBy(() -> profileService.create(UserFactory.FOREMAN_USER, request))
-                    .isInstanceOf(IllegalArgumentException.class);
+            assertCodeException(() -> profileService.create(UserFactory.FOREMAN_USER, request))
+                    .hasExceptionCode(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
         }
 
         @Test

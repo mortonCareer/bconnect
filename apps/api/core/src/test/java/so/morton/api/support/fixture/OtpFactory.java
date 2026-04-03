@@ -18,20 +18,16 @@ public class OtpFactory {
         return new OtpEntity(phone, code, LocalDateTime.MAX);
     }
 
-    public static OtpEntity createExpiredEntity(String phone) {
-        return new OtpEntity(phone, DEFAULT_CODE, LocalDateTime.MIN);
-    }
-
     public static OtpEntity createEntity(String phone, int count) {
         OtpEntity entity = createEntity(phone);
-        ReflectionTestUtils.setField(entity, "attemptCount", count);
+        for (int i = 0; i < count; i++) entity.attempt();
         return entity;
     }
 
-    public static OtpEntity createEntity(String phone, int count, LocalDateTime modifiedAt) {
+    public static OtpEntity createEntity(String phone, int count, LocalDateTime lastSentAt) {
         OtpEntity entity = createEntity(phone);
         ReflectionTestUtils.setField(entity, "dailyCount", count);
-        ReflectionTestUtils.setField(entity, "modifiedAt", modifiedAt);
+        ReflectionTestUtils.setField(entity, "lastSentAt", lastSentAt);
         return entity;
     }
 

@@ -21,12 +21,6 @@ public record Profile(
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
-    public Profile {
-        if (!trades.contains(primaryTrade)) {
-            throw new IllegalArgumentException("주 직종은 보유 직종에 포함되어야 합니다");
-        }
-    }
-
     public static Profile of(ProfileEntity entity) {
         Hibernate.initialize(entity.getTrades());
         return new Profile(

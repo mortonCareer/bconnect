@@ -63,7 +63,7 @@ class CredentialServiceTest {
                     LocalDateTime.now(), LocalDateTime.now()
             );
             List<Credential> expected = List.of(cred1, cred2);
-            when(credentialFinder.findByProfileId(PROFILE_ID)).thenReturn(expected);
+            when(credentialFinder.findFilteredByProfileId(PROFILE_ID)).thenReturn(expected);
 
             // when
             List<Credential> result = credentialService.getAll(PROFILE_ID);
@@ -71,21 +71,21 @@ class CredentialServiceTest {
             // then
             assertThat(result).hasSize(2);
             assertThat(result).isEqualTo(expected);
-            verify(credentialFinder).findByProfileId(PROFILE_ID);
+            verify(credentialFinder).findFilteredByProfileId(PROFILE_ID);
         }
 
         @Test
         @DisplayName("빈 리스트 반환")
         void getAll_empty() {
             // given
-            when(credentialFinder.findByProfileId(PROFILE_ID)).thenReturn(List.of());
+            when(credentialFinder.findFilteredByProfileId(PROFILE_ID)).thenReturn(List.of());
 
             // when
             List<Credential> result = credentialService.getAll(PROFILE_ID);
 
             // then
             assertThat(result).isEmpty();
-            verify(credentialFinder).findByProfileId(PROFILE_ID);
+            verify(credentialFinder).findFilteredByProfileId(PROFILE_ID);
         }
     }
 
@@ -124,54 +124,29 @@ class CredentialServiceTest {
         }
 
         @Test
-        @DisplayName("null expiration 타입 시 NPE (버그)")
-        void create_typeWithNullExpiration() {
+        @DisplayName("null expiredAt 시 생성 성공")
+        void create_nullExpiredAt() {
             // given
             Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
-            CreateCredentialRequest request = new CreateCredentialRequest(CredentialType.IDENTITY_VERIFICATION);
+            CreateCredentialRequest request = new CreateCredentialRequest(CredentialType.IDENTITY_VERIFICATION, null);
 
             when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
+            when(credentialRepository.save(any(CredentialEntity.class))).thenAnswer(invocation -> {
+                CredentialEntity entity = invocation.getArgument(0);
+                ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
+                ReflectionTestUtils.setField(entity, "createdAt", LocalDateTime.now());
+                ReflectionTestUtils.setField(entity, "modifiedAt", LocalDateTime.now());
+                return entity;
+            });
 
-            // when & then
-            assertThatThrownBy(() -> credentialService.create(UserFactory.FOREMAN_USER, request))
-                    .isInstanceOf(NullPointerException.class);
+            // when
+            Credential result = credentialService.create(UserFactory.FOREMAN_USER, request);
 
-            verify(profileFinder).findByMemberId(USER_ID);
-            verify(credentialRepository, never()).save(any());
-        }
-
-        @Test
-        @DisplayName("CAREER_CERTIFICATE 타입 시 NPE (버그)")
-        void create_typeCareerCertificate() {
-            // given
-            Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
-            CreateCredentialRequest request = new CreateCredentialRequest(CredentialType.CAREER_CERTIFICATE);
-
-            when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
-
-            // when & then
-            assertThatThrownBy(() -> credentialService.create(UserFactory.FOREMAN_USER, request))
-                    .isInstanceOf(NullPointerException.class);
-
-            verify(profileFinder).findByMemberId(USER_ID);
-            verify(credentialRepository, never()).save(any());
-        }
-
-        @Test
-        @DisplayName("OTHER_CERTIFICATE 타입 시 NPE (버그)")
-        void create_typeOtherCertificate() {
-            // given
-            Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
-            CreateCredentialRequest request = new CreateCredentialRequest(CredentialType.OTHER_CERTIFICATE);
-
-            when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
-
-            // when & then
-            assertThatThrownBy(() -> credentialService.create(UserFactory.FOREMAN_USER, request))
-                    .isInstanceOf(NullPointerException.class);
-
-            verify(profileFinder).findByMemberId(USER_ID);
-            verify(credentialRepository, never()).save(any());
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.type()).isEqualTo(CredentialType.IDENTITY_VERIFICATION);
+            assertThat(result.expiredAt()).isNull();
+            verify(credentialRepository).save(any(CredentialEntity.class));
         }
 
         @Test
@@ -200,7 +175,7 @@ class CredentialServiceTest {
         void delete_success() {
             // given
             Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
 
             when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
@@ -237,7 +212,7 @@ class CredentialServiceTest {
         void delete_forbidden() {
             // given
             Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             ReflectionTestUtils.setField(entity, "profileId", 999L); // Different profile
 
@@ -261,7 +236,7 @@ class CredentialServiceTest {
         @DisplayName("승인 성공")
         void accept_success() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             when(credentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(entity));
 
@@ -270,7 +245,6 @@ class CredentialServiceTest {
 
             // then
             assertThat(entity.getStatus()).isEqualTo(CredentialStatus.ACCEPTED);
-            assertThat(entity.getExpiredAt()).isNotNull();
             verify(credentialRepository).findById(CREDENTIAL_ID);
         }
 
@@ -287,13 +261,12 @@ class CredentialServiceTest {
         }
 
         @Test
-        @DisplayName("이미 승인된 자격 재승인 시 expiredAt 갱신")
+        @DisplayName("이미 승인된 자격 재승인 시 상태 유지")
         void accept_alreadyAccepted() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             entity.accept();
-            ReflectionTestUtils.setField(entity, "expiredAt", LocalDate.now().minusDays(1));
             when(credentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(entity));
 
             // when
@@ -301,14 +274,13 @@ class CredentialServiceTest {
 
             // then
             assertThat(entity.getStatus()).isEqualTo(CredentialStatus.ACCEPTED);
-            assertThat(entity.getExpiredAt()).isAfter(LocalDate.now().minusDays(1));
         }
 
         @Test
         @DisplayName("거부된 자격 승인 시 상태 변경")
         void accept_afterDenied() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             entity.deny();
             when(credentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(entity));
@@ -318,22 +290,6 @@ class CredentialServiceTest {
 
             // then
             assertThat(entity.getStatus()).isEqualTo(CredentialStatus.ACCEPTED);
-            assertThat(entity.getExpiredAt()).isNotNull();
-        }
-
-        @Test
-        @DisplayName("null expiration 타입 승인 시 NPE (버그)")
-        void accept_typeWithNullExpiration() {
-            // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
-            ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
-            ReflectionTestUtils.setField(entity, "type", CredentialType.IDENTITY_VERIFICATION);
-            when(credentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(entity));
-
-            // when & then
-            assertThatThrownBy(() -> credentialService.accept(CREDENTIAL_ID))
-                    .isInstanceOf(NullPointerException.class);
-            verify(credentialRepository).findById(CREDENTIAL_ID);
         }
     }
 
@@ -345,7 +301,7 @@ class CredentialServiceTest {
         @DisplayName("거부 성공")
         void deny_success() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             when(credentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(entity));
 
@@ -373,7 +329,7 @@ class CredentialServiceTest {
         @DisplayName("이미 거부된 자격 재거부 시 상태 유지")
         void deny_alreadyDenied() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             entity.deny();
             when(credentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(entity));
@@ -400,7 +356,7 @@ class CredentialServiceTest {
         @DisplayName("조회 성공")
         void find_success() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             when(finderCredentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(entity));
 
@@ -442,7 +398,7 @@ class CredentialServiceTest {
         @DisplayName("조회 성공")
         void findByProfileId_success() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             when(finderCredentialRepository.findByProfileId(PROFILE_ID)).thenReturn(List.of(entity));
 

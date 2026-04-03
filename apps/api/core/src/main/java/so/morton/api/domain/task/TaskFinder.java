@@ -15,16 +15,16 @@ public class TaskFinder {
 
     private final TaskRepository taskRepository;
 
+    public List<Task> findByProfileId(Long profileId) {
+        return taskRepository.findAllByProfileId((profileId))
+                .stream()
+                .map(Task::of)
+                .toList();
+    }
+
     public Task find(Long taskId) {
         return taskRepository.findById(taskId)
                 .map(Task::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-    }
-
-    public List<Task> findAll() {
-        return taskRepository.findAll()
-                .stream()
-                .map(Task::of)
-                .toList();
     }
 }

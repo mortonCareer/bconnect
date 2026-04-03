@@ -1,28 +1,35 @@
 package so.morton.api.support.auth.jwt;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.StringUtils;
-import so.morton.api.support.auth.BearerTokenNotValidException;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class JwtUtils {
 
     public static String resolveBearerToken(HttpServletRequest request) {
-        Pattern authorizationPattern = Pattern.compile("^Bearer (?<token>[a-zA-Z0-9-._~+/]+=*)$", Pattern.CASE_INSENSITIVE);
-        String bearerTokenHeaderName = HttpHeaders.AUTHORIZATION;
-        String authorization = request.getHeader(bearerTokenHeaderName);
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (!StringUtils.startsWithIgnoreCase(authorization, "bearer ")) return null;
 
-        if (!StringUtils.startsWithIgnoreCase(authorization, "bearer")) {
-            return null;
-        }
+        return authorization.substring(7).trim();
+    }
 
-        Matcher matcher = authorizationPattern.matcher(authorization);
-        if (!matcher.matches()) {
-            throw new BearerTokenNotValidException("Bearer token is malformed");
-        }
-        return matcher.group("token");
+    public static String resolveCookie(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) return null;
+
+        for (Cookie cookie : cookies)
+            if (name.equals(cookie.getName()))
+                return cookie.getValue();
+
+        return null;
+    }
+
+    public static ResponseCookie deleteCookie(String name, String path) {
+        return ResponseCookie.from(name, "")
+                .path(path)
+                .maxAge(0)
+                .build();
     }
 }

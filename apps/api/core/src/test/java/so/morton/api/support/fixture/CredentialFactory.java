@@ -17,7 +17,7 @@ public class CredentialFactory {
                 LocalDateTime.MIN, LocalDateTime.MIN);
     }
 
-    public static CredentialEntity createEntity(Long profileId, CredentialStatus status) {
+    public static CredentialEntity createEntity(Long profileId) {
         return CredentialEntity.builder()
                 .profileId(profileId)
                 .type(CredentialType.SOLE_PROPRIETOR)
@@ -25,6 +25,6 @@ public class CredentialFactory {
     }
 
     public static CreateCredentialRequest createRequest() {
-        return new CreateCredentialRequest(CredentialType.SOLE_PROPRIETOR);
+        return new CreateCredentialRequest(CredentialType.SOLE_PROPRIETOR, LocalDate.MAX);
     }
 }

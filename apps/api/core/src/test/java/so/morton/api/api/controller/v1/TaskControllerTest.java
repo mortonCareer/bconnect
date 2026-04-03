@@ -126,8 +126,8 @@ class TaskControllerTest {
     }
 
     @Nested
-    @DisplayName("GET /api/v1/tasks")
-    class GetAllTasks {
+    @DisplayName("GET /api/v1/tasks/me")
+    class GetMyTasks {
 
         @Test
         @DisplayName("목록 조회 성공")
@@ -140,6 +140,14 @@ class TaskControllerTest {
                             .with(user(UserFactory.FOREMAN_USER)))
                     .andExpect(status().isOk())
                     .andExpect(successResponse());
+        }
+
+        @Test
+        @DisplayName("인증 없이 내 일감 목록을 조회하면 403을 반환한다")
+        void getAll_unauthenticated() throws Exception {
+            // when & then
+            mockMvc.perform(get("/api/v1/tasks"))
+                    .andExpect(status().isForbidden());
         }
     }
 

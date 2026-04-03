@@ -19,12 +19,13 @@ import so.morton.api.support.sms.SmsProvider;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static so.morton.api.support.CodeExceptionAssert.assertCodeException;
-import static so.morton.api.support.auth.AuthUtils.hash;
+import static so.morton.api.support.auth.AuthUtils.sha256;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SessionService 테스트")
@@ -47,7 +48,7 @@ class SessionServiceTest {
         void verify_success() {
             // given
             String rawToken = "refresh-token-123";
-            SessionEntity session = SessionFactory.createEntity(USERNAME, "agent", "ip", hash(rawToken));
+            SessionEntity session = SessionFactory.createEntity(USERNAME, "agent", "ip", sha256(rawToken));
             when(sessionRepository.findByUsername(USERNAME)).thenReturn(Optional.of(session));
 
             // when & then
@@ -70,7 +71,7 @@ class SessionServiceTest {
         @DisplayName("토큰 불일치 시 INVALID_REFRESH_TOKEN")
         void verify_tokenMismatch() {
             // given
-            SessionEntity session = SessionFactory.createEntity(USERNAME, "agent", "ip", hash("correct-token"));
+            SessionEntity session = SessionFactory.createEntity(USERNAME, "agent", "ip", sha256("correct-token"));
             when(sessionRepository.findByUsername(USERNAME)).thenReturn(Optional.of(session));
 
             // when & then
@@ -83,7 +84,7 @@ class SessionServiceTest {
         void verify_revokedSession() {
             // given
             String rawToken = "refresh-token-123";
-            SessionEntity session = SessionFactory.createEntity(USERNAME, "agent", "ip", hash(rawToken));
+            SessionEntity session = SessionFactory.createEntity(USERNAME, "agent", "ip", sha256(rawToken));
             session.revoke();
             when(sessionRepository.findByUsername(USERNAME)).thenReturn(Optional.of(session));
 
@@ -109,6 +110,7 @@ class SessionServiceTest {
 
             // then
             verify(sessionRepository).findByUsername(USERNAME);
+            assertThat(session.isRevoked()).isTrue();
         }
 
         @Test
@@ -167,6 +169,9 @@ class SessionServiceTest {
 
             // then
             verify(sessionRepository, never()).save(any(SessionEntity.class));
+            verify(smsProvider, never()).send(anyString(), anyString());
+            assertThat(existingSession.getAgent()).isEqualTo(agent);
+            assertThat(existingSession.getIp()).isEqualTo(ip);
         }
     }
 }

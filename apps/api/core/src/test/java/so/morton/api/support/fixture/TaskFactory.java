@@ -12,9 +12,12 @@ import java.util.Set;
 
 public class TaskFactory {
 
+    private static final LocalDate START_DATE = LocalDate.of(2024, 1, 1);
+    private static final LocalDate END_DATE = LocalDate.of(2024, 12, 31);
+
     public static Task create(Long id, Long profileId) {
         return new Task(id, profileId, "company", ProfileFactory.ADDRESS, "task", "event",
-                Set.of(Trade.ELECTRICAL), LocalDate.MIN, LocalDate.MIN,
+                Set.of(Trade.ELECTRICAL), START_DATE, END_DATE,
                 LocalDateTime.now(), LocalDateTime.now());
     }
 
@@ -26,20 +29,20 @@ public class TaskFactory {
                 .taskTitle("task")
                 .eventTitle("event")
                 .trades(Set.of(Trade.ELECTRICAL))
-                .start(LocalDate.MIN)
-                .end(LocalDate.MAX)
+                .start(START_DATE)
+                .end(END_DATE)
                 .build();
     }
 
     public static CreateTaskRequest createRequest() {
         return new CreateTaskRequest(
                 "company", ProfileFactory.ADDRESS, "create", "create",
-                Set.of(Trade.ELECTRICAL), LocalDate.MIN, LocalDate.MAX);
+                Set.of(Trade.ELECTRICAL), START_DATE, END_DATE);
     }
 
     public static UpdateTaskRequest updateRequest() {
         return new UpdateTaskRequest(
                 "company", ProfileFactory.ADDRESS, "update", "update",
-                Set.of(Trade.DEMOLITION), LocalDate.MIN, LocalDate.MAX);
+                Set.of(Trade.DEMOLITION), START_DATE, END_DATE);
     }
 }

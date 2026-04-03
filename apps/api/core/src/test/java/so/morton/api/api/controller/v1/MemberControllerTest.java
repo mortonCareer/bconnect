@@ -10,7 +10,6 @@ import so.morton.api.config.IntegrationTest;
 import org.springframework.test.web.servlet.MockMvc;
 import so.morton.api.api.controller.v1.request.RegisterMemberRequest;
 import so.morton.api.api.controller.v1.request.UpdateMemberRequest;
-import so.morton.api.config.AppProperties;
 import so.morton.api.domain.member.Member;
 import so.morton.api.domain.member.MemberService;
 import so.morton.api.support.CodeException;
@@ -21,7 +20,6 @@ import so.morton.api.support.fixture.UserFactory;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -55,30 +53,14 @@ class MemberControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
-                    .andExpect(successResponse())
-                    .andExpect(jsonPath("$.data.memberId").value(1))
-                    .andExpect(jsonPath("$.data.accessToken").value("test-access-token"));
+                    .andExpect(successResponse());
         }
 
         @Test
         @DisplayName("필수 필드 누락 시 400")
         void create_invalidRequest() throws Exception {
             // given
-            String body = "{\"signupToken\":\"\",\"username\":\"\",\"name\":\"\",\"phone\":\"\",\"picture\":\"\"}";
-
-            // when & then
-            mockMvc.perform(post("/api/v1/members")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(body))
-                    .andExpect(errorResponse(CommonExceptionCode.NOT_VALID));
-        }
-
-        @Test
-        @DisplayName("phone 잘못된 패턴 시 400")
-        void create_invalidPhonePattern() throws Exception {
-            // given
-            String body = """
-                    {"signupToken":"token","username":"user","name":"name","phone":"010-1234-5678","picture":"pic.jpg","role":"SKILLED"}""";
+            String body = "{\"signupToken\":\"\",\"username\":\"\",\"name\":\"\",\"picture\":\"\"}";
 
             // when & then
             mockMvc.perform(post("/api/v1/members")

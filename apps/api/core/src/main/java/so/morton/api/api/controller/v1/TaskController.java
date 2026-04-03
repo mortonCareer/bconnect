@@ -30,7 +30,7 @@ public class TaskController {
 
     @GetMapping
     public ApiResponse<List<TaskResponse>> getAll(@AuthenticationPrincipal User user) {
-        List<TaskResponse> tasks = taskService.getAll().stream()
+        List<TaskResponse> tasks = taskService.getAll(user).stream()
                 .map(TaskResponse::of)
                 .toList();
         return ApiResponse.success(tasks);

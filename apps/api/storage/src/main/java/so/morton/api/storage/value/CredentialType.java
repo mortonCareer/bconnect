@@ -3,26 +3,25 @@ package so.morton.api.storage.value;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.time.Duration;
-
 @Getter
 @RequiredArgsConstructor
 public enum CredentialType {
-    // TODO: 만료기한 설정
 
     // 사업자 및 면허
-    IDENTITY_VERIFICATION(null),
-    SOLE_PROPRIETOR(Duration.ofDays(365)),
-    CONSTRUCTION_LICENSE(Duration.ofDays(365)),
-    SPECIALTY_CONSTRUCTION_LICENSE(Duration.ofDays(365)),
-    // 증명서
-    CAREER_CERTIFICATE(null),
-    SKILL_GRADE_CERTIFICATE(Duration.ofDays(365)),
-    OTHER_CERTIFICATE(null),
-    // 자격증
-    NATIONAL_TECHNICAL_QUALIFICATION(Duration.ofDays(365)),
-    SKILLED_TECHNICIAN(Duration.ofDays(365)),
-    OTHER_QUALIFICATION(null);
+    IDENTITY_VERIFICATION("본인인증"),
+    SOLE_PROPRIETOR("개인사업자"),
+    CONSTRUCTION_LICENSE("건설업면허"),
+    SPECIALTY_CONSTRUCTION_LICENSE("전문건설업면허"),
 
-    private final Duration expiration;
+    // 증명서
+    CAREER_CERTIFICATE("경력증명서"),
+    SKILL_GRADE_CERTIFICATE("기능등급증명서"),
+    OTHER_CERTIFICATE("기타 증명서"),
+
+    // 자격증
+    NATIONAL_TECHNICAL_QUALIFICATION("국가기술자격"),
+    SKILLED_TECHNICIAN("숙련기술인"),
+    OTHER_QUALIFICATION("기타 자격증");
+
+    private final String label;
 }

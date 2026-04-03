@@ -171,7 +171,7 @@ class ProfileControllerTest {
 
         @Test
         @DisplayName("미인증 시 403")
-        void unauthenticated_401() throws Exception {
+        void unauthenticated_403() throws Exception {
             // when & then
             mockMvc.perform(post("/api/v1/profiles")
                             .contentType(MediaType.APPLICATION_JSON)

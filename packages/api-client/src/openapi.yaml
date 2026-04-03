@@ -97,6 +97,19 @@ paths:
         '200':
           description: OK
 
+  /api/v1/auth/me:
+    get:
+      operationId: getCurrentMember
+      tags: [Auth]
+      summary: 현재 로그인한 회원 정보를 조회합니다
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+
   # =====================
   # Member Endpoints
   # =====================
@@ -126,14 +139,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RegisterMemberRequest'
-      description: 회원 등록 후 accessToken 반환 + refreshToken httpOnly 쿠키 설정
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegisterMemberResponse'
+                type: integer
+                format: int64
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -422,25 +435,6 @@ paths:
       responses:
         '200':
           description: OK
-
-  # =====================
-  # Feed Endpoints
-  # =====================
-  /api/v1/feeds:
-    get:
-      operationId: getFeeds
-      tags: [Feeds]
-      security: []
-      summary: 피드 목록 조회
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Feed'
 
   # =====================
   # Chat Endpoints
@@ -1048,14 +1042,15 @@ components:
           pattern: '\d{6}'
 
     VerifyOtpLoginResponse:
-      description: 로그인 성공 응답. refreshToken은 httpOnly 쿠키(refreshToken)로 전달됩니다.
       type: object
-      required: [registered, accessToken]
+      required: [registered, accessToken, refreshToken]
       properties:
         registered:
           type: boolean
           enum: [true]
         accessToken:
+          type: string
+        refreshToken:
           type: string
 
     VerifyOtpSignupResponse:
@@ -1071,17 +1066,6 @@ components:
     RefreshTokenResponse:
       type: object
       properties:
-        accessToken:
-          type: string
-
-    RegisterMemberResponse:
-      description: 회원 등록 응답. refreshToken은 httpOnly 쿠키로 전달됩니다.
-      type: object
-      required: [memberId, accessToken]
-      properties:
-        memberId:
-          type: integer
-          format: int64
         accessToken:
           type: string
 
@@ -1199,7 +1183,7 @@ components:
 
     CreateProfileRequest:
       type: object
-      required: [primaryTrade, trades, experience]
+      required: [primaryTrade, trades, experience, address]
       properties:
         primaryTrade:
           $ref: '#/components/schemas/Trade'

@@ -8,13 +8,10 @@ import so.morton.api.storage.domain.session.SessionEntity;
 import so.morton.api.storage.domain.session.SessionRepository;
 import so.morton.api.support.AuthExceptionCode;
 import so.morton.api.support.CodeException;
+import so.morton.api.support.auth.AuthUtils;
 import so.morton.api.support.sms.SmsProvider;
 import so.morton.api.support.sms.SmsTemplate;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HexFormat;
 import java.util.Optional;
 
 @Service
@@ -30,7 +27,7 @@ public class SessionService {
         SessionEntity found = sessionRepository.findByUsername(username)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
 
-        if (!sha256(refreshToken).equals(found.getRefreshToken())) {
+        if (!AuthUtils.sha256(refreshToken).equals(found.getRefreshToken())) {
             throw new CodeException(AuthExceptionCode.INVALID_REFRESH_TOKEN);
         }
 
@@ -41,17 +38,17 @@ public class SessionService {
 
     public void login(String username, String agent, String ip, String refreshToken) {
         Optional<SessionEntity> found = sessionRepository.findByUsername(username);
-        String hashed = sha256(refreshToken);
+        String encrypted = AuthUtils.sha256(refreshToken);
 
         if (found.isPresent()) {
-            found.get().update(agent, ip, hashed);
+            found.get().update(agent, ip, encrypted);
         } else {
             sessionRepository.save(
                     SessionEntity.builder()
                             .username(username)
                             .agent(agent)
                             .ip(ip)
-                            .refreshToken(hashed)
+                            .refreshToken(encrypted)
                             .build()
             );
 
@@ -64,14 +61,11 @@ public class SessionService {
         }
     }
 
-    private static String sha256(String input) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hash);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 not available", e);
-        }
+    public void rotate(String username, String refreshToken) {
+        SessionEntity found = sessionRepository.findByUsername(username)
+                .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
+
+        found.rotate(AuthUtils.sha256(refreshToken));
     }
 
     public void logout(String username) {

@@ -36,6 +36,7 @@ class MemberServiceTest {
 
     @Mock private MemberRepository memberRepository;
     @Mock private MemberFinder memberFinder;
+    @Mock private so.morton.api.support.auth.otp.OtpService otpService;
     @InjectMocks private MemberService memberService;
 
     private static final Long USER_ID = UserFactory.FOREMAN_USER.id();
@@ -83,6 +84,7 @@ class MemberServiceTest {
             // given
             RegisterMemberRequest request = MemberFactory.registerRequest();
 
+            when(otpService.consumeToken("signupToken")).thenReturn("01000000000");
             when(memberRepository.findByUsername("username")).thenReturn(Optional.empty());
             when(memberRepository.findByPhone("01000000000")).thenReturn(Optional.empty());
             when(memberRepository.save(any(MemberEntity.class))).thenAnswer(invocation -> {
@@ -116,6 +118,7 @@ class MemberServiceTest {
             RegisterMemberRequest request = MemberFactory.registerRequest();
             MemberEntity existing = MemberFactory.createEntity();
 
+            when(otpService.consumeToken("signupToken")).thenReturn("01000000000");
             when(memberRepository.findByUsername("username")).thenReturn(Optional.of(existing));
 
             // when & then
@@ -133,6 +136,7 @@ class MemberServiceTest {
             RegisterMemberRequest request = MemberFactory.registerRequest();
             MemberEntity existing = MemberFactory.createEntity();
 
+            when(otpService.consumeToken("signupToken")).thenReturn("01000000000");
             when(memberRepository.findByUsername("username")).thenReturn(Optional.empty());
             when(memberRepository.findByPhone("01000000000")).thenReturn(Optional.of(existing));
 

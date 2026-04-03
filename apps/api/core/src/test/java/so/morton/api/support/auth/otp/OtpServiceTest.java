@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import so.morton.api.storage.domain.otp.OtpEntity;
 import so.morton.api.storage.domain.otp.OtpRepository;
 import so.morton.api.support.AuthExceptionCode;
@@ -146,7 +145,7 @@ class OtpServiceTest {
         void verify_validCode() {
             // given
             OtpEntity entity = OtpFactory.createEntity(PHONE);
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.of(entity));
 
             // when & then
             otpService.verifyCode(PHONE, CODE);
@@ -156,7 +155,7 @@ class OtpServiceTest {
         @DisplayName("미존재 시 INVALID_OTP")
         void verify_otpNotFound() {
             // given
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.empty());
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.empty());
 
             // when & then
             assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
@@ -164,15 +163,28 @@ class OtpServiceTest {
         }
 
         @Test
-        @DisplayName("만료 시 OTP_EXPIRED")
-        void verify_expired() {
+        @DisplayName("phone 불일치 시 INVALID_OTP")
+        void verify_phoneMismatch() {
             // given
-            OtpEntity entity = OtpFactory.createExpiredEntity(PHONE);
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+            OtpEntity entity = OtpFactory.createEntity("01099999999");
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.of(entity));
 
             // when & then
             assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
-                    .hasExceptionCode(AuthExceptionCode.OTP_EXPIRED);
+                    .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
+        }
+
+        @Test
+        @DisplayName("폐기된 코드 시 OTP_REVOKED")
+        void verify_revoked() {
+            // given
+            OtpEntity entity = OtpFactory.createEntity(PHONE);
+            entity.invalidateCode();
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.of(entity));
+
+            // when & then
+            assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
+                    .hasExceptionCode(AuthExceptionCode.OTP_REVOKED);
         }
 
         @Test
@@ -180,7 +192,7 @@ class OtpServiceTest {
         void verify_maxAttempts() {
             // given
             OtpEntity entity = OtpFactory.createEntity(PHONE, 5);
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.of(entity));
 
             // when & then
             assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
@@ -188,29 +200,15 @@ class OtpServiceTest {
         }
 
         @Test
-        @DisplayName("코드 불일치 시 INVALID_OTP")
-        void verify_codeMismatch() {
-            // given
-            OtpEntity entity = OtpFactory.createEntity(PHONE);
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
-
-            // when & then
-            assertCodeException(() -> otpService.verifyCode(PHONE, "999999"))
-                    .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
-
-            assertThat(entity.getAttemptCount()).isEqualTo(1);
-        }
-
-        @Test
         @DisplayName("시도 횟수 4회에서 검증 성공")
         void verify_attemptCount4_success() {
             // given
             OtpEntity entity = OtpFactory.createEntity(PHONE, 4);
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.of(entity));
 
             // when & then
             otpService.verifyCode(PHONE, CODE);
-            assertThat(entity.getAttemptCount()).isEqualTo(5);
+            assertThat(entity.getAttempts()).isEqualTo(5);
         }
 
         @Test
@@ -218,33 +216,33 @@ class OtpServiceTest {
         void verify_success_invalidatesCode() {
             // given
             OtpEntity entity = OtpFactory.createEntity(PHONE);
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.of(entity));
 
             // when
             otpService.verifyCode(PHONE, CODE);
 
             // then
-            assertThat(entity.getCodeExpiredAt()).isEqualTo(LocalDateTime.MIN);
+            assertThat(entity.isRevoked()).isTrue();
         }
     }
 
     @Nested
-    @DisplayName("OtpService.verifyToken")
-    class VerifyTokenTests {
+    @DisplayName("OtpService.consumeToken")
+    class ConsumeTokenTests {
 
         @Test
-        @DisplayName("만료 시 SIGNUP_TOKEN_EXPIRED")
-        void verifyToken_expired() {
+        @DisplayName("폐기된 토큰 시 SIGNUP_TOKEN_REVOKED")
+        void consumeToken_revoked() {
             // given
-            String token = "expired-token";
+            String tokenValue = "revoked-token";
             OtpEntity entity = OtpFactory.createEntity(PHONE);
-            ReflectionTestUtils.setField(entity, "signupToken", token);
-            ReflectionTestUtils.setField(entity, "signupTokenExpiredAt", LocalDateTime.now().minusMinutes(1));
-            when(otpRepository.findBySignupToken(token)).thenReturn(Optional.of(entity));
+            entity.generateToken(tokenValue, LocalDateTime.now().plusMinutes(10));
+            entity.invalidateToken();
+            when(otpRepository.findByToken_Token(tokenValue)).thenReturn(Optional.of(entity));
 
             // when & then
-            assertCodeException(() -> otpService.verifyToken(token))
-                    .hasExceptionCode(AuthExceptionCode.SIGNUP_TOKEN_EXPIRED);
+            assertCodeException(() -> otpService.consumeToken(tokenValue))
+                    .hasExceptionCode(AuthExceptionCode.SIGNUP_TOKEN_REVOKED);
         }
     }
 }

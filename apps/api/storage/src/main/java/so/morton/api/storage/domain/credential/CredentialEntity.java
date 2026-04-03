@@ -32,15 +32,14 @@ public class CredentialEntity extends BaseEntity {
     // TODO 파일 첨부
 
     @Builder
-    public CredentialEntity(Long profileId, CredentialType type) {
+    public CredentialEntity(Long profileId, CredentialType type, LocalDate expiredAt) {
         this.profileId = profileId;
         this.type = type;
-        this.expiredAt = LocalDate.now().plus(type.getExpiration());
+        this.expiredAt = expiredAt;
     }
 
     public void accept() {
         this.status = CredentialStatus.ACCEPTED;
-        this.expiredAt = LocalDate.now().plus(this.type.getExpiration());
     }
 
     public void deny() {

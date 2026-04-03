@@ -11,8 +11,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -28,7 +26,6 @@ import so.morton.api.support.auth.otp.SessionService;
 import so.morton.api.support.auth.otp.VerifyOtpAuthenticationFilter;
 
 import java.util.Collections;
-import java.util.List;
 
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
@@ -54,11 +51,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
-
-    @Bean
     SecurityFilterChain defaultSecurityFilterChain(
             HttpSecurity http,
             AuthenticationManager authenticationManager,
@@ -80,7 +72,6 @@ public class SecurityConfig {
                     config.setAllowedOriginPatterns(appProperties.cors().allowedOriginPatterns());
                     config.setAllowedMethods(Collections.singletonList("*"));
                     config.setAllowedHeaders(Collections.singletonList("*"));
-                    config.setExposedHeaders(List.of("Authorization"));
                     config.setAllowCredentials(true);
                     config.setMaxAge(3600L);
                     return config;
@@ -92,9 +83,10 @@ public class SecurityConfig {
                         .requestMatchers(POST, "/api/v1/members").permitAll()
                         .requestMatchers(GET, "/api/v1/profiles", "/api/v1/profiles/{id}").permitAll()
                         .requestMatchers(GET, "/api/v1/posts", "/api/v1/posts/{id}").permitAll()
-                        .requestMatchers(GET, "/api/v1/tasks", "/api/v1/tasks/{id}").permitAll()
+                        .requestMatchers(GET, "/api/v1/tasks/me").authenticated()
+                        .requestMatchers(GET, "/api/v1/tasks/{id}").permitAll()
                         .requestMatchers(GET, "/api/v1/feeds").permitAll()
-                        .requestMatchers(GET, "/api/v1/credentials").permitAll()
+                        .requestMatchers(GET, "/api/v1/credentials", "/api/v1/credentials/types").permitAll()
                         .requestMatchers(POST, "/api/v1/credentials/*/accept", "/api/v1/credentials/*/deny").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterAfter(verifyOtpFilter, LogoutFilter.class)
