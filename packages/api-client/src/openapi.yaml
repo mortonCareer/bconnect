@@ -444,6 +444,15 @@ paths:
       operationId: getMyChats
       tags: [Chats]
       summary: 내 채팅방 목록 조회
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chat'
 
     post:
       operationId: createChat
@@ -465,28 +474,6 @@ paths:
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
-
-  /api/v1/chats/{chatId}:
-    get:
-      operationId: getChat
-      tags: [Chats]
-      summary: 채팅방을 조회합니다
-      parameters:
-        - name: chatId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Chat'
 
   /api/v1/chats/{chatId}:
     get:
