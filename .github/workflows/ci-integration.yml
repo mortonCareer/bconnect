@@ -1,0 +1,39 @@
+name: Integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate API client
+        run: pnpm api:generate
+
+      - name: Type check (career)
+        run: pnpm --filter morton-career typecheck
+
+      - name: Type check (plan)
+        run: pnpm --filter morton-plan typecheck
+
+      - name: Build
+        run: pnpm build
