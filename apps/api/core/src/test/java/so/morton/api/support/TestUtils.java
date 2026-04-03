@@ -18,7 +18,7 @@ public final class TestUtils {
         return result -> {
             status().is(code.getStatus().value()).match(result);
             jsonPath("$.success").value(false).match(result);
-            jsonPath("$.error").value(code.name()).match(result);
+            jsonPath("$.error.code").value(code.getCode()).match(result);
         };
     }
 }
