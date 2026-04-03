@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
   pull_request:
-    branches: [main]
+    branches: [dev]
 
 permissions:
   contents: read
@@ -63,9 +63,6 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
-      - name: Type check
-        run: pnpm --filter morton-career typecheck
-
   ci-plan:
     needs: changes
     if: ${{ needs.changes.outputs.plan == 'true' }}
@@ -88,9 +85,6 @@ jobs:
 
       - name: Format check
         run: pnpm format:check
-
-      - name: Type check
-        run: pnpm --filter morton-plan typecheck
 
   ci-api:
     needs: changes

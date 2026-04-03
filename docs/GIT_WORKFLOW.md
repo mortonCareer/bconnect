@@ -9,37 +9,45 @@ Morton 프로젝트의 Git 및 GitHub 사용 가이드입니다.
 ```
 GitHub Issue 생성 (#123)
     ↓
-feat/123-description 브랜치 생성
+feat/123-description 브랜치 생성 (dev에서 분기)
     ↓
 작업 진행 + 커밋
     ↓
-PR 생성 (Closes #123)
+PR 생성 → dev 브랜치 (Closes #123)
     ↓
-Vercel 프리뷰 자동 배포
-    ↓
-QA on Preview 환경
+CI 체크 (lint, format, BE 빌드/테스트)
     ↓
 리뷰 및 승인
     ↓
-main 브랜치 머지
+dev 브랜치 머지
     ↓
-이슈 자동 닫힘 + 프로덕션 배포
+dev → main PR 생성 (통합검증)
+    ↓
+통합 CI (api:generate + typecheck + 빌드)
+    ↓
+main 머지 → 프로덕션 배포
 ```
 
 ---
 
-## 브랜치 전략 (GitHub Flow + Issue)
+## 브랜치 전략
 
-### 메인 브랜치
+### 상시 브랜치
 
 - **`main`**: 프로덕션 브랜치
   - 항상 배포 가능한 상태 유지
-  - 직접 푸시 금지 (PR을 통해서만 머지)
+  - 직접 푸시 금지 (`dev`에서 PR을 통해서만 머지)
   - 머지 즉시 Vercel 자동 배포
+  - 통합검증 CI: `api:generate` → typecheck → 빌드
+
+- **`dev`**: 개발 브랜치 (GitHub 기본 브랜치)
+  - BE/FE 독립 개발 (FE는 MSW mock 기반)
+  - 모든 feature/fix PR의 타겟
+  - CI: lint, format, BE 빌드/테스트 (FE typecheck 제외)
 
 ### 작업 브랜치
 
-모든 작업은 이슈를 먼저 생성한 후 브랜치를 만듭니다.
+모든 작업은 이슈를 먼저 생성한 후 `dev`에서 브랜치를 만듭니다.
 
 **브랜치 네이밍:**
 
@@ -62,9 +70,9 @@ fix/456-login-redirect-loop
 
 ```bash
 # 1. 이슈 번호 확인 (예: #123)
-# 2. main에서 최신 코드 가져오기
-git checkout main
-git pull origin main
+# 2. dev에서 최신 코드 가져오기
+git checkout dev
+git pull origin dev
 
 # 3. 브랜치 생성 및 체크아웃
 git checkout -b feat/123-add-profile-upload
@@ -75,6 +83,15 @@ git checkout -b feat/123-add-profile-upload
 **자동화 스킬 사용:**
 
 `worktree-manager` 스킬을 사용하면 이슈 번호를 입력하는 것만으로 워크트리와 브랜치를 자동 생성합니다.
+
+### dev → main 머지 (릴리스)
+
+```bash
+# dev에서 main으로 PR 생성
+gh pr create --base main --head dev --title "release: v1.x.x"
+```
+
+통합검증 CI가 통과해야 머지 가능합니다. 실패 시 dev에서 수정 후 재시도합니다.
 
 ---
 
@@ -415,20 +432,20 @@ Notion 보드와 Git 작업 동기화 (구현 예정)
 
 ## 문제 해결
 
-### 브랜치가 main과 충돌할 때
+### 브랜치가 dev와 충돌할 때
 
 ```bash
-# 1. main 최신화
-git checkout main
-git pull origin main
+# 1. dev 최신화
+git checkout dev
+git pull origin dev
 
 # 2. 작업 브랜치로 돌아가기
 git checkout feat/123-add-profile-upload
 
-# 3. main 변경사항 가져오기
-git rebase main
+# 3. dev 변경사항 가져오기
+git rebase dev
 # 또는
-git merge main
+git merge dev
 
 # 4. 충돌 해결 후 푸시
 git push origin feat/123-add-profile-upload --force-with-lease

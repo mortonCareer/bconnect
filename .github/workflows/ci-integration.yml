@@ -1,0 +1,54 @@
+# 통합검증 CI — dev → main PR 시 API 정합성 검증
+#
+# dev에서는 BE/FE가 독립 개발 (FE는 MSW mock 기반, api:generate 미실행)
+# main 머지 전에 openapi.yaml 기준으로 API 클라이언트를 재생성하고
+# FE typecheck + 빌드를 실행하여 BE/FE 정합성을 검증한다.
+name: Integration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate API client
+        run: pnpm api:generate
+
+      - name: Type check (career)
+        run: pnpm --filter morton-career typecheck
+
+      - name: Type check (plan)
+        run: pnpm --filter morton-plan typecheck
+
+      - name: Build
+        run: pnpm build
