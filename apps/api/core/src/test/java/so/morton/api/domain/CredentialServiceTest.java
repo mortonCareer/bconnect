@@ -128,7 +128,7 @@ class CredentialServiceTest {
         void create_typeWithNullExpiration() {
             // given
             Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
-            CreateCredentialRequest request = new CreateCredentialRequest(CredentialType.IDENTITY_VERIFICATION);
+            CreateCredentialRequest request = new CreateCredentialRequest(CredentialType.IDENTITY_VERIFICATION, null);
 
             when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
 
@@ -145,7 +145,7 @@ class CredentialServiceTest {
         void create_typeCareerCertificate() {
             // given
             Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
-            CreateCredentialRequest request = new CreateCredentialRequest(CredentialType.CAREER_CERTIFICATE);
+            CreateCredentialRequest request = new CreateCredentialRequest(CredentialType.CAREER_CERTIFICATE, null);
 
             when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
 
@@ -162,7 +162,7 @@ class CredentialServiceTest {
         void create_typeOtherCertificate() {
             // given
             Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
-            CreateCredentialRequest request = new CreateCredentialRequest(CredentialType.OTHER_CERTIFICATE);
+            CreateCredentialRequest request = new CreateCredentialRequest(CredentialType.OTHER_CERTIFICATE, null);
 
             when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
 

@@ -62,7 +62,7 @@ class CredentialControllerTest {
         @DisplayName("등록 성공")
         void create_200() throws Exception {
             // given
-            CreateCredentialRequest request = new CreateCredentialRequest(CredentialType.IDENTITY_VERIFICATION);
+            CreateCredentialRequest request = new CreateCredentialRequest(CredentialType.IDENTITY_VERIFICATION, null);
             when(credentialService.create(any(User.class), any(CreateCredentialRequest.class)))
                     .thenReturn(credential);
 
@@ -79,7 +79,7 @@ class CredentialControllerTest {
         @DisplayName("type null 시 400")
         void create_400_nullType() throws Exception {
             // given
-            CreateCredentialRequest request = new CreateCredentialRequest(null);
+            CreateCredentialRequest request = new CreateCredentialRequest(null, null);
 
             // when & then
             mockMvc.perform(post("/api/v1/credentials")

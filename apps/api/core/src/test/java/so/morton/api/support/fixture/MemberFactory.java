@@ -36,7 +36,7 @@ public class MemberFactory {
     }
 
     public static RegisterMemberRequest registerRequest() {
-        return new RegisterMemberRequest("signupToken", "username", "name", "01000000000", "picture", Role.FOREMAN);
+        return new RegisterMemberRequest("signupToken", "username", "name", "picture", Role.FOREMAN);
     }
 
     public static UpdateMemberRequest updateRequest() {

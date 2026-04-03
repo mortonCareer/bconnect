@@ -25,6 +25,6 @@ public class CredentialFactory {
     }
 
     public static CreateCredentialRequest createRequest() {
-        return new CreateCredentialRequest(CredentialType.SOLE_PROPRIETOR);
+        return new CreateCredentialRequest(CredentialType.SOLE_PROPRIETOR, LocalDate.MAX);
     }
 }

@@ -95,7 +95,7 @@ class TaskServiceTest {
             List<Task> expectedTasks = List.of(task1, task2);
 
             when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
-            when(taskFinder.findAllByProfileId(PROFILE_ID)).thenReturn(expectedTasks);
+            when(taskFinder.findByProfileId(PROFILE_ID)).thenReturn(expectedTasks);
 
             // when
             List<Task> result = taskService.getAll(UserFactory.FOREMAN_USER);
@@ -104,7 +104,7 @@ class TaskServiceTest {
             assertThat(result).isEqualTo(expectedTasks);
             assertThat(result).hasSize(2);
             verify(profileFinder).findByMemberId(USER_ID);
-            verify(taskFinder).findAllByProfileId(PROFILE_ID);
+            verify(taskFinder).findByProfileId(PROFILE_ID);
         }
 
         @Test
@@ -114,7 +114,7 @@ class TaskServiceTest {
             Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
 
             when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
-            when(taskFinder.findAllByProfileId(PROFILE_ID)).thenReturn(List.of());
+            when(taskFinder.findByProfileId(PROFILE_ID)).thenReturn(List.of());
 
             // when
             List<Task> result = taskService.getAll(UserFactory.FOREMAN_USER);
@@ -122,7 +122,7 @@ class TaskServiceTest {
             // then
             assertThat(result).isEmpty();
             verify(profileFinder).findByMemberId(USER_ID);
-            verify(taskFinder).findAllByProfileId(PROFILE_ID);
+            verify(taskFinder).findByProfileId(PROFILE_ID);
         }
     }
 
@@ -428,8 +428,8 @@ class TaskServiceTest {
     }
 
     @Nested
-    @DisplayName("TaskFinder.findAllByProfileId")
-    class TaskFinderFindAllByProfileIdTests {
+    @DisplayName("TaskFinder.findByProfileId")
+    class TaskFinderFindByProfileIdTests {
 
         @Mock
         private TaskRepository finderTaskRepository;
@@ -449,7 +449,7 @@ class TaskServiceTest {
             when(finderTaskRepository.findAllByProfileId(PROFILE_ID)).thenReturn(List.of(entity1, entity2));
 
             // when
-            List<Task> result = taskFinder.findAllByProfileId(PROFILE_ID);
+            List<Task> result = taskFinder.findByProfileId(PROFILE_ID);
 
             // then
             assertThat(result).hasSize(2);
@@ -465,7 +465,7 @@ class TaskServiceTest {
             when(finderTaskRepository.findAllByProfileId(PROFILE_ID)).thenReturn(List.of());
 
             // when
-            List<Task> result = taskFinder.findAllByProfileId(PROFILE_ID);
+            List<Task> result = taskFinder.findByProfileId(PROFILE_ID);
 
             // then
             assertThat(result).isEmpty();

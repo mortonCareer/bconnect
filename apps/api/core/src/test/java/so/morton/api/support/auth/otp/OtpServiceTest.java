@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import so.morton.api.storage.domain.otp.OtpEntity;
 import so.morton.api.storage.domain.otp.OtpRepository;
 import so.morton.api.support.AuthExceptionCode;
@@ -172,7 +171,7 @@ class OtpServiceTest {
 
             // when & then
             assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
-                    .hasExceptionCode(AuthExceptionCode.OTP_EXPIRED);
+                    .hasExceptionCode(AuthExceptionCode.OTP_REVOKED);
         }
 
         @Test
@@ -198,7 +197,7 @@ class OtpServiceTest {
             assertCodeException(() -> otpService.verifyCode(PHONE, "999999"))
                     .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
 
-            assertThat(entity.getAttemptCount()).isEqualTo(1);
+            assertThat(entity.getAttempts()).isEqualTo(1);
         }
 
         @Test
@@ -210,7 +209,7 @@ class OtpServiceTest {
 
             // when & then
             otpService.verifyCode(PHONE, CODE);
-            assertThat(entity.getAttemptCount()).isEqualTo(5);
+            assertThat(entity.getAttempts()).isEqualTo(5);
         }
 
         @Test
@@ -224,27 +223,27 @@ class OtpServiceTest {
             otpService.verifyCode(PHONE, CODE);
 
             // then
-            assertThat(entity.getCodeExpiredAt()).isEqualTo(LocalDateTime.MIN);
+            assertThat(entity.isRevoked()).isTrue();
         }
     }
 
     @Nested
-    @DisplayName("OtpService.verifyToken")
-    class VerifyTokenTests {
+    @DisplayName("OtpService.consumeToken")
+    class ConsumeTokenTests {
 
         @Test
-        @DisplayName("만료 시 SIGNUP_TOKEN_EXPIRED")
-        void verifyToken_expired() {
+        @DisplayName("폐기된 토큰 시 SIGNUP_TOKEN_REVOKED")
+        void consumeToken_revoked() {
             // given
-            String token = "expired-token";
+            String tokenValue = "revoked-token";
             OtpEntity entity = OtpFactory.createEntity(PHONE);
-            ReflectionTestUtils.setField(entity, "signupToken", token);
-            ReflectionTestUtils.setField(entity, "signupTokenExpiredAt", LocalDateTime.now().minusMinutes(1));
-            when(otpRepository.findBySignupToken(token)).thenReturn(Optional.of(entity));
+            entity.generateToken(tokenValue, LocalDateTime.now().plusMinutes(10));
+            entity.invalidateToken();
+            when(otpRepository.findByToken_Token(tokenValue)).thenReturn(Optional.of(entity));
 
             // when & then
-            assertCodeException(() -> otpService.verifyToken(token))
-                    .hasExceptionCode(AuthExceptionCode.SIGNUP_TOKEN_EXPIRED);
+            assertCodeException(() -> otpService.consumeToken(tokenValue))
+                    .hasExceptionCode(AuthExceptionCode.SIGNUP_TOKEN_REVOKED);
         }
     }
 }

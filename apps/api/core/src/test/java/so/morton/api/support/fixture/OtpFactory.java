@@ -24,14 +24,14 @@ public class OtpFactory {
 
     public static OtpEntity createEntity(String phone, int count) {
         OtpEntity entity = createEntity(phone);
-        ReflectionTestUtils.setField(entity, "attemptCount", count);
+        ReflectionTestUtils.setField(entity, "attempts", count);
         return entity;
     }
 
-    public static OtpEntity createEntity(String phone, int count, LocalDateTime modifiedAt) {
+    public static OtpEntity createEntity(String phone, int count, LocalDateTime lastSentAt) {
         OtpEntity entity = createEntity(phone);
         ReflectionTestUtils.setField(entity, "dailyCount", count);
-        ReflectionTestUtils.setField(entity, "modifiedAt", modifiedAt);
+        ReflectionTestUtils.setField(entity, "lastSentAt", lastSentAt);
         return entity;
     }
 
