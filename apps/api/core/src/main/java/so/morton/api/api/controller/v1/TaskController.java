@@ -28,9 +28,9 @@ public class TaskController {
 
     private final TaskService taskService;
 
-    @GetMapping("/me")
+    @GetMapping
     public ApiResponse<List<TaskResponse>> getAll(@AuthenticationPrincipal User user) {
-        List<TaskResponse> tasks = taskService.getAll(user).stream()
+        List<TaskResponse> tasks = taskService.getAll().stream()
                 .map(TaskResponse::of)
                 .toList();
         return ApiResponse.success(tasks);

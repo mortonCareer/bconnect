@@ -16,7 +16,8 @@
       "Bash(git show:*)",
       "WebFetch(domain:notion.so)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:notion.site)"
+      "WebFetch(domain:notion.site)",
+      "Bash(./gradlew test:*)"
     ],
     "deny": [],
     "ask": []

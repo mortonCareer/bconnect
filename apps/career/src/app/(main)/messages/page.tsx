@@ -1,16 +1,16 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
+import Link from 'next/link'
 import {
-  useInfiniteQuery,
   useQueries,
-  getMyChats,
-  getGetMyChatsQueryKey,
+  useGetMyChats,
   useGetMembers,
   getGetProfileQueryOptions,
 } from '@morton/api-client'
-import type { ChatPage, Member, Profile } from '@morton/api-client'
+import type { Member, Profile } from '@morton/api-client'
 import { ChatListItem, TopBar } from '@morton/ui'
 import { formatRelativeTime } from '@/lib/format-time'
 import { TRADE_LABELS } from '@/lib/trade-labels'
@@ -22,55 +22,26 @@ export default function MessagesPage() {
   const observerRef = useRef<HTMLDivElement>(null)
   const currentUserId = useAuthStore((s) => s.member?.id)
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteQuery<ChatPage>({
-      queryKey: getGetMyChatsQueryKey(),
-      queryFn: ({ pageParam }) =>
-        getMyChats(pageParam ? { cursor: pageParam as string } : undefined),
-      initialPageParam: undefined as string | undefined,
-      getNextPageParam: (lastPage) =>
-        lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
-    })
+  const { data: chats, isLoading } = useGetMyChats()
 
-  const handleObserver = useCallback(
-    (entries: IntersectionObserverEntry[]) => {
-      const [entry] = entries
-      if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage()
-      }
-    },
-    [hasNextPage, isFetchingNextPage, fetchNextPage]
-  )
-
-  useEffect(() => {
-    const el = observerRef.current
-    if (!el) return
-
-    const observer = new IntersectionObserver(handleObserver, {
-      threshold: 0.1,
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [handleObserver])
-
-  const chats = data?.pages.flatMap((page) => page.items) ?? []
+  const allChats = chats ?? []
 
   // 각 채팅의 상대방 멤버 ID 추출
   const otherMemberIds = useMemo(() => {
     const ids = new Set<number>()
-    for (const chat of chats) {
-      const otherId = chat.participantIds?.find((id) => id !== currentUserId)
+    for (const chat of allChats) {
+      const otherId = chat.participantIds?.find((id: number) => id !== currentUserId)
       if (otherId != null) ids.add(otherId)
     }
     return [...ids]
-  }, [chats, currentUserId])
+  }, [allChats, currentUserId])
 
   // 전체 Member 조회 후 매핑
   const { data: allMembers } = useGetMembers()
 
   const memberMap = useMemo(() => {
     const map = new Map<number, Member>()
-    allMembers?.forEach((m) => {
+    allMembers?.forEach((m: Member) => {
       if (m.id) map.set(m.id, m)
     })
     return map
@@ -94,29 +65,25 @@ export default function MessagesPage() {
 
   return (
     <div className="flex flex-col">
-      <TopBar variant="default" title="메시지" showAction={false} />
+      <TopBar variant="default" title="메시지" showAction={false} backHref="/" />
 
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center py-20">
           <p className="text-m-14 text-morton-gray-500">로딩 중...</p>
         </div>
-      ) : chats.length === 0 ? (
+      ) : allChats.length === 0 ? (
         <div className="flex flex-1 items-center justify-center py-20">
           <p className="text-m-14 text-morton-gray-500">채팅이 없습니다</p>
         </div>
       ) : (
         <div className="flex flex-col">
-          {chats.map((chat) => {
-            const otherId = chat.participantIds?.find((id) => id !== currentUserId)
+          {allChats.map((chat) => {
+            const otherId = chat.participantIds?.find((id: number) => id !== currentUserId)
             const otherMember = otherId != null ? memberMap.get(otherId) : undefined
             const otherProfile = otherId != null ? profileMap.get(otherId) : undefined
 
             return (
-              <div
-                key={chat.id}
-                onClick={() => router.push(`/messages/${chat.id}`)}
-                className="cursor-pointer"
-              >
+              <Link key={chat.id} href={`/messages/${chat.id}`} className="block px-4">
                 <ChatListItem
                   variant="badge"
                   profileImage={otherMember?.picture}
@@ -130,15 +97,9 @@ export default function MessagesPage() {
                   timestamp={chat.modifiedAt ? formatRelativeTime(chat.modifiedAt) : undefined}
                   unreadCount={chat.unreadCount}
                 />
-              </div>
+              </Link>
             )
           })}
-          <div ref={observerRef} className="h-1" />
-          {isFetchingNextPage && (
-            <div className="flex justify-center py-4">
-              <p className="text-r-12 text-morton-gray-400">불러오는 중...</p>
-            </div>
-          )}
         </div>
       )}
     </div>

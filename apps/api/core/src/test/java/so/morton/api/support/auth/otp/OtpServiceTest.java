@@ -1,6 +1,7 @@
 package so.morton.api.support.auth.otp;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,6 +11,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import so.morton.api.storage.domain.otp.OtpEntity;
 import so.morton.api.storage.domain.otp.OtpRepository;
 import so.morton.api.support.AuthExceptionCode;
+import so.morton.api.support.fixture.OtpFactory;
 import so.morton.api.support.sms.SmsProvider;
 
 import java.time.LocalDateTime;
@@ -26,152 +28,223 @@ import static org.mockito.Mockito.*;
 @DisplayName("OtpService 테스트")
 class OtpServiceTest {
 
-    @Mock
-    private OtpRepository otpRepository;
+    @Mock private OtpRepository otpRepository;
+    @Mock private SmsProvider smsProvider;
+    @InjectMocks private OtpService otpService;
 
-    @Mock
-    private SmsProvider smsProvider;
+    private static final String PHONE = "01000000000";
+    private static final String CODE = "000000";
 
-    @InjectMocks
-    private OtpService otpService;
+    @Nested
+    @DisplayName("OtpService.sendCode")
+    class SendCodeTests {
 
-    private static final String PHONE = "01012345678";
-    private static final String CODE = "123456";
+        @Test
+        @DisplayName("신규 OTP 생성")
+        void send_newOtp() {
+            // given
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.empty());
 
-    @Test
-    @DisplayName("신규 번호로 요청하면 OTP를 생성한다")
-    void send_newOtp() {
-        // given
-        when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.empty());
+            // when
+            otpService.sendCode(PHONE);
 
-        // when
-        otpService.sendCode(PHONE);
+            // then
+            verify(otpRepository).save(any(OtpEntity.class));
+            verify(smsProvider).send(eq(PHONE), anyString());
+        }
 
-        // then
-        verify(otpRepository).save(any(OtpEntity.class));
-        verify(smsProvider).send(eq(PHONE), anyString());
+        @Test
+        @DisplayName("기존 OTP 갱신")
+        void send_existingOtp() {
+            // given
+            OtpEntity entity = OtpFactory.createEntity(PHONE, 3, LocalDateTime.now().minusMinutes(2));
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+
+            // when
+            otpService.sendCode(PHONE);
+            verify(otpRepository, never()).save(any(OtpEntity.class));
+            verify(smsProvider).send(eq(PHONE), anyString());
+        }
+
+        @Test
+        @DisplayName("일일 한도 초과 시 OTP_DAILY_LIMIT")
+        void send_dailyLimitExceeded() {
+            // given
+            OtpEntity entity = OtpFactory.createEntity(PHONE, 10, LocalDateTime.now().minusMinutes(2));
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+
+            // when & then
+            assertCodeException(() -> otpService.sendCode(PHONE))
+                    .hasExceptionCode(AuthExceptionCode.OTP_DAILY_LIMIT);
+            verify(smsProvider, never()).send(anyString(), anyString());
+        }
+
+        @Test
+        @DisplayName("날짜 변경 시 횟수 초기화")
+        void send_dailyCountReset() {
+            // given
+            OtpEntity entity = OtpFactory.createEntity(PHONE, 5, LocalDateTime.now().minusDays(1));
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+
+            // when
+            otpService.sendCode(PHONE);
+
+            // then
+            assertThat(entity.getDailyCount()).isEqualTo(1);
+            verify(smsProvider).send(eq(PHONE), anyString());
+        }
+
+        @Test
+        @DisplayName("재전송 대기 시간 내 요청 시 OTP_RATE_LIMIT")
+        void send_rateLimited() {
+            // given
+            OtpEntity entity = OtpFactory.createEntity(PHONE, 3, LocalDateTime.now().minusSeconds(30));
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+
+            // when & then
+            assertCodeException(() -> otpService.sendCode(PHONE))
+                    .hasExceptionCode(AuthExceptionCode.OTP_RATE_LIMIT);
+            verify(smsProvider, never()).send(anyString(), anyString());
+        }
+
+        @Test
+        @DisplayName("일일 한도 9회에서 전송 성공")
+        void send_dailyCount9_success() {
+            // given
+            OtpEntity entity = OtpFactory.createEntity(PHONE, 9, LocalDateTime.now().minusMinutes(2));
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+
+            // when
+            otpService.sendCode(PHONE);
+
+            // then
+            assertThat(entity.getDailyCount()).isEqualTo(10);
+            verify(smsProvider).send(eq(PHONE), anyString());
+        }
+
+        @Test
+        @DisplayName("재전송 대기 정확히 60초 경과 시 전송 성공")
+        void send_rateLimitExact60s_success() {
+            // given
+            OtpEntity entity = OtpFactory.createEntity(PHONE, 3, LocalDateTime.now().minusSeconds(60));
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+
+            // when
+            otpService.sendCode(PHONE);
+
+            // then
+            verify(smsProvider).send(eq(PHONE), anyString());
+        }
     }
 
-    @Test
-    @DisplayName("기존 OTP가 있으면 코드를 갱신한다")
-    void send_existingOtp() {
-        // given
-        OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
-        ReflectionTestUtils.setField(entity, "dailyCount", 3);
-        ReflectionTestUtils.setField(entity, "modifiedAt", LocalDateTime.now().minusMinutes(2));
-        when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+    @Nested
+    @DisplayName("OtpService.verifyCode")
+    class VerifyCodeTests {
 
-        // when
-        otpService.sendCode(PHONE);
-        verify(otpRepository, never()).save(any(OtpEntity.class));
-        verify(smsProvider).send(eq(PHONE), anyString());
+        @Test
+        @DisplayName("검증 성공")
+        void verify_validCode() {
+            // given
+            OtpEntity entity = OtpFactory.createEntity(PHONE);
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+
+            // when & then
+            otpService.verifyCode(PHONE, CODE);
+        }
+
+        @Test
+        @DisplayName("미존재 시 INVALID_OTP")
+        void verify_otpNotFound() {
+            // given
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.empty());
+
+            // when & then
+            assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
+                    .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
+        }
+
+        @Test
+        @DisplayName("만료 시 OTP_EXPIRED")
+        void verify_expired() {
+            // given
+            OtpEntity entity = OtpFactory.createExpiredEntity(PHONE);
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+
+            // when & then
+            assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
+                    .hasExceptionCode(AuthExceptionCode.OTP_EXPIRED);
+        }
+
+        @Test
+        @DisplayName("시도 횟수 초과 시 OTP_MAX_ATTEMPTS")
+        void verify_maxAttempts() {
+            // given
+            OtpEntity entity = OtpFactory.createEntity(PHONE, 5);
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+
+            // when & then
+            assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
+                    .hasExceptionCode(AuthExceptionCode.OTP_MAX_ATTEMPTS);
+        }
+
+        @Test
+        @DisplayName("코드 불일치 시 INVALID_OTP")
+        void verify_codeMismatch() {
+            // given
+            OtpEntity entity = OtpFactory.createEntity(PHONE);
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+
+            // when & then
+            assertCodeException(() -> otpService.verifyCode(PHONE, "999999"))
+                    .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
+
+            assertThat(entity.getAttemptCount()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("시도 횟수 4회에서 검증 성공")
+        void verify_attemptCount4_success() {
+            // given
+            OtpEntity entity = OtpFactory.createEntity(PHONE, 4);
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+
+            // when & then
+            otpService.verifyCode(PHONE, CODE);
+            assertThat(entity.getAttemptCount()).isEqualTo(5);
+        }
+
+        @Test
+        @DisplayName("검증 성공 후 코드 무효화 확인")
+        void verify_success_invalidatesCode() {
+            // given
+            OtpEntity entity = OtpFactory.createEntity(PHONE);
+            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+
+            // when
+            otpService.verifyCode(PHONE, CODE);
+
+            // then
+            assertThat(entity.getCodeExpiredAt()).isEqualTo(LocalDateTime.MIN);
+        }
     }
 
-    @Test
-    @DisplayName("일일 발송 한도를 초과하면 예외를 던진다")
-    void send_dailyLimitExceeded() {
-        // given
-        OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
-        ReflectionTestUtils.setField(entity, "dailyCount", 10);
-        ReflectionTestUtils.setField(entity, "modifiedAt", LocalDateTime.now().minusMinutes(2));
-        when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+    @Nested
+    @DisplayName("OtpService.verifyToken")
+    class VerifyTokenTests {
 
-        // when & then
-        assertCodeException(() -> otpService.sendCode(PHONE))
-                .hasExceptionCode(AuthExceptionCode.OTP_DAILY_LIMIT);
-        verify(smsProvider, never()).send(anyString(), anyString());
-    }
+        @Test
+        @DisplayName("만료 시 SIGNUP_TOKEN_EXPIRED")
+        void verifyToken_expired() {
+            // given
+            String token = "expired-token";
+            OtpEntity entity = OtpFactory.createEntity(PHONE);
+            ReflectionTestUtils.setField(entity, "signupToken", token);
+            ReflectionTestUtils.setField(entity, "signupTokenExpiredAt", LocalDateTime.now().minusMinutes(1));
+            when(otpRepository.findBySignupToken(token)).thenReturn(Optional.of(entity));
 
-     @Test
-     @DisplayName("날짜가 바뀌면 일일 발송 횟수를 초기화한다")
-     void send_dailyCountReset() {
-         // given
-         OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
-         ReflectionTestUtils.setField(entity, "dailyCount", 5);
-         ReflectionTestUtils.setField(entity, "modifiedAt", LocalDateTime.now().minusDays(1));
-         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
-
-         // when
-         otpService.sendCode(PHONE);
-
-         // then
-         assertThat(entity.getDailyCount()).isEqualTo(1);
-         verify(smsProvider).send(eq(PHONE), anyString());
-     }
-
-     @Test
-     @DisplayName("재전송 대기 시간 이내에 요청하면 예외를 던진다")
-     void send_rateLimited() {
-         // given
-         OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
-         ReflectionTestUtils.setField(entity, "dailyCount", 3);
-         ReflectionTestUtils.setField(entity, "modifiedAt", LocalDateTime.now().minusSeconds(30));
-         when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
-
-          // when & then
-          assertCodeException(() -> otpService.sendCode(PHONE))
-                  .hasExceptionCode(AuthExceptionCode.OTP_RATE_LIMIT);
-          verify(smsProvider, never()).send(anyString(), anyString());
-     }
-
-    @Test
-    @DisplayName("올바른 코드로 검증하면 성공한다")
-    void verify_validCode() {
-        // given
-        OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
-        when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
-
-        // when & then
-        otpService.verifyCode(PHONE, CODE);
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 OTP로 검증하면 예외를 던진다")
-    void verify_otpNotFound() {
-        // given
-        when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.empty());
-
-        // when & then
-        assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
-                .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
-    }
-
-    @Test
-    @DisplayName("만료된 OTP로 검증하면 예외를 던진다")
-    void verify_expired() {
-        // given
-        OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().minusMinutes(1));
-        when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
-
-        // when & then
-        assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
-                .hasExceptionCode(AuthExceptionCode.OTP_REVOKED);
-    }
-
-    @Test
-    @DisplayName("시도 횟수를 초과하면 예외를 던진다")
-    void verify_maxAttempts() {
-        // given
-        OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
-        ReflectionTestUtils.setField(entity, "attemptCount", 5);
-        when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
-
-        // when & then
-        assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
-                .hasExceptionCode(AuthExceptionCode.OTP_MAX_ATTEMPTS);
-    }
-
-    @Test
-    @DisplayName("코드가 불일치하면 예외를 던진다")
-    void verify_codeMismatch() {
-        // given
-        OtpEntity entity = new OtpEntity(PHONE, CODE, LocalDateTime.now().plusMinutes(3));
-        when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
-
-        // when & then
-        assertCodeException(() -> otpService.verifyCode(PHONE, "000000"))
-                .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
-
-        assertThat(entity.getAttempts()).isEqualTo(1);
+            // when & then
+            assertCodeException(() -> otpService.verifyToken(token))
+                    .hasExceptionCode(AuthExceptionCode.SIGNUP_TOKEN_EXPIRED);
+        }
     }
 }

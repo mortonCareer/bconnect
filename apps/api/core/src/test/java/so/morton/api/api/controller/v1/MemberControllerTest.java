@@ -4,23 +4,20 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import so.morton.api.config.IntegrationTest;
 import org.springframework.test.web.servlet.MockMvc;
 import so.morton.api.api.controller.v1.request.RegisterMemberRequest;
 import so.morton.api.api.controller.v1.request.UpdateMemberRequest;
 import so.morton.api.domain.member.Member;
 import so.morton.api.domain.member.MemberService;
-import so.morton.api.storage.value.Role;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 import so.morton.api.support.auth.User;
+import so.morton.api.support.fixture.MemberFactory;
+import so.morton.api.support.fixture.UserFactory;
 import tools.jackson.databind.ObjectMapper;
-
-import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -31,38 +28,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static so.morton.api.support.TestUtils.errorResponse;
 import static so.morton.api.support.TestUtils.successResponse;
 
-@ActiveProfiles("test")
-@SpringBootTest
-@AutoConfigureMockMvc
+@IntegrationTest
 class MemberControllerTest {
 
-    @MockitoBean
-    private MemberService memberService;
-
-    @Autowired
-    private MockMvc mockMvc;
-
+    @MockitoBean private MemberService memberService;
+    @Autowired private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final User TEST_USER = new User(1L, "testuser", "SKILLED");
-
-    private static final Member SAMPLE_MEMBER = new Member(
-            1L, "testuser", "홍길동", "01012345678", "pic.jpg",
-            Role.SKILLED, LocalDateTime.now(), LocalDateTime.now()
-    );
+    private final Member member = MemberFactory.create(1L);
 
     @Nested
     @DisplayName("POST /api/v1/members")
     class CreateMember {
 
         @Test
-        @DisplayName("회원 가입을 요청하면 성공 응답을 반환한다")
+        @DisplayName("가입 성공")
         void create_success() throws Exception {
             // given
-            RegisterMemberRequest request = new RegisterMemberRequest(
-                    "signup-token", "testuser", "홍길동", "pic.jpg", Role.SKILLED
-            );
-            when(memberService.register(any(RegisterMemberRequest.class))).thenReturn(SAMPLE_MEMBER);
+            var request = MemberFactory.registerRequest();
+            when(memberService.register(any(RegisterMemberRequest.class))).thenReturn(member);
 
             // when & then
             mockMvc.perform(post("/api/v1/members")
@@ -73,10 +57,38 @@ class MemberControllerTest {
         }
 
         @Test
-        @DisplayName("필수 필드가 비어있으면 400을 반환한다")
+        @DisplayName("필수 필드 누락 시 400")
         void create_invalidRequest() throws Exception {
             // given
             String body = "{\"signupToken\":\"\",\"username\":\"\",\"name\":\"\",\"picture\":\"\"}";
+
+            // when & then
+            mockMvc.perform(post("/api/v1/members")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(errorResponse(CommonExceptionCode.NOT_VALID));
+        }
+
+        @Test
+        @DisplayName("phone 잘못된 패턴 시 400")
+        void create_invalidPhonePattern() throws Exception {
+            // given
+            String body = """
+                    {"signupToken":"token","username":"user","name":"name","phone":"010-1234-5678","picture":"pic.jpg","role":"SKILLED"}""";
+
+            // when & then
+            mockMvc.perform(post("/api/v1/members")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(errorResponse(CommonExceptionCode.NOT_VALID));
+        }
+
+        @Test
+        @DisplayName("role null 시 400")
+        void create_nullRole() throws Exception {
+            // given
+            String body = """
+                    {"signupToken":"token","username":"user","name":"name","phone":"01000000000","picture":"pic.jpg"}""";
 
             // when & then
             mockMvc.perform(post("/api/v1/members")
@@ -91,34 +103,34 @@ class MemberControllerTest {
     class GetMyInfo {
 
         @Test
-        @DisplayName("인증된 사용자가 내 정보를 조회하면 성공 응답을 반환한다")
+        @DisplayName("조회 성공")
         void getMe_success() throws Exception {
             // given
-            when(memberService.get(any(User.class))).thenReturn(SAMPLE_MEMBER);
+            when(memberService.get(any(User.class))).thenReturn(member);
 
             // when & then
             mockMvc.perform(get("/api/v1/members/me")
-                            .with(user(TEST_USER)))
+                            .with(user(UserFactory.FOREMAN_USER)))
                     .andExpect(status().isOk())
                     .andExpect(successResponse())
                     .andExpect(jsonPath("$.data.id").value(1))
-                    .andExpect(jsonPath("$.data.name").value("홍길동"));
+                    .andExpect(jsonPath("$.data.name").value("name"));
         }
 
         @Test
-        @DisplayName("존재하지 않는 사용자를 조회하면 에러 응답을 반환한다")
+        @DisplayName("미존재 시 NOT_FOUND")
         void getMe_notFound() throws Exception {
             // given
             when(memberService.get(any(User.class))).thenThrow(new CodeException(CommonExceptionCode.NOT_FOUND));
 
             // when & then
             mockMvc.perform(get("/api/v1/members/me")
-                            .with(user(TEST_USER)))
+                            .with(user(UserFactory.FOREMAN_USER)))
                     .andExpect(errorResponse(CommonExceptionCode.NOT_FOUND));
         }
 
         @Test
-        @DisplayName("인증 없이 내 정보를 조회하면 403을 반환한다")
+        @DisplayName("미인증 시 403")
         void getMe_unauthenticated() throws Exception {
             // when & then
             mockMvc.perform(get("/api/v1/members/me"))
@@ -131,15 +143,15 @@ class MemberControllerTest {
     class UpdateMyInfo {
 
         @Test
-        @DisplayName("인증된 사용자가 내 정보를 수정하면 성공 응답을 반환한다")
+        @DisplayName("수정 성공")
         void updateMe_success() throws Exception {
             // given
-            UpdateMemberRequest request = new UpdateMemberRequest("새이름", "new-pic.jpg", Role.SKILLED);
+            var request = MemberFactory.updateRequest();
             doNothing().when(memberService).update(any(User.class), any(UpdateMemberRequest.class));
 
             // when & then
             mockMvc.perform(put("/api/v1/members/me")
-                            .with(user(TEST_USER))
+                            .with(user(UserFactory.FOREMAN_USER))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -147,10 +159,10 @@ class MemberControllerTest {
         }
 
         @Test
-        @DisplayName("인증 없이 내 정보를 수정하면 403을 반환한다")
+        @DisplayName("미인증 시 403")
         void updateMe_unauthenticated() throws Exception {
             // given
-            UpdateMemberRequest request = new UpdateMemberRequest("새이름", "new-pic.jpg", Role.SKILLED);
+            var request = MemberFactory.updateRequest();
 
             // when & then
             mockMvc.perform(put("/api/v1/members/me")
@@ -165,11 +177,11 @@ class MemberControllerTest {
     class DeleteMyInfo {
 
         @Test
-        @DisplayName("인증된 사용자가 회원 탈퇴하면 성공 응답을 반환한다")
+        @DisplayName("탈퇴 성공")
         void deleteMe_success() throws Exception {
             // when & then
             mockMvc.perform(delete("/api/v1/members/me")
-                            .with(user(TEST_USER)))
+                            .with(user(UserFactory.FOREMAN_USER)))
                     .andExpect(status().isOk())
                     .andExpect(successResponse());
 
@@ -177,7 +189,7 @@ class MemberControllerTest {
         }
 
         @Test
-        @DisplayName("인증 없이 회원을 탈퇴하면 403을 반환한다")
+        @DisplayName("미인증 시 403")
         void deleteMe_unauthenticated() throws Exception {
             // when & then
             mockMvc.perform(delete("/api/v1/members/me"))

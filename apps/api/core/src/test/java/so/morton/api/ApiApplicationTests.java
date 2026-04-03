@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 class ApiApplicationTests {
 
 	@Test
-	@DisplayName("애플리케이션 컨텍스트가 정상적으로 로드된다")
+	@DisplayName("컨텍스트 로드 성공")
 	void contextLoads() {
 	}
 
