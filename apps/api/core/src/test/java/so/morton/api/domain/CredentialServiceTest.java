@@ -175,7 +175,7 @@ class CredentialServiceTest {
         void delete_success() {
             // given
             Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
 
             when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
@@ -212,7 +212,7 @@ class CredentialServiceTest {
         void delete_forbidden() {
             // given
             Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             ReflectionTestUtils.setField(entity, "profileId", 999L); // Different profile
 
@@ -236,7 +236,7 @@ class CredentialServiceTest {
         @DisplayName("승인 성공")
         void accept_success() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             when(credentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(entity));
 
@@ -264,7 +264,7 @@ class CredentialServiceTest {
         @DisplayName("이미 승인된 자격 재승인 시 상태 유지")
         void accept_alreadyAccepted() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             entity.accept();
             when(credentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(entity));
@@ -280,7 +280,7 @@ class CredentialServiceTest {
         @DisplayName("거부된 자격 승인 시 상태 변경")
         void accept_afterDenied() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             entity.deny();
             when(credentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(entity));
@@ -301,7 +301,7 @@ class CredentialServiceTest {
         @DisplayName("거부 성공")
         void deny_success() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             when(credentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(entity));
 
@@ -329,7 +329,7 @@ class CredentialServiceTest {
         @DisplayName("이미 거부된 자격 재거부 시 상태 유지")
         void deny_alreadyDenied() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             entity.deny();
             when(credentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(entity));
@@ -356,7 +356,7 @@ class CredentialServiceTest {
         @DisplayName("조회 성공")
         void find_success() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             when(finderCredentialRepository.findById(CREDENTIAL_ID)).thenReturn(Optional.of(entity));
 
@@ -398,7 +398,7 @@ class CredentialServiceTest {
         @DisplayName("조회 성공")
         void findByProfileId_success() {
             // given
-            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID, CredentialStatus.PENDING);
+            CredentialEntity entity = CredentialFactory.createEntity(PROFILE_ID);
             ReflectionTestUtils.setField(entity, "id", CREDENTIAL_ID);
             when(finderCredentialRepository.findByProfileId(PROFILE_ID)).thenReturn(List.of(entity));
 

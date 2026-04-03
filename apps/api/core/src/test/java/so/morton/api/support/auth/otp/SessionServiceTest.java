@@ -19,6 +19,7 @@ import so.morton.api.support.sms.SmsProvider;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -109,6 +110,7 @@ class SessionServiceTest {
 
             // then
             verify(sessionRepository).findByUsername(USERNAME);
+            assertThat(session.isRevoked()).isTrue();
         }
 
         @Test
@@ -167,6 +169,9 @@ class SessionServiceTest {
 
             // then
             verify(sessionRepository, never()).save(any(SessionEntity.class));
+            verify(smsProvider, never()).send(anyString(), anyString());
+            assertThat(existingSession.getAgent()).isEqualTo(agent);
+            assertThat(existingSession.getIp()).isEqualTo(ip);
         }
     }
 }

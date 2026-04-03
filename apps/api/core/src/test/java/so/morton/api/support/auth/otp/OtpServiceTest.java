@@ -163,6 +163,18 @@ class OtpServiceTest {
         }
 
         @Test
+        @DisplayName("phone 불일치 시 INVALID_OTP")
+        void verify_phoneMismatch() {
+            // given
+            OtpEntity entity = OtpFactory.createEntity("01099999999");
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.of(entity));
+
+            // when & then
+            assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
+                    .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
+        }
+
+        @Test
         @DisplayName("폐기된 코드 시 OTP_REVOKED")
         void verify_revoked() {
             // given
@@ -185,17 +197,6 @@ class OtpServiceTest {
             // when & then
             assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
                     .hasExceptionCode(AuthExceptionCode.OTP_MAX_ATTEMPTS);
-        }
-
-        @Test
-        @DisplayName("코드 미존재 시 INVALID_OTP")
-        void verify_codeNotFound() {
-            // given
-            when(otpRepository.findByCode("999999")).thenReturn(Optional.empty());
-
-            // when & then
-            assertCodeException(() -> otpService.verifyCode(PHONE, "999999"))
-                    .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
         }
 
         @Test
