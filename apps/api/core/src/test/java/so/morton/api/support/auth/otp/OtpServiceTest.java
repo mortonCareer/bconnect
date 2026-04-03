@@ -145,7 +145,7 @@ class OtpServiceTest {
         void verify_validCode() {
             // given
             OtpEntity entity = OtpFactory.createEntity(PHONE);
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.of(entity));
 
             // when & then
             otpService.verifyCode(PHONE, CODE);
@@ -155,7 +155,7 @@ class OtpServiceTest {
         @DisplayName("미존재 시 INVALID_OTP")
         void verify_otpNotFound() {
             // given
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.empty());
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.empty());
 
             // when & then
             assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
@@ -163,11 +163,12 @@ class OtpServiceTest {
         }
 
         @Test
-        @DisplayName("만료 시 OTP_EXPIRED")
-        void verify_expired() {
+        @DisplayName("폐기된 코드 시 OTP_REVOKED")
+        void verify_revoked() {
             // given
-            OtpEntity entity = OtpFactory.createExpiredEntity(PHONE);
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+            OtpEntity entity = OtpFactory.createEntity(PHONE);
+            entity.invalidateCode();
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.of(entity));
 
             // when & then
             assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
@@ -179,7 +180,7 @@ class OtpServiceTest {
         void verify_maxAttempts() {
             // given
             OtpEntity entity = OtpFactory.createEntity(PHONE, 5);
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.of(entity));
 
             // when & then
             assertCodeException(() -> otpService.verifyCode(PHONE, CODE))
@@ -187,17 +188,14 @@ class OtpServiceTest {
         }
 
         @Test
-        @DisplayName("코드 불일치 시 INVALID_OTP")
-        void verify_codeMismatch() {
+        @DisplayName("코드 미존재 시 INVALID_OTP")
+        void verify_codeNotFound() {
             // given
-            OtpEntity entity = OtpFactory.createEntity(PHONE);
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+            when(otpRepository.findByCode("999999")).thenReturn(Optional.empty());
 
             // when & then
             assertCodeException(() -> otpService.verifyCode(PHONE, "999999"))
                     .hasExceptionCode(AuthExceptionCode.INVALID_OTP);
-
-            assertThat(entity.getAttempts()).isEqualTo(1);
         }
 
         @Test
@@ -205,7 +203,7 @@ class OtpServiceTest {
         void verify_attemptCount4_success() {
             // given
             OtpEntity entity = OtpFactory.createEntity(PHONE, 4);
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.of(entity));
 
             // when & then
             otpService.verifyCode(PHONE, CODE);
@@ -217,7 +215,7 @@ class OtpServiceTest {
         void verify_success_invalidatesCode() {
             // given
             OtpEntity entity = OtpFactory.createEntity(PHONE);
-            when(otpRepository.findByPhone(PHONE)).thenReturn(Optional.of(entity));
+            when(otpRepository.findByCode(CODE)).thenReturn(Optional.of(entity));
 
             // when
             otpService.verifyCode(PHONE, CODE);

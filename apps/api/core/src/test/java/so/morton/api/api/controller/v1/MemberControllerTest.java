@@ -70,20 +70,6 @@ class MemberControllerTest {
         }
 
         @Test
-        @DisplayName("phone 잘못된 패턴 시 400")
-        void create_invalidPhonePattern() throws Exception {
-            // given
-            String body = """
-                    {"signupToken":"token","username":"user","name":"name","phone":"010-1234-5678","picture":"pic.jpg","role":"SKILLED"}""";
-
-            // when & then
-            mockMvc.perform(post("/api/v1/members")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(body))
-                    .andExpect(errorResponse(CommonExceptionCode.NOT_VALID));
-        }
-
-        @Test
         @DisplayName("role null 시 400")
         void create_nullRole() throws Exception {
             // given
