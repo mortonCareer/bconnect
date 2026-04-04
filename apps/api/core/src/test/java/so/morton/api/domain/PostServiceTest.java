@@ -144,7 +144,7 @@ class PostServiceTest {
             // then
             assertThat(result).isNotNull();
             assertThat(result.id()).isEqualTo(POST_ID);
-            assertThat(result.authorId()).isEqualTo(PROFILE_ID);
+            assertThat(result.profileId()).isEqualTo(PROFILE_ID);
             assertThat(result.content()).isEqualTo("content");
             assertThat(result.images()).isEqualTo(List.of("image"));
             verify(profileFinder).findByMemberId(USER_ID);
@@ -269,7 +269,7 @@ class PostServiceTest {
             Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
             PostEntity entity = PostFactory.createEntity(PROFILE_ID, TASK_ID);
             ReflectionTestUtils.setField(entity, "id", POST_ID);
-            ReflectionTestUtils.setField(entity, "authorId", 999L); // Different author
+            ReflectionTestUtils.setField(entity, "profileId", 999L); // Different author
 
             when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
             when(postRepository.findById(POST_ID)).thenReturn(Optional.of(entity));
@@ -330,7 +330,7 @@ class PostServiceTest {
             Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
             PostEntity entity = PostFactory.createEntity(PROFILE_ID, TASK_ID);
             ReflectionTestUtils.setField(entity, "id", POST_ID);
-            ReflectionTestUtils.setField(entity, "authorId", 999L); // Different author
+            ReflectionTestUtils.setField(entity, "profileId", 999L); // Different author
 
             when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
             when(postRepository.findById(POST_ID)).thenReturn(Optional.of(entity));
@@ -368,7 +368,7 @@ class PostServiceTest {
             // then
             assertThat(result).isNotNull();
             assertThat(result.id()).isEqualTo(POST_ID);
-            assertThat(result.authorId()).isEqualTo(PROFILE_ID);
+            assertThat(result.profileId()).isEqualTo(PROFILE_ID);
             assertThat(result.content()).isEqualTo("content");
             verify(finderPostRepository).findById(POST_ID);
         }
@@ -387,8 +387,8 @@ class PostServiceTest {
     }
 
     @Nested
-    @DisplayName("PostFinder.findByAuthorId")
-    class PostFinderFindByAuthorIdTests {
+    @DisplayName("PostFinder.findByProfileId")
+    class PostFinderFindByProfileIdTests {
 
         @Mock
         private PostRepository finderPostRepository;
@@ -398,37 +398,37 @@ class PostServiceTest {
 
         @Test
         @DisplayName("조회 성공")
-        void findByAuthorId_success() {
+        void findByProfileId_success() {
             // given
             PostEntity entity1 = PostFactory.createEntity(PROFILE_ID, TASK_ID);
             ReflectionTestUtils.setField(entity1, "id", POST_ID);
             PostEntity entity2 = PostFactory.createEntity(PROFILE_ID, TASK_ID);
             ReflectionTestUtils.setField(entity2, "id", 101L);
 
-            when(finderPostRepository.findByAuthorId(PROFILE_ID)).thenReturn(List.of(entity1, entity2));
+            when(finderPostRepository.findByProfileId(PROFILE_ID)).thenReturn(List.of(entity1, entity2));
 
             // when
-            List<Post> result = finderPostFinder.findByAuthorId(PROFILE_ID);
+            List<Post> result = finderPostFinder.findByProfileId(PROFILE_ID);
 
             // then
             assertThat(result).hasSize(2);
             assertThat(result.get(0).id()).isEqualTo(POST_ID);
             assertThat(result.get(1).id()).isEqualTo(101L);
-            verify(finderPostRepository).findByAuthorId(PROFILE_ID);
+            verify(finderPostRepository).findByProfileId(PROFILE_ID);
         }
 
         @Test
         @DisplayName("빈 리스트 반환")
-        void findByAuthorId_empty() {
+        void findByProfileId_empty() {
             // given
-            when(finderPostRepository.findByAuthorId(PROFILE_ID)).thenReturn(List.of());
+            when(finderPostRepository.findByProfileId(PROFILE_ID)).thenReturn(List.of());
 
             // when
-            List<Post> result = finderPostFinder.findByAuthorId(PROFILE_ID);
+            List<Post> result = finderPostFinder.findByProfileId(PROFILE_ID);
 
             // then
             assertThat(result).isEmpty();
-            verify(finderPostRepository).findByAuthorId(PROFILE_ID);
+            verify(finderPostRepository).findByProfileId(PROFILE_ID);
         }
     }
 

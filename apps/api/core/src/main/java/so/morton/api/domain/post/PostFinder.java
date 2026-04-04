@@ -21,8 +21,8 @@ public class PostFinder {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
-    public List<Post> findByAuthorId(Long authorId) {
-        return postRepository.findByAuthorId(authorId)
+    public List<Post> findByProfileId(Long profileId) {
+        return postRepository.findByProfileId(profileId)
                 .stream()
                 .map(Post::of)
                 .toList();
