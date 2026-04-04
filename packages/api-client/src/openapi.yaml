@@ -122,8 +122,8 @@ paths:
       tags: [Auth]
       summary: 로그아웃
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
   # =====================
   # Member Endpoints
@@ -141,8 +141,8 @@ paths:
             schema:
               $ref: '#/components/schemas/RegisterMemberRequest'
       responses:
-        '201':
-          description: Created
+        '200':
+          description: OK
           content:
             application/json:
               schema:
@@ -178,8 +178,8 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateMemberRequest'
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -189,8 +189,8 @@ paths:
       tags: [Members]
       summary: 회원 탈퇴
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
   # =====================
   # Feed Endpoints
@@ -241,8 +241,8 @@ paths:
             schema:
               $ref: '#/components/schemas/CreatePostRequest'
       responses:
-        '201':
-          description: Created
+        '200':
+          description: OK
           content:
             application/json:
               schema:
@@ -284,8 +284,8 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdatePostRequest'
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -295,8 +295,8 @@ paths:
       tags: [Posts]
       summary: 게시글 삭제
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
   # =====================
   # Task Endpoints
@@ -327,8 +327,8 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateTaskRequest'
       responses:
-        '201':
-          description: Created
+        '200':
+          description: OK
           content:
             application/json:
               schema:
@@ -370,8 +370,8 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateTaskRequest'
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -381,8 +381,8 @@ paths:
       tags: [Tasks]
       summary: 작업 삭제
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
   # =====================
   # Profile Endpoints
@@ -414,8 +414,8 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateProfileRequest'
       responses:
-        '201':
-          description: Created
+        '200':
+          description: OK
           content:
             application/json:
               schema:
@@ -458,8 +458,8 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateProfileRequest'
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -469,8 +469,8 @@ paths:
       tags: [Profiles]
       summary: 내 프로필 삭제
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
   /api/v1/profiles/me/about:
     patch:
@@ -484,8 +484,8 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateProfileAboutRequest'
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
   # =====================
   # Credential Endpoints
@@ -541,8 +541,8 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateCredentialRequest'
       responses:
-        '201':
-          description: Created
+        '200':
+          description: OK
           content:
             application/json:
               schema:
@@ -565,8 +565,8 @@ paths:
             type: integer
             format: int64
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
   /api/v1/credentials/{credentialId}/deny:
     post:
@@ -581,8 +581,8 @@ paths:
             type: integer
             format: int64
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
   /api/v1/credentials/{credentialId}:
     delete:
@@ -597,8 +597,8 @@ paths:
             type: integer
             format: int64
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
   # =====================
   # Coworker Endpoints
@@ -639,8 +639,8 @@ paths:
             type: integer
             format: int64
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
   # =====================
   # CoworkerRequest Endpoints
@@ -657,8 +657,8 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateCoworkerRequest'
       responses:
-        '201':
-          description: Created
+        '200':
+          description: OK
           content:
             application/json:
               schema:
@@ -681,8 +681,8 @@ paths:
             type: integer
             format: int64
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
   /api/v1/coworker-requests/{id}/accept:
     post:
@@ -697,8 +697,8 @@ paths:
             type: integer
             format: int64
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
   /api/v1/coworker-requests/{id}/deny:
     post:
@@ -713,8 +713,8 @@ paths:
             type: integer
             format: int64
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
 
 components:
   securitySchemes:
