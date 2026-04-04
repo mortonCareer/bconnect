@@ -731,44 +731,6 @@ components:
       in: cookie
       name: refreshToken
 
-  responses:
-    BadRequest:
-      description: 잘못된 요청
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponse'
-    Unauthorized:
-      description: 인증 실패
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponse'
-    Forbidden:
-      description: 권한 없음
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponse'
-    NotFound:
-      description: 리소스 없음
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponse'
-    Conflict:
-      description: 리소스 충돌
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponse'
-    TooManyRequests:
-      description: 요청 한도 초과
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponse'
-
   schemas:
     # =====================
     # Common - Error
@@ -884,6 +846,7 @@ components:
 
     SendOtpResponse:
       type: object
+      required: [expiresAt]
       properties:
         expiresAt:
           type: string
@@ -924,6 +887,7 @@ components:
 
     RefreshTokenResponse:
       type: object
+      required: [accessToken, refreshToken]
       properties:
         accessToken:
           type: string
