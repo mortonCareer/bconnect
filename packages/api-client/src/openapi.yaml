@@ -1,13 +1,41 @@
 openapi: 3.0.3
 info:
-  title: Morton API
-  version: 1.0.0
+  title: Bconnect API
+  description: 인테리어 종사자를 위한 하도급 섭외 · 관리 플랫폼 '품앗이'의 REST API
+  version: 0.2.0
 
 servers:
   - url: http://localhost:8080
+    description: 로컬 개발 서버
+  - url: https://api.bconnect.to
+    description: 프로덕션 서버
 
 security:
   - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: 인증 및 토큰 관리
+  - name: Members
+    description: 회원 정보 관리
+  - name: Feeds
+    description: 피드 관리
+  - name: Posts
+    description: 게시글 관리
+  - name: Tasks
+    description: 작업 사항 관리
+  - name: Profiles
+    description: 기술자 프로필 관리
+  - name: Credentials
+    description: 인증뱃지(자격/면허/증명서) 관리
+  - name: Coworkers
+    description: 동료 관계 관리
+  - name: CoworkerRequests
+    description: 동료 요청 관리
+
+externalDocs:
+  description: 개발 문서 (Notion)
+  url: https://www.notion.so/morton-so/2dc965d2888b80ac9b72ca4d22812b12
 
 paths:
   # =====================
@@ -225,18 +253,18 @@ paths:
             - `C001` 유효하지 않은 입력값입니다
 
   /api/v1/posts/{postId}:
+    parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
     get:
       operationId: getPost
       tags: [Posts]
       security: []
       summary: 게시글 조회
-      parameters:
-        - name: postId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
       responses:
         '200':
           description: OK
@@ -249,13 +277,6 @@ paths:
       operationId: updatePost
       tags: [Posts]
       summary: 게시글 수정
-      parameters:
-        - name: postId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
       requestBody:
         required: true
         content:
@@ -273,13 +294,6 @@ paths:
       operationId: deletePost
       tags: [Posts]
       summary: 게시글 삭제
-      parameters:
-        - name: postId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
       responses:
         '200':
           description: OK
@@ -325,18 +339,18 @@ paths:
             - `C001` 유효하지 않은 입력값입니다
 
   /api/v1/tasks/{taskId}:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
     get:
       operationId: getTask
       tags: [Tasks]
       security: []
       summary: 작업 조회
-      parameters:
-        - name: taskId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
       responses:
         '200':
           description: OK
@@ -349,13 +363,6 @@ paths:
       operationId: updateTask
       tags: [Tasks]
       summary: 작업 수정
-      parameters:
-        - name: taskId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
       requestBody:
         required: true
         content:
@@ -373,13 +380,6 @@ paths:
       operationId: deleteTask
       tags: [Tasks]
       summary: 작업 삭제
-      parameters:
-        - name: taskId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
       responses:
         '200':
           description: OK
@@ -727,10 +727,73 @@ components:
       in: cookie
       name: refreshToken
 
+  responses:
+    BadRequest:
+      description: 잘못된 요청
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    Unauthorized:
+      description: 인증 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    Forbidden:
+      description: 권한 없음
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    NotFound:
+      description: 리소스 없음
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    Conflict:
+      description: 리소스 충돌
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    TooManyRequests:
+      description: 요청 한도 초과
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+
   schemas:
     # =====================
-    # Common
+    # Common - Error
     # =====================
+    ApiError:
+      type: object
+      required: [code, status]
+      properties:
+        code:
+          type: string
+          example: 'C001'
+        status:
+          type: string
+          example: 'BAD_REQUEST'
+
+    ApiErrorResponse:
+      type: object
+      required: [success, error, data]
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        error:
+          $ref: '#/components/schemas/ApiError'
+        data:
+          nullable: true
+
+    # =====================
+    # Common
     Address:
       type: object
       properties:
