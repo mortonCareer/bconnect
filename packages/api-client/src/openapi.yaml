@@ -800,6 +800,7 @@ components:
     # Common
     Address:
       type: object
+      required: [zipcode, city, state, street, latitude, longitude]
       properties:
         zipcode:
           type: string
@@ -813,6 +814,7 @@ components:
           type: string
         detail:
           type: string
+          nullable: true
         latitude:
           type: number
           format: double
@@ -933,6 +935,7 @@ components:
     # =====================
     Member:
       type: object
+      required: [id, username, name, phone, role, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -946,6 +949,7 @@ components:
           type: string
         picture:
           type: string
+          nullable: true
         role:
           $ref: '#/components/schemas/Role'
         createdAt:
@@ -957,7 +961,7 @@ components:
 
     RegisterMemberRequest:
       type: object
-      required: [signupToken, username, name, picture, role]
+      required: [signupToken, username, name, role]
       properties:
         signupToken:
           type: string
@@ -967,6 +971,8 @@ components:
           type: string
         picture:
           type: string
+          format: uri
+          nullable: true
         role:
           $ref: '#/components/schemas/Role'
 
@@ -978,6 +984,8 @@ components:
           type: string
         picture:
           type: string
+          format: uri
+          nullable: true
         role:
           $ref: '#/components/schemas/Role'
 
@@ -986,6 +994,7 @@ components:
     # =====================
     Profile:
       type: object
+      required: [id, memberId, primaryTrade, trades, experience, address, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1021,7 +1030,7 @@ components:
 
     UpdateProfileRequest:
       type: object
-      required: [primaryTrade, trades, address]
+      required: [primaryTrade, trades, experience, address]
       properties:
         primaryTrade:
           $ref: '#/components/schemas/Trade'
@@ -1030,10 +1039,13 @@ components:
           items:
             $ref: '#/components/schemas/Trade'
           uniqueItems: true
+          minItems: 1
         experience:
           type: integer
+          minimum: 0
         headline:
           type: string
+          nullable: true
         address:
           $ref: '#/components/schemas/Address'
 
@@ -1048,12 +1060,16 @@ components:
           items:
             $ref: '#/components/schemas/Trade'
           uniqueItems: true
+          minItems: 1
         experience:
           type: integer
+          minimum: 0
         headline:
           type: string
+          nullable: true
         about:
           type: string
+          nullable: true
         address:
           $ref: '#/components/schemas/Address'
 
@@ -1062,6 +1078,7 @@ components:
       properties:
         about:
           type: string
+          nullable: true
 
     # =====================
     # Feed Schemas
@@ -1071,104 +1088,40 @@ components:
       required: [member, profile, post]
       properties:
         member:
-          $ref: '#/components/schemas/FeedMember'
+          $ref: '#/components/schemas/Member'
         profile:
-          $ref: '#/components/schemas/FeedProfile'
+          $ref: '#/components/schemas/Profile'
         post:
-          $ref: '#/components/schemas/FeedPost'
-
-    FeedMember:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          example: 1
-        username:
-          type: string
-        name:
-          type: string
-        picture:
-          type: string
-        role:
-          $ref: '#/components/schemas/Role'
-        createdAt:
-          type: string
-          format: date-time
-        modifiedAt:
-          type: string
-          format: date-time
-
-    FeedProfile:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          example: 1
-        primaryTrade:
-          $ref: '#/components/schemas/Trade'
-        trades:
-          type: array
-          items:
-            $ref: '#/components/schemas/Trade'
-          uniqueItems: true
-        experience:
-          type: integer
-        headline:
-          type: string
-          nullable: true
-        createdAt:
-          type: string
-          format: date-time
-        modifiedAt:
-          type: string
-          format: date-time
-
-    FeedPost:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          example: 1
-        images:
-          type: array
-          items:
-            type: string
-        content:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        modifiedAt:
-          type: string
-          format: date-time
+          $ref: '#/components/schemas/Post'
 
     # =====================
     # Post Schemas
     # =====================
     Post:
       type: object
+      required: [id, images, createdAt, modifiedAt]
       properties:
         id:
           type: integer
           format: int64
           example: 1
-        authorId:
+        profileId:
           type: integer
           format: int64
           example: 1
+          nullable: true
         taskId:
           type: integer
           format: int64
           example: 1
+          nullable: true
         images:
           type: array
           items:
             type: string
         content:
           type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -1184,10 +1137,12 @@ components:
           type: integer
           format: int64
           example: 1
+          nullable: true
         images:
           type: array
           items:
             type: string
+            format: uri
           minItems: 1
         content:
           type: string
@@ -1204,6 +1159,7 @@ components:
     # =====================
     Task:
       type: object
+      required: [id, company, address, taskTitle, eventTitle, trades, start, end, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1213,6 +1169,7 @@ components:
           type: integer
           format: int64
           example: 1
+          nullable: true
         company:
           type: string
         address:
@@ -1316,6 +1273,7 @@ components:
 
     Credential:
       type: object
+      required: [id, profileId, type, status, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1332,6 +1290,7 @@ components:
         expiredAt:
           type: string
           format: date
+          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -1348,12 +1307,14 @@ components:
         expiredAt:
           type: string
           format: date
+          nullable: true
 
     # =====================
     # Coworker Schemas
     # =====================
     Coworker:
       type: object
+      required: [id, minId, maxId]
       properties:
         id:
           type: integer
@@ -1373,6 +1334,7 @@ components:
     # =====================
     CoworkerRequest:
       type: object
+      required: [id, fromId, toId]
       properties:
         id:
           type: integer
