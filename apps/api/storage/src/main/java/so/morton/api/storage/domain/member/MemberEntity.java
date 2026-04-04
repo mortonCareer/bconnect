@@ -23,7 +23,7 @@ public class MemberEntity extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String phone;
 
-    @Column(nullable = false)
+    @Column
     private String picture;
 
     @Enumerated(EnumType.STRING)

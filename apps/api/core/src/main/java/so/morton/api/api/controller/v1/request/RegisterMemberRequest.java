@@ -8,6 +8,6 @@ public record RegisterMemberRequest(
         @NotBlank String signupToken,
         @NotBlank String username,
         @NotBlank String name,
-        @NotBlank String picture,
+        String picture,
         @NotNull Role role
 ) {}
