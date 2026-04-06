@@ -33,7 +33,7 @@ INSERT INTO tasks (id, company, zipcode, city, state, street, detail, latitude, 
 -- ===========================================
 
 -- messages: 채팅 메시지
-INSERT INTO messages (id, chat_id, sender_id, content, created_at, modified_at, status) VALUES
+INSERT INTO messages (id, chat_id, member_id, content, created_at, modified_at, status) VALUES
 (1, 1, 3, '김철수님, 강남 현장 욕실 타일 작업 가능하신가요? 포세린 600x600입니다.',         TIMESTAMP '2026-02-22 09:05:00', TIMESTAMP '2026-02-22 09:05:00', 'ACTIVE'),
 (2, 1, 1, '네 반장님, 3월 1일부터 투입 가능합니다. 줄눈 색상은 정해졌나요?',                TIMESTAMP '2026-02-22 09:10:00', TIMESTAMP '2026-02-22 09:10:00', 'ACTIVE'),
 (3, 2, 2, '분당 전기 공사 10일 시작인데, 조명 자재 입고 일정 확인 부탁드립니다.',            TIMESTAMP '2026-02-22 10:05:00', TIMESTAMP '2026-02-22 10:05:00', 'ACTIVE');

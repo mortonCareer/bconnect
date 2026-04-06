@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 public record Message(
     Long id,
     Long chatId,
-    Long senderId,
+    Long memberId,
     String content,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
@@ -16,7 +16,7 @@ public record Message(
         return new Message(
                 entity.getId(),
                 entity.getChatId(),
-                entity.getSenderId(),
+                entity.getmemberId(),
                 entity.getContent(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt()
