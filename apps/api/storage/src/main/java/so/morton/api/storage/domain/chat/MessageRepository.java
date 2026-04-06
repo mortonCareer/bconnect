@@ -22,6 +22,6 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
     interface ChatUnreadCount {
         Long chatId();
-        Long unreadCount();
+        Integer unreadCount();
     }
 }
