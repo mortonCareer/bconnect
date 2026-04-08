@@ -269,6 +269,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/FeedOffsetPage'
 
+  /api/v1/feeds/{feedId}:
+    get:
+      operationId: getFeed
+      tags: [Feeds]
+      security: []
+      summary: 피드 단건 조회
+      parameters:
+        - name: feedId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feed'
+
   # =====================
   # Post Endpoints
   # =====================
