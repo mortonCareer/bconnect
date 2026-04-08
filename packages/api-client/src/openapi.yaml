@@ -236,21 +236,6 @@ paths:
   # Post Endpoints
   # =====================
   /api/v1/posts:
-    get:
-      operationId: getPosts
-      tags: [Posts]
-      security: []
-      summary: 게시글 목록 조회
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Post'
-
     post:
       operationId: createPost
       tags: [Posts]
@@ -281,19 +266,6 @@ paths:
         schema:
           type: integer
           format: int64
-    get:
-      operationId: getPost
-      tags: [Posts]
-      security: []
-      summary: 게시글 조회
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Post'
-
     put:
       operationId: updatePost
       tags: [Posts]
@@ -367,19 +339,6 @@ paths:
         schema:
           type: integer
           format: int64
-    get:
-      operationId: getTask
-      tags: [Tasks]
-      security: []
-      summary: 작업 조회
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Task'
-
     put:
       operationId: updateTask
       tags: [Tasks]
@@ -494,10 +453,10 @@ paths:
           description: OK
 
   /api/v1/profiles/me/about:
-    patch:
+    put:
       operationId: updateMyProfileAbout
       tags: [Profiles]
-      summary: 내 자기소개 수정
+      summary: 내 소개 수정
       requestBody:
         required: true
         content:
@@ -685,7 +644,7 @@ paths:
     post:
       operationId: createDirectChat
       tags: [Chats]
-      summary: 1:1 채팅방 생성 (기존 채팅방이 있으면 재사용)
+      summary: 일대일 채팅 생성
       requestBody:
         required: true
         content:
