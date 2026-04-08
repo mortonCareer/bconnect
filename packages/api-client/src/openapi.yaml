@@ -930,6 +930,36 @@ paths:
           description: |
             - `C001` 유효하지 않은 입력값입니다
 
+  /api/v1/coworker-requests/received:
+    get:
+      operationId: getReceivedCoworkerRequests
+      tags: [CoworkerRequests]
+      summary: 받은 동료 요청 목록 조회
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CoworkerRequest'
+
+  /api/v1/coworker-requests/sent:
+    get:
+      operationId: getSentCoworkerRequests
+      tags: [CoworkerRequests]
+      summary: 보낸 동료 요청 목록 조회
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CoworkerRequest'
+
   /api/v1/coworker-requests/{id}:
     delete:
       operationId: cancelCoworkerRequest
