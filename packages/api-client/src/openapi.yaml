@@ -158,6 +158,29 @@ paths:
             - `A009` 유효하지 않은 가입 토큰입니다
             - `A010` 가입 토큰이 만료되었습니다
 
+  /api/v1/members/check-username:
+    get:
+      operationId: checkUsername
+      tags: [Members]
+      security: []
+      summary: 사용자명 중복 확인
+      parameters:
+        - name: username
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckUsernameResponse'
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+
   /api/v1/members/me:
     get:
       operationId: getMyMember
@@ -1164,6 +1187,13 @@ components:
           nullable: true
         role:
           $ref: '#/components/schemas/Role'
+
+    CheckUsernameResponse:
+      type: object
+      required: [available]
+      properties:
+        available:
+          type: boolean
 
     UpdateMemberRequest:
       type: object
