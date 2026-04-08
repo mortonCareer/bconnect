@@ -12,10 +12,10 @@ Morton은 **2단계 배포 모델**을 사용합니다:
 dev (개발 및 QA)  →  prod (프로덕션)
 ```
 
-| 환경 | 목적          | 배포 방식         | URL                                  |
-| ---- | ------------- | ----------------- | ------------------------------------ |
-| dev  | PR 프리뷰, QA | PR 생성 시 자동   | `*.vercel.app` (프리뷰 도메인)       |
-| prod | 실제 서비스   | main 머지 시 자동 | `career.morton.so`, `plan.morton.so` |
+| 환경 | 목적          | 배포 방식         | URL                               |
+| ---- | ------------- | ----------------- | --------------------------------- |
+| dev  | PR 프리뷰, QA | PR 생성 시 자동   | `*.vercel.app` (프리뷰 도메인)    |
+| prod | 실제 서비스   | main 머지 시 자동 | `bconnect.to`, `plan.bconnect.to` |
 
 ### dev 환경 (PR 프리뷰)
 
@@ -34,9 +34,9 @@ dev (개발 및 QA)  →  prod (프로덕션)
 - **배포 플랫폼**: Vercel (Frontend), Railway (Backend)
 - **데이터**: 실제 프로덕션 데이터
 - **URL**:
-  - Career App: `https://career.morton.so`
-  - Plan App: `https://plan.morton.so`
-  - API: `https://api.morton.so`
+  - Career App: `https://bconnect.to`
+  - Plan App: `https://plan.bconnect.to`
+  - API: `https://api.bconnect.to`
 
 ---
 
@@ -81,7 +81,7 @@ Vercel 프로덕션 빌드
     ↓
 빌드 성공 (1-2분)
     ↓
-career.morton.so / plan.morton.so 업데이트
+bconnect.to / plan.bconnect.to 업데이트
     ↓
 헬스체크 (자동)
     ↓
@@ -149,7 +149,7 @@ restartPolicyType = "ON_FAILURE"
 Vercel Dashboard → Project Settings → Environment Variables
 
 ```
-NEXT_PUBLIC_API_URL=https://api.morton.so
+NEXT_PUBLIC_API_URL=https://api.bconnect.to
 NEXT_PUBLIC_VERCEL_ENV=production
 ```
 
@@ -282,13 +282,13 @@ jwt:
 **Frontend**:
 
 ```bash
-curl https://career.morton.so/_health
+curl https://bconnect.to/_health
 ```
 
 **Backend**:
 
 ```bash
-curl https://api.morton.so/actuator/health
+curl https://api.bconnect.to/actuator/health
 ```
 
 **예상 응답**:

@@ -4,7 +4,7 @@
 
 railway_token = "your-railway-token"
 project_name  = "morton"
-github_repo   = "mortonCareer/morton"
+github_repo   = "mortonCareer/bconnect"
 github_branch = "main"
 
 # =============================================================================
@@ -33,7 +33,7 @@ s3_bucket_name        = "morton-storage"
 # Domain Config
 # =============================================================================
 
-api_domain = "api.morton.com"
+domain = "bconnect.to"
 
 # =============================================================================
 # Vercel
@@ -57,8 +57,20 @@ solapi_api_secret    = "your-solapi-api-secret"
 solapi_sender_number = "01012345678"
 
 # =============================================================================
+# Slack
+# =============================================================================
+
+slack_webhook_url = ""
+
+# =============================================================================
 # Sentry
 # =============================================================================
 
 sentry_auth_token = ""
 sentry_dsn        = ""
+
+# =============================================================================
+# Database (Railway Postgres TCP Proxy)
+# =============================================================================
+
+database_url = "postgresql://user:password@host:port/dbname"
