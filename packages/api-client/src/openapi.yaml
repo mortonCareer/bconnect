@@ -512,7 +512,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ProfileWithMemberResponse'
+                  $ref: '#/components/schemas/ProfileWithMember'
 
     post:
       operationId: createProfile
@@ -555,7 +555,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileWithMemberResponse'
+                $ref: '#/components/schemas/ProfileWithMember'
 
   /api/v1/profiles/me:
     put:
@@ -1309,7 +1309,7 @@ components:
           type: string
           format: date-time
 
-    MaskedMemberResponse:
+    MaskedMember:
       type: object
       required: [id, username, name, createdAt, modifiedAt]
       properties:
@@ -1407,12 +1407,12 @@ components:
           type: string
           format: date-time
 
-    ProfileWithMemberResponse:
+    ProfileWithMember:
       type: object
       required: [member, profile]
       properties:
         member:
-          $ref: '#/components/schemas/MaskedMemberResponse'
+          $ref: '#/components/schemas/MaskedMember'
         profile:
           $ref: '#/components/schemas/Profile'
 
@@ -1476,7 +1476,7 @@ components:
       required: [member, profile, post]
       properties:
         member:
-          $ref: '#/components/schemas/MaskedMemberResponse'
+          $ref: '#/components/schemas/MaskedMember'
         profile:
           $ref: '#/components/schemas/Profile'
         post:
