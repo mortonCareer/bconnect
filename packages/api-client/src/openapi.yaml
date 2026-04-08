@@ -389,6 +389,21 @@ paths:
           description: |
             - `C001` 유효하지 않은 입력값입니다
 
+  /api/v1/tasks/coworkers:
+    get:
+      operationId: getCoworkerTasks
+      tags: [Tasks]
+      summary: 지인 작업목록 조회
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CoworkerTask'
+
   /api/v1/tasks/{taskId}:
     parameters:
       - name: taskId
@@ -1497,6 +1512,25 @@ components:
           items:
             $ref: '#/components/schemas/Trade'
           uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+
+    CoworkerTask:
+      type: object
+      required: [id, profileId, start, end]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        profileId:
+          type: integer
+          format: int64
+          example: 1
         start:
           type: string
           format: date
