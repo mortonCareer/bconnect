@@ -259,6 +259,12 @@ paths:
       security: []
       summary: 피드 목록 조회
       parameters:
+        - name: profileId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
         - name: offset
           in: query
           required: false
