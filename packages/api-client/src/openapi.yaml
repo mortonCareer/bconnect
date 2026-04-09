@@ -136,7 +136,7 @@ paths:
     get:
       operationId: getMembers
       tags: [Members]
-      summary: (ADMIN) 회원 목록 조회
+      summary: 회원 목록 조회 (ADMIN)
       responses:
         '200':
           description: OK
@@ -667,7 +667,7 @@ paths:
     post:
       operationId: acceptCredential
       tags: [Credentials]
-      summary: (ADMIN) 인증뱃지 승인
+      summary: 인증뱃지 승인 (ADMIN)
       parameters:
         - name: credentialId
           in: path
@@ -683,7 +683,7 @@ paths:
     post:
       operationId: denyCredential
       tags: [Credentials]
-      summary: (ADMIN) 인증뱃지 거부
+      summary: 인증뱃지 거부 (ADMIN)
       parameters:
         - name: credentialId
           in: path
