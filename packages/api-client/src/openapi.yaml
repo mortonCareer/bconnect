@@ -512,7 +512,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ProfileWithMember'
+                  $ref: '#/components/schemas/ProfileAndMember'
 
     post:
       operationId: createProfile
@@ -555,7 +555,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileWithMember'
+                $ref: '#/components/schemas/ProfileAndMember'
 
   /api/v1/profiles/me:
     put:
@@ -1407,7 +1407,7 @@ components:
           type: string
           format: date-time
 
-    ProfileWithMember:
+    ProfileAndMember:
       type: object
       required: [member, profile]
       properties:
