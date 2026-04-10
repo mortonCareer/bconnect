@@ -10,10 +10,10 @@ public class MessageFactory {
 
     @Autowired private MessageRepository messageRepository;
 
-    public MessageEntity create(Long chatId, Long senderId) {
+    public MessageEntity create(Long chatId, Long memberId) {
         return messageRepository.save(MessageEntity.builder()
                 .chatId(chatId)
-                .senderId(senderId)
+                .memberId(memberId)
                 .content("content")
                 .build());
     }

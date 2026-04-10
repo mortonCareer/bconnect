@@ -38,7 +38,7 @@ public class PostService {
     public Post create(User user, CreatePostRequest request) {
         Profile profile = profileFinder.findByMemberId(user.id());
         PostEntity post = PostEntity.builder()
-                .authorId(profile.id())
+                .profileId(profile.id())
                 .taskId(request.taskId())
                 .images(request.images())
                 .content(request.content())
@@ -53,7 +53,7 @@ public class PostService {
         Profile profile = profileFinder.findByMemberId(user.id());
         PostEntity found = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (!found.getAuthorId().equals(profile.id()))
+        if (!found.getProfileId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         found.update(content);
@@ -64,7 +64,7 @@ public class PostService {
         Profile profile = profileFinder.findByMemberId(user.id());
         PostEntity found = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (!found.getAuthorId().equals(profile.id()))
+        if (!found.getProfileId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         postRepository.delete(found);

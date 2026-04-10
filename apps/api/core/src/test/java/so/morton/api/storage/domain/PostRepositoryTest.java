@@ -46,7 +46,7 @@ class PostRepositoryTest {
             // then
             assertThat(found).isPresent();
             assertThat(found.get().getId()).isEqualTo(saved.getId());
-            assertThat(found.get().getAuthorId()).isEqualTo(AUTHOR_ID);
+            assertThat(found.get().getProfileId()).isEqualTo(AUTHOR_ID);
             assertThat(found.get().getTaskId()).isEqualTo(TASK_ID);
             assertThat(found.get().getContent()).isEqualTo("content");
         }
@@ -78,12 +78,12 @@ class PostRepositoryTest {
     }
 
     @Nested
-    @DisplayName("PostRepository.findByAuthorId")
-    class FindByAuthorIdTests {
+    @DisplayName("PostRepository.findByProfileId")
+    class FindByProfileIdTests {
 
         @Test
-        @DisplayName("authorId 조회 성공")
-        void findByAuthorId_success() {
+        @DisplayName("profileId 조회 성공")
+        void findByProfileId_success() {
             // given
             PostEntity entity = PostFactory.createEntity(AUTHOR_ID, TASK_ID);
             postRepository.save(entity);
@@ -91,11 +91,11 @@ class PostRepositoryTest {
             entityManager.clear();
 
             // when
-            List<PostEntity> result = postRepository.findByAuthorId(AUTHOR_ID);
+            List<PostEntity> result = postRepository.findByProfileId(AUTHOR_ID);
 
             // then
             assertThat(result).hasSize(1);
-            assertThat(result.get(0).getAuthorId()).isEqualTo(AUTHOR_ID);
+            assertThat(result.get(0).getProfileId()).isEqualTo(AUTHOR_ID);
         }
     }
 
@@ -177,7 +177,7 @@ class PostRepositoryTest {
             // given
             List<String> images = List.of("photo1.jpg", "photo2.png", "photo3.webp");
             PostEntity entity = PostEntity.builder()
-                    .authorId(AUTHOR_ID)
+                    .profileId(AUTHOR_ID)
                     .taskId(TASK_ID)
                     .images(images)
                     .content("content")
@@ -203,7 +203,7 @@ class PostRepositoryTest {
         void save_withEmptyImages() {
             // given
             PostEntity entity = PostEntity.builder()
-                    .authorId(AUTHOR_ID)
+                    .profileId(AUTHOR_ID)
                     .taskId(TASK_ID)
                     .images(new ArrayList<>())
                     .content("content")
@@ -226,7 +226,7 @@ class PostRepositoryTest {
         void lazyInit_images_afterClear() {
             // given
             PostEntity entity = PostEntity.builder()
-                    .authorId(AUTHOR_ID)
+                    .profileId(AUTHOR_ID)
                     .taskId(TASK_ID)
                     .images(List.of("lazy1.jpg", "lazy2.jpg"))
                     .content("content")

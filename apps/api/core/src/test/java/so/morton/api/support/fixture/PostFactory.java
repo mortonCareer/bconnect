@@ -10,14 +10,14 @@ import java.util.List;
 
 public class PostFactory {
 
-    public static Post create(Long id, Long authorId, Long taskId) {
-        return new Post(id, authorId, taskId, List.of("image"), "content",
+    public static Post create(Long id, Long profileId, Long taskId) {
+        return new Post(id, profileId, taskId, List.of("image"), "content",
                 LocalDateTime.MIN, LocalDateTime.MIN);
     }
 
-    public static PostEntity createEntity(Long authorId, Long taskId) {
+    public static PostEntity createEntity(Long profileId, Long taskId) {
         return PostEntity.builder()
-                .authorId(authorId)
+                .profileId(profileId)
                 .taskId(taskId)
                 .images(List.of("image"))
                 .content("content")

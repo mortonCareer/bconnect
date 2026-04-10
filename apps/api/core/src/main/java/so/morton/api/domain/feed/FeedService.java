@@ -28,8 +28,8 @@ public class FeedService {
 
         List<Post> posts = postFinder.findAll();
 
-        List<Long> authorIds = posts.stream().map(Post::authorId).toList();
-        Map<Long, Profile> profileMap = profileRepository.findByIdIn(authorIds).stream()
+        List<Long> profileIds = posts.stream().map(Post::profileId).toList();
+        Map<Long, Profile> profileMap = profileRepository.findByIdIn(profileIds).stream()
                 .map(Profile::of)
                 .collect(Collectors.toMap(Profile::memberId, Function.identity()));
 
@@ -40,8 +40,8 @@ public class FeedService {
 
         return posts.stream()
                 .map(post -> new Feed(
-                        memberMap.get(post.authorId()),
-                        profileMap.get(post.authorId()),
+                        memberMap.get(post.profileId()),
+                        profileMap.get(post.profileId()),
                         post
                 ))
                 .toList();

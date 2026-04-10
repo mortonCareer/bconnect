@@ -1,13 +1,15 @@
 package so.morton.api.domain.chat;
 
 import so.morton.api.storage.domain.chat.MessageEntity;
+import so.morton.api.storage.value.MessageType;
 
 import java.time.LocalDateTime;
 
 public record Message(
     Long id,
     Long chatId,
-    Long senderId,
+    Long memberId,
+    MessageType type,
     String content,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
@@ -16,7 +18,8 @@ public record Message(
         return new Message(
                 entity.getId(),
                 entity.getChatId(),
-                entity.getSenderId(),
+                entity.getMemberId(),
+                entity.getType(),
                 entity.getContent(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt()

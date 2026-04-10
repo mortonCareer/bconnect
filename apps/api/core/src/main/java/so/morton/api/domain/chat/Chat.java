@@ -10,11 +10,11 @@ public record Chat(
     String title,
     List<Long> participantIds,
     Message lastMessage,
-    long unreadCount,
+    int unreadCount,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
-    public static Chat of(ChatEntity entity, List<Long> participantIds, Message lastMessage, long unreadCount) {
+    public static Chat of(ChatEntity entity, List<Long> participantIds, Message lastMessage, int unreadCount) {
         return new Chat(
                 entity.getId(),
                 entity.getTitle(),

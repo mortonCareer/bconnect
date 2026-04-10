@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import so.morton.api.storage.support.BaseEntity;
+import so.morton.api.storage.value.MessageType;
 
 @Entity
 @Table(name = "messages")
@@ -17,15 +18,20 @@ public class MessageEntity extends BaseEntity {
     private Long chatId;
 
     @Column(nullable = false)
-    private Long senderId;
+    private Long memberId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MessageType type;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Builder
-    public MessageEntity(Long chatId, Long senderId, String content) {
+    public MessageEntity(Long chatId, Long memberId, MessageType type, String content) {
         this.chatId = chatId;
-        this.senderId = senderId;
+        this.memberId = memberId;
+        this.type = type;
         this.content = content;
     }
 }
