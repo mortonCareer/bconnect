@@ -32,20 +32,20 @@ Morton 서비스 전반에서 사용될 **파일 저장·조회·권한 제어**
 
 ## 2. 핵심 설계 결정 요약
 
-| 영역 | 결정 |
-|---|---|
-| 업로드 방식 | **Presigned PUT URL** (클라이언트 → S3 직접) |
-| 업로드 플로우 | **2-step** — reserve → S3 PUT → confirm |
-| 리사이즈 | **클라이언트 업로드 시 3-size** (원본 + medium + thumb, WebP) |
-| 읽기 (private) | **CloudFront + Signed Cookie** (reference 범위별 scope, slide TTL) |
-| 읽기 (public) | **CloudFront** (capability URL, 추측 불가한 UUID 경로) |
-| 버킷 분리 | **morton-private** (신규) + **morton-public** (신규) |
-| 도메인 | `cdn.bconnect.to` (private), `static.bconnect.to` (public) |
-| DB 모델 | ERD의 **`attachments` 단일 테이블** + 다형적 참조(`reference_type`, `reference_id`) |
-| 권한 | **per-`reference_type` 정책 함수** (Spring 도메인 서비스 위임) |
-| Next.js Image | public 이미지에만 사용, private은 `<img>` + CF signed cookie |
-| 크론 | **GitHub Actions** → 내부 API 엔드포인트 호출 |
-| 법적 보관 기간 | **Java enum `RetentionPolicy`** 코드로 관리 |
+| 영역           | 결정                                                                                |
+| -------------- | ----------------------------------------------------------------------------------- |
+| 업로드 방식    | **Presigned PUT URL** (클라이언트 → S3 직접)                                        |
+| 업로드 플로우  | **2-step** — reserve → S3 PUT → confirm                                             |
+| 리사이즈       | **클라이언트 업로드 시 3-size** (원본 + medium + thumb, WebP)                       |
+| 읽기 (private) | **CloudFront + Signed Cookie** (reference 범위별 scope, slide TTL)                  |
+| 읽기 (public)  | **CloudFront** (capability URL, 추측 불가한 UUID 경로)                              |
+| 버킷 분리      | **morton-private** (신규) + **morton-public** (신규)                                |
+| 도메인         | `cdn.bconnect.to` (private), `static.bconnect.to` (public)                          |
+| DB 모델        | ERD의 **`attachments` 단일 테이블** + 다형적 참조(`reference_type`, `reference_id`) |
+| 권한           | **per-`reference_type` 정책 함수** (Spring 도메인 서비스 위임)                      |
+| Next.js Image  | public 이미지에만 사용, private은 `<img>` + CF signed cookie                        |
+| 크론           | **GitHub Actions** → 내부 API 엔드포인트 호출                                       |
+| 법적 보관 기간 | **Java enum `RetentionPolicy`** 코드로 관리                                         |
 
 > 기존 `morton-storage` 버킷은 Sprint 2 구현 전에 **제거 예정** (현재 미사용).
 
@@ -82,10 +82,10 @@ morton-public/                        (신규, public, OAC 경유)
 
 ### 3.2 CloudFront 배포
 
-| 도메인 | Origin | 인증 | 용도 |
-|---|---|---|---|
-| `cdn.bconnect.to` | morton-private (OAC) | CloudFront Signed Cookie 필수 | 메시지/서류/보드 |
-| `static.bconnect.to` | morton-public (OAC) | 없음 (capability URL) | Post/프로필/로고 |
+| 도메인               | Origin               | 인증                          | 용도             |
+| -------------------- | -------------------- | ----------------------------- | ---------------- |
+| `cdn.bconnect.to`    | morton-private (OAC) | CloudFront Signed Cookie 필수 | 메시지/서류/보드 |
+| `static.bconnect.to` | morton-public (OAC)  | 없음 (capability URL)         | Post/프로필/로고 |
 
 - ACM 인증서: us-east-1 (CloudFront 요구사항)
 - Cache policy: `Cache-Control: private, max-age=604800` (private), `public, max-age=31536000, immutable` (public)
@@ -99,6 +99,8 @@ morton-public/                        (신규, public, OAC 경유)
 - presigned URL 서명은 로컬 crypto 연산이라 S3 API 호출 아님 (추가 권한 불필요)
 - CloudFront OAC는 bucket policy로 설정 (IAM 유저와 별개)
 - CloudFront private key 서명: Spring 내부 crypto. AWS 권한 불필요.
+
+> **관리 방식**: 모든 IAM/S3/CloudFront 리소스는 `infra/aws/` 하위 Terraform으로 선언적 관리. 콘솔 수동 수정 금지 (글로벌 규칙 "선언적 관리 원칙" 준수).
 
 ---
 
@@ -142,6 +144,7 @@ CREATE INDEX idx_att_pending_cleanup
 ### 4.2 Enum 값
 
 **`AttachmentStatus`**
+
 - `PENDING`: reserve 완료, S3 업로드 대기/진행 중. 서빙 제외.
 - `READY`: confirm 완료, S3 객체 존재 확인. 서빙 가능.
 - `FAILED`: confirm 시 S3 객체 없음 확인. 서빙 제외. 버그 추적·감사를 위해 **일정 기간 보존** (§9.1).
@@ -162,10 +165,12 @@ CREATE INDEX idx_att_pending_cleanup
 **`EntityType` (reference_type 값)**
 
 v1:
+
 - `MESSAGE` — 채팅 메시지 첨부
 - `CREDENTIAL` — 자격증 서류
 
 확장 예정:
+
 - `BOARD` — 동산보드판 (Board 엔티티 정의 후)
 - `RECOMMENDATION` — 추천 증빙
 - 기타 필요 시 추가 (스키마 변경 없이 enum 값만 추가)
@@ -230,6 +235,7 @@ v1:
 - 요청 body는 **파일 메타만** (filename, size, contentType) — 신뢰 경계 최소화
 
 예시:
+
 ```
 POST /api/v1/chat-messages/{messageId}/attachments/reserve
 POST /api/v1/chat-messages/{messageId}/attachments/confirm
@@ -254,10 +260,10 @@ POST /api/v1/credentials/{credentialId}/attachments/confirm
 ```typescript
 // packages/config/image-sizes.ts
 export const IMAGE_SIZES = {
-  thumb:    { maxDim: 400, quality: 70 },
-  medium:   { maxDim: 800, quality: 80 },
+  thumb: { maxDim: 400, quality: 70 },
+  medium: { maxDim: 800, quality: 80 },
   original: null,
-} as const;
+} as const
 ```
 
 ### 5.4 배치 처리
@@ -317,12 +323,14 @@ POST /api/v1/posts/{postId}/images/confirm
 **S3 관여도**: 없음 (CF 뒤에서 파일만 제공)
 
 **발급 시점:**
+
 - 로그인 시 기본 scope 쿠키 1회 발급 (범용)
 - 리소스별 API 호출 시 Set-Cookie로 추가 발급 (예: 채팅방 진입 시 해당 방 scope 쿠키)
 - **Slide TTL**: 활동 중엔 매 API 응답에 Set-Cookie 갱신 → 세션 유효하면 만료 안 됨. 비활동 1시간 후 만료.
 
 **만료 시 재발급:**
-- CF가 `401 Unauthorized` → 클라 fetch interceptor가 감지 → `POST /api/v1/auth/refresh-cf-cookies` 호출 → 재시도
+
+- CF가 `403 Forbidden` 반환 (무효/만료 서명 쿠키 시 표준 응답) → 클라 fetch interceptor가 감지 → `POST /api/v1/auth/refresh-cf-cookies` 호출 → 재시도
 - 또는 slide TTL로 선제 갱신
 
 ### 6.3 Signed Cookie Scope 제한 (AWS SDK 기능)
@@ -336,20 +344,24 @@ CloudFront-Key-Pair-Id:    공개키 ID
 ```
 
 **Policy JSON 예시:**
+
 ```json
 {
-  "Statement": [{
-    "Resource": "https://cdn.bconnect.to/messages/42/*",
-    "Condition": {
-      "DateLessThan": { "AWS:EpochTime": 1712700000 }
+  "Statement": [
+    {
+      "Resource": "https://cdn.bconnect.to/messages/42/*",
+      "Condition": {
+        "DateLessThan": { "AWS:EpochTime": 1712700000 }
+      }
     }
-  }]
+  ]
 }
 ```
 
 `Resource`에 `*` 와일드카드 지원 → reference 단위 scope 가능. 여러 scope 동시 발급 시 Statement 배열로.
 
 **TTL:**
+
 - 일반 (메시지/보드): 1시간
 - 인증 서류: **2-5분** (민감도 높음)
 
@@ -359,17 +371,19 @@ CloudFront-Key-Pair-Id:    공개키 ID
 
 ```json
 {
-  "attachments": [{
-    "id": 42,
-    "filename": "photo.jpg",
-    "size": 2400000,
-    "type": "image/jpeg",
-    "urls": {
-      "original": "https://cdn.bconnect.to/messages/7/abc/original.jpg",
-      "medium":   "https://cdn.bconnect.to/messages/7/abc/medium.webp",
-      "thumb":    "https://cdn.bconnect.to/messages/7/abc/thumb.webp"
+  "attachments": [
+    {
+      "id": 42,
+      "filename": "photo.jpg",
+      "size": 2400000,
+      "type": "image/jpeg",
+      "urls": {
+        "original": "https://cdn.bconnect.to/messages/7/abc/original.jpg",
+        "medium": "https://cdn.bconnect.to/messages/7/abc/medium.webp",
+        "thumb": "https://cdn.bconnect.to/messages/7/abc/thumb.webp"
+      }
     }
-  }]
+  ]
 }
 ```
 
@@ -399,20 +413,21 @@ public interface AttachmentAccessPolicy {
 
 **v1 구현:**
 
-| reference_type | canRead | canWrite | canDelete |
-|---|---|---|---|
-| `MESSAGE` | 채팅방 참여자 전원 | 메시지 작성자 | 메시지 작성자 |
-| `CREDENTIAL` | 본인 + 매칭된 업체 + 운영 | 본인 | 본인 + 운영 |
-| `BOARD` (v2+) | 보드 멤버 | 보드 멤버 | 업로더 + 보드 소유자 |
+| reference_type | canRead                   | canWrite      | canDelete            |
+| -------------- | ------------------------- | ------------- | -------------------- |
+| `MESSAGE`      | 채팅방 참여자 전원        | 메시지 작성자 | 메시지 작성자        |
+| `CREDENTIAL`   | 본인 + 매칭된 업체 + 운영 | 본인          | 본인 + 운영          |
+| `BOARD` (v2+)  | 보드 멤버                 | 보드 멤버     | 업로더 + 보드 소유자 |
 
 **구현 패턴 (예):**
+
 ```java
 boolean canRead(Member user, Attachment att) {
   return switch (att.referenceType) {
     case MESSAGE    -> chatRoomService.isParticipantOfMessage(user.id, att.referenceId);
-    case CREDENTIAL -> user.id.equals(att.referenceId)
+    case CREDENTIAL -> user.id.equals(att.memberId)   // 본인 (업로더)
                     || user.role == Role.OPS
-                    || matchingService.hasMatchWith(user.id, att.referenceId);
+                    || matchingService.hasMatchWith(user.id, att.memberId);
     case BOARD      -> boardService.isMember(user.id, att.referenceId);
   };
 }
@@ -422,28 +437,29 @@ boolean canRead(Member user, Attachment att) {
 
 ### 7.3 인증 서류 특별 처리
 
-| 항목 | 설정 |
-|---|---|
-| Signed Cookie TTL | 2-5분 |
-| S3 암호화 | SSE-KMS (전용 KMS 키) |
-| 감사 로그 테이블 | v1 스키마 정의, v1.5 쓰기 로직 |
+| 항목                  | 설정                               |
+| --------------------- | ---------------------------------- |
+| Signed Cookie TTL     | 2-5분                              |
+| S3 암호화             | SSE-KMS (전용 KMS 키)              |
+| 감사 로그 테이블      | v1 스키마 정의, v1.5 쓰기 로직     |
 | `Content-Disposition` | `inline` 고정 (다운로드 유도 억제) |
 
 **SSE-S3 vs SSE-KMS 차이** (암호화 알고리즘 자체는 둘 다 AES-256):
 
-| 항목 | SSE-S3 | SSE-KMS |
-|---|---|---|
-| 암호화 알고리즘 | AES-256 | AES-256 |
-| 데이터 키 관리 | S3가 자동 | KMS 키로 데이터 키 생성·암호화 |
-| 키 접근 제어 | 없음 (S3 접근 = 복호화) | KMS IAM 정책으로 분리 제어 |
-| 감사 로그 | S3 access log만 | **CloudTrail에 복호화 이벤트** |
-| 비용 | 무료 | KMS 요청당 $0.03/10K + 키 저장비 |
+| 항목            | SSE-S3                  | SSE-KMS                          |
+| --------------- | ----------------------- | -------------------------------- |
+| 암호화 알고리즘 | AES-256                 | AES-256                          |
+| 데이터 키 관리  | S3가 자동               | KMS 키로 데이터 키 생성·암호화   |
+| 키 접근 제어    | 없음 (S3 접근 = 복호화) | KMS IAM 정책으로 분리 제어       |
+| 감사 로그       | S3 access log만         | **CloudTrail에 복호화 이벤트**   |
+| 비용            | 무료                    | KMS 요청당 $0.03/10K + 키 저장비 |
 
 KMS의 핵심 이점은 **"S3 접근 권한"과 "실제 복호화 권한"의 분리** + **감사 추적**. 민감 파일 보호에 적합.
 
 **`Content-Disposition`**: HTTP 응답 헤더로 브라우저 처리 방식 지시. `inline` = 바로 표시, `attachment` = 다운로드 대화상자. S3 객체 메타로 세팅 또는 CF 응답 변형 주입. 스크린샷은 차단 불가 (완전 방지는 불가).
 
 **감사 로그 스키마 (v1 정의, Railway Postgres 저장):**
+
 ```sql
 CREATE TABLE credential_access_logs (
   id            BIGSERIAL PRIMARY KEY,
@@ -487,12 +503,12 @@ CREATE INDEX idx_cred_access_attachment ON credential_access_logs (attachment_id
 
 > 한국 시장 특성상 hwp/hwpx는 자격증 및 사업자 서류에서 흔히 사용됨.
 
-| 항목 | 제한 |
-|---|---|
-| 단일 파일 크기 | 20 MB |
-| 배치 업로드 수 | 50장/요청 (reserve 1회) |
+| 항목             | 제한                                          |
+| ---------------- | --------------------------------------------- |
+| 단일 파일 크기   | 20 MB                                         |
+| 배치 업로드 수   | 50장/요청 (reserve 1회)                       |
 | 엔티티당 첨부 수 | 메시지 10개 / 자격증 10개 / 보드 500개 (soft) |
-| 총 스토리지 쿼터 | v1 제한 없음, 모니터링만 |
+| 총 스토리지 쿼터 | v1 제한 없음, 모니터링만                      |
 
 ### 8.2 검증 위치
 
@@ -506,14 +522,15 @@ CREATE INDEX idx_cred_access_attachment ON credential_access_logs (attachment_id
 
 ### 9.1 크론 작업 (GitHub Actions)
 
-**이유**: 다중 컨테이너 운영 시 Spring `@Scheduled`는 중복 실행 위험 (Shedlock 등 부가 의존성 필요). Morton은 이미 [kiscon-sync](../../../.github/workflows/kiscon-sync.yml) 등 GHA 크론 패턴 사용 중. 인프라 분리 + 단일 실행 보장.
+**이유**: 다중 컨테이너 운영 시 Spring `@Scheduled`는 중복 실행 위험 (Shedlock 등 부가 의존성 필요). Morton은 이미 [kiscon-sync](../../.github/workflows/kiscon-sync.yml) 등 GHA 크론 패턴 사용 중. 인프라 분리 + 단일 실행 보장.
 
 **패턴:**
+
 ```yaml
 # .github/workflows/attachment-cleanup.yml
 on:
   schedule:
-    - cron: '0 18 * * *'  # 매일 03:00 KST
+    - cron: '0 18 * * *' # 매일 03:00 KST
 jobs:
   cleanup:
     runs-on: ubuntu-latest
@@ -525,17 +542,18 @@ jobs:
 
 Spring은 `/api/v1/internal/*` 엔드포인트를 별도 인증(X-Internal-Secret)으로 보호.
 
-| 작업 | 주기 | 대상 |
-|---|---|---|
-| PENDING 청소 | 매시 | `status='PENDING' AND created_at < NOW() - 24h` → soft delete (30일 후 물리 삭제) |
-| FAILED 보존 후 청소 | 매일 | `status='FAILED' AND created_at < NOW() - 7d` → soft delete |
-| 물리 삭제 | 매일 | `deleted_at < NOW() - 30d` → S3 삭제 + DB 물리 삭제 |
-| 고아 레코드 스캔 | 주 1회 | `reference_id` 가리키는 대상 없는 row → soft delete |
-| 법적 보관 만료 | 매일 | `RetentionPolicy` 기반 자동 파기 (§10 참조) |
+| 작업                | 주기   | 대상                                                                              |
+| ------------------- | ------ | --------------------------------------------------------------------------------- |
+| PENDING 청소        | 매시   | `status='PENDING' AND created_at < NOW() - 24h` → soft delete (30일 후 물리 삭제) |
+| FAILED 보존 후 청소 | 매일   | `status='FAILED' AND created_at < NOW() - 7d` → soft delete                       |
+| 물리 삭제           | 매일   | `deleted_at < NOW() - 30d` → S3 삭제 + DB 물리 삭제                               |
+| 고아 레코드 스캔    | 주 1회 | `reference_id` 가리키는 대상 없는 row → soft delete                               |
+| 법적 보관 만료      | 매일   | `RetentionPolicy` 기반 자동 파기 (§10 참조)                                       |
 
 ### 9.2 S3 버킷 설정
 
 **morton-private (신규):**
+
 - `PublicAccessBlockConfiguration`: 4개 플래그 전부 ON
   - `BlockPublicAcls`: 공개 ACL 신규 적용 차단
   - `IgnorePublicAcls`: 기존 공개 ACL 무시
@@ -543,26 +561,35 @@ Spring은 `/api/v1/internal/*` 엔드포인트를 별도 인증(X-Internal-Secre
   - `RestrictPublicBuckets`: 기존 공개 policy 무시
 - `ServerSideEncryption`: SSE-S3 기본, `credentials/*` prefix는 SSE-KMS
 - `Versioning`: 비활성 (비용, MVP)
-- `CORS`: PUT만 허용, origin = `https://bconnect.to`, `https://plan.bconnect.to`
+- `CORS`:
+  - `AllowedMethods`: `PUT`
+  - `AllowedOrigins`: `https://bconnect.to`, `https://plan.bconnect.to`
+  - `AllowedHeaders`: `Content-Type`, `Content-Length` (presigned PUT preflight 통과용)
+  - `ExposeHeaders`: `ETag`
 - `BucketPolicy`: CloudFront OAC만 GetObject 허용
 
 **morton-public (신규, OAC 경유):**
+
 - `PublicAccessBlockConfiguration`: 4개 플래그 전부 ON
 - `ServerSideEncryption`: SSE-S3
 - `Versioning`: 비활성
 - `BucketPolicy`: CloudFront OAC만 GetObject 허용 (직접 접근 차단, CF 경유만)
-- `CORS`: GET 허용 모든 origin, PUT만 morton origins
+- `CORS`:
+  - `AllowedMethods`: `GET` (모든 origin), `PUT` (morton origins만)
+  - `AllowedOrigins`: GET `*`, PUT `https://bconnect.to`, `https://plan.bconnect.to`
+  - `AllowedHeaders`: `Content-Type`, `Content-Length` (presigned PUT preflight 통과용)
+  - `ExposeHeaders`: `ETag`
 
 ### 9.3 S3 Lifecycle 보완
 
 네이티브 lifecycle이 가능한 단순 TTL 작업은 S3에 위임 (비용·안정성). DB 상태 기반 로직만 크론으로.
 
-| 작업 | 처리 주체 |
-|---|---|
+| 작업                                    | 처리 주체                           |
+| --------------------------------------- | ----------------------------------- |
 | 불완전 multipart upload 정리 (1일 경과) | S3 `AbortIncompleteMultipartUpload` |
-| PENDING/FAILED 판단 기반 삭제 | 크론 (DB 상태 필요) |
-| soft-deleted 30일 경과 물리 삭제 | 크론 |
-| 스토리지 계층 전환 (IA, Glacier) | v3+ |
+| PENDING/FAILED 판단 기반 삭제           | 크론 (DB 상태 필요)                 |
+| soft-deleted 30일 경과 물리 삭제        | 크론                                |
+| 스토리지 계층 전환 (IA, Glacier)        | v3+                                 |
 
 **버저닝은 버킷 전체 단위만 가능** (폴더/prefix별 선택 불가). prefix별 필요 시 별도 버킷 분리 또는 lifecycle rule로 즉시 만료 처리.
 
@@ -584,6 +611,7 @@ public enum RetentionPolicy {
 ```
 
 **참고 법령:**
+
 - 개인정보보호법: 대량·민감정보 처리 시 접속기록 2년
 - 전자상거래법: 분쟁 가능 기록 3년
 - 부가가치세법: 세금계산서 5년
@@ -594,28 +622,28 @@ public enum RetentionPolicy {
 
 ## 11. 확장 경로
 
-| 단계 | 트리거 | 추가 구성 |
-|---|---|---|
-| **v1 (현재)** | — | 위 설계 전부 |
-| **v1.5** | Board 엔티티 정의 (2026-04-13 이후) | `EntityType.BOARD` 추가, `board_attachment_meta(folder, caption)` 테이블 |
-| **v1.5** | 인증서류 운영 투입 | 감사 로그 쓰기 로직 구현 |
-| **v2** | 업로드 성공률 분석 필요 | S3 ObjectCreated 이벤트 → Lambda → confirm 대체 |
-| **v2** | 악성 파일 우려 / 대규모 | Lambda 비동기 바이러스 스캔 + 매직바이트 검증 (ClamAV) |
-| **v2** | 기술자 프로필 비공개 기능 도입 | Post 이미지 → `morton-private` 마이그레이션 (반나절~하루) |
-| **v3** | 동적 사이즈 요구 증가 | Lambda@Edge on-the-fly 리사이즈 |
-| **v3** | 대용량 파일 (>100MB) | S3 Multipart Upload, Resumable |
-| **v4** | 콜드 스토리지 최적화 | S3 Intelligent-Tiering, Glacier 이전 |
+| 단계          | 트리거                              | 추가 구성                                                                |
+| ------------- | ----------------------------------- | ------------------------------------------------------------------------ |
+| **v1 (현재)** | —                                   | 위 설계 전부                                                             |
+| **v1.5**      | Board 엔티티 정의 (2026-04-13 이후) | `EntityType.BOARD` 추가, `board_attachment_meta(folder, caption)` 테이블 |
+| **v1.5**      | 인증서류 운영 투입                  | 감사 로그 쓰기 로직 구현                                                 |
+| **v2**        | 업로드 성공률 분석 필요             | S3 ObjectCreated 이벤트 → Lambda → confirm 대체                          |
+| **v2**        | 악성 파일 우려 / 대규모             | Lambda 비동기 바이러스 스캔 + 매직바이트 검증 (ClamAV)                   |
+| **v2**        | 기술자 프로필 비공개 기능 도입      | Post 이미지 → `morton-private` 마이그레이션 (반나절~하루)                |
+| **v3**        | 동적 사이즈 요구 증가               | Lambda@Edge on-the-fly 리사이즈                                          |
+| **v3**        | 대용량 파일 (>100MB)                | S3 Multipart Upload, Resumable                                           |
+| **v4**        | 콜드 스토리지 최적화                | S3 Intelligent-Tiering, Glacier 이전                                     |
 
 **CloudFront Functions vs Lambda@Edge** (v3 선택지):
 
-| 항목 | CF Functions | Lambda@Edge |
-|---|---|---|
-| 언어 | JavaScript | Node.js, Python |
-| 실행 위치 | 199+ POPs | 13+ Regional edges |
-| 지연 | <1ms | 수십 ms |
-| 메모리 | 2MB | 최대 10GB |
-| 용도 | header 조작, URL rewrite | 이미지 리사이즈, S3 fetch |
-| 비용 | 10배 저렴 | 표준 Lambda 가격 |
+| 항목      | CF Functions             | Lambda@Edge               |
+| --------- | ------------------------ | ------------------------- |
+| 언어      | JavaScript               | Node.js, Python           |
+| 실행 위치 | 199+ POPs                | 13+ Regional edges        |
+| 지연      | <1ms                     | 수십 ms                   |
+| 메모리    | 2MB                      | 최대 10GB                 |
+| 용도      | header 조작, URL rewrite | 이미지 리사이즈, S3 fetch |
+| 비용      | 10배 저렴                | 표준 Lambda 가격          |
 
 on-the-fly 이미지 리사이즈는 **Lambda@Edge 필수**. header 조작은 CF Functions.
 
