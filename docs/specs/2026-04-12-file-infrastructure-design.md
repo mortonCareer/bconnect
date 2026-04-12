@@ -574,11 +574,13 @@ Spring은 `/api/v1/internal/*` 엔드포인트를 별도 인증(X-Internal-Secre
 - `ServerSideEncryption`: SSE-S3
 - `Versioning`: 비활성
 - `BucketPolicy`: CloudFront OAC만 GetObject 허용 (직접 접근 차단, CF 경유만)
-- `CORS`:
-  - `AllowedMethods`: `GET` (모든 origin), `PUT` (morton origins만)
-  - `AllowedOrigins`: GET `*`, PUT `https://bconnect.to`, `https://plan.bconnect.to`
-  - `AllowedHeaders`: `Content-Type`, `Content-Length` (presigned PUT preflight 통과용)
-  - `ExposeHeaders`: `ETag`
+- `CORS` (두 개 rule로 분리 — S3 CORSRule은 atomic 단위라 method별 origin 스코프 분리 시 rule 분리 필수):
+  - **Rule 1 (브라우저 직접 GET은 허용 안 함)**: 생략. GET 요청은 CloudFront 경유 (서버사이드 fetch, 브라우저 CORS 미관여).
+  - **Rule 2 (presigned PUT)**:
+    - `AllowedMethods`: `PUT`
+    - `AllowedOrigins`: `https://bconnect.to`, `https://plan.bconnect.to`
+    - `AllowedHeaders`: `Content-Type`, `Content-Length`
+    - `ExposeHeaders`: `ETag`
 
 ### 9.3 S3 Lifecycle 보완
 
