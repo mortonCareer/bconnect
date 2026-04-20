@@ -43,6 +43,7 @@ resource "vercel_project_environment_variable" "career_aws_access_key_id" {
   key        = "AWS_ACCESS_KEY_ID"
   value      = var.aws_access_key_id
   target     = ["production", "preview"]
+  sensitive  = true
   comment    = "AWS IAM - S3/Lambda 접근용"
 }
 
@@ -51,6 +52,7 @@ resource "vercel_project_environment_variable" "career_aws_secret_access_key" {
   key        = "AWS_SECRET_ACCESS_KEY"
   value      = var.aws_secret_access_key
   target     = ["production", "preview"]
+  sensitive  = true
   comment    = "AWS IAM - S3/Lambda 접근용"
 }
 
@@ -67,6 +69,7 @@ resource "vercel_project_environment_variable" "career_nts_api_service_key" {
   key        = "NTS_API_SERVICE_KEY"
   value      = var.nts_api_service_key
   target     = ["production", "preview"]
+  sensitive  = true
   comment    = "국세청 사업자등록정보 API (data.go.kr) - 원클릭 조회"
 }
 
@@ -75,6 +78,7 @@ resource "vercel_project_environment_variable" "career_kcomwel_api_service_key" 
   key        = "KCOMWEL_API_SERVICE_KEY"
   value      = var.kcomwel_api_service_key
   target     = ["production", "preview"]
+  sensitive  = true
   comment    = "근로복지공단 고용/산재보험 API (data.go.kr) - 원클릭 조회"
 }
 
@@ -89,6 +93,7 @@ resource "vercel_project_environment_variable" "career_cron_secret" {
   key        = "CRON_SECRET"
   value      = random_password.cron_secret.result
   target     = ["production"]
+  sensitive  = true
   comment    = "Vercel Cron 인증 시크릿 - 스키마 체크 크론잡"
 }
 
@@ -99,6 +104,7 @@ resource "vercel_project_environment_variable" "career_sentry_auth_token" {
   key        = "SENTRY_AUTH_TOKEN"
   value      = var.sentry_auth_token
   target     = ["production", "preview"]
+  sensitive  = true
   comment    = "Sentry auth token - 소스맵 업로드"
 }
 
@@ -108,6 +114,7 @@ resource "vercel_project_environment_variable" "career_slack_webhook_url" {
   key        = "SLACK_WEBHOOK_URL"
   value      = var.slack_webhook_url
   target     = ["production"]
+  sensitive  = true
   comment    = "Slack Incoming Webhook - 크롤링 스키마 변경 알림"
 }
 
@@ -116,6 +123,7 @@ resource "vercel_project_environment_variable" "career_database_url" {
   key        = "DATABASE_URL"
   value      = var.database_url
   target     = ["production", "preview"]
+  sensitive  = true
   comment    = "Railway Postgres - KISCON 건설업체정보 조회"
 }
 
