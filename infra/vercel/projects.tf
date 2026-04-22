@@ -127,6 +127,68 @@ resource "vercel_project_environment_variable" "career_database_url" {
   comment    = "Railway Postgres - KISCON 건설업체정보 조회"
 }
 
+# ---------------------------------------------------------------------------
+# Firebase Cloud Messaging (Web Push)
+# ---------------------------------------------------------------------------
+# NEXT_PUBLIC_* 는 클라이언트에 노출됨 (FCM 웹 SDK config는 공개 정보)
+# VAPID_KEY도 공개 키라 NEXT_PUBLIC_ 접두사 사용 가능
+resource "vercel_project_environment_variable" "career_firebase_api_key" {
+  project_id = vercel_project.morton-career.id
+  key        = "NEXT_PUBLIC_FIREBASE_API_KEY"
+  value      = var.firebase_web_configs["career"].api_key
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web SDK - apiKey"
+}
+
+resource "vercel_project_environment_variable" "career_firebase_auth_domain" {
+  project_id = vercel_project.morton-career.id
+  key        = "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"
+  value      = var.firebase_web_configs["career"].auth_domain
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web SDK - authDomain"
+}
+
+resource "vercel_project_environment_variable" "career_firebase_project_id" {
+  project_id = vercel_project.morton-career.id
+  key        = "NEXT_PUBLIC_FIREBASE_PROJECT_ID"
+  value      = var.firebase_web_configs["career"].project_id
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web SDK - projectId"
+}
+
+resource "vercel_project_environment_variable" "career_firebase_storage_bucket" {
+  project_id = vercel_project.morton-career.id
+  key        = "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"
+  value      = var.firebase_web_configs["career"].storage_bucket
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web SDK - storageBucket"
+}
+
+resource "vercel_project_environment_variable" "career_firebase_messaging_sender_id" {
+  project_id = vercel_project.morton-career.id
+  key        = "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"
+  value      = var.firebase_web_configs["career"].messaging_sender_id
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web SDK - messagingSenderId (FCM)"
+}
+
+resource "vercel_project_environment_variable" "career_firebase_app_id" {
+  project_id = vercel_project.morton-career.id
+  key        = "NEXT_PUBLIC_FIREBASE_APP_ID"
+  value      = var.firebase_web_configs["career"].app_id
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web SDK - appId"
+}
+
+resource "vercel_project_environment_variable" "career_firebase_vapid_key" {
+  count      = var.firebase_vapid_key != "" ? 1 : 0
+  project_id = vercel_project.morton-career.id
+  key        = "NEXT_PUBLIC_FIREBASE_VAPID_KEY"
+  value      = var.firebase_vapid_key
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web Push VAPID public key (브라우저 구독 인증)"
+}
+
 # ===========================================================================
 # Domain Configuration for Career
 # ===========================================================================
@@ -179,6 +241,66 @@ resource "vercel_project_environment_variable" "plan_api_url" {
   value      = "https://api.${var.domain}"
   target     = ["production", "preview", "development"]
   comment    = "Spring Boot API 서버 base URL"
+}
+
+# ---------------------------------------------------------------------------
+# Firebase Cloud Messaging (Web Push) — career와 공통 Firebase Web App 공유
+# ---------------------------------------------------------------------------
+resource "vercel_project_environment_variable" "plan_firebase_api_key" {
+  project_id = vercel_project.morton-plan.id
+  key        = "NEXT_PUBLIC_FIREBASE_API_KEY"
+  value      = var.firebase_web_configs["plan"].api_key
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web SDK - apiKey"
+}
+
+resource "vercel_project_environment_variable" "plan_firebase_auth_domain" {
+  project_id = vercel_project.morton-plan.id
+  key        = "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"
+  value      = var.firebase_web_configs["plan"].auth_domain
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web SDK - authDomain"
+}
+
+resource "vercel_project_environment_variable" "plan_firebase_project_id" {
+  project_id = vercel_project.morton-plan.id
+  key        = "NEXT_PUBLIC_FIREBASE_PROJECT_ID"
+  value      = var.firebase_web_configs["plan"].project_id
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web SDK - projectId"
+}
+
+resource "vercel_project_environment_variable" "plan_firebase_storage_bucket" {
+  project_id = vercel_project.morton-plan.id
+  key        = "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"
+  value      = var.firebase_web_configs["plan"].storage_bucket
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web SDK - storageBucket"
+}
+
+resource "vercel_project_environment_variable" "plan_firebase_messaging_sender_id" {
+  project_id = vercel_project.morton-plan.id
+  key        = "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"
+  value      = var.firebase_web_configs["plan"].messaging_sender_id
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web SDK - messagingSenderId (FCM)"
+}
+
+resource "vercel_project_environment_variable" "plan_firebase_app_id" {
+  project_id = vercel_project.morton-plan.id
+  key        = "NEXT_PUBLIC_FIREBASE_APP_ID"
+  value      = var.firebase_web_configs["plan"].app_id
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web SDK - appId"
+}
+
+resource "vercel_project_environment_variable" "plan_firebase_vapid_key" {
+  count      = var.firebase_vapid_key != "" ? 1 : 0
+  project_id = vercel_project.morton-plan.id
+  key        = "NEXT_PUBLIC_FIREBASE_VAPID_KEY"
+  value      = var.firebase_vapid_key
+  target     = ["production", "preview", "development"]
+  comment    = "Firebase Web Push VAPID public key (브라우저 구독 인증)"
 }
 
 # ===========================================================================
