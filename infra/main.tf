@@ -42,6 +42,14 @@ module "railway" {
   solapi_sender_number = var.solapi_sender_number
 }
 
+module "firebase" {
+  source = "./firebase"
+
+  project_id         = var.firebase_project_id
+  project_name       = var.firebase_project_name
+  billing_account_id = var.firebase_billing_account_id
+}
+
 module "vercel" {
   source = "./vercel"
 
@@ -62,4 +70,8 @@ module "vercel" {
   slack_webhook_url = var.slack_webhook_url
   sentry_auth_token = var.sentry_auth_token
   database_url      = var.database_url
+
+  # Firebase config → Vercel 환경변수로 주입 (앱별 map)
+  firebase_web_configs = module.firebase.web_configs
+  firebase_vapid_key   = var.firebase_vapid_key
 }
