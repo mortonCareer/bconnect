@@ -49,7 +49,7 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
             }
 
             String accessToken = jwtProvider.generateAccessToken(authentication);
-            String refreshToken = jwtProvider.generateRefreshToken(authentication.getName());
+            String refreshToken = jwtProvider.generateRefreshToken(user.id());
 
             String agent = request.getHeader("User-Agent");
             String ip = request.getRemoteAddr();

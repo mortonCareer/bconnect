@@ -11,6 +11,7 @@ import java.util.List;
 public record User(
     Long id,
     String username,
+    Long profileId,
     String role
 ) implements UserDetails {
 

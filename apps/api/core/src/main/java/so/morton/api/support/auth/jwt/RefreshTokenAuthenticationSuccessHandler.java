@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 import so.morton.api.api.controller.v1.response.RefreshTokenResponse;
 import so.morton.api.support.auth.AuthenticationTypeMismatchException;
+import so.morton.api.support.auth.User;
 import so.morton.api.support.auth.otp.SessionService;
 import so.morton.api.support.response.ApiResponse;
 
@@ -44,10 +45,13 @@ public class RefreshTokenAuthenticationSuccessHandler implements AuthenticationS
                 log.debug("Generate access token from refresh token");
             }
 
-            String username = authentication.getName();
+            if (!(authentication.getPrincipal() instanceof User user)) {
+                throw new AuthenticationTypeMismatchException("Principal must be of type " + User.class.getName());
+            }
+
             String accessToken = jwtProvider.generateAccessToken(authentication);
-            String refreshToken = jwtProvider.generateRefreshToken(username);
-            sessionService.rotate(username, refreshToken);
+            String refreshToken = jwtProvider.generateRefreshToken(user.id());
+            sessionService.rotate(user.getUsername(), refreshToken);
 
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getWriter().write(objectMapper.writeValueAsString(

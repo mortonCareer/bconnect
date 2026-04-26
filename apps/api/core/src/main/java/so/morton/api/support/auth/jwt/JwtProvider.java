@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import so.morton.api.support.auth.User;
 import so.morton.api.support.auth.UserService;
 
 import java.time.Duration;
@@ -31,6 +32,7 @@ import static io.jsonwebtoken.Jwts.SIG.HS256;
 public class JwtProvider {
     private static final String SCOPE_CLAIM_KEY = "scope";
     private static final String TOKEN_TYPE_CLAIM_KEY = "type";
+    private static final String PROFILE_ID_CLAIM_KEY = "profileId";
     private static final String ACCESS_TOKEN_TYPE = "access";
     private static final String REFRESH_TOKEN_TYPE = "refresh";
     private static final String AUTHORITIES_DELIMITER = ",";
@@ -50,27 +52,17 @@ public class JwtProvider {
     }
 
     public String generateAccessToken(Authentication authentication) {
-        String username = authentication.getName();
-        String authorities = authentication.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .map(auth -> auth.substring(AUTHORITY_PREFIX.length()))
-                .collect(Collectors.joining(AUTHORITIES_DELIMITER));
-
-        Date now = new Date();
-        Date expiration = new Date(now.getTime() + accessTokenExpiration.toMillis());
-
-        return Jwts.builder()
-                .subject(username)
-                .claim(SCOPE_CLAIM_KEY, authorities)
-                .claim(TOKEN_TYPE_CLAIM_KEY, ACCESS_TOKEN_TYPE)
-                .issuedAt(now)
-                .expiration(expiration)
-                .signWith(secret, HS256)
-                .compact();
+        if (!(authentication.getPrincipal() instanceof User user)) {
+            throw new JwtException("Authentication principal must be of type " + User.class.getName());
+        }
+        return generateAccessToken(user);
     }
 
-    public String generateAccessToken(UserDetails user) {
+    public String generateAccessToken(UserDetails userDetails) {
+        if (!(userDetails instanceof User user)) {
+            throw new JwtException("UserDetails must be of type " + User.class.getName());
+        }
+
         String authorities = user.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
@@ -81,21 +73,22 @@ public class JwtProvider {
         Date expiration = new Date(now.getTime() + accessTokenExpiration.toMillis());
 
         return Jwts.builder()
-                .subject(user.getUsername())
+                .subject(String.valueOf(user.id()))
                 .claim(SCOPE_CLAIM_KEY, authorities)
                 .claim(TOKEN_TYPE_CLAIM_KEY, ACCESS_TOKEN_TYPE)
+                .claim(PROFILE_ID_CLAIM_KEY, user.profileId())
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(secret, HS256)
                 .compact();
     }
 
-    public String generateRefreshToken(String username) {
+    public String generateRefreshToken(Long memberId) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + refreshTokenExpiration.toMillis());
 
         return Jwts.builder()
-                .subject(username)
+                .subject(String.valueOf(memberId))
                 .claim(TOKEN_TYPE_CLAIM_KEY, REFRESH_TOKEN_TYPE)
                 .issuedAt(now)
                 .expiration(expiration)
@@ -107,8 +100,8 @@ public class JwtProvider {
         validateToken(token);
 
         if (isRefreshToken(token)) {
-            String username = getUsername(token);
-            UserDetails user = userService.loadUserByUsername(username);
+            Long memberId = getMemberId(token);
+            UserDetails user = userService.loadUserById(memberId);
             return generateAccessToken(user);
         }
 
@@ -119,8 +112,16 @@ public class JwtProvider {
         getClaims(token);
     }
 
-    public String getUsername(String token) {
-        return getClaims(token).getSubject();
+    public Long getMemberId(String token) {
+        try {
+            return Long.parseLong(getClaims(token).getSubject());
+        } catch (NumberFormatException ex) {
+            throw new JwtException("Invalid subject claim: not a numeric memberId", ex);
+        }
+    }
+
+    public Long getProfileId(String token) {
+        return getClaims(token).get(PROFILE_ID_CLAIM_KEY, Long.class);
     }
 
     public Collection<GrantedAuthority> getAuthorities(String token) {

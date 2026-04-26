@@ -7,9 +7,9 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.Assert;
 import so.morton.api.support.CodeException;
+import so.morton.api.support.auth.UserService;
 import so.morton.api.support.auth.otp.SessionService;
 
 import java.util.Objects;
@@ -21,7 +21,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class JwtAuthenticationProvider implements AuthenticationProvider {
 
-    private final UserDetailsService userDetailsService;
+    private final UserService userService;
     private final SessionService sessionService;
 
     private final JwtProvider jwtProvider;
@@ -33,13 +33,13 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 
         String token = Objects.requireNonNull(authentication.getCredentials()).toString();
         jwtProvider.validateToken(token);
-        String username = jwtProvider.getUsername(token);
+        Long memberId = jwtProvider.getMemberId(token);
         JwtType type = JwtType.valueOf(jwtProvider.getTokenType(token).toUpperCase());
-        UserDetails user = this.userDetailsService.loadUserByUsername(username);
+        UserDetails user = this.userService.loadUserById(memberId);
 
         if (type == JwtType.REFRESH) {
             try {
-                sessionService.verify(username, token);
+                sessionService.verify(user.getUsername(), token);
             } catch (CodeException ex) {
                 throw new AuthenticationServiceException(ex.getMessage(), ex);
             }
