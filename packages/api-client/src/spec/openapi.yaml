@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Bconnect API
   description: 인테리어 종사자를 위한 하도급 섭외 · 관리 플랫폼 '품앗이'의 REST API

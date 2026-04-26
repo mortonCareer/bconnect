@@ -4,10 +4,11 @@ required:
   - content
 properties:
   taskId:
-    type: integer
+    type:
+      - integer
+      - 'null'
     format: int64
     example: 1
-    nullable: true
   images:
     type: array
     items:

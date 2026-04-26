@@ -10,22 +10,25 @@ properties:
     format: int64
     example: 1
   profileId:
-    type: integer
+    type:
+      - integer
+      - 'null'
     format: int64
     example: 1
-    nullable: true
   taskId:
-    type: integer
+    type:
+      - integer
+      - 'null'
     format: int64
     example: 1
-    nullable: true
   images:
     type: array
     items:
       type: string
   content:
-    type: string
-    nullable: true
+    type:
+      - string
+      - 'null'
   createdAt:
     type: string
     format: date-time

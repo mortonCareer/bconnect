@@ -6,11 +6,11 @@ required:
 properties:
   success:
     type: boolean
-    enum:
-      - false
+    const: false
   error:
     $ref: ./ApiError.yaml
   data:
-    type: object
-    nullable: true
-    example: null
+    type:
+      - object
+      - 'null'
+    example:

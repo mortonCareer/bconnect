@@ -5,7 +5,6 @@ required:
 properties:
   registered:
     type: boolean
-    enum:
-      - false
+    const: false
   signupToken:
     type: string

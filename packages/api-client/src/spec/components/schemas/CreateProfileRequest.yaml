@@ -17,10 +17,12 @@ properties:
     type: integer
     minimum: 0
   headline:
-    type: string
-    nullable: true
+    type:
+      - string
+      - 'null'
   about:
-    type: string
-    nullable: true
+    type:
+      - string
+      - 'null'
   address:
     $ref: ./Address.yaml

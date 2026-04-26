@@ -6,8 +6,7 @@ required:
 properties:
   registered:
     type: boolean
-    enum:
-      - true
+    const: true
   accessToken:
     type: string
   refreshToken:

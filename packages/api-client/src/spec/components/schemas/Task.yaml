@@ -16,10 +16,11 @@ properties:
     format: int64
     example: 1
   profileId:
-    type: integer
+    type:
+      - integer
+      - 'null'
     format: int64
     example: 1
-    nullable: true
   company:
     type: string
   address:

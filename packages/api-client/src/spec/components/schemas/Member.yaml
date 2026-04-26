@@ -19,8 +19,9 @@ properties:
   phone:
     type: string
   picture:
-    type: string
-    nullable: true
+    type:
+      - string
+      - 'null'
   role:
     $ref: ./Role.yaml
   createdAt:

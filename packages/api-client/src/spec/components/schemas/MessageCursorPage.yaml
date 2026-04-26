@@ -8,7 +8,8 @@ properties:
     items:
       $ref: ./Message.yaml
   nextCursor:
-    type: string
-    nullable: true
+    type:
+      - string
+      - 'null'
   hasNext:
     type: boolean

@@ -4,6 +4,5 @@ required:
 properties:
   success:
     type: boolean
-    enum:
-      - true
     example: true
+    const: true

@@ -12,8 +12,9 @@ properties:
   name:
     type: string
   picture:
-    type: string
+    type:
+      - string
+      - 'null'
     format: uri
-    nullable: true
   role:
     $ref: ./Role.yaml

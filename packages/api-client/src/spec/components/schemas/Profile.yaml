@@ -27,11 +27,13 @@ properties:
   experience:
     type: integer
   headline:
-    type: string
-    nullable: true
+    type:
+      - string
+      - 'null'
   about:
-    type: string
-    nullable: true
+    type:
+      - string
+      - 'null'
   address:
     $ref: ./Address.yaml
   createdAt:

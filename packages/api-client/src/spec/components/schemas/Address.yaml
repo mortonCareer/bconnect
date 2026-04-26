@@ -18,8 +18,9 @@ properties:
   street:
     type: string
   detail:
-    type: string
-    nullable: true
+    type:
+      - string
+      - 'null'
   latitude:
     type: number
     format: double

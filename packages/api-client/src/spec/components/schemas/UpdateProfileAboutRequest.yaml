@@ -1,5 +1,6 @@
 type: object
 properties:
   about:
-    type: string
-    nullable: true
+    type:
+      - string
+      - 'null'
