@@ -29,6 +29,7 @@ export default defineConfig({
       client: 'react-query',
       // MSW handlers + faker 기반 mock 데이터 생성. baseUrl '*' 는 모든 origin 매칭
       // (FE 가 절대 URL 을 사용해도 가로챌 수 있게). locale 'ko' 는 faker 의 한국어 로케일.
+      // packages/mocks/ 에서 stateful override 와 합쳐 사용.
       mock: { type: 'msw', useExamples: true, baseUrl: '*', locale: 'ko' },
       override: {
         // 모든 hook 의 fetch 호출을 src/client.ts 의 customFetch 로 위임.

@@ -16,16 +16,16 @@
     "generate:watch": "orval --watch"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.4.0",
     "@tanstack/react-query": "^5.80.0",
     "@tanstack/react-query-devtools": "^5.80.0",
-    "ky": "^1.8.1"
+    "ky": "^1.8.1",
+    "msw": "^2.13.6"
   },
   "devDependencies": {
-    "@faker-js/faker": "^10.4.0",
     "@redocly/cli": "^2.30.0",
     "@types/node": "^20",
     "@types/react": "^19",
-    "msw": "^2.13.6",
     "orval": "^7.7.0",
     "typescript": "^5"
   },

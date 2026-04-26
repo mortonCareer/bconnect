@@ -17,7 +17,7 @@ export async function registerDeviceToken(token: string): Promise<void> {
     const response = await fetch(`${API_URL}/api/v1/devices`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, platform: 'WEB' }),
+      body: JSON.stringify({ token, platform: 'web' }),
     })
 
     if (!response.ok) {

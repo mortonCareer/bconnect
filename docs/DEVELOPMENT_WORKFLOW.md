@@ -189,77 +189,55 @@ function EditProfile() {
 ### 개요
 
 dev 환경에서 모든 API 요청은 **MSW (Mock Service Worker)** 가 가로채서 mock 응답으로 답합니다.
-브라우저의 Service Worker 가 fetch 를 intercept 하므로 FE 코드는 실제 BE 와 통신하는 것과 동일하게 동작합니다 (별도 fetch 모킹 코드 불필요).
+브라우저의 Service Worker 가 fetch 를 intercept 하므로 FE 코드는 실제 BE 와 통신하는 것과 동일하게 동작합니다.
 
-production 빌드에선 `process.env.NODE_ENV` 가드로 MSW import 자체가 tree-shake 되어 번들에 포함되지 않습니다.
+핸들러는 **orval 이 `openapi.yaml` 에서 자동 생성** 합니다 (`pnpm api:generate`). stateful flow (OTP 검증, FCM 디바이스 UPSERT 등) 만 `packages/mocks/src/overrides/` 에서 손으로 작성합니다. openapi 스키마가 변경되면 자동 생성된 핸들러의 시그니처가 함께 바뀌고, override 의 콜백 시그니처가 컴파일 시점에 미스매치를 잡아냅니다 (drift 방지).
 
-### 구조 (career / plan 동일)
+production 빌드에선 `process.env.NODE_ENV` 가드로 `@morton/mocks` import 가 tree-shake 되어 번들에 포함되지 않습니다.
 
-```
-apps/career/src/mocks/
-├── handlers/
-│   ├── auth.ts                # /api/v1/auth/* (OTP, refresh, logout)
-│   ├── members.ts             # /api/v1/members/*
-│   ├── profiles.ts            # /api/v1/profiles/*
-│   ├── credentials.ts         # /api/v1/credentials/*
-│   ├── coworkers.ts           # /api/v1/coworkers/*
-│   ├── coworker-requests.ts   # /api/v1/coworker-requests/*
-│   ├── feeds.ts               # /api/v1/feeds/*
-│   ├── posts.ts               # /api/v1/posts/*
-│   ├── tasks.ts               # /api/v1/tasks/*
-│   ├── chats.ts               # /api/v1/chats/*
-│   ├── recommendations.ts     # /api/v1/recommendations/*
-│   ├── devices.ts             # /api/v1/devices (FCM)
-│   └── index.ts               # 모든 핸들러 합치기
-├── data/
-│   └── seed.ts                # 공유 in-memory 데이터셋
-├── lib/
-│   ├── response.ts            # ok/badRequest/notFound 등 응답 헬퍼
-│   └── pagination.ts          # cursor/reverse cursor 페이지네이션
-├── browser.ts                 # 브라우저용 setupWorker
-└── server.ts                  # Node 테스트용 setupServer
+### 구조
 
-apps/career/public/mockServiceWorker.js   # MSW 가 자동 생성한 SW 스크립트
-apps/career/src/components/msw-provider.tsx  # 초기화 게이트 (dev only)
+```text
+packages/api-client/src/
+├── openapi.yaml                  # SSOT
+├── orval.config.ts               # mock: { type: 'msw', useExamples: true, locale: 'ko' }
+└── generated/api.ts              # react-query 훅 + getBconnectAPIMock() (자동 생성)
+
+packages/mocks/src/
+├── overrides/
+│   ├── auth.ts                   # OTP 검증 stateful, signup/login 분기, error 응답
+│   └── devices.ts                # FCM 토큰 UPSERT 의미
+├── handlers.ts                   # [...overrides, ...getBconnectAPIMock()]
+├── browser.ts                    # setupWorker
+└── server.ts                     # setupServer (테스트용)
+
+apps/{career,plan}/
+├── public/mockServiceWorker.js   # npx msw init 자동 생성
+└── src/components/msw-provider.tsx  # dev only 초기화 게이트
 ```
 
 ### 활성화 흐름
 
-1. `app/layout.tsx` 가 `<Providers>` 를 렌더
+1. `app/layout.tsx` → `<Providers>` 렌더
 2. `Providers` 가 `<MSWProvider>` 로 감싸 children 렌더 차단
 3. dev 환경에서 `worker.start()` 가 SW 등록 완료 → children 렌더
 4. 이후 모든 `fetch()` 가 SW 를 거치며 handler 매칭 시 mock 응답 반환
+   - handler 매칭은 **배열 앞쪽 우선** — overrides 가 generated 보다 우선
 5. handler 없는 요청은 `onUnhandledRequest: 'bypass'` 로 실 네트워크 통과
 
-### 핸들러 예시
-
-```typescript
-// apps/career/src/mocks/handlers/auth.ts
-import { http } from 'msw'
-import { ok, badRequest } from '../lib/response'
-import { members } from '../data/seed'
-
-export const authHandlers = [
-  http.post('*/api/v1/auth/otp/send', async ({ request }) => {
-    const body = (await request.json()) as { phone?: string }
-    if (!body.phone) return badRequest('유효하지 않은 입력값입니다', 'C001')
-    return ok({ expiresAt: new Date(Date.now() + 180000).toISOString() })
-  }),
-  // ...
-]
-```
+`refreshAccessToken()` / `usePushNotifications()` 같은 fetch 부수효과는 `<MSWProvider>` **안쪽** 에서 실행되어야 race 가 발생하지 않습니다. providers.tsx 의 `PostMSWBootstrap` 가 이 역할을 함.
 
 ### 새 엔드포인트 추가
 
 1. `packages/api-client/src/openapi.yaml` 에 endpoint 정의
-2. `apps/career/src/mocks/handlers/<category>.ts` 에 handler 추가 (없으면 신규 파일)
-3. `apps/career/src/mocks/handlers/index.ts` 에 export 추가
-4. `apps/plan/` 에도 동일 적용 (현재는 디렉토리 복제, 추후 `packages/mocks` 로 추출 가능)
+2. `pnpm api:generate` — react-query 훅 + MSW 핸들러 동시 자동 생성
+3. **stateful flow 가 필요할 때만**: `packages/mocks/src/overrides/<category>.ts` 추가 → `handlers.ts` 의 spread 에 등록
+4. 끝. career / plan 둘 다 자동 적용됨 (둘 다 `@morton/mocks` 사용).
 
 ### 테스트 환경 (Vitest 등)
 
 ```typescript
-import { server } from '@/mocks/server'
+import { server } from '@morton/mocks/server'
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterEach(() => server.resetHandlers())
