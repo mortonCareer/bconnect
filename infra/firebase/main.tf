@@ -80,17 +80,3 @@ data "google_firebase_web_app_config" "apps" {
   project    = google_firebase_project.bconnect.project
   web_app_id = google_firebase_web_app.apps[each.key].app_id
 }
-
-# Terraform state drift 방지:
-# 리소스 이름을 morton → bconnect 로 변경 (회사명 일치).
-# state 에는 이전 이름으로 import 되어 있어 그대로 두면 destroy/recreate 가 발생.
-# moved 블록으로 state rename 만 수행 (GCP 측 무변동).
-moved {
-  from = google_project.morton
-  to   = google_project.bconnect
-}
-
-moved {
-  from = google_firebase_project.morton
-  to   = google_firebase_project.bconnect
-}
