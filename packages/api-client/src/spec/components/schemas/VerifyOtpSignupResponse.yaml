@@ -1,0 +1,11 @@
+type: object
+required:
+  - registered
+  - signupToken
+properties:
+  registered:
+    type: boolean
+    enum:
+      - false
+  signupToken:
+    type: string

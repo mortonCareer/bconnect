@@ -1,0 +1,25 @@
+put:
+  operationId: updateMyProfile
+  tags:
+    - Profiles
+  summary: 내 프로필 수정
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/UpdateProfileRequest.yaml
+  responses:
+    '200':
+      description: OK
+    '400':
+      description: |
+        - `C001` 유효하지 않은 입력값입니다
+delete:
+  operationId: deleteMyProfile
+  tags:
+    - Profiles
+  summary: 내 프로필 삭제
+  responses:
+    '200':
+      description: OK

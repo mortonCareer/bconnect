@@ -1,0 +1,32 @@
+parameters:
+  - name: taskId
+    in: path
+    required: true
+    schema:
+      type: integer
+      format: int64
+put:
+  operationId: updateTask
+  tags:
+    - Tasks
+  summary: 작업 수정
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/UpdateTaskRequest.yaml
+  responses:
+    '200':
+      description: OK
+    '400':
+      description: |
+        - `C001` 유효하지 않은 입력값입니다
+delete:
+  operationId: deleteTask
+  tags:
+    - Tasks
+  summary: 작업 삭제
+  responses:
+    '200':
+      description: OK

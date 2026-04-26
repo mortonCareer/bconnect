@@ -1,0 +1,9 @@
+type: object
+required:
+  - member
+  - profile
+properties:
+  member:
+    $ref: ./MaskedMember.yaml
+  profile:
+    $ref: ./Profile.yaml

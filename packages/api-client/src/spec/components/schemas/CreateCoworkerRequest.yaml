@@ -1,0 +1,8 @@
+type: object
+required:
+  - toId
+properties:
+  toId:
+    type: integer
+    format: int64
+    example: 1

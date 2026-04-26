@@ -17,6 +17,7 @@ jobs:
       career: ${{ steps.filter.outputs.career }}
       plan: ${{ steps.filter.outputs.plan }}
       api: ${{ steps.filter.outputs.api }}
+      api-spec: ${{ steps.filter.outputs.api-spec }}
       crawler: ${{ steps.filter.outputs.crawler }}
     steps:
       - uses: actions/checkout@v6
@@ -37,6 +38,9 @@ jobs:
               - 'pnpm-lock.yaml'
             api:
               - 'apps/api/**'
+            api-spec:
+              - 'packages/api-client/src/spec/**'
+              - 'packages/api-client/.redocly.yaml'
             crawler:
               - 'apps/crawler/**'
 
@@ -113,6 +117,29 @@ jobs:
         run: |
           cd apps/api
           ./gradlew test --no-daemon
+
+  ci-api-spec:
+    needs: changes
+    if: ${{ needs.changes.outputs.api-spec == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint OpenAPI spec
+        run: pnpm api:lint
+
+      - name: Bundle check (sanity)
+        run: pnpm api:bundle
 
   ci-crawler:
     needs: changes

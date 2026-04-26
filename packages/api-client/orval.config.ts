@@ -3,7 +3,7 @@ import { defineConfig } from 'orval'
 export default defineConfig({
   morton: {
     input: {
-      target: './src/openapi.yaml',
+      target: './src/openapi.bundled.yaml',
     },
     output: {
       mode: 'single',

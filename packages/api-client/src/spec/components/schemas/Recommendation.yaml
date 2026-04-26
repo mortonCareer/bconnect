@@ -1,0 +1,32 @@
+type: object
+required:
+  - id
+  - fromId
+  - toId
+  - content
+  - visible
+  - createdAt
+  - modifiedAt
+properties:
+  id:
+    type: integer
+    format: int64
+    example: 1
+  fromId:
+    type: integer
+    format: int64
+    example: 1
+  toId:
+    type: integer
+    format: int64
+    example: 2
+  content:
+    type: string
+  visible:
+    type: boolean
+  createdAt:
+    type: string
+    format: date-time
+  modifiedAt:
+    type: string
+    format: date-time

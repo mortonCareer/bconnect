@@ -1,0 +1,15 @@
+delete:
+  operationId: cancelCoworkerRequest
+  tags:
+    - CoworkerRequests
+  summary: 동료요청 취소
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  responses:
+    '200':
+      description: OK

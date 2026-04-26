@@ -1,0 +1,52 @@
+post:
+  operationId: registerDevice
+  tags:
+    - Devices
+  summary: 푸시 알림 디바이스 토큰 등록
+  description: |
+    FCM 디바이스 토큰을 현재 로그인한 회원에게 UPSERT.
+    같은 토큰이면 `last_active_at` 만 갱신, 바뀌었으면 교체.
+    앱 진입마다 호출되는 idempotent 엔드포인트.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/RegisterDeviceRequest.yaml
+  responses:
+    '200':
+      description: 등록/갱신 성공
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: ../components/schemas/ApiSuccessResponseBase.yaml
+              - type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: ../components/schemas/RegisterDeviceResponse.yaml
+    '400':
+      description: |
+        - `C001` 유효하지 않은 입력값입니다 (token/platform 누락)
+delete:
+  operationId: unregisterDevice
+  tags:
+    - Devices
+  summary: 푸시 알림 디바이스 토큰 해제
+  description: |
+    로그아웃 또는 디바이스 알림 해제 시 호출.
+    다른 사용자가 같은 브라우저에 로그인했을 때 이전 사용자의 알림이 가지 않도록 삭제.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/UnregisterDeviceRequest.yaml
+  responses:
+    '204':
+      description: 해제 성공 (응답 바디 없음)
+    '400':
+      description: |
+        - `C001` 유효하지 않은 입력값입니다 (token 누락)

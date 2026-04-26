@@ -1,0 +1,8 @@
+post:
+  operationId: logout
+  tags:
+    - Auth
+  summary: 로그아웃
+  responses:
+    '200':
+      description: OK

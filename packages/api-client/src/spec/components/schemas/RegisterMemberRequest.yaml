@@ -1,0 +1,19 @@
+type: object
+required:
+  - signupToken
+  - username
+  - name
+  - role
+properties:
+  signupToken:
+    type: string
+  username:
+    type: string
+  name:
+    type: string
+  picture:
+    type: string
+    format: uri
+    nullable: true
+  role:
+    $ref: ./Role.yaml

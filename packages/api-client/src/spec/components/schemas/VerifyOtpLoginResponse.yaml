@@ -1,0 +1,14 @@
+type: object
+required:
+  - registered
+  - accessToken
+  - refreshToken
+properties:
+  registered:
+    type: boolean
+    enum:
+      - true
+  accessToken:
+    type: string
+  refreshToken:
+    type: string

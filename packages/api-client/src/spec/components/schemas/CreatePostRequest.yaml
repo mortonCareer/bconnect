@@ -1,0 +1,18 @@
+type: object
+required:
+  - images
+  - content
+properties:
+  taskId:
+    type: integer
+    format: int64
+    example: 1
+    nullable: true
+  images:
+    type: array
+    items:
+      type: string
+      format: uri
+    minItems: 1
+  content:
+    type: string

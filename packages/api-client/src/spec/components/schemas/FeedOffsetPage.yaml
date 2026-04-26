@@ -1,0 +1,11 @@
+type: object
+required:
+  - content
+  - hasNext
+properties:
+  content:
+    type: array
+    items:
+      $ref: ./Feed.yaml
+  hasNext:
+    type: boolean

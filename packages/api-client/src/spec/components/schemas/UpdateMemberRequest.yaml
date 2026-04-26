@@ -1,0 +1,13 @@
+type: object
+required:
+  - name
+  - role
+properties:
+  name:
+    type: string
+  picture:
+    type: string
+    format: uri
+    nullable: true
+  role:
+    $ref: ./Role.yaml

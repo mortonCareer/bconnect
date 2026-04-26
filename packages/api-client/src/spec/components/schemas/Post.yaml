@@ -1,0 +1,34 @@
+type: object
+required:
+  - id
+  - images
+  - createdAt
+  - modifiedAt
+properties:
+  id:
+    type: integer
+    format: int64
+    example: 1
+  profileId:
+    type: integer
+    format: int64
+    example: 1
+    nullable: true
+  taskId:
+    type: integer
+    format: int64
+    example: 1
+    nullable: true
+  images:
+    type: array
+    items:
+      type: string
+  content:
+    type: string
+    nullable: true
+  createdAt:
+    type: string
+    format: date-time
+  modifiedAt:
+    type: string
+    format: date-time

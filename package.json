@@ -16,6 +16,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "api:generate": "pnpm --filter @morton/api-client generate",
+    "api:bundle": "pnpm --filter @morton/api-client bundle",
+    "api:lint": "pnpm --filter @morton/api-client lint",
     "figma:connect": "figma connect publish",
     "figma:connect:dry": "figma connect publish --dry-run"
   },

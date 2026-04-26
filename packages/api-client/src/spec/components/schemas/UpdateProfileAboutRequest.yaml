@@ -1,0 +1,5 @@
+type: object
+properties:
+  about:
+    type: string
+    nullable: true

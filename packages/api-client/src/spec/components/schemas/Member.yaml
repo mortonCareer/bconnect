@@ -1,0 +1,31 @@
+type: object
+required:
+  - id
+  - username
+  - name
+  - phone
+  - role
+  - createdAt
+  - modifiedAt
+properties:
+  id:
+    type: integer
+    format: int64
+    example: 1
+  username:
+    type: string
+  name:
+    type: string
+  phone:
+    type: string
+  picture:
+    type: string
+    nullable: true
+  role:
+    $ref: ./Role.yaml
+  createdAt:
+    type: string
+    format: date-time
+  modifiedAt:
+    type: string
+    format: date-time

@@ -43,7 +43,28 @@ Morton의 기능 개발 프로세스를 설명합니다.
 
 ### SSOT (Single Source of Truth)
 
-모든 API 스펙은 **`packages/api-client/src/openapi.yaml`** 파일에서 관리됩니다.
+API 스펙은 **`packages/api-client/src/spec/`** 하위에 도메인별 파일로 분리되어 관리됩니다.
+
+```text
+packages/api-client/
+├── .redocly.yaml                       # lint 규칙 + bundle config
+└── src/
+    ├── spec/                           # 분리된 spec (SSOT)
+    │   ├── openapi.yaml                # 진입점 (info, paths $ref)
+    │   ├── paths/                      # 45 path 파일 (path 단위)
+    │   │   ├── api_v1_auth_otp_send.yaml
+    │   │   └── ...
+    │   └── components/
+    │       └── schemas/                # 50 schema 파일 (schema 단위)
+    │           ├── ApiSuccessResponseBase.yaml
+    │           ├── ApiErrorResponse.yaml
+    │           ├── Member.yaml
+    │           └── ...
+    ├── openapi.bundled.yaml            # bundle 산출물 (gitignored)
+    └── generated/                      # orval 산출물 (gitignored)
+```
+
+분리 결과는 [redocly split](https://redocly.com/docs/cli/commands/split/) 의 default layout. 도메인 단위 grouping 은 의도적으로 제외 (small file 가 review/merge 에 더 친화적).
 
 ### 스펙 작성 도구
 
@@ -53,56 +74,36 @@ Morton의 기능 개발 프로세스를 설명합니다.
 - 자동 완성 지원
 - 시각적 API 문서 미리보기
 
+`@redocly/cli` 가 spec 검증 + bundle:
+
+```bash
+pnpm api:lint        # redocly lint (CI 에서 자동)
+pnpm api:bundle      # spec → openapi.bundled.yaml
+pnpm api:generate    # bundle + orval 자동 chain
+```
+
 ### 스펙 설계 프로세스
 
-```
-CTO: openapi.yaml 초안 작성
+```text
+CTO: spec/paths/<X>.yaml + spec/components/schemas/<Y>.yaml 추가
+   + spec/openapi.yaml 의 paths 에 $ref 등록
     ↓
 GitHub PR 생성
+    ↓
+ci-api-spec (redocly lint) 자동 실행
     ↓
 CEO: API 스펙 리뷰
     ↓
 피드백 반영 및 논의
     ↓
-합의 후 main 브랜치 머지
+합의 후 dev → main 브랜치 머지
     ↓
 API 클라이언트 자동 생성
 ```
 
-### 스펙 작성 가이드
+### 공통 응답 포맷
 
-**엔드포인트 정의:**
-
-```yaml
-paths:
-  /api/v1/users/{userId}:
-    get:
-      summary: 사용자 정보 조회
-      tags: [User]
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: 성공
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse_User'
-        '404':
-          description: 사용자 없음
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse_Error'
-```
-
-**공통 응답 포맷:**
-
-모든 API는 `ApiResponse<T>` 래퍼를 사용합니다:
+모든 API 는 `ApiResponse<T>` 래퍼 (BE `ApiResponse.java` 와 정렬):
 
 ```typescript
 // 성공
@@ -111,6 +112,38 @@ paths:
 // 실패
 { success: false, data: null, error: { code: string, status: number, message: string, logLevel: string } }
 ```
+
+spec 에서는 envelope 을 다음 패턴으로 표현 (`packages/api-client/src/spec/components/schemas/ApiSuccessResponseBase.yaml` 활용):
+
+```yaml
+# spec/paths/api_v1_users_{userId}.yaml
+get:
+  operationId: getUser
+  tags: [Users]
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: ../components/schemas/ApiSuccessResponseBase.yaml
+              - type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: ../components/schemas/User.yaml
+```
+
+`customFetch` ([packages/api-client/src/client.ts](https://github.com/mortonCareer/bconnect/blob/dev/packages/api-client/src/client.ts)) 가 envelope 을 unwrap 하므로 React Query hook 의 `data` 는 inner `T` 타입 (Generic `ExtractData<T>`).
+
+### 새 endpoint 추가 절차
+
+1. `packages/api-client/src/spec/components/schemas/<Schema>.yaml` 추가 (필요 시)
+2. `packages/api-client/src/spec/paths/<path>.yaml` 추가 — operations + envelope wrap
+3. `packages/api-client/src/spec/openapi.yaml` 의 `paths` 섹션에 `$ref` 등록
+4. `pnpm api:generate` — bundle + orval 자동 실행
+5. PR 생성 → `ci-api-spec` 통과 확인
 
 ---
 
@@ -128,13 +161,13 @@ pnpm api:generate
 
 ### 생성되는 파일
 
-```
+```text
 packages/api-client/src/
-├── openapi.yaml          # API 스펙 (SSOT)
-├── generated/
-│   ├── api.ts            # API 클라이언트
-│   ├── models.ts         # TypeScript 타입
-│   └── hooks.ts          # React Query hooks
+├── spec/                       # 분리된 spec (SSOT, gitignored 아님)
+├── openapi.bundled.yaml        # redocly bundle 산출물 (gitignored)
+└── generated/                  # orval 산출물 (gitignored)
+    ├── api.ts                  # 모든 hook + handler aggregator
+    └── schemas/                # 도메인 타입 정의
 ```
 
 ### 사용 예시
@@ -178,9 +211,10 @@ function EditProfile() {
 
 ### 주의사항
 
-- `openapi.yaml` 수정 후 반드시 `pnpm api:generate` 실행
-- 생성된 파일(`generated/` 폴더)은 직접 수정하지 않음
-- 타입 불일치 시 스펙 수정 후 재생성
+- `spec/` 수정 후 반드시 `pnpm api:generate` 실행 (bundle + orval 자동 chain)
+- 생성된 파일 (`generated/`, `openapi.bundled.yaml`) 은 모두 gitignored — 직접 수정하지 않음
+- 타입 불일치 시 spec 수정 후 재생성
+- `pnpm api:lint` 로 spec 품질 사전 검증 가능 (CI 에서 `ci-api-spec` 자동 실행)
 
 ---
 

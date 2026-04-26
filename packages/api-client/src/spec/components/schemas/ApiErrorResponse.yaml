@@ -1,0 +1,16 @@
+type: object
+required:
+  - success
+  - error
+  - data
+properties:
+  success:
+    type: boolean
+    enum:
+      - false
+  error:
+    $ref: ./ApiError.yaml
+  data:
+    type: object
+    nullable: true
+    example: null

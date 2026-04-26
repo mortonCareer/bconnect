@@ -1,0 +1,15 @@
+delete:
+  operationId: deleteCoworker
+  tags:
+    - Coworkers
+  summary: 동료 삭제
+  parameters:
+    - name: coworkerId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  responses:
+    '200':
+      description: OK

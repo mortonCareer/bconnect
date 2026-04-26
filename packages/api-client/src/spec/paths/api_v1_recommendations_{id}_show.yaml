@@ -1,0 +1,15 @@
+post:
+  operationId: showRecommendation
+  tags:
+    - Recommendations
+  summary: 추천서 숨김 해제
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  responses:
+    '200':
+      description: OK

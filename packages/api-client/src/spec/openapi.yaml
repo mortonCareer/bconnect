@@ -1,0 +1,153 @@
+openapi: 3.0.3
+info:
+  title: Bconnect API
+  description: 인테리어 종사자를 위한 하도급 섭외 · 관리 플랫폼 '품앗이'의 REST API
+  version: 0.2.0
+servers:
+  - url: http://localhost:8080
+    description: 로컬 개발 서버
+  - url: https://api.bconnect.to
+    description: 프로덕션 서버
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+    description: 인증 및 토큰 관리
+  - name: Members
+    description: 회원 정보 관리
+  - name: Feeds
+    description: 피드 관리
+  - name: Posts
+    description: 게시글 관리
+  - name: Tasks
+    description: 작업 사항 관리
+  - name: Profiles
+    description: 기술자 프로필 관리
+  - name: Credentials
+    description: 인증뱃지(자격/면허/증명서) 관리
+  - name: Coworkers
+    description: 동료 관계 관리
+  - name: CoworkerRequests
+    description: 동료 요청 관리
+  - name: Recommendations
+    description: 추천서 관리
+  - name: Chats
+    description: 채팅 관리
+  - name: Devices
+    description: 푸시 알림용 디바이스(브라우저) 토큰 관리
+externalDocs:
+  description: 개발 문서 (Notion)
+  url: https://www.notion.so/morton-so/2dc965d2888b80ac9b72ca4d22812b12
+paths:
+  /api/v1/auth/otp/send:
+    $ref: paths/api_v1_auth_otp_send.yaml
+  /api/v1/auth/otp/verify:
+    $ref: paths/api_v1_auth_otp_verify.yaml
+  /api/v1/auth/refresh:
+    $ref: paths/api_v1_auth_refresh.yaml
+  /api/v1/auth/logout:
+    $ref: paths/api_v1_auth_logout.yaml
+  /api/v1/members:
+    $ref: paths/api_v1_members.yaml
+  /api/v1/members/roles:
+    $ref: paths/api_v1_members_roles.yaml
+  /api/v1/members/check-username:
+    $ref: paths/api_v1_members_check-username.yaml
+  /api/v1/members/me:
+    $ref: paths/api_v1_members_me.yaml
+  /api/v1/feeds:
+    $ref: paths/api_v1_feeds.yaml
+  /api/v1/feeds/{feedId}:
+    $ref: paths/api_v1_feeds_{feedId}.yaml
+  /api/v1/posts:
+    $ref: paths/api_v1_posts.yaml
+  /api/v1/posts/{postId}:
+    $ref: paths/api_v1_posts_{postId}.yaml
+  /api/v1/tasks:
+    $ref: paths/api_v1_tasks.yaml
+  /api/v1/coworkers/tasks:
+    $ref: paths/api_v1_coworkers_tasks.yaml
+  /api/v1/tasks/{taskId}:
+    $ref: paths/api_v1_tasks_{taskId}.yaml
+  /api/v1/profiles/trades:
+    $ref: paths/api_v1_profiles_trades.yaml
+  /api/v1/profiles:
+    $ref: paths/api_v1_profiles.yaml
+  /api/v1/profiles/{profileId}:
+    $ref: paths/api_v1_profiles_{profileId}.yaml
+  /api/v1/profiles/me:
+    $ref: paths/api_v1_profiles_me.yaml
+  /api/v1/profiles/me/about:
+    $ref: paths/api_v1_profiles_me_about.yaml
+  /api/v1/credentials/types:
+    $ref: paths/api_v1_credentials_types.yaml
+  /api/v1/credentials:
+    $ref: paths/api_v1_credentials.yaml
+  /api/v1/credentials/{credentialId}/accept:
+    $ref: paths/api_v1_credentials_{credentialId}_accept.yaml
+  /api/v1/credentials/{credentialId}/deny:
+    $ref: paths/api_v1_credentials_{credentialId}_deny.yaml
+  /api/v1/credentials/{credentialId}:
+    $ref: paths/api_v1_credentials_{credentialId}.yaml
+  /api/v1/coworkers:
+    $ref: paths/api_v1_coworkers.yaml
+  /api/v1/coworkers/{coworkerId}:
+    $ref: paths/api_v1_coworkers_{coworkerId}.yaml
+  /api/v1/chats:
+    $ref: paths/api_v1_chats.yaml
+  /api/v1/chats/direct:
+    $ref: paths/api_v1_chats_direct.yaml
+  /api/v1/chats/{chatId}/messages:
+    $ref: paths/api_v1_chats_{chatId}_messages.yaml
+  /api/v1/recommendations:
+    $ref: paths/api_v1_recommendations.yaml
+  /api/v1/recommendations/received:
+    $ref: paths/api_v1_recommendations_received.yaml
+  /api/v1/recommendations/sent:
+    $ref: paths/api_v1_recommendations_sent.yaml
+  /api/v1/recommendations/me/received:
+    $ref: paths/api_v1_recommendations_me_received.yaml
+  /api/v1/recommendations/me/sent:
+    $ref: paths/api_v1_recommendations_me_sent.yaml
+  /api/v1/recommendations/{id}:
+    $ref: paths/api_v1_recommendations_{id}.yaml
+  /api/v1/recommendations/{id}/hide:
+    $ref: paths/api_v1_recommendations_{id}_hide.yaml
+  /api/v1/recommendations/{id}/show:
+    $ref: paths/api_v1_recommendations_{id}_show.yaml
+  /api/v1/coworker-requests:
+    $ref: paths/api_v1_coworker-requests.yaml
+  /api/v1/coworker-requests/received:
+    $ref: paths/api_v1_coworker-requests_received.yaml
+  /api/v1/coworker-requests/sent:
+    $ref: paths/api_v1_coworker-requests_sent.yaml
+  /api/v1/coworker-requests/{id}:
+    $ref: paths/api_v1_coworker-requests_{id}.yaml
+  /api/v1/coworker-requests/{id}/accept:
+    $ref: paths/api_v1_coworker-requests_{id}_accept.yaml
+  /api/v1/coworker-requests/{id}/deny:
+    $ref: paths/api_v1_coworker-requests_{id}_deny.yaml
+  /api/v1/devices:
+    $ref: paths/api_v1_devices.yaml
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        인증이 필요한 엔드포인트에 공통으로 다음 에러를 반환할 수 있습니다.
+        - `A007` 유효하지 않은 액세스 토큰입니다 (401)
+        - `A008` 세션이 만료되었습니다 (401)
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: refreshToken
+
+  # 어떤 path 에서도 직접 $ref 되지 않지만 FE 가 error handling 에서 사용 →
+  # bundle 에 포함되도록 명시적으로 등록.
+  schemas:
+    ApiError:
+      $ref: ./components/schemas/ApiError.yaml
+    ApiErrorResponse:
+      $ref: ./components/schemas/ApiErrorResponse.yaml

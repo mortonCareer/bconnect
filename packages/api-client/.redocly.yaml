@@ -1,0 +1,10 @@
+extends:
+  - recommended
+rules:
+  # 첫 도입 — 기존 spec 의 lint warnings 가 폭주하지 않도록 일부 완화
+  no-empty-servers: error
+  no-invalid-media-type-examples: warn
+  operation-summary: warn
+  operation-description: off
+  operation-operationId: error
+  no-unused-components: off # ApiError 등 명시 ref 로 처리됨

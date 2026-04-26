@@ -1,0 +1,11 @@
+type: object
+required:
+  - token
+  - platform
+properties:
+  token:
+    type: string
+    description: FCM 디바이스 토큰 (FCM SDK 가 발급한 고유 식별자, 150자 내외)
+    example: eNkX...
+  platform:
+    $ref: ./DevicePlatform.yaml

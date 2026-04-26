@@ -1,0 +1,7 @@
+type: object
+required:
+  - registered
+properties:
+  registered:
+    type: boolean
+    description: true 고정 (등록/갱신 공통)

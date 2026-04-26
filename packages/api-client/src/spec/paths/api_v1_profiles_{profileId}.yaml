@@ -1,0 +1,27 @@
+get:
+  operationId: getProfile
+  tags:
+    - Profiles
+  security: []
+  summary: 프로필 조회
+  parameters:
+    - name: profileId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: ../components/schemas/ApiSuccessResponseBase.yaml
+              - type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: ../components/schemas/ProfileAndMember.yaml

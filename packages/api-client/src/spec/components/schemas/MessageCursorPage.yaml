@@ -1,0 +1,14 @@
+type: object
+required:
+  - content
+  - hasNext
+properties:
+  content:
+    type: array
+    items:
+      $ref: ./Message.yaml
+  nextCursor:
+    type: string
+    nullable: true
+  hasNext:
+    type: boolean

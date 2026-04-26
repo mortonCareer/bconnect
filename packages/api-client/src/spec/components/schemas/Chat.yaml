@@ -1,0 +1,31 @@
+type: object
+required:
+  - id
+  - title
+  - participantIds
+  - lastMessage
+  - unreadCount
+  - createdAt
+  - modifiedAt
+properties:
+  id:
+    type: integer
+    format: int64
+    example: 1
+  title:
+    type: string
+  participantIds:
+    type: array
+    items:
+      type: integer
+      format: int64
+  lastMessage:
+    $ref: ./Message.yaml
+  unreadCount:
+    type: integer
+  createdAt:
+    type: string
+    format: date-time
+  modifiedAt:
+    type: string
+    format: date-time

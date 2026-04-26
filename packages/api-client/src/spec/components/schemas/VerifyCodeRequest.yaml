@@ -1,0 +1,11 @@
+type: object
+required:
+  - phone
+  - code
+properties:
+  phone:
+    type: string
+    pattern: \d{10,11}
+  code:
+    type: string
+    pattern: \d{6}
