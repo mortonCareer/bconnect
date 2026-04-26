@@ -18,12 +18,12 @@ Guide for Claude Code working in the Morton codebase.
 
 ### 도메인 산출물 SSOT
 
-| 영역          | SSOT                                   | 보조 자료 (참조용)                                                                                                        |
-| ------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| HTTP API 계약 | `packages/api-client/src/openapi.yaml` | [Morton 개발 보드 FigJam](https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj/) (Sprint별 섹션)                            |
-| DB 스키마     | Spring 엔티티 + Flyway migration       | [Sprint 2 ERD (FigJam)](https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj/?node-id=381-560) — 활성 sprint ERD는 여기에서 |
+| 영역          | SSOT                                   | 보조 자료 (참조용)                                                                                                 |
+| ------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| HTTP API 계약 | `packages/api-client/src/openapi.yaml` | (없음)                                                                                                             |
+| DB 스키마     | Spring 엔티티 + Flyway migration       | [Morton 개발 보드 ERD (FigJam)](https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj/) — 활성 sprint 섹션이 최신 ERD |
 
-**변경 정책**: 코드/스펙 변경이 우선이며, 보조 자료(FigJam 다이어그램)가 stale 돼도 코드/스펙이 진실. FigJam은 변경 *논의*용 시각 자료이지 정답 아님 — 합의되면 코드/스펙에 반영.
+**변경 정책**: 코드/스펙 변경이 우선이며, 보조 자료(FigJam ERD)가 stale 돼도 코드/엔티티가 진실. FigJam ERD는 변경 *논의*용 시각 자료이지 정답 아님 — 합의되면 코드에 반영.
 
 ## Project Overview
 
