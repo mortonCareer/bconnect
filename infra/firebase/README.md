@@ -9,7 +9,7 @@ FCM (Firebase Cloud Messaging) Web Push 알림 인프라를 선언적으로 관�
 - GCP 프로젝트 (`google_project.bconnect`)
 - Firebase API 활성화 (`google_project_service.required`)
 - Firebase 프로젝트 추가 (`google_firebase_project.bconnect`)
-- Web App 2개 (career / plan) — 동산보드는 career 에 흡수
+- Web App 2개 (career / plan)
 - Web App SDK config 데이터 소스
 
 ## 선언적으로 관리되지 않는 것

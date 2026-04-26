@@ -57,7 +57,7 @@ resource "google_firebase_project" "bconnect" {
 # web app 생성/보유 비용은 0이라 처음부터 분리하는 게 마이그레이션 비용을 줄임.
 locals {
   web_apps = {
-    career = "BConnect Career" # 기술자 PWA (동산보드 포함)
+    career = "BConnect Career" # 기술자 PWA
     plan   = "BConnect Plan"   # 업체/건축주 웹
   }
 }
