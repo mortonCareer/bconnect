@@ -16,10 +16,11 @@ export const setAccessToken = (token: string | null) => {
 
 export const getAccessToken = () => accessToken
 
-// API 응답 타입 (Type Narrowing용)
-type ApiSuccessResponse<T> = {
+// API 응답 envelope. orval 이 생성하는 endpoint 응답 타입은
+// `Envelope = ApiSuccessResponseBase & { data: T }` 형태 — `T['data']` 로 inner 추출.
+type ApiSuccessResponse = {
   success: true
-  data: T
+  data: unknown
 }
 
 type ApiErrorResponse = {
@@ -30,7 +31,9 @@ type ApiErrorResponse = {
   }
 }
 
-type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse
+// Generic envelope 의 data 필드 타입을 추출. customFetch<TResponse> 는 inner 데이터를 반환.
+// void 응답은 envelope 에 data 필드가 없어 T 자체로 fallback (콜러는 .data 를 읽지 않음).
+type ExtractData<T> = T extends { data: infer D } ? D : T
 
 export class ApiError extends Error {
   constructor(
@@ -48,7 +51,9 @@ export async function refreshAccessToken(): Promise<boolean> {
     const response = await ky.post(`${getBaseUrl()}/api/v1/auth/refresh`, {
       credentials: 'include',
     })
-    const json = (await response.json()) as ApiResponse<{ accessToken: string }>
+    const json = (await response.json()) as
+      | (ApiSuccessResponse & { data: { accessToken: string } })
+      | ApiErrorResponse
 
     if (json.success) {
       setAccessToken(json.data.accessToken)
@@ -101,7 +106,12 @@ type RequestConfig = {
   signal?: AbortSignal
 }
 
-export async function customFetch<T>(config: RequestConfig, _options?: RequestInit): Promise<T> {
+// orval 이 생성하는 호출 형태: `customFetch<SendOtp200>(...)` — T 는 envelope 타입.
+// 반환은 envelope 의 inner data (T['data']) — 호출부 hook 의 data 가 raw payload 와 정렬됨.
+export async function customFetch<T>(
+  config: RequestConfig,
+  _options?: RequestInit
+): Promise<ExtractData<T>> {
   // ky prefixUrl은 슬래시로 시작하는 경로를 허용하지 않음
   const normalizedUrl = config.url.startsWith('/') ? config.url.slice(1) : config.url
 
@@ -114,7 +124,9 @@ export async function customFetch<T>(config: RequestConfig, _options?: RequestIn
       signal: config.signal,
     })
 
-    const json = (await response.json()) as ApiResponse<T>
+    const json = (await response.json()) as
+      | (ApiSuccessResponse & { data: ExtractData<T> })
+      | ApiErrorResponse
 
     if (!json.success) {
       throw new ApiError(json.error.code, json.error.message)

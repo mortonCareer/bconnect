@@ -65,7 +65,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SendOtpResponse'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/SendOtpResponse'
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -92,11 +99,18 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/VerifyOtpLoginResponse'
-                  - $ref: '#/components/schemas/VerifyOtpSignupResponse'
-                discriminator:
-                  propertyName: registered
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        oneOf:
+                          - $ref: '#/components/schemas/VerifyOtpLoginResponse'
+                          - $ref: '#/components/schemas/VerifyOtpSignupResponse'
+                        discriminator:
+                          propertyName: registered
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -117,7 +131,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RefreshTokenResponse'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RefreshTokenResponse'
         '401':
           description: |
             - `A006` 유효하지 않은 리프레시 토큰입니다
@@ -145,9 +166,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Member'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Member'
 
     post:
       operationId: registerMember
@@ -166,8 +194,15 @@ paths:
           content:
             application/json:
               schema:
-                type: integer
-                format: int64
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: integer
+                        format: int64
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -186,9 +221,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Role'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Role'
 
   /api/v1/members/check-username:
     get:
@@ -208,7 +250,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CheckUsernameResponse'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CheckUsernameResponse'
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -224,7 +273,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Member'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Member'
 
     put:
       operationId: updateMyMember
@@ -291,7 +347,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FeedOffsetPage'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/FeedOffsetPage'
 
   /api/v1/feeds/{feedId}:
     get:
@@ -312,7 +375,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Feed'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Feed'
 
   # =====================
   # Post Endpoints
@@ -334,8 +404,15 @@ paths:
           content:
             application/json:
               schema:
-                type: integer
-                format: int64
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: integer
+                        format: int64
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -400,9 +477,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Task'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Task'
 
     post:
       operationId: createTask
@@ -420,8 +504,15 @@ paths:
           content:
             application/json:
               schema:
-                type: integer
-                format: int64
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: integer
+                        format: int64
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -450,9 +541,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CoworkerTask'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CoworkerTask'
 
   /api/v1/tasks/{taskId}:
     parameters:
@@ -502,9 +600,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Trade'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Trade'
 
   /api/v1/profiles:
     get:
@@ -518,9 +623,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ProfileAndMember'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ProfileAndMember'
 
     post:
       operationId: createProfile
@@ -538,8 +650,15 @@ paths:
           content:
             application/json:
               schema:
-                type: integer
-                format: int64
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: integer
+                        format: int64
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -563,7 +682,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileAndMember'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ProfileAndMember'
 
   /api/v1/profiles/me:
     put:
@@ -621,9 +747,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CredentialType'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CredentialType'
 
   /api/v1/credentials:
     get:
@@ -645,9 +778,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Credential'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Credential'
 
     post:
       operationId: createCredential
@@ -665,8 +805,15 @@ paths:
           content:
             application/json:
               schema:
-                type: integer
-                format: int64
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: integer
+                        format: int64
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -741,9 +888,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Coworker'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Coworker'
 
   /api/v1/coworkers/{coworkerId}:
     delete:
@@ -775,9 +929,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Chat'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Chat'
 
   /api/v1/chats/direct:
     post:
@@ -796,7 +957,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Chat'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Chat'
 
   /api/v1/chats/{chatId}/messages:
     get:
@@ -834,7 +1002,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MessageCursorPage'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/MessageCursorPage'
 
   # =====================
   # Recommendation Endpoints
@@ -856,8 +1031,15 @@ paths:
           content:
             application/json:
               schema:
-                type: integer
-                format: int64
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: integer
+                        format: int64
 
   /api/v1/recommendations/received:
     get:
@@ -879,9 +1061,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Recommendation'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Recommendation'
 
   /api/v1/recommendations/sent:
     get:
@@ -903,9 +1092,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Recommendation'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Recommendation'
 
   /api/v1/recommendations/me/received:
     get:
@@ -918,9 +1114,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Recommendation'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Recommendation'
 
   /api/v1/recommendations/me/sent:
     get:
@@ -933,9 +1136,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Recommendation'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Recommendation'
 
   /api/v1/recommendations/{id}:
     put:
@@ -1026,8 +1236,15 @@ paths:
           content:
             application/json:
               schema:
-                type: integer
-                format: int64
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: integer
+                        format: int64
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -1043,9 +1260,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CoworkerRequest'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CoworkerRequest'
 
   /api/v1/coworker-requests/sent:
     get:
@@ -1058,9 +1282,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CoworkerRequest'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CoworkerRequest'
 
   /api/v1/coworker-requests/{id}:
     delete:
@@ -1131,7 +1362,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegisterDeviceResponse'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponseBase'
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RegisterDeviceResponse'
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다 (token/platform 누락)
@@ -1196,6 +1434,20 @@ components:
           $ref: '#/components/schemas/ApiError'
         data:
           nullable: true
+
+    # 모든 200/201 응답의 공통 envelope. 엔드포인트별 응답은
+    # `allOf: [ApiSuccessResponseBase, { properties: { data: <엔드포인트 응답> } }]`
+    # 패턴으로 wrap. BE ApiResponse.success(data) 와 정렬됨.
+    # 주: 실제 BE 는 success 응답에도 `error: null` 필드를 포함하지만, FE customFetch 가
+    # success=true 일 때 error 를 읽지 않으므로 spec 에는 success 만 기술해 mock 단순화.
+    ApiSuccessResponseBase:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+          example: true
 
     # =====================
     # Common
