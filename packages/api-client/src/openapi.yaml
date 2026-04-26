@@ -1691,7 +1691,7 @@ components:
     # =====================
     Post:
       type: object
-      required: [id, images, createdAt, modifiedAt]
+      required: [id, attachments, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1707,10 +1707,10 @@ components:
           format: int64
           example: 1
           nullable: true
-        images:
+        attachments:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/AttachmentMeta'
         content:
           type: string
           nullable: true
@@ -1723,19 +1723,19 @@ components:
 
     CreatePostRequest:
       type: object
-      required: [images, content]
+      required: [attachmentIds, content]
       properties:
         taskId:
           type: integer
           format: int64
           example: 1
           nullable: true
-        images:
+        attachmentIds:
           type: array
-          items:
-            type: string
-            format: uri
           minItems: 1
+          items:
+            type: integer
+            format: int64
         content:
           type: string
 
