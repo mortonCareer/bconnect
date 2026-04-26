@@ -1553,7 +1553,8 @@ components:
     # =====================
     Task:
       type: object
-      required: [id, company, address, taskTitle, eventTitle, trades, start, end, createdAt, modifiedAt]
+      required:
+        [id, company, address, taskTitle, eventTitle, trades, start, end, createdAt, modifiedAt]
       properties:
         id:
           type: integer
