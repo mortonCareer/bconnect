@@ -53,15 +53,15 @@ gh issue view <issue-number> --json title,labels
 # 3. 브랜치명 생성 (GIT_WORKFLOW.md 규칙)
 # <type>/<issue-number>-<short-description>
 
-# 4. main 최신화
-git -C /home/json/morton fetch origin main
+# 4. dev 최신화
+git -C /home/json/morton fetch origin dev
 
 # 5. 워크트리 + 브랜치 동시 생성
 mkdir -p /home/json/morton-worktrees
 git worktree add \
   /home/json/morton-worktrees/<branch-name-with-hyphens> \
   -b <type>/<issue-number>-<description> \
-  origin/main
+  origin/dev
 
 # 6. 설정 파일 복사
 cp /home/json/morton/.env* <worktree-path>/ 2>/dev/null || true
@@ -148,7 +148,7 @@ git branch -d <branch-name>
 
 ### DO
 
-- 항상 main에서 분기 (origin/main 기준)
+- 항상 dev에서 분기 (origin/dev 기준)
 - 워크트리 생성 전 이슈 확인
 - 설정 파일 복사 (.env, .claude/)
 
