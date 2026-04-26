@@ -1604,6 +1604,9 @@ components:
           nullable: true
         address:
           $ref: '#/components/schemas/Address'
+        pictureAttachment:
+          $ref: '#/components/schemas/AttachmentMeta'
+          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -1640,6 +1643,11 @@ components:
           nullable: true
         address:
           $ref: '#/components/schemas/Address'
+        pictureAttachmentId:
+          type: integer
+          format: int64
+          nullable: true
+          description: 새 프로필 사진 첨부 ID. null이면 사진 제거.
 
     CreateProfileRequest:
       type: object
