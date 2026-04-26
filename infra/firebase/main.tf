@@ -14,7 +14,7 @@ provider "google-beta" {
 }
 
 # GCP 프로젝트 생성 (Firebase가 올라갈 하위 프로젝트)
-resource "google_project" "morton" {
+resource "google_project" "bconnect" {
   provider   = google-beta
   project_id = var.project_id
   name       = var.project_name
@@ -31,7 +31,7 @@ resource "google_project" "morton" {
 # 필요한 GCP API 활성화
 resource "google_project_service" "required" {
   provider = google-beta
-  project  = google_project.morton.project_id
+  project  = google_project.bconnect.project_id
 
   for_each = toset([
     "firebase.googleapis.com",
@@ -43,9 +43,9 @@ resource "google_project_service" "required" {
 }
 
 # GCP 프로젝트에 Firebase 추가
-resource "google_firebase_project" "morton" {
+resource "google_firebase_project" "bconnect" {
   provider = google-beta
-  project  = google_project.morton.project_id
+  project  = google_project.bconnect.project_id
 
   depends_on = [google_project_service.required]
 }
@@ -57,9 +57,8 @@ resource "google_firebase_project" "morton" {
 # web app 생성/보유 비용은 0이라 처음부터 분리하는 게 마이그레이션 비용을 줄임.
 locals {
   web_apps = {
-    career  = "Morton Career"  # 기술자 PWA
-    plan    = "Morton Plan"    # 업체/건축주 웹
-    dongsan = "Morton Dongsan" # 동산보드판 (작업 이력)
+    career = "BConnect Career" # 기술자 PWA
+    plan   = "BConnect Plan"   # 업체/건축주 웹
   }
 }
 
@@ -67,7 +66,7 @@ resource "google_firebase_web_app" "apps" {
   for_each = local.web_apps
 
   provider     = google-beta
-  project      = google_firebase_project.morton.project
+  project      = google_firebase_project.bconnect.project
   display_name = each.value
 
   deletion_policy = "DELETE"
@@ -78,6 +77,6 @@ data "google_firebase_web_app_config" "apps" {
   for_each = local.web_apps
 
   provider   = google-beta
-  project    = google_firebase_project.morton.project
+  project    = google_firebase_project.bconnect.project
   web_app_id = google_firebase_web_app.apps[each.key].app_id
 }

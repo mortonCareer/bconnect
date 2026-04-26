@@ -82,7 +82,7 @@ variable "database_url" {
 }
 
 # Firebase (Cloud Messaging) Web SDK configs — 앱별 map
-#   key: "career" | "plan" | "dongsan"
+#   key: "career" | "plan"
 variable "firebase_web_configs" {
   description = "Firebase 웹 앱 SDK config 맵 (key: 프론트엔드 앱 이름)"
   type = map(object({

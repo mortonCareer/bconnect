@@ -6,10 +6,10 @@ FCM (Firebase Cloud Messaging) Web Push 알림 인프라를 선언적으로 관�
 
 ## 관리 대상
 
-- GCP 프로젝트 (`google_project.morton`)
+- GCP 프로젝트 (`google_project.bconnect`)
 - Firebase API 활성화 (`google_project_service.required`)
-- Firebase 프로젝트 추가 (`google_firebase_project.morton`)
-- Web App 3개 (career / plan / dongsan)
+- Firebase 프로젝트 추가 (`google_firebase_project.bconnect`)
+- Web App 2개 (career / plan)
 - Web App SDK config 데이터 소스
 
 ## 선언적으로 관리되지 않는 것
@@ -45,9 +45,9 @@ Google 이 VAPID key 관리 API 를 추가하면 이 모듈에 다음 리소스�
 
 ```hcl
 # (Future — API 아직 없음)
-resource "google_firebase_messaging_vapid_key" "morton" {
+resource "google_firebase_messaging_vapid_key" "bconnect" {
   provider = google-beta
-  project  = google_firebase_project.morton.project
+  project  = google_firebase_project.bconnect.project
   # ...
 }
 ```
@@ -68,7 +68,7 @@ gcloud config set project bconnect-f0bee
 ## Output
 
 - `web_configs` (map) — 앱별 Firebase SDK config. `module.vercel` 에서 `NEXT_PUBLIC_FIREBASE_*` 환경변수로 주입.
-  - `web_configs["career"]`, `web_configs["plan"]`, `web_configs["dongsan"]`
+  - `web_configs["career"]`, `web_configs["plan"]`
 
 ## 관련 이슈
 
