@@ -1885,7 +1885,7 @@ components:
 
     Credential:
       type: object
-      required: [id, profileId, type, status, createdAt, modifiedAt]
+      required: [id, profileId, type, status, attachments, createdAt, modifiedAt]
       properties:
         id:
           type: integer
@@ -1903,6 +1903,10 @@ components:
           type: string
           format: date
           nullable: true
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttachmentMeta'
         createdAt:
           type: string
           format: date-time
@@ -1912,7 +1916,7 @@ components:
 
     CreateCredentialRequest:
       type: object
-      required: [type]
+      required: [type, attachmentIds]
       properties:
         type:
           $ref: '#/components/schemas/CredentialType'
@@ -1920,6 +1924,12 @@ components:
           type: string
           format: date
           nullable: true
+        attachmentIds:
+          type: array
+          minItems: 1
+          items:
+            type: integer
+            format: int64
 
     # =====================
     # Coworker Schemas
