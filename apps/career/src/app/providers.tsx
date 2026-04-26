@@ -12,6 +12,7 @@ import type { ReactNode } from 'react'
 import '../env'
 import { usePushNotifications } from '@/hooks/use-push-notifications'
 import { InAppNotification } from '@/components/in-app-notification'
+import { MSWProvider } from '@/components/msw-provider'
 
 export function Providers({ children }: { children: ReactNode }) {
   const queryClient = getQueryClient()
@@ -28,12 +29,14 @@ export function Providers({ children }: { children: ReactNode }) {
   usePushNotifications()
 
   return (
-    <NuqsAdapter>
-      <QueryClientProvider client={queryClient}>
-        <InAppNotification />
-        {children}
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </NuqsAdapter>
+    <MSWProvider>
+      <NuqsAdapter>
+        <QueryClientProvider client={queryClient}>
+          <InAppNotification />
+          {children}
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </NuqsAdapter>
+    </MSWProvider>
   )
 }

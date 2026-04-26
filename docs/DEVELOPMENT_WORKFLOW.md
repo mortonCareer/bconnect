@@ -1,6 +1,6 @@
 # 개발 워크플로우
 
-기능 개발 프로세스
+Morton의 기능 개발 프로세스를 설명합니다.
 
 ---
 
@@ -11,7 +11,7 @@
    └─ Figma 시안 → Ready for Dev
 
 2. API 스펙 설계
-   └─ CTO: OpenAPI 스펙 초안 작성
+   └─ CTO: openapi.yaml 초안 작성
    └─ CEO: 리뷰
    └─ 합의 후 머지
 
@@ -23,7 +23,7 @@
    ┌────────────────────────────┐
    │  ERD + BE (CEO)            │
    │       ↕ Mock API (MSW)     │
-   │  퍼블리싱 → FE (CTO, FE)    │
+   │  퍼블리싱 → FE (CTO)       │
    └────────────────────────────┘
 
 5. API 연동 (스토리 단위)
@@ -41,27 +41,76 @@
 
 ## API 스펙 관리
 
-API 스펙은 `packages/api-client/src/spec/` 하위에 분리 관리되며, `@redocly/cli` 로 lint/bundle, `orval` 로 TypeScript hook + MSW mock 자동 생성합니다.
+### SSOT (Single Source of Truth)
 
-### 스펙 작성 워크플로
+모든 API 스펙은 **`packages/api-client/src/openapi.yaml`** 파일에서 관리됩니다.
 
-```text
-spec/ 수정
+### 스펙 작성 도구
+
+**VSCode 42Crunch OpenAPI 익스텐션** 사용:
+
+- 실시간 스펙 검증
+- 자동 완성 지원
+- 시각적 API 문서 미리보기
+
+### 스펙 설계 프로세스
+
+```
+CTO: openapi.yaml 초안 작성
     ↓
 GitHub PR 생성
     ↓
-ci-api-spec (redocly lint) 자동 실행
+CEO: API 스펙 리뷰
     ↓
-상대 (CEO 또는 CTO): API 스펙 리뷰
+피드백 반영 및 논의
     ↓
-합의 후 dev → main 브랜치 머지
+합의 후 main 브랜치 머지
     ↓
-API 클라이언트 자동 생성 (orval)
-    ↓
-FE 앱(Career, Plan)에서 API 훅 사용
+API 클라이언트 자동 생성
 ```
 
-> **상세 작성 가이드 (디렉토리 구조, envelope 패턴, 새 endpoint 추가 절차, axis 결정 근거 등) 는 [`packages/api-client/CLAUDE.md`](../packages/api-client/CLAUDE.md) 참조**. 본 문서는 워크플로 관점만 다룸.
+### 스펙 작성 가이드
+
+**엔드포인트 정의:**
+
+```yaml
+paths:
+  /api/v1/users/{userId}:
+    get:
+      summary: 사용자 정보 조회
+      tags: [User]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_User'
+        '404':
+          description: 사용자 없음
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Error'
+```
+
+**공통 응답 포맷:**
+
+모든 API는 `ApiResponse<T>` 래퍼를 사용합니다:
+
+```typescript
+// 성공
+{ success: true, data: T, error: null }
+
+// 실패
+{ success: false, data: null, error: { code: string, status: number, message: string, logLevel: string } }
+```
 
 ---
 
@@ -79,13 +128,13 @@ pnpm api:generate
 
 ### 생성되는 파일
 
-```text
+```
 packages/api-client/src/
-├── spec/                       # 분리된 spec (SSOT)
-├── openapi.bundled.yaml        # redocly bundle 산출물 (gitignored)
-└── generated/                  # orval 산출물 (gitignored), FE가 참조
-    ├── api.ts                  # 모든 hook + handler aggregator
-    └── schemas/                # 도메인 타입 정의
+├── openapi.yaml          # API 스펙 (SSOT)
+├── generated/
+│   ├── api.ts            # API 클라이언트
+│   ├── models.ts         # TypeScript 타입
+│   └── hooks.ts          # React Query hooks
 ```
 
 ### 사용 예시
@@ -93,11 +142,10 @@ packages/api-client/src/
 **데이터 조회:**
 
 ```typescript
-import { useGetMyMember } from '@bconnect/api-client'
+import { useGetUserQuery } from '@morton/api-client'
 
-function MyProfile() {
-  const { data, isLoading, error } = useGetMyMember()
-  // data 는 envelope 의 inner type (Member). customFetch 가 자동 unwrap.
+function UserProfile({ userId }: { userId: string }) {
+  const { data, isLoading, error } = useGetUserQuery({ userId })
 
   if (isLoading) return <Spinner />
   if (error) return <ErrorMessage error={error} />
@@ -109,14 +157,14 @@ function MyProfile() {
 **데이터 변경:**
 
 ```typescript
-import { useUpdateMyMember } from '@bconnect/api-client'
+import { useUpdateUserMutation } from '@morton/api-client'
 
 function EditProfile() {
-  const { mutate, isPending } = useUpdateMyMember()
+  const { mutate, isPending } = useUpdateUserMutation()
 
-  const handleSubmit = (formData: UpdateMemberRequest) => {
+  const handleSubmit = (formData: ProfileFormData) => {
     mutate(
-      { data: formData },
+      { userId: '123', data: formData },
       {
         onSuccess: () => toast.success('저장 완료'),
         onError: (error) => toast.error(error.message),
@@ -130,93 +178,95 @@ function EditProfile() {
 
 ### 주의사항
 
-- `spec/` 수정 후 반드시 `pnpm api:generate` 실행 (bundle + orval 자동 chain)
-- 생성된 파일 (`generated/`, `openapi.bundled.yaml`) 은 모두 gitignored — 직접 수정하지 않음
-- 타입 불일치 시 spec 수정 후 재생성
-- `pnpm api:lint` 로 spec 품질 사전 검증 가능 (CI 에서 `ci-api-spec` 자동 실행)
+- `openapi.yaml` 수정 후 반드시 `pnpm api:generate` 실행
+- 생성된 파일(`generated/` 폴더)은 직접 수정하지 않음
+- 타입 불일치 시 스펙 수정 후 재생성
 
 ---
 
-## Mock API
+## Mock API (MSW)
 
-### 현재 상태
+### 개요
 
-개발 중에는 **MSW (Mock Service Worker)** 마이그레이션을 진행 중입니다.  
-현재는 `apps/mock-server/server.js`를 임시로 사용하고 있습니다.
+dev 환경에서 모든 API 요청은 **MSW (Mock Service Worker)** 가 가로채서 mock 응답으로 답합니다.
+브라우저의 Service Worker 가 fetch 를 intercept 하므로 FE 코드는 실제 BE 와 통신하는 것과 동일하게 동작합니다 (별도 fetch 모킹 코드 불필요).
 
-### MSW 마이그레이션 계획 (진행 중)
+production 빌드에선 `process.env.NODE_ENV` 가드로 MSW import 자체가 tree-shake 되어 번들에 포함되지 않습니다.
 
-**예정 구조:**
+### 구조 (career / plan 동일)
 
 ```
 apps/career/src/mocks/
 ├── handlers/
-│   ├── auth.ts       # 인증 관련 mock
-│   ├── user.ts       # 사용자 관련 mock
-│   └── index.ts
-├── browser.ts        # 브라우저용 MSW
-└── server.ts         # Node용 MSW (테스트)
+│   ├── auth.ts                # /api/v1/auth/* (OTP, refresh, logout)
+│   ├── members.ts             # /api/v1/members/*
+│   ├── profiles.ts            # /api/v1/profiles/*
+│   ├── credentials.ts         # /api/v1/credentials/*
+│   ├── coworkers.ts           # /api/v1/coworkers/*
+│   ├── coworker-requests.ts   # /api/v1/coworker-requests/*
+│   ├── feeds.ts               # /api/v1/feeds/*
+│   ├── posts.ts               # /api/v1/posts/*
+│   ├── tasks.ts               # /api/v1/tasks/*
+│   ├── chats.ts               # /api/v1/chats/*
+│   ├── recommendations.ts     # /api/v1/recommendations/*
+│   ├── devices.ts             # /api/v1/devices (FCM)
+│   └── index.ts               # 모든 핸들러 합치기
+├── data/
+│   └── seed.ts                # 공유 in-memory 데이터셋
+├── lib/
+│   ├── response.ts            # ok/badRequest/notFound 등 응답 헬퍼
+│   └── pagination.ts          # cursor/reverse cursor 페이지네이션
+├── browser.ts                 # 브라우저용 setupWorker
+└── server.ts                  # Node 테스트용 setupServer
+
+apps/career/public/mockServiceWorker.js   # MSW 가 자동 생성한 SW 스크립트
+apps/career/src/components/msw-provider.tsx  # 초기화 게이트 (dev only)
 ```
 
-**핸들러 예시 (예정):**
+### 활성화 흐름
+
+1. `app/layout.tsx` 가 `<Providers>` 를 렌더
+2. `Providers` 가 `<MSWProvider>` 로 감싸 children 렌더 차단
+3. dev 환경에서 `worker.start()` 가 SW 등록 완료 → children 렌더
+4. 이후 모든 `fetch()` 가 SW 를 거치며 handler 매칭 시 mock 응답 반환
+5. handler 없는 요청은 `onUnhandledRequest: 'bypass'` 로 실 네트워크 통과
+
+### 핸들러 예시
 
 ```typescript
-import { http, HttpResponse } from 'msw'
+// apps/career/src/mocks/handlers/auth.ts
+import { http } from 'msw'
+import { ok, badRequest } from '../lib/response'
+import { members } from '../data/seed'
 
 export const authHandlers = [
-  http.post('/api/v1/auth/otp/send', async ({ request }) => {
-    const { phone } = await request.json()
-
-    return HttpResponse.json({
-      success: true,
-      data: {
-        expiresAt: new Date(Date.now() + 180000).toISOString(),
-      },
-    })
+  http.post('*/api/v1/auth/otp/send', async ({ request }) => {
+    const body = (await request.json()) as { phone?: string }
+    if (!body.phone) return badRequest('유효하지 않은 입력값입니다', 'C001')
+    return ok({ expiresAt: new Date(Date.now() + 180000).toISOString() })
   }),
-
-  http.post('/api/v1/auth/otp/verify', async ({ request }) => {
-    const { phone, code } = await request.json()
-
-    if (code === '123456') {
-      return HttpResponse.json({
-        success: true,
-        data: {
-          accessToken: 'mock_token',
-          isNew: false,
-          user: { id: 1, phone, name: '테스트' },
-        },
-      })
-    }
-
-    return HttpResponse.json(
-      {
-        success: false,
-        error: { code: 'INVALID_CODE', message: '잘못된 인증 코드' },
-      },
-      { status: 401 }
-    )
-  }),
+  // ...
 ]
 ```
 
-### 개발 환경 설정 (예정)
+### 새 엔드포인트 추가
+
+1. `packages/api-client/src/openapi.yaml` 에 endpoint 정의
+2. `apps/career/src/mocks/handlers/<category>.ts` 에 handler 추가 (없으면 신규 파일)
+3. `apps/career/src/mocks/handlers/index.ts` 에 export 추가
+4. `apps/plan/` 에도 동일 적용 (현재는 디렉토리 복제, 추후 `packages/mocks` 로 추출 가능)
+
+### 테스트 환경 (Vitest 등)
 
 ```typescript
-// apps/career/src/main.tsx
-async function enableMocking() {
-  if (process.env.NODE_ENV !== 'development') {
-    return
-  }
+import { server } from '@/mocks/server'
 
-  const { worker } = await import('./mocks/browser')
-  return worker.start()
-}
-
-enableMocking().then(() => {
-  ReactDOM.createRoot(document.getElementById('root')!).render(<App />)
-})
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
 ```
+
+브라우저와 동일한 핸들러를 그대로 재사용합니다.
 
 ---
 
@@ -229,7 +279,7 @@ enableMocking().then(() => {
 3. Spring Boot API 엔드포인트 작성
 4. 단위 테스트 작성 (`./gradlew test`)
 
-### FE 개발 (CTO, FE 개발자)
+### FE 개발 (CTO)
 
 1. **퍼블리싱**: Figma 시안 기반 컴포넌트 작성
    - Tailwind CSS 사용
@@ -252,7 +302,7 @@ enableMocking().then(() => {
 
 ```
 Day 1-2: API 스펙 합의
-  - OpenAPI 스펙에 POST /api/v1/users/{userId}/profile 정의
+  - openapi.yaml에 POST /api/v1/users/{userId}/profile 정의
   - 요청/응답 스키마 정의
 
 Day 3-5: 병렬 개발
@@ -290,16 +340,24 @@ Day 7: QA
 
 ### 환경 변수
 
-환경 변수 관리는 [CLAUDE.md](../CLAUDE.md)의 "Environment Variables" 섹션 참조
+환경 변수 관리는 **[AGENTS.md](../AGENTS.md)**의 "Environment Variables" 섹션 참조
 
 ### 로컬 개발 서버 실행
 
 ```bash
-# Frontend (Next.js)
+# Frontend (Next.js) — MSW 가 dev 환경에서 자동 활성화, BE 없이도 동작
 pnpm dev:career    # http://localhost:3000
 pnpm dev:plan      # http://localhost:3001
 
-# Backend (Spring Boot)
+# Backend (Spring Boot) — 실제 BE 와 통합 테스트 시
 cd apps/api
 ./gradlew bootRun  # http://localhost:8080
 ```
+
+---
+
+## 다음 단계
+
+- **Git 워크플로우**: [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)
+- **QA 및 테스팅**: [QA_AND_TESTING.md](./QA_AND_TESTING.md)
+- **배포**: [DEPLOYMENT.md](./DEPLOYMENT.md)

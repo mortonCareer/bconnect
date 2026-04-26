@@ -65,7 +65,7 @@ importers:
         version: 5.2.2(react-hook-form@7.70.0(react@19.2.3))
       '@sentry/nextjs':
         specifier: ^10.40.0
-        version: 10.40.0(@opentelemetry/context-async-hooks@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.6.1(@opentelemetry/api@1.9.0))(next@16.1.1(@opentelemetry/api@1.9.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.105.3)
+        version: 10.40.0(@opentelemetry/context-async-hooks@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.6.1(@opentelemetry/api@1.9.0))(next@16.1.1(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.105.3)
       cheerio:
         specifier: ^1.2.0
         version: 1.2.0
@@ -121,14 +121,15 @@ importers:
       eslint:
         specifier: ^9
         version: 9.39.2(jiti@2.6.1)
+      msw:
+        specifier: ^2.13.6
+        version: 2.13.6(@types/node@20.19.27)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
       typescript:
         specifier: ^5
         version: 5.9.3
-
-  apps/mock-server: {}
 
   apps/plan:
     dependencies:
@@ -140,7 +141,7 @@ importers:
         version: link:../../packages/ui
       '@sentry/nextjs':
         specifier: ^10.40.0
-        version: 10.40.0(@opentelemetry/context-async-hooks@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.6.1(@opentelemetry/api@1.9.0))(next@16.1.1(@opentelemetry/api@1.9.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.105.3)
+        version: 10.40.0(@opentelemetry/context-async-hooks@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.6.1(@opentelemetry/api@1.9.0))(next@16.1.1(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.105.3)
       next:
         specifier: 16.1.1
         version: 16.1.1(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -172,6 +173,9 @@ importers:
       eslint:
         specifier: ^9
         version: 9.39.2(jiti@2.6.1)
+      msw:
+        specifier: ^2.13.6
+        version: 2.13.6(@types/node@20.19.27)(typescript@5.9.3)
       typescript:
         specifier: ^5
         version: 5.9.3
@@ -9645,7 +9649,7 @@ snapshots:
 
   '@sentry/core@10.40.0': {}
 
-  '@sentry/nextjs@10.40.0(@opentelemetry/context-async-hooks@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.6.1(@opentelemetry/api@1.9.0))(next@16.1.1(@opentelemetry/api@1.9.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.105.3)':
+  '@sentry/nextjs@10.40.0(@opentelemetry/context-async-hooks@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.6.1(@opentelemetry/api@1.9.0))(next@16.1.1(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.105.3)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.40.0
@@ -10693,11 +10697,11 @@ snapshots:
 
   '@types/conventional-commits-parser@5.0.2':
     dependencies:
-      '@types/node': 20.19.27
+      '@types/node': 20.19.35
 
   '@types/es-aggregate-error@1.0.6':
     dependencies:
-      '@types/node': 20.19.27
+      '@types/node': 20.19.35
 
   '@types/eslint-scope@3.7.7':
     dependencies:
