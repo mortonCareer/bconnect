@@ -319,10 +319,23 @@ main 브랜치로 머지
 
 ### PR 머지 방법
 
-- **Squash and Merge** 사용 (기본)
+머지 케이스에 따라 전략이 다릅니다:
+
+| 케이스              | 머지 방식        | 이유                                                        |
+| ------------------- | ---------------- | ----------------------------------------------------------- |
+| `feature/fix → dev` | **Squash**       | 작업 단위 압축, 임시 commit 정리                            |
+| `dev → main` 통합   | **Merge commit** | dev의 PR 단위 보존, main에서 어떤 PR이 들어갔는지 추적 가능 |
+| `main → dev` sync   | **Merge commit** | main의 commit 히스토리 그대로 흡수                          |
+
+공통:
+
 - 머지 커밋 메시지는 PR 제목 사용
 - 머지 즉시 이슈 자동 닫힘
-- 프로덕션 자동 배포
+- 프로덕션 자동 배포 (`main` 머지 시)
+
+#### Sync PR (head=main)의 Vercel checks 예외
+
+`main → dev` sync PR은 head가 `main`이라 Vercel preview가 main 코드를 빌드합니다. main에 typecheck drift 등 broken 상태가 있으면 preview가 실패하지만, 이는 sync PR이 만든 문제가 아니라 기존 main 상태를 비추는 것이므로 머지 금지 사유에 해당하지 않습니다. main의 drift는 다음 `dev → main` 통합 사이클에서 별도로 해소합니다.
 
 ---
 
