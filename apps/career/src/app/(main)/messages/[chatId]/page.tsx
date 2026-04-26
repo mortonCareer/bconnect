@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=619-6074
+ */
 'use client'
 
 import { useCallback, useState } from 'react'

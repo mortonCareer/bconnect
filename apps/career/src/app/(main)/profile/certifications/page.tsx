@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1239-7678
+ */
 'use client'
 
 import { useRouter } from 'next/navigation'

@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=189-720
+ */
 'use client'
 
 import * as React from 'react'

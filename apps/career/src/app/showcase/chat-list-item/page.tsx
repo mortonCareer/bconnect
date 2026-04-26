@@ -1,3 +1,6 @@
+/**
+ * @figma-scaffold 쇼케이스 — ChatListItem 컴포넌트 검수용, 디자인 N/A
+ */
 'use client'
 
 import Link from 'next/link'

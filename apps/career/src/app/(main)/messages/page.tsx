@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=619-5992
+ */
 'use client'
 
 import { useMemo } from 'react'
