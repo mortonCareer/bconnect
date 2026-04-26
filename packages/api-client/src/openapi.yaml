@@ -2285,7 +2285,7 @@ components:
 
     Storage:
       type: object
-      required: [id, type, title, createdAt, modifiedAt]
+      required: [id, type, title, attachments, createdAt, modifiedAt]
       properties:
         id:
           type: integer
