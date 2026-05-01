@@ -43,95 +43,95 @@ tags:
     description: 푸시 알림용 디바이스(브라우저) 토큰 관리
 paths:
   /api/v1/auth/otp/send:
-    $ref: paths/v1/auth/otp/send.yaml
+    $ref: v1/auth.yaml#/paths/~1api~1v1~1auth~1otp~1send
   /api/v1/auth/otp/verify:
-    $ref: paths/v1/auth/otp/verify.yaml
+    $ref: v1/auth.yaml#/paths/~1api~1v1~1auth~1otp~1verify
   /api/v1/auth/refresh:
-    $ref: paths/v1/auth/refresh.yaml
+    $ref: v1/auth.yaml#/paths/~1api~1v1~1auth~1refresh
   /api/v1/auth/logout:
-    $ref: paths/v1/auth/logout.yaml
+    $ref: v1/auth.yaml#/paths/~1api~1v1~1auth~1logout
   /api/v1/members:
-    $ref: paths/v1/members/index.yaml
+    $ref: v1/members.yaml#/paths/~1api~1v1~1members
   /api/v1/members/roles:
-    $ref: paths/v1/members/roles.yaml
+    $ref: v1/members.yaml#/paths/~1api~1v1~1members~1roles
   /api/v1/members/check-username:
-    $ref: paths/v1/members/check-username.yaml
+    $ref: v1/members.yaml#/paths/~1api~1v1~1members~1check-username
   /api/v1/members/me:
-    $ref: paths/v1/members/me.yaml
+    $ref: v1/members.yaml#/paths/~1api~1v1~1members~1me
   /api/v1/feeds:
-    $ref: paths/v1/feeds/index.yaml
+    $ref: v1/feeds.yaml#/paths/~1api~1v1~1feeds
   /api/v1/feeds/{feedId}:
-    $ref: paths/v1/feeds/{feedId}.yaml
+    $ref: v1/feeds.yaml#/paths/~1api~1v1~1feeds~1{feedId}
   /api/v1/posts:
-    $ref: paths/v1/posts/index.yaml
+    $ref: v1/posts.yaml#/paths/~1api~1v1~1posts
   /api/v1/posts/{postId}:
-    $ref: paths/v1/posts/{postId}.yaml
+    $ref: v1/posts.yaml#/paths/~1api~1v1~1posts~1{postId}
   /api/v1/tasks:
-    $ref: paths/v1/tasks/index.yaml
+    $ref: v1/tasks.yaml#/paths/~1api~1v1~1tasks
   /api/v1/coworkers/tasks:
-    $ref: paths/v1/coworkers/tasks.yaml
+    $ref: v1/coworkers.yaml#/paths/~1api~1v1~1coworkers~1tasks
   /api/v1/tasks/{taskId}:
-    $ref: paths/v1/tasks/{taskId}.yaml
+    $ref: v1/tasks.yaml#/paths/~1api~1v1~1tasks~1{taskId}
   /api/v1/profiles/trades:
-    $ref: paths/v1/profiles/trades.yaml
+    $ref: v1/profiles.yaml#/paths/~1api~1v1~1profiles~1trades
   /api/v1/profiles:
-    $ref: paths/v1/profiles/index.yaml
+    $ref: v1/profiles.yaml#/paths/~1api~1v1~1profiles
   /api/v1/profiles/{profileId}:
-    $ref: paths/v1/profiles/{profileId}.yaml
+    $ref: v1/profiles.yaml#/paths/~1api~1v1~1profiles~1{profileId}
   /api/v1/profiles/me:
-    $ref: paths/v1/profiles/me/index.yaml
+    $ref: v1/profiles.yaml#/paths/~1api~1v1~1profiles~1me
   /api/v1/profiles/me/about:
-    $ref: paths/v1/profiles/me/about.yaml
+    $ref: v1/profiles.yaml#/paths/~1api~1v1~1profiles~1me~1about
   /api/v1/credentials/types:
-    $ref: paths/v1/credentials/types.yaml
+    $ref: v1/credentials.yaml#/paths/~1api~1v1~1credentials~1types
   /api/v1/credentials:
-    $ref: paths/v1/credentials/index.yaml
+    $ref: v1/credentials.yaml#/paths/~1api~1v1~1credentials
   /api/v1/credentials/{credentialId}/accept:
-    $ref: paths/v1/credentials/{credentialId}/accept.yaml
+    $ref: v1/credentials.yaml#/paths/~1api~1v1~1credentials~1{credentialId}~1accept
   /api/v1/credentials/{credentialId}/deny:
-    $ref: paths/v1/credentials/{credentialId}/deny.yaml
+    $ref: v1/credentials.yaml#/paths/~1api~1v1~1credentials~1{credentialId}~1deny
   /api/v1/credentials/{credentialId}:
-    $ref: paths/v1/credentials/{credentialId}/index.yaml
+    $ref: v1/credentials.yaml#/paths/~1api~1v1~1credentials~1{credentialId}
   /api/v1/coworkers:
-    $ref: paths/v1/coworkers/index.yaml
+    $ref: v1/coworkers.yaml#/paths/~1api~1v1~1coworkers
   /api/v1/coworkers/{coworkerId}:
-    $ref: paths/v1/coworkers/{coworkerId}.yaml
+    $ref: v1/coworkers.yaml#/paths/~1api~1v1~1coworkers~1{coworkerId}
   /api/v1/chats:
-    $ref: paths/v1/chats/index.yaml
+    $ref: v1/chats.yaml#/paths/~1api~1v1~1chats
   /api/v1/chats/direct:
-    $ref: paths/v1/chats/direct.yaml
+    $ref: v1/chats.yaml#/paths/~1api~1v1~1chats~1direct
   /api/v1/chats/{chatId}/messages:
-    $ref: paths/v1/chats/{chatId}/messages.yaml
+    $ref: v1/chats.yaml#/paths/~1api~1v1~1chats~1{chatId}~1messages
   /api/v1/recommendations:
-    $ref: paths/v1/recommendations/index.yaml
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations
   /api/v1/recommendations/received:
-    $ref: paths/v1/recommendations/received.yaml
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1received
   /api/v1/recommendations/sent:
-    $ref: paths/v1/recommendations/sent.yaml
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1sent
   /api/v1/recommendations/me/received:
-    $ref: paths/v1/recommendations/me/received.yaml
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1me~1received
   /api/v1/recommendations/me/sent:
-    $ref: paths/v1/recommendations/me/sent.yaml
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1me~1sent
   /api/v1/recommendations/{id}:
-    $ref: paths/v1/recommendations/{id}/index.yaml
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1{id}
   /api/v1/recommendations/{id}/hide:
-    $ref: paths/v1/recommendations/{id}/hide.yaml
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1{id}~1hide
   /api/v1/recommendations/{id}/show:
-    $ref: paths/v1/recommendations/{id}/show.yaml
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1{id}~1show
   /api/v1/coworker-requests:
-    $ref: paths/v1/coworker-requests/index.yaml
+    $ref: v1/coworker-requests.yaml#/paths/~1api~1v1~1coworker-requests
   /api/v1/coworker-requests/received:
-    $ref: paths/v1/coworker-requests/received.yaml
+    $ref: v1/coworker-requests.yaml#/paths/~1api~1v1~1coworker-requests~1received
   /api/v1/coworker-requests/sent:
-    $ref: paths/v1/coworker-requests/sent.yaml
+    $ref: v1/coworker-requests.yaml#/paths/~1api~1v1~1coworker-requests~1sent
   /api/v1/coworker-requests/{id}:
-    $ref: paths/v1/coworker-requests/{id}/index.yaml
+    $ref: v1/coworker-requests.yaml#/paths/~1api~1v1~1coworker-requests~1{id}
   /api/v1/coworker-requests/{id}/accept:
-    $ref: paths/v1/coworker-requests/{id}/accept.yaml
+    $ref: v1/coworker-requests.yaml#/paths/~1api~1v1~1coworker-requests~1{id}~1accept
   /api/v1/coworker-requests/{id}/deny:
-    $ref: paths/v1/coworker-requests/{id}/deny.yaml
+    $ref: v1/coworker-requests.yaml#/paths/~1api~1v1~1coworker-requests~1{id}~1deny
   /api/v1/devices:
-    $ref: paths/v1/devices.yaml
+    $ref: v1/devices.yaml#/paths/~1api~1v1~1devices
 components:
   securitySchemes:
     bearerAuth:

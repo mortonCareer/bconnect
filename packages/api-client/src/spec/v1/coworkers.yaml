@@ -1,0 +1,125 @@
+paths:
+  /api/v1/coworkers:
+    get:
+      operationId: getCoworkers
+      tags:
+        - Coworkers
+      summary: 동료 목록 조회
+      parameters:
+        - name: profileId
+          in: query
+          required: true
+          description: 프로필 ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Coworker'
+  /api/v1/coworkers/{coworkerId}:
+    delete:
+      operationId: deleteCoworker
+      tags:
+        - Coworkers
+      summary: 동료 삭제
+      parameters:
+        - name: coworkerId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+  /api/v1/coworkers/tasks:
+    get:
+      operationId: getCoworkerTasks
+      tags:
+        - Tasks
+      summary: 지인 작업목록 조회
+      parameters:
+        - name: start
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CoworkerTask'
+components:
+  schemas:
+    Coworker:
+      type: object
+      required:
+        - id
+        - minId
+        - maxId
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        minId:
+          type: integer
+          format: int64
+          example: 1
+        maxId:
+          type: integer
+          format: int64
+          example: 2
+    CoworkerTask:
+      type: object
+      required:
+        - id
+        - profileId
+        - start
+        - end
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        profileId:
+          type: integer
+          format: int64
+          example: 1
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date

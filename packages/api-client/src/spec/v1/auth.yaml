@@ -1,0 +1,187 @@
+paths:
+  /api/v1/auth/otp/send:
+    post:
+      operationId: sendOtp
+      tags:
+        - Auth
+      security: []
+      summary: 인증코드 발송
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendCodeRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/SendOtpResponse'
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+        '429':
+          description: |
+            - `A001` 일일 발송 한도를 초과했습니다
+            - `A002` 재전송 대기 시간이 지나지 않았습니다
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+  /api/v1/auth/otp/verify:
+    post:
+      operationId: verifyOtp
+      tags:
+        - Auth
+      security: []
+      summary: 인증코드 검증
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyCodeRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        oneOf:
+                          - $ref: '#/components/schemas/VerifyOtpLoginResponse'
+                          - $ref: '#/components/schemas/VerifyOtpSignupResponse'
+                        discriminator:
+                          propertyName: registered
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+            - `A003` 유효하지 않은 인증번호입니다
+            - `A004` 인증번호가 만료되었습니다
+            - `A005` 인증 시도 횟수를 초과했습니다
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+  /api/v1/auth/refresh:
+    post:
+      operationId: refreshToken
+      tags:
+        - Auth
+      security:
+        - cookieAuth: []
+      summary: 토큰 갱신
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RefreshTokenResponse'
+        '401':
+          description: |
+            - `A006` 유효하지 않은 리프레시 토큰입니다
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+  /api/v1/auth/logout:
+    post:
+      operationId: logout
+      tags:
+        - Auth
+      summary: 로그아웃
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    SendCodeRequest:
+      type: object
+      required:
+        - phone
+      properties:
+        phone:
+          type: string
+          pattern: \d{10,11}
+    VerifyCodeRequest:
+      type: object
+      required:
+        - phone
+        - code
+      properties:
+        phone:
+          type: string
+          pattern: \d{10,11}
+        code:
+          type: string
+          pattern: \d{6}
+    SendOtpResponse:
+      type: object
+      required:
+        - expiresAt
+      properties:
+        expiresAt:
+          type: string
+          format: date-time
+    VerifyOtpLoginResponse:
+      type: object
+      required:
+        - registered
+        - accessToken
+        - refreshToken
+      properties:
+        registered:
+          type: boolean
+          const: true
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    VerifyOtpSignupResponse:
+      type: object
+      required:
+        - registered
+        - signupToken
+      properties:
+        registered:
+          type: boolean
+          const: false
+        signupToken:
+          type: string
+    RefreshTokenResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string

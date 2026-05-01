@@ -1,7 +1,0 @@
-type: object
-required:
-  - participantId
-properties:
-  participantId:
-    type: integer
-    format: int64

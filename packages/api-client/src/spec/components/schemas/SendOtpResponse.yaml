@@ -1,7 +1,0 @@
-type: object
-required:
-  - expiresAt
-properties:
-  expiresAt:
-    type: string
-    format: date-time

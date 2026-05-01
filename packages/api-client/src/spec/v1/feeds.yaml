@@ -1,0 +1,102 @@
+paths:
+  /api/v1/feeds:
+    get:
+      operationId: getFeeds
+      tags:
+        - Feeds
+      security: []
+      summary: 피드 목록 조회
+      parameters:
+        - name: profileId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: reverse
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/FeedOffsetPage'
+  /api/v1/feeds/{feedId}:
+    get:
+      operationId: getFeed
+      tags:
+        - Feeds
+      security: []
+      summary: 피드 단건 조회
+      parameters:
+        - name: feedId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Feed'
+components:
+  schemas:
+    Feed:
+      type: object
+      required:
+        - member
+        - profile
+        - post
+      properties:
+        member:
+          $ref: ../v1/members.yaml#/components/schemas/MaskedMember
+        profile:
+          $ref: ../v1/profiles.yaml#/components/schemas/Profile
+        post:
+          $ref: ../v1/posts.yaml#/components/schemas/Post
+    FeedOffsetPage:
+      type: object
+      required:
+        - content
+        - hasNext
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Feed'
+        hasNext:
+          type: boolean

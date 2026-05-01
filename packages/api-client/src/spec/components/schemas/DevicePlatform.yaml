@@ -1,9 +1,0 @@
-type: string
-enum:
-  - web
-  - android
-  - ios
-description: |
-  디바이스 플랫폼.
-  - `web`: 브라우저 Web Push (FCM JS SDK 발급 토큰)
-  - `android`, `ios`: 추후 네이티브 앱 출시 시 사용

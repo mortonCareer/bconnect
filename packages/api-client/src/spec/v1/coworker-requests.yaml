@@ -1,0 +1,157 @@
+paths:
+  /api/v1/coworker-requests:
+    post:
+      operationId: createCoworkerRequest
+      tags:
+        - CoworkerRequests
+      summary: 동료요청 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCoworkerRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: integer
+                        format: int64
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+  /api/v1/coworker-requests/received:
+    get:
+      operationId: getReceivedCoworkerRequests
+      tags:
+        - CoworkerRequests
+      summary: 받은 동료 요청 목록 조회
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CoworkerRequest'
+  /api/v1/coworker-requests/sent:
+    get:
+      operationId: getSentCoworkerRequests
+      tags:
+        - CoworkerRequests
+      summary: 보낸 동료 요청 목록 조회
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CoworkerRequest'
+  /api/v1/coworker-requests/{id}:
+    delete:
+      operationId: cancelCoworkerRequest
+      tags:
+        - CoworkerRequests
+      summary: 동료요청 취소
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+  /api/v1/coworker-requests/{id}/accept:
+    post:
+      operationId: acceptCoworkerRequest
+      tags:
+        - CoworkerRequests
+      summary: 동료요청 수락
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+  /api/v1/coworker-requests/{id}/deny:
+    post:
+      operationId: denyCoworkerRequest
+      tags:
+        - CoworkerRequests
+      summary: 동료요청 거절
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    CoworkerRequest:
+      type: object
+      required:
+        - id
+        - fromId
+        - toId
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        fromId:
+          type: integer
+          format: int64
+          example: 1
+        toId:
+          type: integer
+          format: int64
+          example: 2
+    CreateCoworkerRequest:
+      type: object
+      required:
+        - toId
+      properties:
+        toId:
+          type: integer
+          format: int64
+          example: 1
