@@ -147,7 +147,7 @@ function JobsIcon({ active }: { active: boolean }) {
   )
 }
 
-function UploadIcon({ active: _active }: { active: boolean }) {
+function UploadIcon({ active }: { active: boolean }) {
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
       <g transform="translate(9.33 1.833)">

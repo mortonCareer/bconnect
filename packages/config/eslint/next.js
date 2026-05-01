@@ -7,14 +7,6 @@ export default defineConfig([
   ...nextVitals,
   ...nextTs,
   {
-    rules: {
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-      ],
-    },
-  },
-  {
     files: ['**/page.tsx'],
     plugins: { 'bconnect-figma': figma },
     rules: {
