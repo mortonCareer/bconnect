@@ -13,7 +13,7 @@ import '@morton/ui/styles'
 
 Figma MCP를 활용한 단방향 디자인 동기화 워크플로우.
 
-```
+```text
 Figma → Claude (MCP) → 코드 생성/수정
 ```
 
@@ -36,7 +36,7 @@ import { cva } from 'class-variance-authority'
 export const Button = ...
 ```
 
-ESLint custom rule(`morton-figma/require-figma-tag`)이 누락을 빌드에서 차단합니다. 자세한 형식과 옵션(`@figma-scaffold`, `@figma-pending`, `@figma-state`)은 [figma-mapping 스킬](../../.claude/skills/figma-mapping/SKILL.md) 참조.
+ESLint custom rule(`bconnect-figma/require-figma-tag`)이 누락을 빌드에서 차단합니다. 자세한 형식과 옵션(`@figma-scaffold`, `@figma-pending`, `@figma-state`)은 [figma-mapping 스킬](../../.claude/skills/figma-mapping/SKILL.md) 참조.
 
 ### Claude 커맨드
 
@@ -48,7 +48,7 @@ ESLint custom rule(`morton-figma/require-figma-tag`)이 누락을 빌드에서 �
 
 ## 디렉토리 구조
 
-```
+```text
 packages/ui/
 ├── src/
 │   ├── components/

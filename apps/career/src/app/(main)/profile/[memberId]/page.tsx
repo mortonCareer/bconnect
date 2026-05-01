@@ -23,11 +23,9 @@ export default function MemberProfilePage() {
   const memberId = Number(params.memberId)
   const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'intro' })
 
-  const {
-    data: members,
-    isLoading: isMemberLoading,
-    error: memberError,
-  } = useGetMembers({ query: { enabled: !isNaN(memberId) } })
+  const { data: members, isLoading: isMemberLoading } = useGetMembers({
+    query: { enabled: !isNaN(memberId) },
+  })
   const member = members?.find((m) => m.id === memberId)
 
   const { data: profile, isLoading: isProfileLoading } = useGetProfile(memberId, {

@@ -7,10 +7,18 @@ export default defineConfig([
   ...nextVitals,
   ...nextTs,
   {
-    files: ['**/page.tsx'],
-    plugins: { 'morton-figma': figma },
     rules: {
-      'morton-figma/require-figma-tag': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+    },
+  },
+  {
+    files: ['**/page.tsx'],
+    plugins: { 'bconnect-figma': figma },
+    rules: {
+      'bconnect-figma/require-figma-tag': 'error',
     },
   },
   globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),

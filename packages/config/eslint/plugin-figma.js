@@ -1,5 +1,5 @@
 /**
- * ESLint plugin: morton-figma
+ * ESLint plugin: bconnect-figma
  *
  * Enforces presence of `@figma` JSDoc tag in page.tsx and packages/ui components,
  * so that Figma ↔ code mapping is co-located with the source (SSoT).
@@ -110,7 +110,7 @@ const rules = {
 }
 
 const plugin = {
-  meta: { name: 'morton-figma', version: '0.1.0' },
+  meta: { name: 'bconnect-figma', version: '0.1.0' },
   rules,
 }
 

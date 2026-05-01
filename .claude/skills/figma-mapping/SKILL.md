@@ -1,7 +1,7 @@
 # Figma Mapping (인라인 @figma JSDoc 주석)
 
 `page.tsx`/공통 컴포넌트 파일 상단에 `@figma` JSDoc 주석으로 Figma ↔ 코드 매핑을 SSoT로 관리합니다.
-ESLint custom rule(`morton-figma/require-figma-tag`)이 누락을 빌드에서 차단합니다.
+ESLint custom rule(`bconnect-figma/require-figma-tag`)이 누락을 빌드에서 차단합니다.
 
 배경/근거: [#256](https://github.com/mortonCareer/bconnect/issues/256)
 
@@ -71,7 +71,7 @@ export default function EditAboutPage() { ... }
 
 ## ESLint 강제 범위
 
-`packages/config/eslint/plugin-figma.js` 정의, 다음 파일에서 누락 시 error:
+`packages/config/eslint/plugin-figma.js` 정의 (`bconnect-figma/require-figma-tag` rule), 다음 파일에서 누락 시 error:
 
 - `**/page.tsx` — 모든 Next.js 페이지 (apps/career, apps/plan)
 - `packages/ui/src/components/ui/*.tsx` — 디자인 시스템 공통 컴포넌트

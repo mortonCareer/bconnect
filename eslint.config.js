@@ -18,15 +18,18 @@ export default tseslint.config(
       },
     },
     rules: {
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
       'prefer-const': 'warn',
     },
   },
   {
     files: ['packages/ui/src/components/ui/*.tsx'],
-    plugins: { 'morton-figma': figma },
+    plugins: { 'bconnect-figma': figma },
     rules: {
-      'morton-figma/require-figma-tag': 'error',
+      'bconnect-figma/require-figma-tag': 'error',
     },
   }
 )
