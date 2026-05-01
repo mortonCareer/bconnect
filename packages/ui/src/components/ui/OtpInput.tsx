@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=331-3851
+ */
 import * as React from 'react'
 import { cn } from '../../lib/utils'
 

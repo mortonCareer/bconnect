@@ -3,6 +3,15 @@
 @source "../../apps/career/src/**/*.tsx";
 @source "../components/**/*.tsx";
 
+/**
+ * Morton Design System — Color Tokens, Typography, Font
+ *
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=603-4661
+ *
+ * 토큰 변경 시 Figma의 디자인 시스템 페이지(위 URL)와 동기화.
+ * SSoT는 이 CSS 파일이며, Figma는 시각 명세 참조용.
+ */
+
 /* Morton Design System - Color Tokens */
 :root {
   /* Primary Colors */

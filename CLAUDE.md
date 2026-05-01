@@ -106,7 +106,7 @@ Skills automate common workflows. Located in `.claude/skills/`:
 
 **Figma Integration:**
 
-- `figma-mapping` — Figma ↔ 코드 매핑 관리
+- `figma-mapping` — Figma ↔ 코드 매핑 (인라인 `@figma` JSDoc 주석 + ESLint 강제)
 - `figma-tailwind` — Figma → Tailwind 변환 규칙
 - `figma-verify` — Figma vs 렌더링 시각 비교
 - `figma-compare` — Figma 스플릿 뷰 비교

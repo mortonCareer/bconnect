@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=364-5740
+ */
 import * as React from 'react'
 import { cn } from '../../lib/utils'
 import { ImageIcon } from '../../icons/ImageIcon'
