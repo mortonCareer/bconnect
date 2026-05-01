@@ -138,16 +138,22 @@ components:
         Payload 구조: [`JwtPayload`](#/components/schemas/JwtPayload) 참조 (`type: access`, `scope` 보유).
 
         Lifecycle:
-        - 발급: `POST /api/v1/auth/otp/verify` 응답의 `accessToken`
+        - 발급: `POST /api/v1/auth/otp/verify` 응답 body 의 `accessToken`
         - 갱신: `POST /api/v1/auth/refresh` (cookieAuth 사용)
         - 만료 시간은 BE 의 `app.jwt.access-token-expiration` 환경 변수 (Spring config)
+
+        검증: BE 가 signature + expiration 만 검증 (DB lookup 없음 — stateless).
 
         에러:
         - `A007` 유효하지 않은 액세스 토큰입니다 (401)
         - `A008` 세션이 만료되었습니다 (401)
 
-    # Refresh Token — JWT (HS256). 같은 secret 으로 sign, `type: refresh` claim 로 access 와 구분.
-    # Payload 구조는 JwtPayload 참조 (`scope` 는 access 만 보유, refresh 는 sub/type/iat/exp 만).
+    # Refresh Token — JWT (HS256), AT 와 같은 secret + `type: refresh` claim 으로 구분.
+    # 발급/검증 비대칭:
+    # - BE 발급: response body 로 (Set-Cookie 헤더 없음). FE 가 받아 쿠키에 set 하는 책임.
+    # - BE 검증: 쿠키의 refreshToken 으로 (RefreshTokenAuthenticationFilter).
+    # - signature 검증 + sessions 테이블의 sha256(RT) 비교 + revoked flag (hybrid pattern).
+    # - logout 은 sessions.revoked=true 만 set (cookie 정리는 FE 책임).
     cookieAuth:
       type: apiKey
       in: cookie
