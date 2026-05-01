@@ -70,6 +70,8 @@ components:
           type: boolean
           example: true
           const: true
+  # 사용처에서는 `bearerAuth: []` / `cookieAuth: []` 의 빈 배열로 호출.
+  # 빈 배열은 OAuth2 scope 자리 — JWT/cookie 는 scope 개념이 없어 OpenAPI 표준상 빈 배열.
   securitySchemes:
     bearerAuth:
       type: http

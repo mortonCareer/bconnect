@@ -14,6 +14,10 @@ servers:
     description: 로컬 개발 서버
   - url: https://api.bconnect.to
     description: 프로덕션 서버
+# 모든 endpoint 의 기본 인증 — security: [] 로 endpoint 별 무인증 override 가능 (예: /auth/otp/send).
+# `bearerAuth: []` 의 빈 배열은 OAuth2 scope 자리. JWT/Bearer 는 scope 개념이 없어 빈 배열이
+# OpenAPI 표준 표기. (OAuth2 라면 `bearerAuth: [admin, write]` 같이 scope 명시)
+# https://spec.openapis.org/oas/v3.1.0#security-requirement-object
 security:
   - bearerAuth: []
 tags:
