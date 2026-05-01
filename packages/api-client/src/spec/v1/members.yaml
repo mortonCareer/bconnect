@@ -12,7 +12,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -40,7 +40,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -56,7 +56,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
   /api/v1/members/roles:
     get:
       operationId: getRoles
@@ -71,7 +71,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -100,7 +100,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -113,7 +113,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
   /api/v1/members/me:
     get:
       operationId: getMyMember
@@ -127,7 +127,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -154,7 +154,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
     delete:
       operationId: withdraw
       tags:

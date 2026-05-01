@@ -19,7 +19,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -32,7 +32,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
         '429':
           description: |
             - `A001` 일일 발송 한도를 초과했습니다
@@ -40,7 +40,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
   /api/v1/auth/otp/verify:
     post:
       operationId: verifyOtp
@@ -61,7 +61,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -81,7 +81,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
   /api/v1/auth/refresh:
     post:
       operationId: refreshToken
@@ -97,7 +97,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -110,7 +110,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
   /api/v1/auth/logout:
     post:
       operationId: logout

@@ -12,7 +12,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -40,7 +40,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -85,7 +85,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data

@@ -13,7 +13,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -40,7 +40,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -54,7 +54,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
   /api/v1/profiles/{profileId}:
     get:
       operationId: getProfile
@@ -76,7 +76,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -104,7 +104,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
     delete:
       operationId: deleteMyProfile
       tags:
@@ -142,7 +142,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -191,7 +191,7 @@ components:
             - string
             - 'null'
         address:
-          $ref: ../_shared/components/schemas/Address.yaml
+          $ref: ../_shared.yaml#/components/schemas/Address
         createdAt:
           type: string
           format: date-time
@@ -236,7 +236,7 @@ components:
             - string
             - 'null'
         address:
-          $ref: ../_shared/components/schemas/Address.yaml
+          $ref: ../_shared.yaml#/components/schemas/Address
     UpdateProfileRequest:
       type: object
       required:
@@ -261,7 +261,7 @@ components:
             - string
             - 'null'
         address:
-          $ref: ../_shared/components/schemas/Address.yaml
+          $ref: ../_shared.yaml#/components/schemas/Address
     UpdateProfileAboutRequest:
       type: object
       properties:

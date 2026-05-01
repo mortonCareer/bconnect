@@ -135,14 +135,6 @@ paths:
 components:
   securitySchemes:
     bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      description: |
-        인증이 필요한 엔드포인트에 공통으로 다음 에러를 반환할 수 있습니다.
-        - `A007` 유효하지 않은 액세스 토큰입니다 (401)
-        - `A008` 세션이 만료되었습니다 (401)
+      $ref: _shared.yaml#/components/securitySchemes/bearerAuth
     cookieAuth:
-      type: apiKey
-      in: cookie
-      name: refreshToken
+      $ref: _shared.yaml#/components/securitySchemes/cookieAuth

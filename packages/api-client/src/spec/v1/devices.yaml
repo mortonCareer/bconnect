@@ -22,7 +22,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../_shared/components/schemas/ApiSuccessResponseBase.yaml
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
                   - type: object
                     required:
                       - data
@@ -35,7 +35,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
     delete:
       operationId: unregisterDevice
       tags:
@@ -59,7 +59,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ../_shared/components/schemas/ApiErrorResponse.yaml
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
 components:
   schemas:
     DevicePlatform:
