@@ -6,9 +6,8 @@ info:
 
     ## 관련 문서
 
-    - [개발 문서 (Notion)](https://www.notion.so/morton-so/2dc965d2888b80ac9b72ca4d22812b12)
-    - [도메인 다이어그램 (Figjam)](https://www.figma.com/board/iGTu8r553JZ7TZ5FVdxkoB/) <!-- TODO: 정확한 board URL 로 교체 -->
-    - [기획 및 사업 (Figma)](https://www.figma.com/design/iGTu8r553JZ7TZ5FVdxkoB/) <!-- TODO: 정확한 file URL 로 교체 -->
+    - [개발 문서 (Notion)](https://www.notion.so/morton-so/2dc965d2888b80ac9b72ca4d22812b12) — 도메인 다이어그램 등 하위 페이지 포함
+    - [와이어프레임 (Figma)](https://www.figma.com/design/iGTu8r553JZ7TZ5FVdxkoB/-Morton--%EA%B8%B0%ED%9A%8D---%EC%82%AC%EC%97%85?node-id=0-1)
   version: 0.2.0
 servers:
   - url: http://localhost:8080

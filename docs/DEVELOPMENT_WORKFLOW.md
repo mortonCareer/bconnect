@@ -43,28 +43,61 @@ Morton의 기능 개발 프로세스를 설명합니다.
 
 ### SSOT (Single Source of Truth)
 
-API 스펙은 **`packages/api-client/src/spec/`** 하위에 도메인별 파일로 분리되어 관리됩니다.
+API 스펙은 **`packages/api-client/src/spec/`** 하위에 분리되어 관리됩니다.
 
 ```text
 packages/api-client/
-├── .redocly.yaml                       # lint 규칙 + bundle config
+├── .redocly.yaml                                    # lint 규칙 + bundle config
 └── src/
-    ├── spec/                           # 분리된 spec (SSOT)
-    │   ├── openapi.yaml                # 진입점 (info, paths $ref)
-    │   ├── paths/                      # 45 path 파일 (path 단위)
-    │   │   ├── api_v1_auth_otp_send.yaml
-    │   │   └── ...
+    ├── spec/                                        # 분리된 spec (SSOT)
+    │   ├── openapi.yaml                             # 진입점 (info, tags, paths $ref)
+    │   ├── _shared/                                 # cross-cutting (envelope, error)
+    │   │   └── components/
+    │   │       └── schemas/
+    │   │           ├── ApiSuccessResponseBase.yaml  # 모든 200 응답 envelope base
+    │   │           ├── ApiError.yaml                # error 코드/메시지 구조
+    │   │           └── ApiErrorResponse.yaml        # 모든 4xx/5xx 응답 형태
+    │   ├── paths/                                   # 45 path 파일
+    │   │   └── v1/
+    │   │       ├── auth/
+    │   │       │   ├── otp/{send,verify}.yaml
+    │   │       │   ├── refresh.yaml
+    │   │       │   └── logout.yaml
+    │   │       ├── members/
+    │   │       │   ├── index.yaml                   # /api/v1/members
+    │   │       │   ├── me.yaml
+    │   │       │   ├── roles.yaml
+    │   │       │   └── check-username.yaml
+    │   │       ├── credentials/
+    │   │       │   ├── index.yaml
+    │   │       │   ├── types.yaml
+    │   │       │   └── {credentialId}/
+    │   │       │       ├── index.yaml               # /api/v1/credentials/{id}
+    │   │       │       ├── accept.yaml
+    │   │       │       └── deny.yaml
+    │   │       └── ...                              # chats, posts, profiles, ...
     │   └── components/
-    │       └── schemas/                # 50 schema 파일 (schema 단위)
-    │           ├── ApiSuccessResponseBase.yaml
-    │           ├── ApiErrorResponse.yaml
+    │       └── schemas/                             # 47 도메인 schema 파일
     │           ├── Member.yaml
+    │           ├── Chat.yaml
+    │           ├── Profile.yaml
     │           └── ...
-    ├── openapi.bundled.yaml            # bundle 산출물 (gitignored)
-    └── generated/                      # orval 산출물 (gitignored)
+    ├── openapi.bundled.yaml                         # redocly bundle 산출물 (gitignored)
+    └── generated/                                   # orval 산출물 (gitignored)
+        ├── api.ts                                   # react-query hook + MSW mock aggregator
+        └── schemas/                                 # 각 schema 의 TS 타입
 ```
 
-분리 결과는 [redocly split](https://redocly.com/docs/cli/commands/split/) 의 default layout. 도메인 단위 grouping 은 의도적으로 제외 (small file 가 review/merge 에 더 친화적).
+### 디렉토리 axis 결정
+
+- **paths**: 버전 + 리소스 (`paths/v1/<resource>/[<sub>|{param}/]<file>.yaml`)
+  - URL 구조 ↔ 디렉토리 1:1 정렬
+  - 향후 v2 등장 시 `paths/v2/` clean break
+  - collection root 는 `index.yaml`, dynamic param 은 `{paramName}/` 디렉토리
+- **components/schemas**: 도메인 schema 평면 + cross-cutting 은 `_shared/` 분리
+  - 매우 빈번하게 ref 되는 envelope/error schema 는 `_shared/` (단계적 도메인 packing 의 1단계)
+  - 도메인 단위 packing 은 follow-up 으로 진행 중
+- **components 활용 (현재)**: schemas, securitySchemes 만. responses/parameters/examples 등은 도메인 packing 후 활용 검토.
 
 ### 스펙 작성 도구
 
@@ -87,8 +120,10 @@ pnpm api:generate    # bundle + orval 자동 chain
 스펙 작성은 CTO 또는 CEO 누구나 시작 가능. 주체는 endpoint 의 도메인에 따라 결정 — FE-주도 endpoint 는 CTO, BE 내부 모델 노출은 CEO 가 초안 작성하는 식.
 
 ```text
-CTO 또는 CEO: spec/paths/v1/<resource>/<sub>.yaml + spec/components/schemas/<Y>.yaml 추가
-   + spec/openapi.yaml 의 paths 에 $ref 등록
+작성자: spec/paths/v1/<resource>/<sub>.yaml + spec/components/schemas/<Y>.yaml 추가
+       + spec/openapi.yaml 의 paths 에 $ref 등록
+    ↓
+pnpm api:lint (로컬) 통과 확인
     ↓
 GitHub PR 생성
     ↓
@@ -115,13 +150,13 @@ API 클라이언트 자동 생성
 { success: false, data: null, error: { code: string, status: number, message: string, logLevel: string } }
 ```
 
-spec 에서는 envelope 을 다음 패턴으로 표현 (`packages/api-client/src/spec/components/schemas/ApiSuccessResponseBase.yaml` 활용):
+spec 에서는 envelope 을 다음 패턴으로 표현:
 
 ```yaml
-# spec/paths/api_v1_users_{userId}.yaml
+# spec/paths/v1/members/me.yaml
 get:
-  operationId: getUser
-  tags: [Users]
+  operationId: getMyMember
+  tags: [Members]
   responses:
     '200':
       description: OK
@@ -129,23 +164,36 @@ get:
         application/json:
           schema:
             allOf:
-              - $ref: ../components/schemas/ApiSuccessResponseBase.yaml
+              - $ref: ../../../../_shared/components/schemas/ApiSuccessResponseBase.yaml
               - type: object
                 required: [data]
                 properties:
                   data:
-                    $ref: ../components/schemas/User.yaml
+                    $ref: ../../../../components/schemas/Member.yaml
+    '401':
+      description: |
+        - `A007` 유효하지 않은 액세스 토큰입니다
+        - `A008` 세션이 만료되었습니다
+      content:
+        application/json:
+          schema:
+            $ref: ../../../../_shared/components/schemas/ApiErrorResponse.yaml
 ```
 
 `customFetch` ([packages/api-client/src/client.ts](https://github.com/mortonCareer/bconnect/blob/dev/packages/api-client/src/client.ts)) 가 envelope 을 unwrap 하므로 React Query hook 의 `data` 는 inner `T` 타입 (Generic `ExtractData<T>`).
 
 ### 새 endpoint 추가 절차
 
-1. `packages/api-client/src/spec/components/schemas/<Schema>.yaml` 추가 (필요 시)
-2. `packages/api-client/src/spec/paths/<path>.yaml` 추가 — operations + envelope wrap
-3. `packages/api-client/src/spec/openapi.yaml` 의 `paths` 섹션에 `$ref` 등록
-4. `pnpm api:generate` — bundle + orval 자동 실행
-5. PR 생성 → `ci-api-spec` 통과 확인
+1. **schema 추가** (필요 시):
+   - 도메인 schema → `spec/components/schemas/<Schema>.yaml`
+   - cross-cutting (envelope/error 등) → `spec/_shared/components/schemas/<Schema>.yaml` (드물게)
+2. **path 파일 추가**: `spec/paths/v1/<resource>/<sub>.yaml`
+   - collection root: `<resource>/index.yaml`
+   - sub-resource: `<resource>/<sub>.yaml`
+   - dynamic param 은 디렉토리: `<resource>/{paramName}/<action>.yaml`
+3. **root openapi.yaml 등록**: `paths` 섹션에 URL → `$ref: paths/v1/.../<file>.yaml`
+4. **로컬 검증**: `pnpm api:lint` 통과 → `pnpm api:generate` (bundle + orval 자동 chain)
+5. **PR 생성**: `ci-api-spec` 통과 확인
 
 ---
 
@@ -177,10 +225,11 @@ packages/api-client/src/
 **데이터 조회:**
 
 ```typescript
-import { useGetUserQuery } from '@morton/api-client'
+import { useGetMyMember } from '@morton/api-client'
 
-function UserProfile({ userId }: { userId: string }) {
-  const { data, isLoading, error } = useGetUserQuery({ userId })
+function MyProfile() {
+  const { data, isLoading, error } = useGetMyMember()
+  // data 는 envelope 의 inner type (Member). customFetch 가 자동 unwrap.
 
   if (isLoading) return <Spinner />
   if (error) return <ErrorMessage error={error} />
@@ -192,14 +241,14 @@ function UserProfile({ userId }: { userId: string }) {
 **데이터 변경:**
 
 ```typescript
-import { useUpdateUserMutation } from '@morton/api-client'
+import { useUpdateMyMember } from '@morton/api-client'
 
 function EditProfile() {
-  const { mutate, isPending } = useUpdateUserMutation()
+  const { mutate, isPending } = useUpdateMyMember()
 
-  const handleSubmit = (formData: ProfileFormData) => {
+  const handleSubmit = (formData: UpdateMemberRequest) => {
     mutate(
-      { userId: '123', data: formData },
+      { data: formData },
       {
         onSuccess: () => toast.success('저장 완료'),
         onError: (error) => toast.error(error.message),

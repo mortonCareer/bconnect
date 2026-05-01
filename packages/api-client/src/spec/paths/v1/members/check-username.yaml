@@ -17,7 +17,7 @@ get:
         application/json:
           schema:
             allOf:
-              - $ref: ../../../components/schemas/ApiSuccessResponseBase.yaml
+              - $ref: ../../../_shared/components/schemas/ApiSuccessResponseBase.yaml
               - type: object
                 required:
                   - data
@@ -30,4 +30,4 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../../../components/schemas/ApiErrorResponse.yaml
+            $ref: ../../../_shared/components/schemas/ApiErrorResponse.yaml

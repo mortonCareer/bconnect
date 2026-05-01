@@ -8,7 +8,7 @@ properties:
     type: boolean
     const: false
   error:
-    $ref: ./ApiError.yaml
+    $ref: ApiError.yaml
   data:
     type:
       - object

@@ -25,7 +25,7 @@ put:
       content:
         application/json:
           schema:
-            $ref: ../../../components/schemas/ApiErrorResponse.yaml
+            $ref: ../../../_shared/components/schemas/ApiErrorResponse.yaml
 delete:
   operationId: deletePost
   tags:
