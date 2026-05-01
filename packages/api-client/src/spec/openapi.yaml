@@ -140,8 +140,10 @@ components:
       $ref: _shared.yaml#/components/securitySchemes/bearerAuth
     cookieAuth:
       $ref: _shared.yaml#/components/securitySchemes/cookieAuth
-  # 어떤 path 도 응답/요청 body 로 ref 하지 않지만 FE 가 token 디코딩 시 type 으로 필요 →
-  # bundle 에 포함되도록 root 에서 명시 ref.
+  # 도메인 schema 는 v1/<domain>.yaml 정의 → paths 의 ref graph 로 자동 bundle.
+  # cross-cutting (envelope/error) 은 _shared.yaml.
+  # 아래는 paths 가 ref 안 하지만 bundle 에 포함되어야 하는 특수 case 의 manifest 등록:
+  # - JwtPayload: bearerAuth.x-jwt-payload-schema 로 의미 link, manifest 로 named 등록.
   schemas:
     JwtPayload:
       $ref: v1/auth.yaml#/components/schemas/JwtPayload

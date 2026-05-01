@@ -79,6 +79,12 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
+      # OpenAPI 표준은 securityScheme ↔ token payload schema 의 의미 link 메커니즘 부재 →
+      # `x-` extension (Specification Extensions, OAS §4.9) 으로 의미 명시.
+      # 효과: spec 차원 contract 등록 + redocly bundle 의 ref traversal entry 가 되어
+      # JwtPayload 가 자동 bundle 에 포함됨 (root manifest 불필요).
+      x-jwt-payload-schema:
+        $ref: 'v1/auth.yaml#/components/schemas/JwtPayload'
       description: |
         JWT Access Token (15분 만료).
 
