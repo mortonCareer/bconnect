@@ -65,7 +65,7 @@ ci-api-spec (redocly lint) 자동 실행
 API 클라이언트 자동 생성 (orval)
 ```
 
-> **상세 작성 가이드 (디렉토리 구조, envelope 패턴, 새 endpoint 추가 절차, axis 결정 근거 등) 는 [`packages/api-client/CLAUDE.md`](../packages/api-client/CLAUDE.md) 로 분리 예정** — 이슈 [#271](https://github.com/mortonCareer/bconnect/issues/271) 참조. 본 문서는 워크플로 관점만 다룸.
+> **상세 작성 가이드 (디렉토리 구조, envelope 패턴, 새 endpoint 추가 절차, axis 결정 근거 등) 는 [`packages/api-client/CLAUDE.md`](../packages/api-client/CLAUDE.md) 참조**. 본 문서는 워크플로 관점만 다룸.
 
 ---
 

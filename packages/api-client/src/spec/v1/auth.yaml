@@ -133,21 +133,21 @@ components:
       x-jwt-payload-schema:
         $ref: '#/components/schemas/JwtPayload'
       description: |
-        JWT Access Token (15분 만료).
+        JWT Access Token. 헤더 형식: `Authorization: Bearer <jwt>` (RFC 6750)
 
-        헤더 형식: `Authorization: Bearer <jwt>` (RFC 6750)
-
-        Payload 구조: [`JwtPayload`](#/components/schemas/JwtPayload) 참조 (RFC 7519 표준 claims + Morton custom claims).
+        Payload 구조: [`JwtPayload`](#/components/schemas/JwtPayload) 참조 (`type: access`, `scope` 보유).
 
         Lifecycle:
         - 발급: `POST /api/v1/auth/otp/verify` 응답의 `accessToken`
         - 갱신: `POST /api/v1/auth/refresh` (cookieAuth 사용)
+        - 만료 시간은 BE 의 `app.jwt.access-token-expiration` 환경 변수 (Spring config)
 
         에러:
         - `A007` 유효하지 않은 액세스 토큰입니다 (401)
         - `A008` 세션이 만료되었습니다 (401)
 
-    # Refresh Token — opaque (RFC 6749 의 OAuth2 refresh_token 패턴)
+    # Refresh Token — JWT (HS256). 같은 secret 으로 sign, `type: refresh` claim 로 access 와 구분.
+    # Payload 구조는 JwtPayload 참조 (`scope` 는 access 만 보유, refresh 는 sub/type/iat/exp 만).
     cookieAuth:
       type: apiKey
       in: cookie
@@ -218,39 +218,49 @@ components:
         refreshToken:
           type: string
 
-    # JWT Access Token 의 payload 구조 — bearerAuth scheme 의 token 디코딩 결과.
-    # OpenAPI 표준은 bearerFormat: JWT 만 hint, payload schema 표현 메커니즘 없음 →
-    # 별도 schema 로 정의해 BE/FE contract 동기화.
-    # 사용처: _shared.yaml 의 bearerAuth.description 의 markdown link, FE token 디코딩 type.
+    # JWT 토큰 (access / refresh 공용) payload 구조 — BE [JwtProvider.java](https://github.com/mortonCareer/bconnect/blob/dev/apps/api/core/src/main/java/so/morton/api/support/auth/jwt/JwtProvider.java) 의
+    # 실제 발급 형식과 정렬. SSOT 는 현재 BE 코드 — 표준 마이그레이션은 별도 (#272).
+    #
+    # AT 와 RT 모두 같은 secret 으로 HS256 signing, `type` claim 으로 구분.
+    # access 만 `scope` 보유, refresh 는 sub/type/iat/exp 만.
     JwtPayload:
       type: object
       required:
         - sub
-        - role
+        - type
         - exp
         - iat
       properties:
         # RFC 7519 표준 Registered Claims
         sub: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2
           type: string
-          description: Subject — Member ID
-          example: '12345'
+          description: |
+            Subject — Member.username (Member entity 의 username field, phone 과 별도).
+            Spring Security `Authentication.getName()` 결과.
+            Member.id (Long) 가 아님 — username 이 login ID 역할.
+          example: morton123
         exp: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4
           type: integer
           format: int64
-          description: Expiration Time — 만료 unix timestamp (15분 후)
+          description: Expiration Time — 만료 unix timestamp
           example: 1709251200
         iat: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6
           type: integer
           format: int64
           description: Issued At — 발급 unix timestamp
           example: 1709250300
-        iss: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1
-          type: string
-          description: Issuer
-          example: bconnect.to
 
         # Morton Private Claims (RFC 7519 §4.3)
         # https://datatracker.ietf.org/doc/html/rfc7519#section-4.3
-        role:
-          $ref: ../v1/members.yaml#/components/schemas/Role
+        type:
+          type: string
+          enum: [access, refresh]
+          description: Token type — access vs refresh 구분 (BE private claim, JWT 표준 아님 — #272)
+        scope:
+          type: string
+          description: |
+            Authorities — `User.getAuthorities()` 의 `ROLE_<role>` 에서 prefix 제거 후 comma-join.
+            현재 [User.getAuthorities()](https://github.com/mortonCareer/bconnect/blob/dev/apps/api/core/src/main/java/so/morton/api/support/auth/User.java#L20-L22) 가 `List.of(<single>)` 반환 — 실제로는 단일 enum value.
+            access token 만 보유 (refresh 는 없음).
+            NOTE: RFC 8693 표준은 space-separated. Morton 비표준 — 마이그레이션 검토: #272
+          example: WORKER
