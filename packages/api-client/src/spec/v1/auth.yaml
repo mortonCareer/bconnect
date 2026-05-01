@@ -123,11 +123,9 @@ paths:
 components:
   securitySchemes:
     # Access Token
-    # https://datatracker.ietf.org/doc/html/rfc7235 — HTTP Authentication framework
-    # https://datatracker.ietf.org/doc/html/rfc6750 — OAuth 2.0 Bearer Token Usage
     bearerAuth:
       type: http
-      scheme: bearer
+      scheme: bearer # https://datatracker.ietf.org/doc/html/rfc6750#section-6.1.1
       bearerFormat: JWT # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
       # OpenAPI 표준은 securityScheme ↔ token payload schema 의 의미 link 메커니즘 부재 →
       # `x-` extension (OAS §4.9 Specification Extensions) 으로 명시. JwtPayload 가 같은 파일에
@@ -150,11 +148,10 @@ components:
         - `A008` 세션이 만료되었습니다 (401)
 
     # Refresh Token — opaque (RFC 6749 의 OAuth2 refresh_token 패턴)
-    # https://datatracker.ietf.org/doc/html/rfc6749#section-1.5
     cookieAuth:
       type: apiKey
       in: cookie
-      name: refreshToken
+      name: refreshToken # https://datatracker.ietf.org/doc/html/rfc6749#section-1.5
 
   schemas:
     SendCodeRequest:
