@@ -71,42 +71,6 @@ components:
           example: true
           const: true
 
-    # JWT Access Token 의 payload 구조 — bearerAuth scheme 의 token 디코딩 결과.
-    # OpenAPI 표준은 bearerFormat: JWT 만 hint, payload schema 표현 메커니즘 없음 →
-    # 별도 schema 로 정의해 BE/FE contract 동기화. 사용처: bearerAuth.description 의 markdown link.
-    JwtPayload:
-      type: object
-      required:
-        - sub
-        - role
-        - exp
-        - iat
-      properties:
-        # RFC 7519 표준 Registered Claims
-        sub: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2
-          type: string
-          description: Subject — Member ID
-          example: '12345'
-        exp: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4
-          type: integer
-          format: int64
-          description: Expiration Time — 만료 unix timestamp (15분 후)
-          example: 1709251200
-        iat: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6
-          type: integer
-          format: int64
-          description: Issued At — 발급 unix timestamp
-          example: 1709250300
-        iss: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1
-          type: string
-          description: Issuer
-          example: bconnect.to
-
-        # Morton Private Claims (RFC 7519 §4.3)
-        # https://datatracker.ietf.org/doc/html/rfc7519#section-4.3
-        role:
-          $ref: v1/members.yaml#/components/schemas/Role
-
   securitySchemes:
     # Access Token
     # https://datatracker.ietf.org/doc/html/rfc7235 — HTTP Authentication framework

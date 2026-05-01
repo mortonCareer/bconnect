@@ -144,4 +144,4 @@ components:
   # bundle 에 포함되도록 root 에서 명시 ref.
   schemas:
     JwtPayload:
-      $ref: _shared.yaml#/components/schemas/JwtPayload
+      $ref: v1/auth.yaml#/components/schemas/JwtPayload
