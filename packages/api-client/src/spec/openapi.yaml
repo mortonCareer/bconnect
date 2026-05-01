@@ -137,9 +137,9 @@ paths:
 components:
   securitySchemes:
     bearerAuth:
-      $ref: _shared.yaml#/components/securitySchemes/bearerAuth
+      $ref: v1/auth.yaml#/components/securitySchemes/bearerAuth
     cookieAuth:
-      $ref: _shared.yaml#/components/securitySchemes/cookieAuth
+      $ref: v1/auth.yaml#/components/securitySchemes/cookieAuth
   # 도메인 schema 는 v1/<domain>.yaml 정의 → paths 의 ref graph 로 자동 bundle.
   # cross-cutting (envelope/error) 은 _shared.yaml.
   # 아래는 paths 가 ref 안 하지만 bundle 에 포함되어야 하는 특수 case 의 manifest 등록:
