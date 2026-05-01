@@ -1,0 +1,40 @@
+post:
+  operationId: verifyOtp
+  tags:
+    - Auth
+  security: []
+  summary: 인증코드 검증
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../../../../components/schemas/VerifyCodeRequest.yaml
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: ../../../../components/schemas/ApiSuccessResponseBase.yaml
+              - type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    oneOf:
+                      - $ref: ../../../../components/schemas/VerifyOtpLoginResponse.yaml
+                      - $ref: ../../../../components/schemas/VerifyOtpSignupResponse.yaml
+                    discriminator:
+                      propertyName: registered
+    '400':
+      description: |
+        - `C001` 유효하지 않은 입력값입니다
+        - `A003` 유효하지 않은 인증번호입니다
+        - `A004` 인증번호가 만료되었습니다
+        - `A005` 인증 시도 횟수를 초과했습니다
+      content:
+        application/json:
+          schema:
+            $ref: ../../../../components/schemas/ApiErrorResponse.yaml

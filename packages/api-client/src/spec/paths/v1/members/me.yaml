@@ -1,0 +1,48 @@
+get:
+  operationId: getMyMember
+  tags:
+    - Members
+  summary: 내 정보 조회
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: ../../../components/schemas/ApiSuccessResponseBase.yaml
+              - type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: ../../../components/schemas/Member.yaml
+put:
+  operationId: updateMyMember
+  tags:
+    - Members
+  summary: 내 정보 수정
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../../../components/schemas/UpdateMemberRequest.yaml
+  responses:
+    '200':
+      description: OK
+    '400':
+      description: |
+        - `C001` 유효하지 않은 입력값입니다
+      content:
+        application/json:
+          schema:
+            $ref: ../../../components/schemas/ApiErrorResponse.yaml
+delete:
+  operationId: withdraw
+  tags:
+    - Members
+  summary: 회원 탈퇴
+  responses:
+    '200':
+      description: OK

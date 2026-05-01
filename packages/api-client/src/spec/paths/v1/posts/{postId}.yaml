@@ -1,0 +1,36 @@
+parameters:
+  - name: postId
+    in: path
+    required: true
+    schema:
+      type: integer
+      format: int64
+put:
+  operationId: updatePost
+  tags:
+    - Posts
+  summary: 게시글 수정
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../../../components/schemas/UpdatePostRequest.yaml
+  responses:
+    '200':
+      description: OK
+    '400':
+      description: |
+        - `C001` 유효하지 않은 입력값입니다
+      content:
+        application/json:
+          schema:
+            $ref: ../../../components/schemas/ApiErrorResponse.yaml
+delete:
+  operationId: deletePost
+  tags:
+    - Posts
+  summary: 게시글 삭제
+  responses:
+    '200':
+      description: OK

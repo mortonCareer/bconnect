@@ -1,0 +1,33 @@
+post:
+  operationId: createPost
+  tags:
+    - Posts
+  summary: 게시글 생성
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../../../components/schemas/CreatePostRequest.yaml
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: ../../../components/schemas/ApiSuccessResponseBase.yaml
+              - type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: integer
+                    format: int64
+    '400':
+      description: |
+        - `C001` 유효하지 않은 입력값입니다
+      content:
+        application/json:
+          schema:
+            $ref: ../../../components/schemas/ApiErrorResponse.yaml

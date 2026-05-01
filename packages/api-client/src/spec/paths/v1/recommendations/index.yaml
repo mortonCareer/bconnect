@@ -1,0 +1,26 @@
+post:
+  operationId: createRecommendation
+  tags:
+    - Recommendations
+  summary: 추천서 보내기
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../../../components/schemas/CreateRecommendationRequest.yaml
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: ../../../components/schemas/ApiSuccessResponseBase.yaml
+              - type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: integer
+                    format: int64

@@ -1,7 +1,14 @@
 openapi: 3.1.0
 info:
   title: Bconnect API
-  description: 인테리어 종사자를 위한 하도급 섭외 · 관리 플랫폼 '품앗이'의 REST API
+  description: |
+    인테리어 종사자를 위한 하도급 섭외 · 관리 플랫폼 '품앗이'의 REST API.
+
+    ## 관련 문서
+
+    - [개발 문서 (Notion)](https://www.notion.so/morton-so/2dc965d2888b80ac9b72ca4d22812b12)
+    - [도메인 다이어그램 (Figjam)](https://www.figma.com/board/iGTu8r553JZ7TZ5FVdxkoB/) <!-- TODO: 정확한 board URL 로 교체 -->
+    - [기획 및 사업 (Figma)](https://www.figma.com/design/iGTu8r553JZ7TZ5FVdxkoB/) <!-- TODO: 정확한 file URL 로 교체 -->
   version: 0.2.0
 servers:
   - url: http://localhost:8080
@@ -35,100 +42,97 @@ tags:
     description: 채팅 관리
   - name: Devices
     description: 푸시 알림용 디바이스(브라우저) 토큰 관리
-externalDocs:
-  description: 개발 문서 (Notion)
-  url: https://www.notion.so/morton-so/2dc965d2888b80ac9b72ca4d22812b12
 paths:
   /api/v1/auth/otp/send:
-    $ref: paths/api_v1_auth_otp_send.yaml
+    $ref: paths/v1/auth/otp/send.yaml
   /api/v1/auth/otp/verify:
-    $ref: paths/api_v1_auth_otp_verify.yaml
+    $ref: paths/v1/auth/otp/verify.yaml
   /api/v1/auth/refresh:
-    $ref: paths/api_v1_auth_refresh.yaml
+    $ref: paths/v1/auth/refresh.yaml
   /api/v1/auth/logout:
-    $ref: paths/api_v1_auth_logout.yaml
+    $ref: paths/v1/auth/logout.yaml
   /api/v1/members:
-    $ref: paths/api_v1_members.yaml
+    $ref: paths/v1/members/index.yaml
   /api/v1/members/roles:
-    $ref: paths/api_v1_members_roles.yaml
+    $ref: paths/v1/members/roles.yaml
   /api/v1/members/check-username:
-    $ref: paths/api_v1_members_check-username.yaml
+    $ref: paths/v1/members/check-username.yaml
   /api/v1/members/me:
-    $ref: paths/api_v1_members_me.yaml
+    $ref: paths/v1/members/me.yaml
   /api/v1/feeds:
-    $ref: paths/api_v1_feeds.yaml
+    $ref: paths/v1/feeds/index.yaml
   /api/v1/feeds/{feedId}:
-    $ref: paths/api_v1_feeds_{feedId}.yaml
+    $ref: paths/v1/feeds/{feedId}.yaml
   /api/v1/posts:
-    $ref: paths/api_v1_posts.yaml
+    $ref: paths/v1/posts/index.yaml
   /api/v1/posts/{postId}:
-    $ref: paths/api_v1_posts_{postId}.yaml
+    $ref: paths/v1/posts/{postId}.yaml
   /api/v1/tasks:
-    $ref: paths/api_v1_tasks.yaml
+    $ref: paths/v1/tasks/index.yaml
   /api/v1/coworkers/tasks:
-    $ref: paths/api_v1_coworkers_tasks.yaml
+    $ref: paths/v1/coworkers/tasks.yaml
   /api/v1/tasks/{taskId}:
-    $ref: paths/api_v1_tasks_{taskId}.yaml
+    $ref: paths/v1/tasks/{taskId}.yaml
   /api/v1/profiles/trades:
-    $ref: paths/api_v1_profiles_trades.yaml
+    $ref: paths/v1/profiles/trades.yaml
   /api/v1/profiles:
-    $ref: paths/api_v1_profiles.yaml
+    $ref: paths/v1/profiles/index.yaml
   /api/v1/profiles/{profileId}:
-    $ref: paths/api_v1_profiles_{profileId}.yaml
+    $ref: paths/v1/profiles/{profileId}.yaml
   /api/v1/profiles/me:
-    $ref: paths/api_v1_profiles_me.yaml
+    $ref: paths/v1/profiles/me/index.yaml
   /api/v1/profiles/me/about:
-    $ref: paths/api_v1_profiles_me_about.yaml
+    $ref: paths/v1/profiles/me/about.yaml
   /api/v1/credentials/types:
-    $ref: paths/api_v1_credentials_types.yaml
+    $ref: paths/v1/credentials/types.yaml
   /api/v1/credentials:
-    $ref: paths/api_v1_credentials.yaml
+    $ref: paths/v1/credentials/index.yaml
   /api/v1/credentials/{credentialId}/accept:
-    $ref: paths/api_v1_credentials_{credentialId}_accept.yaml
+    $ref: paths/v1/credentials/{credentialId}/accept.yaml
   /api/v1/credentials/{credentialId}/deny:
-    $ref: paths/api_v1_credentials_{credentialId}_deny.yaml
+    $ref: paths/v1/credentials/{credentialId}/deny.yaml
   /api/v1/credentials/{credentialId}:
-    $ref: paths/api_v1_credentials_{credentialId}.yaml
+    $ref: paths/v1/credentials/{credentialId}/index.yaml
   /api/v1/coworkers:
-    $ref: paths/api_v1_coworkers.yaml
+    $ref: paths/v1/coworkers/index.yaml
   /api/v1/coworkers/{coworkerId}:
-    $ref: paths/api_v1_coworkers_{coworkerId}.yaml
+    $ref: paths/v1/coworkers/{coworkerId}.yaml
   /api/v1/chats:
-    $ref: paths/api_v1_chats.yaml
+    $ref: paths/v1/chats/index.yaml
   /api/v1/chats/direct:
-    $ref: paths/api_v1_chats_direct.yaml
+    $ref: paths/v1/chats/direct.yaml
   /api/v1/chats/{chatId}/messages:
-    $ref: paths/api_v1_chats_{chatId}_messages.yaml
+    $ref: paths/v1/chats/{chatId}/messages.yaml
   /api/v1/recommendations:
-    $ref: paths/api_v1_recommendations.yaml
+    $ref: paths/v1/recommendations/index.yaml
   /api/v1/recommendations/received:
-    $ref: paths/api_v1_recommendations_received.yaml
+    $ref: paths/v1/recommendations/received.yaml
   /api/v1/recommendations/sent:
-    $ref: paths/api_v1_recommendations_sent.yaml
+    $ref: paths/v1/recommendations/sent.yaml
   /api/v1/recommendations/me/received:
-    $ref: paths/api_v1_recommendations_me_received.yaml
+    $ref: paths/v1/recommendations/me/received.yaml
   /api/v1/recommendations/me/sent:
-    $ref: paths/api_v1_recommendations_me_sent.yaml
+    $ref: paths/v1/recommendations/me/sent.yaml
   /api/v1/recommendations/{id}:
-    $ref: paths/api_v1_recommendations_{id}.yaml
+    $ref: paths/v1/recommendations/{id}/index.yaml
   /api/v1/recommendations/{id}/hide:
-    $ref: paths/api_v1_recommendations_{id}_hide.yaml
+    $ref: paths/v1/recommendations/{id}/hide.yaml
   /api/v1/recommendations/{id}/show:
-    $ref: paths/api_v1_recommendations_{id}_show.yaml
+    $ref: paths/v1/recommendations/{id}/show.yaml
   /api/v1/coworker-requests:
-    $ref: paths/api_v1_coworker-requests.yaml
+    $ref: paths/v1/coworker-requests/index.yaml
   /api/v1/coworker-requests/received:
-    $ref: paths/api_v1_coworker-requests_received.yaml
+    $ref: paths/v1/coworker-requests/received.yaml
   /api/v1/coworker-requests/sent:
-    $ref: paths/api_v1_coworker-requests_sent.yaml
+    $ref: paths/v1/coworker-requests/sent.yaml
   /api/v1/coworker-requests/{id}:
-    $ref: paths/api_v1_coworker-requests_{id}.yaml
+    $ref: paths/v1/coworker-requests/{id}/index.yaml
   /api/v1/coworker-requests/{id}/accept:
-    $ref: paths/api_v1_coworker-requests_{id}_accept.yaml
+    $ref: paths/v1/coworker-requests/{id}/accept.yaml
   /api/v1/coworker-requests/{id}/deny:
-    $ref: paths/api_v1_coworker-requests_{id}_deny.yaml
+    $ref: paths/v1/coworker-requests/{id}/deny.yaml
   /api/v1/devices:
-    $ref: paths/api_v1_devices.yaml
+    $ref: paths/v1/devices.yaml
 components:
   securitySchemes:
     bearerAuth:
@@ -143,11 +147,3 @@ components:
       type: apiKey
       in: cookie
       name: refreshToken
-
-  # 어떤 path 에서도 직접 $ref 되지 않지만 FE 가 error handling 에서 사용 →
-  # bundle 에 포함되도록 명시적으로 등록.
-  schemas:
-    ApiError:
-      $ref: ./components/schemas/ApiError.yaml
-    ApiErrorResponse:
-      $ref: ./components/schemas/ApiErrorResponse.yaml

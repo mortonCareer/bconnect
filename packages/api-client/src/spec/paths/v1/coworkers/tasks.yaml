@@ -1,0 +1,34 @@
+get:
+  operationId: getCoworkerTasks
+  tags:
+    - Tasks
+  summary: 지인 작업목록 조회
+  parameters:
+    - name: start
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date
+    - name: end
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: ../../../components/schemas/ApiSuccessResponseBase.yaml
+              - type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: ../../../components/schemas/CoworkerTask.yaml

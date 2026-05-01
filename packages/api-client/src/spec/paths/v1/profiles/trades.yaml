@@ -1,0 +1,22 @@
+get:
+  operationId: getTrades
+  tags:
+    - Profiles
+  security: []
+  summary: 공종 목록 조회
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: ../../../components/schemas/ApiSuccessResponseBase.yaml
+              - type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: ../../../components/schemas/Trade.yaml

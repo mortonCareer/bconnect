@@ -84,15 +84,17 @@ pnpm api:generate    # bundle + orval 자동 chain
 
 ### 스펙 설계 프로세스
 
+스펙 작성은 CTO 또는 CEO 누구나 시작 가능. 주체는 endpoint 의 도메인에 따라 결정 — FE-주도 endpoint 는 CTO, BE 내부 모델 노출은 CEO 가 초안 작성하는 식.
+
 ```text
-CTO: spec/paths/<X>.yaml + spec/components/schemas/<Y>.yaml 추가
+CTO 또는 CEO: spec/paths/v1/<resource>/<sub>.yaml + spec/components/schemas/<Y>.yaml 추가
    + spec/openapi.yaml 의 paths 에 $ref 등록
     ↓
 GitHub PR 생성
     ↓
 ci-api-spec (redocly lint) 자동 실행
     ↓
-CEO: API 스펙 리뷰
+상대 (CEO 또는 CTO): API 스펙 리뷰
     ↓
 피드백 반영 및 논의
     ↓

@@ -1,3 +1,8 @@
+// ky: fetch wrapper — 우리는 prefixUrl/timeout/credentials 같은 cross-cutting 옵션과
+// hook (beforeRequest, afterResponse) 시스템 때문에 native fetch 대신 사용.
+// orval 의 mutator (customFetch) 는 ky 인스턴스 (apiClient) 를 호출해 access token 주입과
+// 401 → refresh → retry 자동 처리. 다른 후보 (axios, ofetch) 대비 ky 가 가장 가볍고
+// hook API 가 명확함.
 import ky, { HTTPError } from 'ky'
 
 const getBaseUrl = () => {
@@ -16,11 +21,15 @@ export const setAccessToken = (token: string | null) => {
 
 export const getAccessToken = () => accessToken
 
-// API 응답 envelope. orval 이 생성하는 endpoint 응답 타입은
-// `Envelope = ApiSuccessResponseBase & { data: T }` 형태 — `T['data']` 로 inner 추출.
-type ApiSuccessResponse = {
+// API 응답 envelope. spec 의 ApiSuccessResponseBase + paths 의 allOf 패턴과 정렬됨.
+// orval 이 생성하는 endpoint 응답 타입은 `ApiSuccessResponseBase & { data: T }` 형태 —
+// 여기 generic 의 T 가 그 inner data 를 채움.
+//
+// Generic 으로 두는 이유: 사용처에서 `ApiSuccessResponse<{ accessToken: string }>` 처럼
+// 호출 별 data 타입을 inline 지정 가능. default 가 never 라 의도치 않은 unknown 노출 방지.
+type ApiSuccessResponse<T = never> = {
   success: true
-  data: unknown
+  data: T
 }
 
 type ApiErrorResponse = {
@@ -52,7 +61,7 @@ export async function refreshAccessToken(): Promise<boolean> {
       credentials: 'include',
     })
     const json = (await response.json()) as
-      | (ApiSuccessResponse & { data: { accessToken: string } })
+      | ApiSuccessResponse<{ accessToken: string }>
       | ApiErrorResponse
 
     if (json.success) {
@@ -124,9 +133,7 @@ export async function customFetch<T>(
       signal: config.signal,
     })
 
-    const json = (await response.json()) as
-      | (ApiSuccessResponse & { data: ExtractData<T> })
-      | ApiErrorResponse
+    const json = (await response.json()) as ApiSuccessResponse<ExtractData<T>> | ApiErrorResponse
 
     if (!json.success) {
       throw new ApiError(json.error.code, json.error.message)
