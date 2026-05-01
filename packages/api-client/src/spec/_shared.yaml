@@ -70,17 +70,68 @@ components:
           type: boolean
           example: true
           const: true
-  # 사용처에서는 `bearerAuth: []` / `cookieAuth: []` 의 빈 배열로 호출.
-  # 빈 배열은 OAuth2 scope 자리 — JWT/cookie 는 scope 개념이 없어 OpenAPI 표준상 빈 배열.
+
+    # JWT Access Token 의 payload 구조 — bearerAuth scheme 의 token 디코딩 결과.
+    # OpenAPI 표준은 bearerFormat: JWT 만 hint, payload schema 표현 메커니즘 없음 →
+    # 별도 schema 로 정의해 BE/FE contract 동기화. 사용처: bearerAuth.description 의 markdown link.
+    JwtPayload:
+      type: object
+      required:
+        - sub
+        - role
+        - exp
+        - iat
+      properties:
+        # RFC 7519 표준 Registered Claims
+        sub: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2
+          type: string
+          description: Subject — Member ID
+          example: '12345'
+        exp: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4
+          type: integer
+          format: int64
+          description: Expiration Time — 만료 unix timestamp (15분 후)
+          example: 1709251200
+        iat: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6
+          type: integer
+          format: int64
+          description: Issued At — 발급 unix timestamp
+          example: 1709250300
+        iss: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1
+          type: string
+          description: Issuer
+          example: bconnect.to
+
+        # Morton Private Claims (RFC 7519 §4.3)
+        # https://datatracker.ietf.org/doc/html/rfc7519#section-4.3
+        role:
+          $ref: v1/members.yaml#/components/schemas/Role
+
   securitySchemes:
+    # Access Token
+    # https://datatracker.ietf.org/doc/html/rfc7235 — HTTP Authentication framework
+    # https://datatracker.ietf.org/doc/html/rfc6750 — OAuth 2.0 Bearer Token Usage
     bearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT
+      bearerFormat: JWT # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
       description: |
-        인증이 필요한 엔드포인트에 공통으로 다음 에러를 반환할 수 있습니다.
+        JWT Access Token (15분 만료).
+
+        헤더 형식: `Authorization: Bearer <jwt>` (RFC 6750)
+
+        Payload 구조: [`JwtPayload`](#/components/schemas/JwtPayload) 참조 (RFC 7519 표준 claims + Morton custom claims).
+
+        Lifecycle:
+        - 발급: `POST /api/v1/auth/otp/verify` 응답의 `accessToken`
+        - 갱신: `POST /api/v1/auth/refresh` (cookieAuth 사용)
+
+        에러:
         - `A007` 유효하지 않은 액세스 토큰입니다 (401)
         - `A008` 세션이 만료되었습니다 (401)
+
+    # Refresh Token — opaque (RFC 6749 의 OAuth2 refresh_token 패턴)
+    # https://datatracker.ietf.org/doc/html/rfc6749#section-1.5
     cookieAuth:
       type: apiKey
       in: cookie
