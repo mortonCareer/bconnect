@@ -41,76 +41,31 @@ Morton의 기능 개발 프로세스를 설명합니다.
 
 ## API 스펙 관리
 
-### SSOT (Single Source of Truth)
+API 스펙은 **`packages/api-client/src/spec/`** 하위에 분리 관리되며, `@redocly/cli` 로 lint/bundle, `orval` 로 TypeScript hook + MSW mock 자동 생성합니다.
 
-모든 API 스펙은 **`packages/api-client/src/openapi.yaml`** 파일에서 관리됩니다.
+### 스펙 작성 워크플로
 
-### 스펙 작성 도구
+스펙 작성은 CTO 또는 CEO 누구나 시작 가능. 주체는 endpoint 의 도메인에 따라 결정 — FE-주도는 CTO, BE 내부 모델 노출은 CEO.
 
-**VSCode 42Crunch OpenAPI 익스텐션** 사용:
-
-- 실시간 스펙 검증
-- 자동 완성 지원
-- 시각적 API 문서 미리보기
-
-### 스펙 설계 프로세스
-
-```
-CTO: openapi.yaml 초안 작성
+```text
+작성자: spec/ 수정
+    ↓
+pnpm api:lint (로컬) 통과 확인 — pnpm api:generate 으로 codegen 출력도 검증
     ↓
 GitHub PR 생성
     ↓
-CEO: API 스펙 리뷰
+ci-api-spec (redocly lint) 자동 실행
+    ↓
+상대 (CEO 또는 CTO): API 스펙 리뷰
     ↓
 피드백 반영 및 논의
     ↓
-합의 후 main 브랜치 머지
+합의 후 dev → main 브랜치 머지
     ↓
-API 클라이언트 자동 생성
+API 클라이언트 자동 생성 (orval)
 ```
 
-### 스펙 작성 가이드
-
-**엔드포인트 정의:**
-
-```yaml
-paths:
-  /api/v1/users/{userId}:
-    get:
-      summary: 사용자 정보 조회
-      tags: [User]
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: 성공
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse_User'
-        '404':
-          description: 사용자 없음
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse_Error'
-```
-
-**공통 응답 포맷:**
-
-모든 API는 `ApiResponse<T>` 래퍼를 사용합니다:
-
-```typescript
-// 성공
-{ success: true, data: T, error: null }
-
-// 실패
-{ success: false, data: null, error: { code: string, status: number, message: string, logLevel: string } }
-```
+> **상세 작성 가이드 (디렉토리 구조, envelope 패턴, 새 endpoint 추가 절차, axis 결정 근거 등) 는 [`packages/api-client/CLAUDE.md`](../packages/api-client/CLAUDE.md) 참조**. 본 문서는 워크플로 관점만 다룸.
 
 ---
 
@@ -128,13 +83,13 @@ pnpm api:generate
 
 ### 생성되는 파일
 
-```
+```text
 packages/api-client/src/
-├── openapi.yaml          # API 스펙 (SSOT)
-├── generated/
-│   ├── api.ts            # API 클라이언트
-│   ├── models.ts         # TypeScript 타입
-│   └── hooks.ts          # React Query hooks
+├── spec/                       # 분리된 spec (SSOT, gitignored 아님)
+├── openapi.bundled.yaml        # redocly bundle 산출물 (gitignored)
+└── generated/                  # orval 산출물 (gitignored)
+    ├── api.ts                  # 모든 hook + handler aggregator
+    └── schemas/                # 도메인 타입 정의
 ```
 
 ### 사용 예시
@@ -142,10 +97,11 @@ packages/api-client/src/
 **데이터 조회:**
 
 ```typescript
-import { useGetUserQuery } from '@morton/api-client'
+import { useGetMyMember } from '@morton/api-client'
 
-function UserProfile({ userId }: { userId: string }) {
-  const { data, isLoading, error } = useGetUserQuery({ userId })
+function MyProfile() {
+  const { data, isLoading, error } = useGetMyMember()
+  // data 는 envelope 의 inner type (Member). customFetch 가 자동 unwrap.
 
   if (isLoading) return <Spinner />
   if (error) return <ErrorMessage error={error} />
@@ -157,14 +113,14 @@ function UserProfile({ userId }: { userId: string }) {
 **데이터 변경:**
 
 ```typescript
-import { useUpdateUserMutation } from '@morton/api-client'
+import { useUpdateMyMember } from '@morton/api-client'
 
 function EditProfile() {
-  const { mutate, isPending } = useUpdateUserMutation()
+  const { mutate, isPending } = useUpdateMyMember()
 
-  const handleSubmit = (formData: ProfileFormData) => {
+  const handleSubmit = (formData: UpdateMemberRequest) => {
     mutate(
-      { userId: '123', data: formData },
+      { data: formData },
       {
         onSuccess: () => toast.success('저장 완료'),
         onError: (error) => toast.error(error.message),
@@ -178,9 +134,10 @@ function EditProfile() {
 
 ### 주의사항
 
-- `openapi.yaml` 수정 후 반드시 `pnpm api:generate` 실행
-- 생성된 파일(`generated/` 폴더)은 직접 수정하지 않음
-- 타입 불일치 시 스펙 수정 후 재생성
+- `spec/` 수정 후 반드시 `pnpm api:generate` 실행 (bundle + orval 자동 chain)
+- 생성된 파일 (`generated/`, `openapi.bundled.yaml`) 은 모두 gitignored — 직접 수정하지 않음
+- 타입 불일치 시 spec 수정 후 재생성
+- `pnpm api:lint` 로 spec 품질 사전 검증 가능 (CI 에서 `ci-api-spec` 자동 실행)
 
 ---
 
