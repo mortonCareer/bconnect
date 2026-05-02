@@ -1,5 +1,6 @@
--- members: 인테리어 기술자 3명
+-- members: 시스템 멤버(id=0) + 인테리어 기술자 3명
 INSERT INTO members (id, username, name, phone, picture, role, created_at, modified_at, status) VALUES
+(0, 'system',   '시스템', '00000000000', '',                                                                                            'ADMIN',      TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00', 'ACTIVE'),
 (1, 'chulsoo',  '김철수', '01012345678', 'https://bconnect.to/_assets/v11/ad13bf96beebe659cc0b7ec32f83f99f6b71c6ec.png?w=2048',  'SKILLED',    TIMESTAMP '2026-02-20 09:00:00', TIMESTAMP '2026-02-20 09:00:00', 'ACTIVE'),
 (2, 'younghee', '박영희', '01023456789', 'https://bconnect.to/_assets/v11/ad13bf96beebe659cc0b7ec32f83f99f6b71c6ec.png?w=2048', 'FOREMAN',    TIMESTAMP '2026-02-20 10:00:00', TIMESTAMP '2026-02-20 10:00:00', 'ACTIVE'),
 (3, 'junho',    '이준호', '01034567890', 'https://bconnect.to/_assets/v11/ad13bf96beebe659cc0b7ec32f83f99f6b71c6ec.png?w=2048',    'CONTRACTOR', TIMESTAMP '2026-02-21 08:00:00', TIMESTAMP '2026-02-21 08:00:00', 'ACTIVE');
