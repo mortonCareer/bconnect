@@ -32,6 +32,14 @@ public class ProfileFinder {
     }
 
     @Transactional(readOnly = true)
+    public List<Profile> findByIds(List<Long> ids) {
+        return profileRepository.findByIdIn(ids)
+                .stream()
+                .map(Profile::of)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public Profile findByMemberId(Long memberId) {
         return profileRepository.findByMemberId(memberId)
                 .map(Profile::of)
