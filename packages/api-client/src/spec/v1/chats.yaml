@@ -149,9 +149,10 @@ components:
           format: int64
           example: 1
         title:
-          type: string
-          # TODO: BE 의 ChatEntity.title 의도 확인 후 정리 예정 (#246 fine-pine 협의 중)
-          # — 1:1 DM 의 경우 participants 에서 derive 가능하므로 제거 후보.
+          type:
+            - string
+            - 'null'
+          description: 채팅방 이름
         participants:
           type: array
           description: |
