@@ -99,7 +99,16 @@ export default function SignupProfilePage() {
             trades: data.fields as Trade[],
             experience: EXPERIENCE_TO_YEARS[data.experience],
             headline: data.headline || undefined,
-            address: data.address ? { street: data.address } : undefined,
+            // TODO #280 — 카카오 우편번호 도입 전 임시 mock 값. zipcode/state/lat/lng 0 으로
+            // address 는 BE-required 라 undefined 불가 — 비어있으면 empty city 로 (BE validation 위임)
+            address: {
+              zipcode: '',
+              city: data.address || '',
+              state: '',
+              street: data.address || '',
+              latitude: 0,
+              longitude: 0,
+            },
           },
         })
       } catch (profileErr) {

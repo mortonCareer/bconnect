@@ -124,7 +124,15 @@ export default function ProfileEditPage() {
             trades: data.trades as Trade[],
             experience: data.experience,
             headline: data.headline || undefined,
-            address: { city: data.city || undefined },
+            // TODO #280 — 카카오 우편번호 도입 전 임시 mock 값. zipcode/state/lat/lng 0 으로
+            address: {
+              zipcode: '',
+              city: data.city || '',
+              state: '',
+              street: data.city || '',
+              latitude: 0,
+              longitude: 0,
+            },
           },
         })
       )
