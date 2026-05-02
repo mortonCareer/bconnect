@@ -54,7 +54,7 @@ paths:
         - Chats
       summary: 채팅방 단건 조회
       description: |
-        본인이 참가자인 채팅방 단건 조회. participants 의 풍부한 Profile 정보 (`address`, `experience`, `primaryTrade`, `headline`)
+        본인이 참가자인 채팅방 단건 조회. participants 의 나머지 Profile 정보 (`address`, `experience`, `primaryTrade`, `headline`)
         는 별도 [`getProfile`](#/Profiles/getProfile) 호출로 lazy load — 응답 폭증 방지 + cache 친화.
 
         본인이 참가자가 아니면 정보 누설 방지로 404 (403 X).
@@ -151,13 +151,14 @@ components:
         title:
           type:
             - string
-            - 'null'
+            - 'null' # TODO: 추후 nullable 처리 대신 개인/단체 채팅에 따라 별도의 Entity로 분리
           description: 채팅방 이름
         participants:
           type: array
           description: |
-            채팅방 참가자의 Member 정보 (BE 의 `MaskedMemberResponse` 와 정렬).
-            풍부한 Profile 정보는 [`getProfile`](#/Profiles/getProfile) 로 lazy load.
+            채팅방 참가자의 Member 정보.
+            나머지 Profile 정보는 [`getProfile`](#/Profiles/getProfile) 로 lazy load.
+            TODO: 가능하면 Member에 필요한 나머지 Profile 정보만 담게 최적화
           items:
             $ref: ../v1/members.yaml#/components/schemas/MaskedMember
         lastMessage:

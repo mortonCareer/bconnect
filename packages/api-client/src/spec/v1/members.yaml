@@ -27,9 +27,7 @@ paths:
         - Members
       security: []
       summary: 회원가입
-      description: |
-        회원가입 + 자동 로그인. signupToken 은 OTP 검증된 phone 의 proof 라 추가 인증 없이 token 발급.
-        응답 형태는 [`verifyOtp` 기존 회원 응답](../auth.yaml#/paths/~1api~1v1~1auth~1otp~1verify) 과 동일 — verify ↔ register 양쪽 다 token 발급 흐름의 끝맺음.
+      description: 회원가입 + 자동 로그인
       requestBody:
         required: true
         content:
