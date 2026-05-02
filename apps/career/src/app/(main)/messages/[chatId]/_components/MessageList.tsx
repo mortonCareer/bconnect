@@ -8,7 +8,7 @@ import {
   useGetMyMember,
   useGetMembers,
 } from '@morton/api-client'
-import type { Message, MessagePage } from '@morton/api-client'
+import type { Message, MessageCursorPage } from '@morton/api-client'
 import { ChatMessage } from '@morton/ui'
 import { formatChatTime } from '@/lib/format-time'
 
@@ -40,9 +40,9 @@ function SenderMessage({
   message: Message
   currentUserId: number | undefined
 }) {
-  const isMine = message.senderId === currentUserId
-  const { data: members } = useGetMembers({ query: { enabled: !isMine && !!message.senderId } })
-  const sender = members?.find((m) => m.id === message.senderId)
+  const isMine = message.memberId === currentUserId
+  const { data: members } = useGetMembers({ query: { enabled: !isMine && !!message.memberId } })
+  const sender = members?.find((m) => m.id === message.memberId)
 
   if (isMine) {
     return (
@@ -74,13 +74,12 @@ export default function MessageList({ chatId, localMessages }: MessageListProps)
   const isInitialLoadRef = useRef(true)
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
-    useInfiniteQuery<MessagePage>({
+    useInfiniteQuery<MessageCursorPage>({
       queryKey: getGetChatMessagesQueryKey(chatId),
       queryFn: ({ pageParam }) =>
-        getChatMessages(chatId, pageParam ? { before: pageParam as string } : undefined),
+        getChatMessages(chatId, pageParam ? { cursor: pageParam as string } : undefined),
       initialPageParam: undefined as string | undefined,
-      getNextPageParam: (lastPage) =>
-        lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
+      getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.nextCursor : undefined),
       refetchInterval: 5000,
     })
 
@@ -89,7 +88,7 @@ export default function MessageList({ chatId, localMessages }: MessageListProps)
     data?.pages
       .slice()
       .reverse()
-      .flatMap((page) => page.items.slice().reverse()) ?? []
+      .flatMap((page) => page.content.slice().reverse()) ?? []
 
   const allMessages = [...serverMessages, ...localMessages]
 

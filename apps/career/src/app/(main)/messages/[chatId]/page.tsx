@@ -5,7 +5,7 @@
 
 import { useCallback, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useGetChat, useGetMyMember } from '@morton/api-client'
+import { useGetChat, useGetMyMember, MessageType } from '@morton/api-client'
 import type { Message } from '@morton/api-client'
 import { TopBar } from '@morton/ui'
 import MessageList from './_components/MessageList'
@@ -25,10 +25,12 @@ export default function ChatRoomPage() {
 
   const handleSend = useCallback(
     (content: string) => {
+      if (currentUserId == null) return // 인증 없이 전송 불가
       const newMessage: Message = {
         id: Date.now(),
         chatId,
-        senderId: currentUserId,
+        memberId: currentUserId,
+        type: MessageType.TEXT,
         content,
         createdAt: new Date().toISOString(),
         modifiedAt: new Date().toISOString(),
