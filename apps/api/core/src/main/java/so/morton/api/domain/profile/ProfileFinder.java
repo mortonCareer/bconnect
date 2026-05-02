@@ -7,6 +7,7 @@ import so.morton.api.storage.domain.profile.ProfileRepository;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 
+import java.util.Collection;
 import java.util.List;
 
 @Component
@@ -36,6 +37,14 @@ public class ProfileFinder {
         return profileRepository.findByMemberId(memberId)
                 .map(Profile::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Profile> findAllByIds(Collection<Long> profileIds) {
+        return profileRepository.findByIdIn(profileIds)
+                .stream()
+                .map(Profile::of)
+                .toList();
     }
 
     @Transactional(readOnly = true)

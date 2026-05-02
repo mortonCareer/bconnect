@@ -7,6 +7,7 @@ import so.morton.api.storage.domain.member.MemberRepository;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 
+import java.util.Collection;
 import java.util.List;
 
 @Component
@@ -29,6 +30,13 @@ public class MemberFinder {
 
     public List<Member> findAll() {
         return memberRepository.findAll()
+                .stream()
+                .map(Member::of)
+                .toList();
+    }
+
+    public List<Member> findAllByIds(Collection<Long> memberIds) {
+        return memberRepository.findByIdIn(memberIds)
                 .stream()
                 .map(Member::of)
                 .toList();
