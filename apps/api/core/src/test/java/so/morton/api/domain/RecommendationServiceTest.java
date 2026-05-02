@@ -53,9 +53,12 @@ class RecommendationServiceTest {
     private static final Long USER_B_ID = 2L;
     private static final Long PROFILE_A_ID = 1L;
     private static final Long PROFILE_B_ID = 2L;
+    private static final Long PROFILE_C_ID = 3L;
     private static final Long MEMBER_A_ID = 1L;
     private static final Long MEMBER_B_ID = 2L;
+    private static final Long MEMBER_C_ID = 3L;
     private static final Long RECOMMENDATION_ID = 1L;
+    private static final Long RECOMMENDATION_ID_2 = 2L;
     private static final User USER_A = UserFactory.create(USER_A_ID, Role.FOREMAN);
     private static final User USER_B = UserFactory.create(USER_B_ID, Role.FOREMAN);
 
@@ -407,6 +410,34 @@ class RecommendationServiceTest {
         }
 
         @Test
+        @DisplayName("다수 건 조회 성공 -- bulk 조립")
+        void getReceived_multiple() {
+            // given -- B가 A, C 두 명에게서 추천서를 받음
+            Recommendation rec1 = RecommendationFactory.create(RECOMMENDATION_ID, PROFILE_A_ID, PROFILE_B_ID);
+            Recommendation rec2 = RecommendationFactory.create(RECOMMENDATION_ID_2, PROFILE_C_ID, PROFILE_B_ID);
+            Profile profileA = ProfileFactory.create(PROFILE_A_ID, MEMBER_A_ID);
+            Profile profileC = ProfileFactory.create(PROFILE_C_ID, MEMBER_C_ID);
+            Member memberA = MemberFactory.create(MEMBER_A_ID);
+            Member memberC = MemberFactory.create(MEMBER_C_ID);
+
+            when(recommendationFinder.findReceived(PROFILE_B_ID)).thenReturn(List.of(rec1, rec2));
+            when(profileFinder.findByIds(List.of(PROFILE_A_ID, PROFILE_C_ID))).thenReturn(List.of(profileA, profileC));
+            when(memberFinder.findByIds(any())).thenReturn(List.of(memberA, memberC));
+
+            // when
+            List<RecommendationDetail> result = recommendationService.getReceived(PROFILE_B_ID);
+
+            // then
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).id()).isEqualTo(RECOMMENDATION_ID);
+            assertThat(result.get(0).member()).isEqualTo(memberA);
+            assertThat(result.get(0).profile()).isEqualTo(profileA);
+            assertThat(result.get(1).id()).isEqualTo(RECOMMENDATION_ID_2);
+            assertThat(result.get(1).member()).isEqualTo(memberC);
+            assertThat(result.get(1).profile()).isEqualTo(profileC);
+        }
+
+        @Test
         @DisplayName("빈 리스트 반환")
         void getReceived_empty() {
             // given
@@ -448,6 +479,34 @@ class RecommendationServiceTest {
             assertThat(result.get(0).member()).isEqualTo(memberB);
             assertThat(result.get(0).profile()).isEqualTo(profileB);
             verify(recommendationFinder).findSent(PROFILE_A_ID);
+        }
+
+        @Test
+        @DisplayName("다수 건 조회 성공 -- bulk 조립")
+        void getSent_multiple() {
+            // given -- A가 B, C 두 명에게 추천서를 발송
+            Recommendation rec1 = RecommendationFactory.create(RECOMMENDATION_ID, PROFILE_A_ID, PROFILE_B_ID);
+            Recommendation rec2 = RecommendationFactory.create(RECOMMENDATION_ID_2, PROFILE_A_ID, PROFILE_C_ID);
+            Profile profileB = ProfileFactory.create(PROFILE_B_ID, MEMBER_B_ID);
+            Profile profileC = ProfileFactory.create(PROFILE_C_ID, MEMBER_C_ID);
+            Member memberB = MemberFactory.create(MEMBER_B_ID);
+            Member memberC = MemberFactory.create(MEMBER_C_ID);
+
+            when(recommendationFinder.findSent(PROFILE_A_ID)).thenReturn(List.of(rec1, rec2));
+            when(profileFinder.findByIds(List.of(PROFILE_B_ID, PROFILE_C_ID))).thenReturn(List.of(profileB, profileC));
+            when(memberFinder.findByIds(any())).thenReturn(List.of(memberB, memberC));
+
+            // when
+            List<RecommendationDetail> result = recommendationService.getSent(PROFILE_A_ID);
+
+            // then
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).id()).isEqualTo(RECOMMENDATION_ID);
+            assertThat(result.get(0).member()).isEqualTo(memberB);
+            assertThat(result.get(0).profile()).isEqualTo(profileB);
+            assertThat(result.get(1).id()).isEqualTo(RECOMMENDATION_ID_2);
+            assertThat(result.get(1).member()).isEqualTo(memberC);
+            assertThat(result.get(1).profile()).isEqualTo(profileC);
         }
 
         @Test
@@ -498,6 +557,36 @@ class RecommendationServiceTest {
         }
 
         @Test
+        @DisplayName("다수 건 조회 성공 -- bulk 조립")
+        void getMyReceived_multiple() {
+            // given -- B가 본인이 받은 추천서 2건 조회 (A->B, C->B)
+            Profile profileB = ProfileFactory.create(PROFILE_B_ID, USER_B_ID);
+            Recommendation rec1 = RecommendationFactory.create(RECOMMENDATION_ID, PROFILE_A_ID, PROFILE_B_ID);
+            Recommendation rec2 = RecommendationFactory.create(RECOMMENDATION_ID_2, PROFILE_C_ID, PROFILE_B_ID);
+            Profile profileA = ProfileFactory.create(PROFILE_A_ID, MEMBER_A_ID);
+            Profile profileC = ProfileFactory.create(PROFILE_C_ID, MEMBER_C_ID);
+            Member memberA = MemberFactory.create(MEMBER_A_ID);
+            Member memberC = MemberFactory.create(MEMBER_C_ID);
+
+            when(profileFinder.findByMemberId(USER_B_ID)).thenReturn(profileB);
+            when(recommendationFinder.findMyReceived(PROFILE_B_ID)).thenReturn(List.of(rec1, rec2));
+            when(profileFinder.findByIds(List.of(PROFILE_A_ID, PROFILE_C_ID))).thenReturn(List.of(profileA, profileC));
+            when(memberFinder.findByIds(any())).thenReturn(List.of(memberA, memberC));
+
+            // when
+            List<RecommendationDetail> result = recommendationService.getMyReceived(USER_B);
+
+            // then
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).id()).isEqualTo(RECOMMENDATION_ID);
+            assertThat(result.get(0).member()).isEqualTo(memberA);
+            assertThat(result.get(0).profile()).isEqualTo(profileA);
+            assertThat(result.get(1).id()).isEqualTo(RECOMMENDATION_ID_2);
+            assertThat(result.get(1).member()).isEqualTo(memberC);
+            assertThat(result.get(1).profile()).isEqualTo(profileC);
+        }
+
+        @Test
         @DisplayName("빈 리스트 반환")
         void getMyReceived_empty() {
             // given
@@ -512,6 +601,19 @@ class RecommendationServiceTest {
             // then
             assertThat(result).isEmpty();
             verify(recommendationFinder).findMyReceived(PROFILE_B_ID);
+        }
+
+        @Test
+        @DisplayName("프로필 미존재 시 NOT_FOUND")
+        void getMyReceived_profileNotFound() {
+            // given
+            when(profileFinder.findByMemberId(USER_B_ID))
+                    .thenThrow(new CodeException(CommonExceptionCode.NOT_FOUND));
+
+            // when & then
+            assertCodeException(() -> recommendationService.getMyReceived(USER_B))
+                    .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+            verify(recommendationFinder, never()).findMyReceived(any());
         }
     }
 
@@ -546,6 +648,36 @@ class RecommendationServiceTest {
         }
 
         @Test
+        @DisplayName("다수 건 조회 성공 -- bulk 조립")
+        void getMySent_multiple() {
+            // given -- A가 본인이 보낸 추천서 2건 조회 (A->B, A->C)
+            Profile profileA = ProfileFactory.create(PROFILE_A_ID, USER_A_ID);
+            Recommendation rec1 = RecommendationFactory.create(RECOMMENDATION_ID, PROFILE_A_ID, PROFILE_B_ID);
+            Recommendation rec2 = RecommendationFactory.create(RECOMMENDATION_ID_2, PROFILE_A_ID, PROFILE_C_ID);
+            Profile profileB = ProfileFactory.create(PROFILE_B_ID, MEMBER_B_ID);
+            Profile profileC = ProfileFactory.create(PROFILE_C_ID, MEMBER_C_ID);
+            Member memberB = MemberFactory.create(MEMBER_B_ID);
+            Member memberC = MemberFactory.create(MEMBER_C_ID);
+
+            when(profileFinder.findByMemberId(USER_A_ID)).thenReturn(profileA);
+            when(recommendationFinder.findMySent(PROFILE_A_ID)).thenReturn(List.of(rec1, rec2));
+            when(profileFinder.findByIds(List.of(PROFILE_B_ID, PROFILE_C_ID))).thenReturn(List.of(profileB, profileC));
+            when(memberFinder.findByIds(any())).thenReturn(List.of(memberB, memberC));
+
+            // when
+            List<RecommendationDetail> result = recommendationService.getMySent(USER_A);
+
+            // then
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).id()).isEqualTo(RECOMMENDATION_ID);
+            assertThat(result.get(0).member()).isEqualTo(memberB);
+            assertThat(result.get(0).profile()).isEqualTo(profileB);
+            assertThat(result.get(1).id()).isEqualTo(RECOMMENDATION_ID_2);
+            assertThat(result.get(1).member()).isEqualTo(memberC);
+            assertThat(result.get(1).profile()).isEqualTo(profileC);
+        }
+
+        @Test
         @DisplayName("빈 리스트 반환")
         void getMySent_empty() {
             // given
@@ -560,6 +692,19 @@ class RecommendationServiceTest {
             // then
             assertThat(result).isEmpty();
             verify(recommendationFinder).findMySent(PROFILE_A_ID);
+        }
+
+        @Test
+        @DisplayName("프로필 미존재 시 NOT_FOUND")
+        void getMySent_profileNotFound() {
+            // given
+            when(profileFinder.findByMemberId(USER_A_ID))
+                    .thenThrow(new CodeException(CommonExceptionCode.NOT_FOUND));
+
+            // when & then
+            assertCodeException(() -> recommendationService.getMySent(USER_A))
+                    .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+            verify(recommendationFinder, never()).findMySent(any());
         }
     }
 }
