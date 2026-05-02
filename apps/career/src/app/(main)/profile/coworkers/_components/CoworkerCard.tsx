@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useGetProfile, useGetMembers } from '@morton/api-client'
+import { useGetProfile } from '@morton/api-client'
 import { TRADE_LABELS } from '@/lib/trade-labels'
 import { getAvatarUrl } from '@/lib/avatar'
 import { getRoleLabel } from '@/hooks/useFeedItems'
@@ -12,11 +12,10 @@ interface CoworkerCardProps {
 
 export function CoworkerCard({ profileId }: CoworkerCardProps) {
   const router = useRouter()
-  const { data: profile, isLoading: isProfileLoading } = useGetProfile(profileId)
-  const { data: members, isLoading: isMemberLoading } = useGetMembers()
-
-  const member = members?.find((m) => m.id === profile?.memberId)
-  const isLoading = isProfileLoading || isMemberLoading
+  // useGetProfile 응답 = ProfileAndMember = { member, profile } (member 도 함께 옴)
+  const { data: profileAndMember, isLoading } = useGetProfile(profileId)
+  const member = profileAndMember?.member
+  const profile = profileAndMember?.profile
 
   if (isLoading) {
     return (
@@ -34,10 +33,10 @@ export function CoworkerCard({ profileId }: CoworkerCardProps) {
 
   const name = member?.name ?? '이름 없음'
   const picture = member?.picture
-  const trade = profile.primaryTrade ? TRADE_LABELS[profile.primaryTrade] : null
+  const trade = profile?.primaryTrade ? TRADE_LABELS[profile.primaryTrade] : null
   const role = member?.role ? getRoleLabel(member.role) : null
   const subtitle = [trade, role].filter(Boolean).join(' · ')
-  const intro = profile.headline
+  const intro = profile?.headline
 
   return (
     <button

@@ -9,14 +9,12 @@ import {
   useQueries,
   useGetMyChats,
   useGetMyMember,
-  useGetMembers,
   getGetProfileQueryOptions,
 } from '@morton/api-client'
-import type { Member, Profile } from '@morton/api-client'
+import type { Profile } from '@morton/api-client'
 import { ChatListItem, TopBar } from '@morton/ui'
 import { formatRelativeTime } from '@/lib/format-time'
 import { TRADE_LABELS } from '@/lib/trade-labels'
-import { ROLE_LABELS } from '@/lib/role-labels'
 
 export default function MessagesPage() {
   const currentUserId = useGetMyMember().data?.id
@@ -25,28 +23,17 @@ export default function MessagesPage() {
 
   const allChats = useMemo(() => chats ?? [], [chats])
 
-  // 각 채팅의 상대방 멤버 ID 추출
+  // Chat.participants 가 이미 MaskedMember[] — 상대방 member 정보 그대로 추출
   const otherMemberIds = useMemo(() => {
     const ids = new Set<number>()
     for (const chat of allChats) {
-      const otherId = chat.participantIds?.find((id: number) => id !== currentUserId)
-      if (otherId != null) ids.add(otherId)
+      const other = chat.participants?.find((p) => p.id !== currentUserId)
+      if (other?.id != null) ids.add(other.id)
     }
     return [...ids]
   }, [allChats, currentUserId])
 
-  // 전체 Member 조회 후 매핑
-  const { data: allMembers } = useGetMembers()
-
-  const memberMap = useMemo(() => {
-    const map = new Map<number, Member>()
-    allMembers?.forEach((m: Member) => {
-      if (m.id) map.set(m.id, m)
-    })
-    return map
-  }, [allMembers])
-
-  // 병렬 Profile 조회 (memberId를 profileId로 사용)
+  // 병렬 Profile 조회 — chat 응답에 없는 풍부 정보(address, headline, primaryTrade 등) 보강
   const profileQueries = useQueries({
     queries: otherMemberIds.map((id) => ({
       ...getGetProfileQueryOptions(id),
@@ -54,10 +41,11 @@ export default function MessagesPage() {
     })),
   })
 
+  // useGetProfile 응답 = ProfileAndMember — 본 페이지는 profile 부분만 필요
   const profileMap = useMemo(() => {
     const map = new Map<number, Profile>()
     profileQueries.forEach((q, i) => {
-      if (q.data) map.set(otherMemberIds[i], q.data)
+      if (q.data) map.set(otherMemberIds[i], q.data.profile)
     })
     return map
   }, [profileQueries, otherMemberIds])
@@ -77,18 +65,19 @@ export default function MessagesPage() {
       ) : (
         <div className="flex flex-col">
           {allChats.map((chat) => {
-            const otherId = chat.participantIds?.find((id: number) => id !== currentUserId)
-            const otherMember = otherId != null ? memberMap.get(otherId) : undefined
+            const otherMember = chat.participants?.find((p) => p.id !== currentUserId)
+            const otherId = otherMember?.id
             const otherProfile = otherId != null ? profileMap.get(otherId) : undefined
 
             return (
               <Link key={chat.id} href={`/messages/${chat.id}`} className="block px-4">
                 <ChatListItem
                   variant="badge"
-                  profileImage={otherMember?.picture}
+                  profileImage={otherMember?.picture ?? undefined}
                   name={otherMember?.name ?? chat.title ?? '채팅'}
                   location={otherProfile?.address?.city}
-                  jobType={otherMember?.role ? ROLE_LABELS[otherMember.role] : undefined}
+                  // TODO: role 은 MaskedMember 에 없음 (BE public masking) — 필요시 BE 협의
+                  jobType={undefined}
                   specialty={
                     otherProfile?.primaryTrade ? TRADE_LABELS[otherProfile.primaryTrade] : undefined
                   }
