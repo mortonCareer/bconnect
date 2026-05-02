@@ -2,6 +2,7 @@ package so.morton.api.storage.domain.recommendation;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -9,7 +10,14 @@ import lombok.NoArgsConstructor;
 import so.morton.api.storage.support.BaseEntity;
 
 @Entity
-@Table(name = "recommendations")
+@Table(
+        name = "recommendations",
+        indexes = @Index(
+                name = "udx_recommendation_from_to",
+                columnList = "fromId, toId",
+                unique = true
+        )
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RecommendationEntity extends BaseEntity {
@@ -24,7 +32,7 @@ public class RecommendationEntity extends BaseEntity {
     private String content;
 
     @Column(nullable = false)
-    private boolean visible = true;
+    private boolean visible = false;
 
     public RecommendationEntity(Long fromId, Long toId, String content) {
         this.fromId = fromId;

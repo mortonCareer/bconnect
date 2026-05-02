@@ -1,0 +1,72 @@
+components:
+  schemas:
+    Address:
+      type: object
+      required:
+        - zipcode
+        - city
+        - state
+        - street
+        - latitude
+        - longitude
+      properties:
+        zipcode:
+          type: string
+          pattern: \d{5}
+          example: '04524'
+        city:
+          type: string
+        state:
+          type: string
+        street:
+          type: string
+        detail:
+          type:
+            - string
+            - 'null'
+        latitude:
+          type: number
+          format: double
+          example: 37.5666805
+        longitude:
+          type: number
+          format: double
+          example: 126.9784147
+    ApiError:
+      type: object
+      required:
+        - code
+        - status
+      properties:
+        code:
+          type: string
+          example: C001
+        status:
+          type: string
+          example: BAD_REQUEST
+    ApiErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+        - data
+      properties:
+        success:
+          type: boolean
+          const: false
+        error:
+          $ref: '#/components/schemas/ApiError'
+        data:
+          type:
+            - object
+            - 'null'
+          example:
+    ApiSuccessResponseBase:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          example: true
+          const: true

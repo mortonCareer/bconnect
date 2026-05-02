@@ -8,16 +8,22 @@ status: todo
 
 # Task Discovery Agent
 
-> **TODO**: 이 에이전트는 아직 구현되지 않았습니다. [Issue #50](https://github.com/mortonCareer/morton/issues/50)에서 작업 예정입니다.
+> **TODO**: 이 에이전트는 아직 구현되지 않았습니다. [Issue #50](https://github.com/mortonCareer/morton/issues/50)에서 작업 예정.
+>
+> **재설계 필요 (#256 이후)**: 본 에이전트는 `packages/ui/figma-mapping.json` 기반으로 설계되었으나, [#256](https://github.com/mortonCareer/bconnect/issues/256)에서 매니페스트가 폐기되고 인라인 `@figma` JSDoc 주석으로 전환됨. 구현 시 다음 방식으로 재설계 필요:
+>
+> 1. `rg "@figma" -n` 으로 모든 매핑된 파일과 frame URL 추출
+> 2. Figma MCP로 sprint section의 frame 목록 조회
+> 3. Figma frame 중 `@figma` 주석에 매칭되지 않는 것 = 미구현
+> 4. `@figma-pending`/`@figma-scaffold` 마킹은 진행 중/디자인 미정으로 분류
 
 Figma 디자인 현황을 분석하여 개발자에게 다음 작업을 추천하는 에이전트입니다.
 
 ## 역할
 
 1. Figma 페이지에서 "Ready for dev" 상태 컴포넌트/페이지 탐색
-2. `figma-mapping.json`과 비교하여 미구현 항목 필터링
-3. 동기화 시각 기반 변경사항 감지
-4. 우선순위/의존성 분석 후 다음 작업 추천
+2. 코드의 인라인 `@figma` 주석 목록(`rg "@figma" -n`)과 비교하여 미구현 항목 필터링
+3. 우선순위/의존성 분석 후 다음 작업 추천
 
 ---
 

@@ -1,3 +1,6 @@
+/**
+ * @figma-scaffold 원클릭 조회 PoC — 백엔드 검증용, 디자인 미정
+ */
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { getCompanyInfo } from './_clients/fetch-business'

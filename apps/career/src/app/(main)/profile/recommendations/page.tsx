@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1239-7873
+ */
 // TODO: 추천서 API 연동 — 현재 mock 데이터 사용
 'use client'
 

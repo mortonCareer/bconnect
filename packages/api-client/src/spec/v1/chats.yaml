@@ -1,0 +1,192 @@
+paths:
+  /api/v1/chats:
+    get:
+      operationId: getMyChats
+      tags:
+        - Chats
+      summary: 내 채팅방 목록 조회
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Chat'
+  /api/v1/chats/direct:
+    post:
+      operationId: createDirectChat
+      tags:
+        - Chats
+      summary: 일대일 채팅 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDirectChatRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Chat'
+  /api/v1/chats/{chatId}/messages:
+    get:
+      operationId: getChatMessages
+      tags:
+        - Chats
+      summary: 채팅방 메시지 목록 조회
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: cursor
+          in: query
+          required: false
+          description: 페이지네이션 커서 (null이면 최신 메시지부터)
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: reverse
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/MessageCursorPage'
+components:
+  schemas:
+    Chat:
+      type: object
+      required:
+        - id
+        - title
+        - participantIds
+        - lastMessage
+        - unreadCount
+        - createdAt
+        - modifiedAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        title:
+          type: string
+        participantIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+        lastMessage:
+          $ref: '#/components/schemas/Message'
+        unreadCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+    Message:
+      type: object
+      required:
+        - id
+        - chatId
+        - memberId
+        - type
+        - content
+        - createdAt
+        - modifiedAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        chatId:
+          type: integer
+          format: int64
+          example: 1
+        memberId:
+          type: integer
+          format: int64
+          example: 1
+        type:
+          $ref: '#/components/schemas/MessageType'
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+    MessageType:
+      type: string
+      enum:
+        - TEXT
+        - IMAGE
+        - FILE
+        - SYSTEM
+    MessageCursorPage:
+      type: object
+      required:
+        - content
+        - hasNext
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+        nextCursor:
+          type:
+            - string
+            - 'null'
+        hasNext:
+          type: boolean
+    CreateDirectChatRequest:
+      type: object
+      required:
+        - participantId
+      properties:
+        participantId:
+          type: integer
+          format: int64

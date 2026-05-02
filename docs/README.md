@@ -42,6 +42,9 @@ Morton은 업체-기술자 연결 구인구직 플랫폼입니다.
 - **[팀 구성](./TEAM.md)**  
   팀 역할, GitHub/Notion 매핑, 협업 프로세스
 
+- **[푸시 알림 딥링크 규격](./NOTIFICATION_DEEPLINKS.md)**  
+  FCM 페이로드 `data.url` 컨벤션, 카테고리별 경로, BE 발송 예시
+
 ### 기술 참조
 
 프로젝트 루트의 **[AGENTS.md](../AGENTS.md)**에서 다음 정보를 확인할 수 있습니다:
