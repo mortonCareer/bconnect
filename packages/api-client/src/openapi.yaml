@@ -1876,20 +1876,16 @@ components:
     # =====================
     Recommendation:
       type: object
-      required: [id, fromId, toId, content, visible, createdAt, modifiedAt]
+      required: [id, member, profile, content, visible, createdAt, modifiedAt]
       properties:
         id:
           type: integer
           format: int64
           example: 1
-        fromId:
-          type: integer
-          format: int64
-          example: 1
-        toId:
-          type: integer
-          format: int64
-          example: 2
+        member:
+          $ref: '#/components/schemas/MaskedMember'
+        profile:
+          $ref: '#/components/schemas/Profile'
         content:
           type: string
         visible:
