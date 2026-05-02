@@ -8,6 +8,7 @@ import Link from 'next/link'
 import {
   useQueries,
   useGetMyChats,
+  useGetMyMember,
   useGetMembers,
   getGetProfileQueryOptions,
 } from '@morton/api-client'
@@ -16,10 +17,9 @@ import { ChatListItem, TopBar } from '@morton/ui'
 import { formatRelativeTime } from '@/lib/format-time'
 import { TRADE_LABELS } from '@/lib/trade-labels'
 import { ROLE_LABELS } from '@/lib/role-labels'
-import { useAuthStore } from '@/stores/auth-store'
 
 export default function MessagesPage() {
-  const currentUserId = useAuthStore((s) => s.member?.id)
+  const currentUserId = useGetMyMember().data?.id
 
   const { data: chats, isLoading } = useGetMyChats()
 

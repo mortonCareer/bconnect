@@ -5,10 +5,9 @@
 
 import { useCallback, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useGetChat } from '@morton/api-client'
+import { useGetChat, useGetMyMember } from '@morton/api-client'
 import type { Message } from '@morton/api-client'
 import { TopBar } from '@morton/ui'
-import { useAuthStore } from '@/stores/auth-store'
 import MessageList from './_components/MessageList'
 import ChatInput from './_components/ChatInput'
 
@@ -16,7 +15,7 @@ export default function ChatRoomPage() {
   const params = useParams()
   const router = useRouter()
   const chatId = Number(params.chatId)
-  const currentUserId = useAuthStore((s) => s.member?.id)
+  const currentUserId = useGetMyMember().data?.id
 
   const { data: chat } = useGetChat(chatId, {
     query: { enabled: !!chatId },

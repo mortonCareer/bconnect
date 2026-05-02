@@ -5,11 +5,11 @@ import {
   useInfiniteQuery,
   getChatMessages,
   getGetChatMessagesQueryKey,
+  useGetMyMember,
   useGetMembers,
 } from '@morton/api-client'
 import type { Message, MessagePage } from '@morton/api-client'
 import { ChatMessage } from '@morton/ui'
-import { useAuthStore } from '@/stores/auth-store'
 import { formatChatTime } from '@/lib/format-time'
 
 interface MessageListProps {
@@ -66,7 +66,7 @@ function SenderMessage({
 }
 
 export default function MessageList({ chatId, localMessages }: MessageListProps) {
-  const currentUserId = useAuthStore((s) => s.member?.id)
+  const currentUserId = useGetMyMember().data?.id
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const topObserverRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)

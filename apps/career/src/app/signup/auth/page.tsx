@@ -76,8 +76,8 @@ export default function SignupAuthPage() {
         data: { phone: toNationalNumber(phone), code },
       })
       if ('accessToken' in result) {
-        // 이미 가입된 회원 — 로그인 처리 후 홈으로
-        login({ phone: e164Phone }, result.accessToken)
+        // 이미 가입된 회원 — 로그인 처리 후 홈으로 (member 정보는 useGetMyMember 로 별도 조회)
+        login(result.accessToken)
         router.push('/')
       } else {
         // 신규 유저 — signupToken 저장 후 회원가입 진행
