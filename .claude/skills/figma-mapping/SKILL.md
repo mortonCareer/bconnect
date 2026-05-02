@@ -134,7 +134,7 @@ mcp__figma__get_metadata(fileKey="EFXofON7gTFbmbE2kB31SS", nodeId="<section-id>"
 누락된 `@figma-state` 발견 시 단일 누적 issue (`🤖 figma-drift` 라벨)에 자동 갱신.
 
 수동 실행: `pnpm figma:check:dry` (로컬 stdout) 또는 GHA workflow_dispatch.
-자세한 내용: [scripts/figma-checks/README.md](../../../scripts/figma-checks/README.md)
+자세한 내용: [scripts/figma-checks/CLAUDE.md](../../../scripts/figma-checks/CLAUDE.md)
 
 ## 후속 자동화 (별도 이슈)
 
