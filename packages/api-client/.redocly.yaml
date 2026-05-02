@@ -26,6 +26,7 @@ rules:
   operation-operationId: error
   no-unused-components: off # 의도적으로 root inline ref 유지하는 schema 가 있을 수 있음
 
+
   # === TODO: enable when ready ===
   # ▼ Operation 품질
   # operation-2xx-response: error              # 모든 op 에 2xx 응답 정의 (이미 충족 가능성 높음)
