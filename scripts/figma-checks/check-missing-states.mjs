@@ -14,26 +14,21 @@ const FIGMA_URL_BASE = 'https://www.figma.com/design'
 /**
  * Frame 이름에서 base prefix 추출 (variant suffix 제거)
  * - "프로필 - 인증 신청 (원클릭 조회)" → "프로필 - 인증 신청"
- * - "회원가입/auth - OTP 입력" → "회원가입/auth"
- * - "프로필 - 동료" → "프로필 - 동료" (delimiter 없음 = standalone)
+ * - "프로필 - 소개 (본인 View)"        → "프로필 - 소개"
+ * - "프로필 - 동료"                     → "프로필 - 동료" (괄호 없음 = standalone)
+ * - "프로필 - 인증"                     → "프로필 - 인증" (standalone)
  *
- * 휴리스틱: 마지막 " (" 또는 " - " 기준으로 분할 → 앞부분이 prefix
+ * **괄호 `(...)`만 variant 표시로 인식**. " - "는 hierarchy delimiter로 보고
+ * prefix로 자르지 않음 (같은 부모 안의 다른 페이지를 같은 그룹으로 묶지 않기 위함).
  *
  * @param {string} name
  * @returns {string}
  */
 function extractBasePrefix(name) {
-  // " (" 우선 (괄호로 변형 표현)
   const parenIdx = name.lastIndexOf(' (')
   if (parenIdx > 0 && name.endsWith(')')) {
     return name.slice(0, parenIdx)
   }
-  // " - " (대시로 상태 표현)
-  const dashIdx = name.lastIndexOf(' - ')
-  if (dashIdx > 0) {
-    return name.slice(0, dashIdx)
-  }
-  // delimiter 없음 = 자기 자신이 base
   return name
 }
 
@@ -43,6 +38,13 @@ function extractBasePrefix(name) {
  */
 export async function checkMissingStates(ctx) {
   const findings = []
+
+  // 모든 코드 페이지가 매핑한 노드 ID 전체 set (다른 페이지의 매핑은 누락이 아님)
+  const allMappedNodeIds = new Set()
+  for (const tag of ctx.codeTags) {
+    if (tag.primaryNodeId) allMappedNodeIds.add(tag.primaryNodeId)
+    for (const s of tag.states) allMappedNodeIds.add(s.nodeId)
+  }
 
   for (const tag of ctx.codeTags) {
     if (tag.kind !== 'figma' || !tag.primaryNodeId) continue
@@ -74,18 +76,18 @@ export async function checkMissingStates(ctx) {
     // 자기 자신만 매칭 = standalone, 검사 패스
     if (siblings.length <= 1) continue
 
-    // 코드의 state 노드 + primary 노드 합쳐서 매핑된 노드 IDs
-    const mappedNodeIds = new Set([tag.primaryNodeId, ...tag.states.map((s) => s.nodeId)])
-
-    // 매핑 안 된 sibling 찾기
-    const missing = siblings.filter((s) => !mappedNodeIds.has(s.id))
+    // 누락 = 자기 자신 제외 + 어떤 코드에도 매핑되지 않은 sibling
+    // (다른 페이지가 매핑한 sibling은 "내 페이지의 누락" 아님)
+    const missing = siblings.filter(
+      (s) => s.id !== tag.primaryNodeId && !allMappedNodeIds.has(s.id)
+    )
     if (missing.length === 0) continue
 
     findings.push({
       checkName: 'missing-states',
       severity: 'warning',
       file: tag.file,
-      message: `Figma에 "${basePrefix}" 계열 frame이 ${siblings.length}개 있는데 코드는 ${mappedNodeIds.size}개만 매핑 (누락 ${missing.length}개)`,
+      message: `Figma에 "${basePrefix}" 계열 frame이 ${siblings.length}개 있는데 코드는 ${siblings.length - missing.length}개만 매핑 (누락 ${missing.length}개)`,
       links: missing.map((m) => {
         const urlNodeId = m.id.replace(':', '-')
         return `\`${m.name}\` — ${FIGMA_URL_BASE}/${ctx.fileKey}?node-id=${urlNodeId}`
