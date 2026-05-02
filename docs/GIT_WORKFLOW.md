@@ -41,9 +41,11 @@ main 머지 → 프로덕션 배포
   - 통합검증 CI: `api:generate` → typecheck → 빌드
 
 - **`dev`**: 개발 브랜치 (GitHub 기본 브랜치)
-  - BE/FE 독립 개발 (FE는 MSW mock 기반)
+  - BE/FE 독립 개발 — FE 는 [MSW mock](../packages/api-client/CLAUDE.md) 으로 BE 미구현 endpoint 호출 가능 (drift 누적 방식 X)
   - 모든 feature/fix PR의 타겟
-  - CI: lint, format, BE 빌드/테스트 (FE typecheck 제외)
+  - CI: lint, format, BE 빌드/테스트, **FE typecheck 포함** (강제 green 정책)
+  - spec 변경 PR 은 FE drift 해소 같이 진행하거나 즉시 follow-up PR
+  - Vercel preview 도 항상 green — 디자이너 검수 / 시각 QA 사이클 보장
 
 ### 작업 브랜치
 

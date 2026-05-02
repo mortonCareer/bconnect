@@ -58,8 +58,12 @@ jobs:
           node-version: 24
           cache: 'pnpm'
 
+      # postinstall 이 자동으로 pnpm api:generate 실행 (root package.json)
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm --filter morton-career typecheck
 
       - name: Lint
         run: pnpm --filter morton-career lint
@@ -81,8 +85,12 @@ jobs:
           node-version: 24
           cache: 'pnpm'
 
+      # postinstall 이 자동으로 pnpm api:generate 실행 (root package.json)
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm --filter morton-plan typecheck
 
       - name: Lint
         run: pnpm --filter morton-plan lint
