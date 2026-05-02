@@ -89,7 +89,7 @@ export default function MyProfilePage() {
 
       <ProfileHeader
         name={member.name}
-        picture={member.picture}
+        picture={member.picture ?? undefined}
         city={profile.address?.city}
         headline={profile.headline}
         primaryTrade={profile.primaryTrade}

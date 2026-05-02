@@ -60,7 +60,7 @@ function SenderMessage({
       message={message.content}
       timestamp={message.createdAt ? formatChatTime(message.createdAt) : undefined}
       nickname={sender?.name ?? '상대방'}
-      profileImage={sender?.picture}
+      profileImage={sender?.picture ?? undefined}
     />
   )
 }

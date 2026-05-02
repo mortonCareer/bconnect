@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { useGetProfile } from '@morton/api-client'
 import { TRADE_LABELS } from '@/lib/trade-labels'
 import { getAvatarUrl } from '@/lib/avatar'
-import { getRoleLabel } from '@/hooks/useFeedItems'
 
 interface CoworkerCardProps {
   profileId: number
@@ -34,8 +33,8 @@ export function CoworkerCard({ profileId }: CoworkerCardProps) {
   const name = member?.name ?? '이름 없음'
   const picture = member?.picture
   const trade = profile?.primaryTrade ? TRADE_LABELS[profile.primaryTrade] : null
-  const role = member?.role ? getRoleLabel(member.role) : null
-  const subtitle = [trade, role].filter(Boolean).join(' · ')
+  // TODO: role 은 MaskedMember 에 없음 (BE public masking) — 필요시 BE 협의 후 부활
+  const subtitle = trade ?? ''
   const intro = profile?.headline
 
   return (
