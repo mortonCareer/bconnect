@@ -84,6 +84,28 @@ paths:
                       data:
                         $ref: '#/components/schemas/ProfileAndMember'
   /api/v1/profiles/me:
+    get:
+      operationId: getMyProfile
+      tags:
+        - Profiles
+      summary: 내 프로필 조회
+      description: |
+        본인 profile 단독 조회. member 정보는 [`getMyMember`](#/Members/getMyMember) 로 별도 fetch.
+        다른 사용자 조회 ([`getProfile`](#/Profiles/getProfile)) 는 `ProfileAndMember` 반환 — 본인은 member 가 이미 있으니 `Profile` 만.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Profile'
     put:
       operationId: updateMyProfile
       tags:
