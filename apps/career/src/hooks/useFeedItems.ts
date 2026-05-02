@@ -46,7 +46,8 @@ export function useFeedItems({
   const feedItems: FeedItem[] = useMemo(() => {
     if (!feeds) return []
 
-    return feeds
+    // useGetFeeds 응답 = FeedOffsetPage = { content: Feed[], hasNext } — content 풀어냄
+    return feeds.content
       .filter((feed) => {
         if (trade && feed.profile.primaryTrade !== trade) return false
         if (minExperience != null && (feed.profile.experience ?? 0) < minExperience) return false
@@ -60,13 +61,14 @@ export function useFeedItems({
         if (!member || !profile || !post) return null
 
         return {
-          postId: post.id!,
+          postId: post.id,
           memberId: member.id,
           profile: {
             image: member.picture ?? '',
             name: member.name ?? '',
             location: '',
-            jobType: member.role ? getRoleLabel(member.role) : '',
+            // TODO: role 은 MaskedMember 에 없음 (BE public masking) — 필요시 BE 협의 후 부활
+            jobType: '',
             specialty: profile.primaryTrade ? (TRADE_LABELS[profile.primaryTrade] ?? '') : '',
             bio: profile.headline ?? '',
           },
