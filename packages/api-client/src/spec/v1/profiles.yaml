@@ -213,6 +213,10 @@ components:
             - 'null'
         address:
           $ref: ../_shared.yaml#/components/schemas/Address
+        pictureAttachment:
+          oneOf:
+            - $ref: '../v1/attachments.yaml#/components/schemas/AttachmentMeta'
+            - type: 'null'
         createdAt:
           type: string
           format: date-time
@@ -283,6 +287,12 @@ components:
             - 'null'
         address:
           $ref: ../_shared.yaml#/components/schemas/Address
+        pictureAttachmentId:
+          type:
+            - integer
+            - 'null'
+          format: int64
+          description: 새 프로필 사진 첨부 ID. null 이면 사진 제거.
     UpdateProfileAboutRequest:
       type: object
       properties:

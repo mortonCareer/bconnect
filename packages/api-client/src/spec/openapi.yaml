@@ -43,6 +43,10 @@ tags:
     description: 채팅 관리
   - name: Devices
     description: 푸시 알림용 디바이스(브라우저) 토큰 관리
+  - name: Attachments
+    description: 파일 업로드 (presign·confirm)
+  - name: Storages
+    description: 저장소(폴더) 관리 — Storage + Attachment 매핑
 paths:
   /api/v1/auth/otp/send:
     $ref: v1/auth.yaml#/paths/~1api~1v1~1auth~1otp~1send
@@ -136,6 +140,16 @@ paths:
     $ref: v1/coworker-requests.yaml#/paths/~1api~1v1~1coworker-requests~1{id}~1deny
   /api/v1/devices:
     $ref: v1/devices.yaml#/paths/~1api~1v1~1devices
+  /api/v1/attachments/presign:
+    $ref: v1/attachments.yaml#/paths/~1api~1v1~1attachments~1presign
+  /api/v1/attachments/confirm:
+    $ref: v1/attachments.yaml#/paths/~1api~1v1~1attachments~1confirm
+  /api/v1/storages:
+    $ref: v1/storages.yaml#/paths/~1api~1v1~1storages
+  /api/v1/storages/{storageId}:
+    $ref: v1/storages.yaml#/paths/~1api~1v1~1storages~1{storageId}
+  /api/v1/storages/{storageId}/attachments:
+    $ref: v1/storages.yaml#/paths/~1api~1v1~1storages~1{storageId}~1attachments
 components:
   securitySchemes:
     bearerAuth:

@@ -76,7 +76,7 @@ components:
       type: object
       required:
         - id
-        - images
+        - attachments
         - createdAt
         - modifiedAt
       properties:
@@ -96,12 +96,10 @@ components:
             - 'null'
           format: int64
           example: 1
-        images:
+        attachments:
           type: array
           items:
-            type: string
-            format: image-url
-            example: https://placehold.co/600x400
+            $ref: '../v1/attachments.yaml#/components/schemas/AttachmentMeta'
         content:
           type:
             - string
@@ -115,7 +113,7 @@ components:
     CreatePostRequest:
       type: object
       required:
-        - images
+        - attachmentIds
         - content
       properties:
         taskId:
@@ -124,13 +122,12 @@ components:
             - 'null'
           format: int64
           example: 1
-        images:
+        attachmentIds:
           type: array
-          items:
-            type: string
-            format: image-url
-            example: https://placehold.co/600x400
           minItems: 1
+          items:
+            type: integer
+            format: int64
         content:
           type: string
     UpdatePostRequest:
