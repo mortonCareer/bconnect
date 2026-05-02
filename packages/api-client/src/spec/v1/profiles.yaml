@@ -1,0 +1,299 @@
+paths:
+  /api/v1/profiles:
+    get:
+      operationId: getProfiles
+      tags:
+        - Profiles
+      security: []
+      summary: 프로필 목록 조회
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ProfileAndMember'
+    post:
+      operationId: createProfile
+      tags:
+        - Profiles
+      summary: 프로필 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProfileRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: integer
+                        format: int64
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+  /api/v1/profiles/{profileId}:
+    get:
+      operationId: getProfile
+      tags:
+        - Profiles
+      security: []
+      summary: 프로필 조회
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ProfileAndMember'
+  /api/v1/profiles/me:
+    put:
+      operationId: updateMyProfile
+      tags:
+        - Profiles
+      summary: 내 프로필 수정
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+    delete:
+      operationId: deleteMyProfile
+      tags:
+        - Profiles
+      summary: 내 프로필 삭제
+      responses:
+        '200':
+          description: OK
+  /api/v1/profiles/me/about:
+    put:
+      operationId: updateMyProfileAbout
+      tags:
+        - Profiles
+      summary: 내 소개 수정
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileAboutRequest'
+      responses:
+        '200':
+          description: OK
+  /api/v1/profiles/trades:
+    get:
+      operationId: getTrades
+      tags:
+        - Profiles
+      security: []
+      summary: 공종 목록 조회
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Trade'
+components:
+  schemas:
+    Profile:
+      type: object
+      required:
+        - id
+        - memberId
+        - primaryTrade
+        - trades
+        - experience
+        - address
+        - createdAt
+        - modifiedAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        memberId:
+          type: integer
+          format: int64
+          example: 1
+        primaryTrade:
+          $ref: '#/components/schemas/Trade'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+        experience:
+          type: integer
+        headline:
+          type:
+            - string
+            - 'null'
+        about:
+          type:
+            - string
+            - 'null'
+        address:
+          $ref: ../_shared.yaml#/components/schemas/Address
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+    ProfileAndMember:
+      type: object
+      required:
+        - member
+        - profile
+      properties:
+        member:
+          $ref: ../v1/members.yaml#/components/schemas/MaskedMember
+        profile:
+          $ref: '#/components/schemas/Profile'
+    CreateProfileRequest:
+      type: object
+      required:
+        - primaryTrade
+        - trades
+        - experience
+        - address
+      properties:
+        primaryTrade:
+          $ref: '#/components/schemas/Trade'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+          minItems: 1
+        experience:
+          type: integer
+          minimum: 0
+        headline:
+          type:
+            - string
+            - 'null'
+        about:
+          type:
+            - string
+            - 'null'
+        address:
+          $ref: ../_shared.yaml#/components/schemas/Address
+    UpdateProfileRequest:
+      type: object
+      required:
+        - primaryTrade
+        - trades
+        - experience
+        - address
+      properties:
+        primaryTrade:
+          $ref: '#/components/schemas/Trade'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+          uniqueItems: true
+          minItems: 1
+        experience:
+          type: integer
+          minimum: 0
+        headline:
+          type:
+            - string
+            - 'null'
+        address:
+          $ref: ../_shared.yaml#/components/schemas/Address
+    UpdateProfileAboutRequest:
+      type: object
+      properties:
+        about:
+          type:
+            - string
+            - 'null'
+    Trade:
+      type: string
+      enum:
+        - DESIGN
+        - DEMOLITION
+        - ELECTRICAL
+        - PLUMBING
+        - MECHANICAL
+        - MASONRY
+        - CARPENTRY
+        - GLAZING
+        - WATERPROOFING
+        - PLASTERING
+        - INSULATION
+        - TILING
+        - GROUTING
+        - PAINTING
+        - WALLPAPER
+        - FILM_SHEET
+        - HARDWOOD
+        - VINYL
+        - SINK
+        - FURNITURE
+        - AIR_CONDITIONING
+        - HOISTING
+        - TRANSPORT
+        - CLEANING
+        - GENERAL_LABOR

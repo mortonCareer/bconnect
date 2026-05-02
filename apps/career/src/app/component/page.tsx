@@ -1,3 +1,6 @@
+/**
+ * @figma-scaffold 컴포넌트 디버깅용 인덱스, 디자인 N/A
+ */
 'use client'
 
 import { Input } from '@morton/ui'

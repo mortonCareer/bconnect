@@ -19,11 +19,19 @@
       "WebFetch(domain:notion.site)",
       "Bash(./gradlew test:*)",
       "Bash(./gradlew :core:test:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(./gradlew compileJava)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ],
     "deny": [],
     "ask": []
   },
+  "disabledMcpjsonServers": [
+    "playwright",
+    "figma",
+    "aws"
+  ],
   "hooks": {
     "UserPromptSubmit": [
       {

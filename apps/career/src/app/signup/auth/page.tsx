@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-4394
+ */
 'use client'
 
 import { useAuthStore } from '@/stores/auth-store'

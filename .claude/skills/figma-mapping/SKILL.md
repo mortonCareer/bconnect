@@ -1,225 +1,142 @@
-# Figma Mapping 관리
+# Figma Mapping (인라인 @figma JSDoc 주석)
 
-`figma-mapping.json` 스키마 및 업데이트 규칙입니다.
+`page.tsx`/공통 컴포넌트 파일 상단에 `@figma` JSDoc 주석으로 Figma ↔ 코드 매핑을 SSoT로 관리합니다.
+ESLint custom rule(`bconnect-figma/require-figma-tag`)이 누락을 빌드에서 차단합니다.
+
+배경/근거: [#256](https://github.com/mortonCareer/bconnect/issues/256)
 
 ## 사용 시점
 
-- 새 컴포넌트/페이지 생성 후 매핑 등록 시
-- Figma 디자인과 코드의 동기화 상태 관리 시
+- 새 `page.tsx` 생성 시
+- 새 `packages/ui/src/components/ui/<Name>.tsx` 컴포넌트 생성 시
+- 기존 페이지/컴포넌트의 디자인이 redesign되어 다른 Figma frame을 가리켜야 할 때
 
 ---
 
-## 파일 위치
+## 주석 형식
 
-```text
-packages/ui/figma-mapping.json
+### 1. 정상 매핑 — `@figma`
+
+```tsx
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1239-7050
+ */
+'use client'
+
+export default function EditAboutPage() { ... }
 ```
+
+- URL 형식: `https://www.figma.com/design/<fileKey>?node-id=<nodeId>` (하이픈 형식)
+- `<fileKey>` Morton 디자인 파일: `EFXofON7gTFbmbE2kB31SS`
+- 한 파일에 `@figma`는 하나만
+
+### 2. 디자인 없이 임의 스캐폴딩 — `@figma-scaffold`
+
+쇼케이스/PoC/임시 페이지처럼 디자인 없이 만든 경우. **반드시 사유 또는 이슈 링크 명시**.
+
+```tsx
+/**
+ * @figma-scaffold 원클릭 조회 PoC — 백엔드 검증용, 디자인 미정 (#284)
+ */
+```
+
+빈 `@figma-scaffold`만 적으면 ESLint 에러.
+
+### 3. 디자인 작업 대기 중 — `@figma-pending`
+
+디자이너가 디자인 중이거나 곧 추가될 페이지.
+
+```tsx
+/**
+ * @figma-pending 회원가입 - 업체 생성 (Sprint 2 예정, #TBD)
+ */
+```
+
+### 4. 다중 state/tab — `@figma-state` (옵션)
+
+같은 페이지의 추가 상태(loading/error/empty/탭 변형). `@figma`와 함께 사용.
+
+```tsx
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1240-8132
+ * @figma-state career  https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1240-8451
+ * @figma-state license https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1387-9351
+ */
+```
+
+- `@figma-state <name> <url>` — name은 코드의 state/tab 키와 매칭 권장
+- 단일 state 페이지는 생략 (대다수 페이지는 `@figma` 한 줄로 충분)
 
 ---
 
-## JSON 스키마
+## ESLint 강제 범위
 
-```json
-{
-  "description": "Figma 컴포넌트 & 페이지 ↔ 코드 매핑 (개발자 관리)",
-  "components": {
-    "ComponentName": {
-      /* 컴포넌트 엔트리 */
-    }
-  },
-  "pages": {
-    "feature/step": {
-      /* 페이지 엔트리 */
-    }
-  }
-}
-```
+`packages/config/eslint/plugin-figma.js` 정의 (`bconnect-figma/require-figma-tag` rule), 다음 파일에서 누락 시 error:
+
+- `**/page.tsx` — 모든 Next.js 페이지 (apps/career, apps/plan)
+- `packages/ui/src/components/ui/*.tsx` — 디자인 시스템 공통 컴포넌트
+
+`@figma`, `@figma-scaffold`, `@figma-pending` 셋 중 **하나는 필수**.
+
+내부 컴포넌트 (`apps/*/src/app/.../_components/*.tsx`) 와 아이콘 (`packages/ui/src/icons/*.tsx`) 은 enforce 대상 외, 선택 사항.
 
 ---
 
-## 컴포넌트 엔트리 구조
-
-```json
-{
-  "Tag": {
-    "figmaUrl": "https://www.figma.com/design/FILE_KEY?node-id=NODE-ID",
-    "codePath": "src/components/ui/Tag.tsx",
-    "createdAt": "2026-01-27",
-    "lastSyncedAt": "2026-01-27",
-    "variants": [
-      { "name": "default", "nodeId": "188-1005", "description": "기본 스타일" },
-      { "name": "selected", "nodeId": "188-1011", "description": "선택된 상태" },
-      { "name": "filter", "nodeId": "352-3876", "description": "필터 삭제 (X 아이콘)" }
-    ]
-  }
-}
-```
-
-### 컴포넌트 필드 설명
-
-| 필드           | 타입   | 필수 | 설명                                        |
-| -------------- | ------ | ---- | ------------------------------------------- |
-| `figmaUrl`     | string | O    | Figma 디자인 URL                            |
-| `codePath`     | string | O    | 코드 파일 경로 (packages/ui 기준 상대 경로) |
-| `createdAt`    | string | O    | 최초 생성 날짜 (YYYY-MM-DD)                 |
-| `lastSyncedAt` | string | O    | 마지막 동기화 날짜                          |
-| `variants`     | array  | -    | variant별 Figma 노드 매핑                   |
-
-### variants 배열 요소
-
-| 필드          | 타입   | 설명                                      |
-| ------------- | ------ | ----------------------------------------- |
-| `name`        | string | CVA variant 이름 (default, primary, etc.) |
-| `nodeId`      | string | Figma 노드 ID (하이픈 형식: 188-1005)     |
-| `description` | string | variant 설명                              |
-
----
-
-## 페이지 엔트리 구조
-
-```json
-{
-  "signup/profile": {
-    "figmaUrl": "https://www.figma.com/design/FILE_KEY?node-id=NODE-ID",
-    "codePath": "apps/career/src/app/signup/profile/page.tsx",
-    "createdAt": "2026-01-27",
-    "lastSyncedAt": "2026-01-27",
-    "states": [
-      { "name": "default", "nodeId": "574-4554" },
-      { "name": "error", "nodeId": "574-4560" },
-      { "name": "loading", "nodeId": "574-4570" }
-    ]
-  }
-}
-```
-
-### 페이지 필드 설명
-
-| 필드           | 타입   | 필수 | 설명                                |
-| -------------- | ------ | ---- | ----------------------------------- |
-| `figmaUrl`     | string | O    | Figma 디자인 URL                    |
-| `codePath`     | string | O    | 코드 파일 경로 (프로젝트 루트 기준) |
-| `createdAt`    | string | O    | 최초 생성 날짜                      |
-| `lastSyncedAt` | string | O    | 마지막 동기화 날짜                  |
-| `states`       | array  | -    | UI 상태별 Figma 노드 매핑           |
-
-### states 배열 요소
-
-| 필드     | 타입   | 설명                                      |
-| -------- | ------ | ----------------------------------------- |
-| `name`   | string | 상태 이름 (default, error, loading, etc.) |
-| `nodeId` | string | Figma 노드 ID                             |
-
----
-
-## 날짜 필드 규칙
-
-### createdAt
-
-- **설명**: 최초 동기화 시각
-- **형식**: YYYY-MM-DD
-- **업데이트**: 최초 생성 시에만 설정, 이후 변경 없음
-
-### lastSyncedAt
-
-- **설명**: 마지막 동기화 시각
-- **형식**: YYYY-MM-DD
-- **업데이트**: 재동기화 시마다 현재 날짜로 갱신
-
-```javascript
-// 날짜 생성
-const today = new Date().toISOString().split('T')[0] // "2026-01-27"
-```
-
----
-
-## 업데이트 시나리오
-
-### 1. 새 컴포넌트 생성
-
-```json
-// 추가할 엔트리
-"NewComponent": {
-  "figmaUrl": "https://www.figma.com/design/xxx?node-id=123-456",
-  "codePath": "src/components/ui/NewComponent.tsx",
-  "createdAt": "2026-01-27",
-  "lastSyncedAt": "2026-01-27",
-  "variants": [
-    { "name": "default", "nodeId": "123-456", "description": "기본" }
-  ]
-}
-```
-
-### 2. 새 페이지 생성
-
-```json
-// pages에 추가
-"feature/step": {
-  "figmaUrl": "https://www.figma.com/design/xxx?node-id=789-012",
-  "codePath": "apps/career/src/app/feature/step/page.tsx",
-  "createdAt": "2026-01-27",
-  "lastSyncedAt": "2026-01-27",
-  "states": [
-    { "name": "default", "nodeId": "789-012" }
-  ]
-}
-```
-
-### 3. 기존 컴포넌트 재동기화
-
-```json
-// 변경 전
-"Tag": {
-  "figmaUrl": "...",
-  "codePath": "...",
-  "createdAt": "2026-01-20",
-  "lastSyncedAt": "2026-01-20",
-  "variants": [...]
-}
-
-// 변경 후 (lastSyncedAt만 업데이트)
-"Tag": {
-  "figmaUrl": "...",
-  "codePath": "...",
-  "createdAt": "2026-01-20",      // 유지
-  "lastSyncedAt": "2026-01-27",   // 갱신
-  "variants": [...]
-}
-```
-
-### 4. variant 추가
-
-기존 컴포넌트에 새 variant 추가 시:
-
-```json
-"variants": [
-  { "name": "default", "nodeId": "188-1005", "description": "기본" },
-  { "name": "selected", "nodeId": "188-1011", "description": "선택됨" },
-  // 새로 추가
-  { "name": "disabled", "nodeId": "188-1020", "description": "비활성" }
-]
-```
-
----
-
-## Node ID 형식
+## Node ID 찾는 법
 
 ### Figma URL에서 추출
 
-```text
-URL: https://www.figma.com/design/xxx?node-id=574-4554
-Node ID: 574-4554 (하이픈 형식 그대로 사용)
+```
+URL: https://www.figma.com/design/<fileKey>?node-id=574-4554
+Node ID: 574-4554 (그대로 사용)
 ```
 
-### API 호출 시
+### Figma desktop/web에서
 
-```text
-Node ID: 574:4554 (콜론 형식으로 변환)
+1. frame 우클릭 → "Copy link" → URL의 `node-id` 파라미터 추출
+2. 또는 우측 패널의 ID 탭에서 직접 복사
+
+### Figma MCP로 탐색 (Claude Code)
+
+매니페스트가 없으므로, 디자인 파일 구조 탐색이 필요할 땐 figma MCP로 직접 query:
+
 ```
+mcp__figma__get_metadata(fileKey="EFXofON7gTFbmbE2kB31SS", nodeId="<section-id>")
+```
+
+또는 자유 탐색을 위해 `mcp__figma__use_figma` 사용 (figma-use 스킬 prerequisite 로드 후).
+
+---
+
+## Figma 파일 구조 (Morton)
+
+`EFXofON7gTFbmbE2kB31SS` 파일은 7개 page(canvas)로 구성:
+
+| Page                   | Node ID     | 비고                    |
+| ---------------------- | ----------- | ----------------------- |
+| Brand                  | `799-2087`  | IR/슬라이드             |
+| References & Drafts    | `118-645`   | 참조 자료               |
+| Assets & Design System | `603-3460`  | 컬러/폰트/아이콘        |
+| Sprint 1               | `603-4660`  | 초기 화면               |
+| Sprint 1.5             | `1232-1833` | 프로필 confirm/redesign |
+| Sprint 2               | `1415-1339` | Plan 앱 등              |
+| 동산보드               | `978-4324`  | 작업 보드               |
+
+각 page 안에 section(`스프린트 1.5` 등) → frame(개별 화면) 계층.
+
+신규 sprint 추가 시 별도 page로 만들어지는 패턴이라, "section 매니페스트"가 stale되기 쉬움. 인라인 주석은 page 단위와 무관하게 frame node ID만 가리키므로 stale에 강함.
+
+---
+
+## 후속 자동화 (별도 이슈)
+
+- [#257](https://github.com/mortonCareer/bconnect/issues/257) — `@figma-state` 누락 CI 자동 감지
+- [#258](https://github.com/mortonCareer/bconnect/issues/258) — frame naming convention 합의
 
 ---
 
 ## 참조
 
-- 매핑 파일: `packages/ui/figma-mapping.json`
-- 관련 스킬: [figma-tailwind](../figma-tailwind/SKILL.md)
+- ESLint plugin: `packages/config/eslint/plugin-figma.js`
+- 디자인 시스템 메타: `packages/ui/src/styles/globals.css` (디자인 토큰 정의 + design system Figma URL)
+- 관련 스킬: [figma-tailwind](../figma-tailwind/SKILL.md), [figma-verify](../figma-verify/SKILL.md), [cva-component](../cva-component/SKILL.md)

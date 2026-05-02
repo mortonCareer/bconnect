@@ -14,7 +14,7 @@ Figma 디자인을 분석하여 React 컴포넌트 또는 페이지 코드를 �
 1. Figma MCP 도구로 디자인 데이터 추출
 2. 생성 타입 결정 (컴포넌트 vs 페이지)
 3. 해당 스킬 참조하여 코드 생성
-4. `packages/ui/figma-mapping.json` 업데이트
+4. 생성된 파일 상단에 인라인 `@figma <url>` JSDoc 주석 추가 ([figma-mapping](../skills/figma-mapping/SKILL.md))
 5. (컴포넌트인 경우) 쇼케이스 페이지 등록
 6. 시각적 검증 (figma-verify)
 
@@ -50,7 +50,7 @@ MCP 도구 사용 순서:
 1. **스타일 변환**: `.claude/skills/figma-tailwind/SKILL.md`
 2. **컴포넌트 코드**: `.claude/skills/cva-component/SKILL.md`
    - UX 원칙: `.claude/skills/cva-component/UX_PRINCIPLES.md`
-3. **매핑 업데이트**: `.claude/skills/figma-mapping/SKILL.md`
+3. **인라인 매핑 주석**: `.claude/skills/figma-mapping/SKILL.md` (`@figma <url>` JSDoc)
 4. **쇼케이스 등록**: `.claude/skills/showcase-template/SKILL.md`
 5. **시각적 검증**: `.claude/skills/figma-verify/SKILL.md`
 6. **Split View 비교**: `.claude/skills/figma-compare/SKILL.md`
@@ -59,7 +59,7 @@ MCP 도구 사용 순서:
 
 1. **스타일 변환**: `.claude/skills/figma-tailwind/SKILL.md`
 2. **페이지 코드**: `.claude/skills/react-form-page/SKILL.md`
-3. **매핑 업데이트**: `.claude/skills/figma-mapping/SKILL.md`
+3. **인라인 매핑 주석**: `.claude/skills/figma-mapping/SKILL.md` (`@figma <url>` JSDoc)
 4. **시각적 검증**: `.claude/skills/figma-verify/SKILL.md`
 5. **Split View 비교**: `.claude/skills/figma-compare/SKILL.md`
 
@@ -69,7 +69,8 @@ MCP 도구 사용 순서:
 
 - 컴포넌트 예시: `packages/ui/src/components/ui/Button.tsx`
 - 페이지 예시: `apps/career/src/app/signup/profile/page.tsx`
-- 매핑 파일: `packages/ui/figma-mapping.json`
+- 매핑 형식: `.claude/skills/figma-mapping/SKILL.md` (인라인 `@figma` JSDoc)
+- ESLint plugin: `packages/config/eslint/plugin-figma.js`
 - 쇼케이스 목록: `apps/career/src/app/showcase/page.tsx`
 
 ---
@@ -91,7 +92,7 @@ MCP 도구 사용 순서:
 - primary: 주요 스타일
 - ...
 
-**figma-mapping.json:** 업데이트됨
+**`@figma` 주석:** 추가됨 (인라인 JSDoc)
 **쇼케이스:** /showcase 등록됨
 **시각적 검증:** Figma 디자인과 일치 확인됨
 ```
@@ -110,6 +111,6 @@ MCP 도구 사용 순서:
 - field1: type (required)
 - field2: type (optional)
 
-**figma-mapping.json:** 업데이트됨
+**`@figma` 주석:** 추가됨 (인라인 JSDoc)
 **시각적 검증:** Figma 디자인과 일치 확인됨
 ```

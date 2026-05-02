@@ -1,3 +1,6 @@
+/**
+ * @figma-scaffold 디자인 시스템 미정 — 임시 컴포넌트
+ */
 'use client'
 
 import * as React from 'react'

@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1235-4100
+ */
 'use client'
 
 import { useEffect } from 'react'

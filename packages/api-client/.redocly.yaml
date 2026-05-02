@@ -1,0 +1,65 @@
+# Redocly CLI lint config.
+# https://redocly.com/docs/cli/rules
+#
+# 정책: 가능한 한 strict 한 lint 로 spec 품질을 끌어올림. 단 첫 도입 단계라
+#       모든 strict rule 을 한 번에 켜면 warnings 폭주 → review 부담.
+#       활성화 후보들을 TODO 로 등록 → 점진적으로 enable (각 enable 은 별도 PR 권장).
+#
+# 작업 시 참고:
+#   1. TODO 항목 중 하나 enable
+#   2. `pnpm api:lint` 실행, 새로 발생한 warning/error 수 확인
+#   3. 그 항목들을 spec 에 반영 (요구사항 충족) 또는 명시적 off
+#   4. 별도 PR 로 commit
+
+extends:
+  - recommended
+  # TODO: recommended-strict 로 격상 검토 — 더 엄격한 default 룰셋 적용.
+  #       활성화 시 약 20~30 warnings 추가 예상.
+  # - recommended-strict
+
+rules:
+  # === 현재 활성 ===
+  no-empty-servers: error
+  no-invalid-media-type-examples: warn
+  operation-summary: warn # 누락 endpoint 점진 보완
+  operation-description: off # description 은 summary 로 충분 (한국어 도메인 컨텍스트)
+  operation-operationId: error
+  no-unused-components: off # 의도적으로 root inline ref 유지하는 schema 가 있을 수 있음
+
+
+  # === TODO: enable when ready ===
+  # ▼ Operation 품질
+  # operation-2xx-response: error              # 모든 op 에 2xx 응답 정의 (이미 충족 가능성 높음)
+  # operation-4xx-response: warn               # 모든 op 에 4xx 응답 — 점진 보완
+  # operation-operationId-unique: error        # operationId 중복 금지
+  # operation-tag-defined: error               # tags 가 spec.tags 에 선언된 것만 사용
+  # operation-singular-tag: error              # 1 op 당 1 tag (현재 spec 정책과 정렬)
+  # operation-parameters-unique: error         # operation 내 parameter 중복 금지
+  #
+  # ▼ Path 품질
+  # path-declaration-must-exist: error         # path parameter 가 path 패턴에 존재
+  # path-not-include-query: error              # path 에 ? 포함 금지
+  # path-parameters-defined: error             # path parameter 모두 declared
+  # path-segment-plural: warn                  # collection 은 복수형 (members, posts)
+  # path-excludes-patterns: { patterns: [^\\/api\\/v1\\/], severity: off }
+  #     # /api/vN prefix 강제는 우리 컨벤션과 정렬 — pattern 작성 후 enable
+  #
+  # ▼ Tag 품질
+  # tag-description: warn                      # 모든 tag 에 description (이미 충족)
+  # tags-alphabetical: warn                    # tags 를 알파벳순 정렬
+  #
+  # ▼ Spec 품질
+  # info-license: warn                         # 사내 spec 이라 미적용
+  # info-contact: warn                         # 사내 spec 이라 미적용
+  # spec-strict-refs: error                    # $ref 가 schema 위치에만 존재 (3.1 strict)
+  # struct: error                              # OpenAPI 구조 검증
+  # no-server-example.com: error               # example.com 서버 URL 금지
+  # no-server-trailing-slash: error            # 서버 URL 의 trailing / 금지
+  # no-server-variables-empty-enum: error      # server variables enum 비어있음 금지
+  # no-undefined-server-variable: error        # 사용된 서버 변수가 declared 되어야 함
+  # no-empty-enum-servers: error               # 서버 enum 빈 배열 금지
+  #
+  # ▼ Style/Naming
+  # boolean-parameter-prefixes: { prefixes: [is, has], severity: warn }
+  #     # boolean parameter 는 is*, has* prefix
+  # component-name-unique: error               # component 이름 중복 금지

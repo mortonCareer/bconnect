@@ -40,7 +40,7 @@ Publishing → API Connect → UI-API Bind 순차 실행
 1. Figma MCP로 디자인 데이터 추출
 2. 페이지/컴포넌트 코드 생성
 3. React Hook Form + Zod 스키마 생성
-4. figma-mapping.json 업데이트
+4. 생성된 파일 상단에 인라인 `@figma <url>` JSDoc 주석 추가
 
 **출력:**
 

@@ -1,8 +1,9 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=619-5992
+ */
 'use client'
 
 import { useMemo } from 'react'
-import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import {
   useQueries,
@@ -18,13 +19,11 @@ import { ROLE_LABELS } from '@/lib/role-labels'
 import { useAuthStore } from '@/stores/auth-store'
 
 export default function MessagesPage() {
-  const router = useRouter()
-  const observerRef = useRef<HTMLDivElement>(null)
   const currentUserId = useAuthStore((s) => s.member?.id)
 
   const { data: chats, isLoading } = useGetMyChats()
 
-  const allChats = chats ?? []
+  const allChats = useMemo(() => chats ?? [], [chats])
 
   // 각 채팅의 상대방 멤버 ID 추출
   const otherMemberIds = useMemo(() => {

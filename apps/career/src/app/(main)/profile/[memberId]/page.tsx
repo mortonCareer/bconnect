@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1387-9882
+ */
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
@@ -20,11 +23,9 @@ export default function MemberProfilePage() {
   const memberId = Number(params.memberId)
   const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'intro' })
 
-  const {
-    data: members,
-    isLoading: isMemberLoading,
-    error: memberError,
-  } = useGetMembers({ query: { enabled: !isNaN(memberId) } })
+  const { data: members, isLoading: isMemberLoading } = useGetMembers({
+    query: { enabled: !isNaN(memberId) },
+  })
   const member = members?.find((m) => m.id === memberId)
 
   const { data: profile, isLoading: isProfileLoading } = useGetProfile(memberId, {

@@ -1,0 +1,217 @@
+paths:
+  /api/v1/tasks:
+    get:
+      operationId: getMyTasks
+      tags:
+        - Tasks
+      summary: 내 작업 목록 조회
+      parameters:
+        - name: start
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Task'
+    post:
+      operationId: createTask
+      tags:
+        - Tasks
+      summary: 작업 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: integer
+                        format: int64
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+  /api/v1/tasks/{taskId}:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    put:
+      operationId: updateTask
+      tags:
+        - Tasks
+      summary: 작업 수정
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+    delete:
+      operationId: deleteTask
+      tags:
+        - Tasks
+      summary: 작업 삭제
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    Task:
+      type: object
+      required:
+        - id
+        - company
+        - address
+        - taskTitle
+        - eventTitle
+        - trades
+        - start
+        - end
+        - createdAt
+        - modifiedAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        profileId:
+          type:
+            - integer
+            - 'null'
+          format: int64
+          example: 1
+        company:
+          type: string
+        address:
+          $ref: ../_shared.yaml#/components/schemas/Address
+        taskTitle:
+          type: string
+        eventTitle:
+          type: string
+        trades:
+          type: array
+          items:
+            $ref: ../v1/profiles.yaml#/components/schemas/Trade
+          uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+    CreateTaskRequest:
+      type: object
+      required:
+        - company
+        - address
+        - taskTitle
+        - eventTitle
+        - trades
+        - start
+        - end
+      properties:
+        company:
+          type: string
+        address:
+          $ref: ../_shared.yaml#/components/schemas/Address
+        taskTitle:
+          type: string
+        eventTitle:
+          type: string
+        trades:
+          type: array
+          items:
+            $ref: ../v1/profiles.yaml#/components/schemas/Trade
+          uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+    UpdateTaskRequest:
+      type: object
+      required:
+        - company
+        - address
+        - taskTitle
+        - eventTitle
+        - trades
+        - start
+        - end
+      properties:
+        company:
+          type: string
+        address:
+          $ref: ../_shared.yaml#/components/schemas/Address
+        taskTitle:
+          type: string
+        eventTitle:
+          type: string
+        trades:
+          type: array
+          items:
+            $ref: ../v1/profiles.yaml#/components/schemas/Trade
+          uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date

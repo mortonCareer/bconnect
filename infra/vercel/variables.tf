@@ -80,3 +80,26 @@ variable "database_url" {
   type        = string
   sensitive   = true
 }
+
+# Firebase (Cloud Messaging) Web SDK configs — 앱별 map
+#   key: "career" | "plan"
+variable "firebase_web_configs" {
+  description = "Firebase 웹 앱 SDK config 맵 (key: 프론트엔드 앱 이름)"
+  type = map(object({
+    api_key             = string
+    auth_domain         = string
+    project_id          = string
+    storage_bucket      = string
+    messaging_sender_id = string
+    app_id              = string
+    measurement_id      = string
+  }))
+  sensitive = true
+}
+
+variable "firebase_vapid_key" {
+  description = "Firebase Web Push VAPID public key (Firebase Console에서 수동 생성)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
