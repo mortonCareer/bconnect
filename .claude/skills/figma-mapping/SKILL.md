@@ -128,10 +128,17 @@ mcp__figma__get_metadata(fileKey="EFXofON7gTFbmbE2kB31SS", nodeId="<section-id>"
 
 ---
 
+## 자동 CI 감지 (#257 구현됨)
+
+`scripts/figma-checks/` — 매주 월 09:00 KST cron으로 Figma drift 감지.
+누락된 `@figma-state` 발견 시 단일 누적 issue (`🤖 figma-drift` 라벨)에 자동 갱신.
+
+수동 실행: `pnpm figma:check:dry` (로컬 stdout) 또는 GHA workflow_dispatch.
+자세한 내용: [scripts/figma-checks/README.md](../../../scripts/figma-checks/README.md)
+
 ## 후속 자동화 (별도 이슈)
 
-- [#257](https://github.com/mortonCareer/bconnect/issues/257) — `@figma-state` 누락 CI 자동 감지
-- [#258](https://github.com/mortonCareer/bconnect/issues/258) — frame naming convention 합의
+- [#258](https://github.com/mortonCareer/bconnect/issues/258) — frame naming convention 합의 + CI 체크 추가
 
 ---
 
