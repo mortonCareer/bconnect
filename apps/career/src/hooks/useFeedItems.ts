@@ -95,18 +95,3 @@ export function useFeedItems({
     error,
   }
 }
-
-export function getRoleLabel(role: string): string {
-  const labels: Record<string, string> = {
-    GUEST: '게스트',
-    CLIENT: '의뢰인',
-    ARCHITECT: '건축사',
-    CONTRACTOR: '시공사',
-    FOREMAN: '반장',
-    SKILLED: '숙련공',
-    SEMI_SKILLED: '준숙련공',
-    HELPER: '보조',
-    ADMIN: '관리자',
-  }
-  return labels[role] ?? role
-}
