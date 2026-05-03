@@ -82,8 +82,6 @@ git checkout -b feat/123-add-profile-upload
 # 4. 작업 진행...
 ```
 
-워크트리 룰: [~/.claude/rules/worktree.md](~/.claude/rules/worktree.md) (글로벌, env 파일 자동 심링크 + .code-workspace 동기화 포함).
-
 ### dev → main 머지 (릴리스)
 
 ```bash
