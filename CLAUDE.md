@@ -6,15 +6,15 @@ Guide for Claude Code working in the Morton codebase.
 
 ### 운영 규칙 SSOT
 
-상세 규칙은 `docs/` 또는 `.github/`에 원본을 두고, 스킬(`.claude/skills/`)과 에이전트(`.claude/agents/`)는 해당 문서를 **참조**만 합니다.
-
-| 규칙 종류      | 원본 위치                          | 참조하는 곳                          |
-| -------------- | ---------------------------------- | ------------------------------------ |
-| 브랜치 네이밍  | `docs/GIT_WORKFLOW.md`             | worktree-manager 스킬                |
-| 이슈 템플릿    | `.github/ISSUE_TEMPLATE/`          | issue-management 스킬                |
-| PR 템플릿      | `.github/pull_request_template.md` | pr-from-issue 스킬                   |
-| 커밋 컨벤션    | `docs/GIT_WORKFLOW.md`             | commit 스킬                          |
-| 팀 역할/담당자 | `docs/TEAM.md`                     | issue-management, pr-from-issue 스킬 |
+| 규칙 종류         | 원본 위치                                       |
+| ----------------- | ----------------------------------------------- |
+| 브랜치 네이밍     | `docs/GIT_WORKFLOW.md`                          |
+| 이슈 템플릿       | `.github/ISSUE_TEMPLATE/`                       |
+| PR 템플릿         | `.github/pull_request_template.md`              |
+| 커밋 컨벤션       | `docs/GIT_WORKFLOW.md` + commitlint             |
+| 팀 역할/담당자    | `docs/TEAM.md`                                  |
+| Figma 매핑 컨벤션 | `packages/ui/CLAUDE.md` (인라인 `@figma` JSDoc) |
+| Worktree 룰       | `~/.claude/rules/worktree.md` (글로벌)          |
 
 ### 도메인 산출물 SSOT
 
@@ -92,21 +92,12 @@ Code style rules are in `.claude/rules/` and load automatically when working wit
 - @docs/QA_AND_TESTING.md — QA process, test coverage, bug classification
 - @docs/DEPLOYMENT.md — Deployment environments, process, infrastructure
 
-## Available Skills
+## Conventions & Tooling (no custom skills)
 
-Skills automate common workflows. Located in `.claude/skills/`:
+이 프로젝트는 `.claude/skills/`를 사용하지 않습니다. 모든 컨벤션은 docs와 자동화 도구에 직접 inline:
 
-**Git Workflow:**
-
-- `issue-management` — GitHub Issue 생성/관리, 레이블 자동 적용
-- `worktree-manager` — Git worktree 기반 병렬 작업 관리
-- `commit` — Conventional Commits 형식 자동 커밋
-- `pr-from-issue` — 이슈 기반 PR 생성, 리뷰어 자동 할당
-
-**Figma Integration:**
-
-- `figma-mapping` — Figma ↔ 코드 매핑 (인라인 `@figma` JSDoc 주석 + ESLint 강제)
-
-**Environment:**
-
-- `env-config` — 환경 변수 관리 및 동기화
+- **Git workflow**: @docs/GIT_WORKFLOW.md (브랜치, 커밋, PR), `.github/ISSUE_TEMPLATE/`, `.github/pull_request_template.md`
+- **Worktree**: @~/.claude/rules/worktree.md (글로벌 룰)
+- **환경 변수**: 각 앱의 `.env.example` + `scripts/link-env.sh` (워크트리 자동 심링크)
+- **Figma 매핑**: @packages/ui/CLAUDE.md (인라인 `@figma` JSDoc 컨벤션) + `packages/config/eslint/plugin-figma.js` (강제) + `scripts/figma-checks/` (drift CI)
+- **Commit format**: commitlint 자동 검증 (husky)

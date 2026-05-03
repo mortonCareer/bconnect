@@ -82,9 +82,7 @@ git checkout -b feat/123-add-profile-upload
 # 4. 작업 진행...
 ```
 
-**자동화 스킬 사용:**
-
-`worktree-manager` 스킬을 사용하면 이슈 번호를 입력하는 것만으로 워크트리와 브랜치를 자동 생성합니다.
+워크트리 룰: [~/.claude/rules/worktree.md](~/.claude/rules/worktree.md) (글로벌, env 파일 자동 심링크 + .code-workspace 동기화 포함).
 
 ### dev → main 머지 (릴리스)
 
@@ -149,9 +147,7 @@ PR 생성 (Closes #123)
 머지 후 이슈 자동 닫힘
 ```
 
-**자동화 스킬 사용:**
-
-`issue-management` 스킬을 사용하면 템플릿 선택과 레이블 적용이 자동으로 처리됩니다.
+이슈 템플릿/레이블: [.github/ISSUE_TEMPLATE/](../.github/ISSUE_TEMPLATE/), 담당자 자동 할당은 [docs/TEAM.md](TEAM.md) 참조.
 
 ---
 
@@ -244,9 +240,7 @@ fix bug
 WIP
 ```
 
-**자동화 스킬 사용:**
-
-`commit-convention` 스킬을 사용하면 커밋 메시지 포맷 검증과 제안을 받을 수 있습니다.
+커밋 형식은 commitlint(husky)가 자동 검증합니다. 위반 시 commit 차단.
 
 ---
 
@@ -297,9 +291,7 @@ git push origin feat/123-add-profile-upload
 gh pr create --title "feat(career): Add user profile upload" --body "..."
 ```
 
-**자동화 스킬 사용:**
-
-`pr-from-issue` 스킬을 사용하면 현재 브랜치에서 이슈 정보를 추출해 PR 제목/본문을 자동 생성합니다.
+PR 본문 템플릿: [.github/pull_request_template.md](../.github/pull_request_template.md). 리뷰어 자동 할당은 [docs/TEAM.md](TEAM.md) 참조.
 
 ### PR 리뷰 프로세스
 
@@ -375,44 +367,6 @@ https://morton-plan-git-feat-123-add-profile-upload-<team>.vercel.app
 - 실사용자 관점 검증 (CEO)
 
 상세 QA 프로세스: **[QA_AND_TESTING.md](./QA_AND_TESTING.md)** 참조
-
----
-
-## 자동화 스킬
-
-Git 워크플로우를 자동화하는 4가지 스킬이 있습니다:
-
-### 1. issue-management
-
-GitHub Issue 생성 및 관리 자동화
-
-- 템플릿 선택 (bug/feat/task)
-- 레이블 자동 적용
-- 담당자 할당
-
-### 2. worktree-manager
-
-Git worktree 기반 병렬 작업 관리
-
-- 이슈 번호 기반 워크트리+브랜치 동시 생성
-- `feat/#-description` 형식 브랜치 네이밍 (위 브랜치 전략 참조)
-- 워크트리 목록 조회 및 삭제
-
-### 3. commit
-
-커밋 메시지 검증 및 생성
-
-- Conventional Commits 형식 검증
-- scope 추천
-- 이슈 번호 자동 참조
-
-### 4. pr-from-issue
-
-이슈 기반 PR 생성 자동화
-
-- 현재 브랜치에서 이슈 번호 추출
-- PR 제목/본문 자동 생성
-- `Closes #123` 자동 추가
 
 ---
 

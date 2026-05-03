@@ -248,7 +248,7 @@ jwt:
 
 ### 환경 변수 추가 시
 
-환경 변수 관리는 **[AGENTS.md](../AGENTS.md)**의 "Environment Variables" 섹션 또는 `env-config` 스킬 참조
+환경 변수 관리: 각 앱의 `.env.example` + `scripts/link-env.sh` (워크트리 자동 심링크).
 
 **간단 가이드**:
 
