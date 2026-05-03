@@ -32,6 +32,7 @@ const FIGMA_URL_RE =
  * @property {string|null} parentId
  * @property {string|null} parentName
  * @property {string[]} childIds
+ * @property {boolean} devReady - Dev Mode에서 "Ready for dev" 마킹 여부
  */
 
 /**
@@ -188,7 +189,7 @@ async function loadFigmaTree(fileKey) {
 
   /**
    * 재귀 walk
-   * @param {{id: string, name: string, type: string, children?: any[]}} node
+   * @param {{id: string, name: string, type: string, devStatus?: {type: string}, children?: any[]}} node
    * @param {{id: string, name: string} | null} parent
    */
   function walk(node, parent) {
@@ -200,6 +201,7 @@ async function loadFigmaTree(fileKey) {
       parentId: parent?.id ?? null,
       parentName: parent?.name ?? null,
       childIds,
+      devReady: node.devStatus?.type === 'READY_FOR_DEV',
     })
     for (const child of node.children ?? []) {
       walk(child, { id: node.id, name: node.name })

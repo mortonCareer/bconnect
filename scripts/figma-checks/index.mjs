@@ -16,7 +16,7 @@
 
 import { loadFigmaContext } from './lib/figma-context.mjs'
 import { publishReport, printReportDryRun } from './lib/report.mjs'
-import { checkMissingStates } from './check-missing-states.mjs'
+import { checkFigmaCoverage } from './check-figma-coverage.mjs'
 
 /**
  * 모든 체크 함수 등록.
@@ -24,7 +24,7 @@ import { checkMissingStates } from './check-missing-states.mjs'
  * @type {Array<(ctx: any) => Promise<import('./lib/report.mjs').Finding[]>>}
  */
 const CHECKS = [
-  checkMissingStates,
+  checkFigmaCoverage,
   // 추후 추가:
   // checkNamingConvention,    // #258
   // checkScaffoldIsolation,
