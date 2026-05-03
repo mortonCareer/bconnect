@@ -17,11 +17,6 @@
         "AWS_PROFILE": "morton",
         "AWS_REGION": "ap-northeast-2"
       }
-    },
-    "firebase": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "firebase-tools@latest", "experimental:mcp"]
     }
   }
 }
