@@ -6,17 +6,18 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 
 ## 팀원
 
-| 역할     | 이름 | GitHub            | 주요 작업                                |
-| -------- | ---- | ----------------- | ---------------------------------------- |
-| CEO      | -    | `fine-pine`       | ERD 설계, BE 구현, API 리뷰, 최종 QA     |
-| CTO      | -    | `manamana32321`   | API 스펙 설계, 퍼블리싱, FE 구현, 인프라 |
-| 디자이너 | -    | `julyatpark-star` | UI/UX 시안, UI 검수                      |
+| 역할       | 이름   | GitHub            | 주요 작업                            |
+| ---------- | ------ | ----------------- | ------------------------------------ |
+| CEO        | 이송목 | `fine-pine`       | ERD 설계, BE 구현, API 리뷰, 최종 QA |
+| CTO        | 손장수 | `manamana32321`   | API 스펙 설계, 인프라, 코드 리뷰     |
+| 프론트엔드 | 김예진 | TBD               | 퍼블리싱, FE 구현                    |
+| 디자이너   | 박정윤 | `julyatpark-star` | UI/UX 시안, UI 검수                  |
 
 ---
 
 ## 역할 및 책임
 
-### CEO (`fine-pine`)
+### CEO (이송목, `fine-pine`)
 
 **백엔드 개발 책임**
 
@@ -33,25 +34,36 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 - 데이터베이스 마이그레이션
 - Backend 성능 최적화
 
-### CTO (`manamana32321`)
+### CTO (손장수, `manamana32321`)
 
-**프론트엔드 및 인프라 책임**
+**API 스펙 + 인프라 책임**
 
 - API 스펙 초안 작성 (`packages/api-client`)
-- 퍼블리싱 (Figma → HTML/CSS)
-- Next.js 앱 구현 (Career, Plan)
-- 인프라 관리 (Vercel, Railway, AWS)
+- 인프라 관리 (Vercel, Railway, AWS, Terraform)
 - 코드 리뷰 및 기능 테스트
+- AI/CI 도구 인프라
+
+**담당 영역:**
+
+- `packages/api-client/` - API 클라이언트
+- `packages/config/` - 공통 설정
+- `infra/` - Terraform 인프라 코드
+- `.github/`, `scripts/` - CI/도구
+
+### Frontend (김예진, TBD)
+
+**프론트엔드 개발 책임**
+
+- 퍼블리싱 (Figma → React)
+- Next.js 앱 구현 (Career, Plan)
+- 공통 UI 컴포넌트 작성
 
 **담당 영역:**
 
 - `apps/career/`, `apps/plan/` - Next.js 앱
 - `packages/ui/` - UI 컴포넌트
-- `packages/api-client/` - API 클라이언트
-- `packages/config/` - 공통 설정
-- `infra/` - Terraform 인프라 코드
 
-### 디자이너
+### 디자이너 (박정윤, `julyatpark-star`)
 
 **UI/UX 디자인 책임**
 
@@ -75,13 +87,13 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 | 작업 유형         | 담당자    | GitHub               |
 | ----------------- | --------- | -------------------- |
 | `⚙️ BE`           | CEO       | `fine-pine`          |
-| `📋 api-spec`     | 둘이 논의 | (CTO 작성, CEO 리뷰) |
-| `💻 FE`           | CTO       | `manamana32321`      |
-| `🎨 publishing`   | CTO       | `manamana32321`      |
+| `📋 api-spec`     | CTO + CEO | (CTO 작성, CEO 리뷰) |
+| `💻 FE`           | Frontend  | TBD                  |
+| `🎨 publishing`   | Frontend  | TBD                  |
 | `☁️ infra`        | CTO       | `manamana32321`      |
 | `🐛 bug:BE`       | CEO       | `fine-pine`          |
-| `🐛 bug:FE`       | CTO       | `manamana32321`      |
-| `🐛 bug:api-spec` | 둘이 논의 | (함께 결정)          |
+| `🐛 bug:FE`       | Frontend  | TBD                  |
+| `🐛 bug:api-spec` | CTO + CEO | (함께 결정)          |
 
 ### PR 리뷰어 자동 할당
 
