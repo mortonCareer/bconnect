@@ -43,7 +43,7 @@ const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'one-clic
 
 ```tsx
 // ❌ className="bg-[#386dff]"
-// ✓ className="bg-morton-primary"
+// ✓ className="bg-bconnect-primary"
 ```
 
 토큰 정의: `packages/ui/src/styles/globals.css`. 신규 색상 추가 시 globals.css에 먼저 정의.

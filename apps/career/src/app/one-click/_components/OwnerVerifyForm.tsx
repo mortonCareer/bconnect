@@ -46,9 +46,9 @@ export function OwnerVerifyForm({ registrationNumber }: OwnerVerifyFormProps) {
   }
 
   return (
-    <div className="mt-4 rounded-lg border border-morton-gray-300 p-4">
-      <h4 className="text-sb-14 text-morton-gray-900">사업자 진위확인</h4>
-      <p className="mt-1 text-r-12 text-morton-gray-500">
+    <div className="mt-4 rounded-lg border border-bconnect-gray-300 p-4">
+      <h4 className="text-sb-14 text-bconnect-gray-900">사업자 진위확인</h4>
+      <p className="mt-1 text-r-12 text-bconnect-gray-500">
         대표자명, 개업일자가 등록된 정보와 일치하는지 확인해요. (출처: 국세청)
       </p>
 
@@ -80,11 +80,11 @@ export function OwnerVerifyForm({ registrationNumber }: OwnerVerifyFormProps) {
       </div>
 
       {result && (
-        <p className={`mt-2 text-r-12 ${result.valid ? 'text-[#2E7D32]' : 'text-morton-error'}`}>
+        <p className={`mt-2 text-r-12 ${result.valid ? 'text-[#2E7D32]' : 'text-bconnect-error'}`}>
           {result.message}
         </p>
       )}
-      {error && <p className="mt-2 text-r-12 text-morton-error">{error}</p>}
+      {error && <p className="mt-2 text-r-12 text-bconnect-error">{error}</p>}
     </div>
   )
 }

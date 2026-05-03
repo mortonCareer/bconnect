@@ -15,19 +15,19 @@
 /* Morton Design System - Color Tokens */
 :root {
   /* Primary Colors */
-  --morton-primary: #386dff;
-  --morton-primary-sub: #eaefff;
-  --morton-primary-hover: #2858e0;
+  --bconnect-primary: #386dff;
+  --bconnect-primary-sub: #eaefff;
+  --bconnect-primary-hover: #2858e0;
 
   /* Grayscale */
-  --morton-gray-900: #1b1b1b;
-  --morton-gray-700: #7b7b7b;
-  --morton-gray-500: #a5a5a5;
-  --morton-gray-300: #e5e5e5;
-  --morton-gray-100: #f4f4f4;
+  --bconnect-gray-900: #1b1b1b;
+  --bconnect-gray-700: #7b7b7b;
+  --bconnect-gray-500: #a5a5a5;
+  --bconnect-gray-300: #e5e5e5;
+  --bconnect-gray-100: #f4f4f4;
 
   /* Semantic Colors */
-  --morton-error: #ff4242;
+  --bconnect-error: #ff4242;
 
   /* shadcn/ui compatibility */
   --background: oklch(1 0 0);
@@ -76,15 +76,15 @@
 /* Tailwind v4 Theme */
 @theme inline {
   /* Morton Design System Colors */
-  --color-morton-primary: var(--morton-primary);
-  --color-morton-primary-sub: var(--morton-primary-sub);
-  --color-morton-primary-hover: var(--morton-primary-hover);
-  --color-morton-gray-900: var(--morton-gray-900);
-  --color-morton-gray-700: var(--morton-gray-700);
-  --color-morton-gray-500: var(--morton-gray-500);
-  --color-morton-gray-300: var(--morton-gray-300);
-  --color-morton-gray-100: var(--morton-gray-100);
-  --color-morton-error: var(--morton-error);
+  --color-bconnect-primary: var(--bconnect-primary);
+  --color-bconnect-primary-sub: var(--bconnect-primary-sub);
+  --color-bconnect-primary-hover: var(--bconnect-primary-hover);
+  --color-bconnect-gray-900: var(--bconnect-gray-900);
+  --color-bconnect-gray-700: var(--bconnect-gray-700);
+  --color-bconnect-gray-500: var(--bconnect-gray-500);
+  --color-bconnect-gray-300: var(--bconnect-gray-300);
+  --color-bconnect-gray-100: var(--bconnect-gray-100);
+  --color-bconnect-error: var(--bconnect-error);
 
   /* shadcn/ui compatibility */
   --color-background: var(--background);

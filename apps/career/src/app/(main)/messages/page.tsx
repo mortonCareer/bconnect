@@ -56,11 +56,11 @@ export default function MessagesPage() {
 
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-morton-gray-500">로딩 중...</p>
+          <p className="text-m-14 text-bconnect-gray-500">로딩 중...</p>
         </div>
       ) : allChats.length === 0 ? (
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-morton-gray-500">채팅이 없습니다</p>
+          <p className="text-m-14 text-bconnect-gray-500">채팅이 없습니다</p>
         </div>
       ) : (
         <div className="flex flex-col">

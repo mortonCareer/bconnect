@@ -23,7 +23,7 @@ export function CredentialItem({ credential, onDelete, onRenew, isDeleting }: Cr
           height="20"
           viewBox="0 0 20 20"
           fill="none"
-          className="shrink-0 text-morton-primary"
+          className="shrink-0 text-bconnect-primary"
         >
           <circle cx="10" cy="10" r="8.5" stroke="currentColor" strokeWidth="1.5" />
           <path
@@ -36,14 +36,14 @@ export function CredentialItem({ credential, onDelete, onRenew, isDeleting }: Cr
         </svg>
         {/* 인증명 + 만료일 — 같은 줄 */}
         <div className="flex items-baseline gap-2">
-          <span className="text-sb-14 text-morton-gray-900">{label}</span>
-          {expiryText && <span className="text-r-12 text-morton-gray-500">{expiryText}</span>}
+          <span className="text-sb-14 text-bconnect-gray-900">{label}</span>
+          {expiryText && <span className="text-r-12 text-bconnect-gray-500">{expiryText}</span>}
         </div>
       </div>
       <div className="flex items-center gap-2">
         {onRenew && credential.id !== undefined && (
           <button
-            className="rounded border border-morton-primary px-3 py-1 text-r-14 text-morton-primary"
+            className="rounded border border-bconnect-primary px-3 py-1 text-r-14 text-bconnect-primary"
             onClick={() => onRenew(credential.id!)}
           >
             갱신
@@ -51,7 +51,7 @@ export function CredentialItem({ credential, onDelete, onRenew, isDeleting }: Cr
         )}
         {credential.id !== undefined && (
           <button
-            className="rounded border border-morton-gray-500 px-3 py-1 text-r-14 text-morton-gray-500"
+            className="rounded border border-bconnect-gray-500 px-3 py-1 text-r-14 text-bconnect-gray-500"
             onClick={() => onDelete(credential.id!)}
             disabled={isDeleting}
           >

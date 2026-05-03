@@ -36,12 +36,12 @@ export function OneClickTab({ credentials, onDelete, isDeleting }: OneClickTabPr
 
   return (
     <div className="flex flex-col gap-4 px-4 py-4">
-      <p className="text-r-12 text-morton-gray-700">사업자 및 면허 정보를 한 번에 인증하세요.</p>
+      <p className="text-r-12 text-bconnect-gray-700">사업자 및 면허 정보를 한 번에 인증하세요.</p>
 
       {/* 입력 폼 */}
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-2">
-          <label className="text-m-14 text-morton-gray-900">사업자등록번호</label>
+          <label className="text-m-14 text-bconnect-gray-900">사업자등록번호</label>
           <Input
             placeholder="000-00-00000"
             value={businessNumber}
@@ -49,7 +49,7 @@ export function OneClickTab({ credentials, onDelete, isDeleting }: OneClickTabPr
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-m-14 text-morton-gray-900">대표자성명</label>
+          <label className="text-m-14 text-bconnect-gray-900">대표자성명</label>
           <Input
             placeholder="홍길동"
             value={ownerName}
@@ -57,7 +57,7 @@ export function OneClickTab({ credentials, onDelete, isDeleting }: OneClickTabPr
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-m-14 text-morton-gray-900">개업일자</label>
+          <label className="text-m-14 text-bconnect-gray-900">개업일자</label>
           <Input
             placeholder="0000-00-00"
             value={openDate}
@@ -77,28 +77,28 @@ export function OneClickTab({ credentials, onDelete, isDeleting }: OneClickTabPr
       </Button>
 
       {/* 업데이트 날짜 */}
-      <p className="text-center text-r-12 text-morton-gray-700">2026.02.21 업데이트됨</p>
+      <p className="text-center text-r-12 text-bconnect-gray-700">2026.02.21 업데이트됨</p>
 
       {/* 하단 인증 목록 — 심플 리스트 */}
       {oneClickCredentials.length > 0 && (
-        <div className="flex flex-col border-t border-morton-gray-300 pt-4">
+        <div className="flex flex-col border-t border-bconnect-gray-300 pt-4">
           {oneClickCredentials.map((credential) => (
             <div
               key={credential.id}
-              className="flex items-center justify-between border-b border-morton-gray-300 py-3"
+              className="flex items-center justify-between border-b border-bconnect-gray-300 py-3"
             >
               <div className="flex items-baseline gap-2">
-                <span className="text-r-14 text-morton-gray-900">
+                <span className="text-r-14 text-bconnect-gray-900">
                   {credential.type ? getCredentialLabel(credential.type) : '알 수 없음'}
                 </span>
                 {credential.expiredAt && (
-                  <span className="text-r-10 text-morton-gray-700">
+                  <span className="text-r-10 text-bconnect-gray-700">
                     {formatDate(credential.expiredAt)} 만료
                   </span>
                 )}
               </div>
               <button
-                className="rounded border border-morton-gray-500 px-3 py-1 text-r-14 text-morton-gray-700"
+                className="rounded border border-bconnect-gray-500 px-3 py-1 text-r-14 text-bconnect-gray-700"
                 onClick={() => onDelete(credential.id!)}
                 disabled={isDeleting}
               >
