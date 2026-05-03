@@ -21,7 +21,7 @@ GHA에서는 `.github/workflows/figma-state-check.yml` (매주 월 09:00 KST + w
 ```text
 scripts/figma-checks/
 ├── index.mjs                    # 진입점 — CHECKS 배열 등록
-├── check-missing-states.mjs     # 첫 체크: @figma-state 누락 감지
+├── check-figma-coverage.mjs     # 첫 체크: Ready 마킹 frame 커버리지 (figma-first)
 └── lib/
     ├── figma-context.mjs        # Figma API + 코드 @figma 추출 (공유)
     └── report.mjs               # 단일 누적 issue 갱신 (공유)

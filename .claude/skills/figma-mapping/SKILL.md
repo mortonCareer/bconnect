@@ -59,12 +59,12 @@ export default function EditAboutPage() { ... }
 ```tsx
 /**
  * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1240-8132
- * @figma-state career  https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1240-8451
- * @figma-state license https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1387-9351
+ * @figma-state 경력증명서 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1240-8451
+ * @figma-state 국가기술자격증 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1387-9351
  */
 ```
 
-- `@figma-state <name> <url>` — name은 코드의 state/tab 키와 매칭 권장
+- `@figma-state <name> <url>` — name은 Figma frame의 한글 variant와 일치 권장 (공백 없이)
 - 단일 state 페이지는 생략 (대다수 페이지는 `@figma` 한 줄로 충분)
 
 ---

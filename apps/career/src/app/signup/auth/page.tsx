@@ -1,7 +1,7 @@
 /**
  * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-4394
- * @figma-state otp-waiting https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-4405
- * @figma-state otp-error https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-4420
+ * @figma-state OTP대기 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-4405
+ * @figma-state OTP에러 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-4420
  */
 'use client'
 

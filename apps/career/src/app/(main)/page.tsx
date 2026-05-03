@@ -1,6 +1,6 @@
 /**
  * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-5449
- * @figma-state filter-select https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-5501
+ * @figma-state 필터선택 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-5501
  */
 'use client'
 
