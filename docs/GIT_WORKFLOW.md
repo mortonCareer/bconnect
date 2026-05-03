@@ -1,6 +1,6 @@
 # Git 워크플로우
 
-Morton 프로젝트의 Git 및 GitHub 사용 가이드입니다.
+Git 및 GitHub 사용 가이드
 
 ---
 
@@ -410,27 +410,3 @@ git merge dev
 # 4. 충돌 해결 후 푸시
 git push origin feat/123-add-profile-upload --force-with-lease
 ```
-
-### PR 프리뷰가 안 뜰 때
-
-- Vercel 빌드 로그 확인
-- 빌드 에러 수정 후 재푸시
-- 환경 변수 누락 확인
-
-### 이슈가 자동으로 안 닫힐 때
-
-PR 본문이나 커밋 메시지에 다음 중 하나를 포함해야 합니다:
-
-```
-Closes #123
-Fixes #123
-Resolves #123
-```
-
----
-
-## 다음 단계
-
-- **개발 워크플로우**: [DEVELOPMENT_WORKFLOW.md](./DEVELOPMENT_WORKFLOW.md)
-- **QA 및 테스팅**: [QA_AND_TESTING.md](./QA_AND_TESTING.md)
-- **배포**: [DEPLOYMENT.md](./DEPLOYMENT.md)

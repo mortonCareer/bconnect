@@ -1,6 +1,6 @@
 # 개발 워크플로우
 
-Morton의 기능 개발 프로세스를 설명합니다.
+기능 개발 프로세스
 
 ---
 
@@ -23,7 +23,7 @@ Morton의 기능 개발 프로세스를 설명합니다.
    ┌────────────────────────────┐
    │  ERD + BE (CEO)            │
    │       ↕ Mock API (MSW)     │
-   │  퍼블리싱 → FE (CTO)       │
+   │  퍼블리싱 → FE (CTO, FE)    │
    └────────────────────────────┘
 
 5. API 연동 (스토리 단위)
@@ -41,16 +41,12 @@ Morton의 기능 개발 프로세스를 설명합니다.
 
 ## API 스펙 관리
 
-API 스펙은 **`packages/api-client/src/spec/`** 하위에 분리 관리되며, `@redocly/cli` 로 lint/bundle, `orval` 로 TypeScript hook + MSW mock 자동 생성합니다.
+API 스펙은 `packages/api-client/src/spec/` 하위에 분리 관리되며, `@redocly/cli` 로 lint/bundle, `orval` 로 TypeScript hook + MSW mock 자동 생성합니다.
 
 ### 스펙 작성 워크플로
 
-스펙 작성은 CTO 또는 CEO 누구나 시작 가능. 주체는 endpoint 의 도메인에 따라 결정 — FE-주도는 CTO, BE 내부 모델 노출은 CEO.
-
 ```text
-작성자: spec/ 수정
-    ↓
-pnpm api:lint (로컬) 통과 확인 — pnpm api:generate 으로 codegen 출력도 검증
+spec/ 수정
     ↓
 GitHub PR 생성
     ↓
@@ -58,11 +54,11 @@ ci-api-spec (redocly lint) 자동 실행
     ↓
 상대 (CEO 또는 CTO): API 스펙 리뷰
     ↓
-피드백 반영 및 논의
-    ↓
 합의 후 dev → main 브랜치 머지
     ↓
 API 클라이언트 자동 생성 (orval)
+    ↓
+FE 앱(Career, Plan)에서 API 훅 사용
 ```
 
 > **상세 작성 가이드 (디렉토리 구조, envelope 패턴, 새 endpoint 추가 절차, axis 결정 근거 등) 는 [`packages/api-client/CLAUDE.md`](../packages/api-client/CLAUDE.md) 참조**. 본 문서는 워크플로 관점만 다룸.
@@ -85,9 +81,9 @@ pnpm api:generate
 
 ```text
 packages/api-client/src/
-├── spec/                       # 분리된 spec (SSOT, gitignored 아님)
+├── spec/                       # 분리된 spec (SSOT)
 ├── openapi.bundled.yaml        # redocly bundle 산출물 (gitignored)
-└── generated/                  # orval 산출물 (gitignored)
+└── generated/                  # orval 산출물 (gitignored), FE가 참조
     ├── api.ts                  # 모든 hook + handler aggregator
     └── schemas/                # 도메인 타입 정의
 ```
@@ -149,14 +145,6 @@ function EditProfile() {
 현재는 `apps/mock-server/server.js`를 임시로 사용하고 있습니다.
 
 ### MSW 마이그레이션 계획 (진행 중)
-
-**MSW 사용 시 장점:**
-
-- 브라우저/Node 모두 지원
-- 실제 네트워크 레이어에서 인터셉트
-- TypeScript 지원 우수
-- OpenAPI 스펙과 연동 가능
-- 개발/테스트 환경 모두 사용 가능
 
 **예정 구조:**
 
@@ -241,7 +229,7 @@ enableMocking().then(() => {
 3. Spring Boot API 엔드포인트 작성
 4. 단위 테스트 작성 (`./gradlew test`)
 
-### FE 개발 (CTO)
+### FE 개발 (CTO, FE 개발자)
 
 1. **퍼블리싱**: Figma 시안 기반 컴포넌트 작성
    - Tailwind CSS 사용
@@ -302,7 +290,7 @@ Day 7: QA
 
 ### 환경 변수
 
-환경 변수 관리는 **[AGENTS.md](../AGENTS.md)**의 "Environment Variables" 섹션 참조
+환경 변수 관리는 [CLAUDE.md](../CLAUDE.md)의 "Environment Variables" 섹션 참조
 
 ### 로컬 개발 서버 실행
 
@@ -314,16 +302,4 @@ pnpm dev:plan      # http://localhost:3001
 # Backend (Spring Boot)
 cd apps/api
 ./gradlew bootRun  # http://localhost:8080
-
-# Mock API (임시, MSW 마이그레이션 전)
-cd apps/mock-server
-node server.js     # http://localhost:8080
 ```
-
----
-
-## 다음 단계
-
-- **Git 워크플로우**: [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)
-- **QA 및 테스팅**: [QA_AND_TESTING.md](./QA_AND_TESTING.md)
-- **배포**: [DEPLOYMENT.md](./DEPLOYMENT.md)
