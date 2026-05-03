@@ -17,7 +17,7 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 
 ## 역할 및 책임
 
-### CEO (이송목, `fine-pine`)
+### CEO
 
 **백엔드 개발 책임**
 
@@ -34,7 +34,7 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 - 데이터베이스 마이그레이션
 - Backend 성능 최적화
 
-### CTO (손장수, `manamana32321`)
+### CTO
 
 **프론트엔드 + API 스펙 + 인프라 책임**
 
@@ -54,7 +54,7 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 - `infra/` - Terraform 인프라 코드
 - `.github/`, `scripts/` - CI/도구
 
-### Frontend (김예진, TBD)
+### Frontend
 
 **프론트엔드 개발 책임**
 
@@ -67,7 +67,7 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 - `apps/career/`, `apps/plan/` - Next.js 앱 (CTO와 공유)
 - `packages/ui/` - UI 컴포넌트 (CTO와 공유)
 
-### 디자이너 (박정윤, `julyatpark-star`)
+### 디자이너
 
 **UI/UX 디자인 책임**
 
@@ -86,26 +86,28 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 
 ## GitHub 작업 매핑
 
+담당자/리뷰어의 실제 GitHub 핸들은 위 [팀원](#팀원) 표 참조.
+
 ### Issue 담당자 자동 할당
 
-| 작업 유형         | 담당자         | GitHub                   |
-| ----------------- | -------------- | ------------------------ |
-| `⚙️ BE`           | CEO            | `fine-pine`              |
-| `📋 api-spec`     | CTO + CEO      | (CTO 작성, CEO 리뷰)     |
-| `💻 FE`           | CTO + Frontend | `manamana32321` 또는 TBD |
-| `🎨 publishing`   | CTO + Frontend | `manamana32321` 또는 TBD |
-| `☁️ infra`        | CTO            | `manamana32321`          |
-| `🐛 bug:BE`       | CEO            | `fine-pine`              |
-| `🐛 bug:FE`       | CTO + Frontend | `manamana32321` 또는 TBD |
-| `🐛 bug:api-spec` | CTO + CEO      | (함께 결정)              |
+| 작업 유형         | 담당자         | 비고               |
+| ----------------- | -------------- | ------------------ |
+| `⚙️ BE`           | CEO            |                    |
+| `📋 api-spec`     | CTO + CEO      | CTO 작성, CEO 리뷰 |
+| `💻 FE`           | CTO + Frontend |                    |
+| `🎨 publishing`   | CTO + Frontend |                    |
+| `☁️ infra`        | CTO            |                    |
+| `🐛 bug:BE`       | CEO            |                    |
+| `🐛 bug:FE`       | CTO + Frontend |                    |
+| `🐛 bug:api-spec` | CTO + CEO      | 함께 결정          |
 
 ### PR 리뷰어 자동 할당
 
-| 변경 영역                | 리뷰어      | GitHub      |
-| ------------------------ | ----------- | ----------- |
-| `apps/api/` 포함         | CEO         | `fine-pine` |
-| 프론트엔드/인프라만 변경 | 리뷰어 없음 | -           |
-| API 스펙 변경            | 둘 다       | 모두        |
+| 변경 영역                | 리뷰어      |
+| ------------------------ | ----------- |
+| `apps/api/` 포함         | CEO         |
+| 프론트엔드/인프라만 변경 | 리뷰어 없음 |
+| API 스펙 변경            | 둘 다       |
 
 ---
 
