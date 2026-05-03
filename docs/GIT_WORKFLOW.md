@@ -351,6 +351,8 @@ GitHub PR 댓글에 링크 추가
 
 ### 프리뷰 URL 예시
 
+URL 패턴은 [TOOLS.md](./TOOLS.md#terraform-선언적-관리) Vercel 섹션 참조.
+
 ```
 https://morton-career-git-feat-123-add-profile-upload-<team>.vercel.app
 https://morton-plan-git-feat-123-add-profile-upload-<team>.vercel.app

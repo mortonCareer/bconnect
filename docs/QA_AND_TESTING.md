@@ -213,7 +213,7 @@ QA 중 발견된 문제는 다음 기준으로 분류합니다:
 
 ## 환경
 
-- URL: https://morton-career-git-feat-123-<team>.vercel.app/profile
+- URL: https://morton-career-git-feat-123-<team>.vercel.app/profile (패턴은 [TOOLS.md](./TOOLS.md#terraform-선언적-관리) Vercel 섹션 참조)
 - 브라우저: Chrome 120
 - 디바이스: iPhone 15 Pro
 
