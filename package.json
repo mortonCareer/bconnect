@@ -19,7 +19,9 @@
     "api:bundle": "pnpm --filter @morton/api-client bundle",
     "api:lint": "pnpm --filter @morton/api-client lint",
     "figma:connect": "figma connect publish",
-    "figma:connect:dry": "figma connect publish --dry-run"
+    "figma:connect:dry": "figma connect publish --dry-run",
+    "figma:check": "node scripts/figma-checks/index.mjs",
+    "figma:check:dry": "node scripts/figma-checks/index.mjs --dry-run"
   },
   "packageManager": "pnpm@10.23.0",
   "devDependencies": {
