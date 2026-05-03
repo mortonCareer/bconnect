@@ -380,7 +380,7 @@ https://morton-plan-git-feat-123-add-profile-upload-<team>.vercel.app
 
 ## 자동화 스킬
 
-Git 워크플로우를 자동화하는 5가지 스킬이 있습니다:
+Git 워크플로우를 자동화하는 4가지 스킬이 있습니다:
 
 ### 1. issue-management
 
@@ -398,7 +398,7 @@ Git worktree 기반 병렬 작업 관리
 - `feat/#-description` 형식 브랜치 네이밍 (위 브랜치 전략 참조)
 - 워크트리 목록 조회 및 삭제
 
-### 3. commit-convention
+### 3. commit
 
 커밋 메시지 검증 및 생성
 
@@ -413,15 +413,6 @@ Git worktree 기반 병렬 작업 관리
 - 현재 브랜치에서 이슈 번호 추출
 - PR 제목/본문 자동 생성
 - `Closes #123` 자동 추가
-
-### 5. notion-task-sync
-
-Notion 보드와 Git 작업 동기화 (구현 예정)
-
-- 이슈 생성 → Notion "Todo"
-- 브랜치 생성 → "In Progress"
-- PR 생성 → "QA"
-- PR 머지 → "Done"
 
 ---
 

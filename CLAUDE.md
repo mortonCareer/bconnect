@@ -102,20 +102,10 @@ Skills automate common workflows. Located in `.claude/skills/`:
 - `worktree-manager` — Git worktree 기반 병렬 작업 관리
 - `commit` — Conventional Commits 형식 자동 커밋
 - `pr-from-issue` — 이슈 기반 PR 생성, 리뷰어 자동 할당
-- `notion-task-sync` — Notion 보드 동기화 (구현 예정)
 
 **Figma Integration:**
 
 - `figma-mapping` — Figma ↔ 코드 매핑 (인라인 `@figma` JSDoc 주석 + ESLint 강제)
-- `figma-tailwind` — Figma → Tailwind 변환 규칙
-- `figma-verify` — Figma vs 렌더링 시각 비교
-- `figma-compare` — Figma 스플릿 뷰 비교
-- `cva-component` — CVA 컴포넌트 템플릿
-
-**Templates:**
-
-- `react-form-page` — React Hook Form + Zod 페이지 템플릿
-- `showcase-template` — 컴포넌트 쇼케이스 페이지
 
 **Environment:**
 

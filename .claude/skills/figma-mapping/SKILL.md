@@ -146,4 +146,4 @@ mcp__figma__get_metadata(fileKey="EFXofON7gTFbmbE2kB31SS", nodeId="<section-id>"
 
 - ESLint plugin: `packages/config/eslint/plugin-figma.js`
 - 디자인 시스템 메타: `packages/ui/src/styles/globals.css` (디자인 토큰 정의 + design system Figma URL)
-- 관련 스킬: [figma-tailwind](../figma-tailwind/SKILL.md), [figma-verify](../figma-verify/SKILL.md), [cva-component](../cva-component/SKILL.md)
+- CI 인프라: [scripts/figma-checks/CLAUDE.md](../../../scripts/figma-checks/CLAUDE.md)
