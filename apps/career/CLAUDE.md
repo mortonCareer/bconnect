@@ -25,16 +25,16 @@ const PUBLIC_EXACT = ['/login', '/signup/auth', ...]
 const PUBLIC_PREFIX = ['/showcase', '/one-click', ...]
 ```
 
-### Mock fallback — `useMock` 패턴
+### Mock fallback — `useMock` 패턴 (legacy, 제거 대상)
 
-대부분 page.tsx가 API 에러 시 `MOCK_*` constants로 폴백:
+대부분 page.tsx에 API 에러 시 `MOCK_*` constants로 폴백하는 임시 패턴 존재:
 
 ```tsx
 const useMock = isProfileError || (!isProfileLoading && !profileId)
 const data = useMock ? MOCK_DATA : (apiData ?? [])
 ```
 
-리팩토링 시 무심코 제거하면 dev/Vercel preview에서 화면 깨짐. Mock data는 보통 `constants.ts` 또는 페이지 폴더 안에 정의.
+**방향**: 신규 추가 금지. 발견 시 점진적 제거 (MSW 기반 mock으로 대체 — [DEVELOPMENT_WORKFLOW.md](../../docs/DEVELOPMENT_WORKFLOW.md) Mock API 섹션 참조). 제거 시 BE 연동 상태 확인 후 진행.
 
 ### URL state via nuqs
 
@@ -58,8 +58,6 @@ const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'one-clic
 ```
 
 토큰 정의: `packages/ui/src/styles/globals.css`. 신규 색상 추가 시 globals.css에 먼저 정의.
-
-Tailwind v4는 v3와 다른 패턴 (CSS-first, `tailwind.config.ts` 거의 안 씀). v3 지식 그대로 적용 시 동작 X.
 
 ### Figma 매핑 — `@figma` JSDoc
 
