@@ -103,11 +103,16 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 
 ### PR 리뷰어 자동 할당
 
-| 변경 영역                | 리뷰어      |
-| ------------------------ | ----------- |
-| `apps/api/` 포함         | CEO         |
-| 프론트엔드/인프라만 변경 | 리뷰어 없음 |
-| API 스펙 변경            | 둘 다       |
+| 변경 영역                                                                                   | 리뷰어      |
+| ------------------------------------------------------------------------------------------- | ----------- |
+| BE: `apps/api/`                                                                             | CEO         |
+| 인프라: `infra/`, `.github/workflows/`                                                      | CEO         |
+| 프론트엔드: `apps/{career,plan}/`, `packages/{ui,api-client,config}/`                       | CTO         |
+| 크롤러: `apps/crawler/`                                                                     | CTO         |
+| API 스펙: `packages/api-client/src/spec/`                                                   | 모든 개발자 |
+| DX universal: `.claude/`, `docs/`, root 컨벤션 (`commitlint*`, `.husky/`, ESLint config 등) | 모든 개발자 |
+
+여러 영역에 걸친 PR은 해당 룰들의 union 적용. 인프라/DX 변경은 보수적으로 운영 영향 고려.
 
 ---
 
