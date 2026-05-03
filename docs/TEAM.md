@@ -148,18 +148,6 @@ PR 생성 + 리뷰어 할당
 
 ---
 
-## Notion 사용자 매핑
-
-> 향후 Notion 연동 도구 (자동 sync, briefing, board 동기화 등) 구현 시 사용
-
-| 팀원     | Notion User ID | 비고                            |
-| -------- | -------------- | ------------------------------- |
-| CEO      | TBD            | Notion Integration 설정 후 추가 |
-| CTO      | TBD            | Notion Integration 설정 후 추가 |
-| 디자이너 | TBD            | Notion Integration 설정 후 추가 |
-
----
-
 ## 커뮤니케이션
 
 ### 도구별 용도
