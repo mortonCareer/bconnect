@@ -18,7 +18,6 @@ pnpm lint:plan
 대부분 패턴은 [apps/career/CLAUDE.md](../career/CLAUDE.md)와 동일:
 
 - 인증 미들웨어 (Public routes)
-- Mock fallback (`useMock` 패턴)
 - URL state via nuqs
 - Tailwind v4 design tokens
 - Figma 매핑 (`@figma` JSDoc)

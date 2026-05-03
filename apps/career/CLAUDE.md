@@ -25,17 +25,6 @@ const PUBLIC_EXACT = ['/login', '/signup/auth', ...]
 const PUBLIC_PREFIX = ['/showcase', '/one-click', ...]
 ```
 
-### Mock fallback — `useMock` 패턴 (legacy, 제거 대상)
-
-대부분 page.tsx에 API 에러 시 `MOCK_*` constants로 폴백하는 임시 패턴 존재:
-
-```tsx
-const useMock = isProfileError || (!isProfileLoading && !profileId)
-const data = useMock ? MOCK_DATA : (apiData ?? [])
-```
-
-**방향**: 신규 추가 금지. 발견 시 점진적 제거 (MSW 기반 mock으로 대체 — [DEVELOPMENT_WORKFLOW.md](../../docs/DEVELOPMENT_WORKFLOW.md) Mock API 섹션 참조). 제거 시 BE 연동 상태 확인 후 진행.
-
 ### URL state via nuqs
 
 탭/필터/검색 state는 `useQueryState` (nuqs). `useState` 금지.
@@ -90,3 +79,14 @@ kiscon.net이 cloud IP 차단 → self-hosted runner(homelab K3s ARC)에서 크�
 - `scripts/kiscon-sync.ts` (워크플로우 트리거)
 - `app/one-click/_clients/kiscon-s3-client.ts` (S3 read)
 - `.github/workflows/kiscon-sync.yml` (매주 월 09:00 KST)
+
+### Mock fallback — `useMock` 패턴 (legacy, 제거 대상)
+
+대부분 page.tsx에 API 에러 시 `MOCK_*` constants로 폴백하는 임시 패턴 존재:
+
+```tsx
+const useMock = isProfileError || (!isProfileLoading && !profileId)
+const data = useMock ? MOCK_DATA : (apiData ?? [])
+```
+
+**방향**: 신규 추가 금지. 발견 시 점진적 제거 (MSW 기반 mock으로 대체 — [DEVELOPMENT_WORKFLOW.md](../../docs/DEVELOPMENT_WORKFLOW.md) Mock API 섹션 참조). 제거 시 BE 연동 상태 확인 후 진행.
