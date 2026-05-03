@@ -91,7 +91,7 @@ gh pr create --base main --head dev --title "release: v1.x.x"
 
 통합검증 CI(`ci-integration.yml`)가 통과해야 머지 가능합니다. 실패 시 dev에서 수정 후 재시도합니다.
 
-dev 브랜치는 BE/FE 독립 개발을 허용하므로 `openapi.yaml` ↔ FE 타입 drift가 누적될 수 있습니다. 통합은 일반적으로 스프린트 단위로 진행하되, 필요 시 CTO가 임의로 트리거할 수 있습니다. drift는 dev 브랜치에서 직접 수정하며, typecheck 에러가 많을 경우 AI agent에 초안 작성 위임 후 CTO 리뷰.
+dev 브랜치는 BE/FE 독립 개발을 허용하므로 OpenAPI 스펙 ↔ FE 타입 drift가 누적될 수 있습니다. 통합은 일반적으로 스프린트 단위로 진행하되, 필요 시 CTO가 임의로 트리거할 수 있습니다. drift는 dev 브랜치에서 직접 수정하며, typecheck 에러가 많을 경우 AI agent에 초안 작성 위임 후 CTO 리뷰.
 
 ---
 

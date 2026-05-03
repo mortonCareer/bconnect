@@ -37,7 +37,7 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 
 **프론트엔드 및 인프라 책임**
 
-- API 스펙 초안 작성 (`openapi.yaml`)
+- API 스펙 초안 작성 (`packages/api-client`)
 - 퍼블리싱 (Figma → HTML/CSS)
 - Next.js 앱 구현 (Career, Plan)
 - 인프라 관리 (Vercel, Railway, AWS)
@@ -98,7 +98,7 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 ### API 스펙 설계
 
 ```
-CTO: openapi.yaml 초안 작성
+CTO: OpenAPI 스펙 초안 작성
     ↓
 GitHub PR 생성
     ↓
@@ -170,12 +170,6 @@ PR 생성 + 리뷰어 할당
 | Figma  | 디자인 시안, 디자인 피드백      |
 | GitHub | 코드 리뷰, 이슈 트래킹, PR 논의 |
 | Slack  | 일상 커뮤니케이션 (선택)        |
-
-### 응답 시간 기대치
-
-- **긴급 (버그, 배포 이슈)**: 1시간 이내
-- **일반 (PR 리뷰, 이슈)**: 당일 또는 익일
-- **기획/논의**: 주간 미팅에서 논의
 
 ---
 

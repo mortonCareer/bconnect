@@ -11,7 +11,7 @@ Morton의 기능 개발 프로세스를 설명합니다.
    └─ Figma 시안 → Ready for Dev
 
 2. API 스펙 설계
-   └─ CTO: openapi.yaml 초안 작성
+   └─ CTO: OpenAPI 스펙 초안 작성
    └─ CEO: 리뷰
    └─ 합의 후 머지
 
@@ -264,7 +264,7 @@ enableMocking().then(() => {
 
 ```
 Day 1-2: API 스펙 합의
-  - openapi.yaml에 POST /api/v1/users/{userId}/profile 정의
+  - OpenAPI 스펙에 POST /api/v1/users/{userId}/profile 정의
   - 요청/응답 스키마 정의
 
 Day 3-5: 병렬 개발
