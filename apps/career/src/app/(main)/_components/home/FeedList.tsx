@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import { Feed } from '@morton/ui'
+import { Feed } from '@bconnect/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { useFilterParams } from '@/hooks/useFilterParams'
 

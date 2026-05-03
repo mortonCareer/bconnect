@@ -1,5 +1,5 @@
 import { useQueryStates, parseAsArrayOf, parseAsStringLiteral } from 'nuqs'
-import { Trade } from '@morton/api-client'
+import { Trade } from '@bconnect/api-client'
 import type { ExperienceLevel } from '@/lib/experience'
 import { EXPERIENCE_RANGES } from '@/lib/experience'
 

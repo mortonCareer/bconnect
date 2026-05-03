@@ -17,8 +17,8 @@ import {
   getGetMyMemberQueryKey,
   getGetMyProfileQueryKey,
   Trade,
-} from '@morton/api-client'
-import { TopBar, Input, Tag } from '@morton/ui'
+} from '@bconnect/api-client'
+import { TopBar, Input, Tag } from '@bconnect/ui'
 import { TRADE_LABELS, TRADE_GROUPS } from '@/lib/trade-labels'
 import { profileEditSchema, type ProfileEditFormData } from './schema'
 

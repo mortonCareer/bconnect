@@ -16,8 +16,8 @@ import {
   useCreateCredential,
   useDeleteCredential,
   getGetCredentialsQueryKey,
-} from '@morton/api-client'
-import { Tab, TopBar } from '@morton/ui'
+} from '@bconnect/api-client'
+import { Tab, TopBar } from '@bconnect/ui'
 import { useQueryState } from 'nuqs'
 import { MOCK_CREDENTIALS } from '../constants'
 import { OneClickTab } from './_components/OneClickTab'

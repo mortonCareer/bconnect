@@ -10,8 +10,8 @@ import {
   useUpdateMyProfileAbout,
   useQueryClient,
   getGetMyProfileQueryKey,
-} from '@morton/api-client'
-import { TopBar } from '@morton/ui'
+} from '@bconnect/api-client'
+import { TopBar } from '@bconnect/ui'
 
 export default function EditAboutPage() {
   const router = useRouter()

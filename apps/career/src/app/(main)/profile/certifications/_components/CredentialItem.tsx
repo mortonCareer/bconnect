@@ -1,6 +1,6 @@
 'use client'
 
-import type { Credential } from '@morton/api-client'
+import type { Credential } from '@bconnect/api-client'
 import { getCredentialLabel, formatDate } from '../constants'
 
 interface CredentialItemProps {

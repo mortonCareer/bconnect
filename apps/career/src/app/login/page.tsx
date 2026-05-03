@@ -5,14 +5,14 @@
 
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
-import { ApiError, useSendOtp, useVerifyOtp } from '@morton/api-client'
+import { ApiError, useSendOtp, useVerifyOtp } from '@bconnect/api-client'
 import {
   formatPhoneNumber,
   isValidPhoneNumber,
   toE164,
   toNationalNumber,
-} from '@morton/config/phone'
-import { Button, TopBar } from '@morton/ui'
+} from '@bconnect/config/phone'
+import { Button, TopBar } from '@bconnect/ui'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { FormInput, OtpTimer, FormError } from '../signup/_components'

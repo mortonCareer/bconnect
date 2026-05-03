@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import type { Credential } from '@morton/api-client'
-import { Button, Input } from '@morton/ui'
+import type { Credential } from '@bconnect/api-client'
+import { Button, Input } from '@bconnect/ui'
 import { getCredentialLabel, formatDate } from '../../constants'
 
 interface OneClickTabProps {

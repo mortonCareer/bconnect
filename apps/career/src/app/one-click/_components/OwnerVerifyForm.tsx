@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Input } from '@morton/ui'
+import { Button, Input } from '@bconnect/ui'
 import type { VerifyOwnerResult } from '../_clients/types'
 
 interface OwnerVerifyFormProps {

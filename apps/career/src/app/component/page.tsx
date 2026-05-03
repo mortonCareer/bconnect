@@ -3,7 +3,7 @@
  */
 'use client'
 
-import { Input } from '@morton/ui'
+import { Input } from '@bconnect/ui'
 
 export default function ComponentPage() {
   return (

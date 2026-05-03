@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { cn } from '@morton/ui'
+import { cn } from '@bconnect/ui'
 
 interface WorkCardProps {
   postId?: number

@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@morton/ui'
+import { cn } from '@bconnect/ui'
 import type { ExperienceLevel, ExperienceOption } from '../types'
 
 interface ExperienceSelectorProps {

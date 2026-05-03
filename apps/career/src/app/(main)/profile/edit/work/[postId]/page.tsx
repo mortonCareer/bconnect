@@ -5,7 +5,7 @@
 
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { TopBar } from '@morton/ui'
+import { TopBar } from '@bconnect/ui'
 
 // TODO: Post + Task API 연동 (#197)
 const MOCK_WORK = {

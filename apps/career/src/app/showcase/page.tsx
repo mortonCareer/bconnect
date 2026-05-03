@@ -4,7 +4,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Button, Tag, Input, Feed, TopBar, ChatMessage } from '@morton/ui'
+import { Button, Tag, Input, Feed, TopBar, ChatMessage } from '@bconnect/ui'
 
 interface ComponentPreview {
   name: string

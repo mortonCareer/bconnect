@@ -5,9 +5,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useGetCoworkers, useGetMyProfile } from '@morton/api-client'
+import { useGetCoworkers, useGetMyProfile } from '@bconnect/api-client'
 import { getAvatarUrl } from '@/lib/avatar'
-import { TopBar } from '@morton/ui'
+import { TopBar } from '@bconnect/ui'
 import { CoworkerCard } from './_components/CoworkerCard'
 
 // TODO: API 연동 후 제거 — 발표용 mock 데이터

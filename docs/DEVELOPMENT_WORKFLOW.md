@@ -93,7 +93,7 @@ packages/api-client/src/
 **데이터 조회:**
 
 ```typescript
-import { useGetMyMember } from '@morton/api-client'
+import { useGetMyMember } from '@bconnect/api-client'
 
 function MyProfile() {
   const { data, isLoading, error } = useGetMyMember()
@@ -109,7 +109,7 @@ function MyProfile() {
 **데이터 변경:**
 
 ```typescript
-import { useUpdateMyMember } from '@morton/api-client'
+import { useUpdateMyMember } from '@bconnect/api-client'
 
 function EditProfile() {
   const { mutate, isPending } = useUpdateMyMember()

@@ -4,8 +4,8 @@
 'use client'
 
 import Link from 'next/link'
-import { buttonVariants, CheckIcon } from '@morton/ui'
-import { useGetMyMember } from '@morton/api-client'
+import { buttonVariants, CheckIcon } from '@bconnect/ui'
+import { useGetMyMember } from '@bconnect/api-client'
 
 export default function SignupCompletePage() {
   const { data: member } = useGetMyMember()

@@ -10,9 +10,9 @@ import {
   useGetMyProfile,
   useGetCoworkers,
   useGetCredentials,
-} from '@morton/api-client'
-import { Button, Tab, TopBar } from '@morton/ui'
-import type { Credential, Profile } from '@morton/api-client'
+} from '@bconnect/api-client'
+import { Button, Tab, TopBar } from '@bconnect/ui'
+import type { Credential, Profile } from '@bconnect/api-client'
 import { useQueryState } from 'nuqs'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { MOCK_CREDENTIALS } from './certifications/constants'

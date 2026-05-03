@@ -1,4 +1,4 @@
-import { Role } from '@morton/api-client'
+import { Role } from '@bconnect/api-client'
 
 export const ROLE_LABELS: Record<Role, string> = {
   [Role.GUEST]: '게스트',

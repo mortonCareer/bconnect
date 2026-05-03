@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useGetProfile } from '@morton/api-client'
+import { useGetProfile } from '@bconnect/api-client'
 import { TRADE_LABELS } from '@/lib/trade-labels'
 import { getAvatarUrl } from '@/lib/avatar'
 

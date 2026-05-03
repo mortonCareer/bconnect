@@ -1,8 +1,8 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import type { Credential, Profile } from '@morton/api-client'
-import { Tag } from '@morton/ui'
+import type { Credential, Profile } from '@bconnect/api-client'
+import { Tag } from '@bconnect/ui'
 import { getCredentialLabel } from '../certifications/constants'
 import { getAvatarUrl } from '@/lib/avatar'
 

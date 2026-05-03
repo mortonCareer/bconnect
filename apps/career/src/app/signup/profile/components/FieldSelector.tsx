@@ -1,7 +1,7 @@
 'use client'
 
-import { cn } from '@morton/ui'
-import type { Trade } from '@morton/api-client'
+import { cn } from '@bconnect/ui'
+import type { Trade } from '@bconnect/api-client'
 import { TRADE_LABELS } from '@/lib/trade-labels'
 import type { TradeCategory } from '../types'
 

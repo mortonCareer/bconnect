@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Tab, TopBar } from '@morton/ui'
+import { Tab, TopBar } from '@bconnect/ui'
 import { getAvatarUrl } from '@/lib/avatar'
 
 interface Recommendation {

@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { TopBar } from '@morton/ui'
+import { TopBar } from '@bconnect/ui'
 import { FeedList } from './_components/home/FeedList'
 import { FilterSheet } from './_components/home/FilterSheet'
 import { FilterTags } from './_components/home/FilterTags'

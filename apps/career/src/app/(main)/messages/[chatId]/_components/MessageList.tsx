@@ -7,9 +7,9 @@ import {
   getGetChatMessagesQueryKey,
   useGetMyMember,
   useGetMembers,
-} from '@morton/api-client'
-import type { Message, MessageCursorPage } from '@morton/api-client'
-import { ChatMessage } from '@morton/ui'
+} from '@bconnect/api-client'
+import type { Message, MessageCursorPage } from '@bconnect/api-client'
+import { ChatMessage } from '@bconnect/ui'
 import { formatChatTime } from '@/lib/format-time'
 
 interface MessageListProps {

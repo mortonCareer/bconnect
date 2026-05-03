@@ -1,4 +1,4 @@
-import { cn } from '@morton/ui'
+import { cn } from '@bconnect/ui'
 import type { StatusType } from '../_clients/types'
 
 const variantClasses: Record<StatusType, string> = {

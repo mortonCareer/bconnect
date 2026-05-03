@@ -4,7 +4,7 @@
 'use client'
 
 import Link from 'next/link'
-import { TopBar } from '@morton/ui'
+import { TopBar } from '@bconnect/ui'
 
 export default function TopBarDetailPage() {
   return (
@@ -173,7 +173,7 @@ export default function TopBarDetailPage() {
           <section>
             <h2 className="mb-4 text-xl font-semibold text-gray-800">Usage</h2>
             <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
-              {`import { TopBar } from '@morton/ui'
+              {`import { TopBar } from '@bconnect/ui'
 
 // Progress variant - 회원가입 플로우
 <TopBar

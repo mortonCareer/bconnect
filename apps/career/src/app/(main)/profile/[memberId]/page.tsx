@@ -5,8 +5,8 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useGetProfile, useGetCoworkers } from '@morton/api-client'
-import { Button, Tab, TopBar } from '@morton/ui'
+import { useGetProfile, useGetCoworkers } from '@bconnect/api-client'
+import { Button, Tab, TopBar } from '@bconnect/ui'
 import { useQueryState } from 'nuqs'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { ProfileHeader } from '../_components/ProfileHeader'

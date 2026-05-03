@@ -10,9 +10,9 @@ import {
   useGetMyChats,
   useGetMyMember,
   getGetProfileQueryOptions,
-} from '@morton/api-client'
-import type { Profile } from '@morton/api-client'
-import { ChatListItem, TopBar } from '@morton/ui'
+} from '@bconnect/api-client'
+import type { Profile } from '@bconnect/api-client'
+import { ChatListItem, TopBar } from '@bconnect/ui'
 import { formatRelativeTime } from '@/lib/format-time'
 import { TRADE_LABELS } from '@/lib/trade-labels'
 

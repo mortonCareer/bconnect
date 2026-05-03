@@ -26,8 +26,8 @@ import * as React from 'react'
 import { useForm } from 'react-hook-form'
 
 // 2. Internal packages
-import { Button } from '@morton/ui/components/ui/Button'
-import { api } from '@morton/api-client'
+import { Button } from '@bconnect/ui/components/ui/Button'
+import { api } from '@bconnect/api-client'
 
 // 3. Relative imports (grouped by type)
 import { cn } from '@/lib/utils'
@@ -44,7 +44,7 @@ import type { ProfileFormData } from './types'
 
 - Strict mode enabled, no implicit `any`, strict null checks
 - Prefer interfaces for component props, type for unions/intersections
-- Path aliases: `@/*` → `src/*`, `@morton/ui`, `@morton/api-client`, `@morton/config`
+- Path aliases: `@/*` → `src/*`, `@bconnect/ui`, `@bconnect/api-client`, `@bconnect/config`
 
 ## Component Patterns
 
@@ -78,7 +78,7 @@ export function Component({ className, ...props }: ComponentProps) {
 
 ## State Management
 
-- **Server state**: React Query (via generated hooks from `@morton/api-client`)
+- **Server state**: React Query (via generated hooks from `@bconnect/api-client`)
 - **Client state**: Zustand stores (e.g., `auth-store.ts`, `signup-store.ts`)
 - **Form state**: react-hook-form + Zod validation
 
@@ -111,7 +111,7 @@ export class ApiError extends Error {
 ## API Client Usage
 
 ```typescript
-import { useGetUserQuery, useUpdateUserMutation } from '@morton/api-client'
+import { useGetUserQuery, useUpdateUserMutation } from '@bconnect/api-client'
 
 const { data, isLoading, error } = useGetUserQuery({ userId: '123' })
 const { mutate, isPending } = useUpdateUserMutation()

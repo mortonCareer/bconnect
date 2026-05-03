@@ -1,12 +1,12 @@
-# @morton/ui
+# @bconnect/ui
 
 Morton 공용 UI 컴포넌트 패키지. [shadcn/ui](https://ui.shadcn.com) 기반.
 
 ## 사용법
 
 ```tsx
-import { Input } from '@morton/ui'
-import '@morton/ui/styles'
+import { Input } from '@bconnect/ui'
+import '@bconnect/ui/styles'
 ```
 
 ---

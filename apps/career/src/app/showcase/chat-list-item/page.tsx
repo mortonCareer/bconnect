@@ -4,7 +4,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ChatListItem } from '@morton/ui'
+import { ChatListItem } from '@bconnect/ui'
 
 export default function ChatListItemShowcasePage() {
   return (
@@ -136,7 +136,7 @@ export default function ChatListItemShowcasePage() {
           <section>
             <h2 className="mb-4 text-xl font-semibold text-gray-800">Usage</h2>
             <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
-              {`import { ChatListItem } from '@morton/ui'
+              {`import { ChatListItem } from '@bconnect/ui'
 
 // Default (chevron)
 <ChatListItem

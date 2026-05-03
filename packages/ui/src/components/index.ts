@@ -1,4 +1,4 @@
-// @morton/ui - Components
+// @bconnect/ui - Components
 export { Button, buttonVariants } from './ui/Button'
 export { Input, inputVariants } from './ui/Input'
 export { OtpInput } from './ui/OtpInput'

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Tag, TopBar } from '@morton/ui'
-import type { Trade } from '@morton/api-client'
+import { Tag, TopBar } from '@bconnect/ui'
+import type { Trade } from '@bconnect/api-client'
 import { TRADE_GROUPS, TRADE_LABELS } from '@/lib/trade-labels'
 import { EXPERIENCE_OPTIONS } from '@/lib/experience'
 import type { ExperienceLevel } from '@/lib/experience'

@@ -1,2 +1,2 @@
-// @morton/ui - Utils
+// @bconnect/ui - Utils
 export { cn } from '../lib/utils'

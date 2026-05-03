@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { cn } from '@morton/ui'
+import { cn } from '@bconnect/ui'
 
 interface NavItem {
   href: string

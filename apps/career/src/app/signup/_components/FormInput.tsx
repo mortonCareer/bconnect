@@ -1,7 +1,7 @@
 'use client'
 
 import { forwardRef, type InputHTMLAttributes } from 'react'
-import { cn } from '@morton/ui'
+import { cn } from '@bconnect/ui'
 
 export interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: boolean

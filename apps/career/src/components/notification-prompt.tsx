@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@morton/ui'
+import { Button } from '@bconnect/ui'
 import { usePushNotifications } from '@/hooks/use-push-notifications'
 
 /**

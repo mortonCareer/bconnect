@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import type { Credential, CredentialType } from '@morton/api-client'
-import { Button, Tag } from '@morton/ui'
+import type { Credential, CredentialType } from '@bconnect/api-client'
+import { Button, Tag } from '@bconnect/ui'
 import { getCredentialLabel, formatDate } from '../../constants'
 
 interface QualificationTabProps {
