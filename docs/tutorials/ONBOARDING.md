@@ -30,20 +30,9 @@
 - GitHub: Settings → Password and authentication → 2FA (TOTP 권장)
 - Notion: TOTP
 
-### Step 2. SSH key 등록 (push/pull용)
+### Step 2. 도구 설치
 
-GitHub에 SSH key 등록:
-
-```bash
-ssh-keygen -t ed25519 -C "<your email>"
-cat ~/.ssh/id_ed25519.pub  # GitHub Settings → SSH keys 에 등록
-```
-
-GPG 서명은 선택 — 팀 정책 강제 X. 필요 시만.
-
-### Step 3. 도구 설치 (AI 자동화 권장)
-
-기본 셋(Node.js 20+, pnpm 9+, gh, direnv, Claude Code 확장)은 [Claude Code](https://claude.com/code)에 `/setup` 또는 별도 셋업 스킬로 자동화 가능 — follow-up 이슈로 분리 (TBD). 수동 설치하려면:
+기본 셋: Node.js 20+, pnpm 9+, gh, direnv, Claude Code.
 
 ```bash
 node --version  # >= 20
@@ -52,52 +41,57 @@ brew install direnv gh
 gh auth login
 ```
 
-### Step 4. 환경 시크릿
+Claude Code 셋업: [Claude Code 다운로드](https://claude.com/code) → VSCode/터미널 통합. 이후 도구 설치/환경 셋업의 자잘한 작업은 Claude Code 가 도와줄 수 있다.
 
-`.envrc.local`(direnv 시크릿) 받는 절차는 Notion 페이지로 관리: **[합류자 환경 셋업 가이드](https://www.notion.so/morton-so/27a965d2888b80b4961bcc07957776f8)** (홈에서 검색).
-
-```bash
-cd <repo-root>
-direnv allow .  # 환경변수 자동 로드 확인
-```
+> 합류자 도구 설치를 자동화하는 `/setup` 스킬은 미구현 — follow-up 이슈로 분리 예정. 현재는 위 수동 절차.
 
 ---
 
-## Phase 3 — 로컬 환경 verify
+## Phase 3 — Repo + AI 환경 셋업
 
-### Step 1. Repo clone + 의존성 설치
+### Step 1. Repo clone
 
 ```bash
 git clone git@github.com:mortonCareer/bconnect.git
 cd bconnect
+```
+
+### Step 2. AI / Claude 도구 사용 컨벤션 (필수)
+
+Morton 팀은 Claude Code 를 적극 사용. 셋업은 clone 직후 — 이후 모든 작업의 컨텍스트가 됨.
+
+- **글로벌 셋업**: `~/.claude/CLAUDE.md` + `~/.claude/rules/*.md`
+- **워크스페이스 자동 로드**: repo 루트 `CLAUDE.md` + 각 디렉토리의 `<dir>/CLAUDE.md` 가 cwd 기준 자동 로드
+- **`docs/` 안에서 편집 시**: [`docs/CLAUDE.md`](../CLAUDE.md) thin pointer → [`how-to/write-docs.md`](../how-to/write-docs.md) 룰
+- **main 직접 push 금지**: hook 으로 자동 차단. 우회 시도 X
+
+### Step 3. 환경 시크릿
+
+`.envrc.local`(direnv 시크릿) 받는 절차는 Notion 페이지로 관리: **[로컬 환경변수](https://www.notion.so/morton-so/35a965d2888b80a19c8df76ba51cd2d0?source=copy_link)**.
+
+```bash
+direnv allow .  # 환경변수 자동 로드 확인
+```
+
+### Step 4. 의존성 설치 + dev 서버 + lint
+
+```bash
 pnpm install --frozen-lockfile
 # postinstall 시 `pnpm api:generate` (orval) 자동 실행됨
-```
 
-### Step 2. 개발 서버 기동 확인
-
-```bash
 pnpm dev:career  # http://localhost:3000 — 기술자 PWA
 pnpm dev:plan    # http://localhost:3001 — 업체/건축주 웹
+
+pnpm lint && pnpm format:check  # 0 exit 확인
 ```
 
-브라우저에서 두 앱 모두 로딩되는지 확인.
-
-### Step 3. CI 체크 명령 통과 확인
-
-```bash
-pnpm api:generate  # OpenAPI → orval client/hook 생성
-pnpm lint          # ESLint
-pnpm format:check  # Prettier
-```
-
-세 명령 모두 0 exit. 실패 시 Slack 도움 요청.
+실패 시 팀 Slack 도움 요청.
 
 ---
 
 ## Phase 4 — Day 1 Smoke Test PR
 
-워크플로 1회 경험을 위해 **본인 정보를 추가하는 작은 PR**을 만든다.
+워크플로 1회 경험을 위해 **본인 정보를 추가하는 작은 PR** 을 만든다.
 
 ### Step 1. 이슈 생성
 
@@ -105,7 +99,7 @@ pnpm format:check  # Prettier
 
 ### Step 2. 워크트리 + 브랜치
 
-[`how-to/git-workflow.md`](../how-to/git-workflow.md)의 브랜치 네이밍 룰을 따라:
+[`how-to/git-workflow.md`](../how-to/git-workflow.md) 의 브랜치 네이밍 룰:
 
 ```bash
 git worktree add ~/bconnect-worktrees/<issue-num>-onboarding chore/<issue-num>-onboarding origin/dev
@@ -113,11 +107,9 @@ cd ~/bconnect-worktrees/<issue-num>-onboarding
 pnpm install --frozen-lockfile
 ```
 
-### Step 3. team.md 편집
+### Step 3. team.md 편집 + 커밋 + PR
 
-[`docs/reference/team.md`](../reference/team.md)에 본인 행 추가 (또는 GitHub username TBD 채우기).
-
-### Step 4. 커밋 + PR
+[`docs/reference/team.md`](../reference/team.md) 에 본인 행 추가:
 
 ```bash
 git add docs/reference/team.md
@@ -128,42 +120,27 @@ gh pr create --base dev --fill
 
 PR 생성 후 1-2분 안에 **Vercel 프리뷰** 자동 배포 — 댓글에 URL 뜸.
 
-### Step 5. CI / QA / 머지
+### Step 4. CI / QA / 머지
 
 - CI 통과 확인 (lint, format, BE 빌드/테스트)
 - 리뷰어 approve 후 본인이 **Squash and Merge**
 - main 직접 머지 X — PR 타겟은 항상 `dev`
 
-자세한 CI / QA / 배포는 [`how-to/qa-and-testing.md`](../how-to/qa-and-testing.md), [`how-to/deployment.md`](../how-to/deployment.md).
+자세한 CI / QA / 배포: [`how-to/qa-and-testing.md`](../how-to/qa-and-testing.md), [`how-to/deployment.md`](../how-to/deployment.md).
 
 ---
 
 ## Phase 5 — 도메인 / 비즈니스 컨텍스트 (5분 개요)
 
-품앗이(BConnect)는 **인테리어 업체-기술자 연결 구인구직 플랫폼**:
+품앗이(BConnect) 는 **인테리어 업체-기술자 연결 구인구직 플랫폼**:
 
-- **`apps/career`** (PWA) — 기술자(개인)용. 일감 찾기, 동료 추천, 인증서, 작업물 포트폴리오, 원클릭 업체 조회, 동산보드판(MVP-3) 등.
-- **`apps/plan`** (웹) — 업체 + 건축주/발주자용. 기술자 검색, 매칭 요청, 공정표/견적, 반장 리뷰 등.
+- **`apps/career`** (PWA) — 기술자(개인) 용. 일감 찾기, 동료 추천, 인증서, 작업물 포트폴리오, 원클릭 업체 조회, 동산보드판(MVP-3) 등.
+- **`apps/plan`** (웹) — 업체 + 건축주/발주자 용. 기술자 검색, 매칭 요청, 공정표/견적, 반장 리뷰 등.
 - **양쪽 공통** — 메시지, 인증, 파일, 알림, 캘린더.
 
-상세 분류는 메모리/Notion(현재 git 미반영). ERD: [Figma 개발 보드](https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj).
+상세 분류는 메모리/Notion (현재 git 미반영). ERD: [Figma 개발 보드](https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj).
 
-### 결정 컨텍스트
-
-"왜 이렇게 했나"는 [`explanation/adr/`](../explanation/adr/) 디렉토리 직접 탐색.
-
----
-
-## Phase 6 — AI / Claude 도구 사용 컨벤션 (필수)
-
-Morton 팀은 Claude Code를 적극 사용. 신규 합류자도 **반드시** 동일 환경 셋업:
-
-- **글로벌 셋업**: `~/.claude/CLAUDE.md` + `~/.claude/rules/*.md`
-- **워크스페이스 자동 로드**: repo 루트 `CLAUDE.md` + 각 디렉토리의 `<dir>/CLAUDE.md`가 cwd 기준 자동 로드
-- **`docs/`에서 편집 시**: [`docs/CLAUDE.md`](../CLAUDE.md) thin pointer → [`how-to/write-docs.md`](../how-to/write-docs.md) 룰
-- **main 직접 push 금지**: hook으로 자동 차단. 우회 시도 X
-
-새 docs 작성 룰: [`how-to/write-docs.md`](../how-to/write-docs.md).
+"왜 이렇게 했나" 는 [`explanation/adr/`](../explanation/adr/) 직접 탐색.
 
 ---
 
@@ -172,6 +149,7 @@ Morton 팀은 Claude Code를 적극 사용. 신규 합류자도 **반드시** �
 - 개발 사이클: [`how-to/git-workflow.md`](../how-to/git-workflow.md) → [`how-to/development-workflow.md`](../how-to/development-workflow.md) → [`how-to/qa-and-testing.md`](../how-to/qa-and-testing.md) → [`how-to/deployment.md`](../how-to/deployment.md)
 - 사실 lookup: [`reference/`](../reference/)
 - 결정 이유: [`explanation/adr/`](../explanation/adr/)
+- 새 docs 작성 룰: [`how-to/write-docs.md`](../how-to/write-docs.md)
 - 막혔을 때: 팀 Slack 또는 CTO/CEO DM
 
 환영합니다.
