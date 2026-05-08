@@ -144,16 +144,20 @@ function EditProfile() {
 dev 환경에서 모든 API 요청은 **MSW (Mock Service Worker)** 가 가로채서 mock 응답으로 답합니다.
 브라우저의 Service Worker 가 fetch 를 intercept 하므로 FE 코드는 실제 BE 와 통신하는 것과 동일하게 동작합니다.
 
-핸들러는 **orval 이 `openapi.yaml` 에서 자동 생성** 합니다 (`pnpm api:generate`). stateful flow (OTP 검증, FCM 디바이스 UPSERT 등) 만 `packages/mocks/src/overrides/` 에서 손으로 작성합니다. openapi 스키마가 변경되면 자동 생성된 핸들러의 시그니처가 함께 바뀌고, override 의 콜백 시그니처가 컴파일 시점에 미스매치를 잡아냅니다 (drift 방지).
+핸들러는 **orval 이 `spec/v1/<domain>.yaml` 들에서 자동 생성** 합니다 (`pnpm api:generate` — redocly bundle 후 orval 실행). stateful flow (OTP 검증, FCM 디바이스 UPSERT 등) 만 `packages/mocks/src/overrides/` 에서 손으로 작성합니다. spec 이 변경되면 자동 생성된 핸들러의 시그니처가 함께 바뀌고, override 의 콜백 시그니처가 컴파일 시점에 미스매치를 잡아냅니다 (drift 방지).
 
-production 빌드에선 `process.env.NODE_ENV` 가드로 `@morton/mocks` import 가 tree-shake 되어 번들에 포함되지 않습니다.
+production 빌드에선 `process.env.NODE_ENV` 가드로 `@bconnect/mocks` import 가 tree-shake 되어 번들에 포함되지 않습니다.
 
 ### 구조
 
 ```text
 packages/api-client/src/
-├── openapi.yaml                  # SSOT
+├── spec/
+│   ├── openapi.yaml              # 진입점 (info, tags, paths 매핑)
+│   ├── _shared.yaml              # envelope/error + cross-domain entity
+│   └── v1/<domain>.yaml          # 도메인별 paths + schemas (12 도메인)
 ├── orval.config.ts               # mock: { type: 'msw', useExamples: true, locale: 'ko' }
+├── openapi.bundled.yaml          # redocly bundle 산출물 (gitignored)
 └── generated/api.ts              # react-query 훅 + getBconnectAPIMock() (자동 생성)
 
 packages/mocks/src/
@@ -182,15 +186,15 @@ apps/{career,plan}/
 
 ### 새 엔드포인트 추가
 
-1. `packages/api-client/src/openapi.yaml` 에 endpoint 정의
-2. `pnpm api:generate` — react-query 훅 + MSW 핸들러 동시 자동 생성
+1. `packages/api-client/src/spec/v1/<domain>.yaml` 에 endpoint 정의 (신규 도메인이면 파일 자체를 만들고 `spec/openapi.yaml` 의 `paths` 에 매핑)
+2. `pnpm api:generate` — bundle (redocly) → react-query 훅 + MSW 핸들러 자동 생성
 3. **stateful flow 가 필요할 때만**: `packages/mocks/src/overrides/<category>.ts` 추가 → `handlers.ts` 의 spread 에 등록
-4. 끝. career / plan 둘 다 자동 적용됨 (둘 다 `@morton/mocks` 사용).
+4. 끝. career / plan 둘 다 자동 적용됨 (둘 다 `@bconnect/mocks` 사용).
 
 ### 테스트 환경 (Vitest 등)
 
 ```typescript
-import { server } from '@morton/mocks/server'
+import { server } from '@bconnect/mocks/server'
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterEach(() => server.resetHandlers())
