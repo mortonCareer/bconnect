@@ -12,19 +12,26 @@
   "dependencies": {
     "@bconnect/api-client": "workspace:*",
     "@bconnect/ui": "workspace:*",
-    "@sentry/nextjs": "^10.40.0",
-    "next": "16.1.1",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "zod": "^4.3.5",
-    "zustand": "^5.0.9"
+    "@sentry/nextjs": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@bconnect/config": "workspace:*",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "typescript": "^5"
+    "@bconnect/mocks": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "eslint": "catalog:",
+    "msw": "catalog:",
+    "typescript": "catalog:"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

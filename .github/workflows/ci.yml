@@ -19,6 +19,7 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       api-spec: ${{ steps.filter.outputs.api-spec }}
       crawler: ${{ steps.filter.outputs.crawler }}
+      packages: ${{ steps.filter.outputs.packages }}
     steps:
       - uses: actions/checkout@v6
 
@@ -50,6 +51,11 @@ jobs:
               - 'packages/api-client/.redocly.yaml'
             crawler:
               - 'apps/crawler/**'
+            packages:
+              - '**/package.json'
+              - 'pnpm-workspace.yaml'
+              - 'pnpm-lock.yaml'
+              - '.syncpackrc.json'
 
   ci-career:
     needs: changes
@@ -155,6 +161,28 @@ jobs:
 
       - name: Bundle check (sanity)
         run: pnpm api:bundle
+
+  ci-packages:
+    needs: changes
+    if: ${{ needs.changes.outputs.packages == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # syncpack 으로 같은 dep 의 spec 불일치 차단 (workspace 전체).
+      # 새 dep 이 2+ package 에 있으면 pnpm-workspace.yaml 의 catalog 사용 권장.
+      - name: Check package versions
+        run: pnpm package:check
 
   ci-crawler:
     needs: changes
