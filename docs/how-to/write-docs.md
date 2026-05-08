@@ -122,13 +122,3 @@ Diátaxis 자체는 명시적 줄 수 룰을 두지 않는다. 줄 수보다 **�
 `docs/` 아래에 4 카테고리(`tutorials/`, `how-to/`, `reference/`, `explanation/`) 디렉토리. 각 카테고리는 `README.md`(카테고리 의도) + 실제 문서들. 진입점은 `docs/README.md`, AI 자동로드 thin pointer 는 `docs/CLAUDE.md`. 디렉토리 자체와 파일 목록은 GitHub UI 가 자동 표시 — 본 문서가 인덱스를 직접 유지하지 않는다.
 
 ADR 은 `docs/explanation/adr/` (`_template.md` + `<번호>-<제목>.md`).
-
----
-
-## 7. 자기 검증
-
-이 문서 자체:
-
-- **Type**: How-to (룰을 어떻게 적용할지). 그래서 `how-to/write-docs.md`에 둠.
-- **메타데이터**: 상단 For/You'll be able to 두 줄 명시.
-- **외부 도구 참조**: tools.md 명시 인용.
