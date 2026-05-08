@@ -448,6 +448,8 @@ function fileUrl(att: AttachmentMeta): string {
 
 권한은 **two-tier**로 나뉜다 — (1) 엔티티 메타데이터 API와 (2) 첨부 파일 바이트(S3 object). 같은 도메인이라도 두 레이어 정책이 다를 수 있음.
 
+> **`Attachment` 자체는 권한 boundary가 아님.** 본 표는 권한 경계를 정의하는 엔티티(`Storage`, `Post`, `Credential` 등)만 나열한다. Attachment는 부모 엔티티의 정책을 상속하는 **substrate**라 자체 행 없음 — 매핑 테이블(§4.3) 모델의 직접 결과. 업로드 endpoint(`POST /attachments/presign|confirm`)는 데이터 권한이 아니라 **API 권한**(인증된 유저면 OK)으로, 부모 엔티티 연결은 §5.2 시나리오의 후속 API 호출에서 검증된다.
+
 #### 메타데이터 (REST API 응답)
 
 엔티티 record와 그에 포함된 `AttachmentMeta` 필드(id, path, filename, contentType, size).
