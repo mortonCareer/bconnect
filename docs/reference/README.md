@@ -6,10 +6,3 @@
 Reference는 [Diátaxis](https://diataxis.fr/reference.html) 4분할 중 검색 카테고리. 사전처럼 단일 사실을 빠르게 찾는다. 설명/배경 없이 정확함이 우선.
 
 작성 룰: [`how-to/write-docs.md`](../how-to/write-docs.md)
-
-## 문서 목록
-
-- [`team.md`](./team.md) — 팀 구성, GitHub 매핑, 리뷰어 룰
-- [`tools.md`](./tools.md) — 외부 도구 SSoT (Vercel/Railway/AWS/Firebase/GitHub/Figma/Notion/Slack/Sentry)
-- [`notification-deeplinks.md`](./notification-deeplinks.md) — FCM 페이로드 `data.url` 컨벤션
-- [`specs/`](./specs/) — OpenAPI 스펙 (도메인별 분리, 진입점 `openapi.yaml`)

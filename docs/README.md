@@ -46,10 +46,7 @@ docs는 [Diátaxis](https://diataxis.fr) 4분할로 정리됨. "지금 무슨 �
 
 ### 결정 이유 (왜 이렇게?)
 
-- ADR 인덱스: [`explanation/adr/`](./explanation/adr/)
-  - [ADR-0002 단일 S3 버킷](./explanation/adr/0002-single-s3-bucket-with-prefix.md)
-  - [ADR-0003 OpenAPI 3.1 + 도메인 분리](./explanation/adr/0003-openapi-3-1-with-domain-split.md)
-  - [ADR-0004 API response envelope](./explanation/adr/0004-api-response-envelope.md)
+- [`explanation/adr/`](./explanation/adr/) — 시스템 디자인 결정의 영구 기록 (파일명 = 번호 + 제목으로 직접 탐색)
 
 ---
 

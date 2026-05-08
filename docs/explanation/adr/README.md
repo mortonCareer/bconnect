@@ -5,16 +5,7 @@
 
 ADR은 PR 리뷰 코멘트에 묻혀 사라지던 결정을 영구 기록한다. 작성 룰과 형식은 [`how-to/write-docs.md`](../../how-to/write-docs.md) 6장 참조.
 
-새 ADR은 [`_template.md`](./_template.md) 복사로 시작한다.
-
-## 인덱스
-
-| 번호 | 제목                                                                              | Status   | Date       |
-| ---- | --------------------------------------------------------------------------------- | -------- | ---------- |
-| 0001 | [Markdown ADR 도입](./0001-use-markdown-adrs.md)                                  | Accepted | 2026-05-08 |
-| 0002 | [단일 S3 버킷 + prefix 분리](./0002-single-s3-bucket-with-prefix.md)              | Accepted | 2026-04-XX |
-| 0003 | [OpenAPI 3.1 + 도메인 분리](./0003-openapi-3-1-with-domain-split.md)              | Accepted | 2026-04-XX |
-| 0004 | [API response envelope `{success, data, error}`](./0004-api-response-envelope.md) | Accepted | 2025-XX-XX |
+새 ADR은 [`_template.md`](./_template.md) 복사로 시작한다. 인덱스는 디렉토리 listing(파일명 = 번호 + 제목)이 곧 표지.
 
 ## Status 의미
 
