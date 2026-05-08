@@ -29,7 +29,10 @@ export const authOverrides = [
         console.log(`[MSW Auth] OTP sent to ${body.phone}: ${MOCK_OTP_CODE}`)
       }
     }
-    return { expiresAt: new Date(Date.now() + 180000).toISOString() }
+    return {
+      success: true,
+      data: { expiresAt: new Date(Date.now() + 180000).toISOString() },
+    }
   }),
 
   // OTP 검증: orval mock 은 200 만 생성하므로 error 응답이 필요한 이 endpoint 는 raw 핸들러.
@@ -71,17 +74,18 @@ export const authOverrides = [
     verificationCodes.delete(body.phone)
 
     if (body.phone.startsWith(NEW_USER_PHONE_PREFIX)) {
-      return HttpResponse.json({ registered: false, signupToken: generateToken('signup') })
+      return HttpResponse.json({
+        success: true,
+        data: { registered: false, signupToken: generateToken('signup') },
+      })
     }
     const accessToken = generateToken('access')
     const refreshToken = generateToken('refresh')
-    // NOTE: MSW Service Worker 에서 Set-Cookie 헤더를 응답에 포함해도
-    // 브라우저가 cookie store 에 실제로 기록하는 동작은 환경에 따라 달라질 수 있음
-    // (Chromium 기반은 동작, 일부 브라우저/모드는 무시). dev 에서 refresh flow 가
-    // 안 풀릴 경우 BE 가 동일 응답을 내려주는 것을 기준으로 디버깅할 것.
-    // 응답 body 에 refreshToken 을 포함해 두므로 FE 가 in-memory 로도 보관 가능.
     return HttpResponse.json(
-      { registered: true, accessToken, refreshToken },
+      {
+        success: true,
+        data: { registered: true, accessToken, refreshToken },
+      },
       {
         headers: {
           'Set-Cookie': `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=604800; SameSite=Lax`,
@@ -92,8 +96,11 @@ export const authOverrides = [
 
   // refresh: 매번 새 access token 발급. mock 에선 쿠키 검증을 생략 (실제 BE 는 검증).
   getRefreshTokenMockHandler(() => ({
-    accessToken: generateToken('access'),
-    refreshToken: generateToken('refresh'),
+    success: true,
+    data: {
+      accessToken: generateToken('access'),
+      refreshToken: generateToken('refresh'),
+    },
   })),
 
   // logout: void 응답 (orval 기본 시그니처 그대로).
