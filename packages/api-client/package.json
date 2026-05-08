@@ -16,11 +16,11 @@
     "generate:watch": "orval --watch"
   },
   "dependencies": {
-    "@faker-js/faker": "^10.4.0",
+    "@faker-js/faker": "catalog:",
     "@tanstack/react-query": "^5.80.0",
     "@tanstack/react-query-devtools": "^5.80.0",
     "ky": "^1.8.1",
-    "msw": "^2.13.6"
+    "msw": "catalog:"
   },
   "devDependencies": {
     "@redocly/cli": "^2.30.0",
