@@ -154,33 +154,9 @@ docs는 코드 변경 따라 같이 갱신해야 한다. drift 방지:
 
 ## 7. 디렉토리 구조
 
-```
-docs/
-├── README.md                      # 단일 진입점 (인간용 navigation)
-├── CLAUDE.md                      # AI 자동로드용 thin pointer
-├── tutorials/                     # 학습 — 손잡고 따라가는 결과
-│   ├── README.md
-│   └── ONBOARDING.md
-├── how-to/                        # 작업 — 특정 task 실행 절차
-│   ├── README.md
-│   ├── write-docs.md              # 이 문서
-│   ├── deployment.md
-│   ├── git-workflow.md
-│   ├── development-workflow.md
-│   └── qa-and-testing.md
-├── reference/                     # 검색 — 사실 lookup
-│   ├── README.md
-│   ├── team.md
-│   ├── tools.md                   # 외부 도구 SSoT
-│   ├── notification-deeplinks.md
-│   └── specs/                     # OpenAPI spec
-└── explanation/                   # 이해 — 왜 이렇게 했나
-    ├── README.md
-    └── adr/                       # Architecture Decision Records
-        ├── README.md              # ADR 인덱스
-        ├── _template.md
-        └── 0001-...md
-```
+`docs/` 아래에 4 카테고리(`tutorials/`, `how-to/`, `reference/`, `explanation/`) 디렉토리. 각 카테고리는 `README.md`(카테고리 의도) + 실제 문서들. 진입점은 `docs/README.md`, AI 자동로드 thin pointer 는 `docs/CLAUDE.md`. 디렉토리 자체와 파일 목록은 GitHub UI 가 자동 표시 — 본 문서가 인덱스를 직접 유지하지 않는다.
+
+ADR 은 `docs/explanation/adr/` (`_template.md` + `<번호>-<제목>.md`).
 
 ---
 
@@ -190,6 +166,5 @@ docs/
 
 - **Type**: How-to (룰을 어떻게 적용할지). 그래서 `how-to/write-docs.md`에 둠.
 - **메타데이터**: 상단 For/You'll be able to 두 줄 명시.
-- **길이**: ~190줄, How-to 통념 안 (100-300줄).
 - **WHAT 설명**: 룰의 의도(WHY)와 적용 방법(HOW) 위주, "코드를 읽으면 알 수 있는" 사실 없음.
 - **외부 도구 참조**: tools.md 명시 인용.
