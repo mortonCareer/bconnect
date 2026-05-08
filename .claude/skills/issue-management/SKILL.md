@@ -58,7 +58,7 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 
 ## 담당자 할당 규칙
 
-> **SSoT**: 담당자 할당 규칙과 GitHub 사용자명 매핑은 [docs/TEAM.md](../../../docs/TEAM.md)의 "GitHub 작업 매핑" 섹션을 참조하세요.
+> **SSoT**: 담당자 할당 규칙과 GitHub 사용자명 매핑은 [docs/reference/team.md](../../../docs/reference/team.md)의 "GitHub 작업 매핑" 섹션을 참조하세요.
 
 ## 사용 예시
 
@@ -154,5 +154,5 @@ gh issue view 123
 
 ## 참고 문서
 
-- [Git Workflow](../../../docs/GIT_WORKFLOW.md) - 이슈 기반 개발 프로세스
-- [QA & Testing](../../../docs/QA_AND_TESTING.md) - 버그 판단 기준
+- [Git Workflow](../../../docs/how-to/git-workflow.md) - 이슈 기반 개발 프로세스
+- [QA & Testing](../../../docs/how-to/qa-and-testing.md) - 버그 판단 기준

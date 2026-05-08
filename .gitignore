@@ -36,7 +36,6 @@ next-env.d.ts
 
 # IDE
 .idea
-.vscode
 
 # terraform
 .terraform/
@@ -85,7 +84,10 @@ bin/
 /.nb-gradle/
 
 ### VS Code ###
-.vscode/
+# 공유 설정만 추적: extensions, settings (개인 launch/tasks 등은 ignore)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 
 ### Environments ###
 *.env
