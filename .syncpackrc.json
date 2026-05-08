@@ -1,0 +1,15 @@
+{
+  "$schema": "https://unpkg.com/syncpack@latest/dist/schema.json",
+
+  "//": "버전 spec SSoT — 같은 dep 이 여러 workspace package 에 있을 때 spec 불일치 차단.",
+  "//1": "공유 dep 은 pnpm-workspace.yaml 의 catalog 사용 권장 (https://pnpm.io/catalogs).",
+
+  "versionGroups": [
+    {
+      "label": "workspace 내부 패키지는 항상 workspace:* 참조",
+      "packages": ["**"],
+      "dependencies": ["@bconnect/**"],
+      "pinVersion": "workspace:*"
+    }
+  ]
+}
