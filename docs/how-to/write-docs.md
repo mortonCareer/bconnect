@@ -33,7 +33,7 @@ Diátaxis 자체는 명시적 줄 수 룰을 두지 않는다. 줄 수보다 **�
 | Reference   | 길이 무관, 구조 우선                | TOC 깊이 4 넘으면 split 고려      |
 | Explanation | essay 형식, 한 주제 깊이 있게       | 한 글에서 결정 둘 이상 정당화     |
 
-**Anti-example**: [`how-to/deployment.md`](./deployment.md)(이전 `DEPLOYMENT.md`, 449줄) — How-to(배포 절차) + Reference(URL/환경) + Explanation(인프라 선택 이유) 셋이 섞여 있음. P1에서 분해 예정 ([#288](https://github.com/mortonCareer/bconnect/issues/288)).
+한 파일이 분해 신호 셋 이상에 걸리면 type별 분리(별도 How-to + 별도 Reference + 별도 Explanation)가 옳다.
 
 ---
 
