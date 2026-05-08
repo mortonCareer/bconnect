@@ -7,6 +7,10 @@
 {
   "default": true,
 
+  // MD013 (line-length): 한국어 + 풍부한 table 셀에서 80자 한계가 비현실적.
+  // 줄 길이 강제는 가독성 도구가 아닌 잡음 → 비활성 (Diátaxis 진영도 길이 룰 비강제).
+  "MD013": false,
+
   // MD033 (no-inline-html): docs/reference/tools.md 가 table 셀에 <ul><li> 사용
   // (markdown native bullet 은 셀 안에서 줄바꿈 표현 한계). 비활성.
   "MD033": false,
