@@ -9,7 +9,6 @@ import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Tag } from '@morton/ui'
 import { ApiError, useRegisterMember, useCreateProfile, Role, Trade } from '@morton/api-client'
-import type { Member } from '@morton/api-client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import { TRADE_LABELS, TRADE_GROUPS } from '@/lib/trade-labels'
@@ -84,22 +83,13 @@ export default function SignupProfilePage() {
           signupToken: formData.signupToken,
           username: formData.username,
           name: data.name,
-          phone: formData.phone.replace(/^\+82/, '0'),
           picture: '',
           role: selectedRole,
         },
       })
 
-      // 회원가입 성공 — 로그인 처리 (BE가 accessToken + refreshToken 쿠키 발급)
-      login(
-        {
-          id: result.memberId,
-          name: data.name,
-          username: formData.username,
-          role: selectedRole,
-        } as Member,
-        result.accessToken
-      )
+      // 회원가입 성공 — accessToken 저장 (member 정보는 useGetMyMember 로 별도 조회)
+      login(result.accessToken)
 
       // 프로필 데이터 생성 (시공분야/경력/주소/한줄소개)
       try {
@@ -109,7 +99,16 @@ export default function SignupProfilePage() {
             trades: data.fields as Trade[],
             experience: EXPERIENCE_TO_YEARS[data.experience],
             headline: data.headline || undefined,
-            address: data.address ? { street: data.address } : undefined,
+            // TODO #280 — 카카오 우편번호 도입 전 임시 mock 값. zipcode/state/lat/lng 0 으로
+            // address 는 BE-required 라 undefined 불가 — 비어있으면 empty city 로 (BE validation 위임)
+            address: {
+              zipcode: '',
+              city: data.address || '',
+              state: '',
+              street: data.address || '',
+              latitude: 0,
+              longitude: 0,
+            },
           },
         })
       } catch (profileErr) {

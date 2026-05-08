@@ -27,6 +27,7 @@ paths:
         - Members
       security: []
       summary: 회원가입
+      description: 회원가입 + 자동 로그인
       requestBody:
         required: true
         content:
@@ -46,8 +47,7 @@ paths:
                       - data
                     properties:
                       data:
-                        type: integer
-                        format: int64
+                        $ref: '#/components/schemas/RegisterMemberResponse'
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다
@@ -219,6 +219,16 @@ components:
           format: uri
         role:
           $ref: '#/components/schemas/Role'
+    RegisterMemberResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
     UpdateMemberRequest:
       type: object
       required:

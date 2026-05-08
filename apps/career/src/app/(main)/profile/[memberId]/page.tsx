@@ -5,7 +5,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useGetMembers, useGetProfile, useGetCoworkers } from '@morton/api-client'
+import { useGetProfile, useGetCoworkers } from '@morton/api-client'
 import { Button, Tab, TopBar } from '@morton/ui'
 import { useQueryState } from 'nuqs'
 import { useFeedItems } from '@/hooks/useFeedItems'
@@ -24,14 +24,12 @@ export default function MemberProfilePage() {
   const memberId = Number(params.memberId)
   const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'intro' })
 
-  const { data: members, isLoading: isMemberLoading } = useGetMembers({
+  // useGetProfile 응답 = ProfileAndMember = { member, profile } (member 도 함께 옴)
+  const { data: profileAndMember, isLoading: isProfileLoading } = useGetProfile(memberId, {
     query: { enabled: !isNaN(memberId) },
   })
-  const member = members?.find((m) => m.id === memberId)
-
-  const { data: profile, isLoading: isProfileLoading } = useGetProfile(memberId, {
-    query: { enabled: !isNaN(memberId) },
-  })
+  const member = profileAndMember?.member
+  const profile = profileAndMember?.profile
 
   const { postCount } = useFeedItems({ authorId: profile?.id })
   const { data: coworkers } = useGetCoworkers(
@@ -41,7 +39,7 @@ export default function MemberProfilePage() {
   // TODO: 추천서 API 연동
   const recommendationCount = 0
 
-  const isLoading = isProfileLoading || (isMemberLoading && !profile)
+  const isLoading = isProfileLoading
 
   if (isLoading) {
     return (
@@ -76,8 +74,8 @@ export default function MemberProfilePage() {
 
       <ProfileHeader
         name={member?.name}
-        picture={member?.picture}
-        city={profile.address?.city}
+        picture={member?.picture ?? undefined}
+        city={profile?.address?.city}
         headline={profile?.headline}
         primaryTrade={profile?.primaryTrade}
         experience={profile?.experience}

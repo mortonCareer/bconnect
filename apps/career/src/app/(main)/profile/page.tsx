@@ -12,7 +12,7 @@ import {
   useGetCredentials,
 } from '@morton/api-client'
 import { Button, Tab, TopBar } from '@morton/ui'
-import type { Credential } from '@morton/api-client'
+import type { Credential, Profile } from '@morton/api-client'
 import { useQueryState } from 'nuqs'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { MOCK_CREDENTIALS } from './certifications/constants'
@@ -21,17 +21,22 @@ import { IntroSection } from './_components/IntroSection'
 import { WorksSection } from './_components/WorksSection'
 
 // TODO: API 연동 후 제거 — 발표용 mock 데이터
+const MOCK_TIMESTAMP = '2026-01-01T00:00:00Z'
 const MOCK_MEMBER = { name: '이송목', username: 'finepine_official', picture: undefined }
+// TODO #280 — Address 의 zipcode/state/lat/lng 는 카카오 우편번호 도입 후 실제 값
 const MOCK_PROFILE = {
   id: 1,
+  memberId: 1,
   primaryTrade: 'TILING' as const,
   trades: ['TILING' as const],
   experience: 3,
   headline: '안녕하세요, 타일 준기공 이송목입니다. 믿고 맡겨주신다면 성실히 임하겠습니다.',
   about:
     '안녕하세요, 도배 준기공 이송목입니다. 수입타일을 전문으로 시공하고 있습니다.\n\n바닥, 벽면, 욕실 타일 모두 작업 가능하며, 줄눈 정밀도와 평탄 마감에 자신 있습니다.\n\n시공문의\n010-8335-8632\nlsm3645@g.skku.edu\n\n#타일 #수입타일 #욕실타일 #바닥타일',
-  address: { city: '경기도' },
-}
+  address: { zipcode: '', city: '경기도', state: '', street: '', latitude: 0, longitude: 0 },
+  createdAt: MOCK_TIMESTAMP,
+  modifiedAt: MOCK_TIMESTAMP,
+} satisfies Profile
 
 const TAB_ITEMS = [
   { key: 'intro', label: '소개' },
@@ -90,7 +95,7 @@ export default function MyProfilePage() {
 
       <ProfileHeader
         name={member.name}
-        picture={member.picture}
+        picture={member.picture ?? undefined}
         city={profile.address?.city}
         headline={profile.headline}
         primaryTrade={profile.primaryTrade}

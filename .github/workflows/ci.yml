@@ -25,15 +25,22 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          # spec 만 변경된 PR 은 ci-career/ci-plan skip — spec ↔ FE drift 는
+          # FE follow-up PR 에서 해소 (dev → main 의 ci-integration 가 최종 gate).
+          # api-spec 자체는 항상 lint/bundle 검증.
           filters: |
             career:
               - 'apps/career/**'
               - 'packages/**'
+              - '!packages/api-client/src/spec/**'
+              - '!packages/api-client/.redocly.yaml'
               - 'package.json'
               - 'pnpm-lock.yaml'
             plan:
               - 'apps/plan/**'
               - 'packages/**'
+              - '!packages/api-client/src/spec/**'
+              - '!packages/api-client/.redocly.yaml'
               - 'package.json'
               - 'pnpm-lock.yaml'
             api:
@@ -58,8 +65,12 @@ jobs:
           node-version: 24
           cache: 'pnpm'
 
+      # postinstall 이 자동으로 pnpm api:generate 실행 (root package.json)
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm --filter morton-career typecheck
 
       - name: Lint
         run: pnpm --filter morton-career lint
@@ -81,8 +92,12 @@ jobs:
           node-version: 24
           cache: 'pnpm'
 
+      # postinstall 이 자동으로 pnpm api:generate 실행 (root package.json)
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm --filter morton-plan typecheck
 
       - name: Lint
         run: pnpm --filter morton-plan lint

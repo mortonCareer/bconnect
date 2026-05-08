@@ -12,6 +12,10 @@ export const ROLE_LABELS: Record<Role, string> = {
   [Role.ADMIN]: '관리자',
 }
 
+export function getRoleLabel(role: Role): string {
+  return ROLE_LABELS[role] ?? role
+}
+
 /** 회원가입 시 선택 가능한 유형 (Figma 기준) */
 export const SIGNUP_ROLES: Role[] = [
   Role.CLIENT,
