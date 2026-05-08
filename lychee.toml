@@ -1,0 +1,27 @@
+# lychee — 깨진 링크 검출기
+# docs: https://lychee.cli.rs/usage/config/
+
+# 검사 대상
+include_verbatim = true     # ``` 코드 블록 안 링크도 검사
+include_mail = false        # mailto: 검사 X (외부 의존 + 인증 노이즈)
+
+# 동작
+max_redirects = 5
+max_concurrency = 32
+timeout = 20                # 초
+
+# HTTP
+accept = [200, 204, 206, 301, 302, 304, 307, 308, 401, 403, 429]
+# 401/403/429: 외부 SaaS 인증 wall — false-fail 방지 (실제 URL 존재 확인은 .lycheeignore 로)
+# 429: rate-limit, 일시적
+
+# Github 토큰: env GITHUB_TOKEN 자동 사용 (rate-limit 완화)
+# CI 에서 secrets.GITHUB_TOKEN 으로 주입
+
+# Cache
+cache = true
+max_cache_age = "1d"
+
+# 출력
+no_progress = true
+verbose = "warn"

@@ -1,0 +1,22 @@
+# 인증 wall — 링크는 살아있으나 익명 접근 시 401/403
+# (lychee.toml accept 에 401/403 포함했으나 명시적 ignore 가 메시지 가독성 ↑)
+
+# Vercel / Railway / AWS / Firebase 콘솔
+^https://vercel\.com/morton-2262d67a
+^https://railway\.com/project
+^https://console\.firebase\.google\.com
+^https://morton-so\.signin\.aws\.amazon\.com
+
+# Notion / Slack / Sentry / Figma
+^https://www\.notion\.so/morton-so
+^https://app\.slack\.com/client
+^https://morton-2l\.sentry\.io
+^https://www\.figma\.com/(design|board|file)
+
+# GitHub private 자체는 검증되지만 사용 흔적 미세하게 남음 — pull/issue 안전
+# (검사 유지: 대부분 public 처럼 동작)
+
+# 로컬 개발 URL — 검사 의미 없음
+^https?://localhost
+^https?://127\.0\.0\.1
+^https?://0\.0\.0\.0

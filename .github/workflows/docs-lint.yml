@@ -1,0 +1,71 @@
+name: docs-lint
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - '**/*.md'
+      - '**/*.mdx'
+      - '.markdownlint.jsonc'
+      - 'lychee.toml'
+      - '.lycheeignore'
+      - '.github/workflows/docs-lint.yml'
+  pull_request:
+    paths:
+      - '**/*.md'
+      - '**/*.mdx'
+      - '.markdownlint.jsonc'
+      - 'lychee.toml'
+      - '.lycheeignore'
+      - '.github/workflows/docs-lint.yml'
+
+# 같은 PR/브랜치 push 연속 시 옛 run cancel
+concurrency:
+  group: docs-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  markdownlint:
+    name: markdownlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: markdownlint-cli2
+        uses: DavidAnson/markdownlint-cli2-action@v20
+        with:
+          # 검사 범위: 모든 .md 파일. .markdownlint.jsonc 가 룰 SSoT.
+          # node_modules 등은 markdownlint-cli2 의 default ignore 가 처리.
+          globs: |
+            **/*.md
+            !**/node_modules/**
+            !**/.next/**
+            !**/dist/**
+            !**/build/**
+            !packages/api-client/src/generated/**
+
+  link-check:
+    name: lychee link check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Restore lychee cache
+        uses: actions/cache@v4
+        with:
+          path: .lycheecache
+          key: lychee-${{ github.sha }}
+          restore-keys: lychee-
+
+      - name: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # docs/ 와 root level *.md 만 검증
+          args: >-
+            --config lychee.toml
+            --base .
+            --no-progress
+            './**/*.md'
+            './**/*.mdx'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,26 @@
+{
+  // Morton docs markdown lint 룰
+  // 룰 의도: docs/how-to/write-docs.md 4장 안티패턴 차단 보조.
+  // 너무 strict 한 룰은 한국어 docs + tools.md 표현(<ul><li>, table)과 충돌 → 처음엔 lenient.
+
+  "default": true,
+
+  // line-length: 한국어 문장 + 풍부한 table 셀에서 빈번 위반 → 비활성
+  "MD013": false,
+
+  // no-inline-html: tools.md 가 table 셀에 <ul><li> 사용 (markdown table 한계)
+  "MD033": false,
+
+  // no-duplicate-heading: section 내 중복은 OK (예: 여러 ADR 의 ## Context)
+  "MD024": { "siblings_only": true },
+
+  // no-bare-urls: prettier 가 자동 링크화하므로 굳이 막지 않음
+  "MD034": false,
+
+  // fenced-code-language: 간혹 plain block 허용
+  "MD040": false,
+
+  // emphasis-style: prettier 가 _ vs * 알아서 — 충돌 방지
+  "MD049": false,
+  "MD050": false
+}
