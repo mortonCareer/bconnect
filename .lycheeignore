@@ -1,22 +1,26 @@
-# 인증 wall — 링크는 살아있으나 익명 접근 시 401/403
-# (lychee.toml accept 에 401/403 포함했으나 명시적 ignore 가 메시지 가독성 ↑)
+# lychee.toml 의 보조 — 정규식 패턴으로 검사 제외 도메인 명시.
+#
+# 왜 필요한가: Vercel / Railway / AWS 콘솔 등은 익명 접근 시 인증 wall 로 401/403 응답.
+#  lychee.toml accept 에 401/403 포함했으나, 명시적 ignore 가 다음 둘에서 유리:
+#  1. CI 로그 가독성 ↑ (false-positive warning 자체가 안 뜸)
+#  2. 외부 서비스 동작 변경 시 (4xx → 5xx 같은) 잘못 fail 안 되도록 안전망
+#
+# 추가 시 정규식 형태 (^https://example\.com).
 
-# Vercel / Railway / AWS / Firebase 콘솔
+# 인증 wall — 링크는 살아있으나 익명 접근 시 401/403
+# (Vercel / Railway / AWS / Firebase 콘솔)
 ^https://vercel\.com/morton-2262d67a
 ^https://railway\.com/project
 ^https://console\.firebase\.google\.com
 ^https://morton-so\.signin\.aws\.amazon\.com
 
-# Notion / Slack / Sentry / Figma
+# Notion / Slack / Sentry / Figma — 모두 워크스페이스/계정 인증 필요
 ^https://www\.notion\.so/morton-so
 ^https://app\.slack\.com/client
 ^https://morton-2l\.sentry\.io
 ^https://www\.figma\.com/(design|board|file)
 
-# GitHub private 자체는 검증되지만 사용 흔적 미세하게 남음 — pull/issue 안전
-# (검사 유지: 대부분 public 처럼 동작)
-
-# 로컬 개발 URL — 검사 의미 없음
+# 로컬 개발 URL — CI 환경에서 검증 의미 없음
 ^https?://localhost
 ^https?://127\.0\.0\.1
 ^https?://0\.0\.0\.0

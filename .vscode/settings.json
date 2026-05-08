@@ -1,10 +1,16 @@
 {
+  // 저장 시 자동 포맷 — Prettier 룰 (.prettierrc) 가 SSoT.
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // 저장 시 ESLint auto-fix — eslint.config 가 SSoT, "explicit" 은 명시 호출 시만 실행해서
+  // 무관한 파일까지 건드리지 않게 함.
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
 
+  // 파일 타입별 default formatter 명시 — Prettier 가 jsonc / yaml / md 까지 책임지게 강제.
+  // (다른 formatter 가 우연히 등록될 경우 충돌 방지)
   "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
   "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
   "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
@@ -14,25 +20,32 @@
   "[yaml]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
   "[markdown]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
 
+  // Tailwind IntelliSense — `cn()` `cva()` `clsx()` 헬퍼 호출 안의 문자열도 클래스로 인식하게.
+  // Morton 은 packages/ui 가 cva 기반 component 다수, app 단에서 cn 으로 합성.
   "tailwindCSS.experimental.classRegex": [
     ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
     ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
     ["clsx\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
   ],
 
+  // ESLint workingDirectories — 모노레포 안의 각 app/package 의 eslint.config 를 정확히 적용.
+  // pattern 안 쓰면 root config 만 사용해 app 별 차이 무시됨.
   "eslint.workingDirectories": [{ "pattern": "apps/*" }, { "pattern": "packages/*" }],
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
 
+  // OpenAPI 파일 식별자 — 42crunch 확장이 알아보고 specialized UI 적용 (validation/preview).
   "files.associations": {
     "openapi.yaml": "openapi-yaml",
     "openapi.yml": "openapi-yaml",
     "*.openapi.yaml": "openapi-yaml"
   },
 
+  // GHA workflow YAML schema — redhat.vscode-yaml 이 자동완성 + 룰 위반 표시.
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.{yml,yaml}"
   },
 
+  // 검색 시 노이즈 제외 — generated/ 와 lock 파일은 노이즈가 너무 큼.
   "search.exclude": {
     "**/node_modules": true,
     "**/.next": true,

@@ -1,4 +1,16 @@
-# lychee — 깨진 링크 검출기
+# lychee — markdown 안의 깨진 링크 자동 검출기
+#
+# 왜 필요한가:
+# - docs 가 코드와 drift 가 가장 심한 곳이 "옛 파일/이슈 링크" — 사람이 매번 일일이 검증 불가
+# - PR 마다 자동 검증하면 stale 링크가 main 에 들어가는 것을 차단
+# - 본 PR (#288) 자체도 git mv 로 다수 경로 변경 — lychee 가 회귀 검출 도구
+#
+# 어떻게 작동:
+# - .github/workflows/docs-lint.yml 에서 lychee-action 이 본 config 로드
+# - 모든 .md 안의 [text](url) 을 HTTP 호출하거나 파일시스템 stat
+# - 200/204/3xx 면 OK, 실패면 PR 에 fail
+# - 인증 wall (Vercel/Notion 콘솔 등) 은 .lycheeignore 로 false-fail 방지
+#
 # docs: https://lychee.cli.rs/usage/config/
 
 # 검사 대상
@@ -12,13 +24,14 @@ timeout = 20                # 초
 
 # HTTP
 accept = [200, 204, 206, 301, 302, 304, 307, 308, 401, 403, 429]
-# 401/403/429: 외부 SaaS 인증 wall — false-fail 방지 (실제 URL 존재 확인은 .lycheeignore 로)
-# 429: rate-limit, 일시적
+# 401/403/429 도 accept: 외부 SaaS 가 익명에 401 응답하는 경우 false-fail 방지
+# (URL 자체는 살아있음). 일관된 ignore 는 .lycheeignore 로.
+# 429 는 일시적 rate-limit — fail 아님.
 
 # Github 토큰: env GITHUB_TOKEN 자동 사용 (rate-limit 완화)
 # CI 에서 secrets.GITHUB_TOKEN 으로 주입
 
-# Cache
+# Cache (반복 PR run 시 외부 호출 절약)
 cache = true
 max_cache_age = "1d"
 
