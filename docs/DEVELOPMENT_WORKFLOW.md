@@ -150,28 +150,11 @@ production 빌드에선 `process.env.NODE_ENV` 가드로 `@bconnect/mocks` impor
 
 ### 구조
 
-```text
-packages/api-client/src/
-├── spec/
-│   ├── openapi.yaml              # 진입점 (info, tags, paths 매핑)
-│   ├── _shared.yaml              # envelope/error + cross-domain entity
-│   └── v1/<domain>.yaml          # 도메인별 paths + schemas (12 도메인)
-├── orval.config.ts               # mock: { type: 'msw', useExamples: true, locale: 'ko' }
-├── openapi.bundled.yaml          # redocly bundle 산출물 (gitignored)
-└── generated/api.ts              # react-query 훅 + getBconnectAPIMock() (자동 생성)
+각 패키지의 자체 CLAUDE.md 참조 (각자 SoT):
 
-packages/mocks/src/
-├── overrides/
-│   ├── auth.ts                   # OTP 검증 stateful, signup/login 분기, error 응답
-│   └── devices.ts                # FCM 토큰 UPSERT 의미
-├── handlers.ts                   # [...overrides, ...getBconnectAPIMock()]
-├── browser.ts                    # setupWorker
-└── server.ts                     # setupServer (테스트용)
-
-apps/{career,plan}/
-├── public/mockServiceWorker.js   # npx msw init 자동 생성
-└── src/components/msw-provider.tsx  # dev only 초기화 게이트
-```
+- spec + orval codegen: [`packages/api-client/CLAUDE.md`](../packages/api-client/CLAUDE.md)
+- handlers / overrides / browser·server entry: [`packages/mocks/CLAUDE.md`](../packages/mocks/CLAUDE.md)
+- `apps/{career,plan}/`: `public/mockServiceWorker.js` (msw postinstall 자동 생성, gitignored) + `src/components/msw-provider.tsx` (dev only gate)
 
 ### 활성화 흐름
 
