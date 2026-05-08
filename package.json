@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "prepare": "husky && sh scripts/link-env.sh",
-    "postinstall": "pnpm api:generate",
+    "postinstall": "pnpm api:generate && pnpm msw:init",
+    "msw:init": "pnpm --filter morton-career exec msw init public --save && pnpm --filter morton-plan exec msw init public --save",
     "dev": "pnpm --filter morton-career --filter morton-plan dev",
     "dev:career": "pnpm --filter morton-career dev",
     "dev:plan": "pnpm --filter morton-plan dev",
