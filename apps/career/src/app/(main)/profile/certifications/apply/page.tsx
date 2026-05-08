@@ -16,8 +16,8 @@ import {
   useCreateCredential,
   useDeleteCredential,
   getGetCredentialsQueryKey,
-} from '@morton/api-client'
-import { Tab, TopBar } from '@morton/ui'
+} from '@bconnect/api-client'
+import { Tab, TopBar } from '@bconnect/ui'
 import { useQueryState } from 'nuqs'
 import { MOCK_CREDENTIALS } from '../constants'
 import { OneClickTab } from './_components/OneClickTab'
@@ -84,7 +84,7 @@ export default function CertificationApplyPage() {
       <div className="flex flex-col">
         <TopBar variant="default" title="인증 신청" showAction={false} />
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-morton-gray-500">로딩 중...</p>
+          <p className="text-m-14 text-bconnect-gray-500">로딩 중...</p>
         </div>
       </div>
     )

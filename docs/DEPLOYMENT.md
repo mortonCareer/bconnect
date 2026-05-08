@@ -1,12 +1,12 @@
 # 배포
 
-Morton 프로젝트의 배포 환경 및 프로세스를 설명합니다.
+배포 환경 및 프로세스
 
 ---
 
 ## 배포 환경
 
-Morton은 **2단계 배포 모델**을 사용합니다:
+bconnect은 **2단계 배포 모델**을 사용합니다:
 
 ```
 dev (개발 및 QA)  →  prod (프로덕션)
@@ -23,9 +23,7 @@ dev (개발 및 QA)  →  prod (프로덕션)
 - **배포 트리거**: PR 생성 또는 업데이트
 - **배포 플랫폼**: Vercel (Frontend), Railway (Backend)
 - **데이터**: 테스트 데이터 또는 Mock API
-- **URL 예시**:
-  - `https://morton-career-git-feat-123-<team>.vercel.app`
-  - `https://morton-plan-git-feat-123-<team>.vercel.app`
+- **URL 예시**: `https://<vercel-project>-git-<branch>-<team>.vercel.app` (각 PR Vercel comment에 자동 노출)
 
 ### prod 환경 (프로덕션)
 
@@ -58,18 +56,6 @@ Vercel 자동 빌드 시작
 GitHub PR 댓글에 링크 추가
     ↓
 QA 진행
-```
-
-**Vercel 빌드 설정:**
-
-```json
-// vercel.json (예시)
-{
-  "buildCommand": "pnpm build:career",
-  "outputDirectory": "apps/career/.next",
-  "framework": "nextjs",
-  "installCommand": "pnpm install"
-}
 ```
 
 #### 프로덕션 배포
@@ -108,94 +94,30 @@ Docker 이미지 생성
 트래픽 전환
 ```
 
-**Railway 설정:**
-
-```toml
-# railway.toml (예시)
-[build]
-builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
-
-[deploy]
-startCommand = "java -jar app.jar"
-healthcheckPath = "/actuator/health"
-healthcheckTimeout = 100
-restartPolicyType = "ON_FAILURE"
-```
-
 ---
 
 ## 인프라 구성
 
-### Vercel (Frontend)
+도구 식별자(프로젝트명/bucket/services 등)는 [TOOLS.md](TOOLS.md) 또는 각 Terraform 모듈 참조. 본 섹션은 **운영 관점**만 다룸.
 
-**사용 목적**: Next.js 앱 호스팅
+### Vercel ([infra/vercel/](../infra/vercel/))
 
-**주요 기능**:
+- 자동 빌드/배포, PR 프리뷰, CDN/Edge, Analytics
+- **환경 변수 설정**: Vercel Dashboard → Project Settings → Environment Variables (또는 Terraform `vercel_project_environment_variable`)
 
-- 자동 빌드 및 배포
-- PR 프리뷰 환경
-- CDN 및 Edge Network
-- 환경 변수 관리
-- Analytics
+### Railway ([infra/railway/](../infra/railway/))
 
-**프로젝트**:
+- Docker 기반 배포, 자동 헬스체크, 로그 모니터링
+- PostgreSQL 호스팅 포함
 
-- `morton-career` (Career 앱)
-- `morton-plan` (Plan 앱)
+### AWS ([infra/aws/](../infra/aws/))
 
-**환경 변수 설정**:
+- **S3**: 사용자 업로드 파일 (`profiles/`, `documents/`, `temp/`, `kiscon/`)
+- **CloudFront**: S3 앞단 CDN + signed cookie (private content)
+- **(향후) Lambda@Edge**: 이미지 리사이즈
+- **(향후) RDS**: Railway 대체 검토
 
-Vercel Dashboard → Project Settings → Environment Variables
-
-```
-NEXT_PUBLIC_API_URL=https://api.bconnect.to
-NEXT_PUBLIC_VERCEL_ENV=production
-```
-
-### Railway (Backend)
-
-**사용 목적**: Spring Boot API 호스팅
-
-**주요 기능**:
-
-- Docker 기반 배포
-- PostgreSQL 데이터베이스
-- 자동 헬스체크
-- 환경 변수 관리
-- 로그 모니터링
-
-**서비스**:
-
-- `morton-api` (Spring Boot)
-- `morton-db` (PostgreSQL)
-
-**환경 변수 설정**:
-
-```
-DATABASE_URL=jdbc:postgresql://...
-SPRING_PROFILES_ACTIVE=production
-JWT_SECRET=***
-```
-
-### AWS (파일 스토리지 등)
-
-**사용 목적**: 정적 파일 저장 및 배포
-
-**주요 서비스**:
-
-- **S3**: 사용자 업로드 파일 (프로필 이미지 등)
-- **CloudFront**: S3 앞단 CDN
-- **(향후) RDS**: 데이터베이스 (Railway 대체 고려)
-
-**S3 버킷 구조**:
-
-```
-morton-uploads/
-├── profiles/          # 프로필 이미지
-├── documents/         # 서류
-└── temp/              # 임시 파일
-```
+자세한 파일 인프라 설계: [docs/specs/2026-04-12-file-infrastructure-design.md](specs/2026-04-12-file-infrastructure-design.md)
 
 ---
 
@@ -218,7 +140,7 @@ export const envSchema = z.object({
 **사용 방법**:
 
 ```typescript
-import { env } from '@morton/config/env'
+import { env } from '@bconnect/config/env'
 
 const apiUrl = env.NEXT_PUBLIC_API_URL
 ```
@@ -248,7 +170,7 @@ jwt:
 
 ### 환경 변수 추가 시
 
-환경 변수 관리는 **[AGENTS.md](../AGENTS.md)**의 "Environment Variables" 섹션 또는 `env-config` 스킬 참조
+환경 변수 관리: 각 앱의 `.env.example` + `scripts/link-env.sh` (워크트리 자동 심링크).
 
 **간단 가이드**:
 
@@ -373,48 +295,6 @@ git push origin main
 
 ---
 
-## 자주 묻는 질문
-
-### Q. PR 프리뷰가 실제 API를 호출하나요?
-
-A. 설정에 따라 다릅니다:
-
-- Mock API 사용: 브라우저에서 MSW로 인터셉트
-- 실제 API 사용: dev/staging API 서버 호출
-
-### Q. 배포 시간은 얼마나 걸리나요?
-
-A. 평균 배포 시간:
-
-- Frontend (Vercel): 1-2분
-- Backend (Railway): 3-5분
-
-### Q. 배포 실패 시 어떻게 하나요?
-
-A. Vercel/Railway 빌드 로그 확인:
-
-1. GitHub PR 댓글의 "Details" 클릭
-2. 에러 메시지 확인
-3. 로컬에서 재현 (`pnpm build`)
-4. 수정 후 재푸시
-
-### Q. 환경 변수 변경 후 배포가 필요한가요?
-
-A. 플랫폼에 따라 다름:
-
-- **Vercel**: 환경 변수 변경 후 Redeploy 필요
-- **Railway**: 자동 재시작
-
-### Q. 데이터베이스 마이그레이션은 어떻게 하나요?
-
-A. Spring Boot Flyway/Liquibase 사용:
-
-1. 마이그레이션 스크립트 작성 (`db/migration/`)
-2. main 브랜치 머지
-3. Railway 배포 시 자동 실행
-
----
-
 ## 보안
 
 ### HTTPS
@@ -439,11 +319,3 @@ A. Spring Boot Flyway/Liquibase 사용:
 - JWT Secret
 - Database Password
 - 외부 API 키
-
----
-
-## 다음 단계
-
-- **개발 워크플로우**: [DEVELOPMENT_WORKFLOW.md](./DEVELOPMENT_WORKFLOW.md)
-- **Git 워크플로우**: [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)
-- **QA 및 테스팅**: [QA_AND_TESTING.md](./QA_AND_TESTING.md)

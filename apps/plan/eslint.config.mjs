@@ -1,3 +1,3 @@
-import config from '@morton/config/eslint/next'
+import config from '@bconnect/config/eslint/next'
 
 export default config

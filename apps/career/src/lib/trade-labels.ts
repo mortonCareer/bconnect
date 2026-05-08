@@ -1,4 +1,4 @@
-import { Trade } from '@morton/api-client'
+import { Trade } from '@bconnect/api-client'
 
 export const TRADE_LABELS: Record<Trade, string> = {
   [Trade.DESIGN]: '설계',

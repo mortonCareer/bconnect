@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button, Input } from '@morton/ui'
+import { Button, Input } from '@bconnect/ui'
 import { formatRegistrationNumber, extractDigits, isValidRegistrationNumber } from './constants'
 
 interface SearchBarProps {

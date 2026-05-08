@@ -1,6 +1,6 @@
 'use client'
 
-import { QueryClientProvider, ReactQueryDevtools, getQueryClient } from '@morton/api-client'
+import { QueryClientProvider, ReactQueryDevtools, getQueryClient } from '@bconnect/api-client'
 import type { ReactNode } from 'react'
 import '../env'
 

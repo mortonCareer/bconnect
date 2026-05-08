@@ -4,7 +4,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Tag } from '@morton/ui'
+import { Tag } from '@bconnect/ui'
 
 export default function TagDetailPage() {
   return (
@@ -148,7 +148,7 @@ export default function TagDetailPage() {
           <section>
             <h2 className="mb-4 text-xl font-semibold text-gray-800">Usage</h2>
             <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
-              {`import { Tag } from '@morton/ui'
+              {`import { Tag } from '@bconnect/ui'
 
 // Default (기본)
 <Tag>도배</Tag>

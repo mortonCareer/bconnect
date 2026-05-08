@@ -7,9 +7,9 @@ import {
   getGetChatMessagesQueryKey,
   useGetMyMember,
   useGetMembers,
-} from '@morton/api-client'
-import type { Message, MessageCursorPage } from '@morton/api-client'
-import { ChatMessage } from '@morton/ui'
+} from '@bconnect/api-client'
+import type { Message, MessageCursorPage } from '@bconnect/api-client'
+import { ChatMessage } from '@bconnect/ui'
 import { formatChatTime } from '@/lib/format-time'
 
 interface MessageListProps {
@@ -147,7 +147,7 @@ export default function MessageList({ chatId, localMessages }: MessageListProps)
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="text-m-14 text-morton-gray-500">메시지를 불러오는 중...</p>
+        <p className="text-m-14 text-bconnect-gray-500">메시지를 불러오는 중...</p>
       </div>
     )
   }
@@ -155,7 +155,7 @@ export default function MessageList({ chatId, localMessages }: MessageListProps)
   if (isError) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="text-m-14 text-morton-gray-500">메시지를 불러올 수 없습니다</p>
+        <p className="text-m-14 text-bconnect-gray-500">메시지를 불러올 수 없습니다</p>
       </div>
     )
   }
@@ -166,7 +166,7 @@ export default function MessageList({ chatId, localMessages }: MessageListProps)
       <div ref={topObserverRef} className="h-1 shrink-0" />
       {isFetchingNextPage && (
         <div className="flex justify-center py-2">
-          <p className="text-r-12 text-morton-gray-400">이전 메시지 불러오는 중...</p>
+          <p className="text-r-12 text-bconnect-gray-400">이전 메시지 불러오는 중...</p>
         </div>
       )}
 

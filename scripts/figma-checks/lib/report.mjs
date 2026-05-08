@@ -96,7 +96,7 @@ function buildMarkdown(findings) {
   lines.push('')
   lines.push('1. 각 항목의 코드 파일 열기')
   lines.push(
-    '2. 누락된 `@figma-state <name> <url>` 라인을 [figma-mapping 스킬](.claude/skills/figma-mapping/SKILL.md) 형식으로 추가'
+    '2. 누락된 `@figma-state <name> <url>` 라인을 [packages/ui/CLAUDE.md](packages/ui/CLAUDE.md) 형식으로 추가'
   )
   lines.push('3. PR 머지 후 본 이슈는 다음 검사 사이클에서 자동 갱신/닫힘')
   lines.push('')

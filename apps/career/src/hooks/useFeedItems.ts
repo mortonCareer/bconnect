@@ -1,8 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useGetFeeds } from '@morton/api-client'
-import type { Trade } from '@morton/api-client'
+import { useGetFeeds } from '@bconnect/api-client'
+import type { Trade } from '@bconnect/api-client'
 import { TRADE_LABELS } from '../lib/trade-labels'
 import { formatRelativeTime } from '../lib/format-time'
 

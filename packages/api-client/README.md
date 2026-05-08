@@ -1,4 +1,4 @@
-# @morton/api-client
+# @bconnect/api-client
 
 OpenAPI 스펙 기반 타입 안전한 API 클라이언트 패키지
 
@@ -34,7 +34,7 @@ pnpm generate
 ```tsx
 'use client'
 
-import { useGetUsers, type User } from '@morton/api-client'
+import { useGetUsers, type User } from '@bconnect/api-client'
 
 export function UserList() {
   const { data, isSuccess, error } = useGetUsers()
@@ -107,7 +107,7 @@ generated/schemas/ (User 등 타입)
 - 갱신 성공 시 원래 요청 재시도
 
 ```typescript
-import { setAccessToken } from '@morton/api-client'
+import { setAccessToken } from '@bconnect/api-client'
 
 // 로그인 성공 후
 setAccessToken(response.accessToken)

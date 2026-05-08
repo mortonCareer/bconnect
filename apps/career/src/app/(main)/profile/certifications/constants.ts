@@ -1,4 +1,4 @@
-import type { CredentialType } from '@morton/api-client'
+import type { CredentialType } from '@bconnect/api-client'
 
 export const CREDENTIAL_TYPE_LABELS: Record<CredentialType, string> = {
   IDENTITY_VERIFICATION: '본인인증',

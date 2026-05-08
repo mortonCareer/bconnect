@@ -1,6 +1,6 @@
 # API Spec 작업 가이드
 
-`@morton/api-client` 의 OpenAPI spec 작성 + codegen 가이드. spec 변경 시 이 문서 + spec 파일 동시 reference.
+`@bconnect/api-client` 의 OpenAPI spec 작성 + codegen 가이드. spec 변경 시 이 문서 + spec 파일 동시 reference.
 
 ## 디렉토리 구조
 
@@ -232,16 +232,16 @@ FE 사용 패턴:
 
 ```typescript
 // Hook 호출 — data 는 envelope unwrap 된 inner type
-import { useGetMyMember } from '@morton/api-client'
+import { useGetMyMember } from '@bconnect/api-client'
 const { data, isLoading } = useGetMyMember()
 // data: Member (envelope 사라짐)
 
 // Type import — entity 직접 사용
-import type { Member, Profile } from '@morton/api-client'
+import type { Member, Profile } from '@bconnect/api-client'
 
 // MSW mock setup (test/dev)
 import { setupServer } from 'msw/node'
-import { getBconnectAPIMock } from '@morton/api-client'
+import { getBconnectAPIMock } from '@bconnect/api-client'
 const server = setupServer(...getBconnectAPIMock())
 ```
 
@@ -302,7 +302,7 @@ orval mock + customFetch 가 envelope unwrap 정상 작동하는지 — node 환
 
 ```typescript
 import { setupServer } from 'msw/node'
-import { getBconnectAPIMock, sendOtp } from '@morton/api-client'
+import { getBconnectAPIMock, sendOtp } from '@bconnect/api-client'
 const server = setupServer(...getBconnectAPIMock())
 server.listen()
 const result = await sendOtp({ phone: '01012345678' })

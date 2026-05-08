@@ -6,17 +6,18 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 
 ## 팀원
 
-| 역할     | 이름 | GitHub            | 주요 작업                                |
-| -------- | ---- | ----------------- | ---------------------------------------- |
-| CEO      | -    | `fine-pine`       | ERD 설계, BE 구현, API 리뷰, 최종 QA     |
-| CTO      | -    | `manamana32321`   | API 스펙 설계, 퍼블리싱, FE 구현, 인프라 |
-| 디자이너 | -    | `julyatpark-star` | UI/UX 시안, UI 검수                      |
+| 역할       | 이름   | GitHub            | 주요 작업                                           |
+| ---------- | ------ | ----------------- | --------------------------------------------------- |
+| CEO        | 이송목 | `fine-pine`       | ERD 설계, BE 구현, API 리뷰, 최종 QA                |
+| CTO        | 손장수 | `manamana32321`   | API 스펙 설계, 퍼블리싱, FE 구현, 인프라, 코드 리뷰 |
+| 프론트엔드 | 김예진 | TBD               | 퍼블리싱, FE 구현                                   |
+| 디자이너   | 박정윤 | `julyatpark-star` | UI/UX 시안, UI 검수                                 |
 
 ---
 
 ## 역할 및 책임
 
-### CEO (`fine-pine`)
+### CEO
 
 **백엔드 개발 책임**
 
@@ -33,23 +34,38 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 - 데이터베이스 마이그레이션
 - Backend 성능 최적화
 
-### CTO (`manamana32321`)
+### CTO
 
-**프론트엔드 및 인프라 책임**
+**프론트엔드 + API 스펙 + 인프라 책임**
 
-- API 스펙 초안 작성 (`openapi.yaml`)
-- 퍼블리싱 (Figma → HTML/CSS)
-- Next.js 앱 구현 (Career, Plan)
-- 인프라 관리 (Vercel, Railway, AWS)
+- API 스펙 초안 작성 (`packages/api-client`)
+- 퍼블리싱 (Figma → React) — Frontend와 공유
+- Next.js 앱 구현 (Career, Plan) — Frontend와 공유
+- 인프라 관리 (Vercel, Railway, AWS, Terraform)
 - 코드 리뷰 및 기능 테스트
+- AI/CI 도구 인프라
 
 **담당 영역:**
 
-- `apps/career/`, `apps/plan/` - Next.js 앱
-- `packages/ui/` - UI 컴포넌트
+- `apps/career/`, `apps/plan/` - Next.js 앱 (Frontend와 공유)
+- `packages/ui/` - UI 컴포넌트 (Frontend와 공유)
 - `packages/api-client/` - API 클라이언트
 - `packages/config/` - 공통 설정
 - `infra/` - Terraform 인프라 코드
+- `.github/`, `scripts/` - CI/도구
+
+### Frontend
+
+**프론트엔드 개발 책임**
+
+- 퍼블리싱 (Figma → React) — CTO와 공유
+- Next.js 앱 구현 (Career, Plan) — CTO와 공유
+- 공통 UI 컴포넌트 작성
+
+**담당 영역:**
+
+- `apps/career/`, `apps/plan/` - Next.js 앱 (CTO와 공유)
+- `packages/ui/` - UI 컴포넌트 (CTO와 공유)
 
 ### 디자이너
 
@@ -70,26 +86,33 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 
 ## GitHub 작업 매핑
 
+담당자/리뷰어의 실제 GitHub 핸들은 위 [팀원](#팀원) 표 참조.
+
 ### Issue 담당자 자동 할당
 
-| 작업 유형         | 담당자    | GitHub               |
-| ----------------- | --------- | -------------------- |
-| `⚙️ BE`           | CEO       | `fine-pine`          |
-| `📋 api-spec`     | 둘이 논의 | (CTO 작성, CEO 리뷰) |
-| `💻 FE`           | CTO       | `manamana32321`      |
-| `🎨 publishing`   | CTO       | `manamana32321`      |
-| `☁️ infra`        | CTO       | `manamana32321`      |
-| `🐛 bug:BE`       | CEO       | `fine-pine`          |
-| `🐛 bug:FE`       | CTO       | `manamana32321`      |
-| `🐛 bug:api-spec` | 둘이 논의 | (함께 결정)          |
+| 작업 유형         | 담당자         | 비고               |
+| ----------------- | -------------- | ------------------ |
+| `⚙️ BE`           | CEO            |                    |
+| `📋 api-spec`     | CTO + CEO      | CTO 작성, CEO 리뷰 |
+| `💻 FE`           | CTO + Frontend |                    |
+| `🎨 publishing`   | CTO + Frontend |                    |
+| `☁️ infra`        | CTO            |                    |
+| `🐛 bug:BE`       | CEO            |                    |
+| `🐛 bug:FE`       | CTO + Frontend |                    |
+| `🐛 bug:api-spec` | CTO + CEO      | 함께 결정          |
 
 ### PR 리뷰어 자동 할당
 
-| 변경 영역                | 리뷰어      | GitHub      |
-| ------------------------ | ----------- | ----------- |
-| `apps/api/` 포함         | CEO         | `fine-pine` |
-| 프론트엔드/인프라만 변경 | 리뷰어 없음 | -           |
-| API 스펙 변경            | 둘 다       | 모두        |
+| 변경 영역                                                                                   | 리뷰어      |
+| ------------------------------------------------------------------------------------------- | ----------- |
+| BE: `apps/api/`                                                                             | CEO         |
+| 인프라: `infra/`, `.github/workflows/`                                                      | CEO         |
+| 프론트엔드: `apps/{career,plan}/`, `packages/{ui,api-client,config}/`                       | CTO         |
+| 크롤러: `apps/crawler/`                                                                     | CTO         |
+| API 스펙: `packages/api-client/src/spec/`                                                   | 모든 개발자 |
+| DX universal: `.claude/`, `docs/`, root 컨벤션 (`commitlint*`, `.husky/`, ESLint config 등) | 모든 개발자 |
+
+여러 영역에 걸친 PR은 해당 룰들의 union 적용. 인프라/DX 변경은 보수적으로 운영 영향 고려.
 
 ---
 
@@ -98,7 +121,7 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 ### API 스펙 설계
 
 ```
-CTO: openapi.yaml 초안 작성
+CTO: OpenAPI 스펙 초안 작성
     ↓
 GitHub PR 생성
     ↓
@@ -148,34 +171,16 @@ PR 생성 + 리뷰어 할당
 
 ---
 
-## Notion 사용자 매핑
-
-> 향후 `notion-task-sync` 스킬 구현 시 사용
-
-| 팀원     | Notion User ID | 비고                            |
-| -------- | -------------- | ------------------------------- |
-| CEO      | TBD            | Notion Integration 설정 후 추가 |
-| CTO      | TBD            | Notion Integration 설정 후 추가 |
-| 디자이너 | TBD            | Notion Integration 설정 후 추가 |
-
----
-
 ## 커뮤니케이션
 
-### 도구별 용도
+각 도구의 계정/식별자/링크는 [TOOLS.md](TOOLS.md) 참조. 본 섹션은 **언제 어디서 무엇을 논의하는가** 만 다룸.
 
-| 도구   | 용도                            |
-| ------ | ------------------------------- |
-| Notion | 기획, 스프린트 계획, 작업 보드  |
-| Figma  | 디자인 시안, 디자인 피드백      |
-| GitHub | 코드 리뷰, 이슈 트래킹, PR 논의 |
-| Slack  | 일상 커뮤니케이션 (선택)        |
-
-### 응답 시간 기대치
-
-- **긴급 (버그, 배포 이슈)**: 1시간 이내
-- **일반 (PR 리뷰, 이슈)**: 당일 또는 익일
-- **기획/논의**: 주간 미팅에서 논의
+| 채널           | 사용 맥락                               |
+| -------------- | --------------------------------------- |
+| Notion         | 기획, 스프린트 계획, 작업 보드, 지식 KB |
+| Figma          | 디자인 시안 검토, 디자인 피드백         |
+| GitHub PR/이슈 | 코드 리뷰, 이슈 트래킹, 기술 논의       |
+| Slack          | 일상 커뮤니케이션 (선택)                |
 
 ---
 

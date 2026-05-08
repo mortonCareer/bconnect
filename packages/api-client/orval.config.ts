@@ -16,7 +16,7 @@ import { defineConfig } from 'orval'
 //
 // 결과: MSW provider 가 `getBconnectAPIMock()` 을 setupWorker 에 넘기면
 // 모든 endpoint 가 spec 기반 mock 응답으로 대체됨. stateful flow 가 필요한
-// endpoint (auth OTP 검증 등) 는 별도 패키지 (@morton/mocks/overrides) 에서 override.
+// endpoint (auth OTP 검증 등) 는 별도 패키지 (@bconnect/mocks/overrides) 에서 override.
 export default defineConfig({
   morton: {
     input: {

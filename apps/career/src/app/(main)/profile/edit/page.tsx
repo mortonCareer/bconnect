@@ -17,8 +17,8 @@ import {
   getGetMyMemberQueryKey,
   getGetMyProfileQueryKey,
   Trade,
-} from '@morton/api-client'
-import { TopBar, Input, Tag } from '@morton/ui'
+} from '@bconnect/api-client'
+import { TopBar, Input, Tag } from '@bconnect/ui'
 import { TRADE_LABELS, TRADE_GROUPS } from '@/lib/trade-labels'
 import { profileEditSchema, type ProfileEditFormData } from './schema'
 
@@ -189,7 +189,7 @@ export default function ProfileEditPage() {
           onBack={() => router.back()}
         />
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-morton-gray-500">로딩 중...</p>
+          <p className="text-m-14 text-bconnect-gray-500">로딩 중...</p>
         </div>
       </div>
     )
@@ -208,8 +208,8 @@ export default function ProfileEditPage() {
       <form className="flex flex-1 flex-col gap-[24px] overflow-y-auto px-4 pb-24 pt-3">
         {/* 이름 */}
         <div className="flex flex-col gap-[8px]">
-          <label className="text-m-16 text-morton-gray-900">
-            이름 <span className="text-morton-error">*</span>
+          <label className="text-m-16 text-bconnect-gray-900">
+            이름 <span className="text-bconnect-error">*</span>
           </label>
           <Input
             placeholder="내용을 입력해주세요"
@@ -221,8 +221,8 @@ export default function ProfileEditPage() {
 
         {/* 시공분야 */}
         <div className="flex flex-col gap-[12px]">
-          <label className="text-m-16 text-morton-gray-900">
-            시공분야 <span className="text-morton-error">*</span>
+          <label className="text-m-16 text-bconnect-gray-900">
+            시공분야 <span className="text-bconnect-error">*</span>
           </label>
           <Controller
             name="trades"
@@ -231,7 +231,7 @@ export default function ProfileEditPage() {
               <div className="flex flex-col gap-[12px]">
                 {TRADE_GROUPS.map((group) => (
                   <div key={group.label} className="flex flex-col gap-[12px]">
-                    <p className="text-m-14 text-morton-gray-700">{group.label}</p>
+                    <p className="text-m-14 text-bconnect-gray-700">{group.label}</p>
                     <div className="flex flex-wrap gap-[8px]">
                       {group.trades.map((tradeValue) => {
                         const isSelected = field.value?.includes(tradeValue) ?? false
@@ -251,14 +251,14 @@ export default function ProfileEditPage() {
               </div>
             )}
           />
-          {errors.trades && <p className="text-sm text-morton-error">{errors.trades.message}</p>}
+          {errors.trades && <p className="text-sm text-bconnect-error">{errors.trades.message}</p>}
         </div>
 
         {/* 대표분야 */}
         {(watchedTrades ?? []).length > 0 && (
           <div className="flex flex-col gap-[8px]">
-            <label className="text-m-16 text-morton-gray-900">
-              대표분야 <span className="text-morton-error">*</span>
+            <label className="text-m-16 text-bconnect-gray-900">
+              대표분야 <span className="text-bconnect-error">*</span>
             </label>
             <Controller
               name="primaryTrade"
@@ -268,7 +268,7 @@ export default function ProfileEditPage() {
                   <select
                     value={field.value || ''}
                     onChange={field.onChange}
-                    className="flex h-[40px] appearance-none items-center rounded-[8px] border border-morton-gray-300 bg-white py-[3px] pl-[10px] pr-8 text-m-14 text-morton-gray-900"
+                    className="flex h-[40px] appearance-none items-center rounded-[8px] border border-bconnect-gray-300 bg-white py-[3px] pl-[10px] pr-8 text-m-14 text-bconnect-gray-900"
                   >
                     {(watchedTrades ?? []).map((tradeValue: string) => (
                       <option key={tradeValue} value={tradeValue}>
@@ -299,8 +299,8 @@ export default function ProfileEditPage() {
 
         {/* 경력 */}
         <div className="flex flex-col gap-[8px]">
-          <label className="text-m-16 text-morton-gray-900">
-            경력 <span className="text-morton-error">*</span>
+          <label className="text-m-16 text-bconnect-gray-900">
+            경력 <span className="text-bconnect-error">*</span>
           </label>
           <Controller
             name="experience"
@@ -316,8 +316,8 @@ export default function ProfileEditPage() {
                       onClick={() => field.onChange(levelToYears(option.id))}
                       className={`flex h-[40px] items-center justify-center rounded-[8px] border px-[14px] py-[3px] text-sm leading-[1.6] transition-colors ${
                         isSelected
-                          ? 'border-morton-primary bg-morton-primary-sub font-semibold text-morton-primary'
-                          : 'border-morton-gray-300 font-medium text-morton-gray-500'
+                          ? 'border-bconnect-primary bg-bconnect-primary-sub font-semibold text-bconnect-primary'
+                          : 'border-bconnect-gray-300 font-medium text-bconnect-gray-500'
                       }`}
                     >
                       {option.label}
@@ -331,7 +331,7 @@ export default function ProfileEditPage() {
 
         {/* 한줄소개 */}
         <div className="flex flex-col gap-[8px]">
-          <label className="text-m-16 text-morton-gray-900">한줄소개</label>
+          <label className="text-m-16 text-bconnect-gray-900">한줄소개</label>
           <Input
             placeholder="한줄소개를 입력해주세요 (최대 20글자)"
             variant={errors.headline ? 'error' : 'default'}
@@ -342,20 +342,20 @@ export default function ProfileEditPage() {
 
         {/* 소개 */}
         <div className="flex flex-col gap-[8px]">
-          <label className="text-r-14 text-morton-gray-900">소개</label>
+          <label className="text-r-14 text-bconnect-gray-900">소개</label>
           <textarea
             placeholder="자기소개를 입력해주세요"
             rows={4}
-            className="w-full resize-none rounded-lg border border-morton-gray-300 bg-transparent px-3 py-2 text-r-14 text-morton-gray-900 outline-none transition-colors placeholder:text-morton-gray-500 focus:border-morton-primary focus:ring-1 focus:ring-morton-primary disabled:pointer-events-none disabled:opacity-50"
+            className="w-full resize-none rounded-lg border border-bconnect-gray-300 bg-transparent px-3 py-2 text-r-14 text-bconnect-gray-900 outline-none transition-colors placeholder:text-bconnect-gray-500 focus:border-bconnect-primary focus:ring-1 focus:ring-bconnect-primary disabled:pointer-events-none disabled:opacity-50"
             {...register('about')}
           />
-          {errors.about && <p className="text-sm text-morton-error">{errors.about.message}</p>}
+          {errors.about && <p className="text-sm text-bconnect-error">{errors.about.message}</p>}
         </div>
 
         {/* 지역 */}
         <div className="flex flex-col gap-[8px]">
-          <label className="text-m-16 text-morton-gray-900">주소</label>
-          <p className="text-r-12 text-morton-gray-700">
+          <label className="text-m-16 text-bconnect-gray-900">주소</label>
+          <p className="text-r-12 text-bconnect-gray-700">
             정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요
           </p>
           <Input

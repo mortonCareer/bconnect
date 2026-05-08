@@ -6,9 +6,9 @@
 
 import { useCallback, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useGetChat, useGetMyMember, MessageType } from '@morton/api-client'
-import type { Message } from '@morton/api-client'
-import { TopBar } from '@morton/ui'
+import { useGetChat, useGetMyMember, MessageType } from '@bconnect/api-client'
+import type { Message } from '@bconnect/api-client'
+import { TopBar } from '@bconnect/ui'
 import MessageList from './_components/MessageList'
 import ChatInput from './_components/ChatInput'
 

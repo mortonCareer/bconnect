@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { Trade } from '@morton/api-client'
+import { Trade } from '@bconnect/api-client'
 
 const tradeValues = Object.values(Trade) as [string, ...string[]]
 

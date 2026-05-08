@@ -6,7 +6,7 @@ import {
   ReactQueryDevtools,
   getQueryClient,
   refreshAccessToken,
-} from '@morton/api-client'
+} from '@bconnect/api-client'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import type { ReactNode } from 'react'
 import '../env'

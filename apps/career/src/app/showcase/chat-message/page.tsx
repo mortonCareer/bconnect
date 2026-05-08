@@ -4,7 +4,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ChatMessage } from '@morton/ui'
+import { ChatMessage } from '@bconnect/ui'
 
 export default function ChatMessageDetailPage() {
   return (
@@ -114,7 +114,7 @@ export default function ChatMessageDetailPage() {
           <section>
             <h2 className="mb-4 text-xl font-semibold text-gray-800">Usage</h2>
             <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
-              {`import { ChatMessage } from '@morton/ui'
+              {`import { ChatMessage } from '@bconnect/ui'
 
 // 내 채팅
 <ChatMessage variant="mine" message="안녕하세요." timestamp="오후 2:09" />
