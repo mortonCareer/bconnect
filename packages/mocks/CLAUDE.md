@@ -23,13 +23,24 @@ packages/mocks/src/
 
 ## 사용처
 
-### 브라우저 dev (apps/{career,plan})
+### 브라우저 dev — race-safe gate (apps/{career,plan})
 
 ```typescript
-// apps/career/src/components/msw-provider.tsx (dev only gate)
+// apps/career/src/components/msw-provider.tsx
 const { worker } = await import('@bconnect/mocks/browser')
 await worker.start()
 ```
+
+활성화 흐름:
+
+1. `app/layout.tsx` → `<Providers>` 렌더
+2. `<Providers>` 가 `<MSWProvider>` 로 wrap → `worker.start()` 완료까지 children 렌더 차단
+3. dev 환경에서 SW 등록 완료 → children 렌더
+4. 이후 모든 `fetch()` 가 SW 거치며 handler 매칭 시 mock 응답 반환
+   - 매칭 우선순위: **배열 앞쪽** — overrides > generated
+5. handler 없는 요청은 `onUnhandledRequest: 'bypass'` 로 실 네트워크 통과
+
+`refreshAccessToken()` / `usePushNotifications()` 같은 fetch 부수효과는 `<MSWProvider>` **안쪽** 에서 실행되어야 race 안 발생. `providers.tsx` 의 `<PostMSWBootstrap>` 가 그 역할.
 
 `pnpm install` 시 msw 패키지의 postinstall 이 `apps/{career,plan}/public/mockServiceWorker.js` 자동 재생성 (gitignored — 진짜 SoT 는 node_modules/msw).
 

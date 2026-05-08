@@ -139,52 +139,14 @@ function EditProfile() {
 
 ## Mock API (MSW)
 
-### 개요
+dev 환경에서 모든 API 요청은 **MSW (Mock Service Worker)** 가 가로채서 mock 응답으로 답합니다. production 빌드에선 `NODE_ENV` 가드로 `@bconnect/mocks` 가 tree-shake.
 
-dev 환경에서 모든 API 요청은 **MSW (Mock Service Worker)** 가 가로채서 mock 응답으로 답합니다.
-브라우저의 Service Worker 가 fetch 를 intercept 하므로 FE 코드는 실제 BE 와 통신하는 것과 동일하게 동작합니다.
+상세는 패키지 SoT:
 
-핸들러는 **orval 이 `spec/v1/<domain>.yaml` 들에서 자동 생성** 합니다 (`pnpm api:generate` — redocly bundle 후 orval 실행). stateful flow (OTP 검증, FCM 디바이스 UPSERT 등) 만 `packages/mocks/src/overrides/` 에서 손으로 작성합니다. spec 이 변경되면 자동 생성된 핸들러의 시그니처가 함께 바뀌고, override 의 콜백 시그니처가 컴파일 시점에 미스매치를 잡아냅니다 (drift 방지).
+- spec + orval codegen + 새 endpoint 추가 절차: [`packages/api-client/CLAUDE.md`](../packages/api-client/CLAUDE.md)
+- 핸들러 / stateful override / 브라우저·테스트 entry / race-safe gate / 새 override 추가 절차: [`packages/mocks/CLAUDE.md`](../packages/mocks/CLAUDE.md)
 
-production 빌드에선 `process.env.NODE_ENV` 가드로 `@bconnect/mocks` import 가 tree-shake 되어 번들에 포함되지 않습니다.
-
-### 구조
-
-각 패키지의 자체 CLAUDE.md 참조 (각자 SoT):
-
-- spec + orval codegen: [`packages/api-client/CLAUDE.md`](../packages/api-client/CLAUDE.md)
-- handlers / overrides / browser·server entry: [`packages/mocks/CLAUDE.md`](../packages/mocks/CLAUDE.md)
-- `apps/{career,plan}/`: `public/mockServiceWorker.js` (msw postinstall 자동 생성, gitignored) + `src/components/msw-provider.tsx` (dev only gate)
-
-### 활성화 흐름
-
-1. `app/layout.tsx` → `<Providers>` 렌더
-2. `Providers` 가 `<MSWProvider>` 로 감싸 children 렌더 차단
-3. dev 환경에서 `worker.start()` 가 SW 등록 완료 → children 렌더
-4. 이후 모든 `fetch()` 가 SW 를 거치며 handler 매칭 시 mock 응답 반환
-   - handler 매칭은 **배열 앞쪽 우선** — overrides 가 generated 보다 우선
-5. handler 없는 요청은 `onUnhandledRequest: 'bypass'` 로 실 네트워크 통과
-
-`refreshAccessToken()` / `usePushNotifications()` 같은 fetch 부수효과는 `<MSWProvider>` **안쪽** 에서 실행되어야 race 가 발생하지 않습니다. providers.tsx 의 `PostMSWBootstrap` 가 이 역할을 함.
-
-### 새 엔드포인트 추가
-
-1. `packages/api-client/src/spec/v1/<domain>.yaml` 에 endpoint 정의 (신규 도메인이면 파일 자체를 만들고 `spec/openapi.yaml` 의 `paths` 에 매핑)
-2. `pnpm api:generate` — bundle (redocly) → react-query 훅 + MSW 핸들러 자동 생성
-3. **stateful flow 가 필요할 때만**: `packages/mocks/src/overrides/<category>.ts` 추가 → `handlers.ts` 의 spread 에 등록
-4. 끝. career / plan 둘 다 자동 적용됨 (둘 다 `@bconnect/mocks` 사용).
-
-### 테스트 환경 (Vitest 등)
-
-```typescript
-import { server } from '@bconnect/mocks/server'
-
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
-```
-
-브라우저와 동일한 핸들러를 그대로 재사용합니다.
+career / plan 둘 다 자동 적용됨 (둘 다 `@bconnect/mocks` 사용).
 
 ---
 
