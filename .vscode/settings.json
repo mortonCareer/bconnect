@@ -1,5 +1,6 @@
 {
   // 저장 시 자동 포맷 — Prettier 룰 (.prettierrc) 가 SSoT.
+  // 글로벌 defaultFormatter 단일 — 파일 타입별 명시는 redundant 라 제거.
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
 
@@ -9,17 +10,6 @@
     "source.fixAll.eslint": "explicit"
   },
 
-  // 파일 타입별 default formatter 명시 — Prettier 가 jsonc / yaml / md 까지 책임지게 강제.
-  // (다른 formatter 가 우연히 등록될 경우 충돌 방지)
-  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[javascriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[yaml]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[markdown]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-
   // Tailwind IntelliSense — `cn()` `cva()` `clsx()` 헬퍼 호출 안의 문자열도 클래스로 인식하게.
   // Morton 은 packages/ui 가 cva 기반 component 다수, app 단에서 cn 으로 합성.
   "tailwindCSS.experimental.classRegex": [
@@ -28,16 +18,17 @@
     ["clsx\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
   ],
 
-  // ESLint workingDirectories — 모노레포 안의 각 app/package 의 eslint.config 를 정확히 적용.
-  // pattern 안 쓰면 root config 만 사용해 app 별 차이 무시됨.
-  "eslint.workingDirectories": [{ "pattern": "apps/*" }, { "pattern": "packages/*" }],
+  // ESLint workingDirectories — apps/career, apps/plan 이 자체 eslint.config.mjs 를 가지므로
+  // 각 app 을 working directory 로 인식해야 그 config 를 정확히 적용.
+  // packages/* 는 root config 사용이라 명시 불필요. 새 app 추가 시 자동 처리되도록 glob 유지.
+  "eslint.workingDirectories": [{ "pattern": "apps/*" }],
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
 
   // OpenAPI 파일 식별자 — 42crunch 확장이 알아보고 specialized UI 적용 (validation/preview).
+  // 진입점 + bundle 결과만 등록 (도메인 분할 _shared.yaml / v1/*.yaml 는 generic yaml 로 충분).
   "files.associations": {
     "openapi.yaml": "openapi-yaml",
-    "openapi.yml": "openapi-yaml",
-    "*.openapi.yaml": "openapi-yaml"
+    "openapi.bundled.yaml": "openapi-yaml"
   },
 
   // GHA workflow YAML schema — redhat.vscode-yaml 이 자동완성 + 룰 위반 표시.
