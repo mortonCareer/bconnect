@@ -11,7 +11,7 @@ paths:
 
 ## 핵심 원칙
 
-**같은 dep 이 2+ package.json 에 있으면 [pnpm catalog](https://pnpm.io/catalogs) 사용**.
+**같은 dep 이 2+ package.json 에 있으면 [pnpm catalog](https://pnpm.io/catalogs) 사용**. syncpack 룰 (`.syncpackrc.json` 의 "공유 dep 은 catalog: 강제" versionGroup) 이 declaration SSoT 까지 강제 — 같은 dep 이 2+ 곳에 있으면 모두 `catalog:` reference 여야 통과.
 
 ## 새 dep 추가 시 결정 트리
 
@@ -34,8 +34,9 @@ digraph add_dep {
 pnpm --filter <package> add <dep>
 
 # 2+ package 공유 가능성 (확신 X) — catalog 가 안전한 default
-# pnpm-workspace.yaml 에 먼저 추가 후
-pnpm --filter <package> add <dep>@catalog:
+# 1) pnpm-workspace.yaml 의 catalog 에 추가
+# 2) .syncpackrc.json 의 "공유 dep" versionGroup 의 dependencies 배열에 추가
+# 3) pnpm --filter <package> add <dep>@catalog:
 ```
 
 ### 2. 기존 dep 의 spec 변경
