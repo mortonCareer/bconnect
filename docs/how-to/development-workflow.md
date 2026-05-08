@@ -31,7 +31,7 @@
    └─ 테스트 수행
 
 6. QA (PR 프리뷰 환경)
-   └─ 상세 프로세스: QA_AND_TESTING.md 참조
+   └─ 상세 프로세스: qa-and-testing.md 참조
 
 7. 완료
    └─ PR 머지 → 프로덕션 배포
@@ -61,7 +61,7 @@ API 클라이언트 자동 생성 (orval)
 FE 앱(Career, Plan)에서 API 훅 사용
 ```
 
-> **상세 작성 가이드 (디렉토리 구조, envelope 패턴, 새 endpoint 추가 절차, axis 결정 근거 등) 는 [`packages/api-client/CLAUDE.md`](../packages/api-client/CLAUDE.md) 참조**. 본 문서는 워크플로 관점만 다룸.
+> **상세 작성 가이드 (디렉토리 구조, envelope 패턴, 새 endpoint 추가 절차, axis 결정 근거 등) 는 [`packages/api-client/CLAUDE.md`](../../packages/api-client/CLAUDE.md) 참조**. 본 문서는 워크플로 관점만 다룸.
 
 ---
 

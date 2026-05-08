@@ -98,26 +98,26 @@ Docker 이미지 생성
 
 ## 인프라 구성
 
-도구 식별자(프로젝트명/bucket/services 등)는 [TOOLS.md](TOOLS.md) 또는 각 Terraform 모듈 참조. 본 섹션은 **운영 관점**만 다룸.
+도구 식별자(프로젝트명/bucket/services 등)는 [tools.md](../reference/tools.md) 또는 각 Terraform 모듈 참조. 본 섹션은 **운영 관점**만 다룸.
 
-### Vercel ([infra/vercel/](../infra/vercel/))
+### Vercel ([infra/vercel/](../../infra/vercel/))
 
 - 자동 빌드/배포, PR 프리뷰, CDN/Edge, Analytics
 - **환경 변수 설정**: Vercel Dashboard → Project Settings → Environment Variables (또는 Terraform `vercel_project_environment_variable`)
 
-### Railway ([infra/railway/](../infra/railway/))
+### Railway ([infra/railway/](../../infra/railway/))
 
 - Docker 기반 배포, 자동 헬스체크, 로그 모니터링
 - PostgreSQL 호스팅 포함
 
-### AWS ([infra/aws/](../infra/aws/))
+### AWS ([infra/aws/](../../infra/aws/))
 
 - **S3**: 사용자 업로드 파일 (`profiles/`, `documents/`, `temp/`, `kiscon/`)
 - **CloudFront**: S3 앞단 CDN + signed cookie (private content)
 - **(향후) Lambda@Edge**: 이미지 리사이즈
 - **(향후) RDS**: Railway 대체 검토
 
-자세한 파일 인프라 설계: [docs/specs/2026-04-12-file-infrastructure-design.md](specs/2026-04-12-file-infrastructure-design.md)
+자세한 파일 인프라 설계: [docs/reference/specs/2026-04-12-file-infrastructure-design.md](../reference/specs/2026-04-12-file-infrastructure-design.md)
 
 ---
 

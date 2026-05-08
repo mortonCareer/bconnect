@@ -145,7 +145,7 @@ PR 생성 (Closes #123)
 머지 후 이슈 자동 닫힘
 ```
 
-이슈 템플릿/레이블: [.github/ISSUE_TEMPLATE/](../.github/ISSUE_TEMPLATE/), 담당자 자동 할당은 [docs/TEAM.md](TEAM.md) 참조.
+이슈 템플릿/레이블: [.github/ISSUE_TEMPLATE/](../../.github/ISSUE_TEMPLATE/), 담당자 자동 할당은 [docs/reference/team.md](../reference/team.md) 참조.
 
 ---
 
@@ -289,7 +289,7 @@ git push origin feat/123-add-profile-upload
 gh pr create --title "feat(career): Add user profile upload" --body "..."
 ```
 
-PR 본문 템플릿: [.github/pull_request_template.md](../.github/pull_request_template.md). 리뷰어 자동 할당은 [docs/TEAM.md](TEAM.md) 참조.
+PR 본문 템플릿: [.github/pull_request_template.md](../../.github/pull_request_template.md). 리뷰어 자동 할당은 [docs/reference/team.md](../reference/team.md) 참조.
 
 ### PR 리뷰 프로세스
 
@@ -351,7 +351,7 @@ GitHub PR 댓글에 링크 추가
 
 ### 프리뷰 URL 예시
 
-URL 패턴은 [TOOLS.md](./TOOLS.md#terraform-선언적-관리) Vercel 섹션 참조.
+URL 패턴은 [tools.md](../reference/tools.md#terraform-선언적-관리) Vercel 섹션 참조.
 
 ```
 https://morton-career-git-feat-123-add-profile-upload-<team>.vercel.app
@@ -366,7 +366,7 @@ https://morton-plan-git-feat-123-add-profile-upload-<team>.vercel.app
 - 기능 동작 테스트 (CTO)
 - 실사용자 관점 검증 (CEO)
 
-상세 QA 프로세스: **[QA_AND_TESTING.md](./QA_AND_TESTING.md)** 참조
+상세 QA 프로세스: **[qa-and-testing.md](./qa-and-testing.md)** 참조
 
 ---
 

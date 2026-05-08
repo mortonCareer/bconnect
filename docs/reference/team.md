@@ -173,7 +173,7 @@ PR 생성 + 리뷰어 할당
 
 ## 커뮤니케이션
 
-각 도구의 계정/식별자/링크는 [TOOLS.md](TOOLS.md) 참조. 본 섹션은 **언제 어디서 무엇을 논의하는가** 만 다룸.
+각 도구의 계정/식별자/링크는 [tools.md](./tools.md) 참조. 본 섹션은 **언제 어디서 무엇을 논의하는가** 만 다룸.
 
 | 채널           | 사용 맥락                               |
 | -------------- | --------------------------------------- |
@@ -186,6 +186,6 @@ PR 생성 + 리뷰어 할당
 
 ## 참고 문서
 
-- [Git Workflow](./GIT_WORKFLOW.md) - 이슈/PR 프로세스
-- [Development Workflow](./DEVELOPMENT_WORKFLOW.md) - 개발 프로세스
-- [QA & Testing](./QA_AND_TESTING.md) - 버그 판단 기준
+- [Git Workflow](../how-to/git-workflow.md) - 이슈/PR 프로세스
+- [Development Workflow](../how-to/development-workflow.md) - 개발 프로세스
+- [QA & Testing](../how-to/qa-and-testing.md) - 버그 판단 기준
