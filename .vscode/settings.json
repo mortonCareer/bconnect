@@ -1,0 +1,49 @@
+{
+  // 저장 시 자동 포맷 — Prettier 룰 (.prettierrc) 가 SSoT.
+  // 글로벌 defaultFormatter 단일 — 파일 타입별 명시는 redundant 라 제거.
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // 저장 시 ESLint auto-fix — eslint.config 가 SSoT, "explicit" 은 명시 호출 시만 실행해서
+  // 무관한 파일까지 건드리지 않게 함.
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // Tailwind IntelliSense — `cn()` `cva()` `clsx()` 헬퍼 호출 안의 문자열도 클래스로 인식하게.
+  // Morton 은 packages/ui 가 cva 기반 component 다수, app 단에서 cn 으로 합성.
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["clsx\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ],
+
+  // ESLint workingDirectories — apps/career, apps/plan 이 자체 eslint.config.mjs 를 가지므로
+  // 각 app 을 working directory 로 인식해야 그 config 를 정확히 적용.
+  // packages/* 는 root config 사용이라 명시 불필요. 새 app 추가 시 자동 처리되도록 glob 유지.
+  "eslint.workingDirectories": [{ "pattern": "apps/*" }],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+
+  // OpenAPI 파일 식별자 — 42crunch 확장이 알아보고 specialized UI 적용 (validation/preview).
+  // 진입점 + bundle 결과만 등록 (도메인 분할 _shared.yaml / v1/*.yaml 는 generic yaml 로 충분).
+  "files.associations": {
+    "openapi.yaml": "openapi-yaml",
+    "openapi.bundled.yaml": "openapi-yaml"
+  },
+
+  // GHA workflow YAML schema — redhat.vscode-yaml 이 자동완성 + 룰 위반 표시.
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.{yml,yaml}"
+  },
+
+  // 검색 시 노이즈 제외 — generated/ 와 lock 파일은 노이즈가 너무 큼.
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.turbo": true,
+    "packages/api-client/src/generated": true,
+    "pnpm-lock.yaml": true
+  }
+}

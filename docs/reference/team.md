@@ -1,5 +1,8 @@
 # 팀 구성
 
+> **For**: 합류자, 협업자, 자동화 (issue/PR 담당자/리뷰어 자동 할당).
+> **You'll be able to**: 팀원 GitHub 매핑, 책임 영역, 리뷰어 룰 lookup.
+
 Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 
 ---
@@ -173,7 +176,7 @@ PR 생성 + 리뷰어 할당
 
 ## 커뮤니케이션
 
-각 도구의 계정/식별자/링크는 [TOOLS.md](TOOLS.md) 참조. 본 섹션은 **언제 어디서 무엇을 논의하는가** 만 다룸.
+각 도구의 계정/식별자/링크는 [tools.md](./tools.md) 참조. 본 섹션은 **언제 어디서 무엇을 논의하는가** 만 다룸.
 
 | 채널           | 사용 맥락                               |
 | -------------- | --------------------------------------- |
@@ -186,6 +189,6 @@ PR 생성 + 리뷰어 할당
 
 ## 참고 문서
 
-- [Git Workflow](./GIT_WORKFLOW.md) - 이슈/PR 프로세스
-- [Development Workflow](./DEVELOPMENT_WORKFLOW.md) - 개발 프로세스
-- [QA & Testing](./QA_AND_TESTING.md) - 버그 판단 기준
+- [Git Workflow](../how-to/git-workflow.md) - 이슈/PR 프로세스
+- [Development Workflow](../how-to/development-workflow.md) - 개발 프로세스
+- [QA & Testing](../how-to/qa-and-testing.md) - 버그 판단 기준

@@ -89,4 +89,4 @@ const useMock = isProfileError || (!isProfileLoading && !profileId)
 const data = useMock ? MOCK_DATA : (apiData ?? [])
 ```
 
-**방향**: 신규 추가 금지. 발견 시 점진적 제거 (MSW 기반 mock으로 대체 — [DEVELOPMENT_WORKFLOW.md](../../docs/DEVELOPMENT_WORKFLOW.md) Mock API 섹션 참조). 제거 시 BE 연동 상태 확인 후 진행.
+**방향**: 신규 추가 금지. 발견 시 점진적 제거 (MSW 기반 mock으로 대체 — [development-workflow.md](../../docs/how-to/development-workflow.md) Mock API 섹션 참조). 제거 시 BE 연동 상태 확인 후 진행.

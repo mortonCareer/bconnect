@@ -228,14 +228,7 @@ npx playwright install chromium
 
 ---
 
-## 관련 스킬
-
-- [figma-to-component](../figma-to-component/SKILL.md): Figma에서 컴포넌트 코드 생성
-- [figma-sync](../figma-sync/SKILL.md): Figma와 코드베이스 동기화
-
----
-
 ## 참고
 
-- [Playwright CLI](https://playwright.dev/docs/cli)
+- [Playwright Test CLI](https://playwright.dev/docs/test-cli)
 - [Playwright Screenshots](https://playwright.dev/docs/screenshots)

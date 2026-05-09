@@ -384,7 +384,7 @@ curl https://api.notion.com/v1/databases/$NOTION_DATABASE_ID \
 ## 관련 문서
 
 - [Notion API Documentation](https://developers.notion.com/)
-- [Git Workflow](../../../docs/GIT_WORKFLOW.md)
+- [Git Workflow](../../../docs/how-to/git-workflow.md)
 - [Issue Management](../issue-management/SKILL.md)
 
 ---

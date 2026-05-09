@@ -184,9 +184,11 @@ await client.send('Browser.setWindowBounds', {
 
 1. **Figma 이동**: Playwright `browser_navigate`로 Figma 노드 URL 이동
 2. **Dev 페이지 이동**: HTTP 제어로 Puppeteer 네비게이션
+
    ```bash
    curl -s "http://localhost:19222/navigate?url=http://localhost:3000/path"
    ```
+
 3. **시각적 비교**: 사용자가 두 화면을 나란히 보며 차이점 확인
 4. **조정**: 차이점 발견 시 코드 수정 후 Dev 리로드
 

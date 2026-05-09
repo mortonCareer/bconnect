@@ -22,8 +22,10 @@ BConnect is a job matching platform (업체-기술자 연결 구인구직 플랫
 
 ## Workflow & Processes
 
-- @docs/GIT_WORKFLOW.md
-- @docs/TEAM.md — Team roles, GitHub/Notion mapping
-- @docs/DEVELOPMENT_WORKFLOW.md — API spec, API client generation, Mock API (MSW)
-- @docs/QA_AND_TESTING.md — QA process, test coverage, bug classification
-- @docs/DEPLOYMENT.md — Deployment environments, process, infrastructure
+- @docs/how-to/git-workflow.md
+- @docs/reference/team.md — Team roles, GitHub/Notion mapping
+- @docs/how-to/development-workflow.md — API spec, API client generation, Mock API (MSW)
+- @docs/how-to/qa-and-testing.md — QA process, test coverage, bug classification
+- @docs/how-to/deployment.md — Deployment environments, process, infrastructure
+- @docs/how-to/write-docs.md — 문서 작성 룰 (Diátaxis 4분할, ADR 가이드)
+- @docs/explanation/adr/README.md — Architecture Decision Records 인덱스

@@ -1,5 +1,8 @@
 # 푸시 알림 딥링크 규격
 
+> **For**: BE (FCM 발송), FE (SW / foreground 핸들러) 개발자.
+> **You'll be able to**: FCM 페이로드 `data.url` 컨벤션 확인, 새 카테고리 추가 절차 수행.
+
 FCM 페이로드의 `data.url` 필드 규격. BE 가 알림을 보낼 때 사용자를 어느 화면으로 보낼지 결정하는 **공개 URL 계약**.
 
 ## 규약
@@ -90,7 +93,7 @@ URL 컨벤션 변경은 **FE/BE 동시 작업** 으로 처리합니다.
 
 ## 관련 구현
 
-- SW: [apps/career/src/service-workers/firebase-messaging.sw.template.js](../apps/career/src/service-workers/firebase-messaging.sw.template.js)
-- Foreground 훅: [apps/career/src/hooks/use-push-notifications.ts](../apps/career/src/hooks/use-push-notifications.ts)
-- 테스트 스크립트: [apps/career/scripts/test-push.ts](../apps/career/scripts/test-push.ts)
+- SW: [apps/career/src/service-workers/firebase-messaging.sw.template.js](../../apps/career/src/service-workers/firebase-messaging.sw.template.js)
+- Foreground 훅: [apps/career/src/hooks/use-push-notifications.ts](../../apps/career/src/hooks/use-push-notifications.ts)
+- 테스트 스크립트: [apps/career/scripts/test-push.ts](../../apps/career/scripts/test-push.ts)
 - Notion 아키텍처 문서: [알림 인프라 (FCM Web Push)](https://www.notion.so/340965d2888b815b929ce3ddc3fe493f)

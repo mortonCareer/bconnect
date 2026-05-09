@@ -1,0 +1,73 @@
+name: docs-lint
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - '**/*.md'
+      - '**/*.mdx'
+      - '.markdownlint.jsonc'
+      - 'lychee.toml'
+      - '.lycheeignore'
+      - '.github/workflows/docs-lint.yml'
+  pull_request:
+    paths:
+      - '**/*.md'
+      - '**/*.mdx'
+      - '.markdownlint.jsonc'
+      - 'lychee.toml'
+      - '.lycheeignore'
+      - '.github/workflows/docs-lint.yml'
+
+# 같은 PR/브랜치 push 연속 시 옛 run cancel
+concurrency:
+  group: docs-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  markdownlint:
+    name: markdownlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: markdownlint-cli2
+        uses: DavidAnson/markdownlint-cli2-action@v20
+        with:
+          # apps/api (BE 영역 미관여) + 빌드 산출물 외 모든 markdown 일관 룰 적용
+          globs: |
+            **/*.md
+            !apps/api/**
+            !**/node_modules/**
+            !**/.next/**
+            !**/dist/**
+            !**/build/**
+            !packages/api-client/src/generated/**
+
+  # docs 안의 외부 링크 / 상대 경로 깨짐 자동 검출
+  link-check:
+    name: lychee link check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Restore lychee cache
+        uses: actions/cache@v4
+        with:
+          path: .lycheecache
+          key: lychee-${{ github.sha }}
+          restore-keys: lychee-
+
+      - name: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # markdownlint 와 동일 scope. lychee 는 `--base` 에 절대 경로 또는 URL 만 허용
+          # — 생략하면 source 파일 위치 기준 상대 링크 자동 해결.
+          args: >-
+            --config lychee.toml
+            --no-progress
+            --exclude-path apps/api
+            './**/*.md'
+            './**/*.mdx'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

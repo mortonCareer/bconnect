@@ -1,5 +1,8 @@
 # QA & 테스팅
 
+> **For**: PR 리뷰어, QA 수행자.
+> **You'll be able to**: PR 프리뷰 환경에서 happy path / 엣지 케이스 / 에러 검증, 버그 분류.
+
 Morton 프로젝트의 QA 및 테스팅 가이드입니다.
 
 ---
@@ -213,7 +216,7 @@ QA 중 발견된 문제는 다음 기준으로 분류합니다:
 
 ## 환경
 
-- URL: https://morton-career-git-feat-123-<team>.vercel.app/profile (패턴은 [TOOLS.md](./TOOLS.md#terraform-선언적-관리) Vercel 섹션 참조)
+- URL: https://morton-career-git-feat-123-<team>.vercel.app/profile (패턴은 [tools.md](../reference/tools.md#terraform-선언적-관리) Vercel 섹션 참조)
 - 브라우저: Chrome 120
 - 디바이스: iPhone 15 Pro
 
@@ -387,6 +390,6 @@ CTO: +821087654321 (이영희, 기술자)
 
 ## 다음 단계
 
-- **개발 워크플로우**: [DEVELOPMENT_WORKFLOW.md](./DEVELOPMENT_WORKFLOW.md)
-- **Git 워크플로우**: [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)
-- **배포**: [DEPLOYMENT.md](./DEPLOYMENT.md)
+- **개발 워크플로우**: [development-workflow.md](./development-workflow.md)
+- **Git 워크플로우**: [git-workflow.md](./git-workflow.md)
+- **배포**: [deployment.md](./deployment.md)

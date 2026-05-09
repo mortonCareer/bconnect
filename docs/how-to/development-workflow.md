@@ -1,5 +1,8 @@
 # 개발 워크플로우
 
+> **For**: 모든 개발자.
+> **You'll be able to**: API 스펙 작성 → 클라이언트 codegen → BE/FE 병렬 개발 → 연동 절차 수행.
+
 기능 개발 프로세스
 
 ---
@@ -31,7 +34,7 @@
    └─ 테스트 수행
 
 6. QA (PR 프리뷰 환경)
-   └─ 상세 프로세스: QA_AND_TESTING.md 참조
+   └─ 상세 프로세스: [qa-and-testing.md](./qa-and-testing.md) 참조
 
 7. 완료
    └─ PR 머지 → 프로덕션 배포
@@ -61,7 +64,7 @@ API 클라이언트 자동 생성 (orval)
 FE 앱(Career, Plan)에서 API 훅 사용
 ```
 
-> **상세 작성 가이드 (디렉토리 구조, envelope 패턴, 새 endpoint 추가 절차, axis 결정 근거 등) 는 [`packages/api-client/CLAUDE.md`](../packages/api-client/CLAUDE.md) 참조**. 본 문서는 워크플로 관점만 다룸.
+> **상세 작성 가이드 (디렉토리 구조, envelope 패턴, 새 endpoint 추가 절차, axis 결정 근거 등) 는 [`packages/api-client/CLAUDE.md`](../../packages/api-client/CLAUDE.md) 참조**. 본 문서는 워크플로 관점만 다룸.
 
 ---
 
@@ -143,8 +146,8 @@ dev 환경에서 모든 API 요청은 **MSW (Mock Service Worker)** 가 가로�
 
 상세는 패키지 SoT:
 
-- spec + orval codegen + 새 endpoint 추가 절차: [`packages/api-client/CLAUDE.md`](../packages/api-client/CLAUDE.md)
-- 핸들러 / stateful override / 브라우저·테스트 entry / race-safe gate / 새 override 추가 절차: [`packages/mocks/CLAUDE.md`](../packages/mocks/CLAUDE.md)
+- spec + orval codegen + 새 endpoint 추가 절차: [`packages/api-client/CLAUDE.md`](../../packages/api-client/CLAUDE.md)
+- 핸들러 / stateful override / 브라우저·테스트 entry / race-safe gate / 새 override 추가 절차: [`packages/mocks/CLAUDE.md`](../../packages/mocks/CLAUDE.md)
 
 career / plan 둘 다 자동 적용됨 (둘 다 `@bconnect/mocks` 사용).
 
