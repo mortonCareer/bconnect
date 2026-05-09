@@ -44,10 +44,17 @@ export default defineConfig({
           useSuspenseQuery: true,
         },
         // mock format override:
-        //   spec 의 `format: uri` 필드 (Member.picture, Post.images 등) 가
-        //   `useExamples: true` 만으로는 nullable union/array items 의 `example` 을
-        //   못 받아오는 orval 한계 우회. format 단위로 placeholder URL 강제 →
-        //   콘솔 `Failed to load resource` noise 제거 + 실제 이미지 렌더링.
+        //   spec 의 `format: uri` 필드가 `useExamples: true` 만으로는 nullable
+        //   union/array items 의 `example` 을 못 받아오는 orval 한계 우회 →
+        //   placeholder URL 강제로 콘솔 noise 제거 + 실제 이미지 렌더링.
+        //
+        //   주의: format:uri 는 webhook URL, redirect URI 등 비-이미지 URI 에도
+        //   적용. 현재 spec 의 모든 format:uri 는 image (Member.picture, Post.images
+        //   등) 라서 의도 일치. 미래 비-이미지 URI 추가 시 그 필드만 별도 properties
+        //   override 또는 spec 의 example 을 우선시하도록 처리.
+        //
+        //   properties override 는 nullable wrapping 을 깨먹어서 type drift 발생 →
+        //   format 매칭이 nullable 보존 차원에서 더 안전.
         mock: {
           format: {
             uri: () => 'https://placehold.co/600x400',
