@@ -100,7 +100,7 @@ components:
           type: array
           items:
             type: string
-            format: uri
+            format: image-url
             example: https://placehold.co/600x400
         content:
           type:
@@ -128,7 +128,7 @@ components:
           type: array
           items:
             type: string
-            format: uri
+            format: image-url
             example: https://placehold.co/600x400
           minItems: 1
         content:

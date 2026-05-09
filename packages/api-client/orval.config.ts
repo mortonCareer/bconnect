@@ -43,6 +43,21 @@ export default defineConfig({
           useMutation: true,
           useSuspenseQuery: true,
         },
+        // mock format override:
+        //   spec 의 `format: image-url` 필드 (Member.picture, Post.images 등) 가
+        //   `useExamples: true` 만으로는 nullable union/array items 의 `example` 을
+        //   못 받아오는 orval 한계 우회 → placeholder URL 강제로 콘솔 noise 제거
+        //   + 실제 이미지 렌더링.
+        //
+        //   `image-url` 은 [JSON Schema 의 custom format](https://json-schema.org/draft/2020-12/json-schema-validation#name-custom-format-attributes)
+        //   허용 규정에 따른 vendor format. 표준 `format: uri` (webhook URL,
+        //   redirect URI 등 모든 URI) 와 의미 분리 — 비-이미지 URI 가 추가돼도
+        //   default faker 로 fallback (이 override 미적용).
+        mock: {
+          format: {
+            'image-url': () => 'https://placehold.co/600x400',
+          },
+        },
       },
     },
   },
