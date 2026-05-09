@@ -90,12 +90,14 @@ orval mock 끄고 별도 fixture builder 도입.
 ## Notes
 
 - 측정 단계별 typecheck errors:
-  | 단계 | errors |
-  |---|---|
-  | orval 8 plain bump | 316 (career 200 + plan 116) |
-  | + customFetch 재작성 + `includeHttpResponseReturnType: false` | 84 |
-  | + transformer | 3 (mock overrides) |
-  | + mock overrides envelope unwrap | **0** |
+
+  | 단계                                                          | errors                      |
+  | ------------------------------------------------------------- | --------------------------- |
+  | orval 8 plain bump                                            | 316 (career 200 + plan 116) |
+  | + customFetch 재작성 + `includeHttpResponseReturnType: false` | 84                          |
+  | + transformer                                                 | 3 (mock overrides)          |
+  | + mock overrides envelope unwrap                              | **0**                       |
+
 - 미래 escape hatch 필요 시점에 별도 ADR 작성 권장 — "ADR-X: customFetch variant for status-aware endpoints" 같은 형태
 - PR [#296](https://github.com/mortonCareer/bconnect/pull/296) 의 `override.mock.format.image-url` 은 orval 8 + transformer 후에도 그대로 작동 (forward-compatible)
 - 관련 코드: [`packages/api-client/orval.transformer.ts`](../../../packages/api-client/orval.transformer.ts), [`packages/api-client/src/client.ts`](../../../packages/api-client/src/client.ts), [`packages/api-client/orval.config.ts`](../../../packages/api-client/orval.config.ts)
