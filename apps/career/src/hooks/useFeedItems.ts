@@ -5,6 +5,7 @@ import { useGetFeeds } from '@bconnect/api-client'
 import type { Trade } from '@bconnect/api-client'
 import { TRADE_LABELS } from '../lib/trade-labels'
 import { formatRelativeTime } from '../lib/format-time'
+import { getAvatarUrl } from '../lib/avatar'
 
 export interface FeedItem {
   postId: number
@@ -64,7 +65,9 @@ export function useFeedItems({
           postId: post.id,
           memberId: member.id,
           profile: {
-            image: member.picture ?? '',
+            // picture nullable → 빈 string fallback 시 <img src=""> 가 page URL 재 fetch 하는
+            // 브라우저 anti-pattern. DiceBear 아바타 (getAvatarUrl) 로 deterministic fallback.
+            image: member.picture || getAvatarUrl(member.name ?? 'user'),
             name: member.name ?? '',
             location: '',
             // TODO: role 은 MaskedMember 에 없음 (BE public masking) — 필요시 BE 협의 후 부활
