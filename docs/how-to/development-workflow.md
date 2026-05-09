@@ -137,86 +137,16 @@ function EditProfile() {
 
 ---
 
-## Mock API
+## Mock API (MSW)
 
-### 현재 상태
+dev 환경에서 모든 API 요청은 **MSW (Mock Service Worker)** 가 가로채서 mock 응답으로 답합니다. production 빌드에선 `NODE_ENV` 가드로 `@bconnect/mocks` 가 tree-shake.
 
-개발 중에는 **MSW (Mock Service Worker)** 마이그레이션을 진행 중입니다.  
-현재는 `apps/mock-server/server.js`를 임시로 사용하고 있습니다.
+상세는 패키지 SoT:
 
-### MSW 마이그레이션 계획 (진행 중)
+- spec + orval codegen + 새 endpoint 추가 절차: [`packages/api-client/CLAUDE.md`](../packages/api-client/CLAUDE.md)
+- 핸들러 / stateful override / 브라우저·테스트 entry / race-safe gate / 새 override 추가 절차: [`packages/mocks/CLAUDE.md`](../packages/mocks/CLAUDE.md)
 
-**예정 구조:**
-
-```
-apps/career/src/mocks/
-├── handlers/
-│   ├── auth.ts       # 인증 관련 mock
-│   ├── user.ts       # 사용자 관련 mock
-│   └── index.ts
-├── browser.ts        # 브라우저용 MSW
-└── server.ts         # Node용 MSW (테스트)
-```
-
-**핸들러 예시 (예정):**
-
-```typescript
-import { http, HttpResponse } from 'msw'
-
-export const authHandlers = [
-  http.post('/api/v1/auth/otp/send', async ({ request }) => {
-    const { phone } = await request.json()
-
-    return HttpResponse.json({
-      success: true,
-      data: {
-        expiresAt: new Date(Date.now() + 180000).toISOString(),
-      },
-    })
-  }),
-
-  http.post('/api/v1/auth/otp/verify', async ({ request }) => {
-    const { phone, code } = await request.json()
-
-    if (code === '123456') {
-      return HttpResponse.json({
-        success: true,
-        data: {
-          accessToken: 'mock_token',
-          isNew: false,
-          user: { id: 1, phone, name: '테스트' },
-        },
-      })
-    }
-
-    return HttpResponse.json(
-      {
-        success: false,
-        error: { code: 'INVALID_CODE', message: '잘못된 인증 코드' },
-      },
-      { status: 401 }
-    )
-  }),
-]
-```
-
-### 개발 환경 설정 (예정)
-
-```typescript
-// apps/career/src/main.tsx
-async function enableMocking() {
-  if (process.env.NODE_ENV !== 'development') {
-    return
-  }
-
-  const { worker } = await import('./mocks/browser')
-  return worker.start()
-}
-
-enableMocking().then(() => {
-  ReactDOM.createRoot(document.getElementById('root')!).render(<App />)
-})
-```
+career / plan 둘 다 자동 적용됨 (둘 다 `@bconnect/mocks` 사용).
 
 ---
 

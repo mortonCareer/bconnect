@@ -2,6 +2,24 @@ packages:
   - apps/*
   - packages/*
 
+# 여러 workspace package 가 같은 라이브러리 의존 시 버전 spec SSoT.
+# 각 package.json 은 'catalog:' 로 reference — 버전 bump 는 여기 한 곳만.
+# https://pnpm.io/catalogs
+catalog:
+  '@faker-js/faker': ^10.4.0
+  '@sentry/nextjs': ^10.40.0
+  '@types/node': ^20
+  '@types/react': ^19
+  '@types/react-dom': ^19
+  eslint: ^9
+  msw: ^2.13.6
+  next: 16.1.1
+  react: 19.2.3
+  react-dom: 19.2.3
+  typescript: ^5
+  zod: ^4.3.5
+  zustand: ^5.0.9
+
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver

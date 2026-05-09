@@ -108,6 +108,11 @@ infra/aws/lambda/**/function.zip
 ### Generated code ###
 packages/api-client/src/generated/
 
+### MSW Service Worker — msw 패키지의 산출물 (workerDirectory 자동 생성) ###
+# 진짜 SoT 는 node_modules/msw — 각 앱의 public/ 은 origin-scoped 배포용 artifact.
+# fresh clone 시 npx msw init 으로 재생성 (또는 msw 패키지 install 시 자동).
+**/mockServiceWorker.js
+
 ### Figma lint reports ###
 .claude/skills/figma-lint/figma-lint-report.md
 
