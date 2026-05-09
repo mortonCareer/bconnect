@@ -23,14 +23,7 @@
 
 ## Phase 2 — 신규 팀원 셋업
 
-### Step 1. 계정 수락 + 2FA
-
-받은 invite 모두 수락하고 **2FA 활성화**:
-
-- GitHub: Settings → Password and authentication → 2FA (TOTP 권장)
-- Notion: TOTP
-
-### Step 2. 도구 설치
+### Step 1. 도구 설치
 
 기본 셋: Node.js 20+, pnpm 9+, gh, direnv.
 
