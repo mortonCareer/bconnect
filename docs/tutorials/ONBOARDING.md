@@ -32,7 +32,7 @@
 
 ### Step 2. 도구 설치
 
-기본 셋: Node.js 20+, pnpm 9+, gh, direnv, Claude Code.
+기본 셋: Node.js 20+, pnpm 9+, gh, direnv.
 
 ```bash
 node --version  # >= 20
@@ -41,13 +41,13 @@ brew install direnv gh
 gh auth login
 ```
 
-Claude Code 셋업: [Claude Code 다운로드](https://claude.com/code) → VSCode/터미널 통합. 이후 도구 설치/환경 셋업의 자잘한 작업은 Claude Code 가 도와줄 수 있다.
+**Claude Code** — VSCode Extension 또는 CLI 둘 중 하나로 설치 ([공식 가이드](https://claude.com/code)).
 
 > 합류자 도구 설치를 자동화하는 `/setup` 스킬은 미구현 — follow-up 이슈로 분리 예정. 현재는 위 수동 절차.
 
 ---
 
-## Phase 3 — Repo + AI 환경 셋업
+## Phase 3 — Repo 셋업
 
 ### Step 1. Repo clone
 
@@ -56,16 +56,7 @@ git clone git@github.com:mortonCareer/bconnect.git
 cd bconnect
 ```
 
-### Step 2. AI / Claude 도구 사용 컨벤션 (필수)
-
-Morton 팀은 Claude Code 를 적극 사용. 셋업은 clone 직후 — 이후 모든 작업의 컨텍스트가 됨.
-
-- **글로벌 셋업**: `~/.claude/CLAUDE.md` + `~/.claude/rules/*.md`
-- **워크스페이스 자동 로드**: repo 루트 `CLAUDE.md` + 각 디렉토리의 `<dir>/CLAUDE.md` 가 cwd 기준 자동 로드
-- **`docs/` 안에서 편집 시**: [`docs/CLAUDE.md`](../CLAUDE.md) thin pointer → [`how-to/write-docs.md`](../how-to/write-docs.md) 룰
-- **main 직접 push 금지**: hook 으로 자동 차단. 우회 시도 X
-
-### Step 3. 환경 시크릿
+### Step 2. 환경 시크릿
 
 `.envrc.local`(direnv 시크릿) 받는 절차는 Notion 페이지로 관리: **[로컬 환경변수](https://www.notion.so/morton-so/35a965d2888b80a19c8df76ba51cd2d0?source=copy_link)**.
 
@@ -73,7 +64,7 @@ Morton 팀은 Claude Code 를 적극 사용. 셋업은 clone 직후 — 이후 �
 direnv allow .  # 환경변수 자동 로드 확인
 ```
 
-### Step 4. 의존성 설치 + dev 서버 + lint
+### Step 3. 의존성 설치 + dev 서버 + lint
 
 ```bash
 pnpm install --frozen-lockfile
@@ -84,8 +75,6 @@ pnpm dev:plan    # http://localhost:3001 — 업체/건축주 웹
 
 pnpm lint && pnpm format:check  # 0 exit 확인
 ```
-
-실패 시 팀 Slack 도움 요청.
 
 ---
 
@@ -117,8 +106,6 @@ git commit -m "chore(docs): <your-name> 본인 정보 추가 (#<issue>)"
 git push -u origin chore/<issue>-onboarding
 gh pr create --base dev --fill
 ```
-
-PR 생성 후 1-2분 안에 **Vercel 프리뷰** 자동 배포 — 댓글에 URL 뜸.
 
 ### Step 4. CI / QA / 머지
 
