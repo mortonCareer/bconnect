@@ -102,37 +102,16 @@ export const apiClient = ky.create({
 })
 
 /**
- * Orval 8 mutator — generated 요청 함수가 모두 이 customFetch 를 통해 ky `apiClient`
- * 를 호출. ApiResponse envelope 을 벗기고 raw payload 만 return → hook 의 `data` 가
- * domain object 직접 접근 (`member?.id`).
- *
- * Orval 호출 시그니처:
- * - `url`: orval URL builder 가 query params 포함 fully qualified path 로 전달 (예:
- *   `/api/v1/coworkers?key=val`)
- * - `options.body`: orval 이 이미 `JSON.stringify` 한 string
- * - `options.headers` / `method` / `signal`: 표준 `RequestInit`
- *
- * Return type 정렬: orval config 의 `output.override.fetch.includeHttpResponseReturnType:
- * false` 가 generated return 을 `Promise<T>` 로 simplified → 이 mutator 도 inner `T`
- * (envelope unwrap 후 raw payload) 만 return. + `input.override.transformer` 로
- * spec 의 envelope 자체도 type 단계에서 strip 되어 generated type 의 `T` 가 inner data.
- *
- * 부수효과:
- * - ky `afterResponse` hook 이 401/403 시 refresh token 자동 retry
- * - 4xx 응답은 `ApiError` 로 변환해 throw — hook 의 `query.error` 로 받음
- * - 204 / 빈 응답은 `undefined` return (T = void 케이스)
+ * Orval 8 의 mutator — 런타임 단계에서 ApiResponse envelope (`{ success, data }`)
+ * 을 벗기고 inner data 만 return + 401/403 retry + 4xx → ApiError throw.
+ * spec 단계의 type 정렬은 `orval.transformer.ts` 가 담당.
  */
 export async function customFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
   // ky prefixUrl 은 leading slash 거부 — orval URL 이 `/api/...` 로 시작하므로 strip
   const normalizedUrl = url.startsWith('/') ? url.slice(1) : url
 
   try {
-    const response = await apiClient(normalizedUrl, {
-      method: options.method,
-      body: options.body,
-      headers: options.headers,
-      signal: options.signal,
-    })
+    const response = await apiClient(normalizedUrl, options)
 
     // 204 No Content 등 빈 응답은 envelope 없이 통과 (T = void 케이스)
     const text = await response.text()

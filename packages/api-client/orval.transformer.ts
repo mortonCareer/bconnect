@@ -7,28 +7,10 @@ import type {
 import { defineTransformer } from 'orval'
 
 /**
- * Morton OpenAPI spec transformer — 2xx 응답에서 envelope 패턴을 벗겨 generated
- * type 이 inner data 만 expose 하도록 변환. 런타임의 `customFetch` 가 envelope
- * unwrap 한 결과와 type 정렬되어 hook 사용처가 `result.data.data` 같은
- * boilerplate 없이 raw payload 직접 접근 (`member?.id`).
- *
- * 변환 패턴:
- * ```yaml
- * responses['2xx'].content['application/json'].schema:
- *   allOf:
- *     - $ref: '...ApiSuccessResponseBase'
- *     - type: object
- *       required: [data]
- *       properties:
- *         data: <inner schema>
- * # ↓
- * responses['2xx'].content['application/json'].schema: <inner schema>
- * ```
- *
- * 4xx/5xx 는 그대로 보존 — `customFetch` 가 `throw ApiError` 로 처리하고
- * hook 사용처는 `query.error` 로 받음.
- *
- * @see {@link https://orval.dev/docs/reference/configuration/input#transformer | orval input transformer docs}
+ * compile-time spec transformer — 2xx 응답의 envelope 패턴
+ * (`allOf: [ApiSuccessResponseBase, {data: T}]`) 을 inner `T` 로 대체. 런타임의
+ * `customFetch` envelope unwrap 과 type 정렬용. 4xx/5xx 는 그대로 (customFetch
+ * 가 throw 처리). 자세한 결정 근거는 ADR-0005 참조.
  */
 export default defineTransformer((spec) => {
   const openapi = spec as OpenAPIObject

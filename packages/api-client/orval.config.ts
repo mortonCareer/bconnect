@@ -22,9 +22,8 @@ export default defineConfig({
     input: {
       target: './src/openapi.bundled.yaml',
       override: {
-        // 모든 2xx 응답의 envelope (`{ success, data }`) 을 spec 단계에서 벗겨내
-        // generated type 이 inner data 만 expose 하게 함. customFetch 의 runtime
-        // unwrap 과 type 정렬 — hook 사용처가 `data.data.foo` 보일러 없이 직접 접근.
+        // compile-time: spec 의 envelope 을 type 단계에서 strip → generated type
+        // 이 inner data 만 expose. 런타임 unwrap 은 customFetch 가 담당.
         transformer: './orval.transformer.ts',
       },
     },

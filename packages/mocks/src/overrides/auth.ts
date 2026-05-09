@@ -21,9 +21,6 @@ const generateToken = (label: string) => `mock_${label}_${Date.now()}`
 // 두고 stateful endpoint 만 override.
 export const authOverrides = [
   // OTP 발송: 코드 저장 + 만료시각 응답.
-  // orval 8 의 transformer 가 spec envelope 을 벗겨 generated mock handler 가
-  // inner data 만 expect → 여기서도 inner data 만 return (envelope wrapping 은
-  // generated mock 이 자동 처리).
   getSendOtpMockHandler(async ({ request }) => {
     const body = (await request.json()) as { phone?: string }
     if (body.phone) {
