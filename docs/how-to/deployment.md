@@ -1,6 +1,6 @@
 # 배포
 
-> **For**: 배포 담당자 (CTO).
+> **For**: 모든 개발자.
 > **You'll be able to**: dev 머지 후 production 까지 배포 절차 수행, 헬스체크, 롤백.
 
 배포 환경 및 프로세스
