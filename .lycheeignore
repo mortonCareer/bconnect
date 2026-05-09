@@ -30,3 +30,5 @@
 ^https://morton-(career|plan)-git-
 # - 미배포 CDN 도메인 (file-infrastructure-design 안 — production 활성 시 ignore 제거 검토)
 ^https://static\.bconnect\.to
+# - 미배포 production health endpoint (deployment.md 운영 가이드 안)
+^https://bconnect\.to/_health
