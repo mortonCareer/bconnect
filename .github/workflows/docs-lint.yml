@@ -4,18 +4,16 @@ on:
   push:
     branches: [dev, main]
     paths:
-      - 'docs/**'
-      - '**/CLAUDE.md'
-      - 'README.md'
+      - '**/*.md'
+      - '**/*.mdx'
       - '.markdownlint.jsonc'
       - 'lychee.toml'
       - '.lycheeignore'
       - '.github/workflows/docs-lint.yml'
   pull_request:
     paths:
-      - 'docs/**'
-      - '**/CLAUDE.md'
-      - 'README.md'
+      - '**/*.md'
+      - '**/*.mdx'
       - '.markdownlint.jsonc'
       - 'lychee.toml'
       - '.lycheeignore'
@@ -36,18 +34,15 @@ jobs:
       - name: markdownlint-cli2
         uses: DavidAnson/markdownlint-cli2-action@v20
         with:
-          # SSoT 인 git 추적 docs 만 검사:
-          # - docs/ 트리 (Diátaxis 4 카테고리 + ADR + write-docs.md 룰 적용 대상)
-          # - 모든 CLAUDE.md (계층, AI 자동로드) — 단 apps/api 는 BE 영역 미관여 (제외)
-          # - 루트 README.md
-          # .claude/ (스킬/에이전트), .github/ (template), apps/api/ 자체 docs 는
-          # 자체 컨벤션 따르므로 본 lint scope 외.
+          # apps/api (BE 영역 미관여) + 빌드 산출물 외 모든 markdown 일관 룰 적용
           globs: |
-            docs/**/*.md
-            **/CLAUDE.md
-            README.md
+            **/*.md
             !apps/api/**
-            !**/.claude/**
+            !**/node_modules/**
+            !**/.next/**
+            !**/dist/**
+            !**/build/**
+            !packages/api-client/src/generated/**
 
   # docs 안의 외부 링크 / 상대 경로 깨짐 자동 검출
   link-check:
@@ -71,10 +66,8 @@ jobs:
           args: >-
             --config lychee.toml
             --no-progress
-            'docs/**/*.md'
-            'CLAUDE.md'
-            'apps/*/CLAUDE.md'
-            'packages/*/CLAUDE.md'
-            'README.md'
+            --exclude-path apps/api
+            './**/*.md'
+            './**/*.mdx'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
