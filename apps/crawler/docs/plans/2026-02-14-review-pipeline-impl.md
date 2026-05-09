@@ -12,7 +12,7 @@
 
 ---
 
-### Task 1: config.py — 검수 DB ID 설정 추가
+## Task 1: config.py — 검수 DB ID 설정 추가
 
 **Files:**
 

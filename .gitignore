@@ -121,3 +121,4 @@ docs/superpowers/
 
 # 임시 산출물 (분석 노트, 스크린샷 등)
 .tmp/
+.lycheecache

@@ -21,9 +21,9 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 
 | 템플릿          | 파일                                                                     | 제목 접두사 |
 | --------------- | ------------------------------------------------------------------------ | ----------- |
-| Feature Request | [feature_request.md](../../../.github/ISSUE_TEMPLATE/feature_request.md) | `feat: `    |
-| Bug Report      | [bug_report.md](../../../.github/ISSUE_TEMPLATE/bug_report.md)           | `bug: `     |
-| Task            | [task.md](../../../.github/ISSUE_TEMPLATE/task.md)                       | `chore: `   |
+| Feature Request | [feature_request.md](../../../.github/ISSUE_TEMPLATE/feature_request.md) | `feat:`     |
+| Bug Report      | [bug_report.md](../../../.github/ISSUE_TEMPLATE/bug_report.md)           | `bug:`      |
+| Task            | [task.md](../../../.github/ISSUE_TEMPLATE/task.md)                       | `chore:`    |
 
 ## 레이블
 
