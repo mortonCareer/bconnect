@@ -88,6 +88,6 @@ CF 도메인: `static.bconnect.to` 단일.
 
 ## Notes
 
-- 데이터 모델: Storage / Attachment / 매핑 테이블 (post_attachments 등) — 메모리 [`project_file_infra.md`](../../../.claude/projects/...) 참조 (인프라 수정 시 함께 갱신)
+- 데이터 모델: Storage / Attachment / 매핑 테이블 (post_attachments 등) — 메모리 `project_file_infra.md` 참조 (인프라 수정 시 함께 갱신)
 - 업로드 플로우: `presign → S3 PUT → confirm` 공통 패턴
 - 후속: KMS 도입 / 감사 로그 별도 테이블은 컴플라이언스 요구 시 검토

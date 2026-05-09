@@ -3,7 +3,7 @@
 - **Status**: Accepted
 - **Date**: 2026-05-08 (백필 작성일. 결정 자체는 BE 초기 — 정확한 origin 추적 곤란)
 - **Deciders**: @fine-pine (BE 초기 도입), @manamana32321 (spec 정렬)
-- **Related**: [PR #266](https://github.com/mortonCareer/bconnect/pull/266) (spec 정렬), [`packages/api-client/src/spec/_shared.yaml`](../../reference/specs/_shared.yaml) (envelope schema)
+- **Related**: [PR #266](https://github.com/mortonCareer/bconnect/pull/266) (spec 정렬), [`packages/api-client/src/spec/_shared.yaml`](../../../packages/api-client/src/spec/_shared.yaml) (envelope schema)
 
 ## Context
 
@@ -66,7 +66,7 @@ ApiError: { code: string, status: string }
 
 **Option 3 (단순 envelope)** 채택.
 
-Spec 정의 ([`_shared.yaml`](../../reference/specs/_shared.yaml)):
+Spec 정의 ([`_shared.yaml`](../../../packages/api-client/src/spec/_shared.yaml)):
 
 ```yaml
 ApiSuccessResponseBase:
