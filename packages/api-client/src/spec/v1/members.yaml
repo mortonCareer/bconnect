@@ -190,7 +190,7 @@ components:
           type:
             - string
             - 'null'
-          format: uri
+          format: image-url
           example: https://placehold.co/200x200
         role:
           $ref: '#/components/schemas/Role'
@@ -218,7 +218,7 @@ components:
           type:
             - string
             - 'null'
-          format: uri
+          format: image-url
           example: https://placehold.co/200x200
         role:
           $ref: '#/components/schemas/Role'
@@ -244,7 +244,7 @@ components:
           type:
             - string
             - 'null'
-          format: uri
+          format: image-url
           example: https://placehold.co/200x200
         role:
           $ref: '#/components/schemas/Role'
@@ -281,7 +281,7 @@ components:
           type:
             - string
             - 'null'
-          format: uri
+          format: image-url
           example: https://placehold.co/200x200
         createdAt:
           type: string
