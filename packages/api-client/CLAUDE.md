@@ -320,7 +320,7 @@ const result = await sendOtp({ phone: '01012345678' })
 
 ## 관련 문서
 
-- [docs/DEVELOPMENT_WORKFLOW.md](../../docs/DEVELOPMENT_WORKFLOW.md) — 워크플로 (이슈 → 브랜치 → PR → 머지)
+- [docs/how-to/development-workflow.md](../../docs/how-to/development-workflow.md) — 워크플로 (이슈 → 브랜치 → PR → 머지)
 - [PR #266](https://github.com/mortonCareer/bconnect/pull/266) — 본 spec 구조의 도입 PR (envelope wrap, 도메인 packing, 3.1 업그레이드, MSW mock generation)
 
 ## 후속 이슈

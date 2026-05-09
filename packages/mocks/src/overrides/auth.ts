@@ -5,7 +5,7 @@ import {
   getLogoutMockHandler,
 } from '@bconnect/api-client'
 
-// dev 편의용 고정값 — docs/QA_AND_TESTING.md "테스트 데이터 생성" 섹션과 일치.
+// dev 편의용 고정값 — docs/how-to/qa-and-testing.md "테스트 데이터 생성" 섹션과 일치.
 const MOCK_OTP_CODE = '123456'
 const NEW_USER_PHONE_PREFIX = '01099'
 
