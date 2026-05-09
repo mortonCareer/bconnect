@@ -143,8 +143,8 @@ dev 환경에서 모든 API 요청은 **MSW (Mock Service Worker)** 가 가로�
 
 상세는 패키지 SoT:
 
-- spec + orval codegen + 새 endpoint 추가 절차: [`packages/api-client/CLAUDE.md`](../packages/api-client/CLAUDE.md)
-- 핸들러 / stateful override / 브라우저·테스트 entry / race-safe gate / 새 override 추가 절차: [`packages/mocks/CLAUDE.md`](../packages/mocks/CLAUDE.md)
+- spec + orval codegen + 새 endpoint 추가 절차: [`packages/api-client/CLAUDE.md`](../../packages/api-client/CLAUDE.md)
+- 핸들러 / stateful override / 브라우저·테스트 entry / race-safe gate / 새 override 추가 절차: [`packages/mocks/CLAUDE.md`](../../packages/mocks/CLAUDE.md)
 
 career / plan 둘 다 자동 적용됨 (둘 다 `@bconnect/mocks` 사용).
 

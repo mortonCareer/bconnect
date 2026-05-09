@@ -65,4 +65,4 @@ afterAll(() => server.close())
 ## 관련 문서
 
 - [packages/api-client/CLAUDE.md](../api-client/CLAUDE.md) — spec 구조 + orval codegen 가이드
-- [docs/DEVELOPMENT_WORKFLOW.md](../../docs/DEVELOPMENT_WORKFLOW.md) — Mock API 흐름
+- [docs/how-to/development-workflow.md](../../docs/how-to/development-workflow.md) — Mock API 흐름
