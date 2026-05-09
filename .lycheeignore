@@ -24,3 +24,9 @@
 ^https?://localhost
 ^https?://127\.0\.0\.1
 ^https?://0\.0\.0\.0
+
+# docs 본문 안의 예시/placeholder URL (실제 도메인 아님)
+# - Vercel 프리뷰 URL 패턴 예시 (git-workflow / qa-and-testing 안)
+^https://morton-(career|plan)-git-
+# - 미배포 CDN 도메인 (file-infrastructure-design 안 — production 활성 시 ignore 제거 검토)
+^https://static\.bconnect\.to
