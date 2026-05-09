@@ -38,7 +38,7 @@ jobs:
         with:
           # SSoT 인 git 추적 docs 만 검사:
           # - docs/ 트리 (Diátaxis 4 카테고리 + ADR + write-docs.md 룰 적용 대상)
-          # - 모든 CLAUDE.md (계층, AI 자동로드)
+          # - 모든 CLAUDE.md (계층, AI 자동로드) — 단 apps/api 는 BE 영역 미관여 (제외)
           # - 루트 README.md
           # .claude/ (스킬/에이전트), .github/ (template), apps/api/ 자체 docs 는
           # 자체 컨벤션 따르므로 본 lint scope 외.
@@ -46,6 +46,8 @@ jobs:
             docs/**/*.md
             **/CLAUDE.md
             README.md
+            !apps/api/**
+            !**/.claude/**
 
   link-check:
     name: lychee link check
@@ -69,7 +71,9 @@ jobs:
             --config lychee.toml
             --no-progress
             'docs/**/*.md'
-            '**/CLAUDE.md'
+            'CLAUDE.md'
+            'apps/*/CLAUDE.md'
+            'packages/*/CLAUDE.md'
             'README.md'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

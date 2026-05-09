@@ -27,6 +27,10 @@
   // MD040 (fenced-code-language): 간혹 plain output(diff dump 등) 의 ``` 사용 허용
   "MD040": false,
 
+  // MD036 (no-emphasis-as-heading): Morton docs 컨벤션이 짧은 sub-section 표시에
+  // **굵은 글씨** 사용 다수 (table 셀, 섹션 강조 등). 정식 ## heading 강제는 비현실.
+  "MD036": false,
+
   // MD049/MD050 (emphasis-style/strong-style): _ vs * 선택은 prettier 의 영역
   // markdownlint 가 또 검사하면 충돌 → 비활성
   "MD049": false,
