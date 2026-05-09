@@ -29,10 +29,7 @@ export const authOverrides = [
         console.log(`[MSW Auth] OTP sent to ${body.phone}: ${MOCK_OTP_CODE}`)
       }
     }
-    return {
-      success: true,
-      data: { expiresAt: new Date(Date.now() + 180000).toISOString() },
-    }
+    return { expiresAt: new Date(Date.now() + 180000).toISOString() }
   }),
 
   // OTP 검증: orval mock 은 200 만 생성하므로 error 응답이 필요한 이 endpoint 는 raw 핸들러.
@@ -96,11 +93,8 @@ export const authOverrides = [
 
   // refresh: 매번 새 access token 발급. mock 에선 쿠키 검증을 생략 (실제 BE 는 검증).
   getRefreshTokenMockHandler(() => ({
-    success: true,
-    data: {
-      accessToken: generateToken('access'),
-      refreshToken: generateToken('refresh'),
-    },
+    accessToken: generateToken('access'),
+    refreshToken: generateToken('refresh'),
   })),
 
   // logout: void 응답 (orval 기본 시그니처 그대로).

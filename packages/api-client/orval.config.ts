@@ -21,6 +21,11 @@ export default defineConfig({
   morton: {
     input: {
       target: './src/openapi.bundled.yaml',
+      override: {
+        // compile-time: spec 의 envelope 을 type 단계에서 strip → generated type
+        // 이 inner data 만 expose. 런타임 unwrap 은 customFetch 가 담당.
+        transformer: './orval.transformer.ts',
+      },
     },
     output: {
       mode: 'single',
@@ -42,6 +47,12 @@ export default defineConfig({
           useQuery: true,
           useMutation: true,
           useSuspenseQuery: true,
+        },
+        // orval 8 의 generated 함수 return type 을 `Promise<{ data, status }>` →
+        // `Promise<T>` 로 simplified. wrapper 가 hook 까지 노출되는 것 방지.
+        // mutator 가 inner data 를 return 하면 hook 의 `data` 도 raw payload.
+        fetch: {
+          includeHttpResponseReturnType: false,
         },
         // mock format override:
         //   spec 의 `format: image-url` 필드 (Member.picture, Post.images 등) 가
