@@ -40,10 +40,6 @@ type ApiErrorResponse = {
   }
 }
 
-// Generic envelope 의 data 필드 타입을 추출. customFetch<TResponse> 는 inner 데이터를 반환.
-// void 응답은 envelope 에 data 필드가 없어 T 자체로 fallback (콜러는 .data 를 읽지 않음).
-type ExtractData<T> = T extends { data: infer D } ? D : T
-
 export class ApiError extends Error {
   constructor(
     public code: string,
@@ -105,41 +101,36 @@ export const apiClient = ky.create({
   },
 })
 
-// Orval mutator 시그니처
-type RequestConfig = {
-  url: string
-  method: string
-  headers?: Record<string, string>
-  data?: unknown
-  params?: Record<string, unknown>
-  signal?: AbortSignal
-}
-
-// orval 이 생성하는 호출 형태: `customFetch<SendOtp200>(...)` — T 는 envelope 타입.
-// 반환은 envelope 의 inner data (T['data']) — 호출부 hook 의 data 가 raw payload 와 정렬됨.
-export async function customFetch<T>(
-  config: RequestConfig,
-  _options?: RequestInit
-): Promise<ExtractData<T>> {
-  // ky prefixUrl은 슬래시로 시작하는 경로를 허용하지 않음
-  const normalizedUrl = config.url.startsWith('/') ? config.url.slice(1) : config.url
+// Orval 8 mutator 시그니처: `customFetch<T>(url, options)`.
+//   - url: orval 의 URL builder 가 query params 포함해 fully qualified path 를 만들어 전달 (예: `/api/v1/coworkers?key=val`)
+//   - options.body: orval 이 이미 JSON.stringify 한 string 으로 전달
+//   - options.headers/method/signal: 표준 RequestInit
+//
+// orval config 의 `output.override.fetch.includeHttpResponseReturnType: false` 가
+// generated return type 을 `Promise<{ data, status }>` → `Promise<T>` 로 simplified
+// → mutator 도 inner T (envelope unwrap 후 raw payload) 를 return 하면 hook 의
+// `data` 가 raw payload 와 정렬됨.
+export async function customFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
+  // ky prefixUrl 은 leading slash 거부 — orval URL 이 `/api/...` 로 시작하므로 strip
+  const normalizedUrl = url.startsWith('/') ? url.slice(1) : url
 
   try {
     const response = await apiClient(normalizedUrl, {
-      method: config.method,
-      json: config.data,
-      headers: config.headers,
-      searchParams: config.params as Record<string, string | number | boolean> | undefined,
-      signal: config.signal,
+      method: options.method,
+      body: options.body,
+      headers: options.headers,
+      signal: options.signal,
     })
 
-    const json = (await response.json()) as ApiSuccessResponse<ExtractData<T>> | ApiErrorResponse
+    // 204 No Content 등 빈 응답은 envelope 없이 통과 (T = void 케이스)
+    const text = await response.text()
+    if (!text) return undefined as T
 
+    const json = JSON.parse(text) as ApiSuccessResponse<T> | ApiErrorResponse
     if (!json.success) {
       throw new ApiError(json.error.code, json.error.message)
     }
-
-    // ApiResponse 래퍼를 벗기고 실제 데이터만 반환
+    // ApiResponse envelope 을 벗기고 실제 data 만 반환
     return json.data
   } catch (error) {
     if (error instanceof ApiError) {
