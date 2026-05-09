@@ -6,25 +6,30 @@ import type {
 } from 'openapi3-ts/oas31'
 import { defineTransformer } from 'orval'
 
-// Morton API 의 모든 성공 응답은 envelope 패턴 (`ApiSuccessResponseBase + allOf + data`).
-// orval 이 그대로 generate 하면 hook 의 data 가 envelope (`{ success, data }`) 으로 노출 →
-// 사용처에서 `result.data.data.foo` 같은 boilerplate 발생.
-//
-// 이 transformer 는 spec 자체에서 envelope 을 벗겨, generated type 이 inner data 만
-// expose 하도록 변환. 런타임의 customFetch 가 envelope unwrap 한 결과와 type 정렬됨.
-//
-// 변환 패턴:
-//   responses['2xx'].content['application/json'].schema:
-//     allOf:
-//       - $ref: '...ApiSuccessResponseBase'
-//       - type: object
-//         required: [data]
-//         properties:
-//           data: <inner schema>
-//   ↓
-//   responses['2xx'].content['application/json'].schema: <inner schema>
-//
-// 4xx/5xx 는 그대로 — customFetch 가 throw ApiError 로 처리, hook 사용처는 error 객체만 봄.
+/**
+ * Morton OpenAPI spec transformer — 2xx 응답에서 envelope 패턴을 벗겨 generated
+ * type 이 inner data 만 expose 하도록 변환. 런타임의 `customFetch` 가 envelope
+ * unwrap 한 결과와 type 정렬되어 hook 사용처가 `result.data.data` 같은
+ * boilerplate 없이 raw payload 직접 접근 (`member?.id`).
+ *
+ * 변환 패턴:
+ * ```yaml
+ * responses['2xx'].content['application/json'].schema:
+ *   allOf:
+ *     - $ref: '...ApiSuccessResponseBase'
+ *     - type: object
+ *       required: [data]
+ *       properties:
+ *         data: <inner schema>
+ * # ↓
+ * responses['2xx'].content['application/json'].schema: <inner schema>
+ * ```
+ *
+ * 4xx/5xx 는 그대로 보존 — `customFetch` 가 `throw ApiError` 로 처리하고
+ * hook 사용처는 `query.error` 로 받음.
+ *
+ * @see {@link https://orval.dev/docs/reference/configuration/input#transformer | orval input transformer docs}
+ */
 export default defineTransformer((spec) => {
   const openapi = spec as OpenAPIObject
   if (!openapi.paths) return openapi
@@ -74,8 +79,11 @@ export default defineTransformer((spec) => {
   return { ...openapi, paths: transformedPaths }
 })
 
-// allOf 두 항목 (ApiSuccessResponseBase + data 포함 object) 패턴이면 inner data schema 만 추출.
-// 패턴이 안 맞으면 원본 그대로 (빈 응답, void 등).
+/**
+ * `allOf` 두 항목 (`ApiSuccessResponseBase` + `data` 포함 object) 패턴 발견 시
+ * inner `data` schema 만 추출해 새 ResponseObject 반환. 패턴이 안 맞으면 원본
+ * 그대로 (빈 응답, void 응답 등).
+ */
 function unwrapEnvelope(resp: ResponseObject): ResponseObject {
   const jsonContent = resp.content?.['application/json']
   if (!jsonContent?.schema) return resp
