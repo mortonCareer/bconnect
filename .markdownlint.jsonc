@@ -34,5 +34,5 @@
   // MD049/MD050 (emphasis-style/strong-style): _ vs * 선택은 prettier 의 영역
   // markdownlint 가 또 검사하면 충돌 → 비활성
   "MD049": false,
-  "MD050": false
+  "MD050": false,
 }
