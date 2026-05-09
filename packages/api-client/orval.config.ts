@@ -43,6 +43,16 @@ export default defineConfig({
           useMutation: true,
           useSuspenseQuery: true,
         },
+        // mock format override:
+        //   spec 의 `format: uri` 필드 (Member.picture, Post.images 등) 가
+        //   `useExamples: true` 만으로는 nullable union/array items 의 `example` 을
+        //   못 받아오는 orval 한계 우회. format 단위로 placeholder URL 강제 →
+        //   콘솔 `Failed to load resource` noise 제거 + 실제 이미지 렌더링.
+        mock: {
+          format: {
+            uri: () => 'https://placehold.co/600x400',
+          },
+        },
       },
     },
   },
