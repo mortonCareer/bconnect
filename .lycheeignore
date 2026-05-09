@@ -32,3 +32,8 @@
 ^https://static\.bconnect\.to
 # - 미배포 production health endpoint (deployment.md 운영 가이드 안)
 ^https://bconnect\.to/_health
+# - .claude/agents 안의 placeholder URL (예시 figma URL, github owner/repo 등)
+^https://(www\.)?figma\.com/design/xxx
+^https://github\.com/(owner|org)/repo
+# - notion-task-sync 의 JS template literal (lychee 가 plain URL 로 잘못 파싱)
+^https://github\.com/org/repo/(issues|pull)/\$\{

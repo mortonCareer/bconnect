@@ -1,5 +1,8 @@
 # 푸시 알림 딥링크 규격
 
+> **For**: BE (FCM 발송), FE (SW / foreground 핸들러) 개발자.
+> **You'll be able to**: FCM 페이로드 `data.url` 컨벤션 확인, 새 카테고리 추가 절차 수행.
+
 FCM 페이로드의 `data.url` 필드 규격. BE 가 알림을 보낼 때 사용자를 어느 화면으로 보낼지 결정하는 **공개 URL 계약**.
 
 ## 규약

@@ -59,7 +59,7 @@ Notion에 결정 데이터베이스를 만들어 페이지 단위 기록.
 
 근거:
 
-- Morton의 docs는 이미 git 레포 SSoT 정책 (`docs/how-to/write-docs.md` 5장)
+- Morton의 docs는 이미 git 레포 SSoT 정책 (`docs/how-to/write-docs.md` 4장)
 - AI(Claude Code)가 docs를 자동으로 컨텍스트로 사용 — Markdown ADR이 결정 컨텍스트를 AI에 자연스럽게 전달
 - Drift 방지가 docs 운영의 핵심 — 코드와 같은 git 트리 안에 두어야 PR 리뷰로 정합 검증 가능
 
@@ -81,5 +81,5 @@ Notion에 결정 데이터베이스를 만들어 페이지 단위 기록.
 
 ## Notes
 
-- ADR을 언제 작성? `how-to/write-docs.md` 6장 ("언제 ADR 작성?") 참조
+- ADR을 언제 작성? `how-to/write-docs.md` 5장 ("언제 ADR 작성?") 참조
 - ADR 작성 강제는 별도 follow-up 이슈 — PR 템플릿에 "ADR 필요 여부 체크" 항목 추가 검토

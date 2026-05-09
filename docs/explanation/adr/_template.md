@@ -45,4 +45,4 @@
 - 번호: 4자리 zero-padded, 작성 순서, 영구
 - Status 전이: Proposed → Accepted → (Superseded by ADR-YYYY | Deprecated)
 - 길이 통념: 100-300줄. essay 형식 1-2 결정만.
-- 참고: [`how-to/write-docs.md`](../../how-to/write-docs.md) 6장 ADR 작성 가이드
+- 참고: [`how-to/write-docs.md`](../../how-to/write-docs.md) 5장 ADR 작성 가이드

@@ -237,10 +237,10 @@ N개 작업 요청
 
 ## 참조
 
-- [Issue Management](../.claude/skills/issue-management/SKILL.md)
-- [Worktree Manager](../.claude/skills/worktree-manager/SKILL.md)
-- [Commit](../.claude/skills/commit/SKILL.md)
-- [PR from Issue](../.claude/skills/pr-from-issue/SKILL.md)
+- [Issue Management](../skills/issue-management/SKILL.md)
+- [Worktree Manager](../skills/worktree-manager/SKILL.md)
+- [Commit](../skills/commit/SKILL.md)
+- [PR from Issue](../skills/pr-from-issue/SKILL.md)
 - [Git Workflow](../../docs/how-to/git-workflow.md) - 브랜치 네이밍 규칙
 
 ---

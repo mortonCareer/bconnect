@@ -1,5 +1,8 @@
 # 외부 도구 (SSoT)
 
+> **For**: 외부 SaaS / 클라우드 / 라이브러리 정보를 찾는 사람 또는 AI.
+> **You'll be able to**: 도구별 Web/CLI/MCP 접근 방법, Terraform 모듈, 계정/식별자 lookup.
+
 코드/Terraform에 없는 외부 정보의 단일 진실. **Terraform 관리되는 항목은 infra/ 링크로 연결** (중복 작성 X). 도구 자체 정보(라이브러리, GHA workflow 등)는 코드를 SSoT로 사용.
 
 축 분리: **Web** (인간 only), **CLI** (인간 + AI), **MCP** (AI only). `-` = 해당 접근법 없음/미사용.

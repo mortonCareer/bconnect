@@ -64,6 +64,6 @@ docs는 [Diátaxis](https://diataxis.fr) 4분할로 정리됨. "지금 무슨 �
 
 ## docs 운영
 
-- **외부 도구 SSoT 룰**: [`reference/tools.md`](./reference/tools.md)가 단일 진실. 다른 docs에서는 도구명 / 참조 링크만. (작성 룰: [`how-to/write-docs.md`](./how-to/write-docs.md) 5장)
+- **외부 도구 SSoT 룰**: [`reference/tools.md`](./reference/tools.md)가 단일 진실. 다른 docs에서는 도구명 / 참조 링크만. (작성 룰: [`how-to/write-docs.md`](./how-to/write-docs.md) 4장)
 - **자동 검증**: markdownlint + lychee CI ([`.github/workflows/docs-lint.yml`](../.github/workflows/docs-lint.yml)) — 깨진 링크 / 룰 위반 PR 차단
 - **CLAUDE.md 자동로드**: AI는 cwd 기준 상위 CLAUDE.md를 자동 로드. `docs/` 안에서 편집 시 [`docs/CLAUDE.md`](./CLAUDE.md)도 함께 (작성 룰 포인터).

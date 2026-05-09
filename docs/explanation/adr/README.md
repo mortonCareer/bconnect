@@ -3,7 +3,7 @@
 > **For**: 시스템 디자인 결정의 배경/대안/근거를 추적하려는 사람.
 > **You'll be able to**: 어떤 결정이 언제, 왜 내려졌고 누가 결정했는지 확인한다.
 
-ADR은 PR 리뷰 코멘트에 묻혀 사라지던 결정을 영구 기록한다. 작성 룰과 형식은 [`how-to/write-docs.md`](../../how-to/write-docs.md) 6장 참조.
+ADR은 PR 리뷰 코멘트에 묻혀 사라지던 결정을 영구 기록한다. 작성 룰과 형식은 [`how-to/write-docs.md`](../../how-to/write-docs.md) 5장 참조.
 
 새 ADR은 [`_template.md`](./_template.md) 복사로 시작한다. 인덱스는 디렉토리 listing(파일명 = 번호 + 제목)이 곧 표지.
 

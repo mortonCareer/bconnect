@@ -1,5 +1,8 @@
 # 팀 구성
 
+> **For**: 합류자, 협업자, 자동화 (issue/PR 담당자/리뷰어 자동 할당).
+> **You'll be able to**: 팀원 GitHub 매핑, 책임 영역, 리뷰어 룰 lookup.
+
 Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 
 ---

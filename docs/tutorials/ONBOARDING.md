@@ -77,7 +77,7 @@ pnpm lint && pnpm format:check  # 0 exit 확인
 
 ### Step 1. 이슈 생성
 
-[새 이슈](https://github.com/mortonCareer/bconnect/issues/new) → "Task" 템플릿 → 제목: `chore: TEAM.md 본인 정보 추가`. issue 번호 확인.
+[새 이슈](https://github.com/mortonCareer/bconnect/issues/new) → "Task" 템플릿 → 제목: `chore: team.md 본인 정보 추가`. issue 번호 확인.
 
 ### Step 2. 워크트리 + 브랜치
 

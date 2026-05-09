@@ -1,5 +1,8 @@
 # QA & 테스팅
 
+> **For**: PR 리뷰어, QA 수행자.
+> **You'll be able to**: PR 프리뷰 환경에서 happy path / 엣지 케이스 / 에러 검증, 버그 분류.
+
 Morton 프로젝트의 QA 및 테스팅 가이드입니다.
 
 ---

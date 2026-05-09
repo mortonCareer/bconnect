@@ -1,5 +1,8 @@
 # 파일 인프라 설계
 
+> **For**: 파일 인프라 (S3/CloudFront/Lambda) 작업자.
+> **You'll be able to**: 단일 버킷 + path prefix 격리 결정의 컨텍스트, 데이터 모델, 업로드 플로우 이해.
+
 **작성일**: 2026-04-12 (v2 업데이트: 2026-04-17)
 **관련 이슈**: [mortonCareer/bconnect#174](https://github.com/mortonCareer/bconnect/issues/174)
 **관련 디자인**: [MVP-2 동산보드판 (Figma)](https://www.figma.com/design/iGTu8r553JZ7TZ5FVdxkoB/?node-id=1143-793)
