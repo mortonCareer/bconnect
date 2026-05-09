@@ -18,14 +18,16 @@ const devices: DeviceRecord[] = []
 
 export const devicesOverrides = [
   // 등록: UPSERT
+  // orval 8 의 transformer 가 spec envelope 을 벗겨 generated mock handler 가
+  // inner data 만 expect → 여기서도 inner data 만 return.
   getRegisterDeviceMockHandler(async ({ request }) => {
     const body = (await request.json()) as { token?: string; platform?: DevicePlatform }
-    if (!body.token) return { success: true, data: { registered: false } }
+    if (!body.token) return { registered: false }
     const now = new Date().toISOString()
     const existing = devices.find((d) => d.token === body.token)
     if (existing) {
       existing.lastActiveAt = now
-      return { success: true, data: { registered: true } }
+      return { registered: true }
     }
     devices.push({
       id: devices.length + 1,
@@ -34,7 +36,7 @@ export const devicesOverrides = [
       createdAt: now,
       lastActiveAt: now,
     })
-    return { success: true, data: { registered: true } }
+    return { registered: true }
   }),
 
   // 해제: orval 이 generate 한 unregister 는 void 라 mock 핸들러로는 stateful 처리 어려움.
