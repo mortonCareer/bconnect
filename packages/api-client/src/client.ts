@@ -102,9 +102,9 @@ export const apiClient = ky.create({
 })
 
 /**
- * Orval 8 의 mutator — 런타임 단계에서 ApiResponse envelope (`{ success, data }`)
- * 을 벗기고 inner data 만 return + 401/403 retry + 4xx → ApiError throw.
- * spec 단계의 type 정렬은 `orval.transformer.ts` 가 담당.
+ * 런타임에서 ApiResponse envelope (`{ success, data }`) 을 벗기고 inner data 만
+ * return + 401/403 retry + 4xx → ApiError throw. spec 단계의 type 정렬은
+ * `orval.transformer.ts` 가 담당.
  */
 export async function customFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
   // ky prefixUrl 은 leading slash 거부 — orval URL 이 `/api/...` 로 시작하므로 strip
