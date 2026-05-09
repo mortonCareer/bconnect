@@ -1,8 +1,4 @@
-// Morton docs markdown lint 룰 — docs-lint CI 가 이 파일을 SSoT 로 사용.
-//
-// 룰 의도: docs/how-to/write-docs.md 4장 안티패턴 차단 보조.
-// markdownlint 의 default 룰 셋(MD001-MD059) 위에서 한국어 docs + Morton 표현 충돌 항목만
-// 비활성/완화. 룰 번호는 https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md 참조.
+// Morton docs markdown lint 룰
 
 {
   "default": true,

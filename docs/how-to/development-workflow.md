@@ -31,7 +31,7 @@
    └─ 테스트 수행
 
 6. QA (PR 프리뷰 환경)
-   └─ 상세 프로세스: qa-and-testing.md 참조
+   └─ 상세 프로세스: [qa-and-testing.md](./qa-and-testing.md) 참조
 
 7. 완료
    └─ PR 머지 → 프로덕션 배포

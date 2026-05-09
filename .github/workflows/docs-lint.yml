@@ -49,6 +49,7 @@ jobs:
             !apps/api/**
             !**/.claude/**
 
+  # docs 안의 외부 링크 / 상대 경로 깨짐 자동 검출
   link-check:
     name: lychee link check
     runs-on: ubuntu-latest
