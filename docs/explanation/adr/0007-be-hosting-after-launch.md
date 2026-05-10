@@ -13,7 +13,7 @@ Morton 컨텍스트:
 
 - **운영 인력**: CTO 1명 단독
 - **인접 AWS 인프라**: S3 (kiscon sync, profile uploads), IAM (terraform 관리, `morton-terraform-state` backend), CloudFront, 향후 RDS 검토
-- **글로벌 룰** ([`~/.claude/CLAUDE.md`](file:///home/json/.claude/CLAUDE.md)): "선호 스택 — 클라우드: AWS > Cloudflare", "선언적 관리 — IaC: Terraform"
+- **CTO 선호 스택** (개인 룰): 클라우드 AWS > Cloudflare, 선언적 관리 (Terraform IaC)
 - **사용자 가설**: 베타 ~수백 명, 1년 후 ~수십만 명 (한국 인테리어 종사자 + 업체)
 - **region**: 서울 (ap-northeast-2)
 
