@@ -173,6 +173,33 @@ Cross-cloud (AWS-first 원칙 위배), GCP IAM/billing 신규 학습. 비추.
 
 ## Notes
 
+### Spring Boot cold start 대응
+
+Fargate 는 Lambda 와 달리 **매 호출 spin up 이 아님** — 최소 N task 항시 유지, cold start 는 deploy / auto-scale / failure 시점에만 발생. 그래도 Spring Boot 자체 부팅이 ~20–60초라 다음 5단계 적용 (단계별 누적):
+
+| 단계 | 방법                                                                                               | 비용                                               | 효과                           |
+| ---- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------ |
+| 1    | **최소 1 task 항시 유지** (scale-to-zero X)                                                        | 0                                                  | 사용자-facing cold start 0     |
+| 2    | **Spring Boot 3.x AOT compilation + lazy initialization** (`spring.main.lazy-initialization=true`) | 0                                                  | 부팅 30–50% 단축               |
+| 3    | **AWS SOCI** (Seekable OCI Index — 이미지 lazy load)                                               | 0 (SOCI snapshot)                                  | 이미지 pull ~50% 단축          |
+| 4    | **JVM CDS** (Class Data Sharing)                                                                   | 0 (JDK 기본)                                       | startup 10–20% 단축            |
+| 5    | **GraalVM Native Image** (JVM 자체 제거)                                                           | 빌드 시간 5분 → 30분 + 일부 라이브러리 호환성 검증 | cold start ~50ms (Lambda 수준) |
+
+베타 (~수백 사용자): 단계 1+2 만 → 첫 deploy ~30초 (사용자 0 영향). 1년차 (~수만): + 단계 3+4 (SOCI). 대규모 또는 cost critical: + 단계 5 (GraalVM).
+
+**Auto-scaling pre-warm**: 트래픽 패턴 알면 미리 task 추가 (`aws_appautoscaling_scheduled_action` cron). 한국 사용자 트래픽이 출근/퇴근 피크 패턴이면 9 AM / 6 PM 미리 scale.
+
+cold start 비교:
+
+| 호스팅                                | Cold start            | 발생 시점            |
+| ------------------------------------- | --------------------- | -------------------- |
+| Lambda (Java)                         | 5–15초                | **매 호출**          |
+| Lambda + SnapStart                    | 1–2초                 | 매 호출              |
+| **Fargate (Spring Boot, 단계 1+2+3)** | **~15–30초 (단 1회)** | deploy/auto-scale 시 |
+| Fargate + GraalVM                     | ~50ms                 | deploy/auto-scale 시 |
+
+Lambda 는 stateful WAS (DB connection pool, in-memory cache, WebSocket) 제약으로 Spring Boot 패턴과 stack mismatch — 비교만 참조.
+
 ### Express Mode 재평가 조건 (2026 후반 ~ 2027)
 
 다음 모두 충족 시 표준 Fargate → Express Mode 또는 신규 deploy 시 Express 우선:
