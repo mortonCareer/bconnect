@@ -153,7 +153,9 @@ BE 와 DB 분리 이전 (small batch) 검토했으나 폐기:
 
 ## Migration Plan (트리거 발동 시)
 
-### Phase 0 — 준비 (CTO 2일)
+스프린트 5 까지 비공개 (사용자 0) → **다운타임 고려 불필요**. DMS / replication / 새벽 컷오버 같은 무거운 도구 생략, 단순 dump/restore 한 방으로.
+
+### Phase 0 — 준비 (CTO 1일)
 
 - [`infra/`](../../../infra) 에 `module "ecs_be"` 추가 (terraform-aws-modules/terraform-aws-ecs v7.x)
 - [`infra/`](../../../infra) 에 `module "rds"` 추가 (RDS Postgres 또는 Aurora — ADR-0008 결정 따름)
@@ -162,31 +164,19 @@ BE 와 DB 분리 이전 (small batch) 검토했으나 폐기:
 - AWS Secrets Manager + ECS task secrets (`JWT_SECRET`, `DATABASE_URL`)
 - Graviton 빌드 (Spring Boot Docker multi-arch — `linux/arm64` 추가)
 - Health check endpoint (`/actuator/health`) + grace period (~60초)
-- Railway Postgres 의 schema dump + AWS DMS (Database Migration Service) 또는 `pg_dump`/`pg_restore` 파이프라인 준비
 
-### Phase 1 — DB 동기화 + BE 병행 (1주)
+### Phase 1 — 이전 + 검증 (1일)
 
-- AWS RDS 인스턴스 프로비전 + Railway Postgres 의 초기 dump 복원
-- AWS DMS replication task 설정 — Railway → RDS continuous replication (CDC)
-- AWS Fargate 에 동일 컨테이너 배포, 단 Railway DB 가리킴 (replication source 보호)
-- Railway BE + Railway DB 정상 운영, AWS BE 는 idle (smoke test 만)
-
-### Phase 2 — 컷오버 (계획된 다운타임 ~30분)
-
-- 사용자 공지 (한국 새벽 4-5 AM 등 트래픽 최저 윈도우)
-- Railway BE 의 write traffic 차단 (read-only mode)
-- DMS replication lag 0 확인 → Railway DB → RDS final sync 완료
-- AWS Fargate 의 `DATABASE_URL` 을 RDS 로 전환 + ALB target health 확인
+- Railway Postgres `pg_dump` → AWS RDS `pg_restore` (한 번)
+- AWS Fargate 에 컨테이너 배포 + `DATABASE_URL` RDS 로 설정
 - Vercel `NEXT_PUBLIC_API_URL` 을 AWS 엔드포인트로 전환
-- Blackbox Exporter probe 로 AWS BE + RDS SLA 검증 (24h 모니터링)
+- Smoke test: 홈 / 로그인 / 핵심 flow + Blackbox Exporter probe SLA 검증 (수 시간)
 
-### Phase 3 — 정리 + 롤백 플랜
+### Phase 2 — Railway 정리
 
-- Railway 서비스 1주간 suspended 유지 — 비용 0, 즉시 재기동 가능
+- Railway 서비스 1주간 suspended (비용 0, 롤백 buffer)
 - 1주 후 Railway 데이터 final dump 보관 (S3) → Railway 계정 종료
-- 롤백 트리거: AWS BE/RDS error rate > 5% 또는 SLA 미달
-  - Vercel env 즉시 Railway 로 회귀 (Railway DB 의 1주 buffer 활용)
-  - 그 후 다시 phase 1 부터 진행
+- 롤백 트리거: AWS error rate > 5% 또는 SLA 미달 → Vercel env 즉시 Railway 회귀
 
 ## Notes
 
