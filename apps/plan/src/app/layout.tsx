@@ -15,8 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Plan',
-  description:
-    '기술자(조공, 준조공, 기공)가 작업물을 업로드 하고 일감을 받을 수 있는 서비스입니다.',
+  description: 'Bconnect Plan — 시공/하도급 인력 처음부터 끝까지',
 }
 
 export default function RootLayout({

@@ -12,10 +12,12 @@
   "dependencies": {
     "@bconnect/api-client": "workspace:*",
     "@bconnect/ui": "workspace:*",
+    "@hookform/resolvers": "5.2.2",
     "@sentry/nextjs": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-hook-form": "^7.70.0",
     "zod": "catalog:",
     "zustand": "catalog:"
   },
