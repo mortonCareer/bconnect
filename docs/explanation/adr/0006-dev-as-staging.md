@@ -25,11 +25,11 @@
 
 3개 layer 가 한 정책 (`dev = mock-driven staging`) 으로 동기화:
 
-| Layer | 구체 |
-|---|---|
-| **런타임 transport** | `customFetch` 가 BE envelope + MSW inner-only 두 wire format 흡수 (PR [#307](https://github.com/mortonCareer/bconnect/pull/307)) |
-| **MSW gate** | `NODE_ENV === 'development' \|\| NEXT_PUBLIC_VERCEL_ENV === 'preview'` (PR [#309](https://github.com/mortonCareer/bconnect/pull/309)) |
-| **인프라** | terraform `vercel_custom_environment` "dev" + `branch_tracking` equals "dev" (PR [#313](https://github.com/mortonCareer/bconnect/pull/313)) |
+| Layer                | 구체                                                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **런타임 transport** | `customFetch` 가 BE envelope + MSW inner-only 두 wire format 흡수 (PR [#307](https://github.com/mortonCareer/bconnect/pull/307))            |
+| **MSW gate**         | `NODE_ENV === 'development' \|\| NEXT_PUBLIC_VERCEL_ENV === 'preview'` (PR [#309](https://github.com/mortonCareer/bconnect/pull/309))       |
+| **인프라**           | terraform `vercel_custom_environment` "dev" + `branch_tracking` equals "dev" (PR [#313](https://github.com/mortonCareer/bconnect/pull/313)) |
 
 - **장점**:
   - 정책 한 곳 (이 ADR) 에서 결정 보존, 3 layer 가 그 적용
