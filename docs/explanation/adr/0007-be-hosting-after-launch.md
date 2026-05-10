@@ -1,4 +1,4 @@
-# ADR-0007: 정식 출시 후 BE 호스팅 — Railway → AWS ECS Fargate 트리거 기반 이전
+# ADR-0007: 정식 출시 후 BE + DB 호스팅 — Railway → AWS ECS Fargate + RDS 트리거 기반 이전
 
 - **Status**: Proposed
 - **Date**: 2026-05-10
@@ -101,11 +101,18 @@ Cross-cloud (AWS-first 원칙 위배), GCP IAM/billing 신규 학습. 비추.
 
 ## Decision
 
-**1순위: 표준 ECS Fargate** (Graviton + Spot 활용, ap-northeast-2 Seoul) — 단 **트리거 충족 시점에 이전**.
+**Railway 완전 폐기 — BE + DB 동시 이전.**
 
-**차선: ECS on EC2** — Steady high traffic 시점 또는 Fargate cost break-even 초과 시 검토.
+- **BE 1순위**: 표준 ECS Fargate (Graviton + Spot 활용, ap-northeast-2 Seoul)
+- **BE 차선**: ECS on EC2 — Steady high traffic 시점 또는 Fargate cost break-even 초과 시 검토
+- **BE 보류**: ECS Express Mode — Production maturity 누적 후 (~2026 후반 ~ 2027) 재평가
+- **DB**: AWS RDS Postgres (옵션 비교는 별도 ADR-0008 — RDS Postgres / Aurora / Aurora Serverless v2 비교)
 
-**ECS Express Mode 보류** — Production maturity 누적 후 (~2026 후반 ~ 2027) 재평가.
+BE 와 DB 분리 이전 (small batch) 검토했으나 폐기:
+
+- Railway 는 BE + DB 결합 운영 (단일 청구). 부분 이전 시 Railway 운영 부담 + AWS 운영 부담 둘 다.
+- cross-cloud BE↔DB 통신 latency 추가 (Vercel → Railway DB → AWS BE 또는 역방향)
+- 트리거 발동 후 1-2주 내 완전 컷오버 — small batch 의 risk 분산보다 단기 마이그레이션이 운영 단순.
 
 ### Trigger (둘 중 하나 충족 시 이전 진행)
 
@@ -141,35 +148,45 @@ Cross-cloud (AWS-first 원칙 위배), GCP IAM/billing 신규 학습. 비추.
 
 ### 중립적 결과
 
-- Railway Postgres → RDS 이전은 **별도 ADR** (본 결정 범위 외)
+- RDS 옵션 결정 (Postgres / Aurora / Aurora Serverless v2) 은 **별도 ADR-0008** — 본 ADR 은 "BE + DB 동시 이전" 결정만
 - Express Mode 의 production maturity 가 누적되면 (2026 후반 ~ 2027) 재평가 — 그 시점 Graviton/Spot 추가 지원되었으면 자연스러운 graduate
 
 ## Migration Plan (트리거 발동 시)
 
-### Phase 0 — 준비 (CTO 1일)
+### Phase 0 — 준비 (CTO 2일)
 
 - [`infra/`](../../../infra) 에 `module "ecs_be"` 추가 (terraform-aws-modules/terraform-aws-ecs v7.x)
+- [`infra/`](../../../infra) 에 `module "rds"` 추가 (RDS Postgres 또는 Aurora — ADR-0008 결정 따름)
+- VPC 설계 — public subnet (ALB), private subnet (ECS task + RDS), NAT Gateway
 - ECR repo 프로비전 + GHA `ci-api` 빌드 산출물을 ECR push 로 변경
 - AWS Secrets Manager + ECS task secrets (`JWT_SECRET`, `DATABASE_URL`)
 - Graviton 빌드 (Spring Boot Docker multi-arch — `linux/arm64` 추가)
 - Health check endpoint (`/actuator/health`) + grace period (~60초)
+- Railway Postgres 의 schema dump + AWS DMS (Database Migration Service) 또는 `pg_dump`/`pg_restore` 파이프라인 준비
 
-### Phase 1 — 병행 운영 (1주)
+### Phase 1 — DB 동기화 + BE 병행 (1주)
 
-- Railway 운영 유지, AWS Fargate 에 동일 컨테이너 동시 배포
-- Vercel `NEXT_PUBLIC_API_URL` 을 두 환경 모두 가리키도록 weighted DNS (Route53) — 10% AWS, 90% Railway
-- Spot capacity provider 50% 비중 (비-critical), on-demand 50% (critical)
+- AWS RDS 인스턴스 프로비전 + Railway Postgres 의 초기 dump 복원
+- AWS DMS replication task 설정 — Railway → RDS continuous replication (CDC)
+- AWS Fargate 에 동일 컨테이너 배포, 단 Railway DB 가리킴 (replication source 보호)
+- Railway BE + Railway DB 정상 운영, AWS BE 는 idle (smoke test 만)
 
-### Phase 2 — 컷오버 (1일)
+### Phase 2 — 컷오버 (계획된 다운타임 ~30분)
 
-- Blackbox Exporter probe 로 AWS 엔드포인트 SLA 검증 (24h)
-- 트래픽 100% AWS 전환, Railway BE 서비스 중단 (DB 는 별도 결정까지 유지)
-- Sentry release tag 갱신, Vercel env 정리
+- 사용자 공지 (한국 새벽 4-5 AM 등 트래픽 최저 윈도우)
+- Railway BE 의 write traffic 차단 (read-only mode)
+- DMS replication lag 0 확인 → Railway DB → RDS final sync 완료
+- AWS Fargate 의 `DATABASE_URL` 을 RDS 로 전환 + ALB target health 확인
+- Vercel `NEXT_PUBLIC_API_URL` 을 AWS 엔드포인트로 전환
+- Blackbox Exporter probe 로 AWS BE + RDS SLA 검증 (24h 모니터링)
 
-### Phase 3 — 롤백 플랜
+### Phase 3 — 정리 + 롤백 플랜
 
-- Route53 weighted record 로 즉시 50/50 또는 0/100 Railway 회귀 가능
-- Railway 서비스 1개월간 정지 (suspended) — 비용 0, 인스턴스 즉시 재기동 가능
+- Railway 서비스 1주간 suspended 유지 — 비용 0, 즉시 재기동 가능
+- 1주 후 Railway 데이터 final dump 보관 (S3) → Railway 계정 종료
+- 롤백 트리거: AWS BE/RDS error rate > 5% 또는 SLA 미달
+  - Vercel env 즉시 Railway 로 회귀 (Railway DB 의 1주 buffer 활용)
+  - 그 후 다시 phase 1 부터 진행
 
 ## Notes
 
