@@ -153,7 +153,7 @@ BE 와 DB 분리 이전 (small batch) 검토했으나 폐기:
 
 ## Migration Plan (트리거 발동 시)
 
-스프린트 5 까지 비공개 (사용자 0) → **다운타임 고려 불필요**. DMS / replication / 새벽 컷오버 같은 무거운 도구 생략, 단순 dump/restore 한 방으로.
+트리거 발동 시점 (~사용자 N00 명 베타) 의 트래픽이 적어 **무중단 마이그레이션 도구 (DMS, continuous replication) 불필요**. 짧은 다운타임 (수십 분) 컷오버로 단순화 — 사용자 영향 작음.
 
 ### Phase 0 — 준비 (CTO 1일)
 
