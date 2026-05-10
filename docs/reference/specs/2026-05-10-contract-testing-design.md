@@ -6,7 +6,7 @@
 **작성일**: 2026-05-10
 **관련 이슈**: [mortonCareer/bconnect#328](https://github.com/mortonCareer/bconnect/issues/328)
 **관련 ADR**: [explanation/adr/0003-openapi-3-1-with-domain-split.md](../../explanation/adr/0003-openapi-3-1-with-domain-split.md), [explanation/adr/0004-api-response-envelope.md](../../explanation/adr/0004-api-response-envelope.md), [explanation/adr/0006-dev-as-staging.md](../../explanation/adr/0006-dev-as-staging.md)
-**상태**: Draft (review 중) — tech-scout 검증 반영 (v2)
+**상태**: Draft (review 중) — 외부 도구 비교 조사 반영 (v2)
 
 ---
 
@@ -56,7 +56,7 @@ Morton 의 dev → main 통합 CI ([`.github/workflows/ci-integration.yml`](../.
 | 결과 표시     | PR sticky comment (한글, 합쇼체)    | job summary, Slack    | 외부 노출 톤 일관성, 매 commit 마다 자동 갱신             |
 | 미정렬 처리   | known-issues YAML (expires 필드)    | YAML allowlist 영구   | `expires` 자동 만료로 잊혀진 ignore 누적 방지             |
 
-(★) Schemathesis 표준성 근거: Capital One, PayLead, Mattermost, Kiwi.com, Bumble 채택. v4.x 활발 release (2026-05-10 기준 v4.18.1). 학술 평가 1.4-4.5x defect detection. 대안 verdict: Dredd archived 2024 (dead), Pact paradigm mismatch, Microcks over-engineered, Specmatic/swagger-request-validator BE 영역 강제 (도입 불가). 상세 비교는 [tech-scout 보고서](../../../.claude/plans/) 참조.
+(★) Schemathesis 표준성 근거: Capital One, PayLead, Mattermost, Kiwi.com, Bumble 채택. v4.x 활발 release (2026-05-10 기준 v4.18.1). 학술 평가 1.4-4.5x defect detection. 대안 verdict: Dredd archived 2024 (dead), Pact paradigm mismatch, Microcks over-engineered, Specmatic/swagger-request-validator BE 영역 강제 (도입 불가). 상세 비교는 §11 외부 검증 참조.
 
 ---
 
@@ -279,7 +279,7 @@ oasdiff 는 Phase 1 부터 warn-only 로 도입, Phase 2 부터 strict (breaking
 
 ## 11. 외부 검증
 
-본 design 은 [tech-scout](../../../.claude/plans/) 의 ADR-style 분석 결과를 반영한 v2 이다. 핵심 검증 포인트:
+본 design 은 외부 도구 표준성·적합성을 비교한 조사 결과를 반영한 v2 이다. 핵심 검증 포인트:
 
 - **Schemathesis 채택은 산업 표준 패턴**: PyPI 3.4M/월, MIT, 활발 유지보수, 학술 1.4-4.5x defect detection
 - **PayLead 도입 사례**가 우리 디자인과 거의 동일: GitLab CI nightly + rate-limit + custom hooks
