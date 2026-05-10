@@ -12,7 +12,7 @@
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.965.0",
     "@aws-sdk/client-s3": "^3.965.0",
-    "@hookform/resolvers": "5.2.2",
+    "@hookform/resolvers": "catalog:",
     "@bconnect/api-client": "workspace:*",
     "@bconnect/ui": "workspace:*",
     "@sentry/nextjs": "catalog:",
@@ -24,7 +24,7 @@
     "postgres": "^3.4.8",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-hook-form": "^7.70.0",
+    "react-hook-form": "catalog:",
     "server-only": "^0.0.1",
     "zod": "catalog:",
     "zustand": "catalog:"
