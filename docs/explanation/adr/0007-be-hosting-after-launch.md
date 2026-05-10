@@ -114,13 +114,9 @@ BE 와 DB 분리 이전 (small batch) 검토했으나 폐기:
 - cross-cloud BE↔DB 통신 latency 추가 (Vercel → Railway DB → AWS BE 또는 역방향)
 - 트리거 발동 후 1-2주 내 완전 컷오버 — small batch 의 risk 분산보다 단기 마이그레이션이 운영 단순.
 
-### Trigger (둘 중 하나 충족 시 이전 진행)
+### Trigger
 
-1. **비용 트리거**: Railway 월 청구액 USD 50 초과 3개월 연속 — [동일 스펙 break-even ~$57](https://getdeploying.com/aws-vs-railway)
-2. **운영 트리거** (다음 중 하나):
-   - private VPC peering 필요 (RDS Seoul 이전 결정 시)
-   - SLA 99.9% 외부 약속 발생
-   - Sentry/Blackbox 외 더 깊은 AWS 네이티브 옵저버빌리티 필요
+**스프린트 5 완료 시점 또는 CTO 임의 결정.**
 
 ### 근거
 
@@ -150,33 +146,6 @@ BE 와 DB 분리 이전 (small batch) 검토했으나 폐기:
 
 - RDS 옵션 결정 (Postgres / Aurora / Aurora Serverless v2) 은 **별도 ADR-0008** — 본 ADR 은 "BE + DB 동시 이전" 결정만
 - Express Mode 의 production maturity 가 누적되면 (2026 후반 ~ 2027) 재평가 — 그 시점 Graviton/Spot 추가 지원되었으면 자연스러운 graduate
-
-## Migration Plan (트리거 발동 시)
-
-트리거 발동 시점 (~사용자 N00 명 베타) 의 트래픽이 적어 **무중단 마이그레이션 도구 (DMS, continuous replication) 불필요**. 짧은 다운타임 (수십 분) 컷오버로 단순화 — 사용자 영향 작음.
-
-### Phase 0 — 준비 (CTO 1일)
-
-- [`infra/`](../../../infra) 에 `module "ecs_be"` 추가 (terraform-aws-modules/terraform-aws-ecs v7.x)
-- [`infra/`](../../../infra) 에 `module "rds"` 추가 (RDS Postgres 또는 Aurora — ADR-0008 결정 따름)
-- VPC 설계 — public subnet (ALB), private subnet (ECS task + RDS), NAT Gateway
-- ECR repo 프로비전 + GHA `ci-api` 빌드 산출물을 ECR push 로 변경
-- AWS Secrets Manager + ECS task secrets (`JWT_SECRET`, `DATABASE_URL`)
-- Graviton 빌드 (Spring Boot Docker multi-arch — `linux/arm64` 추가)
-- Health check endpoint (`/actuator/health`) + grace period (~60초)
-
-### Phase 1 — 이전 + 검증 (1일)
-
-- Railway Postgres `pg_dump` → AWS RDS `pg_restore` (한 번)
-- AWS Fargate 에 컨테이너 배포 + `DATABASE_URL` RDS 로 설정
-- Vercel `NEXT_PUBLIC_API_URL` 을 AWS 엔드포인트로 전환
-- Smoke test: 홈 / 로그인 / 핵심 flow + Blackbox Exporter probe SLA 검증 (수 시간)
-
-### Phase 2 — Railway 정리
-
-- Railway 서비스 1주간 suspended (비용 0, 롤백 buffer)
-- 1주 후 Railway 데이터 final dump 보관 (S3) → Railway 계정 종료
-- 롤백 트리거: AWS error rate > 5% 또는 SLA 미달 → Vercel env 즉시 Railway 회귀
 
 ## Notes
 
@@ -222,15 +191,6 @@ Lambda 는 stateful WAS (DB connection pool, in-memory cache, WebSocket) 제약�
 - **표준 Fargate → ECS on EC2**: Task definition launch type 만 변경 (state 보존). Steady high traffic 시점 비용 최적화
 - **Fargate → EKS**: 트래픽이 마이크로서비스 5개 이상 + k8s 운영 인력 확보 시
 - **Fargate → Lambda (특정 엔드포인트)**: cold-path API 만 SnapStart Lambda 로 분기
-
-### RDS 옵션 후보 (ADR-0008 에서 결정 예정)
-
-본 ADR 의 트리거 발동 시점에 별도 ADR-0008 작성 — 그 시점의 maturity / 가격 / Morton 트래픽 패턴에 맞춰 결정. 현재 후보 (참고):
-
-- **RDS Postgres** — managed Postgres, 표준. 베타~중규모 sweet spot
-- **Aurora Postgres** — Postgres 호환 + Multi-AZ + 읽기 분산. 비용 ↑, scale ↑
-- **Aurora Serverless v2** — 사용량 기반 ACU. 트래픽 spike 패턴에 적합. cold start 우려
-- **(거부) RDS MySQL / 외 엔진** — Morton 의 Postgres-only 컨벤션 (Railway 시절부터)
 
 ### Production maturity audit (tech-scout 2026-05-10)
 
