@@ -312,13 +312,8 @@ resource "vercel_project_domain" "plan" {
 }
 
 # ===========================================================================
-# Custom Environments for dev branch
+# dev 브랜치 자동 preview 환경
 # ===========================================================================
-# dev 브랜치 push 시 자동 deploy + 고정 alias.
-# - 기본 동작: PR push 만 preview deploy 됨 (PR alias 자동 생성). dev branch 자체
-#   push 는 deploy 안 일어남 → dogfood 검증 시 매번 최신 PR alias 추적 필요.
-# - branch_tracking 의 'equals' 패턴은 정확히 'dev' branch 만 매칭
-# - Vercel docs: "When enabled, each qualifying merge will generate a deployment"
 resource "vercel_custom_environment" "career_dev" {
   project_id  = vercel_project.morton-career.id
   name        = "dev"
