@@ -117,12 +117,17 @@ export async function customFetch<T>(url: string, options: RequestInit = {}): Pr
     const text = await response.text()
     if (!text) return undefined as T
 
-    const json = JSON.parse(text) as ApiSuccessResponse<T> | ApiErrorResponse
-    if (!json.success) {
-      throw new ApiError(json.error.code, json.error.message)
+    const json = JSON.parse(text) as unknown
+    // BE 는 envelope (`{success, data}`) 으로 응답, MSW mock 은 transformer 적용 후
+    // inner data 만 wire 로 보내므로 두 wire format 모두 처리.
+    if (json && typeof json === 'object' && 'success' in json) {
+      const env = json as ApiSuccessResponse<T> | ApiErrorResponse
+      if (!env.success) {
+        throw new ApiError(env.error.code, env.error.message)
+      }
+      return env.data
     }
-    // ApiResponse envelope 을 벗기고 실제 data 만 반환
-    return json.data
+    return json as T
   } catch (error) {
     if (error instanceof ApiError) {
       throw error
