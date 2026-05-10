@@ -3,7 +3,11 @@
 import { useCallback, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Input } from '@bconnect/ui'
-import { formatRegistrationNumber, extractDigits, isValidRegistrationNumber } from './constants'
+import {
+  formatRegistrationNumber,
+  extractDigits,
+  isValidRegistrationNumber,
+} from '@bconnect/config/biz-number'
 
 interface SearchBarProps {
   defaultValue?: string

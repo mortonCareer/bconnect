@@ -8,6 +8,7 @@
     "./eslint/base": "./eslint/base.js",
     "./tsconfig/next": "./tsconfig/next.json",
     "./tsconfig/base": "./tsconfig/base.json",
+    "./biz-number": "./biz-number/index.ts",
     "./env": "./env/validate.ts",
     "./phone": "./phone/index.ts",
     "./sentry": "./sentry/index.ts"
