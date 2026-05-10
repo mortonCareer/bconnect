@@ -310,3 +310,26 @@ resource "vercel_project_domain" "plan" {
   project_id = vercel_project.morton-plan.id
   domain     = "plan.${var.domain}"
 }
+
+# ===========================================================================
+# dev 브랜치 자동 preview 환경
+# ===========================================================================
+resource "vercel_custom_environment" "career_dev" {
+  project_id  = vercel_project.morton-career.id
+  name        = "dev"
+  description = "dev branch 자동 deploy — staging-like preview"
+  branch_tracking = {
+    pattern = "dev"
+    type    = "equals"
+  }
+}
+
+resource "vercel_custom_environment" "plan_dev" {
+  project_id  = vercel_project.morton-plan.id
+  name        = "dev"
+  description = "dev branch 자동 deploy — staging-like preview"
+  branch_tracking = {
+    pattern = "dev"
+    type    = "equals"
+  }
+}
