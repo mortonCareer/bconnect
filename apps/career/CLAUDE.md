@@ -20,7 +20,7 @@ pnpm lint:career
 
 `src/proxy.ts`의 `PUBLIC_EXACT`/`PUBLIC_PREFIX` 배열로 인증 면제 라우트 정의. 신규 public 페이지 추가 시 여기 추가 안 하면 redirect loop 발생.
 
-> Next 16 부터 `middleware.ts` 가 `proxy.ts` 로 네이밍 변경됨 ([공식 docs](https://nextjs.org/docs/messages/middleware-renamed-to-proxy)).
+> Next 16 부터 `middleware.ts` 가 `proxy.ts` 로 네이밍 변경됨.
 
 아래는 형식 참고용 예시 — 실제 값은 [src/proxy.ts](./src/proxy.ts) 참조.
 
