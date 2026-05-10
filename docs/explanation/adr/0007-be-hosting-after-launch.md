@@ -66,7 +66,7 @@ App Runner 후계자. Container image + IAM 만으로 ALB+HTTPS+오토스케일 
   - **terraform-provider-aws#47576** — ALB import 충돌 open
   - **graduate path 부재** — AWS 공식 입장 "graduate 안 해도 standard ECS API 옆 작동" (깔끔하지 않음)
 
-→ **트리거 시점 (~2026 후반) 재평가 후보** — production 사례 ≥ 3건 + Graviton/Spot 지원 추가되면 채택
+→ **거부** — 4종 기능 봉쇄 + production 사례 부족이 critical.
 
 ### Option 4: App Runner ❌
 
@@ -105,8 +105,8 @@ Cross-cloud (AWS-first 원칙 위배), GCP IAM/billing 신규 학습. 비추.
 
 - **BE 1순위**: 표준 ECS Fargate (Graviton + Spot 활용, ap-northeast-2 Seoul)
 - **BE 차선**: ECS on EC2 — Steady high traffic 시점 또는 Fargate cost break-even 초과 시 검토
-- **BE 보류**: ECS Express Mode — Production maturity 누적 후 (~2026 후반 ~ 2027) 재평가
-- **DB**: AWS RDS Postgres (옵션 비교는 별도 ADR-0008 — RDS Postgres / Aurora / Aurora Serverless v2 비교)
+- **BE 거부**: ECS Express Mode — Production maturity 부족 + 4종 기능 봉쇄 (Graviton/Spot/Exec/blue-green)
+- **DB**: AWS RDS — 엔진/구체 옵션은 별도 ADR-0008 (트리거 시점)
 
 BE 와 DB 분리 이전 (small batch) 검토했으나 폐기:
 
@@ -120,7 +120,7 @@ BE 와 DB 분리 이전 (small batch) 검토했으나 폐기:
 
 ### 근거
 
-1. **App Runner 사망 → 표준 Fargate 가 stable AWS 컨테이너 호스팅**. ECS Express Mode 는 후계자로 지정됐지만 2026-05 시점 production maturity 부족 (사례 0건, Graviton/Spot/Exec/blue-green 4종 봉쇄). 트리거 시점에 재평가.
+1. **App Runner 사망 → 표준 Fargate 가 stable AWS 컨테이너 호스팅**. ECS Express Mode 는 후계자로 지정됐지만 2026-05 시점 production maturity 부족 (사례 0건, Graviton/Spot/Exec/blue-green 4종 봉쇄) → 거부.
 2. **Morton 스택 정합성**: 기존 [`infra/`](../../../infra) terraform 자산 + S3/IAM/CloudFront 와 단일 프로파일 (`AWS_PROFILE=morton`). Seoul region 한국 latency 최적.
 3. **비용 단계별** — 표준 Fargate + Graviton + Spot 으로 베타부터 1년차까지 Railway 대비 우위. Express Mode 의 비용 봉쇄 없음.
 4. **출시 즉시 이전 X** — 마이그레이션 1–2일 CTO 시간. ["ship first, migrate when revenue justifies"](https://solodevstack.com/blog/railway-vs-aws-solo-developers).
@@ -145,7 +145,6 @@ BE 와 DB 분리 이전 (small batch) 검토했으나 폐기:
 ### 중립적 결과
 
 - RDS 옵션 결정 (Postgres / Aurora / Aurora Serverless v2) 은 **별도 ADR-0008** — 본 ADR 은 "BE + DB 동시 이전" 결정만
-- Express Mode 의 production maturity 가 누적되면 (2026 후반 ~ 2027) 재평가 — 그 시점 Graviton/Spot 추가 지원되었으면 자연스러운 graduate
 
 ## Notes
 
@@ -175,16 +174,6 @@ cold start 비교:
 | Fargate + GraalVM                     | ~50ms                 | deploy/auto-scale 시 |
 
 Lambda 는 stateful WAS (DB connection pool, in-memory cache, WebSocket) 제약으로 Spring Boot 패턴과 stack mismatch — 비교만 참조.
-
-### Express Mode 재평가 조건 (2026 후반 ~ 2027)
-
-다음 모두 충족 시 표준 Fargate → Express Mode 또는 신규 deploy 시 Express 우선:
-
-- AWS 공식 named-customer case study ≥ 3건
-- Graviton 지원 추가 (20% 비용 회복)
-- Fargate Spot 지원 추가
-- ECS Exec 지원 추가 (디버깅)
-- terraform-provider-aws#47576 resolve
 
 ### Future escape hatches
 
