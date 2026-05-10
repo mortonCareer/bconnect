@@ -223,6 +223,15 @@ Lambda 는 stateful WAS (DB connection pool, in-memory cache, WebSocket) 제약�
 - **Fargate → EKS**: 트래픽이 마이크로서비스 5개 이상 + k8s 운영 인력 확보 시
 - **Fargate → Lambda (특정 엔드포인트)**: cold-path API 만 SnapStart Lambda 로 분기
 
+### RDS 옵션 후보 (ADR-0008 에서 결정 예정)
+
+본 ADR 의 트리거 발동 시점에 별도 ADR-0008 작성 — 그 시점의 maturity / 가격 / Morton 트래픽 패턴에 맞춰 결정. 현재 후보 (참고):
+
+- **RDS Postgres** — managed Postgres, 표준. 베타~중규모 sweet spot
+- **Aurora Postgres** — Postgres 호환 + Multi-AZ + 읽기 분산. 비용 ↑, scale ↑
+- **Aurora Serverless v2** — 사용량 기반 ACU. 트래픽 spike 패턴에 적합. cold start 우려
+- **(거부) RDS MySQL / 외 엔진** — Morton 의 Postgres-only 컨벤션 (Railway 시절부터)
+
 ### Production maturity audit (tech-scout 2026-05-10)
 
 ECS Express Mode 채택 보류 근거:
