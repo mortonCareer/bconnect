@@ -1,0 +1,151 @@
+openapi: 3.1.0
+info:
+  title: Bconnect API
+  description: |
+    인테리어 종사자를 위한 하도급 섭외 · 관리 플랫폼 '품앗이'의 REST API.
+
+    ## 관련 문서
+
+    - [개발 문서 (Notion)](https://www.notion.so/morton-so/2dc965d2888b80ac9b72ca4d22812b12) — 도메인 다이어그램 등 하위 페이지 포함
+    - [와이어프레임 (Figma)](https://www.figma.com/design/iGTu8r553JZ7TZ5FVdxkoB/-Morton--%EA%B8%B0%ED%9A%8D---%EC%82%AC%EC%97%85?node-id=0-1)
+  version: 0.2.0
+servers:
+  - url: http://localhost:8080
+    description: 로컬 개발 서버
+  - url: https://api.bconnect.to
+    description: 프로덕션 서버
+# 기본 인증: 없음(빈 배열)
+# 인증이 필요한 부분은 별도로 작성
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+    description: 인증 및 토큰 관리
+  - name: Members
+    description: 회원 정보 관리
+  - name: Feeds
+    description: 피드 관리
+  - name: Posts
+    description: 게시글 관리
+  - name: Tasks
+    description: 작업 사항 관리
+  - name: Profiles
+    description: 기술자 프로필 관리
+  - name: Credentials
+    description: 인증뱃지(자격/면허/증명서) 관리
+  - name: Coworkers
+    description: 동료 관계 관리
+  - name: CoworkerRequests
+    description: 동료 요청 관리
+  - name: Recommendations
+    description: 추천서 관리
+  - name: Chats
+    description: 채팅 관리
+  - name: Devices
+    description: 푸시 알림용 디바이스(브라우저) 토큰 관리
+paths:
+  /api/v1/auth/otp/send:
+    $ref: v1/auth.yaml#/paths/~1api~1v1~1auth~1otp~1send
+  /api/v1/auth/otp/verify:
+    $ref: v1/auth.yaml#/paths/~1api~1v1~1auth~1otp~1verify
+  /api/v1/auth/refresh:
+    $ref: v1/auth.yaml#/paths/~1api~1v1~1auth~1refresh
+  /api/v1/auth/logout:
+    $ref: v1/auth.yaml#/paths/~1api~1v1~1auth~1logout
+  /api/v1/members:
+    $ref: v1/members.yaml#/paths/~1api~1v1~1members
+  /api/v1/members/roles:
+    $ref: v1/members.yaml#/paths/~1api~1v1~1members~1roles
+  /api/v1/members/check-username:
+    $ref: v1/members.yaml#/paths/~1api~1v1~1members~1check-username
+  /api/v1/members/me:
+    $ref: v1/members.yaml#/paths/~1api~1v1~1members~1me
+  /api/v1/feeds:
+    $ref: v1/feeds.yaml#/paths/~1api~1v1~1feeds
+  /api/v1/feeds/{feedId}:
+    $ref: v1/feeds.yaml#/paths/~1api~1v1~1feeds~1{feedId}
+  /api/v1/posts:
+    $ref: v1/posts.yaml#/paths/~1api~1v1~1posts
+  /api/v1/posts/{postId}:
+    $ref: v1/posts.yaml#/paths/~1api~1v1~1posts~1{postId}
+  /api/v1/tasks:
+    $ref: v1/tasks.yaml#/paths/~1api~1v1~1tasks
+  /api/v1/coworkers/tasks:
+    $ref: v1/coworkers.yaml#/paths/~1api~1v1~1coworkers~1tasks
+  /api/v1/tasks/{taskId}:
+    $ref: v1/tasks.yaml#/paths/~1api~1v1~1tasks~1{taskId}
+  /api/v1/profiles/trades:
+    $ref: v1/profiles.yaml#/paths/~1api~1v1~1profiles~1trades
+  /api/v1/profiles:
+    $ref: v1/profiles.yaml#/paths/~1api~1v1~1profiles
+  /api/v1/profiles/{profileId}:
+    $ref: v1/profiles.yaml#/paths/~1api~1v1~1profiles~1{profileId}
+  /api/v1/profiles/me:
+    $ref: v1/profiles.yaml#/paths/~1api~1v1~1profiles~1me
+  /api/v1/profiles/me/about:
+    $ref: v1/profiles.yaml#/paths/~1api~1v1~1profiles~1me~1about
+  /api/v1/credentials/types:
+    $ref: v1/credentials.yaml#/paths/~1api~1v1~1credentials~1types
+  /api/v1/credentials:
+    $ref: v1/credentials.yaml#/paths/~1api~1v1~1credentials
+  /api/v1/credentials/{credentialId}/accept:
+    $ref: v1/credentials.yaml#/paths/~1api~1v1~1credentials~1{credentialId}~1accept
+  /api/v1/credentials/{credentialId}/deny:
+    $ref: v1/credentials.yaml#/paths/~1api~1v1~1credentials~1{credentialId}~1deny
+  /api/v1/credentials/{credentialId}:
+    $ref: v1/credentials.yaml#/paths/~1api~1v1~1credentials~1{credentialId}
+  /api/v1/coworkers:
+    $ref: v1/coworkers.yaml#/paths/~1api~1v1~1coworkers
+  /api/v1/coworkers/{coworkerId}:
+    $ref: v1/coworkers.yaml#/paths/~1api~1v1~1coworkers~1{coworkerId}
+  /api/v1/chats:
+    $ref: v1/chats.yaml#/paths/~1api~1v1~1chats
+  /api/v1/chats/direct:
+    $ref: v1/chats.yaml#/paths/~1api~1v1~1chats~1direct
+  /api/v1/chats/{chatId}:
+    $ref: v1/chats.yaml#/paths/~1api~1v1~1chats~1{chatId}
+  /api/v1/chats/{chatId}/messages:
+    $ref: v1/chats.yaml#/paths/~1api~1v1~1chats~1{chatId}~1messages
+  /api/v1/recommendations:
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations
+  /api/v1/recommendations/received:
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1received
+  /api/v1/recommendations/sent:
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1sent
+  /api/v1/recommendations/me/received:
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1me~1received
+  /api/v1/recommendations/me/sent:
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1me~1sent
+  /api/v1/recommendations/{id}:
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1{id}
+  /api/v1/recommendations/{id}/hide:
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1{id}~1hide
+  /api/v1/recommendations/{id}/show:
+    $ref: v1/recommendations.yaml#/paths/~1api~1v1~1recommendations~1{id}~1show
+  /api/v1/coworker-requests:
+    $ref: v1/coworker-requests.yaml#/paths/~1api~1v1~1coworker-requests
+  /api/v1/coworker-requests/received:
+    $ref: v1/coworker-requests.yaml#/paths/~1api~1v1~1coworker-requests~1received
+  /api/v1/coworker-requests/sent:
+    $ref: v1/coworker-requests.yaml#/paths/~1api~1v1~1coworker-requests~1sent
+  /api/v1/coworker-requests/{id}:
+    $ref: v1/coworker-requests.yaml#/paths/~1api~1v1~1coworker-requests~1{id}
+  /api/v1/coworker-requests/{id}/accept:
+    $ref: v1/coworker-requests.yaml#/paths/~1api~1v1~1coworker-requests~1{id}~1accept
+  /api/v1/coworker-requests/{id}/deny:
+    $ref: v1/coworker-requests.yaml#/paths/~1api~1v1~1coworker-requests~1{id}~1deny
+  /api/v1/devices:
+    $ref: v1/devices.yaml#/paths/~1api~1v1~1devices
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: v1/auth.yaml#/components/securitySchemes/bearerAuth
+    cookieAuth:
+      $ref: v1/auth.yaml#/components/securitySchemes/cookieAuth
+  # 도메인 schema 는 v1/<domain>.yaml 정의 → paths 의 ref graph 로 자동 bundle.
+  # cross-cutting (envelope/error) 은 _shared.yaml.
+  # 아래는 paths 가 ref 안 하지만 bundle 에 포함되어야 하는 특수 case 의 manifest 등록:
+  # - JwtPayload: bearerAuth.x-jwt-payload-schema 로 의미 link, manifest 로 named 등록.
+  schemas:
+    JwtPayload:
+      $ref: v1/auth.yaml#/components/schemas/JwtPayload

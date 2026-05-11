@@ -1,6 +1,6 @@
 'use client'
 
-import { TopBar } from '@morton/ui'
+import { TopBar } from '@bconnect/ui'
 
 interface SignupHeaderProps {
   step: number

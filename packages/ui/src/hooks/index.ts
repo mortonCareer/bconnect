@@ -1,3 +1,2 @@
-// @morton/ui - Hooks
-// Export custom hooks here as they are created
-export {}
+// @bconnect/ui - Hooks
+export { useOtpTimer, type UseOtpTimerResult } from './useOtpTimer'

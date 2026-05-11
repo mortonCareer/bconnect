@@ -78,7 +78,7 @@ GitHub Issue 정보를 기반으로 Pull Request를 자동 생성합니다.
 
 ## 리뷰어 자동 할당
 
-> **SSoT**: 리뷰어 할당 규칙과 GitHub 사용자명 매핑은 [docs/TEAM.md](../../../docs/TEAM.md)의 "PR 리뷰어 자동 할당" 섹션을 참조하세요.
+> **SSoT**: 리뷰어 할당 규칙과 GitHub 사용자명 매핑은 [docs/reference/team.md](../../../docs/reference/team.md)의 "PR 리뷰어 자동 할당" 섹션을 참조하세요.
 
 ### 감지 방법
 
@@ -525,6 +525,6 @@ PR 생성 후:
 
 ## 참고 문서
 
-- [Git Workflow](../../../docs/GIT_WORKFLOW.md) - PR 프로세스
-- [QA & Testing](../../../docs/QA_AND_TESTING.md) - QA 체크리스트
-- [Deployment](../../../docs/DEPLOYMENT.md) - Vercel 프리뷰 배포
+- [Git Workflow](../../../docs/how-to/git-workflow.md) - PR 프로세스
+- [QA & Testing](../../../docs/how-to/qa-and-testing.md) - QA 체크리스트
+- [Deployment](../../../docs/how-to/deployment.md) - Vercel 프리뷰 배포

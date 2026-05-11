@@ -1,0 +1,28 @@
+name: close-linked-issues
+
+# GitHub closing keyword (Closes #N / Fixes #N) 는 default branch (main) 머지 시만 작동.
+# Morton 의 PR base 는 dev → mismatch. ldez/gha-mjolnir 가 non-default branch 머지 시
+# closing keyword 인식해서 자동 close (#303 결정 — Option D).
+#
+# action SHA pin (v1.5.0) — supply chain 위험 회피. deprecated 시 actions/github-script 로 fallback 가능.
+# 결정 컨텍스트: docs/how-to/git-workflow.md "이슈가 자동으로 안 닫힐 때" 섹션 + #303
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [dev]
+
+jobs:
+  close-linked-issues:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: read
+    steps:
+      - name: Close issues linked by closing keyword
+        uses: ldez/gha-mjolnir@5574ed1f1151e4d2f11e3513cd85920a3a46bb7b # v1.5.0
+        env:
+          # mjolnir 은 with: token: input 미지원 (valid inputs: entryPoint/args).
+          # GITHUB_TOKEN env 로 인증 — 미주입 시 익명 → private repo 404 (PR #304 fail 원인).
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

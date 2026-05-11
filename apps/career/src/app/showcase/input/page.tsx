@@ -1,8 +1,11 @@
+/**
+ * @figma-scaffold 쇼케이스 — Input 컴포넌트 검수용, 디자인 N/A
+ */
 'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Input, OtpInput } from '@morton/ui'
+import { Input, OtpInput } from '@bconnect/ui'
 
 export default function InputDetailPage() {
   const [inputValue, setInputValue] = useState('')
@@ -143,7 +146,7 @@ export default function InputDetailPage() {
           <section>
             <h2 className="mb-4 text-xl font-semibold text-gray-800">Usage</h2>
             <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
-              {`import { Input, OtpInput } from '@morton/ui'
+              {`import { Input, OtpInput } from '@bconnect/ui'
 
 // 기본 입력
 <Input placeholder="내용을 입력해주세요" />

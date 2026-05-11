@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=189-626
+ */
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
@@ -10,16 +13,16 @@ import { cn } from '../../lib/utils'
  * Figma: https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=189-626
  */
 const inputVariants = cva(
-  'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border bg-transparent text-base outline-none transition-colors placeholder:text-morton-gray-500 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+  'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border bg-transparent text-base outline-none transition-colors placeholder:text-bconnect-gray-500 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
         // 기본 상태
         default:
-          'border-morton-gray-300 text-morton-gray-900 focus:border-morton-primary focus:ring-1 focus:ring-morton-primary',
+          'border-bconnect-gray-300 text-bconnect-gray-900 focus:border-bconnect-primary focus:ring-1 focus:ring-bconnect-primary',
         // 에러 상태
         error:
-          'border-destructive text-morton-gray-900 focus:border-destructive focus:ring-1 focus:ring-destructive/50',
+          'border-destructive text-bconnect-gray-900 focus:border-destructive focus:ring-1 focus:ring-destructive/50',
       },
     },
     defaultVariants: {
@@ -69,7 +72,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       return (
         <div className="flex w-full flex-col items-start gap-2">
           {inputElement}
-          <p className="text-sm text-morton-error">{errorMessage}</p>
+          <p className="text-sm text-bconnect-error">{errorMessage}</p>
         </div>
       )
     }

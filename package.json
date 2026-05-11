@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "prepare": "husky && sh scripts/link-env.sh",
+    "postinstall": "pnpm api:generate && pnpm msw:init",
+    "msw:init": "pnpm --filter morton-career exec msw init public --save && pnpm --filter morton-plan exec msw init public --save",
     "dev": "pnpm --filter morton-career --filter morton-plan dev",
     "dev:career": "pnpm --filter morton-career dev",
     "dev:plan": "pnpm --filter morton-plan dev",
@@ -15,9 +17,18 @@
     "lint:plan": "pnpm --filter morton-plan lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "api:generate": "pnpm --filter @morton/api-client generate",
+    "docs:lint": "pnpm docs:lint:md && pnpm docs:lint:links",
+    "docs:lint:md": "markdownlint-cli2 \"**/*.md\" \"!apps/api/**\" \"!**/node_modules/**\" \"!**/.next/**\" \"!**/dist/**\" \"!**/build/**\" \"!packages/api-client/src/generated/**\"",
+    "docs:lint:links": "command -v lychee >/dev/null || { echo 'lychee not installed — see https://lychee.cli.rs/installation/'; exit 1; } && GITHUB_TOKEN=\"$(gh auth token 2>/dev/null)\" lychee --config lychee.toml --cache=false --no-progress --exclude-path apps/api --exclude-path node_modules './**/*.md' './**/*.mdx'",
+    "api:generate": "pnpm --filter @bconnect/api-client generate",
+    "api:bundle": "pnpm --filter @bconnect/api-client bundle",
+    "api:lint": "pnpm --filter @bconnect/api-client lint",
+    "package:check": "syncpack lint",
+    "package:fix": "syncpack fix",
     "figma:connect": "figma connect publish",
-    "figma:connect:dry": "figma connect publish --dry-run"
+    "figma:connect:dry": "figma connect publish --dry-run",
+    "figma:check": "node scripts/figma-checks/index.mjs",
+    "figma:check:dry": "node scripts/figma-checks/index.mjs --dry-run"
   },
   "packageManager": "pnpm@10.23.0",
   "devDependencies": {
@@ -25,12 +36,14 @@
     "@commitlint/config-conventional": "^20.2.0",
     "@eslint/js": "^9.39.2",
     "@figma/code-connect": "^1.3.12",
-    "eslint": "^9.39.2",
+    "eslint": "catalog:",
     "globals": "^16.5.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
+    "markdownlint-cli2": "^0.22.1",
     "playwright": "^1.58.0",
     "prettier": "^3.7.4",
+    "syncpack": "^15.0.0",
     "typescript-eslint": "^8.50.1"
   },
   "lint-staged": {

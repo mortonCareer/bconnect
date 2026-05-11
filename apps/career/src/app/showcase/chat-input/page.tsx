@@ -1,7 +1,10 @@
+/**
+ * @figma-scaffold 쇼케이스 — ChatInput 컴포넌트 검수용, 디자인 N/A
+ */
 'use client'
 
 import Link from 'next/link'
-import { ChatInput } from '@morton/ui'
+import { ChatInput } from '@bconnect/ui'
 
 export default function ChatInputShowcasePage() {
   return (
@@ -81,7 +84,7 @@ export default function ChatInputShowcasePage() {
           <section>
             <h2 className="mb-4 text-xl font-semibold text-gray-800">Usage</h2>
             <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
-              {`import { ChatInput } from '@morton/ui'
+              {`import { ChatInput } from '@bconnect/ui'
 
 // 기본 사용
 <ChatInput

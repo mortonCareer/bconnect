@@ -157,6 +157,36 @@ variable "sentry_dsn" {
 }
 
 # =============================================================================
+# Firebase (Cloud Messaging)
+# =============================================================================
+
+variable "firebase_project_id" {
+  description = "GCP/Firebase 프로젝트 ID (전역 고유)"
+  type        = string
+  default     = "bconnect-f0bee"
+}
+
+variable "firebase_project_name" {
+  description = "Firebase 프로젝트 표시 이름"
+  type        = string
+  default     = "bconnect"
+}
+
+variable "firebase_billing_account_id" {
+  description = "결제 계정 ID (Spark 플랜이면 null)"
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
+variable "firebase_vapid_key" {
+  description = "Firebase Web Push VAPID public key (Firebase Console → Cloud Messaging에서 수동 생성)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+# =============================================================================
 # Database (Railway Postgres TCP Proxy)
 # =============================================================================
 

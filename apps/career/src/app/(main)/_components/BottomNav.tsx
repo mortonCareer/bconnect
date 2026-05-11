@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { cn } from '@morton/ui'
+import { cn } from '@bconnect/ui'
 
 interface NavItem {
   href: string
@@ -25,7 +25,7 @@ export function BottomNav() {
   if (/^\/messages\/\d+/.test(pathname)) return null
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-morton-gray-300 bg-white pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-bconnect-gray-300 bg-white pb-[env(safe-area-inset-bottom)]">
       <div className="mx-auto flex h-[70px] max-w-screen-sm items-center justify-around">
         {NAV_ITEMS.map(({ href, label, icon: Icon, disabled }) => {
           const isActive =
@@ -35,7 +35,7 @@ export function BottomNav() {
             return (
               <span
                 key={href}
-                className="flex w-11 cursor-not-allowed flex-col items-center gap-1 text-morton-gray-500 opacity-40"
+                className="flex w-11 cursor-not-allowed flex-col items-center gap-1 text-bconnect-gray-500 opacity-40"
               >
                 <Icon active={false} />
                 <span className="text-m-12 leading-[1.6]">{label}</span>
@@ -49,7 +49,7 @@ export function BottomNav() {
               href={href}
               className={cn(
                 'flex w-11 flex-col items-center gap-1 transition-colors',
-                isActive ? 'text-morton-primary' : 'text-morton-gray-500'
+                isActive ? 'text-bconnect-primary' : 'text-bconnect-gray-500'
               )}
             >
               <Icon active={isActive} />

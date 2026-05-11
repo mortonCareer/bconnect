@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=331-3851
+ */
 import * as React from 'react'
 import { cn } from '../../lib/utils'
 
@@ -38,7 +41,7 @@ const OtpInput = React.forwardRef<HTMLInputElement, OtpInputProps>(
     return (
       <div
         className={cn(
-          'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border border-morton-gray-300 bg-transparent',
+          'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border border-bconnect-gray-300 bg-transparent',
           className
         )}
       >
@@ -48,18 +51,18 @@ const OtpInput = React.forwardRef<HTMLInputElement, OtpInputProps>(
           pattern="[0-9]*"
           ref={ref}
           data-slot="otp-input"
-          className="flex-1 bg-transparent text-base text-morton-gray-900 placeholder:text-morton-gray-500 outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex-1 bg-transparent text-base text-bconnect-gray-900 placeholder:text-bconnect-gray-500 outline-none disabled:cursor-not-allowed disabled:opacity-50"
           {...props}
         />
         <div className="flex items-center gap-[10px] text-sm shrink-0">
           {remainingTime > 0 && (
-            <span className="text-morton-gray-500">{formatTime(remainingTime)}</span>
+            <span className="text-bconnect-gray-500">{formatTime(remainingTime)}</span>
           )}
           <button
             type="button"
             onClick={onResend}
             disabled={resendDisabled}
-            className="font-medium text-morton-primary hover:text-morton-primary-hover disabled:opacity-50 disabled:cursor-not-allowed"
+            className="font-medium text-bconnect-primary hover:text-bconnect-primary-hover disabled:opacity-50 disabled:cursor-not-allowed"
           >
             재요청
           </button>

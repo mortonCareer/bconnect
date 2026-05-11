@@ -1,7 +1,7 @@
 'use client'
 
 import { forwardRef, type InputHTMLAttributes } from 'react'
-import { cn } from '@morton/ui'
+import { cn } from '@bconnect/ui'
 
 export interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: boolean
@@ -13,15 +13,15 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
     return (
       <div
         className={cn(
-          'flex h-[50px] items-center rounded-[8px] border border-morton-gray-300 px-3 py-[7px]',
-          error && 'border-morton-error',
+          'flex h-[50px] items-center rounded-[8px] border border-bconnect-gray-300 px-3 py-[7px]',
+          error && 'border-bconnect-error',
           props.disabled && 'opacity-50'
         )}
       >
         <input
           ref={ref}
           className={cn(
-            'w-full bg-transparent text-r-16 text-morton-gray-900 placeholder:text-morton-gray-500 focus:outline-none disabled:cursor-not-allowed',
+            'w-full bg-transparent text-r-16 text-bconnect-gray-900 placeholder:text-bconnect-gray-500 focus:outline-none disabled:cursor-not-allowed',
             className
           )}
           {...props}

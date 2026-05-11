@@ -11,14 +11,14 @@ Git worktree를 활용하여 여러 이슈를 병렬로 작업할 수 있도록 
 ## 핵심 원칙
 
 - **이슈1 - 워크트리1 - 브랜치1 - PR1**: 각 이슈는 독립된 워크트리에서 작업
-- **브랜치 네이밍**: [Git Workflow](../../../docs/GIT_WORKFLOW.md)의 브랜치 전략 섹션 참조
+- **브랜치 네이밍**: [Git Workflow](../../../docs/how-to/git-workflow.md)의 브랜치 전략 섹션 참조
 - **독립 실행**: 각 워크트리에서 별도 터미널로 병렬 작업
 
 ---
 
 ## 브랜치 네이밍 규칙
 
-> 상세 규칙은 [docs/GIT_WORKFLOW.md](../../../docs/GIT_WORKFLOW.md)를 참조합니다.
+> 상세 규칙은 [docs/how-to/git-workflow.md](../../../docs/how-to/git-workflow.md)를 참조합니다.
 
 ---
 
@@ -50,7 +50,7 @@ gh issue view <issue-number> --json title,labels
 # - bug 레이블 → fix
 # - 기타 → feat
 
-# 3. 브랜치명 생성 (GIT_WORKFLOW.md 규칙)
+# 3. 브랜치명 생성 (git-workflow.md 규칙)
 # <type>/<issue-number>-<short-description>
 
 # 4. dev 최신화
@@ -171,6 +171,6 @@ git branch -d <branch-name>
 
 ## 참고 문서
 
-- [Git Workflow](../../../docs/GIT_WORKFLOW.md) - 브랜치 전략 및 네이밍
+- [Git Workflow](../../../docs/how-to/git-workflow.md) - 브랜치 전략 및 네이밍
 - [Commit](../commit/SKILL.md)
 - [PR from Issue](../pr-from-issue/SKILL.md)

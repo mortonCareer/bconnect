@@ -1,7 +1,10 @@
+/**
+ * @figma-scaffold 쇼케이스 — Button 컴포넌트 검수용, 디자인 N/A
+ */
 'use client'
 
 import Link from 'next/link'
-import { Button } from '@morton/ui'
+import { Button } from '@bconnect/ui'
 
 export default function ButtonDetailPage() {
   return (
@@ -166,7 +169,7 @@ export default function ButtonDetailPage() {
           <section>
             <h2 className="mb-4 text-xl font-semibold text-gray-800">Usage</h2>
             <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
-              {`import { Button } from '@morton/ui'
+              {`import { Button } from '@bconnect/ui'
 
 // Primary (활성)
 <Button variant="primary">다음</Button>

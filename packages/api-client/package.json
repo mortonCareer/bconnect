@@ -1,5 +1,5 @@
 {
-  "name": "@morton/api-client",
+  "name": "@bconnect/api-client",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,21 +10,26 @@
     "./client": "./src/client.ts"
   },
   "scripts": {
-    "generate": "orval",
+    "bundle": "redocly bundle src/spec/openapi.yaml -o src/openapi.bundled.yaml",
+    "lint": "redocly lint src/spec/openapi.yaml",
+    "generate": "pnpm bundle && orval",
     "generate:watch": "orval --watch"
   },
   "dependencies": {
-    "ky": "^1.8.1",
+    "@faker-js/faker": "catalog:",
     "@tanstack/react-query": "^5.80.0",
-    "@tanstack/react-query-devtools": "^5.80.0"
+    "@tanstack/react-query-devtools": "^5.80.0",
+    "ky": "^1.8.1",
+    "msw": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "orval": "^7.7.0",
-    "typescript": "^5"
+    "@redocly/cli": "^2.30.0",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "orval": "^8.9.1",
+    "typescript": "catalog:"
   },
   "peerDependencies": {
-    "react": "^19.0.0"
+    "react": "catalog:"
   }
 }

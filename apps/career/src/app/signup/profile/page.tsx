@@ -1,12 +1,14 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=643-8028
+ */
 'use client'
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Tag } from '@morton/ui'
-import { ApiError, useRegisterMember, useCreateProfile, Role, Trade } from '@morton/api-client'
-import type { Member } from '@morton/api-client'
+import { Button, Tag } from '@bconnect/ui'
+import { ApiError, useRegisterMember, useCreateProfile, Role, Trade } from '@bconnect/api-client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import { TRADE_LABELS, TRADE_GROUPS } from '@/lib/trade-labels'
@@ -81,22 +83,13 @@ export default function SignupProfilePage() {
           signupToken: formData.signupToken,
           username: formData.username,
           name: data.name,
-          phone: formData.phone.replace(/^\+82/, '0'),
           picture: '',
           role: selectedRole,
         },
       })
 
-      // 회원가입 성공 — 로그인 처리 (BE가 accessToken + refreshToken 쿠키 발급)
-      login(
-        {
-          id: result.memberId,
-          name: data.name,
-          username: formData.username,
-          role: selectedRole,
-        } as Member,
-        result.accessToken
-      )
+      // 회원가입 성공 — accessToken 저장 (member 정보는 useGetMyMember 로 별도 조회)
+      login(result.accessToken)
 
       // 프로필 데이터 생성 (시공분야/경력/주소/한줄소개)
       try {
@@ -106,7 +99,16 @@ export default function SignupProfilePage() {
             trades: data.fields as Trade[],
             experience: EXPERIENCE_TO_YEARS[data.experience],
             headline: data.headline || undefined,
-            address: data.address ? { street: data.address } : undefined,
+            // TODO #280 — 카카오 우편번호 도입 전 임시 mock 값. zipcode/state/lat/lng 0 으로
+            // address 는 BE-required 라 undefined 불가 — 비어있으면 empty city 로 (BE validation 위임)
+            address: {
+              zipcode: '',
+              city: data.address || '',
+              state: '',
+              street: data.address || '',
+              latitude: 0,
+              longitude: 0,
+            },
           },
         })
       } catch (profileErr) {
@@ -149,7 +151,7 @@ export default function SignupProfilePage() {
           <FormLabel required>시공분야</FormLabel>
           {TRADE_GROUPS.map((group) => (
             <div key={group.label} className="flex flex-col gap-3">
-              <p className="text-m-14 text-morton-gray-700">{group.label}</p>
+              <p className="text-m-14 text-bconnect-gray-700">{group.label}</p>
               <div className="flex flex-wrap gap-2">
                 {group.trades.map((trade) => (
                   <Tag
@@ -178,7 +180,7 @@ export default function SignupProfilePage() {
                   <select
                     value={field.value || ''}
                     onChange={field.onChange}
-                    className="flex h-[40px] appearance-none items-center rounded-[8px] border border-morton-gray-300 bg-white py-[3px] pl-[10px] pr-8 text-m-14 text-morton-gray-900"
+                    className="flex h-[40px] appearance-none items-center rounded-[8px] border border-bconnect-gray-300 bg-white py-[3px] pl-[10px] pr-8 text-m-14 text-bconnect-gray-900"
                   >
                     {selectedFields.map((tradeValue) => (
                       <option key={tradeValue} value={tradeValue}>
@@ -261,7 +263,7 @@ export default function SignupProfilePage() {
         {/* 주소 */}
         <div className="flex flex-col gap-2">
           <FormLabel>주소</FormLabel>
-          <p className="text-r-12 text-morton-gray-700">
+          <p className="text-r-12 text-bconnect-gray-700">
             정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요
           </p>
           <FormInput type="text" placeholder="주소를 입력해주세요" {...register('address')} />

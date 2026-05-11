@@ -1,15 +1,20 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-4394
+ * @figma-state OTP대기 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-4405
+ * @figma-state OTP에러 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-4420
+ */
 'use client'
 
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
-import { ApiError, useSendOtp, useVerifyOtp } from '@morton/api-client'
+import { ApiError, useSendOtp, useVerifyOtp } from '@bconnect/api-client'
 import {
   formatPhoneNumber,
   isValidPhoneNumber,
   toE164,
   toNationalNumber,
-} from '@morton/config/phone'
-import { Button } from '@morton/ui'
+} from '@bconnect/config/phone'
+import { Button } from '@bconnect/ui'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { FormInput, OtpTimer, SignupHeader, FormError } from '../_components'
@@ -73,8 +78,8 @@ export default function SignupAuthPage() {
         data: { phone: toNationalNumber(phone), code },
       })
       if ('accessToken' in result) {
-        // 이미 가입된 회원 — 로그인 처리 후 홈으로
-        login({ phone: e164Phone }, result.accessToken)
+        // 이미 가입된 회원 — 로그인 처리 후 홈으로 (member 정보는 useGetMyMember 로 별도 조회)
+        login(result.accessToken)
         router.push('/')
       } else {
         // 신규 유저 — signupToken 저장 후 회원가입 진행

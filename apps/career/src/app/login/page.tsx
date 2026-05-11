@@ -1,15 +1,18 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-4283
+ */
 'use client'
 
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
-import { ApiError, useSendOtp, useVerifyOtp } from '@morton/api-client'
+import { ApiError, useSendOtp, useVerifyOtp } from '@bconnect/api-client'
 import {
   formatPhoneNumber,
   isValidPhoneNumber,
   toE164,
   toNationalNumber,
-} from '@morton/config/phone'
-import { Button, TopBar } from '@morton/ui'
+} from '@bconnect/config/phone'
+import { Button, TopBar } from '@bconnect/ui'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { FormInput, OtpTimer, FormError } from '../signup/_components'
@@ -66,15 +69,14 @@ export default function LoginPage() {
   // 인증번호 확인
   const handleVerifyCode = useCallback(async () => {
     setError(null)
-    const e164Phone = toE164(phone)
 
     try {
       const result = await verifyCodeMutation.mutateAsync({
         data: { phone: toNationalNumber(phone), code },
       })
       if ('accessToken' in result) {
-        // 기존 회원 — 바로 로그인
-        login({ phone: e164Phone }, result.accessToken)
+        // 기존 회원 — 바로 로그인 (member 정보는 useGetMyMember 로 별도 조회)
+        login(result.accessToken)
         router.push('/')
       } else {
         // 미가입 유저 — signupToken 저장 후 회원가입 진행 (OTP 재인증 불필요)

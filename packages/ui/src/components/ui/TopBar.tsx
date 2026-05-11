@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=189-720
+ */
 'use client'
 
 import * as React from 'react'
@@ -45,7 +48,7 @@ function ChatIcon({ className, count }: { className?: string; count?: number }) 
         />
       </svg>
       {count !== undefined && count > 0 && (
-        <div className="absolute -right-[7.5px] -top-[3.5px] flex min-w-[15px] items-center justify-center rounded-full bg-morton-error px-1">
+        <div className="absolute -right-[7.5px] -top-[3.5px] flex min-w-[15px] items-center justify-center rounded-full bg-bconnect-error px-1">
           <span className="text-[10px] font-bold leading-[15px] text-white">
             {count > 99 ? '99+' : count}
           </span>
@@ -63,7 +66,7 @@ function ProgressBarInline({ step, total }: { step: number; total: number }) {
           key={i}
           className={cn(
             'h-full flex-1 rounded-full',
-            i < step ? 'bg-morton-primary' : 'bg-morton-gray-300'
+            i < step ? 'bg-bconnect-primary' : 'bg-bconnect-gray-300'
           )}
         />
       ))}
@@ -132,12 +135,12 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
         {variant === 'default' && (
           <>
             {BackButton}
-            <p className="text-sb-16 text-morton-gray-900">{title}</p>
+            <p className="text-sb-16 text-bconnect-gray-900">{title}</p>
             {showAction ? (
               <button
                 type="button"
                 onClick={onAction}
-                className="text-sb-16 text-morton-primary transition-all active:scale-[0.95]"
+                className="text-sb-16 text-bconnect-primary transition-all active:scale-[0.95]"
               >
                 {actionLabel}
               </button>

@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=188-1010
+ */
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
@@ -10,18 +13,19 @@ import { XIcon } from '../../icons/XIcon'
  * - filter (필터 삭제): 파란색 배경/테두리 + X 아이콘
  */
 const tagVariants = cva(
-  'inline-flex items-center justify-center rounded-lg border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morton-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white cursor-pointer active:scale-[0.98]',
+  'inline-flex items-center justify-center rounded-lg border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bconnect-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white cursor-pointer active:scale-[0.98]',
   {
     variants: {
       variant: {
         // 기본 - 회색 테두리
         default:
-          'border-morton-gray-300 bg-transparent text-morton-gray-500 font-medium hover:border-morton-gray-500',
+          'border-bconnect-gray-300 bg-transparent text-bconnect-gray-500 font-medium hover:border-bconnect-gray-500',
         // 선택 - 파란색 배경/테두리
-        selected: 'border-morton-primary bg-morton-primary-sub text-morton-primary font-semibold',
+        selected:
+          'border-bconnect-primary bg-bconnect-primary-sub text-bconnect-primary font-semibold',
         // 필터 삭제 - 파란색 배경/테두리 + X 아이콘
         filter:
-          'border-morton-primary bg-morton-primary-sub text-morton-primary font-semibold gap-1',
+          'border-bconnect-primary bg-bconnect-primary-sub text-bconnect-primary font-semibold gap-1',
       },
       size: {
         // default: h-40px, px-14px

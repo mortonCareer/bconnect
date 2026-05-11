@@ -1,3 +1,6 @@
+/**
+ * @figma-scaffold 디자인 시스템 미정 — 임시 컴포넌트
+ */
 'use client'
 
 import * as React from 'react'
@@ -13,7 +16,7 @@ const AccordionItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn('border-b border-morton-gray-300', className)}
+    className={cn('border-b border-bconnect-gray-300', className)}
     {...props}
   />
 ))
@@ -33,7 +36,7 @@ const AccordionTrigger = React.forwardRef<
       {...props}
     >
       {children}
-      <ChevronLeftIcon className="size-4 shrink-0 text-morton-gray-500 transition-transform duration-200" />
+      <ChevronLeftIcon className="size-4 shrink-0 text-bconnect-gray-500 transition-transform duration-200" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ))

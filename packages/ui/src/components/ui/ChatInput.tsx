@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=364-5740
+ */
 import * as React from 'react'
 import { cn } from '../../lib/utils'
 import { ImageIcon } from '../../icons/ImageIcon'
@@ -87,11 +90,11 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
       >
         {/* 갤러리 아이콘 */}
         <button type="button" className="shrink-0" aria-label="갤러리">
-          <ImageIcon size={24} className="text-morton-gray-500" />
+          <ImageIcon size={24} className="text-bconnect-gray-500" />
         </button>
 
         {/* 입력 영역 */}
-        <div className="flex flex-1 items-center rounded-[12px] bg-morton-gray-100 px-[16px] py-[9px]">
+        <div className="flex flex-1 items-center rounded-[12px] bg-bconnect-gray-100 px-[16px] py-[9px]">
           <input
             type="text"
             value={inputValue}
@@ -101,8 +104,8 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
             disabled={disabled}
             className={cn(
               'flex-1 bg-transparent text-[0.875rem] leading-[1.6] font-normal outline-none',
-              disabled ? 'text-morton-gray-500' : 'text-morton-gray-900',
-              'placeholder:text-morton-gray-500'
+              disabled ? 'text-bconnect-gray-500' : 'text-bconnect-gray-900',
+              'placeholder:text-bconnect-gray-500'
             )}
           />
         </div>
@@ -114,7 +117,7 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           disabled={!isActive}
           className={cn(
             'flex size-[40px] shrink-0 items-center justify-center rounded-full p-[8px]',
-            isActive ? 'bg-morton-primary' : 'bg-morton-gray-500'
+            isActive ? 'bg-bconnect-primary' : 'bg-bconnect-gray-500'
           )}
           aria-label="전송"
         >

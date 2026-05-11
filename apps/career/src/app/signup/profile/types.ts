@@ -1,4 +1,4 @@
-import type { Trade } from '@morton/api-client'
+import type { Trade } from '@bconnect/api-client'
 
 export type { ExperienceLevel, ExperienceOption } from '@/lib/experience'
 

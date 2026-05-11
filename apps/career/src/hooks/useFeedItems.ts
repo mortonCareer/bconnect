@@ -1,10 +1,11 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useGetFeeds } from '@morton/api-client'
-import type { Feed, Trade } from '@morton/api-client'
+import { useGetFeeds } from '@bconnect/api-client'
+import type { Trade } from '@bconnect/api-client'
 import { TRADE_LABELS } from '../lib/trade-labels'
 import { formatRelativeTime } from '../lib/format-time'
+import { getAvatarUrl } from '../lib/avatar'
 
 export interface FeedItem {
   postId: number
@@ -46,7 +47,8 @@ export function useFeedItems({
   const feedItems: FeedItem[] = useMemo(() => {
     if (!feeds) return []
 
-    return feeds
+    // useGetFeeds 응답 = FeedOffsetPage = { content: Feed[], hasNext } — content 풀어냄
+    return feeds.content
       .filter((feed) => {
         if (trade && feed.profile.primaryTrade !== trade) return false
         if (minExperience != null && (feed.profile.experience ?? 0) < minExperience) return false
@@ -60,13 +62,16 @@ export function useFeedItems({
         if (!member || !profile || !post) return null
 
         return {
-          postId: post.id!,
+          postId: post.id,
           memberId: member.id,
           profile: {
-            image: member.picture ?? '',
+            // picture nullable → 빈 string fallback 시 <img src=""> 가 page URL 재 fetch 하는
+            // 브라우저 anti-pattern. DiceBear 아바타 (getAvatarUrl) 로 deterministic fallback.
+            image: member.picture || getAvatarUrl(member.name ?? 'user'),
             name: member.name ?? '',
             location: '',
-            jobType: member.role ? getRoleLabel(member.role) : '',
+            // TODO: role 은 MaskedMember 에 없음 (BE public masking) — 필요시 BE 협의 후 부활
+            jobType: '',
             specialty: profile.primaryTrade ? (TRADE_LABELS[profile.primaryTrade] ?? '') : '',
             bio: profile.headline ?? '',
           },
@@ -92,19 +97,4 @@ export function useFeedItems({
     fetchNextPage: () => {},
     error,
   }
-}
-
-export function getRoleLabel(role: string): string {
-  const labels: Record<string, string> = {
-    GUEST: '게스트',
-    CLIENT: '의뢰인',
-    ARCHITECT: '건축사',
-    CONTRACTOR: '시공사',
-    FOREMAN: '반장',
-    SKILLED: '숙련공',
-    SEMI_SKILLED: '준숙련공',
-    HELPER: '보조',
-    ADMIN: '관리자',
-  }
-  return labels[role] ?? role
 }

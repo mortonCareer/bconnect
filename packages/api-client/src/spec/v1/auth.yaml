@@ -1,0 +1,272 @@
+paths:
+  /api/v1/auth/otp/send:
+    post:
+      operationId: sendOtp
+      tags:
+        - Auth
+      security: []
+      summary: 인증코드 발송
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendCodeRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/SendOtpResponse'
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+        '429':
+          description: |
+            - `A001` 일일 발송 한도를 초과했습니다
+            - `A002` 재전송 대기 시간이 지나지 않았습니다
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+  /api/v1/auth/otp/verify:
+    post:
+      operationId: verifyOtp
+      tags:
+        - Auth
+      security: []
+      summary: 인증코드 검증
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyCodeRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        oneOf:
+                          - $ref: '#/components/schemas/VerifyOtpLoginResponse'
+                          - $ref: '#/components/schemas/VerifyOtpSignupResponse'
+                        discriminator:
+                          propertyName: registered
+        '400':
+          description: |
+            - `C001` 유효하지 않은 입력값입니다
+            - `A003` 유효하지 않은 인증번호입니다
+            - `A004` 인증번호가 만료되었습니다
+            - `A005` 인증 시도 횟수를 초과했습니다
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+  /api/v1/auth/refresh:
+    post:
+      operationId: refreshToken
+      tags:
+        - Auth
+      security:
+        - cookieAuth: []
+      summary: 토큰 갱신
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RefreshTokenResponse'
+        '401':
+          description: |
+            - `A006` 유효하지 않은 리프레시 토큰입니다
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+  /api/v1/auth/logout:
+    post:
+      operationId: logout
+      tags:
+        - Auth
+      summary: 로그아웃
+      responses:
+        '200':
+          description: OK
+components:
+  securitySchemes:
+    # Access Token
+    bearerAuth:
+      type: http
+      scheme: bearer # https://datatracker.ietf.org/doc/html/rfc6750#section-6.1.1
+      bearerFormat: JWT # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
+      # OpenAPI 표준은 securityScheme ↔ token payload schema 의 의미 link 메커니즘 부재 →
+      # `x-` extension (OAS §4.9 Specification Extensions) 으로 명시. JwtPayload 가 같은 파일에
+      # 정의되어 있어 internal ref 로 self-contained.
+      x-jwt-payload-schema:
+        $ref: '#/components/schemas/JwtPayload'
+      description: |
+        JWT Access Token. 헤더 형식: `Authorization: Bearer <jwt>` (RFC 6750)
+
+        Payload 구조: [`JwtPayload`](#/components/schemas/JwtPayload) 참조 (`type: access`, `scope` 보유).
+
+        Lifecycle:
+        - 발급: `POST /api/v1/auth/otp/verify` 응답 body 의 `accessToken`
+        - 갱신: `POST /api/v1/auth/refresh` (cookieAuth 사용)
+        - 만료 시간은 BE 의 `app.jwt.access-token-expiration` 환경 변수 (Spring config)
+
+        검증: BE 가 signature + expiration 만 검증 (DB lookup 없음 — stateless).
+
+        에러:
+        - `A007` 유효하지 않은 액세스 토큰입니다 (401)
+        - `A008` 세션이 만료되었습니다 (401)
+
+    # Refresh Token — JWT (HS256), AT 와 같은 secret + `type: refresh` claim 으로 구분.
+    # 발급/검증 비대칭:
+    # - BE 발급: response body 로 (Set-Cookie 헤더 없음). FE 가 받아 쿠키에 set 하는 책임.
+    # - BE 검증: 쿠키의 refreshToken 으로 (RefreshTokenAuthenticationFilter).
+    # - signature 검증 + sessions 테이블의 sha256(RT) 비교 + revoked flag (hybrid pattern).
+    # - logout 은 sessions.revoked=true 만 set (cookie 정리는 FE 책임).
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: refreshToken # https://datatracker.ietf.org/doc/html/rfc6749#section-1.5
+
+  schemas:
+    SendCodeRequest:
+      type: object
+      required:
+        - phone
+      properties:
+        phone:
+          type: string
+          pattern: \d{10,11}
+    VerifyCodeRequest:
+      type: object
+      required:
+        - phone
+        - code
+      properties:
+        phone:
+          type: string
+          pattern: \d{10,11}
+        code:
+          type: string
+          pattern: \d{6}
+    SendOtpResponse:
+      type: object
+      required:
+        - expiresAt
+      properties:
+        expiresAt:
+          type: string
+          format: date-time
+    VerifyOtpLoginResponse:
+      type: object
+      required:
+        - registered
+        - accessToken
+        - refreshToken
+      properties:
+        registered:
+          type: boolean
+          const: true
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    VerifyOtpSignupResponse:
+      type: object
+      required:
+        - registered
+        - signupToken
+      properties:
+        registered:
+          type: boolean
+          const: false
+        signupToken:
+          type: string
+    RefreshTokenResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+
+    # JWT 토큰 (access / refresh 공용) payload 구조 — BE [JwtProvider.java](https://github.com/mortonCareer/bconnect/blob/dev/apps/api/core/src/main/java/so/morton/api/support/auth/jwt/JwtProvider.java) 의
+    # 실제 발급 형식과 정렬. SSOT 는 현재 BE 코드 — 표준 마이그레이션은 별도 (#272).
+    #
+    # AT 와 RT 모두 같은 secret 으로 HS256 signing, `type` claim 으로 구분.
+    # access 만 `scope` 보유, refresh 는 sub/type/iat/exp 만.
+    JwtPayload:
+      type: object
+      required:
+        - sub
+        - type
+        - exp
+        - iat
+      properties:
+        # RFC 7519 표준 Registered Claims
+        sub: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2
+          type: string
+          description: |
+            Subject — Member.username (Member entity 의 username field, phone 과 별도).
+            Spring Security `Authentication.getName()` 결과.
+            Member.id (Long) 가 아님 — username 이 login ID 역할.
+          example: morton123
+        exp: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4
+          type: integer
+          format: int64
+          description: Expiration Time — 만료 unix timestamp
+          example: 1709251200
+        iat: # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6
+          type: integer
+          format: int64
+          description: Issued At — 발급 unix timestamp
+          example: 1709250300
+
+        # Morton Private Claims (RFC 7519 §4.3)
+        # https://datatracker.ietf.org/doc/html/rfc7519#section-4.3
+        type:
+          type: string
+          enum: [access, refresh]
+          description: Token type — access vs refresh 구분 (BE private claim, JWT 표준 아님 — #272)
+        scope:
+          type: string
+          description: |
+            Authorities — `User.getAuthorities()` 의 `ROLE_<role>` 에서 prefix 제거 후 comma-join.
+            현재 [User.getAuthorities()](https://github.com/mortonCareer/bconnect/blob/dev/apps/api/core/src/main/java/so/morton/api/support/auth/User.java#L20-L22) 가 `List.of(<single>)` 반환 — 실제로는 단일 enum value.
+            access token 만 보유 (refresh 는 없음).
+            NOTE: RFC 8693 표준은 space-separated. Morton 비표준 — 마이그레이션 검토: #272
+          example: WORKER

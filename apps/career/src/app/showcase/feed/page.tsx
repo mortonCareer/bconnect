@@ -1,7 +1,10 @@
+/**
+ * @figma-scaffold 쇼케이스 — Feed 컴포넌트 검수용, 디자인 N/A
+ */
 'use client'
 
 import Link from 'next/link'
-import { Feed } from '@morton/ui'
+import { Feed } from '@bconnect/ui'
 
 export default function FeedDetailPage() {
   return (
@@ -224,7 +227,7 @@ export default function FeedDetailPage() {
           <section>
             <h2 className="mb-4 text-xl font-semibold text-gray-800">Usage</h2>
             <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
-              {`import { Feed } from '@morton/ui'
+              {`import { Feed } from '@bconnect/ui'
 
 // Basic usage
 <Feed
