@@ -78,7 +78,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'auth-storage',
+      name: 'plan-auth-storage',
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,
       }),
