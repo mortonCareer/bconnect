@@ -16,7 +16,7 @@ import { Button } from '@bconnect/ui'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
-import { FormError, FormInput, OtpTimer } from './_components'
+import { FormInput, OtpTimer } from './_components'
 
 type Step = 'phone' | 'otp'
 
@@ -187,7 +187,7 @@ export default function LoginPage() {
                   }
                 />
                 {error ? (
-                  <FormError message={error} />
+                  <p className="text-r-14 text-bconnect-error">{error}</p>
                 ) : (
                   <p className="text-r-14 text-bconnect-gray-500">
                     타인에게 인증번호를 공유하지 마세요.
@@ -197,7 +197,7 @@ export default function LoginPage() {
             )}
 
             {/* Phone step error */}
-            {step === 'phone' && error && <FormError message={error} />}
+            {step === 'phone' && error && <p className="text-r-14 text-bconnect-error">{error}</p>}
           </div>
 
           {/* Submit Button */}
