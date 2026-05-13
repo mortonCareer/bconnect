@@ -12,7 +12,7 @@ import { Button } from '@bconnect/ui'
 import Image from 'next/image'
 import { useSignupStore } from '@/stores/signup-store'
 import { memberSchema, type MemberFormData } from './schema'
-import { FormInput } from '../_components'
+import { FormInput } from '@/components/FormInput'
 
 export default function SignupMemberPage() {
   const router = useRouter()
