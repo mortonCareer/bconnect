@@ -1,9 +1,9 @@
-# ADR-0009: dev 브랜치 데이터 소스 — MSW mock → 실 staging BE
+# ADR-0010: dev 브랜치 데이터 소스 — MSW mock → 실 staging BE
 
 - **Status**: Proposed
 - **Date**: 2026-05-14
 - **Deciders**: @manamana32321, @fine-pine (리뷰)
-- **Related**: [ADR-0006](./0006-dev-as-staging.md) (amends), [ADR-0005](./0005-orval-mock-transformer-and-no-response-wrapper.md), [ADR-0008](./0008-be-db-hosting-railway-staging.md) (자매 결정 — staging 환경 제공), [#339](https://github.com/mortonCareer/bconnect/issues/339)
+- **Related**: [ADR-0006](./0006-dev-as-staging.md) (amends), [ADR-0005](./0005-orval-mock-transformer-and-no-response-wrapper.md), [ADR-0009](./0009-be-db-hosting-railway-staging.md) (자매 결정 — staging 환경 제공), [#339](https://github.com/mortonCareer/bconnect/issues/339)
 
 ## Context
 
@@ -15,7 +15,7 @@ ADR-0006 은 이 변경을 **escape hatch 로 미리 설계**해뒀다:
 
 두 가지가 이 hatch 의 발동 시점을 만들었다:
 
-1. [ADR-0008](./0008-be-db-hosting-railway-staging.md) 이 BE + DB staging 환경을 Railway 에 추가 → dev 가 가리킬 **실 BE 가 존재**하게 됨.
+1. [ADR-0009](./0009-be-db-hosting-railway-staging.md) 이 BE + DB staging 환경을 Railway 에 추가 → dev 가 가리킬 **실 BE 가 존재**하게 됨.
 2. ADR-0006 이 기록한 silent-failure 사고들(orval transformer 부작용으로 MSW wire format 이 envelope 없이 변경 → customFetch silent reject)은 **mock 레이어 자체가 desync 위험원**임을 보여준다. dev 가 실 BE 를 보면 이 divergence 가 dev 단계에서 노출된다.
 
 따라서 dev 브랜치의 데이터 소스를 재결정한다.
@@ -54,7 +54,7 @@ ADR-0006 은 이 변경을 **escape hatch 로 미리 설계**해뒀다:
 
 ADR-0006 의 3 layer 중 변경 범위:
 
-| Layer                          | ADR-0006                                     | ADR-0009 (본 ADR)                                          |
+| Layer                          | ADR-0006                                     | ADR-0010 (본 ADR)                                          |
 | ------------------------------ | -------------------------------------------- | ---------------------------------------------------------- |
 | 런타임 transport (customFetch) | envelope + MSW inner 양쪽 흡수               | **변경 없음** — 양쪽 wire format 그대로 처리               |
 | MSW 활성 범위                  | 로컬 + 모든 Vercel preview (dev 브랜치 포함) | 로컬 + feature PR preview 만 — **dev 브랜치 preview 제외** |
@@ -62,7 +62,7 @@ ADR-0006 의 3 layer 중 변경 범위:
 
 ### 근거
 
-1. **ADR-0006 escape hatch 의 정시 발동** — "BE 도 dev 환경 필요" 가 그 hatch 의 조건. ADR-0008 이 staging BE 를 제공하며 조건이 충족됐다.
+1. **ADR-0006 escape hatch 의 정시 발동** — "BE 도 dev 환경 필요" 가 그 hatch 의 조건. ADR-0009 이 staging BE 를 제공하며 조건이 충족됐다.
 2. **dev 가 진짜 통합 지점이 된다** — ADR-0006 은 BE 통합 검증이 dev→main PR 직전까지 미뤄지는 갭을 인정했다. dev = 실 staging BE 면 그 갭이 dev 단계로 당겨진다.
 3. **BE/FE 독립 개발 보존** — feature PR·로컬은 MSW 유지. [development-workflow.md](../../how-to/development-workflow.md) 의 병렬 개발 흐름(API 스펙 → orval codegen → BE/FE 병렬, FE 는 mock)이 feature 단계에서 그대로 작동한다. Option 3(완전 폐기)는 이를 깨뜨려 거부.
 4. **ADR-0005 자산 유지** — orval mock transformer 는 feature PR·로컬·테스트에서 계속 쓰인다.

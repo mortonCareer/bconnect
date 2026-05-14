@@ -1,9 +1,9 @@
-# ADR-0008: BE + DB 호스팅 — Railway 유지 + staging environment, AWS 이전 분기점 기반 보류
+# ADR-0009: BE + DB 호스팅 — Railway 유지 + staging environment, AWS 이전 분기점 기반 보류
 
 - **Status**: Proposed
 - **Date**: 2026-05-14
 - **Deciders**: @manamana32321, @fine-pine (리뷰)
-- **Related**: [ADR-0007](./0007-be-hosting-after-launch.md) (supersedes), [ADR-0006](./0006-dev-as-staging.md), [ADR-0009](./0009-dev-branch-staging-be.md) (자매 결정), [#339](https://github.com/mortonCareer/bconnect/issues/339)
+- **Related**: [ADR-0007](./0007-be-hosting-after-launch.md) (supersedes), [ADR-0006](./0006-dev-as-staging.md), [ADR-0010](./0010-dev-branch-staging-be.md) (자매 결정), [#339](https://github.com/mortonCareer/bconnect/issues/339)
 
 ## Context
 
@@ -15,7 +15,7 @@
 - **CTO 시간은 기능에 우선 배분**: 인프라 현대화보다 제품 기능 개발이 현 단계 우선순위.
 - **Railway 가 아직 충분**: 비용·성능 pain point 미도달. ADR-0007 이 인용한 ["ship first, migrate when revenue justifies"](https://solodevstack.com/blog/railway-vs-aws-solo-developers) 원칙을 더 길게 적용할 여지.
 
-또한 [ADR-0006](./0006-dev-as-staging.md) 이 dev = mock 기반 **FE** staging 을 정착시켰으나, **BE + DB 의 staging 환경은 부재** — 현재 Railway 에는 production 만 존재한다. dev 브랜치를 실 BE 에 연결하려면 ([ADR-0009](./0009-dev-branch-staging-be.md)) staging BE 가 먼저 있어야 한다.
+또한 [ADR-0006](./0006-dev-as-staging.md) 이 dev = mock 기반 **FE** staging 을 정착시켰으나, **BE + DB 의 staging 환경은 부재** — 현재 Railway 에는 production 만 존재한다. dev 브랜치를 실 BE 에 연결하려면 ([ADR-0010](./0010-dev-branch-staging-be.md)) staging BE 가 먼저 있어야 한다.
 
 따라서 BE + DB 호스팅을 **"언제 이전하나"** 와 **"staging 을 어디에 두나"** 두 축에서 재정의한다. 목적지(어떤 AWS 서비스로) 분석은 ADR-0007 이 이미 10개 옵션을 상세 평가했으므로 본 ADR 은 재론하지 않는다.
 
@@ -51,7 +51,7 @@ BE + DB 모두 Railway 유지. staging 은 Railway 같은 프로젝트 내 별�
 
 ADR-0007 대비 변경점:
 
-| 항목              | ADR-0007                           | ADR-0008 (본 ADR)                                    |
+| 항목              | ADR-0007                           | ADR-0009 (본 ADR)                                    |
 | ----------------- | ---------------------------------- | ---------------------------------------------------- |
 | BE+DB 위치 (현재) | Railway → AWS 이전 예정            | **Railway 유지**                                     |
 | 트리거            | 스프린트 5 완료 또는 CTO 임의 결정 | Railway 비용 > AWS break-even 추정, 또는 트래픽 임계 |
@@ -89,7 +89,7 @@ ADR-0007 대비 변경점:
 
 - 지금 마이그레이션 비용 0 — CTO 시간을 제품 기능에 집중
 - 트리거가 인과적 — "왜 지금 이전하나" 에 명확히 답하는 재검토 신호 확보
-- BE + DB staging 환경 확보 — [ADR-0009](./0009-dev-branch-staging-be.md)(dev = 실 staging BE)의 전제 충족
+- BE + DB staging 환경 확보 — [ADR-0010](./0010-dev-branch-staging-be.md)(dev = 실 staging BE)의 전제 충족
 - ADR-0007 의 목적지 분석이 live reference 로 보존 — 트리거 발동 시 즉시 실행 가능
 
 ### 나쁜 결과
@@ -111,7 +111,7 @@ ADR-0007 대비 변경점:
 - Railway staging environment 프로비저닝 — BE service + Postgres, [`infra/railway/`](../../../infra/railway/) terraform 모듈
 - staging 환경변수 셋업 — production 변수의 staging 오버라이드
 - **트리거 모니터링 가시화** — Railway 월 청구액 추세 + 동시접속·응답시간 메트릭. 이게 없으면 트리거가 무의미해진다
-- dev 브랜치 → staging BE 연결은 [ADR-0009](./0009-dev-branch-staging-be.md)
+- dev 브랜치 → staging BE 연결은 [ADR-0010](./0010-dev-branch-staging-be.md)
 
 ### 트리거 재평가 주기
 
