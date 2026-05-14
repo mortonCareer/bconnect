@@ -383,7 +383,7 @@ Scope는 엔티티 ID가 경로에 포함되므로 prefix 와일드카드로 지
 }
 ```
 
-여러 context 동시 접근 필요 시 Statement 배열로 발급. 단 쿠키 크기 4KB 제한 유의.
+한 Signed Cookie 의 custom policy 는 **단일 `Resource`** 만 지원한다 — `Statement` 배열에 여러 요소를 넣어도 첫 요소만 적용된다 ([CloudFront custom policy spec](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-setting-signed-cookie-custom-policy.html), [AWS re:Post](https://repost.aws/questions/QUEFDu9ScTRfqXrFe7BWIjUA/support-multiple-resource-paths-in-aws-cloudfront-cookie)). 여러 context 에 동시 접근이 필요하면 context 별로 **별도의 Set-Cookie 를 발급**한다 (각 쿠키 3종 세트 × context 수). 단 브라우저 쿠키 총량 제한 유의. 대부분의 화면은 단일 entity context (한 chat, 한 storage) 이므로 다중 발급은 예외적 케이스다.
 
 ### 6.4 FE URL 조립 규칙
 
@@ -482,7 +482,7 @@ S3 presigned PUT은 `Content-Type` 조건을 단일 문자열로만 지원 (`app
 **전략**:
 
 - **FE**: 확장자 기반 1차 검증 (예: `.hwp`, `.docx`, `.pdf`, `.jpg` 등)
-- **BE (Spring)**: 거부 목록(실행파일 등) + 파일 크기 재검증 (confirm 시 S3 HeadObject)
+- **BE (Spring)**: confirm 시 S3 HeadObject 로 **실제 크기·`Content-Type` 재검증**. presigned PUT 은 크기·타입을 S3 측에서 강제하지 못하므로 (클라이언트가 presign 요청 값과 다른 파일을 올릴 수 있음) confirm 단계가 유일한 검증 지점이다. presign 요청 값과 불일치하거나 거부 목록(실행파일 등)에 해당하면 **즉시 S3 `DeleteObject` + `status=FAILED`** — 미검증 객체를 S3 에 남기지 않는다.
 - **매직바이트 검증**: v2+ Lambda 비동기 스캔으로 추후 도입
 
 ---
