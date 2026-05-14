@@ -77,6 +77,7 @@ export default function SignupMemberPage() {
           <FormInput
             type="text"
             placeholder="user_id"
+            error={!!usernameError}
             {...register('username', {
               onChange: (e) => {
                 e.target.value = e.target.value.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase()
@@ -87,7 +88,12 @@ export default function SignupMemberPage() {
 
           {/* 이름 */}
           <p className="text-m-16 text-bconnect-gray-900">이름</p>
-          <FormInput type="text" placeholder="홍길동" {...register('name')} />
+          <FormInput
+            type="text"
+            placeholder="홍길동"
+            error={!!errors.name?.message}
+            {...register('name')}
+          />
           {errors.name?.message && (
             <p className="text-r-14 text-bconnect-error">{errors.name.message}</p>
           )}
