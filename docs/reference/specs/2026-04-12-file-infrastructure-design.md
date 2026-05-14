@@ -446,14 +446,37 @@ function fileUrl(att: AttachmentMeta): string {
 
 ### 7.1 Context별 권한
 
-| context               | Scope 기준     | Read 허용      | Write 허용     |
-| --------------------- | -------------- | -------------- | -------------- |
-| `profiles` (public)   | 전체 공개      | 누구나         | 본인           |
-| `posts` (public)      | 전체 공개      | 누구나         | 작성자         |
-| `businesses` (public) | 전체 공개      | 누구나         | 업체 멤버      |
-| `chats`               | `chatId`       | 채팅방 참여자  | 메시지 작성자  |
-| `credentials`         | `credentialId` | 본인 + 어드민  | 본인           |
-| `storage`             | `storageId`    | 권한 보유 멤버 | 권한 보유 멤버 |
+권한은 **two-tier**로 나뉜다 — (1) 엔티티 메타데이터 API와 (2) 첨부 파일 바이트(S3 object). 같은 도메인이라도 두 레이어 정책이 다를 수 있음.
+
+> **`Attachment` 자체는 권한 boundary가 아님.** 본 표는 권한 경계를 정의하는 엔티티(`Storage`, `Post`, `Credential` 등)만 나열한다. Attachment는 부모 엔티티의 정책을 상속하는 **substrate**라 자체 행 없음 — 매핑 테이블(§4.3) 모델의 직접 결과. 업로드 endpoint(`POST /attachments/presign|confirm`)는 데이터 권한이 아니라 **API 권한**(인증된 유저면 OK)으로, 부모 엔티티 연결은 §5.2 시나리오의 후속 API 호출에서 검증된다.
+
+#### 메타데이터 (REST API 응답)
+
+엔티티 record와 그에 포함된 `AttachmentMeta` 필드(id, path, filename, contentType, size).
+
+| context       | Read 허용                          | Write 허용     |
+| ------------- | ---------------------------------- | -------------- |
+| `profiles`    | 누구나                             | 본인           |
+| `posts`       | 누구나                             | 작성자         |
+| `businesses`  | 누구나                             | 업체 멤버      |
+| `chats`       | 채팅방 참여자                      | 메시지 작성자  |
+| `credentials` | **누구나** (프로필 공개 신뢰 지표) | 본인           |
+| `storages`    | 권한 보유 멤버                     | 권한 보유 멤버 |
+
+#### 파일 바이트 (CloudFront 통한 S3 object)
+
+실제 이미지/PDF 등 첨부 파일 본문. CloudFront Signed Cookie scope으로 제한.
+
+| context       | Scope                          | 접근 허용                     |
+| ------------- | ------------------------------ | ----------------------------- |
+| `profiles`    | `profiles/{profileId}/*`       | 누구나 (capability URL)       |
+| `posts`       | `posts/{postId}/*`             | 누구나 (capability URL)       |
+| `businesses`  | `businesses/{businessId}/*`    | 누구나 (capability URL)       |
+| `chats`       | `chats/{chatId}/*`             | 채팅방 참여자                 |
+| `credentials` | `credentials/{credentialId}/*` | **본인 + 매칭된 업체 + 운영** |
+| `storages`    | `storages/{storageId}/*`       | 권한 보유 멤버                |
+
+**핵심 차이:** `credentials`는 메타데이터(어떤 자격증을 보유 중인지)는 공개되지만, 실제 인증서 파일(신분증/자격증 사본 등 민감 정보)은 본인 외에 매칭된 업체와 운영만 접근. 메타가 공개돼도 파일 자체는 보호됨 — [피그마 디자인](https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS/?node-id=1238-5348)이 메타 공개 의도 확정.
 
 ### 7.2 구현 원칙
 
