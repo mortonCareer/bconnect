@@ -1,9 +1,11 @@
 # ADR-0007: 정식 출시 후 BE + DB 호스팅 — Railway → AWS ECS Fargate + RDS 트리거 기반 이전
 
-- **Status**: Proposed
+- **Status**: Superseded by ADR-0008
 - **Date**: 2026-05-10
 - **Deciders**: @manamana32321, @fine-pine (리뷰)
-- **Related**: [ADR-0006](./0006-dev-as-staging.md), [#322](https://github.com/mortonCareer/bconnect/issues/322)
+- **Related**: [ADR-0006](./0006-dev-as-staging.md), [ADR-0008](./0008-be-db-hosting-railway-staging.md) (supersedes this), [#322](https://github.com/mortonCareer/bconnect/issues/322)
+
+> **2026-05-14**: [ADR-0008](./0008-be-db-hosting-railway-staging.md) 이 본 ADR 을 supersede 한다 — Railway 유지로 결정, 트리거를 "스프린트 5" 에서 스케일·비용 기반으로 교체. **단 본 ADR 의 옵션 분석(목적지 호스팅 10개 옵션 비교, Spring Boot cold start 대응, maturity audit)은 트리거 발동 시점의 출발 참조로 유효하다** — supersede 가 바꾼 것은 _언제 이전하나_ 지 _어디로 가나_ 가 아니다.
 
 ## Context
 
