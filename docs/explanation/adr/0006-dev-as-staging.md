@@ -3,7 +3,7 @@
 - **Status**: Accepted
 - **Date**: 2026-05-10
 - **Deciders**: @manamana32321
-- **Related**: [#307](https://github.com/mortonCareer/bconnect/pull/307), [#309](https://github.com/mortonCareer/bconnect/pull/309), [#313](https://github.com/mortonCareer/bconnect/pull/313), [ADR-0005](./0005-orval-mock-transformer-and-no-response-wrapper.md)
+- **Related**: [#307](https://github.com/mortonCareer/bconnect/pull/307), [#309](https://github.com/mortonCareer/bconnect/pull/309), [#313](https://github.com/mortonCareer/bconnect/pull/313), [ADR-0005](./0005-orval-mock-transformer-and-no-response-wrapper.md), [ADR-0010](./0010-dev-branch-staging-be.md) (이 ADR 을 amend)
 
 ## Context
 
@@ -110,6 +110,8 @@ MSW provider gate         NODE_ENV + NEXT_PUBLIC_VERCEL_ENV          #309
 
 - `vercel_custom_environment` 에 별도 env 변수 분리 — dev-only `NEXT_PUBLIC_API_URL` 로 staging BE 호출
 - 또는 별도 staging 브랜치 도입 (Option 3) — ADR 갱신으로 정책 변경
+
+> **2026-05-14 발동**: 첫 번째 hatch 가 [ADR-0010](./0010-dev-branch-staging-be.md) 로 발동됨 — [ADR-0009](./0009-be-db-hosting-railway-staging.md) 이 Railway staging 환경을 추가하면서, dev 브랜치 배포 환경이 실 staging BE 를 호출하도록 변경. 본 ADR 의 "dev = staging-like" 핵심 결정은 유효하며, 데이터 소스(mock → 실 BE)만 dev 브랜치 한정으로 amend 됐다.
 
 ### 관련 코드
 
