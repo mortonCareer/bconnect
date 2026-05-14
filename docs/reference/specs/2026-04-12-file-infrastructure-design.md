@@ -63,9 +63,9 @@ Morton 서비스 전반에서 사용될 **파일 저장·조회·권한 제어**
 ```
 static/                                            ← 버킷 (단일)
 ├── profiles/{profileId}/images/{o,m,s}/{imageId}      ← public (CF Behavior)
-├── posts/{postId}/images/{o,m,s}/{imageId}            ← public
+├── posts/{profileId}/images/{o,m,s}/{imageId}         ← public
 ├── businesses/{businessId}/images/{o,m,s}/{imageId}   ← public
-├── credentials/{credentialId}/files/{fileId}          ← private (CF Signed Cookie)
+├── credentials/{profileId}/files/{fileId}             ← private (CF Signed Cookie)
 ├── chats/{chatId}/images/{o,m,s}/{imageId}            ← private
 ├── chats/{chatId}/files/{fileId}                      ← private
 ├── storages/{storageId}/images/{o,m,s}/{imageId}      ← private
@@ -74,7 +74,7 @@ static/                                            ← 버킷 (단일)
 
 **경로 컨벤션:**
 
-- `{entity}/{entityId}/` — 엔티티 단위 권한 scope. Signed Cookie는 이 prefix 기준으로 발급
+- `{entity}/{scopeId}/` — 엔티티 단위 권한 scope. Signed Cookie는 이 prefix 기준으로 발급. `scopeId`는 **presign 시점에 이미 존재하는 ID**여야 한다 — `chats`/`storages`/`businesses`/`profiles`는 자기 ID, `posts`/`credentials`는 소유자 `profileId` (생성 플로우에선 글·인증서 ID가 presign 시점에 아직 없으므로). leaf 엔티티(`postId`/`credentialId`)↔attachment 연결은 path가 아니라 매핑 테이블(§4.3)이 담당
 - `images/{o,m,s}/` — 이미지는 사이즈 디렉토리 필수
   - `o` = original (무변환)
   - `m` = medium (긴변 800px, WebP)
@@ -146,8 +146,8 @@ CREATE TABLE attachments (
 
 **예시:**
 
-- 채팅 이미지: `path = "chats/42/images"`, 실제 S3 key = `chats/42/images/o/{id}.{ext}`
-- 자격증 파일: `path = "credentials/7/files"`, 실제 S3 key = `credentials/7/files/{id}.{ext}`
+- 채팅 이미지: `path = "chats/42/images"`, 실제 S3 key = `chats/42/images/o/{id}.{ext}` (`42` = chatId)
+- 자격증 파일: `path = "credentials/7/files"`, 실제 S3 key = `credentials/7/files/{id}.{ext}` (`7` = profileId — §3.1 경로 컨벤션 참고)
 
 **Status 전이:**
 
@@ -249,17 +249,19 @@ CREATE TABLE credential_attachments (
 
 ### 5.1 공통 2-step (`/presign` → `/confirm`)
 
-모든 업로드는 단일 엔드포인트를 사용. context 정보는 BE가 요청 내부에서 처리.
+모든 업로드는 단일 엔드포인트를 사용. 요청 body에 첨부 대상 엔티티 context(`referenceType` + `referenceId`)를 포함한다 (§5.3).
 
 ```
 [Client]                        [Spring]                         [S3]
    │                               │                               │
    │ 1. POST /api/v1/attachments/presign                          │
-   │    body: { files: [{ filename, size, contentType, ...}] }   │
+   │    body: { context: {referenceType, referenceId},            │
+   │            files: [{ filename, size, contentType }] }        │
    │──────────────────────────→    │                               │
-   │                               │ ① 권한 체크                    │
+   │                               │ ① context 검증 + 권한 체크     │
    │                               │ ② attachments INSERT (PENDING) │
-   │                               │ ③ S3 key 생성, presigned URL  │
+   │                               │ ③ context로 path·S3 key 생성   │
+   │                               │   presigned URL 발급           │
    │  ←────────────────────────    │                               │
    │  { items: [{ attachmentId,   │                               │
    │    uploadUrl }] }             │                               │
@@ -319,18 +321,21 @@ CREATE TABLE credential_attachments (
 
 ### 5.3 Presign 요청 body
 
-context 정보(어떤 엔티티에 붙을지)는 **Spring 내부에서 결정**. FE는 파일 메타만 전달.
+요청 body에 **첨부 대상 엔티티 context**를 포함한다 — `referenceType`(엔티티 종류) + `referenceId`(S3 path를 결정하는 ID). 한 presign 호출의 모든 파일은 동일 context를 공유한다.
 
 ```json
 POST /api/v1/attachments/presign
 {
+  "context": { "referenceType": "CREDENTIAL", "referenceId": 7 },
   "files": [
-    { "filename": "photo.jpg", "size": 2400000, "contentType": "image/jpeg" }
+    { "filename": "license.pdf", "size": 2400000, "contentType": "application/pdf" }
   ]
 }
 ```
 
-Spring은 요청 경로/세션 컨텍스트 기반으로 `path` 생성 (세부 결정은 BE 책임).
+`referenceId`는 §3.1의 `scopeId` — `CHAT`/`STORAGE`/`BUSINESS`/`PROFILE`은 자기 ID, `POST`/`CREDENTIAL`은 소유자 `profileId`. Spring은 `referenceType` + `referenceId`로 `path`(위 예시 → `credentials/7/files`)를 생성한다.
+
+> **왜 context를 FE가 보내는가**: presign 시점에 `path`가 확정되는데(§5.1 ③) 단일 엔드포인트라 요청 경로에 엔티티 정보가 없고 세션엔 `userId`뿐이라 BE가 추론할 수 없다. 또 `POST`/`CREDENTIAL`의 leaf ID(`postId`/`credentialId`)는 생성 플로우상 presign 시점에 아직 없으므로, path는 소유자 `profileId`로 scope하고 leaf↔attachment 연결은 매핑 테이블(§4.3)이 담당한다. 배경: [#340](https://github.com/mortonCareer/bconnect/issues/340).
 
 ---
 
@@ -467,14 +472,14 @@ function fileUrl(att: AttachmentMeta): string {
 
 실제 이미지/PDF 등 첨부 파일 본문. CloudFront Signed Cookie scope으로 제한.
 
-| context       | Scope                          | 접근 허용                     |
-| ------------- | ------------------------------ | ----------------------------- |
-| `profiles`    | `profiles/{profileId}/*`       | 누구나 (capability URL)       |
-| `posts`       | `posts/{postId}/*`             | 누구나 (capability URL)       |
-| `businesses`  | `businesses/{businessId}/*`    | 누구나 (capability URL)       |
-| `chats`       | `chats/{chatId}/*`             | 채팅방 참여자                 |
-| `credentials` | `credentials/{credentialId}/*` | **본인 + 매칭된 업체 + 운영** |
-| `storages`    | `storages/{storageId}/*`       | 권한 보유 멤버                |
+| context       | Scope                       | 접근 허용                     |
+| ------------- | --------------------------- | ----------------------------- |
+| `profiles`    | `profiles/{profileId}/*`    | 누구나 (capability URL)       |
+| `posts`       | `posts/{profileId}/*`       | 누구나 (capability URL)       |
+| `businesses`  | `businesses/{businessId}/*` | 누구나 (capability URL)       |
+| `chats`       | `chats/{chatId}/*`          | 채팅방 참여자                 |
+| `credentials` | `credentials/{profileId}/*` | **본인 + 매칭된 업체 + 운영** |
+| `storages`    | `storages/{storageId}/*`    | 권한 보유 멤버                |
 
 **핵심 차이:** `credentials`는 메타데이터(어떤 자격증을 보유 중인지)는 공개되지만, 실제 인증서 파일(신분증/자격증 사본 등 민감 정보)은 본인 외에 매칭된 업체와 운영만 접근. 메타가 공개돼도 파일 자체는 보호됨 — [피그마 디자인](https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS/?node-id=1238-5348)이 메타 공개 의도 확정.
 
