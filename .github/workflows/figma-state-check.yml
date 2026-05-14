@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  contents: read # actions/checkout 가 repo 를 읽으려면 필수 (permissions 명시 시 미선언 권한은 none 으로 떨어짐)
   issues: write # 누락 감지 시 issue 생성/갱신
 
 jobs:
