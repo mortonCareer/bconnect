@@ -47,7 +47,7 @@ main 머지 → 프로덕션 배포
   - BE/FE 독립 — spec 변경 후 FE 가 새 endpoint 호출하는 PR 도 typecheck 통과 (orval 자동 생성). 단 runtime 검증은 BE 구현 후. 진정한 디커플 (BE 미구현 endpoint 호출하는 페이지의 preview 동작까지 보장) 은 [#171](https://github.com/mortonCareer/bconnect/issues/171) (MSW 도입) 후.
   - 모든 feature/fix PR의 타겟
   - CI: lint, format, BE 빌드/테스트, **FE typecheck 포함** (강제 green 정책)
-  - **spec 변경 PR 은 ci-career/ci-plan skip** (paths filter 에서 negate). spec ↔ FE drift 는 즉시 follow-up PR 로 해소. spec PR 머지 ~ FE follow-up PR 머지 사이의 dev 는 broken state — 다른 FE PR 의 ci-career 가 fail 로 압력 발생 (drift 빨리 해소 유도). 누적된 drift 가 main 으로 흘러가지 않도록 `ci-integration` 가 dev → main 최종 gate.
+  - **spec 변경 PR 은 ci-career/ci-plan skip** (paths filter 의 career/plan 트리거 경로에서 `src/spec/**` 제외 — [#357](https://github.com/mortonCareer/bconnect/issues/357)). spec ↔ FE drift 는 즉시 follow-up PR 로 해소. spec PR 머지 ~ FE follow-up PR 머지 사이의 dev 는 broken state — 다른 FE PR 의 ci-career 가 fail 로 압력 발생 (drift 빨리 해소 유도). 누적된 drift 가 main 으로 흘러가지 않도록 `ci-integration` 가 dev → main 최종 gate.
   - Vercel preview build 항상 green — 디자이너 검수 / 시각 QA 사이클 보장. spec 변경 후 BE 미구현 endpoint 의 runtime 은 [#171](https://github.com/mortonCareer/bconnect/issues/171) 도입 전까진 BE 구현 후 동작.
 
 ### 작업 브랜치
