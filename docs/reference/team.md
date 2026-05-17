@@ -89,25 +89,23 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 
 ## GitHub 작업 매핑
 
+레이블 정의 + 자동 적용 규칙은 [labels.md](./labels.md) 참조. 본 섹션은 레이블 → 담당자/리뷰어 매핑.
+
 담당자/리뷰어의 실제 GitHub 핸들은 위 [팀원](#팀원) 표 참조.
 
 ### Issue 담당자 자동 할당
 
-| 작업 범위       | 담당자         | 비고                                 |
-| --------------- | -------------- | ------------------------------------ |
-| `⚙️ be` (포괄)  | CEO            |                                      |
-| `⚙️be:api`      | CEO            |                                      |
-| `⚙️be:service`  | CEO            |                                      |
-| `📋 api-spec`   | CTO + CEO      | CTO 작성, CEO 리뷰                   |
-| `💻 fe`         | CTO + Frontend |                                      |
-| `🎨 publishing` | CTO + Frontend |                                      |
-| `☁️ infra`      | CTO            |                                      |
-| `🤖 crawler`    | CTO            |                                      |
-| `🔧 chore`      | (해당자)       | DX universal — 모든 개발자 리뷰 가능 |
+| 작업 범위        | 담당자         | 비고                                 |
+| ---------------- | -------------- | ------------------------------------ |
+| `⚙️ be` (+ 하위) | CEO            | `⚙️be:api`, `⚙️be:service` 포함      |
+| `📋 api-spec`    | CTO + CEO      | CTO 작성, CEO 리뷰                   |
+| `💻 fe`          | CTO + Frontend |                                      |
+| `🎨 publishing`  | CTO + Frontend |                                      |
+| `☁️ infra`       | CTO            |                                      |
+| `🤖 crawler`     | CTO            |                                      |
+| `🔧 chore`       | (해당자)       | DX universal — 모든 개발자 리뷰 가능 |
 
-버그는 `🐛 bug` 단일 레이블 + 범위 레이블 조합. 담당자는 범위 레이블에 따름. 예: `🐛 bug` + `💻 fe` → CTO + Frontend.
-
-> 옛 `🐛 bug:FE` / `🐛 bug:BE` / `🐛 bug:api-spec` 분화는 2026-05-10 폐기.
+버그는 `🐛 bug` + 범위 레이블 조합. 담당자는 범위 레이블에 따름.
 
 ### PR 리뷰어 자동 할당
 

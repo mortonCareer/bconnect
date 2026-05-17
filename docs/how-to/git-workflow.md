@@ -111,30 +111,7 @@ dev 브랜치는 BE/FE 독립 개발을 허용하므로 OpenAPI 스펙 ↔ FE �
 
 ### 이슈 레이블
 
-#### 작업 범위
-
-| 레이블          | 용도                             |
-| --------------- | -------------------------------- |
-| `📋 api-spec`   | API 스펙 설계                    |
-| `🎨 publishing` | 퍼블리싱                         |
-| `⚙️ be`         | 백엔드 (포괄)                    |
-| `⚙️be:api`      | 백엔드 API 계층                  |
-| `⚙️be:service`  | 백엔드 서비스 로직               |
-| `💻 fe`         | 프론트엔드                       |
-| `☁️ infra`      | 인프라                           |
-| `🤖 crawler`    | 크롤러                           |
-| `🔧 chore`      | 설정, 문서, CI/CD, 스킬/에이전트 |
-
-#### 버그
-
-`🐛 bug` 단일 레이블 + 범위 레이블 조합으로 표현. 담당자는 범위 레이블에 따름 ([team.md](../reference/team.md#issue-담당자-자동-할당) 참조).
-
-> 옛 `🐛 bug:FE` / `🐛 bug:BE` / `🐛 bug:api-spec` 분화는 2026-05-10 폐기.
-
-#### 자동 봇 레이블 (사람이 직접 사용 X)
-
-- `🚨 sync-failure` — GHA 동기화/헬스체크 실패 자동 이슈
-- `🤖 figma-drift` — Figma drift 자동 감지 봇 이슈
+레이블 목록 + 자동 적용 규칙은 [labels.md](../reference/labels.md) 참조.
 
 ### 이슈 처리 흐름
 

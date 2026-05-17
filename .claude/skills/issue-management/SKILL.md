@@ -25,43 +25,7 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 
 ## 레이블
 
-### 작업 범위 레이블
-
-- `💻 fe` — 프론트엔드
-- `⚙️ be` — 백엔드 (포괄)
-- `⚙️be:api` — 백엔드 API 계층 (컨트롤러/DTO/엔드포인트)
-- `⚙️be:service` — 백엔드 서비스 로직
-- `📋 api-spec` — API 스펙 설계
-- `🎨 publishing` — 퍼블리싱
-- `☁️ infra` — 인프라
-- `🤖 crawler` — 크롤러
-- `🔧 chore` — 설정, 문서, CI/CD, 스킬/에이전트 수정
-
-### 버그
-
-`🐛 bug` 단일 레이블 + 범위 레이블 조합으로 표현.
-
-예: `🐛 bug` + `💻 fe` = FE 버그, `🐛 bug` + `⚙️be:api` = BE API 계층 버그.
-
-### 자동 봇 레이블 (사람이 직접 사용 X)
-
-- `🚨 sync-failure` — GHA 동기화/헬스체크 실패 자동 이슈
-- `🤖 figma-drift` — Figma drift 자동 감지 봇 이슈
-
-## 레이블 자동 적용 규칙
-
-| 키워드                                      | 레이블                 |
-| ------------------------------------------- | ---------------------- |
-| API 스펙, openapi.yaml                      | `📋 api-spec`          |
-| 퍼블리싱, UI 마크업, HTML                   | `🎨 publishing`        |
-| Spring Boot, Java, Backend (포괄)           | `⚙️ be`                |
-| BE 컨트롤러/DTO/엔드포인트                  | `⚙️be:api`             |
-| BE 서비스 로직                              | `⚙️be:service`         |
-| Next.js, React, Frontend                    | `💻 fe`                |
-| Vercel, Railway, AWS, 인프라                | `☁️ infra`             |
-| 크롤러                                      | `🤖 crawler`           |
-| 설정, 문서, CI/CD, 스킬, 에이전트, .claude/ | `🔧 chore`             |
-| 버그 (모든 유형)                            | `🐛 bug` + 범위 레이블 |
+레이블 목록 + 자동 적용 규칙은 [labels.md](../../../docs/reference/labels.md) 참조.
 
 ## 담당자 할당 규칙
 
