@@ -29,12 +29,6 @@ jobs:
           # spec 만 변경된 PR 은 ci-career/ci-plan skip — spec ↔ FE drift 는
           # FE follow-up PR 에서 해소 (dev → main 의 ci-integration 가 최종 gate).
           # api-spec 자체는 항상 lint/bundle 검증.
-          #
-          # dorny/paths-filter 는 패턴 리스트를 OR 로 평가하고 '!' negation 은
-          # subtractive 가 아니다 — 'packages/**' 광역 패턴 + '!spec/**' 로는
-          # spec PR 을 못 뺀다 (#357). career/plan 이 실제 소비하는 경로만
-          # positive 로 나열한다. api-client 는 거의 전부 codegen 이라
-          # 수기 작성분(src/*.ts) + orval 설정 + 패키지 메타만 트리거 대상.
           filters: |
             career:
               - 'apps/career/**'
