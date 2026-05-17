@@ -1,3 +1,4 @@
+# ci-paths-filter 검증용 throwaway 변경 — do not merge
 components:
   schemas:
     Address:
