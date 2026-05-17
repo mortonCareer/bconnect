@@ -118,7 +118,7 @@ dev 브랜치는 BE/FE 독립 개발을 허용하므로 OpenAPI 스펙 ↔ FE �
 ```
 문제 발견
     ↓
-GitHub Issue 생성 + 레이블 적용
+GitHub Issue 생성
     ↓
 담당자 할당
     ↓
