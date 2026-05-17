@@ -108,7 +108,7 @@ fi
 **이슈 정보** (#123):
 
 - 제목: "Add user profile image upload"
-- 레이블: `💻 FE`
+- 레이블: `💻 fe`
 
 **변경 파일**:
 
@@ -150,7 +150,7 @@ Closes #123
 **이슈 정보** (#456):
 
 - 제목: "Fix login redirect loop"
-- 레이블: `🐛 bug:FE`
+- 레이블: `🐛 bug`, `💻 fe`
 
 **생성되는 PR**:
 
@@ -222,7 +222,7 @@ gh pr create \
   --title "feat(career): Add user profile upload" \
   --body "..." \
   --reviewer <CEO_GITHUB> \
-  --label "💻 FE"
+  --label "💻 fe"
 ```
 
 ### base 브랜치 지정
@@ -262,11 +262,11 @@ ISSUE_BODY=$(gh issue view $ISSUE --json body -q .body)
 
 # scope 추론 (레이블에서)
 LABELS=$(gh issue view $ISSUE --json labels -q '.labels[].name')
-if echo "$LABELS" | grep -q "career\|💻 FE"; then
+if echo "$LABELS" | grep -q "career\|💻 fe"; then
   SCOPE="career"
 elif echo "$LABELS" | grep -q "plan"; then
   SCOPE="plan"
-elif echo "$LABELS" | grep -q "⚙️ BE\|api"; then
+elif echo "$LABELS" | grep -q "⚙️ be\|api"; then
   SCOPE="api"
 else
   SCOPE=""
@@ -399,7 +399,7 @@ gh pr create --draft
 gh pr create --reviewer CEO,CTO
 
 # 레이블 추가
-gh pr create --label "💻 FE"
+gh pr create --label "💻 fe"
 ```
 
 ### PR 조회

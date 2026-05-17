@@ -16,49 +16,56 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 
 ## 이슈 템플릿
 
-> **SSoT**: 이슈 템플릿의 원본은 [.github/ISSUE_TEMPLATE/](../../../.github/ISSUE_TEMPLATE/)에 있습니다.
-> 이슈 생성 시 해당 템플릿 파일을 읽어서 본문을 채워 넣으세요.
+> **SSoT**: 이슈 템플릿의 원본은 [.github/ISSUE_TEMPLATE/](../../../.github/ISSUE_TEMPLATE/) 하위 파일만 사용
 
-| 템플릿          | 파일                                                                     | 제목 접두사 |
-| --------------- | ------------------------------------------------------------------------ | ----------- |
-| Feature Request | [feature_request.md](../../../.github/ISSUE_TEMPLATE/feature_request.md) | `feat:`     |
-| Bug Report      | [bug_report.md](../../../.github/ISSUE_TEMPLATE/bug_report.md)           | `bug:`      |
-| Task            | [task.md](../../../.github/ISSUE_TEMPLATE/task.md)                       | `chore:`    |
+| 템플릿     | 용도                                      | 제목 접두사                                      |
+| ---------- | ----------------------------------------- | ------------------------------------------------ |
+| Bug Report | 버그 리포트 (재현/예상/실제 구조)         | `bug:`                                           |
+| Task       | 그 외 모든 작업 (기능/리팩토링/설정/문서) | 작성자가 commit type 결정 (`feat:`/`chore:`/...) |
 
 ## 레이블
 
-### 작업 유형 레이블
+### 작업 범위 레이블
 
-- `💻 FE` - 프론트엔드 작업
-- `⚙️ BE` - 백엔드 작업
-- `📋 api-spec` - API 스펙 설계
-- `🎨 publishing` - 퍼블리싱
-- `☁️ infra` - 인프라
-- `🔧 chore` - 설정, 문서, CI/CD, 스킬/에이전트 수정
+- `💻 fe` — 프론트엔드
+- `⚙️ be` — 백엔드 (포괄)
+- `⚙️be:api` — 백엔드 API 계층 (컨트롤러/DTO/엔드포인트)
+- `⚙️be:service` — 백엔드 서비스 로직
+- `📋 api-spec` — API 스펙 설계
+- `🎨 publishing` — 퍼블리싱
+- `☁️ infra` — 인프라
+- `🤖 crawler` — 크롤러
+- `🔧 chore` — 설정, 문서, CI/CD, 스킬/에이전트 수정
 
-### 버그 유형 레이블
+### 버그
 
-- `🐛 bug:FE` - 프론트엔드 버그
-- `🐛 bug:BE` - 백엔드 버그
-- `🐛 bug:api-spec` - API 스펙 버그
+`🐛 bug` 단일 레이블 + 범위 레이블 조합으로 표현.
+
+예: `🐛 bug` + `💻 fe` = FE 버그, `🐛 bug` + `⚙️be:api` = BE API 계층 버그.
+
+### 자동 봇 레이블 (사람이 직접 사용 X)
+
+- `🚨 sync-failure` — GHA 동기화/헬스체크 실패 자동 이슈
+- `🤖 figma-drift` — Figma drift 자동 감지 봇 이슈
 
 ## 레이블 자동 적용 규칙
 
-| 키워드                                      | 레이블            |
-| ------------------------------------------- | ----------------- |
-| API 스펙, openapi.yaml                      | `📋 api-spec`     |
-| 퍼블리싱, UI 마크업, HTML                   | `🎨 publishing`   |
-| Spring Boot, Java, Backend                  | `⚙️ BE`           |
-| Next.js, React, Frontend                    | `💻 FE`           |
-| Vercel, Railway, AWS, 인프라                | `☁️ infra`        |
-| 설정, 문서, CI/CD, 스킬, 에이전트, .claude/ | `🔧 chore`        |
-| 버그 + API 응답                             | `🐛 bug:BE`       |
-| 버그 + 화면, UI                             | `🐛 bug:FE`       |
-| 버그 + 스펙                                 | `🐛 bug:api-spec` |
+| 키워드                                      | 레이블                 |
+| ------------------------------------------- | ---------------------- |
+| API 스펙, openapi.yaml                      | `📋 api-spec`          |
+| 퍼블리싱, UI 마크업, HTML                   | `🎨 publishing`        |
+| Spring Boot, Java, Backend (포괄)           | `⚙️ be`                |
+| BE 컨트롤러/DTO/엔드포인트                  | `⚙️be:api`             |
+| BE 서비스 로직                              | `⚙️be:service`         |
+| Next.js, React, Frontend                    | `💻 fe`                |
+| Vercel, Railway, AWS, 인프라                | `☁️ infra`             |
+| 크롤러                                      | `🤖 crawler`           |
+| 설정, 문서, CI/CD, 스킬, 에이전트, .claude/ | `🔧 chore`             |
+| 버그 (모든 유형)                            | `🐛 bug` + 범위 레이블 |
 
 ## 담당자 할당 규칙
 
-> **SSoT**: 담당자 할당 규칙과 GitHub 사용자명 매핑은 [docs/reference/team.md](../../../docs/reference/team.md)의 "GitHub 작업 매핑" 섹션을 참조하세요.
+> **SSoT**: 담당자 할당 규칙과 GitHub 사용자명 매핑은 [docs/reference/team.md](../../../docs/reference/team.md)의 "GitHub 작업 매핑" 섹션을 참조
 
 ## 사용 예시
 
@@ -69,8 +76,8 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 **생성되는 이슈**:
 
 - 제목: "feat: Add user profile image upload"
-- 본문: Feature Request 템플릿
-- 레이블: `💻 FE`, `⚙️ BE` (FE/BE 모두 필요)
+- 본문: Task 템플릿
+- 레이블: `💻 fe`, `⚙️ be` (FE/BE 모두 필요)
 - 담당자: CTO (FE), CEO (BE)
 
 ### 예시 2: 버그 리포트
@@ -86,7 +93,7 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 
 - 제목: "bug: Profile page not showing phone number"
 - 본문: Bug Report 템플릿 (자동 채워짐)
-- 레이블: `🐛 bug:FE`
+- 레이블: `🐛 bug`, `💻 fe`
 - 담당자: CTO
 
 ### 예시 3: API 스펙 작업
@@ -96,7 +103,7 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 **생성되는 이슈**:
 
 - 제목: "api-spec: User profile retrieval endpoint"
-- 본문: Feature Request 템플릿
+- 본문: Task 템플릿
 - 레이블: `📋 api-spec`
 - 담당자: CTO (초안), CEO (리뷰어)
 
@@ -123,8 +130,8 @@ gh issue create \
 
 EOF
 )" \
-  --label "💻 FE" \
-  --label "⚙️ BE" \
+  --label "💻 fe" \
+  --label "⚙️ be" \
   --assignee <CTO_GITHUB> \
   --assignee <CEO_GITHUB>
 ```
