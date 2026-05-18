@@ -51,8 +51,10 @@ Figma 디자인을 Next.js 코드로 옮길 때 일관된 사이클을 강제하
 ## Phase 1. Understand (사용자 승인)
 
 ```
-mcp__figma__get_design_context(fileKey, nodeId)
-mcp__figma__get_screenshot(fileKey, nodeId)
+mcp__figma__get_metadata(fileKey, nodeId)         # 트리 구조 먼저
+mcp__figma__get_design_context(fileKey, nodeId)   # 루트 + 필요 시 자식 개별 호출
+mcp__figma__get_variable_defs(fileKey, nodeId)    # 디자인 토큰 정의
+mcp__figma__get_screenshot(fileKey, nodeId)       # 시각 reference (검증용)
 ```
 
 - 컴포넌트 식별 (재사용 vs 신규)
@@ -62,8 +64,9 @@ mcp__figma__get_screenshot(fileKey, nodeId)
   - 키보드 내비게이션 / A11y
   - 반응형 (mobile/tablet/desktop)
 - 데이터 소스 매핑 (어떤 orval 훅을 쓸지)
+- **디자인 토큰 매핑**: `get_variable_defs` 결과를 프로젝트 토큰(`packages/ui` / Tailwind config)과 1:1 매핑표로 정리. 불일치 토큰은 명시적으로 표기
 
-**산출물**: gap 리스트 + 데이터 매핑을 사용자에게 보고 → 승인.
+**산출물**: gap 리스트 + 데이터 매핑 + 토큰 매핑표를 사용자에게 보고 → 승인.
 
 ---
 
@@ -107,6 +110,7 @@ mcp__figma__get_screenshot(fileKey, nodeId)
 - shadcn → `packages/ui` → 신규 순으로 컴포넌트 매핑
 - 독립 컴포넌트는 병렬 에이전트로 동시 구현
 - Tailwind 토큰은 프로젝트 디자인 토큰으로 매핑
+- **디테일 누락 방지**: 루트 노드 한 번에 구현 금지. 컴포넌트(또는 의미 단위 자식 노드)별로 `get_design_context`를 개별 호출해서 안쪽 속성(border-radius / padding / gap / color / line-height) 모두 받아 반영. truncation·attention drift 차단
 
 ### 6. Visual Verify → `design-review` 스킬 호출
 
@@ -114,6 +118,7 @@ mcp__figma__get_screenshot(fileKey, nodeId)
 
 - 스크린샷 저장 경로: `.tmp/screenshots/` (gitignored)
 - mobile / tablet / desktop 3 해상도 확인
+- **정량 비교**: 시각 일치만 보지 말고 각 컴포넌트의 `border-radius` / `padding` / `gap` / `color` / `font-size` / `line-height` 를 Figma 값과 직접 대조. 불일치 발견 시 Phase 5 디자인 토큰 매핑부터 재검토 (단순 "비슷해 보임" 통과 금지)
 
 ### 7. Behavior Verify → `qa` 스킬 호출
 
