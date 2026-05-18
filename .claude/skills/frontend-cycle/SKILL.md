@@ -170,4 +170,3 @@ Phase 3~10 중 어느 단계라도 막히면:
 - 기존 67줄 hook (`~/.claude/hook-trigger-rules/frontend-cycle.md`)이 이 스킬로 대체됨
 - 개발 워크플로 전반: [docs/how-to/development-workflow.md](../../../docs/how-to/development-workflow.md)
 - API 스펙·MSW: [packages/api-client/CLAUDE.md](../../../packages/api-client/CLAUDE.md), [packages/mocks/CLAUDE.md](../../../packages/mocks/CLAUDE.md)
-
