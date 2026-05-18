@@ -12,6 +12,19 @@ description: |
 
 Figma 디자인을 Next.js 코드로 옮길 때 일관된 사이클을 강제하는 thin orchestrator.
 
+## Prerequisites
+
+본 스킬은 다음 외부 스킬을 **각 Phase에서 호출**합니다. 호출 시점에 미설치이면 해당 Phase가 동작하지 않으므로, 본 스킬을 사용할 환경에 모두 설치돼 있어야 합니다.
+
+| 호출 위치                         | 의존 스킬                | 출처                                                       |
+| --------------------------------- | ------------------------ | ---------------------------------------------------------- |
+| Phase 5 (Build)                   | `figma-implement-design` | [Anthropic Figma plugin](https://claude.com/plugins/figma) |
+| Phase 6 (Visual Verify)           | `design-review`          | [gstack](https://github.com/garrytan/gstack)               |
+| Phase 7 (Behavior Verify)         | `qa`                     | [gstack](https://github.com/garrytan/gstack)               |
+| Phase 9·10 (Integration + Report) | `ship`                   | [gstack](https://github.com/garrytan/gstack)               |
+
+설치 방법은 각 출처 문서 참고. 미설치 협업자는 본 스킬 호출 전에 환경 셋업을 마쳐 주세요.
+
 ## 원칙
 
 - **Outside-in**: 타입/골격 먼저 → 데이터 연결 → UI 마감
