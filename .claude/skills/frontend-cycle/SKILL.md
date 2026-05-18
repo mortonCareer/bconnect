@@ -159,14 +159,9 @@ Phase 3~10 중 어느 단계라도 막히면:
 - `main` 직접 push 금지 — 글로벌 hook이 자동 차단. PR은 항상 `dev` 타겟
 - 생성된 API 클라이언트 (`packages/api-client/generated/`) 직접 수정 금지 — spec 수정 후 `pnpm api:generate` 재생성
 
-### 비-Morton 환경
-
-프로젝트 루트에 `apps/career` `apps/plan` `packages/api-client`가 없으면 Morton 특화 단계(orval/MSW/envelope 언급)는 skip하고 일반 사이클만 수행.
-
 ---
 
 ## 참고
 
-- 기존 67줄 hook (`~/.claude/hook-trigger-rules/frontend-cycle.md`)이 이 스킬로 대체됨
 - 개발 워크플로 전반: [docs/how-to/development-workflow.md](../../../docs/how-to/development-workflow.md)
 - API 스펙·MSW: [packages/api-client/CLAUDE.md](../../../packages/api-client/CLAUDE.md), [packages/mocks/CLAUDE.md](../../../packages/mocks/CLAUDE.md)
