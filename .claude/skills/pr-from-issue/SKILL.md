@@ -74,6 +74,28 @@ GitHub Issue 정보를 기반으로 Pull Request를 자동 생성합니다.
 
 템플릿 구조: Summary → Changes → Test → Screenshots → `Closes #이슈번호`
 
+## 본문 quality 룰
+
+PR 본문은 위 4-section 구조 + `Closes #N` 을 유지한다. 다음은 본문에 박지 말 것 — 결정 history, supersede 사유, 코드리뷰 반영 내역, ADR 번호 재할당, 정정 이력. ADR/이슈/git history 가 SoT.
+
+### Section 별 룰
+
+- **Summary** (1-3문장) — 첫 줄은 stand-alone 으로 의도 전달, 나머지는 Why
+- **Changes** — 무엇 + 왜 그렇게 했나. 컴포넌트 구조표 X (코드가 SoT)
+- **Test** — 검증 절차 + 결과
+- **Screenshots** — UI 변경 시
+- **Closes #N** — 이슈에 모든 깊이를 link out
+
+### 권장 길이
+
+| 종류              | 본문 길이         |
+| ----------------- | ----------------- |
+| 단순 fix/refactor | 200-500 bytes     |
+| 일반 feature      | 600-1,200 bytes   |
+| 복잡한 change     | 1,200-2,000 bytes |
+
+상한 초과 시 self-check: "이 단락은 무엇/왜? Detail? ADR/이슈로 보낼 수 있는가?"
+
 ---
 
 ## 리뷰어 자동 할당
