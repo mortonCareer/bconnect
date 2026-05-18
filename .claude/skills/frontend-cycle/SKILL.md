@@ -42,6 +42,7 @@ Figma 디자인을 Next.js 코드로 옮길 때 일관된 사이클을 강제하
 - 어느 앱 (`apps/career` / `apps/plan`), 어느 라우트?
 - API 스펙 준비? (없으면 spec PR 먼저 vs MSW 우회로 시작)
 - GitHub 이슈 번호?
+- **의존 스킬 설치 확인**: `figma-implement-design` / `design-review` / `qa` / `ship` 4 개 모두 환경에 설치되어 있는지 검증. 하나라도 없으면 진행 중단하고 사용자에게 설치 요청 — 자체 구현으로 대체 금지 ([Prerequisites](#prerequisites) 참조)
 
 승인 받기 전까지 Phase 1로 넘어가지 않음.
 
