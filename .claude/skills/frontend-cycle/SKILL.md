@@ -106,6 +106,7 @@ mcp__figma__get_screenshot(fileKey, nodeId)
 스킬이 3-tier 테스트(Quick/Standard/Exhaustive) + atomic fix loop.
 
 검증 시나리오:
+
 - happy flow
 - empty state
 - error state (400 / 401 / 403 / 404 / 500)
@@ -146,17 +147,20 @@ Phase 3~10 중 어느 단계라도 막히면:
 ## Morton 특화 가드레일
 
 ### 코드 컨벤션
+
 - API 응답 envelope: `{success, data/error}` — `@bconnect/api-client`의 `customFetch`가 자동 unwrap. 직접 unwrap 시도 금지
 - 데이터 포맷 (phone, address 등): `@bconnect/config/*` 유틸 우선 사용
 - env: `process.env.X` 직접 접근 금지 → `@bconnect/config/env`
 - 임시 산출물 (스크린샷 등): `.tmp/screenshots/` (gitignored, glob hook이 강제)
 
 ### 영역 보호
+
 - BE 영역 (`apps/api/`) 변경 금지 — CEO 단독 영역
 - `main` 직접 push 금지 — 글로벌 hook이 자동 차단. PR은 항상 `dev` 타겟
 - 생성된 API 클라이언트 (`packages/api-client/generated/`) 직접 수정 금지 — spec 수정 후 `pnpm api:generate` 재생성
 
 ### 비-Morton 환경
+
 프로젝트 루트에 `apps/career` `apps/plan` `packages/api-client`가 없으면 Morton 특화 단계(orval/MSW/envelope 언급)는 skip하고 일반 사이클만 수행.
 
 ---
@@ -166,3 +170,4 @@ Phase 3~10 중 어느 단계라도 막히면:
 - 기존 67줄 hook (`~/.claude/hook-trigger-rules/frontend-cycle.md`)이 이 스킬로 대체됨
 - 개발 워크플로 전반: [docs/how-to/development-workflow.md](../../../docs/how-to/development-workflow.md)
 - API 스펙·MSW: [packages/api-client/CLAUDE.md](../../../packages/api-client/CLAUDE.md), [packages/mocks/CLAUDE.md](../../../packages/mocks/CLAUDE.md)
+
