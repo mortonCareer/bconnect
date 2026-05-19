@@ -147,7 +147,13 @@ mcp__figma__get_screenshot(fileKey, nodeId)       # 시각 reference (검증용)
 - Vercel preview 빌드 + URL 동작 확인
 - PR description:
   - 변경 요약
-  - Figma vs 구현 스크린샷 비교 첨부
+  - Figma vs 구현 스크린샷 비교 첨부 (각 화면은 `### Figma` / `### 구현 (Mobile)` 등 h3 로 구분)
+  - **State coverage 체크리스트** — Phase 1 UX gap 에서 열거한 상태가 모두 처리됐는지 self-audit. 본 PR 과 무관한 항목은 `N/A` 명시 (예: display-only 컴포넌트 → 데이터 상태는 부모 위임)
+    - 데이터: loading / empty / error (4xx, 5xx) / success
+    - 폼: validation (필드별 에러)
+    - 인터랙션: hover / focus / disabled / 키보드 내비게이션
+    - 접근성: ARIA 라벨 / 색 대비 / 스크린 리더 호환
+    - 파생 속성: filter / sort / aggregation 등 derived state
   - `Closes #<이슈번호>`
   - 사이클 중 반복된 문제 / 개선 제안
 
