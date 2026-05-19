@@ -104,7 +104,7 @@ class MemberServiceTest {
             assertThat(result.username()).isEqualTo("username");
             assertThat(result.name()).isEqualTo("name");
             assertThat(result.phone()).isEqualTo("01000000000");
-            assertThat(result.picture()).isEqualTo("picture");
+            assertThat(result.picture()).isEqualTo(MemberFactory.PICTURE);
             assertThat(result.role()).isEqualTo(Role.FOREMAN);
             verify(memberRepository).findByUsername("username");
             verify(memberRepository).findByPhone("01000000000");
@@ -168,7 +168,7 @@ class MemberServiceTest {
 
             // then
             assertThat(entity.getName()).isEqualTo("name");
-            assertThat(entity.getPicture()).isEqualTo("picture");
+            assertThat(entity.getPicture()).isEqualTo(MemberFactory.PICTURE);
             assertThat(entity.getRole()).isEqualTo(Role.CONTRACTOR);
             verify(memberRepository).findById(USER_ID);
         }
