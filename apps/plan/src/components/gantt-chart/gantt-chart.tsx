@@ -15,6 +15,14 @@ const STATUS_STYLES: Record<TaskStatus, { bg: string; text: string }> = {
   not_started: { bg: '#d0d0d0', text: '#2d2d2d' },
 }
 
+const STATUS_LABELS: Record<TaskStatus, string> = {
+  completed: '완료됨',
+  in_progress: '진행 중',
+  recruited: '섭외됨',
+  recruiting: '섭외 중',
+  not_started: '시작 전',
+}
+
 const ISO_DAY_MS = 86_400_000
 
 function toIsoDate(d: Date): string {
@@ -111,10 +119,11 @@ function TaskBar({ task, startDate }: { task: GanttTask; startDate: string }) {
   const left = offsetDays * DAY_WIDTH + 2
   const width = spanDays * DAY_WIDTH - 4
   const style = STATUS_STYLES[task.status]
+  const label = STATUS_LABELS[task.status]
 
   return (
     <div
-      className="absolute flex items-center overflow-clip rounded-[4px] pl-[10px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)]"
+      className="group absolute flex items-center rounded-[4px] pl-[10px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
       style={{
         left,
         top: BAR_TOP,
@@ -122,7 +131,8 @@ function TaskBar({ task, startDate }: { task: GanttTask; startDate: string }) {
         height: BAR_HEIGHT,
         backgroundColor: style.bg,
       }}
-      aria-label={`${task.name} (${task.startDate} ~ ${task.endDate}, ${task.status})`}
+      tabIndex={0}
+      aria-label={`${task.name} · ${task.startDate} ~ ${task.endDate} · ${label}`}
     >
       <p
         className="truncate text-[12px] font-semibold leading-[18px]"
@@ -130,6 +140,18 @@ function TaskBar({ task, startDate }: { task: GanttTask; startDate: string }) {
       >
         {task.name}
       </p>
+      <div
+        className="pointer-events-none invisible absolute left-0 top-full z-10 mt-1 whitespace-nowrap rounded bg-neutral-900 px-2 py-1 text-[11px] text-white opacity-0 shadow-lg transition-opacity group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100"
+        role="tooltip"
+      >
+        <span className="font-semibold">{task.name}</span>
+        <span className="mx-1 text-neutral-400">·</span>
+        <span>
+          {task.startDate} ~ {task.endDate}
+        </span>
+        <span className="mx-1 text-neutral-400">·</span>
+        <span>{label}</span>
+      </div>
     </div>
   )
 }
