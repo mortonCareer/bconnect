@@ -148,7 +148,9 @@ mcp__figma__get_screenshot(fileKey, nodeId)       # 시각 reference (검증용)
 - Vercel preview 빌드 + URL 동작 확인
 - PR description (**리뷰어 시점** — 도구 만료 경고, 로컬 파일 경로, 작업 환경 메타 등 작성자만 아는 내용은 본문에서 제외):
   - 변경 요약
-  - **구현 결과 스크린샷만** 첨부 (각 화면은 `### 구현 (Mobile)` / `### 구현 (Desktop)` 등 h3 로 구분). Figma 설계는 이슈에서 참조 — PR 본문은 구현 결과물만. 영구 첨부는 GitHub UI 에서 drag-drop 또는 release asset 활용
+  - **구현 결과 스크린샷만** 첨부. Figma 설계는 이슈에서 참조 — PR 본문은 구현 결과물만. 영구 첨부는 GitHub UI 에서 drag-drop 또는 release asset 활용. 분류:
+    - 해상도별 (mobile / tablet / desktop) **×** 상태별 (default / loading / empty / error / hover 등 Phase 1 UX gap 에 해당)
+    - 본문이 길어지므로 해상도 단위로 `<details><summary>` 토글로 접고, 안에 상태별 h3 (`### Default` / `### Loading` / ...)
   - **State coverage 체크리스트** — Phase 1 UX gap 에서 열거한 상태가 모두 처리됐는지 self-audit. 본 PR 과 무관한 항목은 `N/A` 명시 (예: display-only 컴포넌트 → 데이터 상태는 부모 위임)
     - 데이터: loading / empty / error (4xx, 5xx) / success
     - 폼: validation (필드별 에러)
