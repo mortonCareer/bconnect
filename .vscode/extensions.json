@@ -1,0 +1,26 @@
+{
+  // VSCode 추천 확장 — 신규 합류자가 워크스페이스를 열면 설치 prompt 가 자동으로 뜸.
+  // 각 확장의 역할:
+  //  - dbaeumer.vscode-eslint        : ESLint 통합. settings.json 의 codeActionsOnSave 와 짝.
+  //  - esbenp.prettier-vscode        : Prettier formatter (format-on-save 의 default formatter).
+  //  - bradlc.vscode-tailwindcss     : Tailwind 클래스 자동완성 + cn/cva/clsx regex 인식.
+  //  - 42crunch.vscode-openapi       : OpenAPI spec 실시간 검증/시각화 (packages/api-client/src/spec).
+  //  - usernamehw.errorlens          : 에러/경고를 인라인으로 즉시 표시 (편집 중 빠른 피드백).
+  //  - yzhang.markdown-all-in-one    : markdown 편집 보조 (TOC, table, list 등).
+  //  - DavidAnson.vscode-markdownlint: 본 repo 의 .markdownlint.jsonc 룰을 IDE 에서 실시간 검증.
+  //  - redhat.vscode-yaml            : OpenAPI / GHA workflow YAML schema 검증.
+  //  - tamasfe.even-better-toml      : lychee.toml / Cargo.toml 등 TOML 편집.
+  //  - eamodio.gitlens               : git blame inline + 히스토리 탐색.
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "42crunch.vscode-openapi",
+    "usernamehw.errorlens",
+    "yzhang.markdown-all-in-one",
+    "DavidAnson.vscode-markdownlint",
+    "redhat.vscode-yaml",
+    "tamasfe.even-better-toml",
+    "eamodio.gitlens"
+  ]
+}

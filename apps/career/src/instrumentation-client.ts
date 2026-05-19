@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
-import { clientSentryOptions } from '@morton/config/sentry'
+import { clientSentryOptions } from '@bconnect/config/sentry'
 
 Sentry.init({
   ...clientSentryOptions,

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { cn } from '@morton/ui'
+import { cn } from '@bconnect/ui'
 
 interface WorkCardProps {
   postId?: number
@@ -40,11 +40,11 @@ export function WorkCard({
       {/* 카드 헤더 — 건축주명 · 소요기간 + 날짜 + 액션 */}
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-1.5">
-          <span className="text-r-12 text-morton-gray-700">{company}</span>
+          <span className="text-r-12 text-bconnect-gray-700">{company}</span>
           {company && duration && (
             <>
-              <span className="text-r-12 text-morton-gray-500">·</span>
-              <span className="text-r-12 text-morton-gray-700">{duration}</span>
+              <span className="text-r-12 text-bconnect-gray-500">·</span>
+              <span className="text-r-12 text-bconnect-gray-700">{duration}</span>
             </>
           )}
           {/* 인증 체크 아이콘 */}
@@ -53,7 +53,7 @@ export function WorkCard({
             height="16"
             viewBox="0 0 16 16"
             fill="none"
-            className="text-morton-primary"
+            className="text-bconnect-primary"
           >
             <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
             <path
@@ -66,10 +66,10 @@ export function WorkCard({
           </svg>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-r-12 text-morton-gray-500">{timestamp}</span>
+          <span className="text-r-12 text-bconnect-gray-500">{timestamp}</span>
           {/* ⋮ 액션 버튼 */}
           <button
-            className="flex h-6 w-6 items-center justify-center text-morton-gray-500"
+            className="flex h-6 w-6 items-center justify-center text-bconnect-gray-500"
             onClick={() => postId && router.push(`/profile/edit/work/${postId}`)}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -94,7 +94,7 @@ export function WorkCard({
           <p
             ref={textRef}
             className={cn(
-              'text-m-16 text-morton-gray-900',
+              'text-m-16 text-bconnect-gray-900',
               isExpanded ? 'w-full whitespace-pre-wrap' : 'min-w-0 flex-1 truncate'
             )}
           >
@@ -104,7 +104,7 @@ export function WorkCard({
             <button
               type="button"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="shrink-0 cursor-pointer text-r-12 leading-[25.2px] text-morton-gray-700 underline hover:text-morton-gray-900"
+              className="shrink-0 cursor-pointer text-r-12 leading-[25.2px] text-bconnect-gray-700 underline hover:text-bconnect-gray-900"
             >
               {isExpanded ? '접기' : '더보기'}
             </button>

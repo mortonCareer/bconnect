@@ -19,21 +19,37 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       api-spec: ${{ steps.filter.outputs.api-spec }}
       crawler: ${{ steps.filter.outputs.crawler }}
+      packages: ${{ steps.filter.outputs.packages }}
     steps:
       - uses: actions/checkout@v6
 
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          # spec 만 변경된 PR 은 ci-career/ci-plan skip — spec ↔ FE drift 는
+          # FE follow-up PR 에서 해소 (dev → main 의 ci-integration 가 최종 gate).
+          # api-spec 자체는 항상 lint/bundle 검증.
           filters: |
             career:
               - 'apps/career/**'
-              - 'packages/**'
+              - 'packages/ui/**'
+              - 'packages/config/**'
+              - 'packages/mocks/**'
+              - 'packages/api-client/src/*.ts'
+              - 'packages/api-client/orval.*.ts'
+              - 'packages/api-client/package.json'
+              - 'packages/api-client/tsconfig.json'
               - 'package.json'
               - 'pnpm-lock.yaml'
             plan:
               - 'apps/plan/**'
-              - 'packages/**'
+              - 'packages/ui/**'
+              - 'packages/config/**'
+              - 'packages/mocks/**'
+              - 'packages/api-client/src/*.ts'
+              - 'packages/api-client/orval.*.ts'
+              - 'packages/api-client/package.json'
+              - 'packages/api-client/tsconfig.json'
               - 'package.json'
               - 'pnpm-lock.yaml'
             api:
@@ -43,6 +59,11 @@ jobs:
               - 'packages/api-client/.redocly.yaml'
             crawler:
               - 'apps/crawler/**'
+            packages:
+              - '**/package.json'
+              - 'pnpm-workspace.yaml'
+              - 'pnpm-lock.yaml'
+              - '.syncpackrc.json'
 
   ci-career:
     needs: changes
@@ -58,8 +79,12 @@ jobs:
           node-version: 24
           cache: 'pnpm'
 
+      # postinstall 이 자동으로 pnpm api:generate 실행 (root package.json)
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm --filter morton-career typecheck
 
       - name: Lint
         run: pnpm --filter morton-career lint
@@ -81,8 +106,12 @@ jobs:
           node-version: 24
           cache: 'pnpm'
 
+      # postinstall 이 자동으로 pnpm api:generate 실행 (root package.json)
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm --filter morton-plan typecheck
 
       - name: Lint
         run: pnpm --filter morton-plan lint
@@ -140,6 +169,28 @@ jobs:
 
       - name: Bundle check (sanity)
         run: pnpm api:bundle
+
+  ci-packages:
+    needs: changes
+    if: ${{ needs.changes.outputs.packages == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # syncpack 으로 같은 dep 의 spec 불일치 차단 (workspace 전체).
+      # 새 dep 이 2+ package 에 있으면 pnpm-workspace.yaml 의 catalog 사용 권장.
+      - name: Check package versions
+        run: pnpm package:check
 
   ci-crawler:
     needs: changes

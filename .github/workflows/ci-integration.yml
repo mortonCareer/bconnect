@@ -1,8 +1,8 @@
-# 통합검증 CI — dev → main PR 시 API 정합성 검증
+# 통합검증 CI — dev → main PR 시 최종 build gate
 #
-# dev에서는 BE/FE가 독립 개발 (FE는 MSW mock 기반, api:generate 미실행)
-# main 머지 전에 openapi.yaml 기준으로 API 클라이언트를 재생성하고
-# FE typecheck + 빌드를 실행하여 BE/FE 정합성을 검증한다.
+# dev CI 도 typecheck/lint 모두 strict 통과 (#246 정책 변경)이라 typecheck
+# 단계는 redundant 하지만, main 보호를 위한 defense in depth 로 유지.
+# build 가 추가 검증 (typecheck 가 안 잡는 SSR/RSC/turbo 이슈 등).
 name: Integration
 
 on:

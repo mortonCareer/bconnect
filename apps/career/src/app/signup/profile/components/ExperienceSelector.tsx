@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@morton/ui'
+import { cn } from '@bconnect/ui'
 import type { ExperienceLevel, ExperienceOption } from '../types'
 
 interface ExperienceSelectorProps {
@@ -22,8 +22,8 @@ export function ExperienceSelector({ options, selected, onSelect }: ExperienceSe
             className={cn(
               'flex h-[40px] items-center justify-center rounded-[8px] border px-[14px] py-[3px] text-sm leading-[1.6] transition-colors',
               isSelected
-                ? 'border-morton-primary bg-morton-primary-sub font-semibold text-morton-primary'
-                : 'border-morton-gray-300 font-medium text-morton-gray-500'
+                ? 'border-bconnect-primary bg-bconnect-primary-sub font-semibold text-bconnect-primary'
+                : 'border-bconnect-gray-300 font-medium text-bconnect-gray-500'
             )}
           >
             {option.label}

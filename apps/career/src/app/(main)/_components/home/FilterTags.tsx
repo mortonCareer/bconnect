@@ -1,6 +1,6 @@
 'use client'
 
-import { Tag } from '@morton/ui'
+import { Tag } from '@bconnect/ui'
 import { TRADE_LABELS } from '@/lib/trade-labels'
 import { EXPERIENCE_LABELS } from '@/lib/experience'
 import { useFilterParams } from '@/hooks/useFilterParams'

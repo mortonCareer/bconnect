@@ -39,7 +39,7 @@ export function WorksSection({ authorId }: WorksSectionProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-m-14 text-morton-gray-500">로딩 중...</p>
+        <p className="text-m-14 text-bconnect-gray-500">로딩 중...</p>
       </div>
     )
   }
@@ -47,7 +47,7 @@ export function WorksSection({ authorId }: WorksSectionProps) {
   if (feedItems.length === 0) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-m-14 text-morton-gray-500">작업물이 없습니다</p>
+        <p className="text-m-14 text-bconnect-gray-500">작업물이 없습니다</p>
       </div>
     )
   }
@@ -69,7 +69,7 @@ export function WorksSection({ authorId }: WorksSectionProps) {
       <div ref={observerRef} className="h-1" />
       {isFetchingNextPage && (
         <div className="flex justify-center py-4">
-          <p className="text-r-12 text-morton-gray-400">불러오는 중...</p>
+          <p className="text-r-12 text-bconnect-gray-400">불러오는 중...</p>
         </div>
       )}
     </div>

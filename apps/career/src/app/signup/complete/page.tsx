@@ -4,11 +4,11 @@
 'use client'
 
 import Link from 'next/link'
-import { buttonVariants, CheckIcon } from '@morton/ui'
-import { useAuthStore } from '@/stores/auth-store'
+import { buttonVariants, CheckIcon } from '@bconnect/ui'
+import { useGetMyMember } from '@bconnect/api-client'
 
 export default function SignupCompletePage() {
-  const member = useAuthStore((state) => state.member)
+  const { data: member } = useGetMyMember()
 
   // 사용자 이름 (없으면 기본값)
   const userName = member?.name || '회원'

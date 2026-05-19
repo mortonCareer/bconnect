@@ -1,11 +1,12 @@
 /**
  * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1387-9882
+ * @figma-state 작업물 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1387-9637
  */
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useGetMembers, useGetProfile, useGetCoworkers } from '@morton/api-client'
-import { Button, Tab, TopBar } from '@morton/ui'
+import { useGetProfile, useGetCoworkers } from '@bconnect/api-client'
+import { Button, Tab, TopBar } from '@bconnect/ui'
 import { useQueryState } from 'nuqs'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { ProfileHeader } from '../_components/ProfileHeader'
@@ -23,14 +24,12 @@ export default function MemberProfilePage() {
   const memberId = Number(params.memberId)
   const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'intro' })
 
-  const { data: members, isLoading: isMemberLoading } = useGetMembers({
+  // useGetProfile 응답 = ProfileAndMember = { member, profile } (member 도 함께 옴)
+  const { data: profileAndMember, isLoading: isProfileLoading } = useGetProfile(memberId, {
     query: { enabled: !isNaN(memberId) },
   })
-  const member = members?.find((m) => m.id === memberId)
-
-  const { data: profile, isLoading: isProfileLoading } = useGetProfile(memberId, {
-    query: { enabled: !isNaN(memberId) },
-  })
+  const member = profileAndMember?.member
+  const profile = profileAndMember?.profile
 
   const { postCount } = useFeedItems({ authorId: profile?.id })
   const { data: coworkers } = useGetCoworkers(
@@ -40,14 +39,14 @@ export default function MemberProfilePage() {
   // TODO: 추천서 API 연동
   const recommendationCount = 0
 
-  const isLoading = isProfileLoading || (isMemberLoading && !profile)
+  const isLoading = isProfileLoading
 
   if (isLoading) {
     return (
       <div className="flex flex-col">
         <TopBar variant="default" title="프로필" showAction={false} onBack={() => router.back()} />
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-morton-gray-500">로딩 중...</p>
+          <p className="text-m-14 text-bconnect-gray-500">로딩 중...</p>
         </div>
       </div>
     )
@@ -58,7 +57,7 @@ export default function MemberProfilePage() {
       <div className="flex flex-col">
         <TopBar variant="default" title="프로필" showAction={false} onBack={() => router.back()} />
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-morton-gray-500">프로필을 불러올 수 없습니다</p>
+          <p className="text-m-14 text-bconnect-gray-500">프로필을 불러올 수 없습니다</p>
         </div>
       </div>
     )
@@ -75,8 +74,8 @@ export default function MemberProfilePage() {
 
       <ProfileHeader
         name={member?.name}
-        picture={member?.picture}
-        city={profile.address?.city}
+        picture={member?.picture ?? undefined}
+        city={profile?.address?.city}
         headline={profile?.headline}
         primaryTrade={profile?.primaryTrade}
         experience={profile?.experience}
@@ -96,13 +95,13 @@ export default function MemberProfilePage() {
       {activeTab === 'intro' && profile && <IntroSection profile={profile} />}
       {activeTab === 'intro' && !profile && (
         <div className="flex items-center justify-center py-20">
-          <p className="text-m-14 text-morton-gray-500">프로필 정보가 없습니다</p>
+          <p className="text-m-14 text-bconnect-gray-500">프로필 정보가 없습니다</p>
         </div>
       )}
       {activeTab === 'works' && profile?.id && <WorksSection authorId={profile.id} />}
       {activeTab === 'works' && !profile?.id && (
         <div className="flex items-center justify-center py-20">
-          <p className="text-m-14 text-morton-gray-500">작업물을 불러올 수 없습니다</p>
+          <p className="text-m-14 text-bconnect-gray-500">작업물을 불러올 수 없습니다</p>
         </div>
       )}
     </div>

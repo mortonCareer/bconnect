@@ -1,5 +1,10 @@
 /**
  * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1240-8132
+ * @figma-state 경력증명서 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1240-8451
+ * @figma-state 기능등급증명서 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1387-8927
+ * @figma-state 기타증명서 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1387-9568
+ * @figma-state 국가기술자격증 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1387-9351
+ * @figma-state 숙련기술인 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1387-9424
  */
 'use client'
 
@@ -11,8 +16,8 @@ import {
   useCreateCredential,
   useDeleteCredential,
   getGetCredentialsQueryKey,
-} from '@morton/api-client'
-import { Tab, TopBar } from '@morton/ui'
+} from '@bconnect/api-client'
+import { Tab, TopBar } from '@bconnect/ui'
 import { useQueryState } from 'nuqs'
 import { MOCK_CREDENTIALS } from '../constants'
 import { OneClickTab } from './_components/OneClickTab'
@@ -79,7 +84,7 @@ export default function CertificationApplyPage() {
       <div className="flex flex-col">
         <TopBar variant="default" title="인증 신청" showAction={false} />
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-morton-gray-500">로딩 중...</p>
+          <p className="text-m-14 text-bconnect-gray-500">로딩 중...</p>
         </div>
       </div>
     )

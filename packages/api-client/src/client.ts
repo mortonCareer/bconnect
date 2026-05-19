@@ -40,10 +40,6 @@ type ApiErrorResponse = {
   }
 }
 
-// Generic envelope 의 data 필드 타입을 추출. customFetch<TResponse> 는 inner 데이터를 반환.
-// void 응답은 envelope 에 data 필드가 없어 T 자체로 fallback (콜러는 .data 를 읽지 않음).
-type ExtractData<T> = T extends { data: infer D } ? D : T
-
 export class ApiError extends Error {
   constructor(
     public code: string,
@@ -105,42 +101,33 @@ export const apiClient = ky.create({
   },
 })
 
-// Orval mutator 시그니처
-type RequestConfig = {
-  url: string
-  method: string
-  headers?: Record<string, string>
-  data?: unknown
-  params?: Record<string, unknown>
-  signal?: AbortSignal
-}
-
-// orval 이 생성하는 호출 형태: `customFetch<SendOtp200>(...)` — T 는 envelope 타입.
-// 반환은 envelope 의 inner data (T['data']) — 호출부 hook 의 data 가 raw payload 와 정렬됨.
-export async function customFetch<T>(
-  config: RequestConfig,
-  _options?: RequestInit
-): Promise<ExtractData<T>> {
-  // ky prefixUrl은 슬래시로 시작하는 경로를 허용하지 않음
-  const normalizedUrl = config.url.startsWith('/') ? config.url.slice(1) : config.url
+/**
+ * 런타임에서 ApiResponse envelope (`{ success, data }`) 을 벗기고 inner data 만
+ * return + 401/403 retry + 4xx → ApiError throw. spec 단계의 type 정렬은
+ * `orval.transformer.ts` 가 담당.
+ */
+export async function customFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
+  // ky prefixUrl 은 leading slash 거부 — orval URL 이 `/api/...` 로 시작하므로 strip
+  const normalizedUrl = url.startsWith('/') ? url.slice(1) : url
 
   try {
-    const response = await apiClient(normalizedUrl, {
-      method: config.method,
-      json: config.data,
-      headers: config.headers,
-      searchParams: config.params as Record<string, string | number | boolean> | undefined,
-      signal: config.signal,
-    })
+    const response = await apiClient(normalizedUrl, options)
 
-    const json = (await response.json()) as ApiSuccessResponse<ExtractData<T>> | ApiErrorResponse
+    // 204 No Content 등 빈 응답은 envelope 없이 통과 (T = void 케이스)
+    const text = await response.text()
+    if (!text) return undefined as T
 
-    if (!json.success) {
-      throw new ApiError(json.error.code, json.error.message)
+    const json = JSON.parse(text) as unknown
+    // BE 는 envelope (`{success, data}`) 으로 응답, MSW mock 은 transformer 적용 후
+    // inner data 만 wire 로 보내므로 두 wire format 모두 처리.
+    if (json && typeof json === 'object' && 'success' in json) {
+      const env = json as ApiSuccessResponse<T> | ApiErrorResponse
+      if (!env.success) {
+        throw new ApiError(env.error.code, env.error.message)
+      }
+      return env.data
     }
-
-    // ApiResponse 래퍼를 벗기고 실제 데이터만 반환
-    return json.data
+    return json as T
   } catch (error) {
     if (error instanceof ApiError) {
       throw error

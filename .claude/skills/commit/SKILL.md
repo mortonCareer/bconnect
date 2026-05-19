@@ -37,7 +37,7 @@ allowed-tools: Bash, Read, Grep
 
 ## 커밋 컨벤션
 
-> **SSoT**: 커밋 메시지 형식, 타입/스코프 목록, 작성 가이드, 좋은/나쁜 예시는 [docs/GIT_WORKFLOW.md](../../../docs/GIT_WORKFLOW.md)의 "커밋 컨벤션" 섹션을 참조하세요.
+> **SSoT**: 커밋 메시지 형식, 타입/스코프 목록, 작성 가이드, 좋은/나쁜 예시는 [docs/how-to/git-workflow.md](../../../docs/how-to/git-workflow.md)의 "커밋 컨벤션" 섹션을 참조하세요.
 
 핵심 형식: `<type>(<scope>): <description> (#issue)`
 
@@ -136,5 +136,5 @@ const message = `${type}(${scope}): ${description} (${issueNumber})`
 
 ## 참고 문서
 
-- [Git Workflow](../../../docs/GIT_WORKFLOW.md) - 커밋 컨벤션, Commitlint 설정, 문제 해결
+- [Git Workflow](../../../docs/how-to/git-workflow.md) - 커밋 컨벤션, Commitlint 설정, 문제 해결
 - [Conventional Commits](https://www.conventionalcommits.org/) - 공식 스펙

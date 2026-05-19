@@ -1,4 +1,4 @@
-import { Role } from '@morton/api-client'
+import { Role } from '@bconnect/api-client'
 
 export const ROLE_LABELS: Record<Role, string> = {
   [Role.GUEST]: '게스트',
@@ -10,6 +10,10 @@ export const ROLE_LABELS: Record<Role, string> = {
   [Role.SEMI_SKILLED]: '준기공',
   [Role.HELPER]: '조공',
   [Role.ADMIN]: '관리자',
+}
+
+export function getRoleLabel(role: Role): string {
+  return ROLE_LABELS[role] ?? role
 }
 
 /** 회원가입 시 선택 가능한 유형 (Figma 기준) */

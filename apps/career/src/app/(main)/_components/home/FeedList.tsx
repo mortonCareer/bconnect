@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import { Feed } from '@morton/ui'
+import { Feed } from '@bconnect/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { useFilterParams } from '@/hooks/useFilterParams'
 
@@ -87,7 +87,7 @@ export function FeedList() {
 
       {isFetchingNextPage && (
         <div className="flex justify-center py-4">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-morton-primary" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-bconnect-primary" />
         </div>
       )}
     </div>

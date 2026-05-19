@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { validateEnv, commonSchemas } from '@morton/config/env'
+import { validateEnv, commonSchemas } from '@bconnect/config/env'
 
 const planEnvSchema = z.object({
   NEXT_PUBLIC_API_URL: commonSchemas.apiUrl,

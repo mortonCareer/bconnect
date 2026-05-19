@@ -10,8 +10,8 @@ import {
   useUpdateMyProfileAbout,
   useQueryClient,
   getGetMyProfileQueryKey,
-} from '@morton/api-client'
-import { TopBar } from '@morton/ui'
+} from '@bconnect/api-client'
+import { TopBar } from '@bconnect/ui'
 
 export default function EditAboutPage() {
   const router = useRouter()
@@ -49,7 +49,7 @@ export default function EditAboutPage() {
           value={about}
           onChange={(e) => setAbout(e.target.value)}
           placeholder="자기소개를 작성해주세요..."
-          className="min-h-[400px] w-full resize-none text-r-14 leading-[22.4px] text-morton-gray-900 outline-none placeholder:text-morton-gray-500"
+          className="min-h-[400px] w-full resize-none text-r-14 leading-[22.4px] text-bconnect-gray-900 outline-none placeholder:text-bconnect-gray-500"
           disabled={isPending}
         />
       </div>

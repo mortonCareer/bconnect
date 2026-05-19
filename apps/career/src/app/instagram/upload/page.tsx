@@ -4,7 +4,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { UploadCloudIcon } from '@morton/ui'
+import { UploadCloudIcon } from '@bconnect/ui'
 
 interface ParsedPost {
   id: string

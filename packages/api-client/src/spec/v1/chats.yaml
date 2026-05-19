@@ -47,6 +47,45 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/Chat'
+  /api/v1/chats/{chatId}:
+    get:
+      operationId: getChat
+      tags:
+        - Chats
+      summary: 채팅방 단건 조회
+      description: |
+        본인이 참가자인 채팅방 단건 조회. participants 의 나머지 Profile 정보 (`address`, `experience`, `primaryTrade`, `headline`)
+        는 별도 [`getProfile`](#/Profiles/getProfile) 호출로 lazy load — 응답 폭증 방지 + cache 친화.
+
+        본인이 참가자가 아니면 정보 누설 방지로 404 (403 X).
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../_shared.yaml#/components/schemas/ApiSuccessResponseBase
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Chat'
+        '404':
+          description: |
+            채팅방을 찾을 수 없거나 본인이 참가자가 아님 (정보 누설 방지로 권한 위반도 404)
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
   /api/v1/chats/{chatId}/messages:
     get:
       operationId: getChatMessages
@@ -99,7 +138,7 @@ components:
       required:
         - id
         - title
-        - participantIds
+        - participants
         - lastMessage
         - unreadCount
         - createdAt
@@ -110,12 +149,18 @@ components:
           format: int64
           example: 1
         title:
-          type: string
-        participantIds:
+          type:
+            - string
+            - 'null' # TODO: 추후 nullable 처리 대신 개인/단체 채팅에 따라 별도의 Entity로 분리
+          description: 채팅방 이름
+        participants:
           type: array
+          description: |
+            채팅방 참가자의 Member 정보.
+            나머지 Profile 정보는 [`getProfile`](#/Profiles/getProfile) 로 lazy load.
+            TODO: 가능하면 Member에 필요한 나머지 Profile 정보만 담게 최적화
           items:
-            type: integer
-            format: int64
+            $ref: ../v1/members.yaml#/components/schemas/MaskedMember
         lastMessage:
           $ref: '#/components/schemas/Message'
         unreadCount:
