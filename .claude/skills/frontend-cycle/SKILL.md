@@ -146,18 +146,9 @@ mcp__figma__get_screenshot(fileKey, nodeId)       # 시각 reference (검증용)
 - 타겟: `dev` (NOT `main`)
 - CI 통과 확인: `ci-career` / `ci-plan` / `ci-api-spec` (해당 시)
 - Vercel preview 빌드 + URL 동작 확인
-- PR description (**리뷰어 시점** — 도구 만료 경고, 로컬 파일 경로, 작업 환경 메타 등 작성자만 아는 내용은 본문에서 제외):
-  - 변경 요약
-  - **구현 결과 스크린샷만** 첨부. Figma 설계는 이슈에서 참조 — PR 본문은 구현 결과물만. 영구 첨부는 GitHub UI 에서 drag-drop 또는 release asset 활용. 분류:
-    - 해상도별 (mobile / tablet / desktop) **×** 상태별 (default / loading / empty / error / hover 등 Phase 1 UX gap 에 해당)
-    - 본문이 길어지므로 해상도 단위로 `<details><summary>` 토글로 접고, 안에 상태별 h3 (`### Default` / `### Loading` / ...)
-  - **State coverage 체크리스트** — Phase 1 UX gap 에서 열거한 상태가 모두 처리됐는지 self-audit. 본 PR 과 무관한 항목은 `N/A` 명시 (예: display-only 컴포넌트 → 데이터 상태는 부모 위임)
-    - 데이터: loading / empty / error (4xx, 5xx) / success
-    - 폼: validation (필드별 에러)
-    - 인터랙션: hover / focus / disabled / 키보드 내비게이션
-    - 접근성: ARIA 라벨 / 색 대비 / 스크린 리더 호환
-  - `Closes #<이슈번호>`
-  - 사이클 중 반복된 문제 / 개선 제안
+- **PR description 포맷**: 자세한 골격·State coverage 토글 패턴·스크린샷 자동 첨부는 [references/pr-description-format.md](references/pr-description-format.md) 참조 (리뷰어 시점 / 구현 결과만 / 데이터·폼·인터랙션·접근성 카테고리)
+- `Closes #<이슈번호>`
+- 사이클 중 반복된 문제 / 개선 제안
 
 ---
 
