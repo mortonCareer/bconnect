@@ -169,7 +169,7 @@ function TaskRow({
 }) {
   return (
     <div
-      className="relative border-b border-solid border-[#f5f5f5]"
+      className="relative border-b border-solid border-[#f5f5f5] has-[:focus-visible]:z-50 has-[:hover]:z-50"
       style={{ height: ROW_HEIGHT }}
       role="row"
     >
