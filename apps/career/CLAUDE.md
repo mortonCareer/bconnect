@@ -56,6 +56,26 @@ const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'one-clic
 
 모든 `page.tsx` 파일 상단에 `@figma <url>` JSDoc 주석 필수 (ESLint 강제). 디자인 없으면 `@figma-scaffold <reason>`. 자세한 형식과 마커 종류는 [packages/ui/CLAUDE.md](../../packages/ui/CLAUDE.md) 참조.
 
+### 로컬 컴포넌트 colocation — `_components/`
+
+라우트 1곳에서만 쓰는 컴포넌트는 `app/<route>/_components/` 에 colocate. underscore prefix 는 Next.js 공식 private folder — 라우팅 제외 + 미래 file convention 네이밍 충돌 영구 회피.
+
+```text
+app/projects/[projectId]/schedule/
+├── page.tsx
+└── _components/
+    ├── task-table.tsx
+    └── gantt-chart/
+```
+
+- `src/components/` 는 **≥2 production 라우트** 가 import 하는 공통 컴포넌트 전용
+- **Promote 트리거**: 두 번째 production importer 가 등장하면 그때 `_components/` → `src/components/` 로 이동 (`git mv` + import path 한 번)
+- dev-only preview, Storybook story, test fixture 는 importer 로 카운트 **X** (컴포넌트 자체 검증 도구)
+- 처음엔 `_components/`, 나중에 promote — wrong abstraction 의 비용 > late promotion 의 `git mv` 한 번
+- 컴포넌트 이름이 route context 임베드되면 (`ScheduleHeader`, `TaskTable`) 신호 명확 — colocation OK
+
+레퍼런스: [Next.js — Private folders](https://nextjs.org/docs/app/getting-started/project-structure#private-folders) (canonical: `app/blog/_components/Post.tsx`). repo 내 precedent: `apps/career/src/app/{(main),signup,one-click,profile}/_components/`, `apps/plan/src/app/login/_components/`.
+
 ---
 
 ## Career-only Patterns (이례적)

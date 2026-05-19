@@ -21,6 +21,7 @@ pnpm lint:plan
 - URL state via nuqs
 - Tailwind v4 design tokens
 - Figma 매핑 (`@figma` JSDoc)
+- 로컬 컴포넌트 colocation (`_components/`)
 
 ## 미래 (Sprint 2+)
 
