@@ -25,7 +25,6 @@ PR body 는 **리뷰어/디자이너/QA가 검수 가능하게** 만드는 문�
 ```text
 ## Summary
 ... 1-2 문장
-![default screenshot inline]
 
 ## Changes
 - ...
@@ -42,11 +41,13 @@ PR body 는 **리뷰어/디자이너/QA가 검수 가능하게** 만드는 문�
 Closes #<이슈>
 ```
 
+스크린샷은 별도 Summary inline 섹션 두지 않고, State coverage 의 각 상태 li 안 토글에서만 첨부 (시각 증거 분산 X).
+
 ## State coverage 토글 패턴
 
 각 상태별 li 가 한 줄로 보이고, 시각 증거 있는 항목만 자식 `<details>` 토글로 스크린샷 첨부:
 
-````markdown
+```markdown
 ### 데이터
 
 - [ ] loading — **N/A** 부모 위임
@@ -56,6 +57,7 @@ Closes #<이슈>
   ![empty](https://github.com/<owner>/<repo>/raw/<sha>/<path>)
 
   </details>
+
 - [ ] error — **N/A** 부모 위임
 - [x] success — 9개 mock task 정상 렌더
   <details><summary>📸 스크린샷</summary>
@@ -63,7 +65,7 @@ Closes #<이슈>
   ![success](https://github.com/<owner>/<repo>/raw/<sha>/<path>)
 
   </details>
-````
+```
 
 ### GitHub markdown 주의사항
 
