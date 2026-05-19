@@ -26,13 +26,25 @@ PR body 는 **리뷰어/디자이너/QA가 검수 가능하게** 만드는 문�
 
 ## 시각 증거 첨부 방식
 
-PR diff 에 binary commit 금지 (repo 비대·history 오염). 대신:
+PR diff 에 binary commit 금지 (repo 비대·history 오염). 워크플로:
 
-- **Vercel preview URL** — PR comment / body 에 명시. 리뷰어가 클릭해서 실제 페이지에서 시각 검증 — 정적 PNG 보다 인터랙션까지 확인 가능
-- **PR comment drag-drop** — 작성자가 GitHub UI 에서 PNG 수동 첨부 (자동화 불가). 영구 첨부 (`user-images.githubusercontent.com` CDN) 됨
-- **release asset** — 정적 PNG 가 꼭 필요하면 `gh release upload` 로 별도 호스팅 후 URL
+1. 로컬 PNG 캡처 — Playwright 등으로 gitignored 경로 저장 (예: `.tmp/screenshots/state-name.png`)
+2. PR body 토글 안에 HTML 주석으로 로컬 경로 명시 + `(첨부 예정)` placeholder 작성
+3. 사용자에게 PR UI 에서 drag-drop 첨부 요청 — GitHub UI 에서 해당 PNG 를 placeholder 위치에 첨부 (CDN URL 자동 생성). CLI 자동화 불가.
 
-캡처 / 자동화 등 로컬 도구 설정은 본 가이드 범위 외 — 각자 환경에서 결정.
+### 예시 토글 마크업
+
+```markdown
+- [x] success — 9개 mock task 정상 렌더
+  <details><summary>📸 스크린샷</summary>
+
+  <!-- 사용자: 아래 로컬 PNG 를 GitHub UI 에서 drag-drop 으로 첨부 (CLI 자동화 불가):
+       .tmp/screenshots/gantt-success.png -->
+
+  (첨부 예정)
+
+  </details>
+```
 
 ## 예시
 
