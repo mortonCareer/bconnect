@@ -58,11 +58,11 @@ mcp__figma__get_screenshot(fileKey, nodeId)       # 시각 reference (검증용)
 ```
 
 - 컴포넌트 식별 (재사용 vs 신규)
-- **UX gap 열거**: Figma는 보통 happy state만 그림. 누락된 상태를 명시:
-  - loading / empty / error
-  - hover / focus / active / disabled
+- **UX gap 열거**: Figma 에서 다음 카테고리별로 variant 존재 여부 확인. 있으면 그대로 구현, 없으면 Phase 2 에서 사용자에 `AskUserQuestion` 으로 결정:
+  - 데이터 상태: loading / empty / error
+  - 인터랙션: hover / focus / active / disabled
   - 키보드 내비게이션 / A11y
-  - 반응형 (mobile/tablet/desktop)
+  - 반응형: mobile / tablet / desktop
 - 데이터 소스 매핑 (어떤 orval 훅을 쓸지)
 - **디자인 토큰 매핑**: `get_variable_defs` 결과를 프로젝트 토큰(`packages/ui` / Tailwind config)과 1:1 매핑표로 정리. 불일치 토큰은 명시적으로 표기
 
@@ -79,6 +79,7 @@ mcp__figma__get_screenshot(fileKey, nodeId)       # 시각 reference (검증용)
 - 데이터 fetch 위치 (RSC vs Client component)
 - 에러 바운더리 / Suspense 위치
 - 로딩 전략 (Skeleton vs spinner vs optimistic)
+- Figma 미명시 인터랙션 결정: Phase 1 UX gap 에서 figma variant 없는 항목(예: hover 색, focus 링, click 효과, disabled 표현)을 `AskUserQuestion` 으로 처리 방안 합의
 
 **산출물**: 짧은 설계 메모 → 승인 후 자율 영역 진입.
 
@@ -153,7 +154,6 @@ mcp__figma__get_screenshot(fileKey, nodeId)       # 시각 reference (검증용)
     - 폼: validation (필드별 에러)
     - 인터랙션: hover / focus / disabled / 키보드 내비게이션
     - 접근성: ARIA 라벨 / 색 대비 / 스크린 리더 호환
-    - 파생 속성: filter / sort / aggregation 등 derived state
   - `Closes #<이슈번호>`
   - 사이클 중 반복된 문제 / 개선 제안
 
