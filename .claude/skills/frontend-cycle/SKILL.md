@@ -118,7 +118,7 @@ mcp__figma__get_screenshot(fileKey, nodeId)       # 시각 reference (검증용)
 스킬이 Playwright로 스크린샷 캡처 + Figma 대비 + atomic fix loop.
 
 - 스크린샷 저장 경로: `.tmp/screenshots/` (gitignored)
-- mobile / tablet / desktop 3 해상도 확인
+- mobile / desktop 2 해상도 확인
 - **정량 비교**: 시각 일치만 보지 말고 각 컴포넌트의 `border-radius` / `padding` / `gap` / `color` / `font-size` / `line-height` 를 Figma 값과 직접 대조. 불일치 발견 시 Phase 5 디자인 토큰 매핑부터 재검토 (단순 "비슷해 보임" 통과 금지)
 
 ### 7. Behavior Verify → `qa` 스킬 호출
@@ -159,23 +159,6 @@ Phase 3~10 중 어느 단계라도 막히면:
 1. **자동 fix 최대 3회 시도** (lint/typecheck/스크린샷 차이 등)
 2. 그래도 안 되면 사용자에게 **현재 상태 보고** + `/loop` (self-paced loop) 제안
 3. 사용자가 결정: 수동 개입 / `/loop` 위임 / 작업 중단
-
----
-
-## Morton 특화 가드레일
-
-### 코드 컨벤션
-
-- API 응답 envelope: `{success, data/error}` — `@bconnect/api-client`의 `customFetch`가 자동 unwrap. 직접 unwrap 시도 금지
-- 데이터 포맷 (phone, address 등): `@bconnect/config/*` 유틸 우선 사용
-- env: `process.env.X` 직접 접근 금지 → `@bconnect/config/env`
-- 임시 산출물 (스크린샷 등): `.tmp/screenshots/` (gitignored, glob hook이 강제)
-
-### 영역 보호
-
-- BE 영역 (`apps/api/`) 변경 금지 — CEO 단독 영역
-- `main` 직접 push 금지 — 글로벌 hook이 자동 차단. PR은 항상 `dev` 타겟
-- 생성된 API 클라이언트 (`packages/api-client/generated/`) 직접 수정 금지 — spec 수정 후 `pnpm api:generate` 재생성
 
 ---
 

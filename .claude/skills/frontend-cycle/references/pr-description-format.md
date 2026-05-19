@@ -1,6 +1,6 @@
 # PR description format
 
-frontend-cycle Phase 10 의 PR description 자세한 가이드. SKILL.md 본문은 lean 하게 유지하고 본 파일을 참조한다.
+frontend-cycle Phase 10 의 PR description 원칙·패턴. 자세한 골격은 [`.github/pull_request_template.md`](../../../../.github/pull_request_template.md) 참조 — 본 파일은 원칙 + 패턴만 정의.
 
 ## 원칙
 
@@ -18,89 +18,22 @@ PR body 는 **리뷰어/디자이너/QA가 검수 가능하게** 만드는 문�
 
 - **Figma 설계 등 입력은 이슈 본문**에 두고 PR 에서는 이슈 링크만
 - PR 본문은 "이걸 만들었어요" 노출. 설계 ↔ 구현 비교는 리뷰어가 이슈 ↔ PR cross-reference
-- PR 본문의 스크린샷은 **브라우저 렌더 결과물만** (Figma 스크린샷 X)
-
-## 골격
-
-```text
-## Summary
-... 1-2 문장
-
-## Changes
-- ...
-
-## Test
-- [ ] ...
-
-## State coverage
-### 데이터 / ### 폼 / ### 인터랙션 / ### 접근성
-
-## Follow-up
-...
-
-Closes #<이슈>
-```
-
-스크린샷은 별도 Summary inline 섹션 두지 않고, State coverage 의 각 상태 li 안 토글에서만 첨부 (시각 증거 분산 X).
+- PR 본문의 시각 증거는 **브라우저 렌더 결과물만** (Figma 스크린샷 X)
 
 ## State coverage 토글 패턴
 
-각 상태별 li 가 한 줄로 보이고, 시각 증거 있는 항목만 자식 `<details>` 토글로 스크린샷 첨부:
+각 상태별 li 가 한 줄 + 시각 증거 있는 항목만 자식 `<details><summary>📸 스크린샷</summary>` 토글로 첨부. 카테고리 (`### 데이터` / `### 폼` / `### 인터랙션` / `### 접근성`) 는 PR template `## State coverage` 본문 구조 따름.
 
-```markdown
-### 데이터
+## 시각 증거 첨부 방식
 
-- [ ] loading — **N/A** 부모 위임
-- [x] empty — `tasks=[]` 일 때 헤더만 표시
-  <details><summary>📸 스크린샷</summary>
+PR diff 에 binary commit 금지 (repo 비대·history 오염). 대신:
 
-  ![empty](https://github.com/<owner>/<repo>/raw/<sha>/<path>)
+- **Vercel preview URL** — PR comment / body 에 명시. 리뷰어가 클릭해서 실제 페이지에서 시각 검증 — 정적 PNG 보다 인터랙션까지 확인 가능
+- **PR comment drag-drop** — 작성자가 GitHub UI 에서 PNG 수동 첨부 (자동화 불가). 영구 첨부 (`user-images.githubusercontent.com` CDN) 됨
+- **release asset** — 정적 PNG 가 꼭 필요하면 `gh release upload` 로 별도 호스팅 후 URL
 
-  </details>
-
-- [ ] error — **N/A** 부모 위임
-- [x] success — 9개 mock task 정상 렌더
-  <details><summary>📸 스크린샷</summary>
-
-  ![success](https://github.com/<owner>/<repo>/raw/<sha>/<path>)
-
-  </details>
-```
-
-### GitHub markdown 주의사항
-
-- `<details><summary>` 다음 **빈 줄 필수** — markdown 컨텍스트 진입
-- image 다음 빈 줄 + `</details>` 별도 줄
-- li 본문 continuation 은 **2-space 들여쓰기**, summary/image/`</details>` 모두 같은 들여쓰기
-- 들여쓰기 일관성 깨지면 raw HTML 텍스트로 렌더되거나 image 안 보임
-
-## 스크린샷 자동 첨부 (drag-drop 없이)
-
-1. PNG 를 git tracked path 에 commit
-   - 예: `apps/<app>/src/.../​__screenshots__/state-name.png`
-   - dev-only / production-gate 페이지 옆에 두면 production bundle 영향 X
-2. push 후 commit SHA 받음
-3. PR body 에 raw URL: `https://github.com/<owner>/<repo>/raw/<sha>/<path>`
-
-**permalink (SHA 기반) 사용** — branch 링크는 squash merge 후 깨짐.
-
-## 스크린샷 캡처 자동화
-
-Playwright CLI (workspace root `./node_modules/.bin/playwright` 에 hoisted):
-
-```bash
-./node_modules/.bin/playwright screenshot \
-  --viewport-size=1024,800 \
-  --wait-for-selector='[data-testid="..."]' \
-  --full-page \
-  "http://localhost:3001/<route>?<state-param>" \
-  apps/.../​__screenshots__/state-name.png
-```
-
-`--wait-for-selector` 로 hydration 완료 후 캡처. `google-chrome --headless --virtual-time-budget` 보다 안정적.
-
-여러 상태는 route 에 query param 분기 추가 (예: `?state=empty`) — 한 페이지로 다 캡처.
+캡처 / 자동화 등 로컬 도구 설정은 본 가이드 범위 외 — 각자 환경에서 결정.
 
 ## 예시
 
-[mortonCareer/bconnect#374](https://github.com/mortonCareer/bconnect/pull/374) — GanttChart 컴포넌트 PR. 본 가이드의 토글 패턴, 자동 첨부 모두 검증된 형태.
+[mortonCareer/bconnect#374](https://github.com/mortonCareer/bconnect/pull/374) — GanttChart 컴포넌트 PR. State coverage 토글 패턴 적용된 형태.
