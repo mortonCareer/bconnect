@@ -10,6 +10,7 @@ import org.springframework.security.messaging.access.intercept.MessageMatcherDel
 @Configuration
 @RequiredArgsConstructor
 public class WebSocketAuthorizationConfig {
+    public static final String CHAT_TOPIC_PREFIX = "/topic/chats/";
 
     private final ChatAuthorizationManager chatAuthorizationManager;
 
@@ -17,10 +18,10 @@ public class WebSocketAuthorizationConfig {
     AuthorizationManager<Message<?>> messageAuthorizationManager() {
         return MessageMatcherDelegatingAuthorizationManager.builder()
                 .nullDestMatcher().permitAll()
-                .simpSubscribeDestMatchers("/topic/chats/{chatId}")
-                    .access(chatAuthorizationManager)
-                .simpDestMatchers("/app/**").authenticated()
-                .simpDestMatchers("/topic/**", "/queue/**").denyAll()
+                .simpSubscribeDestMatchers(CHAT_TOPIC_PREFIX + "{chatId}")
+                .access(chatAuthorizationManager)
+                .simpMessageDestMatchers("/app/chats/{chatId}/messages")
+                .access(chatAuthorizationManager)
                 .anyMessage().denyAll()
                 .build();
     }
