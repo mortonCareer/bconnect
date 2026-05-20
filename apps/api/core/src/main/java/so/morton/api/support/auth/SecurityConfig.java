@@ -81,6 +81,8 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/v1/auth/otp/**").permitAll()
                         .requestMatchers(POST, "/api/v1/members").permitAll()
+                        .requestMatchers(GET, "/api/v1/members/check-username").permitAll()
+                        .requestMatchers(GET, "/api/v1/members").hasRole("ADMIN")
                         .requestMatchers(GET, "/api/v1/profiles", "/api/v1/profiles/{id}").permitAll()
                         .requestMatchers(GET, "/api/v1/posts", "/api/v1/posts/{id}").permitAll()
                         .requestMatchers(GET, "/api/v1/tasks/me").authenticated()
