@@ -22,10 +22,20 @@ export function GuestSidebar({ memberCount }: GuestSidebarProps) {
         </p>
 
         <div className="flex flex-col gap-2">
-          <Button variant="primary" size="full" onClick={() => router.push('/login')}>
+          <Button
+            variant="primary"
+            size="full"
+            className="h-[40px]"
+            onClick={() => router.push('/login')}
+          >
             로그인
           </Button>
-          <Button variant="outline" size="full" onClick={() => router.push('/signup/member')}>
+          <Button
+            variant="outline"
+            size="full"
+            className="h-[40px]"
+            onClick={() => router.push('/signup/member')}
+          >
             회원가입
           </Button>
         </div>
