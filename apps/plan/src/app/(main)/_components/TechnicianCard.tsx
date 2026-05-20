@@ -92,7 +92,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
 
   const metaParts = [
     item.location,
-    item.primaryTrade,
+    item.grade,
     item.experienceYears > 0 ? `${item.experienceYears}년` : '신입',
   ].filter(Boolean)
 
@@ -136,14 +136,14 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
           {/* 공종 + 인증 태그 — Figma 1470:6779 그룹 (내부 gap 7.85 ≈ gap-2) */}
           {(item.trades.length > 0 || item.certifications.length > 0) && (
             <div className="flex flex-col gap-2">
-              {/* 공종 태그 (첫번째 = selected) */}
+              {/* 공종 태그 (primaryTrade = selected, 파란색) */}
               {item.trades.length > 0 && (
                 <div className="flex flex-wrap gap-1">
-                  {item.trades.map((trade: Trade, idx) => (
+                  {item.trades.map((trade: Trade) => (
                     <SkillTag
                       key={trade}
                       label={TRADE_LABELS[trade] ?? trade}
-                      selected={idx === 0}
+                      selected={trade === item.primaryTrade}
                     />
                   ))}
                 </div>

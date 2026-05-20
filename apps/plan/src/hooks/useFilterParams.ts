@@ -1,37 +1,66 @@
-import { parseAsString, parseAsStringLiteral, useQueryStates } from 'nuqs'
+import { parseAsArrayOf, parseAsString, parseAsStringLiteral, useQueryStates } from 'nuqs'
 import { Trade } from '@bconnect/api-client'
 import type { ExperienceLevel } from '@/lib/experience'
 import { EXPERIENCE_RANGES } from '@/lib/experience'
+import type { Grade } from '@/lib/grade'
+import { GRADE_VALUES } from '@/lib/grade'
 
 const TRADE_VALUES = Object.values(Trade)
 const EXPERIENCE_VALUES = ['newcomer', '1-3', '3-5', '5-10', '10+'] as const
 
 const filterParsers = {
-  trade: parseAsStringLiteral(TRADE_VALUES),
+  // 공종·직급·지역은 다중 선택 — ?trade=TILING,WALLPAPER 형태로 직렬화
+  trade: parseAsArrayOf(parseAsStringLiteral(TRADE_VALUES)),
+  grade: parseAsArrayOf(parseAsStringLiteral(GRADE_VALUES)),
+  region: parseAsArrayOf(parseAsString),
+  // 경력은 구간 버킷이라 단일 선택 유지
   exp: parseAsStringLiteral(EXPERIENCE_VALUES),
-  region: parseAsString,
 }
 
 export function useFilterParams() {
   const [params, setParams] = useQueryStates(filterParsers)
 
-  const { trade, exp: experience, region } = params
+  const { trade, exp: experience, grade, region } = params
 
   const expRange = experience ? EXPERIENCE_RANGES[experience as ExperienceLevel] : undefined
 
-  const setTrade = (value: Trade | null) => setParams({ trade: value })
+  const trades = (trade ?? []) as Trade[]
+  const grades = (grade ?? []) as Grade[]
+  const regions = region ?? []
+
   const setExperience = (value: ExperienceLevel | null) => setParams({ exp: value })
-  const setRegion = (value: string | null) => setParams({ region: value })
-  const clearFilter = () => setParams({ trade: null, exp: null, region: null })
+
+  // 빈 배열은 null 로 정규화 — 빈 파라미터가 URL 에 남지 않게 한다
+  const setTrade = (value: Trade[] | null) =>
+    setParams({ trade: value && value.length > 0 ? value : null })
+  const setGrade = (value: Grade[] | null) =>
+    setParams({ grade: value && value.length > 0 ? value : null })
+  const setRegion = (value: string[] | null) =>
+    setParams({ region: value && value.length > 0 ? value : null })
+
+  // 선택돼 있으면 제거, 없으면 추가
+  const toggleTrade = (value: Trade) =>
+    setTrade(trades.includes(value) ? trades.filter((t) => t !== value) : [...trades, value])
+  const toggleGrade = (value: Grade) =>
+    setGrade(grades.includes(value) ? grades.filter((g) => g !== value) : [...grades, value])
+  const toggleRegion = (value: string) =>
+    setRegion(regions.includes(value) ? regions.filter((r) => r !== value) : [...regions, value])
+
+  const clearFilter = () => setParams({ trade: null, exp: null, grade: null, region: null })
 
   return {
-    trade: trade as Trade | null,
+    trade: trades,
     experience: experience as ExperienceLevel | null,
-    region,
+    grade: grades,
+    region: regions,
     expRange,
     setTrade,
     setExperience,
+    setGrade,
     setRegion,
+    toggleTrade,
+    toggleGrade,
+    toggleRegion,
     clearFilter,
   }
 }

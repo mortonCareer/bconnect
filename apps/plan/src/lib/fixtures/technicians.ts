@@ -13,8 +13,8 @@
  *   6) 최민호  — 평범한 중간값 (부산/도장/1년)
  */
 import { Trade } from '@bconnect/api-client'
-import { TRADE_LABELS } from '@/lib/trade-labels'
 import { getAvatarUrl } from '@/lib/avatar'
+import type { Grade } from '@/lib/grade'
 import type { TechnicianItem } from '@/hooks/useTechnicianItems'
 
 const f = (
@@ -25,6 +25,7 @@ const f = (
   experienceYears: number,
   headline: string,
   metrics: {
+    grade: Grade
     rating: number
     reviewCount: number
     contractCount: number
@@ -40,7 +41,8 @@ const f = (
   name,
   picture: getAvatarUrl(name),
   location,
-  primaryTrade: TRADE_LABELS[trades[0]],
+  // primaryTrade = trades[0] (fixture 한정 규약). BE #211 연동 시 응답의 primaryTrade 직접 매핑.
+  primaryTrade: trades[0],
   experienceYears,
   headline,
   trades,
@@ -52,11 +54,12 @@ export const TECHNICIAN_FIXTURES: TechnicianItem[] = [
     1,
     '이송목',
     '경기도',
-    // Figma 시안 매칭: '도배' selected, '타일' default (trades[0] 이 selected 로 렌더됨)
+    // Figma 시안 매칭: '도배' selected, '타일' default (primaryTrade = trades[0] 이 selected 로 렌더됨)
     [Trade.WALLPAPER, Trade.TILING],
     3,
     '안녕하세요, 타일 준기공 이송목입니다. 믿고 맡겨주신다면 성실히 임하겠습니다.',
     {
+      grade: '준기공',
       rating: 4.3,
       reviewCount: 5,
       contractCount: 13,
@@ -72,6 +75,7 @@ export const TECHNICIAN_FIXTURES: TechnicianItem[] = [
     }
   ),
   f(2, '김철수', '서울', [Trade.WALLPAPER], 10, '도배 경력 10년. 깔끔한 마감 보장합니다.', {
+    grade: '기공',
     rating: 4.8,
     reviewCount: 28,
     contractCount: 64,
@@ -93,6 +97,7 @@ export const TECHNICIAN_FIXTURES: TechnicianItem[] = [
     7,
     '전기·배관 동시 시공 가능. 견적 상담 환영합니다.',
     {
+      grade: '기공',
       rating: 4.5,
       reviewCount: 12,
       contractCount: 31,
@@ -107,6 +112,7 @@ export const TECHNICIAN_FIXTURES: TechnicianItem[] = [
     }
   ),
   f(4, '신혜정', '강원', [Trade.CLEANING], 0, '', {
+    grade: '조공',
     rating: 0,
     reviewCount: 0,
     contractCount: 0,
@@ -124,6 +130,7 @@ export const TECHNICIAN_FIXTURES: TechnicianItem[] = [
     15,
     '15년 경력 목공 반장입니다. 인테리어 전반(목공·단열·마감) 한 번에 가능하고, 까다로운 현장도 자신 있습니다. 견적은 무료로 드리니 부담 없이 연락 주세요.',
     {
+      grade: '반장',
       rating: 4.9,
       reviewCount: 45,
       contractCount: 102,
@@ -139,6 +146,7 @@ export const TECHNICIAN_FIXTURES: TechnicianItem[] = [
     }
   ),
   f(6, '최민호', '부산', [Trade.PAINTING], 1, '꼼꼼한 도장 시공. 작은 현장도 환영합니다.', {
+    grade: '조공',
     rating: 3.8,
     reviewCount: 2,
     contractCount: 3,
