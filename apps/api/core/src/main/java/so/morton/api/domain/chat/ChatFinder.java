@@ -36,7 +36,7 @@ public class ChatFinder {
                 .stream()
                 .collect(Collectors.toMap(MessageEntity::getChatId, Message::of));
 
-        Map<Long, Integer> unreadCounts = messageRepository
+        Map<Long, Long> unreadCounts = messageRepository
                 .findUnreadCountByChatIdsAndMemberId(chatIds, memberId)
                 .stream()
                 .collect(Collectors.toMap(

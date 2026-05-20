@@ -101,7 +101,7 @@ public class ChatService {
                 chat.getTitle(),
                 members,
                 Message.of(welcome),
-                0,
+                0L,
                 chat.getCreatedAt(),
                 chat.getModifiedAt()
         );

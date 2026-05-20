@@ -10,7 +10,7 @@ public record ChatResponse(
         String title,
         List<MaskedMemberResponse> participants,
         MessageResponse lastMessage,
-        int unreadCount,
+        Long unreadCount,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {

@@ -10,7 +10,7 @@ public record ChatDetail(
         String title,
         List<Member> participants,
         Message lastMessage,
-        int unreadCount,
+        Long unreadCount,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {}
