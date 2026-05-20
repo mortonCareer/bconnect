@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react'
 import { GuestSidebar } from './_components/GuestSidebar'
+import { LoginGateProvider } from './_components/LoginGateProvider'
 import { useTechnicianItems } from '@/hooks/useTechnicianItems'
 
 function SidebarWithCount() {
@@ -18,7 +19,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </Suspense>
       </aside>
       <main className="flex h-full flex-1 min-w-0 justify-center overflow-y-auto px-10 py-10">
-        <div className="flex w-full max-w-[1076px] flex-col">{children}</div>
+        <div className="flex w-full max-w-[1076px] flex-col">
+          <LoginGateProvider>{children}</LoginGateProvider>
+        </div>
       </main>
     </div>
   )
