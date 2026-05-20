@@ -3,6 +3,8 @@ package so.morton.api.domain.coworker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import so.morton.api.domain.member.Member;
+import so.morton.api.domain.member.MemberFinder;
 import so.morton.api.domain.profile.Profile;
 import so.morton.api.domain.profile.ProfileFinder;
 import so.morton.api.storage.domain.coworker.CoworkerEntity;
@@ -13,6 +15,7 @@ import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 import so.morton.api.support.auth.User;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,7 +24,9 @@ public class CoworkerRequestService {
 
     private final CoworkerRepository coworkerRepository;
     private final CoworkerRequestRepository requestRepository;
+    private final CoworkerRequestFinder coworkerRequestFinder;
     private final ProfileFinder profileFinder;
+    private final MemberFinder memberFinder;
 
     @Transactional
     public CoworkerRequest create(User user, Long targetId) {
@@ -46,6 +51,29 @@ public class CoworkerRequestService {
                 .toId(targetId)
                 .build());
         return CoworkerRequest.of(persisted);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CoworkerRequestDetail> getReceived(User user) {
+        Profile profile = profileFinder.findByMemberId(user.id());
+        return toDetails(coworkerRequestFinder.findReceived(profile.id()), profile.id());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CoworkerRequestDetail> getSent(User user) {
+        Profile profile = profileFinder.findByMemberId(user.id());
+        return toDetails(coworkerRequestFinder.findSent(profile.id()), profile.id());
+    }
+
+    private List<CoworkerRequestDetail> toDetails(List<CoworkerRequest> requests, Long myProfileId) {
+        return requests.stream()
+                .map(r -> {
+                    Long counterpartId = r.fromId().equals(myProfileId) ? r.toId() : r.fromId();
+                    Profile profile = profileFinder.find(counterpartId);
+                    Member member = memberFinder.find(profile.memberId());
+                    return new CoworkerRequestDetail(r.id(), member, profile);
+                })
+                .toList();
     }
 
     @Transactional
