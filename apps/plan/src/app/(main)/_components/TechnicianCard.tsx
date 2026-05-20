@@ -19,7 +19,7 @@ function CertTag({ label }: { label: string }) {
 // Figma node 1504:12099/12102 — rounded-full pill, selected=primary fill, default=white+gray border
 // M12 타이포는 직접 값으로 우회 — cn()의 tailwind-merge가 커스텀 text-m-12를 text-{color}와
 // 같은 충돌 그룹으로 오판해 제거하기 때문.
-// TODO: packages/ui utils.ts cn() 에 extendTailwindMerge 적용되면 text-m-12 로 되돌리기.
+// TODO: #381 — utils.ts cn() 에 extendTailwindMerge 적용되면 text-m-12 로 되돌리기.
 function SkillTag({ label, selected }: { label: string; selected: boolean }) {
   return (
     <span
