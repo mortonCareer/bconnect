@@ -9,14 +9,21 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import so.morton.api.config.IntegrationTest;
 import org.springframework.test.web.servlet.MockMvc;
-import so.morton.api.api.controller.v1.request.CreateCoworkerRequest;
+import so.morton.api.api.controller.v1.request.CreateCoworkerRequestRequest;
 import so.morton.api.domain.coworker.CoworkerRequest;
+import so.morton.api.domain.coworker.CoworkerRequestDetail;
 import so.morton.api.domain.coworker.CoworkerRequestService;
+import so.morton.api.domain.member.Member;
+import so.morton.api.domain.profile.Profile;
 import so.morton.api.support.auth.User;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 import so.morton.api.support.fixture.CoworkerRequestFactory;
+import so.morton.api.support.fixture.MemberFactory;
+import so.morton.api.support.fixture.ProfileFactory;
 import so.morton.api.support.fixture.UserFactory;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -25,7 +32,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static so.morton.api.support.TestUtils.successResponse;
 import static so.morton.api.support.TestUtils.errorResponse;
@@ -62,7 +71,7 @@ class CoworkerRequestControllerTest {
         @DisplayName("toProfileId null 시 400")
         void create_400_nullToId() throws Exception {
             // given
-            CreateCoworkerRequest request = new CreateCoworkerRequest(null);
+            CreateCoworkerRequestRequest request = new CreateCoworkerRequestRequest(null);
 
             // when & then
             mockMvc.perform(post("/api/v1/coworker-requests")
@@ -70,6 +79,54 @@ class CoworkerRequestControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /api/v1/coworker-requests/received")
+    class GetReceived {
+
+        @Test
+        @DisplayName("받은 동료 요청 목록 조회 성공")
+        void getReceived_200() throws Exception {
+            // given
+            Member member = MemberFactory.create(2L);
+            Profile profile = ProfileFactory.create(2L, 2L);
+            CoworkerRequestDetail detail = CoworkerRequestFactory.createDetail(1L, member, profile);
+            when(coworkerRequestService.getReceived(any(User.class))).thenReturn(List.of(detail));
+
+            // when & then
+            mockMvc.perform(get("/api/v1/coworker-requests/received")
+                            .with(user(UserFactory.FOREMAN_USER)))
+                    .andExpect(status().isOk())
+                    .andExpect(successResponse())
+                    .andExpect(jsonPath("$.data[0].id").value(1))
+                    .andExpect(jsonPath("$.data[0].member.id").value(2))
+                    .andExpect(jsonPath("$.data[0].profile.id").value(2));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /api/v1/coworker-requests/sent")
+    class GetSent {
+
+        @Test
+        @DisplayName("보낸 동료 요청 목록 조회 성공")
+        void getSent_200() throws Exception {
+            // given
+            Member member = MemberFactory.create(3L);
+            Profile profile = ProfileFactory.create(3L, 3L);
+            CoworkerRequestDetail detail = CoworkerRequestFactory.createDetail(1L, member, profile);
+            when(coworkerRequestService.getSent(any(User.class))).thenReturn(List.of(detail));
+
+            // when & then
+            mockMvc.perform(get("/api/v1/coworker-requests/sent")
+                            .with(user(UserFactory.FOREMAN_USER)))
+                    .andExpect(status().isOk())
+                    .andExpect(successResponse())
+                    .andExpect(jsonPath("$.data[0].id").value(1))
+                    .andExpect(jsonPath("$.data[0].member.id").value(3))
+                    .andExpect(jsonPath("$.data[0].profile.id").value(3));
         }
     }
 

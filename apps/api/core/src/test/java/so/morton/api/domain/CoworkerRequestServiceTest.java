@@ -10,7 +10,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import so.morton.api.domain.coworker.CoworkerExceptionCode;
 import so.morton.api.domain.coworker.CoworkerRequest;
+import so.morton.api.domain.coworker.CoworkerRequestDetail;
+import so.morton.api.domain.coworker.CoworkerRequestFinder;
 import so.morton.api.domain.coworker.CoworkerRequestService;
+import so.morton.api.domain.member.Member;
+import so.morton.api.domain.member.MemberFinder;
 import so.morton.api.domain.profile.Profile;
 import so.morton.api.domain.profile.ProfileFinder;
 import so.morton.api.storage.domain.coworker.CoworkerEntity;
@@ -22,9 +26,11 @@ import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 import so.morton.api.support.auth.User;
 import so.morton.api.support.fixture.CoworkerRequestFactory;
+import so.morton.api.support.fixture.MemberFactory;
 import so.morton.api.support.fixture.ProfileFactory;
 import so.morton.api.support.fixture.UserFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +44,9 @@ class CoworkerRequestServiceTest {
 
     @Mock private CoworkerRepository coworkerRepository;
     @Mock private CoworkerRequestRepository requestRepository;
+    @Mock private CoworkerRequestFinder coworkerRequestFinder;
     @Mock private ProfileFinder profileFinder;
+    @Mock private MemberFinder memberFinder;
     @InjectMocks private CoworkerRequestService coworkerRequestService;
 
     private static final Long USER_A_ID = 1L;
@@ -216,6 +224,90 @@ class CoworkerRequestServiceTest {
     }
 
     @Nested
+    @DisplayName("CoworkerRequestService.getReceived")
+    class GetReceivedTests {
+
+        @Test
+        @DisplayName("받은 요청 — 발신자(fromId) 측 member/profile resolve")
+        void getReceived_success() {
+            // given -- B->A 요청 (A가 받음), counterpart = 발신자 B
+            Profile profileA = ProfileFactory.create(PROFILE_A_ID, USER_A_ID);
+            Profile profileB = ProfileFactory.create(PROFILE_B_ID, USER_B_ID);
+            Member memberB = MemberFactory.create(USER_B_ID);
+            CoworkerRequest request = CoworkerRequestFactory.create(REQUEST_ID, PROFILE_B_ID, PROFILE_A_ID);
+
+            when(profileFinder.findByMemberId(USER_A_ID)).thenReturn(profileA);
+            when(coworkerRequestFinder.findReceived(PROFILE_A_ID)).thenReturn(List.of(request));
+            when(profileFinder.find(PROFILE_B_ID)).thenReturn(profileB);
+            when(memberFinder.find(USER_B_ID)).thenReturn(memberB);
+
+            // when
+            List<CoworkerRequestDetail> result = coworkerRequestService.getReceived(USER_A);
+
+            // then
+            assertThat(result).hasSize(1);
+            CoworkerRequestDetail detail = result.get(0);
+            assertThat(detail.id()).isEqualTo(REQUEST_ID);
+            assertThat(detail.profile()).isEqualTo(profileB);
+            assertThat(detail.member()).isEqualTo(memberB);
+        }
+
+        @Test
+        @DisplayName("내 프로필 미존재 시 NOT_FOUND")
+        void getReceived_profileNotFound() {
+            // given
+            when(profileFinder.findByMemberId(USER_A_ID))
+                    .thenThrow(new CodeException(CommonExceptionCode.NOT_FOUND));
+
+            // when & then
+            assertCodeException(() -> coworkerRequestService.getReceived(USER_A))
+                    .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+        }
+    }
+
+    @Nested
+    @DisplayName("CoworkerRequestService.getSent")
+    class GetSentTests {
+
+        @Test
+        @DisplayName("보낸 요청 — 수신자(toId) 측 member/profile resolve")
+        void getSent_success() {
+            // given -- A->B 요청 (A가 보냄), counterpart = 수신자 B
+            Profile profileA = ProfileFactory.create(PROFILE_A_ID, USER_A_ID);
+            Profile profileB = ProfileFactory.create(PROFILE_B_ID, USER_B_ID);
+            Member memberB = MemberFactory.create(USER_B_ID);
+            CoworkerRequest request = CoworkerRequestFactory.create(REQUEST_ID, PROFILE_A_ID, PROFILE_B_ID);
+
+            when(profileFinder.findByMemberId(USER_A_ID)).thenReturn(profileA);
+            when(coworkerRequestFinder.findSent(PROFILE_A_ID)).thenReturn(List.of(request));
+            when(profileFinder.find(PROFILE_B_ID)).thenReturn(profileB);
+            when(memberFinder.find(USER_B_ID)).thenReturn(memberB);
+
+            // when
+            List<CoworkerRequestDetail> result = coworkerRequestService.getSent(USER_A);
+
+            // then
+            assertThat(result).hasSize(1);
+            CoworkerRequestDetail detail = result.get(0);
+            assertThat(detail.id()).isEqualTo(REQUEST_ID);
+            assertThat(detail.profile()).isEqualTo(profileB);
+            assertThat(detail.member()).isEqualTo(memberB);
+        }
+
+        @Test
+        @DisplayName("내 프로필 미존재 시 NOT_FOUND")
+        void getSent_profileNotFound() {
+            // given
+            when(profileFinder.findByMemberId(USER_A_ID))
+                    .thenThrow(new CodeException(CommonExceptionCode.NOT_FOUND));
+
+            // when & then
+            assertCodeException(() -> coworkerRequestService.getSent(USER_A))
+                    .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+        }
+    }
+
+    @Nested
     @DisplayName("CoworkerRequestService.accept")
     class AcceptTests {
 
@@ -379,6 +471,76 @@ class CoworkerRequestServiceTest {
             assertCodeException(() -> coworkerRequestService.cancel(USER_B, REQUEST_ID))
                     .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
             verify(requestRepository, never()).delete(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("CoworkerRequestFinder")
+    class CoworkerRequestFinderTests {
+
+        @Mock private CoworkerRequestRepository finderRequestRepository;
+        @InjectMocks private CoworkerRequestFinder finderUnderTest;
+
+        @Test
+        @DisplayName("findReceived — toId 기준 조회 성공")
+        void findReceived_success() {
+            // given -- B->A 요청 (A가 받음)
+            CoworkerRequestEntity entity = CoworkerRequestFactory.createEntity(PROFILE_B_ID, PROFILE_A_ID);
+            ReflectionTestUtils.setField(entity, "id", REQUEST_ID);
+            when(finderRequestRepository.findByToId(PROFILE_A_ID)).thenReturn(List.of(entity));
+
+            // when
+            List<CoworkerRequest> result = finderUnderTest.findReceived(PROFILE_A_ID);
+
+            // then
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).id()).isEqualTo(REQUEST_ID);
+            assertThat(result.get(0).fromId()).isEqualTo(PROFILE_B_ID);
+            assertThat(result.get(0).toId()).isEqualTo(PROFILE_A_ID);
+        }
+
+        @Test
+        @DisplayName("findReceived — 빈 리스트 반환")
+        void findReceived_empty() {
+            // given
+            when(finderRequestRepository.findByToId(PROFILE_A_ID)).thenReturn(List.of());
+
+            // when
+            List<CoworkerRequest> result = finderUnderTest.findReceived(PROFILE_A_ID);
+
+            // then
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        @DisplayName("findSent — fromId 기준 조회 성공")
+        void findSent_success() {
+            // given -- A->B 요청 (A가 보냄)
+            CoworkerRequestEntity entity = CoworkerRequestFactory.createEntity(PROFILE_A_ID, PROFILE_B_ID);
+            ReflectionTestUtils.setField(entity, "id", REQUEST_ID);
+            when(finderRequestRepository.findByFromId(PROFILE_A_ID)).thenReturn(List.of(entity));
+
+            // when
+            List<CoworkerRequest> result = finderUnderTest.findSent(PROFILE_A_ID);
+
+            // then
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).id()).isEqualTo(REQUEST_ID);
+            assertThat(result.get(0).fromId()).isEqualTo(PROFILE_A_ID);
+            assertThat(result.get(0).toId()).isEqualTo(PROFILE_B_ID);
+        }
+
+        @Test
+        @DisplayName("findSent — 빈 리스트 반환")
+        void findSent_empty() {
+            // given
+            when(finderRequestRepository.findByFromId(PROFILE_A_ID)).thenReturn(List.of());
+
+            // when
+            List<CoworkerRequest> result = finderUnderTest.findSent(PROFILE_A_ID);
+
+            // then
+            assertThat(result).isEmpty();
         }
     }
 }

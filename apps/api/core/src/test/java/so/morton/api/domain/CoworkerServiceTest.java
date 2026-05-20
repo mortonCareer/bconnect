@@ -13,8 +13,6 @@ import so.morton.api.domain.profile.Profile;
 import so.morton.api.domain.profile.ProfileFinder;
 import so.morton.api.storage.domain.coworker.CoworkerEntity;
 import so.morton.api.storage.domain.coworker.CoworkerRepository;
-import so.morton.api.storage.domain.coworker.CoworkerRequestEntity;
-import so.morton.api.storage.domain.coworker.CoworkerRequestRepository;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 import so.morton.api.support.fixture.*;
@@ -230,9 +228,6 @@ class CoworkerServiceTest {
         @Mock
         private CoworkerRepository finderCoworkerRepository;
 
-        @Mock
-        private CoworkerRequestRepository finderRequestRepository;
-
         @InjectMocks
         private CoworkerFinder finderUnderTest;
 
@@ -275,65 +270,11 @@ class CoworkerServiceTest {
     }
 
     @Nested
-    @DisplayName("CoworkerFinder.findRequests")
-    class CoworkerFinderFindRequestsTests {
-
-        @Mock
-        private CoworkerRepository finderCoworkerRepository;
-
-        @Mock
-        private CoworkerRequestRepository finderRequestRepository;
-
-        @InjectMocks
-        private CoworkerFinder finderUnderTest;
-
-        @Test
-        @DisplayName("조회 성공")
-        void findRequests_success() {
-            // given
-            CoworkerRequestEntity entity1 = CoworkerRequestFactory.createEntity(TARGET_PROFILE_ID, PROFILE_ID);
-            ReflectionTestUtils.setField(entity1, "id", 2L);
-            CoworkerRequestEntity entity2 = CoworkerRequestFactory.createEntity(OTHER_PROFILE_ID, PROFILE_ID);
-            ReflectionTestUtils.setField(entity2, "id", 201L);
-
-            when(finderRequestRepository.findByProfileId(PROFILE_ID))
-                    .thenReturn(List.of(entity1, entity2));
-
-            // when
-            List<CoworkerRequest> result = finderUnderTest.findRequests(PROFILE_ID);
-
-            // then
-            assertThat(result).hasSize(2);
-            assertThat(result.get(0).id()).isEqualTo(2L);
-            assertThat(result.get(1).id()).isEqualTo(201L);
-            verify(finderRequestRepository).findByProfileId(PROFILE_ID);
-        }
-
-        @Test
-        @DisplayName("빈 리스트 반환")
-        void findRequests_empty() {
-            // given
-            when(finderRequestRepository.findByProfileId(PROFILE_ID))
-                    .thenReturn(List.of());
-
-            // when
-            List<CoworkerRequest> result = finderUnderTest.findRequests(PROFILE_ID);
-
-            // then
-            assertThat(result).isEmpty();
-            verify(finderRequestRepository).findByProfileId(PROFILE_ID);
-        }
-    }
-
-    @Nested
     @DisplayName("CoworkerFinder.isCoworker")
     class CoworkerFinderIsCoworkerTests {
 
         @Mock
         private CoworkerRepository finderCoworkerRepository;
-
-        @Mock
-        private CoworkerRequestRepository finderRequestRepository;
 
         @InjectMocks
         private CoworkerFinder finderUnderTest;
