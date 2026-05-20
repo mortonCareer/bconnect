@@ -26,10 +26,12 @@ public class CoworkerController {
     public ApiResponse<List<CoworkerResponse>> get(
             @AuthenticationPrincipal User user,
             @RequestParam Long profileId) {
-        List<CoworkerResponse> coworkers = coworkerService.getAll(user, profileId).stream()
-                .map(CoworkerResponse::of)
-                .toList();
-        return ApiResponse.success(coworkers);
+        coworkerService.getAll(user, profileId);
+        // TODO: Coworker -> CoworkerResponse 매핑 구현
+        //  - member: pair(minId, maxId) 중 조회 기준 profileId 가 아닌 상대 프로필의 멤버
+        //  - status: 동료 관계 상태 (CoworkerStatus)
+        //  - CoworkerResponse.of(Coworker, Member, CoworkerStatus) 호출
+        return ApiResponse.success(List.of());
     }
 
     @DeleteMapping("/{id}")
