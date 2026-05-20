@@ -86,21 +86,24 @@ components:
       type: object
       required:
         - id
-        - minId
-        - maxId
+        - member
+        - status
       properties:
         id:
           type: integer
           format: int64
           example: 1
-        minId:
-          type: integer
-          format: int64
-          example: 1
-        maxId:
-          type: integer
-          format: int64
-          example: 2
+        member:
+          $ref: ../v1/members.yaml#/components/schemas/MaskedMember
+        status:
+          $ref: '#/components/schemas/CoworkerStatus'
+    CoworkerStatus:
+      type: string
+      enum:
+        - NONE
+        - SENT
+        - RECEIVED
+        - COWORKER
     CoworkerTask:
       type: object
       required:

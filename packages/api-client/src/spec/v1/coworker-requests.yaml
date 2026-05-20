@@ -10,7 +10,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateCoworkerRequest'
+              $ref: '#/components/schemas/CreateCoworkerRequestRequest'
       responses:
         '200':
           description: OK
@@ -131,22 +131,18 @@ components:
       type: object
       required:
         - id
-        - fromId
-        - toId
+        - member
+        - profile
       properties:
         id:
           type: integer
           format: int64
           example: 1
-        fromId:
-          type: integer
-          format: int64
-          example: 1
-        toId:
-          type: integer
-          format: int64
-          example: 2
-    CreateCoworkerRequest:
+        member:
+          $ref: ../v1/members.yaml#/components/schemas/MaskedMember
+        profile:
+          $ref: ../v1/profiles.yaml#/components/schemas/Profile
+    CreateCoworkerRequestRequest:
       type: object
       required:
         - toId
