@@ -3,7 +3,6 @@ package so.morton.api.domain.chat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import so.morton.api.storage.domain.chat.*;
-import so.morton.api.storage.domain.chat.MessageRepository.ChatUnreadCount;
 
 import java.util.List;
 import java.util.Map;
@@ -40,8 +39,8 @@ public class ChatFinder {
                 .findUnreadCountByChatIdsAndMemberId(chatIds, memberId)
                 .stream()
                 .collect(Collectors.toMap(
-                        ChatUnreadCount::chatId,
-                        ChatUnreadCount::unreadCount
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
                 ));
 
         return chats.stream()
@@ -49,7 +48,7 @@ public class ChatFinder {
                         chat,
                         participantIds.get(chat.getId()),
                         lastMessages.get(chat.getId()),
-                        unreadCounts.getOrDefault(chat.getId(), 0)
+                        unreadCounts.get(chat.getId())
                 )).toList();
     }
 }
