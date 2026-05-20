@@ -1,0 +1,34 @@
+name: Figma State Check
+
+on:
+  schedule:
+    # 매주 월요일 00:00 UTC (09:00 KST)
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read # actions/checkout 가 repo 를 읽으려면 필수 (permissions 명시 시 미선언 권한은 none 으로 떨어짐)
+  issues: write # 누락 감지 시 issue 생성/갱신
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install ripgrep (rg)
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+
+      - name: Run Figma drift check
+        env:
+          FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/figma-checks/index.mjs

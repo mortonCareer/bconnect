@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import '@morton/ui/styles'
+import '@bconnect/ui/styles'
 import { Providers } from './providers'
 
 export const viewport: Viewport = {

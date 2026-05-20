@@ -6,13 +6,15 @@
  * Firebase 공식 권장 패턴: 앱 진입마다 호출해 서버에 UPSERT.
  * 같은 토큰이면 `last_active_at` 만 갱신, 바뀌었으면 교체.
  *
- * TODO: BE에 POST /api/v1/devices 구현되면 orval 생성 훅(`registerDevice`)으로 전환.
- * 현재는 Mock Route Handler 경유를 위해 상대 경로 fetch 를 유지.
- * OpenAPI 스펙은 `packages/api-client/src/openapi.yaml` 에 이미 정의됨.
+ * dev 환경에선 MSW 가 `apps/career/src/mocks/handlers/devices.ts` 로 응답.
+ * prod 환경에선 BE 가 #233 으로 구현 예정. 그 때까지 prod 에선 404.
+ * BE 완료 후 orval 생성 훅 `useRegisterDevice` 로 전환 예정.
  */
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? ''
+
 export async function registerDeviceToken(token: string): Promise<void> {
   try {
-    const response = await fetch('/api/v1/devices', {
+    const response = await fetch(`${API_URL}/api/v1/devices`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, platform: 'web' }),
@@ -30,11 +32,11 @@ export async function registerDeviceToken(token: string): Promise<void> {
 /**
  * 로그아웃 시 토큰 삭제.
  * 다른 유저가 같은 브라우저에 로그인했을 때 이전 유저 알림이 안 가도록.
- * TODO: BE 구현 시 orval 훅 `unregisterDevice` 로 전환.
+ * BE 구현 후 orval 훅 `useUnregisterDevice` 로 전환 예정.
  */
 export async function unregisterDeviceToken(token: string): Promise<void> {
   try {
-    await fetch('/api/v1/devices', {
+    await fetch(`${API_URL}/api/v1/devices`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token }),

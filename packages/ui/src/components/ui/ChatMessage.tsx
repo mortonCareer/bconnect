@@ -14,11 +14,11 @@ import { cn } from '../../lib/utils'
 const chatBubbleVariants = cva('inline-flex items-center px-[16px] text-r-14', {
   variants: {
     variant: {
-      mine: 'bg-morton-primary text-white rounded-tl-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px]',
+      mine: 'bg-bconnect-primary text-white rounded-tl-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px]',
       theirs:
-        'bg-morton-gray-100 text-morton-gray-900 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[12px]',
+        'bg-bconnect-gray-100 text-bconnect-gray-900 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[12px]',
       typing:
-        'bg-morton-gray-100 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px] h-[40px]',
+        'bg-bconnect-gray-100 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px] h-[40px]',
     },
   },
   defaultVariants: {
@@ -67,7 +67,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
       return (
         <div ref={ref} className={cn('flex items-end justify-end gap-[8px]', className)} {...props}>
           {timestamp && (
-            <span className="shrink-0 text-r-12 text-morton-gray-700">{timestamp}</span>
+            <span className="shrink-0 text-r-12 text-bconnect-gray-700">{timestamp}</span>
           )}
           <div className={cn(chatBubbleVariants({ variant }), 'max-w-[55vw]')}>
             <span className="break-words">{message}</span>
@@ -80,7 +80,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
     return (
       <div ref={ref} className={cn('flex items-start gap-[8px]', className)} {...props}>
         {/* 프로필 이미지 */}
-        <div className="size-[40px] shrink-0 overflow-hidden rounded-full bg-morton-gray-100">
+        <div className="size-[40px] shrink-0 overflow-hidden rounded-full bg-bconnect-gray-100">
           {profileImage && (
             <img src={profileImage} alt={nickname || ''} className="size-full object-cover" />
           )}
@@ -89,7 +89,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
         {/* 닉네임 + 버블 + 타임스탬프 */}
         <div className="flex items-end gap-[8px]">
           <div className="flex max-w-[55vw] flex-col gap-[4px]">
-            {nickname && <span className="text-m-12 text-morton-gray-900">{nickname}</span>}
+            {nickname && <span className="text-m-12 text-bconnect-gray-900">{nickname}</span>}
             <div className={chatBubbleVariants({ variant })}>
               {variant === 'typing' ? (
                 <TypingDots />
@@ -99,7 +99,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
             </div>
           </div>
           {variant === 'theirs' && timestamp && (
-            <span className="shrink-0 text-r-12 text-morton-gray-700">{timestamp}</span>
+            <span className="shrink-0 text-r-12 text-bconnect-gray-700">{timestamp}</span>
           )}
         </div>
       </div>
@@ -115,7 +115,7 @@ function TypingDots() {
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className="size-[8px] rounded-full bg-morton-primary animate-bounce"
+          className="size-[8px] rounded-full bg-bconnect-primary animate-bounce"
           style={{ animationDelay: `${i * 0.15}s`, animationDuration: '0.6s' }}
         />
       ))}

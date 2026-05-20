@@ -59,12 +59,12 @@ export default function EditAboutPage() { ... }
 ```tsx
 /**
  * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1240-8132
- * @figma-state career  https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1240-8451
- * @figma-state license https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1387-9351
+ * @figma-state 경력증명서 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1240-8451
+ * @figma-state 국가기술자격증 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1387-9351
  */
 ```
 
-- `@figma-state <name> <url>` — name은 코드의 state/tab 키와 매칭 권장
+- `@figma-state <name> <url>` — name은 Figma frame의 한글 variant와 일치 권장 (공백 없이)
 - 단일 state 페이지는 생략 (대다수 페이지는 `@figma` 한 줄로 충분)
 
 ---
@@ -128,10 +128,17 @@ mcp__figma__get_metadata(fileKey="EFXofON7gTFbmbE2kB31SS", nodeId="<section-id>"
 
 ---
 
+## 자동 CI 감지 (#257 구현됨)
+
+`scripts/figma-checks/` — 매주 월 09:00 KST cron으로 Figma drift 감지.
+누락된 `@figma-state` 발견 시 단일 누적 issue (`🤖 figma-drift` 라벨)에 자동 갱신.
+
+수동 실행: `pnpm figma:check:dry` (로컬 stdout) 또는 GHA workflow_dispatch.
+자세한 내용: [scripts/figma-checks/CLAUDE.md](../../../scripts/figma-checks/CLAUDE.md)
+
 ## 후속 자동화 (별도 이슈)
 
-- [#257](https://github.com/mortonCareer/bconnect/issues/257) — `@figma-state` 누락 CI 자동 감지
-- [#258](https://github.com/mortonCareer/bconnect/issues/258) — frame naming convention 합의
+- [#258](https://github.com/mortonCareer/bconnect/issues/258) — frame naming convention 합의 + CI 체크 추가
 
 ---
 

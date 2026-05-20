@@ -1,5 +1,6 @@
 /**
  * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-4289
+ * @figma-state 에러 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-4273
  */
 'use client'
 
@@ -7,7 +8,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@morton/ui'
+import { Button } from '@bconnect/ui'
 import { useSignupStore } from '@/stores/signup-store'
 import { usernameSchema, type UsernameFormData } from './schema'
 import { SignupHeader, FormInput, FormError } from '../_components'

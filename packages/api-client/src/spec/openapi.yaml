@@ -102,6 +102,8 @@ paths:
     $ref: v1/chats.yaml#/paths/~1api~1v1~1chats
   /api/v1/chats/direct:
     $ref: v1/chats.yaml#/paths/~1api~1v1~1chats~1direct
+  /api/v1/chats/{chatId}:
+    $ref: v1/chats.yaml#/paths/~1api~1v1~1chats~1{chatId}
   /api/v1/chats/{chatId}/messages:
     $ref: v1/chats.yaml#/paths/~1api~1v1~1chats~1{chatId}~1messages
   /api/v1/recommendations:

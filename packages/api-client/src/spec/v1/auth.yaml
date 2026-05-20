@@ -225,7 +225,7 @@ components:
           type: string
 
     # JWT 토큰 (access / refresh 공용) payload 구조 — BE [JwtProvider.java](https://github.com/mortonCareer/bconnect/blob/dev/apps/api/core/src/main/java/so/morton/api/support/auth/jwt/JwtProvider.java) 의
-    # 실제 발급 형식과 정렬. SSOT 는 현재 BE 코드 — 표준 마이그레이션은 별도 (#272).
+    # 실제 발급 형식과 정렬. SSOT 는 현재 BE 코드 — JWT claim 표준 정합성은 별도 (#249).
     #
     # AT 와 RT 모두 같은 secret 으로 HS256 signing, `type` claim 으로 구분.
     # access 만 `scope` 보유, refresh 는 sub/type/iat/exp 만.
@@ -261,12 +261,12 @@ components:
         type:
           type: string
           enum: [access, refresh]
-          description: Token type — access vs refresh 구분 (BE private claim, JWT 표준 아님 — #272)
+          description: Token type — access vs refresh 구분 (BE private claim, RFC 7519 §4.3 허용 범위 — 유지 결정, 추적 #249)
         scope:
           type: string
           description: |
             Authorities — `User.getAuthorities()` 의 `ROLE_<role>` 에서 prefix 제거 후 comma-join.
             현재 [User.getAuthorities()](https://github.com/mortonCareer/bconnect/blob/dev/apps/api/core/src/main/java/so/morton/api/support/auth/User.java#L20-L22) 가 `List.of(<single>)` 반환 — 실제로는 단일 enum value.
             access token 만 보유 (refresh 는 없음).
-            NOTE: RFC 8693 표준은 space-separated. Morton 비표준 — 마이그레이션 검토: #272
+            NOTE: RFC 8693 표준은 space-separated. Morton 비표준 — 마이그레이션 검토: #249
           example: WORKER

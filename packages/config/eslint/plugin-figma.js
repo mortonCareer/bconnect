@@ -20,7 +20,7 @@ const rules = {
       schema: [],
       messages: {
         missing:
-          '파일 상단에 @figma <url>, @figma-scaffold <reason>, 또는 @figma-pending <description> JSDoc 태그가 필요합니다. 자세한 내용은 .claude/skills/figma-mapping/SKILL.md 참조.',
+          '파일 상단에 @figma <url>, @figma-scaffold <reason>, 또는 @figma-pending <description> JSDoc 태그가 필요합니다. 자세한 내용은 packages/ui/CLAUDE.md 참조.',
         figmaInvalidUrl: '@figma 뒤에는 Figma URL(https://www.figma.com/design/...)이 와야 합니다.',
         scaffoldNoReason:
           '@figma-scaffold 뒤에는 사유 또는 이슈 링크가 필요합니다 (예: "@figma-scaffold 디자인 미정 (#193)").',

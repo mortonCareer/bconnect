@@ -10,12 +10,12 @@ interface DetailSectionProps {
 
 function DetailItemSkeleton() {
   return (
-    <div className="border-b border-morton-gray-200 py-3 last:border-b-0">
+    <div className="border-b border-bconnect-gray-200 py-3 last:border-b-0">
       <div className="flex items-center gap-2">
-        <div className="h-5 w-28 animate-pulse rounded bg-morton-gray-200" />
-        <div className="h-5 w-16 animate-pulse rounded-full bg-morton-gray-200" />
+        <div className="h-5 w-28 animate-pulse rounded bg-bconnect-gray-200" />
+        <div className="h-5 w-16 animate-pulse rounded-full bg-bconnect-gray-200" />
       </div>
-      <div className="mt-1 h-3 w-48 animate-pulse rounded bg-morton-gray-100" />
+      <div className="mt-1 h-3 w-48 animate-pulse rounded bg-bconnect-gray-100" />
     </div>
   )
 }
@@ -36,9 +36,9 @@ export function DetailSection({ registrationNumber }: DetailSectionProps) {
     <div className="flex flex-col gap-8">
       {CATEGORY_GROUPS.map((group) => (
         <section key={group.id}>
-          <h3 className="text-sb-20 text-morton-gray-900">{group.label}</h3>
+          <h3 className="text-sb-20 text-bconnect-gray-900">{group.label}</h3>
           {group.id === 'WAGE_RESTRICTION' && (
-            <p className="mt-1 text-r-12 text-morton-gray-500">
+            <p className="mt-1 text-r-12 text-bconnect-gray-500">
               공표기간이 지난 정보는 표시되지 않습니다
             </p>
           )}

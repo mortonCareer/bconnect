@@ -59,7 +59,7 @@ model: sonnet
     │       ▼                             ▼
     └───────────────▶ [2] Skill("worktree-manager")
                           ├─ 워크트리 생성 (/home/json/morton-worktrees/)
-                          ├─ 브랜치 생성 (feat/<issue>-<description>, GIT_WORKFLOW.md 규칙)
+                          ├─ 브랜치 생성 (feat/<issue>-<description>, git-workflow.md 규칙)
                           ├─ 설정 파일 복사 (.env, .claude/)
                           └─ 의존성 설치 (pnpm install)
                           │
@@ -229,7 +229,7 @@ N개 작업 요청
 | 작업                   | 자동 호출 스킬   | 강제되는 컨벤션                                                                       |
 | ---------------------- | ---------------- | ------------------------------------------------------------------------------------- |
 | 이슈 생성              | issue-management | 레이블, 담당자 자동 적용                                                              |
-| 워크트리 + 브랜치 생성 | worktree-manager | 워크트리 독립 디렉토리 + `<type>/<issue>-<description>` 브랜치 (GIT_WORKFLOW.md 참조) |
+| 워크트리 + 브랜치 생성 | worktree-manager | 워크트리 독립 디렉토리 + `<type>/<issue>-<description>` 브랜치 (git-workflow.md 참조) |
 | 커밋                   | commit           | Conventional Commits + 이슈 번호                                                      |
 | PR 생성                | pr-from-issue    | `Closes #<issue>` 자동 포함                                                           |
 
@@ -237,11 +237,11 @@ N개 작업 요청
 
 ## 참조
 
-- [Issue Management](../.claude/skills/issue-management/SKILL.md)
-- [Worktree Manager](../.claude/skills/worktree-manager/SKILL.md)
-- [Commit](../.claude/skills/commit/SKILL.md)
-- [PR from Issue](../.claude/skills/pr-from-issue/SKILL.md)
-- [Git Workflow](../../docs/GIT_WORKFLOW.md) - 브랜치 네이밍 규칙
+- [Issue Management](../skills/issue-management/SKILL.md)
+- [Worktree Manager](../skills/worktree-manager/SKILL.md)
+- [Commit](../skills/commit/SKILL.md)
+- [PR from Issue](../skills/pr-from-issue/SKILL.md)
+- [Git Workflow](../../docs/how-to/git-workflow.md) - 브랜치 네이밍 규칙
 
 ---
 

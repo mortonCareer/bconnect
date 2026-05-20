@@ -34,9 +34,9 @@ export function InAppNotification() {
         dismiss()
       }}
     >
-      <div className="mx-4 mt-[env(safe-area-inset-top,12px)] rounded-[12px] border border-morton-gray-100 bg-white p-3 shadow-lg">
-        <p className="text-morton-sb-14 text-morton-gray-900 truncate">{current.title}</p>
-        <p className="mt-0.5 text-morton-r-12 text-morton-gray-500 truncate">{current.body}</p>
+      <div className="mx-4 mt-[env(safe-area-inset-top,12px)] rounded-[12px] border border-bconnect-gray-100 bg-white p-3 shadow-lg">
+        <p className="text-bconnect-sb-14 text-bconnect-gray-900 truncate">{current.title}</p>
+        <p className="mt-0.5 text-bconnect-r-12 text-bconnect-gray-500 truncate">{current.body}</p>
       </div>
     </div>
   )

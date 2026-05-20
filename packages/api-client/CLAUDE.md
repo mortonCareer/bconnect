@@ -1,6 +1,6 @@
 # API Spec 작업 가이드
 
-`@morton/api-client` 의 OpenAPI spec 작성 + codegen 가이드. spec 변경 시 이 문서 + spec 파일 동시 reference.
+`@bconnect/api-client` 의 OpenAPI spec 작성 + codegen 가이드. spec 변경 시 이 문서 + spec 파일 동시 reference.
 
 ## 디렉토리 구조
 
@@ -193,6 +193,22 @@ JwtPayload:
       type: integer
 ```
 
+## 보안 컨벤션
+
+### Sensitive resource 의 단건 조회 — 권한 없을 시 404
+
+본인이 접근 권한 없는 sensitive resource 단건 조회 시 **403 대신 404** 반환:
+
+- ✅ 404 — 정보 누설 방지 ("그 resource 자체가 없는 척"). [Stripe](https://stripe.com/docs/api/errors), [GitHub](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#authentication) 패턴.
+- ❌ 403 — resource 존재 여부 노출. enumerate 공격 표면 생성.
+
+**대상**:
+
+- [`getChat`](src/spec/v1/chats.yaml) — 본인이 `participants` 에 없으면 404
+- 추가될 sensitive endpoint 들 동일 적용
+
+**예외**: public 조회 (`security: []`) 는 무관 — 어차피 인증 없는 endpoint.
+
 ## Custom Extensions (`x-` prefix)
 
 OpenAPI §4.9 Specification Extensions — vendor-specific 의미 명시.
@@ -216,16 +232,16 @@ FE 사용 패턴:
 
 ```typescript
 // Hook 호출 — data 는 envelope unwrap 된 inner type
-import { useGetMyMember } from '@morton/api-client'
+import { useGetMyMember } from '@bconnect/api-client'
 const { data, isLoading } = useGetMyMember()
 // data: Member (envelope 사라짐)
 
 // Type import — entity 직접 사용
-import type { Member, Profile } from '@morton/api-client'
+import type { Member, Profile } from '@bconnect/api-client'
 
 // MSW mock setup (test/dev)
 import { setupServer } from 'msw/node'
-import { getBconnectAPIMock } from '@morton/api-client'
+import { getBconnectAPIMock } from '@bconnect/api-client'
 const server = setupServer(...getBconnectAPIMock())
 ```
 
@@ -286,7 +302,7 @@ orval mock + customFetch 가 envelope unwrap 정상 작동하는지 — node 환
 
 ```typescript
 import { setupServer } from 'msw/node'
-import { getBconnectAPIMock, sendOtp } from '@morton/api-client'
+import { getBconnectAPIMock, sendOtp } from '@bconnect/api-client'
 const server = setupServer(...getBconnectAPIMock())
 server.listen()
 const result = await sendOtp({ phone: '01012345678' })
@@ -304,7 +320,7 @@ const result = await sendOtp({ phone: '01012345678' })
 
 ## 관련 문서
 
-- [docs/DEVELOPMENT_WORKFLOW.md](../../docs/DEVELOPMENT_WORKFLOW.md) — 워크플로 (이슈 → 브랜치 → PR → 머지)
+- [docs/how-to/development-workflow.md](../../docs/how-to/development-workflow.md) — 워크플로 (이슈 → 브랜치 → PR → 머지)
 - [PR #266](https://github.com/mortonCareer/bconnect/pull/266) — 본 spec 구조의 도입 PR (envelope wrap, 도메인 packing, 3.1 업그레이드, MSW mock generation)
 
 ## 후속 이슈

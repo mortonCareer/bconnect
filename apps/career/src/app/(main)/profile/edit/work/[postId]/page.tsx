@@ -5,7 +5,7 @@
 
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { TopBar } from '@morton/ui'
+import { TopBar } from '@bconnect/ui'
 
 // TODO: Post + Task API 연동 (#197)
 const MOCK_WORK = {
@@ -46,42 +46,42 @@ export default function EditWorkPage() {
       />
 
       {/* 이미지 영역 */}
-      <div className="mx-4 mt-4 flex h-[200px] items-center justify-center rounded-lg bg-morton-gray-100">
-        <span className="text-r-12 text-morton-gray-500">이미지</span>
+      <div className="mx-4 mt-4 flex h-[200px] items-center justify-center rounded-lg bg-bconnect-gray-100">
+        <span className="text-r-12 text-bconnect-gray-500">이미지</span>
       </div>
 
       {/* 메타 정보 */}
       <div className="flex flex-col gap-3 px-4 pt-6">
         <div className="flex items-start gap-4">
-          <span className="w-16 shrink-0 text-sb-14 text-morton-gray-900">업체명</span>
+          <span className="w-16 shrink-0 text-sb-14 text-bconnect-gray-900">업체명</span>
           <input
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            className="flex-1 text-r-14 text-morton-gray-900 outline-none"
+            className="flex-1 text-r-14 text-bconnect-gray-900 outline-none"
           />
         </div>
         <div className="flex items-start gap-4">
-          <span className="w-16 shrink-0 text-sb-14 text-morton-gray-900">시공기간</span>
+          <span className="w-16 shrink-0 text-sb-14 text-bconnect-gray-900">시공기간</span>
           <input
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            className="flex-1 text-r-14 text-morton-gray-900 outline-none"
+            className="flex-1 text-r-14 text-bconnect-gray-900 outline-none"
           />
         </div>
         <div className="flex items-start gap-4">
-          <span className="w-16 shrink-0 text-sb-14 text-morton-gray-900">현장주소</span>
+          <span className="w-16 shrink-0 text-sb-14 text-bconnect-gray-900">현장주소</span>
           <input
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="flex-1 text-r-14 text-morton-gray-900 outline-none"
+            className="flex-1 text-r-14 text-bconnect-gray-900 outline-none"
           />
         </div>
         <div className="flex items-start gap-4">
-          <span className="w-16 shrink-0 text-sb-14 text-morton-gray-900">시공분야</span>
+          <span className="w-16 shrink-0 text-sb-14 text-bconnect-gray-900">시공분야</span>
           <input
             value={trade}
             onChange={(e) => setTrade(e.target.value)}
-            className="flex-1 text-r-14 text-morton-gray-900 outline-none"
+            className="flex-1 text-r-14 text-bconnect-gray-900 outline-none"
           />
         </div>
       </div>
@@ -91,7 +91,7 @@ export default function EditWorkPage() {
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="min-h-[200px] w-full resize-none text-r-14 leading-[22.4px] text-morton-gray-900 outline-none placeholder:text-morton-gray-500"
+          className="min-h-[200px] w-full resize-none text-r-14 leading-[22.4px] text-bconnect-gray-900 outline-none placeholder:text-bconnect-gray-500"
         />
       </div>
     </div>

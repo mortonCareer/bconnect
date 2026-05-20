@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { validateEnv, commonSchemas } from '@morton/config/env'
+import { validateEnv, commonSchemas } from '@bconnect/config/env'
 
 // NOTE: Firebase Cloud Messaging NEXT_PUBLIC_FIREBASE_* 는 이 스키마에서 제외.
 // validateEnv() 를 거치면 클라이언트 번들에서 process.env 가 빈 객체가 되어 undefined 로 떨어지기 때문에,
