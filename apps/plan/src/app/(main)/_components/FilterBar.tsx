@@ -37,6 +37,7 @@ interface DropdownOption {
 // 같은 충돌 그룹으로 오판해 제거하기 때문 (TechnicianCard SkillTag와 동일 사유).
 const M14 = 'font-[Pretendard_Variable] text-[14px] font-medium leading-[1.6]'
 
+// TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지)
 function CheckMark() {
   return (
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0">
@@ -53,6 +54,7 @@ function CheckMark() {
 
 // Figma "더보기" 아이콘 (node 188:1118) — 16px 박스 안 inset[40% 20% 28.33% 20%] 배치.
 // 색은 currentColor 상속 — 트리거 텍스트 색(gray-500/gray-900)을 그대로 따른다.
+// TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지)
 function ChevronIcon({ open }: { open?: boolean }) {
   return (
     <svg
@@ -301,6 +303,7 @@ function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }
       className="inline-flex items-center gap-1 rounded-full bg-bconnect-primary-sub px-3 py-1 text-m-14 text-bconnect-primary transition-opacity hover:opacity-80"
     >
       {label}
+      {/* TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지) */}
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="shrink-0">
         <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
       </svg>
@@ -317,6 +320,7 @@ function RefreshButton({ onClick }: { onClick: () => void }) {
       className="flex h-[27px] w-[27px] items-center justify-center rounded-full hover:bg-bconnect-gray-100"
     >
       {/* Figma node 1470:6746 (RefreshIcon) — 단일 fill path, gray-500 */}
+      {/* TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지) */}
       <svg
         width="18"
         height="18"

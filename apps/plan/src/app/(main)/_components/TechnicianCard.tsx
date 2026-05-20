@@ -44,6 +44,7 @@ function StarRating({ rating, reviewCount }: { rating: number; reviewCount: numb
         {Array.from({ length: 5 }).map((_, i) => {
           const filled = i < full || (i === full && half)
           return (
+            // TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지)
             <svg key={i} width="14" height="14" viewBox="0 0 16 16" fill="none">
               {/* 비활성: bconnect-gray-300 (#E5E5E5). 활성: 별점 전용 amber — 디자인 시스템 미정 (TODO: 토큰 추가 시 교체) */}
               <path
