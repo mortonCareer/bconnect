@@ -8,7 +8,7 @@ import { TechnicianList } from './_components/TechnicianList'
 
 export default function ExplorePage() {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-[27px]">
       <FilterBar />
       <TechnicianList />
     </div>

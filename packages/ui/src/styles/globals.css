@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 
 @source "../../apps/career/src/**/*.tsx";
+@source "../../apps/plan/src/**/*.tsx";
 @source "../components/**/*.tsx";
 
 /**

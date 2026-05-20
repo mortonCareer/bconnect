@@ -52,7 +52,8 @@ export const TECHNICIAN_FIXTURES: TechnicianItem[] = [
     1,
     '이송목',
     '경기도',
-    [Trade.TILING, Trade.WALLPAPER],
+    // Figma 시안 매칭: '도배' selected, '타일' default (trades[0] 이 selected 로 렌더됨)
+    [Trade.WALLPAPER, Trade.TILING],
     3,
     '안녕하세요, 타일 준기공 이송목입니다. 믿고 맡겨주신다면 성실히 임하겠습니다.',
     {
