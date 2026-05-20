@@ -6,11 +6,14 @@ import org.springframework.data.domain.Sort;
 
 public record CursorLimit(
         Long cursor,
-        int limit,
-        boolean reverse
+        Integer limit,
+        Boolean reverse
 ) {
+    private static final int DEFAULT_LIMIT = 20;
+
     public CursorLimit {
-        if (limit <= 0) limit = 20;
+        if (limit == null || limit <= 0) limit = DEFAULT_LIMIT;
+        if (reverse == null) reverse = false;
     }
 
     public Pageable toPageable() {
