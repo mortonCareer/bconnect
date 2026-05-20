@@ -25,7 +25,7 @@ export function TechnicianList() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-[18px]">
+      <div className="flex flex-col gap-[18px] pb-10">
         {Array.from({ length: 3 }).map((_, i) => (
           <SkeletonCard key={i} />
         ))}
@@ -56,7 +56,7 @@ export function TechnicianList() {
   }
 
   return (
-    <div className="flex flex-col gap-[18px]">
+    <div className="flex flex-col gap-[18px] pb-10">
       {items.map((item) => (
         <TechnicianCard key={item.profileId} item={item} />
       ))}

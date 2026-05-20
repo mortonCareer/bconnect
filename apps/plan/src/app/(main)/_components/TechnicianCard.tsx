@@ -16,12 +16,15 @@ function CertTag({ label }: { label: string }) {
   )
 }
 
-// Figma node 1504:12099/12102 — rounded-full pill, M12, selected=primary fill, default=white+gray border
+// Figma node 1504:12099/12102 — rounded-full pill, selected=primary fill, default=white+gray border
+// M12 타이포는 직접 값으로 우회 — cn()의 tailwind-merge가 커스텀 text-m-12를 text-{color}와
+// 같은 충돌 그룹으로 오판해 제거하기 때문.
+// TODO: packages/ui utils.ts cn() 에 extendTailwindMerge 적용되면 text-m-12 로 되돌리기.
 function SkillTag({ label, selected }: { label: string; selected: boolean }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border px-[12px] py-[4px] text-m-12',
+        'inline-flex items-center rounded-full border px-[12px] py-[4px] font-[Pretendard_Variable] text-[12px] font-medium leading-[1.6]',
         selected
           ? 'border-bconnect-primary bg-bconnect-primary-sub text-bconnect-primary'
           : 'border-bconnect-gray-300 bg-white text-bconnect-gray-700'
@@ -59,7 +62,7 @@ function StarRating({ rating, reviewCount }: { rating: number; reviewCount: numb
 
 function Stat({ value, label }: { value: number; label: string }) {
   return (
-    <div className="flex flex-col items-start gap-1">
+    <div className="flex flex-col items-center gap-1">
       <span className="text-sb-24 text-bconnect-gray-900">{value}</span>
       <span className="text-r-14 text-bconnect-gray-500">{label}</span>
     </div>
@@ -121,7 +124,8 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
             <div className="flex items-center gap-[11px]">
               {/* TODO: BE #211 구현 후 실데이터 교체 */}
               <StarRating rating={item.rating} reviewCount={item.reviewCount} />
-              <span className="h-3 w-px bg-bconnect-gray-300" />
+              {/* Figma node 1470:6775 — 행 높이(20px) 세로 divider, gray-100 */}
+              <span className="h-5 w-px bg-bconnect-gray-100" />
               <span className="text-r-14 text-bconnect-gray-500">
                 계약 {item.contractCount} · 게시글 {item.postCount}
               </span>
@@ -133,22 +137,31 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
             <p className="line-clamp-2 text-r-16 text-bconnect-gray-900">{item.headline}</p>
           )}
 
-          {/* 공종 태그 (첫번째 = selected) */}
-          {item.trades.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {item.trades.map((trade: Trade, idx) => (
-                <SkillTag key={trade} label={TRADE_LABELS[trade] ?? trade} selected={idx === 0} />
-              ))}
-            </div>
-          )}
+          {/* 공종 + 인증 태그 — Figma 1470:6779 그룹 (내부 gap 7.85 ≈ gap-2) */}
+          {(item.trades.length > 0 || item.certifications.length > 0) && (
+            <div className="flex flex-col gap-2">
+              {/* 공종 태그 (첫번째 = selected) */}
+              {item.trades.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {item.trades.map((trade: Trade, idx) => (
+                    <SkillTag
+                      key={trade}
+                      label={TRADE_LABELS[trade] ?? trade}
+                      selected={idx === 0}
+                    />
+                  ))}
+                </div>
+              )}
 
-          {/* 인증 태그 */}
-          {/* TODO: BE #211 구현 후 실데이터 교체 */}
-          {item.certifications.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {item.certifications.map((cert) => (
-                <CertTag key={cert} label={cert} />
-              ))}
+              {/* 인증 태그 */}
+              {/* TODO: BE #211 구현 후 실데이터 교체 */}
+              {item.certifications.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {item.certifications.map((cert) => (
+                    <CertTag key={cert} label={cert} />
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

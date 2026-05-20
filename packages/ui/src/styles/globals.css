@@ -133,6 +133,9 @@
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
 
+  /* TODO: text-sb-14 / text-m-14 의 line-height 1.8 → Figma SB14·M14 스펙은 1.6.
+     아래 @theme 토큰(--text-sb-14--line-height, --text-m-14--line-height)과
+     하단 @utility text-sb-14 / text-m-14 블록 양쪽을 함께 수정해야 함. */
   /* Morton Typography - SemiBold */
   --text-sb-24: 1.5rem;
   --text-sb-24--line-height: 1.4;
