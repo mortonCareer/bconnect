@@ -341,10 +341,10 @@ function RefreshButton({ onClick }: { onClick: () => void }) {
 
 export function FilterBar() {
   const {
-    trade,
+    trades,
     experience,
-    grade,
-    region,
+    grades,
+    regions,
     setTrade,
     setExperience,
     setGrade,
@@ -355,7 +355,7 @@ export function FilterBar() {
     clearFilter,
   } = useFilterParams()
 
-  const hasFilter = trade.length > 0 || !!experience || grade.length > 0 || region.length > 0
+  const hasFilter = trades.length > 0 || !!experience || grades.length > 0 || regions.length > 0
 
   return (
     <div className="flex flex-col gap-[13px]">
@@ -363,21 +363,21 @@ export function FilterBar() {
       <div className="flex items-center gap-[9px]">
         <MultiDropdownSelect
           label="지역"
-          values={region}
+          values={regions}
           onToggle={toggleRegion}
           onClear={() => setRegion(null)}
           options={REGION_OPTIONS.map((r) => ({ value: r, label: r }))}
         />
         <MultiDropdownSelect
           label="공종"
-          values={trade}
+          values={trades}
           onToggle={toggleTrade}
           onClear={() => setTrade(null)}
           options={TRADE_LIST}
         />
         <MultiDropdownSelect
           label="직급"
-          values={grade}
+          values={grades}
           onToggle={toggleGrade}
           onClear={() => setGrade(null)}
           options={GRADE_OPTIONS}
@@ -393,13 +393,13 @@ export function FilterBar() {
       {/* Active filter chips + refresh */}
       {hasFilter && (
         <div className="flex items-center gap-[7px]">
-          {region.map((r) => (
+          {regions.map((r) => (
             <FilterChip key={r} label={r} onRemove={() => toggleRegion(r)} />
           ))}
-          {trade.map((t) => (
+          {trades.map((t) => (
             <FilterChip key={t} label={TRADE_LABELS[t]} onRemove={() => toggleTrade(t)} />
           ))}
-          {grade.map((g) => (
+          {grades.map((g) => (
             <FilterChip key={g} label={g} onRemove={() => toggleGrade(g)} />
           ))}
           {experience && (

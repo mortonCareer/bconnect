@@ -20,8 +20,8 @@ function SkeletonCard() {
 }
 
 export function TechnicianList() {
-  const { trade, experience, grade, region } = useFilterParams()
-  const { items, isLoading, error } = useTechnicianItems({ trade, experience, grade, region })
+  const { trades, experience, grades, regions } = useFilterParams()
+  const { items, isLoading, error } = useTechnicianItems({ trades, experience, grades, regions })
 
   if (isLoading) {
     return (

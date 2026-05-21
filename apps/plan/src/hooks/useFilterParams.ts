@@ -49,10 +49,10 @@ export function useFilterParams() {
   const clearFilter = () => setParams({ trade: null, exp: null, grade: null, region: null })
 
   return {
-    trade: trades,
+    trades,
     experience: experience as ExperienceLevel | null,
-    grade: grades,
-    region: regions,
+    grades,
+    regions,
     expRange,
     setTrade,
     setExperience,
