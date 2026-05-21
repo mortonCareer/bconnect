@@ -1,7 +1,5 @@
-'use client'
-
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Button } from '@bconnect/ui'
 
 interface GuestSidebarProps {
@@ -9,8 +7,6 @@ interface GuestSidebarProps {
 }
 
 export function GuestSidebar({ memberCount }: GuestSidebarProps) {
-  const router = useRouter()
-
   return (
     <div className="flex h-full flex-col justify-between">
       {/* 안내 + CTA */}
@@ -21,22 +17,13 @@ export function GuestSidebar({ memberCount }: GuestSidebarProps) {
           {memberCount.toLocaleString()}명의 기술자를 만나보세요.
         </p>
 
+        {/* 이동 동작 → semantic <a href> (asChild 로 <Link> 에 버튼 스타일 합성) */}
         <div className="flex flex-col gap-2">
-          <Button
-            variant="primary"
-            size="full"
-            className="h-[40px]"
-            onClick={() => router.push('/login')}
-          >
-            로그인
+          <Button asChild variant="primary" size="full" className="h-[40px]">
+            <Link href="/login">로그인</Link>
           </Button>
-          <Button
-            variant="outline"
-            size="full"
-            className="h-[40px]"
-            onClick={() => router.push('/signup/member')}
-          >
-            회원가입
+          <Button asChild variant="outline" size="full" className="h-[40px]">
+            <Link href="/signup/member">회원가입</Link>
           </Button>
         </div>
       </div>
