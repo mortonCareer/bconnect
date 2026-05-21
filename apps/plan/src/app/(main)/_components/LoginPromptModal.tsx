@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Button } from '@bconnect/ui'
 
 interface LoginPromptModalProps {
@@ -15,7 +15,6 @@ interface LoginPromptModalProps {
  * (main)/layout.tsx 가 overflow-hidden 이라 createPortal 로 body 에 렌더해 잘림을 피한다.
  */
 export function LoginPromptModal({ open, onClose }: LoginPromptModalProps) {
-  const router = useRouter()
   const panelRef = useRef<HTMLDivElement>(null)
 
   // ESC 닫기 + 열림 동안 body 스크롤 잠금 + 모달로 포커스 이동
@@ -84,21 +83,11 @@ export function LoginPromptModal({ open, onClose }: LoginPromptModalProps) {
 
         {/* CTA — GuestSidebar 와 동선 통일 */}
         <div className="flex flex-col gap-2">
-          <Button
-            variant="primary"
-            size="full"
-            className="h-[40px]"
-            onClick={() => router.push('/login')}
-          >
-            로그인
+          <Button asChild variant="primary" size="full" className="h-[40px]">
+            <Link href="/login">로그인</Link>
           </Button>
-          <Button
-            variant="outline"
-            size="full"
-            className="h-[40px]"
-            onClick={() => router.push('/signup/member')}
-          >
-            회원가입
+          <Button asChild variant="outline" size="full" className="h-[40px]">
+            <Link href="/signup/member">회원가입</Link>
           </Button>
         </div>
       </div>

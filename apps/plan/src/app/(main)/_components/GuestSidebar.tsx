@@ -17,7 +17,7 @@ export function GuestSidebar({ memberCount }: GuestSidebarProps) {
           {memberCount.toLocaleString()}명의 기술자를 만나보세요.
         </p>
 
-        {/* 이동 동작 → semantic <a href> (asChild 로 <Link> 에 버튼 스타일 합성) */}
+        {/* 이동 동작 */}
         <div className="flex flex-col gap-2">
           <Button asChild variant="primary" size="full" className="h-[40px]">
             <Link href="/login">로그인</Link>
