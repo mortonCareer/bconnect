@@ -34,8 +34,8 @@ export interface TechnicianItem {
 interface UseTechnicianItemsOptions {
   trades?: Trade[] | null
   experience?: ExperienceLevel | null
-  grade?: Grade[] | null
-  region?: string[] | null
+  grades?: Grade[] | null
+  regions?: string[] | null
 }
 
 export function useTechnicianItems({
