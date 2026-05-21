@@ -1,6 +1,6 @@
 package so.morton.api.support.fixture;
 
-import so.morton.api.api.controller.v1.request.CreateCoworkerRequestRequest;
+import so.morton.api.api.controller.v1.request.CreateCoworkerRequest;
 import so.morton.api.domain.coworker.CoworkerRequest;
 import so.morton.api.domain.coworker.CoworkerRequestDetail;
 import so.morton.api.domain.member.Member;
@@ -20,8 +20,8 @@ public class CoworkerRequestFactory {
                 .build();
     }
 
-    public static CreateCoworkerRequestRequest createRequest(Long toId) {
-        return new CreateCoworkerRequestRequest(toId);
+    public static CreateCoworkerRequest createRequest(Long toId) {
+        return new CreateCoworkerRequest(toId);
     }
 
     public static CoworkerRequestDetail createDetail(Long id, Member member, Profile profile) {

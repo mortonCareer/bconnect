@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import so.morton.api.config.IntegrationTest;
 import org.springframework.test.web.servlet.MockMvc;
-import so.morton.api.api.controller.v1.request.CreateCoworkerRequestRequest;
+import so.morton.api.api.controller.v1.request.CreateCoworkerRequest;
 import so.morton.api.domain.coworker.CoworkerRequest;
 import so.morton.api.domain.coworker.CoworkerRequestDetail;
 import so.morton.api.domain.coworker.CoworkerRequestService;
@@ -71,7 +71,7 @@ class CoworkerRequestControllerTest {
         @DisplayName("toProfileId null 시 400")
         void create_400_nullToId() throws Exception {
             // given
-            CreateCoworkerRequestRequest request = new CreateCoworkerRequestRequest(null);
+            CreateCoworkerRequest request = new CreateCoworkerRequest(null);
 
             // when & then
             mockMvc.perform(post("/api/v1/coworker-requests")

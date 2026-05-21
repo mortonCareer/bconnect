@@ -10,7 +10,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateCoworkerRequestRequest'
+              $ref: '#/components/schemas/CreateCoworkerRequest'
       responses:
         '200':
           description: OK
@@ -142,7 +142,7 @@ components:
           $ref: ../v1/members.yaml#/components/schemas/MaskedMember
         profile:
           $ref: ../v1/profiles.yaml#/components/schemas/Profile
-    CreateCoworkerRequestRequest:
+    CreateCoworkerRequest:
       type: object
       required:
         - toId

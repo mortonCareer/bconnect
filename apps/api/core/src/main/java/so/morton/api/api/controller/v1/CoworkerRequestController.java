@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import so.morton.api.api.controller.v1.request.CreateCoworkerRequestRequest;
+import so.morton.api.api.controller.v1.request.CreateCoworkerRequest;
 import so.morton.api.api.controller.v1.response.CoworkerRequestResponse;
 import so.morton.api.domain.coworker.CoworkerRequestService;
 import so.morton.api.domain.coworker.CoworkerRequest;
@@ -29,7 +29,7 @@ public class CoworkerRequestController {
     @PostMapping
     public ApiResponse<Long> create(
             @AuthenticationPrincipal User user,
-            @RequestBody @Valid CreateCoworkerRequestRequest request) {
+            @RequestBody @Valid CreateCoworkerRequest request) {
         CoworkerRequest coworkerRequest = coworkerRequestService.create(user, request.toId());
         return ApiResponse.success(coworkerRequest.id());
     }
