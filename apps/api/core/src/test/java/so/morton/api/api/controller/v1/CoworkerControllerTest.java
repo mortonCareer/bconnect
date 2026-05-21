@@ -10,10 +10,14 @@ import so.morton.api.config.IntegrationTest;
 import so.morton.api.domain.coworker.Coworker;
 import so.morton.api.domain.coworker.CoworkerExceptionCode;
 import so.morton.api.domain.coworker.CoworkerService;
+import so.morton.api.domain.member.MemberFinder;
+import so.morton.api.domain.profile.ProfileFinder;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 import so.morton.api.support.auth.User;
 import so.morton.api.support.fixture.CoworkerFactory;
+import so.morton.api.support.fixture.MemberFactory;
+import so.morton.api.support.fixture.ProfileFactory;
 import so.morton.api.support.fixture.UserFactory;
 
 import java.util.List;
@@ -24,6 +28,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static so.morton.api.support.TestUtils.errorResponse;
 import static so.morton.api.support.TestUtils.successResponse;
@@ -33,6 +38,8 @@ class CoworkerControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @MockitoBean private CoworkerService coworkerService;
+    @MockitoBean private ProfileFinder profileFinder;
+    @MockitoBean private MemberFinder memberFinder;
 
     private final Coworker coworker = CoworkerFactory.create(1L, 1L, 2L);
 
@@ -45,13 +52,18 @@ class CoworkerControllerTest {
         void get_200() throws Exception {
             // given
             when(coworkerService.getAll(any(User.class), eq(1L))).thenReturn(List.of(coworker));
+            when(profileFinder.find(2L)).thenReturn(ProfileFactory.create(2L, 20L));
+            when(memberFinder.find(20L)).thenReturn(MemberFactory.create(20L));
 
             // when & then
             mockMvc.perform(get("/api/v1/coworkers")
                             .with(user(UserFactory.FOREMAN_USER))
                             .param("profileId", "1"))
                     .andExpect(status().isOk())
-                    .andExpect(successResponse());
+                    .andExpect(successResponse())
+                    .andExpect(jsonPath("$.data[0].id").value(1))
+                    .andExpect(jsonPath("$.data[0].member.id").value(20))
+                    .andExpect(jsonPath("$.data[0].status").value("COWORKER"));
         }
 
         @Test

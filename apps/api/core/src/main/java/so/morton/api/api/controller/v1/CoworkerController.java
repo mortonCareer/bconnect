@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import so.morton.api.api.controller.v1.response.CoworkerResponse;
 import so.morton.api.domain.coworker.CoworkerService;
+import so.morton.api.domain.member.Member;
+import so.morton.api.domain.member.MemberFinder;
+import so.morton.api.domain.profile.ProfileFinder;
+import so.morton.api.storage.value.CoworkerStatus;
 import so.morton.api.support.auth.User;
 import so.morton.api.support.response.ApiResponse;
 
@@ -21,17 +25,24 @@ import java.util.List;
 public class CoworkerController {
 
     private final CoworkerService coworkerService;
+    private final ProfileFinder profileFinder;
+    private final MemberFinder memberFinder;
 
     @GetMapping
     public ApiResponse<List<CoworkerResponse>> get(
             @AuthenticationPrincipal User user,
             @RequestParam Long profileId) {
-        coworkerService.getAll(user, profileId);
-        // TODO: Coworker -> CoworkerResponse 매핑 구현
-        //  - member: pair(minId, maxId) 중 조회 기준 profileId 가 아닌 상대 프로필의 멤버
-        //  - status: 동료 관계 상태 (CoworkerStatus)
-        //  - CoworkerResponse.of(Coworker, Member, CoworkerStatus) 호출
-        return ApiResponse.success(List.of());
+        List<CoworkerResponse> coworkers = coworkerService.getAll(user, profileId).stream()
+                .map(coworker -> {
+                    Long counterpartProfileId = coworker.minId().equals(profileId)
+                            ? coworker.maxId()
+                            : coworker.minId();
+                    Member member = memberFinder.find(
+                            profileFinder.find(counterpartProfileId).memberId());
+                    return CoworkerResponse.of(coworker, member, CoworkerStatus.COWORKER);
+                })
+                .toList();
+        return ApiResponse.success(coworkers);
     }
 
     @DeleteMapping("/{id}")

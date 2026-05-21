@@ -3,17 +3,24 @@ package so.morton.api.domain.coworker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import so.morton.api.domain.member.Member;
 import so.morton.api.domain.profile.Profile;
 import so.morton.api.domain.profile.ProfileFinder;
 import so.morton.api.storage.domain.coworker.CoworkerEntity;
 import so.morton.api.storage.domain.coworker.CoworkerRepository;
 import so.morton.api.storage.domain.coworker.CoworkerRequestEntity;
 import so.morton.api.storage.domain.coworker.CoworkerRequestRepository;
+import so.morton.api.storage.domain.member.MemberRepository;
+import so.morton.api.storage.domain.profile.ProfileRepository;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 import so.morton.api.support.auth.User;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +28,10 @@ public class CoworkerRequestService {
 
     private final CoworkerRepository coworkerRepository;
     private final CoworkerRequestRepository requestRepository;
+    private final CoworkerRequestFinder coworkerRequestFinder;
     private final ProfileFinder profileFinder;
+    private final ProfileRepository profileRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
     public CoworkerRequest create(User user, Long targetId) {
@@ -46,6 +56,62 @@ public class CoworkerRequestService {
                 .toId(targetId)
                 .build());
         return CoworkerRequest.of(persisted);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CoworkerRequestDetail> getReceived(User user) {
+        Profile profile = profileFinder.findByMemberId(user.id());
+        List<CoworkerRequest> requests = coworkerRequestFinder.findReceived(profile.id());
+
+        List<Long> counterpartIds = requests.stream()
+                .map(CoworkerRequest::fromId)
+                .toList();
+        Map<Long, Profile> profileById = profileRepository.findByIdIn(counterpartIds).stream()
+                .map(Profile::of)
+                .collect(Collectors.toMap(Profile::id, Function.identity()));
+
+        List<Long> memberIds = profileById.values().stream()
+                .map(Profile::memberId)
+                .toList();
+        Map<Long, Member> memberById = memberRepository.findByIdIn(memberIds).stream()
+                .map(Member::of)
+                .collect(Collectors.toMap(Member::id, Function.identity()));
+
+        return requests.stream()
+                .map(request -> {
+                    Profile counterpart = profileById.get(request.fromId());
+                    Member member = memberById.get(counterpart.memberId());
+                    return CoworkerRequestDetail.of(request.id(), member, counterpart);
+                })
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CoworkerRequestDetail> getSent(User user) {
+        Profile profile = profileFinder.findByMemberId(user.id());
+        List<CoworkerRequest> requests = coworkerRequestFinder.findSent(profile.id());
+
+        List<Long> counterpartIds = requests.stream()
+                .map(CoworkerRequest::toId)
+                .toList();
+        Map<Long, Profile> profileById = profileRepository.findByIdIn(counterpartIds).stream()
+                .map(Profile::of)
+                .collect(Collectors.toMap(Profile::id, Function.identity()));
+
+        List<Long> memberIds = profileById.values().stream()
+                .map(Profile::memberId)
+                .toList();
+        Map<Long, Member> memberById = memberRepository.findByIdIn(memberIds).stream()
+                .map(Member::of)
+                .collect(Collectors.toMap(Member::id, Function.identity()));
+
+        return requests.stream()
+                .map(request -> {
+                    Profile counterpart = profileById.get(request.toId());
+                    Member member = memberById.get(counterpart.memberId());
+                    return CoworkerRequestDetail.of(request.id(), member, counterpart);
+                })
+                .toList();
     }
 
     @Transactional

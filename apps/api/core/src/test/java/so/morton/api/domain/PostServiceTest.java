@@ -146,7 +146,7 @@ class PostServiceTest {
             assertThat(result.id()).isEqualTo(POST_ID);
             assertThat(result.profileId()).isEqualTo(PROFILE_ID);
             assertThat(result.content()).isEqualTo("content");
-            assertThat(result.images()).isEqualTo(List.of("image"));
+            assertThat(result.images()).isEqualTo(List.of(PostFactory.IMAGE));
             verify(profileFinder).findByMemberId(USER_ID);
             verify(postRepository).save(any(PostEntity.class));
         }

@@ -131,21 +131,17 @@ components:
       type: object
       required:
         - id
-        - fromId
-        - toId
+        - member
+        - profile
       properties:
         id:
           type: integer
           format: int64
           example: 1
-        fromId:
-          type: integer
-          format: int64
-          example: 1
-        toId:
-          type: integer
-          format: int64
-          example: 2
+        member:
+          $ref: ../v1/members.yaml#/components/schemas/MaskedMember
+        profile:
+          $ref: ../v1/profiles.yaml#/components/schemas/Profile
     CreateCoworkerRequest:
       type: object
       required:
