@@ -32,7 +32,7 @@ export interface TechnicianItem {
 }
 
 interface UseTechnicianItemsOptions {
-  trade?: Trade[] | null
+  trades?: Trade[] | null
   experience?: ExperienceLevel | null
   grade?: Grade[] | null
   region?: string[] | null
