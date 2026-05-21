@@ -13,14 +13,16 @@ import so.morton.api.domain.coworker.CoworkerRequest;
 import so.morton.api.domain.coworker.CoworkerRequestDetail;
 import so.morton.api.domain.coworker.CoworkerRequestFinder;
 import so.morton.api.domain.coworker.CoworkerRequestService;
-import so.morton.api.domain.member.Member;
-import so.morton.api.domain.member.MemberFinder;
 import so.morton.api.domain.profile.Profile;
 import so.morton.api.domain.profile.ProfileFinder;
 import so.morton.api.storage.domain.coworker.CoworkerEntity;
 import so.morton.api.storage.domain.coworker.CoworkerRepository;
 import so.morton.api.storage.domain.coworker.CoworkerRequestEntity;
 import so.morton.api.storage.domain.coworker.CoworkerRequestRepository;
+import so.morton.api.storage.domain.member.MemberEntity;
+import so.morton.api.storage.domain.member.MemberRepository;
+import so.morton.api.storage.domain.profile.ProfileEntity;
+import so.morton.api.storage.domain.profile.ProfileRepository;
 import so.morton.api.storage.value.Role;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
@@ -46,7 +48,8 @@ class CoworkerRequestServiceTest {
     @Mock private CoworkerRequestRepository requestRepository;
     @Mock private CoworkerRequestFinder coworkerRequestFinder;
     @Mock private ProfileFinder profileFinder;
-    @Mock private MemberFinder memberFinder;
+    @Mock private ProfileRepository profileRepository;
+    @Mock private MemberRepository memberRepository;
     @InjectMocks private CoworkerRequestService coworkerRequestService;
 
     private static final Long USER_A_ID = 1L;
@@ -232,14 +235,16 @@ class CoworkerRequestServiceTest {
         void getReceived_success() {
             // given -- B->A 요청 (A가 받음), counterpart = 발신자 B
             Profile profileA = ProfileFactory.create(PROFILE_A_ID, USER_A_ID);
-            Profile profileB = ProfileFactory.create(PROFILE_B_ID, USER_B_ID);
-            Member memberB = MemberFactory.create(USER_B_ID);
+            ProfileEntity profileEntityB = ProfileFactory.createEntity(USER_B_ID);
+            ReflectionTestUtils.setField(profileEntityB, "id", PROFILE_B_ID);
+            MemberEntity memberEntityB = MemberFactory.createEntity();
+            ReflectionTestUtils.setField(memberEntityB, "id", USER_B_ID);
             CoworkerRequest request = CoworkerRequestFactory.create(REQUEST_ID, PROFILE_B_ID, PROFILE_A_ID);
 
             when(profileFinder.findByMemberId(USER_A_ID)).thenReturn(profileA);
             when(coworkerRequestFinder.findReceived(PROFILE_A_ID)).thenReturn(List.of(request));
-            when(profileFinder.find(PROFILE_B_ID)).thenReturn(profileB);
-            when(memberFinder.find(USER_B_ID)).thenReturn(memberB);
+            when(profileRepository.findByIdIn(List.of(PROFILE_B_ID))).thenReturn(List.of(profileEntityB));
+            when(memberRepository.findByIdIn(List.of(USER_B_ID))).thenReturn(List.of(memberEntityB));
 
             // when
             List<CoworkerRequestDetail> result = coworkerRequestService.getReceived(USER_A);
@@ -248,8 +253,9 @@ class CoworkerRequestServiceTest {
             assertThat(result).hasSize(1);
             CoworkerRequestDetail detail = result.get(0);
             assertThat(detail.id()).isEqualTo(REQUEST_ID);
-            assertThat(detail.profile()).isEqualTo(profileB);
-            assertThat(detail.member()).isEqualTo(memberB);
+            assertThat(detail.profile().id()).isEqualTo(PROFILE_B_ID);
+            assertThat(detail.profile().memberId()).isEqualTo(USER_B_ID);
+            assertThat(detail.member().id()).isEqualTo(USER_B_ID);
         }
 
         @Test
@@ -274,14 +280,16 @@ class CoworkerRequestServiceTest {
         void getSent_success() {
             // given -- A->B 요청 (A가 보냄), counterpart = 수신자 B
             Profile profileA = ProfileFactory.create(PROFILE_A_ID, USER_A_ID);
-            Profile profileB = ProfileFactory.create(PROFILE_B_ID, USER_B_ID);
-            Member memberB = MemberFactory.create(USER_B_ID);
+            ProfileEntity profileEntityB = ProfileFactory.createEntity(USER_B_ID);
+            ReflectionTestUtils.setField(profileEntityB, "id", PROFILE_B_ID);
+            MemberEntity memberEntityB = MemberFactory.createEntity();
+            ReflectionTestUtils.setField(memberEntityB, "id", USER_B_ID);
             CoworkerRequest request = CoworkerRequestFactory.create(REQUEST_ID, PROFILE_A_ID, PROFILE_B_ID);
 
             when(profileFinder.findByMemberId(USER_A_ID)).thenReturn(profileA);
             when(coworkerRequestFinder.findSent(PROFILE_A_ID)).thenReturn(List.of(request));
-            when(profileFinder.find(PROFILE_B_ID)).thenReturn(profileB);
-            when(memberFinder.find(USER_B_ID)).thenReturn(memberB);
+            when(profileRepository.findByIdIn(List.of(PROFILE_B_ID))).thenReturn(List.of(profileEntityB));
+            when(memberRepository.findByIdIn(List.of(USER_B_ID))).thenReturn(List.of(memberEntityB));
 
             // when
             List<CoworkerRequestDetail> result = coworkerRequestService.getSent(USER_A);
@@ -290,8 +298,9 @@ class CoworkerRequestServiceTest {
             assertThat(result).hasSize(1);
             CoworkerRequestDetail detail = result.get(0);
             assertThat(detail.id()).isEqualTo(REQUEST_ID);
-            assertThat(detail.profile()).isEqualTo(profileB);
-            assertThat(detail.member()).isEqualTo(memberB);
+            assertThat(detail.profile().id()).isEqualTo(PROFILE_B_ID);
+            assertThat(detail.profile().memberId()).isEqualTo(USER_B_ID);
+            assertThat(detail.member().id()).isEqualTo(USER_B_ID);
         }
 
         @Test
