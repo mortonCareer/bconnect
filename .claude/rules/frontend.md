@@ -102,7 +102,7 @@ export class ApiError extends Error {
 
 ## Forms
 
-폼(검증·제출이 있는 입력)의 표준·룰·레시피는 [docs/how-to/frontend-forms.md](../../docs/how-to/frontend-forms.md) 가 단일 출처(SSOT) — 여기 중복하지 않는다. 근거: [ADR 0013](../../docs/explanation/adr/0013-form-handling-standard.md).
+폼(검증·제출이 있는 입력)의 표준·룰·레시피는 [docs/how-to/frontend-forms.md](../../docs/how-to/frontend-forms.md) 가 단일 출처(SSOT). 근거: [ADR 0013](../../docs/explanation/adr/0013-form-handling-standard.md).
 
 ## Naming Conventions
 

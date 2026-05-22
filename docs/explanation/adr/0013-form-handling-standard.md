@@ -66,7 +66,7 @@ BConnect 프론트엔드의 폼 처리가 페이지마다 갈라져 있다. `app
 
 ### 컴포넌트 레이어를 이렇게 정한 이유
 
-raw shadcn primitive는 호출부가 verbose하다는 우려가 있었다. 대안은 (a) raw primitive 직접 사용, (b) a11y를 자체 구현한 커스텀 Field, (c) shadcn Form 위에 얇은 래퍼. (b)는 검증된 a11y 배선을 재구현하는 손실이고, (a)는 호출부 verbosity가 남는다. (c)를 택해 DX 검증 spike에서 로그인 페이지로 실측한 결과, raw FormField 228줄 → `TextField` 래퍼 182줄로 **원본 수동 폼(218줄)보다도 짧았다.**
+raw shadcn primitive를 그대로 쓰면 필드 하나마다 `FormField`·`FormItem`·`FormControl`·`FormMessage`를 중첩해 적어야 해서 **호출부 코드가 길어진다.** 세 방법을 검토했다 — (a) raw primitive를 그대로 사용, (b) a11y를 직접 구현한 커스텀 Field 컴포넌트, (c) shadcn Form 위에 얇은 래퍼. (b)는 shadcn이 이미 검증해 둔 a11y 배선을 재구현하는 낭비고, (a)는 호출부 코드가 긴 문제가 그대로 남는다. 그래서 (c)를 택했고, DX 검증 spike에서 로그인 페이지로 실측하니 raw FormField 228줄이 `TextField` 래퍼로 182줄 — **원본 수동 폼(218줄)보다도 짧았다.**
 
 ## Consequences
 
@@ -79,7 +79,7 @@ raw shadcn primitive는 호출부가 verbose하다는 우려가 있었다. 대�
 
 ### 나쁜 결과 / 비용 (DX 검증 spike에서 실측한 마찰)
 
-- raw shadcn `FormField`는 호출부가 verbose — `TextField` 래퍼를 기본으로 써 완화.
+- raw shadcn `FormField`는 필드마다 컴포넌트를 중첩해야 해 호출부 코드가 길다 — `TextField` 래퍼를 기본으로 써 완화.
 - 렌더에서 `form.watch()`를 호출하면 React Compiler가 해당 컴포넌트 최적화를 건너뜀(bail-out) → 폼 값은 `useWatch` 훅으로 구독.
 - shadcn `FormControl`은 RHF `fieldState`만 `aria-invalid`로 반영 — 서버 에러는 `aria-invalid`를 수동 OR(`TextField`가 내부 흡수).
 - 멀티스텝 폼의 per-step 유효성은 `formState.isValid`로 표현 안 됨 — `trigger(field)` + 개별 판정 필요.
@@ -93,13 +93,10 @@ raw shadcn primitive는 호출부가 verbose하다는 우려가 있었다. 대�
 
 ## Notes
 
-후속 작업 (이슈로 분리):
+후속 작업 (이슈):
 
-- `useServerError` 훅 / `TextField`·`TextareaField` / shadcn Form 도입 → `@bconnect/ui`
-- login(plan·career)·signup 페이지 마이그레이션
-- zod v3→v4 import 정리
-- 원본 로그인 에러 코드 불일치(`A003`) 수정
-- [`.claude/rules/frontend.md`](../../../.claude/rules/frontend.md) 갱신, [`docs/how-to`](../../how-to/)에 폼 작성 how-to 추가
+- [#400](https://github.com/mortonCareer/bconnect/issues/400) — shadcn Form suite 도입 + 입력 컴포넌트 통합 (ADR 0013 구현). login·signup 마이그레이션, `A003` 에러 코드 정합 포함.
+- [#401](https://github.com/mortonCareer/bconnect/issues/401) — 폼 스키마 zod v3 → v4 import 정리
 
 근거: 폼 처리 best-practice 조사(라이브러리 표준성 비교) + DX 검증 spike — react-hook-form·shadcn Form·`useServerError`·`TextField`를 로그인 페이지에 실제 적용해 라인 수·접근성·마찰을 실측했다.
 
