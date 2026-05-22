@@ -11,3 +11,17 @@ export { ChatMessage, chatBubbleVariants } from './ui/ChatMessage'
 export { ChatInput } from './ui/ChatInput'
 export { ChatListItem, chatListItemVariants } from './ui/ChatListItem'
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './ui/Accordion'
+
+// shadcn Form suite (ADR 0013 / #400)
+export {
+  Form,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+  FormField,
+  useFormField,
+} from './ui/form'
+export { Label } from './ui/label'
+export { TextField } from './ui/TextField'
