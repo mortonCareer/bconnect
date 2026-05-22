@@ -136,7 +136,7 @@ export default function EditAboutPage() { ... }
 3. 컴포넌트에서 Tailwind 유틸(`bg-<token>` 등)로 사용.
 
 - **System color**(feedback)는 사용처가 생길 때 추가한다. 현재 `destructive`(error)만 — `warning`/`success`/`info`는 미도입 (ADR-0012 §5).
-- 다크모드·반응형 토큰은 1차 범위 외 (ADR-0012 §6).
+- 다크모드는 1차 범위 외 (ADR-0012 §6) — `globals.css`에 `.dark` 스캐폴드만 유지(toggle 없어 비활성). 도입 시 `.dark` 블록의 semantic 값 검수 + theme provider 연결. 반응형 토큰도 미도입.
 
 ---
 
