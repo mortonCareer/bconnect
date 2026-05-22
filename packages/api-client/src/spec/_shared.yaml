@@ -97,6 +97,39 @@ components:
             - object
             - 'null'
           example:
+    NotFoundError:
+      allOf:
+        - $ref: '#/components/schemas/ApiErrorResponse'
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum: [C005]
+    ForbiddenError:
+      allOf:
+        - $ref: '#/components/schemas/ApiErrorResponse'
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum: [C004]
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/ApiErrorResponse'
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum: [C001]
     ApiSuccessResponseBase:
       type: object
       required:

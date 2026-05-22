@@ -27,12 +27,23 @@ paths:
                         type: integer
                         format: int64
         '400':
-          description: |
-            - `C001` 유효하지 않은 입력값입니다
+          description: Bad Request
           content:
             application/json:
               schema:
-                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+                $ref: '#/components/schemas/CreateCoworkerRequestValidationError'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCoworkerRequestNotFoundError'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCoworkerRequestConflictError'
   /api/v1/coworker-requests/received:
     get:
       operationId: getReceivedCoworkerRequests
@@ -93,6 +104,18 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ForbiddenError
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoworkerRequestNotFoundError'
   /api/v1/coworker-requests/{id}/accept:
     post:
       operationId: acceptCoworkerRequest
@@ -109,6 +132,18 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ForbiddenError
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoworkerRequestNotFoundError'
   /api/v1/coworker-requests/{id}/deny:
     post:
       operationId: denyCoworkerRequest
@@ -125,8 +160,64 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ForbiddenError
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoworkerRequestNotFoundError'
 components:
   schemas:
+    CreateCoworkerRequestValidationError:
+      allOf:
+        - $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum: [C001, CW001]
+    CreateCoworkerRequestNotFoundError:
+      allOf:
+        - $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum: [C005, CW003]
+    CreateCoworkerRequestConflictError:
+      allOf:
+        - $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum: [CW002, CW005]
+    CoworkerRequestNotFoundError:
+      allOf:
+        - $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum: [C005, CW004]
     CoworkerRequest:
       type: object
       required:

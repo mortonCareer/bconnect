@@ -49,14 +49,17 @@ paths:
                       data:
                         $ref: '#/components/schemas/RegisterMemberResponse'
         '400':
-          description: |
-            - `C001` 유효하지 않은 입력값입니다
-            - `A009` 유효하지 않은 가입 토큰입니다
-            - `A010` 가입 토큰이 만료되었습니다
+          description: Bad Request
           content:
             application/json:
               schema:
-                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+                $ref: '#/components/schemas/RegisterMemberValidationError'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterMemberConflictError'
   /api/v1/members/roles:
     get:
       operationId: getRoles
@@ -134,6 +137,12 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/Member'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/NotFoundError
     put:
       operationId: updateMyMember
       tags:
@@ -149,12 +158,17 @@ paths:
         '200':
           description: OK
         '400':
-          description: |
-            - `C001` 유효하지 않은 입력값입니다
+          description: Bad Request
           content:
             application/json:
               schema:
-                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+                $ref: ../_shared.yaml#/components/schemas/ValidationError
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/NotFoundError
     delete:
       operationId: withdraw
       tags:
@@ -163,6 +177,12 @@ paths:
       responses:
         '200':
           description: OK
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/NotFoundError
 components:
   schemas:
     Member:
@@ -296,3 +316,25 @@ components:
       properties:
         available:
           type: boolean
+    RegisterMemberValidationError:
+      allOf:
+        - $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum: [C001, A009, A010]
+    RegisterMemberConflictError:
+      allOf:
+        - $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum: [M001, M002]

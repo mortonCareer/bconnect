@@ -29,6 +29,18 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Coworker'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ForbiddenError
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/NotFoundError
   /api/v1/coworkers/{coworkerId}:
     delete:
       operationId: deleteCoworker
@@ -45,6 +57,18 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ForbiddenError
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteCoworkerNotFoundError'
   /api/v1/coworkers/tasks:
     get:
       operationId: getCoworkerTasks
@@ -82,6 +106,17 @@ paths:
                           $ref: '#/components/schemas/CoworkerTask'
 components:
   schemas:
+    DeleteCoworkerNotFoundError:
+      allOf:
+        - $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum: [C005, CW006]
     Coworker:
       type: object
       required:

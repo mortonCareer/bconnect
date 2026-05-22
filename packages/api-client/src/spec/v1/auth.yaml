@@ -27,20 +27,17 @@ paths:
                       data:
                         $ref: '#/components/schemas/SendOtpResponse'
         '400':
-          description: |
-            - `C001` 유효하지 않은 입력값입니다
+          description: Bad Request
           content:
             application/json:
               schema:
-                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+                $ref: ../_shared.yaml#/components/schemas/ValidationError
         '429':
-          description: |
-            - `A001` 일일 발송 한도를 초과했습니다
-            - `A002` 재전송 대기 시간이 지나지 않았습니다
+          description: Too Many Requests
           content:
             application/json:
               schema:
-                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+                $ref: '#/components/schemas/SendOtpRateLimitError'
   /api/v1/auth/otp/verify:
     post:
       operationId: verifyOtp
@@ -160,6 +157,17 @@ components:
       name: refreshToken # https://datatracker.ietf.org/doc/html/rfc6749#section-1.5
 
   schemas:
+    SendOtpRateLimitError:
+      allOf:
+        - $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum: [A001, A002]
     SendCodeRequest:
       type: object
       required:

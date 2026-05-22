@@ -34,6 +34,12 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Task'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/NotFoundError
     post:
       operationId: createTask
       tags:
@@ -61,12 +67,17 @@ paths:
                         type: integer
                         format: int64
         '400':
-          description: |
-            - `C001` 유효하지 않은 입력값입니다
+          description: Bad Request
           content:
             application/json:
               schema:
-                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+                $ref: ../_shared.yaml#/components/schemas/ValidationError
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/NotFoundError
   /api/v1/tasks/{taskId}:
     parameters:
       - name: taskId
@@ -90,12 +101,23 @@ paths:
         '200':
           description: OK
         '400':
-          description: |
-            - `C001` 유효하지 않은 입력값입니다
+          description: Bad Request
           content:
             application/json:
               schema:
-                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+                $ref: ../_shared.yaml#/components/schemas/ValidationError
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ForbiddenError
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/NotFoundError
     delete:
       operationId: deleteTask
       tags:
@@ -104,6 +126,18 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ForbiddenError
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/NotFoundError
 components:
   schemas:
     Task:

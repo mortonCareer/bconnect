@@ -49,12 +49,17 @@ paths:
                         type: integer
                         format: int64
         '400':
-          description: |
-            - `C001` 유효하지 않은 입력값입니다
+          description: Bad Request
           content:
             application/json:
               schema:
-                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+                $ref: '#/components/schemas/ProfileValidationError'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateProfileConflictError'
   /api/v1/profiles/{profileId}:
     get:
       operationId: getProfile
@@ -83,6 +88,12 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/ProfileAndMember'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/NotFoundError
   /api/v1/profiles/me:
     get:
       operationId: getMyProfile
@@ -120,12 +131,23 @@ paths:
         '200':
           description: OK
         '400':
-          description: |
-            - `C001` 유효하지 않은 입력값입니다
+          description: Bad Request
           content:
             application/json:
               schema:
-                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+                $ref: '#/components/schemas/ProfileValidationError'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ForbiddenError
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/NotFoundError
     delete:
       operationId: deleteMyProfile
       tags:
@@ -134,6 +156,18 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ForbiddenError
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/NotFoundError
   /api/v1/profiles/me/about:
     put:
       operationId: updateMyProfileAbout
@@ -149,6 +183,18 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/ForbiddenError
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: ../_shared.yaml#/components/schemas/NotFoundError
   /api/v1/profiles/trades:
     get:
       operationId: getTrades
@@ -290,6 +336,28 @@ components:
           type:
             - string
             - 'null'
+    ProfileValidationError:
+      allOf:
+        - $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum: [C001, P002]
+    CreateProfileConflictError:
+      allOf:
+        - $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum: [P001]
     Trade:
       type: string
       enum:
