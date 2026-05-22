@@ -151,18 +151,44 @@ responses:
 
 ### 에러 응답 (4xx/5xx)
 
+feature 에러(`400` validation · `403` · `404` · `409` · 도메인 코드)는 가능한 `error.code` 를 enum 으로 좁힌 typed 스키마로 선언한다. 코드가 단일이면 `_shared.yaml` 공유 스키마, 여러 개면 per-operation named 스키마.
+
+**단일 코드 — 공유 스키마 `$ref`:**
+
+| 코드         | 스키마            |
+| ------------ | ----------------- |
+| `C005` (404) | `NotFoundError`   |
+| `C004` (403) | `ForbiddenError`  |
+| `C001` (400) | `ValidationError` |
+
 ```yaml
-responses:
-  '400':
-    description: |
-      - `C001` 유효하지 않은 입력값입니다
-    content:
-      application/json:
-        schema:
-          $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+'404':
+  description: Not Found
+  content:
+    application/json:
+      schema:
+        $ref: ../_shared.yaml#/components/schemas/NotFoundError
 ```
 
-description 의 error code list 는 인간용 안내. `ApiErrorResponse` schema 는 `{success: false, error: ApiError, data: null}` 표준 형태.
+**여러 코드 — per-operation named 스키마** (도메인 파일의 `components.schemas` 에):
+
+```yaml
+RegisterMemberConflictError:
+  allOf:
+    - $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
+    - type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum: [M001, M002]
+```
+
+`description` 은 `Bad Request` / `Not Found` 등 HTTP 상태명만 — 코드 의미는 `enum` 이 표현한다.
+
+`401` · `500` 은 per-operation 선언하지 않는다 — cross-cutting 인프라 에러 (`customFetch` 가 처리). 근거: [ADR-0004](../../docs/explanation/adr/0004-api-response-envelope.md) Amendment B.
 
 ## RFC 표준 인용 컨벤션
 
