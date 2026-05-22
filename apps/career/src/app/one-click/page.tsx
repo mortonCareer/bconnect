@@ -35,8 +35,8 @@ function CompanyHeaderSkeleton() {
   return (
     <div className="flex items-start justify-between">
       <div className="flex items-baseline gap-3">
-        <div className="h-7 w-40 animate-pulse rounded bg-bconnect-gray-200" />
-        <div className="h-5 w-28 animate-pulse rounded bg-bconnect-gray-100" />
+        <div className="h-7 w-40 animate-pulse rounded bg-gray-200" />
+        <div className="h-5 w-28 animate-pulse rounded bg-gray-100" />
       </div>
     </div>
   )
@@ -54,13 +54,13 @@ export default async function OneClickPage({ searchParams }: PageProps) {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-6">
-        <h1 className="text-sb-24 text-bconnect-gray-900">원클릭 조회</h1>
+        <h1 className="text-sb-24 text-gray-900">원클릭 조회</h1>
 
         <SearchBar defaultValue={q} />
         <TipBanner />
 
         {q && !isValid && (
-          <p className="text-r-14 text-bconnect-error">
+          <p className="text-r-14 text-destructive">
             올바른 사업자등록번호 형식이 아닙니다. (10자리 숫자)
           </p>
         )}

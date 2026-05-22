@@ -102,6 +102,44 @@ export default function EditAboutPage() { ... }
 
 ---
 
+## 디자인 토큰 (색상)
+
+색 토큰은 [globals.css](src/styles/globals.css) `@theme`에 정의한다. SSOT는 **Figma Variables**이고 이 파일은 sync 결과물 — 토큰은 Figma에서 먼저 바꾸고 코드에 반영한다. 결정 근거: [ADR-0012](../../docs/explanation/adr/0012-design-system-ssot-figma.md).
+
+### 2-layer 구조
+
+| Layer         | 역할                                | 예                                       |
+| ------------- | ----------------------------------- | ---------------------------------------- |
+| **Primitive** | 원시 색 팔레트 (색 × 11단계 스케일) | `--color-primary-500`                    |
+| **Semantic**  | 역할 토큰 — "이 색을 어디에 쓰나"   | `--color-primary`, `--color-destructive` |
+
+- **Primitive** — brand 색(`primary`·`secondary`)만 `@theme`에 11단계(`50`~`950`)로 정의. 비-brand 색(`gray`·`red`·`orange`·`green` 등)은 Tailwind v4 기본 팔레트를 그대로 쓴다 (globals.css에서 재정의하지 않음).
+- **Semantic** — shadcn 토큰 어휘(`background`·`foreground`·`border`·`primary`·`secondary`·`destructive`·`muted`·`ring` 등)를 그대로 쓰고, 값은 Primitive를 `var()`로 alias 한다. globals.css는 이들을 `surface`·`action`·`feedback`·`border` 주석 그룹으로 묶는다.
+- 컴포넌트는 **semantic 토큰을 우선 소비**한다. primitive step 직접 사용(`bg-primary-600` 등)은 hover 등 특정 단계가 꼭 필요할 때만.
+
+### 네이밍 규칙
+
+- 모든 색 토큰은 `--color-` prefix (Tailwind v4 색 네임스페이스). `--bconnect-*` 같은 커스텀 prefix 금지.
+- **Figma Variable 명 = `@theme` 변수명**, 글자 단위로 일치시킨다. 변환 규칙 없는 1:1 매핑 — drift 감지·검색을 단순하게.
+- Figma의 group 구분은 CSS에서 하이픈으로 평탄화한다.
+
+| Figma Variable | `@theme` 변수         | Tailwind 유틸      |
+| -------------- | --------------------- | ------------------ |
+| `primary/500`  | `--color-primary-500` | `bg-primary-500`   |
+| `primary`      | `--color-primary`     | `bg-primary`       |
+| `destructive`  | `--color-destructive` | `text-destructive` |
+
+### 새 토큰 추가 절차
+
+1. **디자이너** — Figma Variables에 등록 (primitive면 색×11단계, semantic이면 primitive를 가리키는 alias).
+2. **FE** — [globals.css](src/styles/globals.css) `@theme`에 같은 이름으로 추가. primitive면 `50`~`950` 전부, semantic이면 `var()` alias 한 줄.
+3. 컴포넌트에서 Tailwind 유틸(`bg-<token>` 등)로 사용.
+
+- **System color**(feedback)는 사용처가 생길 때 추가한다. 현재 `destructive`(error)만 — `warning`/`success`/`info`는 미도입 (ADR-0012 §5).
+- 다크모드·반응형 토큰은 1차 범위 외 (ADR-0012 §6).
+
+---
+
 ## 디렉토리 구조
 
 ```text

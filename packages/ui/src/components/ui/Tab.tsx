@@ -38,7 +38,7 @@ export interface TabProps {
 const Tab = React.forwardRef<HTMLDivElement, TabProps>(
   ({ items, activeKey, onChange, className }, ref) => {
     return (
-      <div ref={ref} className={cn('flex w-full border-b border-bconnect-gray-300', className)}>
+      <div ref={ref} className={cn('flex w-full border-b border-gray-300', className)}>
         {items.map((item) => {
           const isActive = item.key === activeKey
 
@@ -49,15 +49,13 @@ const Tab = React.forwardRef<HTMLDivElement, TabProps>(
               onClick={() => onChange?.(item.key)}
               className={cn(
                 'flex-1 flex flex-col items-center pt-3 cursor-pointer transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bconnect-primary focus-visible:ring-offset-2'
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
               )}
             >
               <span
                 className={cn(
                   'text-sm pb-[10px]',
-                  isActive
-                    ? 'text-bconnect-primary font-semibold'
-                    : 'text-bconnect-gray-500 font-medium'
+                  isActive ? 'text-primary font-semibold' : 'text-gray-500 font-medium'
                 )}
               >
                 {item.label}
@@ -65,7 +63,7 @@ const Tab = React.forwardRef<HTMLDivElement, TabProps>(
               <div
                 className={cn(
                   'w-full h-[2px] transition-colors',
-                  isActive ? 'bg-bconnect-primary' : 'bg-transparent'
+                  isActive ? 'bg-primary' : 'bg-transparent'
                 )}
               />
             </button>

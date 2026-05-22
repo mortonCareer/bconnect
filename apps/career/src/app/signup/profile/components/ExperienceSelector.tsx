@@ -22,8 +22,8 @@ export function ExperienceSelector({ options, selected, onSelect }: ExperienceSe
             className={cn(
               'flex h-[40px] items-center justify-center rounded-[8px] border px-[14px] py-[3px] text-sm leading-[1.6] transition-colors',
               isSelected
-                ? 'border-bconnect-primary bg-bconnect-primary-sub font-semibold text-bconnect-primary'
-                : 'border-bconnect-gray-300 font-medium text-bconnect-gray-500'
+                ? 'border-primary bg-secondary font-semibold text-primary'
+                : 'border-gray-300 font-medium text-gray-500'
             )}
           >
             {option.label}
