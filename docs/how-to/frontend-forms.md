@@ -69,7 +69,6 @@ const form = useForm<LoginFormData>({
 ```tsx
 import { formatPhoneNumber } from '@bconnect/config/phone'
 import { Button, Form, TextField } from '@bconnect/ui'
-
 ;<Form {...form}>
   <form onSubmit={onSubmit}>
     <TextField
