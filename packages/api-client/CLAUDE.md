@@ -97,13 +97,6 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/MemberPreferences'
-        '401':
-          description: |
-            - `A007` 유효하지 않은 액세스 토큰입니다
-          content:
-            application/json:
-              schema:
-                $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
 ```
 
 ### 3. Root openapi.yaml 등록

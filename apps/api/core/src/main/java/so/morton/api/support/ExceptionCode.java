@@ -8,7 +8,7 @@ import org.springframework.boot.logging.LogLevel;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public interface ExceptionCode {
     String getCode();
-    HttpStatus getStatus();
-    @JsonIgnore String getMessage();
+    @JsonIgnore HttpStatus getStatus();
+    String getMessage();
     @JsonIgnore LogLevel getLogLevel();
 }

@@ -1,6 +1,6 @@
 # ADR-0004: API response envelope `{success, data, error}`
 
-- **Status**: Accepted
+- **Status**: Accepted (↓ 2026-05-22 Amendment — `error` 구조 + cross-cutting 에러 선언 정책 변경)
 - **Date**: 2026-05-08 (백필 작성일. 결정 자체는 BE 초기 — 정확한 origin 추적 곤란)
 - **Deciders**: @fine-pine (BE 초기 도입), @manamana32321 (spec 정렬)
 - **Related**: [PR #266](https://github.com/mortonCareer/bconnect/pull/266) (spec 정렬), [`packages/api-client/src/spec/_shared.yaml`](../../../packages/api-client/src/spec/_shared.yaml) (envelope schema)
@@ -110,10 +110,33 @@ ApiError:
   - HTTP 표준에서 약간 일탈 — 외부 API 통합 또는 외부 계약 시 설명 비용
   - void 응답(PUT/DELETE 일부) wrap 안 함 → ExtractData fallback 처리 필요 — codegen 복잡도 약간 ↑
 - **중립적 결과**:
-  - `ApiError`는 의도적으로 simple (`{code, status}` 만). 사람용 message는 클라이언트가 code → message 매핑. 다국어/A11y 대응 단일 책임.
+  - `ApiError`는 의도적으로 simple (`{code, status}` 만). 사람용 message는 클라이언트가 code → message 매핑. 다국어/A11y 대응 단일 책임. _(↓ 2026-05-22 Amendment A 로 번복 — message BE 소유, `status` 제거.)_
 
 ## Notes
 
 - envelope 도입 origin은 BE 초기. spec 정렬은 [PR #266](https://github.com/mortonCareer/bconnect/pull/266) Phase 1
 - 루트 [`CLAUDE.md`](../../../CLAUDE.md)에 "API Response Wrapper" 패턴 명시
 - 후속: void 응답 unwrap 패턴 검증 — orval generated hooks의 `data` 타입이 정확히 `void`로 떨어지는지 spot check 필요
+
+## Amendment 2026-05-22 — 에러 envelope 정비
+
+> 2026-05-22 회의 의결. envelope 결정(Option 3)은 유지, `error` 구조·에러 선언 방식만 변경. 위 본문은 역사 보존용. **Related**: [#398](https://github.com/mortonCareer/bconnect/issues/398), [#270](https://github.com/mortonCareer/bconnect/issues/270)
+
+### A. `error` 구조 — `{code, status}` → `{code, message}`
+
+- `error.status` 제거 — HTTP status line과 중복, FE 소비처 0.
+- `error.message` 추가 — **BE 정의, FE 그대로 표시.** `error.code`는 분기 키로 유지.
+- **⚠️ 위 Consequences "message는 클라가 code→message 매핑"을 번복** — 소유권 클라 → BE. 근거: BE `ExceptionCode`가 한국어 카피를 이미 보유(`@JsonIgnore`로 막혀 있었을 뿐) → 클라 매핑은 카피 2벌 = SSOT 붕괴. 단일 언어라 i18n 명분도 부재.
+- BE: `ExceptionCode.getMessage()` `@JsonIgnore` 제거 / `getStatus()` `@JsonIgnore` 추가(메서드 유지) / `getLogLevel()` 유지.
+- 스펙: [`_shared.yaml`](../../../packages/api-client/src/spec/_shared.yaml) `ApiError` → `{code, message}`, `code`는 신규 `ApiErrorCode` 카탈로그 enum 참조.
+
+### B. cross-cutting 에러 응답 선언 정책
+
+에러를 **처리 주체** 기준 두 부류로 나눠 선언 방식을 달리한다.
+
+| 부류                                                                             | per-op 선언                                                      |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Cross-cutting 인프라 (`401`·`500` — `customFetch`가 처리)                        | 안 함, 본 정책으로 1회 명시                                      |
+| Feature 에러 (`400`/`403`/`404`/`409`·도메인 코드 — feature가 `error.code` 분기) | 함 ([#270](https://github.com/mortonCareer/bconnect/issues/270)) |
+
+근거: `401`은 `client.ts`가 가로채 처리 → feature 코드가 분기 안 함. per-op 선언은 가치 0 + #270 보일러플레이트 44배. [`api-client/CLAUDE.md`](../../../packages/api-client/CLAUDE.md) 템플릿의 `'401'` 블록 제거로 정합.

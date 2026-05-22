@@ -36,14 +36,50 @@ components:
       type: object
       required:
         - code
-        - status
+        - message
       properties:
         code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
           type: string
-          example: C001
-        status:
-          type: string
-          example: BAD_REQUEST
+          description: 사용자에게 표시할 에러 메시지.
+          example: 유효하지 않은 입력값입니다.
+    ApiErrorCode:
+      type: string
+      description: 전체 에러 코드 카탈로그.
+      enum:
+        # Common (CommonExceptionCode)
+        - C001 # 유효하지 않은 입력값
+        - C002 # 요청 값 타입 불일치
+        - C003 # 필수 파라미터 누락
+        - C004 # 리소스 접근 권한 없음
+        - C005 # 리소스를 찾을 수 없음
+        - C006 # 지원하지 않는 미디어 형식
+        - C007 # 서버 내부 오류
+        # Auth (AuthExceptionCode)
+        - A001 # 일일 발송 한도 초과
+        - A002 # 재전송 대기 시간 미경과
+        - A003 # 유효하지 않은 인증번호
+        - A004 # 인증번호 만료
+        - A005 # 인증 시도 횟수 초과
+        - A006 # 유효하지 않은 리프레시 토큰
+        - A007 # 유효하지 않은 액세스 토큰
+        - A008 # 세션 만료
+        - A009 # 유효하지 않은 가입 토큰
+        - A010 # 가입 토큰 만료
+        # Coworker (CoworkerExceptionCode)
+        - CW001 # 자기 자신에게 동료 요청
+        - CW002 # 이미 동료
+        - CW003 # 요청 대상 프로필 없음
+        - CW004 # 동료 요청 없음
+        - CW005 # 이미 동료 요청을 보냄
+        - CW006 # 동료 관계 없음
+        # Member (MemberExceptionCode)
+        - M001 # 이미 사용 중인 사용자명
+        - M002 # 이미 사용 중인 전화번호
+        # Profile (ProfileExceptionCode)
+        - P001 # 이미 프로필 존재
+        - P002 # 유효하지 않은 대표 공종
     ApiErrorResponse:
       type: object
       required:
