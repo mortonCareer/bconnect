@@ -139,4 +139,4 @@ ApiError:
 | Cross-cutting 인프라 (`401`·`500` — `customFetch`가 처리)                        | 안 함, 본 정책으로 1회 명시                                      |
 | Feature 에러 (`400`/`403`/`404`/`409`·도메인 코드 — feature가 `error.code` 분기) | 함 ([#270](https://github.com/mortonCareer/bconnect/issues/270)) |
 
-근거: `401`은 `client.ts`가 가로채 처리 → feature 코드가 분기 안 함. per-op 선언은 가치 0 + #270 보일러플레이트 44배. [`api-client/CLAUDE.md`](../../../packages/api-client/CLAUDE.md) 템플릿의 `'401'` 블록 제거로 정합.
+근거: `401`은 `client.ts`가 가로채 처리 → feature 코드가 분기 안 함. per-op 선언은 가치가 없고 [#270](https://github.com/mortonCareer/bconnect/issues/270)의 보일러플레이트만 44배로 키운다. [`api-client/CLAUDE.md`](../../../packages/api-client/CLAUDE.md) 템플릿의 `'401'` 블록 제거로 정합.
