@@ -7,9 +7,11 @@ import Image from 'next/image'
 import { useGetMyMember, useGetMyChats } from '@bconnect/api-client'
 import { cn } from '@bconnect/ui'
 import { getAvatarUrl } from '@/lib/avatar'
+import { SidebarFooter } from './SidebarFooter'
 
-// 알림 카운트 — notification 엔드포인트 미존재. count=0 이면 badge 숨김 처리되므로 시안상 무영향.
-// TODO: notification 엔드포인트 추가되면 useGet*Notifications 로 교체.
+// TODO(신규 BE 이슈 필요 — notification 도메인): 엔드포인트 추가 시
+//   `const { data } = useGetMyNotifications(); const NOTIFICATION_COUNT = data?.unreadCount ?? 0`
+//   형태로 교체. count=0 이면 Badge 자동 숨김.
 const NOTIFICATION_COUNT = 4
 
 function Badge({ count }: { count: number }) {
@@ -59,8 +61,13 @@ function ProfileSection() {
   }
 
   const displayName = member?.name ? `${member.name}님` : ''
-  // member.picture 가 null 일 때 (mock faker / BE 미연결) dicebear 아바타로 폴백 — Figma 일러스트 톤과 유사.
-  const avatarUrl = member?.picture ?? getAvatarUrl(member?.name ?? '회원')
+
+  // BE 가 실제 업로드 URL (S3 등) 을 내려주면 그대로 사용. null 또는 MSW faker 의 placehold URL 이면
+  // dicebear 아바타로 폴백 — Figma 일러스트 톤과 유사. 운영에서도 사진 미업로드 회원은 자연 폴백.
+  const avatarUrl =
+    member?.picture && !/placehold\.co|placeholder\.com/i.test(member.picture)
+      ? member.picture
+      : getAvatarUrl(member?.name ?? '회원')
 
   return (
     <div className="flex items-center gap-3">
@@ -69,7 +76,8 @@ function ProfileSection() {
       </div>
       <div className="flex min-w-0 flex-col gap-0.5">
         <p className="truncate text-sb-16 text-bconnect-gray-900">{displayName}</p>
-        {/* TODO: Corporation 도메인 도입 후 업체명 필드로 교체 (Member schema 에 미존재) */}
+        {/* TODO(신규 BE 이슈 필요 — Corporation 도메인): Member schema 에 업체명 필드 추가 시
+            `{member?.corporation?.name ?? ''}` 등으로 교체. */}
         <p className="truncate text-r-12 text-bconnect-gray-500">OO디자인</p>
       </div>
     </div>
@@ -103,11 +111,7 @@ export function MemberSidebar() {
         </div>
       </div>
 
-      {/* 푸터: 로고 + 무료 요금제 캡션 (GuestSidebar 와 동일) */}
-      <div className="flex flex-col gap-3 p-5">
-        <Image src="/logo.png" alt="품앗이" width={70} height={24} priority />
-        <p className="text-r-12 text-bconnect-gray-500">무료 요금제</p>
-      </div>
+      <SidebarFooter />
     </div>
   )
 }
