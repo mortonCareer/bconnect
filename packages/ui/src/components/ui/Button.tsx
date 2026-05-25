@@ -2,6 +2,7 @@
  * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=187-607
  */
 import * as React from 'react'
+import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
 
@@ -48,6 +49,7 @@ export interface ButtonProps
   children?: React.ReactNode
   isLoading?: boolean
   loadingText?: string
+  asChild?: boolean
 }
 
 /**
@@ -72,19 +74,38 @@ export interface ButtonProps
  *
  * // Full width
  * <Button size="full">다음</Button>
+ *
+ * // 링크로 동작 (semantic <a href>) — asChild 로 자식 <Link> 에 스타일 합성
+ * <Button asChild variant="primary">
+ *   <Link href="/login">로그인</Link>
+ * </Button>
  * ```
  */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, children, isLoading, loadingText, disabled, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      children,
+      isLoading,
+      loadingText,
+      disabled,
+      asChild = false,
+      ...props
+    },
+    ref
+  ) => {
+    const Comp = asChild ? Slot : 'button'
     return (
-      <button
+      <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         disabled={disabled || isLoading}
         {...props}
       >
         {isLoading ? loadingText || '로딩 중...' : children}
-      </button>
+      </Comp>
     )
   }
 )

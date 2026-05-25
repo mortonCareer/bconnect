@@ -52,8 +52,5 @@
       "prettier --write"
     ],
     "*.{json,md,css}": "prettier --write"
-  },
-  "dependencies": {
-    "nuqs": "^2.8.9"
   }
 }
