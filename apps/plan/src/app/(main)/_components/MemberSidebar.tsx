@@ -90,9 +90,9 @@ export function MemberSidebar() {
 
   return (
     <div className="flex h-full flex-col justify-between">
-      <div className="flex flex-col px-5 py-10">
+      <div className="flex flex-col gap-5 px-5 py-7">
         <ProfileSection />
-        <div className="my-3 h-px bg-bconnect-gray-300" />
+        <div className="h-px bg-bconnect-gray-300" />
         <div className="flex flex-col gap-0.5">
           <NavItem
             label="알림"
