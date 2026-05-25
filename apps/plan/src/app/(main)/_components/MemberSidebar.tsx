@@ -28,6 +28,7 @@ interface NavItemProps {
   onClick: () => void
 }
 
+// TODO: #381 — utils.ts 이슈 수정 후 스타일 반영
 function NavItem({ label, count, onClick }: NavItemProps) {
   return (
     <button
