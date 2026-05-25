@@ -6,6 +6,7 @@ import { TRADE_LABELS } from '@/lib/trade-labels'
 import type { TechnicianItem } from '@/hooks/useTechnicianItems'
 import type { Trade } from '@bconnect/api-client'
 import { useLoginGate } from './LoginGateProvider'
+import { useAuthStore } from '@/stores/auth-store'
 
 // Figma node 1504:12113 — bg-gray-100, border-gray-300, rounded-7, R14 gray-700
 function CertTag({ label }: { label: string }) {
@@ -90,6 +91,18 @@ interface TechnicianCardProps {
 
 export function TechnicianCard({ item }: TechnicianCardProps) {
   const { requireLogin } = useLoginGate()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
+  const handleViewProfile = isAuthenticated
+    ? () => {
+        /* TODO #344 — ProfilePanel 트리거 */
+      }
+    : requireLogin
+  const handleSendMessage = isAuthenticated
+    ? () => {
+        /* TODO #345 — MessagesPanel 트리거 */
+      }
+    : requireLogin
 
   const metaParts = [
     item.location,
@@ -162,10 +175,10 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
 
           {/* 액션 버튼 — Figma 카드: h-40 w-full. design system Button 의 'full' size 는 h-50 이라 h-40 override. */}
           <div className="mt-auto flex gap-[10px]">
-            <Button variant="outline" size="full" className="h-[40px]" onClick={requireLogin}>
+            <Button variant="outline" size="full" className="h-[40px]" onClick={handleViewProfile}>
               프로필 보기
             </Button>
-            <Button variant="primary" size="full" className="h-[40px]" onClick={requireLogin}>
+            <Button variant="primary" size="full" className="h-[40px]" onClick={handleSendMessage}>
               메시지 보내기
             </Button>
           </div>
