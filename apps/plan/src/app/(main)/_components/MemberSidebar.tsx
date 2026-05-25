@@ -5,7 +5,6 @@
 
 import Image from 'next/image'
 import { useGetMyMember, useGetMyChats } from '@bconnect/api-client'
-import { cn } from '@bconnect/ui'
 import { getAvatarUrl } from '@/lib/avatar'
 import { SidebarFooter } from './SidebarFooter'
 
@@ -34,10 +33,7 @@ function NavItem({ label, count, onClick }: NavItemProps) {
     <button
       type="button"
       onClick={onClick}
-      className={cn(
-        'flex h-[44px] w-full items-center justify-between rounded-[8px] px-3',
-        'text-r-14 text-bconnect-gray-900 hover:bg-bconnect-gray-100'
-      )}
+      className="flex h-[44px] w-full items-center justify-between rounded-[8px] px-3 text-r-14 text-bconnect-gray-900 hover:bg-bconnect-gray-100"
     >
       <span>{label}</span>
       <Badge count={count} />
