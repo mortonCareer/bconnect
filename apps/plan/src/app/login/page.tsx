@@ -165,6 +165,7 @@ export default function LoginPage() {
               onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
               onKeyDown={handleKeyDown}
               disabled={step === 'otp'}
+              error={step === 'phone' && !!error}
             />
 
             {/* OTP Section */}
@@ -178,6 +179,7 @@ export default function LoginPage() {
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   onKeyDown={handleKeyDown}
+                  error={!!error}
                   rightElement={
                     <OtpTimer
                       expiresAt={expiresAt}

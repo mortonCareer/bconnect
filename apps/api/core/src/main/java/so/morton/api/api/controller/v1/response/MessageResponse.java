@@ -4,6 +4,7 @@ import so.morton.api.domain.chat.Message;
 import so.morton.api.storage.value.MessageType;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record MessageResponse(
         Long id,
@@ -24,5 +25,8 @@ public record MessageResponse(
                 message.createdAt(),
                 message.modifiedAt()
         );
+    }
+    public static List<MessageResponse> of(List<Message> messages) {
+        return messages.stream().map(MessageResponse::of).toList();
     }
 }

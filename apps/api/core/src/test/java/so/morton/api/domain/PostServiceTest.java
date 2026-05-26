@@ -146,7 +146,7 @@ class PostServiceTest {
             assertThat(result.id()).isEqualTo(POST_ID);
             assertThat(result.profileId()).isEqualTo(PROFILE_ID);
             assertThat(result.content()).isEqualTo("content");
-            assertThat(result.images()).isEqualTo(List.of("image"));
+            assertThat(result.images()).isEqualTo(List.of(PostFactory.IMAGE));
             verify(profileFinder).findByMemberId(USER_ID);
             verify(postRepository).save(any(PostEntity.class));
         }
@@ -172,7 +172,7 @@ class PostServiceTest {
         void create_withNullTaskId() {
             // given
             Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
-            CreatePostRequest request = new CreatePostRequest(null, List.of("image"), "content");
+            CreatePostRequest request = new CreatePostRequest(null, List.of(PostFactory.IMAGE), "content");
 
             when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
             when(postRepository.save(any(PostEntity.class))).thenAnswer(invocation -> {
