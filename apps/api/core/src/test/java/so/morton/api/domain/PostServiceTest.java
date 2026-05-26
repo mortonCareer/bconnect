@@ -172,7 +172,7 @@ class PostServiceTest {
         void create_withNullTaskId() {
             // given
             Profile profile = ProfileFactory.create(PROFILE_ID, USER_ID);
-            CreatePostRequest request = new CreatePostRequest(null, List.of("image"), "content");
+            CreatePostRequest request = new CreatePostRequest(null, List.of(PostFactory.IMAGE), "content");
 
             when(profileFinder.findByMemberId(USER_ID)).thenReturn(profile);
             when(postRepository.save(any(PostEntity.class))).thenAnswer(invocation -> {

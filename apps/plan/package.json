@@ -19,6 +19,7 @@
     "react-dom": "catalog:",
     "react-hook-form": "catalog:",
     "zod": "catalog:",
+    "nuqs": "catalog:",
     "zustand": "catalog:"
   },
   "devDependencies": {
