@@ -8,11 +8,13 @@ import org.springframework.util.StringUtils;
 
 public class JwtUtils {
 
-    public static String resolveBearerToken(HttpServletRequest request) {
-        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+    public static String resolveBearerToken(String authorization) {
         if (!StringUtils.startsWithIgnoreCase(authorization, "bearer ")) return null;
-
         return authorization.substring(7).trim();
+    }
+
+    public static String resolveBearerToken(HttpServletRequest request) {
+        return resolveBearerToken(request.getHeader(HttpHeaders.AUTHORIZATION));
     }
 
     public static String resolveCookie(HttpServletRequest request, String name) {

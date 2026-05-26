@@ -1,11 +1,25 @@
 package so.morton.api.support.request;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 public record CursorLimit(
-        String cursor,
-        int limit,
-        boolean reverse
+        Long cursor,
+        Integer limit,
+        Boolean reverse
 ) {
+    private static final int DEFAULT_LIMIT = 20;
+
     public CursorLimit {
-        if (limit <= 0) limit = 20;
+        if (limit == null || limit <= 0) limit = DEFAULT_LIMIT;
+        if (reverse == null) reverse = false;
+    }
+
+    public Pageable toPageable() {
+        Sort sort = reverse
+                ? Sort.by(Sort.Direction.ASC, "id")
+                : Sort.by(Sort.Direction.DESC, "id");
+        return PageRequest.of(0, limit, sort);
     }
 }

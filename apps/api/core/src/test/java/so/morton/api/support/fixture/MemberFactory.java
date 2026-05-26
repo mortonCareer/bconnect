@@ -10,8 +10,10 @@ import java.time.LocalDateTime;
 
 public class MemberFactory {
 
+    public static final String PICTURE = "https://example.com/picture.jpg";
+
     public static Member create(Long id) {
-        return new Member(id, "username", "name", "phone", "picture", Role.FOREMAN,
+        return new Member(id, "username", "name", "phone", PICTURE, Role.FOREMAN,
                 LocalDateTime.MIN, LocalDateTime.MIN);
     }
 
@@ -20,7 +22,7 @@ public class MemberFactory {
                 .username("username")
                 .name("name")
                 .phone("phone")
-                .picture("picture")
+                .picture(PICTURE)
                 .role(Role.FOREMAN)
                 .build();
     }
@@ -30,16 +32,16 @@ public class MemberFactory {
                 .username(username)
                 .phone(phone)
                 .name("name")
-                .picture("picture")
+                .picture(PICTURE)
                 .role(role)
                 .build();
     }
 
     public static RegisterMemberRequest registerRequest() {
-        return new RegisterMemberRequest("signupToken", "username", "name", "picture", Role.FOREMAN);
+        return new RegisterMemberRequest("signupToken", "username", "name", PICTURE, Role.FOREMAN);
     }
 
     public static UpdateMemberRequest updateRequest() {
-        return new UpdateMemberRequest("name", "picture", Role.CONTRACTOR);
+        return new UpdateMemberRequest("name", PICTURE, Role.CONTRACTOR);
     }
 }
