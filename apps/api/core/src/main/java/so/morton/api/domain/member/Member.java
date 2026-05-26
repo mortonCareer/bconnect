@@ -15,6 +15,8 @@ public record Member(
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
+    public static final Long SYSTEM_ID = 0L;
+
     public static Member of(MemberEntity entity) {
         return new Member(
                 entity.getId(),

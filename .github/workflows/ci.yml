@@ -86,6 +86,9 @@ jobs:
       - name: Type check
         run: pnpm --filter morton-career typecheck
 
+      - name: Build
+        run: pnpm --filter morton-career build
+
       - name: Lint
         run: pnpm --filter morton-career lint
 
@@ -112,6 +115,9 @@ jobs:
 
       - name: Type check
         run: pnpm --filter morton-plan typecheck
+
+      - name: Build
+        run: pnpm --filter morton-plan build
 
       - name: Lint
         run: pnpm --filter morton-plan lint

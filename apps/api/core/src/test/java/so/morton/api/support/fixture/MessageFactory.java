@@ -2,8 +2,10 @@ package so.morton.api.support.fixture;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import so.morton.api.api.controller.v1.request.SendMessageRequest;
 import so.morton.api.storage.domain.chat.MessageEntity;
 import so.morton.api.storage.domain.chat.MessageRepository;
+import so.morton.api.storage.value.MessageType;
 
 @Component
 public class MessageFactory {
@@ -16,5 +18,13 @@ public class MessageFactory {
                 .memberId(memberId)
                 .content("content")
                 .build());
+    }
+
+    public static SendMessageRequest createRequest() {
+        return new SendMessageRequest(MessageType.TEXT, "content");
+    }
+
+    public static SendMessageRequest createRequest(MessageType type, String content) {
+        return new SendMessageRequest(type, content);
     }
 }

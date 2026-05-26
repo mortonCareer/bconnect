@@ -90,6 +90,7 @@ public class SecurityConfig {
                         .requestMatchers(GET, "/api/v1/feeds").permitAll()
                         .requestMatchers(GET, "/api/v1/credentials", "/api/v1/credentials/types").permitAll()
                         .requestMatchers(POST, "/api/v1/credentials/*/accept", "/api/v1/credentials/*/deny").hasRole("ADMIN")
+                        .requestMatchers(GET, "/api/v1/recommendations/received", "/api/v1/recommendations/sent").permitAll()
                         .anyRequest().authenticated())
                 .addFilterAfter(verifyOtpFilter, LogoutFilter.class)
                 .addFilterAfter(accessTokenAuthenticationFilter, LogoutFilter.class)
