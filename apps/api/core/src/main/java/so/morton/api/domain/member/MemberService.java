@@ -13,6 +13,8 @@ import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
 import so.morton.api.support.auth.otp.OtpService;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -24,6 +26,16 @@ public class MemberService {
     @Transactional(readOnly = true)
     public Member get(User user) {
         return memberFinder.find(user.id());
+    }
+
+    @Transactional(readOnly = true)
+    public List<Member> getAll() {
+        return memberFinder.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean checkUsername(String username) {
+        return !memberRepository.existsByUsername(username);
     }
 
     @Transactional
