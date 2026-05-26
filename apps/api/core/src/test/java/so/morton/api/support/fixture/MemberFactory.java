@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 public class MemberFactory {
 
-    public static final String PICTURE = "https://example.com/picture.jpg";
+    public static final String PICTURE = "https://placehold.co/200x200";
 
     public static Member create(Long id) {
         return new Member(id, "username", "name", "phone", PICTURE, Role.FOREMAN,

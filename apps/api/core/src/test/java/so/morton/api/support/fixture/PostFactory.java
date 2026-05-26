@@ -10,7 +10,7 @@ import java.util.List;
 
 public class PostFactory {
 
-    public static final String IMAGE = "https://example.com/image.jpg";
+    public static final String IMAGE = "https://placehold.co/600x400";
 
     public static Post create(Long id, Long profileId, Long taskId) {
         return new Post(id, profileId, taskId, List.of(IMAGE), "content",
