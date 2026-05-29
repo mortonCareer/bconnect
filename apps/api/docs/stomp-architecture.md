@@ -11,7 +11,7 @@
 - WebSocketAuthInterceptor : WebSocket 연결시 인증 처리
 - WebSocketAuthorizationConfig : 엔드포인트에 따른 보안 설정
 - WebSocketConfig : STOMP 설정
-- WebSocketSecurityConfig : CSRF 비활성화를 위한 보안 설정 ([ref](ttps://docs.spring.io/spring-security/reference/servlet/integrations/websocket.html#websocket-sameorigin-disable))
+- WebSocketSecurityConfig : CSRF 비활성화를 위한 보안 설정 ([자세히보기](https://docs.spring.io/spring-security/reference/servlet/integrations/websocket.html#websocket-sameorigin-disable))
 
 ## Reference
 - `core` module `/support/ws`

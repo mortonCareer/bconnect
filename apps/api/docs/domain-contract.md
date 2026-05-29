@@ -1,12 +1,14 @@
-# domain-contract
+# 도메인 패키지 제약사항
 
-## Scope
+## 범위
 - 서비스(Service)
 - 도메인 객체(Domain Object)
 
-## Service Contracts
-- 클래스명 : <domain>-<component>
-- 클래스 유형
-  - service : default, command
-  - finder : query
-  - validator : validation
+## 서비스 유형
+- XXXService : 기본 서비스, 퍼사드(Facade) 서비스
+- XXXFinder : 쿼리 메서드
+- XXXValidator : 유효성 검증
+
+## 도메인 객체 유형
+- 하위 도메인 객체 : 엔티티에 의존
+- 상위 도메인 객체 : 하위 도메인에 의존

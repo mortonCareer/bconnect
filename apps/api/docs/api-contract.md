@@ -1,19 +1,10 @@
-# api-contract
+# API 패키지 제약사항
 
-## Scope
-- API 또는 컨트롤러(Controller)
+## 범위
+- 컨트롤러(Controller)
 - DTO
 
-## API Contracts
-- API 메서드명은 다음 중 하나에 해당된다
-  - `create`, `send`
-  - `list`
-  - `detail`
-  - `update`
-  - `delete`
-
-## DTO Contracts
-- DTO 클래스명의 suffix는 다음 중 하나에 해당된다
-  - `request`
-  - `response`
-  - `detail-response`
+## DTO 유형
+- `XXXRequest` : 요청 DTO
+- `XXXResponse` : 단일 도메인 객체에 대응되는 응답 DTO
+- `XXXDetailResponse` : 둘 이상의 도메인 객체가 병합된 응답 DTO
