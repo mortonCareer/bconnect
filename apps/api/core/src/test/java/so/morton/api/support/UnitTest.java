@@ -1,4 +1,4 @@
-package so.morton.api.config;
+package so.morton.api.support;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;

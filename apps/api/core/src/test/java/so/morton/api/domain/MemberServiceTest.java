@@ -18,6 +18,7 @@ import so.morton.api.storage.domain.member.MemberEntity;
 import so.morton.api.storage.domain.member.MemberRepository;
 import so.morton.api.storage.value.Role;
 import so.morton.api.support.CommonExceptionCode;
+import so.morton.api.support.UnitTest;
 import so.morton.api.support.fixture.MemberFactory;
 import so.morton.api.support.fixture.UserFactory;
 
@@ -30,7 +31,7 @@ import static so.morton.api.support.CodeExceptionAssert.assertCodeException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@UnitTest
 @DisplayName("MemberService 테스트")
 class MemberServiceTest {
 

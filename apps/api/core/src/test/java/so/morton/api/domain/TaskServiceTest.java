@@ -18,6 +18,7 @@ import so.morton.api.domain.task.TaskService;
 import so.morton.api.storage.domain.task.TaskEntity;
 import so.morton.api.storage.domain.task.TaskRepository;
 import so.morton.api.support.CommonExceptionCode;
+import so.morton.api.support.UnitTest;
 import so.morton.api.support.fixture.ProfileFactory;
 import so.morton.api.support.fixture.TaskFactory;
 import so.morton.api.support.fixture.UserFactory;
@@ -33,7 +34,7 @@ import static so.morton.api.support.CodeExceptionAssert.assertCodeException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@UnitTest
 @DisplayName("TaskService 테스트")
 class TaskServiceTest {
 

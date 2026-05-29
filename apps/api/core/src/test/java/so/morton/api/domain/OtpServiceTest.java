@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import so.morton.api.storage.domain.otp.OtpEntity;
 import so.morton.api.storage.domain.otp.OtpRepository;
 import so.morton.api.support.AuthExceptionCode;
+import so.morton.api.support.UnitTest;
 import so.morton.api.support.auth.otp.OtpService;
 import so.morton.api.support.fixture.OtpFactory;
 import so.morton.api.support.sms.SmsProvider;
@@ -24,7 +25,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@UnitTest
 @DisplayName("OtpService 테스트")
 class OtpServiceTest {
 

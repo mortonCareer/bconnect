@@ -13,6 +13,7 @@ import so.morton.api.storage.domain.session.SessionEntity;
 import so.morton.api.storage.domain.session.SessionRepository;
 import so.morton.api.storage.value.Role;
 import so.morton.api.support.AuthExceptionCode;
+import so.morton.api.support.UnitTest;
 import so.morton.api.support.auth.otp.SessionService;
 import so.morton.api.support.fixture.MemberFactory;
 import so.morton.api.support.fixture.SessionFactory;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.*;
 import static so.morton.api.support.CodeExceptionAssert.assertCodeException;
 import static so.morton.api.support.auth.AuthUtils.sha256;
 
-@ExtendWith(MockitoExtension.class)
+@UnitTest
 @DisplayName("SessionService 테스트")
 class SessionServiceTest {
 

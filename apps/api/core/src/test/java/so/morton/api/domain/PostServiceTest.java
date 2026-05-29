@@ -18,6 +18,7 @@ import so.morton.api.storage.domain.post.PostEntity;
 import so.morton.api.storage.domain.post.PostRepository;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
+import so.morton.api.support.UnitTest;
 import so.morton.api.support.fixture.PostFactory;
 import so.morton.api.support.fixture.ProfileFactory;
 import so.morton.api.support.fixture.UserFactory;
@@ -31,7 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static so.morton.api.support.CodeExceptionAssert.assertCodeException;
 
-@ExtendWith(MockitoExtension.class)
+@UnitTest
 @DisplayName("PostService 테스트")
 class PostServiceTest {
 

@@ -26,6 +26,7 @@ import so.morton.api.storage.domain.profile.ProfileRepository;
 import so.morton.api.storage.value.Role;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
+import so.morton.api.support.UnitTest;
 import so.morton.api.support.auth.User;
 import so.morton.api.support.fixture.CoworkerRequestFactory;
 import so.morton.api.support.fixture.MemberFactory;
@@ -40,7 +41,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static so.morton.api.support.CodeExceptionAssert.assertCodeException;
 
-@ExtendWith(MockitoExtension.class)
+@UnitTest
 @DisplayName("CoworkerRequestService 테스트")
 class CoworkerRequestServiceTest {
 

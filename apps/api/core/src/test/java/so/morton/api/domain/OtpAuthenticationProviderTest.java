@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import so.morton.api.support.AuthExceptionCode;
 import so.morton.api.support.CodeException;
+import so.morton.api.support.UnitTest;
 import so.morton.api.support.auth.User;
 import so.morton.api.support.auth.UserService;
 import so.morton.api.support.auth.otp.OtpAuthenticationProvider;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.*;
 import static so.morton.api.storage.value.Role.GUEST;
 import static so.morton.api.support.auth.User.ROLE_PREFIX;
 
-@ExtendWith(MockitoExtension.class)
+@UnitTest
 @DisplayName("OtpAuthenticationProvider 테스트")
 class OtpAuthenticationProviderTest {
 

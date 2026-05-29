@@ -20,6 +20,7 @@ import so.morton.api.storage.value.CredentialStatus;
 import so.morton.api.storage.value.CredentialType;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
+import so.morton.api.support.UnitTest;
 import so.morton.api.support.fixture.CredentialFactory;
 import so.morton.api.support.fixture.ProfileFactory;
 import so.morton.api.support.fixture.UserFactory;
@@ -35,7 +36,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static so.morton.api.support.CodeExceptionAssert.assertCodeException;
 
-@ExtendWith(MockitoExtension.class)
+@UnitTest
 @DisplayName("CredentialService 테스트")
 class CredentialServiceTest {
 

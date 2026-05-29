@@ -15,6 +15,7 @@ import so.morton.api.storage.domain.coworker.CoworkerEntity;
 import so.morton.api.storage.domain.coworker.CoworkerRepository;
 import so.morton.api.support.CodeException;
 import so.morton.api.support.CommonExceptionCode;
+import so.morton.api.support.UnitTest;
 import so.morton.api.support.fixture.*;
 
 import java.util.List;
@@ -24,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static so.morton.api.support.CodeExceptionAssert.assertCodeException;
 
-@ExtendWith(MockitoExtension.class)
+@UnitTest
 @DisplayName("CoworkerService 테스트")
 class CoworkerServiceTest {
 
