@@ -16,4 +16,4 @@ core/src/test/java/
     ├── domain/         # Spring Unit Test
     └── support/        # Helpers
 ```
-- 더미 데이터는 `data.sql`를 통해 주입 받습니다.
+- `data.sql` 파일의 시드 데이터를 활용합니다

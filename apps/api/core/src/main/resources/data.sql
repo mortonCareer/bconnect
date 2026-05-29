@@ -1,16 +1,21 @@
 INSERT INTO otps (id, phone, code, code_expired_at, code_revoked, attempts, daily_count, last_sent_at, token, token_expired_at, token_revoked, created_at, modified_at) VALUES
-(1, '01000000001', '000000', TIMESTAMP '2026-01-01 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', 'signup-token', TIMESTAMP '2026-12-01 00:00:00', true, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(2, '01000000009', '000000', TIMESTAMP '2026-01-01 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', 'signup-token', TIMESTAMP '2026-12-01 00:00:00', false, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+-- otp test
+(1, '01000000001', '000001', TIMESTAMP '2026-01-01 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', 'signup-token-1', TIMESTAMP '2026-12-01 00:00:00', false, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(2, '01000000010', '000010', TIMESTAMP '2026-01-01 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', 'signup-token-2', TIMESTAMP '2026-12-01 00:00:00', false, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+-- auth test
+(3, '01000000011', '000011', TIMESTAMP '2026-01-01 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', 'signup-token-3', TIMESTAMP '2026-12-01 00:00:00', false, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(4, '01000000012', '000012', TIMESTAMP '2026-01-01 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', 'signup-token-4', TIMESTAMP '2026-12-01 00:00:00', false, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO members (id, username, name, phone, picture, role, created_at, modified_at) VALUES
 (0, 'system', '시스템', '01000000000', 'https://image.com', 'ADMIN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(1, 'contractor', '업체', '01000000001', 'https://image.com', 'CONTRACTOR', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(2, 'foreman1', '반장1', '01000000002', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(3, 'foreman2', '반장2', '01000000003', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(4, 'foreman3', '반장3', '01000000004', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(1, 'username1', '업체', '01000000001', 'https://image.com', 'CONTRACTOR', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(2, 'username2', '반장1', '01000000002', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(3, 'username3', '반장2', '01000000003', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(4, 'username4', '반장3', '01000000004', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(5, 'username12', '탈퇴', '01000000012', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO sessions (id, username, agent, ip, refresh_token, revoked, created_at, modified_at) VALUES
-(1, 'foreman1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', '000.000.000.000', 'refresh-token', false, TIMESTAMP '2026-12-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(1, 'username1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', '000.000.000.000', 'refresh-token', false, TIMESTAMP '2026-12-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO chats (id, title, created_at, modified_at) VALUES
 (1, '채팅방1', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
