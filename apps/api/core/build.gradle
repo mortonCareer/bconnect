@@ -46,11 +46,23 @@ dependencies {
     implementation 'io.sentry:sentry-spring-boot-4:8.34.1'
 
     // test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.karatelabs:karate-core:2.0.0'
+
     testImplementation "org.testcontainers:testcontainers"
     testImplementation "org.testcontainers:testcontainers-junit-jupiter"
     testImplementation "org.testcontainers:testcontainers-postgresql"
+}
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-    testImplementation 'org.springframework.security:spring-security-test'
+sourceSets {
+    test {
+        resources {
+            srcDir file('src/test/java')
+            exclude '**/*.java'
+        }
+    }
+}
+
+tasks.named('test') {
+    jvmArgs '--enable-preview'
 }
