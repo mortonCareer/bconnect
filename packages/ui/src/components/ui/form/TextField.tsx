@@ -90,7 +90,7 @@ export function TextField<T extends FieldValues>({
       render={({ field }) => (
         <FormItem className="gap-3">
           {label && (
-            <FormLabel className="text-m-16 text-bconnect-gray-900">
+            <FormLabel className="text-m-16 text-gray-900">
               {label}
               {required && (
                 <span className="ml-0.5 text-destructive" aria-hidden>
@@ -100,9 +100,7 @@ export function TextField<T extends FieldValues>({
             </FormLabel>
           )}
           {description && (
-            <FormDescription className="text-r-14 text-bconnect-gray-700">
-              {description}
-            </FormDescription>
+            <FormDescription className="text-r-14 text-gray-700">{description}</FormDescription>
           )}
           <div className="relative">
             <TextFieldControl serverError={serverError}>

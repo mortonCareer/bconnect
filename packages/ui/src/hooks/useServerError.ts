@@ -77,7 +77,7 @@ export function useServerError<T extends FieldValues>(
 
 /**
  * BE envelope 의 `error.message` 를 그대로 사용하는 표준 mapError.
- * ADR-0014 (BE = API SSOT) + 2026-05-22 회의 결정: FE 는 코드별 분기 없이 BE 메시지 표시,
+ * ADR-0015 (BE = API SSOT) + 2026-05-22 회의 결정: FE 는 코드별 분기 없이 BE 메시지 표시,
  * 특수 분기 필요시에만 enum narrowing. 호출부 보일러플레이트 제거용.
  *
  * @param field 에러를 묶을 필드명. 생략 시 폼 전역 에러.

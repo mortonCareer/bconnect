@@ -17,5 +17,18 @@ import { useWatch, type Control, type FieldValues } from 'react-hook-form'
  */
 export function useAllFieldsFilled<T extends FieldValues>(control: Control<T>): boolean {
   const values = useWatch({ control })
-  return Object.values(values).every((v) => v != null && v !== '')
+  return isFilledDeep(values)
+}
+
+/**
+ * 깊이 우선 비-비어있음 검사. nested object 필드 (RHF path "address.city" 등) 도 정확히 다룸.
+ * - 원시값: `null`/`undefined`/`''` → false, 그 외 → true (boolean false, number 0 도 의도적 정상값으로 간주)
+ * - 객체: 모든 키의 값이 isFilledDeep 통과해야 true
+ * - 배열: 길이 > 0 + 모든 원소 통과해야 true (빈 배열 = 미입력 간주)
+ */
+function isFilledDeep(value: unknown): boolean {
+  if (value == null || value === '') return false
+  if (Array.isArray(value)) return value.length > 0 && value.every(isFilledDeep)
+  if (typeof value === 'object') return Object.values(value).every(isFilledDeep)
+  return true
 }

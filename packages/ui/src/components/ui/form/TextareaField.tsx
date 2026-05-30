@@ -7,6 +7,7 @@ import * as React from 'react'
 import { Slot } from 'radix-ui'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
 import { cn } from '../../../lib/utils'
+import { FIELD_BASE_CLASSES, FIELD_DEFAULT_VARIANT_CLASSES } from '../_field-base'
 import {
   FormDescription,
   FormField,
@@ -82,7 +83,7 @@ export function TextareaField<T extends FieldValues>({
       render={({ field }) => (
         <FormItem className="gap-3">
           {label && (
-            <FormLabel className="text-m-16 text-bconnect-gray-900">
+            <FormLabel className="text-m-16 text-gray-900">
               {label}
               {required && (
                 <span className="ml-0.5 text-destructive" aria-hidden>
@@ -92,9 +93,7 @@ export function TextareaField<T extends FieldValues>({
             </FormLabel>
           )}
           {description && (
-            <FormDescription className="text-r-14 text-bconnect-gray-700">
-              {description}
-            </FormDescription>
+            <FormDescription className="text-r-14 text-gray-700">{description}</FormDescription>
           )}
           <TextareaFieldControl serverError={serverError}>
             <textarea
@@ -105,7 +104,9 @@ export function TextareaField<T extends FieldValues>({
                 transform ? (e) => field.onChange(transform(e.target.value)) : field.onChange
               }
               className={cn(
-                'flex w-full resize-y rounded-lg border border-gray-300 bg-transparent px-3 py-[7px] text-base text-gray-900 outline-none transition-colors placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-1 aria-invalid:ring-destructive/50',
+                FIELD_BASE_CLASSES,
+                FIELD_DEFAULT_VARIANT_CLASSES,
+                'flex resize-y',
                 className
               )}
             />
