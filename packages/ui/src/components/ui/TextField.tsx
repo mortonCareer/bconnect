@@ -7,7 +7,14 @@ import * as React from 'react'
 import { Slot } from 'radix-ui'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
 import { cn } from '../../lib/utils'
-import { FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField } from './form'
+import {
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useFormField,
+} from './primitives/form'
 import { Input } from './Input'
 
 interface TextFieldProps<T extends FieldValues> extends Omit<

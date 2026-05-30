@@ -12,7 +12,7 @@ export { ChatInput } from './ui/ChatInput'
 export { ChatListItem, chatListItemVariants } from './ui/ChatListItem'
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './ui/Accordion'
 
-// shadcn Form suite (ADR 0013 / #400)
+// shadcn Form suite (ADR 0013 / #400) — primitives 디렉토리에 격리, 우리 wrapper 는 ui/ 루트
 export {
   Form,
   FormItem,
@@ -22,8 +22,8 @@ export {
   FormMessage,
   FormField,
   useFormField,
-} from './ui/form'
-export { Label } from './ui/label'
+} from './ui/primitives/form'
+export { Label } from './ui/primitives/label'
 export { TextField } from './ui/TextField'
 export { FormError } from './ui/FormError'
 export { FormSubmitButton } from './ui/FormSubmitButton'
