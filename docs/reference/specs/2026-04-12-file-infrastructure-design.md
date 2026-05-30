@@ -9,6 +9,8 @@
 **관련 ERD**: [Attachment 엔티티 (FigJam)](https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj/?node-id=381-560)
 **상태**: 오프라인 미팅(2026-04-17) 합의 완료
 
+> **ADR-0015 (2026-05-28) 영향**: [ADR-0015 BE 코드를 API SSOT](../../explanation/adr/0015-be-code-as-api-ssot.md) 채택으로 본 doc 의 §5/§6 (presign body, 업로드/조회 플로우 세부) 는 **BE 구현이 최종 결정** — design-time 가이드이며 BE 가 override 가능. §3 (인프라), §4 (DB 스키마), §7-§10 (권한/정책/운영) 부분은 BE-first 워크플로와 무관하게 유효.
+
 ---
 
 ## 1. 목적과 범위
