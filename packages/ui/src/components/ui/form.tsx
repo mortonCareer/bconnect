@@ -96,15 +96,25 @@ function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPri
   )
 }
 
-function FormControl({ ...props }: React.ComponentProps<typeof Slot.Root>) {
+/**
+ * Morton 확장: shadcn 원본의 `FormControl` 은 `aria-invalid` / `aria-describedby` 를
+ * RHF `error`(zod) 만으로 계산해서, 서버 에러만 있을 때 (zod 통과 + BE 거절) 스크린리더가
+ * `<FormMessage>` 의 서버 에러 텍스트를 안내하지 못한다 (#403 code-review C / WCAG 1.3.1).
+ * `serverError` prop 으로 두 채널을 합성한다 — TextField 가 이 prop 으로 위임한다.
+ */
+function FormControl({
+  serverError,
+  ...props
+}: React.ComponentProps<typeof Slot.Root> & { serverError?: string }) {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+  const invalid = !!error || !!serverError
 
   return (
     <Slot.Root
       data-slot="form-control"
       id={formItemId}
-      aria-describedby={!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}
-      aria-invalid={!!error}
+      aria-describedby={!invalid ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}
+      aria-invalid={invalid}
       {...props}
     />
   )

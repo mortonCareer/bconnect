@@ -53,7 +53,7 @@ export function TextField<T extends FieldValues>({
     <FormField
       control={control}
       name={name}
-      render={({ field, fieldState }) => (
+      render={({ field }) => (
         <FormItem className="gap-3">
           {label && <FormLabel className="text-m-16 text-bconnect-gray-900">{label}</FormLabel>}
           {description && (
@@ -62,11 +62,10 @@ export function TextField<T extends FieldValues>({
             </FormDescription>
           )}
           <div className="relative">
-            <FormControl>
+            <FormControl serverError={serverError}>
               <Input
                 {...field}
                 {...inputProps}
-                aria-invalid={fieldState.invalid || !!serverError || undefined}
                 onChange={
                   transform ? (e) => field.onChange(transform(e.target.value)) : field.onChange
                 }
