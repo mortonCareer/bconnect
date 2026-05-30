@@ -49,7 +49,6 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   children?: React.ReactNode
   isLoading?: boolean
-  loadingText?: string
   asChild?: boolean
 }
 
@@ -83,23 +82,8 @@ export interface ButtonProps
  * ```
  */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      className,
-      variant,
-      size,
-      children,
-      isLoading,
-      loadingText,
-      disabled,
-      asChild = false,
-      ...props
-    },
-    ref
-  ) => {
+  ({ className, variant, size, children, isLoading, disabled, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button'
-    // isLoading 동작: loadingText 명시 시 텍스트 교체 (legacy), 미명시 시 children + spinner.
-    // 후자가 표준 (Material/antd 패턴) — 라벨 점프 없고 다국어 호환. 신규 호출부는 후자 권장.
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
@@ -108,14 +92,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         aria-busy={isLoading || undefined}
         {...props}
       >
-        {isLoading && loadingText ? (
-          loadingText
-        ) : (
-          <>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />}
-            {children}
-          </>
-        )}
+        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />}
+        {children}
       </Comp>
     )
   }

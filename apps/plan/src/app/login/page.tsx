@@ -205,7 +205,6 @@ export default function LoginPage() {
             onClick={step === 'phone' ? handleSendCode : handleVerifyCode}
             disabled={isSubmitDisabled}
             isLoading={isSubmitLoading}
-            loadingText={step === 'phone' ? '발송 중...' : '확인 중...'}
           >
             {step === 'phone' ? '인증번호 받기' : '인증 완료'}
           </Button>

@@ -73,7 +73,6 @@ export function OwnerVerifyForm({ registrationNumber }: OwnerVerifyFormProps) {
           onClick={handleVerify}
           disabled={!isValid}
           isLoading={isLoading}
-          loadingText="..."
         >
           조회
         </Button>

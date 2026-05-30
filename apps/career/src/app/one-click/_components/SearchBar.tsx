@@ -53,7 +53,6 @@ export function SearchBar({ defaultValue }: SearchBarProps) {
         onClick={handleSearch}
         disabled={!isValid}
         isLoading={isPending}
-        loadingText="조회 중..."
       >
         조회
       </Button>
