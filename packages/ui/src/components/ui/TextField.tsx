@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
   useFormField,
-} from './primitives/form'
+} from './shadcn/form'
 import { Input } from './Input'
 
 interface TextFieldProps<T extends FieldValues> extends Omit<
