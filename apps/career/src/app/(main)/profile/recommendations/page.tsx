@@ -78,7 +78,7 @@ function RecommendationCard({ recommendation }: { recommendation: Recommendation
     <div className="flex gap-3 px-4 py-4">
       {/* 프로필 이미지 */}
       {/* TODO: 실제 프로필 이미지 연동 시 DiceBear 폴백 제거 */}
-      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-bconnect-gray-100">
+      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-100">
         <img
           src={profileImage || getAvatarUrl(name)}
           alt={name}
@@ -89,10 +89,10 @@ function RecommendationCard({ recommendation }: { recommendation: Recommendation
       {/* 이름 + 분야/역할 + 추천 내용 */}
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-baseline gap-1.5">
-          <span className="text-sb-16 text-bconnect-gray-900">{name}</span>
-          {subtitle && <span className="text-r-12 text-bconnect-gray-500">{subtitle}</span>}
+          <span className="text-sb-16 text-gray-900">{name}</span>
+          {subtitle && <span className="text-r-12 text-gray-500">{subtitle}</span>}
         </div>
-        <p className="text-r-14 text-bconnect-gray-700">{content}</p>
+        <p className="text-r-14 text-gray-700">{content}</p>
       </div>
     </div>
   )
@@ -112,12 +112,12 @@ export default function RecommendationsPage() {
 
       {recommendations.length === 0 ? (
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-bconnect-gray-500">
+          <p className="text-m-14 text-gray-500">
             {activeTab === 'received' ? '받은 추천서가 없습니다' : '보낸 추천서가 없습니다'}
           </p>
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-bconnect-gray-300">
+        <div className="flex flex-col divide-y divide-gray-300">
           {recommendations.map((rec) => (
             <RecommendationCard key={rec.id} recommendation={rec} />
           ))}

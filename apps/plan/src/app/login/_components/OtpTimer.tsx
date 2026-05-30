@@ -11,7 +11,7 @@ interface OtpTimerProps {
 function TimerDisplay({ expiresAt }: { expiresAt: string | null }) {
   const { formatted, expired } = useOtpTimer(expiresAt)
   if (expired) return null
-  return <span className="text-r-14 text-bconnect-gray-500">{formatted}</span>
+  return <span className="text-r-14 text-gray-500">{formatted}</span>
 }
 
 export function OtpTimer({ expiresAt, onResend, isResending }: OtpTimerProps) {
@@ -22,7 +22,7 @@ export function OtpTimer({ expiresAt, onResend, isResending }: OtpTimerProps) {
         type="button"
         onClick={onResend}
         disabled={isResending}
-        className="text-m-14 text-bconnect-primary disabled:opacity-50"
+        className="text-m-14 text-primary disabled:opacity-50"
       >
         재요청
       </button>

@@ -13,19 +13,16 @@ import { XIcon } from '../../icons/XIcon'
  * - filter (필터 삭제): 파란색 배경/테두리 + X 아이콘
  */
 const tagVariants = cva(
-  'inline-flex items-center justify-center rounded-lg border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bconnect-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white cursor-pointer active:scale-[0.98]',
+  'inline-flex items-center justify-center rounded-lg border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white cursor-pointer active:scale-[0.98]',
   {
     variants: {
       variant: {
         // 기본 - 회색 테두리
-        default:
-          'border-bconnect-gray-300 bg-transparent text-bconnect-gray-500 font-medium hover:border-bconnect-gray-500',
+        default: 'border-gray-300 bg-transparent text-gray-500 font-medium hover:border-gray-500',
         // 선택 - 파란색 배경/테두리
-        selected:
-          'border-bconnect-primary bg-bconnect-primary-sub text-bconnect-primary font-semibold',
+        selected: 'border-primary bg-secondary text-primary font-semibold',
         // 필터 삭제 - 파란색 배경/테두리 + X 아이콘
-        filter:
-          'border-bconnect-primary bg-bconnect-primary-sub text-bconnect-primary font-semibold gap-1',
+        filter: 'border-primary bg-secondary text-primary font-semibold gap-1',
       },
       size: {
         // default: h-40px, px-14px

@@ -58,20 +58,18 @@ export default function SignupMemberPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
       {/* Card */}
-      <div className="flex w-[480px] flex-col items-center gap-8 rounded-[12px] border border-bconnect-gray-300 p-10">
+      <div className="flex w-[480px] flex-col items-center gap-8 rounded-[12px] border border-gray-300 p-10">
         {/* Logo */}
         <Image src="/logo.png" alt="품앗이" width={160} height={56} priority />
 
         {/* Subtitle */}
-        <p className="text-r-16 text-bconnect-gray-700">
-          신뢰할 수 있는 인테리어 하도급 섭외 · 관리 서비스
-        </p>
+        <p className="text-r-16 text-gray-700">신뢰할 수 있는 인테리어 하도급 섭외 · 관리 서비스</p>
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex w-[400px] flex-col gap-3">
           {/* 사용자 ID */}
-          <p className="text-m-16 text-bconnect-gray-900">사용자 ID</p>
-          <p className="text-r-14 text-bconnect-gray-700">
+          <p className="text-m-16 text-gray-900">사용자 ID</p>
+          <p className="text-r-14 text-gray-700">
             동일한 사용자를 구분하는데 활용되며, 한 번 설정하면 변경이 불가해요.
           </p>
           <FormInput
@@ -84,10 +82,10 @@ export default function SignupMemberPage() {
               },
             })}
           />
-          {usernameError && <p className="text-r-14 text-bconnect-error">{usernameError}</p>}
+          {usernameError && <p className="text-r-14 text-destructive">{usernameError}</p>}
 
           {/* 이름 */}
-          <p className="text-m-16 text-bconnect-gray-900">이름</p>
+          <p className="text-m-16 text-gray-900">이름</p>
           <FormInput
             type="text"
             placeholder="홍길동"
@@ -95,7 +93,7 @@ export default function SignupMemberPage() {
             {...register('name')}
           />
           {errors.name?.message && (
-            <p className="text-r-14 text-bconnect-error">{errors.name.message}</p>
+            <p className="text-r-14 text-destructive">{errors.name.message}</p>
           )}
 
           {/* CTA */}

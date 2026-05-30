@@ -49,7 +49,7 @@ export default function EditAboutPage() {
           value={about}
           onChange={(e) => setAbout(e.target.value)}
           placeholder="자기소개를 작성해주세요..."
-          className="min-h-[400px] w-full resize-none text-r-14 leading-[22.4px] text-bconnect-gray-900 outline-none placeholder:text-bconnect-gray-500"
+          className="min-h-[400px] w-full resize-none text-r-14 leading-[22.4px] text-gray-900 outline-none placeholder:text-gray-500"
           disabled={isPending}
         />
       </div>

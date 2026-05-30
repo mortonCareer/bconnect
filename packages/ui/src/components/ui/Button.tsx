@@ -14,19 +14,19 @@ import { cn } from '../../lib/utils'
  * - ghost: 회색 테두리, 회색 텍스트 (비활성_stroke)
  */
 const buttonVariants = cva(
-  'inline-flex items-center justify-center rounded-[8px] text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bconnect-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer active:scale-[0.98]',
+  'inline-flex items-center justify-center rounded-[8px] text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer active:scale-[0.98]',
   {
     variants: {
       variant: {
         // 활성 - 파란색 배경
-        primary: 'bg-bconnect-primary text-white font-semibold hover:bg-bconnect-primary-hover',
+        primary: 'bg-primary text-white font-semibold hover:bg-primary-600',
         // 비활성 - 회색 배경
-        secondary: 'bg-bconnect-gray-100 text-bconnect-gray-500 font-medium',
+        secondary: 'bg-gray-100 text-gray-500 font-medium',
         // 활성_stroke - 파란색 테두리
         outline:
-          'border border-bconnect-primary bg-transparent text-bconnect-primary font-semibold hover:bg-bconnect-primary/10',
+          'border border-primary bg-transparent text-primary font-semibold hover:bg-primary/10',
         // 비활성_stroke - 회색 테두리
-        ghost: 'border border-bconnect-gray-500 bg-transparent text-bconnect-gray-500 font-medium',
+        ghost: 'border border-gray-500 bg-transparent text-gray-500 font-medium',
       },
       size: {
         // default: 360x50

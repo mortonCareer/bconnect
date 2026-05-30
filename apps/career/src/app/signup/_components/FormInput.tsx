@@ -13,15 +13,15 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
     return (
       <div
         className={cn(
-          'flex h-[50px] items-center rounded-[8px] border border-bconnect-gray-300 px-3 py-[7px]',
-          error && 'border-bconnect-error',
+          'flex h-[50px] items-center rounded-[8px] border border-gray-300 px-3 py-[7px]',
+          error && 'border-destructive',
           props.disabled && 'opacity-50'
         )}
       >
         <input
           ref={ref}
           className={cn(
-            'w-full bg-transparent text-r-16 text-bconnect-gray-900 placeholder:text-bconnect-gray-500 focus:outline-none disabled:cursor-not-allowed',
+            'w-full bg-transparent text-r-16 text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:cursor-not-allowed',
             className
           )}
           {...props}
