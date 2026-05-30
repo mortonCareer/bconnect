@@ -9,7 +9,7 @@
 
 ## 전체 플로우
 
-BE 코드를 API 기준(SSOT)으로 하는 BE-first 사이클 ([ADR-0014](../explanation/adr/0014-be-code-as-api-ssot.md)).
+BE 코드를 API 기준(SSOT)으로 하는 BE-first 사이클 ([ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md)).
 
 ```
 1. 디자인 (스프린트 단위)
@@ -45,7 +45,7 @@ BE 코드를 API 기준(SSOT)으로 하는 BE-first 사이클 ([ADR-0014](../exp
 
 ## API 스펙 관리
 
-API 스펙은 BE 구현을 따라가는 산출물입니다 ([ADR-0014](../explanation/adr/0014-be-code-as-api-ssot.md)). `packages/api-client/src/spec/` 하위에 분리 관리되며, `@redocly/cli` 로 lint/bundle, `orval` 로 TypeScript hook + MSW mock 자동 생성합니다.
+API 스펙은 BE 구현을 따라가는 산출물입니다 ([ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md)). `packages/api-client/src/spec/` 하위에 분리 관리되며, `@redocly/cli` 로 lint/bundle, `orval` 로 TypeScript hook + MSW mock 자동 생성합니다.
 
 ### 스펙 갱신 워크플로
 
@@ -156,7 +156,7 @@ career / plan 둘 다 자동 적용됨 (둘 다 `@bconnect/mocks` 사용).
 
 ## BE-first 개발
 
-[ADR-0014](../explanation/adr/0014-be-code-as-api-ssot.md)에 따라 BE 코드를 API 기준(SSOT)으로 하는 BE-first 사이클로 진행합니다.
+[ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md)에 따라 BE 코드를 API 기준(SSOT)으로 하는 BE-first 사이클로 진행합니다.
 
 ### BE 개발 (CEO)
 

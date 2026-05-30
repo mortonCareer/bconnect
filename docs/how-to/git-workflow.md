@@ -44,7 +44,7 @@ main 머지 → 프로덕션 배포
   - 통합검증 CI: `api:generate` → typecheck → 빌드
 
 - **`dev`**: 개발 브랜치 (GitHub 기본 브랜치)
-  - BE 코드를 API 기준(SSOT)으로 하는 BE-first 개발 사이클 ([ADR-0014](../explanation/adr/0014-be-code-as-api-ssot.md)). 일반적으로 **BE 구현 → 스펙 갱신 → FE 작업** 순서로 진행
+  - BE 코드를 API 기준(SSOT)으로 하는 BE-first 개발 사이클 ([ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md)). 일반적으로 **BE 구현 → 스펙 갱신 → FE 작업** 순서로 진행
   - FE는 MSW mock으로 BE 미구현 상태에서도 일부 작업 가능 (preview 환경에서 mock 응답으로 동작)
   - 모든 feature/fix PR의 타겟
   - CI: lint, format, BE 빌드/테스트, **FE typecheck 포함** (강제 green 정책)
@@ -95,7 +95,7 @@ gh pr create --base main --head dev --title "release: v1.x.x"
 
 통합검증 CI(`ci-integration.yml`)가 통과해야 머지 가능합니다. 실패 시 dev에서 수정 후 재시도합니다.
 
-dev 브랜치는 BE-first 개발 사이클이라 BE 구현 → 스펙 → FE 순서로 자연스럽게 정합됩니다 ([ADR-0014](../explanation/adr/0014-be-code-as-api-ssot.md)). 통합은 일반적으로 스프린트 단위로 진행하되, 필요 시 CTO가 임의로 트리거할 수 있습니다. BE 변경 후 스펙 또는 FE 갱신 누락으로 드물게 drift가 발생할 수 있으며, 발견 시 dev에서 직접 수정합니다.
+dev 브랜치는 BE-first 개발 사이클이라 BE 구현 → 스펙 → FE 순서로 자연스럽게 정합됩니다 ([ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md)). 통합은 일반적으로 스프린트 단위로 진행하되, 필요 시 CTO가 임의로 트리거할 수 있습니다. BE 변경 후 스펙 또는 FE 갱신 누락으로 드물게 drift가 발생할 수 있으며, 발견 시 dev에서 직접 수정합니다.
 
 ---
 

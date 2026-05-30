@@ -1,6 +1,6 @@
 # API Spec 작업 가이드
 
-`@bconnect/api-client` 의 OpenAPI spec 작성 + codegen 가이드. BE 코드가 API 기준(SSOT)이며 ([ADR-0014](../../docs/explanation/adr/0014-be-code-as-api-ssot.md)), 본 문서는 BE 구현 후 스펙을 갱신하는 작성 절차를 다룹니다. spec 변경 시 이 문서 + spec 파일 동시 reference.
+`@bconnect/api-client` 의 OpenAPI spec 작성 + codegen 가이드. BE 코드가 API 기준(SSOT)이며 ([ADR-0015](../../docs/explanation/adr/0015-be-code-as-api-ssot.md)), 본 문서는 BE 구현 후 스펙을 갱신하는 작성 절차를 다룹니다. spec 변경 시 이 문서 + spec 파일 동시 reference.
 
 ## 디렉토리 구조
 
