@@ -6,7 +6,7 @@
 import * as React from 'react'
 import { Slot } from 'radix-ui'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
-import { cn } from '../../lib/utils'
+import { cn } from '../../../lib/utils'
 import {
   FormDescription,
   FormField,
@@ -14,8 +14,8 @@ import {
   FormLabel,
   FormMessage,
   useFormField,
-} from './shadcn/form'
-import { Input } from './Input'
+} from '../shadcn/form'
+import { Input } from '../Input'
 
 interface TextFieldProps<T extends FieldValues> extends Omit<
   React.ComponentProps<typeof Input>,

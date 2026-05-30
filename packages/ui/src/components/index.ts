@@ -24,6 +24,6 @@ export {
   useFormField,
 } from './ui/shadcn/form'
 export { Label } from './ui/shadcn/label'
-export { TextField } from './ui/TextField'
-export { FormError } from './ui/FormError'
-export { FormSubmitButton } from './ui/FormSubmitButton'
+export { TextField } from './ui/form/TextField'
+export { FormError } from './ui/form/FormError'
+export { FormSubmitButton } from './ui/form/FormSubmitButton'

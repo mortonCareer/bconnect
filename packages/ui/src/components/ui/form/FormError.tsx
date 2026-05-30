@@ -1,7 +1,7 @@
 /**
  * @figma-scaffold 폼 전역 에러 표시 — useServerError 의 formError 를 받아 role="alert" 로 렌더 (#400)
  */
-import { cn } from '../../lib/utils'
+import { cn } from '../../../lib/utils'
 
 interface FormErrorProps {
   /** 표시할 에러 메시지. falsy 면 컴포넌트가 null 반환 (조건부 렌더 불필요). */
