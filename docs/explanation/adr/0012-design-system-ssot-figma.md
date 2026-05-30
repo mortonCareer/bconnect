@@ -1,9 +1,11 @@
 # ADR-0012: 디자인 토큰 — Figma Variables SSOT + Primitive/Semantic 2-layer
 
-- **Status**: Accepted
+- **Status**: Superseded in part by [ADR-0014](./0014-design-system-tokens-krds-tailwind.md) (2026-05-29)
 - **Date**: 2026-05-22
 - **Deciders**: @manamana32321, @julyatpark-star
-- **Related**: [2026-05-22 회의록](https://www.notion.so/morton-so/367965d2888b8011b077fd5e544029b4) · [globals.css](../../../packages/ui/src/styles/globals.css) · [KRDS](https://www.krds.go.kr/)
+- **Related**: [2026-05-22 회의록](https://www.notion.so/morton-so/367965d2888b8011b077fd5e544029b4) · [globals.css](../../../packages/ui/src/styles/globals.css) · [KRDS](https://www.krds.go.kr/) · [ADR-0014](./0014-design-system-tokens-krds-tailwind.md)
+
+> **참고**: 2026-05-29 후속 합의로 일부 결정이 [ADR-0014](./0014-design-system-tokens-krds-tailwind.md)로 대체됨 — 반응형 토큰(1차 제외 → 필수로 격상), 시스템 색 어휘(`destructive`→`danger`), 계층 variant에 `tertiary` 추가, State에 `pressed` 추가, Size 어휘 신설. 2-layer 구조·Tailwind 팔레트·Figma SSOT·brand 11단계 스케일·`--color-*` prefix는 그대로 유지. 본문은 작성 시점 기록으로 보존.
 
 ## Context
 
