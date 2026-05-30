@@ -35,18 +35,18 @@
   --color-primary-900: #192a8f;
   --color-primary-950: #141c57;
 
-  /* secondary — brand 앵커 #eaefff @ 100 */
-  --color-secondary-50: #f3f5fc;
-  --color-secondary-100: #eaefff;
-  --color-secondary-200: #ced7f4;
-  --color-secondary-300: #b0bef0;
-  --color-secondary-400: #889ce8;
-  --color-secondary-500: #697ee0;
-  --color-secondary-600: #5064d2;
-  --color-secondary-700: #4252bd;
-  --color-secondary-800: #364498;
-  --color-secondary-900: #303c77;
-  --color-secondary-950: #1f2648;
+  /* secondary — brand 앵커 #eaefff @ 50 (https://uicolors.app/generate/eaefff) */
+  --color-secondary-50: #eaefff;
+  --color-secondary-100: #e0e7ff;
+  --color-secondary-200: #c7d2fe;
+  --color-secondary-300: #a5b4fc;
+  --color-secondary-400: #818cf8;
+  --color-secondary-500: #6366f1;
+  --color-secondary-600: #4f46e5;
+  --color-secondary-700: #4338ca;
+  --color-secondary-800: #3730a3;
+  --color-secondary-900: #312e81;
+  --color-secondary-950: #1e1b4b;
 
   /* --- Layer 2 · Semantic — 역할 토큰 ---------------------------
      "이 색을 어디에 쓰는가". shadcn 토큰 어휘를 semantic 계층으로
@@ -68,7 +68,7 @@
   /* action — 상호작용(버튼 · 링크 · 포커스) */
   --color-primary: var(--color-primary-500);
   --color-primary-foreground: #ffffff;
-  --color-secondary: var(--color-secondary-100);
+  --color-secondary: var(--color-secondary-50);
   --color-secondary-foreground: var(--color-primary-700);
   --color-ring: var(--color-primary-500);
 
