@@ -135,22 +135,20 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
       {/* Card */}
-      <div className="flex w-[480px] flex-col items-center gap-8 rounded-[12px] border border-bconnect-gray-300 p-10">
+      <div className="flex w-[480px] flex-col items-center gap-8 rounded-[12px] border border-gray-300 p-10">
         {/* Logo */}
         <Image src="/logo.png" alt="품앗이" width={160} height={56} priority />
 
         {/* Subtitle */}
-        <p className="text-r-16 text-bconnect-gray-700">
-          신뢰할 수 있는 인테리어 하도급 섭외 · 관리 서비스
-        </p>
+        <p className="text-r-16 text-gray-700">신뢰할 수 있는 인테리어 하도급 섭외 · 관리 서비스</p>
 
         {/* Form */}
         <div className="flex w-[400px] flex-col gap-3">
           {/* Label */}
-          <p className="text-m-16 text-bconnect-gray-900">휴대전화</p>
+          <p className="text-m-16 text-gray-900">휴대전화</p>
 
           {/* Helper text */}
-          <p className="text-r-14 text-bconnect-gray-700">
+          <p className="text-r-14 text-gray-700">
             품앗이 서비스는 인증된 사용자만 이용하실 수 있어요.
           </p>
 
@@ -189,17 +187,15 @@ export default function LoginPage() {
                   }
                 />
                 {error ? (
-                  <p className="text-r-14 text-bconnect-error">{error}</p>
+                  <p className="text-r-14 text-destructive">{error}</p>
                 ) : (
-                  <p className="text-r-14 text-bconnect-gray-500">
-                    타인에게 인증번호를 공유하지 마세요.
-                  </p>
+                  <p className="text-r-14 text-gray-500">타인에게 인증번호를 공유하지 마세요.</p>
                 )}
               </div>
             )}
 
             {/* Phone step error */}
-            {step === 'phone' && error && <p className="text-r-14 text-bconnect-error">{error}</p>}
+            {step === 'phone' && error && <p className="text-r-14 text-destructive">{error}</p>}
           </div>
 
           {/* Submit Button */}

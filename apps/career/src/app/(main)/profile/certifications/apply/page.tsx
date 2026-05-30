@@ -84,7 +84,7 @@ export default function CertificationApplyPage() {
       <div className="flex flex-col">
         <TopBar variant="default" title="인증 신청" showAction={false} />
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-bconnect-gray-500">로딩 중...</p>
+          <p className="text-m-14 text-gray-500">로딩 중...</p>
         </div>
       </div>
     )

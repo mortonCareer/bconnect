@@ -5,10 +5,6 @@
       "command": "npx",
       "args": ["-y", "@playwright/mcp@latest"]
     },
-    "figma": {
-      "type": "http",
-      "url": "https://mcp.figma.com/mcp"
-    },
     "aws": {
       "type": "stdio",
       "command": "npx",

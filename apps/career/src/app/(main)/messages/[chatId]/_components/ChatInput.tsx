@@ -63,7 +63,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="내용을 입력해주세요."
-          className="text-r-14 min-w-0 flex-1 rounded-xl bg-bconnect-gray-100 px-4 py-[9px] text-bconnect-gray-900 placeholder:text-bconnect-gray-500 focus:outline-none"
+          className="text-r-14 min-w-0 flex-1 rounded-xl bg-gray-100 px-4 py-[9px] text-gray-900 placeholder:text-gray-500 focus:outline-none"
         />
 
         {/* 전송 버튼 */}
@@ -71,7 +71,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           type="button"
           onClick={handleSend}
           disabled={isDisabled}
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-bconnect-primary transition-colors active:scale-95 disabled:bg-bconnect-gray-500"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary transition-colors active:scale-95 disabled:bg-gray-500"
           aria-label="보내기"
         >
           <svg

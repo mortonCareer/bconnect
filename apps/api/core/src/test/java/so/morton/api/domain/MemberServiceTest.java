@@ -104,7 +104,7 @@ class MemberServiceTest {
             assertThat(result.username()).isEqualTo("username");
             assertThat(result.name()).isEqualTo("name");
             assertThat(result.phone()).isEqualTo("01000000000");
-            assertThat(result.picture()).isEqualTo("picture");
+            assertThat(result.picture()).isEqualTo(MemberFactory.PICTURE);
             assertThat(result.role()).isEqualTo(Role.FOREMAN);
             verify(memberRepository).findByUsername("username");
             verify(memberRepository).findByPhone("01000000000");
@@ -168,7 +168,7 @@ class MemberServiceTest {
 
             // then
             assertThat(entity.getName()).isEqualTo("name");
-            assertThat(entity.getPicture()).isEqualTo("picture");
+            assertThat(entity.getPicture()).isEqualTo(MemberFactory.PICTURE);
             assertThat(entity.getRole()).isEqualTo(Role.CONTRACTOR);
             verify(memberRepository).findById(USER_ID);
         }
@@ -368,6 +368,73 @@ class MemberServiceTest {
             // then
             assertThat(result).isEmpty();
             verify(finderMemberRepository).findAll();
+        }
+    }
+
+    @Nested
+    @DisplayName("MemberService.getAll")
+    class GetAllTests {
+
+        @Test
+        @DisplayName("목록 조회 성공")
+        void getAll_success() {
+            // given
+            List<Member> members = List.of(MemberFactory.create(USER_ID), MemberFactory.create(2L));
+            when(memberFinder.findAll()).thenReturn(members);
+
+            // when
+            List<Member> result = memberService.getAll();
+
+            // then
+            assertThat(result).hasSize(2).isEqualTo(members);
+            verify(memberFinder).findAll();
+        }
+
+        @Test
+        @DisplayName("빈 목록 반환")
+        void getAll_empty() {
+            // given
+            when(memberFinder.findAll()).thenReturn(List.of());
+
+            // when
+            List<Member> result = memberService.getAll();
+
+            // then
+            assertThat(result).isEmpty();
+            verify(memberFinder).findAll();
+        }
+    }
+
+    @Nested
+    @DisplayName("MemberService.checkUsername")
+    class CheckUsernameTests {
+
+        @Test
+        @DisplayName("미존재 사용자명 - 사용 가능")
+        void checkUsername_available() {
+            // given
+            when(memberRepository.existsByUsername("neo")).thenReturn(false);
+
+            // when
+            boolean result = memberService.checkUsername("neo");
+
+            // then
+            assertThat(result).isTrue();
+            verify(memberRepository).existsByUsername("neo");
+        }
+
+        @Test
+        @DisplayName("중복 사용자명 - 사용 불가")
+        void checkUsername_taken() {
+            // given
+            when(memberRepository.existsByUsername("taken")).thenReturn(true);
+
+            // when
+            boolean result = memberService.checkUsername("taken");
+
+            // then
+            assertThat(result).isFalse();
+            verify(memberRepository).existsByUsername("taken");
         }
     }
 }

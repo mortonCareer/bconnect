@@ -19,6 +19,8 @@ import so.morton.api.support.fixture.MemberFactory;
 import so.morton.api.support.fixture.UserFactory;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -180,6 +182,105 @@ class MemberControllerTest {
             // when & then
             mockMvc.perform(delete("/api/v1/members/me"))
                     .andExpect(status().isForbidden());
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /api/v1/members")
+    class GetMembers {
+
+        @Test
+        @DisplayName("ADMIN 목록 조회 성공")
+        void getMembers_success() throws Exception {
+            // given
+            when(memberService.getAll())
+                    .thenReturn(List.of(MemberFactory.create(1L), MemberFactory.create(2L)));
+
+            // when & then
+            mockMvc.perform(get("/api/v1/members")
+                            .with(user(UserFactory.ADMIN_USER)))
+                    .andExpect(status().isOk())
+                    .andExpect(successResponse())
+                    .andExpect(jsonPath("$.data.length()").value(2));
+        }
+
+        @Test
+        @DisplayName("빈 목록 조회 성공")
+        void getMembers_empty() throws Exception {
+            // given
+            when(memberService.getAll()).thenReturn(List.of());
+
+            // when & then
+            mockMvc.perform(get("/api/v1/members")
+                            .with(user(UserFactory.ADMIN_USER)))
+                    .andExpect(status().isOk())
+                    .andExpect(successResponse())
+                    .andExpect(jsonPath("$.data.length()").value(0));
+        }
+
+        @Test
+        @DisplayName("비-ADMIN 접근 시 403")
+        void getMembers_forbidden() throws Exception {
+            // when & then
+            mockMvc.perform(get("/api/v1/members")
+                            .with(user(UserFactory.FOREMAN_USER)))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("미인증 시 403")
+        void getMembers_unauthenticated() throws Exception {
+            // when & then
+            mockMvc.perform(get("/api/v1/members"))
+                    .andExpect(status().isForbidden());
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /api/v1/members/check-username")
+    class CheckUsername {
+
+        @Test
+        @DisplayName("사용 가능한 사용자명")
+        void checkUsername_available() throws Exception {
+            // given
+            when(memberService.checkUsername("neo")).thenReturn(true);
+
+            // when & then
+            mockMvc.perform(get("/api/v1/members/check-username")
+                            .with(user(UserFactory.FOREMAN_USER))
+                            .param("username", "neo"))
+                    .andExpect(status().isOk())
+                    .andExpect(successResponse())
+                    .andExpect(jsonPath("$.data.available").value(true));
+        }
+
+        @Test
+        @DisplayName("중복된 사용자명")
+        void checkUsername_taken() throws Exception {
+            // given
+            when(memberService.checkUsername("taken")).thenReturn(false);
+
+            // when & then
+            mockMvc.perform(get("/api/v1/members/check-username")
+                            .with(user(UserFactory.FOREMAN_USER))
+                            .param("username", "taken"))
+                    .andExpect(status().isOk())
+                    .andExpect(successResponse())
+                    .andExpect(jsonPath("$.data.available").value(false));
+        }
+
+        @Test
+        @DisplayName("미인증 상태로도 접근 가능 (public)")
+        void checkUsername_publicAccess() throws Exception {
+            // given
+            when(memberService.checkUsername("neo")).thenReturn(true);
+
+            // when & then
+            mockMvc.perform(get("/api/v1/members/check-username")
+                            .param("username", "neo"))
+                    .andExpect(status().isOk())
+                    .andExpect(successResponse());
         }
     }
 }

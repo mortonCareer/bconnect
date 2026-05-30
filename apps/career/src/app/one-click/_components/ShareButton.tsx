@@ -25,7 +25,7 @@ export function ShareButton() {
     <button
       type="button"
       onClick={handleShare}
-      className="flex size-10 items-center justify-center rounded-lg transition-colors hover:bg-bconnect-gray-100"
+      className="flex size-10 items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
       aria-label={copied ? '링크 복사됨' : '공유하기'}
     >
       {copied ? (

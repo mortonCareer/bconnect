@@ -10,8 +10,10 @@ import java.util.List;
 
 public class PostFactory {
 
+    public static final String IMAGE = "https://placehold.co/600x400";
+
     public static Post create(Long id, Long profileId, Long taskId) {
-        return new Post(id, profileId, taskId, List.of("image"), "content",
+        return new Post(id, profileId, taskId, List.of(IMAGE), "content",
                 LocalDateTime.MIN, LocalDateTime.MIN);
     }
 
@@ -19,13 +21,13 @@ public class PostFactory {
         return PostEntity.builder()
                 .profileId(profileId)
                 .taskId(taskId)
-                .images(List.of("image"))
+                .images(List.of(IMAGE))
                 .content("content")
                 .build();
     }
 
     public static CreatePostRequest createRequest() {
-        return new CreatePostRequest(1L, List.of("image"), "content");
+        return new CreatePostRequest(1L, List.of(IMAGE), "content");
     }
 
     public static UpdatePostRequest updateRequest() {

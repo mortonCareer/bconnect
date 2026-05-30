@@ -80,13 +80,13 @@ export default function CoworkersPage() {
 
       {/* 검색 입력 */}
       <div className="px-4 py-2">
-        <div className="flex items-center gap-2 rounded-lg border border-bconnect-gray-300 bg-white px-3 py-2.5 focus-within:border-bconnect-primary focus-within:ring-1 focus-within:ring-bconnect-primary">
+        <div className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2.5 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
           <svg
             width="20"
             height="20"
             viewBox="0 0 20 20"
             fill="none"
-            className="shrink-0 text-bconnect-gray-400"
+            className="shrink-0 text-gray-400"
           >
             <path
               d="M9.16667 15.8333C12.8486 15.8333 15.8333 12.8486 15.8333 9.16667C15.8333 5.48477 12.8486 2.5 9.16667 2.5C5.48477 2.5 2.5 5.48477 2.5 9.16667C2.5 12.8486 5.48477 15.8333 9.16667 15.8333Z"
@@ -108,7 +108,7 @@ export default function CoworkersPage() {
             placeholder="검색..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 bg-transparent text-base text-bconnect-gray-900 outline-none placeholder:text-bconnect-gray-500"
+            className="flex-1 bg-transparent text-base text-gray-900 outline-none placeholder:text-gray-500"
           />
         </div>
       </div>
@@ -116,20 +116,20 @@ export default function CoworkersPage() {
       {/* 동료 목록 */}
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-bconnect-gray-500">로딩 중...</p>
+          <p className="text-m-14 text-gray-500">로딩 중...</p>
         </div>
       ) : useMock ? (
-        <div className="flex flex-col divide-y divide-bconnect-gray-300">
+        <div className="flex flex-col divide-y divide-gray-300">
           {filteredMock.map((coworker) => (
             <MockCoworkerCard key={coworker.id} coworker={coworker} />
           ))}
         </div>
       ) : coworkerProfileIds.length === 0 ? (
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-bconnect-gray-500">등록된 동료가 없습니다</p>
+          <p className="text-m-14 text-gray-500">등록된 동료가 없습니다</p>
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-bconnect-gray-300">
+        <div className="flex flex-col divide-y divide-gray-300">
           {coworkerProfileIds.map((profileId) => (
             <CoworkerCard key={profileId} profileId={profileId} />
           ))}
@@ -146,7 +146,7 @@ function MockCoworkerCard({
 }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3">
-      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-bconnect-gray-100">
+      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-100">
         <img
           src={getAvatarUrl(coworker.name)}
           alt={coworker.name}
@@ -156,18 +156,18 @@ function MockCoworkerCard({
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-1.5">
           <span className="text-sb-16">{coworker.name}</span>
-          <span className="text-r-12 text-bconnect-gray-500">
+          <span className="text-r-12 text-gray-500">
             {coworker.trade} · {coworker.role}
           </span>
         </div>
-        <p className="mt-0.5 line-clamp-2 text-r-12 text-bconnect-gray-500">{coworker.about}</p>
+        <p className="mt-0.5 line-clamp-2 text-r-12 text-gray-500">{coworker.about}</p>
       </div>
       <svg
         width="20"
         height="20"
         viewBox="0 0 20 20"
         fill="none"
-        className="shrink-0 text-bconnect-gray-400"
+        className="shrink-0 text-gray-400"
       >
         <path
           d="M7.5 15L12.5 10L7.5 5"

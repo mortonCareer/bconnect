@@ -48,7 +48,7 @@ function ChatIcon({ className, count }: { className?: string; count?: number }) 
         />
       </svg>
       {count !== undefined && count > 0 && (
-        <div className="absolute -right-[7.5px] -top-[3.5px] flex min-w-[15px] items-center justify-center rounded-full bg-bconnect-error px-1">
+        <div className="absolute -right-[7.5px] -top-[3.5px] flex min-w-[15px] items-center justify-center rounded-full bg-destructive px-1">
           <span className="text-[10px] font-bold leading-[15px] text-white">
             {count > 99 ? '99+' : count}
           </span>
@@ -64,10 +64,7 @@ function ProgressBarInline({ step, total }: { step: number; total: number }) {
       {Array.from({ length: total }, (_, i) => (
         <div
           key={i}
-          className={cn(
-            'h-full flex-1 rounded-full',
-            i < step ? 'bg-bconnect-primary' : 'bg-bconnect-gray-300'
-          )}
+          className={cn('h-full flex-1 rounded-full', i < step ? 'bg-primary' : 'bg-gray-300')}
         />
       ))}
     </div>
@@ -135,12 +132,12 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
         {variant === 'default' && (
           <>
             {BackButton}
-            <p className="text-sb-16 text-bconnect-gray-900">{title}</p>
+            <p className="text-sb-16 text-gray-900">{title}</p>
             {showAction ? (
               <button
                 type="button"
                 onClick={onAction}
-                className="text-sb-16 text-bconnect-primary transition-all active:scale-[0.95]"
+                className="text-sb-16 text-primary transition-all active:scale-[0.95]"
               >
                 {actionLabel}
               </button>

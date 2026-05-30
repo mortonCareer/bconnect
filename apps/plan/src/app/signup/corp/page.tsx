@@ -86,20 +86,18 @@ export default function SignupCorpPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
       {/* Card */}
-      <div className="flex w-[480px] flex-col items-center gap-8 rounded-[12px] border border-bconnect-gray-300 p-10">
+      <div className="flex w-[480px] flex-col items-center gap-8 rounded-[12px] border border-gray-300 p-10">
         {/* Logo */}
         <Image src="/logo.png" alt="품앗이" width={160} height={56} priority />
 
         {/* Subtitle */}
-        <p className="text-r-16 text-bconnect-gray-700">
-          신뢰할 수 있는 인테리어 하도급 섭외 · 관리 서비스
-        </p>
+        <p className="text-r-16 text-gray-700">신뢰할 수 있는 인테리어 하도급 섭외 · 관리 서비스</p>
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex w-[400px] flex-col gap-3">
           {/* 업체명 */}
           <div className="flex flex-col gap-2">
-            <p className="text-m-16 text-bconnect-gray-900">업체명</p>
+            <p className="text-m-16 text-gray-900">업체명</p>
             <FormInput
               type="text"
               placeholder="모튼디자인"
@@ -107,14 +105,14 @@ export default function SignupCorpPage() {
               {...register('companyName')}
             />
             {errors.companyName?.message && (
-              <p className="text-r-14 text-bconnect-error">{errors.companyName.message}</p>
+              <p className="text-r-14 text-destructive">{errors.companyName.message}</p>
             )}
           </div>
 
           {/* 사업자등록번호 */}
           <div className="flex flex-col gap-2">
-            <p className="text-m-16 text-bconnect-gray-900">사업자등록번호</p>
-            <p className="text-r-14 text-bconnect-gray-700">동일한 업장의 중복 가입을 방지해요</p>
+            <p className="text-m-16 text-gray-900">사업자등록번호</p>
+            <p className="text-r-14 text-gray-700">동일한 업장의 중복 가입을 방지해요</p>
             <FormInput
               type="text"
               placeholder="00000-00-000"
@@ -126,12 +124,12 @@ export default function SignupCorpPage() {
               })}
             />
             {errors.bizNumber?.message && (
-              <p className="text-r-14 text-bconnect-error">{errors.bizNumber.message}</p>
+              <p className="text-r-14 text-destructive">{errors.bizNumber.message}</p>
             )}
           </div>
 
           {/* Server Error */}
-          {serverError && <p className="text-r-14 text-bconnect-error">{serverError}</p>}
+          {serverError && <p className="text-r-14 text-destructive">{serverError}</p>}
 
           {/* CTA */}
           <Button

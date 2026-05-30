@@ -37,3 +37,7 @@
 ^https://github\.com/(owner|org)/repo
 # - notion-task-sync 의 JS template literal (lychee 가 plain URL 로 잘못 파싱)
 ^https://github\.com/org/repo/(issues|pull)/\$\{
+
+# 외부 도구 — SPA 라 lychee 가 timeout (링크 자체는 살아있음)
+# - uicolors.app: Tailwind 색 스케일 생성기 (ADR-0012 에서 참조)
+^https://uicolors\.app

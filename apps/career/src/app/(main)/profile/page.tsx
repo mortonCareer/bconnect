@@ -78,7 +78,7 @@ export default function MyProfilePage() {
       <div className="flex flex-col">
         <TopBar variant="default" title="내 프로필" showAction={false} />
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-bconnect-gray-500">로딩 중...</p>
+          <p className="text-m-14 text-gray-500">로딩 중...</p>
         </div>
       </div>
     )
@@ -117,7 +117,7 @@ export default function MyProfilePage() {
       {activeTab === 'works' && profile.id && <WorksSection authorId={profile.id} />}
       {activeTab === 'works' && !profile.id && (
         <div className="flex items-center justify-center py-20">
-          <p className="text-m-14 text-bconnect-gray-500">작업물을 불러올 수 없습니다</p>
+          <p className="text-m-14 text-gray-500">작업물을 불러올 수 없습니다</p>
         </div>
       )}
     </div>

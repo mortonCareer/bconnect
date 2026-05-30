@@ -13,16 +13,16 @@ import { cn } from '../../lib/utils'
  * Figma: https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=189-626
  */
 const inputVariants = cva(
-  'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border bg-transparent text-base outline-none transition-colors placeholder:text-bconnect-gray-500 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-1 aria-invalid:ring-destructive/50',
+  'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border bg-transparent text-base outline-none transition-colors placeholder:text-gray-500 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-1 aria-invalid:ring-destructive/50',
   {
     variants: {
       variant: {
         // 기본 상태
         default:
-          'border-bconnect-gray-300 text-bconnect-gray-900 focus:border-bconnect-primary focus:ring-1 focus:ring-bconnect-primary',
+          'border-gray-300 text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary',
         // 에러 상태
         error:
-          'border-destructive text-bconnect-gray-900 focus:border-destructive focus:ring-1 focus:ring-destructive/50',
+          'border-destructive text-gray-900 focus:border-destructive focus:ring-1 focus:ring-destructive/50',
       },
     },
     defaultVariants: {
@@ -72,7 +72,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       return (
         <div className="flex w-full flex-col items-start gap-2">
           {inputElement}
-          <p className="text-sm text-bconnect-error">{errorMessage}</p>
+          <p className="text-sm text-destructive">{errorMessage}</p>
         </div>
       )
     }

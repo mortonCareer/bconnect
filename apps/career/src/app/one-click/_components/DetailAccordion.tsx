@@ -34,12 +34,10 @@ export function DetailAccordionItem({
       <AccordionTrigger className="gap-3">
         <div className="flex flex-1 flex-col gap-1">
           <div className="flex items-center gap-2">
-            <span className="text-sb-16 text-bconnect-gray-900">{item.label}</span>
+            <span className="text-sb-16 text-gray-900">{item.label}</span>
             <StatusBadge status={item.status} statusType={item.statusType} />
           </div>
-          {item.description && (
-            <span className="text-r-12 text-bconnect-gray-500">{item.description}</span>
-          )}
+          {item.description && <span className="text-r-12 text-gray-500">{item.description}</span>}
         </div>
       </AccordionTrigger>
       <AccordionContent>
