@@ -26,3 +26,4 @@ export {
 export { Label } from './ui/label'
 export { TextField } from './ui/TextField'
 export { FormError } from './ui/FormError'
+export { FormSubmitButton } from './ui/FormSubmitButton'
