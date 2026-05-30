@@ -22,18 +22,18 @@
      비-brand 색(gray·red·orange·green …)은 Tailwind v4 기본 팔레트를
      그대로 쓴다. 여기서 재정의하지 않는다 (ADR-0012 §3). */
 
-  /* primary — brand 앵커 #386dff @ 500 */
-  --color-primary-50: #f0f5ff;
-  --color-primary-100: #dee9ff;
-  --color-primary-200: #c6d8ff;
-  --color-primary-300: #a2c0ff;
-  --color-primary-400: #719cff;
+  /* primary — brand 앵커 #386dff @ 500 (https://uicolors.app/generate/386dff) */
+  --color-primary-50: #eef4ff;
+  --color-primary-100: #d9e5ff;
+  --color-primary-200: #bcd2ff;
+  --color-primary-300: #8eb6ff;
+  --color-primary-400: #5991ff;
   --color-primary-500: #386dff;
-  --color-primary-600: #2559ff;
-  --color-primary-700: #1543ed;
-  --color-primary-800: #133abd;
-  --color-primary-900: #183892;
-  --color-primary-950: #112558;
+  --color-primary-600: #1b47f5;
+  --color-primary-700: #1432e1;
+  --color-primary-800: #172ab6;
+  --color-primary-900: #192a8f;
+  --color-primary-950: #141c57;
 
   /* secondary — brand 앵커 #eaefff @ 100 */
   --color-secondary-50: #f3f5fc;
