@@ -146,15 +146,65 @@ export default function EditAboutPage() { ... }
 packages/ui/
 ├── src/
 │   ├── components/
-│   │   ├── ui/           # shadcn 컴포넌트 (각 파일 상단에 @figma 주석 필수)
-│   │   └── index.ts      # export
-│   ├── icons/            # 아이콘 컴포넌트
-│   ├── lib/
-│   │   └── utils.ts      # cn() 함수
-│   └── styles/
-│       └── globals.css   # CSS Variables + 디자인 시스템 @figma URL
-└── components.json       # shadcn CLI 설정
+│   │   ├── ui/
+│   │   │   ├── shadcn/          # shadcn registry vanilla — 재실행 안전 (소문자 파일명)
+│   │   │   │   ├── accordion.tsx
+│   │   │   │   ├── form.tsx
+│   │   │   │   └── label.tsx
+│   │   │   ├── form/            # 우리 form-coupled wrapper — RHF context 소비
+│   │   │   │   ├── TextField.tsx
+│   │   │   │   ├── TextareaField.tsx
+│   │   │   │   ├── FormError.tsx
+│   │   │   │   └── FormSubmitButton.tsx
+│   │   │   ├── _field-base.ts   # Input/Textarea 공통 클래스 SSOT (drift 차단)
+│   │   │   ├── Button.tsx       # 디자인 시스템 base (Figma 시안 매핑)
+│   │   │   └── ...              # 도메인 컴포넌트 (Chat*, Feed, TopBar 등)
+│   │   └── index.ts             # barrel export
+│   ├── icons/                   # 아이콘 컴포넌트
+│   ├── hooks/                   # useServerError, useAllFieldsFilled 등
+│   ├── lib/utils.ts             # cn() 함수
+│   └── styles/globals.css       # CSS Variables + 디자인 시스템 @figma URL
+└── components.json              # shadcn CLI 설정 (ui alias → src/components/ui/shadcn)
 ```
+
+---
+
+## 폼 시스템 (ADR 0013, PR #403)
+
+상세: [`docs/how-to/frontend-forms.md`](../../docs/how-to/frontend-forms.md), [ADR 0013](../../docs/explanation/adr/0013-form-handling-standard.md).
+
+### 표준 컴포넌트·훅
+
+| 자리                 | 사용                                                          |
+| -------------------- | ------------------------------------------------------------- |
+| 폼 컨테이너          | `<Form {...form}>` (FormProvider alias)                       |
+| 텍스트 입력          | `<TextField>` (단일), `<TextareaField>` (멀티)                |
+| 폼 전역 에러 슬롯    | `<FormError error={server.formError} />`                      |
+| 제출 버튼            | `<FormSubmitButton isLoading={mutation.isPending}>`           |
+| 폼 외 단일 버튼      | `<Button isLoading={...}>` — `loadingText` 폐기, spinner 통일 |
+| 서버 에러 derive     | `useServerError(control, mapError)`                           |
+| 기본 mapError        | `passthroughError(field?)` — BE message 그대로 (ADR-0015)     |
+| 특수 분기 type guard | `isApiErrorShape(err)`                                        |
+
+### DO
+
+- zod = 검증 SSOT. `useForm({ resolver: zodResolver(schema), mode: 'onSubmit' })`
+- `coerce`/`transform` 스키마는 `useForm<input, ctx, output>` 3-제네릭
+- 필수 필드는 `<TextField required>` — 라벨 옆 빨간 별표 자동 (HTML native required 는 발동 안 함, zod 가 검증)
+- FormProvider 의존 컴포넌트는 런타임 가드 `if (!formContext) throw` (TS 강제 불가)
+- Input·Textarea 등 폼 필드 base 클래스는 [`_field-base.ts`](src/components/ui/_field-base.ts) 의 `FIELD_*` 상수 사용
+
+### DON'T
+
+- raw `<input>`/`<textarea>` 폼 입력 (a11y 누락 위험)
+- raw `<button type="submit">` (FormSubmitButton 또는 Button isLoading)
+- `setError('root')` 또는 onChange 마다 `clearErrors` — [#369](https://github.com/mortonCareer/bconnect/pull/369) 버그 클래스
+- `form.watch()` 호출 — `useWatch` 훅 사용 (React Compiler 호환)
+- `packages/ui` 가 `@bconnect/api-client` 에 import 의존 — duck typing (`isApiErrorShape`)
+- shadcn primitive (`ui/shadcn/*`) 직접 수정 — 확장은 wrapper 에서 (예: `TextField` 가 `TextFieldControl` 로 aria 흡수)
+- `text-bconnect-*` prefix 사용 — globals.css 에 정의 없는 미정의 토큰 (Tailwind 무시)
+
+---
 
 ## 관련 도구
 

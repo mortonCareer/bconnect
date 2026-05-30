@@ -4,6 +4,7 @@
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { Loader2 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
 /**
@@ -48,7 +49,6 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   children?: React.ReactNode
   isLoading?: boolean
-  loadingText?: string
   asChild?: boolean
 }
 
@@ -82,29 +82,28 @@ export interface ButtonProps
  * ```
  */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      className,
-      variant,
-      size,
-      children,
-      isLoading,
-      loadingText,
-      disabled,
-      asChild = false,
-      ...props
-    },
-    ref
-  ) => {
+  ({ className, variant, size, children, isLoading, disabled, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button'
+    // 단일 child 표현 필수 — asChild(Slot) 가 React.Children.only 강제.
+    // 다중 sibling (`{isLoading && X}{children}`) 은 isLoading=false 라도 children prop 이
+    // [false, child] 배열이 돼 Slot 사용처 (LoginPromptModal 등) prerender 가 깨진다.
+    const content = isLoading ? (
+      <>
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+        {children}
+      </>
+    ) : (
+      children
+    )
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         disabled={disabled || isLoading}
+        aria-busy={isLoading || undefined}
         {...props}
       >
-        {isLoading ? loadingText || '로딩 중...' : children}
+        {content}
       </Comp>
     )
   }

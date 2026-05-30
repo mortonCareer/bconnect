@@ -4,6 +4,11 @@
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
+import {
+  FIELD_BASE_CLASSES,
+  FIELD_DEFAULT_VARIANT_CLASSES,
+  FIELD_ERROR_VARIANT_CLASSES,
+} from './_field-base'
 
 /**
  * Input variants:
@@ -12,24 +17,19 @@ import { cn } from '../../lib/utils'
  *
  * Figma: https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=189-626
  */
-const inputVariants = cva(
-  'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border bg-transparent text-base outline-none transition-colors placeholder:text-gray-500 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-  {
-    variants: {
-      variant: {
-        // 기본 상태
-        default:
-          'border-gray-300 text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary',
-        // 에러 상태
-        error:
-          'border-destructive text-gray-900 focus:border-destructive focus:ring-1 focus:ring-destructive/50',
-      },
+const inputVariants = cva(`${FIELD_BASE_CLASSES} flex items-center h-[50px]`, {
+  variants: {
+    variant: {
+      // 기본 상태 — 회색 보더 + primary 포커스
+      default: FIELD_DEFAULT_VARIANT_CLASSES,
+      // 에러 상태 — destructive 보더·포커스
+      error: FIELD_ERROR_VARIANT_CLASSES,
     },
-    defaultVariants: {
-      variant: 'default',
-    },
-  }
-)
+  },
+  defaultVariants: {
+    variant: 'default',
+  },
+})
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement>, VariantProps<typeof inputVariants> {

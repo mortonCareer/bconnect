@@ -138,7 +138,6 @@ export default function SignupCorpPage() {
             size="full"
             disabled={!isValid}
             isLoading={isSubmitting || registerMemberMutation.isPending}
-            loadingText="가입 중..."
           >
             가입 완료
           </Button>

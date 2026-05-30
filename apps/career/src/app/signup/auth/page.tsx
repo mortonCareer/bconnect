@@ -193,7 +193,6 @@ export default function SignupAuthPage() {
             onClick={handleSendCode}
             disabled={!isPhoneValid}
             isLoading={sendCodeMutation.isPending}
-            loadingText="발송 중..."
           >
             다음
           </Button>
@@ -204,7 +203,6 @@ export default function SignupAuthPage() {
             onClick={handleVerifyCode}
             disabled={!isCodeValid}
             isLoading={verifyCodeMutation.isPending}
-            loadingText="확인 중..."
           >
             다음으로
           </Button>

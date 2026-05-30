@@ -290,7 +290,6 @@ export default function SignupProfilePage() {
           size="full"
           disabled={!isValid}
           isLoading={isSubmitting || registerMemberMutation.isPending}
-          loadingText="저장 중..."
           onClick={handleSubmit(onSubmit)}
         >
           완료

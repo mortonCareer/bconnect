@@ -66,13 +66,7 @@ export function OneClickTab({ credentials, onDelete, isDeleting }: OneClickTabPr
         </div>
       </div>
 
-      <Button
-        variant="secondary"
-        size="full"
-        onClick={handleSearch}
-        isLoading={isSearching}
-        loadingText="조회 중..."
-      >
+      <Button variant="secondary" size="full" onClick={handleSearch} isLoading={isSearching}>
         조회하기
       </Button>
 

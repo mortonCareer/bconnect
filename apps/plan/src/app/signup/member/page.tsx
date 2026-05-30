@@ -103,7 +103,6 @@ export default function SignupMemberPage() {
             size="full"
             disabled={!isValid}
             isLoading={isSubmitting}
-            loadingText="확인 중..."
           >
             다음으로
           </Button>
