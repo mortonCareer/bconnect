@@ -39,15 +39,13 @@ export interface UseServerErrorResult<T extends FieldValues> {
  *
  * @param control  `useForm()` 의 `control`
  * @param mapError 잡은 에러 → `{ field?, message }`. `field` 생략 시 폼 전역 에러.
+ *                 표준 케이스는 `passthroughError` 헬퍼 사용 (BE message 그대로).
  *
  * @example
- * const server = useServerError(form.control, (err) =>
- *   err instanceof ApiError && err.code === 'A003'
- *     ? { field: 'code', message: '유효하지 않은 인증번호입니다.' }
- *     : { message: '잠시 후 다시 시도해주세요.' }
- * )
- * // onSubmit catch: server.capture(err, data)
- * // 렌더: <FormMessage>{server.fieldError('code')}</FormMessage>
+ *   // 표준: BE envelope `error.message` 를 'code' 필드 밑에 그대로 표시
+ *   const server = useServerError(form.control, passthroughError('code'))
+ *   // onSubmit catch: server.capture(err, data)
+ *   // 렌더: <FormMessage>{server.fieldError('code')}</FormMessage>
  */
 export function useServerError<T extends FieldValues>(
   control: Control<T>,
@@ -75,4 +73,42 @@ export function useServerError<T extends FieldValues>(
     formError: live && !live.field ? live.message : undefined,
     reset: () => setSnapshot(null),
   }
+}
+
+/**
+ * BE envelope 의 `error.message` 를 그대로 사용하는 표준 mapError.
+ * ADR-0014 (BE = API SSOT) + 2026-05-22 회의 결정: FE 는 코드별 분기 없이 BE 메시지 표시,
+ * 특수 분기 필요시에만 enum narrowing. 호출부 보일러플레이트 제거용.
+ *
+ * @param field 에러를 묶을 필드명. 생략 시 폼 전역 에러.
+ * @param fallback ApiError 가 아닐 때 (네트워크/타임아웃 등) 표시할 메시지.
+ *
+ * @example
+ *   useServerError(form.control, passthroughError('code'))
+ *
+ *   // 특수 분기 — 헬퍼는 옵셔널, 콜백 직접 작성 가능
+ *   useServerError(form.control, (err) =>
+ *     isApiErrorShape(err) && err.code === 'OTP_RATE_LIMITED'
+ *       ? { field: 'code', message: '시도 횟수 초과 — 5분 후 다시 시도해주세요.' }
+ *       : passthroughError<LoginFormData>('code')(err)
+ *   )
+ */
+export function passthroughError<T extends FieldValues>(
+  field?: keyof T & string,
+  fallback = '알 수 없는 오류가 발생했습니다.'
+): (error: unknown) => ServerErrorMapping<T> {
+  return (error) => ({
+    ...(field && { field }),
+    message: isApiErrorShape(error) ? error.message : fallback,
+  })
+}
+
+/**
+ * `ApiError` 의 duck type. `packages/ui` 가 `@bconnect/api-client` 에 의존하지
+ * 않기 위함 (ADR-0013). `ApiError` 가 `this.name = 'ApiError'` 를 명시하므로 안전한 표식.
+ */
+export function isApiErrorShape(error: unknown): error is { message: string; code: string } {
+  if (typeof error !== 'object' || error === null) return false
+  const e = error as { name?: unknown; message?: unknown; code?: unknown }
+  return e.name === 'ApiError' && typeof e.message === 'string' && typeof e.code === 'string'
 }

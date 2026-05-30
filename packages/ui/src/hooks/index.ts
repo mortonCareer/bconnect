@@ -1,3 +1,8 @@
 // @bconnect/ui - Hooks
 export { useOtpTimer, type UseOtpTimerResult } from './useOtpTimer'
-export { useServerError, type UseServerErrorResult } from './useServerError'
+export {
+  useServerError,
+  passthroughError,
+  isApiErrorShape,
+  type UseServerErrorResult,
+} from './useServerError'

@@ -93,18 +93,27 @@ import { Button, Form, TextField } from '@bconnect/ui'
 
 ## 4. 서버 에러 — `useServerError`
 
-API 실패(`ApiError`)는 `useServerError` 훅으로 다룬다. 서버 에러를 _제출 시점 입력값_ 에 묶어, 사용자가 입력을 바꾸면 자동으로 사라지게 한다(derive). `setError('root')`나 onChange마다 `clearErrors` 호출하는 방식은 금지.
+API 실패는 `useServerError` 훅으로 다룬다. 서버 에러를 _제출 시점 입력값_ 에 묶어, 사용자가 입력을 바꾸면 자동으로 사라지게 한다(derive). `setError('root')`나 onChange마다 `clearErrors` 호출하는 방식은 금지.
+
+기본은 BE envelope 의 `error.message` 를 그대로 표시한다 (ADR-0014: BE = API SSOT). 표준 헬퍼 `passthroughError` 사용:
 
 ```tsx
-import { ApiError } from '@bconnect/api-client'
-import { useServerError } from '@bconnect/ui'
+import { useServerError, passthroughError } from '@bconnect/ui'
 
-const server = useServerError(form.control, (err) => {
-  if (err instanceof ApiError && err.code === 'A003') {
-    return { field: 'code', message: '유효하지 않은 인증번호입니다.' }
-  }
-  return { message: '잠시 후 다시 시도해주세요.' } // field 생략 → 폼 전역 에러
-})
+// 'code' 필드 밑에 BE 메시지 그대로 표시. 폼 전역으로 띄우려면 passthroughError() (인자 없이).
+const server = useServerError(form.control, passthroughError('code'))
+```
+
+특수 분기가 필요한 경우 (특정 에러 코드만 FE 가 자체 메시지로 덮어쓰기) 에만 콜백 직접 작성:
+
+```tsx
+import { useServerError, passthroughError, isApiErrorShape } from '@bconnect/ui'
+
+const server = useServerError(form.control, (err) =>
+  isApiErrorShape(err) && err.code === 'OTP_RATE_LIMITED'
+    ? { field: 'code', message: '시도 횟수 초과 — 5분 후 다시 시도해주세요.' }
+    : passthroughError<LoginFormData>('code')(err)
+)
 ```
 
 `TextField`에 연결하고, 폼 전역 에러는 따로 렌더:
@@ -113,7 +122,7 @@ const server = useServerError(form.control, (err) => {
 <TextField ... serverError={server.fieldError('code')} />
 
 {server.formError && (
-  <p className="text-center text-r-14 text-bconnect-error">{server.formError}</p>
+  <p className="text-center text-r-14 text-destructive">{server.formError}</p>
 )}
 ```
 
