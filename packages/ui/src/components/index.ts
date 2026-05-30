@@ -25,3 +25,4 @@ export {
 } from './ui/form'
 export { Label } from './ui/label'
 export { TextField } from './ui/TextField'
+export { FormError } from './ui/FormError'

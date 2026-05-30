@@ -11,7 +11,7 @@ import { Input } from './Input'
 
 interface TextFieldProps<T extends FieldValues> extends Omit<
   React.ComponentProps<typeof Input>,
-  'name' | 'onChange'
+  'name' | 'onChange' | 'required'
 > {
   control: Control<T>
   name: FieldPath<T>
@@ -19,6 +19,8 @@ interface TextFieldProps<T extends FieldValues> extends Omit<
   label?: string
   /** 입력 위 설명문 (생략 가능) */
   description?: string
+  /** 필수 입력 표시 — 라벨 옆 빨간 별표. 검증은 zod 가 담당, native required 는 발동 안 함. */
+  required?: boolean
   /** useServerError 의 fieldError 결과 — zod 클라이언트 에러와 한 슬롯에 합성. */
   serverError?: string
   /** 입력 우측 adornment (OTP 타이머 등) */
@@ -43,6 +45,7 @@ export function TextField<T extends FieldValues>({
   name,
   label,
   description,
+  required,
   serverError,
   rightElement,
   transform,
@@ -55,7 +58,11 @@ export function TextField<T extends FieldValues>({
       name={name}
       render={({ field }) => (
         <FormItem className="gap-3">
-          {label && <FormLabel className="text-m-16 text-bconnect-gray-900">{label}</FormLabel>}
+          {label && (
+            <FormLabel required={required} className="text-m-16 text-bconnect-gray-900">
+              {label}
+            </FormLabel>
+          )}
           {description && (
             <FormDescription className="text-r-14 text-bconnect-gray-700">
               {description}
