@@ -1,5 +1,5 @@
 /**
- * @figma-scaffold 디자인 시스템 시안 미정 — TextField 미러링 임시 구현. 디자이너 확정 시 갈아끼움.
+ * @figma-scaffold 디자인 시안 미정 — TextField 미러링 임시 구현, 디자이너 확정 시 갈아끼움 (#400)
  */
 'use client'
 

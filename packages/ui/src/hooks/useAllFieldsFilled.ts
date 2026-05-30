@@ -28,7 +28,11 @@ export function useAllFieldsFilled<T extends FieldValues>(control: Control<T>): 
  */
 function isFilledDeep(value: unknown): boolean {
   if (value == null || value === '') return false
+  if (value instanceof Date) return !Number.isNaN(value.getTime())
   if (Array.isArray(value)) return value.length > 0 && value.every(isFilledDeep)
-  if (typeof value === 'object') return Object.values(value).every(isFilledDeep)
+  if (typeof value === 'object') {
+    const vals = Object.values(value)
+    return vals.length > 0 && vals.every(isFilledDeep)
+  }
   return true
 }
