@@ -44,11 +44,12 @@ main 머지 → 프로덕션 배포
   - 통합검증 CI: `api:generate` → typecheck → 빌드
 
 - **`dev`**: 개발 브랜치 (GitHub 기본 브랜치)
-  - BE/FE 독립 — spec 변경 후 FE 가 새 endpoint 호출하는 PR 도 typecheck 통과 (orval 자동 생성). 단 runtime 검증은 BE 구현 후. 진정한 디커플 (BE 미구현 endpoint 호출하는 페이지의 preview 동작까지 보장) 은 [#171](https://github.com/mortonCareer/bconnect/issues/171) (MSW 도입) 후.
+  - BE 코드를 API 기준(SSOT)으로 하는 BE-first 개발 사이클 ([ADR-0014](../explanation/adr/0014-be-code-as-api-ssot.md)). 일반적으로 **BE 구현 → 스펙 갱신 → FE 작업** 순서로 진행
+  - FE는 MSW mock으로 BE 미구현 상태에서도 일부 작업 가능 (preview 환경에서 mock 응답으로 동작)
   - 모든 feature/fix PR의 타겟
   - CI: lint, format, BE 빌드/테스트, **FE typecheck 포함** (강제 green 정책)
-  - **spec 변경 PR 은 ci-career/ci-plan skip** — drift 는 follow-up FE PR 로 해소, `ci-integration` 가 dev → main 최종 gate.
-  - Vercel preview build 항상 green — 디자이너 검수 / 시각 QA 사이클 보장. spec 변경 후 BE 미구현 endpoint 의 runtime 은 [#171](https://github.com/mortonCareer/bconnect/issues/171) 도입 전까진 BE 구현 후 동작.
+  - 스펙만 갱신하는 PR(BE 구현 후 따라가는 갱신)은 paths-filter로 ci-career/ci-plan skip — BE-first에선 일반적으로 BE 변경과 스펙 갱신이 같은 PR에 묶이거나, 스펙 갱신이 FE 호출부 영향 없는 형태로 들어옴
+  - Vercel preview build 항상 green — 디자이너 검수 / 시각 QA 사이클 보장
 
 ### 작업 브랜치
 
@@ -94,7 +95,7 @@ gh pr create --base main --head dev --title "release: v1.x.x"
 
 통합검증 CI(`ci-integration.yml`)가 통과해야 머지 가능합니다. 실패 시 dev에서 수정 후 재시도합니다.
 
-dev 브랜치는 BE/FE 독립 개발을 허용하므로 OpenAPI 스펙 ↔ FE 타입 drift가 누적될 수 있습니다. 통합은 일반적으로 스프린트 단위로 진행하되, 필요 시 CTO가 임의로 트리거할 수 있습니다. drift는 dev 브랜치에서 직접 수정하며, typecheck 에러가 많을 경우 AI agent에 초안 작성 위임 후 CTO 리뷰.
+dev 브랜치는 BE-first 개발 사이클이라 BE 구현 → 스펙 → FE 순서로 자연스럽게 정합됩니다 ([ADR-0014](../explanation/adr/0014-be-code-as-api-ssot.md)). 통합은 일반적으로 스프린트 단위로 진행하되, 필요 시 CTO가 임의로 트리거할 수 있습니다. BE 변경 후 스펙 또는 FE 갱신 누락으로 드물게 drift가 발생할 수 있으며, 발견 시 dev에서 직접 수정합니다.
 
 ---
 
