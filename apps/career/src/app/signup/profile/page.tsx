@@ -6,14 +6,13 @@
 import type { ExperienceLevel } from '@/lib/experience'
 import { EXPERIENCE_OPTIONS, EXPERIENCE_TO_YEARS } from '@/lib/experience'
 import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
-import { TRADE_GROUPS, TRADE_LABELS } from '@/lib/trade-labels'
+import { TRADE_LABELS } from '@/lib/trade-labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import { Trade, useCreateProfile, useRegisterMember } from '@bconnect/api-client'
 import {
   Button,
   Form,
-  FormDescription,
   FormError,
   Tag,
   TextField,
@@ -26,6 +25,7 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { SignupHeader } from '../_components/SignupHeader'
 import { FormLabel } from './_components/FormLabel'
+import { TradeSelector } from './_components/TradeSelector'
 import { MAX_TRADES, profileSchema, type ProfileFormData } from './schema'
 
 export default function SignupProfilePage() {
@@ -78,19 +78,6 @@ export default function SignupProfilePage() {
     }
   }, [watchedFields, watchedPrimaryField, setValue])
 
-  const toggleField = (trade: Trade) => {
-    const currentFields = selectedFields || []
-    if (currentFields.includes(trade)) {
-      setValue(
-        'fields',
-        currentFields.filter((f) => f !== trade),
-        { shouldValidate: true }
-      )
-    } else if (currentFields.length < MAX_TRADES) {
-      setValue('fields', [...currentFields, trade], { shouldValidate: true })
-    }
-  }
-
   const onSubmit = async (data: ProfileFormData) => {
     try {
       // registerMember 는 signupToken 을 소비 — 실패 후 재시도 시 재호출하지 않도록 가드.
@@ -135,7 +122,7 @@ export default function SignupProfilePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col">
       <SignupHeader step={3} onBack={() => router.back()} />
 
       {/* Content */}
@@ -161,29 +148,7 @@ export default function SignupProfilePage() {
           />
 
           {/* 시공분야 */}
-          <div className="flex flex-col gap-3">
-            <FormLabel required>시공분야</FormLabel>
-            <FormDescription>
-              최대 {MAX_TRADES}개까지 선택 가능해요 ({selectedFields.length}/{MAX_TRADES})
-            </FormDescription>
-            {TRADE_GROUPS.map((group) => (
-              <div key={group.label} className="flex flex-col gap-3">
-                <p className="text-m-14 text-gray-700">{group.label}</p>
-                <div className="flex flex-wrap gap-2">
-                  {group.trades.map((trade) => (
-                    <Tag
-                      key={trade}
-                      variant={selectedFields.includes(trade) ? 'selected' : 'default'}
-                      onClick={() => toggleField(trade)}
-                    >
-                      {TRADE_LABELS[trade]}
-                    </Tag>
-                  ))}
-                </div>
-              </div>
-            ))}
-            <FormError error={errors.fields?.message} />
-          </div>
+          <TradeSelector control={control} name="fields" max={MAX_TRADES} />
 
           {/* 대표분야 */}
           {/* TODO: 별도 SelectField로 대체 */}
