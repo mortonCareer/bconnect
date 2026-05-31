@@ -12,7 +12,7 @@ import {
   toE164,
   toNationalNumber,
 } from '@bconnect/config/phone'
-import { Button, Form, TextField, passthroughError, useServerError } from '@bconnect/ui'
+import { Form, FormSubmitButton, TextField, passthroughError, useServerError } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -160,15 +160,15 @@ export default function LoginPage() {
             )}
 
             {/* Submit Button */}
-            <Button
-              type="submit"
+            <FormSubmitButton
+              requireAllFilled={false}
               variant={isSubmitDisabled ? 'secondary' : 'primary'}
               size="full"
               disabled={isSubmitDisabled}
               isLoading={isSubmitLoading}
             >
               {step === 'phone' ? '인증번호 받기' : '인증 완료'}
-            </Button>
+            </FormSubmitButton>
           </form>
         </Form>
       </div>

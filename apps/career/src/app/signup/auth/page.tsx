@@ -14,7 +14,7 @@ import {
   toE164,
   toNationalNumber,
 } from '@bconnect/config/phone'
-import { Button, Form, TextField, passthroughError, useServerError } from '@bconnect/ui'
+import { Form, FormSubmitButton, TextField, passthroughError, useServerError } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -163,25 +163,25 @@ export default function SignupAuthPage() {
 
           {/* Submit Button */}
           {step === 'phone' ? (
-            <Button
-              type="submit"
+            <FormSubmitButton
+              requireAllFilled={false}
               variant="outline"
               size="full"
               disabled={!isPhoneValid}
               isLoading={sendCodeMutation.isPending}
             >
               다음
-            </Button>
+            </FormSubmitButton>
           ) : (
-            <Button
-              type="submit"
+            <FormSubmitButton
+              requireAllFilled={false}
               variant="primary"
               size="full"
               disabled={!isCodeValid}
               isLoading={verifyCodeMutation.isPending}
             >
               다음으로
-            </Button>
+            </FormSubmitButton>
           )}
         </form>
       </Form>

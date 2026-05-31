@@ -12,7 +12,14 @@ import {
   toE164,
   toNationalNumber,
 } from '@bconnect/config/phone'
-import { Button, Form, TextField, TopBar, passthroughError, useServerError } from '@bconnect/ui'
+import {
+  Form,
+  FormSubmitButton,
+  TextField,
+  TopBar,
+  passthroughError,
+  useServerError,
+} from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -164,25 +171,25 @@ export default function LoginPage() {
 
           {/* Submit Button */}
           {step === 'phone' ? (
-            <Button
-              type="submit"
+            <FormSubmitButton
+              requireAllFilled={false}
               variant="outline"
               size="full"
               disabled={!isPhoneValid}
               isLoading={sendCodeMutation.isPending}
             >
               다음
-            </Button>
+            </FormSubmitButton>
           ) : (
-            <Button
-              type="submit"
+            <FormSubmitButton
+              requireAllFilled={false}
               variant="primary"
               size="full"
               disabled={!isCodeValid}
               isLoading={verifyCodeMutation.isPending}
             >
               로그인
-            </Button>
+            </FormSubmitButton>
           )}
         </form>
       </Form>
