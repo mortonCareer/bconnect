@@ -4,11 +4,12 @@
  */
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Form, TextField } from '@bconnect/ui'
+import { checkUsername } from '@bconnect/api-client'
+import { Button, Form, TextField, passthroughError, useServerError } from '@bconnect/ui'
 import { formatUsername } from '@bconnect/config/username'
 import Image from 'next/image'
 import { useSignupStore } from '@/stores/signup-store'
@@ -16,7 +17,6 @@ import { memberSchema, type MemberFormData } from './schema'
 
 export default function SignupMemberPage() {
   const router = useRouter()
-  const [serverError, setServerError] = useState<string | null>(null)
   const { formData, setMember } = useSignupStore()
 
   // signupToken 없으면 로그인으로 리다이렉트
@@ -40,15 +40,19 @@ export default function SignupMemberPage() {
     formState: { isSubmitting, isValid },
   } = form
 
-  const onSubmit = async (data: MemberFormData) => {
-    setServerError(null)
+  const server = useServerError(control, passthroughError<MemberFormData>('username'))
 
+  const onSubmit = async (data: MemberFormData) => {
     try {
-      // TODO: 사용자 ID 중복 확인 API 호출
+      const { available } = await checkUsername({ username: data.username })
+      if (!available) {
+        form.setError('username', { message: '이미 존재하는 사용자 이름입니다.' })
+        return
+      }
       setMember({ username: data.username, name: data.name })
       router.push('/signup/corp')
-    } catch {
-      setServerError('이미 존재하는 사용자 이름입니다.')
+    } catch (err) {
+      server.capture(err, data)
     }
   }
 
@@ -75,7 +79,7 @@ export default function SignupMemberPage() {
               description="동일한 사용자를 구분하는데 활용되며, 한 번 설정하면 변경이 불가해요."
               placeholder="user_id"
               transform={formatUsername}
-              serverError={serverError ?? undefined}
+              serverError={server.fieldError('username')}
             />
 
             <TextField
