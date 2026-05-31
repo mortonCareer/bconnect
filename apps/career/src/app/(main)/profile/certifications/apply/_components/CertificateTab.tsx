@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
 import type { Credential, CredentialType } from '@bconnect/api-client'
-import { Button, Tag } from '@bconnect/ui'
-import { getCredentialLabel, formatDate } from '../../constants'
+import { Button, Form, Tag, TextareaField } from '@bconnect/ui'
+import { useState } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
+import { formatDate, getCredentialLabel } from '../../constants'
 
 interface CertificateTabProps {
   credentials: Credential[]
@@ -46,7 +47,14 @@ export function CertificateTab({
   isDeleting,
 }: CertificateTabProps) {
   const [activeSubTab, setActiveSubTab] = useState('career')
-  const [otherNote, setOtherNote] = useState('')
+
+  // "그 외" 서브탭의 검토 참고 note — 단일 필드 폼 (검증 메시지 없음, 입력 시에만 제출 활성)
+  const form = useForm<{ note: string }>({ defaultValues: { note: '' } })
+  const note = useWatch({ control: form.control, name: 'note' })
+  const submitOther = form.handleSubmit((data) => {
+    onSubmitOther(data.note)
+    form.reset({ note: '' })
+  })
 
   const currentType = SUB_TAB_TYPE_MAP[activeSubTab]
   const filteredCredentials = credentials.filter((c) => c.type === currentType)
@@ -88,28 +96,22 @@ export function CertificateTab({
           <p className="text-center text-r-12 text-gray-700">2026.02.21 업데이트됨</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          <Button variant="secondary" size="full" disabled>
-            파일 제출
-          </Button>
-          <textarea
-            className="h-24 w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-r-14 text-gray-900 placeholder:text-gray-500 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="검토시 참고할 내용을 작성해주세요..."
-            value={otherNote}
-            onChange={(e) => setOtherNote(e.target.value)}
-          />
-          <Button
-            variant="primary"
-            size="full"
-            disabled={!otherNote.trim()}
-            onClick={() => {
-              onSubmitOther(otherNote)
-              setOtherNote('')
-            }}
-          >
-            제출하기
-          </Button>
-        </div>
+        <Form {...form}>
+          <form onSubmit={submitOther} className="flex flex-col gap-3">
+            <Button type="button" variant="secondary" size="full" disabled>
+              파일 업로드
+            </Button>
+            <TextareaField
+              control={form.control}
+              name="note"
+              rows={4}
+              placeholder="검토시 참고할 내용을 작성해주세요..."
+            />
+            <Button type="submit" variant="primary" size="full" disabled={!note?.trim()}>
+              제출하기
+            </Button>
+          </form>
+        </Form>
       )}
 
       {/* 하단 인증 목록 — 심플 리스트 */}

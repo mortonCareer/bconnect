@@ -1,5 +1,3 @@
-export { FormInput, type FormInputProps } from './FormInput'
 export { OtpTimer } from './OtpTimer'
 export { SignupHeader } from './SignupHeader'
 export { FormLabel } from './FormLabel'
-export { FormError } from './FormError'

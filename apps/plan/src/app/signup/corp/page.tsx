@@ -3,22 +3,28 @@
  */
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@bconnect/ui'
-import { ApiError, useRegisterMember, Role } from '@bconnect/api-client'
+import {
+  Button,
+  Form,
+  FormError,
+  TextField,
+  isApiErrorShape,
+  passthroughError,
+  useServerError,
+} from '@bconnect/ui'
+import { useRegisterMember, Role } from '@bconnect/api-client'
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
 import Image from 'next/image'
 import { useSignupStore } from '@/stores/signup-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { corpSchema, type CorpFormData } from './schema'
-import { FormInput } from '@/components/FormInput'
 
 export default function SignupCorpPage() {
   const router = useRouter()
-  const [serverError, setServerError] = useState<string | null>(null)
   const { formData, setCorp, reset: resetSignup } = useSignupStore()
   const { login } = useAuthStore()
   const registerMemberMutation = useRegisterMember()
@@ -32,11 +38,7 @@ export default function SignupCorpPage() {
     }
   }, [formData.signupToken, formData.username, formData.name, router])
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting, isValid },
-  } = useForm<CorpFormData>({
+  const form = useForm<CorpFormData>({
     resolver: zodResolver(corpSchema),
     mode: 'onChange',
     defaultValues: {
@@ -44,13 +46,30 @@ export default function SignupCorpPage() {
       bizNumber: formData.bizNumber,
     },
   })
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting, isValid },
+  } = form
+
+  // 가입 토큰 만료/무효(A009/A010)는 "다시 로그인" 안내가 필요한 특수 분기 (ADR-0015).
+  // 그 외 에러는 BE envelope message 그대로 표시.
+  const server = useServerError(control, (err) => {
+    if (isApiErrorShape(err)) {
+      if (err.code === 'A009')
+        return { message: '유효하지 않은 가입 토큰입니다. 다시 로그인해주세요.' }
+      if (err.code === 'A010')
+        return { message: '가입 토큰이 만료되었습니다. 다시 로그인해주세요.' }
+    }
+    return passthroughError<CorpFormData>(
+      undefined,
+      '회원가입에 실패했습니다. 다시 시도해주세요.'
+    )(err)
+  })
 
   const onSubmit = async (data: CorpFormData) => {
-    setServerError(null)
-
+    setCorp({ companyName: data.companyName, bizNumber: data.bizNumber })
     try {
-      setCorp({ companyName: data.companyName, bizNumber: data.bizNumber })
-
       const result = await registerMemberMutation.mutateAsync({
         data: {
           signupToken: formData.signupToken,
@@ -59,25 +78,11 @@ export default function SignupCorpPage() {
           role: Role.CONTRACTOR,
         },
       })
-
       login(result.accessToken)
       resetSignup()
       router.push('/')
-    } catch (error) {
-      if (error instanceof ApiError) {
-        switch (error.code) {
-          case 'A009':
-            setServerError('유효하지 않은 가입 토큰입니다. 다시 로그인해주세요.')
-            break
-          case 'A010':
-            setServerError('가입 토큰이 만료되었습니다. 다시 로그인해주세요.')
-            break
-          default:
-            setServerError(error.message || '회원가입에 실패했습니다. 다시 시도해주세요.')
-        }
-      } else {
-        setServerError('회원가입에 실패했습니다. 다시 시도해주세요.')
-      }
+    } catch (err) {
+      server.capture(err, data)
     }
   }
 
@@ -94,54 +99,41 @@ export default function SignupCorpPage() {
         <p className="text-r-16 text-gray-700">신뢰할 수 있는 인테리어 하도급 섭외 · 관리 서비스</p>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="flex w-[400px] flex-col gap-3">
-          {/* 업체명 */}
-          <div className="flex flex-col gap-2">
-            <p className="text-m-16 text-gray-900">업체명</p>
-            <FormInput
+        <Form {...form}>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex w-[400px] flex-col gap-3">
+            <TextField
+              control={control}
+              name="companyName"
               type="text"
+              label="업체명"
               placeholder="모튼디자인"
-              error={!!errors.companyName?.message}
-              {...register('companyName')}
             />
-            {errors.companyName?.message && (
-              <p className="text-r-14 text-destructive">{errors.companyName.message}</p>
-            )}
-          </div>
 
-          {/* 사업자등록번호 */}
-          <div className="flex flex-col gap-2">
-            <p className="text-m-16 text-gray-900">사업자등록번호</p>
-            <p className="text-r-14 text-gray-700">동일한 업장의 중복 가입을 방지해요</p>
-            <FormInput
+            <TextField
+              control={control}
+              name="bizNumber"
               type="text"
+              label="사업자등록번호"
+              description="동일한 업장의 중복 가입을 방지해요"
               placeholder="00000-00-000"
-              error={!!errors.bizNumber?.message}
-              {...register('bizNumber', {
-                onChange: (e) => {
-                  e.target.value = formatRegistrationNumber(e.target.value)
-                },
-              })}
+              transform={formatRegistrationNumber}
             />
-            {errors.bizNumber?.message && (
-              <p className="text-r-14 text-destructive">{errors.bizNumber.message}</p>
-            )}
-          </div>
 
-          {/* Server Error */}
-          {serverError && <p className="text-r-14 text-destructive">{serverError}</p>}
+            {/* Server Error (폼 전역) */}
+            <FormError error={server.formError} />
 
-          {/* CTA */}
-          <Button
-            type="submit"
-            variant={isValid ? 'primary' : 'secondary'}
-            size="full"
-            disabled={!isValid}
-            isLoading={isSubmitting || registerMemberMutation.isPending}
-          >
-            가입 완료
-          </Button>
-        </form>
+            {/* CTA */}
+            <Button
+              type="submit"
+              variant={isValid ? 'primary' : 'secondary'}
+              size="full"
+              disabled={!isValid}
+              isLoading={isSubmitting || registerMemberMutation.isPending}
+            >
+              가입 완료
+            </Button>
+          </form>
+        </Form>
       </div>
     </div>
   )
