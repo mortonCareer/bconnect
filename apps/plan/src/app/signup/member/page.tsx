@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Form, TextField } from '@bconnect/ui'
+import { formatUsername } from '@bconnect/config/username'
 import Image from 'next/image'
 import { useSignupStore } from '@/stores/signup-store'
 import { memberSchema, type MemberFormData } from './schema'
@@ -73,7 +74,7 @@ export default function SignupMemberPage() {
               label="사용자 ID"
               description="동일한 사용자를 구분하는데 활용되며, 한 번 설정하면 변경이 불가해요."
               placeholder="user_id"
-              transform={(raw) => raw.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase()}
+              transform={formatUsername}
               serverError={serverError ?? undefined}
             />
 
