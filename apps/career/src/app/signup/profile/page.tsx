@@ -3,12 +3,21 @@
  */
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Form, FormError, Tag, TextField } from '@bconnect/ui'
-import { ApiError, useRegisterMember, useCreateProfile, Role, Trade } from '@bconnect/api-client'
+import {
+  Button,
+  Form,
+  FormError,
+  Tag,
+  TextField,
+  isApiErrorShape,
+  passthroughError,
+  useServerError,
+} from '@bconnect/ui'
+import { useRegisterMember, useCreateProfile, Role, Trade } from '@bconnect/api-client'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import { TRADE_LABELS, TRADE_GROUPS } from '@/lib/trade-labels'
@@ -46,6 +55,20 @@ export default function SignupProfilePage() {
     formState: { errors, isSubmitting, isValid },
   } = form
 
+  const server = useServerError(control, (err) => {
+    if (isApiErrorShape(err)) {
+      if (err.code === 'A009')
+        return { message: '유효하지 않은 가입 토큰입니다. 다시 로그인해주세요.' }
+      if (err.code === 'A010')
+        return { message: '가입 토큰이 만료되었습니다. 다시 로그인해주세요.' }
+    }
+    return passthroughError<ProfileFormData>(
+      undefined,
+      '회원가입에 실패했습니다. 다시 시도해주세요.'
+    )(err)
+  })
+  const [registered, setRegistered] = useState(false)
+
   const watchedFields = useWatch({ control, name: 'fields' })
   const watchedPrimaryField = useWatch({ control, name: 'primaryField' })
 
@@ -77,50 +100,45 @@ export default function SignupProfilePage() {
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
-      const selectedRole = (data.role as Role) || Role.SKILLED
-      const result = await registerMemberMutation.mutateAsync({
-        data: {
-          signupToken: formData.signupToken,
-          username: formData.username,
-          name: data.name,
-          picture: '',
-          role: selectedRole,
-        },
-      })
-
-      // 회원가입 성공 — accessToken 저장 (member 정보는 useGetMyMember 로 별도 조회)
-      login(result.accessToken)
-
-      // 프로필 데이터 생성 (시공분야/경력/주소/한줄소개)
-      try {
-        await createProfileMutation.mutateAsync({
+      // registerMember 는 signupToken 을 소비 — 실패 후 재시도 시 재호출하지 않도록 가드.
+      if (!registered) {
+        const selectedRole = (data.role as Role) || Role.SKILLED
+        const result = await registerMemberMutation.mutateAsync({
           data: {
-            primaryTrade: data.primaryField as Trade,
-            trades: data.fields as Trade[],
-            experience: EXPERIENCE_TO_YEARS[data.experience],
-            headline: data.headline || undefined,
-            // TODO #280 — 카카오 우편번호 도입 전 임시 mock 값. zipcode/state/lat/lng 0 으로
-            // address 는 BE-required 라 undefined 불가 — 비어있으면 empty city 로 (BE validation 위임)
-            address: {
-              zipcode: '',
-              city: data.address || '',
-              state: '',
-              street: data.address || '',
-              latitude: 0,
-              longitude: 0,
-            },
+            signupToken: formData.signupToken,
+            username: formData.username,
+            name: data.name,
+            picture: '',
+            role: selectedRole,
           },
         })
-      } catch (profileErr) {
-        console.error('Profile creation failed (non-blocking):', profileErr)
+        login(result.accessToken)
+        setRegistered(true)
       }
+
+      await createProfileMutation.mutateAsync({
+        data: {
+          primaryTrade: data.primaryField as Trade,
+          trades: data.fields as Trade[],
+          experience: EXPERIENCE_TO_YEARS[data.experience],
+          headline: data.headline || undefined,
+          // TODO #280 — 카카오 우편번호 도입 전 임시 mock 값. zipcode/state/lat/lng 0 으로
+          // address 는 BE-required 라 undefined 불가 — 비어있으면 empty city 로 (BE validation 위임)
+          address: {
+            zipcode: '',
+            city: data.address || '',
+            state: '',
+            street: data.address || '',
+            latitude: 0,
+            longitude: 0,
+          },
+        },
+      })
 
       useSignupStore.getState().reset()
       router.push('/signup/complete')
     } catch (err) {
-      if (err instanceof ApiError) {
-        console.error('Registration failed:', err.code, err.message)
-      }
+      server.capture(err, data)
     }
   }
 
@@ -291,6 +309,7 @@ export default function SignupProfilePage() {
 
         {/* Fixed Submit Button */}
         <div className="fixed inset-x-0 bottom-0 bg-white px-4 pb-[env(safe-area-inset-bottom,32px)] pt-4">
+          <FormError error={server.formError} className="mb-2" />
           <Button
             type="submit"
             variant="primary"
