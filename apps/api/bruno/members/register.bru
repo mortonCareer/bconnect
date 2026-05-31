@@ -1,0 +1,27 @@
+meta {
+  name: 회원가입
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/members
+}
+
+body {
+  {
+    "signupToken": "signup-token",
+    "username": "new-username",
+    "name": "이름",
+    "picture": "https://image.com",
+    "role": "FOREMAN"
+  }
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.a('number');
+  });
+}

@@ -1,0 +1,25 @@
+meta {
+  name: OTP 검증 성공 - 미가입 연락처 Signup 토큰 발급
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/otp/verify
+}
+
+body {
+  {
+    "phone": "01000000010",
+    "code": "000010"
+  }
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.registered).to.equal(false);
+    expect(res.body.data.signupToken).to.be.a('string');
+  });
+}
