@@ -68,7 +68,7 @@ export default function EditWorkPage() {
         onBack={() => router.back()}
       />
 
-      {/* 이미지 영역 */}
+      {/* TODO: 이미지 업로드 공통 컴포넌트로 교체 (#424) */}
       <div className="mx-4 mt-4 flex h-50 items-center justify-center rounded-lg bg-gray-100">
         <span className="text-r-12 text-gray-500">이미지</span>
       </div>
