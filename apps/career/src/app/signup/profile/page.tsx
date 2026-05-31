@@ -3,13 +3,17 @@
  */
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm, useWatch, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import type { ExperienceLevel } from '@/lib/experience'
+import { EXPERIENCE_OPTIONS, EXPERIENCE_TO_YEARS } from '@/lib/experience'
+import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
+import { TRADE_GROUPS, TRADE_LABELS } from '@/lib/trade-labels'
+import { useAuthStore } from '@/stores/auth-store'
+import { useSignupStore } from '@/stores/signup-store'
+import { Role, Trade, useCreateProfile, useRegisterMember } from '@bconnect/api-client'
 import {
   Button,
   Form,
+  FormDescription,
   FormError,
   Tag,
   TextField,
@@ -17,15 +21,12 @@ import {
   passthroughError,
   useServerError,
 } from '@bconnect/ui'
-import { useRegisterMember, useCreateProfile, Role, Trade } from '@bconnect/api-client'
-import { useAuthStore } from '@/stores/auth-store'
-import { useSignupStore } from '@/stores/signup-store'
-import { TRADE_LABELS, TRADE_GROUPS } from '@/lib/trade-labels'
-import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
-import { EXPERIENCE_OPTIONS, EXPERIENCE_TO_YEARS } from '@/lib/experience'
-import type { ExperienceLevel } from '@/lib/experience'
-import { SignupHeader, FormLabel } from '../_components'
-import { profileSchema, type ProfileFormData } from './schema'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { Controller, useForm, useWatch } from 'react-hook-form'
+import { FormLabel, SignupHeader } from '../_components'
+import { MAX_TRADES, profileSchema, type ProfileFormData } from './schema'
 
 export default function SignupProfilePage() {
   const router = useRouter()
@@ -93,7 +94,7 @@ export default function SignupProfilePage() {
         currentFields.filter((f) => f !== trade),
         { shouldValidate: true }
       )
-    } else if (currentFields.length < 3) {
+    } else if (currentFields.length < MAX_TRADES) {
       setValue('fields', [...currentFields, trade], { shouldValidate: true })
     }
   }
@@ -165,12 +166,15 @@ export default function SignupProfilePage() {
             type="text"
             label="이름"
             required
-            placeholder="내용을 입력해주세요"
+            placeholder="이름을 입력해주세요"
           />
 
           {/* 시공분야 */}
           <div className="flex flex-col gap-3">
             <FormLabel required>시공분야</FormLabel>
+            <FormDescription>
+              최대 {MAX_TRADES}개까지 선택 가능해요 ({selectedFields.length}/{MAX_TRADES})
+            </FormDescription>
             {TRADE_GROUPS.map((group) => (
               <div key={group.label} className="flex flex-col gap-3">
                 <p className="text-m-14 text-gray-700">{group.label}</p>
@@ -191,6 +195,7 @@ export default function SignupProfilePage() {
           </div>
 
           {/* 대표분야 */}
+          {/* TODO: 별도 SelectField로 대체 */}
           {selectedFields.length > 0 && (
             <div className="flex flex-col gap-2">
               <FormLabel required>대표분야</FormLabel>
