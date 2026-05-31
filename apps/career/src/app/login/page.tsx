@@ -128,7 +128,7 @@ export default function LoginPage() {
             <h1 className="text-2xl font-semibold leading-[1.4] text-[#000000]">
               휴대폰 번호로
               <br />
-              <span className="text-[#386DFF]">간편하게 로그인</span>하세요
+              <span className="text-primary">간편하게 로그인</span>하세요
             </h1>
 
             <TextField

@@ -88,6 +88,7 @@ export function QualificationTab({
           <Button variant="outline" size="full">
             발급받기
           </Button>
+          {/* TODO: 파일 업로드 컴포넌트 구현 */}
           <Button variant="secondary" size="full" disabled>
             파일 업로드
           </Button>
