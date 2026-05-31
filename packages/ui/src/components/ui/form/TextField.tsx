@@ -3,10 +3,11 @@
  */
 'use client'
 
-import * as React from 'react'
 import { Slot } from 'radix-ui'
+import * as React from 'react'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
 import { cn } from '../../../lib/utils'
+import { Input } from '../Input'
 import {
   FormDescription,
   FormField,
@@ -15,7 +16,6 @@ import {
   FormMessage,
   useFormField,
 } from '../shadcn/form'
-import { Input } from '../Input'
 
 interface TextFieldProps<T extends FieldValues> extends Omit<
   React.ComponentProps<typeof Input>,
@@ -27,6 +27,8 @@ interface TextFieldProps<T extends FieldValues> extends Omit<
   label?: string
   /** 입력 위 설명문 (생략 가능) */
   description?: string
+  /** 입력 아래 보조 텍스트 — 에러(zod ∪ serverError) 발생 시 에러 메시지가 대체 */
+  hint?: string
   /** 필수 입력 표시 — 라벨 옆 빨간 별표. 검증은 zod 가 담당, native required 는 발동 안 함. */
   required?: boolean
   /** useServerError 의 fieldError 결과 — zod 클라이언트 에러와 한 슬롯에 합성. */
@@ -76,6 +78,7 @@ export function TextField<T extends FieldValues>({
   name,
   label,
   description,
+  hint,
   required,
   serverError,
   rightElement,
@@ -87,39 +90,43 @@ export function TextField<T extends FieldValues>({
     <FormField
       control={control}
       name={name}
-      render={({ field }) => (
-        <FormItem className="gap-3">
-          {label && (
-            <FormLabel className="text-m-16 text-gray-900">
-              {label}
-              {required && (
-                <span className="ml-0.5 text-destructive" aria-hidden>
-                  *
-                </span>
-              )}
-            </FormLabel>
-          )}
-          {description && (
-            <FormDescription className="text-r-14 text-gray-700">{description}</FormDescription>
-          )}
-          <div className="relative">
-            <TextFieldControl serverError={serverError}>
-              <Input
-                {...field}
-                {...inputProps}
-                onChange={
-                  transform ? (e) => field.onChange(transform(e.target.value)) : field.onChange
-                }
-                className={cn(rightElement && 'pr-28', className)}
-              />
-            </TextFieldControl>
-            {rightElement && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightElement}</div>
+      render={({ field, fieldState }) => {
+        const hasError = !!fieldState.error || !!serverError
+        return (
+          <FormItem className="gap-3">
+            {label && (
+              <FormLabel className="text-m-16 text-gray-900">
+                {label}
+                {required && (
+                  <span className="ml-0.5 text-destructive" aria-hidden>
+                    *
+                  </span>
+                )}
+              </FormLabel>
             )}
-          </div>
-          <FormMessage>{serverError}</FormMessage>
-        </FormItem>
-      )}
+            {description && (
+              <FormDescription className="text-r-14 text-gray-500">{description}</FormDescription>
+            )}
+            <div className="relative">
+              <TextFieldControl serverError={serverError}>
+                <Input
+                  {...field}
+                  {...inputProps}
+                  onChange={
+                    transform ? (e) => field.onChange(transform(e.target.value)) : field.onChange
+                  }
+                  className={cn(rightElement && 'pr-28', className)}
+                />
+              </TextFieldControl>
+              {rightElement && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightElement}</div>
+              )}
+            </div>
+            <FormMessage>{serverError}</FormMessage>
+            {hint && !hasError && <p className="text-r-14 text-gray-500">{hint}</p>}
+          </FormItem>
+        )
+      }}
     />
   )
 }

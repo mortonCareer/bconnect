@@ -5,18 +5,21 @@
 
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
-import { ApiError, useSendOtp, useVerifyOtp } from '@bconnect/api-client'
+import { useSendOtp, useVerifyOtp } from '@bconnect/api-client'
 import {
   formatPhoneNumber,
   isValidPhoneNumber,
   toE164,
   toNationalNumber,
 } from '@bconnect/config/phone'
-import { Button } from '@bconnect/ui'
+import { Form, FormSubmitButton, TextField, passthroughError, useServerError } from '@bconnect/ui'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useCallback, useState } from 'react'
-import { FormInput, OtpTimer } from './_components'
+import { useEffect, useState } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
+import { OtpTimer } from './_components/OtpTimer'
+import { loginSchema, type LoginFormData } from './schema'
 
 type Step = 'phone' | 'otp'
 
@@ -26,20 +29,32 @@ export default function LoginPage() {
   const { setPhone: setSignupPhone, setSignupToken } = useSignupStore()
 
   const [step, setStep] = useState<Step>('phone')
-  const [phone, setPhone] = useState('')
-  const [code, setCode] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [expiresAt, setExpiresAt] = useState<string | null>(null)
+
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { phone: '', code: '' },
+    mode: 'onTouched',
+  })
+
+  const phoneServer = useServerError(form.control, passthroughError<LoginFormData>('phone'))
+  const codeServer = useServerError(form.control, passthroughError<LoginFormData>('code'))
 
   const sendCodeMutation = useSendOtp()
   const verifyCodeMutation = useVerifyOtp()
 
-  // 인증번호 발송
-  const handleSendCode = useCallback(async () => {
-    setError(null)
-    const e164Phone = toE164(phone)
-    setPhoneNumber(e164Phone)
+  useEffect(() => {
+    if (step === 'otp') form.setFocus('code')
+  }, [step, form])
 
+  const phoneValue = useWatch({ control: form.control, name: 'phone' })
+  const codeValue = useWatch({ control: form.control, name: 'code' })
+  const isPhoneValid = isValidPhoneNumber(phoneValue ?? '')
+  const isCodeValid = (codeValue ?? '').length === 6
+
+  const sendCode = async () => {
+    const phone = form.getValues('phone')
+    setPhoneNumber(toE164(phone))
     try {
       const result = await sendCodeMutation.mutateAsync({
         data: { phone: toNationalNumber(phone) },
@@ -49,28 +64,13 @@ export default function LoginPage() {
         setExpiresAt(result.expiresAt)
       }
       setStep('otp')
-    } catch (error: unknown) {
-      if (error instanceof ApiError) {
-        switch (error.code) {
-          case 'OTP_RATE_LIMIT':
-            setError('인증번호 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.')
-            break
-          case 'INVALID_PHONE':
-            setError('유효하지 않은 전화번호입니다.')
-            break
-          default:
-            setError(error.message || '인증번호 발송에 실패했습니다.')
-        }
-      } else {
-        setError('인증번호 발송에 실패했습니다.')
-      }
+    } catch (err) {
+      phoneServer.capture(err, form.getValues())
     }
-  }, [phone, setPhoneNumber, setCodeSent, sendCodeMutation])
+  }
 
-  // 인증번호 확인
-  const handleVerifyCode = useCallback(async () => {
-    setError(null)
-
+  const verifyCode = async () => {
+    const { phone, code } = form.getValues()
     try {
       const result = await verifyCodeMutation.mutateAsync({
         data: { phone: toNationalNumber(phone), code },
@@ -81,51 +81,28 @@ export default function LoginPage() {
         router.push('/')
       } else {
         // 미가입 유저 — signupToken 저장 후 회원가입 진행
-        const e164Phone = toE164(phone)
-        setSignupPhone(e164Phone)
+        setSignupPhone(toE164(phone))
         setSignupToken(result.signupToken)
         router.push('/signup/member')
       }
-    } catch (error: unknown) {
-      if (error instanceof ApiError) {
-        switch (error.code) {
-          case 'OTP_INVALID':
-            setError('올바르지 않은 인증번호입니다.')
-            break
-          case 'OTP_EXPIRED':
-            setError('인증번호가 만료되었습니다. 재요청해주세요.')
-            break
-          case 'OTP_MAX_ATTEMPTS':
-            setError('인증 시도 횟수를 초과했습니다. 새로운 인증번호를 요청해주세요.')
-            break
-          default:
-            setError(error.message || '인증에 실패했습니다.')
-        }
-      } else {
-        setError('인증에 실패했습니다.')
-      }
+    } catch (err) {
+      codeServer.capture(err, form.getValues())
     }
-  }, [phone, code, login, router, verifyCodeMutation, setSignupPhone, setSignupToken])
+  }
 
-  // 재발송
-  const handleResend = useCallback(async () => {
-    setCode('')
-    setError(null)
-    await handleSendCode()
-  }, [handleSendCode])
-
-  const isPhoneValid = isValidPhoneNumber(phone)
-  const isCodeValid = code.length === 6
-
-  // 엔터키 submit 핸들러
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      if (step === 'phone' && isPhoneValid && !sendCodeMutation.isPending) {
-        handleSendCode()
-      } else if (step === 'otp' && isCodeValid && !verifyCodeMutation.isPending) {
-        handleVerifyCode()
-      }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (step === 'phone') {
+      if (await form.trigger('phone')) await sendCode()
+    } else {
+      if (await form.trigger()) await verifyCode()
     }
+  }
+
+  const handleResend = async () => {
+    form.setValue('code', '')
+    codeServer.reset()
+    await sendCode()
   }
 
   const isSubmitDisabled = step === 'phone' ? !isPhoneValid : !isCodeValid
@@ -143,72 +120,57 @@ export default function LoginPage() {
         <p className="text-r-16 text-gray-700">신뢰할 수 있는 인테리어 하도급 섭외 · 관리 서비스</p>
 
         {/* Form */}
-        <div className="flex w-[400px] flex-col gap-3">
-          {/* Label */}
-          <p className="text-m-16 text-gray-900">휴대전화</p>
-
-          {/* Helper text */}
-          <p className="text-r-14 text-gray-700">
-            품앗이 서비스는 인증된 사용자만 이용하실 수 있어요.
-          </p>
-
-          {/* Inputs */}
-          <div className="flex flex-col gap-3">
-            {/* Phone Input */}
-            <FormInput
+        <Form {...form}>
+          <form onSubmit={handleSubmit} className="flex w-[400px] flex-col gap-3">
+            <TextField
+              control={form.control}
+              name="phone"
               type="tel"
               inputMode="numeric"
+              autoComplete="tel"
+              enterKeyHint="next"
+              label="휴대전화"
+              description="품앗이 서비스는 인증된 사용자만 이용하실 수 있어요."
               placeholder="010-0000-0000"
-              value={phone}
-              onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
-              onKeyDown={handleKeyDown}
               disabled={step === 'otp'}
-              error={step === 'phone' && !!error}
+              transform={formatPhoneNumber}
+              serverError={phoneServer.fieldError('phone')}
             />
 
-            {/* OTP Section */}
             {step === 'otp' && (
-              <div className="flex flex-col gap-2">
-                <FormInput
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="숫자 6자리"
-                  maxLength={6}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  onKeyDown={handleKeyDown}
-                  error={!!error}
-                  rightElement={
-                    <OtpTimer
-                      expiresAt={expiresAt}
-                      onResend={handleResend}
-                      isResending={sendCodeMutation.isPending}
-                    />
-                  }
-                />
-                {error ? (
-                  <p className="text-r-14 text-destructive">{error}</p>
-                ) : (
-                  <p className="text-r-14 text-gray-500">타인에게 인증번호를 공유하지 마세요.</p>
-                )}
-              </div>
+              <TextField
+                control={form.control}
+                name="code"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                enterKeyHint="done"
+                placeholder="숫자 6자리"
+                hint="타인에게 인증번호를 공유하지 마세요."
+                transform={(raw) => raw.replace(/\D/g, '').slice(0, 6)}
+                serverError={codeServer.fieldError('code')}
+                rightElement={
+                  <OtpTimer
+                    expiresAt={expiresAt}
+                    onResend={handleResend}
+                    isResending={sendCodeMutation.isPending}
+                  />
+                }
+              />
             )}
 
-            {/* Phone step error */}
-            {step === 'phone' && error && <p className="text-r-14 text-destructive">{error}</p>}
-          </div>
-
-          {/* Submit Button */}
-          <Button
-            variant={isSubmitDisabled ? 'secondary' : 'primary'}
-            size="full"
-            onClick={step === 'phone' ? handleSendCode : handleVerifyCode}
-            disabled={isSubmitDisabled}
-            isLoading={isSubmitLoading}
-          >
-            {step === 'phone' ? '인증번호 받기' : '인증 완료'}
-          </Button>
-        </div>
+            {/* Submit Button */}
+            <FormSubmitButton
+              requireAllFilled={false}
+              variant={isSubmitDisabled ? 'secondary' : 'primary'}
+              size="full"
+              disabled={isSubmitDisabled}
+              isLoading={isSubmitLoading}
+            >
+              {step === 'phone' ? '인증번호 받기' : '인증 완료'}
+            </FormSubmitButton>
+          </form>
+        </Form>
       </div>
     </div>
   )

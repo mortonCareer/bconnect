@@ -3,14 +3,13 @@
  */
 'use client'
 
-import Link from 'next/link'
-import { buttonVariants, CheckIcon } from '@bconnect/ui'
 import { useGetMyMember } from '@bconnect/api-client'
+import { Button, CheckIcon } from '@bconnect/ui'
+import Link from 'next/link'
 
 export default function SignupCompletePage() {
   const { data: member } = useGetMyMember()
 
-  // 사용자 이름 (없으면 기본값)
   const userName = member?.name || '회원'
 
   return (
@@ -26,15 +25,15 @@ export default function SignupCompletePage() {
 
         {/* Check Icon */}
         <div className="mt-8 flex size-[100px] items-center justify-center rounded-full bg-[#386DFF]">
-          <CheckIcon className="text-white" />
+          <CheckIcon className="text-white" size={83} />
         </div>
       </main>
 
       {/* Fixed Start Button */}
       <div className="fixed inset-x-0 bottom-0 bg-white px-4 pb-8 pt-4">
-        <Link href="/" className={buttonVariants({ variant: 'primary', size: 'full' })}>
-          시작하기
-        </Link>
+        <Button asChild variant="primary" size="full">
+          <Link href="/">시작하기</Link>
+        </Button>
       </div>
     </div>
   )

@@ -69,10 +69,8 @@ export default function CoworkersPage() {
     (c) => !search || c.name.includes(search) || c.trade.includes(search)
   )
 
-  // 실제 API: 각 동료의 profileId 추출
-  const coworkerProfileIds = hasRealCoworkers
-    ? coworkers.map((c) => (c.minId === myProfileId ? c.maxId! : c.minId!))
-    : []
+  // 실제 API: 각 동료의 member id 추출 (Coworker 가 member 를 inline 으로 포함)
+  const coworkerMemberIds = hasRealCoworkers ? coworkers.map((c) => c.member.id) : []
 
   return (
     <div className="flex flex-col">
@@ -124,14 +122,14 @@ export default function CoworkersPage() {
             <MockCoworkerCard key={coworker.id} coworker={coworker} />
           ))}
         </div>
-      ) : coworkerProfileIds.length === 0 ? (
+      ) : coworkerMemberIds.length === 0 ? (
         <div className="flex flex-1 items-center justify-center py-20">
           <p className="text-m-14 text-gray-500">등록된 동료가 없습니다</p>
         </div>
       ) : (
         <div className="flex flex-col divide-y divide-gray-300">
-          {coworkerProfileIds.map((profileId) => (
-            <CoworkerCard key={profileId} profileId={profileId} />
+          {coworkerMemberIds.map((memberId) => (
+            <CoworkerCard key={memberId} profileId={memberId} />
           ))}
         </div>
       )}

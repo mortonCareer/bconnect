@@ -53,12 +53,12 @@ import { loginSchema, type LoginFormData } from './schema'
 
 const form = useForm<LoginFormData>({
   resolver: zodResolver(loginSchema),
-  mode: 'onChange', // 실시간 검증
+  mode: 'onTouched', // blur 후 검증
   defaultValues: { phone: '', code: '' },
 })
 ```
 
-`mode: 'onChange'` — 입력마다 검증해 클라이언트 에러가 실시간 갱신된다.
+`mode: 'onTouched'` — 필드를 한 번 벗어난(blur) 뒤부터 검증해 갱신한다. `isValid` 게이팅 버튼은 유지하면서 첫 타이핑 중 에러 노출을 피한다. (`onSubmit` 은 제출 전 `isValid` 가 안 갱신돼 게이팅 버튼이 안 열리고, `onChange` 는 첫 글자부터 naggy.)
 
 ---
 
