@@ -2,6 +2,7 @@ import { getBconnectAPIMock } from '@bconnect/api-client'
 import { delay, http } from 'msw'
 import { authOverrides } from './overrides/auth'
 import { devicesOverrides } from './overrides/devices'
+import { membersOverrides } from './overrides/members'
 
 // 전역 2초 지연 — 실 네트워크 지연 모사로 로딩/비활성 상태 검증을 쉽게. mock 응답이
 // 즉시라 로딩 UI 가 안 보이는 문제 해소. resolver 가 undefined 반환 → 다음 핸들러로 fall-through.
@@ -23,5 +24,6 @@ export const handlers = [
   globalDelay,
   ...authOverrides,
   ...devicesOverrides,
+  ...membersOverrides,
   ...getBconnectAPIMock(),
 ]

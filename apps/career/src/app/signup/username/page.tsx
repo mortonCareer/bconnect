@@ -4,18 +4,18 @@
  */
 'use client'
 
-import { useState } from 'react'
+import { useSignupStore } from '@/stores/signup-store'
+import { checkUsername } from '@bconnect/api-client'
+import { formatUsername } from '@bconnect/config/username'
+import { Form, FormSubmitButton, TextField, passthroughError, useServerError } from '@bconnect/ui'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Form, TextField } from '@bconnect/ui'
-import { useSignupStore } from '@/stores/signup-store'
-import { usernameSchema, type UsernameFormData } from './schema'
 import { SignupHeader } from '../_components'
+import { usernameSchema, type UsernameFormData } from './schema'
 
 export default function SignupUsernamePage() {
   const router = useRouter()
-  const [serverError, setServerError] = useState<string | null>(null)
   const { formData, setUsername } = useSignupStore()
 
   const form = useForm<UsernameFormData>({
@@ -28,18 +28,22 @@ export default function SignupUsernamePage() {
   const {
     control,
     handleSubmit,
-    formState: { isSubmitting, isValid },
+    formState: { isSubmitting },
   } = form
 
-  const onSubmit = async (data: UsernameFormData) => {
-    setServerError(null)
+  const server = useServerError(control, passthroughError<UsernameFormData>('username'))
 
+  const onSubmit = async (data: UsernameFormData) => {
     try {
-      // TODO: API 호출로 사용자 이름 중복 확인
+      const { available } = await checkUsername({ username: data.username })
+      if (!available) {
+        form.setError('username', { message: '이미 존재하는 사용자 이름입니다.' })
+        return
+      }
       setUsername(data.username)
       router.push('/signup/profile')
-    } catch {
-      setServerError('이미 존재하는 사용자 이름입니다.')
+    } catch (err) {
+      server.capture(err, data)
     }
   }
 
@@ -52,7 +56,7 @@ export default function SignupUsernamePage() {
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col gap-6 px-4 pt-3">
           {/* Title Section */}
           <div className="flex flex-col gap-4">
-            <h1 className="text-2xl font-semibold leading-[1.4] text-[#1B1B1B]">
+            <h1 className="text-2xl font-semibold leading-[1.4] text-[#000000]">
               서비스에서 사용할 ID를
               <br />
               입력해 주세요
@@ -63,23 +67,16 @@ export default function SignupUsernamePage() {
               control={control}
               name="username"
               type="text"
-              description="사용자 이름은 숫자, 영어, 밑줄 및 마침표만 포함할 수 있습니다. 한 번 설정되면 변경할 수 없습니다."
+              autoComplete="username"
+              description="ID는 프로필과 검색에 활용되며, 한 번 설정하면 변경이 불가해요."
               placeholder="내용을 입력해주세요"
-              transform={(raw) => raw.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase()}
-              serverError={serverError ?? undefined}
+              transform={formatUsername}
+              serverError={server.fieldError('username')}
             />
           </div>
 
           {/* Submit Button */}
-          <Button
-            type="submit"
-            variant="primary"
-            size="full"
-            disabled={!isValid}
-            isLoading={isSubmitting}
-          >
-            다음으로
-          </Button>
+          <FormSubmitButton isLoading={isSubmitting}>다음으로</FormSubmitButton>
         </form>
       </Form>
     </div>
