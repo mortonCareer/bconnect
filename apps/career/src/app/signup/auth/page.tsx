@@ -124,12 +124,10 @@ export default function SignupAuthPage() {
           {/* Title Section */}
           <div className="flex flex-col gap-4">
             <h1 className="text-2xl font-semibold leading-[1.4] text-[#1B1B1B]">
-              신뢰할 수 있는 계약을 위해 <span className="text-[#386DFF]">본인 확인</span>이
-              필요해요
+              신뢰할 수 있는 계약을 위해
+              <br />
+              <span className="text-primary">본인 확인</span>이 필요해요
             </h1>
-            <p className="text-sm leading-[1.6] text-[#9C9C9C]">
-              공방터 서비스는 인증된 기술자만 이용하실 수 있어요.
-            </p>
 
             {/* Phone Input */}
             <TextField
@@ -140,6 +138,7 @@ export default function SignupAuthPage() {
               autoComplete="tel"
               enterKeyHint="next"
               placeholder="010-1234-5678"
+              description="품앗이 서비스는 인증된 기술자만 이용하실 수 있어요."
               disabled={step === 'otp'}
               transform={formatPhoneNumber}
               serverError={phoneServer.fieldError('phone')}
