@@ -3,10 +3,11 @@
  */
 'use client'
 
-import * as React from 'react'
 import { Slot } from 'radix-ui'
+import * as React from 'react'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
 import { cn } from '../../../lib/utils'
+import { Input } from '../Input'
 import {
   FormDescription,
   FormField,
@@ -15,7 +16,6 @@ import {
   FormMessage,
   useFormField,
 } from '../shadcn/form'
-import { Input } from '../Input'
 
 interface TextFieldProps<T extends FieldValues> extends Omit<
   React.ComponentProps<typeof Input>,
@@ -105,7 +105,7 @@ export function TextField<T extends FieldValues>({
               </FormLabel>
             )}
             {description && (
-              <FormDescription className="text-r-14 text-gray-700">{description}</FormDescription>
+              <FormDescription className="text-r-14 text-gray-500">{description}</FormDescription>
             )}
             <div className="relative">
               <TextFieldControl serverError={serverError}>
