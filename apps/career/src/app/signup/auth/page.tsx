@@ -17,7 +17,7 @@ import {
 import { Button, Form, TextField, passthroughError, useServerError } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { OtpTimer, SignupHeader } from '../_components'
@@ -51,6 +51,10 @@ export default function SignupAuthPage() {
 
   const sendCodeMutation = useSendOtp()
   const verifyCodeMutation = useVerifyOtp()
+
+  useEffect(() => {
+    if (step === 'otp') form.setFocus('code')
+  }, [step, form])
 
   const phoneValue = useWatch({ control: form.control, name: 'phone' })
   const codeValue = useWatch({ control: form.control, name: 'code' })
@@ -110,8 +114,6 @@ export default function SignupAuthPage() {
     await sendCode()
   }
 
-  const hasCodeError = !!form.formState.errors.code || !!codeServer.fieldError('code')
-
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <SignupHeader step={1} onBack={() => (step === 'otp' ? setStep('phone') : router.back())} />
@@ -135,6 +137,8 @@ export default function SignupAuthPage() {
               name="phone"
               type="tel"
               inputMode="numeric"
+              autoComplete="tel"
+              enterKeyHint="next"
               placeholder="010-1234-5678"
               disabled={step === 'otp'}
               transform={formatPhoneNumber}
@@ -144,30 +148,25 @@ export default function SignupAuthPage() {
 
           {/* OTP Section (step === 'otp') */}
           {step === 'otp' && (
-            <div className="flex flex-col gap-2">
-              <TextField
-                control={form.control}
-                name="code"
-                type="text"
-                inputMode="numeric"
-                placeholder="숫자 6자리"
-                maxLength={6}
-                transform={(raw) => raw.replace(/\D/g, '').slice(0, 6)}
-                serverError={codeServer.fieldError('code')}
-                rightElement={
-                  <OtpTimer
-                    expiresAt={expiresAt}
-                    onResend={handleResend}
-                    isResending={sendCodeMutation.isPending}
-                  />
-                }
-              />
-              {!hasCodeError && (
-                <p className="text-sm leading-[1.6] text-[#9C9C9C]">
-                  타인에게 인증번호를 공유하지 마세요.
-                </p>
-              )}
-            </div>
+            <TextField
+              control={form.control}
+              name="code"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              enterKeyHint="done"
+              placeholder="숫자 6자리"
+              hint="타인에게 인증번호를 공유하지 마세요."
+              transform={(raw) => raw.replace(/\D/g, '').slice(0, 6)}
+              serverError={codeServer.fieldError('code')}
+              rightElement={
+                <OtpTimer
+                  expiresAt={expiresAt}
+                  onResend={handleResend}
+                  isResending={sendCodeMutation.isPending}
+                />
+              }
+            />
           )}
 
           {/* Submit Button */}
