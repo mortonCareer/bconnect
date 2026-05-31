@@ -14,6 +14,10 @@ import {
   Button,
   Form,
   FormError,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
   Tag,
   TextField,
   passthroughError,
@@ -22,9 +26,8 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Controller, useForm, useWatch } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { SignupHeader } from '../_components/SignupHeader'
-import { FormLabel } from './_components/FormLabel'
 import { TradeSelector } from './_components/TradeSelector'
 import { MAX_TRADES, profileSchema, type ProfileFormData } from './schema'
 
@@ -53,7 +56,7 @@ export default function SignupProfilePage() {
     control,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting, isValid },
+    formState: { isSubmitting, isValid },
   } = form
 
   const server = useServerError(
@@ -153,12 +156,12 @@ export default function SignupProfilePage() {
           {/* 대표분야 */}
           {/* TODO: 별도 SelectField로 대체 */}
           {selectedFields.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <FormLabel required>대표분야</FormLabel>
-              <Controller
-                name="primaryField"
-                control={control}
-                render={({ field }) => (
+            <FormField
+              control={control}
+              name="primaryField"
+              render={({ field }) => (
+                <FormItem className="gap-2">
+                  <FormLabel required>대표분야</FormLabel>
                   <div className="relative w-fit">
                     <select
                       value={field.value || ''}
@@ -187,18 +190,19 @@ export default function SignupProfilePage() {
                       />
                     </svg>
                   </div>
-                )}
-              />
-            </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           )}
 
           {/* 경력 */}
-          <div className="flex flex-col gap-3">
-            <FormLabel required>경력</FormLabel>
-            <Controller
-              name="experience"
-              control={control}
-              render={({ field }) => (
+          <FormField
+            control={control}
+            name="experience"
+            render={({ field }) => (
+              <FormItem className="gap-3">
+                <FormLabel required>경력</FormLabel>
                 <div className="flex flex-wrap gap-2">
                   {EXPERIENCE_OPTIONS.map((option) => (
                     <Tag
@@ -210,10 +214,10 @@ export default function SignupProfilePage() {
                     </Tag>
                   ))}
                 </div>
-              )}
-            />
-            <FormError error={errors.experience?.message} />
-          </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* 소속 */}
           <TextField
@@ -226,12 +230,12 @@ export default function SignupProfilePage() {
           />
 
           {/* 유형 */}
-          <div className="flex flex-col gap-2">
-            <FormLabel required>유형</FormLabel>
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
+          <FormField
+            control={control}
+            name="role"
+            render={({ field }) => (
+              <FormItem className="gap-2">
+                <FormLabel required>유형</FormLabel>
                 <div className="flex flex-wrap gap-2">
                   {SIGNUP_ROLES.map((role) => (
                     <Tag
@@ -243,10 +247,10 @@ export default function SignupProfilePage() {
                     </Tag>
                   ))}
                 </div>
-              )}
-            />
-            <FormError error={errors.role?.message} />
-          </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* 주소 */}
           <TextField
