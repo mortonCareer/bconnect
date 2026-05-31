@@ -3,10 +3,10 @@
  */
 'use client'
 
-import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
-import { cn } from '../../lib/utils'
+import * as React from 'react'
 import { ChevronLeftIcon } from '../../icons'
+import { cn } from '../../lib/utils'
 
 const topBarVariants = cva('flex h-[60px] w-full items-center bg-white px-4', {
   variants: {
@@ -137,7 +137,7 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
               <button
                 type="button"
                 onClick={onAction}
-                className="text-sb-16 text-primary transition-all active:scale-[0.95]"
+                className="hover:cursor-pointer text-sb-16 text-primary"
               >
                 {actionLabel}
               </button>
