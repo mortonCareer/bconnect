@@ -17,7 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { OtpTimer } from '../signup/_components'
+import { OtpTimer } from '../signup/_components/OtpTimer'
 import { loginSchema, type LoginFormData } from './schema'
 
 type Step = 'phone' | 'otp'

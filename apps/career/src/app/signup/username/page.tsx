@@ -11,7 +11,7 @@ import { Form, FormSubmitButton, TextField, passthroughError, useServerError } f
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import { SignupHeader } from '../_components'
+import { SignupHeader } from '../_components/SignupHeader'
 import { usernameSchema, type UsernameFormData } from './schema'
 
 export default function SignupUsernamePage() {
