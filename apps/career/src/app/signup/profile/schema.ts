@@ -1,3 +1,4 @@
+import { Role } from '@bconnect/api-client'
 import { z } from 'zod'
 
 export const MAX_TRADES = 3
@@ -13,7 +14,7 @@ export const profileSchema = z.object({
   primaryField: z.string(),
   experience: experienceLevelSchema,
   affiliation: z.string().min(1, '소속을 입력해주세요.'),
-  role: z.string().optional(),
+  role: z.enum(Role, { error: '유형을 선택해주세요.' }),
   address: z.string().optional(),
   headline: z.string().max(20, '한줄소개는 최대 20글자까지 입력 가능합니다.').optional(),
 })

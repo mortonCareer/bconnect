@@ -9,7 +9,7 @@ import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
 import { TRADE_GROUPS, TRADE_LABELS } from '@/lib/trade-labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
-import { Role, Trade, useCreateProfile, useRegisterMember } from '@bconnect/api-client'
+import { Trade, useCreateProfile, useRegisterMember } from '@bconnect/api-client'
 import {
   Button,
   Form,
@@ -94,14 +94,13 @@ export default function SignupProfilePage() {
     try {
       // registerMember 는 signupToken 을 소비 — 실패 후 재시도 시 재호출하지 않도록 가드.
       if (!registered) {
-        const selectedRole = (data.role as Role) || Role.SKILLED
         const result = await registerMemberMutation.mutateAsync({
           data: {
             signupToken: formData.signupToken,
             username: formData.username,
             name: data.name,
             picture: '',
-            role: selectedRole,
+            role: data.role,
           },
         })
         login(result.accessToken)
@@ -262,7 +261,7 @@ export default function SignupProfilePage() {
 
           {/* 유형 */}
           <div className="flex flex-col gap-2">
-            <FormLabel>유형</FormLabel>
+            <FormLabel required>유형</FormLabel>
             <Controller
               name="role"
               control={control}
@@ -272,7 +271,7 @@ export default function SignupProfilePage() {
                     <Tag
                       key={role}
                       variant={field.value === role ? 'selected' : 'default'}
-                      onClick={() => field.onChange(field.value === role ? undefined : role)}
+                      onClick={() => field.onChange(role)}
                     >
                       {ROLE_LABELS[role]}
                     </Tag>
@@ -280,6 +279,7 @@ export default function SignupProfilePage() {
                 </div>
               )}
             />
+            <FormError error={errors.role?.message} />
           </div>
 
           {/* 주소 */}
