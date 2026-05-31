@@ -40,7 +40,7 @@ export default function SignupProfilePage() {
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    mode: 'onChange',
+    mode: 'onTouched',
     defaultValues: {
       name: formData.name || '',
       fields: formData.fields || [],

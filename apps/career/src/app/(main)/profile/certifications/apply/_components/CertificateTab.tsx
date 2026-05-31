@@ -49,7 +49,7 @@ export function CertificateTab({
   const [activeSubTab, setActiveSubTab] = useState('career')
 
   // "그 외" 서브탭의 검토 참고 note — 단일 필드 폼 (검증 메시지 없음, 입력 시에만 제출 활성)
-  const form = useForm<{ note: string }>({ defaultValues: { note: '' } })
+  const form = useForm<{ note: string }>({ mode: 'onTouched', defaultValues: { note: '' } })
   const note = useWatch({ control: form.control, name: 'note' })
   const submitOther = form.handleSubmit((data) => {
     onSubmitOther(data.note)

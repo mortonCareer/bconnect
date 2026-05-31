@@ -28,7 +28,7 @@ export default function SignupMemberPage() {
 
   const form = useForm<MemberFormData>({
     resolver: zodResolver(memberSchema),
-    mode: 'onChange',
+    mode: 'onTouched',
     defaultValues: {
       username: formData.username,
       name: formData.name,

@@ -32,7 +32,7 @@ export default function SignupCorpPage() {
 
   const form = useForm<CorpFormData>({
     resolver: zodResolver(corpSchema),
-    mode: 'onChange',
+    mode: 'onTouched',
     defaultValues: {
       companyName: formData.companyName,
       bizNumber: formData.bizNumber,

@@ -22,7 +22,10 @@ export default function EditAboutPage() {
 
   const { data: profile } = useGetMyProfile({ query: { retry: false } })
 
-  const form = useForm<AboutFormValues>({ values: { about: profile?.about ?? '' } })
+  const form = useForm<AboutFormValues>({
+    mode: 'onTouched',
+    values: { about: profile?.about ?? '' },
+  })
 
   const server = useServerError(form.control, passthroughError<AboutFormValues>('about'))
 

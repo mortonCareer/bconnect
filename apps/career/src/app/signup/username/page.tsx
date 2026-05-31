@@ -20,7 +20,7 @@ export default function SignupUsernamePage() {
 
   const form = useForm<UsernameFormData>({
     resolver: zodResolver(usernameSchema),
-    mode: 'onChange',
+    mode: 'onTouched',
     defaultValues: {
       username: formData.username,
     },

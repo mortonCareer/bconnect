@@ -36,7 +36,7 @@ export default function SignupAuthPage() {
   const form = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
     defaultValues: { phone: '', code: '' },
-    mode: 'onSubmit',
+    mode: 'onTouched',
   })
 
   // 단계별 서버 에러 분리: 발송 실패는 phone, 검증 실패(A003)는 code 필드에 합성.

@@ -64,7 +64,7 @@ export default function ProfileEditPage() {
   } = useForm<ProfileEditFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- zod v4 + @hookform/resolvers 타입 호환 workaround
     resolver: zodResolver(profileEditSchema as any),
-    mode: 'onChange',
+    mode: 'onTouched',
     defaultValues: {
       name: '',
       phone: '',

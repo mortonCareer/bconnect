@@ -46,7 +46,7 @@ export default function EditWorkPage() {
 
   const form = useForm<WorkFormValues>({
     resolver: zodResolver(workSchema),
-    mode: 'onChange',
+    mode: 'onTouched',
     defaultValues: { company: '', period: '', address: '', trade: '', description: '' },
   })
 
