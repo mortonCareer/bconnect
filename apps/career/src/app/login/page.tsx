@@ -1,5 +1,5 @@
 /**
- * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-4283
+ * @figma-pending 로그인 페이지 디자인 없음
  */
 'use client'
 
@@ -15,7 +15,7 @@ import {
 import { Button, Form, TextField, TopBar, passthroughError, useServerError } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { OtpTimer } from '../signup/_components'
@@ -49,6 +49,10 @@ export default function LoginPage() {
 
   const sendCodeMutation = useSendOtp()
   const verifyCodeMutation = useVerifyOtp()
+
+  useEffect(() => {
+    if (step === 'otp') form.setFocus('code')
+  }, [step, form])
 
   const phoneValue = useWatch({ control: form.control, name: 'phone' })
   const codeValue = useWatch({ control: form.control, name: 'code' })
@@ -108,8 +112,6 @@ export default function LoginPage() {
     await sendCode()
   }
 
-  const hasCodeError = !!form.formState.errors.code || !!codeServer.fieldError('code')
-
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <TopBar
@@ -139,6 +141,8 @@ export default function LoginPage() {
               name="phone"
               type="tel"
               inputMode="numeric"
+              autoComplete="tel"
+              enterKeyHint="next"
               placeholder="010-1234-5678"
               disabled={step === 'otp'}
               transform={formatPhoneNumber}
@@ -148,30 +152,25 @@ export default function LoginPage() {
 
           {/* OTP Section (step === 'otp') */}
           {step === 'otp' && (
-            <div className="flex flex-col gap-2">
-              <TextField
-                control={form.control}
-                name="code"
-                type="text"
-                inputMode="numeric"
-                placeholder="숫자 6자리"
-                maxLength={6}
-                transform={(raw) => raw.replace(/\D/g, '').slice(0, 6)}
-                serverError={codeServer.fieldError('code')}
-                rightElement={
-                  <OtpTimer
-                    expiresAt={expiresAt}
-                    onResend={handleResend}
-                    isResending={sendCodeMutation.isPending}
-                  />
-                }
-              />
-              {!hasCodeError && (
-                <p className="text-sm leading-[1.6] text-[#9C9C9C]">
-                  타인에게 인증번호를 공유하지 마세요.
-                </p>
-              )}
-            </div>
+            <TextField
+              control={form.control}
+              name="code"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              enterKeyHint="done"
+              placeholder="숫자 6자리"
+              hint="타인에게 인증번호를 공유하지 마세요."
+              transform={(raw) => raw.replace(/\D/g, '').slice(0, 6)}
+              serverError={codeServer.fieldError('code')}
+              rightElement={
+                <OtpTimer
+                  expiresAt={expiresAt}
+                  onResend={handleResend}
+                  isResending={sendCodeMutation.isPending}
+                />
+              }
+            />
           )}
 
           {/* Submit Button */}
