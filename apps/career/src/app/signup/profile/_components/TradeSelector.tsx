@@ -8,14 +8,9 @@ import type { Control, FieldPath, FieldValues } from 'react-hook-form'
 interface TradeSelectorProps<T extends FieldValues> {
   control: Control<T>
   name: FieldPath<T>
-  /** 최대 선택 개수 */
   max: number
 }
 
-/**
- * 시공분야 grouped 멀티 선택 — TRADE_GROUPS 별 Tag row, max 개수 제한.
- * shadcn FormField 합성 (value: Trade[]), 에러는 FormMessage 로 표시.
- */
 export function TradeSelector<T extends FieldValues>({
   control,
   name,

@@ -98,6 +98,7 @@ export function CertificateTab({
       ) : (
         <Form {...form}>
           <form onSubmit={submitOther} className="flex flex-col gap-3">
+            {/* TODO: 파일 업로드 컴포넌트 구현 */}
             <Button type="button" variant="secondary" size="full" disabled>
               파일 업로드
             </Button>

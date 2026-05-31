@@ -39,8 +39,6 @@ export default function SignupAuthPage() {
     mode: 'onTouched',
   })
 
-  // 단계별 서버 에러 분리: 발송 실패는 phone, 검증 실패(A003)는 code 필드에 합성.
-  // ADR-0015 — BE envelope message 를 그대로 표시 (코드별 분기 없음).
   const phoneServer = useServerError(form.control, passthroughError<AuthFormData>('phone'))
   const codeServer = useServerError(form.control, passthroughError<AuthFormData>('code'))
 

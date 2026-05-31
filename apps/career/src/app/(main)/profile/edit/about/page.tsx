@@ -10,7 +10,14 @@ import {
   useUpdateMyProfileAbout,
   type UpdateProfileAboutRequest,
 } from '@bconnect/api-client'
-import { Button, Form, TextareaField, TopBar, passthroughError, useServerError } from '@bconnect/ui'
+import {
+  Form,
+  FormSubmitButton,
+  TextareaField,
+  TopBar,
+  passthroughError,
+  useServerError,
+} from '@bconnect/ui'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 
@@ -58,10 +65,14 @@ export default function EditAboutPage() {
             disabled={isPending}
           />
 
-          {/* 소개는 필수가 아니기에 FormSubmitButton 미사용 */}
-          <Button type="submit" variant="primary" size="full" isLoading={isPending}>
+          <FormSubmitButton
+            requireAllFilled={false}
+            variant="primary"
+            size="full"
+            isLoading={isPending}
+          >
             저장
-          </Button>
+          </FormSubmitButton>
         </form>
       </Form>
     </div>

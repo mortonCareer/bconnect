@@ -36,8 +36,6 @@ export default function LoginPage() {
     mode: 'onTouched',
   })
 
-  // 단계별 서버 에러 분리: 발송 실패는 phone, 검증 실패(A003)는 code 필드에 합성.
-  // ADR-0015 — BE envelope message 를 그대로 표시 (코드별 분기 없음).
   const phoneServer = useServerError(form.control, passthroughError<LoginFormData>('phone'))
   const codeServer = useServerError(form.control, passthroughError<LoginFormData>('code'))
 
@@ -120,16 +118,12 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-6 px-4 pt-3">
           {/* Title Section */}
           <div className="flex flex-col gap-4">
-            <h1 className="text-2xl font-semibold leading-[1.4] text-[#1B1B1B]">
+            <h1 className="text-2xl font-semibold leading-[1.4] text-[#000000]">
               휴대폰 번호로
               <br />
               <span className="text-[#386DFF]">간편하게 로그인</span>하세요
             </h1>
-            <p className="text-sm leading-[1.6] text-[#9C9C9C]">
-              가입하신 휴대폰 번호를 입력해주세요.
-            </p>
 
-            {/* Phone Input */}
             <TextField
               control={form.control}
               name="phone"
@@ -138,6 +132,7 @@ export default function LoginPage() {
               autoComplete="tel"
               enterKeyHint="next"
               placeholder="010-1234-5678"
+              description="가입하신 휴대폰 번호를 입력해주세요."
               disabled={step === 'otp'}
               transform={formatPhoneNumber}
               serverError={phoneServer.fieldError('phone')}
