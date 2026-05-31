@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import type { Credential, CredentialType } from '@bconnect/api-client'
-import { Button, Form, Tag, TextareaField } from '@bconnect/ui'
+import { Button, Form, FormSubmitButton, Tag, TextareaField } from '@bconnect/ui'
 import { getCredentialLabel, formatDate } from '../../constants'
 
 interface QualificationTabProps {
@@ -48,9 +48,7 @@ export function QualificationTab({
 }: QualificationTabProps) {
   const [activeSubTab, setActiveSubTab] = useState('national')
 
-  // "그 외" 서브탭의 검토 참고 note — 단일 필드 폼 (검증 메시지 없음, 입력 시에만 제출 활성)
   const form = useForm<{ note: string }>({ mode: 'onTouched', defaultValues: { note: '' } })
-  const note = useWatch({ control: form.control, name: 'note' })
   const submitOther = form.handleSubmit((data) => {
     onSubmitOther(data.note)
     form.reset({ note: '' })
@@ -98,6 +96,7 @@ export function QualificationTab({
       ) : (
         <Form {...form}>
           <form onSubmit={submitOther} className="flex flex-col gap-3">
+            {/* TODO: 파일 업로드 컴포넌트 구현 */}
             <Button type="button" variant="secondary" size="full" disabled>
               파일 제출
             </Button>
@@ -107,9 +106,9 @@ export function QualificationTab({
               rows={4}
               placeholder="검토시 참고할 내용을 작성해주세요..."
             />
-            <Button type="submit" variant="primary" size="full" disabled={!note?.trim()}>
+            <FormSubmitButton variant="primary" size="full">
               제출하기
-            </Button>
+            </FormSubmitButton>
           </form>
         </Form>
       )}
