@@ -24,7 +24,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
-import { FormLabel, SignupHeader } from '../_components'
+import { SignupHeader } from '../_components'
+import { FormLabel } from './_components'
 import { MAX_TRADES, profileSchema, type ProfileFormData } from './schema'
 
 export default function SignupProfilePage() {
