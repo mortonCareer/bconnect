@@ -18,16 +18,10 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { z } from 'zod'
 import { OtpTimer } from './_components'
+import { loginSchema, type LoginFormData } from './schema'
 
 type Step = 'phone' | 'otp'
-
-const schema = z.object({
-  phone: z.string().refine(isValidPhoneNumber, '유효하지 않은 전화번호입니다.'),
-  code: z.string().regex(/^\d{6}$/, '인증번호 6자리를 입력해주세요.'),
-})
-type FormValues = z.infer<typeof schema>
 
 export default function LoginPage() {
   const router = useRouter()
@@ -37,16 +31,16 @@ export default function LoginPage() {
   const [step, setStep] = useState<Step>('phone')
   const [expiresAt, setExpiresAt] = useState<string | null>(null)
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
     defaultValues: { phone: '', code: '' },
     mode: 'onSubmit',
   })
 
   // 단계별 서버 에러 분리: 발송 실패는 phone, 검증 실패(A003)는 code 필드에 합성.
   // ADR-0015 — BE envelope message 를 그대로 표시 (코드별 분기 없음).
-  const phoneServer = useServerError(form.control, passthroughError<FormValues>('phone'))
-  const codeServer = useServerError(form.control, passthroughError<FormValues>('code'))
+  const phoneServer = useServerError(form.control, passthroughError<LoginFormData>('phone'))
+  const codeServer = useServerError(form.control, passthroughError<LoginFormData>('code'))
 
   const sendCodeMutation = useSendOtp()
   const verifyCodeMutation = useVerifyOtp()
