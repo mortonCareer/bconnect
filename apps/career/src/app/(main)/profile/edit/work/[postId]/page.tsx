@@ -3,36 +3,36 @@
  */
 'use client'
 
-import { useState } from 'react'
+import { Form, TextField, TextareaField, TopBar } from '@bconnect/ui'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
-import { TopBar } from '@bconnect/ui'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
-// TODO: Post + Task API 연동 (#197)
-const MOCK_WORK = {
-  image: '/placeholder-post.svg',
-  company: '서정건축',
-  period: '12.25 ~ 12.26 (총 2일 소요)',
-  address: '경기도 수원시 율전로 00번길 00-00, 000호',
-  trade: '타일',
-  description:
-    '신축 아파트 32평 욕실 2개소 타일 시공을 진행했습니다.\n\n벽면은 600×300 수입 포세린, 바닥은 300×300 논슬립 타일로 시공했고, 헤링본 패턴 포인트 벽 작업까지 담당했습니다.\n\n시공 완료 후 현장 감리자로부터 "줄눈 간격이 균일하고 마감이 깔끔하다"는 평가를 받았습니다.',
-}
+const workSchema = z.object({
+  company: z.string().min(1, '업체명을 입력해주세요.'),
+  period: z.string().min(1, '시공기간을 입력해주세요.'),
+  address: z.string().min(1, '현장주소를 입력해주세요.'),
+  trade: z.string().min(1, '시공분야를 입력해주세요.'),
+  description: z.string().min(1, '작업 설명을 입력해주세요.'),
+})
+type WorkFormValues = z.infer<typeof workSchema>
 
 export default function EditWorkPage() {
   const router = useRouter()
   const params = useParams<{ postId: string }>()
   const _postId = Number(params.postId)
 
-  const [company, setCompany] = useState(MOCK_WORK.company)
-  const [period, setPeriod] = useState(MOCK_WORK.period)
-  const [address, setAddress] = useState(MOCK_WORK.address)
-  const [trade, setTrade] = useState(MOCK_WORK.trade)
-  const [description, setDescription] = useState(MOCK_WORK.description)
+  const form = useForm<WorkFormValues>({
+    resolver: zodResolver(workSchema),
+    mode: 'onChange',
+    defaultValues: { company: '', period: '', address: '', trade: '', description: '' },
+  })
 
-  const handleSave = () => {
-    // TODO: Post + Task 수정 API 연동
+  const handleSave = form.handleSubmit(() => {
+    // TODO: Post + Task 수정 API 연동 (#197)
     router.back()
-  }
+  })
 
   return (
     <div className="flex flex-col">
@@ -50,50 +50,41 @@ export default function EditWorkPage() {
         <span className="text-r-12 text-gray-500">이미지</span>
       </div>
 
-      {/* 메타 정보 */}
-      <div className="flex flex-col gap-3 px-4 pt-6">
-        <div className="flex items-start gap-4">
-          <span className="w-16 shrink-0 text-sb-14 text-gray-900">업체명</span>
-          <input
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            className="flex-1 text-r-14 text-gray-900 outline-none"
+      <Form {...form}>
+        <form onSubmit={handleSave} className="flex flex-col gap-4 px-4 pt-6">
+          <TextField
+            control={form.control}
+            name="company"
+            label="업체명"
+            placeholder="업체명을 입력해주세요"
           />
-        </div>
-        <div className="flex items-start gap-4">
-          <span className="w-16 shrink-0 text-sb-14 text-gray-900">시공기간</span>
-          <input
-            value={period}
-            onChange={(e) => setPeriod(e.target.value)}
-            className="flex-1 text-r-14 text-gray-900 outline-none"
+          <TextField
+            control={form.control}
+            name="period"
+            label="시공기간"
+            placeholder="시공기간을 입력해주세요"
           />
-        </div>
-        <div className="flex items-start gap-4">
-          <span className="w-16 shrink-0 text-sb-14 text-gray-900">현장주소</span>
-          <input
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="flex-1 text-r-14 text-gray-900 outline-none"
+          <TextField
+            control={form.control}
+            name="address"
+            label="현장주소"
+            placeholder="현장주소를 입력해주세요"
           />
-        </div>
-        <div className="flex items-start gap-4">
-          <span className="w-16 shrink-0 text-sb-14 text-gray-900">시공분야</span>
-          <input
-            value={trade}
-            onChange={(e) => setTrade(e.target.value)}
-            className="flex-1 text-r-14 text-gray-900 outline-none"
+          <TextField
+            control={form.control}
+            name="trade"
+            label="시공분야"
+            placeholder="시공분야를 입력해주세요"
           />
-        </div>
-      </div>
-
-      {/* 설명 */}
-      <div className="px-4 pt-6">
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="min-h-[200px] w-full resize-none text-r-14 leading-[22.4px] text-gray-900 outline-none placeholder:text-gray-500"
-        />
-      </div>
+          <TextareaField
+            control={form.control}
+            name="description"
+            label="설명"
+            rows={6}
+            placeholder="작업 내용을 입력해주세요"
+          />
+        </form>
+      </Form>
     </div>
   )
 }
