@@ -7,15 +7,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  Button,
-  Form,
-  FormError,
-  TextField,
-  isApiErrorShape,
-  passthroughError,
-  useServerError,
-} from '@bconnect/ui'
+import { Button, Form, FormError, TextField, passthroughError, useServerError } from '@bconnect/ui'
 import { useRegisterMember, Role } from '@bconnect/api-client'
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
 import Image from 'next/image'
@@ -52,20 +44,10 @@ export default function SignupCorpPage() {
     formState: { isSubmitting, isValid },
   } = form
 
-  // 가입 토큰 만료/무효(A009/A010)는 "다시 로그인" 안내가 필요한 특수 분기 (ADR-0015).
-  // 그 외 에러는 BE envelope message 그대로 표시.
-  const server = useServerError(control, (err) => {
-    if (isApiErrorShape(err)) {
-      if (err.code === 'A009')
-        return { message: '유효하지 않은 가입 토큰입니다. 다시 로그인해주세요.' }
-      if (err.code === 'A010')
-        return { message: '가입 토큰이 만료되었습니다. 다시 로그인해주세요.' }
-    }
-    return passthroughError<CorpFormData>(
-      undefined,
-      '회원가입에 실패했습니다. 다시 시도해주세요.'
-    )(err)
-  })
+  const server = useServerError(
+    control,
+    passthroughError<CorpFormData>(undefined, '회원가입에 실패했습니다. 다시 시도해주세요.')
+  )
 
   const onSubmit = async (data: CorpFormData) => {
     setCorp({ companyName: data.companyName, bizNumber: data.bizNumber })

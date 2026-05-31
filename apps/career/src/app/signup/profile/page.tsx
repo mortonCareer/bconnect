@@ -17,7 +17,6 @@ import {
   FormError,
   Tag,
   TextField,
-  isApiErrorShape,
   passthroughError,
   useServerError,
 } from '@bconnect/ui'
@@ -56,18 +55,10 @@ export default function SignupProfilePage() {
     formState: { errors, isSubmitting, isValid },
   } = form
 
-  const server = useServerError(control, (err) => {
-    if (isApiErrorShape(err)) {
-      if (err.code === 'A009')
-        return { message: '유효하지 않은 가입 토큰입니다. 다시 로그인해주세요.' }
-      if (err.code === 'A010')
-        return { message: '가입 토큰이 만료되었습니다. 다시 로그인해주세요.' }
-    }
-    return passthroughError<ProfileFormData>(
-      undefined,
-      '회원가입에 실패했습니다. 다시 시도해주세요.'
-    )(err)
-  })
+  const server = useServerError(
+    control,
+    passthroughError<ProfileFormData>(undefined, '회원가입에 실패했습니다. 다시 시도해주세요.')
+  )
   const [registered, setRegistered] = useState(false)
 
   const watchedFields = useWatch({ control, name: 'fields' })
