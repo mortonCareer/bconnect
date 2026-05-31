@@ -1,0 +1,55 @@
+package to.bconnect.api.api.controller.v1;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import to.bconnect.api.api.controller.v1.response.CoworkerResponse;
+import to.bconnect.api.domain.coworker.CoworkerService;
+import to.bconnect.api.domain.member.Member;
+import to.bconnect.api.domain.member.MemberFinder;
+import to.bconnect.api.domain.profile.ProfileFinder;
+import to.bconnect.api.storage.common.value.CoworkerStatus;
+import to.bconnect.api.support.security.User;
+import to.bconnect.api.common.response.ApiResponse;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/coworkers")
+@RequiredArgsConstructor
+public class CoworkerController {
+
+    private final CoworkerService coworkerService;
+    private final ProfileFinder profileFinder;
+    private final MemberFinder memberFinder;
+
+    @GetMapping
+    public ApiResponse<List<CoworkerResponse>> get(
+            @AuthenticationPrincipal User user,
+            @RequestParam Long profileId) {
+        List<CoworkerResponse> coworkers = coworkerService.getAll(user, profileId).stream()
+                .map(coworker -> {
+                    Long counterpartProfileId = coworker.minId().equals(profileId)
+                            ? coworker.maxId()
+                            : coworker.minId();
+                    Member member = memberFinder.find(
+                            profileFinder.find(counterpartProfileId).memberId());
+                    return CoworkerResponse.of(coworker, member, CoworkerStatus.COWORKER);
+                })
+                .toList();
+        return ApiResponse.success(coworkers);
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> delete(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
+        coworkerService.delete(user, id);
+        return ApiResponse.success(null);
+    }
+}
