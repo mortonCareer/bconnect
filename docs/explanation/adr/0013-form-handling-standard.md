@@ -48,7 +48,7 @@ BConnect 프론트엔드의 폼 처리가 페이지마다 갈라져 있다. `app
 - **검증 또는 제출이 있는 폼**은 `react-hook-form` + `@hookform/resolvers/zod` 사용. 수동 `useState` 폼 금지.
 - 단순 검색·필터·URL-state 입력(nuqs)은 폼이 아니므로 제외 — bare `Input` 사용.
 - 검증 스키마는 zod **v4** (`schema.ts`에 분리). `zod/v3` compat import 금지.
-- 검증 타이밍은 `mode: 'onChange'`.
+- 검증 타이밍은 `mode: 'onTouched'` — blur 후 첫 검증, 이후 onChange 처럼 갱신. `isValid` 게이팅 버튼을 유지하면서(onSubmit 은 제출 전 isValid 미갱신 → 버튼 안 열림) 첫 타이핑 중 naggy 한 에러 노출을 피한다.
 
 ### 2. 컴포넌트 레이어 — shadcn Form + `*Field` 래퍼
 
@@ -83,7 +83,7 @@ raw shadcn primitive를 그대로 쓰면 필드 하나마다 `FormField`·`FormI
 - 렌더에서 `form.watch()`를 호출하면 React Compiler가 해당 컴포넌트 최적화를 건너뜀(bail-out) → 폼 값은 `useWatch` 훅으로 구독.
 - shadcn `FormControl`은 RHF `fieldState`만 `aria-invalid`로 반영 — 서버 에러는 `aria-invalid`를 수동 OR(`TextField`가 내부 흡수).
 - 멀티스텝 폼의 per-step 유효성은 `formState.isValid`로 표현 안 됨 — `trigger(field)` + 개별 판정 필요.
-- `mode: 'onChange'`는 입력 도중 에러가 다소 naggy.
+- `mode: 'onTouched'`는 blur 후부터 에러 노출 — onChange 의 첫 타이핑 naggy 는 해소하나, 제출 전에도 touched 필드 에러는 보인다.
 - 마이그레이션 비용 — login(plan·career), signup 서버 에러, 입력 컴포넌트 통합.
 
 ### 중립
