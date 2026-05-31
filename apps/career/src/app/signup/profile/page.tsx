@@ -142,7 +142,7 @@ export default function SignupProfilePage() {
       <Form {...form}>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-28 pt-3"
+          className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-8 pt-3"
         >
           <h1 className="text-sb-24 text-black">
             기술자님의 시공분야와
@@ -301,22 +301,17 @@ export default function SignupProfilePage() {
             maxLength={20}
             placeholder="한줄소개를 입력해주세요 (최대 20글자)"
           />
-        </form>
-
-        {/* Fixed Submit Button */}
-        <div className="fixed inset-x-0 bottom-0 bg-white px-4 pb-[env(safe-area-inset-bottom,32px)] pt-4">
-          <FormError error={server.formError} className="mb-2" />
+          <FormError error={server.formError} />
           <Button
             type="submit"
             variant="primary"
             size="full"
             disabled={!isValid}
             isLoading={isSubmitting || registerMemberMutation.isPending}
-            onClick={handleSubmit(onSubmit)}
           >
             완료
           </Button>
-        </div>
+        </form>
       </Form>
     </div>
   )
