@@ -1,4 +1,4 @@
-import { z } from 'zod/v3'
+import { z } from 'zod'
 
 const experienceLevelSchema = z.enum(['newcomer', '1-3', '3-5', '5-10', '10+'])
 
