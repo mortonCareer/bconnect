@@ -61,5 +61,5 @@ production 도메인을 손대지 않는 연속성과, 환경이 apex 앞에 오
 ## Notes
 
 - 구현·체크리스트: [#438](https://github.com/mortonCareer/bconnect/issues/438)
-- CORS `*.dev.bconnect.to` 추가는 BE(CEO) 후속
+- CORS `*.dev.bconnect.to` 추가는 BE 후속
 - DNS 수동 단계: Vercel/Railway custom domain apply 후 노출되는 CNAME 타겟을 가비아 콘솔에서 등록
