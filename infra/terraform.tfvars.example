@@ -13,6 +13,7 @@ github_branch = "main"
 
 db_user     = "morton"
 db_password = "secure_password_here"
+dev_db_password = "dev_secure_password_here"
 db_name     = "morton"
 
 # =============================================================================
@@ -21,6 +22,7 @@ db_name     = "morton"
 
 spring_profile = "prod"
 jwt_secret     = "your-jwt-secret-base64-string"
+dev_jwt_secret = "your-dev-jwt-secret-base64-string"
 
 # =============================================================================
 # AWS Config
@@ -28,6 +30,7 @@ jwt_secret     = "your-jwt-secret-base64-string"
 
 aws_region            = "ap-northeast-2"
 s3_bucket_name        = "morton-storage"
+dev_s3_bucket_name    = "morton-storage-dev"
 
 # =============================================================================
 # Domain Config
