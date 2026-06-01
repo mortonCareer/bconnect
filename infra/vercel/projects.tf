@@ -372,3 +372,16 @@ resource "vercel_project_environment_variable" "plan_dev_api_mocking" {
   custom_environment_ids = [vercel_custom_environment.plan_dev.id]
   comment                = "dev 환경은 MSW mock 대신 실 staging BE 호출"
 }
+
+# dev custom 도메인 (ADR-0016). DNS CNAME 은 가비아에서 수동 등록.
+resource "vercel_project_domain" "career_dev" {
+  project_id            = vercel_project.morton-career.id
+  domain                = "dev.${var.domain}"
+  custom_environment_id = vercel_custom_environment.career_dev.id
+}
+
+resource "vercel_project_domain" "plan_dev" {
+  project_id            = vercel_project.morton-plan.id
+  domain                = "plan.dev.${var.domain}"
+  custom_environment_id = vercel_custom_environment.plan_dev.id
+}
