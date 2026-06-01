@@ -11,11 +11,12 @@ API_SVC="831fe58d-b966-4af1-b517-128e205c77b3"
 PG_SVC="1b00b504-e28e-4a58-a78c-dfbaba713fbc"
 PG_TCP_PROXY_ID="28dcbe10-599f-4a9e-b842-4e68cf4b0543"
 ENV="dev"
+ENV_ID="c0ed38c7-08ae-40c1-8a4f-cf09cbaf008a"
 
 # resource_label : import_id
 declare -A IMPORTS=(
   ["railway_environment.dev"]="${PROJECT_ID}:${ENV}"
-  ["railway_tcp_proxy.postgres_dev"]="${PG_TCP_PROXY_ID}"
+  ["railway_tcp_proxy.postgres_dev"]="${PG_SVC}:${ENV_ID}:${PG_TCP_PROXY_ID}"
 
   # api service variables (import id: service_id:env_name:var_name)
   ["railway_variable.dev_api_database_url"]="${API_SVC}:${ENV}:DATABASE_URL"
