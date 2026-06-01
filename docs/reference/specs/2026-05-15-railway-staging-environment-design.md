@@ -87,7 +87,7 @@ ADR-0009 의 결정("같은 프로젝트 별도 environment")이 그대로 유�
 
 ## 7. 비용
 
-staging environment 의 postgres + api 인스턴스가 상시 가동 → Railway 월 비용 추가 (prod 와 동등 수준). staging S3 버킷 사용량 비용 (미미). `terraform apply` 는 **`terraform plan` 출력을 사용자에게 보여주고 명시적 승인 후에만** 실행 (CLAUDE.md terraform 규칙 + 클라우드 비용 발생 규칙).
+staging environment 의 postgres + api 인스턴스가 상시 가동 → Railway 월 비용 추가 (prod 와 동등 수준). staging S3 버킷 사용량 비용 (미미).
 
 ## 8. 검증
 

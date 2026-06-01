@@ -16,7 +16,7 @@ Morton 백엔드 인프라를 Terraform으로 관리합니다.
 
 community provider 제약상 아래는 Railway GUI 1회 수동 (postgres volume 과 동일 패턴):
 
-1. **환경 생성**: prod 환경을 GUI 에서 `dev` 로 복제 → 이후 `scripts/import-dev.sh` 로 TF state 흡수
+1. **환경 생성**: prod 환경을 GUI 에서 `dev` 로 복제 → 복제된 환경/변수/TCP proxy 를 `terraform import` 로 1회 흡수 (provider 가 빈 환경에 서비스를 fork 하지 않아 GUI 복제가 필요)
 2. **source branch override**: `dev` 환경 → `api` 서비스 → source branch 를 `dev` 로 override (TF state 밖)
 3. **postgres volume**: `dev` 환경 postgres volume (복제 시 자동 생성, prod 패턴 동일)
 4. **(dev 전용 DB 비밀번호 적용 시)** postgres 는 빈 데이터 디렉토리 첫 init 때만 `POSTGRES_PASSWORD` 반영 → 클론 직후 volume 재초기화 필요 (dev 는 데이터 없어 안전)
