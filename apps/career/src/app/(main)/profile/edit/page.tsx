@@ -18,7 +18,7 @@ import {
   getGetMyProfileQueryKey,
   Trade,
 } from '@bconnect/api-client'
-import { TopBar, Input, Tag } from '@bconnect/ui'
+import { Form, Input, SelectField, Tag, TopBar } from '@bconnect/ui'
 import { TRADE_LABELS, TRADE_GROUPS } from '@/lib/trade-labels'
 import { profileEditSchema, type ProfileEditFormData } from './schema'
 
@@ -54,14 +54,7 @@ export default function ProfileEditPage() {
   const updateProfileMutation = useUpdateMyProfile()
   const updateAboutMutation = useUpdateMyProfileAbout()
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    setValue,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<ProfileEditFormData>({
+  const form = useForm<ProfileEditFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- zod v4 + @hookform/resolvers 타입 호환 workaround
     resolver: zodResolver(profileEditSchema as any),
     mode: 'onTouched',
@@ -76,6 +69,14 @@ export default function ProfileEditPage() {
       city: '',
     },
   })
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    reset,
+    formState: { errors, isSubmitting },
+  } = form
 
   // 데이터 로드 후 폼 초기값 설정
   useEffect(() => {
@@ -205,167 +206,140 @@ export default function ProfileEditPage() {
         onBack={() => router.back()}
       />
 
-      <form className="flex flex-1 flex-col gap-[24px] overflow-y-auto px-4 pb-24 pt-3">
-        {/* 이름 */}
-        <div className="flex flex-col gap-[8px]">
-          <label className="text-m-16 text-gray-900">
-            이름 <span className="text-destructive">*</span>
-          </label>
-          <Input
-            placeholder="내용을 입력해주세요"
-            variant={errors.name ? 'error' : 'default'}
-            errorMessage={errors.name?.message}
-            {...register('name')}
-          />
-        </div>
-
-        {/* 시공분야 */}
-        <div className="flex flex-col gap-[12px]">
-          <label className="text-m-16 text-gray-900">
-            시공분야 <span className="text-destructive">*</span>
-          </label>
-          <Controller
-            name="trades"
-            control={control}
-            render={({ field }) => (
-              <div className="flex flex-col gap-[12px]">
-                {TRADE_GROUPS.map((group) => (
-                  <div key={group.label} className="flex flex-col gap-[12px]">
-                    <p className="text-m-14 text-gray-700">{group.label}</p>
-                    <div className="flex flex-wrap gap-[8px]">
-                      {group.trades.map((tradeValue) => {
-                        const isSelected = field.value?.includes(tradeValue) ?? false
-                        return (
-                          <Tag
-                            key={tradeValue}
-                            variant={isSelected ? 'selected' : 'default'}
-                            onClick={() => toggleTrade(tradeValue)}
-                          >
-                            {TRADE_LABELS[tradeValue]}
-                          </Tag>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          />
-          {errors.trades && <p className="text-sm text-destructive">{errors.trades.message}</p>}
-        </div>
-
-        {/* 대표분야 */}
-        {(watchedTrades ?? []).length > 0 && (
+      <Form {...form}>
+        <form className="flex flex-1 flex-col gap-[24px] overflow-y-auto px-4 pb-24 pt-3">
+          {/* 이름 */}
           <div className="flex flex-col gap-[8px]">
             <label className="text-m-16 text-gray-900">
-              대표분야 <span className="text-destructive">*</span>
+              이름 <span className="text-destructive">*</span>
+            </label>
+            <Input
+              placeholder="내용을 입력해주세요"
+              variant={errors.name ? 'error' : 'default'}
+              errorMessage={errors.name?.message}
+              {...register('name')}
+            />
+          </div>
+
+          {/* 시공분야 */}
+          <div className="flex flex-col gap-[12px]">
+            <label className="text-m-16 text-gray-900">
+              시공분야 <span className="text-destructive">*</span>
             </label>
             <Controller
-              name="primaryTrade"
+              name="trades"
               control={control}
               render={({ field }) => (
-                <div className="relative w-fit">
-                  <select
-                    value={field.value || ''}
-                    onChange={field.onChange}
-                    className="flex h-[40px] appearance-none items-center rounded-[8px] border border-gray-300 bg-white py-[3px] pl-[10px] pr-8 text-m-14 text-gray-900"
-                  >
-                    {(watchedTrades ?? []).map((tradeValue: string) => (
-                      <option key={tradeValue} value={tradeValue}>
-                        {TRADE_LABELS[tradeValue as Trade]}
-                      </option>
-                    ))}
-                  </select>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    className="pointer-events-none absolute right-[10px] top-1/2 -translate-y-1/2"
-                  >
-                    <path
-                      d="M4 6L8 10L12 6"
-                      stroke="#1B1B1B"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                <div className="flex flex-col gap-[12px]">
+                  {TRADE_GROUPS.map((group) => (
+                    <div key={group.label} className="flex flex-col gap-[12px]">
+                      <p className="text-m-14 text-gray-700">{group.label}</p>
+                      <div className="flex flex-wrap gap-[8px]">
+                        {group.trades.map((tradeValue) => {
+                          const isSelected = field.value?.includes(tradeValue) ?? false
+                          return (
+                            <Tag
+                              key={tradeValue}
+                              variant={isSelected ? 'selected' : 'default'}
+                              onClick={() => toggleTrade(tradeValue)}
+                            >
+                              {TRADE_LABELS[tradeValue]}
+                            </Tag>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            />
+            {errors.trades && <p className="text-sm text-destructive">{errors.trades.message}</p>}
+          </div>
+
+          {/* 대표분야 */}
+          {(watchedTrades ?? []).length > 0 && (
+            <SelectField
+              control={control}
+              name="primaryTrade"
+              label="대표분야"
+              required
+              options={(watchedTrades ?? []).map((trade) => ({
+                value: trade,
+                label: TRADE_LABELS[trade as Trade],
+              }))}
+            />
+          )}
+
+          {/* 경력 */}
+          <div className="flex flex-col gap-[8px]">
+            <label className="text-m-16 text-gray-900">
+              경력 <span className="text-destructive">*</span>
+            </label>
+            <Controller
+              name="experience"
+              control={control}
+              render={({ field }) => (
+                <div className="flex flex-wrap items-center gap-2">
+                  {EXPERIENCE_OPTIONS.map((option) => {
+                    const isSelected = yearsToLevel(field.value) === option.id
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => field.onChange(levelToYears(option.id))}
+                        className={`flex h-[40px] items-center justify-center rounded-[8px] border px-[14px] py-[3px] text-sm leading-[1.6] transition-colors ${
+                          isSelected
+                            ? 'border-primary bg-secondary font-semibold text-primary'
+                            : 'border-gray-300 font-medium text-gray-500'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    )
+                  })}
                 </div>
               )}
             />
           </div>
-        )}
 
-        {/* 경력 */}
-        <div className="flex flex-col gap-[8px]">
-          <label className="text-m-16 text-gray-900">
-            경력 <span className="text-destructive">*</span>
-          </label>
-          <Controller
-            name="experience"
-            control={control}
-            render={({ field }) => (
-              <div className="flex flex-wrap items-center gap-2">
-                {EXPERIENCE_OPTIONS.map((option) => {
-                  const isSelected = yearsToLevel(field.value) === option.id
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => field.onChange(levelToYears(option.id))}
-                      className={`flex h-[40px] items-center justify-center rounded-[8px] border px-[14px] py-[3px] text-sm leading-[1.6] transition-colors ${
-                        isSelected
-                          ? 'border-primary bg-secondary font-semibold text-primary'
-                          : 'border-gray-300 font-medium text-gray-500'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          />
-        </div>
+          {/* 한줄소개 */}
+          <div className="flex flex-col gap-[8px]">
+            <label className="text-m-16 text-gray-900">한줄소개</label>
+            <Input
+              placeholder="한줄소개를 입력해주세요 (최대 20글자)"
+              variant={errors.headline ? 'error' : 'default'}
+              errorMessage={errors.headline?.message}
+              {...register('headline')}
+            />
+          </div>
 
-        {/* 한줄소개 */}
-        <div className="flex flex-col gap-[8px]">
-          <label className="text-m-16 text-gray-900">한줄소개</label>
-          <Input
-            placeholder="한줄소개를 입력해주세요 (최대 20글자)"
-            variant={errors.headline ? 'error' : 'default'}
-            errorMessage={errors.headline?.message}
-            {...register('headline')}
-          />
-        </div>
+          {/* 소개 */}
+          <div className="flex flex-col gap-[8px]">
+            <label className="text-r-14 text-gray-900">소개</label>
+            <textarea
+              placeholder="자기소개를 입력해주세요"
+              rows={4}
+              className="w-full resize-none rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-r-14 text-gray-900 outline-none transition-colors placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary disabled:pointer-events-none disabled:opacity-50"
+              {...register('about')}
+            />
+            {errors.about && <p className="text-sm text-destructive">{errors.about.message}</p>}
+          </div>
 
-        {/* 소개 */}
-        <div className="flex flex-col gap-[8px]">
-          <label className="text-r-14 text-gray-900">소개</label>
-          <textarea
-            placeholder="자기소개를 입력해주세요"
-            rows={4}
-            className="w-full resize-none rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-r-14 text-gray-900 outline-none transition-colors placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary disabled:pointer-events-none disabled:opacity-50"
-            {...register('about')}
-          />
-          {errors.about && <p className="text-sm text-destructive">{errors.about.message}</p>}
-        </div>
-
-        {/* 지역 */}
-        <div className="flex flex-col gap-[8px]">
-          <label className="text-m-16 text-gray-900">주소</label>
-          <p className="text-r-12 text-gray-700">
-            정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요
-          </p>
-          <Input
-            placeholder="주소를 입력해주세요"
-            variant={errors.city ? 'error' : 'default'}
-            errorMessage={errors.city?.message}
-            {...register('city')}
-          />
-        </div>
-      </form>
+          {/* 지역 */}
+          <div className="flex flex-col gap-[8px]">
+            <label className="text-m-16 text-gray-900">주소</label>
+            <p className="text-r-12 text-gray-700">
+              정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요
+            </p>
+            <Input
+              placeholder="주소를 입력해주세요"
+              variant={errors.city ? 'error' : 'default'}
+              errorMessage={errors.city?.message}
+              {...register('city')}
+            />
+          </div>
+        </form>
+      </Form>
     </div>
   )
 }

@@ -18,6 +18,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  SelectField,
   Tag,
   TextField,
   passthroughError,
@@ -154,45 +155,16 @@ export default function SignupProfilePage() {
           <TradeSelector control={control} name="fields" max={MAX_TRADES} />
 
           {/* 대표분야 */}
-          {/* TODO: 별도 SelectField로 대체 */}
           {selectedFields.length > 0 && (
-            <FormField
+            <SelectField
               control={control}
               name="primaryField"
-              render={({ field }) => (
-                <FormItem className="gap-2">
-                  <FormLabel required>대표분야</FormLabel>
-                  <div className="relative w-fit">
-                    <select
-                      value={field.value || ''}
-                      onChange={field.onChange}
-                      className="flex h-[40px] appearance-none items-center rounded-[8px] border border-gray-300 bg-white py-[3px] pl-[10px] pr-8 text-m-14 text-gray-900"
-                    >
-                      {selectedFields.map((tradeValue) => (
-                        <option key={tradeValue} value={tradeValue}>
-                          {TRADE_LABELS[tradeValue as Trade]}
-                        </option>
-                      ))}
-                    </select>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      className="pointer-events-none absolute right-[10px] top-1/2 -translate-y-1/2"
-                    >
-                      <path
-                        d="M4 6L8 10L12 6"
-                        stroke="#1B1B1B"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="대표분야"
+              required
+              options={selectedFields.map((trade) => ({
+                value: trade,
+                label: TRADE_LABELS[trade as Trade],
+              }))}
             />
           )}
 

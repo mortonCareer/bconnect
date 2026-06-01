@@ -26,5 +26,7 @@ export {
 export { Label } from './ui/shadcn/label'
 export { TextField } from './ui/form/TextField'
 export { TextareaField } from './ui/form/TextareaField'
+export { SelectField } from './ui/form/SelectField'
+export type { SelectFieldOption } from './ui/form/SelectField'
 export { FormError } from './ui/form/FormError'
 export { FormSubmitButton } from './ui/form/FormSubmitButton'
