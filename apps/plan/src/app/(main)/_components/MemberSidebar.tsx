@@ -16,7 +16,7 @@ const NOTIFICATION_COUNT = 4
 function Badge({ count }: { count: number }) {
   if (count <= 0) return null
   return (
-    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-[8px] bg-[#FF4242] px-1 text-sb-12 text-white">
+    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-[8px] bg-red-500 px-1 text-sb-12 text-white">
       {count > 99 ? '99+' : count}
     </span>
   )

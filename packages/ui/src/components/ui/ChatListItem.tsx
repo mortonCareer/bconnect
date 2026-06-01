@@ -158,7 +158,7 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
               </span>
             )}
             {unreadCount != null && unreadCount > 0 && (
-              <div className="flex size-[20px] items-center justify-center rounded-[8px] bg-[#FF4242]">
+              <div className="flex size-[20px] items-center justify-center rounded-[8px] bg-red-500">
                 <span className="font-[Pretendard_Variable] text-[12px] font-bold leading-none text-white">
                   {unreadCount}
                 </span>
