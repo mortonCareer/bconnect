@@ -10,7 +10,7 @@ import { useLoginGate } from './LoginGateProvider'
 // Figma node 1504:12113 — bg-gray-100, border-gray-300, rounded-7, R14 gray-700
 function CertTag({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center rounded-[7px] border border-bconnect-gray-300 bg-bconnect-gray-100 px-[8px] py-[4px] text-r-14 text-bconnect-gray-700">
+    <span className="inline-flex items-center rounded-[7px] border border-gray-300 bg-gray-100 px-[8px] py-[4px] text-r-14 text-gray-700">
       {label}
     </span>
   )
@@ -26,8 +26,8 @@ function SkillTag({ label, selected }: { label: string; selected: boolean }) {
       className={cn(
         'inline-flex items-center rounded-full border px-[12px] py-[4px] font-[Pretendard_Variable] text-[12px] font-medium leading-[1.6]',
         selected
-          ? 'border-bconnect-primary bg-bconnect-primary-sub text-bconnect-primary'
-          : 'border-bconnect-gray-300 bg-white text-bconnect-gray-700'
+          ? 'border-primary bg-secondary text-primary'
+          : 'border-gray-300 bg-white text-gray-700'
       )}
     >
       {label}
@@ -46,17 +46,17 @@ function StarRating({ rating, reviewCount }: { rating: number; reviewCount: numb
           return (
             // TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지)
             <svg key={i} width="14" height="14" viewBox="0 0 16 16" fill="none">
-              {/* 비활성: bconnect-gray-300 (#E5E5E5). 활성: 별점 전용 amber — 디자인 시스템 미정 (TODO: 토큰 추가 시 교체) */}
+              {/* 비활성: gray-300 (#E5E5E5). 활성: 별점 전용 amber — 디자인 시스템 미정 (TODO: 토큰 추가 시 교체) */}
               <path
                 d="M8 1l1.85 3.75L14 5.5l-3 2.92.71 4.13L8 10.4l-3.71 2.15L5 8.42 2 5.5l4.15-.75L8 1z"
-                fill={filled ? '#FFB800' : 'var(--bconnect-gray-300)'}
+                fill={filled ? '#FFB800' : 'var(--color-gray-300)'}
               />
             </svg>
           )
         })}
       </div>
-      <span className="text-m-14 text-bconnect-gray-900">{rating.toFixed(1)}</span>
-      <span className="text-r-14 text-bconnect-gray-500">({reviewCount})</span>
+      <span className="text-m-14 text-gray-900">{rating.toFixed(1)}</span>
+      <span className="text-r-14 text-gray-500">({reviewCount})</span>
     </div>
   )
 }
@@ -64,8 +64,8 @@ function StarRating({ rating, reviewCount }: { rating: number; reviewCount: numb
 function Stat({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <span className="text-sb-24 text-bconnect-gray-900">{value}</span>
-      <span className="text-r-14 text-bconnect-gray-500">{label}</span>
+      <span className="text-sb-24 text-gray-900">{value}</span>
+      <span className="text-r-14 text-gray-500">{label}</span>
     </div>
   )
 }
@@ -74,10 +74,10 @@ function Stat({ value, label }: { value: number; label: string }) {
 function PortfolioThumb({ imageUrl, daysRequired }: { imageUrl?: string; daysRequired?: number }) {
   return (
     <div className="flex w-[135px] shrink-0 flex-col items-end gap-[6px]">
-      <div className="relative aspect-square w-full overflow-hidden rounded-[9px] bg-bconnect-gray-100">
+      <div className="relative aspect-square w-full overflow-hidden rounded-[9px] bg-gray-100">
         {imageUrl && <Image src={imageUrl} alt="" fill className="object-cover" unoptimized />}
       </div>
-      <span className="text-r-14 text-bconnect-gray-500">
+      <span className="text-r-14 text-gray-500">
         {daysRequired ? `${daysRequired}일 소요` : ' '}
       </span>
     </div>
@@ -104,10 +104,10 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
       : Array.from({ length: 3 }, () => ({ imageUrl: '', daysRequired: 0 }))
 
   return (
-    <div className="flex gap-[27px] rounded-[13px] border border-bconnect-gray-300 bg-white p-[28px]">
+    <div className="flex gap-[27px] rounded-[13px] border border-gray-300 bg-white p-[28px]">
       {/* 좌측: 프로필 + 정보 + 태그 + 버튼 */}
       <div className="flex flex-1 gap-[18px]">
-        <div className="relative h-[90px] w-[90px] shrink-0 overflow-hidden rounded-full bg-bconnect-gray-100">
+        <div className="relative h-[90px] w-[90px] shrink-0 overflow-hidden rounded-full bg-gray-100">
           <Image src={item.picture} alt={item.name} fill className="object-cover" unoptimized />
         </div>
 
@@ -115,24 +115,22 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
           {/* 이름 + 메타 + 별점/계약·게시글 */}
           <div className="flex flex-col gap-[6px]">
             <div className="flex items-baseline gap-[10px]">
-              <p className="text-sb-20 text-bconnect-gray-900">{item.name}</p>
-              <p className="text-r-14 text-bconnect-gray-500">{metaParts.join(' · ')}</p>
+              <p className="text-sb-20 text-gray-900">{item.name}</p>
+              <p className="text-r-14 text-gray-500">{metaParts.join(' · ')}</p>
             </div>
             <div className="flex items-center gap-[11px]">
               {/* TODO: BE #211 구현 후 실데이터 교체 */}
               <StarRating rating={item.rating} reviewCount={item.reviewCount} />
               {/* Figma node 1470:6775 — 행 높이(20px) 세로 divider, gray-100 */}
-              <span className="h-5 w-px bg-bconnect-gray-100" />
-              <span className="text-r-14 text-bconnect-gray-500">
+              <span className="h-5 w-px bg-gray-100" />
+              <span className="text-r-14 text-gray-500">
                 계약 {item.contractCount} · 게시글 {item.postCount}
               </span>
             </div>
           </div>
 
           {/* 한 줄 소개 */}
-          {item.headline && (
-            <p className="line-clamp-2 text-r-16 text-bconnect-gray-900">{item.headline}</p>
-          )}
+          {item.headline && <p className="line-clamp-2 text-r-16 text-gray-900">{item.headline}</p>}
 
           {/* 공종 + 인증 태그 — Figma 1470:6779 그룹 (내부 gap 7.85 ≈ gap-2) */}
           {(item.trades.length > 0 || item.certifications.length > 0) && (
@@ -175,7 +173,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
       </div>
 
       {/* 세로 divider */}
-      <div className="w-px shrink-0 self-stretch bg-bconnect-gray-100" />
+      <div className="w-px shrink-0 self-stretch bg-gray-100" />
 
       {/* 우측: 통계 + 작업물 썸네일 */}
       <div className="flex w-[422px] shrink-0 flex-col gap-[22px]">
