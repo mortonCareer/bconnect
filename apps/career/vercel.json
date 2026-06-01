@@ -1,9 +1,4 @@
 {
-  "git": {
-    "deploymentEnabled": {
-      "dev": true
-    }
-  },
   "crons": [
     {
       "path": "/api/cron/schema-check",
