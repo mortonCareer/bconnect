@@ -31,6 +31,8 @@ resource "railway_variable" "dev_api" {
   value          = each.value
   service_id     = railway_service.api.id
   environment_id = railway_environment.dev.id
+
+  depends_on = [railway_environment.dev]
 }
 
 resource "railway_variable" "dev_postgres" {
@@ -39,6 +41,8 @@ resource "railway_variable" "dev_postgres" {
   value          = each.value
   service_id     = railway_service.postgres.id
   environment_id = railway_environment.dev.id
+
+  depends_on = [railway_variable.dev_api]
 }
 
 resource "railway_service_domain" "api_dev" {
