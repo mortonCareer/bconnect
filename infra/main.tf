@@ -55,6 +55,7 @@ module "vercel" {
 
   vercel_api_token = var.vercel_api_token
   domain           = var.domain
+  dev_api_url      = var.dev_api_url
 
   project_name  = var.project_name
   github_repo   = var.github_repo

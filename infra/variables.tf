@@ -87,6 +87,12 @@ variable "domain" {
   type        = string
 }
 
+variable "dev_api_url" {
+  description = "Railway staging BE base URL — dev 브랜치 Vercel 환경에서 호출 (#352, ADR-0010)"
+  type        = string
+  default     = "https://morton-api-dev.up.railway.app"
+}
+
 # =============================================================================
 # Vercel
 # =============================================================================

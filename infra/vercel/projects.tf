@@ -333,3 +333,38 @@ resource "vercel_custom_environment" "plan_dev" {
     type    = "equals"
   }
 }
+
+# ===========================================================================
+# dev custom environment → Railway staging BE 연동 (#352, ADR-0010)
+# ===========================================================================
+resource "vercel_project_environment_variable" "career_dev_api_url" {
+  project_id             = vercel_project.morton-career.id
+  key                    = "NEXT_PUBLIC_API_URL"
+  value                  = var.dev_api_url
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  comment                = "dev 브랜치 → Railway staging BE"
+}
+
+resource "vercel_project_environment_variable" "career_dev_api_mocking" {
+  project_id             = vercel_project.morton-career.id
+  key                    = "NEXT_PUBLIC_API_MOCKING"
+  value                  = "disabled"
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  comment                = "dev 환경은 MSW mock 대신 실 staging BE 호출"
+}
+
+resource "vercel_project_environment_variable" "plan_dev_api_url" {
+  project_id             = vercel_project.morton-plan.id
+  key                    = "NEXT_PUBLIC_API_URL"
+  value                  = var.dev_api_url
+  custom_environment_ids = [vercel_custom_environment.plan_dev.id]
+  comment                = "dev 브랜치 → Railway staging BE"
+}
+
+resource "vercel_project_environment_variable" "plan_dev_api_mocking" {
+  project_id             = vercel_project.morton-plan.id
+  key                    = "NEXT_PUBLIC_API_MOCKING"
+  value                  = "disabled"
+  custom_environment_ids = [vercel_custom_environment.plan_dev.id]
+  comment                = "dev 환경은 MSW mock 대신 실 staging BE 호출"
+}
