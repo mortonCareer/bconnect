@@ -2,7 +2,7 @@
 
 - **Status**: Accepted
 - **Date**: 2026-06-01
-- **Deciders**: @fine-pine (CEO, DNS 관리), @manamana32321 (CTO)
+- **Deciders**: @fine-pine, @manamana32321
 - **Related**: [#438](https://github.com/mortonCareer/bconnect/issues/438) (구현), [#437](https://github.com/mortonCareer/bconnect/issues/437) (dev auto-deploy), [#352](https://github.com/mortonCareer/bconnect/issues/352), [ADR-0006](0006-dev-as-staging.md), [ADR-0009](0009-be-db-hosting-railway-staging.md), [ADR-0010](0010-dev-branch-staging-be.md)
 
 ## Context
@@ -56,10 +56,10 @@ production 도메인을 손대지 않는 연속성과, 환경이 apex 앞에 오
 - **나쁜 결과**:
   - `plan.dev.bconnect.to`·`api.dev.bconnect.to` 는 **2-레벨 서브도메인** → BE CORS 의 `https://*.bconnect.to` 패턴(1-레벨)이 매칭 못 할 수 있어 **`https://*.dev.bconnect.to` 추가 필요**(BE, 후속). TLS 는 Vercel/Railway 가 자동 발급하므로 영향 없음.
   - career 의 apex 특수성으로 `{service}` 생략이 패턴의 예외 — 신규 합류자에게 본 ADR 로 설명.
-- **중립적 결과**: **DNS 는 CEO 수동 관리(IaC 불가)**. TF 는 Vercel `vercel_project_domain`(custom_environment_id) + Railway `railway_custom_domain`(environment_id=dev) 까지만 선언하고, CNAME 등록은 CEO 가 도메인 관리자에서 수동 수행. 안정 도메인이라도 "그 환경의 최신 배포"에 alias 되므로, dev push 자동배포([#437](https://github.com/mortonCareer/bconnect/issues/437))가 동작해야 도메인이 최신을 가리킨다.
+- **중립적 결과**: **DNS 는 가비아(Gabia)에서 수동 관리** — 가비아는 Terraform/CLI 를 지원하지 않아 DNS 레코드는 IaC 불가. TF 는 Vercel `vercel_project_domain`(custom_environment_id) + Railway `railway_custom_domain`(environment_id=dev) 까지 선언하고, 그 후 노출되는 CNAME 타겟을 가비아 콘솔에서 수동 등록한다. 안정 도메인이라도 "그 환경의 최신 배포"에 alias 되므로, dev push 자동배포([#437](https://github.com/mortonCareer/bconnect/issues/437))가 동작해야 도메인이 최신을 가리킨다.
 
 ## Notes
 
 - 구현·체크리스트: [#438](https://github.com/mortonCareer/bconnect/issues/438)
 - CORS `*.dev.bconnect.to` 추가는 BE(CEO) 후속
-- DNS 수동 단계: Vercel/Railway custom domain apply 후 노출되는 CNAME 타겟을 CEO 가 등록
+- DNS 수동 단계: Vercel/Railway custom domain apply 후 노출되는 CNAME 타겟을 가비아 콘솔에서 등록
