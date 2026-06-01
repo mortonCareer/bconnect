@@ -28,7 +28,7 @@ Morton 이 사용하는 `terraform-community-providers/terraform-provider-railwa
 
 ADR-0009 의 결정대로 **같은 Railway 프로젝트 내 별도 staging environment** 로 구성. Railway 상 environment 이름은 **`dev`** ([ADR-0010](../../explanation/adr/0010-dev-branch-staging-be.md) 의 `dev` 브랜치 추적과 일치). 환경별 브랜치 분기는 **1회성 Railway GUI 설정 + 주석 문서화** (postgres volume 과 동일 패턴).
 
-> **구현 시 보강 (2026-06-01)**: community provider v0.6.2 에는 **data source 가 없고**, `railway_environment` 리소스로 빈 환경을 만들어도 **prod 서비스(api/postgres)를 fork 하지 않는다**. 따라서 환경 생성은 **Railway GUI 에서 prod 복제** → `terraform import` 로 state 흡수하는 경로로 확정. 복제가 모든 변수·TCP proxy·volume 을 함께 가져오므로, 변수는 **완전 SSOT** 로 전부 import 한다(`infra/railway/scripts/import-dev.sh`).
+> **구현 시 보강 (2026-06-01)**: community provider v0.6.2 에는 **data source 가 없고**, `railway_environment` 리소스로 빈 환경을 만들어도 **prod 서비스(api/postgres)를 fork 하지 않는다**. 따라서 환경 생성은 **Railway GUI 에서 prod 복제** → `terraform import` 로 state 흡수하는 경로로 확정. 복제가 모든 변수·TCP proxy·volume 을 함께 가져오므로, 변수는 **완전 SSOT** 로 전부 import 한다 (1회성 bootstrap).
 
 ### 거부된 대안
 
