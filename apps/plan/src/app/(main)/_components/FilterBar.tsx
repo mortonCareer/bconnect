@@ -129,8 +129,8 @@ function DropdownSelect({
         className={cn(
           'flex h-[40px] w-[95px] items-center justify-center gap-[10px] rounded-[8px] border bg-white px-[10px]',
           M14,
-          value ? 'text-bconnect-gray-900' : 'text-bconnect-gray-500',
-          open ? 'border-bconnect-primary' : 'border-bconnect-gray-300',
+          value ? 'text-gray-900' : 'text-gray-500',
+          open ? 'border-primary' : 'border-gray-300',
           disabled && 'cursor-not-allowed opacity-40'
         )}
       >
@@ -142,7 +142,7 @@ function DropdownSelect({
       {open && (
         <ul
           role="listbox"
-          className="absolute left-0 top-[calc(100%+6px)] z-20 max-h-[240px] w-max min-w-full overflow-y-auto rounded-[8px] border border-bconnect-gray-300 bg-white py-[4px] shadow-[0_6px_20px_rgba(0,0,0,0.1)]"
+          className="absolute left-0 top-[calc(100%+6px)] z-20 max-h-[240px] w-max min-w-full overflow-y-auto rounded-[8px] border border-gray-300 bg-white py-[4px] shadow-[0_6px_20px_rgba(0,0,0,0.1)]"
         >
           {/* 전체 = 필터 해제 */}
           <li>
@@ -152,9 +152,9 @@ function DropdownSelect({
               aria-selected={!value}
               onClick={() => handleSelect('')}
               className={cn(
-                'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-bconnect-gray-100',
+                'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-gray-100',
                 M14,
-                value ? 'text-bconnect-gray-700' : 'text-bconnect-primary'
+                value ? 'text-gray-700' : 'text-primary'
               )}
             >
               전체
@@ -171,9 +171,9 @@ function DropdownSelect({
                   aria-selected={isSelected}
                   onClick={() => handleSelect(opt.value)}
                   className={cn(
-                    'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-bconnect-gray-100',
+                    'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-gray-100',
                     M14,
-                    isSelected ? 'text-bconnect-primary' : 'text-bconnect-gray-700'
+                    isSelected ? 'text-primary' : 'text-gray-700'
                   )}
                 >
                   {opt.label}
@@ -235,8 +235,8 @@ function MultiDropdownSelect<T extends string>({
         className={cn(
           'flex h-[40px] w-[95px] items-center justify-center gap-[10px] rounded-[8px] border bg-white px-[10px]',
           M14,
-          values.length > 0 ? 'text-bconnect-gray-900' : 'text-bconnect-gray-500',
-          open ? 'border-bconnect-primary' : 'border-bconnect-gray-300'
+          values.length > 0 ? 'text-gray-900' : 'text-gray-500',
+          open ? 'border-primary' : 'border-gray-300'
         )}
       >
         <span className="truncate">{label}</span>
@@ -248,7 +248,7 @@ function MultiDropdownSelect<T extends string>({
         <ul
           role="listbox"
           aria-multiselectable
-          className="absolute left-0 top-[calc(100%+6px)] z-20 max-h-[240px] w-max min-w-full overflow-y-auto rounded-[8px] border border-bconnect-gray-300 bg-white py-[4px] shadow-[0_6px_20px_rgba(0,0,0,0.1)]"
+          className="absolute left-0 top-[calc(100%+6px)] z-20 max-h-[240px] w-max min-w-full overflow-y-auto rounded-[8px] border border-gray-300 bg-white py-[4px] shadow-[0_6px_20px_rgba(0,0,0,0.1)]"
         >
           {/* 전체 = 필터 해제 */}
           <li>
@@ -258,9 +258,9 @@ function MultiDropdownSelect<T extends string>({
               aria-selected={values.length === 0}
               onClick={onClear}
               className={cn(
-                'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-bconnect-gray-100',
+                'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-gray-100',
                 M14,
-                values.length === 0 ? 'text-bconnect-primary' : 'text-bconnect-gray-700'
+                values.length === 0 ? 'text-primary' : 'text-gray-700'
               )}
             >
               전체
@@ -277,9 +277,9 @@ function MultiDropdownSelect<T extends string>({
                   aria-selected={isSelected}
                   onClick={() => onToggle(opt.value)}
                   className={cn(
-                    'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-bconnect-gray-100',
+                    'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-gray-100',
                     M14,
-                    isSelected ? 'text-bconnect-primary' : 'text-bconnect-gray-700'
+                    isSelected ? 'text-primary' : 'text-gray-700'
                   )}
                 >
                   {opt.label}
@@ -300,7 +300,7 @@ function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }
     <button
       type="button"
       onClick={onRemove}
-      className="inline-flex items-center gap-1 rounded-full bg-bconnect-primary-sub px-3 py-1 text-m-14 text-bconnect-primary transition-opacity hover:opacity-80"
+      className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-m-14 text-primary transition-opacity hover:opacity-80"
     >
       {label}
       {/* TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지) */}
@@ -317,7 +317,7 @@ function RefreshButton({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       aria-label="필터 초기화"
-      className="flex h-[27px] w-[27px] items-center justify-center rounded-full hover:bg-bconnect-gray-100"
+      className="flex h-[27px] w-[27px] items-center justify-center rounded-full hover:bg-gray-100"
     >
       {/* Figma node 1470:6746 (RefreshIcon) — 단일 fill path, gray-500 */}
       {/* TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지) */}
@@ -326,7 +326,7 @@ function RefreshButton({ onClick }: { onClick: () => void }) {
         height="18"
         viewBox="0 0 17.9439 17.9439"
         fill="none"
-        className="text-bconnect-gray-500"
+        className="text-gray-500"
       >
         <path
           fillRule="evenodd"
