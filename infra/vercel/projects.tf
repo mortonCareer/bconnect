@@ -27,7 +27,7 @@ resource "vercel_project" "morton-career" {
   # shallow clone 에 없으면(force-push 로 orphan 된 SHA) 빌드 강제
   # dev 브랜치(=dev custom env)는 항상 빌드 — staging 환경이 env var/config 변경을
   # 충실히 반영해야 하므로 git-diff 스킵을 우회. prod/preview/feature 는 기존 최적화 유지.
-  ignore_command = "[ \"$${VERCEL_GIT_COMMIT_REF}\" = \"dev\" ] && exit 1; COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ -z \"$COMPARE\" ] && exit 1; git cat-file -e \"$COMPARE\" 2>/dev/null || exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/career packages"
+  ignore_command = "COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ \"$${VERCEL_GIT_COMMIT_REF}\" = \"dev\" ] && exit 1; [ -z \"$COMPARE\" ] && exit 1; git cat-file -e \"$COMPARE\" 2>/dev/null || exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/career packages"
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
@@ -251,7 +251,7 @@ resource "vercel_project" "morton-plan" {
   # shallow clone 에 없으면(force-push 로 orphan 된 SHA) 빌드 강제
   # dev 브랜치(=dev custom env)는 항상 빌드 — staging 환경이 env var/config 변경을
   # 충실히 반영해야 하므로 git-diff 스킵을 우회. prod/preview/feature 는 기존 최적화 유지.
-  ignore_command = "[ \"$${VERCEL_GIT_COMMIT_REF}\" = \"dev\" ] && exit 1; COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ -z \"$COMPARE\" ] && exit 1; git cat-file -e \"$COMPARE\" 2>/dev/null || exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/plan packages"
+  ignore_command = "COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ \"$${VERCEL_GIT_COMMIT_REF}\" = \"dev\" ] && exit 1; [ -z \"$COMPARE\" ] && exit 1; git cat-file -e \"$COMPARE\" 2>/dev/null || exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/plan packages"
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
