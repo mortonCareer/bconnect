@@ -1,5 +1,6 @@
 resource "railway_project" "morton" {
-  name = var.project_name
+  name           = var.project_name
+  has_pr_deploys = false
 }
 
 resource "railway_environment" "dev" {
