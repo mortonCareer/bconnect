@@ -10,14 +10,15 @@ import { SidebarFooter } from './SidebarFooter'
 
 // TODO(신규 BE 이슈 필요 — notification 도메인): 엔드포인트 추가 시
 //   `const { data } = useGetMyNotifications(); const NOTIFICATION_COUNT = data?.unreadCount ?? 0`
-//   형태로 교체. count=0 이면 Badge 자동 숨김.
+//   형태로 교체. count=0 이면 CountBadge 자동 숨김.
 const NOTIFICATION_COUNT = 4
+const MAX_BADGE_COUNT = 99
 
-function Badge({ count }: { count: number }) {
+function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null
   return (
     <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-[8px] bg-red-500 px-1 text-sb-12 text-white">
-      {count > 99 ? '99+' : count}
+      {count > MAX_BADGE_COUNT ? `${MAX_BADGE_COUNT}+` : count}
     </span>
   )
 }
@@ -37,7 +38,7 @@ function NavItem({ label, count, onClick }: NavItemProps) {
       className="flex h-[44px] w-full items-center justify-between rounded-[8px] px-3 text-r-14 text-gray-900 hover:bg-gray-100"
     >
       <span>{label}</span>
-      <Badge count={count} />
+      <CountBadge count={count} />
     </button>
   )
 }
@@ -69,6 +70,7 @@ function ProfileSection() {
   return (
     <div className="flex items-center gap-3">
       <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-gray-100">
+        {/* TODO: unoptimized 제거 */}
         <Image src={avatarUrl} alt="" fill className="object-cover" unoptimized />
       </div>
       <div className="flex min-w-0 flex-col gap-0.5">
