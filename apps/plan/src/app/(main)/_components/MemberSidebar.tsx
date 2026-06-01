@@ -34,7 +34,7 @@ function NavItem({ label, count, onClick }: NavItemProps) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[44px] w-full items-center justify-between rounded-[8px] px-3 text-r-14 text-bconnect-gray-900 hover:bg-bconnect-gray-100"
+      className="flex h-[44px] w-full items-center justify-between rounded-[8px] px-3 text-r-14 text-gray-900 hover:bg-gray-100"
     >
       <span>{label}</span>
       <Badge count={count} />
@@ -48,10 +48,10 @@ function ProfileSection() {
   if (isLoading) {
     return (
       <div className="flex items-center gap-3">
-        <div className="h-11 w-11 shrink-0 animate-pulse rounded-full bg-bconnect-gray-100" />
+        <div className="h-11 w-11 shrink-0 animate-pulse rounded-full bg-gray-100" />
         <div className="flex flex-col gap-1.5">
-          <div className="h-4 w-20 animate-pulse rounded bg-bconnect-gray-100" />
-          <div className="h-3 w-16 animate-pulse rounded bg-bconnect-gray-100" />
+          <div className="h-4 w-20 animate-pulse rounded bg-gray-100" />
+          <div className="h-3 w-16 animate-pulse rounded bg-gray-100" />
         </div>
       </div>
     )
@@ -68,14 +68,14 @@ function ProfileSection() {
 
   return (
     <div className="flex items-center gap-3">
-      <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-bconnect-gray-100">
+      <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-gray-100">
         <Image src={avatarUrl} alt="" fill className="object-cover" unoptimized />
       </div>
       <div className="flex min-w-0 flex-col gap-0.5">
-        <p className="truncate text-sb-16 text-bconnect-gray-900">{displayName}</p>
+        <p className="truncate text-sb-16 text-gray-900">{displayName}</p>
         {/* TODO(신규 BE 이슈 필요 — Corporation 도메인): Member schema 에 업체명 필드 추가 시
             `{member?.corporation?.name ?? ''}` 등으로 교체. */}
-        <p className="truncate text-r-12 text-bconnect-gray-500">OO디자인</p>
+        <p className="truncate text-r-12 text-gray-500">OO디자인</p>
       </div>
     </div>
   )
@@ -89,7 +89,7 @@ export function MemberSidebar() {
     <div className="flex h-full flex-col justify-between">
       <div className="flex flex-col gap-5 px-5 py-7">
         <ProfileSection />
-        <div className="h-px bg-bconnect-gray-300" />
+        <div className="h-px bg-gray-300" />
         <div className="flex flex-col gap-0.5">
           <NavItem
             label="알림"

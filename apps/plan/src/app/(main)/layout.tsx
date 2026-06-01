@@ -17,7 +17,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="flex h-screen overflow-hidden bg-white">
-      <aside className="flex h-full w-[270px] shrink-0 flex-col border-r border-bconnect-gray-300">
+      <aside className="flex h-full w-[270px] shrink-0 flex-col border-r border-gray-300">
         {isAuthenticated ? (
           <MemberSidebar />
         ) : (
