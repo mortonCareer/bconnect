@@ -5,6 +5,8 @@ resource "vercel_project" "morton-career" {
   name      = "${var.project_name}-career"
   framework = "nextjs"
 
+  automatically_expose_system_environment_variables = true
+
   git_repository = {
     type              = "github"
     repo              = var.github_repo
@@ -209,6 +211,8 @@ resource "vercel_project_domain" "career_www" {
 resource "vercel_project" "morton-plan" {
   name      = "${var.project_name}-plan"
   framework = "nextjs"
+
+  automatically_expose_system_environment_variables = true
 
   git_repository = {
     type              = "github"
