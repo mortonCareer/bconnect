@@ -23,8 +23,9 @@ resource "vercel_project" "morton-career" {
   root_directory = "apps/career"
 
   # 모노레포: apps/career 또는 packages 변경 시에만 빌드
-  # VERCEL_GIT_PREVIOUS_SHA 미설정 시 main 분기점 기준, 둘 다 실패하면 빌드 강제
-  ignore_command = "COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ -z \"$COMPARE\" ] && exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/career packages"
+  # VERCEL_GIT_PREVIOUS_SHA 미설정 시 main 분기점 기준, COMPARE 가 비었거나(둘 다 실패)
+  # shallow clone 에 없으면(force-push 로 orphan 된 SHA) 빌드 강제
+  ignore_command = "COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ -z \"$COMPARE\" ] && exit 1; git cat-file -e \"$COMPARE\" 2>/dev/null || exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/career packages"
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
@@ -230,8 +231,9 @@ resource "vercel_project" "morton-plan" {
   root_directory = "apps/plan"
 
   # 모노레포: apps/plan 또는 packages 변경 시에만 빌드
-  # VERCEL_GIT_PREVIOUS_SHA 미설정 시 main 분기점 기준, 둘 다 실패하면 빌드 강제
-  ignore_command = "COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ -z \"$COMPARE\" ] && exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/plan packages"
+  # VERCEL_GIT_PREVIOUS_SHA 미설정 시 main 분기점 기준, COMPARE 가 비었거나(둘 다 실패)
+  # shallow clone 에 없으면(force-push 로 orphan 된 SHA) 빌드 강제
+  ignore_command = "COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ -z \"$COMPARE\" ] && exit 1; git cat-file -e \"$COMPARE\" 2>/dev/null || exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/plan packages"
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
