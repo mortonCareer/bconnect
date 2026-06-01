@@ -26,7 +26,9 @@ Morton 이 사용하는 `terraform-community-providers/terraform-provider-railwa
 
 ## 2. 결정 — Approach A-revised
 
-ADR-0009 의 결정대로 **같은 Railway 프로젝트 내 별도 `staging` environment** 로 구성. 환경별 브랜치 분기는 **1회성 Railway GUI 설정 + 주석 문서화** (postgres volume 과 동일 패턴).
+ADR-0009 의 결정대로 **같은 Railway 프로젝트 내 별도 staging environment** 로 구성. Railway 상 environment 이름은 **`dev`** ([ADR-0010](../../explanation/adr/0010-dev-branch-staging-be.md) 의 `dev` 브랜치 추적과 일치). 환경별 브랜치 분기는 **1회성 Railway GUI 설정 + 주석 문서화** (postgres volume 과 동일 패턴).
+
+> **구현 시 보강 (2026-06-01)**: community provider v0.6.2 에는 **data source 가 없고**, `railway_environment` 리소스로 빈 환경을 만들어도 **prod 서비스(api/postgres)를 fork 하지 않는다**. 따라서 환경 생성은 **Railway GUI 에서 prod 복제** → `terraform import` 로 state 흡수하는 경로로 확정. 복제가 모든 변수·TCP proxy·volume 을 함께 가져오므로, 변수는 **완전 SSOT** 로 전부 import 한다(`infra/railway/scripts/import-dev.sh`).
 
 ### 거부된 대안
 
@@ -59,12 +61,12 @@ ADR-0009 의 결정대로 **같은 Railway 프로젝트 내 별도 `staging` env
 | 항목                        | staging                                     | 근거                                               |
 | --------------------------- | ------------------------------------------- | -------------------------------------------------- |
 | Railway 프로젝트            | 공유 (`morton`)                             | ADR-0009                                           |
-| Railway environment         | **별도** (`staging`)                        | ADR-0009                                           |
+| Railway environment         | **별도** (이름 `dev`)                       | ADR-0009 + ADR-0010                                |
 | Postgres DB (인스턴스)      | **별도** (staging env 의 postgres 인스턴스) | 데이터 격리                                        |
 | git 브랜치                  | **`dev`** (Railway GUI 1회 수동)            | provider 제약 + ADR-0010                           |
 | `db_password`, `jwt_secret` | **별도** (staging 전용 시크릿)              | 보안                                               |
 | S3 버킷                     | **별도** (staging 전용 버킷)                | 사용자 결정 — 테스트 파일이 prod 에 안 섞임        |
-| Spring 프로파일             | **`staging`** (env-scoped 변수)             | 사용자 결정 — staging 전용 BE 설정 여지            |
+| Spring 프로파일             | **`prod` 재사용** (전용 프로파일 BE 후속)   | §6 정정 — dev 프로파일 부재 시 datasource 미설정   |
 | Sentry DSN                  | 공유                                        | 같은 프로젝트, `SENTRY_ENVIRONMENT=staging` 태그   |
 | AWS IAM 자격증명            | 공유                                        | 같은 유저가 두 버킷 접근                           |
 | Solapi (SMS)                | **공유**                                    | 사용자 결정 — staging OTP 로그인 실 동작 ⚠️ 실 SMS |
@@ -76,7 +78,10 @@ ADR-0009 의 결정("같은 프로젝트 별도 environment")이 그대로 유�
 
 ## 6. 후속 의존성 (#351 범위 밖)
 
-- **BE `application-staging.yml`** — `SPRING_PROFILES_ACTIVE=staging` 이 가리킬 Spring 프로파일. 없으면 Spring Boot 가 fallback (부팅은 되나 staging 전용 설정 부재). CEO 작업 — [#353](https://github.com/mortonCareer/bconnect/issues/353) 에 묶거나 신규 이슈. **#351 자체는 차단되지 않음**.
+- **BE `application-staging.yml`** — `SPRING_PROFILES_ACTIVE` 전용 프로파일. CEO 작업 — [#353](https://github.com/mortonCareer/bconnect/issues/353) 에 묶거나 신규 이슈.
+
+  > **구현 시 정정 (2026-06-01)**: 초안의 "프로파일 없으면 fallback 가능, 부팅됨" 은 **부정확**. datasource(url/user/pw) 와이어링이 `application-prod.yaml` 에만 있고 base `application.yaml` 엔 없어, `dev`/`staging` 프로파일 부재 시 base fallback → **datasource 미설정 → 부팅 실패**. 따라서 dev 환경은 **`SPRING_PROFILES_ACTIVE=prod` (prod 프로파일 재사용)** 으로 부팅하고, 텔레메트리만 `SENTRY_ENVIRONMENT=dev` 로 구분. 전용 `application-dev.yaml` 도입은 BE 후속에서 진행하며 **#351 은 차단되지 않음**.
+
 - [#352](https://github.com/mortonCareer/bconnect/issues/352) — Vercel dev custom environment 에 staging BE URL 주입.
 - [#353](https://github.com/mortonCareer/bconnect/issues/353) — staging BE CORS 에 dev 브랜치 도메인 허용.
 

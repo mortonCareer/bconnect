@@ -51,6 +51,12 @@ variable "db_name" {
   default     = "morton"
 }
 
+variable "dev_db_password" {
+  description = "PostgreSQL password for dev(staging) environment (prod 와 분리된 시크릿)"
+  type        = string
+  sensitive   = true
+}
+
 # =============================================================================
 # Spring
 # =============================================================================
@@ -63,6 +69,12 @@ variable "spring_profile" {
 
 variable "jwt_secret" {
   description = "JWT signing secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "dev_jwt_secret" {
+  description = "JWT signing secret for dev(staging) environment (prod 와 분리된 시크릿)"
   type        = string
   sensitive   = true
 }
@@ -91,6 +103,11 @@ variable "aws_region" {
 
 variable "s3_bucket_name" {
   description = "S3 bucket name for file storage"
+  type        = string
+}
+
+variable "dev_s3_bucket_name" {
+  description = "S3 bucket name for dev(staging) environment file storage"
   type        = string
 }
 
