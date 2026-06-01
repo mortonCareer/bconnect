@@ -27,7 +27,7 @@ const REGION_OPTIONS = [
   '제주',
 ]
 
-// Figma node 1503:12064 — rounded-full pill, no border, secondary bg + primary text, M14, x icon
+/** Figma node 1503:12064 — rounded-full pill, no border, secondary bg + primary text, M14, x icon */
 function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
     <button
