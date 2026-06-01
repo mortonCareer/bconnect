@@ -44,7 +44,7 @@ resource "railway_variable" "dev_postgres" {
 resource "railway_service_domain" "api_dev" {
   service_id     = railway_service.api.id
   environment_id = railway_environment.dev.id
-  subdomain      = "${railway_service.api.name}-${railway_environment.dev.name}"
+  subdomain      = "${var.project_name}-${railway_service.api.name}-${railway_environment.dev.name}"
 }
 
 resource "railway_tcp_proxy" "postgres_dev" {
