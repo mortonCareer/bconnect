@@ -25,7 +25,9 @@ resource "vercel_project" "morton-career" {
   # 모노레포: apps/career 또는 packages 변경 시에만 빌드
   # VERCEL_GIT_PREVIOUS_SHA 미설정 시 main 분기점 기준, COMPARE 가 비었거나(둘 다 실패)
   # shallow clone 에 없으면(force-push 로 orphan 된 SHA) 빌드 강제
-  ignore_command = "COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ -z \"$COMPARE\" ] && exit 1; git cat-file -e \"$COMPARE\" 2>/dev/null || exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/career packages"
+  # dev 브랜치(=dev custom env)는 항상 빌드 — staging 환경이 env var/config 변경을
+  # 충실히 반영해야 하므로 git-diff 스킵을 우회. prod/preview/feature 는 기존 최적화 유지.
+  ignore_command = "COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ \"$VERCEL_GIT_COMMIT_REF\" = dev ] && exit 1; git cat-file -e \"$COMPARE\" 2>/dev/null || exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/career packages"
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
@@ -42,47 +44,52 @@ resource "vercel_project_environment_variable" "career_api_url" {
 }
 
 resource "vercel_project_environment_variable" "career_aws_access_key_id" {
-  project_id = vercel_project.morton-career.id
-  key        = "AWS_ACCESS_KEY_ID"
-  value      = var.aws_access_key_id
-  target     = ["production", "preview"]
-  sensitive  = true
-  comment    = "AWS IAM - S3/Lambda 접근용"
+  project_id             = vercel_project.morton-career.id
+  key                    = "AWS_ACCESS_KEY_ID"
+  value                  = var.aws_access_key_id
+  target                 = ["production", "preview"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  sensitive              = true
+  comment                = "AWS IAM - S3/Lambda 접근용"
 }
 
 resource "vercel_project_environment_variable" "career_aws_secret_access_key" {
-  project_id = vercel_project.morton-career.id
-  key        = "AWS_SECRET_ACCESS_KEY"
-  value      = var.aws_secret_access_key
-  target     = ["production", "preview"]
-  sensitive  = true
-  comment    = "AWS IAM - S3/Lambda 접근용"
+  project_id             = vercel_project.morton-career.id
+  key                    = "AWS_SECRET_ACCESS_KEY"
+  value                  = var.aws_secret_access_key
+  target                 = ["production", "preview"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  sensitive              = true
+  comment                = "AWS IAM - S3/Lambda 접근용"
 }
 
 resource "vercel_project_environment_variable" "career_aws_region" {
-  project_id = vercel_project.morton-career.id
-  key        = "AWS_REGION"
-  value      = var.aws_region
-  target     = ["production", "preview"]
-  comment    = "AWS 리전 (ap-northeast-2)"
+  project_id             = vercel_project.morton-career.id
+  key                    = "AWS_REGION"
+  value                  = var.aws_region
+  target                 = ["production", "preview"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  comment                = "AWS 리전 (ap-northeast-2)"
 }
 
 resource "vercel_project_environment_variable" "career_nts_api_service_key" {
-  project_id = vercel_project.morton-career.id
-  key        = "NTS_API_SERVICE_KEY"
-  value      = var.nts_api_service_key
-  target     = ["production", "preview"]
-  sensitive  = true
-  comment    = "국세청 사업자등록정보 API (data.go.kr) - 원클릭 조회"
+  project_id             = vercel_project.morton-career.id
+  key                    = "NTS_API_SERVICE_KEY"
+  value                  = var.nts_api_service_key
+  target                 = ["production", "preview"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  sensitive              = true
+  comment                = "국세청 사업자등록정보 API (data.go.kr) - 원클릭 조회"
 }
 
 resource "vercel_project_environment_variable" "career_kcomwel_api_service_key" {
-  project_id = vercel_project.morton-career.id
-  key        = "KCOMWEL_API_SERVICE_KEY"
-  value      = var.kcomwel_api_service_key
-  target     = ["production", "preview"]
-  sensitive  = true
-  comment    = "근로복지공단 고용/산재보험 API (data.go.kr) - 원클릭 조회"
+  project_id             = vercel_project.morton-career.id
+  key                    = "KCOMWEL_API_SERVICE_KEY"
+  value                  = var.kcomwel_api_service_key
+  target                 = ["production", "preview"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  sensitive              = true
+  comment                = "근로복지공단 고용/산재보험 API (data.go.kr) - 원클릭 조회"
 }
 
 # Vercel Cron 인증용 시크릿 (자동 생성)
@@ -102,13 +109,14 @@ resource "vercel_project_environment_variable" "career_cron_secret" {
 
 # Sentry 소스맵 업로드 (DSN·org·project는 코드에 하드코딩)
 resource "vercel_project_environment_variable" "career_sentry_auth_token" {
-  count      = var.sentry_auth_token != "" ? 1 : 0
-  project_id = vercel_project.morton-career.id
-  key        = "SENTRY_AUTH_TOKEN"
-  value      = var.sentry_auth_token
-  target     = ["production", "preview"]
-  sensitive  = true
-  comment    = "Sentry auth token - 소스맵 업로드"
+  count                  = var.sentry_auth_token != "" ? 1 : 0
+  project_id             = vercel_project.morton-career.id
+  key                    = "SENTRY_AUTH_TOKEN"
+  value                  = var.sentry_auth_token
+  target                 = ["production", "preview"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  sensitive              = true
+  comment                = "Sentry auth token - 소스맵 업로드"
 }
 
 resource "vercel_project_environment_variable" "career_slack_webhook_url" {
@@ -122,12 +130,13 @@ resource "vercel_project_environment_variable" "career_slack_webhook_url" {
 }
 
 resource "vercel_project_environment_variable" "career_database_url" {
-  project_id = vercel_project.morton-career.id
-  key        = "DATABASE_URL"
-  value      = var.database_url
-  target     = ["production", "preview"]
-  sensitive  = true
-  comment    = "Railway Postgres - KISCON 건설업체정보 조회"
+  project_id             = vercel_project.morton-career.id
+  key                    = "DATABASE_URL"
+  value                  = var.database_url
+  target                 = ["production", "preview"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  sensitive              = true
+  comment                = "Railway Postgres - KISCON 건설업체정보 조회"
 }
 
 # ---------------------------------------------------------------------------
@@ -136,60 +145,67 @@ resource "vercel_project_environment_variable" "career_database_url" {
 # NEXT_PUBLIC_* 는 클라이언트에 노출됨 (FCM 웹 SDK config는 공개 정보)
 # VAPID_KEY도 공개 키라 NEXT_PUBLIC_ 접두사 사용 가능
 resource "vercel_project_environment_variable" "career_firebase_api_key" {
-  project_id = vercel_project.morton-career.id
-  key        = "NEXT_PUBLIC_FIREBASE_API_KEY"
-  value      = var.firebase_web_configs["career"].api_key
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web SDK - apiKey"
+  project_id             = vercel_project.morton-career.id
+  key                    = "NEXT_PUBLIC_FIREBASE_API_KEY"
+  value                  = var.firebase_web_configs["career"].api_key
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  comment                = "Firebase Web SDK - apiKey"
 }
 
 resource "vercel_project_environment_variable" "career_firebase_auth_domain" {
-  project_id = vercel_project.morton-career.id
-  key        = "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"
-  value      = var.firebase_web_configs["career"].auth_domain
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web SDK - authDomain"
+  project_id             = vercel_project.morton-career.id
+  key                    = "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"
+  value                  = var.firebase_web_configs["career"].auth_domain
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  comment                = "Firebase Web SDK - authDomain"
 }
 
 resource "vercel_project_environment_variable" "career_firebase_project_id" {
-  project_id = vercel_project.morton-career.id
-  key        = "NEXT_PUBLIC_FIREBASE_PROJECT_ID"
-  value      = var.firebase_web_configs["career"].project_id
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web SDK - projectId"
+  project_id             = vercel_project.morton-career.id
+  key                    = "NEXT_PUBLIC_FIREBASE_PROJECT_ID"
+  value                  = var.firebase_web_configs["career"].project_id
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  comment                = "Firebase Web SDK - projectId"
 }
 
 resource "vercel_project_environment_variable" "career_firebase_storage_bucket" {
-  project_id = vercel_project.morton-career.id
-  key        = "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"
-  value      = var.firebase_web_configs["career"].storage_bucket
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web SDK - storageBucket"
+  project_id             = vercel_project.morton-career.id
+  key                    = "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"
+  value                  = var.firebase_web_configs["career"].storage_bucket
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  comment                = "Firebase Web SDK - storageBucket"
 }
 
 resource "vercel_project_environment_variable" "career_firebase_messaging_sender_id" {
-  project_id = vercel_project.morton-career.id
-  key        = "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"
-  value      = var.firebase_web_configs["career"].messaging_sender_id
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web SDK - messagingSenderId (FCM)"
+  project_id             = vercel_project.morton-career.id
+  key                    = "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"
+  value                  = var.firebase_web_configs["career"].messaging_sender_id
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  comment                = "Firebase Web SDK - messagingSenderId (FCM)"
 }
 
 resource "vercel_project_environment_variable" "career_firebase_app_id" {
-  project_id = vercel_project.morton-career.id
-  key        = "NEXT_PUBLIC_FIREBASE_APP_ID"
-  value      = var.firebase_web_configs["career"].app_id
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web SDK - appId"
+  project_id             = vercel_project.morton-career.id
+  key                    = "NEXT_PUBLIC_FIREBASE_APP_ID"
+  value                  = var.firebase_web_configs["career"].app_id
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  comment                = "Firebase Web SDK - appId"
 }
 
 resource "vercel_project_environment_variable" "career_firebase_vapid_key" {
-  count      = var.firebase_vapid_key != "" ? 1 : 0
-  project_id = vercel_project.morton-career.id
-  key        = "NEXT_PUBLIC_FIREBASE_VAPID_KEY"
-  value      = var.firebase_vapid_key
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web Push VAPID public key (브라우저 구독 인증)"
+  count                  = var.firebase_vapid_key != "" ? 1 : 0
+  project_id             = vercel_project.morton-career.id
+  key                    = "NEXT_PUBLIC_FIREBASE_VAPID_KEY"
+  value                  = var.firebase_vapid_key
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.career_dev.id]
+  comment                = "Firebase Web Push VAPID public key (브라우저 구독 인증)"
 }
 
 # ===========================================================================
@@ -233,7 +249,9 @@ resource "vercel_project" "morton-plan" {
   # 모노레포: apps/plan 또는 packages 변경 시에만 빌드
   # VERCEL_GIT_PREVIOUS_SHA 미설정 시 main 분기점 기준, COMPARE 가 비었거나(둘 다 실패)
   # shallow clone 에 없으면(force-push 로 orphan 된 SHA) 빌드 강제
-  ignore_command = "COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ -z \"$COMPARE\" ] && exit 1; git cat-file -e \"$COMPARE\" 2>/dev/null || exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/plan packages"
+  # dev 브랜치(=dev custom env)는 항상 빌드 — staging 환경이 env var/config 변경을
+  # 충실히 반영해야 하므로 git-diff 스킵을 우회. prod/preview/feature 는 기존 최적화 유지.
+  ignore_command = "COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ \"$VERCEL_GIT_COMMIT_REF\" = dev ] && exit 1; git cat-file -e \"$COMPARE\" 2>/dev/null || exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/plan packages"
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
@@ -253,60 +271,67 @@ resource "vercel_project_environment_variable" "plan_api_url" {
 # Firebase Cloud Messaging (Web Push) — career와 공통 Firebase Web App 공유
 # ---------------------------------------------------------------------------
 resource "vercel_project_environment_variable" "plan_firebase_api_key" {
-  project_id = vercel_project.morton-plan.id
-  key        = "NEXT_PUBLIC_FIREBASE_API_KEY"
-  value      = var.firebase_web_configs["plan"].api_key
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web SDK - apiKey"
+  project_id             = vercel_project.morton-plan.id
+  key                    = "NEXT_PUBLIC_FIREBASE_API_KEY"
+  value                  = var.firebase_web_configs["plan"].api_key
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.plan_dev.id]
+  comment                = "Firebase Web SDK - apiKey"
 }
 
 resource "vercel_project_environment_variable" "plan_firebase_auth_domain" {
-  project_id = vercel_project.morton-plan.id
-  key        = "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"
-  value      = var.firebase_web_configs["plan"].auth_domain
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web SDK - authDomain"
+  project_id             = vercel_project.morton-plan.id
+  key                    = "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"
+  value                  = var.firebase_web_configs["plan"].auth_domain
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.plan_dev.id]
+  comment                = "Firebase Web SDK - authDomain"
 }
 
 resource "vercel_project_environment_variable" "plan_firebase_project_id" {
-  project_id = vercel_project.morton-plan.id
-  key        = "NEXT_PUBLIC_FIREBASE_PROJECT_ID"
-  value      = var.firebase_web_configs["plan"].project_id
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web SDK - projectId"
+  project_id             = vercel_project.morton-plan.id
+  key                    = "NEXT_PUBLIC_FIREBASE_PROJECT_ID"
+  value                  = var.firebase_web_configs["plan"].project_id
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.plan_dev.id]
+  comment                = "Firebase Web SDK - projectId"
 }
 
 resource "vercel_project_environment_variable" "plan_firebase_storage_bucket" {
-  project_id = vercel_project.morton-plan.id
-  key        = "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"
-  value      = var.firebase_web_configs["plan"].storage_bucket
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web SDK - storageBucket"
+  project_id             = vercel_project.morton-plan.id
+  key                    = "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"
+  value                  = var.firebase_web_configs["plan"].storage_bucket
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.plan_dev.id]
+  comment                = "Firebase Web SDK - storageBucket"
 }
 
 resource "vercel_project_environment_variable" "plan_firebase_messaging_sender_id" {
-  project_id = vercel_project.morton-plan.id
-  key        = "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"
-  value      = var.firebase_web_configs["plan"].messaging_sender_id
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web SDK - messagingSenderId (FCM)"
+  project_id             = vercel_project.morton-plan.id
+  key                    = "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"
+  value                  = var.firebase_web_configs["plan"].messaging_sender_id
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.plan_dev.id]
+  comment                = "Firebase Web SDK - messagingSenderId (FCM)"
 }
 
 resource "vercel_project_environment_variable" "plan_firebase_app_id" {
-  project_id = vercel_project.morton-plan.id
-  key        = "NEXT_PUBLIC_FIREBASE_APP_ID"
-  value      = var.firebase_web_configs["plan"].app_id
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web SDK - appId"
+  project_id             = vercel_project.morton-plan.id
+  key                    = "NEXT_PUBLIC_FIREBASE_APP_ID"
+  value                  = var.firebase_web_configs["plan"].app_id
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.plan_dev.id]
+  comment                = "Firebase Web SDK - appId"
 }
 
 resource "vercel_project_environment_variable" "plan_firebase_vapid_key" {
-  count      = var.firebase_vapid_key != "" ? 1 : 0
-  project_id = vercel_project.morton-plan.id
-  key        = "NEXT_PUBLIC_FIREBASE_VAPID_KEY"
-  value      = var.firebase_vapid_key
-  target     = ["production", "preview", "development"]
-  comment    = "Firebase Web Push VAPID public key (브라우저 구독 인증)"
+  count                  = var.firebase_vapid_key != "" ? 1 : 0
+  project_id             = vercel_project.morton-plan.id
+  key                    = "NEXT_PUBLIC_FIREBASE_VAPID_KEY"
+  value                  = var.firebase_vapid_key
+  target                 = ["production", "preview", "development"]
+  custom_environment_ids = [vercel_custom_environment.plan_dev.id]
+  comment                = "Firebase Web Push VAPID public key (브라우저 구독 인증)"
 }
 
 # ===========================================================================
