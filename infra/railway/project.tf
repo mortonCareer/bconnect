@@ -1,9 +1,5 @@
 resource "railway_project" "morton" {
   name = var.project_name
-
-  lifecycle {
-    ignore_changes = [has_pr_deploys]
-  }
 }
 
 resource "railway_environment" "dev" {
