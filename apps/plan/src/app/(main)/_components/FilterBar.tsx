@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { cn } from '@bconnect/ui'
+import { Select } from '@bconnect/ui'
+import { Trade } from '@bconnect/api-client'
 import { TRADE_LIST, TRADE_LABELS } from '@/lib/trade-labels'
 import { EXPERIENCE_OPTIONS, EXPERIENCE_LABELS } from '@/lib/experience'
 import { GRADE_OPTIONS } from '@/lib/grade'
+import type { Grade } from '@/lib/grade'
 import { useFilterParams } from '@/hooks/useFilterParams'
 import type { ExperienceLevel } from '@/lib/experience'
 
@@ -28,273 +29,7 @@ const REGION_OPTIONS = [
   '제주',
 ]
 
-interface DropdownOption {
-  value: string
-  label: string
-}
-
-// M14 타이포는 직접 값으로 우회 — cn()의 tailwind-merge가 커스텀 text-m-14를 text-{color}와
-// 같은 충돌 그룹으로 오판해 제거하기 때문 (TechnicianCard SkillTag와 동일 사유).
-const M14 = 'font-[Pretendard_Variable] text-[14px] font-medium leading-[1.6]'
-
-// TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지)
-function CheckMark() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0">
-      <path
-        d="M3.5 8.5L6.5 11.5L12.5 4.5"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-// Figma "더보기" 아이콘 (node 188:1118) — 16px 박스 안 inset[40% 20% 28.33% 20%] 배치.
-// 색은 currentColor 상속 — 트리거 텍스트 색(gray-500/gray-900)을 그대로 따른다.
-// TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지)
-function ChevronIcon({ open }: { open?: boolean }) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      className={cn('shrink-0 transition-transform', open && 'rotate-180')}
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        transform="translate(3.2 6.4)"
-        d="M0.144247 0.168567C0.345708 -0.0463238 0.683223 -0.0572037 0.898103 0.144247L4.8 3.80228L8.70187 0.144247C8.9168 -0.0572037 9.2543 -0.0463238 9.45579 0.168567C9.65718 0.383458 9.6463 0.720972 9.43147 0.922423L5.16477 4.92246C4.95962 5.11478 4.64039 5.11478 4.43523 4.92246L0.168567 0.922423C-0.0463238 0.720972 -0.0572037 0.383458 0.144247 0.168567Z"
-        fill="currentColor"
-      />
-    </svg>
-  )
-}
-
-// 네이티브 <select> 는 펼친 옵션 리스트를 스타일링할 수 없어 커스텀 드롭다운으로 구현.
-// 트리거는 Figma dropdown 컴포넌트(node 188:1129 접힘 / 1498:11472 선택됨)를 따른다:
-// - 항상 카테고리명(label) 표시
-// - 필터 미적용 = 접힘 → gray-500 / 필터 적용 = 선택됨 → gray-900
-function DropdownSelect({
-  label,
-  value,
-  onChange,
-  options,
-  disabled,
-}: {
-  label: string
-  value: string
-  onChange: (v: string) => void
-  options: DropdownOption[]
-  disabled?: boolean
-}) {
-  const [open, setOpen] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
-
-  // 바깥 클릭 / Escape 로 닫기
-  useEffect(() => {
-    if (!open) return
-    const handlePointer = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false)
-    }
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('mousedown', handlePointer)
-    document.addEventListener('keydown', handleKey)
-    return () => {
-      document.removeEventListener('mousedown', handlePointer)
-      document.removeEventListener('keydown', handleKey)
-    }
-  }, [open])
-
-  const handleSelect = (next: string) => {
-    onChange(next)
-    setOpen(false)
-  }
-
-  return (
-    <div ref={rootRef} className="relative">
-      {/* 트리거 — 항상 label 표시, 색만 필터 적용 여부로 분기 (Figma dropdown 2 variant) */}
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setOpen((prev) => !prev)}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        className={cn(
-          'flex h-[40px] w-[95px] items-center justify-center gap-[10px] rounded-[8px] border bg-white px-[10px]',
-          M14,
-          value ? 'text-gray-900' : 'text-gray-500',
-          open ? 'border-primary' : 'border-gray-300',
-          disabled && 'cursor-not-allowed opacity-40'
-        )}
-      >
-        <span className="truncate">{label}</span>
-        <ChevronIcon open={open} />
-      </button>
-
-      {/* 옵션 리스트 */}
-      {open && (
-        <ul
-          role="listbox"
-          className="absolute left-0 top-[calc(100%+6px)] z-20 max-h-[240px] w-max min-w-full overflow-y-auto rounded-[8px] border border-gray-300 bg-white py-[4px] shadow-[0_6px_20px_rgba(0,0,0,0.1)]"
-        >
-          {/* 전체 = 필터 해제 */}
-          <li>
-            <button
-              type="button"
-              role="option"
-              aria-selected={!value}
-              onClick={() => handleSelect('')}
-              className={cn(
-                'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-gray-100',
-                M14,
-                value ? 'text-gray-700' : 'text-primary'
-              )}
-            >
-              전체
-              {!value && <CheckMark />}
-            </button>
-          </li>
-          {options.map((opt) => {
-            const isSelected = opt.value === value
-            return (
-              <li key={opt.value}>
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={isSelected}
-                  onClick={() => handleSelect(opt.value)}
-                  className={cn(
-                    'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-gray-100',
-                    M14,
-                    isSelected ? 'text-primary' : 'text-gray-700'
-                  )}
-                >
-                  {opt.label}
-                  {isSelected && <CheckMark />}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      )}
-    </div>
-  )
-}
-
-// 다중 선택 드롭다운 (지역·공종·직급 공용). DropdownSelect 와 트리거/패널 스타일은 동일하되
-// 옵션 선택 시 닫지 않고 토글한다. 트리거는 선택 개수와 무관하게 항상 카테고리명을 표시하고,
-// 1개 이상 선택 시 gray-900(선택됨), 미선택 시 gray-500(접힘).
-function MultiDropdownSelect<T extends string>({
-  label,
-  values,
-  onToggle,
-  onClear,
-  options,
-}: {
-  label: string
-  values: T[]
-  onToggle: (v: T) => void
-  onClear: () => void
-  options: { value: T; label: string }[]
-}) {
-  const [open, setOpen] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
-
-  // 바깥 클릭 / Escape 로 닫기
-  useEffect(() => {
-    if (!open) return
-    const handlePointer = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false)
-    }
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('mousedown', handlePointer)
-    document.addEventListener('keydown', handleKey)
-    return () => {
-      document.removeEventListener('mousedown', handlePointer)
-      document.removeEventListener('keydown', handleKey)
-    }
-  }, [open])
-
-  return (
-    <div ref={rootRef} className="relative">
-      {/* 트리거 — 항상 label 표시, 색만 필터 적용 여부로 분기 (Figma dropdown 2 variant) */}
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        className={cn(
-          'flex h-[40px] w-[95px] items-center justify-center gap-[10px] rounded-[8px] border bg-white px-[10px]',
-          M14,
-          values.length > 0 ? 'text-gray-900' : 'text-gray-500',
-          open ? 'border-primary' : 'border-gray-300'
-        )}
-      >
-        <span className="truncate">{label}</span>
-        <ChevronIcon open={open} />
-      </button>
-
-      {/* 옵션 리스트 — 다중 선택이라 선택해도 닫지 않는다 */}
-      {open && (
-        <ul
-          role="listbox"
-          aria-multiselectable
-          className="absolute left-0 top-[calc(100%+6px)] z-20 max-h-[240px] w-max min-w-full overflow-y-auto rounded-[8px] border border-gray-300 bg-white py-[4px] shadow-[0_6px_20px_rgba(0,0,0,0.1)]"
-        >
-          {/* 전체 = 필터 해제 */}
-          <li>
-            <button
-              type="button"
-              role="option"
-              aria-selected={values.length === 0}
-              onClick={onClear}
-              className={cn(
-                'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-gray-100',
-                M14,
-                values.length === 0 ? 'text-primary' : 'text-gray-700'
-              )}
-            >
-              전체
-              {values.length === 0 && <CheckMark />}
-            </button>
-          </li>
-          {options.map((opt) => {
-            const isSelected = values.includes(opt.value)
-            return (
-              <li key={opt.value}>
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={isSelected}
-                  onClick={() => onToggle(opt.value)}
-                  className={cn(
-                    'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-gray-100',
-                    M14,
-                    isSelected ? 'text-primary' : 'text-gray-700'
-                  )}
-                >
-                  {opt.label}
-                  {isSelected && <CheckMark />}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      )}
-    </div>
-  )
-}
-
-// Figma node 1503:12064 — rounded-full pill, no border, primary-sub bg + primary text, M14, x icon
+/** Figma node 1503:12064 — rounded-full pill, no border, secondary bg + primary text, M14, x icon */
 function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
     <button
@@ -361,31 +96,37 @@ export function FilterBar() {
     <div className="flex flex-col gap-[13px]">
       {/* Dropdowns */}
       <div className="flex items-center gap-[9px]">
-        <MultiDropdownSelect
-          label="지역"
-          values={regions}
-          onToggle={toggleRegion}
-          onClear={() => setRegion(null)}
+        <Select
+          multiple
+          clearable
+          triggerLabel="지역"
+          value={regions}
+          onChange={(v) => setRegion(v as string[])}
           options={REGION_OPTIONS.map((r) => ({ value: r, label: r }))}
         />
-        <MultiDropdownSelect
-          label="공종"
-          values={trades}
-          onToggle={toggleTrade}
-          onClear={() => setTrade(null)}
+        <Select
+          multiple
+          clearable
+          triggerLabel="공종"
+          value={trades}
+          onChange={(v) => setTrade(v as Trade[])}
           options={TRADE_LIST}
         />
-        <MultiDropdownSelect
-          label="직급"
-          values={grades}
-          onToggle={toggleGrade}
-          onClear={() => setGrade(null)}
+        <Select
+          multiple
+          clearable
+          triggerLabel="직급"
+          value={grades}
+          onChange={(v) => setGrade(v as Grade[])}
           options={GRADE_OPTIONS}
         />
-        <DropdownSelect
-          label="경력"
+        <Select
+          clearable
+          triggerLabel="경력"
           value={experience ?? ''}
-          onChange={(v) => setExperience((v as ExperienceLevel) || null)}
+          onChange={(v) =>
+            setExperience(typeof v === 'string' && v ? (v as ExperienceLevel) : null)
+          }
           options={EXPERIENCE_OPTIONS.map((o) => ({ value: o.id, label: o.label }))}
         />
       </div>
