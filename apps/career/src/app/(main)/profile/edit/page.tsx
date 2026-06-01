@@ -18,7 +18,7 @@ import {
   getGetMyProfileQueryKey,
   Trade,
 } from '@bconnect/api-client'
-import { Form, Input, SelectField, Tag, TopBar } from '@bconnect/ui'
+import { Form, SelectField, Tag, TextareaField, TextField, TopBar } from '@bconnect/ui'
 import { TRADE_LABELS, TRADE_GROUPS } from '@/lib/trade-labels'
 import { profileEditSchema, type ProfileEditFormData } from './schema'
 
@@ -70,7 +70,6 @@ export default function ProfileEditPage() {
     },
   })
   const {
-    register,
     handleSubmit,
     control,
     setValue,
@@ -207,22 +206,18 @@ export default function ProfileEditPage() {
       />
 
       <Form {...form}>
-        <form className="flex flex-1 flex-col gap-[24px] overflow-y-auto px-4 pb-24 pt-3">
+        <form className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-24 pt-3">
           {/* 이름 */}
-          <div className="flex flex-col gap-[8px]">
-            <label className="text-m-16 text-gray-900">
-              이름 <span className="text-destructive">*</span>
-            </label>
-            <Input
-              placeholder="내용을 입력해주세요"
-              variant={errors.name ? 'error' : 'default'}
-              errorMessage={errors.name?.message}
-              {...register('name')}
-            />
-          </div>
+          <TextField
+            control={control}
+            name="name"
+            label="이름"
+            required
+            placeholder="이름을 입력해주세요"
+          />
 
           {/* 시공분야 */}
-          <div className="flex flex-col gap-[12px]">
+          <div className="flex flex-col gap-3">
             <label className="text-m-16 text-gray-900">
               시공분야 <span className="text-destructive">*</span>
             </label>
@@ -230,11 +225,11 @@ export default function ProfileEditPage() {
               name="trades"
               control={control}
               render={({ field }) => (
-                <div className="flex flex-col gap-[12px]">
+                <div className="flex flex-col gap-3">
                   {TRADE_GROUPS.map((group) => (
-                    <div key={group.label} className="flex flex-col gap-[12px]">
+                    <div key={group.label} className="flex flex-col gap-3">
                       <p className="text-m-14 text-gray-700">{group.label}</p>
-                      <div className="flex flex-wrap gap-[8px]">
+                      <div className="flex flex-wrap gap-2">
                         {group.trades.map((tradeValue) => {
                           const isSelected = field.value?.includes(tradeValue) ?? false
                           return (
@@ -270,8 +265,8 @@ export default function ProfileEditPage() {
             />
           )}
 
-          {/* 경력 */}
-          <div className="flex flex-col gap-[8px]">
+          {/* 경력 — 선택형(#427 슬라이더 전환 예정), 텍스트 *Field 대상 아님 */}
+          <div className="flex flex-col gap-2">
             <label className="text-m-16 text-gray-900">
               경력 <span className="text-destructive">*</span>
             </label>
@@ -303,41 +298,30 @@ export default function ProfileEditPage() {
           </div>
 
           {/* 한줄소개 */}
-          <div className="flex flex-col gap-[8px]">
-            <label className="text-m-16 text-gray-900">한줄소개</label>
-            <Input
-              placeholder="한줄소개를 입력해주세요 (최대 20글자)"
-              variant={errors.headline ? 'error' : 'default'}
-              errorMessage={errors.headline?.message}
-              {...register('headline')}
-            />
-          </div>
+          <TextField
+            control={control}
+            name="headline"
+            label="한줄소개"
+            placeholder="한줄소개를 입력해주세요 (최대 20글자)"
+          />
 
           {/* 소개 */}
-          <div className="flex flex-col gap-[8px]">
-            <label className="text-r-14 text-gray-900">소개</label>
-            <textarea
-              placeholder="자기소개를 입력해주세요"
-              rows={4}
-              className="w-full resize-none rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-r-14 text-gray-900 outline-none transition-colors placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary disabled:pointer-events-none disabled:opacity-50"
-              {...register('about')}
-            />
-            {errors.about && <p className="text-sm text-destructive">{errors.about.message}</p>}
-          </div>
+          <TextareaField
+            control={control}
+            name="about"
+            label="소개"
+            rows={4}
+            placeholder="자기소개를 입력해주세요"
+          />
 
-          {/* 지역 */}
-          <div className="flex flex-col gap-[8px]">
-            <label className="text-m-16 text-gray-900">주소</label>
-            <p className="text-r-12 text-gray-700">
-              정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요
-            </p>
-            <Input
-              placeholder="주소를 입력해주세요"
-              variant={errors.city ? 'error' : 'default'}
-              errorMessage={errors.city?.message}
-              {...register('city')}
-            />
-          </div>
+          {/* 주소 */}
+          <TextField
+            control={control}
+            name="city"
+            label="주소"
+            description="정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요"
+            placeholder="주소를 입력해주세요"
+          />
         </form>
       </Form>
     </div>

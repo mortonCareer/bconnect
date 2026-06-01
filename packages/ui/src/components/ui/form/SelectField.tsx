@@ -1,5 +1,5 @@
 /**
- * @figma-scaffold shadcn Select 합성 래퍼 — FormField/Trigger/aria 배선 흡수 (#426)
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=188-1130
  */
 'use client'
 
