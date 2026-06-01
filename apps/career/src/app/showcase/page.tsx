@@ -4,7 +4,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Button, Tag, Input, Feed, TopBar, ChatMessage } from '@bconnect/ui'
+import { Button, Tag, Input, Feed, TopBar, ChatMessage, ImageInput } from '@bconnect/ui'
 
 interface ComponentPreview {
   name: string
@@ -79,6 +79,16 @@ const components: ComponentPreview[] = [
     description: '채팅 메시지 컴포넌트 (Morton 디자인 시스템)',
     href: '/showcase/chat-message',
     preview: <ChatMessage variant="mine" message="안녕하세요" timestamp="오후 2:09" />,
+  },
+  {
+    name: 'ImageField',
+    description: '이미지 업로드/미리보기/빈상태 (폼: ImageField, 제어: ImageInput)',
+    href: '/showcase/image-field',
+    preview: (
+      <div className="w-40 origin-center scale-[0.5]">
+        <ImageInput value={null} onChange={() => undefined} />
+      </div>
+    ),
   },
 ]
 

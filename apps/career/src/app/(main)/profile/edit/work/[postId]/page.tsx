@@ -3,7 +3,7 @@
  */
 'use client'
 
-import { cn, Form, FormError, Input, Label, TextareaField, TopBar } from '@bconnect/ui'
+import { cn, Form, FormError, ImageField, Input, Label, TextareaField, TopBar } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -32,6 +32,7 @@ const workSchema = z.object({
     .string()
     .min(1, '작업 설명을 입력해주세요.')
     .register(fieldMeta, { label: '작업 설명', placeholder: '작업 내용을 입력해주세요' }),
+  images: z.custom<File>((value) => value instanceof File).nullable(),
 })
 type WorkFormValues = z.infer<typeof workSchema>
 
@@ -47,7 +48,14 @@ export default function EditWorkPage() {
   const form = useForm<WorkFormValues>({
     resolver: zodResolver(workSchema),
     mode: 'onTouched',
-    defaultValues: { company: '', period: '', address: '', trade: '', description: '' },
+    defaultValues: {
+      company: '',
+      period: '',
+      address: '',
+      trade: '',
+      description: '',
+      images: null,
+    },
   })
 
   const onSave = form.handleSubmit(() => {
@@ -68,13 +76,12 @@ export default function EditWorkPage() {
         onBack={() => router.back()}
       />
 
-      {/* TODO: 이미지 업로드 공통 컴포넌트로 교체 (#424) */}
-      <div className="mx-4 mt-4 flex h-50 items-center justify-center rounded-lg bg-gray-100">
-        <span className="text-r-12 text-gray-500">이미지</span>
-      </div>
-
       <Form {...form}>
         <form onSubmit={onSave}>
+          <div className="px-4 pt-4">
+            <ImageField control={form.control} name="images" />
+          </div>
+
           {/* 메타 정보 */}
           <div className="flex flex-col gap-3 px-4 pt-6">
             {META_FIELD_NAMES.map((name) => {
