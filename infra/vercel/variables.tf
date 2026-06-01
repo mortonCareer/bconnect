@@ -9,6 +9,11 @@ variable "domain" {
   type        = string
 }
 
+variable "dev_api_url" {
+  description = "Railway staging BE base URL — dev custom environment 에서 호출 (#352, ADR-0010)"
+  type        = string
+}
+
 variable "project_name" {
   description = "Project name (used for Vercel project name prefix)"
   type        = string
