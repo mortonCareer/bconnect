@@ -56,3 +56,11 @@ resource "railway_tcp_proxy" "postgres_dev" {
   environment_id   = railway_environment.dev.id
   application_port = 5432
 }
+
+# dev custom 도메인 (ADR-0016). railway 생성 도메인(api_dev)과 병행.
+# DNS CNAME 은 가비아에서 수동 등록.
+resource "railway_custom_domain" "api_dev" {
+  service_id     = railway_service.api.id
+  environment_id = railway_environment.dev.id
+  domain         = "api.dev.${var.domain}"
+}
