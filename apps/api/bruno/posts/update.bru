@@ -1,19 +1,17 @@
 meta {
-  name: 내 정보 수정
+  name: 게시글 수정
   type: http
-  seq: 5
+  seq: 4
 }
 
 put {
-  url: {{baseUrl}}/api/v1/members/me
+  url: {{baseUrl}}/api/v1/posts/{{postId}}
   auth: inherit
 }
 
 body {
   {
-    "name": "이름 수정",
-    "picture": "https://new-image.com",
-    "role": "CONTRACTOR"
+    "content": "게시글 수정"
   }
 }
 

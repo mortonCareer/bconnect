@@ -1,0 +1,35 @@
+meta {
+  name: 내 프로필 수정
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/profiles/me
+  auth: inherit
+}
+
+body {
+  {
+    "primaryTrade": "FILM_SHEET",
+    "trades": ["TILING", "FILM_SHEET"],
+    "experience": 20,
+    "headline": "한줄소개 수정",
+    "address": {
+      "zipcode": "00001",
+      "city": "서울특별시",
+      "state": "종로구",
+      "street": "성균관로 25-2",
+      "detail": "상세주소",
+      "latitude":  37.588000,
+      "longitude": 126.993000
+    }
+  }
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}

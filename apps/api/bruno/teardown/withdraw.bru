@@ -1,20 +1,12 @@
 meta {
-  name: 내 정보 수정
+  name: 회원 탈퇴
   type: http
-  seq: 5
+  seq: 3
 }
 
-put {
+delete {
   url: {{baseUrl}}/api/v1/members/me
   auth: inherit
-}
-
-body {
-  {
-    "name": "이름 수정",
-    "picture": "https://new-image.com",
-    "role": "CONTRACTOR"
-  }
 }
 
 tests {

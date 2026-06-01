@@ -1,11 +1,11 @@
 meta {
-  name: 내 정보 조회
+  name: 로그아웃
   type: http
-  seq: 4
+  seq: 2
 }
 
-get {
-  url: {{baseUrl}}/api/v1/members/me
+post {
+  url: {{baseUrl}}/api/v1/auth/logout
   auth: inherit
 }
 
