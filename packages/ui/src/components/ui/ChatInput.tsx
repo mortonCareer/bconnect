@@ -82,10 +82,7 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
     return (
       <div
         ref={ref}
-        className={cn(
-          'flex h-[80px] items-center gap-[8px] bg-white px-[24px] py-[16px]',
-          className
-        )}
+        className={cn('flex h-20 items-center gap-2 bg-white px-6 py-4', className)}
         {...props}
       >
         {/* 갤러리 아이콘 */}
@@ -94,7 +91,7 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
         </button>
 
         {/* 입력 영역 */}
-        <div className="flex flex-1 items-center rounded-[12px] bg-gray-100 px-[16px] py-[9px]">
+        <div className="flex flex-1 items-center rounded-xl bg-gray-100 px-4 py-[9px]">
           <input
             type="text"
             value={inputValue}
@@ -116,7 +113,7 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           onClick={handleSendClick}
           disabled={!isActive}
           className={cn(
-            'flex size-[40px] shrink-0 items-center justify-center rounded-full p-[8px]',
+            'flex size-10 shrink-0 items-center justify-center rounded-full p-2',
             isActive ? 'bg-primary' : 'bg-gray-500'
           )}
           aria-label="전송"

@@ -76,7 +76,7 @@ export function WorkCard({
       </div>
 
       {/* 풀 와이드 이미지 */}
-      <div className="relative h-[220px] w-full overflow-hidden">
+      <div className="relative h-55 w-full overflow-hidden">
         <img src={image} alt={imageAlt || description} className="h-full w-full object-cover" />
       </div>
 

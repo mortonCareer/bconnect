@@ -43,7 +43,7 @@ export function ProfileHeader({
       {/* 상단: 아바타 + StatsRow */}
       <div className="flex items-center gap-4">
         {/* 아바타 */}
-        <div className="h-[100px] w-[100px] shrink-0 overflow-hidden rounded-full bg-gray-100">
+        <div className="h-25 w-25 shrink-0 overflow-hidden rounded-full bg-gray-100">
           <img
             src={picture || getAvatarUrl(name ?? 'user')}
             alt={name ?? '프로필'}

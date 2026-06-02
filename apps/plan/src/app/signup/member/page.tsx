@@ -61,7 +61,7 @@ export default function SignupMemberPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
       {/* Card */}
-      <div className="flex w-[480px] flex-col items-center gap-8 rounded-[12px] border border-gray-300 p-10">
+      <div className="flex w-120 flex-col items-center gap-8 rounded-xl border border-gray-300 p-10">
         {/* Logo */}
         <Image src="/logo.png" alt="품앗이" width={160} height={56} priority />
 
@@ -70,7 +70,7 @@ export default function SignupMemberPage() {
 
         {/* Form */}
         <Form {...form}>
-          <form onSubmit={handleSubmit(onSubmit)} className="flex w-[400px] flex-col gap-3">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex w-100 flex-col gap-3">
             <TextField
               control={control}
               name="username"

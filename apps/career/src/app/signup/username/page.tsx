@@ -56,7 +56,7 @@ export default function SignupUsernamePage() {
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col gap-6 px-4 pt-3">
           {/* Title Section */}
           <div className="flex flex-col gap-4">
-            <h1 className="text-2xl font-semibold leading-[1.4] text-[#000000]">
+            <h1 className="text-2xl font-semibold leading-[1.4] text-black">
               서비스에서 사용할 ID를
               <br />
               입력해 주세요

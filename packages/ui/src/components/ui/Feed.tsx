@@ -191,7 +191,7 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
         )}
 
         {/* 이미지 */}
-        <div className="relative h-[220px] w-full overflow-hidden rounded-lg">
+        <div className="relative h-55 w-full overflow-hidden rounded-lg">
           <img
             src={content.image}
             alt={content.imageAlt || content.description}

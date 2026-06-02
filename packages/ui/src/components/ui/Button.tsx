@@ -15,7 +15,7 @@ import { cn } from '../../lib/utils'
  * - ghost: 회색 테두리, 회색 텍스트 (비활성_stroke)
  */
 const buttonVariants = cva(
-  'inline-flex items-center justify-center rounded-[8px] text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer active:scale-[0.98]',
+  'inline-flex items-center justify-center rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer active:scale-[0.98]',
   {
     variants: {
       variant: {
@@ -31,9 +31,9 @@ const buttonVariants = cva(
       },
       size: {
         // default: 360x50
-        default: 'h-[50px] w-[360px] px-4',
+        default: 'h-[50px] w-90 px-4',
         // small: 206x40
-        sm: 'h-[40px] w-[206px] px-3',
+        sm: 'h-10 w-[206px] px-3',
         // full width
         full: 'h-[50px] w-full px-4',
       },

@@ -54,7 +54,7 @@ const Tab = React.forwardRef<HTMLDivElement, TabProps>(
             >
               <span
                 className={cn(
-                  'text-sm pb-[10px]',
+                  'text-sm pb-2.5',
                   isActive ? 'text-primary font-semibold' : 'text-gray-500 font-medium'
                 )}
               >
@@ -62,7 +62,7 @@ const Tab = React.forwardRef<HTMLDivElement, TabProps>(
               </span>
               <div
                 className={cn(
-                  'w-full h-[2px] transition-colors',
+                  'w-full h-0.5 transition-colors',
                   isActive ? 'bg-primary' : 'bg-transparent'
                 )}
               />
