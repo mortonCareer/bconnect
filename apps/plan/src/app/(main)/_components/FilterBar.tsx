@@ -38,7 +38,7 @@ function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }
       className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-m-14 text-primary transition-opacity hover:opacity-80"
     >
       {label}
-      <XIcon size={12} className="shrink-0" />
+      <XIcon size={12} />
     </button>
   )
 }

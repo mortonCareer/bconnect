@@ -6,7 +6,6 @@
   "exports": {
     "./eslint/next": "./eslint/next.js",
     "./eslint/base": "./eslint/base.js",
-    "./eslint/plugin-no-inline-svg": "./eslint/plugin-no-inline-svg.js",
     "./tsconfig/next": "./tsconfig/next.json",
     "./tsconfig/base": "./tsconfig/base.json",
     "./biz-number": "./biz-number/index.ts",

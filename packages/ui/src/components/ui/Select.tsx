@@ -145,7 +145,7 @@ export function Select({
         className={triggerClass}
       >
         <span className={cn('truncate', placeholderColor && 'text-gray-500')}>{triggerText}</span>
-        <ChevronDownIcon className={cn('shrink-0 transition-transform', open && 'rotate-180')} />
+        <ChevronDownIcon className={cn('transition-transform', open && 'rotate-180')} />
       </button>
 
       {open && (
@@ -160,7 +160,7 @@ export function Select({
                 className={cn(OPTION_CLASSES, M14, !hasValue ? 'text-primary' : 'text-gray-700')}
               >
                 전체
-                {!hasValue && <CheckIcon size={14} className="shrink-0" />}
+                {!hasValue && <CheckIcon size={14} />}
               </button>
             </li>
           )}
@@ -176,7 +176,7 @@ export function Select({
                   className={cn(OPTION_CLASSES, M14, sel ? 'text-primary' : 'text-gray-700')}
                 >
                   {opt.label}
-                  {sel && <CheckIcon size={14} className="shrink-0" />}
+                  {sel && <CheckIcon size={14} />}
                 </button>
               </li>
             )
