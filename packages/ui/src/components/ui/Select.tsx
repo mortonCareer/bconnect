@@ -12,8 +12,6 @@ export interface SelectOption {
   label: string
 }
 
-const M14 = 'text-m-14'
-
 const FILTER_TRIGGER =
   'flex h-[40px] w-[95px] items-center justify-center gap-[10px] rounded-[8px] border bg-white px-[10px]'
 const PANEL_CLASSES =
@@ -148,7 +146,7 @@ export function Select({
   const triggerClass = filterMode
     ? cn(
         FILTER_TRIGGER,
-        M14,
+        'text-m-14',
         'outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary',
         hasValue ? 'text-gray-900' : 'text-gray-500',
         open ? 'border-primary' : 'border-gray-300',
@@ -192,7 +190,11 @@ export function Select({
                 role="option"
                 aria-selected={!hasValue}
                 onClick={handleClear}
-                className={cn(OPTION_CLASSES, M14, !hasValue ? 'text-primary' : 'text-gray-700')}
+                className={cn(
+                  OPTION_CLASSES,
+                  'text-m-14',
+                  !hasValue ? 'text-primary' : 'text-gray-700'
+                )}
               >
                 전체
                 {!hasValue && <CheckMark />}
@@ -208,7 +210,11 @@ export function Select({
                   role="option"
                   aria-selected={sel}
                   onClick={() => handleSelect(opt.value)}
-                  className={cn(OPTION_CLASSES, M14, sel ? 'text-primary' : 'text-gray-700')}
+                  className={cn(
+                    OPTION_CLASSES,
+                    'text-m-14',
+                    sel ? 'text-primary' : 'text-gray-700'
+                  )}
                 >
                   {opt.label}
                   {sel && <CheckMark />}
