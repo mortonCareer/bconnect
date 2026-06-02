@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { cn } from '@bconnect/ui'
+import { cn, CheckCircleIcon, MoreVerticalIcon } from '@bconnect/ui'
 
 interface WorkCardProps {
   postId?: number
@@ -47,17 +47,7 @@ export function WorkCard({
               <span className="text-r-12 text-gray-700">{duration}</span>
             </>
           )}
-          {/* 인증 체크 아이콘 */}
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-primary">
-            <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
-            <path
-              d="M5 8L7 10L11 6"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <CheckCircleIcon size={16} className="text-primary" />
         </div>
         <div className="flex items-center gap-2">
           <span className="text-r-12 text-gray-500">{timestamp}</span>
@@ -66,11 +56,7 @@ export function WorkCard({
             className="flex h-6 w-6 items-center justify-center text-gray-500"
             onClick={() => postId && router.push(`/profile/edit/work/${postId}`)}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <circle cx="8" cy="3" r="1.5" />
-              <circle cx="8" cy="8" r="1.5" />
-              <circle cx="8" cy="13" r="1.5" />
-            </svg>
+            <MoreVerticalIcon size={16} />
           </button>
         </div>
       </div>

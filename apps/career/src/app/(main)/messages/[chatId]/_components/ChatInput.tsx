@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { SendIcon } from './SendIcon'
 
 interface ChatInputProps {
   onSend: (content: string) => void
@@ -74,21 +75,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary transition-colors active:scale-95 disabled:bg-gray-500"
           aria-label="보내기"
         >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"
-              stroke="white"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <SendIcon className="text-white" />
         </button>
       </div>
     </div>
