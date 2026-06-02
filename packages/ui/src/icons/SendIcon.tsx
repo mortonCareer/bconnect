@@ -1,3 +1,6 @@
+/**
+ * @figma-scaffold DS 에 standalone 전송 없음(채팅입력 컴포넌트 내부) (#458)
+ */
 import type { SVGProps } from 'react'
 
 interface SendIconProps extends SVGProps<SVGSVGElement> {

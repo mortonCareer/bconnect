@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=634-5542
+ */
 import type { SVGProps } from 'react'
 
 interface SearchIconProps extends SVGProps<SVGSVGElement> {

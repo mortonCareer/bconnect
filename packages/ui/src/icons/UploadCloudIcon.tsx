@@ -1,3 +1,6 @@
+/**
+ * @figma-scaffold DS Icons 에 cloud-upload 없음 (#458)
+ */
 import type { SVGProps } from 'react'
 
 interface UploadCloudIconProps extends SVGProps<SVGSVGElement> {

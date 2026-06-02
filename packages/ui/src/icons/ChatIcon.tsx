@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=407-3509
+ */
 import type { SVGProps } from 'react'
 
 interface ChatIconProps extends SVGProps<SVGSVGElement> {

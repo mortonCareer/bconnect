@@ -1,3 +1,6 @@
+/**
+ * @figma-scaffold Feed 전용 chevron — DS 더보기 4방향(352:2839)과 별개, 통합 예정 (#458)
+ */
 import type { SVGProps } from 'react'
 
 interface ChevronRightIconProps extends SVGProps<SVGSVGElement> {

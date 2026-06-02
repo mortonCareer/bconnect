@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=17-1331
+ */
 import type { SVGProps } from 'react'
 
 interface JobsIconProps extends SVGProps<SVGSVGElement> {

@@ -1,3 +1,6 @@
+/**
+ * @figma-scaffold DS Icons 에 없음 — FilterBar(plan, node 1470:6746)에서 추출 (#458)
+ */
 import type { SVGProps } from 'react'
 
 interface RefreshIconProps extends SVGProps<SVGSVGElement> {

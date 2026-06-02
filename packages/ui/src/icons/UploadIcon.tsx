@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=17-1330
+ */
 import type { SVGProps } from 'react'
 
 interface UploadIconProps extends SVGProps<SVGSVGElement> {
