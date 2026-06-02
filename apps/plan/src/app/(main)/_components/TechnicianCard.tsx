@@ -2,9 +2,9 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { Button, cn } from '@bconnect/ui'
 import { TRADE_LABELS } from '@/lib/trade-labels'
+import { usePanelNav } from '@/hooks/usePanelNav'
 import type { TechnicianItem } from '@/hooks/useTechnicianItems'
 import type { Trade } from '@bconnect/api-client'
 import { useLoginGate } from './LoginGateProvider'
@@ -89,9 +89,8 @@ interface TechnicianCardProps {
 
 export function TechnicianCard({ item }: TechnicianCardProps) {
   const { requireLogin } = useLoginGate()
-  const searchParams = useSearchParams()
-  const qs = searchParams.toString()
-  const profileHref = qs ? `/profile/${item.profileId}?${qs}` : `/profile/${item.profileId}`
+  const { panelHref } = usePanelNav()
+  const profileHref = panelHref(`/profile/${item.profileId}`)
 
   const metaParts = [
     item.location,

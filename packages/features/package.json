@@ -9,9 +9,11 @@
   "dependencies": {
     "@bconnect/api-client": "workspace:*",
     "@bconnect/ui": "workspace:*",
-    "lucide-react": "^0.562.0"
+    "lucide-react": "catalog:"
   },
   "peerDependencies": {
+    "next": "catalog:",
+    "nuqs": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"
   },

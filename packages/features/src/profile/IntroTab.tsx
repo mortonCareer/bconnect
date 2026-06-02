@@ -3,7 +3,7 @@
 import { Fragment } from 'react'
 import { useGetCredentials } from '@bconnect/api-client'
 import type { Profile } from '@bconnect/api-client'
-import { Tag } from '@bconnect/ui'
+import { Skeleton, Tag } from '@bconnect/ui'
 import { getCredentialLabel } from './labels'
 import { RecommendationList } from './RecommendationList'
 
@@ -27,13 +27,13 @@ export function IntroTab({ profileId, profile }: IntroTabProps) {
         {credentialsLoading ? (
           <div className="flex flex-wrap gap-2">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-[34px] w-20 animate-pulse rounded-[7px] bg-gray-100" />
+              <Skeleton key={i} className="h-[34px] w-20 rounded-[7px]" />
             ))}
           </div>
         ) : accepted.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {accepted.map((c) => (
-              <Tag key={c.id} variant="default" size="sm">
+              <Tag key={c.id} size="sm">
                 {getCredentialLabel(c.type)}
               </Tag>
             ))}

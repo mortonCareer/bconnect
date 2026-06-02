@@ -1,13 +1,14 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
+import { parseAsStringEnum, useQueryState } from 'nuqs'
 import {
   useGetCoworkers,
   useGetFeeds,
   useGetProfile,
   useGetReceivedRecommendations,
 } from '@bconnect/api-client'
-import { Tab } from '@bconnect/ui'
+import { Skeleton, Tab } from '@bconnect/ui'
 import { PanelHeader } from './PanelHeader'
 import { ProfileSummary } from './ProfileSummary'
 import { IntroTab } from './IntroTab'
@@ -21,11 +22,15 @@ const TAB_ITEMS = [
 
 export interface ProfileViewProps {
   profileId: number
+  closeHref: string
   onClose: () => void
 }
 
-export function ProfileView({ profileId, onClose }: ProfileViewProps) {
-  const [tab, setTab] = useState<TabKey>('intro')
+export function ProfileView({ profileId, closeHref, onClose }: ProfileViewProps) {
+  const [tab, setTab] = useQueryState(
+    'tab',
+    parseAsStringEnum<TabKey>(['intro', 'works']).withDefault('intro')
+  )
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -51,7 +56,7 @@ export function ProfileView({ profileId, onClose }: ProfileViewProps) {
 
   return (
     <div ref={rootRef} tabIndex={-1} className="flex h-full flex-col bg-white outline-none">
-      <PanelHeader username={member?.username} onClose={onClose} />
+      <PanelHeader username={member?.username} closeHref={closeHref} />
 
       <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {isLoading ? (
@@ -90,18 +95,18 @@ function PanelMessage({ children }: { children: React.ReactNode }) {
 
 function ProfileSkeleton() {
   return (
-    <div className="flex animate-pulse flex-col gap-4 p-4">
+    <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center gap-4">
-        <div className="h-[100px] w-[100px] shrink-0 rounded-full bg-gray-100" />
+        <Skeleton className="h-[100px] w-[100px] shrink-0 rounded-full" />
         <div className="flex flex-1 justify-around gap-2">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-12 w-12 rounded bg-gray-100" />
+            <Skeleton key={i} className="h-12 w-12" />
           ))}
         </div>
       </div>
-      <div className="h-5 w-32 rounded bg-gray-100" />
-      <div className="h-4 w-full rounded bg-gray-100" />
-      <div className="h-4 w-2/3 rounded bg-gray-100" />
+      <Skeleton className="h-5 w-32" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-2/3" />
     </div>
   )
 }

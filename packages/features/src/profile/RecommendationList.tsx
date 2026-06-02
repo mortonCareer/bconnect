@@ -1,9 +1,10 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { useGetReceivedRecommendations, useGetSentRecommendations } from '@bconnect/api-client'
 import type { Recommendation } from '@bconnect/api-client'
-import { cn } from '@bconnect/ui'
+import { cn, Skeleton } from '@bconnect/ui'
 import { getAvatarUrl } from './labels'
 
 type Mode = 'received' | 'sent'
@@ -41,11 +42,11 @@ export function RecommendationList({ profileId }: RecommendationListProps) {
       {active.isLoading ? (
         <ul className="flex flex-col divide-y divide-gray-200">
           {Array.from({ length: 3 }).map((_, i) => (
-            <li key={i} className="flex animate-pulse gap-3 py-3">
-              <div className="h-16 w-16 shrink-0 rounded-full bg-gray-100" />
+            <li key={i} className="flex gap-3 py-3">
+              <Skeleton className="h-16 w-16 shrink-0 rounded-full" />
               <div className="flex flex-1 flex-col gap-2 pt-1">
-                <div className="h-4 w-24 rounded bg-gray-100" />
-                <div className="h-3 w-full rounded bg-gray-100" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-full" />
               </div>
             </li>
           ))}
@@ -105,11 +106,15 @@ function RecommendationItem({ recommendation }: { recommendation: Recommendation
 
   return (
     <li className="flex gap-3 py-3">
-      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-gray-100">
-        <img
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-gray-100">
+        {/* TODO: 출시 전 unoptimized 제거 + next/image remotePatterns/loader 구성 (dicebear SVG·외부 업로드 대응) */}
+        <Image
           src={member.picture || getAvatarUrl(member.name)}
           alt={member.name}
-          className="h-full w-full object-cover"
+          fill
+          sizes="64px"
+          unoptimized
+          className="object-cover"
         />
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1">

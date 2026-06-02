@@ -27,6 +27,9 @@ catalogs:
     eslint:
       specifier: ^9
       version: 9.39.2
+    lucide-react:
+      specifier: ^0.562.0
+      version: 0.562.0
     msw:
       specifier: ^2.13.6
       version: 2.13.6
@@ -328,8 +331,14 @@ importers:
         specifier: workspace:*
         version: link:../ui
       lucide-react:
-        specifier: ^0.562.0
+        specifier: 'catalog:'
         version: 0.562.0(react@19.2.3)
+      next:
+        specifier: 'catalog:'
+        version: 16.1.1(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      nuqs:
+        specifier: 'catalog:'
+        version: 2.8.9(next@16.1.1(@opentelemetry/api@1.9.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
       react:
         specifier: 'catalog:'
         version: 19.2.3
@@ -387,7 +396,7 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       lucide-react:
-        specifier: ^0.562.0
+        specifier: 'catalog:'
         version: 0.562.0(react@19.2.3)
       radix-ui:
         specifier: ^1.4.3

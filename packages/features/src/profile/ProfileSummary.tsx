@@ -1,6 +1,8 @@
 'use client'
 
+import Image from 'next/image'
 import type { MaskedMember, Profile } from '@bconnect/api-client'
+import { Skeleton } from '@bconnect/ui'
 import { getAvatarUrl, getTradeLabel } from './labels'
 
 interface ProfileSummaryProps {
@@ -34,11 +36,15 @@ export function ProfileSummary({
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-4 px-4 pt-4">
-        <div className="h-[100px] w-[100px] shrink-0 overflow-hidden rounded-full bg-gray-100">
-          <img
+        <div className="relative h-[100px] w-[100px] shrink-0 overflow-hidden rounded-full bg-gray-100">
+          {/* TODO: 출시 전 unoptimized 제거 + next/image remotePatterns/loader 구성 (dicebear SVG·외부 업로드 대응) */}
+          <Image
             src={member?.picture || getAvatarUrl(name)}
             alt={name}
-            className="h-full w-full object-cover"
+            fill
+            sizes="100px"
+            unoptimized
+            className="object-cover"
           />
         </div>
         <div className="flex flex-1 justify-around">
@@ -63,7 +69,7 @@ function Stat({ label, value }: { label: string; value?: number }) {
   return (
     <div className="flex flex-col items-center gap-1">
       {value === undefined ? (
-        <span className="h-6 w-6 animate-pulse rounded bg-gray-100" />
+        <Skeleton className="h-6 w-6" />
       ) : (
         <span className="text-sb-16 text-gray-900">{value}</span>
       )}
