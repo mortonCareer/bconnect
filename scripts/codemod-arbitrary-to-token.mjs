@@ -10,18 +10,66 @@ const APPLY = process.argv.includes('--apply')
 
 // spacing/size utilities that consume the v4 spacing scale
 const SPACING = [
-  'p', 'px', 'py', 'pt', 'pb', 'pl', 'pr', 'ps', 'pe',
-  'm', 'mx', 'my', 'mt', 'mb', 'ml', 'mr', 'ms', 'me',
-  'gap', 'gap-x', 'gap-y',
-  'w', 'h', 'size', 'min-w', 'max-w', 'min-h', 'max-h',
-  'top', 'left', 'right', 'bottom', 'inset', 'inset-x', 'inset-y', 'start', 'end',
-  'space-x', 'space-y',
+  'p',
+  'px',
+  'py',
+  'pt',
+  'pb',
+  'pl',
+  'pr',
+  'ps',
+  'pe',
+  'm',
+  'mx',
+  'my',
+  'mt',
+  'mb',
+  'ml',
+  'mr',
+  'ms',
+  'me',
+  'gap',
+  'gap-x',
+  'gap-y',
+  'w',
+  'h',
+  'size',
+  'min-w',
+  'max-w',
+  'min-h',
+  'max-h',
+  'top',
+  'left',
+  'right',
+  'bottom',
+  'inset',
+  'inset-x',
+  'inset-y',
+  'start',
+  'end',
+  'space-x',
+  'space-y',
 ]
 const HALF = { 2: '0.5', 6: '1.5', 10: '2.5', 14: '3.5' }
 const ROUNDED = { 2: 'sm', 4: '', 6: 'md', 8: 'lg', 12: 'xl', 16: '2xl', 24: '3xl' }
 // byte-exact color tokens only: #386dff = --color-primary-500 (semantic `primary`), #000000 = `black`.
 // Figma-custom hexes (grays, Material tints) have no exact existing token -> left for design decision.
-const COLOR_UTILS = ['text', 'bg', 'border', 'ring', 'fill', 'stroke', 'outline', 'divide', 'decoration', 'caret', 'accent', 'from', 'via', 'to']
+const COLOR_UTILS = [
+  'text',
+  'bg',
+  'border',
+  'ring',
+  'fill',
+  'stroke',
+  'outline',
+  'divide',
+  'decoration',
+  'caret',
+  'accent',
+  'from',
+  'via',
+  'to',
+]
 const COLOR_MAP = { '#386dff': 'primary', '#000000': 'black' }
 const colorAlt = COLOR_UTILS.join('|')
 const colorRe = new RegExp(`((?:[a-z][a-z0-9-]*:)*)(${colorAlt})-\\[(#[0-9a-fA-F]{3,8})\\]`, 'g')
@@ -41,7 +89,10 @@ const roundedRe = /((?:[a-z][a-z0-9-]*:)*)(rounded(?:-[a-z]{1,2})?)-\[(\d+)px\]/
 const files = execSync(
   `grep -rlE "[a-z0-9]-\\[(#[0-9a-fA-F]|[0-9]+px)" --include="*.tsx" --include="*.ts" apps packages | grep -v node_modules | grep -v .next`,
   { encoding: 'utf8' }
-).trim().split('\n').filter(Boolean)
+)
+  .trim()
+  .split('\n')
+  .filter(Boolean)
 
 const subs = new Map() // old -> new (counts)
 const residue = new Map() // skipped arbitrary -> count
@@ -97,4 +148,5 @@ console.log(`substitutions: ${subCount} | residue (kept arbitrary): ${resCount}\
 console.log('--- substitutions (unique mapping × count) ---')
 for (const [k, v] of [...subs.entries()].sort((a, b) => b[1] - a[1])) console.log(`  ${v}×  ${k}`)
 console.log('\n--- residue: px-arbitrary with NO exact token (genuine) ---')
-for (const [k, v] of [...residue.entries()].sort((a, b) => b[1] - a[1])) console.log(`  ${v}×  ${k}`)
+for (const [k, v] of [...residue.entries()].sort((a, b) => b[1] - a[1]))
+  console.log(`  ${v}×  ${k}`)

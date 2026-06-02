@@ -19,6 +19,7 @@ catalog:
   react: 19.2.3
   react-dom: 19.2.3
   react-hook-form: ^7.70.0
+  tailwindcss: ^4
   typescript: ^5
   zod: ^4.3.5
   zustand: ^5.0.9
