@@ -115,11 +115,11 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
           <div className="flex min-w-0 flex-1 flex-col">
             {/* 이름 + 태그 */}
             <div className="flex items-center gap-[10px]">
-              <span className="shrink-0 font-sans text-sb-16 text-[#1B1B1B]">{name}</span>
+              <span className="shrink-0 text-sb-16 text-[#1B1B1B]">{name}</span>
               {tags.length > 0 && (
                 <div
                   className={cn(
-                    'flex items-center gap-[8px] font-sans text-[#A5A5A5]',
+                    'flex items-center gap-[8px] text-[#A5A5A5]',
                     isBadge ? 'text-m-14' : 'text-m-12'
                   )}
                 >
@@ -137,7 +137,7 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
             {lastMessage && (
               <span
                 className={cn(
-                  'truncate font-sans',
+                  'truncate',
                   isBadge ? 'text-m-14 text-[#1B1B1B]' : 'text-m-12 text-[#A5A5A5]'
                 )}
               >
@@ -150,12 +150,10 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
         {/* 오른쪽 영역 */}
         {isBadge ? (
           <div className="flex shrink-0 flex-col items-end justify-center gap-[8px]">
-            {timestamp && <span className="font-sans text-m-12 text-[#A5A5A5]">{timestamp}</span>}
+            {timestamp && <span className="text-m-12 text-[#A5A5A5]">{timestamp}</span>}
             {unreadCount != null && unreadCount > 0 && (
               <div className="flex size-[20px] items-center justify-center rounded-[8px] bg-[#FF4242]">
-                <span className="font-sans text-[12px] font-bold leading-none text-white">
-                  {unreadCount}
-                </span>
+                <span className="text-[12px] font-bold leading-none text-white">{unreadCount}</span>
               </div>
             )}
           </div>

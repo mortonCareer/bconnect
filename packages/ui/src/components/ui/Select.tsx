@@ -12,7 +12,7 @@ export interface SelectOption {
   label: string
 }
 
-const M14 = 'font-sans text-m-14'
+const M14 = 'text-m-14'
 
 const FILTER_TRIGGER =
   'flex h-[40px] w-[95px] items-center justify-center gap-[10px] rounded-[8px] border bg-white px-[10px]'
