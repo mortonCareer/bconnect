@@ -1,7 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Button, cn } from '@bconnect/ui'
 import { TRADE_LABELS } from '@/lib/trade-labels'
 import type { TechnicianItem } from '@/hooks/useTechnicianItems'
@@ -88,19 +89,9 @@ interface TechnicianCardProps {
 
 export function TechnicianCard({ item }: TechnicianCardProps) {
   const { requireLogin } = useLoginGate()
-  const router = useRouter()
   const searchParams = useSearchParams()
-
-  const openProfile = () => {
-    const qs = searchParams.toString()
-    router.push(qs ? `/profile/${item.profileId}?${qs}` : `/profile/${item.profileId}`, {
-      scroll: false,
-    })
-  }
-
-  const prefetchProfile = () => {
-    if (process.env.NODE_ENV === 'production') router.prefetch(`/profile/${item.profileId}`)
-  }
+  const qs = searchParams.toString()
+  const profileHref = qs ? `/profile/${item.profileId}?${qs}` : `/profile/${item.profileId}`
 
   const metaParts = [
     item.location,
@@ -173,15 +164,10 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
 
           {/* 액션 버튼 — Figma 카드: h-40 w-full. design system Button 의 'full' size 는 h-50 이라 h-40 override. */}
           <div className="mt-auto flex gap-[10px]">
-            <Button
-              variant="outline"
-              size="full"
-              className="h-[40px]"
-              onClick={openProfile}
-              onMouseEnter={prefetchProfile}
-              onFocus={prefetchProfile}
-            >
-              프로필 보기
+            <Button asChild variant="outline" size="full" className="h-[40px]">
+              <Link href={profileHref} scroll={false}>
+                프로필 보기
+              </Link>
             </Button>
             <Button variant="primary" size="full" className="h-[40px]" onClick={requireLogin}>
               메시지 보내기
