@@ -14,7 +14,7 @@ export function PanelHeader({ username, onClose }: PanelHeaderProps) {
         type="button"
         onClick={onClose}
         aria-label="프로필 패널 닫기"
-        className="flex h-5 w-5 items-center justify-center text-gray-700 hover:text-gray-900"
+        className="flex h-5 w-5 cursor-pointer items-center justify-center text-gray-700 hover:text-gray-900"
       >
         <ChevronsRight className="h-5 w-5" />
       </button>

@@ -93,8 +93,12 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
 
   const openProfile = () => {
     const qs = searchParams.toString()
-    router.push(qs ? `/profile/${item.profileId}?${qs}` : `/profile/${item.profileId}`)
+    router.push(qs ? `/profile/${item.profileId}?${qs}` : `/profile/${item.profileId}`, {
+      scroll: false,
+    })
   }
+
+  const prefetchProfile = () => router.prefetch(`/profile/${item.profileId}`)
 
   const metaParts = [
     item.location,
@@ -167,7 +171,14 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
 
           {/* 액션 버튼 — Figma 카드: h-40 w-full. design system Button 의 'full' size 는 h-50 이라 h-40 override. */}
           <div className="mt-auto flex gap-[10px]">
-            <Button variant="outline" size="full" className="h-[40px]" onClick={openProfile}>
+            <Button
+              variant="outline"
+              size="full"
+              className="h-[40px]"
+              onClick={openProfile}
+              onMouseEnter={prefetchProfile}
+              onFocus={prefetchProfile}
+            >
               프로필 보기
             </Button>
             <Button variant="primary" size="full" className="h-[40px]" onClick={requireLogin}>

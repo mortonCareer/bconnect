@@ -14,7 +14,7 @@ export default function ProfilePanelPage() {
 
   const handleClose = () => {
     const qs = searchParams.toString()
-    router.push(qs ? `/?${qs}` : '/')
+    router.push(qs ? `/?${qs}` : '/', { scroll: false })
   }
 
   return (

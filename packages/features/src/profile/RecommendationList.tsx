@@ -70,7 +70,7 @@ function ToggleButton({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'rounded-md border px-3 py-2 text-r-14',
+        'cursor-pointer rounded-md border px-3 py-2 text-r-14',
         active
           ? 'border-gray-300 bg-gray-100 text-sb-14 text-gray-900'
           : 'border-gray-300 bg-white text-gray-700'
@@ -117,7 +117,7 @@ function RecommendationItem({ recommendation }: { recommendation: Recommendation
             onClick={() => setExpanded((v) => !v)}
             aria-expanded={expanded}
             aria-controls={textId}
-            className="self-start text-r-12 text-gray-500 underline"
+            className="cursor-pointer self-start text-r-12 text-gray-500 underline"
           >
             {expanded ? '접기' : '더보기'}
           </button>

@@ -32,6 +32,14 @@ export function ProfileView({ profileId, onClose }: ProfileViewProps) {
     rootRef.current?.focus()
   }, [])
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [onClose])
+
   const enabled = Number.isFinite(profileId) && profileId > 0
   const { data, isLoading, isError } = useGetProfile(profileId, { query: { enabled } })
   const member = data?.member
@@ -45,7 +53,7 @@ export function ProfileView({ profileId, onClose }: ProfileViewProps) {
     <div ref={rootRef} tabIndex={-1} className="flex h-full flex-col bg-white outline-none">
       <PanelHeader username={member?.username} onClose={onClose} />
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {isLoading ? (
           <ProfileSkeleton />
         ) : isError || !profile ? (
