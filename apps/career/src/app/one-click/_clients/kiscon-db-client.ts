@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { getDb } from '../../../lib/db'
+import { getDb } from '@/lib/db'
 import type { KisconArrearsItem, KisconSubconLimitItem } from './kiscon-parser'
 
 export type { KisconArrearsItem, KisconSubconLimitItem }
