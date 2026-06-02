@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import type { Credential } from '@bconnect/api-client'
 import { Button, Input } from '@bconnect/ui'
-import { getCredentialLabel, formatDate } from '../../constants'
+import { getCredentialLabel, formatDate } from '@/app/(main)/profile/certifications/constants'
 
 interface OneClickTabProps {
   credentials: Credential[]
