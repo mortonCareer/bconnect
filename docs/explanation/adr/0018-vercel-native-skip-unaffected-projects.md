@@ -1,9 +1,9 @@
 # ADR-0018: Vercel 네이티브 Skip Unaffected Projects 채택 (커스텀 ignore_command 폐기)
 
-- **Status**: Proposed
+- **Status**: Accepted
 - **Date**: 2026-06-02
 - **Deciders**: CTO (@manamana32321)
-- **Related**: [#453](https://github.com/mortonCareer/bconnect/issues/453), [ADR-0006](./0006-dev-as-staging.md), [ADR-0010](./0010-dev-branch-staging-be.md), [Vercel — Skipping unaffected projects](https://vercel.com/docs/monorepos#skipping-unaffected-projects). 선행 땜질 이력: #440, #443, #445
+- **Related**: [#453](https://github.com/mortonCareer/bconnect/issues/453), [PR #455](https://github.com/mortonCareer/bconnect/pull/455)(머지+apply 완료), [ADR-0006](./0006-dev-as-staging.md), [ADR-0010](./0010-dev-branch-staging-be.md), [Vercel — Skipping unaffected projects](https://vercel.com/docs/monorepos#skipping-unaffected-projects). 선행 땜질 이력: #440, #443, #445
 
 ## Context
 
@@ -63,6 +63,7 @@ BConnect는 pnpm 워크스페이스 모노레포다. Vercel 프로젝트 2개(`a
 
 ## Notes
 
-- **검증**: merge + `terraform apply` 후, feature 브랜치에 `apps/<app>` 후속 푸시가 실제로 프리뷰를 재배포하는지(이 ADR의 1차 목표), 무관 패키지 변경 시 비대상 앱이 스킵되는지 확인.
-- **모니터**: dev staging의 always-green 회귀가 실제로 없는지 디자이너 검수 사이클에서 관찰 (회귀 시 ADR-0006/0010 맥락에서 재검토).
-- merge + apply 시 Status를 **Accepted**로 전이.
+- **적용 완료 (2026-06-02)**: PR #455 머지(`2778f2b`) → `terraform apply -target=module.vercel` (career/plan `ignore_command -> null`, **0 add / 2 change / 0 destroy**) → `terraform plan` 재확인 **"No changes"**. 라이브 Vercel 에서 ignore_command 제거됨.
+- **실세계 검증 (이 PR)**: 이 PR 은 `docs/` 만 바꾸므로 어느 앱 closure 에도 안 들어감 → native skip 이 활성이면 career·plan 양쪽 프리뷰 빌드가 **스킵**돼야 한다(그래프 인지 확증). 옛 ignore_command 의 "첫 푸시 merge-base 폴백 → 빌드"(#455 가 그랬음)와 대비되는 직접 증거. 관찰 결과는 이 PR 체크/코멘트에 기록.
+- **남은 검증**: "관련 변경(`apps/**`·`packages/**`) 후속 푸시가 비대상 앱은 스킵하고 대상 앱은 재배포" = #453 본 증상의 정확한 재현은 다음 코드 feature PR 에서 관찰.
+- **모니터**: dev staging always-green 회귀가 없는지 디자이너 검수 사이클에서 관찰 (회귀 시 ADR-0006/0010 맥락 재검토).
