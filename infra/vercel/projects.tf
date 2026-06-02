@@ -22,7 +22,7 @@ resource "vercel_project" "morton-career" {
 
   root_directory = "apps/career"
 
-  # ignore_command 없음 — Vercel 네이티브 "Skip Unaffected Projects"(기본 ON) 위임 (ADR-0018, #453)
+  # ignore_command 없음 — 매 푸시 빌드(Vercel 기본; native skip 미작동, 실측 ADR-0018). 경위 #453
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
@@ -241,7 +241,7 @@ resource "vercel_project" "morton-plan" {
 
   root_directory = "apps/plan"
 
-  # ignore_command 없음 — Vercel 네이티브 "Skip Unaffected Projects"(기본 ON) 위임 (ADR-0018, #453)
+  # ignore_command 없음 — 매 푸시 빌드(Vercel 기본; native skip 미작동, 실측 ADR-0018). 경위 #453
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
