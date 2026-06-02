@@ -26,9 +26,9 @@ const tagVariants = cva(
       },
       size: {
         // default: h-40px, px-14px
-        default: 'h-[40px] px-[14px] py-[3px]',
+        default: 'h-10 px-3.5 py-[3px]',
         // small
-        sm: 'h-[32px] px-[10px] py-[2px] text-xs',
+        sm: 'h-8 px-2.5 py-0.5 text-xs',
       },
     },
     defaultVariants: {

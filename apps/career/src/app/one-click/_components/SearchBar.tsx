@@ -49,7 +49,7 @@ export function SearchBar({ defaultValue }: SearchBarProps) {
       />
       <Button
         variant="primary"
-        className="h-[50px] w-[100px] shrink-0"
+        className="h-[50px] w-25 shrink-0"
         onClick={handleSearch}
         disabled={!isValid}
         isLoading={isPending}

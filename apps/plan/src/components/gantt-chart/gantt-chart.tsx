@@ -123,7 +123,7 @@ function TaskBar({ task, startDate }: { task: GanttTask; startDate: string }) {
 
   return (
     <div
-      className="group absolute flex items-center rounded-[4px] pl-[10px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+      className="group absolute flex items-center rounded pl-2.5 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
       style={{
         left,
         top: BAR_TOP,

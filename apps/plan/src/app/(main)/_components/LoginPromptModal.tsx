@@ -50,7 +50,7 @@ export function LoginPromptModal({ open, onClose }: LoginPromptModalProps) {
         aria-modal="true"
         aria-labelledby="login-prompt-title"
         tabIndex={-1}
-        className="relative flex w-full max-w-[400px] flex-col gap-6 rounded-[13px] bg-white p-7 focus:outline-none"
+        className="relative flex w-full max-w-100 flex-col gap-6 rounded-[13px] bg-white p-7 focus:outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 닫기 */}
@@ -75,10 +75,10 @@ export function LoginPromptModal({ open, onClose }: LoginPromptModalProps) {
 
         {/* CTA — GuestSidebar 와 동선 통일 */}
         <div className="flex flex-col gap-2">
-          <Button asChild variant="primary" size="full" className="h-[40px]">
+          <Button asChild variant="primary" size="full" className="h-10">
             <Link href="/login">로그인</Link>
           </Button>
-          <Button asChild variant="outline" size="full" className="h-[40px]">
+          <Button asChild variant="outline" size="full" className="h-10">
             <Link href="/signup/member">회원가입</Link>
           </Button>
         </div>

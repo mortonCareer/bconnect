@@ -19,7 +19,9 @@
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "eslint-config-next": "16.1.1",
+    "eslint-plugin-tailwindcss": "3.18.3",
     "globals": "^16.5.0",
+    "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "^8.50.1"
   },

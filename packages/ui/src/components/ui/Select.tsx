@@ -14,11 +14,11 @@ export interface SelectOption {
 }
 
 const FILTER_TRIGGER =
-  'flex h-[40px] w-[95px] items-center justify-center gap-[10px] rounded-[8px] border bg-white px-[10px]'
+  'flex h-10 w-[95px] items-center justify-center gap-2.5 rounded-lg border bg-white px-2.5'
 const PANEL_CLASSES =
-  'absolute left-0 top-[calc(100%+6px)] z-20 max-h-[240px] w-max min-w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-[8px] border border-gray-300 bg-white py-[4px] shadow-[0_6px_20px_rgba(0,0,0,0.1)]'
+  'absolute left-0 top-[calc(100%+6px)] z-20 max-h-60 w-max min-w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-lg border border-gray-300 bg-white py-1 shadow-[0_6px_20px_rgba(0,0,0,0.1)]'
 const OPTION_CLASSES =
-  'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-secondary'
+  'flex w-full items-center justify-between gap-2 px-3 py-2 text-left hover:bg-secondary'
 
 /** open 일 때 바깥 클릭 / Escape 로 닫는다 */
 function useCloseOnOutside(open: boolean, close: () => void) {

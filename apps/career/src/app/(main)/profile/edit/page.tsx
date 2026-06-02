@@ -282,7 +282,7 @@ export default function ProfileEditPage() {
                         key={option.id}
                         type="button"
                         onClick={() => field.onChange(levelToYears(option.id))}
-                        className={`flex h-[40px] items-center justify-center rounded-[8px] border px-[14px] py-[3px] text-sm leading-[1.6] transition-colors ${
+                        className={`flex h-10 items-center justify-center rounded-lg border px-3.5 py-[3px] text-sm leading-[1.6] transition-colors ${
                           isSelected
                             ? 'border-primary bg-secondary font-semibold text-primary'
                             : 'border-gray-300 font-medium text-gray-500'

@@ -125,7 +125,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-6 px-4 pt-3">
           {/* Title Section */}
           <div className="flex flex-col gap-4">
-            <h1 className="text-2xl font-semibold leading-[1.4] text-[#000000]">
+            <h1 className="text-2xl font-semibold leading-[1.4] text-black">
               휴대폰 번호로
               <br />
               <span className="text-primary">간편하게 로그인</span>하세요

@@ -11,13 +11,12 @@ import { cn } from '../../lib/utils'
  * - theirs: 상대 채팅 - 회색 버블, 프로필+닉네임
  * - typing: 입력 중 - 프로필+닉네임+타이핑 인디케이터
  */
-const chatBubbleVariants = cva('inline-flex items-center px-[16px] text-r-14', {
+const chatBubbleVariants = cva('inline-flex items-center px-4 text-r-14', {
   variants: {
     variant: {
-      mine: 'bg-primary text-white rounded-tl-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px]',
-      theirs:
-        'bg-gray-100 text-gray-900 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[12px]',
-      typing: 'bg-gray-100 rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] py-[9px] h-[40px]',
+      mine: 'bg-primary text-white rounded-tl-xl rounded-bl-xl rounded-br-xl py-[9px]',
+      theirs: 'bg-gray-100 text-gray-900 rounded-tr-xl rounded-bl-xl rounded-br-xl py-3',
+      typing: 'bg-gray-100 rounded-tr-xl rounded-bl-xl rounded-br-xl py-[9px] h-10',
     },
   },
   defaultVariants: {
@@ -64,7 +63,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
   ({ className, variant, message, timestamp, profileImage, nickname, ...props }, ref) => {
     if (variant === 'mine') {
       return (
-        <div ref={ref} className={cn('flex items-end justify-end gap-[8px]', className)} {...props}>
+        <div ref={ref} className={cn('flex items-end justify-end gap-2', className)} {...props}>
           {timestamp && <span className="shrink-0 text-r-12 text-gray-700">{timestamp}</span>}
           <div className={cn(chatBubbleVariants({ variant }), 'max-w-[55vw]')}>
             <span className="break-words">{message}</span>
@@ -75,17 +74,17 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
 
     // theirs & typing 공통 레이아웃
     return (
-      <div ref={ref} className={cn('flex items-start gap-[8px]', className)} {...props}>
+      <div ref={ref} className={cn('flex items-start gap-2', className)} {...props}>
         {/* 프로필 이미지 */}
-        <div className="size-[40px] shrink-0 overflow-hidden rounded-full bg-gray-100">
+        <div className="size-10 shrink-0 overflow-hidden rounded-full bg-gray-100">
           {profileImage && (
             <img src={profileImage} alt={nickname || ''} className="size-full object-cover" />
           )}
         </div>
 
         {/* 닉네임 + 버블 + 타임스탬프 */}
-        <div className="flex items-end gap-[8px]">
-          <div className="flex max-w-[55vw] flex-col gap-[4px]">
+        <div className="flex items-end gap-2">
+          <div className="flex max-w-[55vw] flex-col gap-1">
             {nickname && <span className="text-m-12 text-gray-900">{nickname}</span>}
             <div className={chatBubbleVariants({ variant })}>
               {variant === 'typing' ? (
@@ -108,11 +107,11 @@ ChatMessage.displayName = 'ChatMessage'
 /** 타이핑 인디케이터 (3개의 점 애니메이션) */
 function TypingDots() {
   return (
-    <div className="flex items-center gap-[4px]">
+    <div className="flex items-center gap-1">
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className="size-[8px] rounded-full bg-primary animate-bounce"
+          className="size-2 rounded-full bg-primary animate-bounce"
           style={{ animationDelay: `${i * 0.15}s`, animationDuration: '0.6s' }}
         />
       ))}
