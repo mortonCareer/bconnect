@@ -116,7 +116,7 @@ export default function ShowcasePage() {
             <Link
               key={component.name}
               href={component.href}
-              className="group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-[#386DFF] hover:shadow-md"
+              className="group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-primary hover:shadow-md"
             >
               {/* Preview Area */}
               <div className="mb-4 flex h-32 items-center justify-center rounded-lg bg-gray-50">
@@ -125,14 +125,14 @@ export default function ShowcasePage() {
 
               {/* Component Info */}
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 group-hover:text-[#386DFF]">
+                <h2 className="text-lg font-semibold text-gray-900 group-hover:text-primary">
                   {component.name}
                 </h2>
                 <p className="mt-1 text-sm text-gray-500">{component.description}</p>
               </div>
 
               {/* Arrow indicator */}
-              <div className="mt-4 flex items-center text-sm text-gray-400 group-hover:text-[#386DFF]">
+              <div className="mt-4 flex items-center text-sm text-gray-400 group-hover:text-primary">
                 <span>상세보기</span>
                 <svg
                   className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1"

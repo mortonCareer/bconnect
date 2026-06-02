@@ -5,6 +5,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '../../lib/utils'
+import { CheckIcon, ChevronDownIcon } from '../../icons'
 import { FIELD_BASE_CLASSES, FIELD_DEFAULT_VARIANT_CLASSES } from './_field-base'
 
 export interface SelectOption {
@@ -12,50 +13,12 @@ export interface SelectOption {
   label: string
 }
 
-const M14 = 'font-[Pretendard_Variable] text-m-14'
-
 const FILTER_TRIGGER =
-  'flex h-[40px] w-[95px] items-center justify-center gap-[10px] rounded-[8px] border bg-white px-[10px]'
+  'flex h-10 w-[95px] items-center justify-center gap-2.5 rounded-lg border bg-white px-2.5'
 const PANEL_CLASSES =
-  'absolute left-0 top-[calc(100%+6px)] z-20 max-h-[240px] w-max min-w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-[8px] border border-gray-300 bg-white py-[4px] shadow-[0_6px_20px_rgba(0,0,0,0.1)]'
+  'absolute left-0 top-[calc(100%+6px)] z-20 max-h-60 w-max min-w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-lg border border-gray-300 bg-white py-1 shadow-[0_6px_20px_rgba(0,0,0,0.1)]'
 const OPTION_CLASSES =
-  'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-secondary'
-
-// TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지)
-function CheckMark() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0">
-      <path
-        d="M3.5 8.5L6.5 11.5L12.5 4.5"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-// TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지)
-function ChevronIcon({ open }: { open?: boolean }) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      className={cn('shrink-0 transition-transform', open && 'rotate-180')}
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        transform="translate(3.2 6.4)"
-        d="M0.144247 0.168567C0.345708 -0.0463238 0.683223 -0.0572037 0.898103 0.144247L4.8 3.80228L8.70187 0.144247C8.9168 -0.0572037 9.2543 -0.0463238 9.45579 0.168567C9.65718 0.383458 9.6463 0.720972 9.43147 0.922423L5.16477 4.92246C4.95962 5.11478 4.64039 5.11478 4.43523 4.92246L0.168567 0.922423C-0.0463238 0.720972 -0.0572037 0.383458 0.144247 0.168567Z"
-        fill="currentColor"
-      />
-    </svg>
-  )
-}
+  'flex w-full items-center justify-between gap-2 px-3 py-2 text-left hover:bg-secondary'
 
 /** open 일 때 바깥 클릭 / Escape 로 닫는다 */
 function useCloseOnOutside(open: boolean, close: () => void) {
@@ -148,7 +111,7 @@ export function Select({
   const triggerClass = filterMode
     ? cn(
         FILTER_TRIGGER,
-        M14,
+        'text-m-14',
         'outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary',
         hasValue ? 'text-gray-900' : 'text-gray-500',
         open ? 'border-primary' : 'border-gray-300',
@@ -180,7 +143,7 @@ export function Select({
         className={triggerClass}
       >
         <span className={cn('truncate', placeholderColor && 'text-gray-500')}>{triggerText}</span>
-        <ChevronIcon open={open} />
+        <ChevronDownIcon className={cn('transition-transform', open && 'rotate-180')} />
       </button>
 
       {open && (
@@ -192,10 +155,14 @@ export function Select({
                 role="option"
                 aria-selected={!hasValue}
                 onClick={handleClear}
-                className={cn(OPTION_CLASSES, M14, !hasValue ? 'text-primary' : 'text-gray-700')}
+                className={cn(
+                  OPTION_CLASSES,
+                  'text-m-14',
+                  !hasValue ? 'text-primary' : 'text-gray-700'
+                )}
               >
                 전체
-                {!hasValue && <CheckMark />}
+                {!hasValue && <CheckIcon size={14} />}
               </button>
             </li>
           )}
@@ -208,10 +175,14 @@ export function Select({
                   role="option"
                   aria-selected={sel}
                   onClick={() => handleSelect(opt.value)}
-                  className={cn(OPTION_CLASSES, M14, sel ? 'text-primary' : 'text-gray-700')}
+                  className={cn(
+                    OPTION_CLASSES,
+                    'text-m-14',
+                    sel ? 'text-primary' : 'text-gray-700'
+                  )}
                 >
                   {opt.label}
-                  {sel && <CheckMark />}
+                  {sel && <CheckIcon size={14} />}
                 </button>
               </li>
             )

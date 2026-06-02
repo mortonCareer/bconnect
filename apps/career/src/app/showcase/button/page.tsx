@@ -13,7 +13,7 @@ export default function ButtonDetailPage() {
         {/* Back Navigation */}
         <Link
           href="/showcase"
-          className="mb-6 inline-flex items-center text-sm text-gray-500 hover:text-[#386DFF]"
+          className="mb-6 inline-flex items-center text-sm text-gray-500 hover:text-primary"
         >
           <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path

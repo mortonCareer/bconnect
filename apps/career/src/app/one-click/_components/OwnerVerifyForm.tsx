@@ -58,18 +58,18 @@ export function OwnerVerifyForm({ registrationNumber }: OwnerVerifyFormProps) {
           placeholder="대표자 성명"
           value={ownerName}
           onChange={(e) => setOwnerName(e.target.value)}
-          className="h-[40px] flex-1"
+          className="h-10 flex-1"
         />
         <Input
           type="text"
           placeholder="개업일자 (YYYY-MM-DD)"
           value={openDate}
           onChange={(e) => setOpenDate(e.target.value)}
-          className="h-[40px] flex-1"
+          className="h-10 flex-1"
         />
         <Button
           variant="primary"
-          className="h-[40px] w-[80px] shrink-0"
+          className="h-10 w-20 shrink-0"
           onClick={handleVerify}
           disabled={!isValid}
           isLoading={isLoading}

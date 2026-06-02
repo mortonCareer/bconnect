@@ -100,7 +100,7 @@
 
   /* Typography - Pretendard */
   --font-sans:
-    'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    var(--font-pretendard), -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 
   /* Font sizes matching Figma */
   --font-size-xs: 0.75rem; /* 12px */

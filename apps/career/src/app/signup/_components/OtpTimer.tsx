@@ -22,7 +22,7 @@ export function OtpTimer({ expiresAt, onResend, isResending }: OtpTimerProps) {
         type="button"
         onClick={onResend}
         disabled={isResending}
-        className="font-medium text-[#386DFF] disabled:opacity-50"
+        className="font-medium text-primary disabled:opacity-50"
       >
         재요청
       </button>

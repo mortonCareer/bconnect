@@ -1,6 +1,13 @@
 // @bconnect/ui - Icons
 export { ChevronLeftIcon } from './ChevronLeftIcon'
+export { ChevronDownIcon } from './ChevronDownIcon'
+export { ChevronRightIcon } from './ChevronRightIcon'
 export { CheckIcon } from './CheckIcon'
+export { XIcon } from './XIcon'
+export { RefreshIcon } from './RefreshIcon'
+export { StarIcon } from './StarIcon'
+export { FilterIcon } from './FilterIcon'
+export { ChatIcon } from './ChatIcon'
 export { UploadCloudIcon } from './UploadCloudIcon'
 export { ImageIcon } from './ImageIcon'
 export { SendIcon } from './SendIcon'

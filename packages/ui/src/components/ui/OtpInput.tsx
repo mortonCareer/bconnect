@@ -54,7 +54,7 @@ const OtpInput = React.forwardRef<HTMLInputElement, OtpInputProps>(
           className="flex-1 bg-transparent text-base text-gray-900 placeholder:text-gray-500 outline-none disabled:cursor-not-allowed disabled:opacity-50"
           {...props}
         />
-        <div className="flex items-center gap-[10px] text-sm shrink-0">
+        <div className="flex items-center gap-2.5 text-sm shrink-0">
           {remainingTime > 0 && <span className="text-gray-500">{formatTime(remainingTime)}</span>}
           <button
             type="button"
