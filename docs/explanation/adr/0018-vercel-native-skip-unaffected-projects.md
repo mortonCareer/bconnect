@@ -64,6 +64,6 @@ BConnect는 pnpm 워크스페이스 모노레포다. Vercel 프로젝트 2개(`a
 ## Notes
 
 - **적용 완료 (2026-06-02)**: PR #455 머지(`2778f2b`) → `terraform apply -target=module.vercel` (career/plan `ignore_command -> null`, **0 add / 2 change / 0 destroy**) → `terraform plan` 재확인 **"No changes"**. 라이브 Vercel 에서 ignore_command 제거됨.
-- **실세계 검증 (이 PR)**: 이 PR 은 `docs/` 만 바꾸므로 어느 앱 closure 에도 안 들어감 → native skip 이 활성이면 career·plan 양쪽 프리뷰 빌드가 **스킵**돼야 한다(그래프 인지 확증). 옛 ignore_command 의 "첫 푸시 merge-base 폴백 → 빌드"(#455 가 그랬음)와 대비되는 직접 증거. 관찰 결과는 이 PR 체크/코멘트에 기록.
+- **실세계 검증 (이 PR, PR #460)**: native skip 의 스킵은 _직전 배포 대비_ **후속 푸시**에서 발동한다 — 첫 푸시는 비교 baseline 이 없어 안전하게 빌드(#460 1차 푸시도 docs-only 였지만 career·plan 양쪽 빌드됨, 예상대로). 따라서 검증은 후속 푸시로 한다: 이 PR 에 docs-only 후속 푸시 → 직전 배포 대비 앱·패키지 변경 0 → native skip 활성이면 career·plan 양쪽 **스킵**돼야 한다. ignore_command 는 이미 제거(apply 로 검증)됐으니, 스킵 발생 = native skip 이 유일 활성 메커니즘으로 작동 + 그래프 인지 확증. 결과는 PR 체크/코멘트에 기록.
 - **남은 검증**: "관련 변경(`apps/**`·`packages/**`) 후속 푸시가 비대상 앱은 스킵하고 대상 앱은 재배포" = #453 본 증상의 정확한 재현은 다음 코드 feature PR 에서 관찰.
 - **모니터**: dev staging always-green 회귀가 없는지 디자이너 검수 사이클에서 관찰 (회귀 시 ADR-0006/0010 맥락 재검토).
