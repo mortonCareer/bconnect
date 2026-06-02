@@ -163,12 +163,12 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
 
           {/* 액션 버튼 — Figma 카드: h-40 w-full. design system Button 의 'full' size 는 h-50 이라 h-40 override. */}
           <div className="mt-auto flex gap-[10px]">
-            <Button asChild variant="outline" size="full" className="h-[40px]">
+            <Button asChild variant="outline" size="full" className="h-10">
               <Link href={profileHref} scroll={false}>
                 프로필 보기
               </Link>
             </Button>
-            <Button variant="primary" size="full" className="h-[40px]" onClick={requireLogin}>
+            <Button variant="primary" size="full" className="h-10" onClick={requireLogin}>
               메시지 보내기
             </Button>
           </div>

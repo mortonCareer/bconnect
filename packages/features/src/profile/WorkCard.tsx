@@ -1,8 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
 import { cn } from '@bconnect/ui'
+import { useExpandableText } from './useExpandableText'
 
 interface WorkCardProps {
   image: string
@@ -12,15 +12,7 @@ interface WorkCardProps {
 }
 
 export function WorkCard({ image, imageAlt, timestamp, description }: WorkCardProps) {
-  const [expanded, setExpanded] = useState(false)
-  const [truncated, setTruncated] = useState(false)
-  const textRef = useRef<HTMLParagraphElement>(null)
-
-  useEffect(() => {
-    if (expanded) return
-    const el = textRef.current
-    if (el) setTruncated(el.scrollWidth > el.clientWidth)
-  }, [expanded, description])
+  const { ref, expanded, showToggle, toggle } = useExpandableText([description], 'width')
 
   return (
     <div className="flex flex-col">
@@ -47,7 +39,7 @@ export function WorkCard({ image, imageAlt, timestamp, description }: WorkCardPr
       <div className="flex flex-col gap-2 px-4 pt-3 pb-4">
         <div className={cn('flex w-full', expanded ? 'flex-col items-end' : 'items-center gap-2')}>
           <p
-            ref={textRef}
+            ref={ref}
             className={cn(
               'text-m-16 text-gray-900',
               expanded ? 'w-full whitespace-pre-wrap' : 'min-w-0 flex-1 truncate'
@@ -55,10 +47,10 @@ export function WorkCard({ image, imageAlt, timestamp, description }: WorkCardPr
           >
             {description}
           </p>
-          {(expanded || truncated) && (
+          {showToggle && (
             <button
               type="button"
-              onClick={() => setExpanded((v) => !v)}
+              onClick={toggle}
               aria-expanded={expanded}
               className="shrink-0 cursor-pointer text-r-12 leading-[25.2px] text-gray-700 underline hover:text-gray-900"
             >

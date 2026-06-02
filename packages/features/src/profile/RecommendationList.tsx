@@ -1,11 +1,12 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useGetReceivedRecommendations, useGetSentRecommendations } from '@bconnect/api-client'
 import type { Recommendation } from '@bconnect/api-client'
 import { cn, Skeleton } from '@bconnect/ui'
 import { getAvatarUrl } from './labels'
+import { useExpandableText } from './useExpandableText'
 
 type Mode = 'received' | 'sent'
 
@@ -94,15 +95,8 @@ function ToggleButton({
 
 function RecommendationItem({ recommendation }: { recommendation: Recommendation }) {
   const { member, content } = recommendation
-  const [expanded, setExpanded] = useState(false)
-  const [truncated, setTruncated] = useState(false)
-  const textRef = useRef<HTMLParagraphElement>(null)
+  const { ref, expanded, showToggle, toggle } = useExpandableText([content], 'height')
   const textId = `recommendation-${recommendation.id}`
-
-  useEffect(() => {
-    const el = textRef.current
-    if (el) setTruncated(el.scrollHeight > el.clientHeight + 1)
-  }, [content])
 
   return (
     <li className="flex gap-3 py-3">
@@ -121,15 +115,15 @@ function RecommendationItem({ recommendation }: { recommendation: Recommendation
         <span className="text-m-14 text-gray-900">{member.name}</span>
         <p
           id={textId}
-          ref={textRef}
+          ref={ref}
           className={cn('whitespace-pre-wrap text-r-12 text-gray-900', !expanded && 'line-clamp-2')}
         >
           {content}
         </p>
-        {(truncated || expanded) && (
+        {showToggle && (
           <button
             type="button"
-            onClick={() => setExpanded((v) => !v)}
+            onClick={toggle}
             aria-expanded={expanded}
             aria-controls={textId}
             className="cursor-pointer self-start text-r-12 text-gray-500 underline"
