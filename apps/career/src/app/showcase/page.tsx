@@ -4,7 +4,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Button, Tag, Input, Feed, TopBar, ChatMessage, ImageInput } from '@bconnect/ui'
+import { Button, Tag, Slider, Input, Feed, TopBar, ChatMessage, ImageInput } from '@bconnect/ui'
 
 interface ComponentPreview {
   name: string
@@ -29,6 +29,16 @@ const components: ComponentPreview[] = [
     description: '태그 컴포넌트 (Morton 디자인 시스템)',
     href: '/showcase/tag',
     preview: <Tag variant="selected">도배</Tag>,
+  },
+  {
+    name: 'Slider',
+    description: '범위(dual-handle) 슬라이더 — 경력 등 범위 선택',
+    href: '/showcase/slider',
+    preview: (
+      <div className="w-56">
+        <Slider defaultValue={[2, 7]} min={0} max={10} formatLabel={(n) => `${n}년`} />
+      </div>
+    ),
   },
   {
     name: 'Input',
