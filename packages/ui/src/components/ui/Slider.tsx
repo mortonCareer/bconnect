@@ -96,8 +96,10 @@ function Slider({
             data-slot="slider-thumb"
             key={i}
             aria-label={thumbLabels?.[i]}
-            className="relative block size-3 shrink-0 rounded-full border-[3px] border-primary bg-white transition-[box-shadow] focus-visible:ring-4 focus-visible:ring-primary/30 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+            className="group/thumb relative block size-3 shrink-0 cursor-pointer rounded-full transition-[box-shadow] focus-visible:ring-4 focus-visible:ring-primary/30 focus-visible:outline-none data-[disabled]:pointer-events-none"
           >
+            {/* 핸들 원 — 사용 가능할 때 hover 시 살짝 확대 */}
+            <span className="absolute inset-0 rounded-full border-[3px] border-primary bg-white transition-transform duration-150 group-hover/thumb:scale-125" />
             {formatLabel && (
               <span className="absolute bottom-full left-1/2 mb-3 -translate-x-1/2 rounded-lg bg-secondary px-2 py-1 text-m-12 whitespace-nowrap text-primary">
                 {formatLabel(thumbValue)}
