@@ -5,6 +5,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '../../lib/utils'
+import { CheckIcon, ChevronDownIcon } from '../../icons'
 import { FIELD_BASE_CLASSES, FIELD_DEFAULT_VARIANT_CLASSES } from './_field-base'
 
 export interface SelectOption {
@@ -20,42 +21,6 @@ const PANEL_CLASSES =
   'absolute left-0 top-[calc(100%+6px)] z-20 max-h-[240px] w-max min-w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-[8px] border border-gray-300 bg-white py-[4px] shadow-[0_6px_20px_rgba(0,0,0,0.1)]'
 const OPTION_CLASSES =
   'flex w-full items-center justify-between gap-2 px-[12px] py-[8px] text-left hover:bg-secondary'
-
-// TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지)
-function CheckMark() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0">
-      <path
-        d="M3.5 8.5L6.5 11.5L12.5 4.5"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-// TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지)
-function ChevronIcon({ open }: { open?: boolean }) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      className={cn('shrink-0 transition-transform', open && 'rotate-180')}
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        transform="translate(3.2 6.4)"
-        d="M0.144247 0.168567C0.345708 -0.0463238 0.683223 -0.0572037 0.898103 0.144247L4.8 3.80228L8.70187 0.144247C8.9168 -0.0572037 9.2543 -0.0463238 9.45579 0.168567C9.65718 0.383458 9.6463 0.720972 9.43147 0.922423L5.16477 4.92246C4.95962 5.11478 4.64039 5.11478 4.43523 4.92246L0.168567 0.922423C-0.0463238 0.720972 -0.0572037 0.383458 0.144247 0.168567Z"
-        fill="currentColor"
-      />
-    </svg>
-  )
-}
 
 /** open 일 때 바깥 클릭 / Escape 로 닫는다 */
 function useCloseOnOutside(open: boolean, close: () => void) {
@@ -180,7 +145,7 @@ export function Select({
         className={triggerClass}
       >
         <span className={cn('truncate', placeholderColor && 'text-gray-500')}>{triggerText}</span>
-        <ChevronIcon open={open} />
+        <ChevronDownIcon className={cn('shrink-0 transition-transform', open && 'rotate-180')} />
       </button>
 
       {open && (
@@ -195,7 +160,7 @@ export function Select({
                 className={cn(OPTION_CLASSES, M14, !hasValue ? 'text-primary' : 'text-gray-700')}
               >
                 전체
-                {!hasValue && <CheckMark />}
+                {!hasValue && <CheckIcon size={14} className="shrink-0" />}
               </button>
             </li>
           )}
@@ -211,7 +176,7 @@ export function Select({
                   className={cn(OPTION_CLASSES, M14, sel ? 'text-primary' : 'text-gray-700')}
                 >
                   {opt.label}
-                  {sel && <CheckMark />}
+                  {sel && <CheckIcon size={14} className="shrink-0" />}
                 </button>
               </li>
             )
