@@ -35,7 +35,7 @@ const toItems = (value: ImageInputProps['value']): ImageValue[] =>
   value == null ? [] : Array.isArray(value) ? value : [value]
 
 const TRIGGER_BASE =
-  'flex flex-col items-center justify-center gap-2 rounded-lg bg-gray-100 text-gray-500 outline-none transition-colors focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50'
+  'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg bg-gray-100 text-gray-500 outline-none transition-colors enabled:hover:bg-gray-200 enabled:hover:text-gray-600 focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50'
 
 /**
  * 제어 이미지 입력 primitive (single/multi). 파일 선택 + 로컬 미리보기 + 삭제 + 빈상태.
@@ -158,7 +158,7 @@ export function ImageInput({
               disabled={disabled}
               aria-label="이미지 변경"
               className={cn(
-                'h-full w-full overflow-hidden rounded-lg bg-gray-100 outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50',
+                'h-full w-full cursor-pointer overflow-hidden rounded-lg bg-gray-100 outline-none transition-opacity focus-visible:ring-1 focus-visible:ring-primary enabled:hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50',
                 invalid && 'ring-1 ring-destructive'
               )}
             >
@@ -253,7 +253,7 @@ function RemoveButton({
       }}
       disabled={disabled}
       aria-label={label}
-      className="absolute right-2 top-2 z-10 flex size-6 items-center justify-center rounded-full bg-black/50 text-white outline-none focus-visible:ring-1 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
+      className="absolute right-2 top-2 z-10 flex size-6 cursor-pointer items-center justify-center rounded-full bg-black/50 text-white outline-none transition-colors hover:bg-black/70 focus-visible:ring-1 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
     >
       <XIcon size={14} />
     </button>

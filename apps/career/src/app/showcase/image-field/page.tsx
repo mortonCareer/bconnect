@@ -6,14 +6,24 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
-import { Form, ImageField, ImageInput, type ImageValue } from '@bconnect/ui'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Button, Form, ImageField, ImageInput, type ImageValue } from '@bconnect/ui'
+
+const demoSchema = z.object({
+  images: z
+    .custom<ImageValue | ImageValue[] | null>()
+    .refine((v) => v != null && (!Array.isArray(v) || v.length > 0), '이미지를 등록해주세요.'),
+})
 
 export default function ImageFieldDetailPage() {
   const [single, setSingle] = useState<ImageValue | ImageValue[] | null>(null)
   const [multi, setMulti] = useState<ImageValue | ImageValue[] | null>([])
-  const form = useForm<{ images: ImageValue | ImageValue[] | null }>({
+  const form = useForm<z.infer<typeof demoSchema>>({
+    resolver: zodResolver(demoSchema),
     defaultValues: { images: null },
   })
+  const onSubmit = form.handleSubmit(() => window.alert('제출 성공'))
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -34,14 +44,24 @@ export default function ImageFieldDetailPage() {
 
           <section className="mb-12">
             <h2 className="mb-4 text-xl font-semibold text-gray-800">폼 (ImageField + RHF)</h2>
+            <p className="mb-3 text-sm text-gray-500">
+              빈 채로 “제출”하면 zod 검증 에러(빨간 테두리 + 메시지)가, 비이미지/5MB 초과 파일을
+              올리면 파일 검증 에러가 뜹니다.
+            </p>
             <div className="rounded-lg border p-6">
               <Form {...form}>
-                <ImageField
-                  control={form.control}
-                  name="images"
-                  label="작업물 이미지"
-                  hint="장당 5MB 이하 이미지"
-                />
+                <form onSubmit={onSubmit} className="flex flex-col gap-3">
+                  <ImageField
+                    control={form.control}
+                    name="images"
+                    label="작업물 이미지"
+                    hint="장당 5MB 이하 이미지"
+                    required
+                  />
+                  <Button type="submit" variant="primary" size="sm" className="self-start">
+                    제출 (검증)
+                  </Button>
+                </form>
               </Form>
             </div>
           </section>
