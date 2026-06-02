@@ -7,7 +7,7 @@ INSERT INTO otps (id, phone, code, code_expired_at, code_revoked, attempts, dail
 
 INSERT INTO members (id, username, name, phone, picture, role, created_at, modified_at) VALUES
 (0, 'system', '시스템', '01000000000', 'https://image.com', 'ADMIN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(1, 'test', '테스트', '01000000001', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(1, 'test', '테스트', '01000000001', 'https://image.com', 'ADMIN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (2, 'foreman1', '반장1', '01000000005', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (3, 'foreman2', '반장2', '01000000006', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (4, 'foreman3', '반장3', '01000000007', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
@@ -44,8 +44,11 @@ INSERT INTO coworkers (id, min_id, max_id) VALUES
 (1, 1, 5);
 
 INSERT INTO recommendations (id, from_id, to_id, content, visible, created_at, modified_at) VALUES
-(1, 5, 1, '추천서1', true, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(2, 1, 5, '추천서2', true, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(1, 5, 1, '추천서1', true, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+
+INSERT INTO credentials (id, profile_id, type, status, expired_at, created_at, modified_at) VALUES
+(1, 1, 'IDENTITY_VERIFICATION', 'PENDING', DATE '2026-12-31', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(2, 1, 'SKILL_GRADE_CERTIFICATE', 'PENDING', DATE '2026-12-31', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 -- for special entities
 ALTER TABLE otps ALTER COLUMN id RESTART WITH 100;

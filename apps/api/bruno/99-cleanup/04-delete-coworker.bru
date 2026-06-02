@@ -1,14 +1,14 @@
 meta {
-  name: 받은 추천서 노출
+  name: 동료 삭제
   type: http
-  seq: 7
+  seq: 4
   tags: [
     seed
   ]
 }
 
-post {
-  url: {{baseUrl}}/api/v1/recommendations/1/show
+delete {
+  url: {{baseUrl}}/api/v1/coworkers/1
   auth: inherit
 }
 
@@ -20,8 +20,8 @@ tests {
 }
 
 docs {
-  수신자(profile 1)가 숨긴 추천서(seed rec 1)를 다시 노출한다.
+  로그인 유저(profile 1)가 시드 동료 관계(coworker 1 = profile1·profile5)를 삭제한다.
   @seed members : 1, 6
   @seed profiles : 1, 5
-  @seed recommendations : 1
+  @seed coworkers : 1
 }

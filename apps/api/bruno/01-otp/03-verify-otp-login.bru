@@ -20,6 +20,7 @@ body {
 
 script:post-response {
   bru.setVar("accessToken", res.body.data.accessToken);
+  bru.setVar("refreshToken", res.body.data.refreshToken);
 }
 
 tests {
@@ -33,7 +34,7 @@ tests {
 }
 
 docs {
-  가입된 연락처 OTP 검증 시 JWT 토큰 발급(로그인)을 확인한다.
+  가입된 연락처 OTP 검증 시 JWT 토큰을 발급(로그인)한다.
   @seed otps : 1
   @seed members : 1
 }
