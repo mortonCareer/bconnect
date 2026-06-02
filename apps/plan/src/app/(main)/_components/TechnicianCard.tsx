@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { Button, cn } from '@bconnect/ui'
+import { Button, cn, StarIcon } from '@bconnect/ui'
 import { TRADE_LABELS } from '@/lib/trade-labels'
 import type { TechnicianItem } from '@/hooks/useTechnicianItems'
 import type { Trade } from '@bconnect/api-client'
@@ -40,16 +40,7 @@ function StarRating({ rating, reviewCount }: { rating: number; reviewCount: numb
       <div className="flex gap-[2px]">
         {Array.from({ length: 5 }).map((_, i) => {
           const filled = i < full || (i === full && half)
-          return (
-            // TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지)
-            <svg key={i} width="14" height="14" viewBox="0 0 16 16" fill="none">
-              {/* 비활성: gray-300 (#E5E5E5). 활성: 별점 전용 amber — 디자인 시스템 미정 (TODO: 토큰 추가 시 교체) */}
-              <path
-                d="M8 1l1.85 3.75L14 5.5l-3 2.92.71 4.13L8 10.4l-3.71 2.15L5 8.42 2 5.5l4.15-.75L8 1z"
-                fill={filled ? '#FFB800' : 'var(--color-gray-300)'}
-              />
-            </svg>
-          )
+          return <StarIcon key={i} size={14} filled={filled} />
         })}
       </div>
       <span className="text-m-14 text-gray-900">{rating.toFixed(1)}</span>
