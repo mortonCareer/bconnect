@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
-import { Button } from '@bconnect/ui'
+import { Button, XIcon } from '@bconnect/ui'
 
 interface LoginPromptModalProps {
   open: boolean
@@ -60,15 +60,7 @@ export function LoginPromptModal({ open, onClose }: LoginPromptModalProps) {
           aria-label="닫기"
           className="absolute right-[18px] top-[18px] flex h-6 w-6 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100"
         >
-          {/* TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지) */}
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M12 4L4 12M4 4l8 8"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
+          <XIcon size={16} />
         </button>
 
         {/* 안내 카피 — 가입 유도 */}

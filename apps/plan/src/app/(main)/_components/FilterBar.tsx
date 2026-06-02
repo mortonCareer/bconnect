@@ -1,6 +1,6 @@
 'use client'
 
-import { Select } from '@bconnect/ui'
+import { Select, XIcon, RefreshIcon } from '@bconnect/ui'
 import { Trade } from '@bconnect/api-client'
 import { TRADE_LIST, TRADE_LABELS } from '@/lib/trade-labels'
 import { EXPERIENCE_OPTIONS, EXPERIENCE_LABELS } from '@/lib/experience'
@@ -38,10 +38,7 @@ function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }
       className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-m-14 text-primary transition-opacity hover:opacity-80"
     >
       {label}
-      {/* TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지) */}
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="shrink-0">
-        <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      </svg>
+      <XIcon size={12} />
     </button>
   )
 }
@@ -54,22 +51,7 @@ function RefreshButton({ onClick }: { onClick: () => void }) {
       aria-label="필터 초기화"
       className="flex h-[27px] w-[27px] items-center justify-center rounded-full hover:bg-gray-100"
     >
-      {/* Figma node 1470:6746 (RefreshIcon) — 단일 fill path, gray-500 */}
-      {/* TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지) */}
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 17.9439 17.9439"
-        fill="none"
-        className="text-gray-500"
-      >
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M2.21304 8.97188C2.21304 5.58001 4.85655 2.21301 8.97192 2.21301C12.2955 2.21301 13.9382 4.67302 14.6383 5.98126H12.5607C12.2305 5.98126 11.9626 6.24905 11.9626 6.57938C11.9626 6.90972 12.2305 7.17752 12.5607 7.17752H16.1495C16.4798 7.17752 16.7477 6.90972 16.7477 6.57938V2.9906C16.7477 2.66027 16.4798 2.39247 16.1495 2.39247C15.8193 2.39247 15.5514 2.66027 15.5514 2.9906V5.15964C14.7086 3.67397 12.7592 1.01674 8.97192 1.01674C4.11172 1.01674 1.01677 5.00674 1.01677 8.97188C1.01677 12.9371 4.11172 16.9271 8.97192 16.9271C11.2973 16.9271 13.2333 16.0069 14.6117 14.6044C15.3498 13.8534 15.9262 12.9662 16.3192 12.0113C16.4449 11.7058 16.2992 11.3562 15.9938 11.2305C15.6883 11.1048 15.3387 11.2505 15.2129 11.556C14.877 12.3723 14.3852 13.1284 13.7586 13.7658C12.596 14.9488 10.9638 15.7308 8.97192 15.7308C4.85655 15.7308 2.21304 12.3638 2.21304 8.97188Z"
-          fill="currentColor"
-        />
-      </svg>
+      <RefreshIcon size={18} className="text-gray-500" />
     </button>
   )
 }
