@@ -21,7 +21,7 @@ function SkillTag({ label, selected }: { label: string; selected: boolean }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border px-[12px] py-[4px] font-[Pretendard_Variable] text-m-12',
+        'inline-flex items-center rounded-full border px-[12px] py-[4px] font-sans text-m-12',
         selected
           ? 'border-primary bg-secondary text-primary'
           : 'border-gray-300 bg-white text-gray-700'
