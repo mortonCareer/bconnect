@@ -1,0 +1,27 @@
+meta {
+  name: 사용자명 중복 확인 - 사용 불가능
+  type: http
+  seq: 2
+  tags: [
+    seed
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/members/check-username?username=test
+}
+
+params:query {
+  username: test
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.data.available).to.equal(false);
+  });
+}
+
+docs {
+  @seed members : 1
+}

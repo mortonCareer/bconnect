@@ -1,0 +1,22 @@
+meta {
+  name: 동료 목록 조회
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/coworkers?profileId={{profileId}}
+  auth: inherit
+}
+
+params:query {
+  profileId: {{profileId}}
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.an('array');
+  });
+}

@@ -1,0 +1,35 @@
+meta {
+  name: 보낸 추천서 조회
+  type: http
+  seq: 2
+  tags: [
+    seed
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/recommendations/sent?profileId=2
+}
+
+params:query {
+  profileId: 2
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.an('array');
+  });
+}
+
+docs {
+  @seed members : 1
+  @seed members : 2
+  @seed members : 3
+  @seed profiles : 1
+  @seed profiles : 2
+  @seed profiles : 3
+  @seed recommendations : 1
+  @seed recommendations : 2
+}
