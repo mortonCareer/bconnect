@@ -12,9 +12,7 @@ export interface SelectOption {
   label: string
 }
 
-// M14 타이포는 직접 값으로 우회 — cn()의 tailwind-merge가 커스텀 text-m-14를 text-{color}와
-// 같은 충돌 그룹으로 오판해 제거하기 때문.
-const M14 = 'font-[Pretendard_Variable] text-[14px] font-medium leading-[1.6]'
+const M14 = 'font-[Pretendard_Variable] text-m-14'
 
 const FILTER_TRIGGER =
   'flex h-[40px] w-[95px] items-center justify-center gap-[10px] rounded-[8px] border bg-white px-[10px]'

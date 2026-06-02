@@ -38,7 +38,7 @@ export function BottomNav() {
                 className="flex w-11 cursor-not-allowed flex-col items-center gap-1 text-gray-500 opacity-40"
               >
                 <Icon active={false} />
-                <span className="text-m-12 leading-[1.6]">{label}</span>
+                <span className="text-m-12">{label}</span>
               </span>
             )
           }
@@ -53,14 +53,7 @@ export function BottomNav() {
               )}
             >
               <Icon active={isActive} />
-              <span
-                className={cn(
-                  'text-[12px] leading-[1.6]',
-                  isActive ? 'font-semibold' : 'font-medium'
-                )}
-              >
-                {label}
-              </span>
+              <span className={isActive ? 'text-sb-12' : 'text-m-12'}>{label}</span>
             </Link>
           )
         })}

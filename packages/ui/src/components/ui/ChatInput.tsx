@@ -103,7 +103,7 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
             onKeyDown={handleKeyDown}
             disabled={disabled}
             className={cn(
-              'flex-1 bg-transparent text-[0.875rem] leading-[1.6] font-normal outline-none',
+              'flex-1 bg-transparent text-r-14 outline-none',
               disabled ? 'text-gray-500' : 'text-gray-900',
               'placeholder:text-gray-500'
             )}
