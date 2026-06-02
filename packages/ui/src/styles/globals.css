@@ -3,6 +3,7 @@
 @source "../../apps/career/src/**/*.{ts,tsx}";
 @source "../../apps/plan/src/**/*.{ts,tsx}";
 @source "../components/**/*.{ts,tsx}";
+@source "../../../features/src/**/*.{ts,tsx}";
 
 /**
  * Morton Design System — Design Tokens (Color), Typography, Font

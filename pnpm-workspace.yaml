@@ -13,6 +13,7 @@ catalog:
   '@types/react': ^19
   '@types/react-dom': ^19
   eslint: ^9
+  lucide-react: ^0.562.0
   msw: ^2.13.6
   next: 16.1.1
   nuqs: ^2.8.9
