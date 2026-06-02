@@ -201,7 +201,7 @@ export function GanttChart({ tasks, startDate, endDate, today }: GanttChartProps
 
   return (
     <div
-      className="relative flex flex-col bg-white font-sans"
+      className="relative flex flex-col bg-white"
       style={{ width: totalGridWidth }}
       role="grid"
       aria-label="공정표 간트 차트"
