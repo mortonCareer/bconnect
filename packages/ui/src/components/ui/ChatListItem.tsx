@@ -115,14 +115,14 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
           <div className="flex min-w-0 flex-1 flex-col">
             {/* 이름 + 태그 */}
             <div className="flex items-center gap-[10px]">
-              <span className="shrink-0 font-[Pretendard_Variable] text-[16px] font-semibold leading-[1.6] text-[#1B1B1B]">
+              <span className="shrink-0 font-[Pretendard_Variable] text-sb-16 text-[#1B1B1B]">
                 {name}
               </span>
               {tags.length > 0 && (
                 <div
                   className={cn(
-                    'flex items-center gap-[8px] font-[Pretendard_Variable] font-medium leading-[1.6] text-[#A5A5A5]',
-                    isBadge ? 'text-[14px]' : 'text-[12px]'
+                    'flex items-center gap-[8px] font-[Pretendard_Variable] text-[#A5A5A5]',
+                    isBadge ? 'text-m-14' : 'text-m-12'
                   )}
                 >
                   {tags.map((tag, index) => (
@@ -139,8 +139,8 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
             {lastMessage && (
               <span
                 className={cn(
-                  'truncate font-[Pretendard_Variable] font-medium leading-[1.6]',
-                  isBadge ? 'text-[14px] text-[#1B1B1B]' : 'text-[12px] text-[#A5A5A5]'
+                  'truncate font-[Pretendard_Variable]',
+                  isBadge ? 'text-m-14 text-[#1B1B1B]' : 'text-m-12 text-[#A5A5A5]'
                 )}
               >
                 {lastMessage}
@@ -153,7 +153,7 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
         {isBadge ? (
           <div className="flex shrink-0 flex-col items-end justify-center gap-[8px]">
             {timestamp && (
-              <span className="font-[Pretendard_Variable] text-[12px] font-medium leading-[1.6] text-[#A5A5A5]">
+              <span className="font-[Pretendard_Variable] text-m-12 text-[#A5A5A5]">
                 {timestamp}
               </span>
             )}
