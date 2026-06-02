@@ -53,3 +53,19 @@ export function getTradeLabel(trade: Trade): string {
 export function getAvatarUrl(seed: string): string {
   return `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(seed)}`
 }
+
+const MINUTE = 60 * 1000
+const HOUR = 60 * MINUTE
+const DAY = 24 * HOUR
+const WEEK = 7 * DAY
+const MONTH = 30 * DAY
+
+export function formatRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  if (diff < MINUTE) return '방금'
+  if (diff < HOUR) return `${Math.floor(diff / MINUTE)}분 전`
+  if (diff < DAY) return `${Math.floor(diff / HOUR)}시간 전`
+  if (diff < WEEK) return `${Math.floor(diff / DAY)}일 전`
+  if (diff < MONTH) return `${Math.floor(diff / WEEK)}주 전`
+  return `${Math.floor(diff / MONTH)}개월 전`
+}

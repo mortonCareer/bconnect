@@ -12,6 +12,7 @@ import { Skeleton, Tab } from '@bconnect/ui'
 import { PanelHeader } from './PanelHeader'
 import { ProfileSummary } from './ProfileSummary'
 import { IntroTab } from './IntroTab'
+import { WorksTab } from './WorksTab'
 
 type TabKey = 'intro' | 'works'
 
@@ -76,7 +77,7 @@ export function ProfileView({ profileId, closeHref, onClose }: ProfileViewProps)
             {tab === 'intro' ? (
               <IntroTab profileId={profileId} profile={profile} />
             ) : (
-              <PanelMessage>작업물 탭은 준비 중입니다</PanelMessage>
+              <WorksTab profileId={profileId} />
             )}
           </>
         )}
