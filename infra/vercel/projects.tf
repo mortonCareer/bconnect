@@ -22,12 +22,7 @@ resource "vercel_project" "morton-career" {
 
   root_directory = "apps/career"
 
-  # 모노레포: apps/career 또는 packages 변경 시에만 빌드
-  # VERCEL_GIT_PREVIOUS_SHA 미설정 시 main 분기점 기준, COMPARE 가 비었거나(둘 다 실패)
-  # shallow clone 에 없으면(force-push 로 orphan 된 SHA) 빌드 강제
-  # dev 브랜치(=dev custom env)는 항상 빌드 — staging 환경이 env var/config 변경을
-  # 충실히 반영해야 하므로 git-diff 스킵을 우회. prod/preview/feature 는 기존 최적화 유지.
-  ignore_command = "COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ \"$VERCEL_GIT_COMMIT_REF\" = dev ] && exit 1; git cat-file -e \"$COMPARE\" 2>/dev/null || exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/career packages"
+  # ignore_command 없음 — Vercel 네이티브 "Skip Unaffected Projects"(기본 ON) 위임 (ADR-0018, #453)
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
@@ -246,12 +241,7 @@ resource "vercel_project" "morton-plan" {
 
   root_directory = "apps/plan"
 
-  # 모노레포: apps/plan 또는 packages 변경 시에만 빌드
-  # VERCEL_GIT_PREVIOUS_SHA 미설정 시 main 분기점 기준, COMPARE 가 비었거나(둘 다 실패)
-  # shallow clone 에 없으면(force-push 로 orphan 된 SHA) 빌드 강제
-  # dev 브랜치(=dev custom env)는 항상 빌드 — staging 환경이 env var/config 변경을
-  # 충실히 반영해야 하므로 git-diff 스킵을 우회. prod/preview/feature 는 기존 최적화 유지.
-  ignore_command = "COMPARE=$${VERCEL_GIT_PREVIOUS_SHA:-$(git merge-base HEAD origin/main 2>/dev/null)}; [ \"$VERCEL_GIT_COMMIT_REF\" = dev ] && exit 1; git cat-file -e \"$COMPARE\" 2>/dev/null || exit 1; git diff \"$COMPARE\" HEAD --quiet -- apps/plan packages"
+  # ignore_command 없음 — Vercel 네이티브 "Skip Unaffected Projects"(기본 ON) 위임 (ADR-0018, #453)
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
