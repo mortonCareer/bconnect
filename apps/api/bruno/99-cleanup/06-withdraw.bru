@@ -1,11 +1,11 @@
 meta {
-  name: 내 프로필 삭제
+  name: 회원 탈퇴
   type: http
-  seq: 5
+  seq: 6
 }
 
 delete {
-  url: {{baseUrl}}/api/v1/profiles/me
+  url: {{baseUrl}}/api/v1/members/me
   auth: inherit
 }
 

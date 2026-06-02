@@ -8,11 +8,11 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/v1/recommendations/received?profileId=2
+  url: {{baseUrl}}/api/v1/recommendations/received?profileId={{profileId}}
 }
 
 params:query {
-  profileId: 2
+  profileId: {{profileId}}
 }
 
 tests {
@@ -24,9 +24,5 @@ tests {
 }
 
 docs {
-  @seed members : 2
-  @seed members : 3
-  @seed profiles : 2
-  @seed profiles : 3
-  @seed recommendations : 3
+  profile {{profileId}}이 받은 추천서 목록 조회를 확인한다.
 }

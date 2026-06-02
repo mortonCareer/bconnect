@@ -1,5 +1,5 @@
 meta {
-  name: 동료 요청 생성
+  name: 동료 요청 보내기
   type: http
   seq: 1
   tags: [
@@ -31,6 +31,7 @@ tests {
 }
 
 docs {
-  @seed members : 2
+  로그인 유저가 시드 프로필(2)에게 동료 요청 생성을 확인한다.
+  @seed members : 3
   @seed profiles : 2
 }
