@@ -98,7 +98,9 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
     })
   }
 
-  const prefetchProfile = () => router.prefetch(`/profile/${item.profileId}`)
+  const prefetchProfile = () => {
+    if (process.env.NODE_ENV === 'production') router.prefetch(`/profile/${item.profileId}`)
+  }
 
   const metaParts = [
     item.location,

@@ -39,7 +39,17 @@ export function RecommendationList({ profileId }: RecommendationListProps) {
       </div>
 
       {active.isLoading ? (
-        <p className="py-3 text-r-14 text-gray-500">불러오는 중...</p>
+        <ul className="flex flex-col divide-y divide-gray-200">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <li key={i} className="flex animate-pulse gap-3 py-3">
+              <div className="h-16 w-16 shrink-0 rounded-full bg-gray-100" />
+              <div className="flex flex-1 flex-col gap-2 pt-1">
+                <div className="h-4 w-24 rounded bg-gray-100" />
+                <div className="h-3 w-full rounded bg-gray-100" />
+              </div>
+            </li>
+          ))}
+        </ul>
       ) : items.length === 0 ? (
         <p className="py-3 text-r-14 text-gray-500">
           {mode === 'received' ? '받은 추천서가 없습니다' : '보낸 추천서가 없습니다'}

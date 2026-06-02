@@ -6,9 +6,9 @@ import { getAvatarUrl, getTradeLabel } from './labels'
 interface ProfileSummaryProps {
   member?: MaskedMember
   profile?: Profile
-  postCount: number
-  coworkerCount: number
-  recommendationCount: number
+  postCount?: number
+  coworkerCount?: number
+  recommendationCount?: number
 }
 
 export function ProfileSummary({
@@ -59,10 +59,14 @@ export function ProfileSummary({
   )
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value }: { label: string; value?: number }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <span className="text-sb-16 text-gray-900">{value}</span>
+      {value === undefined ? (
+        <span className="h-6 w-6 animate-pulse rounded bg-gray-100" />
+      ) : (
+        <span className="text-sb-16 text-gray-900">{value}</span>
+      )}
       <span className="text-r-14 text-gray-900">{label}</span>
     </div>
   )

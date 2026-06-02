@@ -14,14 +14,23 @@ interface IntroTabProps {
 
 export function IntroTab({ profileId, profile }: IntroTabProps) {
   const enabled = Number.isFinite(profileId) && profileId > 0
-  const { data: credentials } = useGetCredentials({ profileId }, { query: { enabled } })
+  const { data: credentials, isLoading: credentialsLoading } = useGetCredentials(
+    { profileId },
+    { query: { enabled } }
+  )
   const accepted = (credentials ?? []).filter((c) => c.status === 'ACCEPTED')
 
   return (
     <div className="flex flex-col gap-6 px-4 py-4">
       <section className="flex flex-col gap-3">
         <h3 className="text-sb-16 text-gray-900">인증</h3>
-        {accepted.length > 0 ? (
+        {credentialsLoading ? (
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-[34px] w-20 animate-pulse rounded-[7px] bg-gray-100" />
+            ))}
+          </div>
+        ) : accepted.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {accepted.map((c) => (
               <Tag key={c.id} variant="default" size="sm">

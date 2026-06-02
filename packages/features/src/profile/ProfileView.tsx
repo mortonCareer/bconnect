@@ -63,9 +63,9 @@ export function ProfileView({ profileId, onClose }: ProfileViewProps) {
             <ProfileSummary
               member={member}
               profile={profile}
-              postCount={feeds?.content.length ?? 0}
-              coworkerCount={coworkers?.length ?? 0}
-              recommendationCount={received?.length ?? 0}
+              postCount={feeds ? feeds.content.length : undefined}
+              coworkerCount={coworkers?.length}
+              recommendationCount={received?.length}
             />
             <Tab items={TAB_ITEMS} activeKey={tab} onChange={(key) => setTab(key as TabKey)} />
             {tab === 'intro' ? (
