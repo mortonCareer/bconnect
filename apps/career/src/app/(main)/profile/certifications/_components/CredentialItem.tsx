@@ -18,7 +18,7 @@ export function CredentialItem({ credential, onDelete, onRenew, isDeleting }: Cr
   return (
     <div className="flex items-center justify-between px-4 py-3">
       <div className="flex items-center gap-2">
-        <CheckCircleIcon className="shrink-0 text-primary" />
+        <CheckCircleIcon className="text-primary" />
         {/* 인증명 + 만료일 — 같은 줄 */}
         <div className="flex items-baseline gap-2">
           <span className="text-sb-14 text-gray-900">{label}</span>

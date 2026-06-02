@@ -4,6 +4,8 @@ interface SendIconProps extends SVGProps<SVGSVGElement> {
   size?: number
 }
 
+// Figma 디자인시스템에 독립 아이콘 컴포넌트로 없음(전송은 채팅 입력 디자인 안에만 존재).
+// DS 가 컴포넌트화하기 전까지 packages/ui/src/icons 대신 채팅 로컬에 둔다.
 export function SendIcon({ size = 24, ...props }: SendIconProps) {
   return (
     <svg

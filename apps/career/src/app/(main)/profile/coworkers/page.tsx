@@ -79,7 +79,7 @@ export default function CoworkersPage() {
       {/* 검색 입력 */}
       <div className="px-4 py-2">
         <div className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2.5 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
-          <SearchIcon className="shrink-0 text-gray-400" />
+          <SearchIcon className="text-gray-400" />
           <input
             type="text"
             placeholder="검색..."
