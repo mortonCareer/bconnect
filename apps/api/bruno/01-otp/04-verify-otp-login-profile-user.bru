@@ -1,0 +1,39 @@
+meta {
+  name: OTP 로그인 - 프로필 생성용 유저
+  type: http
+  seq: 4
+  tags: [
+    seed
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/otp/verify
+  auth: none
+}
+
+body {
+  {
+    "phone": "01000000005",
+    "code": "000005"
+  }
+}
+
+script:post-response {
+  bru.setVar("profileToken", res.body.data.accessToken);
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.registered).to.equal(true);
+    expect(res.body.data.accessToken).to.be.a('string');
+  });
+}
+
+docs {
+  프로필 미보유 전용 유저로 로그인해 프로필 생성 테스트용 profileToken 을 발급한다.
+  @seed otps : 4
+  @seed members : 2
+}

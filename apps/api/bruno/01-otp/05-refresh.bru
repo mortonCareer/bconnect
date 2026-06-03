@@ -1,0 +1,26 @@
+meta {
+  name: 토큰 재발급
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/refresh
+  auth: none
+}
+
+headers {
+  Cookie: refreshToken={{refreshToken}}
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.accessToken).to.be.a('string');
+  });
+}
+
+docs {
+  로그인 시 발급된 refreshToken(쿠키)으로 액세스 토큰을 재발급한다.
+}

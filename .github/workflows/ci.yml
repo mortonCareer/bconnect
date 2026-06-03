@@ -56,8 +56,7 @@ jobs:
             api:
               - 'apps/api/**'
             api-spec:
-              - 'packages/api-client/src/spec/**'
-              - 'packages/api-client/.redocly.yaml'
+              - 'apps/api/**'
             crawler:
               - 'apps/crawler/**'
             packages:
@@ -133,51 +132,90 @@ jobs:
     if: ${{ needs.changes.outputs.api == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout sources
+        uses: actions/checkout@v6
 
-      - uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '21'
-          cache: 'gradle'
+          java-version: 21
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x apps/api/gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install Bruno CLI
+        run: npm install -g @usebruno/cli
 
       - name: Build with Gradle
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: |
-          cd apps/api
-          ./gradlew build --no-daemon
+        working-directory: apps/api
+        run: ./gradlew build
 
-      - name: Run tests
+      - name: Start API server
+        working-directory: apps/api
+        run: ./gradlew bootRun > /dev/null 2>&1 &
+
+      - name : Wait for health
         run: |
-          cd apps/api
-          ./gradlew test --no-daemon
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8080/actuator/health && break || sleep 1
+          done
+
+      - name: Run Bruno demo collection
+        working-directory: apps/api/bruno
+        run: bru run --exclude-tags=ws --reporter-html bruno-report.html
+
+      - name: Upload Bruno report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: bruno-report
+          path: apps/api/bruno/bruno-report.html
+          if-no-files-found: error
 
   ci-api-spec:
     needs: changes
     if: ${{ needs.changes.outputs.api-spec == 'true' }}
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
-      - uses: actions/checkout@v6
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v6
+      - name: Checkout sources
+        uses: actions/checkout@v6
         with:
-          node-version: 24
-          cache: 'pnpm'
+          ref: ${{ github.head_ref }}
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 21
 
-      - name: Lint OpenAPI spec
-        run: pnpm api:lint
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
 
-      - name: Bundle check (sanity)
-        run: pnpm api:bundle
+      - name: Generate Open API Docs
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        working-directory: apps/api
+        run: |
+          ./gradlew build
+          ./gradlew generateOpenApiDocs
+
+      - name : Commit and Push changes
+        run: |
+          mv apps/api/build/openapi.yaml packages/api-client/src
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add .
+          git commit -m "docs(api): generate open api document"
+          git push origin HEAD:${{ github.head_ref }}
 
   ci-packages:
     needs: changes

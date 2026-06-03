@@ -1,0 +1,21 @@
+meta {
+  name: 추천서 삭제
+  type: http
+  seq: 9
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/recommendations/{{recommendationId}}
+  auth: inherit
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  작성한 추천서(recommendationId)를 삭제한다.
+}

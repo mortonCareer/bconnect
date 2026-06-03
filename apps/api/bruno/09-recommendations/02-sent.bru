@@ -1,0 +1,28 @@
+meta {
+  name: 보낸 추천서 조회
+  type: http
+  seq: 2
+  tags: [
+    seed
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/recommendations/sent?profileId={{profileId}}
+}
+
+params:query {
+  profileId: {{profileId}}
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.an('array');
+  });
+}
+
+docs {
+  profile {{profileId}}이 보낸 추천서 목록을 조회한다.
+}

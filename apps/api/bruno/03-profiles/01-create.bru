@@ -1,0 +1,49 @@
+meta {
+  name: 프로필 생성
+  type: http
+  seq: 1
+  tags: [
+    seed
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/profiles
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{profileToken}}
+}
+
+body {
+  {
+    "primaryTrade": "TILING",
+    "trades": ["TILING", "FILM_SHEET"],
+    "experience": 10,
+    "headline": "한줄소개",
+    "about": "소개",
+    "address": {
+      "zipcode": "00000",
+      "city": "경기도",
+      "state": "수원시 장안구",
+      "street": "도로명주소",
+      "detail": "상세주소",
+      "latitude": 37.294000,
+      "longitude": 126.974000
+    }
+  }
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.a('number');
+  });
+}
+
+docs {
+  프로필 미보유 전용 유저(profileToken)로 프로필을 생성해 기존 로그인 유저의 프로필 중복 충돌을 피한다.
+  @seed members : 5
+}
