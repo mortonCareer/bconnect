@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { useQuery, customFetch } from '@bconnect/api-client'
 import { Skeleton } from '@bconnect/ui'
-import { PanelHeader } from '../_shared/PanelHeader'
+import { PanelShell } from '../_shared/PanelShell'
+import { PanelScroll } from '../_shared/PanelScroll'
+import { PanelMessage } from '../_shared/PanelMessage'
 import type { AppNotification } from './types'
 
 export interface NotificationsViewProps {
@@ -12,20 +13,6 @@ export interface NotificationsViewProps {
 }
 
 export function NotificationsView({ closeHref, onClose }: NotificationsViewProps) {
-  const rootRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    rootRef.current?.focus()
-  }, [])
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
-
   // TODO(BE notification 도메인 #347): 스펙 확정 시 generated useQuery 훅으로 교체.
   // 현재는 독립 MSW placeholder(`/api/v1/notifications`) — customFetch 가 envelope unwrap.
   const { data, isLoading, isError } = useQuery({
@@ -34,9 +21,8 @@ export function NotificationsView({ closeHref, onClose }: NotificationsViewProps
   })
 
   return (
-    <div ref={rootRef} tabIndex={-1} className="flex h-full flex-col bg-white outline-none">
-      <PanelHeader title="알림" closeLabel="알림 패널 닫기" closeHref={closeHref} />
-      <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <PanelShell title="알림" closeLabel="알림 패널 닫기" closeHref={closeHref} onClose={onClose}>
+      <PanelScroll>
         {isLoading ? (
           <NotificationsSkeleton />
         ) : isError ? (
@@ -58,16 +44,8 @@ export function NotificationsView({ closeHref, onClose }: NotificationsViewProps
             ))}
           </ul>
         )}
-      </div>
-    </div>
-  )
-}
-
-function PanelMessage({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-2 px-4 py-20 text-center">
-      <p className="text-r-14 text-gray-500">{children}</p>
-    </div>
+      </PanelScroll>
+    </PanelShell>
   )
 }
 

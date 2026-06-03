@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { ChevronsRight, ChevronLeft } from 'lucide-react'
 
-interface PanelHeaderProps {
+export interface PanelHeaderProps {
   title?: string
   closeHref: string
   closeLabel?: string

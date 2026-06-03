@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import Link from 'next/link'
 import {
   useQueries,
@@ -12,7 +12,9 @@ import {
 import type { Profile } from '@bconnect/api-client'
 import { ChatListItem, Skeleton } from '@bconnect/ui'
 import { formatRelativeTime } from '@bconnect/config/format'
-import { PanelHeader } from '../_shared/PanelHeader'
+import { PanelShell } from '../_shared/PanelShell'
+import { PanelScroll } from '../_shared/PanelScroll'
+import { PanelMessage } from '../_shared/PanelMessage'
 
 export interface MessagesViewProps {
   closeHref: string
@@ -22,20 +24,6 @@ export interface MessagesViewProps {
 }
 
 export function MessagesView({ closeHref, onClose, chatHref }: MessagesViewProps) {
-  const rootRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    rootRef.current?.focus()
-  }, [])
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
-
   const { data: me, isLoading: isMeLoading } = useGetMyMember()
   const currentUserId = me?.id
   const { data: chats, isLoading: isChatsLoading, isError } = useGetMyChats()
@@ -69,9 +57,13 @@ export function MessagesView({ closeHref, onClose, chatHref }: MessagesViewProps
   }, [profileQueries, otherMemberIds])
 
   return (
-    <div ref={rootRef} tabIndex={-1} className="flex h-full flex-col bg-white outline-none">
-      <PanelHeader title="메시지" closeLabel="메시지 패널 닫기" closeHref={closeHref} />
-      <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <PanelShell
+      title="메시지"
+      closeLabel="메시지 패널 닫기"
+      closeHref={closeHref}
+      onClose={onClose}
+    >
+      <PanelScroll>
         {isLoading ? (
           <MessagesSkeleton />
         ) : isError ? (
@@ -105,16 +97,8 @@ export function MessagesView({ closeHref, onClose, chatHref }: MessagesViewProps
             })}
           </div>
         )}
-      </div>
-    </div>
-  )
-}
-
-function PanelMessage({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-2 px-4 py-20 text-center">
-      <p className="text-r-14 text-gray-500">{children}</p>
-    </div>
+      </PanelScroll>
+    </PanelShell>
   )
 }
 
