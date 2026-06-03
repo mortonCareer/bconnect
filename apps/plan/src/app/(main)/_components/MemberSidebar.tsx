@@ -6,6 +6,7 @@
 import Image from 'next/image'
 import { useGetMyMember, useGetMyChats } from '@bconnect/api-client'
 import { getAvatarUrl } from '@bconnect/config/avatar'
+import { usePanelNav } from '@/hooks/usePanelNav'
 import { SidebarFooter } from './SidebarFooter'
 
 // TODO(신규 BE 이슈 필요 — notification 도메인): 엔드포인트 추가 시
@@ -86,6 +87,7 @@ function ProfileSection() {
 export function MemberSidebar() {
   const { data: chats } = useGetMyChats()
   const messageCount = chats?.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0) ?? 0
+  const { openPanel } = usePanelNav()
 
   return (
     <div className="flex h-full flex-col justify-between">
@@ -100,13 +102,7 @@ export function MemberSidebar() {
               /* TODO #347 — NotificationsPanel 트리거 */
             }}
           />
-          <NavItem
-            label="메시지"
-            count={messageCount}
-            onClick={() => {
-              /* TODO #345 — MessagesPanel 트리거 */
-            }}
-          />
+          <NavItem label="메시지" count={messageCount} onClick={() => openPanel('/messages')} />
         </div>
       </div>
 
