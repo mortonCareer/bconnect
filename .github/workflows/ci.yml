@@ -56,8 +56,7 @@ jobs:
             api:
               - 'apps/api/**'
             api-spec:
-              - 'packages/api-client/src/spec/**'
-              - 'packages/api-client/.redocly.yaml'
+              - 'apps/api/**'
             crawler:
               - 'apps/crawler/**'
             packages:
@@ -155,14 +154,12 @@ jobs:
       - name: Build with Gradle
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: |
-          cd apps/api
-          ./gradlew build
+        working-directory: apps/api
+        run: ./gradlew build
 
       - name: Start API server
-        run: |
-          cd apps/api
-          ./gradlew bootRun > /dev/null 2>&1 &
+        working-directory: apps/api
+        run: ./gradlew bootRun > /dev/null 2>&1 &
 
       - name : Wait for health
         run: |
@@ -172,11 +169,7 @@ jobs:
 
       - name: Run Bruno demo collection
         working-directory: apps/api/bruno
-        run: |
-          cd bruno
-          bru run \
-            --exclude-tags=ws \
-            --reporter-html bruno-report.html
+        run: bru run --exclude-tags=ws --reporter-html bruno-report.html
 
       - name: Upload Bruno report
         if: ${{ !cancelled() }}
@@ -194,6 +187,8 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -207,20 +202,20 @@ jobs:
       - name: Generate Open API Docs
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        working-directory: apps/api
         run: |
-          cd apps/api
           ./gradlew build
           ./gradlew generateOpenApiDocs
 
       - name : Commit and Push changes
         run: |
-          mv ./build/open.yaml ../../packages/api-client/src
+          mv apps/api/build/openapi.yaml packages/api-client/src
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
           git add .
           git commit -m "docs(api): generate open api document"
-          git push origin HEAD:${{ github.ref_name }}
+          git push origin HEAD:${{ github.head_ref }}
 
   ci-packages:
     needs: changes
