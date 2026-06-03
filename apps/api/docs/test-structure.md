@@ -13,8 +13,8 @@
 - 폴더명 : `<seq>-<domain>`
 - 파일명 : `<seq>-<feature>`
 - 태그
-  - `auth` : 인증 필요
   - `seed` : 시드 데이터 소모 (`docs` 블록에 메모)
+  - `ws` : WebSocket 테스트
 - 웹소켓(STOMP)
-  - GUI 수동 실행 필요 (`bru run` 미지원)
+  - GUI 수동 테스트 필요 (`bru run` 항상 실패)
   - 각 프레임은 raw NUL(0x00) 문자로 종료

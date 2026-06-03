@@ -141,17 +141,45 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x apps/api/gradlew
 
-      - name: Build with Gradle
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install Bruno CLI
+        run: npm install -g @usebruno/cli
+
+      - name: Build and test
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           cd apps/api
-          ./gradlew build --no-daemon
+          ./gradlew build test --no-daemon
 
-      - name: Run tests
+      - name: Start API server
         run: |
           cd apps/api
-          ./gradlew test --no-daemon
+          ./gradlew test bootRun --no-daemon
+
+      - name : Wait for health
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8080/actuator/health && break || sleep 1
+          done
+
+      - name: Run Bruno demo collection
+        working-directory: apps/api/bruno
+        run: |
+          bru run \
+            --exclude-tags=ws \
+            --reporter-html bruno-report.html
+
+      - name: Upload Bruno report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: bruno-report
+          path: apps/api/bruno/bruno-report.html
+          if-no-files-found: error
 
   ci-api-spec:
     needs: changes
