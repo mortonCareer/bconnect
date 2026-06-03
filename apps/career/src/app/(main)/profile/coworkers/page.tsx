@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useGetCoworkers, useGetMyProfile } from '@bconnect/api-client'
 import { getAvatarUrl } from '@bconnect/config/avatar'
-import { TopBar, SearchIcon } from '@bconnect/ui'
+import { TopBar, SearchIcon, ChevronIcon } from '@bconnect/ui'
 import { CoworkerCard } from './_components/CoworkerCard'
 
 // TODO: API 연동 후 제거 — 발표용 mock 데이터
@@ -139,21 +139,7 @@ function MockCoworkerCard({
         </div>
         <p className="mt-0.5 line-clamp-2 text-r-12 text-gray-500">{coworker.about}</p>
       </div>
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        className="shrink-0 text-gray-400"
-      >
-        <path
-          d="M7.5 15L12.5 10L7.5 5"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <ChevronIcon direction="right" className="shrink-0 text-gray-400" />
     </div>
   )
 }

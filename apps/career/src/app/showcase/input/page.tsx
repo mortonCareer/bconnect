@@ -5,7 +5,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Input, OtpInput, ChevronLeftIcon } from '@bconnect/ui'
+import { Input, OtpInput, ChevronIcon } from '@bconnect/ui'
 
 export default function InputDetailPage() {
   const [inputValue, setInputValue] = useState('')
@@ -19,7 +19,7 @@ export default function InputDetailPage() {
           href="/showcase"
           className="mb-6 inline-flex items-center text-sm text-gray-500 hover:text-primary"
         >
-          <ChevronLeftIcon size={16} className="mr-1" />
+          <ChevronIcon direction="left" size={16} className="mr-1" />
           컴포넌트 목록
         </Link>
 

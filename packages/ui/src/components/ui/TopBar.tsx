@@ -5,7 +5,7 @@
 
 import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
-import { ChevronLeftIcon, FilterIcon, ChatIcon } from '../../icons'
+import { ChevronIcon, FilterIcon, ChatIcon } from '../../icons'
 import { cn } from '../../lib/utils'
 
 const topBarVariants = cva('flex h-15 w-full items-center bg-white px-4', {
@@ -90,11 +90,11 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
 
     const BackButton = backHref ? (
       <a href={backHref} className={backButtonClass} aria-label="뒤로가기">
-        <ChevronLeftIcon className="text-[#9C9C9C]" />
+        <ChevronIcon direction="left" className="text-[#9C9C9C]" />
       </a>
     ) : (
       <button type="button" onClick={onBack} className={backButtonClass} aria-label="뒤로가기">
-        <ChevronLeftIcon className="text-[#9C9C9C]" />
+        <ChevronIcon direction="left" className="text-[#9C9C9C]" />
       </button>
     )
 

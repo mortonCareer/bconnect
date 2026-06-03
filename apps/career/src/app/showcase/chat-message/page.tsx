@@ -4,7 +4,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ChatMessage, ChevronLeftIcon } from '@bconnect/ui'
+import { ChatMessage, ChevronIcon } from '@bconnect/ui'
 
 export default function ChatMessageDetailPage() {
   return (
@@ -15,7 +15,7 @@ export default function ChatMessageDetailPage() {
           href="/showcase"
           className="mb-6 inline-flex items-center text-sm text-gray-500 hover:text-primary"
         >
-          <ChevronLeftIcon size={16} className="mr-1" />
+          <ChevronIcon direction="left" size={16} className="mr-1" />
           컴포넌트 목록
         </Link>
 

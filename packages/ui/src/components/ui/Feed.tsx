@@ -5,7 +5,7 @@
 
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
-import { ChevronRightIcon } from '../../icons'
+import { ChevronIcon } from '../../icons'
 import { cn } from '../../lib/utils'
 
 /**
@@ -172,7 +172,12 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
             </div>
 
             {/* chevron */}
-            <ChevronRightIcon className="shrink-0 text-[#1B1B1B]" aria-hidden="true" />
+            <ChevronIcon
+              direction="right"
+              size={16}
+              className="shrink-0 text-[#1B1B1B]"
+              aria-hidden="true"
+            />
           </>
         )}
 

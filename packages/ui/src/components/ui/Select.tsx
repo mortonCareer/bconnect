@@ -5,7 +5,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '../../lib/utils'
-import { CheckIcon, ChevronDownIcon } from '../../icons'
+import { CheckIcon, ChevronIcon } from '../../icons'
 import { FIELD_BASE_CLASSES, FIELD_DEFAULT_VARIANT_CLASSES } from './_field-base'
 
 export interface SelectOption {
@@ -143,7 +143,11 @@ export function Select({
         className={triggerClass}
       >
         <span className={cn('truncate', placeholderColor && 'text-gray-500')}>{triggerText}</span>
-        <ChevronDownIcon className={cn('transition-transform', open && 'rotate-180')} />
+        <ChevronIcon
+          direction="down"
+          size={16}
+          className={cn('transition-transform', open && 'rotate-180')}
+        />
       </button>
 
       {open && (

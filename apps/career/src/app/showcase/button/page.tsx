@@ -4,7 +4,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Button, ChevronLeftIcon } from '@bconnect/ui'
+import { Button, ChevronIcon } from '@bconnect/ui'
 
 export default function ButtonDetailPage() {
   return (
@@ -15,7 +15,7 @@ export default function ButtonDetailPage() {
           href="/showcase"
           className="mb-6 inline-flex items-center text-sm text-gray-500 hover:text-primary"
         >
-          <ChevronLeftIcon size={16} className="mr-1" />
+          <ChevronIcon direction="left" size={16} className="mr-1" />
           컴포넌트 목록
         </Link>
 
