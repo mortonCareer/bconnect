@@ -10,6 +10,7 @@ import {
   useGetMyProfile,
   useGetCoworkers,
   useGetCredentials,
+  useGetMyReceivedRecommendations,
 } from '@bconnect/api-client'
 import { Button, Tab, TopBar } from '@bconnect/ui'
 import { useQueryState } from 'nuqs'
@@ -40,8 +41,8 @@ export default function MyProfilePage() {
     { query: { enabled: !!profileData?.id } }
   )
   const credentialsList = credentialsData ?? []
-  // TODO: 추천서 API 연동
-  const recommendationCount = 3
+  const { data: receivedRecommendations } = useGetMyReceivedRecommendations()
+  const recommendationCount = receivedRecommendations?.length ?? 0
 
   const isLoading = isMemberLoading || isProfileLoading
 
