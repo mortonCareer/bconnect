@@ -14,17 +14,14 @@ import {
 } from '@bconnect/api-client'
 import { Button, Tag, TopBar } from '@bconnect/ui'
 import { CredentialItem } from './_components/CredentialItem'
-import { MOCK_CREDENTIALS } from './constants'
 
 export default function CertificationsPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const {
-    data: profile,
-    isLoading: isProfileLoading,
-    isError: isProfileError,
-  } = useGetMyProfile({ query: { retry: false } })
+  const { data: profile, isLoading: isProfileLoading } = useGetMyProfile({
+    query: { retry: false },
+  })
   const profileId = profile?.id
 
   const { data: credentials, isLoading: isCredentialsLoading } = useGetCredentials(
@@ -44,10 +41,8 @@ export default function CertificationsPage() {
     },
   })
 
-  // API 에러 시 mock 데이터 폴백
-  const useMock = isProfileError || (!isProfileLoading && !profileId)
-  const credentialsList = useMock ? MOCK_CREDENTIALS : (credentials ?? [])
-  const isLoading = !useMock && (isProfileLoading || isCredentialsLoading)
+  const credentialsList = credentials ?? []
+  const isLoading = isProfileLoading || isCredentialsLoading
 
   const handleDelete = (credentialId: number) => {
     deleteCredential({ credentialId })
