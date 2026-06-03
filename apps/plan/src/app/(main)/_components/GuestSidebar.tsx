@@ -1,6 +1,6 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@bconnect/ui'
+import { SidebarFooter } from './SidebarFooter'
 
 interface GuestSidebarProps {
   memberCount: number
@@ -28,11 +28,7 @@ export function GuestSidebar({ memberCount }: GuestSidebarProps) {
         </div>
       </div>
 
-      {/* 푸터: 로고 + 무료 요금제 캡션 */}
-      <div className="flex flex-col gap-3 p-5">
-        <Image src="/logo.png" alt="품앗이" width={70} height={24} priority />
-        <p className="text-r-12 text-gray-500">무료 요금제</p>
-      </div>
+      <SidebarFooter />
     </div>
   )
 }
