@@ -19,10 +19,10 @@ export function GuestSidebar({ memberCount }: GuestSidebarProps) {
 
         {/* 이동 동작 */}
         <div className="flex flex-col gap-2">
-          <Button asChild variant="primary" size="full" className="h-[40px]">
+          <Button asChild variant="primary" size="full" className="h-10">
             <Link href="/login">로그인</Link>
           </Button>
-          <Button asChild variant="outline" size="full" className="h-[40px]">
+          <Button asChild variant="outline" size="full" className="h-10">
             <Link href="/signup/member">회원가입</Link>
           </Button>
         </div>

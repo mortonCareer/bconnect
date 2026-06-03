@@ -2,8 +2,8 @@
 
 import { useRouter } from 'next/navigation'
 import type { Trade } from '@bconnect/api-client'
-import { TRADE_LABELS } from '@/lib/trade-labels'
-import { getAvatarUrl } from '@/lib/avatar'
+import { TRADE_LABELS } from '@bconnect/api-client'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 
 interface ProfileHeaderProps {
   name?: string
@@ -43,7 +43,7 @@ export function ProfileHeader({
       {/* 상단: 아바타 + StatsRow */}
       <div className="flex items-center gap-4">
         {/* 아바타 */}
-        <div className="h-[100px] w-[100px] shrink-0 overflow-hidden rounded-full bg-gray-100">
+        <div className="h-25 w-25 shrink-0 overflow-hidden rounded-full bg-gray-100">
           <img
             src={picture || getAvatarUrl(name ?? 'user')}
             alt={name ?? '프로필'}

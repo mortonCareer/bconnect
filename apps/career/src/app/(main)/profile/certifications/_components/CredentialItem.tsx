@@ -1,7 +1,9 @@
 'use client'
 
+import { getCredentialLabel } from '@bconnect/api-client'
 import type { Credential } from '@bconnect/api-client'
-import { getCredentialLabel, formatDate } from '../constants'
+import { CheckCircleIcon } from '@bconnect/ui'
+import { formatDate } from '@bconnect/config/format'
 
 interface CredentialItemProps {
   credential: Credential
@@ -17,23 +19,7 @@ export function CredentialItem({ credential, onDelete, onRenew, isDeleting }: Cr
   return (
     <div className="flex items-center justify-between px-4 py-3">
       <div className="flex items-center gap-2">
-        {/* 체크 아이콘 — outline 스타일 (Figma) */}
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          fill="none"
-          className="shrink-0 text-primary"
-        >
-          <circle cx="10" cy="10" r="8.5" stroke="currentColor" strokeWidth="1.5" />
-          <path
-            d="M6.5 10L9 12.5L13.5 7.5"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <CheckCircleIcon className="text-primary" />
         {/* 인증명 + 만료일 — 같은 줄 */}
         <div className="flex items-baseline gap-2">
           <span className="text-sb-14 text-gray-900">{label}</span>

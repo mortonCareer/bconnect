@@ -6,8 +6,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useGetCoworkers, useGetMyProfile } from '@bconnect/api-client'
-import { getAvatarUrl } from '@/lib/avatar'
-import { TopBar } from '@bconnect/ui'
+import { getAvatarUrl } from '@bconnect/config/avatar'
+import { TopBar, SearchIcon, ChevronIcon } from '@bconnect/ui'
 import { CoworkerCard } from './_components/CoworkerCard'
 
 // TODO: API 연동 후 제거 — 발표용 mock 데이터
@@ -79,28 +79,7 @@ export default function CoworkersPage() {
       {/* 검색 입력 */}
       <div className="px-4 py-2">
         <div className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2.5 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            className="shrink-0 text-gray-400"
-          >
-            <path
-              d="M9.16667 15.8333C12.8486 15.8333 15.8333 12.8486 15.8333 9.16667C15.8333 5.48477 12.8486 2.5 9.16667 2.5C5.48477 2.5 2.5 5.48477 2.5 9.16667C2.5 12.8486 5.48477 15.8333 9.16667 15.8333Z"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M17.5 17.5L13.875 13.875"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <SearchIcon className="text-gray-400" />
           <input
             type="text"
             placeholder="검색..."
@@ -160,21 +139,7 @@ function MockCoworkerCard({
         </div>
         <p className="mt-0.5 line-clamp-2 text-r-12 text-gray-500">{coworker.about}</p>
       </div>
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        className="shrink-0 text-gray-400"
-      >
-        <path
-          d="M7.5 15L12.5 10L7.5 5"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <ChevronIcon direction="right" className="text-gray-400" />
     </div>
   )
 }

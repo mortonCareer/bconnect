@@ -65,6 +65,8 @@ jobs:
               - 'pnpm-workspace.yaml'
               - 'pnpm-lock.yaml'
               - '.syncpackrc.json'
+              - 'packages/ui/**'
+              - 'packages/config/eslint/**'
 
   ci-career:
     needs: changes
@@ -198,6 +200,9 @@ jobs:
       # 새 dep 이 2+ package 에 있으면 pnpm-workspace.yaml 의 catalog 사용 권장.
       - name: Check package versions
         run: pnpm package:check
+
+      - name: Lint @bconnect/ui
+        run: pnpm --filter @bconnect/ui lint
 
   ci-crawler:
     needs: changes

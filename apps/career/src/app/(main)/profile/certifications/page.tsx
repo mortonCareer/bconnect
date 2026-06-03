@@ -10,10 +10,11 @@ import {
   useGetCredentials,
   useDeleteCredential,
   getGetCredentialsQueryKey,
+  getCredentialLabel,
 } from '@bconnect/api-client'
 import { Button, Tag, TopBar } from '@bconnect/ui'
 import { CredentialItem } from './_components/CredentialItem'
-import { getCredentialLabel, MOCK_CREDENTIALS } from './constants'
+import { MOCK_CREDENTIALS } from './constants'
 
 export default function CertificationsPage() {
   const router = useRouter()

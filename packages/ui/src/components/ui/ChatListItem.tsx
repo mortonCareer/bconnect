@@ -45,8 +45,8 @@ const chatListItemVariants = cva(
   {
     variants: {
       variant: {
-        default: 'h-[80px] border-b border-[#E5E5E5] px-[16px] py-[20px]',
-        badge: 'pb-[20px]',
+        default: 'h-20 border-b border-[#E5E5E5] px-4 py-5',
+        badge: 'pb-5',
       },
     },
     defaultVariants: {
@@ -98,12 +98,12 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
     return (
       <div ref={ref} className={cn(chatListItemVariants({ variant }), className)} {...props}>
         {/* 왼쪽: 프로필 + 정보 */}
-        <div className="flex min-w-0 flex-1 items-center gap-[10px]">
+        <div className="flex min-w-0 flex-1 items-center gap-2.5">
           {/* 프로필 이미지 */}
           <div
             className={cn(
               'shrink-0 overflow-hidden rounded-full bg-[#F4F4F4]',
-              isBadge ? 'size-[50px]' : 'size-[40px]'
+              isBadge ? 'size-[50px]' : 'size-10'
             )}
           >
             {profileImage && (
@@ -114,15 +114,13 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
           {/* 텍스트 정보 */}
           <div className="flex min-w-0 flex-1 flex-col">
             {/* 이름 + 태그 */}
-            <div className="flex items-center gap-[10px]">
-              <span className="shrink-0 font-[Pretendard_Variable] text-[16px] font-semibold leading-[1.6] text-[#1B1B1B]">
-                {name}
-              </span>
+            <div className="flex items-center gap-2.5">
+              <span className="shrink-0 text-sb-16 text-[#1B1B1B]">{name}</span>
               {tags.length > 0 && (
                 <div
                   className={cn(
-                    'flex items-center gap-[8px] font-[Pretendard_Variable] font-medium leading-[1.6] text-[#A5A5A5]',
-                    isBadge ? 'text-[14px]' : 'text-[12px]'
+                    'flex items-center gap-2 text-[#A5A5A5]',
+                    isBadge ? 'text-m-14' : 'text-m-12'
                   )}
                 >
                   {tags.map((tag, index) => (
@@ -139,8 +137,8 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
             {lastMessage && (
               <span
                 className={cn(
-                  'truncate font-[Pretendard_Variable] font-medium leading-[1.6]',
-                  isBadge ? 'text-[14px] text-[#1B1B1B]' : 'text-[12px] text-[#A5A5A5]'
+                  'truncate',
+                  isBadge ? 'text-m-14 text-[#1B1B1B]' : 'text-m-12 text-[#A5A5A5]'
                 )}
               >
                 {lastMessage}
@@ -151,22 +149,16 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
 
         {/* 오른쪽 영역 */}
         {isBadge ? (
-          <div className="flex shrink-0 flex-col items-end justify-center gap-[8px]">
-            {timestamp && (
-              <span className="font-[Pretendard_Variable] text-[12px] font-medium leading-[1.6] text-[#A5A5A5]">
-                {timestamp}
-              </span>
-            )}
+          <div className="flex shrink-0 flex-col items-end justify-center gap-2">
+            {timestamp && <span className="text-m-12 text-[#A5A5A5]">{timestamp}</span>}
             {unreadCount != null && unreadCount > 0 && (
-              <div className="flex size-[20px] items-center justify-center rounded-[8px] bg-red-500">
-                <span className="font-[Pretendard_Variable] text-[12px] font-bold leading-none text-white">
-                  {unreadCount}
-                </span>
+              <div className="flex size-5 items-center justify-center rounded-lg bg-[#FF4242]">
+                <span className="text-[12px] font-bold leading-none text-white">{unreadCount}</span>
               </div>
             )}
           </div>
         ) : (
-          <ChevronRight className="size-[16px] shrink-0 text-[#A5A5A5]" />
+          <ChevronRight className="size-4 text-[#A5A5A5]" />
         )}
       </div>
     )

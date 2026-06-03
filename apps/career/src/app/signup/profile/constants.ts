@@ -1,4 +1,4 @@
-import { TRADE_GROUPS } from '@/lib/trade-labels'
+import { TRADE_GROUPS } from '@bconnect/api-client'
 import { EXPERIENCE_OPTIONS } from '@/lib/experience'
 import type { TradeCategory } from './types'
 

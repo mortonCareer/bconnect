@@ -6,10 +6,9 @@
 import type { ExperienceLevel } from '@/lib/experience'
 import { EXPERIENCE_OPTIONS, EXPERIENCE_TO_YEARS } from '@/lib/experience'
 import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
-import { TRADE_LABELS } from '@/lib/trade-labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
-import { Trade, useCreateProfile, useRegisterMember } from '@bconnect/api-client'
+import { Trade, TRADE_LABELS, useCreateProfile, useRegisterMember } from '@bconnect/api-client'
 import {
   Button,
   Form,

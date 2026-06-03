@@ -24,7 +24,7 @@ export default function SignupCompletePage() {
         </h1>
 
         {/* Check Icon */}
-        <div className="mt-8 flex size-[100px] items-center justify-center rounded-full bg-[#386DFF]">
+        <div className="mt-8 flex size-25 items-center justify-center rounded-full bg-primary">
           <CheckIcon className="text-white" size={83} />
         </div>
       </main>

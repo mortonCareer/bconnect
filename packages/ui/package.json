@@ -7,6 +7,9 @@
     ".": "./src/index.ts",
     "./styles": "./src/styles/globals.css"
   },
+  "scripts": {
+    "lint": "eslint"
+  },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -15,10 +18,10 @@
     "@tailwindcss/postcss": "^4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "catalog:",
     "radix-ui": "^1.4.3",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss": "^4"
+    "tailwindcss": "catalog:"
   },
   "peerDependencies": {
     "react": "catalog:",
@@ -26,8 +29,10 @@
     "react-hook-form": "catalog:"
   },
   "devDependencies": {
+    "@bconnect/config": "workspace:*",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "eslint": "catalog:",
     "typescript": "catalog:"
   }
 }

@@ -12,9 +12,10 @@
     "build": "pnpm --filter morton-career --filter morton-plan build",
     "build:career": "pnpm --filter morton-career build",
     "build:plan": "pnpm --filter morton-plan build",
-    "lint": "pnpm --filter morton-career --filter morton-plan lint",
+    "lint": "pnpm --filter morton-career --filter morton-plan --filter @bconnect/ui lint",
     "lint:career": "pnpm --filter morton-career lint",
     "lint:plan": "pnpm --filter morton-plan lint",
+    "lint:ui": "pnpm --filter @bconnect/ui lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "docs:lint": "pnpm docs:lint:md && pnpm docs:lint:links",
@@ -44,6 +45,7 @@
     "playwright": "^1.58.0",
     "prettier": "^3.7.4",
     "syncpack": "^15.0.0",
+    "tailwindcss": "catalog:",
     "typescript-eslint": "^8.50.1"
   },
   "lint-staged": {

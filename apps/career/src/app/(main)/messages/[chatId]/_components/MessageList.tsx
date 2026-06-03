@@ -10,7 +10,7 @@ import {
 } from '@bconnect/api-client'
 import type { Message, MessageCursorPage } from '@bconnect/api-client'
 import { ChatMessage } from '@bconnect/ui'
-import { formatChatTime } from '@/lib/format-time'
+import { formatChatTime } from '@bconnect/config/format'
 
 interface MessageListProps {
   chatId: number

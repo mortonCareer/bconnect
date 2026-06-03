@@ -6,7 +6,7 @@ import { TechnicianCard } from './TechnicianCard'
 
 function SkeletonCard() {
   return (
-    <div className="animate-pulse rounded-[13px] border border-gray-300 bg-white p-[28px]">
+    <div className="animate-pulse rounded-[13px] border border-gray-300 bg-white p-7">
       <div className="flex gap-[18px]">
         <div className="h-[90px] w-[90px] shrink-0 rounded-full bg-gray-100" />
         <div className="flex flex-1 flex-col gap-2 pt-1">

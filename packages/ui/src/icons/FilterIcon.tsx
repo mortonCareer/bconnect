@@ -1,10 +1,13 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=352-2654
+ */
 import type { SVGProps } from 'react'
 
-interface ChevronLeftIconProps extends SVGProps<SVGSVGElement> {
+interface FilterIconProps extends SVGProps<SVGSVGElement> {
   size?: number
 }
 
-export function ChevronLeftIcon({ size = 20, ...props }: ChevronLeftIconProps) {
+export function FilterIcon({ size = 20, ...props }: FilterIconProps) {
   return (
     <svg
       width={size}
@@ -15,7 +18,7 @@ export function ChevronLeftIcon({ size = 20, ...props }: ChevronLeftIconProps) {
       {...props}
     >
       <path
-        d="M12.5 15L7.5 10L12.5 5"
+        d="M2.5 5.83333H17.5M5 10H15M7.5 14.1667H12.5"
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"

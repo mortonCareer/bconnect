@@ -4,7 +4,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ChatMessage } from '@bconnect/ui'
+import { ChatMessage, ChevronIcon } from '@bconnect/ui'
 
 export default function ChatMessageDetailPage() {
   return (
@@ -13,16 +13,9 @@ export default function ChatMessageDetailPage() {
         {/* Back Navigation */}
         <Link
           href="/showcase"
-          className="mb-6 inline-flex items-center text-sm text-gray-500 hover:text-[#386DFF]"
+          className="mb-6 inline-flex items-center text-sm text-gray-500 hover:text-primary"
         >
-          <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
+          <ChevronIcon direction="left" size={16} className="mr-1" />
           컴포넌트 목록
         </Link>
 
@@ -97,7 +90,7 @@ export default function ChatMessageDetailPage() {
           <section className="mb-12">
             <h2 className="mb-4 text-xl font-semibold text-gray-800">대화 예시</h2>
             <div className="rounded-lg border p-6">
-              <div className="flex flex-col gap-[20px]">
+              <div className="flex flex-col gap-5">
                 <ChatMessage variant="mine" message="안녕하세요." timestamp="오후 2:09" />
                 <ChatMessage variant="typing" nickname="닉네임" />
                 <ChatMessage

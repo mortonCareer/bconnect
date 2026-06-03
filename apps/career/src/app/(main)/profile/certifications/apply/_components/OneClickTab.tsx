@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { getCredentialLabel } from '@bconnect/api-client'
 import type { Credential } from '@bconnect/api-client'
 import { Button, Input } from '@bconnect/ui'
-import { getCredentialLabel, formatDate } from '../../constants'
+import { formatDate } from '@bconnect/config/format'
 
 interface OneClickTabProps {
   credentials: Credential[]

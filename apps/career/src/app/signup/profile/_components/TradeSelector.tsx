@@ -1,6 +1,6 @@
 'use client'
 
-import { TRADE_GROUPS, TRADE_LABELS } from '@/lib/trade-labels'
+import { TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
 import type { Trade } from '@bconnect/api-client'
 import { FormDescription, FormField, FormItem, FormLabel, FormMessage, Tag } from '@bconnect/ui'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'

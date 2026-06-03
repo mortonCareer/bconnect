@@ -15,7 +15,7 @@ export function NotificationPrompt() {
   if (!isSupported || permissionStatus !== 'prompt') return null
 
   return (
-    <div className="mx-4 my-3 rounded-[12px] border border-gray-100 bg-white p-4">
+    <div className="mx-4 my-3 rounded-xl border border-gray-100 bg-white p-4">
       <p className="text-sb-14 text-gray-900">알림을 켜시겠어요?</p>
       <p className="mt-1 text-r-12 text-gray-500">
         새로운 채팅 메시지와 매칭 알림을 받을 수 있어요.
