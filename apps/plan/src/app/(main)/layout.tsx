@@ -19,6 +19,8 @@ export default function MainLayout({
   children: React.ReactNode
   panel: React.ReactNode
 }) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
   return (
     <div className="flex h-screen overflow-hidden bg-white">
       <aside className="flex h-full w-[270px] shrink-0 flex-col border-r border-gray-300">

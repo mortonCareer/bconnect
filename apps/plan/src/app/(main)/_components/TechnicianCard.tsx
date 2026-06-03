@@ -9,7 +9,6 @@ import { useAuthStore } from '@/stores/auth-store'
 import type { TechnicianItem } from '@/hooks/useTechnicianItems'
 import type { Trade } from '@bconnect/api-client'
 import { useLoginGate } from './LoginGateProvider'
-import { useAuthStore } from '@/stores/auth-store'
 
 // Figma node 1504:12113 — bg-gray-100, border-gray-300, rounded-7, R14 gray-700
 function CertTag({ label }: { label: string }) {
