@@ -3,10 +3,11 @@
  */
 'use client'
 
+import { Suspense } from 'react'
 import { NotificationsView } from '@bconnect/features'
 import { usePanelNav } from '@/hooks/usePanelNav'
 
-export default function NotificationsPanelPage() {
+function NotificationsPanel() {
   const { closeHref, close } = usePanelNav()
 
   return (
@@ -16,5 +17,14 @@ export default function NotificationsPanelPage() {
     >
       <NotificationsView closeHref={closeHref} onClose={close} />
     </aside>
+  )
+}
+
+// usePanelNav 가 useSearchParams 를 쓰므로 static prerender(/notifications) 에서 Suspense 필요.
+export default function NotificationsPanelPage() {
+  return (
+    <Suspense>
+      <NotificationsPanel />
+    </Suspense>
   )
 }
