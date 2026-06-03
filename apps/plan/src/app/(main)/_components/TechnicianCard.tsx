@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button, cn, StarIcon } from '@bconnect/ui'
-import { TRADE_LABELS } from '@bconnect/api-client'
+import { TRADE_LABELS, useCreateDirectChat } from '@bconnect/api-client'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useAuthStore } from '@/stores/auth-store'
 import type { TechnicianItem } from '@/hooks/useTechnicianItems'
@@ -82,8 +82,9 @@ interface TechnicianCardProps {
 export function TechnicianCard({ item }: TechnicianCardProps) {
   const { requireLogin } = useLoginGate()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const { panelHref } = usePanelNav()
+  const { panelHref, openPanel } = usePanelNav()
   const profileHref = panelHref(`/profile/${item.profileId}`)
+  const { mutate: createDirectChat, isPending: isCreatingChat } = useCreateDirectChat()
 
   const metaParts = [
     item.location,
@@ -167,9 +168,25 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
                 프로필 보기
               </Button>
             )}
-            <Button variant="primary" size="full" className="h-10" onClick={requireLogin}>
-              메시지 보내기
-            </Button>
+            {isAuthenticated ? (
+              <Button
+                size="full"
+                className="h-10"
+                disabled={isCreatingChat}
+                onClick={() =>
+                  createDirectChat(
+                    { data: { participantId: item.memberId } },
+                    { onSuccess: (chat) => openPanel(`/messages/${chat.id}`) }
+                  )
+                }
+              >
+                메시지 보내기
+              </Button>
+            ) : (
+              <Button size="full" className="h-10" onClick={requireLogin}>
+                메시지 보내기
+              </Button>
+            )}
           </div>
         </div>
       </div>

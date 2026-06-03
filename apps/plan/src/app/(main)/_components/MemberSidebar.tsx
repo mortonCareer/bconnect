@@ -4,8 +4,10 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useGetMyMember, useGetMyChats } from '@bconnect/api-client'
 import { getAvatarUrl } from '@bconnect/config/avatar'
+import { usePanelNav } from '@/hooks/usePanelNav'
 import { SidebarFooter } from './SidebarFooter'
 
 // TODO(신규 BE 이슈 필요 — notification 도메인): 엔드포인트 추가 시
@@ -26,19 +28,28 @@ function CountBadge({ count }: { count: number }) {
 interface NavItemProps {
   label: string
   count: number
-  onClick: () => void
+  href?: string
+  onClick?: () => void
 }
 
 // TODO: #381 — utils.ts 이슈 수정 후 스타일 반영
-function NavItem({ label, count, onClick }: NavItemProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex h-[44px] w-full items-center justify-between rounded-[8px] px-3 text-r-14 text-gray-900 hover:bg-gray-100"
-    >
+const NAV_ITEM_CLASS =
+  'flex h-[44px] w-full items-center justify-between rounded-[8px] px-3 text-r-14 text-gray-900 hover:bg-gray-100'
+
+function NavItem({ label, count, href, onClick }: NavItemProps) {
+  const inner = (
+    <>
       <span>{label}</span>
       <CountBadge count={count} />
+    </>
+  )
+  return href ? (
+    <Link href={href} scroll={false} className={NAV_ITEM_CLASS}>
+      {inner}
+    </Link>
+  ) : (
+    <button type="button" onClick={onClick} className={NAV_ITEM_CLASS}>
+      {inner}
     </button>
   )
 }
@@ -86,6 +97,7 @@ function ProfileSection() {
 export function MemberSidebar() {
   const { data: chats } = useGetMyChats()
   const messageCount = chats?.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0) ?? 0
+  const { panelHref } = usePanelNav()
 
   return (
     <div className="flex h-full flex-col justify-between">
@@ -100,13 +112,7 @@ export function MemberSidebar() {
               /* TODO #347 — NotificationsPanel 트리거 */
             }}
           />
-          <NavItem
-            label="메시지"
-            count={messageCount}
-            onClick={() => {
-              /* TODO #345 — MessagesPanel 트리거 */
-            }}
-          />
+          <NavItem label="메시지" count={messageCount} href={panelHref('/messages')} />
         </div>
       </div>
 
