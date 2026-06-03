@@ -33,7 +33,7 @@ public class ProfileController {
     private final ProfileFinder profileFinder;
 
     @GetMapping
-    public ApiResponse<List<ProfileResponse>> getAll() {
+    public ApiResponse<List<ProfileResponse>> list() {
         List<ProfileResponse> profiles = profileFinder.findAll().stream()
                 .map(ProfileResponse::of)
                 .toList();

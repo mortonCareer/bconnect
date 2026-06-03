@@ -22,7 +22,7 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    public ApiResponse<List<PostResponse>> getAll() {
+    public ApiResponse<List<PostResponse>> list() {
         List<PostResponse> posts = postService.getAll().stream()
                 .map(PostResponse::of)
                 .toList();

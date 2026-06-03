@@ -38,7 +38,7 @@ public class RecommendationController {
     }
 
     @GetMapping("/received")
-    public ApiResponse<List<RecommendationResponse>> getReceived(@RequestParam Long profileId) {
+    public ApiResponse<List<RecommendationResponse>> listReceived(@RequestParam Long profileId) {
         List<RecommendationResponse> responses = recommendationService.getReceived(profileId).stream()
                 .map(RecommendationResponse::of)
                 .toList();
@@ -46,7 +46,7 @@ public class RecommendationController {
     }
 
     @GetMapping("/sent")
-    public ApiResponse<List<RecommendationResponse>> getSent(@RequestParam Long profileId) {
+    public ApiResponse<List<RecommendationResponse>> listSent(@RequestParam Long profileId) {
         List<RecommendationResponse> responses = recommendationService.getSent(profileId).stream()
                 .map(RecommendationResponse::of)
                 .toList();
@@ -54,7 +54,7 @@ public class RecommendationController {
     }
 
     @GetMapping("/me/received")
-    public ApiResponse<List<RecommendationResponse>> getMyReceived(
+    public ApiResponse<List<RecommendationResponse>> listMyRecived(
             @AuthenticationPrincipal User user) {
         List<RecommendationResponse> responses = recommendationService.getMyReceived(user).stream()
                 .map(RecommendationResponse::of)
@@ -63,7 +63,7 @@ public class RecommendationController {
     }
 
     @GetMapping("/me/sent")
-    public ApiResponse<List<RecommendationResponse>> getMySent(
+    public ApiResponse<List<RecommendationResponse>> listMySent(
             @AuthenticationPrincipal User user) {
         List<RecommendationResponse> responses = recommendationService.getMySent(user).stream()
                 .map(RecommendationResponse::of)

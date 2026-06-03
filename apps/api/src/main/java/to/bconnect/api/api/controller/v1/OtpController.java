@@ -21,7 +21,7 @@ public class OtpController {
     private final OtpService otpService;
 
     @PostMapping("/send")
-    public ApiResponse<SendOtpResponse> sendOtp(@RequestBody @Valid SendCodeRequest request) {
+    public ApiResponse<SendOtpResponse> send(@RequestBody @Valid SendCodeRequest request) {
         LocalDateTime expiresAt = otpService.sendCode(request.phone());
         return ApiResponse.success(new SendOtpResponse(expiresAt));
     }

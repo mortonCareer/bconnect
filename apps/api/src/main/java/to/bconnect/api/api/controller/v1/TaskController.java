@@ -29,7 +29,7 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping
-    public ApiResponse<List<TaskResponse>> getAll(@AuthenticationPrincipal User user) {
+    public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal User user) {
         List<TaskResponse> tasks = taskService.getAll(user).stream()
                 .map(TaskResponse::of)
                 .toList();

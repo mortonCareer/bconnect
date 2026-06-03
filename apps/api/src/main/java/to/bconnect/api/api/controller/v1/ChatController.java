@@ -30,7 +30,7 @@ public class ChatController {
     private final ChatService chatService;
 
     @GetMapping
-    public ApiResponse<List<ChatResponse>> getMyChats(@AuthenticationPrincipal User user) {
+    public ApiResponse<List<ChatResponse>> list(@AuthenticationPrincipal User user) {
         List<ChatResponse> response = chatService.getMyChats(user.id()).stream()
                 .map(ChatResponse::of)
                 .toList();
@@ -38,7 +38,7 @@ public class ChatController {
     }
 
     @PostMapping
-    public ApiResponse<ChatResponse> createChat(
+    public ApiResponse<ChatResponse> create(
             @AuthenticationPrincipal User user,
             @RequestBody @Valid CreateChatRequest request) {
         ChatDetail chat = chatService.create(user, request);
@@ -46,7 +46,7 @@ public class ChatController {
     }
 
     @GetMapping("/{chatId}/messages")
-    public ApiResponse<CursorPage<MessageResponse>> getChatMessages(
+    public ApiResponse<CursorPage<MessageResponse>> listMessages(
             @AuthenticationPrincipal User user,
             @PathVariable Long chatId,
             CursorLimit cursorLimit) {

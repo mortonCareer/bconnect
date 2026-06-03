@@ -29,7 +29,7 @@ public class CoworkerController {
     private final MemberFinder memberFinder;
 
     @GetMapping
-    public ApiResponse<List<CoworkerResponse>> get(
+    public ApiResponse<List<CoworkerResponse>> list(
             @AuthenticationPrincipal User user,
             @RequestParam Long profileId) {
         List<CoworkerResponse> coworkers = coworkerService.getAll(user, profileId).stream()
