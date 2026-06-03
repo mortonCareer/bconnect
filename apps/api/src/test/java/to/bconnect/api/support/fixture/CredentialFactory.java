@@ -6,15 +6,15 @@ import to.bconnect.api.storage.domain.credential.CredentialEntity;
 import to.bconnect.api.storage.common.value.CredentialStatus;
 import to.bconnect.api.storage.common.value.CredentialType;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import static to.bconnect.api.support.fixture.FixtureConstant.MAX_DATE;
+import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
 public class CredentialFactory {
 
     public static Credential create(Long id, Long profileId) {
         return new Credential(id, profileId, CredentialType.SOLE_PROPRIETOR,
-                CredentialStatus.PENDING, LocalDate.MAX,
-                LocalDateTime.MIN, LocalDateTime.MIN);
+                CredentialStatus.PENDING, MAX_DATE,
+                MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
     public static CredentialEntity createEntity(Long profileId) {
@@ -25,6 +25,6 @@ public class CredentialFactory {
     }
 
     public static CreateCredentialRequest createRequest() {
-        return new CreateCredentialRequest(CredentialType.SOLE_PROPRIETOR, LocalDate.MAX);
+        return new CreateCredentialRequest(CredentialType.SOLE_PROPRIETOR, MAX_DATE);
     }
 }

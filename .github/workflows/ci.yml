@@ -136,10 +136,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'gradle'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x apps/api/gradlew
+      - uses: gradle/gradle-build-action@v3
 
       - uses: actions/setup-node@v6
         with:
@@ -153,20 +151,20 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           cd apps/api
-          ./gradlew build test --no-daemon
+          ./gradlew build test
 
       - name: Start API server
         run: |
           cd apps/api
-          ./gradlew test bootRun --no-daemon
+          ./gradlew test bootRun
 
-      - name : Wait for health
+      - name : Wait for API server health
         run: |
           for i in $(seq 1 60); do
             curl -sf http://localhost:8080/actuator/health && break || sleep 1
           done
 
-      - name: Run Bruno demo collection
+      - name: Run Bruno collection
         working-directory: apps/api/bruno
         run: |
           bru run \
@@ -181,28 +179,23 @@ jobs:
           path: apps/api/bruno/bruno-report.html
           if-no-files-found: error
 
-  ci-api-spec:
+  ci-generate-api-spec:
     needs: changes
     if: ${{ needs.changes.outputs.api-spec == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-java@v4
         with:
-          node-version: 24
-          cache: 'pnpm'
+          distribution: 'temurin'
+          java-version: '21'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
 
-      - name: Lint OpenAPI spec
-        run: pnpm api:lint
-
-      - name: Bundle check (sanity)
-        run: pnpm api:bundle
+      - name: Generate Open API spec
+        run: ./gradlew clean generateOpenApiDocs
 
   ci-packages:
     needs: changes

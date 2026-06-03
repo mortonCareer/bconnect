@@ -12,11 +12,11 @@ import java.util.Set;
 
 public class TaskFactory {
 
-    private static final LocalDate START_DATE = LocalDate.of(2024, 1, 1);
-    private static final LocalDate END_DATE = LocalDate.of(2024, 12, 31);
+    private static final LocalDate START_DATE = LocalDate.of(2026, 6, 1);
+    private static final LocalDate END_DATE = LocalDate.of(2026, 6, 31);
 
     public static Task create(Long id, Long profileId) {
-        return new Task(id, profileId, "company", ProfileFactory.ADDRESS, "task", "event",
+        return new Task(id, profileId, "company", ProfileFactory.DEFAULT_ADDRESS, "task", "event",
                 Set.of(Trade.ELECTRICAL), START_DATE, END_DATE,
                 LocalDateTime.now(), LocalDateTime.now());
     }
@@ -25,7 +25,7 @@ public class TaskFactory {
         return TaskEntity.builder()
                 .profileId(profileId)
                 .company("company")
-                .address(ProfileFactory.ADDRESS)
+                .address(ProfileFactory.DEFAULT_ADDRESS)
                 .taskTitle("task")
                 .eventTitle("event")
                 .trades(Set.of(Trade.ELECTRICAL))
@@ -36,13 +36,13 @@ public class TaskFactory {
 
     public static CreateTaskRequest createRequest() {
         return new CreateTaskRequest(
-                "company", ProfileFactory.ADDRESS, "create", "create",
+                "company", ProfileFactory.DEFAULT_ADDRESS, "create", "create",
                 Set.of(Trade.ELECTRICAL), START_DATE, END_DATE);
     }
 
     public static UpdateTaskRequest updateRequest() {
         return new UpdateTaskRequest(
-                "company", ProfileFactory.ADDRESS, "update", "update",
+                "company", ProfileFactory.DEFAULT_ADDRESS, "update", "update",
                 Set.of(Trade.DEMOLITION), START_DATE, END_DATE);
     }
 }

@@ -5,13 +5,13 @@ import to.bconnect.api.api.controller.v1.request.UpdateRecommendationRequest;
 import to.bconnect.api.domain.recommendation.Recommendation;
 import to.bconnect.api.storage.domain.recommendation.RecommendationEntity;
 
-import java.time.LocalDateTime;
+import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
 public class RecommendationFactory {
 
     public static Recommendation create(Long id, Long fromId, Long toId) {
         return new Recommendation(id, fromId, toId, "content", false,
-                LocalDateTime.MIN, LocalDateTime.MIN);
+                MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
     public static RecommendationEntity createEntity(Long fromId, Long toId) {
