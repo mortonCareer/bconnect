@@ -3,7 +3,7 @@
  */
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
-import { ChevronRight } from 'lucide-react'
+import { ChevronIcon } from '../../icons'
 import { cn } from '../../lib/utils'
 
 /**
@@ -158,7 +158,7 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
             )}
           </div>
         ) : (
-          <ChevronRight className="size-4 text-[#A5A5A5]" />
+          <ChevronIcon direction="right" className="size-4 text-[#A5A5A5]" />
         )}
       </div>
     )
