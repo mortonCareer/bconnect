@@ -1,21 +1,4 @@
-import type { CredentialType } from '@bconnect/api-client'
-
-export const CREDENTIAL_TYPE_LABELS: Record<CredentialType, string> = {
-  IDENTITY_VERIFICATION: '본인인증',
-  SOLE_PROPRIETOR: '개인사업자',
-  CONSTRUCTION_LICENSE: '건설면허',
-  SPECIALTY_CONSTRUCTION_LICENSE: '전문건설면허',
-  CAREER_CERTIFICATE: '경력증명서',
-  SKILL_GRADE_CERTIFICATE: '기능등급증명서',
-  OTHER_CERTIFICATE: '기타 증명서',
-  NATIONAL_TECHNICAL_QUALIFICATION: '국가기술자격증',
-  SKILLED_TECHNICIAN: '숙련기술인',
-  OTHER_QUALIFICATION: '기타 자격증',
-}
-
-export function getCredentialLabel(type: CredentialType): string {
-  return CREDENTIAL_TYPE_LABELS[type] ?? type
-}
+export { CREDENTIAL_TYPE_LABELS, getCredentialLabel } from '@bconnect/api-client'
 
 export function formatDate(dateString: string): string {
   const date = new Date(dateString)

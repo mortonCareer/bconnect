@@ -1,0 +1,32 @@
+const MINUTE = 60 * 1000
+const HOUR = 60 * MINUTE
+const DAY = 24 * HOUR
+const WEEK = 7 * DAY
+const MONTH = 30 * DAY
+
+export function formatRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+
+  if (diff < MINUTE) return '방금'
+  if (diff < HOUR) return `${Math.floor(diff / MINUTE)}분 전`
+  if (diff < DAY) return `${Math.floor(diff / HOUR)}시간 전`
+  if (diff < WEEK) return `${Math.floor(diff / DAY)}일 전`
+  if (diff < MONTH) return `${Math.floor(diff / WEEK)}주 전`
+  return `${Math.floor(diff / MONTH)}개월 전`
+}
+
+export function formatDuration(start: string, end: string): string {
+  const startDate = new Date(start)
+  const endDate = new Date(end)
+  const days = Math.ceil((endDate.getTime() - startDate.getTime()) / DAY)
+  return `${days}일 소요`
+}
+
+export function formatChatTime(dateStr: string): string {
+  const date = new Date(dateStr)
+  const hours = date.getHours()
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+  const period = hours < 12 ? '오전' : '오후'
+  const displayHours = hours % 12 || 12
+  return `${period} ${displayHours}:${minutes}`
+}
