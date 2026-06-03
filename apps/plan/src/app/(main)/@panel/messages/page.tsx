@@ -3,10 +3,11 @@
  */
 'use client'
 
+import { Suspense } from 'react'
 import { MessagesView } from '@bconnect/features'
 import { usePanelNav } from '@/hooks/usePanelNav'
 
-export default function MessagesPanelPage() {
+function MessagesPanel() {
   const { panelHref, closeHref, close } = usePanelNav()
 
   return (
@@ -20,5 +21,14 @@ export default function MessagesPanelPage() {
         chatHref={(chatId) => panelHref(`/messages/${chatId}`)}
       />
     </aside>
+  )
+}
+
+// usePanelNav 가 useSearchParams 를 쓰므로 static prerender(/messages) 에서 Suspense 필요.
+export default function MessagesPanelPage() {
+  return (
+    <Suspense>
+      <MessagesPanel />
+    </Suspense>
   )
 }
