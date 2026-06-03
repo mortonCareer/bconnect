@@ -34,9 +34,7 @@ export default function CertificationApplyPage() {
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'one-click' })
 
-  const { data: profile, isLoading: isProfileLoading } = useGetMyProfile({
-    query: { retry: false },
-  })
+  const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
   const profileId = profile?.id
 
   const { data: credentials, isLoading: isCredentialsLoading } = useGetCredentials(

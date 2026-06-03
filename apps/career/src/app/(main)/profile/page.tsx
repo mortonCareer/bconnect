@@ -27,12 +27,8 @@ export default function MyProfilePage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'intro' })
 
-  const { data: memberData, isLoading: isMemberLoading } = useGetMyMember({
-    query: { retry: false },
-  })
-  const { data: profileData, isLoading: isProfileLoading } = useGetMyProfile({
-    query: { retry: false },
-  })
+  const { data: memberData, isLoading: isMemberLoading } = useGetMyMember()
+  const { data: profileData, isLoading: isProfileLoading } = useGetMyProfile()
 
   const { postCount } = useFeedItems({ authorId: profileData?.id })
   const { data: coworkers } = useGetCoworkers(
@@ -41,7 +37,7 @@ export default function MyProfilePage() {
   )
   const { data: credentialsData } = useGetCredentials(
     { profileId: profileData?.id ?? 0 },
-    { query: { enabled: !!profileData?.id, retry: false } }
+    { query: { enabled: !!profileData?.id } }
   )
   const credentialsList = credentialsData ?? []
   // TODO: 추천서 API 연동

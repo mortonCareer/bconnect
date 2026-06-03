@@ -27,7 +27,7 @@ export default function EditAboutPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const { data: profile } = useGetMyProfile({ query: { retry: false } })
+  const { data: profile } = useGetMyProfile()
 
   const form = useForm<AboutFormValues>({
     mode: 'onTouched',

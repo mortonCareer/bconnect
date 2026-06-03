@@ -19,9 +19,7 @@ export default function CertificationsPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const { data: profile, isLoading: isProfileLoading } = useGetMyProfile({
-    query: { retry: false },
-  })
+  const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
   const profileId = profile?.id
 
   const { data: credentials, isLoading: isCredentialsLoading } = useGetCredentials(

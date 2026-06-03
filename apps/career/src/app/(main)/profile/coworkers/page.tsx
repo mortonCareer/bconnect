@@ -13,9 +13,7 @@ export default function CoworkersPage() {
   const router = useRouter()
   const [search, setSearch] = useState('')
 
-  const { data: myProfile, isLoading: isProfileLoading } = useGetMyProfile({
-    query: { retry: false },
-  })
+  const { data: myProfile, isLoading: isProfileLoading } = useGetMyProfile()
   const myProfileId = myProfile?.id
 
   const { data: coworkers, isLoading: isCoworkersLoading } = useGetCoworkers(
