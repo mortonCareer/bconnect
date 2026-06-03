@@ -5,7 +5,7 @@
 
 import Image from 'next/image'
 import { useGetMyMember, useGetMyChats } from '@bconnect/api-client'
-import { getAvatarUrl } from '@/lib/avatar'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 import { SidebarFooter } from './SidebarFooter'
 
 // TODO(신규 BE 이슈 필요 — notification 도메인): 엔드포인트 추가 시
