@@ -1,35 +1,14 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { getCredentialLabel } from '@bconnect/api-client'
+import {
+  getCredentialLabel,
+  getTradeLabel,
+  useGetMyReceivedRecommendations,
+} from '@bconnect/api-client'
 import type { Credential, Profile } from '@bconnect/api-client'
 import { Tag } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
-
-// TODO: 추천서 API 연동 — 현재 mock 데이터 사용
-const MOCK_RECOMMENDATIONS = [
-  {
-    id: 1,
-    name: '손장수',
-    trade: '도배',
-    role: '반장',
-    content: '깔끔하게 도배하는 동료입니다. 추천합니다...',
-  },
-  {
-    id: 2,
-    name: '손장수',
-    trade: '도배',
-    role: '반장',
-    content: '깔끔하게 도배하는 동료입니다. 추천합니다...',
-  },
-  {
-    id: 3,
-    name: '손장수',
-    trade: '도배',
-    role: '반장',
-    content: '깔끔하게 도배하는 동료입니다. 추천합니다...',
-  },
-]
 
 interface IntroSectionProps {
   profile: Profile
@@ -39,6 +18,9 @@ interface IntroSectionProps {
 export function IntroSection({ profile, credentials }: IntroSectionProps) {
   const router = useRouter()
   const { about } = profile
+
+  const { data: received } = useGetMyReceivedRecommendations()
+  const receivedRecommendations = received ?? []
 
   const acceptedCredentials = credentials?.filter((c) => c.status === 'ACCEPTED') ?? []
 
@@ -115,30 +97,38 @@ export function IntroSection({ profile, credentials }: IntroSectionProps) {
             보낸 추천서
           </button>
         </div>
-        <div className="flex flex-col divide-y divide-gray-300">
-          {MOCK_RECOMMENDATIONS.map((rec) => (
-            <div key={rec.id} className="flex gap-3 py-3">
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-gray-100">
-                <img
-                  src={getAvatarUrl(rec.name)}
-                  alt={rec.name}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-m-14 text-gray-900">{rec.name}</span>
-                  <span className="text-r-12 text-gray-500">
-                    {rec.trade} · {rec.role}
-                  </span>
+        {receivedRecommendations.length > 0 ? (
+          <div className="flex flex-col divide-y divide-gray-300">
+            {receivedRecommendations.map((rec) => {
+              // TODO(#473): BE가 MaskedMember.role 미제공 — 추가되면 실제 role 연결
+              const role = '반장(Mocked)'
+              return (
+                <div key={rec.id} className="flex gap-3 py-3">
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-gray-100">
+                    <img
+                      src={rec.member.picture || getAvatarUrl(rec.member.name)}
+                      alt={rec.member.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-m-14 text-gray-900">{rec.member.name}</span>
+                      <span className="text-r-12 text-gray-500">
+                        {getTradeLabel(rec.profile.primaryTrade)} · {role}
+                      </span>
+                    </div>
+                    <p className="text-r-12 text-gray-900">
+                      {rec.content} <span className="text-gray-500 underline">더보기</span>
+                    </p>
+                  </div>
                 </div>
-                <p className="text-r-12 text-gray-900">
-                  {rec.content} <span className="text-gray-500 underline">더보기</span>
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+              )
+            })}
+          </div>
+        ) : (
+          <p className="text-r-14 text-gray-500">받은 추천서가 없습니다</p>
+        )}
       </div>
     </div>
   )
