@@ -139,7 +139,7 @@ function MockCoworkerCard({
         </div>
         <p className="mt-0.5 line-clamp-2 text-r-12 text-gray-500">{coworker.about}</p>
       </div>
-      <ChevronIcon direction="right" className="shrink-0 text-gray-400" />
+      <ChevronIcon direction="right" className="text-gray-400" />
     </div>
   )
 }

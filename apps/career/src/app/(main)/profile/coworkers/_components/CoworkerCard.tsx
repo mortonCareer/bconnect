@@ -62,7 +62,7 @@ export function CoworkerCard({ profileId }: CoworkerCardProps) {
       </div>
 
       {/* 오른쪽 화살표 */}
-      <ChevronIcon direction="right" className="shrink-0 text-gray-400" />
+      <ChevronIcon direction="right" className="text-gray-400" />
     </button>
   )
 }

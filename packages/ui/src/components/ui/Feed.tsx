@@ -175,7 +175,7 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
             <ChevronIcon
               direction="right"
               size={16}
-              className="shrink-0 text-[#1B1B1B]"
+              className="text-[#1B1B1B]"
               aria-hidden="true"
             />
           </>
