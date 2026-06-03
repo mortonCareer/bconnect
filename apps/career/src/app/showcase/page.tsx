@@ -4,7 +4,17 @@
 'use client'
 
 import Link from 'next/link'
-import { Button, Tag, Slider, Input, Feed, TopBar, ChatMessage, ImageInput } from '@bconnect/ui'
+import {
+  Button,
+  Tag,
+  Slider,
+  Input,
+  Feed,
+  TopBar,
+  ChatMessage,
+  ImageInput,
+  ChevronIcon,
+} from '@bconnect/ui'
 
 interface ComponentPreview {
   name: string
@@ -134,19 +144,10 @@ export default function ShowcasePage() {
               {/* Arrow indicator */}
               <div className="mt-4 flex items-center text-sm text-gray-400 group-hover:text-primary">
                 <span>상세보기</span>
-                <svg
+                <ChevronIcon
+                  direction="right"
                   className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                />
               </div>
             </Link>
           ))}

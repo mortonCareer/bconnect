@@ -1,7 +1,5 @@
 // @bconnect/ui - Icons
-export { ChevronLeftIcon } from './ChevronLeftIcon'
-export { ChevronDownIcon } from './ChevronDownIcon'
-export { ChevronRightIcon } from './ChevronRightIcon'
+export { ChevronIcon } from './ChevronIcon'
 export { CheckIcon } from './CheckIcon'
 export { XIcon } from './XIcon'
 export { RefreshIcon } from './RefreshIcon'

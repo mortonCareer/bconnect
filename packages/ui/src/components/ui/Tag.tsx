@@ -79,7 +79,7 @@ const Tag = React.forwardRef<HTMLButtonElement, TagProps>(
         {...props}
       >
         {children}
-        {variant === 'filter' && <XIcon size={16} className="shrink-0" />}
+        {variant === 'filter' && <XIcon size={16} />}
       </button>
     )
   }

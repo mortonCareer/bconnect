@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { TRADE_LABELS, useGetProfile } from '@bconnect/api-client'
+import { ChevronIcon } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 
 interface CoworkerCardProps {
@@ -61,21 +62,7 @@ export function CoworkerCard({ profileId }: CoworkerCardProps) {
       </div>
 
       {/* 오른쪽 화살표 */}
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        className="shrink-0 text-gray-400"
-      >
-        <path
-          d="M7.5 15L12.5 10L7.5 5"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <ChevronIcon direction="right" className="text-gray-400" />
     </button>
   )
 }

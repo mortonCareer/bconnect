@@ -158,7 +158,7 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
             )}
           </div>
         ) : (
-          <ChevronRight className="size-4 shrink-0 text-[#A5A5A5]" />
+          <ChevronRight className="size-4 text-[#A5A5A5]" />
         )}
       </div>
     )
