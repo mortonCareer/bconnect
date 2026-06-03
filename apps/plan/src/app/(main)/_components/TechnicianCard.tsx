@@ -170,7 +170,6 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
             )}
             {isAuthenticated ? (
               <Button
-                variant="primary"
                 size="full"
                 className="h-10"
                 disabled={isCreatingChat}
@@ -184,7 +183,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
                 메시지 보내기
               </Button>
             ) : (
-              <Button variant="primary" size="full" className="h-10" onClick={requireLogin}>
+              <Button size="full" className="h-10" onClick={requireLogin}>
                 메시지 보내기
               </Button>
             )}
