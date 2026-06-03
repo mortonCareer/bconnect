@@ -26,7 +26,8 @@ export function NotificationsView({ closeHref, onClose }: NotificationsViewProps
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [onClose])
 
-  // BE 미구현 — 독립 MSW placeholder 핸들러(`/api/v1/notifications`). customFetch 가 envelope unwrap.
+  // TODO(BE notification 도메인 #347): 스펙 확정 시 generated useQuery 훅으로 교체.
+  // 현재는 독립 MSW placeholder(`/api/v1/notifications`) — customFetch 가 envelope unwrap.
   const { data, isLoading, isError } = useQuery({
     queryKey: ['notifications'],
     queryFn: () => customFetch<AppNotification[]>('/api/v1/notifications'),
