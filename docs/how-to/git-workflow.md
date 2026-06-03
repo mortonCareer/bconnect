@@ -311,7 +311,6 @@ main 브랜치로 머지
 공통:
 
 - 머지 커밋 메시지는 PR 제목 사용
-- 머지 즉시 이슈 자동 닫힘 — [close-linked-issues workflow](../../.github/workflows/close-linked-issues.yml) (`ldez/gha-mjolnir`) 가 dev 머지에서도 closing keyword 인식 ([#303](https://github.com/mortonCareer/bconnect/issues/303))
 - 프로덕션 자동 배포 (`main` 머지 시)
 
 #### Sync PR (head=main)의 Vercel checks 예외
