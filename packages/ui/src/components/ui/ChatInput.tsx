@@ -71,7 +71,7 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && !disabled && inputValue.trim()) {
+      if (e.key === 'Enter' && !e.nativeEvent.isComposing && !disabled && inputValue.trim()) {
         e.preventDefault()
         onSend?.()
       }
