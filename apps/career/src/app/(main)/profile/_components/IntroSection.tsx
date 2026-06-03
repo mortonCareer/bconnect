@@ -1,10 +1,10 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { getCredentialLabel } from '@bconnect/api-client'
 import type { Credential, Profile } from '@bconnect/api-client'
 import { Tag } from '@bconnect/ui'
-import { getCredentialLabel } from '../certifications/constants'
-import { getAvatarUrl } from '@/lib/avatar'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 
 // TODO: 추천서 API 연동 — 현재 mock 데이터 사용
 const MOCK_RECOMMENDATIONS = [

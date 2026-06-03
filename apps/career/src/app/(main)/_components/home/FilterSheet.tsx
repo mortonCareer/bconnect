@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Select, Tag, TopBar } from '@bconnect/ui'
 import type { Trade } from '@bconnect/api-client'
-import { TRADE_GROUPS, TRADE_LABELS } from '@/lib/trade-labels'
+import { TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
 import { EXPERIENCE_OPTIONS } from '@/lib/experience'
 import type { ExperienceLevel } from '@/lib/experience'
 import { useFilterParams } from '@/hooks/useFilterParams'

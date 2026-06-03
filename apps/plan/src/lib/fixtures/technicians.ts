@@ -13,7 +13,7 @@
  *   6) 최민호  — 평범한 중간값 (부산/도장/1년)
  */
 import { Trade } from '@bconnect/api-client'
-import { getAvatarUrl } from '@/lib/avatar'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 import type { Grade } from '@/lib/grade'
 import type { TechnicianItem } from '@/hooks/useTechnicianItems'
 

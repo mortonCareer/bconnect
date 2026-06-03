@@ -13,8 +13,8 @@ import {
 } from '@bconnect/api-client'
 import type { Profile } from '@bconnect/api-client'
 import { ChatListItem, TopBar } from '@bconnect/ui'
-import { formatRelativeTime } from '@/lib/format-time'
-import { TRADE_LABELS } from '@/lib/trade-labels'
+import { formatRelativeTime } from '@bconnect/config/format'
+import { TRADE_LABELS } from '@bconnect/api-client'
 
 export default function MessagesPage() {
   const currentUserId = useGetMyMember().data?.id

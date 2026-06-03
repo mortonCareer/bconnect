@@ -1,10 +1,9 @@
 'use client'
 
 import { Fragment } from 'react'
-import { useGetCredentials } from '@bconnect/api-client'
+import { getCredentialLabel, useGetCredentials } from '@bconnect/api-client'
 import type { Profile } from '@bconnect/api-client'
 import { Skeleton, Tag } from '@bconnect/ui'
-import { getCredentialLabel } from './labels'
 import { RecommendationList } from './RecommendationList'
 
 interface IntroTabProps {

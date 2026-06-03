@@ -2,8 +2,8 @@
 
 import { useRouter } from 'next/navigation'
 import type { Trade } from '@bconnect/api-client'
-import { TRADE_LABELS } from '@/lib/trade-labels'
-import { getAvatarUrl } from '@/lib/avatar'
+import { TRADE_LABELS } from '@bconnect/api-client'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 
 interface ProfileHeaderProps {
   name?: string

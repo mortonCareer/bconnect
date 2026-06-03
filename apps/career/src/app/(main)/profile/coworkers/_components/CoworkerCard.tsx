@@ -1,9 +1,8 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useGetProfile } from '@bconnect/api-client'
-import { TRADE_LABELS } from '@/lib/trade-labels'
-import { getAvatarUrl } from '@/lib/avatar'
+import { TRADE_LABELS, useGetProfile } from '@bconnect/api-client'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 
 interface CoworkerCardProps {
   profileId: number

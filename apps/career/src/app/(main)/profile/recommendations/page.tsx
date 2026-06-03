@@ -7,7 +7,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Tab, TopBar } from '@bconnect/ui'
-import { getAvatarUrl } from '@/lib/avatar'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 
 interface Recommendation {
   id: number

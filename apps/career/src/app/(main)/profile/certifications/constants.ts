@@ -1,5 +1,3 @@
-export { CREDENTIAL_TYPE_LABELS, getCredentialLabel } from '@bconnect/api-client'
-
 export function formatDate(dateString: string): string {
   const date = new Date(dateString)
   const year = date.getFullYear()

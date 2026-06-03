@@ -1,8 +1,7 @@
 'use client'
 
 import { Select, XIcon, RefreshIcon } from '@bconnect/ui'
-import { Trade } from '@bconnect/api-client'
-import { TRADE_LIST, TRADE_LABELS } from '@/lib/trade-labels'
+import { Trade, TRADE_LIST, TRADE_LABELS } from '@bconnect/api-client'
 import { EXPERIENCE_OPTIONS, EXPERIENCE_LABELS } from '@/lib/experience'
 import { GRADE_OPTIONS } from '@/lib/grade'
 import type { Grade } from '@/lib/grade'

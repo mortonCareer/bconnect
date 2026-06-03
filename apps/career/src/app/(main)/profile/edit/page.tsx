@@ -19,7 +19,7 @@ import {
   Trade,
 } from '@bconnect/api-client'
 import { Form, SelectField, Tag, TextareaField, TextField, TopBar } from '@bconnect/ui'
-import { TRADE_LABELS, TRADE_GROUPS } from '@/lib/trade-labels'
+import { TRADE_LABELS, TRADE_GROUPS } from '@bconnect/api-client'
 import { profileEditSchema, type ProfileEditFormData } from './schema'
 
 const EXPERIENCE_OPTIONS = [
