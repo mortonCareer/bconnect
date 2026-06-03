@@ -41,7 +41,7 @@ const OtpInput = React.forwardRef<HTMLInputElement, OtpInputProps>(
     return (
       <div
         className={cn(
-          'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border border-bconnect-gray-300 bg-transparent',
+          'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border border-gray-300 bg-transparent',
           className
         )}
       >
@@ -51,18 +51,16 @@ const OtpInput = React.forwardRef<HTMLInputElement, OtpInputProps>(
           pattern="[0-9]*"
           ref={ref}
           data-slot="otp-input"
-          className="flex-1 bg-transparent text-base text-bconnect-gray-900 placeholder:text-bconnect-gray-500 outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex-1 bg-transparent text-base text-gray-900 placeholder:text-gray-500 outline-none disabled:cursor-not-allowed disabled:opacity-50"
           {...props}
         />
-        <div className="flex items-center gap-[10px] text-sm shrink-0">
-          {remainingTime > 0 && (
-            <span className="text-bconnect-gray-500">{formatTime(remainingTime)}</span>
-          )}
+        <div className="flex items-center gap-2.5 text-sm shrink-0">
+          {remainingTime > 0 && <span className="text-gray-500">{formatTime(remainingTime)}</span>}
           <button
             type="button"
             onClick={onResend}
             disabled={resendDisabled}
-            className="font-medium text-bconnect-primary hover:text-bconnect-primary-hover disabled:opacity-50 disabled:cursor-not-allowed"
+            className="font-medium text-primary hover:text-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             재요청
           </button>

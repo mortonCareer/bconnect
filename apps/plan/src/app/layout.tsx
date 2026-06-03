@@ -1,7 +1,16 @@
 import '@bconnect/ui/styles'
 import type { Metadata } from 'next'
+import localFont from 'next/font/local'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { Providers } from './providers'
+
+const pretendard = localFont({
+  src: '../../../../packages/ui/src/fonts/PretendardVariable.woff2',
+  display: 'swap',
+  weight: '45 920',
+  style: 'normal',
+  variable: '--font-pretendard',
+})
 
 export const metadata: Metadata = {
   title: 'Plan',
@@ -14,16 +23,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ko">
-      <head>
-        {/* 디자인 시스템 --font-sans = 'Pretendard Variable'. career 앱과 동일하게 CDN 로드 */}
-        <link
-          rel="stylesheet"
-          as="style"
-          crossOrigin="anonymous"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
-        />
-      </head>
+    <html lang="ko" className={pretendard.variable}>
       <body className="antialiased">
         <NuqsAdapter>
           <Providers>{children}</Providers>

@@ -1,4 +1,4 @@
-import { z } from 'zod/v3'
+import { z } from 'zod'
 import { extractDigits, isValidRegistrationNumber } from '@bconnect/config/biz-number'
 
 export const corpSchema = z.object({

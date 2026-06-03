@@ -2,8 +2,8 @@
 
 import { useRouter } from 'next/navigation'
 import type { Trade } from '@bconnect/api-client'
-import { TRADE_LABELS } from '@/lib/trade-labels'
-import { getAvatarUrl } from '@/lib/avatar'
+import { TRADE_LABELS } from '@bconnect/api-client'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 
 interface ProfileHeaderProps {
   name?: string
@@ -43,7 +43,7 @@ export function ProfileHeader({
       {/* 상단: 아바타 + StatsRow */}
       <div className="flex items-center gap-4">
         {/* 아바타 */}
-        <div className="h-[100px] w-[100px] shrink-0 overflow-hidden rounded-full bg-bconnect-gray-100">
+        <div className="h-25 w-25 shrink-0 overflow-hidden rounded-full bg-gray-100">
           <img
             src={picture || getAvatarUrl(name ?? 'user')}
             alt={name ?? '프로필'}
@@ -70,10 +70,10 @@ export function ProfileHeader({
       {/* 하단: 이름 + 서브텍스트 + headline */}
       <div className="flex flex-col gap-0.5">
         <div className="flex items-baseline gap-2">
-          <span className="text-sb-18 text-bconnect-gray-900">{name ?? '이름 없음'}</span>
-          {subtitle && <span className="text-r-12 text-bconnect-gray-500">{subtitle}</span>}
+          <span className="text-sb-18 text-gray-900">{name ?? '이름 없음'}</span>
+          {subtitle && <span className="text-r-12 text-gray-500">{subtitle}</span>}
         </div>
-        {headline && <p className="text-r-12 text-bconnect-gray-900">{headline}</p>}
+        {headline && <p className="text-r-12 text-gray-900">{headline}</p>}
       </div>
     </div>
   )
@@ -91,8 +91,8 @@ function StatItem({
   const Wrapper = onClick ? 'button' : 'div'
   return (
     <Wrapper className="flex flex-col items-center gap-1" onClick={onClick}>
-      <span className="text-sb-16 text-bconnect-gray-900">{value}</span>
-      <span className="text-r-14 text-bconnect-gray-900">{label}</span>
+      <span className="text-sb-16 text-gray-900">{value}</span>
+      <span className="text-r-14 text-gray-900">{label}</span>
     </Wrapper>
   )
 }

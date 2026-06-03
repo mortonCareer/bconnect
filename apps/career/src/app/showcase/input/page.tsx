@@ -5,7 +5,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Input, OtpInput } from '@bconnect/ui'
+import { Input, OtpInput, ChevronIcon } from '@bconnect/ui'
 
 export default function InputDetailPage() {
   const [inputValue, setInputValue] = useState('')
@@ -17,16 +17,9 @@ export default function InputDetailPage() {
         {/* Back Navigation */}
         <Link
           href="/showcase"
-          className="mb-6 inline-flex items-center text-sm text-gray-500 hover:text-[#386DFF]"
+          className="mb-6 inline-flex items-center text-sm text-gray-500 hover:text-primary"
         >
-          <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
+          <ChevronIcon direction="left" size={16} className="mr-1" />
           컴포넌트 목록
         </Link>
 

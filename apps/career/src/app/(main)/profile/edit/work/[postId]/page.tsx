@@ -3,97 +3,123 @@
  */
 'use client'
 
-import { useState } from 'react'
+import { cn, Form, FormError, ImageField, Input, Label, TextareaField, TopBar } from '@bconnect/ui'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
-import { TopBar } from '@bconnect/ui'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
-// TODO: Post + Task API 연동 (#197)
-const MOCK_WORK = {
-  image: '/placeholder-post.svg',
-  company: '서정건축',
-  period: '12.25 ~ 12.26 (총 2일 소요)',
-  address: '경기도 수원시 율전로 00번길 00-00, 000호',
-  trade: '타일',
-  description:
-    '신축 아파트 32평 욕실 2개소 타일 시공을 진행했습니다.\n\n벽면은 600×300 수입 포세린, 바닥은 300×300 논슬립 타일로 시공했고, 헤링본 패턴 포인트 벽 작업까지 담당했습니다.\n\n시공 완료 후 현장 감리자로부터 "줄눈 간격이 균일하고 마감이 깔끔하다"는 평가를 받았습니다.',
-}
+const fieldMeta = z.registry<{ label: string; placeholder: string }>()
+
+const workSchema = z.object({
+  company: z
+    .string()
+    .min(1, '업체명을 입력해주세요.')
+    .register(fieldMeta, { label: '업체명', placeholder: '업체명을 입력해주세요' }),
+  period: z
+    .string()
+    .min(1, '시공기간을 입력해주세요.')
+    .register(fieldMeta, { label: '시공기간', placeholder: '예: 12.25 ~ 12.26' }),
+  address: z
+    .string()
+    .min(1, '현장주소를 입력해주세요.')
+    .register(fieldMeta, { label: '현장주소', placeholder: '현장주소를 입력해주세요' }),
+  trade: z
+    .string()
+    .min(1, '시공분야를 입력해주세요.')
+    .register(fieldMeta, { label: '시공분야', placeholder: '시공분야를 입력해주세요' }),
+  description: z
+    .string()
+    .min(1, '작업 설명을 입력해주세요.')
+    .register(fieldMeta, { label: '작업 설명', placeholder: '작업 내용을 입력해주세요' }),
+  images: z.custom<File>((value) => value instanceof File).nullable(),
+})
+type WorkFormValues = z.infer<typeof workSchema>
+
+const META_FIELD_NAMES = ['company', 'period', 'address', 'trade'] as const
 
 export default function EditWorkPage() {
   const router = useRouter()
   const params = useParams<{ postId: string }>()
+  // TODO: 초기 데이터 받아와서 폼 기본 값 채우기 (#197)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _postId = Number(params.postId)
 
-  const [company, setCompany] = useState(MOCK_WORK.company)
-  const [period, setPeriod] = useState(MOCK_WORK.period)
-  const [address, setAddress] = useState(MOCK_WORK.address)
-  const [trade, setTrade] = useState(MOCK_WORK.trade)
-  const [description, setDescription] = useState(MOCK_WORK.description)
+  const form = useForm<WorkFormValues>({
+    resolver: zodResolver(workSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      company: '',
+      period: '',
+      address: '',
+      trade: '',
+      description: '',
+      images: null,
+    },
+  })
 
-  const handleSave = () => {
-    // TODO: Post + Task 수정 API 연동
+  const onSave = form.handleSubmit(() => {
+    // TODO: Post + Task 수정 API 연동 (#197)
     router.back()
-  }
+  })
+
+  const descriptionMeta = fieldMeta.get(workSchema.shape.description)
 
   return (
     <div className="flex flex-col">
       <TopBar
         variant="default"
-        title="작업물"
-        actionLabel="저장"
-        onAction={handleSave}
+        title="작업물 수정"
+        actionLabel="완료"
+        onAction={onSave}
         showAction
         onBack={() => router.back()}
       />
 
-      {/* 이미지 영역 */}
-      <div className="mx-4 mt-4 flex h-[200px] items-center justify-center rounded-lg bg-bconnect-gray-100">
-        <span className="text-r-12 text-bconnect-gray-500">이미지</span>
-      </div>
+      <Form {...form}>
+        <form onSubmit={onSave}>
+          <div className="px-4 pt-4">
+            <ImageField control={form.control} name="images" />
+          </div>
 
-      {/* 메타 정보 */}
-      <div className="flex flex-col gap-3 px-4 pt-6">
-        <div className="flex items-start gap-4">
-          <span className="w-16 shrink-0 text-sb-14 text-bconnect-gray-900">업체명</span>
-          <input
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            className="flex-1 text-r-14 text-bconnect-gray-900 outline-none"
-          />
-        </div>
-        <div className="flex items-start gap-4">
-          <span className="w-16 shrink-0 text-sb-14 text-bconnect-gray-900">시공기간</span>
-          <input
-            value={period}
-            onChange={(e) => setPeriod(e.target.value)}
-            className="flex-1 text-r-14 text-bconnect-gray-900 outline-none"
-          />
-        </div>
-        <div className="flex items-start gap-4">
-          <span className="w-16 shrink-0 text-sb-14 text-bconnect-gray-900">현장주소</span>
-          <input
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="flex-1 text-r-14 text-bconnect-gray-900 outline-none"
-          />
-        </div>
-        <div className="flex items-start gap-4">
-          <span className="w-16 shrink-0 text-sb-14 text-bconnect-gray-900">시공분야</span>
-          <input
-            value={trade}
-            onChange={(e) => setTrade(e.target.value)}
-            className="flex-1 text-r-14 text-bconnect-gray-900 outline-none"
-          />
-        </div>
-      </div>
+          {/* 메타 정보 */}
+          <div className="flex flex-col gap-3 px-4 pt-6">
+            {META_FIELD_NAMES.map((name) => {
+              const meta = fieldMeta.get(workSchema.shape[name])
+              return (
+                <div key={name} className="flex items-start gap-2">
+                  <Label htmlFor={`work-${name}`} className="w-20 shrink-0 text-gray-900">
+                    {meta?.label}
+                  </Label>
+                  <div className="flex flex-1 flex-col gap-1">
+                    <Input
+                      id={`work-${name}`}
+                      {...form.register(name)}
+                      placeholder={meta?.placeholder}
+                      className={cn(
+                        'h-auto rounded-none border-0 p-0 text-sm text-gray-700 focus:ring-0',
+                        form.formState.errors[name] && 'ring-1 ring-destructive'
+                      )}
+                    />
+                    <FormError error={form.formState.errors[name]?.message} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
 
-      {/* 설명 */}
-      <div className="px-4 pt-6">
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="min-h-[200px] w-full resize-none text-r-14 leading-[22.4px] text-bconnect-gray-900 outline-none placeholder:text-bconnect-gray-500"
-        />
-      </div>
+          {/* 설명 */}
+          <div className="px-4 pt-6">
+            <TextareaField
+              control={form.control}
+              name="description"
+              aria-label={descriptionMeta?.label}
+              placeholder={descriptionMeta?.placeholder}
+              className="min-h-50 rounded-none resize-none p-0 border-0 text-sm focus:ring-0"
+            />
+          </div>
+        </form>
+      </Form>
     </div>
   )
 }

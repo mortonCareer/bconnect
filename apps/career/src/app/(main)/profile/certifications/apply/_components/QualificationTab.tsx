@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { getCredentialLabel } from '@bconnect/api-client'
 import type { Credential, CredentialType } from '@bconnect/api-client'
-import { Button, Tag } from '@bconnect/ui'
-import { getCredentialLabel, formatDate } from '../../constants'
+import { Button, Form, FormSubmitButton, Tag, TextareaField } from '@bconnect/ui'
+import { formatDate } from '@bconnect/config/format'
 
 interface QualificationTabProps {
   credentials: Credential[]
@@ -46,7 +48,12 @@ export function QualificationTab({
   isDeleting,
 }: QualificationTabProps) {
   const [activeSubTab, setActiveSubTab] = useState('national')
-  const [otherNote, setOtherNote] = useState('')
+
+  const form = useForm<{ note: string }>({ mode: 'onTouched', defaultValues: { note: '' } })
+  const submitOther = form.handleSubmit((data) => {
+    onSubmitOther(data.note)
+    form.reset({ note: '' })
+  })
 
   const currentType = SUB_TAB_TYPE_MAP[activeSubTab]
   const filteredCredentials = credentials.filter((c) => c.type === currentType)
@@ -70,9 +77,9 @@ export function QualificationTab({
 
       {/* 타이틀 + 설명 */}
       <div className="flex flex-col gap-1">
-        <h3 className="text-sb-16 text-bconnect-gray-900">{info.title}</h3>
-        <p className="text-r-12 text-bconnect-gray-700">
-          {info.description} <span className="text-bconnect-primary underline">자세히보기</span>
+        <h3 className="text-sb-16 text-gray-900">{info.title}</h3>
+        <p className="text-r-12 text-gray-700">
+          {info.description} <span className="text-primary underline">자세히보기</span>
         </p>
       </div>
 
@@ -82,34 +89,30 @@ export function QualificationTab({
           <Button variant="outline" size="full">
             발급받기
           </Button>
+          {/* TODO: 파일 업로드 컴포넌트 구현 */}
           <Button variant="secondary" size="full" disabled>
             파일 업로드
           </Button>
-          <p className="text-center text-r-12 text-bconnect-gray-700">2026.02.21 업데이트됨</p>
+          <p className="text-center text-r-12 text-gray-700">2026.02.21 업데이트됨</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          <Button variant="secondary" size="full" disabled>
-            파일 제출
-          </Button>
-          <textarea
-            className="h-24 w-full resize-none rounded-lg border border-bconnect-gray-300 px-3 py-2 text-r-14 text-bconnect-gray-900 placeholder:text-bconnect-gray-500 focus:border-bconnect-primary focus:outline-none focus:ring-1 focus:ring-bconnect-primary"
-            placeholder="검토시 참고할 내용을 작성해주세요..."
-            value={otherNote}
-            onChange={(e) => setOtherNote(e.target.value)}
-          />
-          <Button
-            variant="primary"
-            size="full"
-            disabled={!otherNote.trim()}
-            onClick={() => {
-              onSubmitOther(otherNote)
-              setOtherNote('')
-            }}
-          >
-            제출하기
-          </Button>
-        </div>
+        <Form {...form}>
+          <form onSubmit={submitOther} className="flex flex-col gap-3">
+            {/* TODO: 파일 업로드 컴포넌트 구현 */}
+            <Button type="button" variant="secondary" size="full" disabled>
+              파일 제출
+            </Button>
+            <TextareaField
+              control={form.control}
+              name="note"
+              rows={4}
+              placeholder="검토시 참고할 내용을 작성해주세요..."
+            />
+            <FormSubmitButton variant="primary" size="full">
+              제출하기
+            </FormSubmitButton>
+          </form>
+        </Form>
       )}
 
       {/* 하단 인증 목록 — 심플 리스트 */}
@@ -118,20 +121,20 @@ export function QualificationTab({
           {filteredCredentials.map((credential) => (
             <div
               key={credential.id}
-              className="flex items-center justify-between border-b border-bconnect-gray-300 py-3"
+              className="flex items-center justify-between border-b border-gray-300 py-3"
             >
               <div className="flex items-baseline gap-2">
-                <span className="text-r-14 text-bconnect-gray-900">
+                <span className="text-r-14 text-gray-900">
                   {credential.type ? getCredentialLabel(credential.type) : '알 수 없음'}
                 </span>
                 {credential.expiredAt && (
-                  <span className="text-r-10 text-bconnect-gray-700">
+                  <span className="text-r-10 text-gray-700">
                     {formatDate(credential.expiredAt)} 만료
                   </span>
                 )}
               </div>
               <button
-                className="rounded border border-bconnect-gray-500 px-3 py-1 text-r-14 text-bconnect-gray-700"
+                className="rounded border border-gray-500 px-3 py-1 text-r-14 text-gray-700"
                 onClick={() => onDelete(credential.id!)}
                 disabled={isDeleting}
               >

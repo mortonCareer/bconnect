@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Tag, TopBar } from '@bconnect/ui'
+import { Select, Tag, TopBar } from '@bconnect/ui'
 import type { Trade } from '@bconnect/api-client'
-import { TRADE_GROUPS, TRADE_LABELS } from '@/lib/trade-labels'
+import { TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
 import { EXPERIENCE_OPTIONS } from '@/lib/experience'
 import type { ExperienceLevel } from '@/lib/experience'
 import { useFilterParams } from '@/hooks/useFilterParams'
@@ -115,12 +115,12 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
         <div className="flex flex-col gap-6 overflow-y-auto px-4 pb-4 pt-4">
           {/* 시공분야 */}
           <div className="flex flex-col gap-3">
-            <p className="text-sb-16 text-bconnect-gray-900">
-              시공분야 <span className="text-bconnect-error">*</span>
+            <p className="text-sb-16 text-gray-900">
+              시공분야 <span className="text-destructive">*</span>
             </p>
             {TRADE_GROUPS.map((group) => (
               <div key={group.label} className="flex flex-col gap-3">
-                <p className="text-m-14 text-bconnect-gray-700">{group.label}</p>
+                <p className="text-m-14 text-gray-700">{group.label}</p>
                 <div className="flex flex-wrap gap-2">
                   {group.trades.map((trade) => (
                     <Tag
@@ -139,43 +139,26 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
           {/* 대표분야 */}
           {pendingTrades.length > 0 && (
             <div className="flex flex-col gap-2">
-              <p className="text-sb-16 text-bconnect-gray-900">
-                대표분야 <span className="text-bconnect-error">*</span>
+              <p className="text-sb-16 text-gray-900">
+                대표분야 <span className="text-destructive">*</span>
               </p>
-              <div className="relative w-fit">
-                <select
-                  value={pendingPrimary || ''}
-                  onChange={(e) => setPendingPrimary(e.target.value as Trade)}
-                  className="flex h-[40px] appearance-none items-center rounded-[8px] border border-bconnect-gray-300 bg-white py-[3px] pl-[10px] pr-8 text-m-14 text-bconnect-gray-900"
-                >
-                  {pendingTrades.map((trade) => (
-                    <option key={trade} value={trade}>
-                      {TRADE_LABELS[trade]}
-                    </option>
-                  ))}
-                </select>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  className="pointer-events-none absolute right-[10px] top-1/2 -translate-y-1/2"
-                >
-                  <path
-                    d="M4 6L8 10L12 6"
-                    stroke="#1B1B1B"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+              <Select
+                className="w-fit"
+                value={pendingPrimary || ''}
+                onChange={(v) => {
+                  if (typeof v === 'string') setPendingPrimary(v as Trade)
+                }}
+                options={pendingTrades.map((trade) => ({
+                  value: trade,
+                  label: TRADE_LABELS[trade],
+                }))}
+              />
             </div>
           )}
 
           {/* 경력 */}
           <div className="flex flex-col gap-3">
-            <p className="text-sb-16 text-bconnect-gray-900">경력</p>
+            <p className="text-sb-16 text-gray-900">경력</p>
             <div className="flex flex-wrap gap-2">
               {EXPERIENCE_OPTIONS.map((option) => (
                 <Tag

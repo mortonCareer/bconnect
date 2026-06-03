@@ -46,7 +46,7 @@ export default function MemberProfilePage() {
       <div className="flex flex-col">
         <TopBar variant="default" title="프로필" showAction={false} onBack={() => router.back()} />
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-bconnect-gray-500">로딩 중...</p>
+          <p className="text-m-14 text-gray-500">로딩 중...</p>
         </div>
       </div>
     )
@@ -57,7 +57,7 @@ export default function MemberProfilePage() {
       <div className="flex flex-col">
         <TopBar variant="default" title="프로필" showAction={false} onBack={() => router.back()} />
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-bconnect-gray-500">프로필을 불러올 수 없습니다</p>
+          <p className="text-m-14 text-gray-500">프로필을 불러올 수 없습니다</p>
         </div>
       </div>
     )
@@ -95,13 +95,13 @@ export default function MemberProfilePage() {
       {activeTab === 'intro' && profile && <IntroSection profile={profile} />}
       {activeTab === 'intro' && !profile && (
         <div className="flex items-center justify-center py-20">
-          <p className="text-m-14 text-bconnect-gray-500">프로필 정보가 없습니다</p>
+          <p className="text-m-14 text-gray-500">프로필 정보가 없습니다</p>
         </div>
       )}
       {activeTab === 'works' && profile?.id && <WorksSection authorId={profile.id} />}
       {activeTab === 'works' && !profile?.id && (
         <div className="flex items-center justify-center py-20">
-          <p className="text-m-14 text-bconnect-gray-500">작업물을 불러올 수 없습니다</p>
+          <p className="text-m-14 text-gray-500">작업물을 불러올 수 없습니다</p>
         </div>
       )}
     </div>

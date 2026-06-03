@@ -1,6 +1,6 @@
 # API Spec 작업 가이드
 
-`@bconnect/api-client` 의 OpenAPI spec 작성 + codegen 가이드. spec 변경 시 이 문서 + spec 파일 동시 reference.
+`@bconnect/api-client` 의 OpenAPI spec 작성 + codegen 가이드. BE 코드가 API 기준(SSOT)이며 ([ADR-0015](../../docs/explanation/adr/0015-be-code-as-api-ssot.md)), 본 문서는 BE 구현 후 스펙을 갱신하는 작성 절차를 다룹니다. spec 변경 시 이 문서 + spec 파일 동시 reference.
 
 ## 디렉토리 구조
 
@@ -9,7 +9,7 @@ packages/api-client/
 ├── .redocly.yaml                            # lint 규칙 + bundle config
 ├── orval.config.ts                          # codegen 설정 (hook + MSW mock)
 └── src/
-    ├── spec/                                # 분리된 spec (SSOT)
+    ├── spec/                                # 분리된 spec (BE 코드를 따라가는 산출물)
     │   ├── openapi.yaml                     # 진입점: info, tags, paths 매핑, securityScheme ref
     │   ├── _shared.yaml                     # cross-cutting: HTTP envelope/error + cross-domain entity
     │   └── v1/                              # 12 도메인 파일 (self-contained)
@@ -62,6 +62,8 @@ cross-domain ref 가 발생하면 `'../v1/<other>.yaml#/components/schemas/X'` �
 | root → 도메인 path | JSON Pointer escape                                | `'v1/auth.yaml#/paths/~1api~1v1~1auth~1otp~1send'`          |
 
 ## 새 endpoint 추가 절차
+
+BE 구현이 마무리된 후 스펙을 갱신하는 절차입니다.
 
 ### 1. Schema 위치 결정
 

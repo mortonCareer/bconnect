@@ -19,7 +19,6 @@ import {
 } from '@bconnect/api-client'
 import { Tab, TopBar } from '@bconnect/ui'
 import { useQueryState } from 'nuqs'
-import { MOCK_CREDENTIALS } from '../constants'
 import { OneClickTab } from './_components/OneClickTab'
 import { CertificateTab } from './_components/CertificateTab'
 import { QualificationTab } from './_components/QualificationTab'
@@ -35,20 +34,13 @@ export default function CertificationApplyPage() {
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'one-click' })
 
-  const {
-    data: profile,
-    isLoading: isProfileLoading,
-    isError: isProfileError,
-  } = useGetMyProfile({ query: { retry: false } })
+  const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
   const profileId = profile?.id
 
   const { data: credentials, isLoading: isCredentialsLoading } = useGetCredentials(
     { profileId: profileId! },
     { query: { enabled: !!profileId } }
   )
-
-  // API 에러 시 mock 데이터 폴백
-  const useMock = isProfileError || (!isProfileLoading && !profileId)
 
   const invalidateCredentials = () => {
     if (profileId) {
@@ -66,7 +58,7 @@ export default function CertificationApplyPage() {
     mutation: { onSuccess: invalidateCredentials },
   })
 
-  const isLoading = !useMock && (isProfileLoading || isCredentialsLoading)
+  const isLoading = isProfileLoading || isCredentialsLoading
 
   const handleDelete = (credentialId: number) => {
     deleteCredential({ credentialId })
@@ -84,13 +76,13 @@ export default function CertificationApplyPage() {
       <div className="flex flex-col">
         <TopBar variant="default" title="인증 신청" showAction={false} />
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-bconnect-gray-500">로딩 중...</p>
+          <p className="text-m-14 text-gray-500">로딩 중...</p>
         </div>
       </div>
     )
   }
 
-  const credentialsList = useMock ? MOCK_CREDENTIALS : (credentials ?? [])
+  const credentialsList = credentials ?? []
 
   return (
     <div className="flex flex-col">

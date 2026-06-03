@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
-import { Button } from '@bconnect/ui'
+import { Button, XIcon } from '@bconnect/ui'
 
 interface LoginPromptModalProps {
   open: boolean
@@ -50,7 +50,7 @@ export function LoginPromptModal({ open, onClose }: LoginPromptModalProps) {
         aria-modal="true"
         aria-labelledby="login-prompt-title"
         tabIndex={-1}
-        className="relative flex w-full max-w-[400px] flex-col gap-6 rounded-[13px] bg-white p-7 focus:outline-none"
+        className="relative flex w-full max-w-100 flex-col gap-6 rounded-[13px] bg-white p-7 focus:outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 닫기 */}
@@ -58,35 +58,27 @@ export function LoginPromptModal({ open, onClose }: LoginPromptModalProps) {
           type="button"
           onClick={onClose}
           aria-label="닫기"
-          className="absolute right-[18px] top-[18px] flex h-6 w-6 items-center justify-center rounded-full text-bconnect-gray-500 hover:bg-bconnect-gray-100"
+          className="absolute right-[18px] top-[18px] flex h-6 w-6 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100"
         >
-          {/* TODO: #384 — packages/ui/src/icons 공통 아이콘으로 추출 (인라인 svg 금지) */}
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M12 4L4 12M4 4l8 8"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
+          <XIcon size={16} />
         </button>
 
         {/* 안내 카피 — 가입 유도 */}
         <div className="flex flex-col gap-2 pr-6">
-          <p id="login-prompt-title" className="text-sb-20 text-bconnect-gray-900">
+          <p id="login-prompt-title" className="text-sb-20 text-gray-900">
             로그인하고 기술자와 바로 연결하세요
           </p>
-          <p className="break-keep text-r-16 text-bconnect-gray-700">
+          <p className="break-keep text-r-16 text-gray-700">
             검증된 기술자의 프로필과 작업물을 확인하고, 메시지로 바로 문의할 수 있어요.
           </p>
         </div>
 
         {/* CTA — GuestSidebar 와 동선 통일 */}
         <div className="flex flex-col gap-2">
-          <Button asChild variant="primary" size="full" className="h-[40px]">
+          <Button asChild variant="primary" size="full" className="h-10">
             <Link href="/login">로그인</Link>
           </Button>
-          <Button asChild variant="outline" size="full" className="h-[40px]">
+          <Button asChild variant="outline" size="full" className="h-10">
             <Link href="/signup/member">회원가입</Link>
           </Button>
         </div>

@@ -26,8 +26,9 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
-          # spec 만 변경된 PR 은 ci-career/ci-plan skip — spec ↔ FE drift 는
-          # FE follow-up PR 에서 해소 (dev → main 의 ci-integration 가 최종 gate).
+          # spec 만 변경된 PR 은 ci-career/ci-plan skip — BE-first 사이클(ADR-0015)이라
+          # 스펙 단독 변경은 BE 구현에 따라가는 갱신 또는 description 수정 등
+          # FE 영향 없는 형태가 일반적임.
           # api-spec 자체는 항상 lint/bundle 검증.
           filters: |
             career:
@@ -64,6 +65,8 @@ jobs:
               - 'pnpm-workspace.yaml'
               - 'pnpm-lock.yaml'
               - '.syncpackrc.json'
+              - 'packages/ui/**'
+              - 'packages/config/eslint/**'
 
   ci-career:
     needs: changes
@@ -240,6 +243,9 @@ jobs:
       # 새 dep 이 2+ package 에 있으면 pnpm-workspace.yaml 의 catalog 사용 권장.
       - name: Check package versions
         run: pnpm package:check
+
+      - name: Lint @bconnect/ui
+        run: pnpm --filter @bconnect/ui lint
 
   ci-crawler:
     needs: changes

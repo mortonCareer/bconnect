@@ -46,9 +46,9 @@ export function OwnerVerifyForm({ registrationNumber }: OwnerVerifyFormProps) {
   }
 
   return (
-    <div className="mt-4 rounded-lg border border-bconnect-gray-300 p-4">
-      <h4 className="text-sb-14 text-bconnect-gray-900">사업자 진위확인</h4>
-      <p className="mt-1 text-r-12 text-bconnect-gray-500">
+    <div className="mt-4 rounded-lg border border-gray-300 p-4">
+      <h4 className="text-sb-14 text-gray-900">사업자 진위확인</h4>
+      <p className="mt-1 text-r-12 text-gray-500">
         대표자명, 개업일자가 등록된 정보와 일치하는지 확인해요. (출처: 국세청)
       </p>
 
@@ -58,33 +58,32 @@ export function OwnerVerifyForm({ registrationNumber }: OwnerVerifyFormProps) {
           placeholder="대표자 성명"
           value={ownerName}
           onChange={(e) => setOwnerName(e.target.value)}
-          className="h-[40px] flex-1"
+          className="h-10 flex-1"
         />
         <Input
           type="text"
           placeholder="개업일자 (YYYY-MM-DD)"
           value={openDate}
           onChange={(e) => setOpenDate(e.target.value)}
-          className="h-[40px] flex-1"
+          className="h-10 flex-1"
         />
         <Button
           variant="primary"
-          className="h-[40px] w-[80px] shrink-0"
+          className="h-10 w-20 shrink-0"
           onClick={handleVerify}
           disabled={!isValid}
           isLoading={isLoading}
-          loadingText="..."
         >
           조회
         </Button>
       </div>
 
       {result && (
-        <p className={`mt-2 text-r-12 ${result.valid ? 'text-[#2E7D32]' : 'text-bconnect-error'}`}>
+        <p className={`mt-2 text-r-12 ${result.valid ? 'text-[#2E7D32]' : 'text-destructive'}`}>
           {result.message}
         </p>
       )}
-      {error && <p className="mt-2 text-r-12 text-bconnect-error">{error}</p>}
+      {error && <p className="mt-2 text-r-12 text-destructive">{error}</p>}
     </div>
   )
 }

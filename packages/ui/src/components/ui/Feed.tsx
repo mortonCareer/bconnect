@@ -5,6 +5,7 @@
 
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { ChevronIcon } from '../../icons'
 import { cn } from '../../lib/utils'
 
 /**
@@ -154,44 +155,34 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
               <div className="flex flex-col justify-center">
                 {/* 이름 + 지역/직종/전문분야 */}
                 <div className="flex items-center gap-2.5">
-                  <p className="text-sb-16 text-bconnect-gray-900">{profile.name}</p>
+                  <p className="text-sb-16 text-gray-900">{profile.name}</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-m-12 text-bconnect-gray-500">{profile.location}</span>
-                    <div className="h-2 w-0 rotate-90 border-t border-bconnect-gray-300" />
-                    <span className="text-m-12 text-bconnect-gray-500">{profile.jobType}</span>
-                    <div className="h-2 w-0 rotate-90 border-t border-bconnect-gray-300" />
-                    <span className="text-m-12 text-bconnect-gray-500">{profile.specialty}</span>
+                    <span className="text-m-12 text-gray-500">{profile.location}</span>
+                    <div className="h-2 w-0 rotate-90 border-t border-gray-300" />
+                    <span className="text-m-12 text-gray-500">{profile.jobType}</span>
+                    <div className="h-2 w-0 rotate-90 border-t border-gray-300" />
+                    <span className="text-m-12 text-gray-500">{profile.specialty}</span>
                   </div>
                 </div>
                 {/* 자기소개 */}
                 <div className="flex items-center">
-                  <p className="text-m-12 text-bconnect-gray-500">{profile.bio}</p>
+                  <p className="text-m-12 text-gray-500">{profile.bio}</p>
                 </div>
               </div>
             </div>
 
             {/* chevron */}
-            <svg
-              width="5.067"
-              height="9.6"
-              viewBox="0 0 5.067 9.6"
-              fill="none"
-              className="h-4 w-4 shrink-0"
+            <ChevronIcon
+              direction="right"
+              size={16}
+              className="text-[#1B1B1B]"
               aria-hidden="true"
-            >
-              <path
-                d="M0.5 0.5 L4.567 4.8 L0.5 9.1"
-                stroke="#1B1B1B"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            />
           </>
         )}
 
         {/* 이미지 */}
-        <div className="relative h-[220px] w-full overflow-hidden rounded-lg">
+        <div className="relative h-55 w-full overflow-hidden rounded-lg">
           <img
             src={content.image}
             alt={content.imageAlt || content.description}
@@ -206,18 +197,18 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
             <div className="flex items-center justify-center gap-2.5">
               <p
                 className={cn(
-                  'text-r-12 text-bconnect-gray-700',
+                  'text-r-12 text-gray-700',
                   isExpanded ? 'leading-[1.6]' : 'leading-[21.6px]'
                 )}
               >
                 {content.company}
               </p>
               <div className="flex h-[13px] w-0 rotate-90 items-center justify-center">
-                <div className="h-0 w-[13px] border-t border-bconnect-gray-300" />
+                <div className="h-0 w-[13px] border-t border-gray-300" />
               </div>
               <p
                 className={cn(
-                  'text-r-12 text-bconnect-gray-700',
+                  'text-r-12 text-gray-700',
                   isExpanded ? 'leading-[1.6]' : 'leading-[21.6px]'
                 )}
               >
@@ -227,7 +218,7 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
             <div className="flex items-center justify-center">
               <p
                 className={cn(
-                  'text-r-12 text-bconnect-gray-700',
+                  'text-r-12 text-gray-700',
                   isExpanded ? 'leading-[1.6]' : 'leading-[21.6px]'
                 )}
               >
@@ -246,7 +237,7 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
             <p
               ref={textRef}
               className={cn(
-                'text-m-16 text-bconnect-gray-900',
+                'text-m-16 text-gray-900',
                 isExpanded
                   ? 'min-w-full w-[min-content] whitespace-pre-wrap leading-[1.6]'
                   : 'min-w-0 flex-1 truncate leading-[25.2px]'
@@ -259,7 +250,7 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
                 type="button"
                 onClick={handleToggle}
                 className={cn(
-                  'shrink-0 cursor-pointer text-r-12 text-bconnect-gray-700 underline decoration-solid hover:text-bconnect-gray-900',
+                  'shrink-0 cursor-pointer text-r-12 text-gray-700 underline decoration-solid hover:text-gray-900',
                   isExpanded ? 'leading-[25.2px]' : ''
                 )}
               >

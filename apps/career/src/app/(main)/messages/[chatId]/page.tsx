@@ -8,9 +8,8 @@ import { useCallback, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useGetChat, useGetMyMember, MessageType } from '@bconnect/api-client'
 import type { Message } from '@bconnect/api-client'
-import { TopBar } from '@bconnect/ui'
+import { TopBar, ChatInput } from '@bconnect/ui'
 import MessageList from './_components/MessageList'
-import ChatInput from './_components/ChatInput'
 
 export default function ChatRoomPage() {
   const params = useParams()
@@ -23,23 +22,24 @@ export default function ChatRoomPage() {
   })
 
   const [localMessages, setLocalMessages] = useState<Message[]>([])
+  const [message, setMessage] = useState('')
 
-  const handleSend = useCallback(
-    (content: string) => {
-      if (currentUserId == null) return // 인증 없이 전송 불가
-      const newMessage: Message = {
-        id: Date.now(),
-        chatId,
-        memberId: currentUserId,
-        type: MessageType.TEXT,
-        content,
-        createdAt: new Date().toISOString(),
-        modifiedAt: new Date().toISOString(),
-      }
-      setLocalMessages((prev) => [...prev, newMessage])
-    },
-    [chatId, currentUserId]
-  )
+  const handleSend = useCallback(() => {
+    if (currentUserId == null) return // 인증 없이 전송 불가
+    const content = message.trim()
+    if (!content) return
+    const newMessage: Message = {
+      id: Date.now(),
+      chatId,
+      memberId: currentUserId,
+      type: MessageType.TEXT,
+      content,
+      createdAt: new Date().toISOString(),
+      modifiedAt: new Date().toISOString(),
+    }
+    setLocalMessages((prev) => [...prev, newMessage])
+    setMessage('')
+  }, [chatId, currentUserId, message])
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -52,7 +52,7 @@ export default function ChatRoomPage() {
 
       <MessageList chatId={chatId} localMessages={localMessages} />
 
-      <ChatInput onSend={handleSend} />
+      <ChatInput value={message} onChange={setMessage} onSend={handleSend} />
     </div>
   )
 }

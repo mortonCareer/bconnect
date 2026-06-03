@@ -1,6 +1,15 @@
 import type { Metadata, Viewport } from 'next'
+import localFont from 'next/font/local'
 import '@bconnect/ui/styles'
 import { Providers } from './providers'
+
+const pretendard = localFont({
+  src: '../../../../packages/ui/src/fonts/PretendardVariable.woff2',
+  display: 'swap',
+  weight: '45 920',
+  style: 'normal',
+  variable: '--font-pretendard',
+})
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -21,15 +30,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ko">
-      <head>
-        <link
-          rel="stylesheet"
-          as="style"
-          crossOrigin="anonymous"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
-        />
-      </head>
+    <html lang="ko" className={pretendard.variable}>
       <body className="antialiased">
         <Providers>{children}</Providers>
       </body>

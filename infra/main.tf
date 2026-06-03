@@ -9,8 +9,9 @@ resource "aws_iam_account_alias" "this" {
 }
 
 module "aws" {
-  source         = "./aws"
-  s3_bucket_name = var.s3_bucket_name
+  source             = "./aws"
+  s3_bucket_name     = var.s3_bucket_name
+  dev_s3_bucket_name = var.dev_s3_bucket_name
 }
 
 module "railway" {
@@ -25,13 +26,17 @@ module "railway" {
   db_password = var.db_password
   db_name     = var.db_name
 
+  dev_db_password = var.dev_db_password
+
   spring_profile = var.spring_profile
   jwt_secret     = var.jwt_secret
+  dev_jwt_secret = var.dev_jwt_secret
 
   aws_access_key_id     = module.aws.access_key_id
   aws_secret_access_key = module.aws.secret_access_key
   aws_region            = var.aws_region
   s3_bucket_name        = var.s3_bucket_name
+  dev_s3_bucket_name    = var.dev_s3_bucket_name
 
   domain = var.domain
 
@@ -55,6 +60,7 @@ module "vercel" {
 
   vercel_api_token = var.vercel_api_token
   domain           = var.domain
+  dev_api_url      = var.dev_api_url
 
   project_name  = var.project_name
   github_repo   = var.github_repo

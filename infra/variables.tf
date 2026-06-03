@@ -47,6 +47,12 @@ variable "db_name" {
   default     = "morton"
 }
 
+variable "dev_db_password" {
+  description = "PostgreSQL password for dev(staging) environment (prod 와 분리된 시크릿)"
+  type        = string
+  sensitive   = true
+}
+
 # =============================================================================
 # Spring App Config
 # =============================================================================
@@ -59,6 +65,12 @@ variable "spring_profile" {
 
 variable "jwt_secret" {
   description = "JWT signing secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "dev_jwt_secret" {
+  description = "JWT signing secret for dev(staging) environment (prod 와 분리된 시크릿)"
   type        = string
   sensitive   = true
 }
@@ -78,6 +90,12 @@ variable "s3_bucket_name" {
   type        = string
 }
 
+variable "dev_s3_bucket_name" {
+  description = "S3 bucket name for dev(staging) environment file storage"
+  type        = string
+  default     = "morton-storage-dev"
+}
+
 # =============================================================================
 # Domain Config
 # =============================================================================
@@ -85,6 +103,12 @@ variable "s3_bucket_name" {
 variable "domain" {
   description = "Root domain for the project (e.g., bconnect.to)"
   type        = string
+}
+
+variable "dev_api_url" {
+  description = "Railway staging BE base URL — dev 브랜치 Vercel 환경에서 호출 (#352, ADR-0010)"
+  type        = string
+  default     = "https://api.dev.bconnect.to"
 }
 
 # =============================================================================

@@ -10,20 +10,16 @@ import {
   useGetCredentials,
   useDeleteCredential,
   getGetCredentialsQueryKey,
+  getCredentialLabel,
 } from '@bconnect/api-client'
 import { Button, Tag, TopBar } from '@bconnect/ui'
 import { CredentialItem } from './_components/CredentialItem'
-import { getCredentialLabel, MOCK_CREDENTIALS } from './constants'
 
 export default function CertificationsPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const {
-    data: profile,
-    isLoading: isProfileLoading,
-    isError: isProfileError,
-  } = useGetMyProfile({ query: { retry: false } })
+  const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
   const profileId = profile?.id
 
   const { data: credentials, isLoading: isCredentialsLoading } = useGetCredentials(
@@ -43,10 +39,8 @@ export default function CertificationsPage() {
     },
   })
 
-  // API 에러 시 mock 데이터 폴백
-  const useMock = isProfileError || (!isProfileLoading && !profileId)
-  const credentialsList = useMock ? MOCK_CREDENTIALS : (credentials ?? [])
-  const isLoading = !useMock && (isProfileLoading || isCredentialsLoading)
+  const credentialsList = credentials ?? []
+  const isLoading = isProfileLoading || isCredentialsLoading
 
   const handleDelete = (credentialId: number) => {
     deleteCredential({ credentialId })
@@ -57,7 +51,7 @@ export default function CertificationsPage() {
       <div className="flex flex-col">
         <TopBar variant="default" title="인증" showAction={false} />
         <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-bconnect-gray-500">로딩 중...</p>
+          <p className="text-m-14 text-gray-500">로딩 중...</p>
         </div>
       </div>
     )
@@ -89,14 +83,14 @@ export default function CertificationsPage() {
         >
           인증 추가하기
         </Button>
-        <p className="mt-2 text-center text-r-12 text-bconnect-gray-500">
+        <p className="mt-2 text-center text-r-12 text-gray-500">
           인증 정보를 프로필에 표시하고 신뢰도를 높여보세요
         </p>
       </div>
 
       {/* 인증 목록 */}
       {credentialsList.length > 0 ? (
-        <div className="flex flex-col divide-y divide-bconnect-gray-300">
+        <div className="flex flex-col divide-y divide-gray-300">
           {credentialsList.map((credential) => (
             <CredentialItem
               key={credential.id}
@@ -109,7 +103,7 @@ export default function CertificationsPage() {
         </div>
       ) : (
         <div className="flex items-center justify-center py-20">
-          <p className="text-m-14 text-bconnect-gray-500">등록된 인증이 없습니다</p>
+          <p className="text-m-14 text-gray-500">등록된 인증이 없습니다</p>
         </div>
       )}
     </div>
