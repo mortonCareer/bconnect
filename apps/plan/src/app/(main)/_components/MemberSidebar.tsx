@@ -108,9 +108,7 @@ export function MemberSidebar() {
           <NavItem
             label="알림"
             count={NOTIFICATION_COUNT}
-            onClick={() => {
-              /* TODO #347 — NotificationsPanel 트리거 */
-            }}
+            onClick={() => openPanel('/notifications')}
           />
           <NavItem label="메시지" count={messageCount} href={panelHref('/messages')} />
         </div>
