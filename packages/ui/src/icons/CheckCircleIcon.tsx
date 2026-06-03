@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1387-8420
+ */
 import type { SVGProps } from 'react'
 
 interface CheckCircleIconProps extends SVGProps<SVGSVGElement> {

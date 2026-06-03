@@ -1,3 +1,6 @@
+/**
+ * @figma-scaffold 별점 전용 — 디자인시스템 미정 (#458)
+ */
 import type { SVGProps } from 'react'
 
 interface StarIconProps extends SVGProps<SVGSVGElement> {

@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1015-8155
+ */
 import type { SVGProps } from 'react'
 
 interface MoreVerticalIconProps extends SVGProps<SVGSVGElement> {

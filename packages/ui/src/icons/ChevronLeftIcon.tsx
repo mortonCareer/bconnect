@@ -1,3 +1,6 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=637-7564
+ */
 import type { SVGProps } from 'react'
 
 interface ChevronLeftIconProps extends SVGProps<SVGSVGElement> {
