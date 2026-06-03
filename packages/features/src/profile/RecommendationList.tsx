@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useGetReceivedRecommendations, useGetSentRecommendations } from '@bconnect/api-client'
 import type { Recommendation } from '@bconnect/api-client'
 import { cn, Skeleton } from '@bconnect/ui'
-import { getAvatarUrl } from './labels'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 import { useExpandableText } from './useExpandableText'
 
 type Mode = 'received' | 'sent'

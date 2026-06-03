@@ -1,11 +1,10 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useGetFeeds } from '@bconnect/api-client'
+import { TRADE_LABELS, useGetFeeds } from '@bconnect/api-client'
 import type { Trade } from '@bconnect/api-client'
-import { TRADE_LABELS } from '../lib/trade-labels'
-import { formatRelativeTime } from '../lib/format-time'
-import { getAvatarUrl } from '../lib/avatar'
+import { formatRelativeTime } from '@bconnect/config/format'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 
 export interface FeedItem {
   postId: number

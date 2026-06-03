@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button, cn, StarIcon } from '@bconnect/ui'
-import { TRADE_LABELS } from '@/lib/trade-labels'
+import { TRADE_LABELS } from '@bconnect/api-client'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useAuthStore } from '@/stores/auth-store'
 import type { TechnicianItem } from '@/hooks/useTechnicianItems'

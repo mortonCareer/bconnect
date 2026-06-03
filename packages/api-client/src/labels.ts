@@ -1,4 +1,4 @@
-import { Trade } from '@bconnect/api-client'
+import { Trade, type CredentialType } from './generated/schemas'
 
 export const TRADE_LABELS: Record<Trade, string> = {
   [Trade.DESIGN]: '설계',
@@ -71,3 +71,24 @@ export const TRADE_GROUPS: { label: string; trades: Trade[] }[] = [
     trades: [Trade.HOISTING, Trade.TRANSPORT, Trade.CLEANING, Trade.GENERAL_LABOR],
   },
 ]
+
+export function getTradeLabel(trade: Trade): string {
+  return TRADE_LABELS[trade] ?? trade
+}
+
+export const CREDENTIAL_TYPE_LABELS: Record<CredentialType, string> = {
+  IDENTITY_VERIFICATION: '본인인증',
+  SOLE_PROPRIETOR: '개인사업자',
+  CONSTRUCTION_LICENSE: '건설면허',
+  SPECIALTY_CONSTRUCTION_LICENSE: '전문건설면허',
+  CAREER_CERTIFICATE: '경력증명서',
+  SKILL_GRADE_CERTIFICATE: '기능등급증명서',
+  OTHER_CERTIFICATE: '기타 증명서',
+  NATIONAL_TECHNICAL_QUALIFICATION: '국가기술자격증',
+  SKILLED_TECHNICIAN: '숙련기술인',
+  OTHER_QUALIFICATION: '기타 자격증',
+}
+
+export function getCredentialLabel(type: CredentialType): string {
+  return CREDENTIAL_TYPE_LABELS[type] ?? type
+}

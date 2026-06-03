@@ -1,7 +1,7 @@
 'use client'
 
 import { Tag } from '@bconnect/ui'
-import { TRADE_LABELS } from '@/lib/trade-labels'
+import { TRADE_LABELS } from '@bconnect/api-client'
 import { EXPERIENCE_LABELS } from '@/lib/experience'
 import { useFilterParams } from '@/hooks/useFilterParams'
 

@@ -3,7 +3,7 @@
 import { useGetFeeds } from '@bconnect/api-client'
 import { Skeleton } from '@bconnect/ui'
 import { WorkCard } from './WorkCard'
-import { formatRelativeTime } from './labels'
+import { formatRelativeTime } from '@bconnect/config/format'
 
 interface WorksTabProps {
   profileId: number

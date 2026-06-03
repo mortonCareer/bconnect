@@ -6,7 +6,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useGetCoworkers, useGetMyProfile } from '@bconnect/api-client'
-import { getAvatarUrl } from '@/lib/avatar'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 import { TopBar, SearchIcon } from '@bconnect/ui'
 import { CoworkerCard } from './_components/CoworkerCard'
 

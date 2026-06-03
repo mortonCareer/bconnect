@@ -1,9 +1,10 @@
 'use client'
 
 import Image from 'next/image'
+import { getTradeLabel } from '@bconnect/api-client'
 import type { MaskedMember, Profile } from '@bconnect/api-client'
 import { Skeleton } from '@bconnect/ui'
-import { getAvatarUrl, getTradeLabel } from './labels'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 
 interface ProfileSummaryProps {
   member?: MaskedMember
