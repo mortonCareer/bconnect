@@ -18,17 +18,18 @@ import { corpSchema, type CorpFormData } from './schema'
 export default function SignupCorpPage() {
   const router = useRouter()
   const { formData, setCorp, reset: resetSignup } = useSignupStore()
-  const { login } = useAuthStore()
+  const { login, isAuthenticated } = useAuthStore()
   const registerMemberMutation = useRegisterMember()
 
   // signupToken 없으면 로그인으로 리다이렉트
   useEffect(() => {
+    if (isAuthenticated) return
     if (!formData.signupToken) {
       router.replace('/login')
     } else if (!formData.username || !formData.name) {
       router.replace('/signup/member')
     }
-  }, [formData.signupToken, formData.username, formData.name, router])
+  }, [isAuthenticated, formData.signupToken, formData.username, formData.name, router])
 
   const form = useForm<CorpFormData>({
     resolver: zodResolver(corpSchema),

@@ -9,7 +9,7 @@ import {
   useGetReceivedRecommendations,
 } from '@bconnect/api-client'
 import { Skeleton, Tab } from '@bconnect/ui'
-import { PanelHeader } from './PanelHeader'
+import { PanelHeader } from '../_shared/PanelHeader'
 import { ProfileSummary } from './ProfileSummary'
 import { IntroTab } from './IntroTab'
 import { WorksTab } from './WorksTab'
@@ -57,7 +57,7 @@ export function ProfileView({ profileId, closeHref, onClose }: ProfileViewProps)
 
   return (
     <div ref={rootRef} tabIndex={-1} className="flex h-full flex-col bg-white outline-none">
-      <PanelHeader username={member?.username} closeHref={closeHref} />
+      <PanelHeader title={member?.username} closeLabel="프로필 패널 닫기" closeHref={closeHref} />
 
       <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {isLoading ? (
