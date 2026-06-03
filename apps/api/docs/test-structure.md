@@ -18,3 +18,6 @@
 - 웹소켓(STOMP)
   - GUI 수동 테스트 필요 (`bru run` 항상 실패)
   - 각 프레임은 raw NUL(0x00) 문자로 종료
+
+## 통합 테스트
+- `ReflectionTestUtils`을 사용하지 않는다

@@ -6,7 +6,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import to.bconnect.api.AppProperties;
+import to.bconnect.api.ApiConfigProps;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -41,8 +41,8 @@ public class JwtProvider {
     private final Duration refreshTokenExpiration;
     private final UserService userService;
 
-    public JwtProvider(AppProperties appProperties, UserService userService) {
-        AppProperties.Jwt properties = appProperties.jwt();
+    public JwtProvider(ApiConfigProps apiConfigProps, UserService userService) {
+        ApiConfigProps.Jwt properties = apiConfigProps.jwt();
         this.secret = Keys.hmacShaKeyFor(properties.secret().getBytes());
         this.accessTokenExpiration = properties.accessTokenExpiration();
         this.refreshTokenExpiration = properties.refreshTokenExpiration();

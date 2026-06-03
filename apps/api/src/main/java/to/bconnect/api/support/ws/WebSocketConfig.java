@@ -9,7 +9,7 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-import to.bconnect.api.AppProperties;
+import to.bconnect.api.ApiConfigProps;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -17,12 +17,12 @@ import to.bconnect.api.AppProperties;
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final AppProperties appProperties;
+    private final ApiConfigProps apiConfigProps;
     private final WebSocketAuthInterceptor webSocketAuthInterceptor;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        AppProperties.Cors cors = appProperties.cors();
+        ApiConfigProps.Cors cors = apiConfigProps.cors();
         registry.addEndpoint("/ws")
                 .setAllowedOrigins(cors.allowedOrigins().toArray(new String[0]))
                 .setAllowedOriginPatterns(cors.allowedOriginPatterns().toArray(new String[0]));

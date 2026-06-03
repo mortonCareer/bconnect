@@ -13,10 +13,11 @@ import java.util.List;
 
 @Validated
 @ConfigurationProperties(prefix = "app")
-public record AppProperties(
+public record ApiConfigProps(
     @Valid @NotNull Cors cors,
     @Valid @NotNull Jwt jwt
 ) {
+
     public record Cors(
         @NotEmpty(message = "app.cors.allowed-origins must not be empty")
         List<String> allowedOrigins,

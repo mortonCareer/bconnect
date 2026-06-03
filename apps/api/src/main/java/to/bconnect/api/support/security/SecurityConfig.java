@@ -15,7 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import to.bconnect.api.AppProperties;
+import to.bconnect.api.ApiConfigProps;
 import to.bconnect.api.support.security.jwt.AccessTokenAuthenticationFilter;
 import to.bconnect.api.support.security.jwt.JwtAuthenticationProvider;
 import to.bconnect.api.support.security.jwt.JwtProvider;
@@ -36,7 +36,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AppProperties appProperties;
+    private final ApiConfigProps apiConfigProps;
 
     @Bean
     public AuthenticationManager authenticationManager(
@@ -68,8 +68,8 @@ public class SecurityConfig {
                 .headers(hc -> hc.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .cors(cc -> cc.configurationSource(req -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(appProperties.cors().allowedOrigins());
-                    config.setAllowedOriginPatterns(appProperties.cors().allowedOriginPatterns());
+                    config.setAllowedOrigins(apiConfigProps.cors().allowedOrigins());
+                    config.setAllowedOriginPatterns(apiConfigProps.cors().allowedOriginPatterns());
                     config.setAllowedMethods(Collections.singletonList("*"));
                     config.setAllowedHeaders(Collections.singletonList("*"));
                     config.setAllowCredentials(true);
@@ -80,6 +80,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(arc -> arc
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/v1/auth/otp/**").permitAll()
+                        .requestMatchers("/v3/api-docs.yaml").permitAll()
                         .requestMatchers(POST, "/api/v1/members").permitAll()
                         .requestMatchers(GET, "/api/v1/members/check-username").permitAll()
                         .requestMatchers(GET, "/api/v1/members").hasRole("ADMIN")

@@ -43,7 +43,7 @@ dependencies {
     // implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
 
     // jwt
-    implementation('o.jsonwebtoken:jjwt-api:0.13.0')
+    implementation('io.jsonwebtoken:jjwt-api:0.13.0')
     runtimeOnly ('io.jsonwebtoken:jjwt-impl:0.13.0')
     runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.13.0')
 
@@ -68,7 +68,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
     // docs
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
 }
 
 configurations {
@@ -86,4 +86,9 @@ sentry {
     org = "morton-2l"
     projectName = "api"
     authToken = System.getenv("SENTRY_AUTH_TOKEN")
+}
+
+openApi {
+    apiDocsUrl.set("http://localhost:8080/v3/api-docs.yaml")
+    outputFileName.set("openapi.yaml")
 }
