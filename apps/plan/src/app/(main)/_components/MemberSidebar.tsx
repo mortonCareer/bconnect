@@ -32,7 +32,6 @@ interface NavItemProps {
   onClick?: () => void
 }
 
-// TODO: #381 — utils.ts 이슈 수정 후 스타일 반영
 const NAV_ITEM_CLASS =
   'flex h-[44px] w-full items-center justify-between rounded-[8px] px-3 text-r-14 text-gray-900 hover:bg-gray-100'
 
@@ -105,13 +104,7 @@ export function MemberSidebar() {
         <ProfileSection />
         <div className="h-px bg-gray-300" />
         <div className="flex flex-col gap-0.5">
-          <NavItem
-            label="알림"
-            count={NOTIFICATION_COUNT}
-            onClick={() => {
-              /* TODO #347 — NotificationsPanel 트리거 */
-            }}
-          />
+          <NavItem label="알림" count={NOTIFICATION_COUNT} href={panelHref('/notifications')} />
           <NavItem label="메시지" count={messageCount} href={panelHref('/messages')} />
         </div>
       </div>
