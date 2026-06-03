@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { getCredentialLabel } from '@bconnect/api-client'
 import type { Credential, CredentialType } from '@bconnect/api-client'
 import { Button, Form, FormSubmitButton, Tag, TextareaField } from '@bconnect/ui'
-import { formatDate } from '@/app/(main)/profile/certifications/constants'
+import { formatDate } from '@bconnect/config/format'
 
 interface QualificationTabProps {
   credentials: Credential[]

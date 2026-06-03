@@ -1,11 +1,3 @@
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}.${month}.${day}`
-}
-
 // TODO: API 연동 후 제거 — 발표용 mock 데이터
 const MOCK_TIMESTAMP = '2026-01-01T00:00:00Z'
 export const MOCK_CREDENTIALS = [

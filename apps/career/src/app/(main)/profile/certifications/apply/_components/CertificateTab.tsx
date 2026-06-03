@@ -5,7 +5,7 @@ import type { Credential, CredentialType } from '@bconnect/api-client'
 import { Button, Form, FormSubmitButton, Tag, TextareaField } from '@bconnect/ui'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { formatDate } from '@/app/(main)/profile/certifications/constants'
+import { formatDate } from '@bconnect/config/format'
 
 interface CertificateTabProps {
   credentials: Credential[]

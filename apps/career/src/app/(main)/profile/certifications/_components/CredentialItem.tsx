@@ -3,7 +3,7 @@
 import { getCredentialLabel } from '@bconnect/api-client'
 import type { Credential } from '@bconnect/api-client'
 import { CheckCircleIcon } from '@bconnect/ui'
-import { formatDate } from '../constants'
+import { formatDate } from '@bconnect/config/format'
 
 interface CredentialItemProps {
   credential: Credential
