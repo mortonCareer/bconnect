@@ -64,6 +64,7 @@ export function MessageThread({
   const bottomRef = useRef<HTMLDivElement>(null)
   const prevScrollHeightRef = useRef<number>(0)
   const isInitialLoadRef = useRef(true)
+  const isNearBottomRef = useRef(true)
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useInfiniteQuery<MessageCursorPage>({
@@ -82,6 +83,15 @@ export function MessageThread({
       .reverse()
       .flatMap((page) => page.content.slice().reverse()) ?? []
   const allMessages = [...serverMessages, ...localMessages]
+  const lastMessage = allMessages[allMessages.length - 1]
+  const lastMessageId = lastMessage?.id
+  const lastIsMine = lastMessage?.memberId === currentUserId
+
+  const handleScroll = useCallback(() => {
+    const c = scrollContainerRef.current
+    if (!c) return
+    isNearBottomRef.current = c.scrollHeight - c.scrollTop - c.clientHeight < 120
+  }, [])
 
   useEffect(() => {
     if (!isLoading && isInitialLoadRef.current && bottomRef.current) {
@@ -91,10 +101,10 @@ export function MessageThread({
   }, [isLoading])
 
   useEffect(() => {
-    if (!isInitialLoadRef.current && bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth' })
-    }
-  }, [allMessages.length])
+    if (isInitialLoadRef.current || !bottomRef.current) return
+    if (!isNearBottomRef.current && !lastIsMine) return
+    bottomRef.current.scrollIntoView({ behavior: 'smooth' })
+  }, [lastMessageId, lastIsMine])
 
   useEffect(() => {
     const container = scrollContainerRef.current
@@ -141,7 +151,11 @@ export function MessageThread({
   }
 
   return (
-    <div ref={scrollContainerRef} className="flex flex-1 flex-col overflow-y-auto px-4 py-3">
+    <div
+      ref={scrollContainerRef}
+      onScroll={handleScroll}
+      className="flex flex-1 flex-col overflow-y-auto px-4 py-3"
+    >
       <div ref={topObserverRef} className="h-1 shrink-0" />
       {isFetchingNextPage && (
         <div className="flex justify-center py-2">
