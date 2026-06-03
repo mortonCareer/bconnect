@@ -49,7 +49,7 @@ export function PanelHeader({
         closeLink
       )}
       <h2 className="flex-1 truncate text-center text-sb-16 text-gray-900">{title}</h2>
-      {backHref ? closeLink : <span className="h-5 w-5 shrink-0" aria-hidden />}
+      {backHref ? closeLink : <span className="h-5 w-5" aria-hidden />}
     </div>
   )
 }

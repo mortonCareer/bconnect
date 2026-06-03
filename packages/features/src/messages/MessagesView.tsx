@@ -36,15 +36,17 @@ export function MessagesView({ closeHref, onClose, chatHref }: MessagesViewProps
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [onClose])
 
-  const currentUserId = useGetMyMember().data?.id
-  const { data: chats, isLoading, isError } = useGetMyChats()
+  const { data: me, isLoading: isMeLoading } = useGetMyMember()
+  const currentUserId = me?.id
+  const { data: chats, isLoading: isChatsLoading, isError } = useGetMyChats()
+  const isLoading = isMeLoading || isChatsLoading
   const allChats = useMemo(() => chats ?? [], [chats])
 
   // 상대방 member id 모음 — Chat.participants(MaskedMember[]) 에서 본인 제외
   const otherMemberIds = useMemo(() => {
     const ids = new Set<number>()
     for (const chat of allChats) {
-      const other = chat.participants?.find((p) => p.id !== currentUserId)
+      const other = chat.participants.find((p) => p.id !== currentUserId)
       if (other?.id != null) ids.add(other.id)
     }
     return [...ids]
@@ -79,7 +81,7 @@ export function MessagesView({ closeHref, onClose, chatHref }: MessagesViewProps
         ) : (
           <div className="flex flex-col">
             {allChats.map((chat) => {
-              const otherMember = chat.participants?.find((p) => p.id !== currentUserId)
+              const otherMember = chat.participants.find((p) => p.id !== currentUserId)
               const otherId = otherMember?.id
               const otherProfile = otherId != null ? profileMap.get(otherId) : undefined
               return (
@@ -94,8 +96,8 @@ export function MessagesView({ closeHref, onClose, chatHref }: MessagesViewProps
                         ? TRADE_LABELS[otherProfile.primaryTrade]
                         : undefined
                     }
-                    lastMessage={chat.lastMessage?.content}
-                    timestamp={chat.modifiedAt ? formatRelativeTime(chat.modifiedAt) : undefined}
+                    lastMessage={chat.lastMessage.content}
+                    timestamp={formatRelativeTime(chat.modifiedAt)}
                     unreadCount={chat.unreadCount}
                   />
                 </Link>

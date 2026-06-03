@@ -33,9 +33,9 @@ export function ChatView({ chatId, closeHref, onClose, backHref }: ChatViewProps
   const enabled = Number.isFinite(chatId) && chatId > 0
   const currentUserId = useGetMyMember().data?.id
   const { data: chat, isLoading, isError } = useGetChat(chatId, { query: { enabled } })
-  const participants = chat?.participants ?? []
-  const other = participants.find((p) => p.id !== currentUserId)
-  const title = other?.name ?? chat?.title ?? '채팅'
+  const title = chat
+    ? (chat.participants.find((p) => p.id !== currentUserId)?.name ?? chat.title ?? '채팅')
+    : '채팅'
 
   const [localMessages, setLocalMessages] = useState<Message[]>([])
   const [message, setMessage] = useState('')
@@ -83,7 +83,7 @@ export function ChatView({ chatId, closeHref, onClose, backHref }: ChatViewProps
           <MessageThread
             chatId={chatId}
             currentUserId={currentUserId}
-            participants={participants}
+            participants={chat.participants}
             localMessages={localMessages}
           />
           <ChatInput value={message} onChange={setMessage} onSend={handleSend} />
