@@ -19,3 +19,8 @@ spring:
 app:
   jwt:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
+
+logging:
+  level:
+    org.springframework.web.socket: TRACE
+    org.springframework.messaging.simp.stomp: TRACE
