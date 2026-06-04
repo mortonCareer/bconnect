@@ -17,6 +17,10 @@ public class CoworkerFinder {
                 .stream().map(Coworker::of).toList();
     }
 
+    public long countByProfileId(Long profileId) {
+        return coworkerRepository.countByProfileId(profileId);
+    }
+
     public boolean isCoworker(Long profileId, Long targetId) {
         return coworkerRepository.existsByMinIdAndMaxId(
                 Math.min(profileId, targetId),

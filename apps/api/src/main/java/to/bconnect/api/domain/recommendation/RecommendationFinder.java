@@ -36,4 +36,9 @@ public class RecommendationFinder {
         return recommendationRepository.findByFromId(profileId)
                 .stream().map(Recommendation::of).toList();
     }
+
+    @Transactional(readOnly = true)
+    public long countReceived(Long profileId) {
+        return recommendationRepository.countByToIdAndVisibleTrue(profileId);
+    }
 }

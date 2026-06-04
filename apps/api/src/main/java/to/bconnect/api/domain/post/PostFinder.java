@@ -41,4 +41,8 @@ public class PostFinder {
                 .map(Post::of)
                 .toList();
     }
+
+    public long countByProfileId(Long profileId) {
+        return postRepository.countByProfileId(profileId);
+    }
 }

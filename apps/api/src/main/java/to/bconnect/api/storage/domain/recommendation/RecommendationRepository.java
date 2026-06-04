@@ -15,4 +15,6 @@ public interface RecommendationRepository extends JpaRepository<RecommendationEn
     List<RecommendationEntity> findByToId(Long toId);
 
     List<RecommendationEntity> findByFromId(Long fromId);
+
+    long countByToIdAndVisibleTrue(Long toId);
 }
