@@ -23,8 +23,8 @@ public class CredentialController {
     private final CredentialService credentialService;
 
     @GetMapping("/types")
-    public ApiResponse<CredentialType[]> listTypes() {
-        return ApiResponse.success(CredentialType.values());
+    public ApiResponse<List<CredentialType>> listTypes() {
+        return ApiResponse.success(List.of(CredentialType.values()));
     }
 
     @GetMapping
