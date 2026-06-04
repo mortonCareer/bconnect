@@ -31,25 +31,25 @@ public class RecommendationService {
     private final CoworkerFinder coworkerFinder;
 
     @Transactional(readOnly = true)
-    public List<RecommendationDetail> getReceived(Long profileId) {
-        return toDetails(recommendationFinder.findReceived(profileId), Side.FROM);
+    public List<RecommendationDetail> listReceived(Long profileId) {
+        return toDetails(recommendationFinder.findAllReceived(profileId), Side.FROM);
     }
 
     @Transactional(readOnly = true)
-    public List<RecommendationDetail> getSent(Long profileId) {
-        return toDetails(recommendationFinder.findSent(profileId), Side.TO);
+    public List<RecommendationDetail> listSent(Long profileId) {
+        return toDetails(recommendationFinder.findAllSent(profileId), Side.TO);
     }
 
     @Transactional(readOnly = true)
-    public List<RecommendationDetail> getMyReceived(User user) {
+    public List<RecommendationDetail> listMyReceived(User user) {
         Profile me = profileFinder.findByMemberId(user.id());
-        return toDetails(recommendationFinder.findMyReceived(me.id()), Side.FROM);
+        return toDetails(recommendationFinder.findAllMyReceived(me.id()), Side.FROM);
     }
 
     @Transactional(readOnly = true)
-    public List<RecommendationDetail> getMySent(User user) {
+    public List<RecommendationDetail> listMySent(User user) {
         Profile me = profileFinder.findByMemberId(user.id());
-        return toDetails(recommendationFinder.findMySent(me.id()), Side.TO);
+        return toDetails(recommendationFinder.findAllMySent(me.id()), Side.TO);
     }
 
     @Transactional
@@ -128,14 +128,14 @@ public class RecommendationService {
                 .map(r -> counterpart == Side.FROM ? r.fromId() : r.toId())
                 .toList();
 
-        Map<Long, Profile> profileMap = profileFinder.findByIds(profileIds).stream()
+        Map<Long, Profile> profileMap = profileFinder.findAllByIds(profileIds).stream()
                 .collect(Collectors.toMap(Profile::id, Function.identity()));
 
         List<Long> memberIds = profileMap.values().stream()
                 .map(Profile::memberId)
                 .toList();
 
-        Map<Long, Member> memberMap = memberFinder.findByIds(memberIds).stream()
+        Map<Long, Member> memberMap = memberFinder.findAllByIds(memberIds).stream()
                 .collect(Collectors.toMap(Member::id, Function.identity()));
 
         return recommendations.stream()

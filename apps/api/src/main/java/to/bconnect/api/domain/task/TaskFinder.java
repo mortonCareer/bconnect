@@ -12,7 +12,7 @@ public class TaskFinder {
 
     private final TaskRepository taskRepository;
 
-    public List<Task> findByProfileId(Long profileId) {
+    public List<Task> findAllByProfileId(Long profileId) {
         return taskRepository.findAllByProfileId((profileId))
                 .stream()
                 .map(Task::of)

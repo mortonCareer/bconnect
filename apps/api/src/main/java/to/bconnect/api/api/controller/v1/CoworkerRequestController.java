@@ -39,7 +39,7 @@ public class CoworkerRequestController {
     @GetMapping("/received")
     public ApiResponse<List<CoworkerRequestResponse>> listReceived(
             @AuthenticationPrincipal User user) {
-        List<CoworkerRequestResponse> requests = coworkerRequestService.getReceived(user).stream()
+        List<CoworkerRequestResponse> requests = coworkerRequestService.listReceived(user).stream()
                 .map(CoworkerRequestResponse::of)
                 .toList();
         return ApiResponse.success(requests);
@@ -48,7 +48,7 @@ public class CoworkerRequestController {
     @GetMapping("/sent")
     public ApiResponse<List<CoworkerRequestResponse>> listSent(
             @AuthenticationPrincipal User user) {
-        List<CoworkerRequestResponse> requests = coworkerRequestService.getSent(user).stream()
+        List<CoworkerRequestResponse> requests = coworkerRequestService.listSent(user).stream()
                 .map(CoworkerRequestResponse::of)
                 .toList();
         return ApiResponse.success(requests);

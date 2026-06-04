@@ -21,7 +21,7 @@ public class PostFinder {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
-    public List<Post> findByProfileId(Long profileId) {
+    public List<Post> findAllByProfileId(Long profileId) {
         return postRepository.findByProfileId(profileId)
                 .stream()
                 .map(Post::of)
@@ -35,7 +35,7 @@ public class PostFinder {
                 .toList();
     }
 
-    public List<Post> findByTaskId(Long taskId) {
+    public List<Post> findAllByTaskId(Long taskId) {
         return postRepository.findByTaskId(taskId)
                 .stream()
                 .map(Post::of)

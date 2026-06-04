@@ -59,9 +59,9 @@ public class CoworkerRequestService {
     }
 
     @Transactional(readOnly = true)
-    public List<CoworkerRequestDetail> getReceived(User user) {
+    public List<CoworkerRequestDetail> listReceived(User user) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        List<CoworkerRequest> requests = coworkerRequestFinder.findReceived(profile.id());
+        List<CoworkerRequest> requests = coworkerRequestFinder.findAllReceived(profile.id());
 
         List<Long> counterpartIds = requests.stream()
                 .map(CoworkerRequest::fromId)
@@ -87,9 +87,9 @@ public class CoworkerRequestService {
     }
 
     @Transactional(readOnly = true)
-    public List<CoworkerRequestDetail> getSent(User user) {
+    public List<CoworkerRequestDetail> listSent(User user) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        List<CoworkerRequest> requests = coworkerRequestFinder.findSent(profile.id());
+        List<CoworkerRequest> requests = coworkerRequestFinder.findAllSent(profile.id());
 
         List<Long> counterpartIds = requests.stream()
                 .map(CoworkerRequest::toId)

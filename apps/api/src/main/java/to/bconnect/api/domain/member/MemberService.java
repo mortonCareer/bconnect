@@ -29,7 +29,7 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<Member> getAll() {
+    public List<Member> listMembers() {
         return memberFinder.findAll();
     }
 

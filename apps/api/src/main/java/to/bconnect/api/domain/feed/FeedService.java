@@ -32,7 +32,7 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public List<Feed> getAll() {
+    public List<Feed> list() {
 
         List<Post> posts = postFinder.findAll();
 

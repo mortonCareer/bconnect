@@ -24,9 +24,9 @@ public class TaskService {
     private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public List<Task> getAll(User user) {
+    public List<Task> list(User user) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        return taskFinder.findByProfileId(profile.id());
+        return taskFinder.findAllByProfileId(profile.id());
     }
 
     @Transactional

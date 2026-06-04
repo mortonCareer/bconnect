@@ -30,7 +30,7 @@ public class CredentialController {
 
     @GetMapping
     public ApiResponse<List<CredentialResponse>> list(@RequestParam Long profileId) {
-        List<CredentialResponse> credentials = credentialService.getAll(profileId).stream()
+        List<CredentialResponse> credentials = credentialService.list(profileId).stream()
                 .map(CredentialResponse::of)
                 .toList();
         return ApiResponse.success(credentials);

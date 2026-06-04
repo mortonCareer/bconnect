@@ -21,7 +21,7 @@ public class FeedController {
 
     @GetMapping
     public ApiResponse<List<FeedResponse>> list(@RequestParam(required = false) Long profileId) {
-        List<FeedResponse> feeds = feedService.getAll().stream()
+        List<FeedResponse> feeds = feedService.list().stream()
                 .map(FeedResponse::of)
                 .toList();
         return ApiResponse.success(feeds);

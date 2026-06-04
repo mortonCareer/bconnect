@@ -24,8 +24,8 @@ public class CredentialService {
     private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public List<Credential> getAll(Long profileId) {
-        return credentialFinder.findFilteredByProfileId(profileId);
+    public List<Credential> list(Long profileId) {
+        return credentialFinder.findAllFilteredByProfileId(profileId);
     }
 
     @Transactional

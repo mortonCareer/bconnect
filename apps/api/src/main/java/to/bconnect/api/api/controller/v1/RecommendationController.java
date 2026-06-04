@@ -41,7 +41,7 @@ public class RecommendationController {
 
     @GetMapping("/received")
     public ApiResponse<List<RecommendationResponse>> listReceived(@RequestParam Long profileId) {
-        List<RecommendationResponse> responses = recommendationService.getReceived(profileId).stream()
+        List<RecommendationResponse> responses = recommendationService.listReceived(profileId).stream()
                 .map(RecommendationResponse::of)
                 .toList();
         return ApiResponse.success(responses);
@@ -49,7 +49,7 @@ public class RecommendationController {
 
     @GetMapping("/sent")
     public ApiResponse<List<RecommendationResponse>> listSent(@RequestParam Long profileId) {
-        List<RecommendationResponse> responses = recommendationService.getSent(profileId).stream()
+        List<RecommendationResponse> responses = recommendationService.listSent(profileId).stream()
                 .map(RecommendationResponse::of)
                 .toList();
         return ApiResponse.success(responses);
@@ -58,7 +58,7 @@ public class RecommendationController {
     @GetMapping("/me/received")
     public ApiResponse<List<RecommendationResponse>> listMyReceived(
             @AuthenticationPrincipal User user) {
-        List<RecommendationResponse> responses = recommendationService.getMyReceived(user).stream()
+        List<RecommendationResponse> responses = recommendationService.listMyReceived(user).stream()
                 .map(RecommendationResponse::of)
                 .toList();
         return ApiResponse.success(responses);
@@ -67,7 +67,7 @@ public class RecommendationController {
     @GetMapping("/me/sent")
     public ApiResponse<List<RecommendationResponse>> listMySent(
             @AuthenticationPrincipal User user) {
-        List<RecommendationResponse> responses = recommendationService.getMySent(user).stream()
+        List<RecommendationResponse> responses = recommendationService.listMySent(user).stream()
                 .map(RecommendationResponse::of)
                 .toList();
         return ApiResponse.success(responses);

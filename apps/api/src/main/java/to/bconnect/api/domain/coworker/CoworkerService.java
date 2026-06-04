@@ -22,13 +22,13 @@ public class CoworkerService {
     private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public List<Coworker> getAll(User user, Long targetId) {
+    public List<Coworker> list(User user, Long targetId) {
         Profile profile = profileFinder.findByMemberId(user.id());
 
         if (profile.id().equals(targetId))
-            return coworkerFinder.find(targetId);
+            return coworkerFinder.findAllByProfileId(targetId);
         if (coworkerFinder.isCoworker(profile.id(), targetId))
-            return coworkerFinder.find(targetId);
+            return coworkerFinder.findAllByProfileId(targetId);
 
         throw new CodeException(CommonExceptionCode.FORBIDDEN);
     }

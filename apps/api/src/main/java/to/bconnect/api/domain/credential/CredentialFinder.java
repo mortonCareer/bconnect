@@ -27,7 +27,7 @@ public class CredentialFinder {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
-    public List<Credential> findFilteredByProfileId(Long profileId) {
+    public List<Credential> findAllFilteredByProfileId(Long profileId) {
         return credentialRepository.findByProfileId(profileId)
                 .stream()
                 .filter(e -> e.getStatus() == CredentialStatus.ACCEPTED)
@@ -41,7 +41,7 @@ public class CredentialFinder {
                 .toList();
     }
 
-    public List<Credential> findByProfileId(Long profileId) {
+    public List<Credential> findAllByProfileId(Long profileId) {
         return credentialRepository.findByProfileId(profileId)
                 .stream()
                 .map(Credential::of)
