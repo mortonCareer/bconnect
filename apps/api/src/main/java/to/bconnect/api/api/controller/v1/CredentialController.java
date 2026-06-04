@@ -2,7 +2,6 @@ package to.bconnect.api.api.controller.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,11 +44,11 @@ public class CredentialController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
+    public ApiResponse<Void> delete(
             @AuthenticationPrincipal User user,
             @PathVariable Long id) {
         credentialService.delete(user, id);
+        return ApiResponse.success(null);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

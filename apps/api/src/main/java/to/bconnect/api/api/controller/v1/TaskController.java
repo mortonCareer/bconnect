@@ -2,7 +2,6 @@ package to.bconnect.api.api.controller.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.api.controller.v1.request.CreateTaskRequest;
 import to.bconnect.api.api.controller.v1.request.UpdateTaskRequest;
@@ -68,10 +66,10 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
+    public ApiResponse<Void> delete(
             @AuthenticationPrincipal User user,
             @PathVariable Long id) {
         taskService.delete(user, id);
+        return ApiResponse.success(null);
     }
 }
