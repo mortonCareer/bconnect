@@ -7,6 +7,8 @@
 
 축 분리: **Web** (인간 only), **CLI** (인간 + AI), **MCP** (AI only). `-` = 해당 접근법 없음/미사용.
 
+도메인 → 서비스 → 환경 매핑(프로덕션·dev·프리뷰·로컬)은 [도메인 현황](./domains.md). 본 문서는 도구 _접근_(콘솔·CLI·MCP) SSoT, domains.md 는 도메인 _현황_ SSoT.
+
 ## Terraform 선언적 관리
 
 자세한 식별자(프로젝트명, bucket, region 등)는 각 모듈 참조.
