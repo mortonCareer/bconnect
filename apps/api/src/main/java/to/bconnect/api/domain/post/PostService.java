@@ -12,27 +12,12 @@ import to.bconnect.api.storage.domain.post.PostRepository;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 
-import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
-    private final PostFinder postFinder;
     private final ProfileFinder profileFinder;
-
-    @Transactional(readOnly = true)
-    public Post get(Long postId) {
-        return postFinder.find(postId);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Post> getAll() {
-        return postRepository.findAll()
-                .stream()
-                .map(Post::of)
-                .toList();
-    }
 
     @Transactional
     public Post create(User user, CreatePostRequest request) {

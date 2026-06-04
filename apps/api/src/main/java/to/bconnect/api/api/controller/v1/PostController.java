@@ -6,13 +6,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.api.controller.v1.request.CreatePostRequest;
 import to.bconnect.api.api.controller.v1.request.UpdatePostRequest;
-import to.bconnect.api.api.controller.v1.response.PostResponse;
 import to.bconnect.api.domain.post.Post;
 import to.bconnect.api.domain.post.PostService;
 import to.bconnect.api.support.security.User;
 import to.bconnect.api.common.response.ApiResponse;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -20,20 +17,6 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
-
-    @GetMapping
-    public ApiResponse<List<PostResponse>> list() {
-        List<PostResponse> posts = postService.getAll().stream()
-                .map(PostResponse::of)
-                .toList();
-        return ApiResponse.success(posts);
-    }
-
-    @GetMapping("/{id}")
-    public ApiResponse<PostResponse> get(@PathVariable Long id) {
-        Post post = postService.get(id);
-        return ApiResponse.success(PostResponse.of(post));
-    }
 
     @PostMapping
     public ApiResponse<Long> create(
