@@ -45,13 +45,12 @@ public class CredentialService {
     @Transactional
     public void delete(User user, Long id) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        CredentialEntity found = credentialRepository.findById(id)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        credentialRepository.findById(id).ifPresent(found -> {
+            if (!found.getProfileId().equals(profile.id()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        if (!found.getProfileId().equals(profile.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        credentialRepository.delete(found);
+            credentialRepository.delete(found);
+        });
     }
 
     @Transactional

@@ -47,11 +47,10 @@ public class PostService {
     @Transactional
     public void delete(User user, Long postId) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        PostEntity found = postRepository.findById(postId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (!found.getProfileId().equals(profile.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        postRepository.delete(found);
+        postRepository.findById(postId).ifPresent(found -> {
+            if (!found.getProfileId().equals(profile.id()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+            postRepository.delete(found);
+        });
     }
 }

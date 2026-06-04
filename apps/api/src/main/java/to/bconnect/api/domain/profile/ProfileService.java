@@ -73,12 +73,11 @@ public class ProfileService {
 
     @Transactional
     public void delete(User user) {
-        ProfileEntity found = profileRepository.findByMemberId(user.id())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        profileRepository.findByMemberId(user.id()).ifPresent(found -> {
+            if (!found.getMemberId().equals(user.id()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        if (!found.getMemberId().equals(user.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        profileRepository.delete(found);
+            profileRepository.delete(found);
+        });
     }
 }

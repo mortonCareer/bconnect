@@ -2,6 +2,7 @@ package to.bconnect.api.api.controller.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.api.controller.v1.request.CreateProfileRequest;
 import to.bconnect.api.api.controller.v1.request.UpdateProfileRequest;
@@ -71,9 +73,9 @@ public class ProfileController {
     }
 
     @DeleteMapping("/me")
-    public ApiResponse<Void> delete(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(
             @AuthenticationPrincipal User user) {
         profileService.delete(user);
-        return ApiResponse.success(null);
     }
 }

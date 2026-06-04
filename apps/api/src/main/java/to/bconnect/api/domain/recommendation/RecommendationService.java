@@ -89,13 +89,12 @@ public class RecommendationService {
     @Transactional
     public void delete(User user, Long id) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        RecommendationEntity found = recommendationRepository.findById(id)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        recommendationRepository.findById(id).ifPresent(found -> {
+            if (!found.getFromId().equals(profile.id()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        if (!found.getFromId().equals(profile.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        recommendationRepository.delete(found);
+            recommendationRepository.delete(found);
+        });
     }
 
     @Transactional

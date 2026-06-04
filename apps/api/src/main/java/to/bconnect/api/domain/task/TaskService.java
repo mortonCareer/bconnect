@@ -70,11 +70,10 @@ public class TaskService {
     @Transactional
     public void delete(User user, Long taskId) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        TaskEntity found = taskRepository.findById(taskId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-
-        if (!found.getProfileId().equals(profile.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-        taskRepository.delete(found);
+        taskRepository.findById(taskId).ifPresent(found -> {
+            if (!found.getProfileId().equals(profile.id()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+            taskRepository.delete(found);
+        });
     }
 }

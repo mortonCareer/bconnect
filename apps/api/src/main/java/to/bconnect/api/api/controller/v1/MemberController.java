@@ -2,6 +2,7 @@ package to.bconnect.api.api.controller.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -59,8 +60,8 @@ public class MemberController {
     }
 
     @DeleteMapping("/me")
-    public ApiResponse<Void> withdraw(@AuthenticationPrincipal User user) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void withdraw(@AuthenticationPrincipal User user) {
         memberService.withdraw(user);
-        return ApiResponse.success(null);
     }
 }

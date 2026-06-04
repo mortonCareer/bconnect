@@ -149,12 +149,11 @@ public class CoworkerRequestService {
     @Transactional
     public void cancel(User user, Long id) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        CoworkerRequestEntity found = requestRepository.findById(id)
-                .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
+        requestRepository.findById(id).ifPresent(found -> {
+            if (!found.getFromId().equals(profile.id()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        if (!found.getFromId().equals(profile.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        requestRepository.delete(found);
+            requestRepository.delete(found);
+        });
     }
 }
