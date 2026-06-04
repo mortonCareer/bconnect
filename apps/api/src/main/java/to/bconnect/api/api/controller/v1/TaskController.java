@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.api.controller.v1.request.CreateTaskRequest;
 import to.bconnect.api.api.controller.v1.request.UpdateTaskRequest;
+import to.bconnect.api.api.controller.v1.response.CoworkerTaskResponse;
 import to.bconnect.api.api.controller.v1.response.TaskResponse;
 import to.bconnect.api.domain.task.Task;
 import to.bconnect.api.domain.task.TaskService;
@@ -34,6 +36,16 @@ public class TaskController {
     public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal User user) {
         List<TaskResponse> tasks = taskService.list(user).stream()
                 .map(TaskResponse::of)
+                .toList();
+        return ApiResponse.success(tasks);
+    }
+
+    @GetMapping("/coworker")
+    public ApiResponse<List<CoworkerTaskResponse>> listByCoworker(
+            @AuthenticationPrincipal User user,
+            @RequestParam Long profileId) {
+        List<CoworkerTaskResponse> tasks = taskService.listByCoworker(user, profileId).stream()
+                .map(CoworkerTaskResponse::of)
                 .toList();
         return ApiResponse.success(tasks);
     }

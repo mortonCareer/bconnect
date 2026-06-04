@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.api.controller.v1.request.CreateTaskRequest;
 import to.bconnect.api.api.controller.v1.request.UpdateTaskRequest;
+import to.bconnect.api.domain.coworker.CoworkerFinder;
 import to.bconnect.api.domain.profile.Profile;
 import to.bconnect.api.storage.domain.task.TaskEntity;
 import to.bconnect.api.storage.domain.task.TaskRepository;
@@ -22,11 +23,20 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final TaskFinder taskFinder;
     private final ProfileFinder profileFinder;
+    private final CoworkerFinder coworkerFinder;
 
     @Transactional(readOnly = true)
     public List<Task> list(User user) {
         Profile profile = profileFinder.findByMemberId(user.id());
         return taskFinder.findAllByProfileId(profile.id());
+    }
+
+    @Transactional(readOnly = true)
+    public List<Task> listByCoworker(User user, Long targetId) {
+        Profile profile = profileFinder.findByMemberId(user.id());
+        if (!coworkerFinder.isCoworker(profile.id(), targetId))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        return taskFinder.findAllByProfileId(targetId);
     }
 
     @Transactional
