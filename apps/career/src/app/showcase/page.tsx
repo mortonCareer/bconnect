@@ -7,6 +7,9 @@ import Link from 'next/link'
 import {
   Button,
   Tag,
+  FilterChip,
+  SkillTag,
+  CertTag,
   Slider,
   Input,
   Feed,
@@ -39,6 +42,24 @@ const components: ComponentPreview[] = [
     description: '태그 컴포넌트 (Morton 디자인 시스템)',
     href: '/showcase/tag',
     preview: <Tag variant="selected">도배</Tag>,
+  },
+  {
+    name: 'FilterChip',
+    description: '활성 필터 칩 (제거 가능) — 기술자 탐색 필터',
+    href: '/showcase/filter-chip',
+    preview: <FilterChip label="서울" onRemove={() => undefined} />,
+  },
+  {
+    name: 'SkillTag',
+    description: '공종 태그 (선택/미선택) — 기술자 카드',
+    href: '/showcase/skill-tag',
+    preview: <SkillTag label="도배" selected />,
+  },
+  {
+    name: 'CertTag',
+    description: '인증/자격 태그 — 기술자 카드',
+    href: '/showcase/cert-tag',
+    preview: <CertTag label="본인인증" />,
   },
   {
     name: 'Slider',
