@@ -230,16 +230,17 @@ export function Select({
   const triggerClass = filterMode
     ? cn(
         FILTER_TRIGGER,
-        'text-m-14',
+        'text-m-14 cursor-pointer',
         'outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary',
         hasValue ? 'text-gray-900' : 'text-gray-500',
-        open ? 'border-primary' : 'border-gray-300',
+        open ? 'border-primary' : 'border-gray-300 hover:border-gray-400',
         disabled && 'cursor-not-allowed opacity-40'
       )
     : cn(
         FIELD_BASE_CLASSES,
         FIELD_DEFAULT_VARIANT_CLASSES,
-        'flex items-center justify-between gap-2',
+        'flex cursor-pointer items-center justify-between gap-2',
+        !open && 'hover:border-gray-400',
         open && 'border-primary ring-1 ring-primary'
       )
 
