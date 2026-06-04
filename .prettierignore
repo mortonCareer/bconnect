@@ -5,4 +5,3 @@ node_modules
 postcss.config.mjs
 apps/api
 packages/api-client/src/openapi.yaml
-packages/api-client/src/openapi.bundled.yaml
