@@ -748,7 +748,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseCredentialType[]"
+                $ref: "#/components/schemas/ApiResponseListCredentialType"
   /api/v1/coworkers:
     get:
       tags:
@@ -1670,7 +1670,7 @@ components:
       - PENDING
       - ACCEPTED
       - DENIED
-    ApiResponseCredentialType[]:
+    ApiResponseListCredentialType:
       type: object
       properties:
         success:
