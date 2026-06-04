@@ -56,7 +56,7 @@ public class RecommendationController {
     }
 
     @GetMapping("/me/received")
-    public ApiResponse<List<RecommendationResponse>> listMyRecived(
+    public ApiResponse<List<RecommendationResponse>> listMyReceived(
             @AuthenticationPrincipal User user) {
         List<RecommendationResponse> responses = recommendationService.getMyReceived(user).stream()
                 .map(RecommendationResponse::of)

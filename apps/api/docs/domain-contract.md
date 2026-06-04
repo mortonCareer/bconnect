@@ -5,9 +5,12 @@
 - 도메인 객체(Domain Object)
 
 ## 서비스 유형
-- XXXService : 기본 서비스, 퍼사드(Facade) 서비스
-- XXXFinder : 쿼리 메서드
-- XXXValidator : 유효성 검증
+
+| 유형           | 설명                          |
+| -------------- | ----------------------------- |
+| `XXXService`   | 기본 서비스, 퍼사드(Facade) 서비스 |
+| `XXXFinder`    | 쿼리 메서드                   |
+| `XXXValidator` | 유효성 검증                   |
 
 ## 도메인 객체 유형
 - 하위 도메인 객체 : 엔티티에 의존
