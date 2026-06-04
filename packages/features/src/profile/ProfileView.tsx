@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import {
   useGetCoworkers,
@@ -9,7 +8,9 @@ import {
   useGetReceivedRecommendations,
 } from '@bconnect/api-client'
 import { Skeleton, Tab } from '@bconnect/ui'
-import { PanelHeader } from '../_shared/PanelHeader'
+import { PanelShell } from '../_shared/PanelShell'
+import { PanelScroll } from '../_shared/PanelScroll'
+import { PanelMessage } from '../_shared/PanelMessage'
 import { ProfileSummary } from './ProfileSummary'
 import { IntroTab } from './IntroTab'
 import { WorksTab } from './WorksTab'
@@ -32,19 +33,6 @@ export function ProfileView({ profileId, closeHref, onClose }: ProfileViewProps)
     'tab',
     parseAsStringEnum<TabKey>(['intro', 'works']).withDefault('intro')
   )
-  const rootRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    rootRef.current?.focus()
-  }, [])
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
 
   const enabled = Number.isFinite(profileId) && profileId > 0
   const { data, isLoading, isError } = useGetProfile(profileId, { query: { enabled } })
@@ -56,10 +44,13 @@ export function ProfileView({ profileId, closeHref, onClose }: ProfileViewProps)
   const { data: feeds } = useGetFeeds({ profileId }, { query: { enabled } })
 
   return (
-    <div ref={rootRef} tabIndex={-1} className="flex h-full flex-col bg-white outline-none">
-      <PanelHeader title={member?.username} closeLabel="프로필 패널 닫기" closeHref={closeHref} />
-
-      <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <PanelShell
+      title={member?.username}
+      closeLabel="프로필 패널 닫기"
+      closeHref={closeHref}
+      onClose={onClose}
+    >
+      <PanelScroll>
         {isLoading ? (
           <ProfileSkeleton />
         ) : isError || !profile ? (
@@ -81,16 +72,8 @@ export function ProfileView({ profileId, closeHref, onClose }: ProfileViewProps)
             )}
           </>
         )}
-      </div>
-    </div>
-  )
-}
-
-function PanelMessage({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-2 px-4 py-20 text-center">
-      <p className="text-r-14 text-gray-500">{children}</p>
-    </div>
+      </PanelScroll>
+    </PanelShell>
   )
 }
 

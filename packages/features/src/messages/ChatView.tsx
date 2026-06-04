@@ -1,10 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useGetChat, useGetMyMember, MessageType } from '@bconnect/api-client'
 import type { Message } from '@bconnect/api-client'
 import { ChatInput, Skeleton } from '@bconnect/ui'
-import { PanelHeader } from '../_shared/PanelHeader'
+import { PanelShell } from '../_shared/PanelShell'
 import { MessageThread } from './MessageThread'
 
 export interface ChatViewProps {
@@ -16,20 +16,6 @@ export interface ChatViewProps {
 }
 
 export function ChatView({ chatId, closeHref, onClose, backHref }: ChatViewProps) {
-  const rootRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    rootRef.current?.focus()
-  }, [])
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
-
   const enabled = Number.isFinite(chatId) && chatId > 0
   const currentUserId = useGetMyMember().data?.id
   const { data: chat, isLoading, isError } = useGetChat(chatId, { query: { enabled } })
@@ -60,14 +46,14 @@ export function ChatView({ chatId, closeHref, onClose, backHref }: ChatViewProps
   }, [chatId, currentUserId, message])
 
   return (
-    <div ref={rootRef} tabIndex={-1} className="flex h-full flex-col bg-white outline-none">
-      <PanelHeader
-        title={title}
-        backHref={backHref}
-        backLabel="메시지 목록"
-        closeLabel="메시지 패널 닫기"
-        closeHref={closeHref}
-      />
+    <PanelShell
+      title={title}
+      backHref={backHref}
+      backLabel="메시지 목록"
+      closeLabel="메시지 패널 닫기"
+      closeHref={closeHref}
+      onClose={onClose}
+    >
       {isLoading ? (
         <div className="flex flex-1 flex-col gap-4 p-4">
           <Skeleton className="h-12 w-2/3" />
@@ -89,6 +75,6 @@ export function ChatView({ chatId, closeHref, onClose, backHref }: ChatViewProps
           <ChatInput value={message} onChange={setMessage} onSend={handleSend} />
         </>
       )}
-    </div>
+    </PanelShell>
   )
 }
