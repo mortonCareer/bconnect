@@ -2,38 +2,13 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Button, cn, StarIcon } from '@bconnect/ui'
+import { Button, CertTag, SkillTag, StarIcon } from '@bconnect/ui'
 import { TRADE_LABELS, useCreateDirectChat } from '@bconnect/api-client'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useAuthStore } from '@/stores/auth-store'
 import type { TechnicianItem } from '@/hooks/useTechnicianItems'
 import type { Trade } from '@bconnect/api-client'
 import { useLoginGate } from './LoginGateProvider'
-
-// Figma node 1504:12113 — bg-gray-100, border-gray-300, rounded-7, R14 gray-700
-function CertTag({ label }: { label: string }) {
-  return (
-    <span className="inline-flex items-center rounded-[7px] border border-gray-300 bg-gray-100 px-2 py-1 text-r-14 text-gray-700">
-      {label}
-    </span>
-  )
-}
-
-// Figma node 1504:12099/12102 — rounded-full pill, selected=primary fill, default=white+gray border
-function SkillTag({ label, selected }: { label: string; selected: boolean }) {
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full border px-3 py-1 text-m-12',
-        selected
-          ? 'border-primary bg-secondary text-primary'
-          : 'border-gray-300 bg-white text-gray-700'
-      )}
-    >
-      {label}
-    </span>
-  )
-}
 
 function StarRating({ rating, reviewCount }: { rating: number; reviewCount: number }) {
   const full = Math.floor(rating)
