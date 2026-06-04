@@ -1,6 +1,6 @@
 'use client'
 
-import { Select, XIcon, RefreshIcon } from '@bconnect/ui'
+import { Select, FilterChip, RefreshIcon } from '@bconnect/ui'
 import { Trade, TRADE_LIST, TRADE_LABELS } from '@bconnect/api-client'
 import { EXPERIENCE_OPTIONS, EXPERIENCE_LABELS } from '@/lib/experience'
 import { GRADE_OPTIONS } from '@/lib/grade'
@@ -27,20 +27,6 @@ const REGION_OPTIONS = [
   '경남',
   '제주',
 ]
-
-/** Figma node 1503:12064 — rounded-full pill, no border, secondary bg + primary text, M14, x icon */
-function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onRemove}
-      className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-m-14 text-primary transition-opacity hover:opacity-80"
-    >
-      {label}
-      <XIcon size={12} />
-    </button>
-  )
-}
 
 function RefreshButton({ onClick }: { onClick: () => void }) {
   return (
@@ -114,7 +100,7 @@ export function FilterBar() {
 
       {/* Active filter chips + refresh */}
       {hasFilter && (
-        <div className="flex items-center gap-[7px]">
+        <div className="flex flex-wrap items-center gap-[7px]">
           {regions.map((r) => (
             <FilterChip key={r} label={r} onRemove={() => toggleRegion(r)} />
           ))}
