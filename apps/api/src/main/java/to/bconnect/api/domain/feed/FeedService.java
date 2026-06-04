@@ -24,6 +24,14 @@ public class FeedService {
     private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
+    public Feed get(Long postId) {
+        Post post = postFinder.find(postId);
+        Profile profile = profileFinder.find(post.profileId());
+        Member member = memberFinder.find(profile.memberId());
+        return new Feed(member, profile, post);
+    }
+
+    @Transactional(readOnly = true)
     public List<Feed> getAll() {
 
         List<Post> posts = postFinder.findAll();
