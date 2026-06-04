@@ -43,7 +43,7 @@ production = `main` 브랜치, dev(staging) = `dev` 브랜치 추적. PR 프리�
 
 | FE 환경                       | 호출 대상 API                 | 비고                                                                                                        |
 | ----------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| production (`bconnect.to` 등) | `https://api.bconnect.to`     | Vercel `production` 타겟                                                                                    |
+| production (`bconnect.to` 등) | `https://api.bconnect.to`     |                                                                                                             |
 | dev (`dev.bconnect.to` 등)    | `https://api.dev.bconnect.to` | Vercel `dev` custom env override, `NEXT_PUBLIC_API_MOCKING=disabled` → 실제 staging BE                      |
 | PR 프리뷰 (`*.vercel.app`)    | MSW mock 기본                 | 상세: [development-workflow.md](../how-to/development-workflow.md), [packages/mocks](../../packages/mocks/) |
 | 로컬                          | `http://localhost:8080`       | [`packages/api-client/src/client.ts`](../../packages/api-client/src/client.ts) fallback                     |
@@ -68,7 +68,7 @@ production = `main` 브랜치, dev(staging) = `dev` 브랜치 추적. PR 프리�
 
 DNS 레코드는 **Terraform 관리 밖**이다. 가비아는 Terraform/CLI 를 지원하지 않아 IaC 불가 ([ADR-0016](../explanation/adr/0016-environment-service-domain-naming.md) Consequences).
 
-흐름: `infra/` 에서 Vercel/Railway 커스텀 도메인을 선언하고 `apply` → 나오는 CNAME 타겟을 **가비아 콘솔에서 수동 등록**한다. 커스텀 도메인은 항상 그 환경의 **최신 배포**를 가리키므로, `dev.bconnect.to` 가 최신 코드를 보여주려면 `dev` 브랜치 자동배포가 켜져 있어야 한다.
+흐름: `infra/` 에서 Vercel/Railway 커스텀 도메인을 선언하고 `apply` → 나오는 CNAME 타겟을 **가비아 콘솔에서 수동 등록**한다.
 
 | 도메인                 | CNAME 타겟 유형                                       |
 | ---------------------- | ----------------------------------------------------- |
