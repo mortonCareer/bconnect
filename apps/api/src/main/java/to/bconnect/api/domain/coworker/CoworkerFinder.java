@@ -12,9 +12,13 @@ public class CoworkerFinder {
 
     private final CoworkerRepository coworkerRepository;
 
-    public List<Coworker> find(Long profileId) {
+    public List<Coworker> findAllByProfileId(Long profileId) {
         return coworkerRepository.findByProfileId(profileId)
                 .stream().map(Coworker::of).toList();
+    }
+
+    public long countByProfileId(Long profileId) {
+        return coworkerRepository.countByProfileId(profileId);
     }
 
     public boolean isCoworker(Long profileId, Long targetId) {

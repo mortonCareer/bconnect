@@ -2,10 +2,12 @@ package to.bconnect.api.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import org.springframework.boot.logging.LogLevel;
@@ -36,6 +38,13 @@ public class ApiControllerAdvice {
         return ResponseEntity
                 .status(e.getExceptionCode().getStatus())
                 .body(ApiResponse.error(e.getExceptionCode()));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotFound(NoResourceFoundException e) {
+        return ResponseEntity
+                .status(CommonExceptionCode.NOT_FOUND.getStatus())
+                .body(ApiResponse.error(CommonExceptionCode.NOT_FOUND));
     }
 
     @ExceptionHandler(Exception.class)

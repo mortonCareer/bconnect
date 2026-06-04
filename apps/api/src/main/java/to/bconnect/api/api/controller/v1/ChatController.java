@@ -31,7 +31,7 @@ public class ChatController {
 
     @GetMapping
     public ApiResponse<List<ChatResponse>> list(@AuthenticationPrincipal User user) {
-        List<ChatResponse> response = chatService.getMyChats(user.id()).stream()
+        List<ChatResponse> response = chatService.list(user.id()).stream()
                 .map(ChatResponse::of)
                 .toList();
         return ApiResponse.success(response);
@@ -50,7 +50,7 @@ public class ChatController {
             @AuthenticationPrincipal User user,
             @PathVariable Long chatId,
             CursorLimit cursorLimit) {
-        CursorPage<Message> page = chatService.getMessages(user, chatId, cursorLimit);
+        CursorPage<Message> page = chatService.listMessages(user, chatId, cursorLimit);
         CursorPage<MessageResponse> response = new CursorPage<>(
                 MessageResponse.of(page.content()),
                 page.nextCursor(),

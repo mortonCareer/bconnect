@@ -15,4 +15,7 @@ public interface CoworkerRepository extends JpaRepository<CoworkerEntity, Long> 
 
     @Query("SELECT c FROM CoworkerEntity c WHERE c.minId = :profileId OR c.maxId = :profileId")
     List<CoworkerEntity> findByProfileId(@Param("profileId") Long profileId);
+
+    @Query("SELECT COUNT(c) FROM CoworkerEntity c WHERE c.minId = :profileId OR c.maxId = :profileId")
+    long countByProfileId(@Param("profileId") Long profileId);
 }
