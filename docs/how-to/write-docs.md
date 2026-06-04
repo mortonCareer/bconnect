@@ -60,6 +60,8 @@ Diátaxis 자체는 명시적 줄 수 룰을 두지 않는다. 줄 수보다 **�
 
 신규 외부 도구 도입 시 tools.md 먼저 갱신 → 그 후 다른 docs에서 사용.
 
+**예외 — 도메인 매트릭스**: 도메인 → 서비스 → 환경 매핑은 [`reference/domains.md`](../reference/domains.md)가 SSoT다. tools.md는 도구 _접근_(콘솔·CLI·MCP), domains.md는 도메인 *현황*으로 역할 분리. 단 도메인 literal 의 선언적 진실은 [`infra/`](../../infra/) (Terraform)이고 domains.md 는 그 derived view — 다른 docs는 도메인을 직접 쓰지 말고 domains.md 를 링크한다.
+
 ### docs 간 인용 — 마크다운 링크 강제
 
 다른 docs 파일을 본문에서 인용할 때 plain text path 금지. 항상 마크다운 링크 형식.

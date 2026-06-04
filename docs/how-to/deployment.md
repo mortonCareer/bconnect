@@ -15,10 +15,12 @@ bconnect은 **2단계 배포 모델**을 사용합니다:
 dev (개발 및 QA)  →  prod (프로덕션)
 ```
 
-| 환경 | 목적          | 배포 방식         | URL                               |
-| ---- | ------------- | ----------------- | --------------------------------- |
-| dev  | PR 프리뷰, QA | PR 생성 시 자동   | `*.vercel.app` (프리뷰 도메인)    |
-| prod | 실제 서비스   | main 머지 시 자동 | `bconnect.to`, `plan.bconnect.to` |
+| 환경 | 목적          | 배포 방식         |
+| ---- | ------------- | ----------------- |
+| dev  | PR 프리뷰, QA | PR 생성 시 자동   |
+| prod | 실제 서비스   | main 머지 시 자동 |
+
+각 환경의 도메인 매핑(career/plan/api × prod/dev/프리뷰/로컬)은 [도메인 현황](../reference/domains.md) 참조.
 
 ### dev 환경 (PR 프리뷰)
 
@@ -26,7 +28,7 @@ dev (개발 및 QA)  →  prod (프로덕션)
 - **배포 트리거**: PR 생성 또는 업데이트
 - **배포 플랫폼**: Vercel (Frontend), Railway (Backend)
 - **데이터**: 테스트 데이터 또는 Mock API
-- **URL 예시**: `https://<vercel-project>-git-<branch>-<team>.vercel.app` (각 PR Vercel comment에 자동 노출)
+- **URL**: 브랜치별 Vercel 프리뷰 도메인 (각 PR Vercel comment에 자동 노출) — [도메인 현황](../reference/domains.md) 참조
 
 ### prod 환경 (프로덕션)
 
@@ -34,10 +36,7 @@ dev (개발 및 QA)  →  prod (프로덕션)
 - **배포 트리거**: main 브랜치 머지
 - **배포 플랫폼**: Vercel (Frontend), Railway (Backend)
 - **데이터**: 실제 프로덕션 데이터
-- **URL**:
-  - Career App: `https://bconnect.to`
-  - Plan App: `https://plan.bconnect.to`
-  - API: `https://api.bconnect.to`
+- **URL**: career/plan/api production 도메인 — [도메인 현황](../reference/domains.md) 참조
 
 ---
 
