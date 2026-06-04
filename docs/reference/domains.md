@@ -1,7 +1,7 @@
 # 도메인 현황 — 서비스 × 환경 매핑
 
 > **For**: 어떤 도메인이 어떤 서비스의 어떤 환경을 가리키는지 확인하려는 사람 또는 AI.
-> **You'll be able to**: production·dev(staging)·PR 프리뷰·로컬 각 환경의 FE/BE 도메인, FE→BE 연결, 보조 서비스(DB·S3·FCM)·DNS·CORS 현황을 한눈에 lookup.
+> **You'll be able to**: production·dev(staging)·PR 프리뷰·로컬 각 환경의 FE/BE 도메인, FE→BE 연결, 보조 서비스(DB·S3·FCM)·DNS 현황을 한눈에 lookup.
 
 도메인 literal 의 **선언적 SSoT 는 [`infra/`](../../infra/) (Terraform)** 다. 이 문서는 그걸 사람이 읽기 쉽게 비추는 **derived view(현황 스냅샷)** — 도메인이 바뀌면 `infra/` 가 먼저 바뀌고 이 표를 갱신한다. 네이밍 **규칙·근거**는 [ADR-0016](../explanation/adr/0016-environment-service-domain-naming.md), 도구 **접근**(콘솔 링크·CLI·MCP)은 [tools.md](./tools.md).
 
@@ -81,21 +81,7 @@ DNS 레코드는 **Terraform 관리 밖**이다. 가비아는 Terraform/CLI 를 
 
 ---
 
-## 6. CORS (BE allowed origins)
-
-2-레벨 서브도메인(`plan.dev.bconnect.to`)을 1-레벨 와일드카드가 못 잡으므로 `*.dev.bconnect.to` 를 별도 추가 ([ADR-0016](../explanation/adr/0016-environment-service-domain-naming.md)).
-
-| 패턴                                            | 커버                     |
-| ----------------------------------------------- | ------------------------ |
-| `https://*.bconnect.to`                         | production 전체 (1-레벨) |
-| `https://*.dev.bconnect.to`                     | dev 전체 (2-레벨)        |
-| `https://morton-career*.vercel.app`             | career PR 프리뷰         |
-| `https://morton-plan*.vercel.app`               | plan PR 프리뷰           |
-| `http://localhost:3000` (`CORS_ALLOWED_ORIGIN`) | 로컬                     |
-
----
-
-## 7. 변경 절차
+## 6. 변경 절차
 
 도메인을 추가·변경할 때 (`infra/` 가 SSoT, 본 문서는 따라간다):
 
