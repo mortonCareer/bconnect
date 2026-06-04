@@ -29,11 +29,6 @@ public class TaskService {
         return taskFinder.findByProfileId(profile.id());
     }
 
-    @Transactional(readOnly = true)
-    public Task get(Long taskId) {
-        return taskFinder.find(taskId);
-    }
-
     @Transactional
     public Task create(User user, CreateTaskRequest request) {
         Profile profile = profileFinder.findByMemberId(user.id());

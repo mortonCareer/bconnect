@@ -36,12 +36,6 @@ public class TaskController {
         return ApiResponse.success(tasks);
     }
 
-    @GetMapping("/{id}")
-    public ApiResponse<TaskResponse> get(@PathVariable Long id) {
-        Task task = taskService.get(id);
-        return ApiResponse.success(TaskResponse.of(task));
-    }
-
     @PostMapping
     public ApiResponse<Long> create(
             @AuthenticationPrincipal User user,
