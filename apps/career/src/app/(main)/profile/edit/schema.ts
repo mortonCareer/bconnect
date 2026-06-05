@@ -11,7 +11,10 @@ export const profileEditSchema = z.object({
 
   // Profile fields
   primaryTrade: z.enum(tradeValues).optional(),
-  trades: z.array(z.enum(tradeValues)).max(3, '시공분야는 최대 3개까지 선택 가능합니다').optional(),
+  trades: z
+    .array(z.enum(tradeValues))
+    .min(1, '시공분야를 1개 이상 선택해주세요')
+    .max(3, '시공분야는 최대 3개까지 선택 가능합니다'),
   experience: z
     .number({ error: '경력을 입력해주세요' })
     .int('정수만 입력 가능합니다')
