@@ -35,6 +35,7 @@ const workSchema = z.object({
     .string()
     .min(1, '현장주소를 입력해주세요.')
     .register(fieldMeta, { label: '현장주소', placeholder: '현장주소를 입력해주세요' }),
+  detail: z.string().optional(),
   trade: z
     .string()
     .min(1, '시공분야를 입력해주세요.')
@@ -65,6 +66,7 @@ export default function EditWorkPage() {
       company: '',
       period: '',
       address: '',
+      detail: '',
       trade: '',
       description: '',
       images: null,
@@ -146,6 +148,22 @@ export default function EditWorkPage() {
               form.setValue('address', result.roadAddress, { shouldValidate: true })
             }
           />
+
+          {/* 상세주소 */}
+          <div className="flex items-start gap-2 px-4 pt-3">
+            <Label htmlFor="work-detail" className="w-20 shrink-0 text-gray-900">
+              상세주소
+            </Label>
+            <div className="flex flex-1 flex-col gap-1">
+              <Input
+                id="work-detail"
+                {...form.register('detail')}
+                placeholder="상세주소를 입력해주세요 (동/호 등)"
+                className="h-auto rounded-none border-0 p-0 text-sm text-gray-700 focus:ring-0"
+              />
+              <FormError error={form.formState.errors.detail?.message} />
+            </div>
+          </div>
 
           {/* 설명 */}
           <div className="px-4 pt-6">
