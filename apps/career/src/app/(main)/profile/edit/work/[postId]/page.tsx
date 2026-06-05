@@ -132,7 +132,7 @@ export default function EditWorkPage() {
                 id="work-address"
                 type="button"
                 onClick={() => setAddressOpen(true)}
-                className="text-left text-sm text-gray-700"
+                className="cursor-pointer text-left text-sm text-gray-700"
               >
                 {address || <span className="text-gray-400">현장주소를 검색해주세요</span>}
               </button>
