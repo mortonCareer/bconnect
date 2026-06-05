@@ -86,10 +86,8 @@ function ToggleButton({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'cursor-pointer rounded-md border px-3 py-2 text-r-14',
-        active
-          ? 'border-gray-300 bg-gray-100 text-sb-14 text-gray-900'
-          : 'border-gray-300 bg-white text-gray-700'
+        'cursor-pointer rounded-md border border-[#E5E5E5] px-3 py-2 text-[14px] leading-[21px] text-[#1B1B1B]',
+        active ? 'bg-[#F5F5F5] font-semibold' : 'bg-white font-normal'
       )}
     >
       {children}
