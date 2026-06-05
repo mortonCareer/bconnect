@@ -17,7 +17,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 const fieldMeta = z.registry<{ label: string; placeholder: string }>()
@@ -77,6 +77,7 @@ export default function EditWorkPage() {
   })
 
   const descriptionMeta = fieldMeta.get(workSchema.shape.description)
+  const address = useWatch({ control: form.control, name: 'address' })
 
   return (
     <div className="flex flex-col">
@@ -133,9 +134,7 @@ export default function EditWorkPage() {
                 onClick={() => setAddressOpen(true)}
                 className="text-left text-sm text-gray-700"
               >
-                {form.watch('address') || (
-                  <span className="text-gray-400">현장주소를 검색해주세요</span>
-                )}
+                {address || <span className="text-gray-400">현장주소를 검색해주세요</span>}
               </button>
               <FormError error={form.formState.errors.address?.message} />
             </div>
