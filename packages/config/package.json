@@ -29,6 +29,7 @@
     "typescript-eslint": "^8.50.1"
   },
   "dependencies": {
+    "@bconnect/api-client": "workspace:*",
     "libphonenumber-js": "^1.12.33",
     "zod": "catalog:"
   }
