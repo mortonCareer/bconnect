@@ -9,9 +9,8 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { checkUsername } from '@bconnect/api-client'
-import { Button, Form, TextField, passthroughError, useServerError } from '@bconnect/ui'
+import { Button, Form, Logo, TextField, passthroughError, useServerError } from '@bconnect/ui'
 import { formatUsername } from '@bconnect/config/username'
-import Image from 'next/image'
 import { useSignupStore } from '@/stores/signup-store'
 import { memberSchema, type MemberFormData } from './schema'
 
@@ -63,7 +62,7 @@ export default function SignupMemberPage() {
       {/* Card */}
       <div className="flex w-120 flex-col items-center gap-8 rounded-xl border border-gray-300 p-10">
         {/* Logo */}
-        <Image src="/logo.png" alt="품앗이" width={160} height={56} priority />
+        <Logo width={160} height={56} />
 
         {/* Subtitle */}
         <p className="text-r-16 text-gray-700">신뢰할 수 있는 인테리어 하도급 섭외 · 관리 서비스</p>
