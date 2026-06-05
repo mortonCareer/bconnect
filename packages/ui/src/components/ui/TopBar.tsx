@@ -8,7 +8,7 @@ import * as React from 'react'
 import { ChevronIcon, FilterIcon, ChatIcon } from '../../icons'
 import { cn } from '../../lib/utils'
 
-const topBarVariants = cva('flex h-15 w-full items-center bg-white px-4', {
+const topBarVariants = cva('sticky top-0 z-40 flex h-15 w-full items-center bg-white px-4', {
   variants: {
     variant: {
       progress: 'justify-between',
