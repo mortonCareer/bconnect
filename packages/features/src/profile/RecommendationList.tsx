@@ -2,7 +2,11 @@
 
 import Image from 'next/image'
 import { useState } from 'react'
-import { useGetReceivedRecommendations, useGetSentRecommendations } from '@bconnect/api-client'
+import {
+  getTradeLabel,
+  useGetReceivedRecommendations,
+  useGetSentRecommendations,
+} from '@bconnect/api-client'
 import type { Recommendation } from '@bconnect/api-client'
 import { cn, Skeleton } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
@@ -94,9 +98,12 @@ function ToggleButton({
 }
 
 function RecommendationItem({ recommendation }: { recommendation: Recommendation }) {
-  const { member, content } = recommendation
+  const { member, content, profile } = recommendation
   const { ref, expanded, showToggle, toggle } = useExpandableText([content], 'height')
   const textId = `recommendation-${recommendation.id}`
+  // TODO(#473): BE가 MaskedMember.role 미제공 — 추가되면 실제 role 연결
+  const role = '반장(Mocked)'
+  const subtitle = [getTradeLabel(profile.primaryTrade), role].join(' · ')
 
   return (
     <li className="flex gap-3 py-3">
@@ -112,11 +119,17 @@ function RecommendationItem({ recommendation }: { recommendation: Recommendation
         />
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="text-m-14 text-gray-900">{member.name}</span>
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-m-14 text-[#1B1B1B]">{member.name}</span>
+          <span className="text-r-12 text-[#7B7B7B]">{subtitle}</span>
+        </div>
         <p
           id={textId}
           ref={ref}
-          className={cn('whitespace-pre-wrap text-r-12 text-gray-900', !expanded && 'line-clamp-2')}
+          className={cn(
+            'whitespace-pre-wrap text-r-12 text-[#1B1B1B]',
+            !expanded && 'line-clamp-2'
+          )}
         >
           {content}
         </p>
@@ -126,7 +139,7 @@ function RecommendationItem({ recommendation }: { recommendation: Recommendation
             onClick={toggle}
             aria-expanded={expanded}
             aria-controls={textId}
-            className="cursor-pointer self-start text-r-12 text-gray-500 underline"
+            className="cursor-pointer self-start text-r-12 text-[#A5A5A5] underline"
           >
             {expanded ? '접기' : '더보기'}
           </button>
