@@ -30,7 +30,42 @@ jobs:
           # 스펙 단독 변경은 BE 구현에 따라가는 갱신 또는 description 수정 등
           # FE 영향 없는 형태가 일반적임.
           # api-spec 자체는 항상 lint/bundle 검증.
-          filters: .github/filters.yml
+          filters: |
+            career:
+              - 'apps/career/**'
+              - 'packages/ui/**'
+              - 'packages/config/**'
+              - 'packages/mocks/**'
+              - 'packages/api-client/src/*.ts'
+              - 'packages/api-client/orval.*.ts'
+              - 'packages/api-client/package.json'
+              - 'packages/api-client/tsconfig.json'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+            plan:
+              - 'apps/plan/**'
+              - 'packages/ui/**'
+              - 'packages/config/**'
+              - 'packages/mocks/**'
+              - 'packages/api-client/src/*.ts'
+              - 'packages/api-client/orval.*.ts'
+              - 'packages/api-client/package.json'
+              - 'packages/api-client/tsconfig.json'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+            api:
+              - 'apps/api/**'
+            api-spec:
+              - 'apps/api/**'
+            crawler:
+              - 'apps/crawler/**'
+            packages:
+              - '**/package.json'
+              - 'pnpm-workspace.yaml'
+              - 'pnpm-lock.yaml'
+              - '.syncpackrc.json'
+              - 'packages/ui/**'
+              - 'packages/config/eslint/**'
 
   format:
     runs-on: ubuntu-latest
