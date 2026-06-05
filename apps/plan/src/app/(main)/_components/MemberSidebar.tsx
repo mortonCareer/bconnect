@@ -3,11 +3,11 @@
  */
 'use client'
 
+import { usePanelNav } from '@/hooks/usePanelNav'
+import { useGetMyChats, useGetMyMember } from '@bconnect/api-client'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useGetMyMember, useGetMyChats } from '@bconnect/api-client'
-import { getAvatarUrl } from '@bconnect/config/avatar'
-import { usePanelNav } from '@/hooks/usePanelNav'
 import { SidebarFooter } from './SidebarFooter'
 
 // TODO(신규 BE 이슈 필요 — notification 도메인): 엔드포인트 추가 시
@@ -19,7 +19,7 @@ const MAX_BADGE_COUNT = 99
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null
   return (
-    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-[8px] bg-red-500 px-1 text-sb-12 text-white">
+    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs text-white">
       {count > MAX_BADGE_COUNT ? `${MAX_BADGE_COUNT}+` : count}
     </span>
   )
