@@ -3,9 +3,20 @@
  */
 'use client'
 
-import { cn, Form, FormError, ImageField, Input, Label, TextareaField, TopBar } from '@bconnect/ui'
+import {
+  AddressSearchSheet,
+  cn,
+  Form,
+  FormError,
+  ImageField,
+  Input,
+  Label,
+  TextareaField,
+  TopBar,
+} from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -36,7 +47,7 @@ const workSchema = z.object({
 })
 type WorkFormValues = z.infer<typeof workSchema>
 
-const META_FIELD_NAMES = ['company', 'period', 'address', 'trade'] as const
+const META_FIELD_NAMES = ['company', 'period', 'trade'] as const
 
 export default function EditWorkPage() {
   const router = useRouter()
@@ -44,6 +55,8 @@ export default function EditWorkPage() {
   // TODO: 초기 데이터 받아와서 폼 기본 값 채우기 (#197)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _postId = Number(params.postId)
+
+  const [addressOpen, setAddressOpen] = useState(false)
 
   const form = useForm<WorkFormValues>({
     resolver: zodResolver(workSchema),
@@ -107,6 +120,33 @@ export default function EditWorkPage() {
               )
             })}
           </div>
+
+          {/* 현장주소 */}
+          <div className="flex items-start gap-2 px-4 pt-3">
+            <Label htmlFor="work-address" className="w-20 shrink-0 text-gray-900">
+              현장주소
+            </Label>
+            <div className="flex flex-1 flex-col gap-1">
+              <button
+                id="work-address"
+                type="button"
+                onClick={() => setAddressOpen(true)}
+                className="text-left text-sm text-gray-700"
+              >
+                {form.watch('address') || (
+                  <span className="text-gray-400">현장주소를 검색해주세요</span>
+                )}
+              </button>
+              <FormError error={form.formState.errors.address?.message} />
+            </div>
+          </div>
+          <AddressSearchSheet
+            open={addressOpen}
+            onOpenChange={setAddressOpen}
+            onComplete={(result) =>
+              form.setValue('address', result.roadAddress, { shouldValidate: true })
+            }
+          />
 
           {/* 설명 */}
           <div className="px-4 pt-6">
