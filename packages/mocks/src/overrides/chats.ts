@@ -121,7 +121,7 @@ const MESSAGES_BY_CHAT: Record<number, Message[]> = {
   ],
 }
 
-const UNREAD_BY_CHAT: Record<number, number> = { 1: 0, 2: 2, 3: 0 }
+const UNREAD_BY_CHAT: Record<number, number> = { 1: 2, 2: 4, 3: 1 }
 
 const chatOf = (w: Worker, index: number): Chat => {
   const id = index + 1
