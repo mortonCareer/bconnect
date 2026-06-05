@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { SERVICE_NAME } from '@bconnect/config/site'
+import { SERVICE_NAME, BRAND_COLOR } from '@bconnect/config/site'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -9,7 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
-    theme_color: '#386dff',
+    theme_color: BRAND_COLOR,
     lang: 'ko',
     icons: [
       { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },

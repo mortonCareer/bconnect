@@ -2,7 +2,7 @@ import '@bconnect/ui/styles'
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
-import { SERVICE_NAME, SITE_URL } from '@bconnect/config/site'
+import { SERVICE_NAME, SITE_URL, BRAND_COLOR } from '@bconnect/config/site'
 import { Providers } from './providers'
 
 const pretendard = localFont({
@@ -14,7 +14,11 @@ const pretendard = localFont({
 })
 
 export const viewport: Viewport = {
-  themeColor: '#386dff',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: 'cover',
+  themeColor: BRAND_COLOR,
 }
 
 const description = '시공/하도급 인력 처음부터 끝까지'

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import '@bconnect/ui/styles'
-import { SERVICE_NAME, SITE_URL } from '@bconnect/config/site'
+import { SERVICE_NAME, SITE_URL, BRAND_COLOR } from '@bconnect/config/site'
 import { Providers } from './providers'
 
 const pretendard = localFont({
@@ -17,7 +17,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
-  themeColor: '#386dff',
+  themeColor: BRAND_COLOR,
 }
 
 const description =
