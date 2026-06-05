@@ -113,21 +113,9 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
           <div className={cn('flex min-w-0 flex-1 flex-col', !isBadge && 'gap-1')}>
             {/* 이름 + 태그 */}
             <div className="flex items-center gap-2.5">
-              <span
-                className={cn(
-                  'shrink-0 text-[#1B1B1B]',
-                  isBadge ? 'text-sb-16' : 'text-sb-14 leading-[1.6]!'
-                )}
-              >
-                {name}
-              </span>
+              <span className="text-sb-14 leading-[1.6]! shrink-0 text-[#1B1B1B]">{name}</span>
               {tags.length > 0 && (
-                <div
-                  className={cn(
-                    'flex items-center gap-2 text-[#A5A5A5]',
-                    isBadge ? 'text-m-14' : 'text-m-12'
-                  )}
-                >
+                <div className="flex items-center gap-2 text-m-12 text-[#A5A5A5]">
                   {tags.map((tag, index) => (
                     <React.Fragment key={index}>
                       {index > 0 && <span className="text-[#A5A5A5]">|</span>}
