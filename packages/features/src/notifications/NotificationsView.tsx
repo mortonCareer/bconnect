@@ -1,7 +1,8 @@
 'use client'
 
-import { useQuery, customFetch } from '@bconnect/api-client'
-import { Skeleton } from '@bconnect/ui'
+import { useQuery, useQueryClient, customFetch } from '@bconnect/api-client'
+import { NotificationItem, Skeleton } from '@bconnect/ui'
+import { formatRelativeTime } from '@bconnect/config/format'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
 import { PanelMessage } from '../_shared/PanelMessage'
@@ -13,6 +14,7 @@ export interface NotificationsViewProps {
 }
 
 export function NotificationsView({ closeHref, onClose }: NotificationsViewProps) {
+  const queryClient = useQueryClient()
   // TODO(BE notification 도메인 #347): 스펙 확정 시 generated useQuery 훅으로 교체.
   // 현재는 독립 MSW placeholder(`/api/v1/notifications`) — customFetch 가 envelope unwrap.
   const { data, isLoading, isError } = useQuery({
@@ -20,8 +22,28 @@ export function NotificationsView({ closeHref, onClose }: NotificationsViewProps
     queryFn: () => customFetch<AppNotification[]>('/api/v1/notifications'),
   })
 
+  const markAllRead = () => {
+    queryClient.setQueryData<AppNotification[]>(['notifications'], (prev) =>
+      prev?.map((n) => (n.read ? n : { ...n, read: true }))
+    )
+  }
+
   return (
-    <PanelShell title="알림" closeLabel="알림 패널 닫기" closeHref={closeHref} onClose={onClose}>
+    <PanelShell
+      title="알림"
+      closeLabel="알림 패널 닫기"
+      closeHref={closeHref}
+      onClose={onClose}
+      rightSlot={
+        <button
+          type="button"
+          onClick={markAllRead}
+          className="cursor-pointer whitespace-nowrap text-m-12 text-primary-500"
+        >
+          모두 읽음
+        </button>
+      }
+    >
       <PanelScroll>
         {isLoading ? (
           <NotificationsSkeleton />
@@ -32,14 +54,12 @@ export function NotificationsView({ closeHref, onClose }: NotificationsViewProps
         ) : (
           <ul className="flex flex-col">
             {data.map((n) => (
-              <li
-                key={n.id}
-                className={`flex flex-col gap-1 border-b border-gray-100 px-4 py-3 ${
-                  n.read ? 'bg-white' : 'bg-gray-50'
-                }`}
-              >
-                <span className="text-sb-14 text-gray-900">{n.title}</span>
-                <span className="text-r-14 text-gray-700">{n.body}</span>
+              <li key={n.id} className="contents">
+                <NotificationItem
+                  content={n.body}
+                  timestamp={formatRelativeTime(n.createdAt)}
+                  read={n.read}
+                />
               </li>
             ))}
           </ul>
