@@ -21,6 +21,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -35,7 +36,7 @@ import {
 import { TRADE_LABELS, TRADE_GROUPS } from '@bconnect/api-client'
 import { AddressField } from '@/components/AddressField'
 import { mapKakaoAddress } from '@bconnect/config/address'
-import { profileEditSchema, type ProfileEditFormData } from './schema'
+import { MAX_TRADES, profileEditSchema, type ProfileEditFormData } from './schema'
 
 const EXPERIENCE_OPTIONS = [
   { id: 'newcomer', label: '신입', years: 0 },
@@ -178,7 +179,7 @@ export default function ProfileEditPage() {
       if (watchedPrimaryTrade === tradeValue) {
         setValue('primaryTrade', updated[0] ?? undefined, { shouldValidate: true })
       }
-    } else if (currentTrades.length < 3) {
+    } else if (currentTrades.length < MAX_TRADES) {
       const updated = [...currentTrades, tradeValue]
       setValue('trades', updated, { shouldValidate: true })
       // 대표분야 미설정 시 자동 설정
@@ -234,6 +235,10 @@ export default function ProfileEditPage() {
                 <FormLabel required className="text-m-16 text-gray-900">
                   시공분야
                 </FormLabel>
+                <FormDescription>
+                  최대 {MAX_TRADES}개까지 선택 가능해요 ({(watchedTrades ?? []).length}/{MAX_TRADES}
+                  )
+                </FormDescription>
                 <FormControl>
                   <div tabIndex={-1} className="flex flex-col gap-3 outline-none">
                     {TRADE_GROUPS.map((group) => (
@@ -263,18 +268,19 @@ export default function ProfileEditPage() {
           />
 
           {/* 대표분야 */}
-          {(watchedTrades ?? []).length > 0 && (
-            <SelectField
-              control={control}
-              name="primaryTrade"
-              label="대표분야"
-              required
-              options={(watchedTrades ?? []).map((trade) => ({
-                value: trade,
-                label: TRADE_LABELS[trade as Trade],
-              }))}
-            />
-          )}
+          <SelectField
+            control={control}
+            name="primaryTrade"
+            label="대표분야"
+            required
+            fitContent
+            disabled={(watchedTrades ?? []).length === 0}
+            placeholder="선택해주세요"
+            options={(watchedTrades ?? []).map((trade) => ({
+              value: trade,
+              label: TRADE_LABELS[trade as Trade],
+            }))}
+          />
 
           {/* 경력 — 선택형(#427 슬라이더 전환 예정), 텍스트 *Field 대상 아님 */}
           <FormField

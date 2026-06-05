@@ -1,0 +1,92 @@
+name: Lighthouse CI
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  changes:
+    if: github.event.deployment_status.state == 'success' && github.event.deployment_status.environment == 'Preview'
+    runs-on: ubuntu-latest
+    outputs:
+      fe: ${{ steps.filter.outputs.fe }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha }}
+          fetch-depth: 0
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: dev
+          filters: .github/filters.yml
+
+  lighthouse:
+    needs: changes
+    if: needs.changes.outputs.fe == 'true'
+    runs-on: ubuntu-latest
+    env:
+      TARGET_URL: ${{ github.event.deployment_status.target_url }}
+      APP: ${{ contains(github.event.deployment_status.target_url, 'morton-plan') && 'plan' || 'career' }}
+    steps:
+      - name: Find PR for this deployment
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const { data } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.payload.deployment.sha,
+            })
+            return data[0]?.number ?? ''
+
+      - name: Run Lighthouse
+        id: lighthouse
+        if: steps.pr.outputs.result != ''
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: ${{ env.TARGET_URL }}
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Format score
+        id: format
+        if: steps.pr.outputs.result != ''
+        uses: actions/github-script@v7
+        env:
+          LIGHTHOUSE_MANIFEST: ${{ steps.lighthouse.outputs.manifest }}
+        with:
+          script: |
+            const results = JSON.parse(process.env.LIGHTHOUSE_MANIFEST)
+            const score = (v) => `${Math.round(v * 100)}`
+            const emoji = (v) => (v >= 0.9 ? '🟢' : v >= 0.5 ? '🟠' : '🔴')
+            const cell = (v) => `${emoji(v)} ${score(v)}`
+            const rows = results.map((r) => {
+              const s = r.summary
+              const page = new URL(r.url).pathname || '/'
+              return `| \`${page}\` | ${cell(s.performance)} | ${cell(s.accessibility)} | ${cell(s['best-practices'])} | ${cell(s.seo)} | [보기](${r.url}) |`
+            })
+            core.setOutput(
+              'comment',
+              [
+                `### ⚡ Lighthouse 보고서 — ${process.env.APP}`,
+                '',
+                '| 페이지 | 성능 | 접근성 | 권장사항 | SEO | 상세 |',
+                '| --- | --- | --- | --- | --- | --- |',
+                ...rows,
+              ].join('\n'),
+            )
+
+      - name: Comment on PR
+        if: steps.pr.outputs.result != ''
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ steps.pr.outputs.result }}
+          header: lighthouse-${{ env.APP }}
+          message: ${{ steps.format.outputs.comment }}

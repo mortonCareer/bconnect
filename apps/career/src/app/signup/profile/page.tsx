@@ -12,7 +12,6 @@ import { useSignupStore } from '@/stores/signup-store'
 import { Trade, TRADE_LABELS, useCreateProfile, useRegisterMember } from '@bconnect/api-client'
 import { mapKakaoAddress } from '@bconnect/config/address'
 import {
-  Button,
   Form,
   FormControl,
   FormError,
@@ -20,6 +19,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormSubmitButton,
   SelectField,
   Tag,
   TextField,
@@ -122,134 +122,139 @@ export default function SignupProfilePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-dvh flex-col">
       <SignupHeader step={3} onBack={() => router.back()} />
 
       {/* Content */}
       <Form {...form}>
         <form
           onSubmit={handleSubmit(onSubmit, scrollToError)}
-          className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-8 pt-3"
+          className="flex min-h-0 flex-1 flex-col"
         >
-          <h1 className="text-sb-24 text-black">
-            기술자님의 시공분야와
-            <br />
-            역할을 선택해주세요
-          </h1>
+          <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-6 pt-3">
+            <h1 className="text-sb-24 text-black">
+              기술자님의 시공분야와
+              <br />
+              역할을 선택해주세요
+            </h1>
 
-          {/* 이름 */}
-          <TextField
-            control={control}
-            name="name"
-            type="text"
-            label="이름"
-            required
-            placeholder="이름을 입력해주세요"
-          />
+            {/* 이름 */}
+            <TextField
+              control={control}
+              name="name"
+              type="text"
+              label="이름"
+              required
+              placeholder="이름을 입력해주세요"
+            />
 
-          {/* 시공분야 */}
-          <TradeSelector control={control} name="fields" max={MAX_TRADES} />
+            {/* 시공분야 */}
+            <TradeSelector control={control} name="fields" max={MAX_TRADES} />
 
-          {/* 대표분야 */}
-          {selectedFields.length > 0 && (
+            {/* 대표분야 */}
             <SelectField
               control={control}
               name="primaryField"
               label="대표분야"
               required
+              fitContent
+              disabled={selectedFields.length === 0}
+              placeholder="선택해주세요"
               options={selectedFields.map((trade) => ({
                 value: trade,
                 label: TRADE_LABELS[trade as Trade],
               }))}
             />
-          )}
 
-          {/* 경력 */}
-          <FormField
-            control={control}
-            name="experience"
-            render={({ field }) => (
-              <FormItem className="gap-3">
-                <FormLabel required>경력</FormLabel>
-                <FormControl>
-                  <div tabIndex={-1} className="flex flex-wrap gap-2 outline-none">
-                    {EXPERIENCE_OPTIONS.map((option) => (
-                      <Tag
-                        key={option.id}
-                        variant={field.value === option.id ? 'selected' : 'default'}
-                        onClick={() => field.onChange(option.id as ExperienceLevel)}
-                      >
-                        {option.label}
-                      </Tag>
-                    ))}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* 경력 */}
+            <FormField
+              control={control}
+              name="experience"
+              render={({ field }) => (
+                <FormItem className="gap-3">
+                  <FormLabel required>경력</FormLabel>
+                  <FormControl>
+                    <div tabIndex={-1} className="flex flex-wrap gap-2 outline-none">
+                      {EXPERIENCE_OPTIONS.map((option) => (
+                        <Tag
+                          key={option.id}
+                          variant={field.value === option.id ? 'selected' : 'default'}
+                          onClick={() => field.onChange(option.id as ExperienceLevel)}
+                        >
+                          {option.label}
+                        </Tag>
+                      ))}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* 소속 */}
-          <TextField
-            control={control}
-            name="affiliation"
-            type="text"
-            label="소속"
-            required
-            placeholder="소속을 입력해주세요"
-          />
+            {/* 소속 */}
+            <TextField
+              control={control}
+              name="affiliation"
+              type="text"
+              label="소속"
+              required
+              placeholder="소속을 입력해주세요"
+            />
 
-          {/* 유형 */}
-          <FormField
-            control={control}
-            name="role"
-            render={({ field }) => (
-              <FormItem className="gap-2">
-                <FormLabel required>유형</FormLabel>
-                <FormControl>
-                  <div tabIndex={-1} className="flex flex-wrap gap-2 outline-none">
-                    {SIGNUP_ROLES.map((role) => (
-                      <Tag
-                        key={role}
-                        variant={field.value === role ? 'selected' : 'default'}
-                        onClick={() => field.onChange(role)}
-                      >
-                        {ROLE_LABELS[role]}
-                      </Tag>
-                    ))}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* 유형 */}
+            <FormField
+              control={control}
+              name="role"
+              render={({ field }) => (
+                <FormItem className="gap-2">
+                  <FormLabel required>유형</FormLabel>
+                  <FormControl>
+                    <div tabIndex={-1} className="flex flex-wrap gap-2 outline-none">
+                      {SIGNUP_ROLES.map((role) => (
+                        <Tag
+                          key={role}
+                          variant={field.value === role ? 'selected' : 'default'}
+                          onClick={() => field.onChange(role)}
+                        >
+                          {ROLE_LABELS[role]}
+                        </Tag>
+                      ))}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* 주소 */}
-          <AddressField
-            control={control}
-            name="address"
-            label="주소"
-            description="정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요"
-          />
+            {/* 주소 */}
+            <AddressField
+              control={control}
+              name="address"
+              label="주소"
+              description="정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요"
+            />
 
-          {/* 한줄소개 */}
-          <TextField
-            control={control}
-            name="headline"
-            type="text"
-            label="한줄소개"
-            maxLength={20}
-            placeholder="한줄소개를 입력해주세요 (최대 20글자)"
-          />
-          <FormError error={server.formError} />
-          <Button
-            type="submit"
-            variant="primary"
-            size="full"
-            isLoading={isSubmitting || registerMemberMutation.isPending}
-          >
-            완료
-          </Button>
+            {/* 한줄소개 */}
+            <TextField
+              control={control}
+              name="headline"
+              type="text"
+              label="한줄소개"
+              maxLength={20}
+              placeholder="한줄소개를 입력해주세요 (최대 20글자)"
+            />
+            <FormError error={server.formError} />
+          </div>
+          <div className="bg-white p-4">
+            <FormSubmitButton
+              requireAllFilled={false}
+              variant="primary"
+              size="full"
+              isLoading={isSubmitting || registerMemberMutation.isPending}
+            >
+              완료
+            </FormSubmitButton>
+          </div>
         </form>
       </Form>
     </div>

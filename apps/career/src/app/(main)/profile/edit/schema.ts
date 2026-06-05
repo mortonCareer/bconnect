@@ -4,6 +4,8 @@ import type { Address } from '@bconnect/api-client'
 
 const tradeValues = Object.values(Trade) as [string, ...string[]]
 
+export const MAX_TRADES = 3
+
 export const profileEditSchema = z.object({
   // Member fields
   name: z.string().min(1, '이름을 입력해주세요').max(20, '이름은 20자 이내로 입력해주세요'),
@@ -14,7 +16,7 @@ export const profileEditSchema = z.object({
   trades: z
     .array(z.enum(tradeValues))
     .min(1, '시공분야를 1개 이상 선택해주세요')
-    .max(3, '시공분야는 최대 3개까지 선택 가능합니다'),
+    .max(MAX_TRADES, `시공분야는 최대 ${MAX_TRADES}개까지 선택 가능합니다`),
   experience: z
     .number({ error: '경력을 입력해주세요' })
     .int('정수만 입력 가능합니다')

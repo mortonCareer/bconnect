@@ -17,7 +17,7 @@ export default function SignupCompletePage() {
       {/* Content */}
       <main className="flex flex-1 flex-col items-center justify-center px-4">
         {/* Title */}
-        <h1 className="text-center text-2xl font-semibold leading-[1.4] text-[#1B1B1B]">
+        <h1 className="text-center text-sb-24 text-[#1B1B1B]">
           {userName}님,
           <br />
           회원가입이 완료되었어요

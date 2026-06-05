@@ -53,6 +53,8 @@ export interface SelectProps {
   /** "전체"(해제) 옵션 추가 — 필터용 */
   clearable?: boolean
   disabled?: boolean
+  /** 트리거 너비를 풀폭 대신 선택값 콘텐츠 크기에 맞춘다 (폼 모드). 기본 false = w-full */
+  fitContent?: boolean
   className?: string
   // ↓ 폼 래퍼(SelectField)가 aria 합성용으로 주입. 필터/제어로 직접 쓸 때는 불필요.
   invalid?: boolean
@@ -87,6 +89,7 @@ export function Select({
   triggerLabel,
   clearable,
   disabled,
+  fitContent,
   className,
   invalid,
   triggerId,
@@ -240,6 +243,7 @@ export function Select({
         FIELD_BASE_CLASSES,
         FIELD_DEFAULT_VARIANT_CLASSES,
         'flex cursor-pointer items-center justify-between gap-2',
+        fitContent && 'w-fit',
         !open && 'hover:border-gray-400',
         open && 'border-primary ring-1 ring-primary'
       )
