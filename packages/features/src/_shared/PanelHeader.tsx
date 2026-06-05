@@ -1,7 +1,8 @@
 'use client'
 
+import { ChevronLeft, ChevronsRight } from 'lucide-react'
 import Link from 'next/link'
-import { ChevronsRight, ChevronLeft } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 export interface PanelHeaderProps {
   title?: string
@@ -9,6 +10,7 @@ export interface PanelHeaderProps {
   closeLabel?: string
   backHref?: string
   backLabel?: string
+  rightSlot?: ReactNode
 }
 
 /**
@@ -22,26 +24,27 @@ export function PanelHeader({
   closeLabel = '패널 닫기',
   backHref,
   backLabel = '뒤로',
+  rightSlot,
 }: PanelHeaderProps) {
   const closeLink = (
     <Link
       href={closeHref}
       scroll={false}
       aria-label={closeLabel}
-      className="flex h-5 w-5 cursor-pointer items-center justify-center text-gray-700 hover:text-gray-900"
+      className="flex h-5 w-5 cursor-pointer items-center justify-center text-[#999] hover:text-gray-900"
     >
       <ChevronsRight className="h-5 w-5" />
     </Link>
   )
 
   return (
-    <div className="flex h-12 shrink-0 items-center border-b border-gray-200 px-4">
+    <div className="flex h-12 shrink-0 items-center px-4">
       {backHref ? (
         <Link
           href={backHref}
           scroll={false}
           aria-label={backLabel}
-          className="flex h-5 w-5 cursor-pointer items-center justify-center text-gray-700 hover:text-gray-900"
+          className="flex h-5 w-5 cursor-pointer items-center justify-center text-[#999] hover:text-gray-900"
         >
           <ChevronLeft className="h-5 w-5" />
         </Link>
@@ -49,7 +52,7 @@ export function PanelHeader({
         closeLink
       )}
       <h2 className="flex-1 truncate text-center text-sb-16 text-gray-900">{title}</h2>
-      {backHref ? closeLink : <span className="h-5 w-5" aria-hidden />}
+      {backHref ? closeLink : (rightSlot ?? <span className="h-5 w-5" aria-hidden />)}
     </div>
   )
 }
