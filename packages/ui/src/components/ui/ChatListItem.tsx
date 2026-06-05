@@ -156,7 +156,7 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
                   {lastMessage}
                 </span>
                 {isBadge && unreadCount != null && unreadCount > 0 && (
-                  <div className="flex size-5 shrink-0 items-center justify-center rounded-lg bg-[#FF4242]">
+                  <div className="flex size-5 shrink-0 items-center justify-center rounded-[8px] bg-[#FF4242]">
                     <span className="text-[12px] font-bold leading-none text-white">
                       {unreadCount}
                     </span>
