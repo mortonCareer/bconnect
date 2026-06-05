@@ -17,8 +17,8 @@ const tagVariants = cva(
   {
     variants: {
       variant: {
-        // 기본 - 회색 테두리
-        default: 'border-gray-300 bg-transparent text-gray-500 font-medium hover:border-gray-500',
+        // 기본 - 옅은 회색 outline
+        default: 'border-gray-200 bg-transparent text-gray-400 font-medium hover:border-gray-300',
         // 선택 - 파란색 배경/테두리
         selected: 'border-primary bg-secondary text-primary font-semibold',
         // 필터 삭제 - 파란색 배경/테두리 + X 아이콘
