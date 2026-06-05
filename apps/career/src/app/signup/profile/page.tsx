@@ -234,7 +234,7 @@ export default function SignupProfilePage() {
             />
             <FormError error={server.formError} />
           </div>
-          <div className="bg-white px-4 pb-8 pt-4">
+          <div className="bg-white p-4">
             <FormSubmitButton
               requireAllFilled={false}
               variant="primary"
