@@ -12,9 +12,15 @@ import {
   toE164,
   toNationalNumber,
 } from '@bconnect/config/phone'
-import { Form, FormSubmitButton, TextField, passthroughError, useServerError } from '@bconnect/ui'
+import {
+  Form,
+  FormSubmitButton,
+  Logo,
+  TextField,
+  passthroughError,
+  useServerError,
+} from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
@@ -114,7 +120,7 @@ export default function LoginPage() {
       {/* Card */}
       <div className="flex w-120 flex-col items-center gap-8 rounded-xl border border-gray-300 p-10">
         {/* Logo */}
-        <Image src="/logo.png" alt="품앗이" width={160} height={56} priority />
+        <Logo width={160} height={56} />
 
         {/* Subtitle */}
         <p className="text-r-16 text-gray-700">신뢰할 수 있는 인테리어 하도급 섭외 · 관리 서비스</p>
