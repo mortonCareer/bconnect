@@ -21,6 +21,8 @@ interface SelectFieldProps<T extends FieldValues> {
   multiple?: boolean
   placeholder?: string
   disabled?: boolean
+  /** 트리거 너비를 풀폭 대신 선택값 콘텐츠 크기에 맞춘다. 기본 false = w-full */
+  fitContent?: boolean
   className?: string
   /** 필드 라벨 (생략 시 라벨 없음) */
   label?: string
@@ -49,7 +51,10 @@ function SelectFieldControl({
 }: {
   field: RHFFieldArg
   serverError?: string
-} & Pick<SelectProps, 'options' | 'multiple' | 'placeholder' | 'disabled' | 'className'>) {
+} & Pick<
+  SelectProps,
+  'options' | 'multiple' | 'placeholder' | 'disabled' | 'fitContent' | 'className'
+>) {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
   const invalid = !!error || !!serverError
   return (
@@ -84,6 +89,7 @@ export function SelectField<T extends FieldValues>({
   multiple,
   placeholder,
   disabled,
+  fitContent,
   className,
 }: SelectFieldProps<T>) {
   return (
@@ -114,6 +120,7 @@ export function SelectField<T extends FieldValues>({
               multiple={multiple}
               placeholder={placeholder}
               disabled={disabled}
+              fitContent={fitContent}
               className={className}
             />
             <FormMessage>{serverError}</FormMessage>

@@ -132,7 +132,7 @@ export default function SignupProfilePage() {
       <Form {...form}>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-8 pt-3"
+          className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-28 pt-3"
         >
           <h1 className="text-sb-24 text-black">
             기술자님의 시공분야와
@@ -154,18 +154,19 @@ export default function SignupProfilePage() {
           <TradeSelector control={control} name="fields" max={MAX_TRADES} />
 
           {/* 대표분야 */}
-          {selectedFields.length > 0 && (
-            <SelectField
-              control={control}
-              name="primaryField"
-              label="대표분야"
-              required
-              options={selectedFields.map((trade) => ({
-                value: trade,
-                label: TRADE_LABELS[trade as Trade],
-              }))}
-            />
-          )}
+          <SelectField
+            control={control}
+            name="primaryField"
+            label="대표분야"
+            required
+            fitContent
+            disabled={selectedFields.length === 0}
+            placeholder="선택해주세요"
+            options={selectedFields.map((trade) => ({
+              value: trade,
+              label: TRADE_LABELS[trade as Trade],
+            }))}
+          />
 
           {/* 경력 */}
           <FormField
@@ -243,15 +244,17 @@ export default function SignupProfilePage() {
             placeholder="한줄소개를 입력해주세요 (최대 20글자)"
           />
           <FormError error={server.formError} />
-          <Button
-            type="submit"
-            variant="primary"
-            size="full"
-            disabled={!isValid}
-            isLoading={isSubmitting || registerMemberMutation.isPending}
-          >
-            완료
-          </Button>
+          <div className="fixed inset-x-0 bottom-0 bg-white px-4 pb-8 pt-4">
+            <Button
+              type="submit"
+              variant="primary"
+              size="full"
+              disabled={!isValid}
+              isLoading={isSubmitting || registerMemberMutation.isPending}
+            >
+              완료
+            </Button>
+          </div>
         </form>
       </Form>
     </div>
