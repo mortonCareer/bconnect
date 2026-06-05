@@ -5,10 +5,17 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { useGetChat, useGetMyMember, MessageType } from '@bconnect/api-client'
+import {
+  useGetChat,
+  useGetMyMember,
+  useGetProfile,
+  MessageType,
+  TRADE_LABELS,
+} from '@bconnect/api-client'
 import type { Message } from '@bconnect/api-client'
-import { TopBar, ChatInput } from '@bconnect/ui'
+import { TopBar, ChatInput, ChatListItem } from '@bconnect/ui'
 import MessageList from './_components/MessageList'
 
 export default function ChatRoomPage() {
@@ -19,6 +26,12 @@ export default function ChatRoomPage() {
 
   const { data: chat } = useGetChat(chatId, {
     query: { enabled: !!chatId },
+  })
+
+  const otherMember = chat?.participants?.find((p) => p.id !== currentUserId)
+  const otherMemberId = otherMember?.id
+  const { data: otherProfile } = useGetProfile(otherMemberId ?? 0, {
+    query: { enabled: otherMemberId != null },
   })
 
   const [localMessages, setLocalMessages] = useState<Message[]>([])
@@ -45,10 +58,25 @@ export default function ChatRoomPage() {
     <div className="flex min-h-0 flex-1 flex-col">
       <TopBar
         variant="default"
-        title={chat?.title ?? '채팅'}
+        title={otherMember?.name ?? chat?.title ?? '채팅'}
         showAction={false}
         onBack={() => router.back()}
       />
+
+      {otherMember && (
+        <Link href={`/profile/${otherMember.id}`} className="block shrink-0">
+          <ChatListItem
+            profileImage={otherMember.picture ?? undefined}
+            name={otherMember.name}
+            specialty={
+              otherProfile?.profile.primaryTrade
+                ? TRADE_LABELS[otherProfile.profile.primaryTrade]
+                : undefined
+            }
+            lastMessage={otherProfile?.profile.about ?? undefined}
+          />
+        </Link>
+      )}
 
       <MessageList chatId={chatId} localMessages={localMessages} />
 

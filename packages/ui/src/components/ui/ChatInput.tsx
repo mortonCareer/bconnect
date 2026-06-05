@@ -114,7 +114,7 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           disabled={!isActive}
           className={cn(
             'flex size-10 shrink-0 items-center justify-center rounded-full p-2',
-            isActive ? 'bg-primary' : 'bg-gray-500'
+            isActive ? 'bg-primary' : 'bg-[#A5A5A5]'
           )}
           aria-label="전송"
         >
