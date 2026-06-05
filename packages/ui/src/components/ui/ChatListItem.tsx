@@ -45,7 +45,7 @@ const chatListItemVariants = cva(
   {
     variants: {
       variant: {
-        default: 'h-20 border-b border-[#E5E5E5] px-4 py-5',
+        default: 'h-[90px] border-b border-[#E5E5E5] px-4',
         badge: 'pb-5',
       },
     },
@@ -73,6 +73,8 @@ export interface ChatListItemProps
   timestamp?: string
   /** 읽지않은 메시지 수 (badge variant) */
   unreadCount?: number
+  /** default variant 우측 chevron 노출 여부 */
+  showChevron?: boolean
 }
 
 const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
@@ -88,6 +90,7 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
       lastMessage,
       timestamp,
       unreadCount,
+      showChevron = true,
       ...props
     },
     ref
@@ -98,24 +101,26 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
     return (
       <div ref={ref} className={cn(chatListItemVariants({ variant }), className)} {...props}>
         {/* 왼쪽: 프로필 + 정보 */}
-        <div className="flex min-w-0 flex-1 items-center gap-2.5">
+        <div className={cn('flex min-w-0 flex-1 items-center', isBadge ? 'gap-2.5' : 'gap-4')}>
           {/* 프로필 이미지 */}
-          <div
-            className={cn(
-              'shrink-0 overflow-hidden rounded-full bg-[#F4F4F4]',
-              isBadge ? 'size-[50px]' : 'size-10'
-            )}
-          >
+          <div className="size-[50px] shrink-0 overflow-hidden rounded-full bg-[#F4F4F4]">
             {profileImage && (
               <img src={profileImage} alt={name} className="size-full object-cover" />
             )}
           </div>
 
           {/* 텍스트 정보 */}
-          <div className="flex min-w-0 flex-1 flex-col">
+          <div className={cn('flex min-w-0 flex-1 flex-col', !isBadge && 'gap-1')}>
             {/* 이름 + 태그 */}
             <div className="flex items-center gap-2.5">
-              <span className="shrink-0 text-sb-16 text-[#1B1B1B]">{name}</span>
+              <span
+                className={cn(
+                  'shrink-0 text-[#1B1B1B]',
+                  isBadge ? 'text-sb-16' : 'text-sb-14 leading-[1.6]!'
+                )}
+              >
+                {name}
+              </span>
               {tags.length > 0 && (
                 <div
                   className={cn(
@@ -137,8 +142,8 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
             {lastMessage && (
               <span
                 className={cn(
-                  'truncate',
-                  isBadge ? 'text-m-14 text-[#1B1B1B]' : 'text-m-12 text-[#A5A5A5]'
+                  'text-[#1B1B1B]',
+                  isBadge ? 'truncate text-m-14' : 'line-clamp-2 text-r-12'
                 )}
               >
                 {lastMessage}
@@ -157,9 +162,9 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
               </div>
             )}
           </div>
-        ) : (
-          <ChevronIcon direction="right" className="size-4 text-[#A5A5A5]" />
-        )}
+        ) : showChevron ? (
+          <ChevronIcon direction="right" className="size-4 shrink-0 text-[#A5A5A5]" />
+        ) : null}
       </div>
     )
   }
