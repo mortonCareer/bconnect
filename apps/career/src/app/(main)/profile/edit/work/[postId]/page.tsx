@@ -15,6 +15,7 @@ import {
   Input,
   TextareaField,
   TopBar,
+  useScrollToError,
 } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
@@ -70,10 +71,11 @@ export default function EditWorkPage() {
     },
   })
 
+  const scrollToError = useScrollToError()
   const onSave = form.handleSubmit(() => {
     // TODO: Post + Task 수정 API 연동 (#197)
     router.back()
-  })
+  }, scrollToError)
 
   const descriptionMeta = fieldMeta.get(workSchema.shape.description)
 

@@ -22,6 +22,7 @@ import {
   Tag,
   TextField,
   passthroughError,
+  useScrollToError,
   useServerError,
 } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -57,7 +58,7 @@ export default function SignupProfilePage() {
     control,
     handleSubmit,
     setValue,
-    formState: { isSubmitting, isValid },
+    formState: { isSubmitting },
   } = form
 
   const server = useServerError(
@@ -81,6 +82,8 @@ export default function SignupProfilePage() {
       setValue('primaryField', watchedFields[0])
     }
   }, [watchedFields, watchedPrimaryField, setValue])
+
+  const scrollToError = useScrollToError()
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
@@ -132,7 +135,7 @@ export default function SignupProfilePage() {
       {/* Content */}
       <Form {...form}>
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(onSubmit, scrollToError)}
           className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-8 pt-3"
         >
           <h1 className="text-sb-24 text-black">
@@ -252,7 +255,6 @@ export default function SignupProfilePage() {
             type="submit"
             variant="primary"
             size="full"
-            disabled={!isValid}
             isLoading={isSubmitting || registerMemberMutation.isPending}
           >
             완료

@@ -30,6 +30,7 @@ import {
   TextareaField,
   TextField,
   TopBar,
+  useScrollToError,
 } from '@bconnect/ui'
 import { TRADE_LABELS, TRADE_GROUPS } from '@bconnect/api-client'
 import { profileEditSchema, type ProfileEditFormData } from './schema'
@@ -114,6 +115,8 @@ export default function ProfileEditPage() {
     updateMemberMutation.isPending ||
     updateProfileMutation.isPending ||
     updateAboutMutation.isPending
+
+  const scrollToError = useScrollToError()
 
   const onSubmit = async (data: ProfileEditFormData) => {
     try {
@@ -213,7 +216,7 @@ export default function ProfileEditPage() {
         variant="default"
         title="프로필 수정"
         actionLabel={isSaving ? '저장 중...' : '완료'}
-        onAction={handleSubmit(onSubmit)}
+        onAction={handleSubmit(onSubmit, scrollToError)}
         onBack={() => router.back()}
       />
 
