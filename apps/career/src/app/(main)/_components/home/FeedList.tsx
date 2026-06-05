@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useCallback } from 'react'
-import Link from 'next/link'
 import { Feed } from '@bconnect/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { useFilterParams } from '@/hooks/useFilterParams'
@@ -73,13 +72,7 @@ export function FeedList() {
   return (
     <div className="flex flex-col gap-4 px-4 py-2">
       {feedItems.map((item) => (
-        <Feed
-          key={item.postId}
-          profile={item.profile}
-          content={item.content}
-          profileHref={item.memberId != null ? `/profile/${item.memberId}` : undefined}
-          LinkComponent={Link}
-        />
+        <Feed key={item.postId} content={item.content} />
       ))}
 
       {/* Infinite scroll sentinel */}

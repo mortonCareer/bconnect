@@ -64,15 +64,6 @@ export default function FeedDetailPage() {
                 <p className="mb-3 text-sm font-medium text-gray-500">Collapsed - 접힌 상태</p>
                 <div className="mx-auto max-w-md">
                   <Feed
-                    profile={{
-                      image:
-                        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop',
-                      name: '이송목',
-                      location: '경기도',
-                      jobType: '준기공',
-                      specialty: '도배',
-                      bio: '안녕하세요, 도배 준기공 이송목입니다.',
-                    }}
                     content={{
                       image:
                         'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop',
@@ -92,15 +83,6 @@ export default function FeedDetailPage() {
                 <p className="mb-3 text-sm font-medium text-gray-500">Expanded - 펼쳐진 상태</p>
                 <div className="mx-auto max-w-md">
                   <Feed
-                    profile={{
-                      image:
-                        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop',
-                      name: '이송목',
-                      location: '경기도',
-                      jobType: '준기공',
-                      specialty: '도배',
-                      bio: '안녕하세요, 도배 준기공 이송목입니다.',
-                    }}
                     content={{
                       image:
                         'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop',
@@ -122,15 +104,6 @@ export default function FeedDetailPage() {
                 </p>
                 <div className="mx-auto max-w-md">
                   <Feed
-                    profile={{
-                      image:
-                        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop',
-                      name: '김철수',
-                      location: '서울',
-                      jobType: '기능공',
-                      specialty: '타일',
-                      bio: '타일 시공 전문가입니다.',
-                    }}
                     content={{
                       image:
                         'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop',
@@ -163,18 +136,6 @@ export default function FeedDetailPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  <tr>
-                    <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">profile</code>
-                    </td>
-                    <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">ProfileInfo</code>
-                    </td>
-                    <td className="p-3">-</td>
-                    <td className="p-3">
-                      프로필 정보 (image, name, location, jobType, specialty, bio)
-                    </td>
-                  </tr>
                   <tr>
                     <td className="p-3">
                       <code className="rounded bg-gray-100 px-1">content</code>
@@ -211,6 +172,16 @@ export default function FeedDetailPage() {
                     <td className="p-3">-</td>
                     <td className="p-3">더보기/접기 버튼 클릭 핸들러</td>
                   </tr>
+                  <tr>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">onMore</code>
+                    </td>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">() =&gt; void</code>
+                    </td>
+                    <td className="p-3">-</td>
+                    <td className="p-3">케밥(⋮) 메뉴 클릭 핸들러</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -224,14 +195,6 @@ export default function FeedDetailPage() {
 
 // Basic usage
 <Feed
-  profile={{
-    image: '/profile.jpg',
-    name: '이송목',
-    location: '경기도',
-    jobType: '준기공',
-    specialty: '도배',
-    bio: '안녕하세요, 도배 준기공 이송목입니다.',
-  }}
   content={{
     image: '/work.jpg',
     company: '서정 건축',
@@ -239,11 +202,11 @@ export default function FeedDetailPage() {
     timestamp: '3일 전',
     description: '골프장 전원주택 도배 시공을 진행하였습니다...',
   }}
+  onMore={() => openMenu()}
 />
 
 // With toggle handler
 <Feed
-  profile={{ ... }}
   content={{ ... }}
   onToggle={(expanded) => {
     console.log('Expanded:', expanded)
@@ -252,7 +215,6 @@ export default function FeedDetailPage() {
 
 // Initially expanded
 <Feed
-  profile={{ ... }}
   content={{ ... }}
   defaultExpanded={true}
 />`}
