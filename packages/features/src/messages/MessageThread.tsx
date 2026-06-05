@@ -73,7 +73,6 @@ export function MessageThread({
         getChatMessages(chatId, pageParam ? { cursor: pageParam as string } : undefined),
       initialPageParam: undefined as string | undefined,
       getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.nextCursor : undefined),
-      refetchInterval: 5000,
     })
 
   // 서버 페이지는 최신순(페이지·페이지내 모두) → 시간순으로 이중 reverse
