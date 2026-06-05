@@ -1,3 +1,4 @@
+import type { Address } from '@bconnect/api-client'
 import { Role } from '@bconnect/api-client'
 import { z } from 'zod'
 
@@ -15,7 +16,7 @@ export const profileSchema = z.object({
   experience: experienceLevelSchema,
   affiliation: z.string().min(1, '소속을 입력해주세요.'),
   role: z.enum(Role, { error: '유형을 선택해주세요.' }),
-  address: z.string().optional(),
+  address: z.custom<Address>().nullish(),
   headline: z.string().max(20, '한줄소개는 최대 20글자까지 입력 가능합니다.').optional(),
 })
 
