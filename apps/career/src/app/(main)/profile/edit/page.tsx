@@ -5,7 +5,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useForm, useWatch, Controller } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   useQueryClient,
@@ -18,7 +18,19 @@ import {
   getGetMyProfileQueryKey,
   Trade,
 } from '@bconnect/api-client'
-import { Form, SelectField, Tag, TextareaField, TextField, TopBar } from '@bconnect/ui'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  SelectField,
+  Tag,
+  TextareaField,
+  TextField,
+  TopBar,
+} from '@bconnect/ui'
 import { TRADE_LABELS, TRADE_GROUPS } from '@bconnect/api-client'
 import { profileEditSchema, type ProfileEditFormData } from './schema'
 
@@ -74,7 +86,7 @@ export default function ProfileEditPage() {
     control,
     setValue,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = form
 
   // 데이터 로드 후 폼 초기값 설정
@@ -217,39 +229,41 @@ export default function ProfileEditPage() {
           />
 
           {/* 시공분야 */}
-          <div className="flex flex-col gap-3">
-            <label className="text-m-16 text-gray-900">
-              시공분야 <span className="text-destructive">*</span>
-            </label>
-            <Controller
-              name="trades"
-              control={control}
-              render={({ field }) => (
-                <div className="flex flex-col gap-3">
-                  {TRADE_GROUPS.map((group) => (
-                    <div key={group.label} className="flex flex-col gap-3">
-                      <p className="text-m-14 text-gray-700">{group.label}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {group.trades.map((tradeValue) => {
-                          const isSelected = field.value?.includes(tradeValue) ?? false
-                          return (
-                            <Tag
-                              key={tradeValue}
-                              variant={isSelected ? 'selected' : 'default'}
-                              onClick={() => toggleTrade(tradeValue)}
-                            >
-                              {TRADE_LABELS[tradeValue]}
-                            </Tag>
-                          )
-                        })}
+          <FormField
+            control={control}
+            name="trades"
+            render={({ field }) => (
+              <FormItem className="gap-3">
+                <FormLabel required className="text-m-16 text-gray-900">
+                  시공분야
+                </FormLabel>
+                <FormControl>
+                  <div tabIndex={-1} className="flex flex-col gap-3 outline-none">
+                    {TRADE_GROUPS.map((group) => (
+                      <div key={group.label} className="flex flex-col gap-3">
+                        <p className="text-m-14 text-gray-700">{group.label}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {group.trades.map((tradeValue) => {
+                            const isSelected = field.value?.includes(tradeValue) ?? false
+                            return (
+                              <Tag
+                                key={tradeValue}
+                                variant={isSelected ? 'selected' : 'default'}
+                                onClick={() => toggleTrade(tradeValue)}
+                              >
+                                {TRADE_LABELS[tradeValue]}
+                              </Tag>
+                            )
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            />
-            {errors.trades && <p className="text-sm text-destructive">{errors.trades.message}</p>}
-          </div>
+                    ))}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* 대표분야 */}
           {(watchedTrades ?? []).length > 0 && (
@@ -266,36 +280,39 @@ export default function ProfileEditPage() {
           )}
 
           {/* 경력 — 선택형(#427 슬라이더 전환 예정), 텍스트 *Field 대상 아님 */}
-          <div className="flex flex-col gap-2">
-            <label className="text-m-16 text-gray-900">
-              경력 <span className="text-destructive">*</span>
-            </label>
-            <Controller
-              name="experience"
-              control={control}
-              render={({ field }) => (
-                <div className="flex flex-wrap items-center gap-2">
-                  {EXPERIENCE_OPTIONS.map((option) => {
-                    const isSelected = yearsToLevel(field.value) === option.id
-                    return (
-                      <button
-                        key={option.id}
-                        type="button"
-                        onClick={() => field.onChange(levelToYears(option.id))}
-                        className={`flex h-10 items-center justify-center rounded-lg border px-3.5 py-[3px] text-sm leading-[1.6] transition-colors ${
-                          isSelected
-                            ? 'border-primary bg-secondary font-semibold text-primary'
-                            : 'border-gray-300 font-medium text-gray-500'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            />
-          </div>
+          <FormField
+            control={control}
+            name="experience"
+            render={({ field }) => (
+              <FormItem className="gap-2">
+                <FormLabel required className="text-m-16 text-gray-900">
+                  경력
+                </FormLabel>
+                <FormControl>
+                  <div tabIndex={-1} className="flex flex-wrap items-center gap-2 outline-none">
+                    {EXPERIENCE_OPTIONS.map((option) => {
+                      const isSelected = yearsToLevel(field.value) === option.id
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          onClick={() => field.onChange(levelToYears(option.id))}
+                          className={`flex h-10 items-center justify-center rounded-lg border px-3.5 py-[3px] text-sm leading-[1.6] transition-colors ${
+                            isSelected
+                              ? 'border-primary bg-secondary font-semibold text-primary'
+                              : 'border-gray-300 font-medium text-gray-500'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* 한줄소개 */}
           <TextField

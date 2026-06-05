@@ -12,6 +12,7 @@ import { Trade, TRADE_LABELS, useCreateProfile, useRegisterMember } from '@bconn
 import {
   Button,
   Form,
+  FormControl,
   FormError,
   FormField,
   FormItem,
@@ -174,17 +175,19 @@ export default function SignupProfilePage() {
             render={({ field }) => (
               <FormItem className="gap-3">
                 <FormLabel required>경력</FormLabel>
-                <div className="flex flex-wrap gap-2">
-                  {EXPERIENCE_OPTIONS.map((option) => (
-                    <Tag
-                      key={option.id}
-                      variant={field.value === option.id ? 'selected' : 'default'}
-                      onClick={() => field.onChange(option.id as ExperienceLevel)}
-                    >
-                      {option.label}
-                    </Tag>
-                  ))}
-                </div>
+                <FormControl>
+                  <div tabIndex={-1} className="flex flex-wrap gap-2 outline-none">
+                    {EXPERIENCE_OPTIONS.map((option) => (
+                      <Tag
+                        key={option.id}
+                        variant={field.value === option.id ? 'selected' : 'default'}
+                        onClick={() => field.onChange(option.id as ExperienceLevel)}
+                      >
+                        {option.label}
+                      </Tag>
+                    ))}
+                  </div>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -207,17 +210,19 @@ export default function SignupProfilePage() {
             render={({ field }) => (
               <FormItem className="gap-2">
                 <FormLabel required>유형</FormLabel>
-                <div className="flex flex-wrap gap-2">
-                  {SIGNUP_ROLES.map((role) => (
-                    <Tag
-                      key={role}
-                      variant={field.value === role ? 'selected' : 'default'}
-                      onClick={() => field.onChange(role)}
-                    >
-                      {ROLE_LABELS[role]}
-                    </Tag>
-                  ))}
-                </div>
+                <FormControl>
+                  <div tabIndex={-1} className="flex flex-wrap gap-2 outline-none">
+                    {SIGNUP_ROLES.map((role) => (
+                      <Tag
+                        key={role}
+                        variant={field.value === role ? 'selected' : 'default'}
+                        onClick={() => field.onChange(role)}
+                      >
+                        {ROLE_LABELS[role]}
+                      </Tag>
+                    ))}
+                  </div>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
