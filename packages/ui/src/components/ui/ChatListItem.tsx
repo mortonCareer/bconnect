@@ -99,9 +99,22 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
     const tags = [location, jobType, specialty].filter(Boolean)
 
     return (
-      <div ref={ref} className={cn(chatListItemVariants({ variant }), className)} {...props}>
+      <div
+        ref={ref}
+        className={cn(
+          chatListItemVariants({ variant }),
+          isBadge ? 'items-start' : 'items-center',
+          className
+        )}
+        {...props}
+      >
         {/* 왼쪽: 프로필 + 정보 */}
-        <div className={cn('flex min-w-0 flex-1 items-center', isBadge ? 'gap-2.5' : 'gap-4')}>
+        <div
+          className={cn(
+            'flex min-w-0 flex-1',
+            isBadge ? 'items-start gap-2.5' : 'items-center gap-4'
+          )}
+        >
           {/* 프로필 이미지 */}
           <div className="size-[50px] shrink-0 overflow-hidden rounded-full bg-[#F4F4F4]">
             {profileImage && (
@@ -111,48 +124,53 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
 
           {/* 텍스트 정보 */}
           <div className={cn('flex min-w-0 flex-1 flex-col', !isBadge && 'gap-1')}>
-            {/* 이름 + 태그 */}
-            <div className="flex items-center gap-2.5">
-              <span className="text-sb-14 leading-[1.6]! shrink-0 text-[#1B1B1B]">{name}</span>
-              {tags.length > 0 && (
-                <div className="flex items-center gap-2 text-m-12 text-[#A5A5A5]">
-                  {tags.map((tag, index) => (
-                    <React.Fragment key={index}>
-                      {index > 0 && <span className="text-[#A5A5A5]">|</span>}
-                      <span>{tag}</span>
-                    </React.Fragment>
-                  ))}
-                </div>
+            {/* 이름 + 태그 (badge: 우측 시간) */}
+            <div className="flex items-center justify-between gap-2.5">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span className="text-sb-14 leading-[1.6]! shrink-0 text-[#1B1B1B]">{name}</span>
+                {tags.length > 0 && (
+                  <div className="flex items-center gap-2 text-m-12 text-[#A5A5A5]">
+                    {tags.map((tag, index) => (
+                      <React.Fragment key={index}>
+                        {index > 0 && <span className="text-[#A5A5A5]">|</span>}
+                        <span>{tag}</span>
+                      </React.Fragment>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {isBadge && timestamp && (
+                <span className="shrink-0 text-m-12 text-[#A5A5A5]">{timestamp}</span>
               )}
             </div>
 
-            {/* 메시지 미리보기 */}
+            {/* 미리보기 (badge: 우측 안읽음 수) */}
             {lastMessage && (
-              <span
-                className={cn(
-                  'text-[#1B1B1B]',
-                  isBadge ? 'truncate text-m-14' : 'line-clamp-2 text-r-12'
+              <div className="flex items-start justify-between gap-2">
+                <span
+                  className={cn(
+                    'min-w-0 flex-1 text-[#1B1B1B]',
+                    isBadge ? 'truncate text-m-14' : 'line-clamp-2 text-r-12'
+                  )}
+                >
+                  {lastMessage}
+                </span>
+                {isBadge && unreadCount != null && unreadCount > 0 && (
+                  <div className="flex size-5 shrink-0 items-center justify-center rounded-lg bg-[#FF4242]">
+                    <span className="text-[12px] font-bold leading-none text-white">
+                      {unreadCount}
+                    </span>
+                  </div>
                 )}
-              >
-                {lastMessage}
-              </span>
+              </div>
             )}
           </div>
         </div>
 
-        {/* 오른쪽 영역 */}
-        {isBadge ? (
-          <div className="flex shrink-0 flex-col items-end justify-center gap-2">
-            {timestamp && <span className="text-m-12 text-[#A5A5A5]">{timestamp}</span>}
-            {unreadCount != null && unreadCount > 0 && (
-              <div className="flex size-5 items-center justify-center rounded-lg bg-[#FF4242]">
-                <span className="text-[12px] font-bold leading-none text-white">{unreadCount}</span>
-              </div>
-            )}
-          </div>
-        ) : showChevron ? (
+        {/* default: chevron */}
+        {!isBadge && showChevron && (
           <ChevronIcon direction="right" className="size-4 shrink-0 text-[#A5A5A5]" />
-        ) : null}
+        )}
       </div>
     )
   }
