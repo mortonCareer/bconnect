@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import '@bconnect/ui/styles'
+import { SERVICE_NAME, SITE_URL } from '@bconnect/config/site'
 import { Providers } from './providers'
 
 const pretendard = localFont({
@@ -18,10 +19,30 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
+const description =
+  '기술자(조공, 준조공, 기공)가 작업물을 업로드 하고 일감을 받을 수 있는 서비스입니다.'
+
 export const metadata: Metadata = {
-  title: 'Career',
-  description:
-    '기술자(조공, 준조공, 기공)가 작업물을 업로드 하고 일감을 받을 수 있는 서비스입니다.',
+  metadataBase: new URL(SITE_URL.career),
+  title: {
+    default: SERVICE_NAME,
+    template: `%s | ${SERVICE_NAME}`,
+  },
+  description,
+  applicationName: SERVICE_NAME,
+  openGraph: {
+    type: 'website',
+    siteName: SERVICE_NAME,
+    title: SERVICE_NAME,
+    description,
+    url: '/',
+    locale: 'ko_KR',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SERVICE_NAME,
+    description,
+  },
 }
 
 export default function RootLayout({

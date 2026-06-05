@@ -14,6 +14,7 @@
     "./format": "./format/index.ts",
     "./phone": "./phone/index.ts",
     "./sentry": "./sentry/index.ts",
+    "./site": "./site/index.ts",
     "./username": "./username/index.ts"
   },
   "devDependencies": {
