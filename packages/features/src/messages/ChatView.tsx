@@ -1,9 +1,16 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { useGetChat, useGetMyMember, MessageType } from '@bconnect/api-client'
+import Link from 'next/link'
+import {
+  useGetChat,
+  useGetMyMember,
+  useGetProfile,
+  MessageType,
+  TRADE_LABELS,
+} from '@bconnect/api-client'
 import type { Message } from '@bconnect/api-client'
-import { ChatInput, Skeleton } from '@bconnect/ui'
+import { ChatInput, ChatListItem, Skeleton } from '@bconnect/ui'
 import { PanelShell } from '../_shared/PanelShell'
 import { MessageThread } from './MessageThread'
 
@@ -13,15 +20,21 @@ export interface ChatViewProps {
   onClose: () => void
   /** 목록 패널 href — 헤더 뒤로가기 */
   backHref: string
+  /** 상대 프로필 패널 href 빌더 — 앱이 주입 (plan: panelHref('/profile/'+id)) */
+  profileHref?: (memberId: number) => string
 }
 
-export function ChatView({ chatId, closeHref, onClose, backHref }: ChatViewProps) {
+export function ChatView({ chatId, closeHref, onClose, backHref, profileHref }: ChatViewProps) {
   const enabled = Number.isFinite(chatId) && chatId > 0
   const currentUserId = useGetMyMember().data?.id
   const { data: chat, isLoading, isError } = useGetChat(chatId, { query: { enabled } })
-  const title = chat
-    ? (chat.participants.find((p) => p.id !== currentUserId)?.name ?? chat.title ?? '채팅')
-    : '채팅'
+  const other = chat?.participants.find((p) => p.id !== currentUserId)
+  const otherId = other?.id
+  const title = other?.name ?? chat?.title ?? '채팅'
+  const { data: otherProfile } = useGetProfile(otherId ?? 0, {
+    query: { enabled: otherId != null },
+  })
+  const profile = otherProfile?.profile
 
   const [localMessages, setLocalMessages] = useState<Message[]>([])
   const [message, setMessage] = useState('')
@@ -45,6 +58,19 @@ export function ChatView({ chatId, closeHref, onClose, backHref }: ChatViewProps
     setMessage('')
   }, [chatId, currentUserId, message])
 
+  const profilePanelHref = profileHref && otherId != null ? profileHref(otherId) : undefined
+  const headerItem = (
+    <ChatListItem
+      variant="default"
+      showChevron={profilePanelHref != null}
+      profileImage={other?.picture ?? undefined}
+      name={title}
+      location={profile?.address?.city}
+      specialty={profile?.primaryTrade ? TRADE_LABELS[profile.primaryTrade] : undefined}
+      lastMessage={profile?.about ?? profile?.headline ?? undefined}
+    />
+  )
+
   return (
     <PanelShell
       title={title}
@@ -66,6 +92,13 @@ export function ChatView({ chatId, closeHref, onClose, backHref }: ChatViewProps
         </div>
       ) : (
         <>
+          {profilePanelHref ? (
+            <Link href={profilePanelHref} scroll={false} className="block shrink-0">
+              {headerItem}
+            </Link>
+          ) : (
+            <div className="shrink-0">{headerItem}</div>
+          )}
           <MessageThread
             chatId={chatId}
             currentUserId={currentUserId}

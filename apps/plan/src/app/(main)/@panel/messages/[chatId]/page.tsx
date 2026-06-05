@@ -19,6 +19,7 @@ export default function ChatPanelPage() {
         closeHref={closeHref}
         onClose={close}
         backHref={panelHref('/messages')}
+        profileHref={(id) => panelHref(`/profile/${id}`)}
       />
     </PanelAside>
   )

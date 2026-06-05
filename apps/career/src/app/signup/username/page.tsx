@@ -76,7 +76,9 @@ export default function SignupUsernamePage() {
           </div>
 
           {/* Submit Button */}
-          <FormSubmitButton isLoading={isSubmitting}>다음으로</FormSubmitButton>
+          <FormSubmitButton size="full" isLoading={isSubmitting}>
+            다음으로
+          </FormSubmitButton>
         </form>
       </Form>
     </div>

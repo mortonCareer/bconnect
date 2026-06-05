@@ -3,12 +3,14 @@
  */
 'use client'
 
+import { AddressField } from '@/components/AddressField'
 import type { ExperienceLevel } from '@/lib/experience'
 import { EXPERIENCE_OPTIONS, EXPERIENCE_TO_YEARS } from '@/lib/experience'
 import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import { Trade, TRADE_LABELS, useCreateProfile, useRegisterMember } from '@bconnect/api-client'
+import { mapKakaoAddress } from '@bconnect/config/address'
 import {
   Form,
   FormError,
@@ -48,7 +50,7 @@ export default function SignupProfilePage() {
       experience: formData.experience || undefined,
       affiliation: formData.affiliation || '',
       role: undefined,
-      address: '',
+      address: undefined,
       headline: '',
     },
   })
@@ -104,16 +106,7 @@ export default function SignupProfilePage() {
           trades: data.fields as Trade[],
           experience: EXPERIENCE_TO_YEARS[data.experience],
           headline: data.headline || undefined,
-          // TODO #280 — 카카오 우편번호 도입 전 임시 mock 값. zipcode/state/lat/lng 0 으로
-          // address 는 BE-required 라 undefined 불가 — 비어있으면 empty city 로 (BE validation 위임)
-          address: {
-            zipcode: '',
-            city: data.address || '',
-            state: '',
-            street: data.address || '',
-            latitude: 0,
-            longitude: 0,
-          },
+          address: data.address ?? mapKakaoAddress(null),
         },
       })
 
@@ -223,13 +216,11 @@ export default function SignupProfilePage() {
             />
 
             {/* 주소 */}
-            <TextField
+            <AddressField
               control={control}
               name="address"
-              type="text"
               label="주소"
               description="정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요"
-              placeholder="주소를 입력해주세요"
             />
 
             {/* 한줄소개 */}

@@ -3,10 +3,21 @@
  */
 'use client'
 
-import { cn, Form, FormError, ImageField, Input, Label, TextareaField, TopBar } from '@bconnect/ui'
+import {
+  AddressSearchSheet,
+  cn,
+  Form,
+  FormError,
+  ImageField,
+  Input,
+  Label,
+  TextareaField,
+  TopBar,
+} from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
+import { useState } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 const fieldMeta = z.registry<{ label: string; placeholder: string }>()
@@ -24,6 +35,7 @@ const workSchema = z.object({
     .string()
     .min(1, '현장주소를 입력해주세요.')
     .register(fieldMeta, { label: '현장주소', placeholder: '현장주소를 입력해주세요' }),
+  detail: z.string().optional(),
   trade: z
     .string()
     .min(1, '시공분야를 입력해주세요.')
@@ -36,7 +48,7 @@ const workSchema = z.object({
 })
 type WorkFormValues = z.infer<typeof workSchema>
 
-const META_FIELD_NAMES = ['company', 'period', 'address', 'trade'] as const
+const META_FIELD_NAMES = ['company', 'period', 'trade'] as const
 
 export default function EditWorkPage() {
   const router = useRouter()
@@ -45,6 +57,8 @@ export default function EditWorkPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _postId = Number(params.postId)
 
+  const [addressOpen, setAddressOpen] = useState(false)
+
   const form = useForm<WorkFormValues>({
     resolver: zodResolver(workSchema),
     mode: 'onTouched',
@@ -52,6 +66,7 @@ export default function EditWorkPage() {
       company: '',
       period: '',
       address: '',
+      detail: '',
       trade: '',
       description: '',
       images: null,
@@ -64,6 +79,7 @@ export default function EditWorkPage() {
   })
 
   const descriptionMeta = fieldMeta.get(workSchema.shape.description)
+  const address = useWatch({ control: form.control, name: 'address' })
 
   return (
     <div className="flex flex-col">
@@ -106,6 +122,47 @@ export default function EditWorkPage() {
                 </div>
               )
             })}
+          </div>
+
+          {/* 현장주소 */}
+          <div className="flex items-start gap-2 px-4 pt-3">
+            <Label htmlFor="work-address" className="w-20 shrink-0 text-gray-900">
+              현장주소
+            </Label>
+            <div className="flex flex-1 flex-col gap-1">
+              <button
+                id="work-address"
+                type="button"
+                onClick={() => setAddressOpen(true)}
+                className="cursor-pointer text-left text-sm text-gray-700"
+              >
+                {address || <span className="text-gray-400">현장주소를 검색해주세요</span>}
+              </button>
+              <FormError error={form.formState.errors.address?.message} />
+            </div>
+          </div>
+          <AddressSearchSheet
+            open={addressOpen}
+            onOpenChange={setAddressOpen}
+            onComplete={(result) =>
+              form.setValue('address', result.roadAddress, { shouldValidate: true })
+            }
+          />
+
+          {/* 상세주소 */}
+          <div className="flex items-start gap-2 px-4 pt-3">
+            <Label htmlFor="work-detail" className="w-20 shrink-0 text-gray-900">
+              상세주소
+            </Label>
+            <div className="flex flex-1 flex-col gap-1">
+              <Input
+                id="work-detail"
+                {...form.register('detail')}
+                placeholder="상세주소를 입력해주세요 (동/호 등)"
+                className="h-auto rounded-none border-0 p-0 text-sm text-gray-700 focus:ring-0"
+              />
+              <FormError error={form.formState.errors.detail?.message} />
+            </div>
           </div>
 
           {/* 설명 */}
