@@ -12,12 +12,12 @@ public class CoworkerRequestFinder {
 
     private final CoworkerRequestRepository requestRepository;
 
-    public List<CoworkerRequest> findReceived(Long profileId) {
+    public List<CoworkerRequest> findAllReceived(Long profileId) {
         return requestRepository.findByToId(profileId)
                 .stream().map(CoworkerRequest::of).toList();
     }
 
-    public List<CoworkerRequest> findSent(Long profileId) {
+    public List<CoworkerRequest> findAllSent(Long profileId) {
         return requestRepository.findByFromId(profileId)
                 .stream().map(CoworkerRequest::of).toList();
     }

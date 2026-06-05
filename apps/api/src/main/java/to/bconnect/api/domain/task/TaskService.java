@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.api.controller.v1.request.CreateTaskRequest;
 import to.bconnect.api.api.controller.v1.request.UpdateTaskRequest;
+import to.bconnect.api.domain.coworker.CoworkerFinder;
 import to.bconnect.api.domain.profile.Profile;
 import to.bconnect.api.storage.domain.task.TaskEntity;
 import to.bconnect.api.storage.domain.task.TaskRepository;
@@ -22,16 +23,20 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final TaskFinder taskFinder;
     private final ProfileFinder profileFinder;
+    private final CoworkerFinder coworkerFinder;
 
     @Transactional(readOnly = true)
-    public List<Task> getAll(User user) {
+    public List<Task> list(User user) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        return taskFinder.findByProfileId(profile.id());
+        return taskFinder.findAllByProfileId(profile.id());
     }
 
     @Transactional(readOnly = true)
-    public Task get(Long taskId) {
-        return taskFinder.find(taskId);
+    public List<Task> listByCoworker(User user, Long targetId) {
+        Profile profile = profileFinder.findByMemberId(user.id());
+        if (!coworkerFinder.isCoworker(profile.id(), targetId))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        return taskFinder.findAllByProfileId(targetId);
     }
 
     @Transactional
@@ -75,11 +80,10 @@ public class TaskService {
     @Transactional
     public void delete(User user, Long taskId) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        TaskEntity found = taskRepository.findById(taskId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-
-        if (!found.getProfileId().equals(profile.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-        taskRepository.delete(found);
+        taskRepository.findById(taskId).ifPresent(found -> {
+            if (!found.getProfileId().equals(profile.id()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+            taskRepository.delete(found);
+        });
     }
 }

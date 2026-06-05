@@ -1,9 +1,12 @@
 import { getBconnectAPIMock } from '@bconnect/api-client'
 import { delay, http } from 'msw'
 import { authOverrides } from './overrides/auth'
+import { chatsOverrides } from './overrides/chats'
 import { devicesOverrides } from './overrides/devices'
 import { membersOverrides } from './overrides/members'
 import { notificationsOverrides } from './overrides/notifications'
+import { profilesOverrides } from './overrides/profiles'
+import { recommendationsOverrides } from './overrides/recommendations'
 
 // API mock(`/api/*`) 응답만 2초 지연 — 실 네트워크 지연 모사로 로딩 UI 검증. mock 응답이
 // 즉시라 로딩 UI 가 안 보이는 문제 해소. RSC 네비게이션(`?_rsc`)·청크·외부 이미지엔 적용
@@ -26,8 +29,11 @@ const globalDelay = http.all('*', async ({ request }) => {
 export const handlers = [
   globalDelay,
   ...authOverrides,
+  ...chatsOverrides,
   ...devicesOverrides,
   ...membersOverrides,
   ...notificationsOverrides,
+  ...profilesOverrides,
+  ...recommendationsOverrides,
   ...getBconnectAPIMock(),
 ]

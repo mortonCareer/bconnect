@@ -23,13 +23,13 @@ public class CredentialController {
     private final CredentialService credentialService;
 
     @GetMapping("/types")
-    public ApiResponse<CredentialType[]> listTypes() {
-        return ApiResponse.success(CredentialType.values());
+    public ApiResponse<List<CredentialType>> listTypes() {
+        return ApiResponse.success(List.of(CredentialType.values()));
     }
 
     @GetMapping
     public ApiResponse<List<CredentialResponse>> list(@RequestParam Long profileId) {
-        List<CredentialResponse> credentials = credentialService.getAll(profileId).stream()
+        List<CredentialResponse> credentials = credentialService.list(profileId).stream()
                 .map(CredentialResponse::of)
                 .toList();
         return ApiResponse.success(credentials);

@@ -22,13 +22,13 @@ public class CoworkerService {
     private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public List<Coworker> getAll(User user, Long targetId) {
+    public List<Coworker> list(User user, Long targetId) {
         Profile profile = profileFinder.findByMemberId(user.id());
 
         if (profile.id().equals(targetId))
-            return coworkerFinder.find(targetId);
+            return coworkerFinder.findAllByProfileId(targetId);
         if (coworkerFinder.isCoworker(profile.id(), targetId))
-            return coworkerFinder.find(targetId);
+            return coworkerFinder.findAllByProfileId(targetId);
 
         throw new CodeException(CommonExceptionCode.FORBIDDEN);
     }
@@ -36,12 +36,11 @@ public class CoworkerService {
     @Transactional
     public void delete(User user, Long id) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        CoworkerEntity found = coworkerRepository.findById(id)
-                .orElseThrow(() -> new CodeException(CoworkerExceptionCode.NOT_FOUND));
+        coworkerRepository.findById(id).ifPresent(found -> {
+            if (!found.getMinId().equals(profile.id()) && !found.getMaxId().equals(profile.id()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        if (!found.getMinId().equals(profile.id()) && !found.getMaxId().equals(profile.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        coworkerRepository.delete(found);
+            coworkerRepository.delete(found);
+        });
     }
 }

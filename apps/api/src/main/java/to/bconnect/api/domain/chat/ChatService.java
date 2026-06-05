@@ -37,7 +37,7 @@ public class ChatService {
     private final MessageRepository messageRepository;
 
     @Transactional(readOnly = true)
-    public List<ChatDetail> getMyChats(Long memberId) {
+    public List<ChatDetail> list(Long memberId) {
         List<Chat> chats = chatFinder.findAll(memberId);
 
         if (chats.isEmpty()) return List.of();
@@ -108,7 +108,7 @@ public class ChatService {
     }
 
     @Transactional(readOnly = true)
-    public CursorPage<Message> getMessages(User user, Long chatId, CursorLimit cursor) {
+    public CursorPage<Message> listMessages(User user, Long chatId, CursorLimit cursor) {
         if (!participantRepository.existsByChatIdAndMemberId(chatId, user.id()))
             throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
 
@@ -118,7 +118,7 @@ public class ChatService {
                 cursor.reverse()
         );
 
-        List<Message> messages = messageFinder.findByChatId(chatId, fetchCursor);
+        List<Message> messages = messageFinder.findAllByChatId(chatId, fetchCursor);
 
         boolean hasNext = messages.size() > cursor.limit();
         List<Message> content = hasNext ? messages.subList(0, cursor.limit()) : messages;

@@ -33,7 +33,7 @@ export default function MainLayout({
         )}
       </aside>
       <LoginGateProvider>
-        <main className="flex h-full min-w-0 flex-1 justify-center overflow-y-auto px-10 py-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <main className="flex h-full min-w-0 flex-1 justify-start overflow-y-auto px-10 py-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex w-full max-w-269 flex-col">{children}</div>
         </main>
         {panel}

@@ -8,7 +8,7 @@ import * as React from 'react'
 import { ChevronIcon, FilterIcon, ChatIcon } from '../../icons'
 import { cn } from '../../lib/utils'
 
-const topBarVariants = cva('flex h-15 w-full items-center bg-white px-4', {
+const topBarVariants = cva('sticky top-0 z-40 flex h-15 w-full items-center bg-white px-4', {
   variants: {
     variant: {
       progress: 'justify-between',
@@ -24,7 +24,7 @@ const topBarVariants = cva('flex h-15 w-full items-center bg-white px-4', {
 function ChatBadgeIcon({ count }: { count?: number }) {
   return (
     <div className="relative size-5">
-      <ChatIcon className="text-[#9C9C9C]" />
+      <ChatIcon className="text-[#a5a5a5]" />
       {count !== undefined && count > 0 && (
         <div className="absolute -right-[7.5px] -top-[3.5px] flex min-w-[15px] items-center justify-center rounded-full bg-destructive px-1">
           <span className="text-[10px] font-bold leading-[15px] text-white">
@@ -90,11 +90,11 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
 
     const BackButton = backHref ? (
       <a href={backHref} className={backButtonClass} aria-label="뒤로가기">
-        <ChevronIcon direction="left" className="text-[#9C9C9C]" />
+        <ChevronIcon direction="left" className="text-[#a5a5a5]" />
       </a>
     ) : (
       <button type="button" onClick={onBack} className={backButtonClass} aria-label="뒤로가기">
-        <ChevronIcon direction="left" className="text-[#9C9C9C]" />
+        <ChevronIcon direction="left" className="text-[#a5a5a5]" />
       </button>
     )
 
@@ -132,7 +132,7 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
               className="flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]"
               aria-label="필터"
             >
-              <FilterIcon className="text-[#9C9C9C]" />
+              <FilterIcon className="text-[#a5a5a5]" />
             </button>
             <div className="flex-1" />
             <button

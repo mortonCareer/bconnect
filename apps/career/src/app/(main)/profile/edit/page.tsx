@@ -33,6 +33,8 @@ import {
   useScrollToError,
 } from '@bconnect/ui'
 import { TRADE_LABELS, TRADE_GROUPS } from '@bconnect/api-client'
+import { AddressField } from '@/components/AddressField'
+import { mapKakaoAddress } from '@bconnect/config/address'
 import { profileEditSchema, type ProfileEditFormData } from './schema'
 
 const EXPERIENCE_OPTIONS = [
@@ -79,7 +81,7 @@ export default function ProfileEditPage() {
       experience: undefined,
       headline: '',
       about: '',
-      city: '',
+      address: undefined,
     },
   })
   const {
@@ -101,7 +103,7 @@ export default function ProfileEditPage() {
         experience: profile?.experience ?? undefined,
         headline: profile?.headline ?? '',
         about: profile?.about ?? '',
-        city: profile?.address?.city ?? '',
+        address: profile?.address ?? undefined,
       })
     }
   }, [member, profile, reset])
@@ -139,15 +141,7 @@ export default function ProfileEditPage() {
             trades: data.trades as Trade[],
             experience: data.experience,
             headline: data.headline || undefined,
-            // TODO #280 — 카카오 우편번호 도입 전 임시 mock 값. zipcode/state/lat/lng 0 으로
-            address: {
-              zipcode: '',
-              city: data.city || '',
-              state: '',
-              street: data.city || '',
-              latitude: 0,
-              longitude: 0,
-            },
+            address: data.address ?? mapKakaoAddress(null),
           },
         })
       )
@@ -335,12 +329,11 @@ export default function ProfileEditPage() {
           />
 
           {/* 주소 */}
-          <TextField
+          <AddressField
             control={control}
-            name="city"
+            name="address"
             label="주소"
             description="정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요"
-            placeholder="주소를 입력해주세요"
           />
         </form>
       </Form>

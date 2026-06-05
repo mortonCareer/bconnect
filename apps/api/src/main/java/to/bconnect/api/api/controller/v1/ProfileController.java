@@ -15,9 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.api.controller.v1.request.CreateProfileRequest;
 import to.bconnect.api.api.controller.v1.request.UpdateProfileRequest;
 import to.bconnect.api.api.controller.v1.request.UpdateProfileAboutRequest;
-import to.bconnect.api.api.controller.v1.response.ProfileResponse;
+import to.bconnect.api.api.controller.v1.response.ProfileDetailResponse;
 import to.bconnect.api.domain.profile.Profile;
-import to.bconnect.api.domain.profile.ProfileFinder;
 import to.bconnect.api.domain.profile.ProfileService;
 import to.bconnect.api.support.security.User;
 import to.bconnect.api.common.response.ApiResponse;
@@ -30,20 +29,18 @@ import java.util.List;
 public class ProfileController {
 
     private final ProfileService profileService;
-    private final ProfileFinder profileFinder;
 
     @GetMapping
-    public ApiResponse<List<ProfileResponse>> list() {
-        List<ProfileResponse> profiles = profileFinder.findAll().stream()
-                .map(ProfileResponse::of)
+    public ApiResponse<List<ProfileDetailResponse>> list() {
+        List<ProfileDetailResponse> profiles = profileService.list().stream()
+                .map(ProfileDetailResponse::of)
                 .toList();
         return ApiResponse.success(profiles);
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<ProfileResponse> get(@PathVariable Long id) {
-        Profile profile = profileFinder.find(id);
-        return ApiResponse.success(ProfileResponse.of(profile));
+    public ApiResponse<ProfileDetailResponse> get(@PathVariable Long id) {
+        return ApiResponse.success(ProfileDetailResponse.of(profileService.get(id)));
     }
 
     @PostMapping

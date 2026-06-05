@@ -24,8 +24,8 @@ public class CredentialService {
     private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public List<Credential> getAll(Long profileId) {
-        return credentialFinder.findFilteredByProfileId(profileId);
+    public List<Credential> list(Long profileId) {
+        return credentialFinder.findAllFilteredByProfileId(profileId);
     }
 
     @Transactional
@@ -45,13 +45,12 @@ public class CredentialService {
     @Transactional
     public void delete(User user, Long id) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        CredentialEntity found = credentialRepository.findById(id)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        credentialRepository.findById(id).ifPresent(found -> {
+            if (!found.getProfileId().equals(profile.id()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        if (!found.getProfileId().equals(profile.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        credentialRepository.delete(found);
+            credentialRepository.delete(found);
+        });
     }
 
     @Transactional

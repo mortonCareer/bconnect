@@ -29,7 +29,7 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<Member> getAll() {
+    public List<Member> listMembers() {
         return memberFinder.findAll();
     }
 
@@ -74,9 +74,7 @@ public class MemberService {
 
     @Transactional
     public void withdraw(User user) {
-        MemberEntity found = memberRepository.findById(user.id())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-
-        memberRepository.delete(found);
+        memberRepository.findById(user.id())
+                .ifPresent(memberRepository::delete);
     }
 }

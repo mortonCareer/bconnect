@@ -32,7 +32,7 @@ public class CoworkerController {
     public ApiResponse<List<CoworkerResponse>> list(
             @AuthenticationPrincipal User user,
             @RequestParam Long profileId) {
-        List<CoworkerResponse> coworkers = coworkerService.getAll(user, profileId).stream()
+        List<CoworkerResponse> coworkers = coworkerService.list(user, profileId).stream()
                 .map(coworker -> {
                     Long counterpartProfileId = coworker.minId().equals(profileId)
                             ? coworker.maxId()

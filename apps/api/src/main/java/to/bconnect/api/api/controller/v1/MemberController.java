@@ -32,7 +32,7 @@ public class MemberController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ApiResponse<List<MemberResponse>> listMembers() {
-        List<MemberResponse> members = memberService.getAll().stream()
+        List<MemberResponse> members = memberService.listMembers().stream()
                 .map(MemberResponse::of)
                 .toList();
         return ApiResponse.success(members);

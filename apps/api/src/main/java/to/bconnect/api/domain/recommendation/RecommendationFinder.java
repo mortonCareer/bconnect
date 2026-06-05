@@ -14,26 +14,31 @@ public class RecommendationFinder {
     private final RecommendationRepository recommendationRepository;
 
     @Transactional(readOnly = true)
-    public List<Recommendation> findReceived(Long profileId) {
+    public List<Recommendation> findAllReceived(Long profileId) {
         return recommendationRepository.findByToIdAndVisibleTrue(profileId)
                 .stream().map(Recommendation::of).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<Recommendation> findSent(Long profileId) {
+    public List<Recommendation> findAllSent(Long profileId) {
         return recommendationRepository.findByFromIdAndVisibleTrue(profileId)
                 .stream().map(Recommendation::of).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<Recommendation> findMyReceived(Long profileId) {
+    public List<Recommendation> findAllMyReceived(Long profileId) {
         return recommendationRepository.findByToId(profileId)
                 .stream().map(Recommendation::of).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<Recommendation> findMySent(Long profileId) {
+    public List<Recommendation> findAllMySent(Long profileId) {
         return recommendationRepository.findByFromId(profileId)
                 .stream().map(Recommendation::of).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public long countReceived(Long profileId) {
+        return recommendationRepository.countByToIdAndVisibleTrue(profileId);
     }
 }

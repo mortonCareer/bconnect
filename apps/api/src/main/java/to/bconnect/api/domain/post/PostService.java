@@ -12,27 +12,12 @@ import to.bconnect.api.storage.domain.post.PostRepository;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 
-import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
-    private final PostFinder postFinder;
     private final ProfileFinder profileFinder;
-
-    @Transactional(readOnly = true)
-    public Post get(Long postId) {
-        return postFinder.find(postId);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Post> getAll() {
-        return postRepository.findAll()
-                .stream()
-                .map(Post::of)
-                .toList();
-    }
 
     @Transactional
     public Post create(User user, CreatePostRequest request) {
@@ -62,11 +47,10 @@ public class PostService {
     @Transactional
     public void delete(User user, Long postId) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        PostEntity found = postRepository.findById(postId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (!found.getProfileId().equals(profile.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        postRepository.delete(found);
+        postRepository.findById(postId).ifPresent(found -> {
+            if (!found.getProfileId().equals(profile.id()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+            postRepository.delete(found);
+        });
     }
 }

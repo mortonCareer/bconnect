@@ -12,6 +12,7 @@
     "./biz-number": "./biz-number/index.ts",
     "./env": "./env/validate.ts",
     "./format": "./format/index.ts",
+    "./address": "./address/index.ts",
     "./phone": "./phone/index.ts",
     "./sentry": "./sentry/index.ts",
     "./username": "./username/index.ts"
@@ -20,7 +21,7 @@
     "@eslint/js": "^9.39.2",
     "@types/node": "catalog:",
     "eslint": "catalog:",
-    "eslint-config-next": "16.1.1",
+    "eslint-config-next": "16.2.7",
     "eslint-plugin-tailwindcss": "3.18.3",
     "globals": "^16.5.0",
     "tailwindcss": "catalog:",
@@ -28,6 +29,7 @@
     "typescript-eslint": "^8.50.1"
   },
   "dependencies": {
+    "@bconnect/api-client": "workspace:*",
     "libphonenumber-js": "^1.12.33",
     "zod": "catalog:"
   }

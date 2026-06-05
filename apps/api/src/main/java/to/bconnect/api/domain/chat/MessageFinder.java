@@ -14,7 +14,7 @@ import java.util.List;
 public class MessageFinder {
     private final MessageRepository messageRepository;
 
-    public List<Message> findByChatId(Long chatId, CursorLimit cursorLimit) {
+    public List<Message> findAllByChatId(Long chatId, CursorLimit cursorLimit) {
 
         Pageable pageable = cursorLimit.toPageable();
 
