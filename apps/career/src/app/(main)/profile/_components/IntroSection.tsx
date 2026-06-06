@@ -1,28 +1,39 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import {
-  getCredentialLabel,
-  getTradeLabel,
-  useGetMyReceivedRecommendations,
-} from '@bconnect/api-client'
-import type { Credential, Profile } from '@bconnect/api-client'
-import { Tag } from '@bconnect/ui'
+import { getCredentialLabel, getTradeLabel } from '@bconnect/api-client'
+import type { Credential, Profile, Recommendation } from '@bconnect/api-client'
+import { Tab, Tag } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
+import { useQueryState } from 'nuqs'
 
 interface IntroSectionProps {
   profile: Profile
   credentials?: Credential[]
+  isOwner: boolean
+  receivedRecommendations: Recommendation[]
+  sentRecommendations: Recommendation[]
 }
 
-export function IntroSection({ profile, credentials }: IntroSectionProps) {
+const REC_TABS = [
+  { key: 'received', label: '받은 추천서' },
+  { key: 'sent', label: '보낸 추천서' },
+]
+
+export function IntroSection({
+  profile,
+  credentials,
+  isOwner,
+  receivedRecommendations,
+  sentRecommendations,
+}: IntroSectionProps) {
   const router = useRouter()
   const { about } = profile
 
-  const { data: received } = useGetMyReceivedRecommendations()
-  const receivedRecommendations = received ?? []
+  const [recTab, setRecTab] = useQueryState('rec', { defaultValue: 'received' })
 
   const acceptedCredentials = credentials?.filter((c) => c.status === 'ACCEPTED') ?? []
+  const recommendations = recTab === 'sent' ? sentRecommendations : receivedRecommendations
 
   return (
     <div className="flex flex-col gap-6 px-4 pt-4">
@@ -30,12 +41,14 @@ export function IntroSection({ profile, credentials }: IntroSectionProps) {
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="text-sb-16 text-gray-900">인증</span>
-          <button
-            className="text-r-12 text-primary underline"
-            onClick={() => router.push('/profile/certifications')}
-          >
-            편집
-          </button>
+          {isOwner && (
+            <button
+              className="text-r-12 text-primary underline"
+              onClick={() => router.push('/profile/certifications')}
+            >
+              편집
+            </button>
+          )}
         </div>
         {acceptedCredentials.length > 0 ? (
           <div className="flex flex-wrap gap-2">
@@ -54,12 +67,14 @@ export function IntroSection({ profile, credentials }: IntroSectionProps) {
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="text-sb-16 text-gray-900">소개</span>
-          <button
-            className="text-r-12 text-primary underline"
-            onClick={() => router.push('/profile/edit/about')}
-          >
-            편집
-          </button>
+          {isOwner && (
+            <button
+              className="text-r-12 text-primary underline"
+              onClick={() => router.push('/profile/edit/about')}
+            >
+              편집
+            </button>
+          )}
         </div>
         {about ? (
           <p className="whitespace-pre-wrap text-r-14 leading-[22.4px] text-gray-900">
@@ -82,24 +97,19 @@ export function IntroSection({ profile, credentials }: IntroSectionProps) {
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="text-sb-16 text-gray-900">추천서</span>
-          <button
-            className="text-r-12 text-primary underline"
-            onClick={() => router.push('/profile/recommendations')}
-          >
-            편집
-          </button>
+          {isOwner && (
+            <button
+              className="text-r-12 text-primary underline"
+              onClick={() => router.push('/profile/recommendations')}
+            >
+              편집
+            </button>
+          )}
         </div>
-        <div className="flex gap-2">
-          <button className="rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-sb-14 text-gray-900">
-            받은 추천서
-          </button>
-          <button className="rounded-md border border-gray-300 bg-white px-3 py-2 text-r-14 text-gray-900">
-            보낸 추천서
-          </button>
-        </div>
-        {receivedRecommendations.length > 0 ? (
+        <Tab items={REC_TABS} activeKey={recTab} onChange={setRecTab} />
+        {recommendations.length > 0 ? (
           <div className="flex flex-col divide-y divide-gray-300">
-            {receivedRecommendations.map((rec) => {
+            {recommendations.map((rec) => {
               // TODO(#473): BE가 MaskedMember.role 미제공 — 추가되면 실제 role 연결
               const role = '반장(Mocked)'
               return (
@@ -127,7 +137,9 @@ export function IntroSection({ profile, credentials }: IntroSectionProps) {
             })}
           </div>
         ) : (
-          <p className="text-r-14 text-gray-500">받은 추천서가 없습니다</p>
+          <p className="text-r-14 text-gray-500">
+            {recTab === 'sent' ? '보낸 추천서가 없습니다' : '받은 추천서가 없습니다'}
+          </p>
         )}
       </div>
     </div>

@@ -4,6 +4,7 @@
  */
 'use client'
 
+import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   useGetMyMember,
@@ -11,6 +12,7 @@ import {
   useGetCoworkers,
   useGetCredentials,
   useGetMyReceivedRecommendations,
+  useGetMySentRecommendations,
 } from '@bconnect/api-client'
 import { Button, Tab, TopBar } from '@bconnect/ui'
 import { useQueryState } from 'nuqs'
@@ -42,7 +44,20 @@ export default function MyProfilePage() {
   )
   const credentialsList = credentialsData ?? []
   const { data: receivedRecommendations } = useGetMyReceivedRecommendations()
+  const { data: sentRecommendations } = useGetMySentRecommendations()
   const recommendationCount = receivedRecommendations?.length ?? 0
+
+  const [copied, setCopied] = useState(false)
+  const handleShare = useCallback(async () => {
+    const shareData = { title: document.title, url: window.location.href }
+    if (navigator.canShare?.(shareData)) {
+      await navigator.share(shareData)
+      return
+    }
+    await navigator.clipboard.writeText(window.location.href)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }, [])
 
   const isLoading = isMemberLoading || isProfileLoading
 
@@ -78,12 +93,7 @@ export default function MyProfilePage() {
 
   return (
     <div className="flex flex-col">
-      <TopBar
-        variant="default"
-        title={member.username ?? '내 프로필'}
-        showAction={false}
-        onBack={() => router.back()}
-      />
+      <TopBar variant="default" title={member.username ?? '내 프로필'} showAction={false} />
 
       <ProfileHeader
         name={member.name}
@@ -97,15 +107,31 @@ export default function MyProfilePage() {
         recommendationCount={recommendationCount}
       />
 
-      <div className="px-4 py-3">
-        <Button variant="outline" size="full" onClick={() => router.push('/profile/edit')}>
+      <div className="flex gap-2 px-4 py-3">
+        <Button
+          variant="outline"
+          size="full"
+          className="flex-1"
+          onClick={() => router.push('/profile/edit')}
+        >
           프로필 수정
+        </Button>
+        <Button variant="outline" size="full" className="flex-1" onClick={handleShare}>
+          {copied ? '복사됨' : '공유하기'}
         </Button>
       </div>
 
       <Tab items={TAB_ITEMS} activeKey={activeTab} onChange={setActiveTab} />
 
-      {activeTab === 'intro' && <IntroSection profile={profile} credentials={credentialsList} />}
+      {activeTab === 'intro' && (
+        <IntroSection
+          profile={profile}
+          credentials={credentialsList}
+          isOwner
+          receivedRecommendations={receivedRecommendations ?? []}
+          sentRecommendations={sentRecommendations ?? []}
+        />
+      )}
       {activeTab === 'works' && profile.id && <WorksSection authorId={profile.id} />}
       {activeTab === 'works' && !profile.id && (
         <div className="flex items-center justify-center py-20">

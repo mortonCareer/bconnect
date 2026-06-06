@@ -5,7 +5,13 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useGetProfile, useGetCoworkers } from '@bconnect/api-client'
+import {
+  useGetProfile,
+  useGetCoworkers,
+  useGetReceivedRecommendations,
+  useGetSentRecommendations,
+  useCreateCoworkerRequest,
+} from '@bconnect/api-client'
 import { Button, Tab, TopBar } from '@bconnect/ui'
 import { useQueryState } from 'nuqs'
 import { useFeedItems } from '@/hooks/useFeedItems'
@@ -36,8 +42,25 @@ export default function MemberProfilePage() {
     { profileId: profile?.id ?? 0 },
     { query: { enabled: !!profile?.id } }
   )
-  // TODO: 추천서 API 연동
-  const recommendationCount = 0
+  const { data: receivedRecommendations } = useGetReceivedRecommendations(
+    { profileId: profile?.id ?? 0 },
+    { query: { enabled: !!profile?.id } }
+  )
+  const { data: sentRecommendations } = useGetSentRecommendations(
+    { profileId: profile?.id ?? 0 },
+    { query: { enabled: !!profile?.id } }
+  )
+  const recommendationCount = receivedRecommendations?.length ?? 0
+
+  const {
+    mutate: createCoworkerRequest,
+    isPending: isRequesting,
+    isSuccess: isRequested,
+  } = useCreateCoworkerRequest()
+  const handleAddCoworker = () => {
+    if (!profile?.id) return
+    createCoworkerRequest({ data: { toId: profile.id } })
+  }
 
   const isLoading = isProfileLoading
 
@@ -84,15 +107,36 @@ export default function MemberProfilePage() {
         recommendationCount={recommendationCount}
       />
 
-      <div className="px-4 py-3">
-        <Button variant="outline" size="full" onClick={() => router.push('/messages')}>
-          메시지
+      <div className="flex gap-2 px-4 py-3">
+        <Button
+          variant="outline"
+          size="full"
+          className="flex-1"
+          onClick={handleAddCoworker}
+          disabled={isRequesting || isRequested}
+        >
+          {isRequested ? '요청됨' : isRequesting ? '요청 중...' : '동료 추가'}
+        </Button>
+        <Button
+          variant="outline"
+          size="full"
+          className="flex-1"
+          onClick={() => router.push('/messages')}
+        >
+          메시지 보내기
         </Button>
       </div>
 
       <Tab items={TAB_ITEMS} activeKey={activeTab} onChange={setActiveTab} />
 
-      {activeTab === 'intro' && profile && <IntroSection profile={profile} />}
+      {activeTab === 'intro' && profile && (
+        <IntroSection
+          profile={profile}
+          isOwner={false}
+          receivedRecommendations={receivedRecommendations ?? []}
+          sentRecommendations={sentRecommendations ?? []}
+        />
+      )}
       {activeTab === 'intro' && !profile && (
         <div className="flex items-center justify-center py-20">
           <p className="text-m-14 text-gray-500">프로필 정보가 없습니다</p>
