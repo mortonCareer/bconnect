@@ -25,7 +25,6 @@ export { ChatInput } from './ui/ChatInput'
 export { ChatListItem, chatListItemVariants } from './ui/ChatListItem'
 export { NotificationItem } from './ui/NotificationItem'
 export type { NotificationItemProps } from './ui/NotificationItem'
-export { Toaster } from './ui/Toaster'
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './ui/shadcn/accordion'
 
 // shadcn Form suite (ADR 0013 / #400) — shadcn 디렉토리에 격리, 우리 wrapper 는 ui/ 루트

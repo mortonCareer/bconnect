@@ -4,7 +4,6 @@
  */
 'use client'
 
-import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import {
   useGetProfile,
@@ -12,8 +11,9 @@ import {
   useGetReceivedRecommendations,
   useGetSentRecommendations,
   useCreateCoworkerRequest,
+  useCreateDirectChat,
 } from '@bconnect/api-client'
-import { Button, Tab, TopBar, toast } from '@bconnect/ui'
+import { Button, Tab, TopBar } from '@bconnect/ui'
 import { useQueryState } from 'nuqs'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { ProfileHeader } from '../_components/ProfileHeader'
@@ -57,15 +57,17 @@ export default function MemberProfilePage() {
     mutate: createCoworkerRequest,
     isPending: isRequesting,
     isSuccess: isRequested,
-  } = useCreateCoworkerRequest({
-    mutation: {
-      onSuccess: () => toast({ description: '동료 요청을 보냈어요' }),
-      onError: () => toast({ variant: 'destructive', description: '동료 요청에 실패했어요' }),
-    },
-  })
+  } = useCreateCoworkerRequest()
   const handleAddCoworker = () => {
     if (!profile?.id) return
     createCoworkerRequest({ data: { toId: profile.id } })
+  }
+
+  const { mutate: createDirectChat, isPending: isStartingChat } = useCreateDirectChat({
+    mutation: { onSuccess: (chat) => router.push(`/messages/${chat.id}`) },
+  })
+  const handleSendMessage = () => {
+    if (!isNaN(memberId)) createDirectChat({ data: { participantId: memberId } })
   }
 
   const isLoading = isProfileLoading
@@ -123,8 +125,14 @@ export default function MemberProfilePage() {
         >
           {isRequested ? '요청됨' : isRequesting ? '요청 중...' : '동료 추가'}
         </Button>
-        <Button asChild variant="outline" size="full" className="flex-1">
-          <Link href="/messages">메시지 보내기</Link>
+        <Button
+          variant="outline"
+          size="full"
+          className="flex-1"
+          onClick={handleSendMessage}
+          disabled={isStartingChat}
+        >
+          메시지 보내기
         </Button>
       </div>
 

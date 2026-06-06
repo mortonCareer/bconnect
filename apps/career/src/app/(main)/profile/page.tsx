@@ -4,7 +4,7 @@
  */
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -15,7 +15,7 @@ import {
   useGetMyReceivedRecommendations,
   useGetMySentRecommendations,
 } from '@bconnect/api-client'
-import { Button, Tab, TopBar, toast } from '@bconnect/ui'
+import { Button, Tab, TopBar } from '@bconnect/ui'
 import { useQueryState } from 'nuqs'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { ProfileHeader } from './_components/ProfileHeader'
@@ -48,6 +48,7 @@ export default function MyProfilePage() {
   const { data: sentRecommendations } = useGetMySentRecommendations()
   const recommendationCount = receivedRecommendations?.length ?? 0
 
+  const [copied, setCopied] = useState(false)
   const handleShare = useCallback(async () => {
     const shareData = { title: document.title, url: window.location.href }
     if (navigator.canShare?.(shareData)) {
@@ -55,7 +56,8 @@ export default function MyProfilePage() {
       return
     }
     await navigator.clipboard.writeText(window.location.href)
-    toast({ description: '링크가 복사되었어요' })
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
   }, [])
 
   const isLoading = isMemberLoading || isProfileLoading
@@ -116,7 +118,7 @@ export default function MyProfilePage() {
           <Link href="/profile/edit">프로필 수정</Link>
         </Button>
         <Button variant="outline" size="full" className="flex-1" onClick={handleShare}>
-          공유하기
+          {copied ? '복사됨' : '공유하기'}
         </Button>
       </div>
 
