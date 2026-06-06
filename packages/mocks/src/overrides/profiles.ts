@@ -17,8 +17,18 @@ lsm3645@g.skku.edu
 
 #타일 #수입타일 #욕실타일 #바닥타일`
 
+export const myProfileOverride = [
+  getGetMyProfileMockHandler(() => ({
+    ...getGetMyProfileResponseMock(),
+    id: 1,
+    primaryTrade: Trade.TILING,
+    experience: 3,
+    headline: HEADLINE,
+    about: ABOUT,
+  })),
+]
+
 export const profilesOverrides = [
-  getGetMyProfileMockHandler(() => ({ ...getGetMyProfileResponseMock(), id: 1 })),
   getGetProfileMockHandler(() => {
     const base = getGetProfileResponseMock()
     return {
