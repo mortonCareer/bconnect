@@ -1,11 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Select, Tag, TopBar } from '@bconnect/ui'
+import { Select, Slider, Tag, TopBar } from '@bconnect/ui'
 import type { Trade } from '@bconnect/api-client'
 import { TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
-import { EXPERIENCE_OPTIONS } from '@/lib/experience'
-import type { ExperienceLevel } from '@/lib/experience'
+import {
+  EXPERIENCE_MAX,
+  EXPERIENCE_MIN,
+  EXPERIENCE_THUMB_LABELS,
+  FULL_EXPERIENCE_RANGE,
+  formatExperienceYears,
+  isFullExperienceRange,
+  type ExperienceRange,
+} from '@/lib/experience-range'
 import { useFilterParams } from '@/hooks/useFilterParams'
 
 interface FilterSheetProps {
@@ -23,7 +30,7 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
 
   const [pendingTrades, setPendingTrades] = useState<Trade[]>(storeTrades)
   const [pendingPrimary, setPendingPrimary] = useState<Trade | null>(storePrimary)
-  const [pendingExperience, setPendingExperience] = useState<ExperienceLevel | null>(
+  const [pendingExperience, setPendingExperience] = useState<ExperienceRange | null>(
     storeExperience
   )
 
@@ -60,7 +67,9 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
   }, [isOpen, mounted])
 
   const handleClose = () => {
-    applyFilters(pendingTrades, pendingPrimary, pendingExperience)
+    const expToApply =
+      pendingExperience && !isFullExperienceRange(pendingExperience) ? pendingExperience : null
+    applyFilters(pendingTrades, pendingPrimary, expToApply)
     onClose()
   }
 
@@ -85,10 +94,6 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
     } else if (next.length === 0) {
       setPendingPrimary(null)
     }
-  }
-
-  const handleExperienceClick = (level: ExperienceLevel) => {
-    setPendingExperience((prev) => (prev === level ? null : level))
   }
 
   if (!mounted) return null
@@ -159,17 +164,14 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
           {/* 경력 */}
           <div className="flex flex-col gap-3">
             <p className="text-sb-16 text-gray-900">경력</p>
-            <div className="flex flex-wrap gap-2">
-              {EXPERIENCE_OPTIONS.map((option) => (
-                <Tag
-                  key={option.id}
-                  variant={pendingExperience === option.id ? 'selected' : 'default'}
-                  onClick={() => handleExperienceClick(option.id)}
-                >
-                  {option.label}
-                </Tag>
-              ))}
-            </div>
+            <Slider
+              value={pendingExperience ?? FULL_EXPERIENCE_RANGE}
+              onValueChange={(value) => setPendingExperience([value[0], value[1]])}
+              min={EXPERIENCE_MIN}
+              max={EXPERIENCE_MAX}
+              formatLabel={formatExperienceYears}
+              thumbLabels={EXPERIENCE_THUMB_LABELS}
+            />
           </div>
         </div>
       </div>

@@ -7,7 +7,14 @@ export type ExperienceRange = [number, number]
 
 export const DEFAULT_EXPERIENCE_RANGE: ExperienceRange = [1, 3]
 
+export const FULL_EXPERIENCE_RANGE: ExperienceRange = [EXPERIENCE_MIN, EXPERIENCE_MAX]
+
 export const EXPERIENCE_THUMB_LABELS = ['최소 경력', '최대 경력']
+
+export const isFullExperienceRange = ([min, max]: ExperienceRange) =>
+  min <= EXPERIENCE_MIN && max >= EXPERIENCE_MAX
+
+export const formatExperienceRange = ([min, max]: ExperienceRange) => `${min}~${max}년`
 
 export const experienceRangeSchema = z
   .tuple([

@@ -1,28 +1,27 @@
-import { useQueryStates, parseAsArrayOf, parseAsStringLiteral } from 'nuqs'
+import { useQueryStates, parseAsArrayOf, parseAsInteger, parseAsStringLiteral } from 'nuqs'
 import { Trade } from '@bconnect/api-client'
-import type { ExperienceLevel } from '@/lib/experience'
-import { EXPERIENCE_RANGES } from '@/lib/experience'
+import type { ExperienceRange } from '@/lib/experience-range'
 
 const TRADE_VALUES = Object.values(Trade)
-const EXPERIENCE_VALUES = ['newcomer', '1-3', '3-5', '5-10', '10+'] as const
 
 const filterParsers = {
   trades: parseAsArrayOf(parseAsStringLiteral(TRADE_VALUES)).withDefault([]),
   trade: parseAsStringLiteral(TRADE_VALUES),
-  exp: parseAsStringLiteral(EXPERIENCE_VALUES),
+  exp: parseAsArrayOf(parseAsInteger),
 }
 
 export function useFilterParams() {
   const [params, setParams] = useQueryStates(filterParsers)
 
-  const { trades, trade: primaryTrade, exp: experience } = params
+  const { trades, trade: primaryTrade, exp } = params
 
-  const expRange = experience ? EXPERIENCE_RANGES[experience as ExperienceLevel] : undefined
+  const experience: ExperienceRange | null = exp?.length === 2 ? [exp[0], exp[1]] : null
+  const expRange = experience ? { min: experience[0], max: experience[1] } : undefined
 
   const applyFilters = (
     newTrades: Trade[],
     newPrimaryTrade: Trade | null,
-    newExperience: ExperienceLevel | null
+    newExperience: ExperienceRange | null
   ) => setParams({ trades: newTrades, trade: newPrimaryTrade, exp: newExperience })
 
   const clearTrade = () => setParams({ trades: [], trade: null })
@@ -32,7 +31,7 @@ export function useFilterParams() {
   return {
     trades: trades as Trade[],
     primaryTrade: primaryTrade as Trade | null,
-    experience: experience as ExperienceLevel | null,
+    experience,
     expRange,
     applyFilters,
     clearTrade,
