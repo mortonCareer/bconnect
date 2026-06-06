@@ -4,7 +4,9 @@
 'use client'
 
 import * as React from 'react'
+import * as Dialog from '@radix-ui/react-dialog'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { SquarePen, Trash2 } from 'lucide-react'
 import { MoreVerticalIcon } from '../../icons'
 import { useExpandableText } from '../../hooks'
 import { cn } from '../../lib/utils'
@@ -40,9 +42,17 @@ export interface FeedProps
     description: string
   }
   /**
-   * 케밥(⋮) 메뉴 클릭 핸들러
+   * 본인 게시물 여부 — true 일 때만 케밥(수정/삭제) 노출
    */
-  onMore?: () => void
+  canManage?: boolean
+  /**
+   * 수정 액션 (케밥 → 수정)
+   */
+  onEdit?: () => void
+  /**
+   * 삭제 액션 (케밥 → 삭제)
+   */
+  onDelete?: () => void
 }
 
 /**
@@ -58,18 +68,21 @@ export interface FeedProps
  *     timestamp: '3일 전',
  *     description: '골프장 전원주택 도배 시공을 진행하였습니다.',
  *   }}
- *   onMore={() => openMenu()}
+ *   canManage
+ *   onEdit={() => router.push('/profile/edit/work/1')}
+ *   onDelete={() => deletePost(1)}
  * />
  * ```
  */
 export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
-  ({ className, content, onMore, variant, ...props }, ref) => {
+  ({ className, content, canManage = false, onEdit, onDelete, variant, ...props }, ref) => {
     const {
       ref: textRef,
       expanded: isExpanded,
       showToggle,
       toggle: handleToggle,
     } = useExpandableText([content.description], 'width')
+    const [menuOpen, setMenuOpen] = React.useState(false)
 
     const effectiveVariant = isExpanded ? 'expanded' : 'collapsed'
 
@@ -88,14 +101,16 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
           </div>
           <div className="flex items-center gap-1">
             <p className="text-r-12 text-gray-700">{content.timestamp}</p>
-            <button
-              type="button"
-              onClick={onMore}
-              className="shrink-0 cursor-pointer p-1 text-gray-900"
-              aria-label="더보기 메뉴"
-            >
-              <MoreVerticalIcon size={16} />
-            </button>
+            {canManage && (
+              <button
+                type="button"
+                onClick={() => setMenuOpen(true)}
+                className="shrink-0 cursor-pointer p-1 text-[#434343]"
+                aria-label="게시물 관리"
+              >
+                <MoreVerticalIcon size={16} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -139,6 +154,47 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
             </button>
           )}
         </div>
+
+        {canManage && (
+          <Dialog.Root open={menuOpen} onOpenChange={setMenuOpen}>
+            <Dialog.Portal>
+              <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40" />
+              <Dialog.Content
+                aria-describedby={undefined}
+                className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-white pb-[env(safe-area-inset-bottom)] focus:outline-none"
+              >
+                <Dialog.Title className="sr-only">게시물 관리</Dialog.Title>
+                <div className="flex justify-center pt-3 pb-1">
+                  <div className="h-1 w-9 rounded-full bg-gray-300" />
+                </div>
+                <div className="flex flex-col py-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onEdit?.()
+                    }}
+                    className="flex items-center gap-3 px-5 py-3.5 text-m-16 text-gray-900 hover:bg-gray-50"
+                  >
+                    <SquarePen size={20} />
+                    수정
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onDelete?.()
+                    }}
+                    className="flex items-center gap-3 px-5 py-3.5 text-m-16 text-gray-900 hover:bg-gray-50"
+                  >
+                    <Trash2 size={20} />
+                    삭제
+                  </button>
+                </div>
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
+        )}
       </div>
     )
   }

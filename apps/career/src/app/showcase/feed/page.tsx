@@ -59,9 +59,11 @@ export default function FeedDetailPage() {
           <section className="mb-12">
             <h2 className="mb-4 text-xl font-semibold text-gray-800">Variants</h2>
             <div className="space-y-6">
-              {/* 본문이 길면 더보기/접기 토글 (클릭) */}
+              {/* 본문 더보기/접기 + 본인 게시물(canManage) 케밥 → 수정/삭제 드로어 */}
               <div className="rounded-lg border p-6">
-                <p className="mb-3 text-sm font-medium text-gray-500">기본 - 본문 길면 더보기</p>
+                <p className="mb-3 text-sm font-medium text-gray-500">
+                  본인 게시물 (canManage) - 케밥 → 수정/삭제
+                </p>
                 <div className="mx-auto max-w-md">
                   <Feed
                     content={{
@@ -73,7 +75,9 @@ export default function FeedDetailPage() {
                       description:
                         '신축 아파트 욕실 타일 시공을 완료했습니다. 고급 이탈리아산 대리석 타일을 사용하여 프리미엄 마감을 진행하였으며, 방수 작업도 완벽하게 처리했습니다.',
                     }}
-                    onMore={() => console.log('더보기 메뉴')}
+                    canManage
+                    onEdit={() => console.log('수정')}
+                    onDelete={() => console.log('삭제')}
                   />
                 </div>
               </div>
@@ -108,13 +112,35 @@ export default function FeedDetailPage() {
                   </tr>
                   <tr>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">onMore</code>
+                      <code className="rounded bg-gray-100 px-1">canManage</code>
+                    </td>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">boolean</code>
+                    </td>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">false</code>
+                    </td>
+                    <td className="p-3">본인 게시물 여부 — true 일 때만 케밥(수정/삭제) 노출</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">onEdit</code>
                     </td>
                     <td className="p-3">
                       <code className="rounded bg-gray-100 px-1">() =&gt; void</code>
                     </td>
                     <td className="p-3">-</td>
-                    <td className="p-3">케밥(⋮) 메뉴 클릭 핸들러</td>
+                    <td className="p-3">케밥 → 수정 액션</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">onDelete</code>
+                    </td>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">() =&gt; void</code>
+                    </td>
+                    <td className="p-3">-</td>
+                    <td className="p-3">케밥 → 삭제 액션</td>
                   </tr>
                 </tbody>
               </table>
@@ -136,7 +162,9 @@ export default function FeedDetailPage() {
     timestamp: '3일 전',
     description: '골프장 전원주택 도배 시공을 진행하였습니다...',
   }}
-  onMore={() => openMenu()}
+  canManage
+  onEdit={() => router.push('/profile/edit/work/1')}
+  onDelete={() => deletePost(1)}
 />`}
             </pre>
           </section>

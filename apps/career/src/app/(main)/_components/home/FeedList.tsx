@@ -1,11 +1,22 @@
 'use client'
 
 import { useEffect, useRef, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import {
+  useGetMyMember,
+  useDeletePost,
+  useQueryClient,
+  getGetFeedsQueryKey,
+} from '@bconnect/api-client'
 import { Feed } from '@bconnect/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { useFilterParams } from '@/hooks/useFilterParams'
 
 export function FeedList() {
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  const currentUserId = useGetMyMember().data?.id
+  const { mutate: deletePost } = useDeletePost()
   const { primaryTrade, expRange } = useFilterParams()
 
   const { feedItems, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useFeedItems({
@@ -72,7 +83,20 @@ export function FeedList() {
   return (
     <div className="flex flex-col gap-4 px-4 py-2">
       {feedItems.map((item) => (
-        <Feed key={item.postId} content={item.content} />
+        <Feed
+          key={item.postId}
+          content={item.content}
+          canManage={item.memberId != null && item.memberId === currentUserId}
+          onEdit={() => router.push(`/profile/edit/work/${item.postId}`)}
+          onDelete={() =>
+            deletePost(
+              { postId: item.postId },
+              {
+                onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFeedsQueryKey() }),
+              }
+            )
+          }
+        />
       ))}
 
       {/* Infinite scroll sentinel */}
