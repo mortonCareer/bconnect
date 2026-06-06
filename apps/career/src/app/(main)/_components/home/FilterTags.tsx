@@ -2,7 +2,7 @@
 
 import { Tag } from '@bconnect/ui'
 import { TRADE_LABELS } from '@bconnect/api-client'
-import { EXPERIENCE_LABELS } from '@/lib/experience'
+import { formatExperienceRange } from '@/lib/experience-range'
 import { useFilterParams } from '@/hooks/useFilterParams'
 
 export function FilterTags() {
@@ -24,7 +24,7 @@ export function FilterTags() {
       )}
       {selectedExperience && (
         <Tag variant="filter" onRemove={clearExperience}>
-          {EXPERIENCE_LABELS[selectedExperience]}
+          {formatExperienceRange(selectedExperience)}
         </Tag>
       )}
     </div>
