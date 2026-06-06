@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { Trade } from '@bconnect/api-client'
 import type { Address } from '@bconnect/api-client'
+import { experienceRangeSchema } from '@/lib/experience-range'
 
 const tradeValues = Object.values(Trade) as [string, ...string[]]
 
@@ -17,11 +18,7 @@ export const profileEditSchema = z.object({
     .array(z.enum(tradeValues))
     .min(1, '시공분야를 1개 이상 선택해주세요')
     .max(MAX_TRADES, `시공분야는 최대 ${MAX_TRADES}개까지 선택 가능합니다`),
-  experience: z
-    .number({ error: '경력을 입력해주세요' })
-    .int('정수만 입력 가능합니다')
-    .min(0, '경력은 0년 이상이어야 합니다')
-    .max(50, '경력은 50년 이하로 입력해주세요'),
+  experience: experienceRangeSchema,
   headline: z.string().max(50, '한 줄 소개는 50자 이내로 입력해주세요').optional().nullable(),
   about: z.string().max(500, '소개는 500자 이내로 입력해주세요').optional().nullable(),
   address: z.custom<Address>().nullish(),

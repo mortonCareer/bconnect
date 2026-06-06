@@ -1,6 +1,5 @@
 import { create } from 'zustand'
-
-type ExperienceLevel = 'newcomer' | '1-3' | '3-5' | '5-10' | '10+'
+import type { ExperienceRange } from '@/lib/experience-range'
 
 interface SignupFormData {
   phone: string
@@ -9,7 +8,7 @@ interface SignupFormData {
   name: string
   fields: string[]
   primaryField: string | null
-  experience: ExperienceLevel | null
+  experience: ExperienceRange | null
   affiliation: string
 }
 

@@ -27,6 +27,7 @@ import {
   FormLabel,
   FormMessage,
   SelectField,
+  Slider,
   Tag,
   TextareaField,
   TextField,
@@ -36,28 +37,16 @@ import {
 import { TRADE_LABELS, TRADE_GROUPS } from '@bconnect/api-client'
 import { AddressField } from '@/components/AddressField'
 import { mapKakaoAddress } from '@bconnect/config/address'
+import {
+  DEFAULT_EXPERIENCE_RANGE,
+  EXPERIENCE_MAX,
+  EXPERIENCE_MIN,
+  EXPERIENCE_THUMB_LABELS,
+  apiExperienceToRange,
+  formatExperienceYears,
+  rangeToApiExperience,
+} from '@/lib/experience-range'
 import { MAX_TRADES, profileEditSchema, type ProfileEditFormData } from './schema'
-
-const EXPERIENCE_OPTIONS = [
-  { id: 'newcomer', label: '신입', years: 0 },
-  { id: '1-3', label: '1~3년', years: 2 },
-  { id: '3-5', label: '3~5년', years: 4 },
-  { id: '5-10', label: '5~10년', years: 7 },
-  { id: '10+', label: '10년 이상', years: 15 },
-] as const
-
-function yearsToLevel(years: number | undefined): string | undefined {
-  if (years == null) return undefined
-  if (years === 0) return 'newcomer'
-  if (years <= 3) return '1-3'
-  if (years <= 5) return '3-5'
-  if (years <= 10) return '5-10'
-  return '10+'
-}
-
-function levelToYears(level: string): number {
-  return EXPERIENCE_OPTIONS.find((o) => o.id === level)?.years ?? 0
-}
 
 export default function ProfileEditPage() {
   const router = useRouter()
@@ -79,7 +68,7 @@ export default function ProfileEditPage() {
       phone: '',
       primaryTrade: undefined,
       trades: [],
-      experience: undefined,
+      experience: DEFAULT_EXPERIENCE_RANGE,
       headline: '',
       about: '',
       address: undefined,
@@ -101,7 +90,10 @@ export default function ProfileEditPage() {
         phone: member?.phone ?? '',
         primaryTrade: profile?.primaryTrade ?? undefined,
         trades: profile?.trades ?? [],
-        experience: profile?.experience ?? undefined,
+        experience:
+          profile?.experience != null
+            ? apiExperienceToRange(profile.experience)
+            : DEFAULT_EXPERIENCE_RANGE,
         headline: profile?.headline ?? '',
         about: profile?.about ?? '',
         address: profile?.address ?? undefined,
@@ -140,7 +132,7 @@ export default function ProfileEditPage() {
           data: {
             primaryTrade: data.primaryTrade as Trade,
             trades: data.trades as Trade[],
-            experience: data.experience,
+            experience: rangeToApiExperience(data.experience),
             headline: data.headline || undefined,
             address: data.address ?? mapKakaoAddress(null),
           },
@@ -282,7 +274,7 @@ export default function ProfileEditPage() {
             }))}
           />
 
-          {/* 경력 — 선택형(#427 슬라이더 전환 예정), 텍스트 *Field 대상 아님 */}
+          {/* 경력 */}
           <FormField
             control={control}
             name="experience"
@@ -292,25 +284,15 @@ export default function ProfileEditPage() {
                   경력
                 </FormLabel>
                 <FormControl>
-                  <div tabIndex={-1} className="flex flex-wrap items-center gap-2 outline-none">
-                    {EXPERIENCE_OPTIONS.map((option) => {
-                      const isSelected = yearsToLevel(field.value) === option.id
-                      return (
-                        <button
-                          key={option.id}
-                          type="button"
-                          onClick={() => field.onChange(levelToYears(option.id))}
-                          className={`flex h-10 items-center justify-center rounded-lg border px-3.5 py-[3px] text-sm leading-[1.6] transition-colors ${
-                            isSelected
-                              ? 'border-primary bg-secondary font-semibold text-primary'
-                              : 'border-gray-300 font-medium text-gray-500'
-                          }`}
-                        >
-                          {option.label}
-                        </button>
-                      )
-                    })}
-                  </div>
+                  <Slider
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    min={EXPERIENCE_MIN}
+                    max={EXPERIENCE_MAX}
+                    formatLabel={formatExperienceYears}
+                    thumbLabels={EXPERIENCE_THUMB_LABELS}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

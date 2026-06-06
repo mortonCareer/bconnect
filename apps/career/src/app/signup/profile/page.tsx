@@ -4,8 +4,14 @@
 'use client'
 
 import { AddressField } from '@/components/AddressField'
-import type { ExperienceLevel } from '@/lib/experience'
-import { EXPERIENCE_OPTIONS, EXPERIENCE_TO_YEARS } from '@/lib/experience'
+import {
+  DEFAULT_EXPERIENCE_RANGE,
+  EXPERIENCE_MAX,
+  EXPERIENCE_MIN,
+  EXPERIENCE_THUMB_LABELS,
+  formatExperienceYears,
+  rangeToApiExperience,
+} from '@/lib/experience-range'
 import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
@@ -21,6 +27,7 @@ import {
   FormMessage,
   FormSubmitButton,
   SelectField,
+  Slider,
   Tag,
   TextField,
   passthroughError,
@@ -49,7 +56,7 @@ export default function SignupProfilePage() {
       name: formData.name || '',
       fields: formData.fields || [],
       primaryField: formData.primaryField || undefined,
-      experience: formData.experience || undefined,
+      experience: formData.experience ?? DEFAULT_EXPERIENCE_RANGE,
       affiliation: formData.affiliation || '',
       role: undefined,
       address: undefined,
@@ -108,7 +115,7 @@ export default function SignupProfilePage() {
         data: {
           primaryTrade: data.primaryField as Trade,
           trades: data.fields as Trade[],
-          experience: EXPERIENCE_TO_YEARS[data.experience],
+          experience: rangeToApiExperience(data.experience),
           headline: data.headline || undefined,
           address: data.address ?? mapKakaoAddress(null),
         },
@@ -174,17 +181,15 @@ export default function SignupProfilePage() {
                 <FormItem className="gap-3">
                   <FormLabel required>경력</FormLabel>
                   <FormControl>
-                    <div tabIndex={-1} className="flex flex-wrap gap-2 outline-none">
-                      {EXPERIENCE_OPTIONS.map((option) => (
-                        <Tag
-                          key={option.id}
-                          variant={field.value === option.id ? 'selected' : 'default'}
-                          onClick={() => field.onChange(option.id as ExperienceLevel)}
-                        >
-                          {option.label}
-                        </Tag>
-                      ))}
-                    </div>
+                    <Slider
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      min={EXPERIENCE_MIN}
+                      max={EXPERIENCE_MAX}
+                      formatLabel={formatExperienceYears}
+                      thumbLabels={EXPERIENCE_THUMB_LABELS}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
