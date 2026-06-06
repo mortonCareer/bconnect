@@ -50,7 +50,7 @@ export function OneClickTab({ credentials, onDelete, isDeleting }: OneClickTabPr
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-m-14 text-gray-900">대표자성명</label>
+          <label className="text-m-14 text-gray-900">대표자 성명</label>
           <Input
             placeholder="홍길동"
             value={ownerName}
@@ -67,7 +67,7 @@ export function OneClickTab({ credentials, onDelete, isDeleting }: OneClickTabPr
         </div>
       </div>
 
-      <Button variant="secondary" size="full" onClick={handleSearch} isLoading={isSearching}>
+      <Button variant="primary" size="full" onClick={handleSearch} isLoading={isSearching}>
         조회하기
       </Button>
 
