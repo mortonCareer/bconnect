@@ -13,13 +13,10 @@ import { useCallback } from 'react'
  *   const onError = useScrollToError()
  *   <button onClick={handleSubmit(onSubmit, onError)} />
  */
-export function useScrollToError(options?: {
-  behavior?: ScrollBehavior
-  block?: ScrollLogicalPosition
-}): () => void {
-  const behavior = options?.behavior ?? 'smooth'
-  const block = options?.block ?? 'center'
-
+export function useScrollToError({
+  behavior = 'smooth',
+  block = 'center',
+}: { behavior?: ScrollBehavior; block?: ScrollLogicalPosition } = {}): () => void {
   return useCallback(() => {
     // onInvalid 직후엔 setError re-render 가 아직 DOM 에 commit 안 됨 → 다음 paint 까지 대기
     requestAnimationFrame(() => {

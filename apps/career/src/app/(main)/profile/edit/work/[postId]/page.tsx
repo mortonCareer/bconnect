@@ -123,7 +123,7 @@ export default function EditWorkPage() {
                             {...field}
                             placeholder={meta?.placeholder}
                             className={cn(
-                              'h-auto rounded-none border-0 p-0 text-sm text-gray-700 focus:ring-0',
+                              'h-auto rounded-none border-0 p-0 text-sm text-gray-700',
                               fieldState.error && 'ring-1 ring-destructive'
                             )}
                           />
@@ -173,7 +173,7 @@ export default function EditWorkPage() {
                 id="work-detail"
                 {...form.register('detail')}
                 placeholder="상세주소를 입력해주세요 (동/호 등)"
-                className="h-auto rounded-none border-0 p-0 text-sm text-gray-700 focus:ring-0"
+                className="h-auto rounded-none border-0 p-0 text-sm text-gray-700"
               />
               <FormError error={form.formState.errors.detail?.message} />
             </div>
@@ -186,7 +186,7 @@ export default function EditWorkPage() {
               name="description"
               aria-label={descriptionMeta?.label}
               placeholder={descriptionMeta?.placeholder}
-              className="min-h-50 rounded-none resize-none p-0 border-0 text-sm focus:ring-0"
+              className="min-h-50 rounded-none resize-none p-0 border-0 text-sm"
             />
           </div>
         </form>
