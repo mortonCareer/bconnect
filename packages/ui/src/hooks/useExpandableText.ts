@@ -7,7 +7,7 @@ type Axis = 'height' | 'width'
 /**
  * 더보기/접기 텍스트 공통 로직 — overflow 측정 + 펼침 상태.
  * axis='height': 세로 line-clamp (scrollHeight), axis='width': 가로 truncate (scrollWidth).
- * 레이아웃/마크업은 호출부가 소유한다 (RecommendationItem 세로, WorkCard 가로).
+ * 레이아웃/마크업은 호출부가 소유한다 (RecommendationItem 세로, WorkCard·Feed 가로).
  */
 export function useExpandableText(deps: DependencyList, axis: Axis = 'height') {
   const ref = useRef<HTMLParagraphElement>(null)

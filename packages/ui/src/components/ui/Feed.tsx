@@ -1,11 +1,12 @@
 /**
- * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-5449
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=352-2767
  */
 'use client'
 
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { MoreVerticalIcon } from '../../icons'
+import { useExpandableText } from '../../hooks'
 import { cn } from '../../lib/utils'
 
 /**
@@ -26,9 +27,7 @@ const feedVariants = cva('flex flex-col gap-3 items-stretch', {
 })
 
 export interface FeedProps
-  extends
-    Omit<React.HTMLAttributes<HTMLDivElement>, 'content' | 'onToggle'>,
-    VariantProps<typeof feedVariants> {
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'content'>, VariantProps<typeof feedVariants> {
   /**
    * 피드 컨텐츠
    */
@@ -40,14 +39,6 @@ export interface FeedProps
     timestamp: string
     description: string
   }
-  /**
-   * 초기 펼침 상태 (기본값: false)
-   */
-  defaultExpanded?: boolean
-  /**
-   * 더보기/접기 버튼 클릭 핸들러
-   */
-  onToggle?: (expanded: boolean) => void
   /**
    * 케밥(⋮) 메뉴 클릭 핸들러
    */
@@ -72,23 +63,13 @@ export interface FeedProps
  * ```
  */
 export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
-  ({ className, content, defaultExpanded = false, onToggle, onMore, variant, ...props }, ref) => {
-    const [isExpanded, setIsExpanded] = React.useState(defaultExpanded)
-    const [isTruncated, setIsTruncated] = React.useState(false)
-    const textRef = React.useRef<HTMLParagraphElement>(null)
-
-    React.useEffect(() => {
-      if (isExpanded) return
-      const el = textRef.current
-      if (!el) return
-      setIsTruncated(el.scrollWidth > el.clientWidth)
-    }, [isExpanded, content.description])
-
-    const handleToggle = () => {
-      const newState = !isExpanded
-      setIsExpanded(newState)
-      onToggle?.(newState)
-    }
+  ({ className, content, onMore, variant, ...props }, ref) => {
+    const {
+      ref: textRef,
+      expanded: isExpanded,
+      showToggle,
+      toggle: handleToggle,
+    } = useExpandableText([content.description], 'width')
 
     const effectiveVariant = isExpanded ? 'expanded' : 'collapsed'
 
@@ -145,7 +126,7 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
           >
             {content.description}
           </p>
-          {(isExpanded || isTruncated) && (
+          {showToggle && (
             <button
               type="button"
               onClick={handleToggle}

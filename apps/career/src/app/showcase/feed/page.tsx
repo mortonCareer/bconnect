@@ -59,49 +59,9 @@ export default function FeedDetailPage() {
           <section className="mb-12">
             <h2 className="mb-4 text-xl font-semibold text-gray-800">Variants</h2>
             <div className="space-y-6">
-              {/* Collapsed State */}
+              {/* 본문이 길면 더보기/접기 토글 (클릭) */}
               <div className="rounded-lg border p-6">
-                <p className="mb-3 text-sm font-medium text-gray-500">Collapsed - 접힌 상태</p>
-                <div className="mx-auto max-w-md">
-                  <Feed
-                    content={{
-                      image:
-                        'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop',
-                      company: '서정 건축',
-                      duration: '4일 소요',
-                      timestamp: '3일 전',
-                      description:
-                        '골프장 전원주택 도배 시공을 진행하였습니다. 골프장 전원주택 도배 시공을 진행하였습니다.원주택 도배 시공을 ',
-                    }}
-                    defaultExpanded={false}
-                  />
-                </div>
-              </div>
-
-              {/* Expanded State */}
-              <div className="rounded-lg border p-6">
-                <p className="mb-3 text-sm font-medium text-gray-500">Expanded - 펼쳐진 상태</p>
-                <div className="mx-auto max-w-md">
-                  <Feed
-                    content={{
-                      image:
-                        'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop',
-                      company: '서정 건축',
-                      duration: '4일 소요',
-                      timestamp: '3일 전',
-                      description:
-                        '골프장 전원주택 도배 시공을 진행하였습니다. 골프장 전원주택 도배 시공을 진행하였습니다.원주택 도배 시공을 ',
-                    }}
-                    defaultExpanded={true}
-                  />
-                </div>
-              </div>
-
-              {/* Interactive Toggle */}
-              <div className="rounded-lg border p-6">
-                <p className="mb-3 text-sm font-medium text-gray-500">
-                  Interactive - 더보기/접기 토글
-                </p>
+                <p className="mb-3 text-sm font-medium text-gray-500">기본 - 본문 길면 더보기</p>
                 <div className="mx-auto max-w-md">
                   <Feed
                     content={{
@@ -113,9 +73,7 @@ export default function FeedDetailPage() {
                       description:
                         '신축 아파트 욕실 타일 시공을 완료했습니다. 고급 이탈리아산 대리석 타일을 사용하여 프리미엄 마감을 진행하였으며, 방수 작업도 완벽하게 처리했습니다.',
                     }}
-                    onToggle={(expanded) => {
-                      console.log('Toggle state:', expanded)
-                    }}
+                    onMore={() => console.log('더보기 메뉴')}
                   />
                 </div>
               </div>
@@ -150,30 +108,6 @@ export default function FeedDetailPage() {
                   </tr>
                   <tr>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">defaultExpanded</code>
-                    </td>
-                    <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">boolean</code>
-                    </td>
-                    <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">false</code>
-                    </td>
-                    <td className="p-3">초기 펼침 상태</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">onToggle</code>
-                    </td>
-                    <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">
-                        (expanded: boolean) =&gt; void
-                      </code>
-                    </td>
-                    <td className="p-3">-</td>
-                    <td className="p-3">더보기/접기 버튼 클릭 핸들러</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3">
                       <code className="rounded bg-gray-100 px-1">onMore</code>
                     </td>
                     <td className="p-3">
@@ -203,20 +137,6 @@ export default function FeedDetailPage() {
     description: '골프장 전원주택 도배 시공을 진행하였습니다...',
   }}
   onMore={() => openMenu()}
-/>
-
-// With toggle handler
-<Feed
-  content={{ ... }}
-  onToggle={(expanded) => {
-    console.log('Expanded:', expanded)
-  }}
-/>
-
-// Initially expanded
-<Feed
-  content={{ ... }}
-  defaultExpanded={true}
 />`}
             </pre>
           </section>
