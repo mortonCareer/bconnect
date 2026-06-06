@@ -46,9 +46,13 @@ export interface FeedProps
    */
   canManage?: boolean
   /**
-   * 수정 액션 (케밥 → 수정)
+   * 수정 페이지 href — 케밥 → 수정 은 선언적 링크로 이동
    */
-  onEdit?: () => void
+  editHref?: string
+  /**
+   * 링크 컴포넌트 (Next.js Link 등). 미지정 시 <a> 태그 사용
+   */
+  LinkComponent?: React.ElementType
   /**
    * 삭제 액션 (케밥 → 삭제)
    */
@@ -69,13 +73,17 @@ export interface FeedProps
  *     description: '골프장 전원주택 도배 시공을 진행하였습니다.',
  *   }}
  *   canManage
- *   onEdit={() => router.push('/profile/edit/work/1')}
+ *   editHref="/profile/edit/work/1"
+ *   LinkComponent={Link}
  *   onDelete={() => deletePost(1)}
  * />
  * ```
  */
 export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
-  ({ className, content, canManage = false, onEdit, onDelete, variant, ...props }, ref) => {
+  (
+    { className, content, canManage = false, editHref, LinkComponent, onDelete, variant, ...props },
+    ref
+  ) => {
     const {
       ref: textRef,
       expanded: isExpanded,
@@ -83,6 +91,7 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
       toggle: handleToggle,
     } = useExpandableText([content.description], 'width')
     const [menuOpen, setMenuOpen] = React.useState(false)
+    const EditLink = LinkComponent ?? 'a'
 
     const effectiveVariant = isExpanded ? 'expanded' : 'collapsed'
 
@@ -168,17 +177,14 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
                   <div className="h-1 w-9 rounded-full bg-gray-300" />
                 </div>
                 <div className="flex flex-col py-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false)
-                      onEdit?.()
-                    }}
+                  <EditLink
+                    href={editHref}
+                    onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-3 px-5 py-3.5 text-m-16 text-gray-900 hover:bg-gray-50"
                   >
                     <SquarePen size={20} />
                     수정
-                  </button>
+                  </EditLink>
                   <button
                     type="button"
                     onClick={() => {

@@ -3,10 +3,12 @@
  */
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { Feed, ChevronIcon } from '@bconnect/ui'
+import { Feed, ChevronIcon, ConfirmDialog } from '@bconnect/ui'
 
 export default function FeedDetailPage() {
+  const [confirmOpen, setConfirmOpen] = useState(false)
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-4xl">
@@ -76,8 +78,18 @@ export default function FeedDetailPage() {
                         '신축 아파트 욕실 타일 시공을 완료했습니다. 고급 이탈리아산 대리석 타일을 사용하여 프리미엄 마감을 진행하였으며, 방수 작업도 완벽하게 처리했습니다.',
                     }}
                     canManage
-                    onEdit={() => console.log('수정')}
-                    onDelete={() => console.log('삭제')}
+                    editHref="/profile/edit/work/1"
+                    LinkComponent={Link}
+                    onDelete={() => setConfirmOpen(true)}
+                  />
+                  <ConfirmDialog
+                    open={confirmOpen}
+                    onOpenChange={setConfirmOpen}
+                    title="게시물을 삭제할까요?"
+                    description="삭제한 게시물은 복구할 수 없어요."
+                    confirmLabel="삭제"
+                    destructive
+                    onConfirm={() => setConfirmOpen(false)}
                   />
                 </div>
               </div>
@@ -124,13 +136,25 @@ export default function FeedDetailPage() {
                   </tr>
                   <tr>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">onEdit</code>
+                      <code className="rounded bg-gray-100 px-1">editHref</code>
                     </td>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">() =&gt; void</code>
+                      <code className="rounded bg-gray-100 px-1">string</code>
                     </td>
                     <td className="p-3">-</td>
-                    <td className="p-3">케밥 → 수정 액션</td>
+                    <td className="p-3">케밥 → 수정 이동 href (선언적 링크)</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">LinkComponent</code>
+                    </td>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">ElementType</code>
+                    </td>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">a</code>
+                    </td>
+                    <td className="p-3">수정 링크 컴포넌트 (Next.js Link 등)</td>
                   </tr>
                   <tr>
                     <td className="p-3">
@@ -163,8 +187,9 @@ export default function FeedDetailPage() {
     description: '골프장 전원주택 도배 시공을 진행하였습니다...',
   }}
   canManage
-  onEdit={() => router.push('/profile/edit/work/1')}
-  onDelete={() => deletePost(1)}
+  editHref="/profile/edit/work/1"
+  LinkComponent={Link}
+  onDelete={() => setPendingDelete(1)}
 />`}
             </pre>
           </section>

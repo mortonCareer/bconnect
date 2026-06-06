@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { TRADE_LABELS, useGetFeeds } from '@bconnect/api-client'
+import { TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
 import type { Trade } from '@bconnect/api-client'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { getAvatarUrl } from '@bconnect/config/avatar'
@@ -9,6 +9,8 @@ import { getAvatarUrl } from '@bconnect/config/avatar'
 export interface FeedItem {
   postId: number
   memberId?: number
+  /** 현재 로그인 사용자의 게시물 여부 — 케밥(수정/삭제) 노출 게이트 */
+  isMine: boolean
   profile: {
     image: string
     name: string
@@ -42,6 +44,7 @@ export function useFeedItems({
   authorId,
 }: UseFeedItemsOptions = {}) {
   const { data: feeds, isLoading, error } = useGetFeeds()
+  const currentUserId = useGetMyMember().data?.id
 
   const feedItems: FeedItem[] = useMemo(() => {
     if (!feeds) return []
@@ -63,6 +66,7 @@ export function useFeedItems({
         return {
           postId: post.id,
           memberId: member.id,
+          isMine: currentUserId != null && member.id === currentUserId,
           profile: {
             // picture nullable → 빈 string fallback 시 <img src=""> 가 page URL 재 fetch 하는
             // 브라우저 anti-pattern. DiceBear 아바타 (getAvatarUrl) 로 deterministic fallback.
@@ -85,7 +89,7 @@ export function useFeedItems({
         }
       })
       .filter((item): item is FeedItem => item !== null)
-  }, [feeds, trade, minExperience, maxExperience, authorId])
+  }, [feeds, trade, minExperience, maxExperience, authorId, currentUserId])
 
   return {
     feedItems,

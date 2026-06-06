@@ -1,22 +1,16 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import {
-  useGetMyMember,
-  useDeletePost,
-  useQueryClient,
-  getGetFeedsQueryKey,
-} from '@bconnect/api-client'
-import { Feed } from '@bconnect/ui'
+import { useEffect, useRef, useCallback, useState } from 'react'
+import Link from 'next/link'
+import { useDeletePost, useQueryClient, getGetFeedsQueryKey } from '@bconnect/api-client'
+import { Feed, ConfirmDialog } from '@bconnect/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { useFilterParams } from '@/hooks/useFilterParams'
 
 export function FeedList() {
-  const router = useRouter()
   const queryClient = useQueryClient()
-  const currentUserId = useGetMyMember().data?.id
   const { mutate: deletePost } = useDeletePost()
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
   const { primaryTrade, expRange } = useFilterParams()
 
   const { feedItems, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useFeedItems({
@@ -86,16 +80,10 @@ export function FeedList() {
         <Feed
           key={item.postId}
           content={item.content}
-          canManage={item.memberId != null && item.memberId === currentUserId}
-          onEdit={() => router.push(`/profile/edit/work/${item.postId}`)}
-          onDelete={() =>
-            deletePost(
-              { postId: item.postId },
-              {
-                onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFeedsQueryKey() }),
-              }
-            )
-          }
+          canManage={item.isMine}
+          editHref={`/profile/edit/work/${item.postId}`}
+          LinkComponent={Link}
+          onDelete={() => setPendingDeleteId(item.postId)}
         />
       ))}
 
@@ -107,6 +95,25 @@ export function FeedList() {
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-primary" />
         </div>
       )}
+
+      <ConfirmDialog
+        open={pendingDeleteId != null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteId(null)
+        }}
+        title="게시물을 삭제할까요?"
+        description="삭제한 게시물은 복구할 수 없어요."
+        confirmLabel="삭제"
+        destructive
+        onConfirm={() => {
+          if (pendingDeleteId == null) return
+          deletePost(
+            { postId: pendingDeleteId },
+            { onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFeedsQueryKey() }) }
+          )
+          setPendingDeleteId(null)
+        }}
+      />
     </div>
   )
 }
