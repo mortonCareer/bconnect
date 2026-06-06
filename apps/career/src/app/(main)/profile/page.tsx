@@ -5,6 +5,7 @@
 'use client'
 
 import { useCallback } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   useGetMyMember,
@@ -111,13 +112,8 @@ export default function MyProfilePage() {
       />
 
       <div className="flex gap-2 px-4 py-3">
-        <Button
-          variant="outline"
-          size="full"
-          className="flex-1"
-          onClick={() => router.push('/profile/edit')}
-        >
-          프로필 수정
+        <Button asChild variant="outline" size="full" className="flex-1">
+          <Link href="/profile/edit">프로필 수정</Link>
         </Button>
         <Button variant="outline" size="full" className="flex-1" onClick={handleShare}>
           공유하기

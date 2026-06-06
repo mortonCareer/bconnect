@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { TRADE_LABELS, useGetProfile } from '@bconnect/api-client'
 import { ChevronIcon } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
@@ -10,7 +10,6 @@ interface CoworkerCardProps {
 }
 
 export function CoworkerCard({ profileId }: CoworkerCardProps) {
-  const router = useRouter()
   // useGetProfile 응답 = ProfileAndMember = { member, profile } (member 도 함께 옴)
   const { data: profileAndMember, isLoading } = useGetProfile(profileId)
   const member = profileAndMember?.member
@@ -38,9 +37,8 @@ export function CoworkerCard({ profileId }: CoworkerCardProps) {
   const intro = profile?.headline
 
   return (
-    <button
-      type="button"
-      onClick={() => router.push(`/profile/${profileId}`)}
+    <Link
+      href={`/profile/${profileId}`}
       className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 transition-colors active:bg-gray-100"
     >
       {/* 프로필 이미지 */}
@@ -63,6 +61,6 @@ export function CoworkerCard({ profileId }: CoworkerCardProps) {
 
       {/* 오른쪽 화살표 */}
       <ChevronIcon direction="right" className="text-gray-400" />
-    </button>
+    </Link>
   )
 }

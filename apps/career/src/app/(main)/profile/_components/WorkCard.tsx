@@ -35,6 +35,10 @@ export function WorkCard({
     setIsTruncated(el.scrollWidth > el.clientWidth)
   }, [isExpanded, description])
 
+  const handleEdit = () => {
+    if (postId) router.push(`/profile/edit/work/${postId}`)
+  }
+
   return (
     <div className="flex flex-col">
       {/* 카드 헤더 — 건축주명 · 소요기간 + 날짜 + 액션 */}
@@ -54,7 +58,7 @@ export function WorkCard({
           {/* ⋮ 액션 버튼 */}
           <button
             className="flex h-6 w-6 items-center justify-center text-gray-500"
-            onClick={() => postId && router.push(`/profile/edit/work/${postId}`)}
+            onClick={handleEdit}
           >
             <MoreVerticalIcon size={16} />
           </button>

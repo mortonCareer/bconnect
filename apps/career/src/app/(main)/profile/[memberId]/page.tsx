@@ -4,6 +4,7 @@
  */
 'use client'
 
+import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import {
   useGetProfile,
@@ -122,13 +123,8 @@ export default function MemberProfilePage() {
         >
           {isRequested ? '요청됨' : isRequesting ? '요청 중...' : '동료 추가'}
         </Button>
-        <Button
-          variant="outline"
-          size="full"
-          className="flex-1"
-          onClick={() => router.push('/messages')}
-        >
-          메시지 보내기
+        <Button asChild variant="outline" size="full" className="flex-1">
+          <Link href="/messages">메시지 보내기</Link>
         </Button>
       </div>
 

@@ -3,6 +3,7 @@
  */
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   useQueryClient,
@@ -76,12 +77,8 @@ export default function CertificationsPage() {
 
       {/* 인증 추가하기 버튼 */}
       <div className="px-4 py-3">
-        <Button
-          variant="outline"
-          size="full"
-          onClick={() => router.push('/profile/certifications/apply')}
-        >
-          인증 추가하기
+        <Button asChild variant="outline" size="full">
+          <Link href="/profile/certifications/apply">인증 추가하기</Link>
         </Button>
         <p className="mt-2 text-center text-r-12 text-gray-500">
           인증 정보를 프로필에 표시하고 신뢰도를 높여보세요
