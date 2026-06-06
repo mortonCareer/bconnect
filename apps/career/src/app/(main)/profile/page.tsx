@@ -64,7 +64,7 @@ export default function MyProfilePage() {
   if (isLoading) {
     return (
       <div className="flex flex-col">
-        <TopBar variant="default" title="내 프로필" showAction={false} />
+        <TopBar variant="default" title="내 프로필" showAction={false} showBack={false} />
         <div className="flex flex-1 items-center justify-center py-20">
           <p className="text-m-14 text-gray-500">로딩 중...</p>
         </div>
@@ -93,7 +93,12 @@ export default function MyProfilePage() {
 
   return (
     <div className="flex flex-col">
-      <TopBar variant="default" title={member.username ?? '내 프로필'} showAction={false} />
+      <TopBar
+        variant="default"
+        title={member.username ?? '내 프로필'}
+        showAction={false}
+        showBack={false}
+      />
 
       <ProfileHeader
         name={member.name}

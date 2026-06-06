@@ -57,6 +57,7 @@ export interface TopBarProps
   actionLabel?: string
   onAction?: () => void
   showAction?: boolean
+  showBack?: boolean
   chatCount?: number
   onFilter?: () => void
   onChat?: () => void
@@ -76,6 +77,7 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       actionLabel = '완료',
       onAction,
       showAction = true,
+      showBack = true,
       chatCount,
       onFilter,
       onChat,
@@ -88,7 +90,9 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
     const backButtonClass =
       'flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
 
-    const BackButton = backHref ? (
+    const BackButton = !showBack ? (
+      <div className="size-5" />
+    ) : backHref ? (
       <a href={backHref} className={backButtonClass} aria-label="뒤로가기">
         <ChevronIcon direction="left" className="text-[#a5a5a5]" />
       </a>
