@@ -2,6 +2,7 @@ import { getBconnectAPIMock } from '@bconnect/api-client'
 import { delay, http } from 'msw'
 import { authOverrides } from './overrides/auth'
 import { chatsOverrides } from './overrides/chats'
+import { coworkersOverrides } from './overrides/coworkers'
 import { devicesOverrides } from './overrides/devices'
 import { membersOverrides } from './overrides/members'
 import { notificationsOverrides } from './overrides/notifications'
@@ -30,6 +31,7 @@ export const handlers = [
   globalDelay,
   ...authOverrides,
   ...chatsOverrides,
+  ...coworkersOverrides,
   ...devicesOverrides,
   ...membersOverrides,
   ...notificationsOverrides,

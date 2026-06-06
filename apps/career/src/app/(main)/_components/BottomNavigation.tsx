@@ -19,7 +19,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/profile', label: '내 정보', icon: ProfileIcon },
 ]
 
-export function BottomNav() {
+export function BottomNavigation() {
   const pathname = usePathname()
 
   if (isBottomNavHidden(pathname)) return null
