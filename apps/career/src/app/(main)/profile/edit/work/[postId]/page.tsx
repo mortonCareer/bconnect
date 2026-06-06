@@ -7,12 +7,18 @@ import {
   AddressSearchSheet,
   cn,
   Form,
+  FormControl,
   FormError,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
   ImageField,
   Input,
   Label,
   TextareaField,
   TopBar,
+  useScrollToError,
 } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
@@ -73,10 +79,11 @@ export default function EditWorkPage() {
     },
   })
 
+  const scrollToError = useScrollToError()
   const onSave = form.handleSubmit(() => {
     // TODO: Post + Task 수정 API 연동 (#197)
     router.back()
-  })
+  }, scrollToError)
 
   const descriptionMeta = fieldMeta.get(workSchema.shape.description)
   const address = useWatch({ control: form.control, name: 'address' })
@@ -103,23 +110,29 @@ export default function EditWorkPage() {
             {META_FIELD_NAMES.map((name) => {
               const meta = fieldMeta.get(workSchema.shape[name])
               return (
-                <div key={name} className="flex items-start gap-2">
-                  <Label htmlFor={`work-${name}`} className="w-20 shrink-0 text-gray-900">
-                    {meta?.label}
-                  </Label>
-                  <div className="flex flex-1 flex-col gap-1">
-                    <Input
-                      id={`work-${name}`}
-                      {...form.register(name)}
-                      placeholder={meta?.placeholder}
-                      className={cn(
-                        'h-auto rounded-none border-0 p-0 text-sm text-gray-700 focus:ring-0',
-                        form.formState.errors[name] && 'ring-1 ring-destructive'
-                      )}
-                    />
-                    <FormError error={form.formState.errors[name]?.message} />
-                  </div>
-                </div>
+                <FormField
+                  key={name}
+                  control={form.control}
+                  name={name}
+                  render={({ field, fieldState }) => (
+                    <FormItem className="flex items-start gap-2">
+                      <FormLabel className="w-20 shrink-0 text-gray-900">{meta?.label}</FormLabel>
+                      <div className="flex flex-1 flex-col gap-1">
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder={meta?.placeholder}
+                            className={cn(
+                              'h-auto rounded-none border-0 p-0 text-sm text-gray-700',
+                              fieldState.error && 'ring-1 ring-destructive'
+                            )}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
               )
             })}
           </div>
@@ -134,6 +147,7 @@ export default function EditWorkPage() {
                 id="work-address"
                 type="button"
                 onClick={() => setAddressOpen(true)}
+                data-invalid={form.formState.errors.address ? true : undefined}
                 className="cursor-pointer text-left text-sm text-gray-700"
               >
                 {address || <span className="text-gray-400">현장주소를 검색해주세요</span>}
@@ -159,7 +173,7 @@ export default function EditWorkPage() {
                 id="work-detail"
                 {...form.register('detail')}
                 placeholder="상세주소를 입력해주세요 (동/호 등)"
-                className="h-auto rounded-none border-0 p-0 text-sm text-gray-700 focus:ring-0"
+                className="h-auto rounded-none border-0 p-0 text-sm text-gray-700"
               />
               <FormError error={form.formState.errors.detail?.message} />
             </div>
@@ -172,7 +186,7 @@ export default function EditWorkPage() {
               name="description"
               aria-label={descriptionMeta?.label}
               placeholder={descriptionMeta?.placeholder}
-              className="min-h-50 rounded-none resize-none p-0 border-0 text-sm focus:ring-0"
+              className="min-h-50 rounded-none resize-none p-0 border-0 text-sm"
             />
           </div>
         </form>

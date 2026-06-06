@@ -2,7 +2,15 @@
 
 import { TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
 import type { Trade } from '@bconnect/api-client'
-import { FormDescription, FormField, FormItem, FormLabel, FormMessage, Tag } from '@bconnect/ui'
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Tag,
+} from '@bconnect/ui'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
 
 interface TradeSelectorProps<T extends FieldValues> {
@@ -35,22 +43,26 @@ export function TradeSelector<T extends FieldValues>({
             <FormDescription>
               최대 {max}개까지 선택 가능해요 ({selected.length}/{max})
             </FormDescription>
-            {TRADE_GROUPS.map((group) => (
-              <div key={group.label} className="flex flex-col gap-3">
-                <p className="text-m-14 text-gray-700">{group.label}</p>
-                <div className="flex flex-wrap gap-2">
-                  {group.trades.map((trade) => (
-                    <Tag
-                      key={trade}
-                      variant={selected.includes(trade) ? 'selected' : 'default'}
-                      onClick={() => toggle(trade)}
-                    >
-                      {TRADE_LABELS[trade]}
-                    </Tag>
-                  ))}
-                </div>
+            <FormControl>
+              <div tabIndex={-1} className="flex flex-col gap-3 outline-none">
+                {TRADE_GROUPS.map((group) => (
+                  <div key={group.label} className="flex flex-col gap-3">
+                    <p className="text-m-14 text-gray-700">{group.label}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {group.trades.map((trade) => (
+                        <Tag
+                          key={trade}
+                          variant={selected.includes(trade) ? 'selected' : 'default'}
+                          onClick={() => toggle(trade)}
+                        >
+                          {TRADE_LABELS[trade]}
+                        </Tag>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </FormControl>
             <FormMessage />
           </FormItem>
         )
