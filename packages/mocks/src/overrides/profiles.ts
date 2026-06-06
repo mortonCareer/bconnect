@@ -1,4 +1,10 @@
-import { getGetProfileMockHandler, getGetProfileResponseMock, Trade } from '@bconnect/api-client'
+import {
+  getGetProfileMockHandler,
+  getGetProfileResponseMock,
+  getGetMyProfileMockHandler,
+  getGetMyProfileResponseMock,
+  Trade,
+} from '@bconnect/api-client'
 
 const HEADLINE = '안녕하세요, 타일 준기공 이송목입니다. 믿고 맡겨주신다면 성실히 임하겠습니다.'
 
@@ -12,6 +18,7 @@ lsm3645@g.skku.edu
 #타일 #수입타일 #욕실타일 #바닥타일`
 
 export const profilesOverrides = [
+  getGetMyProfileMockHandler(() => ({ ...getGetMyProfileResponseMock(), id: 1 })),
   getGetProfileMockHandler(() => {
     const base = getGetProfileResponseMock()
     return {
