@@ -1,9 +1,9 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { getCredentialLabel, getTradeLabel } from '@bconnect/api-client'
 import type { Credential, Profile, Recommendation } from '@bconnect/api-client'
-import { Tab, Tag } from '@bconnect/ui'
+import { cn, Tag } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 import { useQueryState } from 'nuqs'
 
@@ -15,11 +15,6 @@ interface IntroSectionProps {
   sentRecommendations: Recommendation[]
 }
 
-const REC_TABS = [
-  { key: 'received', label: '받은 추천서' },
-  { key: 'sent', label: '보낸 추천서' },
-]
-
 export function IntroSection({
   profile,
   credentials,
@@ -27,7 +22,6 @@ export function IntroSection({
   receivedRecommendations,
   sentRecommendations,
 }: IntroSectionProps) {
-  const router = useRouter()
   const { about } = profile
 
   const [recTab, setRecTab] = useQueryState('rec', { defaultValue: 'received' })
@@ -42,12 +36,12 @@ export function IntroSection({
         <div className="flex items-center justify-between">
           <span className="text-sb-16 text-gray-900">인증</span>
           {isOwner && (
-            <button
-              className="text-r-12 text-primary underline"
-              onClick={() => router.push('/profile/certifications')}
+            <Link
+              href="/profile/certifications"
+              className="cursor-pointer text-r-12 text-primary underline"
             >
               편집
-            </button>
+            </Link>
           )}
         </div>
         {acceptedCredentials.length > 0 ? (
@@ -68,12 +62,12 @@ export function IntroSection({
         <div className="flex items-center justify-between">
           <span className="text-sb-16 text-gray-900">소개</span>
           {isOwner && (
-            <button
-              className="text-r-12 text-primary underline"
-              onClick={() => router.push('/profile/edit/about')}
+            <Link
+              href="/profile/edit/about"
+              className="cursor-pointer text-r-12 text-primary underline"
             >
               편집
-            </button>
+            </Link>
           )}
         </div>
         {about ? (
@@ -98,15 +92,40 @@ export function IntroSection({
         <div className="flex items-center justify-between">
           <span className="text-sb-16 text-gray-900">추천서</span>
           {isOwner && (
-            <button
-              className="text-r-12 text-primary underline"
-              onClick={() => router.push('/profile/recommendations')}
+            <Link
+              href="/profile/recommendations"
+              className="cursor-pointer text-r-12 text-primary underline"
             >
               편집
-            </button>
+            </Link>
           )}
         </div>
-        <Tab items={REC_TABS} activeKey={recTab} onChange={setRecTab} />
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setRecTab('received')}
+            className={cn(
+              'cursor-pointer rounded-md border border-gray-300 px-3 py-2',
+              recTab === 'received'
+                ? 'bg-gray-100 text-sb-14 text-gray-900'
+                : 'bg-white text-r-14 text-gray-900'
+            )}
+          >
+            받은 추천서
+          </button>
+          <button
+            type="button"
+            onClick={() => setRecTab('sent')}
+            className={cn(
+              'cursor-pointer rounded-md border border-gray-300 px-3 py-2',
+              recTab === 'sent'
+                ? 'bg-gray-100 text-sb-14 text-gray-900'
+                : 'bg-white text-r-14 text-gray-900'
+            )}
+          >
+            보낸 추천서
+          </button>
+        </div>
         {recommendations.length > 0 ? (
           <div className="flex flex-col divide-y divide-gray-300">
             {recommendations.map((rec) => {
