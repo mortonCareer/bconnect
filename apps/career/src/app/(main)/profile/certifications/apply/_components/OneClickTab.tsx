@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { getCredentialLabel } from '@bconnect/api-client'
 import type { Credential } from '@bconnect/api-client'
-import { Button, CheckCircleIcon, Input } from '@bconnect/ui'
+import { Button, Input } from '@bconnect/ui'
 import { formatDate } from '@bconnect/config/format'
 
 interface OneClickTabProps {
@@ -71,6 +71,9 @@ export function OneClickTab({ credentials, onDelete, isDeleting }: OneClickTabPr
         조회하기
       </Button>
 
+      {/* 업데이트 날짜 */}
+      <p className="text-center text-r-12 text-gray-700">2026.02.21 업데이트됨</p>
+
       {/* 하단 인증 목록 — 심플 리스트 */}
       {oneClickCredentials.length > 0 && (
         <div className="flex flex-col border-t border-gray-300 pt-4">
@@ -98,13 +101,6 @@ export function OneClickTab({ credentials, onDelete, isDeleting }: OneClickTabPr
               </button>
             </div>
           ))}
-        </div>
-      )}
-
-      {oneClickCredentials.length > 0 && (
-        <div className="flex items-center gap-2.5 rounded-md bg-secondary-50 px-5 py-3">
-          <CheckCircleIcon size={18} className="shrink-0 text-primary" />
-          <p className="text-m-14 text-primary">면허 정보가 갱신되었어요.</p>
         </div>
       )}
     </div>
