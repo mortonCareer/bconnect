@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import {
   useGetChat,
@@ -14,17 +14,31 @@ import { ChatInput, ChatListItem, Skeleton } from '@bconnect/ui'
 import { PanelShell } from '../_shared/PanelShell'
 import { MessageThread } from './MessageThread'
 
-export interface ChatViewProps {
+type ChatViewProps = {
   chatId: number
-  closeHref: string
-  onClose: () => void
-  /** 목록 패널 href — 헤더 뒤로가기 */
-  backHref: string
-  /** 상대 프로필 패널 href 빌더 — 앱이 주입 (plan: panelHref('/profile/'+id)) */
+  /** 상대 프로필 패널/페이지 href 빌더 — 앱이 주입 (plan: panelHref, career: '/profile/'+id) */
   profileHref?: (memberId: number) => string
-}
+} & (
+  | {
+      /** 풀페이지 등 비-패널 쉘 주입 (career 풀페이지 라우트). title 은 비동기 도출분을 전달받음 */
+      renderShell: (props: { title: string; children: ReactNode }) => ReactNode
+      closeHref?: never
+      onClose?: never
+      backHref?: never
+    }
+  | {
+      /** 기본 @panel 쉘 (plan) */
+      renderShell?: never
+      closeHref: string
+      onClose: () => void
+      backHref: string
+    }
+)
 
-export function ChatView({ chatId, closeHref, onClose, backHref, profileHref }: ChatViewProps) {
+export type { ChatViewProps }
+
+export function ChatView(props: ChatViewProps) {
+  const { chatId, profileHref } = props
   const enabled = Number.isFinite(chatId) && chatId > 0
   const currentUserId = useGetMyMember().data?.id
   const { data: chat, isLoading, isError } = useGetChat(chatId, { query: { enabled } })
@@ -43,7 +57,7 @@ export function ChatView({ chatId, closeHref, onClose, backHref, profileHref }: 
     if (currentUserId == null) return
     const content = message.trim()
     if (!content) return
-    // 전송 엔드포인트 부재(BE 미구현) — career 와 동일 optimistic-local echo. PR 본문 명시.
+    // 전송 엔드포인트 부재(BE 미구현) — optimistic-local echo. PR 본문 명시.
     const now = new Date().toISOString()
     const echo: Message = {
       id: Date.now(),
@@ -71,43 +85,49 @@ export function ChatView({ chatId, closeHref, onClose, backHref, profileHref }: 
     />
   )
 
+  const body = isLoading ? (
+    <div className="flex flex-1 flex-col gap-4 p-4">
+      <Skeleton className="h-12 w-2/3" />
+      <Skeleton className="ml-auto h-12 w-1/2" />
+      <Skeleton className="h-12 w-3/5" />
+    </div>
+  ) : isError || !chat ? (
+    <div className="flex flex-1 items-center justify-center px-4 text-center">
+      <p className="text-r-14 text-gray-500">대화를 불러올 수 없습니다</p>
+    </div>
+  ) : (
+    <>
+      {profilePanelHref ? (
+        <Link href={profilePanelHref} scroll={false} className="block shrink-0">
+          {headerItem}
+        </Link>
+      ) : (
+        <div className="shrink-0">{headerItem}</div>
+      )}
+      <MessageThread
+        chatId={chatId}
+        currentUserId={currentUserId}
+        participants={chat.participants}
+        localMessages={localMessages}
+      />
+      <ChatInput value={message} onChange={setMessage} onSend={handleSend} />
+    </>
+  )
+
+  if (props.renderShell) {
+    return <>{props.renderShell({ title, children: body })}</>
+  }
+
   return (
     <PanelShell
       title={title}
-      backHref={backHref}
+      backHref={props.backHref}
       backLabel="메시지 목록"
       closeLabel="메시지 패널 닫기"
-      closeHref={closeHref}
-      onClose={onClose}
+      closeHref={props.closeHref}
+      onClose={props.onClose}
     >
-      {isLoading ? (
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <Skeleton className="h-12 w-2/3" />
-          <Skeleton className="ml-auto h-12 w-1/2" />
-          <Skeleton className="h-12 w-3/5" />
-        </div>
-      ) : isError || !chat ? (
-        <div className="flex flex-1 items-center justify-center px-4 text-center">
-          <p className="text-r-14 text-gray-500">대화를 불러올 수 없습니다</p>
-        </div>
-      ) : (
-        <>
-          {profilePanelHref ? (
-            <Link href={profilePanelHref} scroll={false} className="block shrink-0">
-              {headerItem}
-            </Link>
-          ) : (
-            <div className="shrink-0">{headerItem}</div>
-          )}
-          <MessageThread
-            chatId={chatId}
-            currentUserId={currentUserId}
-            participants={chat.participants}
-            localMessages={localMessages}
-          />
-          <ChatInput value={message} onChange={setMessage} onSend={handleSend} />
-        </>
-      )}
+      {body}
     </PanelShell>
   )
 }

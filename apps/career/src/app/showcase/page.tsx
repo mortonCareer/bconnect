@@ -84,15 +84,6 @@ const components: ComponentPreview[] = [
     preview: (
       <div className="w-48 scale-[0.4] origin-center">
         <Feed
-          profile={{
-            image:
-              'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop',
-            name: '이송목',
-            location: '경기도',
-            jobType: '준기공',
-            specialty: '도배',
-            bio: '안녕하세요, 도배 준기공 이송목입니다.',
-          }}
           content={{
             image:
               'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop',

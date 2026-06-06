@@ -4,55 +4,25 @@
  */
 'use client'
 
-import { useCallback, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useGetChat, useGetMyMember, MessageType } from '@bconnect/api-client'
-import type { Message } from '@bconnect/api-client'
-import { TopBar, ChatInput } from '@bconnect/ui'
-import MessageList from './_components/MessageList'
+import { ChatView } from '@bconnect/features'
+import { TopBar } from '@bconnect/ui'
 
 export default function ChatRoomPage() {
-  const params = useParams()
+  const params = useParams<{ chatId: string }>()
   const router = useRouter()
   const chatId = Number(params.chatId)
-  const currentUserId = useGetMyMember().data?.id
-
-  const { data: chat } = useGetChat(chatId, {
-    query: { enabled: !!chatId },
-  })
-
-  const [localMessages, setLocalMessages] = useState<Message[]>([])
-  const [message, setMessage] = useState('')
-
-  const handleSend = useCallback(() => {
-    if (currentUserId == null) return // 인증 없이 전송 불가
-    const content = message.trim()
-    if (!content) return
-    const newMessage: Message = {
-      id: Date.now(),
-      chatId,
-      memberId: currentUserId,
-      type: MessageType.TEXT,
-      content,
-      createdAt: new Date().toISOString(),
-      modifiedAt: new Date().toISOString(),
-    }
-    setLocalMessages((prev) => [...prev, newMessage])
-    setMessage('')
-  }, [chatId, currentUserId, message])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <TopBar
-        variant="default"
-        title={chat?.title ?? '채팅'}
-        showAction={false}
-        onBack={() => router.back()}
-      />
-
-      <MessageList chatId={chatId} localMessages={localMessages} />
-
-      <ChatInput value={message} onChange={setMessage} onSend={handleSend} />
-    </div>
+    <ChatView
+      chatId={chatId}
+      profileHref={(id) => `/profile/${id}`}
+      renderShell={({ title, children }) => (
+        <div className="flex min-h-0 flex-1 flex-col">
+          <TopBar variant="default" title={title} showAction={false} onBack={() => router.back()} />
+          {children}
+        </div>
+      )}
+    />
   )
 }
