@@ -1,12 +1,16 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import Link from 'next/link'
-import { Feed } from '@bconnect/ui'
+import { useDeletePost, useQueryClient, getGetFeedsQueryKey } from '@bconnect/api-client'
+import { Feed, ConfirmDialog } from '@bconnect/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { useFilterParams } from '@/hooks/useFilterParams'
 
 export function FeedList() {
+  const queryClient = useQueryClient()
+  const { mutate: deletePost } = useDeletePost()
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
   const { primaryTrade, expRange } = useFilterParams()
 
   const { feedItems, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useFeedItems({
@@ -75,10 +79,11 @@ export function FeedList() {
       {feedItems.map((item) => (
         <Feed
           key={item.postId}
-          profile={item.profile}
           content={item.content}
-          profileHref={item.memberId != null ? `/profile/${item.memberId}` : undefined}
+          canManage={item.isMine}
+          editHref={`/profile/edit/work/${item.postId}`}
           LinkComponent={Link}
+          onDelete={() => setPendingDeleteId(item.postId)}
         />
       ))}
 
@@ -90,6 +95,25 @@ export function FeedList() {
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-primary" />
         </div>
       )}
+
+      <ConfirmDialog
+        open={pendingDeleteId != null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteId(null)
+        }}
+        title="게시물을 삭제할까요?"
+        description="삭제한 게시물은 복구할 수 없어요."
+        confirmLabel="삭제"
+        destructive
+        onConfirm={() => {
+          if (pendingDeleteId == null) return
+          deletePost(
+            { postId: pendingDeleteId },
+            { onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFeedsQueryKey() }) }
+          )
+          setPendingDeleteId(null)
+        }}
+      />
     </div>
   )
 }

@@ -1,8 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { cn } from '@bconnect/ui'
-import { useExpandableText } from './useExpandableText'
+import { cn, useExpandableText } from '@bconnect/ui'
 
 interface WorkCardProps {
   image: string

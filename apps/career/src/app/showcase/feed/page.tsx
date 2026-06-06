@@ -3,10 +3,12 @@
  */
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { Feed, ChevronIcon } from '@bconnect/ui'
+import { Feed, ChevronIcon, ConfirmDialog } from '@bconnect/ui'
 
 export default function FeedDetailPage() {
+  const [confirmOpen, setConfirmOpen] = useState(false)
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-4xl">
@@ -59,78 +61,13 @@ export default function FeedDetailPage() {
           <section className="mb-12">
             <h2 className="mb-4 text-xl font-semibold text-gray-800">Variants</h2>
             <div className="space-y-6">
-              {/* Collapsed State */}
-              <div className="rounded-lg border p-6">
-                <p className="mb-3 text-sm font-medium text-gray-500">Collapsed - 접힌 상태</p>
-                <div className="mx-auto max-w-md">
-                  <Feed
-                    profile={{
-                      image:
-                        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop',
-                      name: '이송목',
-                      location: '경기도',
-                      jobType: '준기공',
-                      specialty: '도배',
-                      bio: '안녕하세요, 도배 준기공 이송목입니다.',
-                    }}
-                    content={{
-                      image:
-                        'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop',
-                      company: '서정 건축',
-                      duration: '4일 소요',
-                      timestamp: '3일 전',
-                      description:
-                        '골프장 전원주택 도배 시공을 진행하였습니다. 골프장 전원주택 도배 시공을 진행하였습니다.원주택 도배 시공을 ',
-                    }}
-                    defaultExpanded={false}
-                  />
-                </div>
-              </div>
-
-              {/* Expanded State */}
-              <div className="rounded-lg border p-6">
-                <p className="mb-3 text-sm font-medium text-gray-500">Expanded - 펼쳐진 상태</p>
-                <div className="mx-auto max-w-md">
-                  <Feed
-                    profile={{
-                      image:
-                        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop',
-                      name: '이송목',
-                      location: '경기도',
-                      jobType: '준기공',
-                      specialty: '도배',
-                      bio: '안녕하세요, 도배 준기공 이송목입니다.',
-                    }}
-                    content={{
-                      image:
-                        'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop',
-                      company: '서정 건축',
-                      duration: '4일 소요',
-                      timestamp: '3일 전',
-                      description:
-                        '골프장 전원주택 도배 시공을 진행하였습니다. 골프장 전원주택 도배 시공을 진행하였습니다.원주택 도배 시공을 ',
-                    }}
-                    defaultExpanded={true}
-                  />
-                </div>
-              </div>
-
-              {/* Interactive Toggle */}
+              {/* 본문 더보기/접기 + 본인 게시물(canManage) 케밥 → 수정/삭제 드로어 */}
               <div className="rounded-lg border p-6">
                 <p className="mb-3 text-sm font-medium text-gray-500">
-                  Interactive - 더보기/접기 토글
+                  본인 게시물 (canManage) - 케밥 → 수정/삭제
                 </p>
                 <div className="mx-auto max-w-md">
                   <Feed
-                    profile={{
-                      image:
-                        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop',
-                      name: '김철수',
-                      location: '서울',
-                      jobType: '기능공',
-                      specialty: '타일',
-                      bio: '타일 시공 전문가입니다.',
-                    }}
                     content={{
                       image:
                         'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop',
@@ -140,9 +77,19 @@ export default function FeedDetailPage() {
                       description:
                         '신축 아파트 욕실 타일 시공을 완료했습니다. 고급 이탈리아산 대리석 타일을 사용하여 프리미엄 마감을 진행하였으며, 방수 작업도 완벽하게 처리했습니다.',
                     }}
-                    onToggle={(expanded) => {
-                      console.log('Toggle state:', expanded)
-                    }}
+                    canManage
+                    editHref="/profile/edit/work/1"
+                    LinkComponent={Link}
+                    onDelete={() => setConfirmOpen(true)}
+                  />
+                  <ConfirmDialog
+                    open={confirmOpen}
+                    onOpenChange={setConfirmOpen}
+                    title="게시물을 삭제할까요?"
+                    description="삭제한 게시물은 복구할 수 없어요."
+                    confirmLabel="삭제"
+                    destructive
+                    onConfirm={() => setConfirmOpen(false)}
                   />
                 </div>
               </div>
@@ -165,18 +112,6 @@ export default function FeedDetailPage() {
                 <tbody className="divide-y">
                   <tr>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">profile</code>
-                    </td>
-                    <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">ProfileInfo</code>
-                    </td>
-                    <td className="p-3">-</td>
-                    <td className="p-3">
-                      프로필 정보 (image, name, location, jobType, specialty, bio)
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="p-3">
                       <code className="rounded bg-gray-100 px-1">content</code>
                     </td>
                     <td className="p-3">
@@ -189,7 +124,7 @@ export default function FeedDetailPage() {
                   </tr>
                   <tr>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">defaultExpanded</code>
+                      <code className="rounded bg-gray-100 px-1">canManage</code>
                     </td>
                     <td className="p-3">
                       <code className="rounded bg-gray-100 px-1">boolean</code>
@@ -197,19 +132,39 @@ export default function FeedDetailPage() {
                     <td className="p-3">
                       <code className="rounded bg-gray-100 px-1">false</code>
                     </td>
-                    <td className="p-3">초기 펼침 상태</td>
+                    <td className="p-3">본인 게시물 여부 — true 일 때만 케밥(수정/삭제) 노출</td>
                   </tr>
                   <tr>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">onToggle</code>
+                      <code className="rounded bg-gray-100 px-1">editHref</code>
                     </td>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">
-                        (expanded: boolean) =&gt; void
-                      </code>
+                      <code className="rounded bg-gray-100 px-1">string</code>
                     </td>
                     <td className="p-3">-</td>
-                    <td className="p-3">더보기/접기 버튼 클릭 핸들러</td>
+                    <td className="p-3">케밥 → 수정 이동 href (선언적 링크)</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">LinkComponent</code>
+                    </td>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">ElementType</code>
+                    </td>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">a</code>
+                    </td>
+                    <td className="p-3">수정 링크 컴포넌트 (Next.js Link 등)</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">onDelete</code>
+                    </td>
+                    <td className="p-3">
+                      <code className="rounded bg-gray-100 px-1">() =&gt; void</code>
+                    </td>
+                    <td className="p-3">-</td>
+                    <td className="p-3">케밥 → 삭제 액션</td>
                   </tr>
                 </tbody>
               </table>
@@ -224,14 +179,6 @@ export default function FeedDetailPage() {
 
 // Basic usage
 <Feed
-  profile={{
-    image: '/profile.jpg',
-    name: '이송목',
-    location: '경기도',
-    jobType: '준기공',
-    specialty: '도배',
-    bio: '안녕하세요, 도배 준기공 이송목입니다.',
-  }}
   content={{
     image: '/work.jpg',
     company: '서정 건축',
@@ -239,22 +186,10 @@ export default function FeedDetailPage() {
     timestamp: '3일 전',
     description: '골프장 전원주택 도배 시공을 진행하였습니다...',
   }}
-/>
-
-// With toggle handler
-<Feed
-  profile={{ ... }}
-  content={{ ... }}
-  onToggle={(expanded) => {
-    console.log('Expanded:', expanded)
-  }}
-/>
-
-// Initially expanded
-<Feed
-  profile={{ ... }}
-  content={{ ... }}
-  defaultExpanded={true}
+  canManage
+  editHref="/profile/edit/work/1"
+  LinkComponent={Link}
+  onDelete={() => setPendingDelete(1)}
 />`}
             </pre>
           </section>

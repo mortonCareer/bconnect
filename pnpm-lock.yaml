@@ -119,6 +119,9 @@ importers:
       '@bconnect/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@bconnect/features':
+        specifier: workspace:*
+        version: link:../../packages/features
       '@bconnect/ui':
         specifier: workspace:*
         version: link:../../packages/ui

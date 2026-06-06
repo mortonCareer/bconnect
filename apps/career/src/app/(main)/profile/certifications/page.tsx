@@ -80,7 +80,7 @@ export default function CertificationsPage() {
         <Button asChild variant="outline" size="full">
           <Link href="/profile/certifications/apply">인증 추가하기</Link>
         </Button>
-        <p className="mt-2 text-center text-r-12 text-gray-500">
+        <p className="mt-2 text-r-12 text-gray-500">
           인증 정보를 프로필에 표시하고 신뢰도를 높여보세요
         </p>
       </div>
