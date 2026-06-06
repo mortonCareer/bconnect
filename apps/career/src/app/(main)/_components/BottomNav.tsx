@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn, HomeIcon, JobsIcon, UploadIcon, ProfileIcon } from '@bconnect/ui'
-import { isChromelessRoute } from './route-chrome'
+import { isBottomNavHidden } from './nav-visibility'
 
 interface NavItem {
   href: string
@@ -22,7 +22,7 @@ const NAV_ITEMS: NavItem[] = [
 export function BottomNav() {
   const pathname = usePathname()
 
-  if (isChromelessRoute(pathname)) return null
+  if (isBottomNavHidden(pathname)) return null
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-300 bg-white pb-[env(safe-area-inset-bottom)]">

@@ -12,7 +12,7 @@ import {
   useGetSentRecommendations,
   useCreateCoworkerRequest,
 } from '@bconnect/api-client'
-import { Button, Tab, TopBar } from '@bconnect/ui'
+import { Button, Tab, TopBar, toast } from '@bconnect/ui'
 import { useQueryState } from 'nuqs'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { ProfileHeader } from '../_components/ProfileHeader'
@@ -56,7 +56,12 @@ export default function MemberProfilePage() {
     mutate: createCoworkerRequest,
     isPending: isRequesting,
     isSuccess: isRequested,
-  } = useCreateCoworkerRequest()
+  } = useCreateCoworkerRequest({
+    mutation: {
+      onSuccess: () => toast({ description: '동료 요청을 보냈어요' }),
+      onError: () => toast({ variant: 'destructive', description: '동료 요청에 실패했어요' }),
+    },
+  })
   const handleAddCoworker = () => {
     if (!profile?.id) return
     createCoworkerRequest({ data: { toId: profile.id } })
