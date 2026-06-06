@@ -13,6 +13,7 @@ import { Trade, TRADE_LABELS, useCreateProfile, useRegisterMember } from '@bconn
 import { mapKakaoAddress } from '@bconnect/config/address'
 import {
   Form,
+  FormControl,
   FormError,
   FormField,
   FormItem,
@@ -23,6 +24,7 @@ import {
   Tag,
   TextField,
   passthroughError,
+  useScrollToError,
   useServerError,
 } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -58,7 +60,7 @@ export default function SignupProfilePage() {
     control,
     handleSubmit,
     setValue,
-    formState: { isSubmitting, isValid },
+    formState: { isSubmitting },
   } = form
 
   const server = useServerError(
@@ -82,6 +84,8 @@ export default function SignupProfilePage() {
       setValue('primaryField', watchedFields[0])
     }
   }, [watchedFields, watchedPrimaryField, setValue])
+
+  const scrollToError = useScrollToError()
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
@@ -123,7 +127,10 @@ export default function SignupProfilePage() {
 
       {/* Content */}
       <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+        <form
+          onSubmit={handleSubmit(onSubmit, scrollToError)}
+          className="flex min-h-0 flex-1 flex-col"
+        >
           <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-6 pt-3">
             <h1 className="text-sb-24 text-black">
               기술자님의 시공분야와
@@ -166,17 +173,19 @@ export default function SignupProfilePage() {
               render={({ field }) => (
                 <FormItem className="gap-3">
                   <FormLabel required>경력</FormLabel>
-                  <div className="flex flex-wrap gap-2">
-                    {EXPERIENCE_OPTIONS.map((option) => (
-                      <Tag
-                        key={option.id}
-                        variant={field.value === option.id ? 'selected' : 'default'}
-                        onClick={() => field.onChange(option.id as ExperienceLevel)}
-                      >
-                        {option.label}
-                      </Tag>
-                    ))}
-                  </div>
+                  <FormControl>
+                    <div tabIndex={-1} className="flex flex-wrap gap-2 outline-none">
+                      {EXPERIENCE_OPTIONS.map((option) => (
+                        <Tag
+                          key={option.id}
+                          variant={field.value === option.id ? 'selected' : 'default'}
+                          onClick={() => field.onChange(option.id as ExperienceLevel)}
+                        >
+                          {option.label}
+                        </Tag>
+                      ))}
+                    </div>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -199,17 +208,19 @@ export default function SignupProfilePage() {
               render={({ field }) => (
                 <FormItem className="gap-2">
                   <FormLabel required>유형</FormLabel>
-                  <div className="flex flex-wrap gap-2">
-                    {SIGNUP_ROLES.map((role) => (
-                      <Tag
-                        key={role}
-                        variant={field.value === role ? 'selected' : 'default'}
-                        onClick={() => field.onChange(role)}
-                      >
-                        {ROLE_LABELS[role]}
-                      </Tag>
-                    ))}
-                  </div>
+                  <FormControl>
+                    <div tabIndex={-1} className="flex flex-wrap gap-2 outline-none">
+                      {SIGNUP_ROLES.map((role) => (
+                        <Tag
+                          key={role}
+                          variant={field.value === role ? 'selected' : 'default'}
+                          onClick={() => field.onChange(role)}
+                        >
+                          {ROLE_LABELS[role]}
+                        </Tag>
+                      ))}
+                    </div>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -239,7 +250,6 @@ export default function SignupProfilePage() {
               requireAllFilled={false}
               variant="primary"
               size="full"
-              disabled={!isValid}
               isLoading={isSubmitting || registerMemberMutation.isPending}
             >
               완료
