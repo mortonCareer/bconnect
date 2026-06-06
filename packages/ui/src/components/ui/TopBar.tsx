@@ -57,6 +57,7 @@ export interface TopBarProps
   actionLabel?: string
   onAction?: () => void
   showAction?: boolean
+  actionDisabled?: boolean
   showBack?: boolean
   chatCount?: number
   onFilter?: () => void
@@ -77,6 +78,7 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       actionLabel = '완료',
       onAction,
       showAction = true,
+      actionDisabled = false,
       showBack = true,
       chatCount,
       onFilter,
@@ -119,7 +121,13 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
               <button
                 type="button"
                 onClick={onAction}
-                className="hover:cursor-pointer text-sb-16 text-primary"
+                disabled={actionDisabled}
+                className={cn(
+                  'text-sb-16',
+                  actionDisabled
+                    ? 'cursor-default text-gray-400'
+                    : 'text-primary hover:cursor-pointer'
+                )}
               >
                 {actionLabel}
               </button>
