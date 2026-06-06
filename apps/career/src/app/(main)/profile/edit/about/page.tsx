@@ -59,7 +59,7 @@ export default function EditAboutPage() {
             control={form.control}
             name="about"
             placeholder="자기소개를 작성해주세요..."
-            className="min-h-100"
+            className="min-h-100 rounded-none border-0 px-0 focus:ring-0"
             serverError={server.fieldError('about')}
             disabled={isPending}
           />
