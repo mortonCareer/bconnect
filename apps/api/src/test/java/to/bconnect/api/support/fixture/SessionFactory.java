@@ -1,6 +1,6 @@
 package to.bconnect.api.support.fixture;
 
-import to.bconnect.api.storage.domain.session.SessionEntity;
+import to.bconnect.api.core.storage.session.SessionEntity;
 
 public class SessionFactory {
 

@@ -1,11 +1,11 @@
 package to.bconnect.api.support.fixture;
 
-import to.bconnect.api.presentation.v1.request.CreateCoworkerRequest;
-import to.bconnect.api.domain.coworker.CoworkerRequest;
-import to.bconnect.api.domain.coworker.CoworkerRequestDetail;
+import to.bconnect.api.core.presentation.v1.request.CreateCoworkerRequest;
+import to.bconnect.api.core.domain.coworker.CoworkerRequest;
+import to.bconnect.api.core.domain.coworker.CoworkerRequestDetail;
 import to.bconnect.api.security.member.Member;
-import to.bconnect.api.domain.profile.Profile;
-import to.bconnect.api.storage.domain.coworker.CoworkerRequestEntity;
+import to.bconnect.api.core.domain.profile.Profile;
+import to.bconnect.api.core.storage.coworker.CoworkerRequestEntity;
 
 public class CoworkerRequestFactory {
 

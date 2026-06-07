@@ -1,10 +1,10 @@
 package to.bconnect.api.support.fixture;
 
-import to.bconnect.api.presentation.v1.request.CreateTaskRequest;
-import to.bconnect.api.presentation.v1.request.UpdateTaskRequest;
-import to.bconnect.api.domain.task.Task;
-import to.bconnect.api.storage.domain.task.TaskEntity;
-import to.bconnect.api.storage.value.Trade;
+import to.bconnect.api.core.presentation.v1.request.CreateTaskRequest;
+import to.bconnect.api.core.presentation.v1.request.UpdateTaskRequest;
+import to.bconnect.api.core.domain.task.Task;
+import to.bconnect.api.core.storage.task.TaskEntity;
+import to.bconnect.api.core.storage.profile.Trade;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

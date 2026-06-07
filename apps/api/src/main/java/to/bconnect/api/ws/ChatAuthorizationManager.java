@@ -6,7 +6,7 @@ import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.messaging.access.intercept.MessageAuthorizationContext;
 import org.springframework.stereotype.Component;
-import to.bconnect.api.storage.domain.chat.ParticipantRepository;
+import to.bconnect.api.core.storage.chat.ParticipantRepository;
 import to.bconnect.api.security.User;
 
 import java.util.function.Supplier;

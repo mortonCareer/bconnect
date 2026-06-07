@@ -2,7 +2,7 @@ package to.bconnect.api.security.member;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import to.bconnect.api.storage.domain.member.MemberRepository;
+import to.bconnect.api.core.storage.member.MemberRepository;
 
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;

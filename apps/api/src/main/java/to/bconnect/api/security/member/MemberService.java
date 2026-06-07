@@ -3,8 +3,8 @@ package to.bconnect.api.security.member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.storage.domain.member.MemberEntity;
-import to.bconnect.api.storage.domain.member.MemberRepository;
+import to.bconnect.api.core.storage.member.MemberEntity;
+import to.bconnect.api.core.storage.member.MemberRepository;
 import to.bconnect.api.security.User;
 
 import to.bconnect.api.common.CodeException;

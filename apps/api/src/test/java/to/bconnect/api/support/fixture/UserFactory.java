@@ -1,6 +1,6 @@
 package to.bconnect.api.support.fixture;
 
-import to.bconnect.api.storage.value.Role;
+import to.bconnect.api.core.storage.member.Role;
 import to.bconnect.api.security.User;
 
 public class UserFactory {

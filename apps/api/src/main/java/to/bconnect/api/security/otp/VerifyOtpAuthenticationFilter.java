@@ -15,7 +15,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import to.bconnect.api.storage.Regex;
+import to.bconnect.api.common.Regex;
 
 /**
  * OTP 검증 요청 처리 필터

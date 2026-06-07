@@ -2,7 +2,7 @@ package to.bconnect.api.security.otp;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import to.bconnect.api.storage.Regex;
+import to.bconnect.api.common.Regex;
 
 public record VerifyCodeRequest(
         @NotBlank

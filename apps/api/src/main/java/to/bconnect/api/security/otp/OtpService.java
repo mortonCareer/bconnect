@@ -3,8 +3,8 @@ package to.bconnect.api.security.otp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.storage.domain.otp.OtpEntity;
-import to.bconnect.api.storage.domain.otp.OtpRepository;
+import to.bconnect.api.core.storage.otp.OtpEntity;
+import to.bconnect.api.core.storage.otp.OtpRepository;
 import to.bconnect.api.security.AuthExceptionCode;
 import to.bconnect.api.common.CodeException;
 

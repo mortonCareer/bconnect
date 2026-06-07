@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import to.bconnect.api.presentation.v1.response.CheckUsernameResponse;
+import to.bconnect.api.core.presentation.v1.response.CheckUsernameResponse;
 import to.bconnect.api.security.User;
 import to.bconnect.api.common.response.ApiResponse;
 
