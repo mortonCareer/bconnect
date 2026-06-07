@@ -51,7 +51,7 @@ export function ProfileHeader({
 
         {/* StatsRow — 아바타 우측 */}
         <div className="flex flex-1 justify-around">
-          <StatItem label="작업물" value={postCount ?? 0} />
+          <StatItem label="작업물" value={postCount ?? 0} href="?tab=works" />
           <StatItem label="동료" value={coworkerCount ?? 0} href="/profile/coworkers" />
           <StatItem
             label="추천서"
