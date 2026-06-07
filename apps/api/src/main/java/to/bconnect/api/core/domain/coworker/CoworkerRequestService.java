@@ -28,7 +28,6 @@ public class CoworkerRequestService {
 
     private final CoworkerRepository coworkerRepository;
     private final CoworkerRequestRepository requestRepository;
-    private final CoworkerRequestFinder coworkerRequestFinder;
     private final ProfileFinder profileFinder;
     private final ProfileRepository profileRepository;
     private final MemberRepository memberRepository;
@@ -48,8 +47,8 @@ public class CoworkerRequestService {
             throw new CodeException(CoworkerExceptionCode.ALREADY_REQUESTED);
 
         // accept
-        Optional<CoworkerRequestEntity> reverse = requestRepository.findByFromIdAndToId(targetId, profileId);
-        reverse.ifPresent(request -> accept(user, request.getId()));
+        requestRepository.findByFromIdAndToId(targetId, profileId)
+                .ifPresent(request -> accept(user, request.getId()));
 
         CoworkerRequestEntity persisted = requestRepository.save(CoworkerRequestEntity.builder()
                 .fromId(profileId)
@@ -59,20 +58,23 @@ public class CoworkerRequestService {
     }
 
     @Transactional(readOnly = true)
-    public List<CoworkerRequestDetail> listReceived(User user) {
+    public List<CoworkerProfile> listReceived(User user) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        List<CoworkerRequest> requests = coworkerRequestFinder.findAllReceived(profile.id());
+        List<CoworkerRequest> requests = requestRepository.findByToId(profile.id())
+                .stream().map(CoworkerRequest::of).toList();
 
-        List<Long> counterpartIds = requests.stream()
+        List<Long> profileIds = requests.stream()
                 .map(CoworkerRequest::fromId)
                 .toList();
-        Map<Long, Profile> profileById = profileRepository.findByIdIn(counterpartIds).stream()
+
+        Map<Long, Profile> profileById = profileRepository.findByIdIn(profileIds).stream()
                 .map(Profile::of)
                 .collect(Collectors.toMap(Profile::id, Function.identity()));
 
         List<Long> memberIds = profileById.values().stream()
                 .map(Profile::memberId)
                 .toList();
+
         Map<Long, Member> memberById = memberRepository.findByIdIn(memberIds).stream()
                 .map(Member::of)
                 .collect(Collectors.toMap(Member::id, Function.identity()));
@@ -81,26 +83,29 @@ public class CoworkerRequestService {
                 .map(request -> {
                     Profile counterpart = profileById.get(request.fromId());
                     Member member = memberById.get(counterpart.memberId());
-                    return CoworkerRequestDetail.of(request.id(), member, counterpart);
+                    return CoworkerProfile.of(request.id(), member, counterpart);
                 })
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<CoworkerRequestDetail> listSent(User user) {
+    public List<CoworkerProfile> listSent(User user) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        List<CoworkerRequest> requests = coworkerRequestFinder.findAllSent(profile.id());
+        List<CoworkerRequest> requests = requestRepository.findByFromId(profile.id())
+                .stream().map(CoworkerRequest::of).toList();
 
-        List<Long> counterpartIds = requests.stream()
+        List<Long> profileIds = requests.stream()
                 .map(CoworkerRequest::toId)
                 .toList();
-        Map<Long, Profile> profileById = profileRepository.findByIdIn(counterpartIds).stream()
+
+        Map<Long, Profile> profileById = profileRepository.findByIdIn(profileIds).stream()
                 .map(Profile::of)
                 .collect(Collectors.toMap(Profile::id, Function.identity()));
 
         List<Long> memberIds = profileById.values().stream()
                 .map(Profile::memberId)
                 .toList();
+
         Map<Long, Member> memberById = memberRepository.findByIdIn(memberIds).stream()
                 .map(Member::of)
                 .collect(Collectors.toMap(Member::id, Function.identity()));
@@ -109,7 +114,7 @@ public class CoworkerRequestService {
                 .map(request -> {
                     Profile counterpart = profileById.get(request.toId());
                     Member member = memberById.get(counterpart.memberId());
-                    return CoworkerRequestDetail.of(request.id(), member, counterpart);
+                    return CoworkerProfile.of(request.id(), member, counterpart);
                 })
                 .toList();
     }

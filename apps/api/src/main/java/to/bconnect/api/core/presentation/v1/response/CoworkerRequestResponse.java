@@ -1,6 +1,6 @@
 package to.bconnect.api.core.presentation.v1.response;
 
-import to.bconnect.api.core.domain.coworker.CoworkerRequestDetail;
+import to.bconnect.api.core.domain.coworker.CoworkerProfile;
 import to.bconnect.api.security.member.MaskedMemberResponse;
 
 public record CoworkerRequestResponse(
@@ -8,7 +8,7 @@ public record CoworkerRequestResponse(
         MaskedMemberResponse member,
         ProfileResponse profile
 ) {
-    public static CoworkerRequestResponse of(CoworkerRequestDetail detail) {
+    public static CoworkerRequestResponse of(CoworkerProfile detail) {
         return new CoworkerRequestResponse(
                 detail.id(),
                 MaskedMemberResponse.of(detail.member()),

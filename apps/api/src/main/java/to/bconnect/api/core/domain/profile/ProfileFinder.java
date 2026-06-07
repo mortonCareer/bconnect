@@ -13,13 +13,19 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class ProfileFinder {
-
     private final ProfileRepository profileRepository;
-
 
     @Transactional(readOnly = true)
     public List<Profile> findAll() {
         return profileRepository.findAll()
+                .stream()
+                .map(Profile::of)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Profile> findAllByIds(Collection<Long> profileIds) {
+        return profileRepository.findByIdIn(profileIds)
                 .stream()
                 .map(Profile::of)
                 .toList();
@@ -37,14 +43,6 @@ public class ProfileFinder {
         return profileRepository.findByMemberId(memberId)
                 .map(Profile::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-    }
-
-    @Transactional(readOnly = true)
-    public List<Profile> findAllByIds(Collection<Long> profileIds) {
-        return profileRepository.findByIdIn(profileIds)
-                .stream()
-                .map(Profile::of)
-                .toList();
     }
 
     @Transactional(readOnly = true)

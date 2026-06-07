@@ -24,12 +24,10 @@ public class CoworkerService {
     public List<Coworker> list(User user, Long targetId) {
         Profile profile = profileFinder.findByMemberId(user.id());
 
-        if (profile.id().equals(targetId))
-            return coworkerFinder.findAllByProfileId(targetId);
-        if (coworkerFinder.isCoworker(profile.id(), targetId))
-            return coworkerFinder.findAllByProfileId(targetId);
+        if (!profile.id().equals(targetId) && !coworkerFinder.isCoworker(profile.id(), targetId))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        return coworkerFinder.findAllByProfileId(targetId);
     }
 
     @Transactional
