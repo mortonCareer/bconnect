@@ -4,7 +4,7 @@
 'use client'
 
 import { useToast } from '../../hooks/use-toast'
-import { CheckCircleIcon } from '../../icons/CheckCircleIcon'
+import { CheckCircleFilledIcon } from '../../icons/CheckCircleFilledIcon'
 import { XIcon } from '../../icons/XIcon'
 import { Toast, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from './shadcn/toast'
 
@@ -14,7 +14,7 @@ export function Toaster() {
   return (
     <ToastProvider swipeDirection="down">
       {toasts.map(({ id, title, description, variant = 'success', ...props }) => {
-        const Icon = variant === 'error' ? XIcon : CheckCircleIcon
+        const Icon = variant === 'error' ? XIcon : CheckCircleFilledIcon
         return (
           <Toast key={id} variant={variant} {...props}>
             <Icon size={18} className="shrink-0" aria-hidden />
