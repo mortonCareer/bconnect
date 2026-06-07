@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Button, CertTag, SkillTag, StarIcon } from '@bconnect/ui'
+import { Button, CertTag, SkillTag, StarIcon, toast, isApiErrorShape } from '@bconnect/ui'
 import { TRADE_LABELS, useCreateDirectChat } from '@bconnect/api-client'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useAuthStore } from '@/stores/auth-store'
@@ -151,7 +151,16 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
                 onClick={() =>
                   createDirectChat(
                     { data: { participantId: item.memberId } },
-                    { onSuccess: (chat) => openPanel(`/messages/${chat.id}`) }
+                    {
+                      onSuccess: (chat) => openPanel(`/messages/${chat.id}`),
+                      onError: (error) =>
+                        toast({
+                          description: isApiErrorShape(error)
+                            ? error.message
+                            : '대화를 시작하지 못했어요. 다시 시도해주세요',
+                          variant: 'error',
+                        }),
+                    }
                   )
                 }
               >

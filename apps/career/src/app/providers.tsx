@@ -8,6 +8,7 @@ import {
   refreshAccessToken,
 } from '@bconnect/api-client'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
+import { Toaster } from '@bconnect/ui'
 import type { ReactNode } from 'react'
 import '../env'
 import { usePushNotifications } from '@/hooks/use-push-notifications'
@@ -41,6 +42,7 @@ export function Providers({ children }: { children: ReactNode }) {
           <PostMSWBootstrap>
             <InAppNotification />
             {children}
+            <Toaster />
             <ReactQueryDevtools initialIsOpen={false} />
           </PostMSWBootstrap>
         </QueryClientProvider>

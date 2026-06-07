@@ -13,7 +13,7 @@ import {
   useCreateCoworkerRequest,
   useCreateDirectChat,
 } from '@bconnect/api-client'
-import { Button, Tab, TopBar } from '@bconnect/ui'
+import { Button, Tab, TopBar, toast, isApiErrorShape } from '@bconnect/ui'
 import { useQueryState } from 'nuqs'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { ProfileHeader } from '../_components/ProfileHeader'
@@ -57,14 +57,34 @@ export default function MemberProfilePage() {
     mutate: createCoworkerRequest,
     isPending: isRequesting,
     isSuccess: isRequested,
-  } = useCreateCoworkerRequest()
+  } = useCreateCoworkerRequest({
+    mutation: {
+      onSuccess: () => toast({ description: '동료 요청을 보냈어요', variant: 'success' }),
+      onError: (error) =>
+        toast({
+          description: isApiErrorShape(error)
+            ? error.message
+            : '동료 요청에 실패했어요. 다시 시도해주세요',
+          variant: 'error',
+        }),
+    },
+  })
   const handleAddCoworker = () => {
     if (!profile?.id) return
     createCoworkerRequest({ data: { toId: profile.id } })
   }
 
   const { mutate: createDirectChat, isPending: isStartingChat } = useCreateDirectChat({
-    mutation: { onSuccess: (chat) => router.push(`/messages/${chat.id}`) },
+    mutation: {
+      onSuccess: (chat) => router.push(`/messages/${chat.id}`),
+      onError: (error) =>
+        toast({
+          description: isApiErrorShape(error)
+            ? error.message
+            : '대화를 시작하지 못했어요. 다시 시도해주세요',
+          variant: 'error',
+        }),
+    },
   })
   const handleSendMessage = () => {
     if (!isNaN(memberId)) createDirectChat({ data: { participantId: memberId } })
