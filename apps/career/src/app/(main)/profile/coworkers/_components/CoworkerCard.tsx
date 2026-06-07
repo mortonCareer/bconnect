@@ -32,8 +32,10 @@ export function CoworkerCard({ profileId }: CoworkerCardProps) {
   const name = member?.name ?? '이름 없음'
   const picture = member?.picture
   const trade = profile?.primaryTrade ? TRADE_LABELS[profile.primaryTrade] : null
-  // TODO: role 은 MaskedMember 에 없음 (BE public masking) — 필요시 BE 협의 후 부활
-  const subtitle = trade ?? ''
+  const city = profile?.address?.city
+  // TODO(#473): role 은 MaskedMember 에 없음 (BE public masking) — 추가 시 실제 연결
+  const role = '준기공'
+  const subtitle = [city, role, trade].filter(Boolean).join(' | ')
   const intro = profile?.headline
 
   return (

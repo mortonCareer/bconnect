@@ -64,7 +64,7 @@ export function ProfileHeader({
       {/* 하단: 이름 + 서브텍스트 + headline */}
       <div className="flex flex-col gap-0.5">
         <div className="flex items-baseline gap-2">
-          <span className="text-sb-18 text-gray-900">{name ?? '이름 없음'}</span>
+          <span className="text-sb-20 text-gray-900">{name ?? '이름 없음'}</span>
           {subtitle && <span className="text-r-12 text-gray-500">{subtitle}</span>}
         </div>
         {headline && <p className="text-r-12 text-gray-900">{headline}</p>}

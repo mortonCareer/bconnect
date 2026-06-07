@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { getCredentialLabel, getTradeLabel } from '@bconnect/api-client'
 import type { Credential, Profile, Recommendation } from '@bconnect/api-client'
-import { cn, Tag } from '@bconnect/ui'
+import { cn, useExpandableText } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 import { useQueryState } from 'nuqs'
 
@@ -47,9 +47,12 @@ export function IntroSection({
         {acceptedCredentials.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {acceptedCredentials.map((c) => (
-              <Tag key={c.id} variant="default" size="sm">
+              <div
+                key={c.id}
+                className="rounded-[4px] border border-gray-200 bg-white px-3 py-1.5 text-r-14 text-[#7B7B7B]"
+              >
                 {c.type ? getCredentialLabel(c.type) : '알 수 없음'}
-              </Tag>
+              </div>
             ))}
           </div>
         ) : (
@@ -128,37 +131,53 @@ export function IntroSection({
         </div>
         {recommendations.length > 0 ? (
           <div className="flex flex-col divide-y divide-gray-300">
-            {recommendations.map((rec) => {
-              // TODO(#473): BE가 MaskedMember.role 미제공 — 추가되면 실제 role 연결
-              const role = '반장(Mocked)'
-              return (
-                <div key={rec.id} className="flex gap-3 py-3">
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-gray-100">
-                    <img
-                      src={rec.member.picture || getAvatarUrl(rec.member.name)}
-                      alt={rec.member.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-m-14 text-gray-900">{rec.member.name}</span>
-                      <span className="text-r-12 text-gray-500">
-                        {getTradeLabel(rec.profile.primaryTrade)} · {role}
-                      </span>
-                    </div>
-                    <p className="text-r-12 text-gray-900">
-                      {rec.content} <span className="text-gray-500 underline">더보기</span>
-                    </p>
-                  </div>
-                </div>
-              )
-            })}
+            {recommendations.map((rec) => (
+              <RecommendationRow key={rec.id} recommendation={rec} />
+            ))}
           </div>
         ) : (
           <p className="text-r-14 text-gray-500">
             {recTab === 'sent' ? '보낸 추천서가 없습니다' : '받은 추천서가 없습니다'}
           </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function RecommendationRow({ recommendation }: { recommendation: Recommendation }) {
+  const { member, content, profile } = recommendation
+  const { ref, expanded, showToggle, toggle } = useExpandableText([content], 'height')
+  // TODO(#473): BE가 MaskedMember.role 미제공 — 추가되면 실제 role 연결
+  const role = '반장(Mocked)'
+
+  return (
+    <div className="flex gap-3 py-3">
+      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-gray-100">
+        <img
+          src={member.picture || getAvatarUrl(member.name)}
+          alt={member.name}
+          className="h-full w-full object-cover"
+        />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-m-14 text-gray-900">{member.name}</span>
+          <span className="text-r-12 text-gray-500">
+            {getTradeLabel(profile.primaryTrade)} · {role}
+          </span>
+        </div>
+        <p ref={ref} className={cn('text-r-12 text-gray-900', !expanded && 'line-clamp-2')}>
+          {content}
+        </p>
+        {showToggle && (
+          <button
+            type="button"
+            onClick={toggle}
+            className="cursor-pointer self-start text-r-12 text-gray-500 underline"
+          >
+            {expanded ? '접기' : '더보기'}
+          </button>
         )}
       </div>
     </div>
