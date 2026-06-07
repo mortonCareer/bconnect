@@ -56,6 +56,14 @@ const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'one-clic
 
 모든 `page.tsx` 파일 상단에 `@figma <url>` JSDoc 주석 필수 (ESLint 강제). 디자인 없으면 `@figma-scaffold <reason>`. 자세한 형식과 마커 종류는 [packages/ui/CLAUDE.md](../../packages/ui/CLAUDE.md) 참조.
 
+### Navigation — 클릭 이동은 `<Link>`, `router.push` 금지
+
+클릭 핸들러(`onClick` 등)의 `router.push`/`router.replace` 금지 (ESLint `no-restricted-syntax` CI 차단) — `<Link>`(버튼은 `<Button asChild>`) 사용. 불가피한 imperative(폼 제출 후 리다이렉트 등)는 핸들러 함수 내부면 비대상, `router.back()` 허용.
+
+### 공유 우선 — career·plan 공통은 `packages` 추출·우선 소비
+
+career·plan 공통 UI/로직은 `packages/ui`·`packages/features`로 추출하고, 앱 로컬 재구현 말고 공용을 우선 import. 다른 앱에서도 쓸 화면이면 셸만 주입(`renderShell`)해 `packages/features`에 둠. 인라인 중복=안티패턴(#541).
+
 ---
 
 ## Career-only Patterns (이례적)

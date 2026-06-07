@@ -6,12 +6,7 @@ import { useNotificationStore } from '@/stores/notification-store'
 
 const AUTO_DISMISS_MS = 4000
 
-/**
- * 포그라운드 인앱 알림 배너
- * 앱이 활성 상태일 때 OS 푸시 대신 상단에 토스트로 표시
- * - 탭/터치 → 딥링크 이동 후 닫힘
- * - 4초 후 자동 사라짐
- */
+/** 앱을 보고 있을 때 알림이 오면 화면 위쪽에 잠깐 떴다 사라지는 배너. 누르면 해당 화면으로 이동. */
 export function InAppNotification() {
   const router = useRouter()
   const current = useNotificationStore((s) => s.current)
@@ -25,15 +20,13 @@ export function InAppNotification() {
 
   if (!current) return null
 
+  const handleClick = () => {
+    if (current.href) router.push(current.href)
+    dismiss()
+  }
+
   return (
-    <div
-      role="alert"
-      className="fixed top-0 right-0 left-0 z-50"
-      onClick={() => {
-        if (current.href) router.push(current.href)
-        dismiss()
-      }}
-    >
+    <div role="alert" className="fixed top-0 right-0 left-0 z-50" onClick={handleClick}>
       <div className="mx-4 mt-[env(safe-area-inset-top,12px)] rounded-xl border border-gray-100 bg-white p-3 shadow-lg">
         <p className="text-sb-14 text-gray-900 truncate">{current.title}</p>
         <p className="mt-0.5 text-r-12 text-gray-500 truncate">{current.body}</p>

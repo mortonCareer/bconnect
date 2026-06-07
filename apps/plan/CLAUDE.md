@@ -21,6 +21,7 @@ pnpm lint:plan
 - URL state via nuqs
 - Tailwind v4 design tokens
 - Figma 매핑 (`@figma` JSDoc)
+- Navigation (`<Link>` 사용, 클릭 핸들러 `router.push` 금지 — ESLint 강제)
 
 ## 미래 (Sprint 2+)
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { TRADE_LABELS, useGetProfile } from '@bconnect/api-client'
 import { ChevronIcon } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
@@ -10,7 +10,6 @@ interface CoworkerCardProps {
 }
 
 export function CoworkerCard({ profileId }: CoworkerCardProps) {
-  const router = useRouter()
   // useGetProfile 응답 = ProfileAndMember = { member, profile } (member 도 함께 옴)
   const { data: profileAndMember, isLoading } = useGetProfile(profileId)
   const member = profileAndMember?.member
@@ -33,14 +32,15 @@ export function CoworkerCard({ profileId }: CoworkerCardProps) {
   const name = member?.name ?? '이름 없음'
   const picture = member?.picture
   const trade = profile?.primaryTrade ? TRADE_LABELS[profile.primaryTrade] : null
-  // TODO: role 은 MaskedMember 에 없음 (BE public masking) — 필요시 BE 협의 후 부활
-  const subtitle = trade ?? ''
+  const city = profile?.address?.city
+  // TODO(#473): role 은 MaskedMember 에 없음 (BE public masking) — 추가 시 실제 연결
+  const role = '준기공'
+  const subtitle = [city, role, trade].filter(Boolean).join(' | ')
   const intro = profile?.headline
 
   return (
-    <button
-      type="button"
-      onClick={() => router.push(`/profile/${profileId}`)}
+    <Link
+      href={`/profile/${profileId}`}
       className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 transition-colors active:bg-gray-100"
     >
       {/* 프로필 이미지 */}
@@ -63,6 +63,6 @@ export function CoworkerCard({ profileId }: CoworkerCardProps) {
 
       {/* 오른쪽 화살표 */}
       <ChevronIcon direction="right" className="text-gray-400" />
-    </button>
+    </Link>
   )
 }

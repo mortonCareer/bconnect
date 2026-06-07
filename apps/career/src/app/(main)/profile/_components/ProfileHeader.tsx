@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import type { Trade } from '@bconnect/api-client'
 import { TRADE_LABELS } from '@bconnect/api-client'
 import { getAvatarUrl } from '@bconnect/config/avatar'
@@ -28,8 +28,6 @@ export function ProfileHeader({
   coworkerCount,
   recommendationCount,
 }: ProfileHeaderProps) {
-  const router = useRouter()
-
   const subtitle = [
     primaryTrade ? TRADE_LABELS[primaryTrade] : null,
     experience != null ? (experience === 0 ? '신입' : `${experience}년`) : null,
@@ -53,16 +51,12 @@ export function ProfileHeader({
 
         {/* StatsRow — 아바타 우측 */}
         <div className="flex flex-1 justify-around">
-          <StatItem label="작업물" value={postCount ?? 0} />
-          <StatItem
-            label="동료"
-            value={coworkerCount ?? 0}
-            onClick={() => router.push('/profile/coworkers')}
-          />
+          <StatItem label="작업물" value={postCount ?? 0} href="?tab=works" />
+          <StatItem label="동료" value={coworkerCount ?? 0} href="/profile/coworkers" />
           <StatItem
             label="추천서"
             value={recommendationCount ?? 0}
-            onClick={() => router.push('/profile/recommendations')}
+            href="/profile/recommendations"
           />
         </div>
       </div>
@@ -70,7 +64,7 @@ export function ProfileHeader({
       {/* 하단: 이름 + 서브텍스트 + headline */}
       <div className="flex flex-col gap-0.5">
         <div className="flex items-baseline gap-2">
-          <span className="text-sb-18 text-gray-900">{name ?? '이름 없음'}</span>
+          <span className="text-sb-20 text-gray-900">{name ?? '이름 없음'}</span>
           {subtitle && <span className="text-r-12 text-gray-500">{subtitle}</span>}
         </div>
         {headline && <p className="text-r-12 text-gray-900">{headline}</p>}
@@ -79,20 +73,19 @@ export function ProfileHeader({
   )
 }
 
-function StatItem({
-  label,
-  value,
-  onClick,
-}: {
-  label: string
-  value: number
-  onClick?: () => void
-}) {
-  const Wrapper = onClick ? 'button' : 'div'
-  return (
-    <Wrapper className="flex flex-col items-center gap-1" onClick={onClick}>
+function StatItem({ label, value, href }: { label: string; value: number; href?: string }) {
+  const className = 'flex flex-col items-center gap-1'
+  const content = (
+    <>
       <span className="text-sb-16 text-gray-900">{value}</span>
       <span className="text-r-14 text-gray-900">{label}</span>
-    </Wrapper>
+    </>
+  )
+  return href ? (
+    <Link href={href} className={className}>
+      {content}
+    </Link>
+  ) : (
+    <div className={className}>{content}</div>
   )
 }

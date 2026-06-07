@@ -14,14 +14,11 @@ import { FilterTags } from './_components/home/FilterTags'
 export default function HomePage() {
   const router = useRouter()
   const [isFilterOpen, setFilterOpen] = useState(false)
+  const goToMessages = () => router.push('/messages')
 
   return (
     <div className="bg-white">
-      <TopBar
-        variant="home"
-        onFilter={() => setFilterOpen(true)}
-        onChat={() => router.push('/messages')}
-      />
+      <TopBar variant="home" onFilter={() => setFilterOpen(true)} onChat={goToMessages} />
       <FilterTags />
       <FeedList />
       <FilterSheet isOpen={isFilterOpen} onClose={() => setFilterOpen(false)} />

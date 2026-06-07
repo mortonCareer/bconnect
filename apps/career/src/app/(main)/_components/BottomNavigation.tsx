@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn, HomeIcon, JobsIcon, UploadIcon, ProfileIcon } from '@bconnect/ui'
+import { isBottomNavHidden } from './nav-visibility'
 
 interface NavItem {
   href: string
@@ -18,11 +19,10 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/profile', label: '내 정보', icon: ProfileIcon },
 ]
 
-export function BottomNav() {
+export function BottomNavigation() {
   const pathname = usePathname()
 
-  // 채팅 상세 페이지에서는 BottomNav 숨김
-  if (/^\/messages\/\d+/.test(pathname)) return null
+  if (isBottomNavHidden(pathname)) return null
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-300 bg-white pb-[env(safe-area-inset-bottom)]">

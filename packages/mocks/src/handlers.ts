@@ -2,10 +2,11 @@ import { getBconnectAPIMock } from '@bconnect/api-client'
 import { delay, http } from 'msw'
 import { authOverrides } from './overrides/auth'
 import { chatsOverrides } from './overrides/chats'
+import { coworkersOverrides } from './overrides/coworkers'
 import { devicesOverrides } from './overrides/devices'
 import { membersOverrides } from './overrides/members'
 import { notificationsOverrides } from './overrides/notifications'
-import { profilesOverrides } from './overrides/profiles'
+import { profilesOverrides, myProfileOverride } from './overrides/profiles'
 import { recommendationsOverrides } from './overrides/recommendations'
 
 // API mock(`/api/*`) 응답만 2초 지연 — 실 네트워크 지연 모사로 로딩 UI 검증. mock 응답이
@@ -28,8 +29,10 @@ const globalDelay = http.all('*', async ({ request }) => {
 //   override 의 콜백 시그니처도 자동으로 컴파일 에러로 떨어짐 (drift 방지).
 export const handlers = [
   globalDelay,
+  ...myProfileOverride,
   ...authOverrides,
   ...chatsOverrides,
+  ...coworkersOverrides,
   ...devicesOverrides,
   ...membersOverrides,
   ...notificationsOverrides,

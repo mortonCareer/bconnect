@@ -1,28 +1,33 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import {
-  getCredentialLabel,
-  getTradeLabel,
-  useGetMyReceivedRecommendations,
-} from '@bconnect/api-client'
-import type { Credential, Profile } from '@bconnect/api-client'
-import { Tag } from '@bconnect/ui'
+import Link from 'next/link'
+import { getCredentialLabel, getTradeLabel } from '@bconnect/api-client'
+import type { Credential, Profile, Recommendation } from '@bconnect/api-client'
+import { cn, useExpandableText } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
+import { useQueryState } from 'nuqs'
 
 interface IntroSectionProps {
   profile: Profile
   credentials?: Credential[]
+  isOwner: boolean
+  receivedRecommendations: Recommendation[]
+  sentRecommendations: Recommendation[]
 }
 
-export function IntroSection({ profile, credentials }: IntroSectionProps) {
-  const router = useRouter()
+export function IntroSection({
+  profile,
+  credentials,
+  isOwner,
+  receivedRecommendations,
+  sentRecommendations,
+}: IntroSectionProps) {
   const { about } = profile
 
-  const { data: received } = useGetMyReceivedRecommendations()
-  const receivedRecommendations = received ?? []
+  const [recTab, setRecTab] = useQueryState('rec', { defaultValue: 'received' })
 
   const acceptedCredentials = credentials?.filter((c) => c.status === 'ACCEPTED') ?? []
+  const recommendations = recTab === 'sent' ? sentRecommendations : receivedRecommendations
 
   return (
     <div className="flex flex-col gap-6 px-4 pt-4">
@@ -30,19 +35,24 @@ export function IntroSection({ profile, credentials }: IntroSectionProps) {
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="text-sb-16 text-gray-900">인증</span>
-          <button
-            className="text-r-12 text-primary underline"
-            onClick={() => router.push('/profile/certifications')}
-          >
-            편집
-          </button>
+          {isOwner && (
+            <Link
+              href="/profile/certifications"
+              className="cursor-pointer text-r-12 text-primary underline"
+            >
+              편집
+            </Link>
+          )}
         </div>
         {acceptedCredentials.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {acceptedCredentials.map((c) => (
-              <Tag key={c.id} variant="default" size="sm">
+              <div
+                key={c.id}
+                className="rounded-[4px] border border-gray-200 bg-white px-3 py-1.5 text-r-14 text-[#7B7B7B]"
+              >
                 {c.type ? getCredentialLabel(c.type) : '알 수 없음'}
-              </Tag>
+              </div>
             ))}
           </div>
         ) : (
@@ -54,12 +64,14 @@ export function IntroSection({ profile, credentials }: IntroSectionProps) {
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="text-sb-16 text-gray-900">소개</span>
-          <button
-            className="text-r-12 text-primary underline"
-            onClick={() => router.push('/profile/edit/about')}
-          >
-            편집
-          </button>
+          {isOwner && (
+            <Link
+              href="/profile/edit/about"
+              className="cursor-pointer text-r-12 text-primary underline"
+            >
+              편집
+            </Link>
+          )}
         </div>
         {about ? (
           <p className="whitespace-pre-wrap text-r-14 leading-[22.4px] text-gray-900">
@@ -82,52 +94,90 @@ export function IntroSection({ profile, credentials }: IntroSectionProps) {
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="text-sb-16 text-gray-900">추천서</span>
-          <button
-            className="text-r-12 text-primary underline"
-            onClick={() => router.push('/profile/recommendations')}
-          >
-            편집
-          </button>
+          {isOwner && (
+            <Link
+              href="/profile/recommendations"
+              className="cursor-pointer text-r-12 text-primary underline"
+            >
+              편집
+            </Link>
+          )}
         </div>
         <div className="flex gap-2">
-          <button className="rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-sb-14 text-gray-900">
+          <button
+            type="button"
+            onClick={() => setRecTab('received')}
+            className={cn(
+              'cursor-pointer rounded-md border border-gray-300 px-3 py-2',
+              recTab === 'received'
+                ? 'bg-gray-100 text-sb-14 text-gray-900'
+                : 'bg-white text-r-14 text-gray-900'
+            )}
+          >
             받은 추천서
           </button>
-          <button className="rounded-md border border-gray-300 bg-white px-3 py-2 text-r-14 text-gray-900">
+          <button
+            type="button"
+            onClick={() => setRecTab('sent')}
+            className={cn(
+              'cursor-pointer rounded-md border border-gray-300 px-3 py-2',
+              recTab === 'sent'
+                ? 'bg-gray-100 text-sb-14 text-gray-900'
+                : 'bg-white text-r-14 text-gray-900'
+            )}
+          >
             보낸 추천서
           </button>
         </div>
-        {receivedRecommendations.length > 0 ? (
+        {recommendations.length > 0 ? (
           <div className="flex flex-col divide-y divide-gray-300">
-            {receivedRecommendations.map((rec) => {
-              // TODO(#473): BE가 MaskedMember.role 미제공 — 추가되면 실제 role 연결
-              const role = '반장(Mocked)'
-              return (
-                <div key={rec.id} className="flex gap-3 py-3">
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-gray-100">
-                    <img
-                      src={rec.member.picture || getAvatarUrl(rec.member.name)}
-                      alt={rec.member.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-m-14 text-gray-900">{rec.member.name}</span>
-                      <span className="text-r-12 text-gray-500">
-                        {getTradeLabel(rec.profile.primaryTrade)} · {role}
-                      </span>
-                    </div>
-                    <p className="text-r-12 text-gray-900">
-                      {rec.content} <span className="text-gray-500 underline">더보기</span>
-                    </p>
-                  </div>
-                </div>
-              )
-            })}
+            {recommendations.map((rec) => (
+              <RecommendationRow key={rec.id} recommendation={rec} />
+            ))}
           </div>
         ) : (
-          <p className="text-r-14 text-gray-500">받은 추천서가 없습니다</p>
+          <p className="text-r-14 text-gray-500">
+            {recTab === 'sent' ? '보낸 추천서가 없습니다' : '받은 추천서가 없습니다'}
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function RecommendationRow({ recommendation }: { recommendation: Recommendation }) {
+  const { member, content, profile } = recommendation
+  const { ref, expanded, showToggle, toggle } = useExpandableText([content], 'height')
+  // TODO(#473): BE가 MaskedMember.role 미제공 — 추가되면 실제 role 연결
+  const role = '반장(Mocked)'
+
+  return (
+    <div className="flex gap-3 py-3">
+      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-gray-100">
+        <img
+          src={member.picture || getAvatarUrl(member.name)}
+          alt={member.name}
+          className="h-full w-full object-cover"
+        />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-m-14 text-gray-900">{member.name}</span>
+          <span className="text-r-12 text-gray-500">
+            {getTradeLabel(profile.primaryTrade)} · {role}
+          </span>
+        </div>
+        <p ref={ref} className={cn('text-r-12 text-gray-900', !expanded && 'line-clamp-2')}>
+          {content}
+        </p>
+        {showToggle && (
+          <button
+            type="button"
+            onClick={toggle}
+            className="cursor-pointer self-start text-r-12 text-gray-500 underline"
+          >
+            {expanded ? '접기' : '더보기'}
+          </button>
         )}
       </div>
     </div>
