@@ -5,8 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import to.bconnect.api.storage.common.BaseEntity;
-import to.bconnect.api.storage.common.value.Role;
+import to.bconnect.api.storage.BaseEntity;
+import to.bconnect.api.storage.value.Role;
 
 @Entity
 @Table(name = "members")

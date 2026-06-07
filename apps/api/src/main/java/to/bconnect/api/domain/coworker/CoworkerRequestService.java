@@ -3,7 +3,7 @@ package to.bconnect.api.domain.coworker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.domain.member.Member;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.domain.profile.Profile;
 import to.bconnect.api.domain.profile.ProfileFinder;
 import to.bconnect.api.storage.domain.coworker.CoworkerEntity;
@@ -14,7 +14,7 @@ import to.bconnect.api.storage.domain.member.MemberRepository;
 import to.bconnect.api.storage.domain.profile.ProfileRepository;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.support.security.User;
+import to.bconnect.api.security.User;
 
 import java.util.List;
 import java.util.Map;

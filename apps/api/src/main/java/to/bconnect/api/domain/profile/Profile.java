@@ -1,8 +1,8 @@
 package to.bconnect.api.domain.profile;
 
 import to.bconnect.api.storage.domain.profile.ProfileEntity;
-import to.bconnect.api.storage.common.Address;
-import to.bconnect.api.storage.common.value.Trade;
+import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.value.Trade;
 
 import java.time.LocalDateTime;
 import java.util.Set;

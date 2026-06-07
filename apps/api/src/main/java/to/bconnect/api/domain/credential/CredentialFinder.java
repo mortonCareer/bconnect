@@ -8,7 +8,7 @@ import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 
 import to.bconnect.api.storage.domain.credential.CredentialEntity;
-import to.bconnect.api.storage.common.value.CredentialStatus;
+import to.bconnect.api.storage.value.CredentialStatus;
 
 import java.util.Comparator;
 import java.util.List;

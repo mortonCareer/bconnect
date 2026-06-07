@@ -6,9 +6,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import to.bconnect.api.storage.common.BaseEntity;
-import to.bconnect.api.storage.common.value.CredentialStatus;
-import to.bconnect.api.storage.common.value.CredentialType;
+import to.bconnect.api.storage.BaseEntity;
+import to.bconnect.api.storage.value.CredentialStatus;
+import to.bconnect.api.storage.value.CredentialType;
 
 @Entity
 @Table(name = "credentials")

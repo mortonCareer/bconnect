@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import to.bconnect.api.storage.common.BaseEntity;
+import to.bconnect.api.storage.BaseEntity;
 
 import java.time.LocalDateTime;
 
@@ -52,7 +52,7 @@ public class OtpEntity extends BaseEntity {
         this.code = code;
         this.expiredAt = expiredAt;
         this.revoked = false;
-        this.dailyCount = 1;
+        this.dailyCount = 0;
         this.lastSentAt = LocalDateTime.now();
     }
 

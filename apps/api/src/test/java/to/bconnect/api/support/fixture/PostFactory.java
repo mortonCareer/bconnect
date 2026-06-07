@@ -1,7 +1,7 @@
 package to.bconnect.api.support.fixture;
 
-import to.bconnect.api.api.controller.v1.request.CreatePostRequest;
-import to.bconnect.api.api.controller.v1.request.UpdatePostRequest;
+import to.bconnect.api.presentation.v1.request.CreatePostRequest;
+import to.bconnect.api.presentation.v1.request.UpdatePostRequest;
 import to.bconnect.api.domain.post.Post;
 import to.bconnect.api.storage.domain.post.PostEntity;
 

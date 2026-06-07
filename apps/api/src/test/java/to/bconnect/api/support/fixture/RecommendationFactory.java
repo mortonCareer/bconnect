@@ -1,7 +1,7 @@
 package to.bconnect.api.support.fixture;
 
-import to.bconnect.api.api.controller.v1.request.CreateRecommendationRequest;
-import to.bconnect.api.api.controller.v1.request.UpdateRecommendationRequest;
+import to.bconnect.api.presentation.v1.request.CreateRecommendationRequest;
+import to.bconnect.api.presentation.v1.request.UpdateRecommendationRequest;
 import to.bconnect.api.domain.recommendation.Recommendation;
 import to.bconnect.api.storage.domain.recommendation.RecommendationEntity;
 

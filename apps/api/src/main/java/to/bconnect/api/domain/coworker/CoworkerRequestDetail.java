@@ -1,6 +1,6 @@
 package to.bconnect.api.domain.coworker;
 
-import to.bconnect.api.domain.member.Member;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.domain.profile.Profile;
 
 public record CoworkerRequestDetail(

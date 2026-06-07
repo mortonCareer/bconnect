@@ -1,8 +1,8 @@
 package to.bconnect.api.domain.task;
 
-import to.bconnect.api.storage.common.Address;
+import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.domain.task.TaskEntity;
-import to.bconnect.api.storage.common.value.Trade;
+import to.bconnect.api.storage.value.Trade;
 import org.hibernate.Hibernate;
 
 import java.time.LocalDate;

@@ -1,6 +1,6 @@
 package to.bconnect.api.domain.recommendation;
 
-import to.bconnect.api.domain.member.Member;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.domain.profile.Profile;
 
 import java.time.LocalDateTime;

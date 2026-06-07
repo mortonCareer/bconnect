@@ -1,0 +1,19 @@
+package to.bconnect.api.presentation.v1.request;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.value.Trade;
+
+import java.time.LocalDate;
+import java.util.Set;
+
+public record UpdateTaskRequest(
+        @NotBlank String company,
+        @NotNull Address address,
+        @NotBlank String taskTitle,
+        @NotBlank String eventTitle,
+        @NotNull Set<Trade> trades,
+        @NotNull LocalDate start,
+        @NotNull LocalDate end
+) {}

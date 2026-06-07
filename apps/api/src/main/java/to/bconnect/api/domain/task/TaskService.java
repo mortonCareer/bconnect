@@ -3,14 +3,14 @@ package to.bconnect.api.domain.task;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.api.controller.v1.request.CreateTaskRequest;
-import to.bconnect.api.api.controller.v1.request.UpdateTaskRequest;
+import to.bconnect.api.presentation.v1.request.CreateTaskRequest;
+import to.bconnect.api.presentation.v1.request.UpdateTaskRequest;
 import to.bconnect.api.domain.coworker.CoworkerFinder;
 import to.bconnect.api.domain.profile.Profile;
 import to.bconnect.api.storage.domain.task.TaskEntity;
 import to.bconnect.api.storage.domain.task.TaskRepository;
 import to.bconnect.api.domain.profile.ProfileFinder;
-import to.bconnect.api.support.security.User;
+import to.bconnect.api.security.User;
 
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;

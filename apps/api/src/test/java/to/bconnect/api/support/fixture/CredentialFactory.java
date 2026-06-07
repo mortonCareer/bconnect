@@ -1,10 +1,10 @@
 package to.bconnect.api.support.fixture;
 
-import to.bconnect.api.api.controller.v1.request.CreateCredentialRequest;
+import to.bconnect.api.presentation.v1.request.CreateCredentialRequest;
 import to.bconnect.api.domain.credential.Credential;
 import to.bconnect.api.storage.domain.credential.CredentialEntity;
-import to.bconnect.api.storage.common.value.CredentialStatus;
-import to.bconnect.api.storage.common.value.CredentialType;
+import to.bconnect.api.storage.value.CredentialStatus;
+import to.bconnect.api.storage.value.CredentialType;
 
 import static to.bconnect.api.support.fixture.FixtureConstant.MAX_DATE;
 import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;

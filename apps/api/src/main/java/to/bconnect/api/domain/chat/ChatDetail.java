@@ -1,6 +1,6 @@
 package to.bconnect.api.domain.chat;
 
-import to.bconnect.api.domain.member.Member;
+import to.bconnect.api.security.member.Member;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,6 +1,6 @@
 package to.bconnect.api.domain.feed;
 
-import to.bconnect.api.domain.member.Member;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.domain.post.Post;
 import to.bconnect.api.domain.profile.Profile;
 

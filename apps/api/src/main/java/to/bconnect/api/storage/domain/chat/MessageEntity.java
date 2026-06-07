@@ -5,8 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import to.bconnect.api.storage.common.BaseEntity;
-import to.bconnect.api.storage.common.value.MessageType;
+import to.bconnect.api.storage.BaseEntity;
+import to.bconnect.api.storage.value.MessageType;
 
 @Entity
 @Table(name = "messages")

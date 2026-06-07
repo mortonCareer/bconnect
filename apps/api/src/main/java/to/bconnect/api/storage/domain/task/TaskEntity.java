@@ -5,9 +5,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import to.bconnect.api.storage.common.Address;
-import to.bconnect.api.storage.common.BaseEntity;
-import to.bconnect.api.storage.common.value.Trade;
+import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.BaseEntity;
+import to.bconnect.api.storage.value.Trade;
 
 import java.time.LocalDate;
 import java.util.HashSet;

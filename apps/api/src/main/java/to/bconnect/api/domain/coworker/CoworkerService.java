@@ -5,11 +5,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.domain.profile.Profile;
 import to.bconnect.api.domain.profile.ProfileFinder;
-import to.bconnect.api.storage.domain.coworker.CoworkerEntity;
 import to.bconnect.api.storage.domain.coworker.CoworkerRepository;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.support.security.User;
+import to.bconnect.api.security.User;
 
 import java.util.List;
 
