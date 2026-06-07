@@ -1,23 +1,35 @@
 'use client'
 
 import Image from 'next/image'
-import { cn, useExpandableText } from '@bconnect/ui'
+import Link from 'next/link'
+import { cn, MoreVerticalIcon, useExpandableText } from '@bconnect/ui'
 
 interface WorkCardProps {
   image: string
   imageAlt?: string
   timestamp: string
   description: string
+  /** owner 전용 수정 링크. 없으면 케밥(수정) 메뉴 안 그림 (viewer/plan) */
+  editHref?: string
 }
 
-export function WorkCard({ image, imageAlt, timestamp, description }: WorkCardProps) {
+export function WorkCard({ image, imageAlt, timestamp, description, editHref }: WorkCardProps) {
   const { ref, expanded, showToggle, toggle } = useExpandableText([description], 'width')
 
   return (
     <div className="flex flex-col">
-      {timestamp && (
-        <div className="flex justify-end px-4 py-2">
-          <span className="text-r-12 text-gray-500">{timestamp}</span>
+      {(timestamp || editHref) && (
+        <div className="flex items-center justify-end gap-2 px-4 py-2">
+          {timestamp && <span className="text-r-12 text-gray-500">{timestamp}</span>}
+          {editHref && (
+            <Link
+              href={editHref}
+              aria-label="작업물 수정"
+              className="flex h-6 w-6 items-center justify-center text-gray-500"
+            >
+              <MoreVerticalIcon size={16} />
+            </Link>
+          )}
         </div>
       )}
 

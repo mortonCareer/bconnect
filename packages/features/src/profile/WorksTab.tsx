@@ -7,9 +7,11 @@ import { formatRelativeTime } from '@bconnect/config/format'
 
 interface WorksTabProps {
   profileId: number
+  /** owner 전용 작업물 수정 href 빌더. 없으면 케밥 메뉴 안 그림 (viewer/plan) */
+  workEditHref?: (postId: number) => string
 }
 
-export function WorksTab({ profileId }: WorksTabProps) {
+export function WorksTab({ profileId, workEditHref }: WorksTabProps) {
   const enabled = Number.isFinite(profileId) && profileId > 0
   const { data: feeds, isLoading } = useGetFeeds({ profileId }, { query: { enabled } })
 
@@ -44,6 +46,7 @@ export function WorksTab({ profileId }: WorksTabProps) {
           image={post.images?.[0] ?? ''}
           timestamp={post.createdAt ? formatRelativeTime(post.createdAt) : ''}
           description={post.content ?? ''}
+          editHref={workEditHref?.(post.id)}
         />
       ))}
     </div>
