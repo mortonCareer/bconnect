@@ -16,7 +16,6 @@ public record Post(
     LocalDateTime modifiedAt
 ) {
     public static Post of(PostEntity entity) {
-        Hibernate.initialize(entity.getImages());
         return new Post(
                 entity.getId(),
                 entity.getProfileId(),

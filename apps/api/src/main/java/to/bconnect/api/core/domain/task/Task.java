@@ -28,7 +28,6 @@ public record Task(
     LocalDateTime modifiedAt
 ) {
     public static Task of(TaskEntity entity) {
-        Hibernate.initialize(entity.getTrades());
         return new Task(
                 entity.getId(),
                 entity.getProfileId(),

@@ -22,6 +22,7 @@ public class PostService {
     @Transactional
     public Post create(User user, CreatePostRequest request) {
         Profile profile = profileFinder.findByMemberId(user.id());
+
         PostEntity post = PostEntity.builder()
                 .profileId(profile.id())
                 .taskId(request.taskId())
@@ -36,8 +37,10 @@ public class PostService {
     @Transactional
     public void update(User user, Long postId, String content) {
         Profile profile = profileFinder.findByMemberId(user.id());
+
         PostEntity found = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
         if (!found.getProfileId().equals(profile.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
@@ -47,9 +50,11 @@ public class PostService {
     @Transactional
     public void delete(User user, Long postId) {
         Profile profile = profileFinder.findByMemberId(user.id());
+
         postRepository.findById(postId).ifPresent(found -> {
             if (!found.getProfileId().equals(profile.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
             postRepository.delete(found);
         });
     }

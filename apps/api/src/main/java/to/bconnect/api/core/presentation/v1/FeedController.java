@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.response.FeedResponse;
-import to.bconnect.api.core.domain.feed.FeedService;
+import to.bconnect.api.core.domain.post.FeedService;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;

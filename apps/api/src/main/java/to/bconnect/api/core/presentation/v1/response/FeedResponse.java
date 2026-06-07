@@ -1,6 +1,6 @@
 package to.bconnect.api.core.presentation.v1.response;
 
-import to.bconnect.api.core.domain.feed.Feed;
+import to.bconnect.api.core.domain.post.Feed;
 import to.bconnect.api.security.member.MaskedMemberResponse;
 
 public record FeedResponse(
