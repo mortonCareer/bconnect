@@ -1,6 +1,6 @@
 package to.bconnect.api.presentation.v1.response;
 
-import to.bconnect.api.domain.chat.ChatDetail;
+import to.bconnect.api.domain.chat.Chat;
 import to.bconnect.api.security.member.MaskedMemberResponse;
 
 import java.time.LocalDateTime;
@@ -15,17 +15,17 @@ public record ChatResponse(
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {
-    public static ChatResponse of(ChatDetail chatDetail) {
+    public static ChatResponse of(Chat chat) {
         return new ChatResponse(
-                chatDetail.id(),
-                chatDetail.title(),
-                chatDetail.participants().stream()
+                chat.id(),
+                chat.title(),
+                chat.participants().stream()
                         .map(MaskedMemberResponse::of)
                         .toList(),
-                chatDetail.lastMessage() != null ? MessageResponse.of(chatDetail.lastMessage()) : null,
-                chatDetail.unreadCount(),
-                chatDetail.createdAt(),
-                chatDetail.modifiedAt()
+                chat.lastMessage() != null ? MessageResponse.of(chat.lastMessage()) : null,
+                chat.unreadCount(),
+                chat.createdAt(),
+                chat.modifiedAt()
         );
     }
 }

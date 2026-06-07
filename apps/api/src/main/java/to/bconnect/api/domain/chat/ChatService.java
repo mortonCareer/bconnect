@@ -3,21 +3,15 @@ package to.bconnect.api.domain.chat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.presentation.v1.request.CreateChatRequest;
-import to.bconnect.api.security.member.Member;
-import to.bconnect.api.security.member.MemberFinder;
-import to.bconnect.api.storage.domain.chat.ChatEntity;
-import to.bconnect.api.storage.domain.chat.ChatRepository;
-import to.bconnect.api.storage.domain.chat.MessageEntity;
-import to.bconnect.api.storage.domain.chat.MessageRepository;
-import to.bconnect.api.storage.domain.chat.ParticipantEntity;
-import to.bconnect.api.storage.domain.chat.ParticipantRepository;
-import to.bconnect.api.storage.value.MessageType;
 import to.bconnect.api.common.CodeException;
-import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.security.User;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
+import to.bconnect.api.presentation.v1.request.CreateChatRequest;
+import to.bconnect.api.security.User;
+import to.bconnect.api.security.member.Member;
+import to.bconnect.api.security.member.MemberFinder;
+import to.bconnect.api.storage.domain.chat.*;
+import to.bconnect.api.storage.value.MessageType;
 
 import java.util.List;
 import java.util.Map;
@@ -29,21 +23,42 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChatService {
 
-    private final ChatFinder chatFinder;
-    private final MessageFinder messageFinder;
+    private final MessageService messageService;
     private final MemberFinder memberFinder;
     private final ChatRepository chatRepository;
     private final ParticipantRepository participantRepository;
     private final MessageRepository messageRepository;
 
     @Transactional(readOnly = true)
-    public List<ChatDetail> list(Long memberId) {
-        List<Chat> chats = chatFinder.findAll(memberId);
+    public List<Chat> list(Long memberId) {
+        List<Long> chatIds = participantRepository.findByMemberId(memberId)
+                .stream().map(ParticipantEntity::getChatId).toList();
 
-        if (chats.isEmpty()) return List.of();
+        if (chatIds.isEmpty()) return List.of();
 
-        List<Long> memberIds = chats.stream()
-                .flatMap(chat -> chat.participantIds().stream())
+        List<ChatEntity> chats = chatRepository.findAllById(chatIds);
+
+        Map<Long, List<Long>> participantIds = participantRepository.findByChatIdIn(chatIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        ParticipantEntity::getChatId,
+                        Collectors.mapping(ParticipantEntity::getMemberId, Collectors.toList())
+                ));
+
+        Map<Long, Message> lastMessageMap = messageRepository.findLatestMessagesByChatIdIn(chatIds)
+                .stream()
+                .collect(Collectors.toMap(MessageEntity::getChatId, Message::of));
+
+        Map<Long, Long> unreadCountMap = messageRepository
+                .findUnreadCountByChatIdsAndMemberId(chatIds, memberId)
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
+
+        List<Long> memberIds = participantIds.values().stream()
+                .flatMap(List::stream)
                 .distinct()
                 .toList();
 
@@ -51,60 +66,51 @@ public class ChatService {
                 .collect(Collectors.toMap(Member::id, Function.identity()));
 
         return chats.stream()
-                .map(chat -> new ChatDetail(
-                        chat.id(),
-                        chat.title(),
-                        chat.participantIds().stream()
+                .map(chat -> new Chat(
+                        chat.getId(),
+                        chat.getTitle(),
+                        participantIds.getOrDefault(chat.getId(), List.of()).stream()
                                 .map(members::get)
                                 .filter(Objects::nonNull)
                                 .toList(),
-                        chat.lastMessage(),
-                        chat.unreadCount(),
-                        chat.createdAt(),
-                        chat.modifiedAt()
+                        lastMessageMap.get(chat.getId()),
+                        unreadCountMap.getOrDefault(chat.getId(), 0L),
+                        chat.getCreatedAt(),
+                        chat.getModifiedAt()
                 )).toList();
     }
 
     @Transactional
-    public ChatDetail create(User user, CreateChatRequest request) {
-        Long memberId = user.id();
+    public Long create(User user, CreateChatRequest request) {
         List<Long> participantIds = request.participantIds().stream().distinct().toList();
 
-        if (!participantIds.contains(memberId))
+        if (!participantIds.contains(user.id()))
             throw new CodeException(ChatExceptionCode.SELF_NOT_INCLUDED);
 
-        List<Member> members = memberFinder.findAllByIds(participantIds);
-        if (members.size() != participantIds.size())
-            throw new CodeException(CommonExceptionCode.NOT_FOUND);
+        List<Member> participants = memberFinder.findAllByIds(participantIds);
+
+        if (participants.size() != participantIds.size())
+            throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
 
         ChatEntity chat = chatRepository.save(ChatEntity.builder()
                 .title(request.title())
                 .build());
 
-        List<ParticipantEntity> participants = participantIds.stream()
+        participantRepository.saveAll(participantIds.stream()
                 .map(id -> ParticipantEntity.builder()
                         .chatId(chat.getId())
                         .memberId(id)
                         .build())
-                .toList();
-        participantRepository.saveAll(participants);
+                .toList());
 
-        MessageEntity welcome = messageRepository.save(MessageEntity.builder()
+        messageRepository.save(MessageEntity.builder()
                 .chatId(chat.getId())
                 .memberId(Member.SYSTEM_ID)
                 .type(MessageType.SYSTEM)
-                .content("채팅방이 생성되었습니다.") // TODO: 상수 분리
+                .content(MessageTemplate.CHAT_CREATED)
                 .build());
 
-        return new ChatDetail(
-                chat.getId(),
-                chat.getTitle(),
-                members,
-                Message.of(welcome),
-                0L,
-                chat.getCreatedAt(),
-                chat.getModifiedAt()
-        );
+        return chat.getId();
     }
 
     @Transactional(readOnly = true)
@@ -118,7 +124,7 @@ public class ChatService {
                 cursor.reverse()
         );
 
-        List<Message> messages = messageFinder.findAllByChatId(chatId, fetchCursor);
+        List<Message> messages = messageService.findAllByChatId(chatId, fetchCursor);
 
         boolean hasNext = messages.size() > cursor.limit();
         List<Message> content = hasNext ? messages.subList(0, cursor.limit()) : messages;

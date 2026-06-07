@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.presentation.v1.request.CreateChatRequest;
 import to.bconnect.api.presentation.v1.response.ChatResponse;
 import to.bconnect.api.presentation.v1.response.MessageResponse;
-import to.bconnect.api.domain.chat.ChatDetail;
+import to.bconnect.api.domain.chat.Chat;
 import to.bconnect.api.domain.chat.ChatService;
 import to.bconnect.api.domain.chat.Message;
 import to.bconnect.api.security.User;
@@ -38,11 +38,11 @@ public class ChatController {
     }
 
     @PostMapping
-    public ApiResponse<ChatResponse> create(
+    public ApiResponse<Long> create(
             @AuthenticationPrincipal User user,
             @RequestBody @Valid CreateChatRequest request) {
-        ChatDetail chat = chatService.create(user, request);
-        return ApiResponse.success(ChatResponse.of(chat));
+        Long id = chatService.create(user, request);
+        return ApiResponse.success(id);
     }
 
     @GetMapping("/{chatId}/messages")
