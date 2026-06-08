@@ -20,8 +20,8 @@ public class MessageController {
     @SendTo("/topic/chats/{chatId}")
     public void send(
             @DestinationVariable Long chatId,
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @Payload @Valid SendMessageRequest request) {
-        messageSocketService.broadcast(authUser, chatId, request);
+        messageSocketService.broadcast(user, chatId, request);
     }
 }

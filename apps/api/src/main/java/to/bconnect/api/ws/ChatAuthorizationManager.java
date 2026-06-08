@@ -25,12 +25,12 @@ public class ChatAuthorizationManager
         Authentication auth = authentication.get();
         if (auth == null || !auth.isAuthenticated())
             return new AuthorizationDecision(false);
-        if (!(auth.getPrincipal() instanceof AuthUser authUser))
+        if (!(auth.getPrincipal() instanceof AuthUser user))
             return new AuthorizationDecision(false);
 
         Long chatId = Long.parseLong(context.getVariables().get("chatId"));
         try {
-            boolean granted = participantRepository.existsByChatIdAndMemberId(chatId, authUser.id());
+            boolean granted = participantRepository.existsByChatIdAndMemberId(chatId, user.id());
             return new AuthorizationDecision(granted);
         } catch (NumberFormatException e) {
             return new AuthorizationDecision(false);

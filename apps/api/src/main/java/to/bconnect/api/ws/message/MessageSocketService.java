@@ -29,13 +29,13 @@ public class MessageSocketService {
     private final SimpUserRegistry simpUserRegistry;
 
     @Transactional
-    public void broadcast(AuthUser authUser, Long chatId, SendMessageRequest request) {
+    public void broadcast(AuthUser user, Long chatId, SendMessageRequest request) {
         if (request.type() == MessageType.SYSTEM)
             throw new CodeException(CommonExceptionCode.NOT_VALID);
 
         MessageEntity entity = messageRepository.save(MessageEntity.builder()
                 .chatId(chatId)
-                .memberId(authUser.id())
+                .memberId(user.id())
                 .type(request.type())
                 .content(request.content())
                 .build());
