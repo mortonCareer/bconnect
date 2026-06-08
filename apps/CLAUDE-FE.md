@@ -1,6 +1,6 @@
-# apps (career · plan 공통 FE 패턴)
+# 공통 FE 패턴 (career · plan)
 
-career·plan 두 Next.js App Router 앱의 공통 프론트엔드 규칙. 앱별 특이사항은 각 앱 CLAUDE.md ([career](./career/CLAUDE.md) · [plan](./plan/CLAUDE.md)). 위반 시 dev 깨짐 또는 production 사고.
+career·plan 두 Next.js App Router 앱의 공통 프론트엔드 규칙. 각 앱 CLAUDE.md가 `@import`로 로드. 파일명이 정확히 `CLAUDE.md`가 아니라 **자동 로드 안 됨** → `apps/api`(Spring Boot)·`apps/crawler`(Python) 작업 시 안 딸려옴(명시 import한 career·plan만 로드). 앱별 특이사항은 [career](./career/CLAUDE.md) · [plan](./plan/CLAUDE.md). 위반 시 dev 깨짐 또는 production 사고.
 
 ## 인증 미들웨어 — Public routes
 

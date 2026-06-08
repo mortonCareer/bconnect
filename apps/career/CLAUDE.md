@@ -2,7 +2,9 @@
 
 기술자(blue-collar worker) PWA. Next.js App Router + Tailwind v4.
 
-> 공통 FE 패턴(인증·nuqs·토큰·figma·navigation·공유화면)은 [apps/CLAUDE.md](../CLAUDE.md). 여기는 career 전용만.
+> 공통 FE 패턴(인증·nuqs·토큰·figma·navigation·공유화면)은 [CLAUDE-FE.md](../CLAUDE-FE.md) (아래 `@import`). 여기는 career 전용만.
+
+@../CLAUDE-FE.md
 
 ## Commands
 
