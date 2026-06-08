@@ -5,7 +5,7 @@
 
 import { mapKakaoAddress } from '@bconnect/config/address'
 import {
-  AddressSearchSheet,
+  AddressSearchDrawer,
   FormControl,
   FormDescription,
   FormField,
@@ -67,7 +67,7 @@ export function AddressField<T extends FieldValues>({
 
             <FormMessage />
 
-            <AddressSearchSheet
+            <AddressSearchDrawer
               open={open}
               onOpenChange={setOpen}
               onComplete={(result) =>
