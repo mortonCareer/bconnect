@@ -11,6 +11,7 @@ import to.bconnect.api.storage.profile.ProfileEntity;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.storage.recommendation.RecommendationRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,6 +56,15 @@ public class ProfileQueryService {
                         coworkerCounts.getOrDefault(entity.getMemberId(), 0L)
                 ))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Profile> summaries(Collection<Long> memberIds) {
+        return profileRepository.findByMemberIdIn(memberIds).stream()
+                .collect(Collectors.toMap(
+                        ProfileEntity::getMemberId,
+                        entity -> Profile.of(entity, null, null, null)
+                ));
     }
 
     private Map<Long, Long> toCountMap(List<Object[]> rows) {

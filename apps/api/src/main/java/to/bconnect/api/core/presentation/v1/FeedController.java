@@ -9,6 +9,8 @@ import to.bconnect.api.core.presentation.v1.response.FeedResponse;
 import to.bconnect.api.core.domain.post.Post;
 import to.bconnect.api.core.domain.post.PostService;
 import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.core.domain.profile.Profile;
+import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.response.ApiResponse;
 
@@ -22,6 +24,7 @@ public class FeedController {
 
     private final PostService postService;
     private final MemberResolver memberResolver;
+    private final ProfileQueryService profileQueryService;
 
     @GetMapping
     public ApiResponse<List<FeedResponse>> list() {
@@ -29,9 +32,13 @@ public class FeedController {
 
         List<Long> memberIds = posts.stream().map(Post::memberId).distinct().toList();
         Map<Long, Member> memberMap = memberResolver.map(memberIds);
+        Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
 
         List<FeedResponse> feeds = posts.stream()
-                .map(post -> FeedResponse.of(post, memberMap.get(post.memberId())))
+                .map(post -> FeedResponse.of(
+                        post,
+                        memberMap.get(post.memberId()),
+                        profileMap.get(post.memberId())))
                 .toList();
         return ApiResponse.success(feeds);
     }
@@ -40,6 +47,7 @@ public class FeedController {
     public ApiResponse<FeedResponse> get(@PathVariable Long id) {
         Post post = postService.get(id);
         Member member = memberResolver.find(post.memberId());
-        return ApiResponse.success(FeedResponse.of(post, member));
+        Profile profile = profileQueryService.summaries(List.of(post.memberId())).get(post.memberId());
+        return ApiResponse.success(FeedResponse.of(post, member, profile));
     }
 }

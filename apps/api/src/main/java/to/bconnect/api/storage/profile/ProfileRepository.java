@@ -12,5 +12,7 @@ public interface ProfileRepository extends JpaRepository<ProfileEntity, Long> {
 
     List<ProfileEntity> findByIdIn(Collection<Long> ids);
 
+    List<ProfileEntity> findByMemberIdIn(Collection<Long> memberIds);
+
     boolean existsByMemberId(Long memberId);
 }

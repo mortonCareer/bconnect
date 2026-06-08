@@ -17,6 +17,8 @@ import to.bconnect.api.core.domain.coworker.Coworker;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestQueryService;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestService;
 import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.core.domain.profile.Profile;
+import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.security.member.Member;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
@@ -32,6 +34,7 @@ public class CoworkerRequestController {
     private final CoworkerRequestService coworkerRequestService;
     private final CoworkerRequestQueryService coworkerRequestQueryService;
     private final MemberResolver memberResolver;
+    private final ProfileQueryService profileQueryService;
 
     @PostMapping
     public ApiResponse<Long> create(
@@ -80,9 +83,13 @@ public class CoworkerRequestController {
     private List<CoworkerRequestResponse> assemble(List<CoworkerRequest> requests) {
         List<Long> memberIds = requests.stream().map(CoworkerRequest::memberId).distinct().toList();
         Map<Long, Member> memberMap = memberResolver.map(memberIds);
+        Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
 
         return requests.stream()
-                .map(request -> CoworkerRequestResponse.of(request, memberMap.get(request.memberId())))
+                .map(request -> CoworkerRequestResponse.of(
+                        request,
+                        memberMap.get(request.memberId()),
+                        profileMap.get(request.memberId())))
                 .toList();
     }
 }

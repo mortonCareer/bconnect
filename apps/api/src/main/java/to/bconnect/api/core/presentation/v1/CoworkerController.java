@@ -12,6 +12,8 @@ import to.bconnect.api.core.presentation.v1.response.CoworkerResponse;
 import to.bconnect.api.core.domain.coworker.Coworker;
 import to.bconnect.api.core.domain.coworker.CoworkerService;
 import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.core.domain.profile.Profile;
+import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.security.member.Member;
 import to.bconnect.api.storage.coworker.CoworkerStatus;
 import to.bconnect.api.security.AuthUser;
@@ -27,6 +29,7 @@ public class CoworkerController {
 
     private final CoworkerService coworkerService;
     private final MemberResolver memberResolver;
+    private final ProfileQueryService profileQueryService;
 
     @GetMapping
     public ApiResponse<List<CoworkerResponse>> list(
@@ -37,10 +40,14 @@ public class CoworkerController {
 
         List<Long> memberIds = coworkers.stream().map(Coworker::memberId).distinct().toList();
         Map<Long, Member> memberMap = memberResolver.map(memberIds);
+        Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
 
         List<CoworkerResponse> response = coworkers.stream()
                 .map(coworker -> CoworkerResponse.of(
-                        coworker, memberMap.get(coworker.memberId()), CoworkerStatus.COWORKER))
+                        coworker,
+                        memberMap.get(coworker.memberId()),
+                        profileMap.get(coworker.memberId()),
+                        CoworkerStatus.COWORKER))
                 .toList();
         return ApiResponse.success(response);
     }

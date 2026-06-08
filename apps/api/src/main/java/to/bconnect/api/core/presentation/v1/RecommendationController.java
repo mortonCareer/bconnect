@@ -19,6 +19,8 @@ import to.bconnect.api.core.domain.recommendation.Recommendation;
 import to.bconnect.api.core.domain.recommendation.RecommendationQueryService;
 import to.bconnect.api.core.domain.recommendation.RecommendationService;
 import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.core.domain.profile.Profile;
+import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.response.ApiResponse;
@@ -34,6 +36,7 @@ public class RecommendationController {
     private final RecommendationService recommendationService;
     private final RecommendationQueryService recommendationQueryService;
     private final MemberResolver memberResolver;
+    private final ProfileQueryService profileQueryService;
 
     @PostMapping
     public ApiResponse<Long> create(
@@ -101,9 +104,13 @@ public class RecommendationController {
     private List<RecommendationResponse> assemble(List<Recommendation> recommendations) {
         List<Long> memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
         Map<Long, Member> memberMap = memberResolver.map(memberIds);
+        Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
 
         return recommendations.stream()
-                .map(r -> RecommendationResponse.of(r, memberMap.get(r.memberId())))
+                .map(r -> RecommendationResponse.of(
+                        r,
+                        memberMap.get(r.memberId()),
+                        profileMap.get(r.memberId())))
                 .toList();
     }
 }
