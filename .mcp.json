@@ -13,6 +13,11 @@
         "AWS_PROFILE": "morton",
         "AWS_REGION": "ap-northeast-2"
       }
+    },
+    "next-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "next-devtools-mcp@latest"]
     }
   }
 }
