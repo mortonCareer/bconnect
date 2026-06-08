@@ -5,12 +5,12 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/v1/coworkers?profileId={{profileId}}
+  url: {{baseUrl}}/api/v1/coworkers?memberId={{memberId}}
   auth: inherit
 }
 
 params:query {
-  profileId: {{profileId}}
+  memberId: {{memberId}}
 }
 
 tests {
