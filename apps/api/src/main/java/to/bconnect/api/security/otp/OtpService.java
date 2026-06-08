@@ -11,6 +11,7 @@ import to.bconnect.api.common.CodeException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,12 +33,16 @@ public class OtpService {
         String code = String.format(CODE_FORMAT, RANDOM.nextInt(CODE_BOUND));
         LocalDateTime expiredAt = LocalDateTime.now().plusSeconds(EXPIRY_SECONDS);
 
-        OtpEntity otp = otpRepository.findByPhone(phone).
-                orElseGet(() -> new OtpEntity(phone, code, expiredAt));
-
-        if (!isToday(otp.getLastSentAt())) otp.dailyReset();
-        if (otp.getDailyCount() >= MAX_DAILY_COUNT) throw new CodeException(AuthExceptionCode.OTP_DAILY_LIMIT);
-        if (isRateLimited(otp)) throw new CodeException(AuthExceptionCode.OTP_RATE_LIMIT);
+        Optional<OtpEntity> found = otpRepository.findByPhone(phone);
+        OtpEntity otp;
+        if (found.isPresent()) {
+            otp = found.get();
+            if (!isToday(otp.getLastSentAt())) otp.dailyReset();
+            if (otp.getDailyCount() >= MAX_DAILY_COUNT) throw new CodeException(AuthExceptionCode.OTP_DAILY_LIMIT);
+            if (isRateLimited(otp)) throw new CodeException(AuthExceptionCode.OTP_RATE_LIMIT);
+        } else {
+            otp = new OtpEntity(phone, code, expiredAt);
+        }
 
         otp.generateCode(code, expiredAt);
         otpRepository.save(otp);
