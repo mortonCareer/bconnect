@@ -8,19 +8,17 @@ import java.util.List;
 public record ChatResponse(
         Long id,
         String title,
-        List<MaskedMemberResponse> participants,
+        List<MemberSummaryResponse> participants,
         MessageResponse lastMessage,
         Long unreadCount,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {
-    public static ChatResponse of(Chat chat) {
+    public static ChatResponse of(Chat chat, List<MemberSummaryResponse> participants) {
         return new ChatResponse(
                 chat.id(),
                 chat.title(),
-                chat.participants().stream()
-                        .map(MaskedMemberResponse::of)
-                        .toList(),
+                participants,
                 chat.lastMessage() != null ? MessageResponse.of(chat.lastMessage()) : null,
                 chat.unreadCount(),
                 chat.createdAt(),

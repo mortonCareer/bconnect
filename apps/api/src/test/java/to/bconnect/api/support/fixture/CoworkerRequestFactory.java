@@ -20,7 +20,7 @@ public class CoworkerRequestFactory {
         return new CreateCoworkerRequest(toId);
     }
 
-    public static Coworker createDetail(Long id, Member member) {
-        return new Coworker(id, member);
+    public static Coworker createDetail(Long id, Long memberId) {
+        return new Coworker(id, memberId);
     }
 }

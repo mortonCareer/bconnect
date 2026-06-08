@@ -1,23 +1,16 @@
 package to.bconnect.api.core.presentation.v1.response;
 
-import to.bconnect.api.core.domain.post.Feed;
+import to.bconnect.api.core.domain.post.Post;
+import to.bconnect.api.security.member.Member;
 
 public record FeedResponse(
-        MaskedMemberResponse member,
+        MemberSummaryResponse member,
         PostResponse post
 ) {
-    public static FeedResponse of(Feed feed) {
+    public static FeedResponse of(Post post, Member member) {
         return new FeedResponse(
-                MaskedMemberResponse.of(feed.member()),
-                new PostResponse(
-                        feed.id(),
-                        feed.member().id(),
-                        feed.taskId(),
-                        feed.images(),
-                        feed.content(),
-                        feed.createdAt(),
-                        feed.modifiedAt()
-                )
+                MemberSummaryResponse.of(member),
+                PostResponse.of(post)
         );
     }
 }

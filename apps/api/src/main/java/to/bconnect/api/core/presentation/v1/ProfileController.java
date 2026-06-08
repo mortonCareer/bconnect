@@ -15,13 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.request.CreateProfileRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProfileRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProfileAboutRequest;
-import to.bconnect.api.core.presentation.v1.response.ProfileDetailResponse;
+import to.bconnect.api.core.presentation.v1.response.ProfileResponse;
+import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.core.domain.profile.ProfileService;
+import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/profiles")
@@ -30,18 +34,26 @@ public class ProfileController {
 
     private final ProfileService profileService;
     private final ProfileQueryService profileQueryService;
+    private final MemberResolver memberResolver;
 
     @GetMapping
-    public ApiResponse<List<ProfileDetailResponse>> list() {
-        List<ProfileDetailResponse> profiles = profileQueryService.list().stream()
-                .map(ProfileDetailResponse::of)
+    public ApiResponse<List<ProfileResponse>> list() {
+        List<Profile> profiles = profileQueryService.list();
+
+        List<Long> memberIds = profiles.stream().map(Profile::memberId).distinct().toList();
+        Map<Long, Member> memberMap = memberResolver.map(memberIds);
+
+        List<ProfileResponse> response = profiles.stream()
+                .map(profile -> ProfileResponse.of(profile, memberMap.get(profile.memberId())))
                 .toList();
-        return ApiResponse.success(profiles);
+        return ApiResponse.success(response);
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<ProfileDetailResponse> get(@PathVariable Long id) {
-        return ApiResponse.success(ProfileDetailResponse.of(profileQueryService.get(id)));
+    public ApiResponse<ProfileResponse> get(@PathVariable Long id) {
+        Profile profile = profileQueryService.get(id);
+        Member member = memberResolver.find(profile.memberId());
+        return ApiResponse.success(ProfileResponse.of(profile, member));
     }
 
     @PostMapping

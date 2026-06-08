@@ -6,13 +6,13 @@ import to.bconnect.api.storage.coworker.CoworkerStatus;
 
 public record CoworkerResponse(
         Long id,
-        MaskedMemberResponse member,
+        MemberSummaryResponse member,
         CoworkerStatus status
 ) {
     public static CoworkerResponse of(Coworker coworker, Member member, CoworkerStatus status) {
         return new CoworkerResponse(
                 coworker.id(),
-                MaskedMemberResponse.of(member),
+                MemberSummaryResponse.of(member),
                 status
         );
     }

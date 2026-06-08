@@ -9,12 +9,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.response.CoworkerResponse;
+import to.bconnect.api.core.domain.coworker.Coworker;
 import to.bconnect.api.core.domain.coworker.CoworkerService;
+import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.storage.coworker.CoworkerStatus;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/coworkers")
@@ -22,16 +26,23 @@ import java.util.List;
 public class CoworkerController {
 
     private final CoworkerService coworkerService;
+    private final MemberResolver memberResolver;
 
     @GetMapping
     public ApiResponse<List<CoworkerResponse>> list(
             @AuthenticationPrincipal AuthUser user,
             @RequestParam Long memberId) {
         // TODO: CoworkerStatus 함께 조회
-        List<CoworkerResponse> coworkers = coworkerService.list(memberId).stream()
-                .map(coworker -> CoworkerResponse.of(coworker, coworker.member(), CoworkerStatus.COWORKER))
+        List<Coworker> coworkers = coworkerService.list(memberId);
+
+        List<Long> memberIds = coworkers.stream().map(Coworker::memberId).distinct().toList();
+        Map<Long, Member> memberMap = memberResolver.map(memberIds);
+
+        List<CoworkerResponse> response = coworkers.stream()
+                .map(coworker -> CoworkerResponse.of(
+                        coworker, memberMap.get(coworker.memberId()), CoworkerStatus.COWORKER))
                 .toList();
-        return ApiResponse.success(coworkers);
+        return ApiResponse.success(response);
     }
 
     @DeleteMapping("/{id}")

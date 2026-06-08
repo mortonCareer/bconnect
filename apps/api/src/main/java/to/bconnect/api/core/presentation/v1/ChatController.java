@@ -11,15 +11,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.request.CreateChatRequest;
 import to.bconnect.api.core.presentation.v1.response.ChatResponse;
+import to.bconnect.api.core.presentation.v1.response.MemberSummaryResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
+import to.bconnect.api.core.domain.chat.Chat;
 import to.bconnect.api.core.domain.chat.ChatService;
 import to.bconnect.api.core.domain.chat.Message;
+import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.common.response.CursorPage;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/chats")
@@ -27,11 +33,27 @@ import java.util.List;
 public class ChatController {
 
     private final ChatService chatService;
+    private final MemberResolver memberResolver;
 
     @GetMapping
     public ApiResponse<List<ChatResponse>> list(@AuthenticationPrincipal AuthUser user) {
-        List<ChatResponse> response = chatService.list(user.id()).stream()
-                .map(ChatResponse::of)
+        List<Chat> chats = chatService.list(user.id());
+
+        List<Long> memberIds = chats.stream()
+                .flatMap(chat -> chat.participantIds().stream())
+                .distinct()
+                .toList();
+        Map<Long, Member> memberMap = memberResolver.map(memberIds);
+
+        List<ChatResponse> response = chats.stream()
+                .map(chat -> ChatResponse.of(
+                        chat,
+                        chat.participantIds().stream()
+                                .map(memberMap::get)
+                                .filter(Objects::nonNull)
+                                .map(MemberSummaryResponse::of)
+                                .toList()
+                ))
                 .toList();
         return ApiResponse.success(response);
     }

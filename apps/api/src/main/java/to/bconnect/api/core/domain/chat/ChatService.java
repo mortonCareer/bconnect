@@ -14,7 +14,6 @@ import to.bconnect.api.security.member.Member;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +34,7 @@ public class ChatService {
 
         List<ChatEntity> chats = chatRepository.findAllById(chatIds);
 
-        Map<Long, List<Long>> participantIds = participantRepository.findByChatIdIn(chatIds)
+        Map<Long, List<Long>> participantMap = participantRepository.findByChatIdIn(chatIds)
                 .stream()
                 .collect(Collectors.groupingBy(
                         ParticipantEntity::getChatId,
@@ -44,7 +43,7 @@ public class ChatService {
 
         Map<Long, Message> lastMessageMap = messageRepository.findLatestMessagesByChatIdIn(chatIds)
                 .stream()
-                .collect(Collectors.toMap(MessageEntity::getChatId, this::toMessage));
+                .collect(Collectors.toMap(MessageEntity::getChatId, Message::of));
 
         Map<Long, Long> unreadCountMap = messageRepository
                 .findUnreadCountByChatIdsAndMemberId(chatIds, memberId)
@@ -54,25 +53,12 @@ public class ChatService {
                         row -> (Long) row[1]
                 ));
 
-        List<Long> memberIds = participantIds.values().stream()
-                .flatMap(List::stream)
-                .distinct()
-                .toList();
-
-        Map<Long, Member> members = memberResolver.map(memberIds);
-
         return chats.stream()
-                .map(chat -> new Chat(
-                        chat.getId(),
-                        chat.getTitle(),
-                        participantIds.getOrDefault(chat.getId(), List.of()).stream()
-                                .map(members::get)
-                                .filter(Objects::nonNull)
-                                .toList(),
+                .map(chat -> Chat.of(
+                        chat,
+                        participantMap.getOrDefault(chat.getId(), List.of()),
                         lastMessageMap.get(chat.getId()),
-                        unreadCountMap.getOrDefault(chat.getId(), 0L),
-                        chat.getCreatedAt(),
-                        chat.getModifiedAt()
+                        unreadCountMap.getOrDefault(chat.getId(), 0L)
                 )).toList();
     }
 
@@ -82,11 +68,6 @@ public class ChatService {
 
         if (!participantIds.contains(user.id()))
             throw new CodeException(ChatExceptionCode.SELF_NOT_INCLUDED);
-
-        List<Member> participants = memberResolver.findAllByIds(participantIds);
-
-        if (participants.size() != participantIds.size())
-            throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
 
         ChatEntity chat = chatRepository.save(new ChatEntity(command.title()));
 
@@ -119,18 +100,6 @@ public class ChatService {
                 cursor.toSort()
         );
 
-        return CursorPage.from(entities.map(this::toMessage), Message::id);
-    }
-
-    private Message toMessage(MessageEntity entity) {
-        return new Message(
-                entity.getId(),
-                entity.getChatId(),
-                entity.getMemberId(),
-                entity.getType(),
-                entity.getContent(),
-                entity.getCreatedAt(),
-                entity.getModifiedAt()
-        );
+        return CursorPage.from(entities.map(Message::of), Message::id);
     }
 }

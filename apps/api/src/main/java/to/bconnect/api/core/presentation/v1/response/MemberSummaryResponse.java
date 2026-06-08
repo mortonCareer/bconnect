@@ -5,7 +5,7 @@ import to.bconnect.api.security.member.Member;
 
 import java.time.LocalDateTime;
 
-public record MaskedMemberResponse(
+public record MemberSummaryResponse(
         Long id,
         String username,
         String name,
@@ -14,8 +14,8 @@ public record MaskedMemberResponse(
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {
-    public static MaskedMemberResponse of(Member member) {
-        return new MaskedMemberResponse(
+    public static MemberSummaryResponse of(Member member) {
+        return new MemberSummaryResponse(
                 member.id(),
                 member.username(),
                 member.name(),

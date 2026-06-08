@@ -21,8 +21,15 @@ public class PostService {
     public List<Post> list() {
         return postRepository.findAll()
                 .stream()
-                .map(this::toPost)
+                .map(Post::of)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Post get(Long postId) {
+        return postRepository.findById(postId)
+                .map(Post::of)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
     @Transactional
@@ -35,7 +42,7 @@ public class PostService {
                 .build();
 
         postRepository.save(post);
-        return toPost(post);
+        return Post.of(post);
     }
 
     @Transactional
@@ -58,17 +65,5 @@ public class PostService {
 
             postRepository.delete(found);
         });
-    }
-
-    private Post toPost(PostEntity entity) {
-        return new Post(
-                entity.getId(),
-                entity.getMemberId(),
-                entity.getTaskId(),
-                entity.getImages(),
-                entity.getContent(),
-                entity.getCreatedAt(),
-                entity.getModifiedAt()
-        );
     }
 }

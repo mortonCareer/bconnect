@@ -12,13 +12,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.request.CreateCoworkerRequest;
 import to.bconnect.api.core.presentation.v1.response.CoworkerRequestResponse;
+import to.bconnect.api.core.domain.coworker.Coworker;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestQueryService;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestService;
-import to.bconnect.api.core.domain.coworker.CoworkerRequest;
+import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/coworker-requests")
@@ -27,6 +30,7 @@ public class CoworkerRequestController {
 
     private final CoworkerRequestService coworkerRequestService;
     private final CoworkerRequestQueryService coworkerRequestQueryService;
+    private final MemberResolver memberResolver;
 
     @PostMapping
     public ApiResponse<Long> create(
@@ -39,19 +43,22 @@ public class CoworkerRequestController {
     @GetMapping("/received")
     public ApiResponse<List<CoworkerRequestResponse>> listReceived(
             @AuthenticationPrincipal AuthUser user) {
-        List<CoworkerRequestResponse> requests = coworkerRequestQueryService.listReceived(user).stream()
-                .map(CoworkerRequestResponse::of)
-                .toList();
-        return ApiResponse.success(requests);
+        return ApiResponse.success(assemble(coworkerRequestQueryService.listReceived(user)));
     }
 
     @GetMapping("/sent")
     public ApiResponse<List<CoworkerRequestResponse>> listSent(
             @AuthenticationPrincipal AuthUser user) {
-        List<CoworkerRequestResponse> requests = coworkerRequestQueryService.listSent(user).stream()
-                .map(CoworkerRequestResponse::of)
+        return ApiResponse.success(assemble(coworkerRequestQueryService.listSent(user)));
+    }
+
+    private List<CoworkerRequestResponse> assemble(List<Coworker> requests) {
+        List<Long> memberIds = requests.stream().map(Coworker::memberId).distinct().toList();
+        Map<Long, Member> memberMap = memberResolver.map(memberIds);
+
+        return requests.stream()
+                .map(request -> CoworkerRequestResponse.of(request, memberMap.get(request.memberId())))
                 .toList();
-        return ApiResponse.success(requests);
     }
 
     @PostMapping("/{id}/accept")

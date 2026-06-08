@@ -1,15 +1,16 @@
 package to.bconnect.api.core.presentation.v1.response;
 
 import to.bconnect.api.core.domain.profile.Profile;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.profile.Trade;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
-public record ProfileDetailResponse(
+public record ProfileResponse(
         Long id,
-        MaskedMemberResponse member,
+        MemberSummaryResponse member,
         Trade primaryTrade,
         Set<Trade> trades,
         int experience,
@@ -22,10 +23,10 @@ public record ProfileDetailResponse(
         int recommendationCount,
         int coworkerCount
 ) {
-    public static ProfileDetailResponse of(Profile detail) {
-        return new ProfileDetailResponse(
+    public static ProfileResponse of(Profile detail, Member member) {
+        return new ProfileResponse(
                 detail.id(),
-                MaskedMemberResponse.of(detail.member()),
+                MemberSummaryResponse.of(member),
                 detail.primaryTrade(),
                 detail.trades(),
                 detail.experience(),
