@@ -22,7 +22,7 @@ pnpm lint:plan
 - Tailwind v4 design tokens
 - Figma 매핑 (`@figma` JSDoc)
 - Navigation (`<Link>` 사용, 클릭 핸들러 `router.push` 금지 — ESLint 강제)
-- **공유 화면 — `packages/features`의 `*View` 소비** ([career CLAUDE.md](../career/CLAUDE.md) "공유 화면" 섹션 · [ADR-0020](../../docs/explanation/adr/0020-dual-shell-view-sharing-rendershell-resolved-data.md)). plan은 `@panel` 라우트의 `page.tsx`에서 by-id 데이터를 resolve해 `data` prop으로 내려주고, `renderShell` 생략 → 기본 `PanelShell`. 액션 슬롯 생략 → 읽기전용. 소비처가 화면당 하나라 어댑터는 `page.tsx`에 인라인(career처럼 `_adapters/` 분리 불필요).
+- **공유 화면 — `packages/features`의 `*View` 소비** ([career CLAUDE.md](../career/CLAUDE.md) · [ADR-0020](../../docs/explanation/adr/0020-dual-shell-view-sharing-rendershell-resolved-data.md)). plan은 `@panel` `page.tsx`에서 by-id 데이터 resolve→`data` prop, `renderShell`·슬롯 생략(기본 `PanelShell`, 읽기전용).
 
 ## 미래 (Sprint 2+)
 

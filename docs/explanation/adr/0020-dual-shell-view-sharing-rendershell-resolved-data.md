@@ -72,6 +72,7 @@ B안의 유일한 장점(career 한 줄)은 "공유 부품이 앱 사정을 떠�
 │     ├─ editHrefs?     (안 주면 편집 링크 안 그림)                              │
 │     ├─ statHrefs?     (안 주면 통계 숫자가 링크 아님)                          │
 │     ├─ workEditHref?  (안 주면 작업물 점 3개 메뉴 안 그림)                      │
+│     ├─ fallbackTitle? (안 주면 셸 타이틀 '프로필'; owner 는 '내 프로필' 주입)    │
 │     │                                                                         │
 │     └─ 그리는 순서:                                                           │
 │         <ProfileSummary data + statHrefs?/>                                    │
@@ -104,14 +105,15 @@ B안의 유일한 장점(career 한 줄)은 "공유 부품이 앱 사정을 떠�
 ### 폴더가 어떻게 바뀌나 (지금 → 목표)
 
 ```
-packages/features/src/profile/
-  ProfileView.tsx          ▲ 껍데기 끼우기(#537) + data prop + 빈자리들. 직접 가져오기 제거
-  ProfileSummary.tsx       ▲ statHrefs? 추가 (주면 통계 숫자를 링크로)
-  IntroTab.tsx             ▲ 자격·추천서 직접 가져오기 제거 → data prop, editHrefs?
-  RecommendationList.tsx   ▲ 받은/보낸 직접 가져오기 제거 → data prop (받은/보낸 토글은 유지)
-  WorksTab.tsx             ▲ workEditHref? 추가 (작업물은 가려짐 없는 데이터라 직접 가져오기 유지)
-  WorkCard.tsx             ▲ 점 3개 수정 메뉴를 선택 prop으로 흡수
-  index.ts                 ▲ ProfileView + 타입들 내보내기
+packages/features/src/profile/   (루트 = 공개 진입점 · _parts/ = 내부 부품)
+  ProfileView.tsx          ▲ 공개. 껍데기 끼우기(#537) + data prop + 빈자리들. 직접 가져오기 제거
+  RecommendationList.tsx   ▲ 공개 (전용 페이지가 단독 소비). 직접 가져오기 제거 → data prop (토글 유지)
+  index.ts                 ▲ 공개 계약 (ProfileView + RecommendationList + 타입만 내보냄)
+  _parts/                  ＋ 내부 부품 디렉토리. 외부 직접 import 금지
+    ProfileSummary.tsx       ▲ statHrefs? 추가 (주면 통계 숫자를 링크로)
+    IntroTab.tsx             ▲ 자격·추천서 직접 가져오기 제거 → data prop, editHrefs?
+    WorksTab.tsx             ▲ workEditHref? 추가 (작업물은 가려짐 없는 데이터라 직접 가져오기 유지)
+    WorkCard.tsx             ▲ 점 3개 수정 메뉴를 선택 prop으로 흡수
 
 apps/career/src/app/(main)/profile/
   _adapters/
@@ -134,12 +136,15 @@ apps/plan/src/app/(main)/@panel/profile/[profileId]/
 
 (`certifications/`, `coworkers/`, `edit/` 아래는 이번 작업 범위 밖 — 그대로 둠.)
 
-### 앞으로 남은 ~29개 화면이 따라 할 4단계
+**폴더 구조 규칙 (새 도메인도 복제)**: 루트 파일 = 공개 진입점(`*View` + `index.ts`가 내보내는 재사용 조각만), `_parts/` = 내부 부품(외부 직접 import 금지). 디렉토리만 봐도 "무엇을 소비해야 하나"가 보인다. `_` 접두사는 앱의 `_adapters`/`_components` 컨벤션을 재사용한 의도 신호(패키지에선 라우팅 의미 없음). 강제(lint)는 첫 도입이라 보류 — 구조 신호 + `index.ts` 계약 + 본 ADR로 충분, 추후 deep-import 사고 보이면 `no-restricted-imports` 추가.
+
+### 앞으로 남은 ~29개 화면이 따라 할 5단계
 
 1. **껍데기**: `ChatView`/`ProfileView`의 껍데기 끼우기 타입을 그대로 복사한다. career는 한 번 만들어 둔 `careerShell(onBack?)`을 넘기고, plan은 안 넘긴다(그러면 기본 패널). 이 타입 모양은 다시 짜지 말고 그대로 쓴다.
 2. **데이터**: 화면이 받을 데이터 묶음 타입(`<화면이름>Data`)을 정한다. 앱/상황마다 갈리는 호출("나" vs id)은 **앱 어댑터가 골라서** 부르고 prop으로 내려준다. 화면은 절대 스스로 안 가져온다 → 이게 패키지를 깨끗하게 유지하는 핵심 규칙. (단, 작업물 목록처럼 "나/남" 차이가 없고 끌어올리기 번거로운 데이터는 화면이 직접 가져와도 된다.)
 3. **버튼·링크**: 빈자리를 선택 prop으로 연다(`actionSlot`/`editHrefs`/`statHrefs` 등). 안 주면 그 기능을 안 그린다 → plan/남 화면은 자동으로 읽기 전용이 된다(기존 동작 안 깨짐).
 4. **어댑터**: 각 앱이 화면마다 얇은 연결 부품 하나로 호출·서버 동작·공유를 묶는다. 서버 동작과 공유는 앱에 살고, 공유 패키지엔 절대 안 들어간다.
+5. **폴더 구조**: `packages/features/src/<도메인>/`에서 `<도메인>View`와 `index.ts`가 내보내는 공개 조각만 루트에 두고, 서브컴포넌트는 `_parts/`로 격리. 루트=공개 표면이 디렉토리만으로 드러나게 한다.
 
 ## Consequences (좋은 점·나쁜 점)
 

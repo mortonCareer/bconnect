@@ -60,15 +60,11 @@ const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'one-clic
 
 클릭 핸들러(`onClick` 등)의 `router.push`/`router.replace` 금지 (ESLint `no-restricted-syntax` CI 차단) — `<Link>`(버튼은 `<Button asChild>`) 사용. 불가피한 imperative(폼 제출 후 리다이렉트 등)는 핸들러 함수 내부면 비대상, `router.back()` 허용.
 
-### 공유 화면 — `packages/features`의 `*View`를 앱별 어댑터로 소비
+### 공유 화면 — `packages/features`의 `*View` 소비
 
-career·plan 공통 화면(프로필/메시지/채팅/알림 등 ~90%)은 `packages/features`에 `<도메인>View` **하나**로 두고 두 앱이 공유한다. 앱 로컬 재구현 = 안티패턴(#541). 공유 UI 조각(`Button` 등)은 `packages/ui`. 소비 계약:
+career·plan 공통 화면(~90%)은 `packages/features`의 `<도메인>View` 하나로 공유. 앱 로컬 재구현=안티패턴(#541). `*View`는 순수 표현 — 앱이 데이터 fetch해 `data` prop으로 내리고, 셸은 `renderShell`(plan 생략→기본 `PanelShell`), 액션·편집은 `actionSlot`/`editHrefs` 슬롯 주입(부재→읽기전용). mutation·공유는 앱측. 여러 페이지가 쓰면 어댑터를 `_adapters/`로 분리, 단일이면 `page.tsx` 인라인. features 폴더: 루트=공개(`*View`+`index.ts`), `_parts/`=내부.
 
-- **`*View`는 순수 표현 계층** — 스스로 fetch·mutation 안 함. 앱이 알맞은 훅으로 데이터를 가져와 `data` prop으로 내려준다(본인 화면=`useGetMy*` 전체 데이터, 타인 조회=by-id 마스킹). 셸은 `renderShell`로 주입(career=풀페이지 `TopBar`, plan=생략 → 기본 `PanelShell`). 액션 버튼·편집 링크는 `actionSlot`/`editHrefs` 등 **optional 슬롯**으로 주입(부재 시 안 그림 → 읽기전용 기본). mutation·Web Share는 **앱측**에 둔다(공유 패키지에 안 넣음 → plan 번들에 career 동작 미유입).
-- **어댑터 위치**: 한 `*View`를 여러 페이지가 소비하면(예: profile 본인 `/profile` + 타인 `/profile/[memberId]`) `_adapters/`로 어댑터 컴포넌트를 분리해 훅·슬롯 배선을 공유. 단일 소비처면 `page.tsx`에 인라인. 어느 쪽이든 `page.tsx`는 라우트 진입점, 어댑터는 데이터↔View 연결.
-- **features 폴더 구조**: `packages/features/src/<도메인>/`에서 **루트 파일 = 공개 진입점**(`<도메인>View` + `index.ts`가 export하는 재사용 조각만), **`_parts/` = 내부 부품**(서브컴포넌트, 외부 직접 import 금지). `index.ts`가 공개 계약. 새 도메인도 이 형태로 복제.
-
-상세 설계 근거·대안 비교: [ADR-0020](../../docs/explanation/adr/0020-dual-shell-view-sharing-rendershell-resolved-data.md). 선례: profile(#541), chat `renderShell`(#537).
+근거: [ADR-0020](../../docs/explanation/adr/0020-dual-shell-view-sharing-rendershell-resolved-data.md).
 
 ---
 
