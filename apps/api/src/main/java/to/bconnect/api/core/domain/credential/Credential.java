@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 public record Credential(
     Long id,
-    Long profileId,
+    Long memberId,
     CredentialType type,
     CredentialStatus status,
     LocalDate expiredAt,
@@ -19,7 +19,7 @@ public record Credential(
     public static Credential of(CredentialEntity entity) {
         return new Credential(
                 entity.getId(),
-                entity.getProfileId(),
+                entity.getMemberId(),
                 entity.getType(),
                 entity.getStatus(),
                 entity.getExpiredAt(),

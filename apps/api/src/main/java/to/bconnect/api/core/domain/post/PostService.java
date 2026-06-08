@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.core.presentation.v1.request.CreatePostRequest;
-import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.core.domain.profile.ProfileFinder;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.core.storage.post.PostEntity;
 import to.bconnect.api.core.storage.post.PostRepository;
@@ -17,14 +15,12 @@ import to.bconnect.api.common.CommonExceptionCode;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final ProfileFinder profileFinder;
 
     @Transactional
-    public Post create(AuthUser authUser, CreatePostRequest request) {
-        Profile profile = profileFinder.findByMemberId(authUser.id());
+    public Post create(AuthUser user, CreatePostRequest request) {
 
         PostEntity post = PostEntity.builder()
-                .profileId(profile.id())
+                .memberId(user.id())
                 .taskId(request.taskId())
                 .images(request.images())
                 .content(request.content())
@@ -35,24 +31,21 @@ public class PostService {
     }
 
     @Transactional
-    public void update(AuthUser authUser, Long postId, String content) {
-        Profile profile = profileFinder.findByMemberId(authUser.id());
+    public void update(AuthUser user, Long postId, String content) {
 
         PostEntity found = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!found.getProfileId().equals(profile.id()))
+        if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         found.update(content);
     }
 
     @Transactional
-    public void delete(AuthUser authUser, Long postId) {
-        Profile profile = profileFinder.findByMemberId(authUser.id());
-
+    public void delete(AuthUser user, Long postId) {
         postRepository.findById(postId).ifPresent(found -> {
-            if (!found.getProfileId().equals(profile.id()))
+            if (!found.getMemberId().equals(user.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
             postRepository.delete(found);

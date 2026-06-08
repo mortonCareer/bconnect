@@ -3,8 +3,6 @@ package to.bconnect.api.core.domain.coworker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.core.domain.profile.ProfileFinder;
 import to.bconnect.api.core.storage.coworker.CoworkerRepository;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
@@ -18,23 +16,16 @@ public class CoworkerService {
 
     private final CoworkerRepository coworkerRepository;
     private final CoworkerFinder coworkerFinder;
-    private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public List<Coworker> list(AuthUser authUser, Long targetId) {
-        Profile profile = profileFinder.findByMemberId(authUser.id());
-
-        if (!profile.id().equals(targetId) && !coworkerFinder.isCoworker(profile.id(), targetId))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        return coworkerFinder.findAllByProfileId(targetId);
+    public List<Coworker> list(Long targetId) {
+        return coworkerFinder.findAllByMemberId(targetId);
     }
 
     @Transactional
-    public void delete(AuthUser authUser, Long id) {
-        Profile profile = profileFinder.findByMemberId(authUser.id());
+    public void delete(AuthUser user, Long id) {
         coworkerRepository.findById(id).ifPresent(found -> {
-            if (!found.getMinId().equals(profile.id()) && !found.getMaxId().equals(profile.id()))
+            if (!found.getMinId().equals(user.id()) && !found.getMaxId().equals(user.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
             coworkerRepository.delete(found);

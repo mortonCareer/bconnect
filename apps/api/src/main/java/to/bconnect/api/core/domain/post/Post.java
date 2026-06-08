@@ -8,7 +8,7 @@ import org.hibernate.Hibernate;
 
 public record Post(
     Long id,
-    Long profileId,
+    Long memberId,
     Long taskId,
     List<String> images,
     String content,
@@ -18,7 +18,7 @@ public record Post(
     public static Post of(PostEntity entity) {
         return new Post(
                 entity.getId(),
-                entity.getProfileId(),
+                entity.getMemberId(),
                 entity.getTaskId(),
                 entity.getImages(),
                 entity.getContent(),

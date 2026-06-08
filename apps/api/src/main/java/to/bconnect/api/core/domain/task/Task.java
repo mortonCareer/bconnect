@@ -11,7 +11,7 @@ import java.util.Set;
 
 public record Task(
     Long id,
-    Long profileId,
+    Long memberId,
     // TODO: 삭제
     String company,
     Address address,
@@ -30,7 +30,7 @@ public record Task(
     public static Task of(TaskEntity entity) {
         return new Task(
                 entity.getId(),
-                entity.getProfileId(),
+                entity.getMemberId(),
                 entity.getCompany(),
                 entity.getAddress(),
                 entity.getTaskTitle(),

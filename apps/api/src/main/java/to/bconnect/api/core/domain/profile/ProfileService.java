@@ -37,9 +37,9 @@ public class ProfileService {
         return ProfileDetail.of(
                 member,
                 profile,
-                (int) postRepository.countByProfileId(profileId),
-                (int) recommendationRepository.countByToIdAndVisibleTrue(profileId),
-                (int) coworkerRepository.countByProfileId(profileId)
+                (int) postRepository.countByMemberId(profile.memberId()),
+                (int) recommendationRepository.countByToIdAndVisibleTrue(profile.memberId()),
+                (int) coworkerRepository.countByMemberId(profile.memberId())
         );
     }
 
@@ -53,23 +53,23 @@ public class ProfileService {
                 .map(profile -> ProfileDetail.of(
                         memberMap.get(profile.memberId()),
                         profile,
-                        (int) postRepository.countByProfileId(profile.id()),
-                        (int) recommendationRepository.countByToIdAndVisibleTrue(profile.id()),
-                        (int) coworkerRepository.countByProfileId(profile.id())
+                        (int) postRepository.countByMemberId(profile.memberId()),
+                        (int) recommendationRepository.countByToIdAndVisibleTrue(profile.memberId()),
+                        (int) coworkerRepository.countByMemberId(profile.memberId())
                 ))
                 .toList();
     }
 
     @Transactional
-    public Profile create(AuthUser authUser, CreateProfileRequest request) {
-        if (profileRepository.existsByMemberId(authUser.id()))
+    public Profile create(AuthUser user, CreateProfileRequest request) {
+        if (profileRepository.existsByMemberId(user.id()))
             throw new CodeException(ProfileExceptionCode.ALREADY_EXISTS);
 
         if (!request.trades().contains(request.primaryTrade()))
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
         ProfileEntity profile = ProfileEntity.builder()
-                .memberId(authUser.id())
+                .memberId(user.id())
                 .primaryTrade(request.primaryTrade())
                 .trades(request.trades())
                 .experience(request.experience())
@@ -83,11 +83,11 @@ public class ProfileService {
     }
 
     @Transactional
-    public void update(AuthUser authUser, UpdateProfileRequest request) {
-        ProfileEntity found = profileRepository.findByMemberId(authUser.id())
+    public void update(AuthUser user, UpdateProfileRequest request) {
+        ProfileEntity found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!found.getMemberId().equals(authUser.id()))
+        if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         if (!request.trades().contains(request.primaryTrade()))
@@ -103,20 +103,20 @@ public class ProfileService {
     }
 
     @Transactional
-    public void updateAbout(AuthUser authUser, String about) {
-        ProfileEntity found = profileRepository.findByMemberId(authUser.id())
+    public void updateAbout(AuthUser user, String about) {
+        ProfileEntity found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!found.getMemberId().equals(authUser.id()))
+        if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         found.updateAbout(about);
     }
 
     @Transactional
-    public void delete(AuthUser authUser) {
-        profileRepository.findByMemberId(authUser.id()).ifPresent(found -> {
-            if (!found.getMemberId().equals(authUser.id()))
+    public void delete(AuthUser user) {
+        profileRepository.findByMemberId(user.id()).ifPresent(found -> {
+            if (!found.getMemberId().equals(user.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
             profileRepository.delete(found);

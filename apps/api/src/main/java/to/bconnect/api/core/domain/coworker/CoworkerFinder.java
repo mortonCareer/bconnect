@@ -12,19 +12,15 @@ public class CoworkerFinder {
 
     private final CoworkerRepository coworkerRepository;
 
-    public List<Coworker> findAllByProfileId(Long profileId) {
-        return coworkerRepository.findByProfileId(profileId)
+    public List<Coworker> findAllByMemberId(Long memberId) {
+        return coworkerRepository.findByMemberId(memberId)
                 .stream().map(Coworker::of).toList();
     }
 
-    public long countByProfileId(Long profileId) {
-        return coworkerRepository.countByProfileId(profileId);
-    }
-
-    public boolean isCoworker(Long profileId, Long targetId) {
+    public boolean isCoworker(Long memberId, Long targetId) {
         return coworkerRepository.existsByMinIdAndMaxId(
-                Math.min(profileId, targetId),
-                Math.max(profileId, targetId)
+                Math.min(memberId, targetId),
+                Math.max(memberId, targetId)
         );
     }
 }

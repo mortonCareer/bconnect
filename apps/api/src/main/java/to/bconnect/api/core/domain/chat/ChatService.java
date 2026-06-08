@@ -79,10 +79,10 @@ public class ChatService {
     }
 
     @Transactional
-    public Long create(AuthUser authUser, CreateChatRequest request) {
+    public Long create(AuthUser user, CreateChatRequest request) {
         List<Long> participantIds = request.participantIds().stream().distinct().toList();
 
-        if (!participantIds.contains(authUser.id()))
+        if (!participantIds.contains(user.id()))
             throw new CodeException(ChatExceptionCode.SELF_NOT_INCLUDED);
 
         List<Member> participants = memberFinder.findAllByIds(participantIds);
@@ -112,8 +112,8 @@ public class ChatService {
     }
 
     @Transactional(readOnly = true)
-    public CursorPage<Message> listMessages(AuthUser authUser, Long chatId, CursorLimit cursor) {
-        if (!participantRepository.existsByChatIdAndMemberId(chatId, authUser.id()))
+    public CursorPage<Message> listMessages(AuthUser user, Long chatId, CursorLimit cursor) {
+        if (!participantRepository.existsByChatIdAndMemberId(chatId, user.id()))
             throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
 
         CursorLimit fetchCursor = new CursorLimit(

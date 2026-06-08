@@ -24,12 +24,11 @@ import java.util.stream.Collectors;
 public class CredentialService {
 
     private final CredentialRepository credentialRepository;
-    private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public List<Credential> list(Long profileId) {
+    public List<Credential> list(Long memberId) {
         // latest one per type
-        return credentialRepository.findByProfileId(profileId)
+        return credentialRepository.findByMemberId(memberId)
                 .stream()
                 .filter(e -> e.getStatus() == CredentialStatus.ACCEPTED)
                 .collect(Collectors.groupingBy(
@@ -43,11 +42,9 @@ public class CredentialService {
     }
 
     @Transactional
-    public Credential create(AuthUser authUser, CreateCredentialRequest request) {
-        Profile profile = profileFinder.findByMemberId(authUser.id());
-
+    public Credential create(AuthUser user, CreateCredentialRequest request) {
         CredentialEntity entity = CredentialEntity.builder()
-                .profileId(profile.id())
+                .memberId(user.id())
                 .type(request.type())
                 .expiredAt(request.expiredAt())
                 .build();
@@ -57,11 +54,9 @@ public class CredentialService {
     }
 
     @Transactional
-    public void delete(AuthUser authUser, Long id) {
-        Profile profile = profileFinder.findByMemberId(authUser.id());
-
+    public void delete(AuthUser user, Long id) {
         credentialRepository.findById(id).ifPresent(found -> {
-            if (!found.getProfileId().equals(profile.id()))
+            if (!found.getMemberId().equals(user.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
             credentialRepository.delete(found);

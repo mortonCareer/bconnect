@@ -6,10 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.core.presentation.v1.request.CreateTaskRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateTaskRequest;
 import to.bconnect.api.core.domain.coworker.CoworkerFinder;
-import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.storage.task.TaskEntity;
 import to.bconnect.api.core.storage.task.TaskRepository;
-import to.bconnect.api.core.domain.profile.ProfileFinder;
 import to.bconnect.api.security.AuthUser;
 
 import to.bconnect.api.common.CodeException;
@@ -21,36 +19,31 @@ import java.util.List;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final TaskFinder taskFinder;
-    private final ProfileFinder profileFinder;
     private final CoworkerFinder coworkerFinder;
 
     @Transactional(readOnly = true)
-    public List<Task> list(AuthUser authUser) {
-        Profile profile = profileFinder.findByMemberId(authUser.id());
-        return taskRepository.findAllByProfileId(profile.id())
+    public List<Task> list(AuthUser user) {
+        return taskRepository.findAllByMemberId(user.id())
                 .stream()
                 .map(Task::of)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<Task> listByCoworker(AuthUser authUser, Long targetId) {
-        Profile profile = profileFinder.findByMemberId(authUser.id());
-        if (!coworkerFinder.isCoworker(profile.id(), targetId))
+    public List<Task> listByCoworker(AuthUser user, Long targetId) {
+        if (!coworkerFinder.isCoworker(user.id(), targetId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        return taskRepository.findAllByProfileId(profile.id())
+        return taskRepository.findAllByMemberId(user.id())
                 .stream()
                 .map(Task::of)
                 .toList();
     }
 
     @Transactional
-    public Task create(AuthUser authUser, CreateTaskRequest request) {
-        Profile profile = profileFinder.findByMemberId(authUser.id());
+    public Task create(AuthUser user, CreateTaskRequest request) {
         TaskEntity task = TaskEntity.builder()
-                .profileId(profile.id())
+                .memberId(user.id())
                 .company(request.company())
                 .address(request.address())
                 .taskTitle(request.taskTitle())
@@ -65,12 +58,11 @@ public class TaskService {
     }
 
     @Transactional
-    public void update(AuthUser authUser, Long taskId, UpdateTaskRequest request) {
-        Profile profile = profileFinder.findByMemberId(authUser.id());
+    public void update(AuthUser user, Long taskId, UpdateTaskRequest request) {
         TaskEntity found = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!found.getProfileId().equals(profile.id()))
+        if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         found.update(
@@ -85,10 +77,9 @@ public class TaskService {
     }
 
     @Transactional
-    public void delete(AuthUser authUser, Long taskId) {
-        Profile profile = profileFinder.findByMemberId(authUser.id());
+    public void delete(AuthUser user, Long taskId) {
         taskRepository.findById(taskId).ifPresent(found -> {
-            if (!found.getProfileId().equals(profile.id()))
+            if (!found.getMemberId().equals(user.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
             taskRepository.delete(found);
         });
