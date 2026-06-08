@@ -3,7 +3,7 @@ package to.bconnect.api.support.fixture;
 import to.bconnect.api.core.presentation.v1.request.CreatePostRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdatePostRequest;
 import to.bconnect.api.core.domain.post.Post;
-import to.bconnect.api.core.storage.post.PostEntity;
+import to.bconnect.api.storage.post.PostEntity;
 
 import java.util.List;
 

@@ -3,7 +3,6 @@ package to.bconnect.api.core.domain.recommendation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.core.presentation.v1.request.CreateRecommendationRequest;
 import to.bconnect.api.core.domain.coworker.CoworkerFinder;
 import to.bconnect.api.security.member.Member;
 import to.bconnect.api.core.domain.MemberResolver;
@@ -46,9 +45,9 @@ public class RecommendationService {
     }
 
     @Transactional
-    public Recommendation create(AuthUser user, CreateRecommendationRequest request) {
+    public Recommendation create(AuthUser user, CreateRecommendation command) {
         Long fromId = user.id();
-        Long toId = request.toId();
+        Long toId = command.toId();
 
         if (fromId.equals(toId))
             throw new CodeException(RecommendationExceptionCode.SELF_RECOMMENDATION);
@@ -57,7 +56,7 @@ public class RecommendationService {
         if (recommendationRepository.existsByFromIdAndToId(fromId, toId))
             throw new CodeException(RecommendationExceptionCode.ALREADY_EXISTS);
 
-        RecommendationEntity created = new RecommendationEntity(fromId, toId, request.content());
+        RecommendationEntity created = new RecommendationEntity(fromId, toId, command.content());
         recommendationRepository.save(created);
 
         // TODO: 알림 전송 (toId 회원에게)

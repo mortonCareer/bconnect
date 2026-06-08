@@ -7,7 +7,6 @@ import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.core.domain.MemberResolver;
-import to.bconnect.api.core.presentation.v1.request.CreateChatRequest;
 import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.security.member.Member;
@@ -78,8 +77,8 @@ public class ChatService {
     }
 
     @Transactional
-    public Long create(AuthUser user, CreateChatRequest request) {
-        List<Long> participantIds = request.participantIds().stream().distinct().toList();
+    public Long create(AuthUser user, CreateChat command) {
+        List<Long> participantIds = command.participantIds().stream().distinct().toList();
 
         if (!participantIds.contains(user.id()))
             throw new CodeException(ChatExceptionCode.SELF_NOT_INCLUDED);
@@ -90,7 +89,7 @@ public class ChatService {
             throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
 
         ChatEntity chat = chatRepository.save(ChatEntity.builder()
-                .title(request.title())
+                .title(command.title())
                 .build());
 
         participantRepository.saveAll(participantIds.stream()

@@ -52,7 +52,7 @@ public class TaskController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateTaskRequest request) {
-        Task task = taskService.create(user, request);
+        Task task = taskService.create(user, request.toCommand());
         return ApiResponse.success(task.id());
     }
 
@@ -61,7 +61,7 @@ public class TaskController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
             @RequestBody @Valid UpdateTaskRequest request) {
-        taskService.update(user, id, request);
+        taskService.update(user, id, request.toCommand());
         return ApiResponse.success(null);
     }
 

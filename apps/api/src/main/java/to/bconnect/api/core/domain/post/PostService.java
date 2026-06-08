@@ -3,7 +3,6 @@ package to.bconnect.api.core.domain.post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.core.presentation.v1.request.CreatePostRequest;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.post.PostEntity;
 import to.bconnect.api.storage.post.PostRepository;
@@ -17,13 +16,13 @@ public class PostService {
     private final PostRepository postRepository;
 
     @Transactional
-    public Post create(AuthUser user, CreatePostRequest request) {
+    public Post create(AuthUser user, CreatePost command) {
 
         PostEntity post = PostEntity.builder()
                 .memberId(user.id())
-                .taskId(request.taskId())
-                .images(request.images())
-                .content(request.content())
+                .taskId(command.taskId())
+                .images(command.images())
+                .content(command.content())
                 .build();
 
         postRepository.save(post);

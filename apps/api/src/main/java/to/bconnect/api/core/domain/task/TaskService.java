@@ -3,8 +3,6 @@ package to.bconnect.api.core.domain.task;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.core.presentation.v1.request.CreateTaskRequest;
-import to.bconnect.api.core.presentation.v1.request.UpdateTaskRequest;
 import to.bconnect.api.core.domain.coworker.CoworkerFinder;
 import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskRepository;
@@ -41,16 +39,16 @@ public class TaskService {
     }
 
     @Transactional
-    public Task create(AuthUser user, CreateTaskRequest request) {
+    public Task create(AuthUser user, CreateTask command) {
         TaskEntity task = TaskEntity.builder()
                 .memberId(user.id())
-                .company(request.company())
-                .address(request.address())
-                .taskTitle(request.taskTitle())
-                .eventTitle(request.eventTitle())
-                .trades(request.trades())
-                .start(request.start())
-                .end(request.end())
+                .company(command.company())
+                .address(command.address())
+                .taskTitle(command.taskTitle())
+                .eventTitle(command.eventTitle())
+                .trades(command.trades())
+                .start(command.start())
+                .end(command.end())
                 .build();
 
         taskRepository.save(task);
@@ -58,7 +56,7 @@ public class TaskService {
     }
 
     @Transactional
-    public void update(AuthUser user, Long taskId, UpdateTaskRequest request) {
+    public void update(AuthUser user, Long taskId, UpdateTask command) {
         TaskEntity found = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
@@ -66,13 +64,13 @@ public class TaskService {
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         found.update(
-                request.company(),
-                request.address(),
-                request.taskTitle(),
-                request.eventTitle(),
-                request.trades(),
-                request.start(),
-                request.end()
+                command.company(),
+                command.address(),
+                command.taskTitle(),
+                command.eventTitle(),
+                command.trades(),
+                command.start(),
+                command.end()
         );
     }
 

@@ -5,8 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.core.presentation.v1.request.CreateProfileRequest;
-import to.bconnect.api.core.presentation.v1.request.UpdateProfileRequest;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.post.PostRepository;
 import to.bconnect.api.storage.profile.ProfileEntity;
@@ -61,21 +59,21 @@ public class ProfileService {
     }
 
     @Transactional
-    public Profile create(AuthUser user, CreateProfileRequest request) {
+    public Profile create(AuthUser user, CreateProfile command) {
         if (profileRepository.existsByMemberId(user.id()))
             throw new CodeException(ProfileExceptionCode.ALREADY_EXISTS);
 
-        if (!request.trades().contains(request.primaryTrade()))
+        if (!command.trades().contains(command.primaryTrade()))
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
         ProfileEntity profile = ProfileEntity.builder()
                 .memberId(user.id())
-                .primaryTrade(request.primaryTrade())
-                .trades(request.trades())
-                .experience(request.experience())
-                .headline(request.headline())
-                .about(request.about())
-                .address(request.address())
+                .primaryTrade(command.primaryTrade())
+                .trades(command.trades())
+                .experience(command.experience())
+                .headline(command.headline())
+                .about(command.about())
+                .address(command.address())
                 .build();
 
         profileRepository.save(profile);
@@ -83,22 +81,22 @@ public class ProfileService {
     }
 
     @Transactional
-    public void update(AuthUser user, UpdateProfileRequest request) {
+    public void update(AuthUser user, UpdateProfile command) {
         ProfileEntity found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        if (!request.trades().contains(request.primaryTrade()))
+        if (!command.trades().contains(command.primaryTrade()))
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
         found.update(
-                request.primaryTrade(),
-                request.trades(),
-                request.experience(),
-                request.headline(),
-                request.address()
+                command.primaryTrade(),
+                command.trades(),
+                command.experience(),
+                command.headline(),
+                command.address()
         );
     }
 

@@ -47,7 +47,7 @@ public class ProfileController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateProfileRequest request) {
-        Profile profile = profileService.create(user, request);
+        Profile profile = profileService.create(user, request.toCommand());
         return ApiResponse.success(profile.id());
     }
 
@@ -55,7 +55,7 @@ public class ProfileController {
     public ApiResponse<Void> update(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid UpdateProfileRequest request) {
-        profileService.update(user, request);
+        profileService.update(user, request.toCommand());
         return ApiResponse.success(null);
     }
 

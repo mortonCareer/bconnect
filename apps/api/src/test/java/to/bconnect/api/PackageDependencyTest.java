@@ -39,11 +39,17 @@ public class PackageDependencyTest {
 
 	@ArchTest
 	ArchRule commonPackageRule = classes().that().resideInAPackage(COMMON)
-			.should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, STORAGE, COMMON);
+			.should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, STORAGE, COMMON)
+            .andShould().onlyDependOnClassesThat(
+                    resideInAnyPackage(COMMON).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
+            );
 
     @ArchTest
     ArchRule supportPackageRule = classes().that().resideInAPackage(SUPPORT)
-            .should().onlyAccessClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, SUPPORT);
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, SUPPORT)
+            .andShould().onlyDependOnClassesThat(
+                    resideInAnyPackage(SUPPORT).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
+            );
 
 	@ArchTest
 	ArchRule cycleCheck = slices().matching("to.bconnect.api.(*)..")

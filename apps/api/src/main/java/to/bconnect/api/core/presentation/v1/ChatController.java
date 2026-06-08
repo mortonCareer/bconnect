@@ -40,7 +40,7 @@ public class ChatController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateChatRequest request) {
-        Long id = chatService.create(user, request);
+        Long id = chatService.create(user, request.toCommand());
         return ApiResponse.success(id);
     }
 

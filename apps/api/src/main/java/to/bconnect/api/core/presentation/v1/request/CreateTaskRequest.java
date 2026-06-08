@@ -2,6 +2,7 @@ package to.bconnect.api.core.presentation.v1.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import to.bconnect.api.core.domain.task.CreateTask;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.profile.Trade;
 
@@ -16,4 +17,8 @@ public record CreateTaskRequest(
         @NotNull Set<Trade> trades,
         @NotNull LocalDate start,
         @NotNull LocalDate end
-) {}
+) {
+    public CreateTask toCommand() {
+        return new CreateTask(company, address, taskTitle, eventTitle, trades, start, end);
+    }
+}

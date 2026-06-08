@@ -4,7 +4,7 @@ import to.bconnect.api.core.presentation.v1.request.CreateCoworkerRequest;
 import to.bconnect.api.core.domain.coworker.CoworkerRequest;
 import to.bconnect.api.core.domain.coworker.CoworkerMember;
 import to.bconnect.api.security.member.Member;
-import to.bconnect.api.core.storage.coworker.CoworkerRequestEntity;
+import to.bconnect.api.storage.coworker.CoworkerRequestEntity;
 
 public class CoworkerRequestFactory {
 

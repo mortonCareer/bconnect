@@ -39,7 +39,7 @@ public class CredentialController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateCredentialRequest request) {
-        Credential saved = credentialService.create(user, request);
+        Credential saved = credentialService.create(user, request.toCommand());
         return ApiResponse.success(saved.id());
     }
 

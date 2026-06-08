@@ -3,8 +3,8 @@ package to.bconnect.api.support.fixture;
 import to.bconnect.api.security.member.RegisterMemberRequest;
 import to.bconnect.api.security.member.UpdateMemberRequest;
 import to.bconnect.api.security.member.Member;
-import to.bconnect.api.core.storage.member.MemberEntity;
-import to.bconnect.api.core.storage.member.Role;
+import to.bconnect.api.storage.member.MemberEntity;
+import to.bconnect.api.storage.member.Role;
 
 import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 

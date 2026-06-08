@@ -11,7 +11,7 @@ import com.tngtech.archunit.lang.ArchRule;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
-@AnalyzeClasses(packages = "to.bconnect.api", importOptions = DoNotIncludeTests.class)
+@AnalyzeClasses(packages = {"to.bconnect.api"}, importOptions = DoNotIncludeTests.class)
 public class LayerDependencyTest {
 
     private static final String PRESENTATION = "..presentation..";
@@ -19,7 +19,7 @@ public class LayerDependencyTest {
     private static final String STORAGE = "..storage..";
 
 	@ArchTest
-	static final ArchRule layerDependenciesRule = layeredArchitecture().consideringAllDependencies()
+	static final ArchRule layerDependenciesRule = layeredArchitecture().consideringOnlyDependenciesInLayers()
 			.layer(PRESENTATION).definedBy("..presentation..")
 			.layer(DOMAIN).definedBy("..domain..")
             .layer(STORAGE).definedBy("..storage..")

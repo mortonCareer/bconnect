@@ -33,7 +33,7 @@ public class RecommendationController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateRecommendationRequest request) {
-        Recommendation recommendation = recommendationService.create(user, request);
+        Recommendation recommendation = recommendationService.create(user, request.toCommand());
         return ApiResponse.success(recommendation.id());
     }
 

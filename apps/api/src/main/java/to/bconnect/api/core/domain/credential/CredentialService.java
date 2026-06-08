@@ -3,7 +3,6 @@ package to.bconnect.api.core.domain.credential;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.core.presentation.v1.request.CreateCredentialRequest;
 import to.bconnect.api.storage.credential.CredentialEntity;
 import to.bconnect.api.storage.credential.CredentialRepository;
 
@@ -40,11 +39,11 @@ public class CredentialService {
     }
 
     @Transactional
-    public Credential create(AuthUser user, CreateCredentialRequest request) {
+    public Credential create(AuthUser user, CreateCredential command) {
         CredentialEntity entity = CredentialEntity.builder()
                 .memberId(user.id())
-                .type(request.type())
-                .expiredAt(request.expiredAt())
+                .type(command.type())
+                .expiredAt(command.expiredAt())
                 .build();
 
         credentialRepository.save(entity);

@@ -22,7 +22,7 @@ public class PostController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreatePostRequest request) {
-        Post post = postService.create(user, request);
+        Post post = postService.create(user, request.toCommand());
         return ApiResponse.success(post.id());
     }
 
