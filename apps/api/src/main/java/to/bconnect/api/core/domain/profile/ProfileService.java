@@ -69,11 +69,11 @@ public class ProfileService {
 
     @Transactional
     public void delete(AuthUser user) {
-        profileRepository.findByMemberId(user.id()).ifPresent(found -> {
-            if (!found.getMemberId().equals(user.id()))
+        profileRepository.findByMemberId(user.id()).ifPresent(it -> {
+            if (!it.getMemberId().equals(user.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-            profileRepository.delete(found);
+            profileRepository.delete(it);
         });
     }
 }

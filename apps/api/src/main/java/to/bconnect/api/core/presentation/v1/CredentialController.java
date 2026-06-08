@@ -28,10 +28,10 @@ public class CredentialController {
 
     @GetMapping
     public ApiResponse<List<CredentialResponse>> list(@RequestParam Long memberId) {
-        List<CredentialResponse> credentials = credentialService.list(memberId).stream()
+        List<CredentialResponse> response = credentialService.list(memberId).stream()
                 .map(CredentialResponse::of)
                 .toList();
-        return ApiResponse.success(credentials);
+        return ApiResponse.success(response);
     }
 
     @PostMapping

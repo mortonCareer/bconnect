@@ -49,11 +49,11 @@ public class ProfileQueryService {
         Map<Long, Long> coworkerCounts = toCountMap(coworkerRepository.countByMemberIdIn(memberIds));
 
         return profiles.stream()
-                .map(entity -> Profile.of(
-                        entity,
-                        postCounts.getOrDefault(entity.getMemberId(), 0L),
-                        recommendationCounts.getOrDefault(entity.getMemberId(), 0L),
-                        coworkerCounts.getOrDefault(entity.getMemberId(), 0L)
+                .map(it -> Profile.of(
+                        it,
+                        postCounts.getOrDefault(it.getMemberId(), 0L),
+                        recommendationCounts.getOrDefault(it.getMemberId(), 0L),
+                        coworkerCounts.getOrDefault(it.getMemberId(), 0L)
                 ))
                 .toList();
     }
@@ -63,14 +63,14 @@ public class ProfileQueryService {
         return profileRepository.findByMemberIdIn(memberIds).stream()
                 .collect(Collectors.toMap(
                         ProfileEntity::getMemberId,
-                        entity -> Profile.of(entity, null, null, null)
+                        it -> Profile.of(it, null, null, null)
                 ));
     }
 
     private Map<Long, Long> toCountMap(List<Object[]> rows) {
         return rows.stream().collect(Collectors.toMap(
-                row -> ((Number) row[0]).longValue(),
-                row -> ((Number) row[1]).longValue()
+                it -> ((Number) it[0]).longValue(),
+                it -> ((Number) it[1]).longValue()
         ));
     }
 }

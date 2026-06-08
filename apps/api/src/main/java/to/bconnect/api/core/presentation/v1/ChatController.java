@@ -40,15 +40,15 @@ public class ChatController {
         List<Chat> chats = chatService.list(user.id());
 
         List<Long> memberIds = chats.stream()
-                .flatMap(chat -> chat.participantIds().stream())
+                .flatMap(it -> it.participantIds().stream())
                 .distinct()
                 .toList();
         Map<Long, Member> memberMap = memberResolver.map(memberIds);
 
         List<ChatResponse> response = chats.stream()
-                .map(chat -> ChatResponse.of(
-                        chat,
-                        chat.participantIds().stream()
+                .map(it -> ChatResponse.of(
+                        it,
+                        it.participantIds().stream()
                                 .map(memberMap::get)
                                 .filter(Objects::nonNull)
                                 .map(MemberSummaryResponse::of)

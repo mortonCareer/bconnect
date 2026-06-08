@@ -54,7 +54,7 @@ public class JwtProvider {
         String authorities = authentication.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
-                .map(auth -> auth.substring(AUTHORITY_PREFIX.length()))
+                .map(it -> it.substring(AUTHORITY_PREFIX.length()))
                 .collect(Collectors.joining(AUTHORITIES_DELIMITER));
 
         Date now = new Date();
@@ -74,7 +74,7 @@ public class JwtProvider {
         String authorities = user.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
-                .map(auth -> auth.substring(AUTHORITY_PREFIX.length()))
+                .map(it -> it.substring(AUTHORITY_PREFIX.length()))
                 .collect(Collectors.joining(AUTHORITIES_DELIMITER));
 
         Date now = new Date();

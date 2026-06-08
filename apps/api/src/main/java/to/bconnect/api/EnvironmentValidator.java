@@ -35,7 +35,7 @@ public class EnvironmentValidator {
     @PostConstruct
     public void validate() {
         List<String> missing = REQUIRED_VARS.stream()
-                .filter(var -> !StringUtils.hasText(env.getProperty(var)))
+                .filter(it -> !StringUtils.hasText(env.getProperty(it)))
                 .toList();
 
         if (!missing.isEmpty()) {

@@ -58,11 +58,11 @@ public class PostService {
 
     @Transactional
     public void delete(AuthUser user, Long postId) {
-        postRepository.findById(postId).ifPresent(found -> {
-            if (!found.getMemberId().equals(user.id()))
+        postRepository.findById(postId).ifPresent(it -> {
+            if (!it.getMemberId().equals(user.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-            postRepository.delete(found);
+            postRepository.delete(it);
         });
     }
 }

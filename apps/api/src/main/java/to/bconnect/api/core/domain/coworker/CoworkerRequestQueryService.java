@@ -12,18 +12,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CoworkerRequestQueryService {
 
-    private final CoworkerRequestRepository requestRepository;
+    private final CoworkerRequestRepository coworkerRequestRepository;
 
     @Transactional(readOnly = true)
     public List<CoworkerRequest> listReceived(AuthUser user) {
-        return requestRepository.findByToId(user.id()).stream()
+        return coworkerRequestRepository.findByToId(user.id()).stream()
                 .map(it -> CoworkerRequest.of(it, it.getFromId()))
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<CoworkerRequest> listSent(AuthUser user) {
-        return requestRepository.findByFromId(user.id()).stream()
+        return coworkerRequestRepository.findByFromId(user.id()).stream()
                 .map(it -> CoworkerRequest.of(it, it.getToId()))
                 .toList();
     }

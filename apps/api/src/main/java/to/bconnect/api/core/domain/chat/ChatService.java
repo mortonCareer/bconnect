@@ -49,16 +49,16 @@ public class ChatService {
                 .findUnreadCountByChatIdsAndMemberId(chatIds, memberId)
                 .stream()
                 .collect(Collectors.toMap(
-                        row -> (Long) row[0],
-                        row -> (Long) row[1]
+                        it -> (Long) it[0],
+                        it -> (Long) it[1]
                 ));
 
         return chats.stream()
-                .map(chat -> Chat.of(
-                        chat,
-                        participantMap.getOrDefault(chat.getId(), List.of()),
-                        lastMessageMap.get(chat.getId()),
-                        unreadCountMap.getOrDefault(chat.getId(), 0L)
+                .map(it -> Chat.of(
+                        it,
+                        participantMap.getOrDefault(it.getId(), List.of()),
+                        lastMessageMap.get(it.getId()),
+                        unreadCountMap.getOrDefault(it.getId(), 0L)
                 )).toList();
     }
 
@@ -72,9 +72,9 @@ public class ChatService {
         ChatEntity created = chatRepository.save(new ChatEntity(command.title()));
 
         participantRepository.saveAll(participantIds.stream()
-                .map(id -> ParticipantEntity.builder()
+                .map(it -> ParticipantEntity.builder()
                         .chatId(created.getId())
-                        .memberId(id)
+                        .memberId(it)
                         .build())
                 .toList());
 

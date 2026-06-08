@@ -107,10 +107,10 @@ public class RecommendationController {
         Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
 
         return recommendations.stream()
-                .map(r -> RecommendationResponse.of(
-                        r,
-                        memberMap.get(r.memberId()),
-                        profileMap.get(r.memberId())))
+                .map(it -> RecommendationResponse.of(
+                        it,
+                        memberMap.get(it.memberId()),
+                        profileMap.get(it.memberId())))
                 .toList();
     }
 }

@@ -50,11 +50,11 @@ public class RecommendationService {
 
     @Transactional
     public void delete(AuthUser user, Long id) {
-        recommendationRepository.findById(id).ifPresent(found -> {
-            if (!found.getFromId().equals(user.id()))
+        recommendationRepository.findById(id).ifPresent(it -> {
+            if (!it.getFromId().equals(user.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-            recommendationRepository.delete(found);
+            recommendationRepository.delete(it);
         });
     }
 

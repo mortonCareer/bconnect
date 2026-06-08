@@ -34,13 +34,13 @@ public class FeedController {
         Map<Long, Member> memberMap = memberResolver.map(memberIds);
         Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
 
-        List<FeedResponse> feeds = posts.stream()
-                .map(post -> FeedResponse.of(
-                        post,
-                        memberMap.get(post.memberId()),
-                        profileMap.get(post.memberId())))
+        List<FeedResponse> response = posts.stream()
+                .map(it -> FeedResponse.of(
+                        it,
+                        memberMap.get(it.memberId()),
+                        profileMap.get(it.memberId())))
                 .toList();
-        return ApiResponse.success(feeds);
+        return ApiResponse.success(response);
     }
 
     @GetMapping("/{id}")

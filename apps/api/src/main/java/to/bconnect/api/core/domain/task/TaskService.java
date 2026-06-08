@@ -40,7 +40,7 @@ public class TaskService {
 
     @Transactional
     public Long create(AuthUser user, CreateTask command) {
-        TaskEntity task = TaskEntity.builder()
+        TaskEntity created = TaskEntity.builder()
                 .memberId(user.id())
                 .company(command.company())
                 .address(command.address())
@@ -51,7 +51,7 @@ public class TaskService {
                 .end(command.end())
                 .build();
 
-        return taskRepository.save(task).getId();
+        return taskRepository.save(created).getId();
     }
 
     @Transactional
@@ -75,10 +75,10 @@ public class TaskService {
 
     @Transactional
     public void delete(AuthUser user, Long taskId) {
-        taskRepository.findById(taskId).ifPresent(found -> {
-            if (!found.getMemberId().equals(user.id()))
+        taskRepository.findById(taskId).ifPresent(it -> {
+            if (!it.getMemberId().equals(user.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
-            taskRepository.delete(found);
+            taskRepository.delete(it);
         });
     }
 }

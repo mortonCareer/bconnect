@@ -33,10 +33,10 @@ public class OtpService {
         String code = String.format(CODE_FORMAT, RANDOM.nextInt(CODE_BOUND));
         LocalDateTime expiredAt = LocalDateTime.now().plusSeconds(EXPIRY_SECONDS);
 
-        Optional<OtpEntity> found = otpRepository.findByPhone(phone);
+        Optional<OtpEntity> optional = otpRepository.findByPhone(phone);
         OtpEntity otp;
-        if (found.isPresent()) {
-            otp = found.get();
+        if (optional.isPresent()) {
+            otp = optional.get();
             if (!isToday(otp.getLastSentAt())) otp.dailyReset();
             if (otp.getDailyCount() >= MAX_DAILY_COUNT) throw new CodeException(AuthExceptionCode.OTP_DAILY_LIMIT);
             if (isRateLimited(otp)) throw new CodeException(AuthExceptionCode.OTP_RATE_LIMIT);

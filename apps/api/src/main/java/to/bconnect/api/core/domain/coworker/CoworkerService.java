@@ -34,11 +34,11 @@ public class CoworkerService {
 
     @Transactional
     public void delete(AuthUser user, Long id) {
-        coworkerRepository.findById(id).ifPresent(found -> {
-            if (!found.getMinId().equals(user.id()) && !found.getMaxId().equals(user.id()))
+        coworkerRepository.findById(id).ifPresent(it -> {
+            if (!it.getMinId().equals(user.id()) && !it.getMaxId().equals(user.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-            coworkerRepository.delete(found);
+            coworkerRepository.delete(it);
         });
     }
 

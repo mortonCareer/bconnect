@@ -16,13 +16,13 @@ public class AuthUserService implements UserDetailsService {
     @Override @NonNull
     public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
         return memberRepository.findById(Long.valueOf(username))
-            .map(e -> new AuthUser(e.getId(), e.getUsername(), e.getRole().name()))
+            .map(it -> new AuthUser(it.getId(), it.getUsername(), it.getRole().name()))
             .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
     public UserDetails loadUserByPhone(@NonNull String phone) throws UsernameNotFoundException {
         return memberRepository.findByPhone(phone)
-            .map(e -> new AuthUser(e.getId(), e.getUsername(), e.getRole().name()))
+            .map(it -> new AuthUser(it.getId(), it.getUsername(), it.getRole().name()))
             .orElseThrow(() -> new UsernameNotFoundException(phone));
     }
 }

@@ -33,7 +33,7 @@ public class MessageSocketService {
         if (request.type() == MessageType.SYSTEM)
             throw new CodeException(CommonExceptionCode.NOT_VALID);
 
-        MessageEntity entity = messageRepository.save(new MessageEntity(
+        MessageEntity created = messageRepository.save(new MessageEntity(
                 chatId,
                 user.id(),
                 request.type(),
@@ -43,12 +43,12 @@ public class MessageSocketService {
         String dest = WebSocketAuthorizationConfig.CHAT_TOPIC_PREFIX + chatId;
 
         Set<String> usernames = simpUserRegistry
-                .findSubscriptions(sub -> dest.equals(sub.getDestination()))
+                .findSubscriptions(it -> dest.equals(it.getDestination()))
                 .stream()
-                .map(sub -> sub.getSession().getUser().getName())
+                .map(it -> it.getSession().getUser().getName())
                 .collect(Collectors.toCollection(HashSet::new));
 
         List<Long> memberIds = memberRepository.findIdsByUsernameIn(usernames);
-        participantRepository.updateLastIdxIn(chatId, memberIds, entity.getId());
+        participantRepository.updateLastIdxIn(chatId, memberIds, created.getId());
     }
 }

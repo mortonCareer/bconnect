@@ -45,12 +45,12 @@ public class MemberService {
         otpService.verifyToken(request.signupToken());
 
         memberRepository.findByUsername(request.username())
-                .ifPresent(e -> { throw new CodeException(MemberExceptionCode.DUPLICATE_USERNAME); });
+                .ifPresent(it -> { throw new CodeException(MemberExceptionCode.DUPLICATE_USERNAME); });
 
         memberRepository.findByPhone(request.phone())
-                .ifPresent(e -> { throw new CodeException(MemberExceptionCode.DUPLICATE_PHONE); });
+                .ifPresent(it -> { throw new CodeException(MemberExceptionCode.DUPLICATE_PHONE); });
 
-        MemberEntity member = new MemberEntity(
+        MemberEntity created = new MemberEntity(
                 request.username(),
                 request.name(),
                 request.phone(),
@@ -58,8 +58,8 @@ public class MemberService {
                 request.role()
         );
 
-        memberRepository.save(member);
-        return Member.of(member);
+        memberRepository.save(created);
+        return Member.of(created);
     }
 
     @Transactional

@@ -26,10 +26,10 @@ public class MemberController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ApiResponse<List<MemberResponse>> listMembers() {
-        List<MemberResponse> members = memberService.list().stream()
+        List<MemberResponse> response = memberService.list().stream()
                 .map(MemberResponse::of)
                 .toList();
-        return ApiResponse.success(members);
+        return ApiResponse.success(response);
     }
 
     @GetMapping("/check-username")

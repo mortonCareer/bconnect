@@ -44,7 +44,7 @@ public class ProfileController {
         Map<Long, Member> memberMap = memberResolver.map(memberIds);
 
         List<ProfileResponse> response = profiles.stream()
-                .map(profile -> ProfileResponse.of(profile, memberMap.get(profile.memberId())))
+                .map(it -> ProfileResponse.of(it, memberMap.get(it.memberId())))
                 .toList();
         return ApiResponse.success(response);
     }

@@ -43,10 +43,10 @@ public class CoworkerController {
         Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
 
         List<CoworkerResponse> response = coworkers.stream()
-                .map(coworker -> CoworkerResponse.of(
-                        coworker,
-                        memberMap.get(coworker.memberId()),
-                        profileMap.get(coworker.memberId()),
+                .map(it -> CoworkerResponse.of(
+                        it,
+                        memberMap.get(it.memberId()),
+                        profileMap.get(it.memberId()),
                         CoworkerStatus.COWORKER))
                 .toList();
         return ApiResponse.success(response);

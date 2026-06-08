@@ -35,9 +35,9 @@ public class RecommendationQueryService {
         return toDomain(recommendationRepository.findByFromId(user.id()), Side.TO);
     }
 
-    private List<Recommendation> toDomain(List<RecommendationEntity> entities, Side dir) {
+    private List<Recommendation> toDomain(List<RecommendationEntity> entities, Side side) {
         return entities.stream()
-                .map(e -> Recommendation.of(e, dir == Side.FROM ? e.getFromId() : e.getToId()))
+                .map(it -> Recommendation.of(it, side == Side.FROM ? it.getFromId() : it.getToId()))
                 .toList();
     }
 

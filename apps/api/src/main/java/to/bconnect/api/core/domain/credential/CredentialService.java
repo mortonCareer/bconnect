@@ -27,7 +27,7 @@ public class CredentialService {
         // latest one per type
         return credentialRepository.findByMemberId(memberId)
                 .stream()
-                .filter(e -> e.getStatus() == CredentialStatus.ACCEPTED)
+                .filter(it -> it.getStatus() == CredentialStatus.ACCEPTED)
                 .collect(Collectors.groupingBy(
                         CredentialEntity::getType,
                         Collectors.maxBy(Comparator.comparing(CredentialEntity::getCreatedAt))
@@ -51,11 +51,11 @@ public class CredentialService {
 
     @Transactional
     public void delete(AuthUser user, Long id) {
-        credentialRepository.findById(id).ifPresent(found -> {
-            if (!found.getMemberId().equals(user.id()))
+        credentialRepository.findById(id).ifPresent(it -> {
+            if (!it.getMemberId().equals(user.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-            credentialRepository.delete(found);
+            credentialRepository.delete(it);
         });
     }
 

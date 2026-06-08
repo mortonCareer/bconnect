@@ -31,20 +31,20 @@ public class TaskController {
 
     @GetMapping
     public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal AuthUser user) {
-        List<TaskResponse> tasks = taskService.list(user).stream()
+        List<TaskResponse> response = taskService.list(user).stream()
                 .map(TaskResponse::of)
                 .toList();
-        return ApiResponse.success(tasks);
+        return ApiResponse.success(response);
     }
 
     @GetMapping("/coworker")
     public ApiResponse<List<CoworkerTaskResponse>> listByCoworker(
             @AuthenticationPrincipal AuthUser user,
             @RequestParam Long memberId) {
-        List<CoworkerTaskResponse> tasks = taskService.listByCoworker(user, memberId).stream()
+        List<CoworkerTaskResponse> response = taskService.listByCoworker(user, memberId).stream()
                 .map(CoworkerTaskResponse::of)
                 .toList();
-        return ApiResponse.success(tasks);
+        return ApiResponse.success(response);
     }
 
     @PostMapping

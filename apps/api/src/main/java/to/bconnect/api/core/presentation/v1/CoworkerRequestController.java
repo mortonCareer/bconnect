@@ -86,10 +86,10 @@ public class CoworkerRequestController {
         Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
 
         return requests.stream()
-                .map(request -> CoworkerRequestResponse.of(
-                        request,
-                        memberMap.get(request.memberId()),
-                        profileMap.get(request.memberId())))
+                .map(it -> CoworkerRequestResponse.of(
+                        it,
+                        memberMap.get(it.memberId()),
+                        profileMap.get(it.memberId())))
                 .toList();
     }
 }
