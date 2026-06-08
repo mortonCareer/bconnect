@@ -21,7 +21,3 @@ plan은 `(main)` 라우트 그룹에 **parallel route `@panel`** 슬롯을 둠 (
 - 본문(`(main)/page.tsx`): 기술자 탐색 — `ExploreContent`·`TechnicianList`·`FilterBar` (`_components/`)
 - 패널(`@panel/…`): `profile/[profileId]`, `messages`·`messages/[chatId]`, `notifications` (슬롯 비활성 시 `@panel/default.tsx`)
 - 비패널 라우트: `login`, `signup/{corp,member}`
-
-## Figma drift 감지
-
-repo 전역 워크플로 `.github/workflows/figma-state-check.yml` cron(매주 월 09:00 KST)이 Figma frame 대비 미구현/drift를 감지해 issue로 보고 (career·plan 공통).
