@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.response.CoworkerResponse;
 import to.bconnect.api.core.domain.coworker.CoworkerService;
 import to.bconnect.api.security.member.Member;
-import to.bconnect.api.security.member.MemberFinder;
-import to.bconnect.api.core.storage.coworker.CoworkerStatus;
+import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.storage.coworker.CoworkerStatus;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
@@ -24,7 +24,7 @@ import java.util.List;
 public class CoworkerController {
 
     private final CoworkerService coworkerService;
-    private final MemberFinder memberFinder;
+    private final MemberResolver memberResolver;
 
     @GetMapping
     public ApiResponse<List<CoworkerResponse>> list(
@@ -36,7 +36,7 @@ public class CoworkerController {
                     Long counterpartId = coworker.minId().equals(memberId)
                             ? coworker.maxId()
                             : coworker.minId();
-                    Member member = memberFinder.find(counterpartId);
+                    Member member = memberResolver.find(counterpartId);
                     return CoworkerResponse.of(coworker, member, CoworkerStatus.COWORKER);
                 })
                 .toList();

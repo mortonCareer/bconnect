@@ -3,7 +3,7 @@ package to.bconnect.api.core.domain.recommendation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.core.storage.recommendation.RecommendationRepository;
+import to.bconnect.api.storage.recommendation.RecommendationRepository;
 
 import java.util.List;
 

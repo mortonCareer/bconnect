@@ -15,7 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import to.bconnect.api.config.ApiConfigProps;
+import to.bconnect.api.ApiConfigProps;
 import to.bconnect.api.security.jwt.AccessTokenAuthenticationFilter;
 import to.bconnect.api.security.jwt.JwtAuthenticationProvider;
 import to.bconnect.api.security.jwt.JwtProvider;

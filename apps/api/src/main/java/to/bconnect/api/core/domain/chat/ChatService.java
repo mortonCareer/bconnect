@@ -6,12 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
+import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.presentation.v1.request.CreateChatRequest;
-import to.bconnect.api.core.storage.chat.*;
-import to.bconnect.api.core.storage.chat.MessageType;
+import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.security.member.Member;
-import to.bconnect.api.security.member.MemberFinder;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,7 @@ import java.util.stream.Collectors;
 public class ChatService {
 
     private final MessageService messageService;
-    private final MemberFinder memberFinder;
+    private final MemberResolver memberResolver;
     private final ChatRepository chatRepository;
     private final ParticipantRepository participantRepository;
     private final MessageRepository messageRepository;
@@ -61,7 +60,7 @@ public class ChatService {
                 .distinct()
                 .toList();
 
-        Map<Long, Member> members = memberFinder.resolveMap(memberIds);
+        Map<Long, Member> members = memberResolver.resolveMap(memberIds);
 
         return chats.stream()
                 .map(chat -> new Chat(
@@ -85,7 +84,7 @@ public class ChatService {
         if (!participantIds.contains(user.id()))
             throw new CodeException(ChatExceptionCode.SELF_NOT_INCLUDED);
 
-        List<Member> participants = memberFinder.findAllByIds(participantIds);
+        List<Member> participants = memberResolver.findAllByIds(participantIds);
 
         if (participants.size() != participantIds.size())
             throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);

@@ -1,7 +1,7 @@
 package to.bconnect.api.support.fixture;
 
 import to.bconnect.api.security.otp.SendCodeRequest;
-import to.bconnect.api.core.storage.otp.OtpEntity;
+import to.bconnect.api.storage.otp.OtpEntity;
 
 import static to.bconnect.api.support.fixture.FixtureConstant.MAX_DATE_TIME;
 

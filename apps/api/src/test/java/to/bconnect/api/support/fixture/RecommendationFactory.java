@@ -3,7 +3,7 @@ package to.bconnect.api.support.fixture;
 import to.bconnect.api.core.presentation.v1.request.CreateRecommendationRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateRecommendationRequest;
 import to.bconnect.api.core.domain.recommendation.Recommendation;
-import to.bconnect.api.core.storage.recommendation.RecommendationEntity;
+import to.bconnect.api.storage.recommendation.RecommendationEntity;
 
 import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 

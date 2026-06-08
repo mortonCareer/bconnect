@@ -1,8 +1,8 @@
 package to.bconnect.api.core.presentation.v1.response;
 
 import to.bconnect.api.core.domain.task.Task;
-import to.bconnect.api.core.storage.Address;
-import to.bconnect.api.core.storage.profile.Trade;
+import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.profile.Trade;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

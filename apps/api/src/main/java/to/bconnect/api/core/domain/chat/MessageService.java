@@ -3,8 +3,8 @@ package to.bconnect.api.core.domain.chat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-import to.bconnect.api.core.storage.chat.MessageEntity;
-import to.bconnect.api.core.storage.chat.MessageRepository;
+import to.bconnect.api.storage.chat.MessageEntity;
+import to.bconnect.api.storage.chat.MessageRepository;
 import to.bconnect.api.common.request.CursorLimit;
 
 import java.util.List;

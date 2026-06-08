@@ -2,7 +2,7 @@ package to.bconnect.api.core.domain.coworker;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import to.bconnect.api.core.storage.coworker.CoworkerRepository;
+import to.bconnect.api.storage.coworker.CoworkerRepository;
 
 import java.util.List;
 

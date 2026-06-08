@@ -14,29 +14,38 @@ import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.sli
 @AnalyzeClasses(packages = "to.bconnect.api", importOptions = DoNotIncludeTests.class)
 public class PackageDependencyTest {
 
-    private static final String WEBSOCKET = "..ws..";
+    private static final String SOCKET = "..socket..";
     private static final String CORE = "..core..";
     private static final String SECURITY = "..security..";
+    private static final String STORAGE = "..storage..";
     private static final String COMMON = "..common..";
     private static final String SUPPORT = "..support..";
 
 	@ArchTest
-	ArchRule socketioPackageRule = classes().that().resideInAPackage(WEBSOCKET)
-			.should().onlyHaveDependentClassesThat().resideInAnyPackage(WEBSOCKET);
+	ArchRule socketPackageRule = classes().that().resideInAPackage(SOCKET)
+			.should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET);
 
 	@ArchTest
-	ArchRule modulesPackageRule = classes().that().resideInAPackage(CORE)
-			.should().onlyHaveDependentClassesThat().resideInAnyPackage(SECURITY, CORE);
+	ArchRule corePackageRule = classes().that().resideInAPackage(CORE)
+			.should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE);
+
+    @ArchTest
+    ArchRule securityPackageRule = classes().that().resideInAPackage(SECURITY)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY);
+
+    @ArchTest
+    ArchRule storagePackageRule = classes().that().resideInAPackage(STORAGE)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, STORAGE);
 
 	@ArchTest
-	ArchRule infraPackageRule = classes().that().resideInAPackage(SUPPORT)
-			.should().onlyHaveDependentClassesThat().resideInAnyPackage(SUPPORT, CORE, SECURITY)
-			.andShould().onlyDependOnClassesThat(
-					resideInAnyPackage(SUPPORT).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
-			);
+	ArchRule commonPackageRule = classes().that().resideInAPackage(COMMON)
+			.should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, STORAGE, COMMON);
+
+    @ArchTest
+    ArchRule supportPackageRule = classes().that().resideInAPackage(SUPPORT)
+            .should().onlyAccessClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, SUPPORT);
 
 	@ArchTest
 	ArchRule cycleCheck = slices().matching("to.bconnect.api.(*)..")
 			.should().beFreeOfCycles();
-
 }

@@ -3,13 +3,13 @@ package to.bconnect.api.security.member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.core.storage.member.MemberEntity;
-import to.bconnect.api.core.storage.member.MemberRepository;
 import to.bconnect.api.security.AuthUser;
 
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.otp.OtpService;
+import to.bconnect.api.storage.member.MemberEntity;
+import to.bconnect.api.storage.member.MemberRepository;
 
 import java.util.List;
 
@@ -18,17 +18,21 @@ import java.util.List;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final MemberFinder memberFinder;
     private final OtpService otpService;
 
     @Transactional(readOnly = true)
     public Member get(AuthUser user) {
-        return memberFinder.find(user.id());
+        return memberRepository.findById(user.id())
+                .map(Member::of)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
     public List<Member> list() {
-        return memberFinder.findAll();
+        return memberRepository.findAll()
+                .stream()
+                .map(Member::of)
+                .toList();
     }
 
     @Transactional(readOnly = true)

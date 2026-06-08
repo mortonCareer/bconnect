@@ -2,7 +2,7 @@ package to.bconnect.api.support.fixture;
 
 import org.springframework.stereotype.Component;
 import to.bconnect.api.core.domain.coworker.Coworker;
-import to.bconnect.api.core.storage.coworker.CoworkerEntity;
+import to.bconnect.api.storage.coworker.CoworkerEntity;
 
 @Component
 public class CoworkerFactory {

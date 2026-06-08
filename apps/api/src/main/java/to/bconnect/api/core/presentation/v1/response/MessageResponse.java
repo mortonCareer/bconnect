@@ -1,7 +1,7 @@
 package to.bconnect.api.core.presentation.v1.response;
 
 import to.bconnect.api.core.domain.chat.Message;
-import to.bconnect.api.core.storage.chat.MessageType;
+import to.bconnect.api.storage.chat.MessageType;
 
 import java.time.LocalDateTime;
 import java.util.List;

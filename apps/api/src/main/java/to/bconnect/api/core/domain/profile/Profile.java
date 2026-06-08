@@ -1,12 +1,11 @@
 package to.bconnect.api.core.domain.profile;
 
-import to.bconnect.api.core.storage.profile.ProfileEntity;
-import to.bconnect.api.core.storage.Address;
-import to.bconnect.api.core.storage.profile.Trade;
+import to.bconnect.api.storage.profile.ProfileEntity;
+import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.profile.Trade;
 
 import java.time.LocalDateTime;
 import java.util.Set;
-import org.hibernate.Hibernate;
 
 public record Profile(
     Long id,

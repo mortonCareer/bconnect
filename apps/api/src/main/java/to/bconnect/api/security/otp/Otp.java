@@ -1,7 +1,7 @@
 package to.bconnect.api.security.otp;
 
-import to.bconnect.api.core.storage.otp.OtpEntity;
-import to.bconnect.api.core.storage.otp.SignupToken;
+import to.bconnect.api.storage.otp.OtpEntity;
+import to.bconnect.api.storage.otp.SignupToken;
 
 import java.time.LocalDateTime;
 

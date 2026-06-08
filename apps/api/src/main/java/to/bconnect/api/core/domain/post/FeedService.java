@@ -5,9 +5,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.core.storage.post.PostRepository;
+import to.bconnect.api.storage.post.PostRepository;
 import to.bconnect.api.security.member.Member;
-import to.bconnect.api.security.member.MemberFinder;
+import to.bconnect.api.core.domain.MemberResolver;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +17,7 @@ import java.util.Map;
 public class FeedService {
 
     private final PostRepository postRepository;
-    private final MemberFinder memberFinder;
+    private final MemberResolver memberResolver;
 
     @Transactional(readOnly = true)
     public List<Feed> list() {
@@ -27,7 +27,7 @@ public class FeedService {
                 .toList();
 
         List<Long> memberIds = posts.stream().map(Post::memberId).toList();
-        Map<Long, Member> memberMap = memberFinder.resolveMap(memberIds);
+        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
 
         return posts.stream()
                 .map(post -> new Feed(
@@ -42,7 +42,7 @@ public class FeedService {
         Post post = postRepository.findById(postId)
                 .map(Post::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        Member member = memberFinder.find(post.memberId());
+        Member member = memberResolver.find(post.memberId());
         return new Feed(member, post);
     }
 

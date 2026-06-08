@@ -2,8 +2,8 @@ package to.bconnect.api.core.presentation.v1.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import to.bconnect.api.core.storage.Address;
-import to.bconnect.api.core.storage.profile.Trade;
+import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.profile.Trade;
 
 import java.time.LocalDate;
 import java.util.Set;

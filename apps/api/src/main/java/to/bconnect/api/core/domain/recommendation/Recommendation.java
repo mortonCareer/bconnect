@@ -1,6 +1,6 @@
 package to.bconnect.api.core.domain.recommendation;
 
-import to.bconnect.api.core.storage.recommendation.RecommendationEntity;
+import to.bconnect.api.storage.recommendation.RecommendationEntity;
 
 import java.time.LocalDateTime;
 

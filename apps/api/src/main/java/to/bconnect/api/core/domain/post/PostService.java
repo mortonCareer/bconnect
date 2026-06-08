@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.core.presentation.v1.request.CreatePostRequest;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.core.storage.post.PostEntity;
-import to.bconnect.api.core.storage.post.PostRepository;
+import to.bconnect.api.storage.post.PostEntity;
+import to.bconnect.api.storage.post.PostRepository;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 

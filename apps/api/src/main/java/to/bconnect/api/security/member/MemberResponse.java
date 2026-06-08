@@ -1,6 +1,6 @@
 package to.bconnect.api.security.member;
 
-import to.bconnect.api.core.storage.member.Role;
+import to.bconnect.api.storage.member.Role;
 
 import java.time.LocalDateTime;
 

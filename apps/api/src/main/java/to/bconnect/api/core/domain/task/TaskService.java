@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.core.presentation.v1.request.CreateTaskRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateTaskRequest;
 import to.bconnect.api.core.domain.coworker.CoworkerFinder;
-import to.bconnect.api.core.storage.task.TaskEntity;
-import to.bconnect.api.core.storage.task.TaskRepository;
+import to.bconnect.api.storage.task.TaskEntity;
+import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.security.AuthUser;
 
 import to.bconnect.api.common.CodeException;

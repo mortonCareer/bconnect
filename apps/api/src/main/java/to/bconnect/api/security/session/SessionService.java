@@ -3,12 +3,12 @@ package to.bconnect.api.security.session;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.core.storage.member.MemberRepository;
-import to.bconnect.api.core.storage.session.SessionEntity;
-import to.bconnect.api.core.storage.session.SessionRepository;
+import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.security.AuthExceptionCode;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.security.AuthUtils;
+import to.bconnect.api.storage.session.SessionEntity;
+import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.support.sms.SmsProvider;
 import to.bconnect.api.support.sms.SmsTemplate;
 

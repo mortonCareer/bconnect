@@ -11,7 +11,7 @@ import com.tngtech.archunit.lang.ArchRule;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
-@AnalyzeClasses(packages = "to.bconnect.api.core", importOptions = DoNotIncludeTests.class)
+@AnalyzeClasses(packages = "to.bconnect.api", importOptions = DoNotIncludeTests.class)
 public class LayerDependencyTest {
 
     private static final String PRESENTATION = "..presentation..";
@@ -29,6 +29,6 @@ public class LayerDependencyTest {
             .whereLayer(STORAGE).mayOnlyBeAccessedByLayers(PRESENTATION, DOMAIN);
 
 	@ArchTest
-	ArchRule cycleCheck = slices().matching("to.bconnect.api.core.(*)..")
+	ArchRule cycleCheck = slices().matching("to.bconnect.api.(*)..")
 			.should().beFreeOfCycles();
 }

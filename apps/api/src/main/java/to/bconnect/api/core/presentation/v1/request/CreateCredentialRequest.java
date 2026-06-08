@@ -1,7 +1,7 @@
 package to.bconnect.api.core.presentation.v1.request;
 
 import jakarta.validation.constraints.NotNull;
-import to.bconnect.api.core.storage.credential.CredentialType;
+import to.bconnect.api.storage.credential.CredentialType;
 
 import java.time.LocalDate;
 

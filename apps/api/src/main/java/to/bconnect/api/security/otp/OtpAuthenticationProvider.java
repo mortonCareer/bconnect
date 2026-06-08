@@ -15,7 +15,7 @@ import to.bconnect.api.security.AuthUserService;
 
 import java.util.List;
 
-import static to.bconnect.api.core.storage.member.Role.GUEST;
+import static to.bconnect.api.storage.member.Role.GUEST;
 import static to.bconnect.api.security.AuthUser.ROLE_PREFIX;
 
 @RequiredArgsConstructor

@@ -2,10 +2,10 @@ package to.bconnect.api.support.fixture;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import to.bconnect.api.ws.message.SendMessageRequest;
-import to.bconnect.api.core.storage.chat.MessageEntity;
-import to.bconnect.api.core.storage.chat.MessageRepository;
-import to.bconnect.api.core.storage.chat.MessageType;
+import to.bconnect.api.socket.message.SendMessageRequest;
+import to.bconnect.api.storage.chat.MessageEntity;
+import to.bconnect.api.storage.chat.MessageRepository;
+import to.bconnect.api.storage.chat.MessageType;
 
 @Component
 public class MessageFactory {

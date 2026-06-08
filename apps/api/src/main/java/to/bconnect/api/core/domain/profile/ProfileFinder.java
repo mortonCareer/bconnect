@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.core.storage.profile.ProfileRepository;
+import to.bconnect.api.storage.profile.ProfileRepository;
 
 import java.util.List;
 

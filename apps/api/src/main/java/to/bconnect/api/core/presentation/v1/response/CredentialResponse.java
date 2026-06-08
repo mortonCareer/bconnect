@@ -1,8 +1,8 @@
 package to.bconnect.api.core.presentation.v1.response;
 
 import to.bconnect.api.core.domain.credential.Credential;
-import to.bconnect.api.core.storage.credential.CredentialStatus;
-import to.bconnect.api.core.storage.credential.CredentialType;
+import to.bconnect.api.storage.credential.CredentialStatus;
+import to.bconnect.api.storage.credential.CredentialType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

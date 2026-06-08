@@ -1,10 +1,9 @@
 package to.bconnect.api.core.domain.post;
 
-import to.bconnect.api.core.storage.post.PostEntity;
+import to.bconnect.api.storage.post.PostEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import org.hibernate.Hibernate;
 
 public record Post(
     Long id,

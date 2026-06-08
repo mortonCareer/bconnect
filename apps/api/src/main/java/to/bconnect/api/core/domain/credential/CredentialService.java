@@ -4,14 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.core.presentation.v1.request.CreateCredentialRequest;
-import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.core.domain.profile.ProfileFinder;
-import to.bconnect.api.core.storage.credential.CredentialEntity;
-import to.bconnect.api.core.storage.credential.CredentialRepository;
+import to.bconnect.api.storage.credential.CredentialEntity;
+import to.bconnect.api.storage.credential.CredentialRepository;
 
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.core.storage.credential.CredentialStatus;
+import to.bconnect.api.storage.credential.CredentialStatus;
 import to.bconnect.api.security.AuthUser;
 
 import java.util.Comparator;

@@ -3,9 +3,9 @@ package to.bconnect.api.support.fixture;
 import to.bconnect.api.core.presentation.v1.request.CreateProfileRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProfileRequest;
 import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.core.storage.profile.ProfileEntity;
-import to.bconnect.api.core.storage.Address;
-import to.bconnect.api.core.storage.profile.Trade;
+import to.bconnect.api.storage.profile.ProfileEntity;
+import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.profile.Trade;
 
 import java.math.BigDecimal;
 import java.util.Set;

@@ -6,9 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.core.presentation.v1.request.CreateRecommendationRequest;
 import to.bconnect.api.core.domain.coworker.CoworkerFinder;
 import to.bconnect.api.security.member.Member;
-import to.bconnect.api.security.member.MemberFinder;
-import to.bconnect.api.core.storage.recommendation.RecommendationEntity;
-import to.bconnect.api.core.storage.recommendation.RecommendationRepository;
+import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.storage.recommendation.RecommendationEntity;
+import to.bconnect.api.storage.recommendation.RecommendationRepository;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthUser;
@@ -22,7 +22,7 @@ public class RecommendationService {
 
     private final RecommendationRepository recommendationRepository;
     private final RecommendationFinder recommendationFinder;
-    private final MemberFinder memberFinder;
+    private final MemberResolver memberResolver;
     private final CoworkerFinder coworkerFinder;
 
     @Transactional(readOnly = true)
@@ -114,7 +114,7 @@ public class RecommendationService {
         List<Long> memberIds = recommendations.stream()
                 .map(r -> dir == Side.FROM ? r.fromId() : r.toId())
                 .toList();
-        Map<Long, Member> memberMap = memberFinder.resolveMap(memberIds);
+        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
 
         return recommendations.stream()
                 .map(r -> {

@@ -10,7 +10,7 @@ import to.bconnect.api.core.presentation.v1.response.CredentialResponse;
 import to.bconnect.api.core.domain.credential.Credential;
 import to.bconnect.api.core.domain.credential.CredentialService;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.core.storage.credential.CredentialType;
+import to.bconnect.api.storage.credential.CredentialType;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;

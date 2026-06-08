@@ -4,15 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.security.member.Member;
-import to.bconnect.api.core.storage.coworker.CoworkerEntity;
-import to.bconnect.api.core.storage.coworker.CoworkerRepository;
-import to.bconnect.api.core.storage.coworker.CoworkerRequestEntity;
-import to.bconnect.api.core.storage.coworker.CoworkerRequestRepository;
-import to.bconnect.api.core.storage.member.MemberRepository;
+import to.bconnect.api.storage.coworker.CoworkerEntity;
+import to.bconnect.api.storage.coworker.CoworkerRepository;
+import to.bconnect.api.storage.coworker.CoworkerRequestEntity;
+import to.bconnect.api.storage.coworker.CoworkerRequestRepository;
+import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.security.member.MemberFinder;
+import to.bconnect.api.core.domain.MemberResolver;
 
 import java.util.List;
 import java.util.Map;
@@ -24,7 +24,7 @@ public class CoworkerRequestService {
     private final CoworkerRepository coworkerRepository;
     private final CoworkerRequestRepository requestRepository;
     private final MemberRepository memberRepository;
-    private final MemberFinder memberFinder;
+    private final MemberResolver memberResolver;
 
     @Transactional
     public CoworkerRequest create(AuthUser user, Long targetId) {
@@ -57,7 +57,7 @@ public class CoworkerRequestService {
                 .map(CoworkerRequest::fromId)
                 .toList();
 
-        Map<Long, Member> memberMap = memberFinder.resolveMap(memberIds);
+        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
 
         return requests.stream()
                 .map(request -> {
@@ -76,7 +76,7 @@ public class CoworkerRequestService {
                 .map(CoworkerRequest::toId)
                 .toList();
 
-        Map<Long, Member> memberMap = memberFinder.resolveMap(memberIds);
+        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
 
         return requests.stream()
                 .map(request -> {
