@@ -3,7 +3,11 @@
 import * as React from 'react'
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 4000
+// 자동 닫힘까지 표시 시간. radix 내부 타이머는 hover/focus/window-blur 에 pause 되어
+// "안 사라짐" 으로 보일 수 있어, 결정적 dismiss 를 위해 자체 타이머로 구동한다.
+const TOAST_DURATION = 4000
+// open=false(닫힘) 후 DOM 에서 제거까지 유예 (exit 처리분).
+const TOAST_REMOVE_DELAY = 200
 
 type ToastVariant = 'success' | 'error'
 
@@ -93,6 +97,7 @@ function toast(props: ToastInput) {
       },
     },
   })
+  setTimeout(dismiss, TOAST_DURATION)
   return { id, dismiss }
 }
 

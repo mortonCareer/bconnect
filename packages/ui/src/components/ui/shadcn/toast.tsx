@@ -26,7 +26,7 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = 'ToastViewport'
 
 const toastVariants = cva(
-  'pointer-events-auto flex w-full items-center gap-2.5 rounded-lg px-5 py-3 text-m-14',
+  'pointer-events-auto flex w-full items-center gap-2.5 rounded-lg px-5 py-3 text-m-14 transition-transform data-[swipe=move]:translate-y-[var(--radix-toast-swipe-move-y)] data-[swipe=cancel]:translate-y-0 data-[swipe=end]:translate-y-[var(--radix-toast-swipe-end-y)]',
   {
     variants: {
       variant: {
@@ -62,4 +62,27 @@ const ToastDescription = React.forwardRef<
 ))
 ToastDescription.displayName = 'ToastDescription'
 
-export { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, toastVariants }
+const ToastClose = React.forwardRef<
+  React.ComponentRef<typeof ToastPrimitive.Close>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitive.Close>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitive.Close
+    ref={ref}
+    className={cn(
+      'shrink-0 rounded p-0.5 opacity-60 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current',
+      className
+    )}
+    {...props}
+  />
+))
+ToastClose.displayName = 'ToastClose'
+
+export {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+  toastVariants,
+}
