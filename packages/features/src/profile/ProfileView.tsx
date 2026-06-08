@@ -42,6 +42,8 @@ interface ProfileViewBaseProps {
   statHrefs?: ProfileStatHrefs
   /** owner 전용 작업물 수정 href 빌더. 없으면 케밥 메뉴 없음 (viewer/plan) */
   workEditHref?: (postId: number) => string
+  /** member 로딩 전/username 부재 시 셸 타이틀 fallback (owner: '내 프로필'). 기본 '프로필' */
+  fallbackTitle?: string
 }
 
 type ProfileViewShellProps =
@@ -61,14 +63,14 @@ type ProfileViewShellProps =
 export type ProfileViewProps = ProfileViewBaseProps & ProfileViewShellProps
 
 export function ProfileView(props: ProfileViewProps) {
-  const { profileId, data, actionSlot, editHrefs, statHrefs, workEditHref } = props
+  const { profileId, data, actionSlot, editHrefs, statHrefs, workEditHref, fallbackTitle } = props
   const [tab, setTab] = useQueryState(
     'tab',
     parseAsStringEnum<TabKey>(['intro', 'works']).withDefault('intro')
   )
 
   const { member, profile } = data
-  const title = member?.username ?? member?.name ?? '프로필'
+  const title = member?.username ?? member?.name ?? fallbackTitle ?? '프로필'
 
   const body = (
     <PanelScroll>

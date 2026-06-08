@@ -84,6 +84,7 @@ export function OwnerProfileView() {
       profileId={pid}
       data={data}
       renderShell={careerShell()}
+      fallbackTitle="내 프로필"
       statHrefs={{
         works: '?tab=works',
         coworkers: '/profile/coworkers',
