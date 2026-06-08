@@ -1,6 +1,6 @@
 package to.bconnect.api.core.presentation.v1.response;
 
-import to.bconnect.api.core.domain.profile.ProfileDetail;
+import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.profile.Trade;
 
@@ -22,7 +22,7 @@ public record ProfileDetailResponse(
         int recommendationCount,
         int coworkerCount
 ) {
-    public static ProfileDetailResponse of(ProfileDetail detail) {
+    public static ProfileDetailResponse of(Profile detail) {
         return new ProfileDetailResponse(
                 detail.id(),
                 MaskedMemberResponse.of(detail.member()),
@@ -34,9 +34,9 @@ public record ProfileDetailResponse(
                 detail.address(),
                 detail.createdAt(),
                 detail.modifiedAt(),
-                detail.postCount(),
-                detail.recommendationCount(),
-                detail.coworkerCount()
+                detail.postCount().intValue(),
+                detail.recommendationCount().intValue(),
+                detail.coworkerCount().intValue()
         );
     }
 }

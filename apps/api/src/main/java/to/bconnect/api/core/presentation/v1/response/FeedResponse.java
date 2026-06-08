@@ -9,7 +9,15 @@ public record FeedResponse(
     public static FeedResponse of(Feed feed) {
         return new FeedResponse(
                 MaskedMemberResponse.of(feed.member()),
-                PostResponse.of(feed.post())
+                new PostResponse(
+                        feed.id(),
+                        feed.member().id(),
+                        feed.taskId(),
+                        feed.images(),
+                        feed.content(),
+                        feed.createdAt(),
+                        feed.modifiedAt()
+                )
         );
     }
 }
