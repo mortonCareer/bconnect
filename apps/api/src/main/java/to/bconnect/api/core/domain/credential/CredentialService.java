@@ -34,20 +34,20 @@ public class CredentialService {
                 ))
                 .values().stream()
                 .flatMap(Optional::stream)
-                .map(Credential::of)
+                .map(this::toCredential)
                 .toList();
     }
 
     @Transactional
     public Credential create(AuthUser user, CreateCredential command) {
-        CredentialEntity entity = CredentialEntity.builder()
-                .memberId(user.id())
-                .type(command.type())
-                .expiredAt(command.expiredAt())
-                .build();
+        CredentialEntity entity = new CredentialEntity(
+                user.id(),
+                command.type(),
+                command.expiredAt()
+        );
 
         credentialRepository.save(entity);
-        return Credential.of(entity);
+        return toCredential(entity);
     }
 
     @Transactional
@@ -74,5 +74,17 @@ public class CredentialService {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         found.deny();
+    }
+
+    private Credential toCredential(CredentialEntity entity) {
+        return new Credential(
+                entity.getId(),
+                entity.getMemberId(),
+                entity.getType(),
+                entity.getStatus(),
+                entity.getExpiredAt(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt()
+        );
     }
 }

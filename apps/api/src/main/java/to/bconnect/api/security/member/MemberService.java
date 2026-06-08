@@ -23,7 +23,7 @@ public class MemberService {
     @Transactional(readOnly = true)
     public Member get(AuthUser user) {
         return memberRepository.findById(user.id())
-                .map(Member::of)
+                .map(this::toMember)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
@@ -31,7 +31,7 @@ public class MemberService {
     public List<Member> list() {
         return memberRepository.findAll()
                 .stream()
-                .map(Member::of)
+                .map(this::toMember)
                 .toList();
     }
 
@@ -50,16 +50,16 @@ public class MemberService {
         memberRepository.findByPhone(request.phone())
                 .ifPresent(e -> { throw new CodeException(MemberExceptionCode.DUPLICATE_PHONE); });
 
-        MemberEntity member = MemberEntity.builder()
-                .username(request.username())
-                .name(request.name())
-                .phone(request.phone())
-                .picture(request.picture())
-                .role(request.role())
-                .build();
+        MemberEntity member = new MemberEntity(
+                request.username(),
+                request.name(),
+                request.phone(),
+                request.picture(),
+                request.role()
+        );
 
         memberRepository.save(member);
-        return Member.of(member);
+        return toMember(member);
     }
 
     @Transactional
@@ -78,5 +78,18 @@ public class MemberService {
     public void withdraw(AuthUser user) {
         memberRepository.findById(user.id())
                 .ifPresent(memberRepository::delete);
+    }
+
+    private Member toMember(MemberEntity entity) {
+        return new Member(
+                entity.getId(),
+                entity.getUsername(),
+                entity.getName(),
+                entity.getPhone(),
+                entity.getPicture(),
+                entity.getRole(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt()
+        );
     }
 }

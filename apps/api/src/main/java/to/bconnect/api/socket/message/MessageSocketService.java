@@ -33,12 +33,12 @@ public class MessageSocketService {
         if (request.type() == MessageType.SYSTEM)
             throw new CodeException(CommonExceptionCode.NOT_VALID);
 
-        MessageEntity entity = messageRepository.save(MessageEntity.builder()
-                .chatId(chatId)
-                .memberId(user.id())
-                .type(request.type())
-                .content(request.content())
-                .build());
+        MessageEntity entity = messageRepository.save(new MessageEntity(
+                chatId,
+                user.id(),
+                request.type(),
+                request.content()
+        ));
 
         String dest = WebSocketAuthorizationConfig.CHAT_TOPIC_PREFIX + chatId;
 

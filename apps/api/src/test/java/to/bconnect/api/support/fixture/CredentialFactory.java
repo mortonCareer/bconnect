@@ -18,10 +18,7 @@ public class CredentialFactory {
     }
 
     public static CredentialEntity createEntity(Long memberId) {
-        return CredentialEntity.builder()
-                .memberId(memberId)
-                .type(CredentialType.SOLE_PROPRIETOR)
-                .build();
+        return new CredentialEntity(memberId, CredentialType.SOLE_PROPRIETOR, null);
     }
 
     public static CreateCredentialRequest createRequest() {

@@ -2,7 +2,6 @@ package to.bconnect.api.storage.coworker;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +23,6 @@ public class CoworkerRequestEntity {
     @Column(nullable = false)
     private Long toId;
 
-    @Builder
     public CoworkerRequestEntity(Long fromId, Long toId) {
         this.fromId = fromId;
         this.toId = toId;

@@ -3,6 +3,7 @@ package to.bconnect.api.support.fixture;
 import to.bconnect.api.core.presentation.v1.request.CreateProfileRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProfileRequest;
 import to.bconnect.api.core.domain.profile.Profile;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.storage.profile.ProfileEntity;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.profile.Trade;
@@ -19,10 +20,10 @@ public class ProfileFactory {
             BigDecimal.ZERO, BigDecimal.ZERO
     );
 
-    public static Profile create(Long id, Long memberId) {
-        return new Profile(id, memberId, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL),
+    public static Profile create(Long id, Member member) {
+        return new Profile(id, member, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL),
                 5, "headline", "about", DEFAULT_ADDRESS,
-                MIN_DATE_TIME, MIN_DATE_TIME);
+                MIN_DATE_TIME, MIN_DATE_TIME, 0L, 0L, 0L);
     }
 
     public static ProfileEntity createEntity(Long memberId) {

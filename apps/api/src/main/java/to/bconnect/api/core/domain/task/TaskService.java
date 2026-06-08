@@ -3,7 +3,7 @@ package to.bconnect.api.core.domain.task;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.core.domain.coworker.CoworkerFinder;
+import to.bconnect.api.core.domain.coworker.CoworkerService;
 import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.security.AuthUser;
@@ -17,24 +17,24 @@ import java.util.List;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final CoworkerFinder coworkerFinder;
+    private final CoworkerService coworkerService;
 
     @Transactional(readOnly = true)
     public List<Task> list(AuthUser user) {
         return taskRepository.findAllByMemberId(user.id())
                 .stream()
-                .map(Task::of)
+                .map(this::toTask)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<Task> listByCoworker(AuthUser user, Long targetId) {
-        if (!coworkerFinder.isCoworker(user.id(), targetId))
+        if (!coworkerService.isCoworker(user.id(), targetId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         return taskRepository.findAllByMemberId(user.id())
                 .stream()
-                .map(Task::of)
+                .map(this::toTask)
                 .toList();
     }
 
@@ -52,7 +52,7 @@ public class TaskService {
                 .build();
 
         taskRepository.save(task);
-        return Task.of(task);
+        return toTask(task);
     }
 
     @Transactional
@@ -81,5 +81,21 @@ public class TaskService {
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
             taskRepository.delete(found);
         });
+    }
+
+    private Task toTask(TaskEntity entity) {
+        return new Task(
+                entity.getId(),
+                entity.getMemberId(),
+                entity.getCompany(),
+                entity.getAddress(),
+                entity.getTaskTitle(),
+                entity.getEventTitle(),
+                entity.getTrades(),
+                entity.getStart(),
+                entity.getEnd(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt()
+        );
     }
 }

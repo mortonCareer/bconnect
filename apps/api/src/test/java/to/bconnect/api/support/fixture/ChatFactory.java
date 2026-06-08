@@ -11,8 +11,6 @@ public class ChatFactory {
     @Autowired private ChatRepository chatRepository;
 
     public ChatEntity create() {
-        return chatRepository.save(ChatEntity.builder()
-                .title("title")
-                .build());
+        return chatRepository.save(new ChatEntity("title"));
     }
 }

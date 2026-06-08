@@ -3,7 +3,6 @@ package to.bconnect.api.storage.credential;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
@@ -29,7 +28,6 @@ public class CredentialEntity extends BaseEntity {
 
     // TODO 파일 첨부
 
-    @Builder
     public CredentialEntity(Long memberId, CredentialType type, LocalDate expiredAt) {
         this.memberId = memberId;
         this.type = type;

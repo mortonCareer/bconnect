@@ -18,23 +18,11 @@ public class MemberFactory {
     }
 
     public static MemberEntity createEntity() {
-        return MemberEntity.builder()
-                .username("username")
-                .name("name")
-                .phone("phone")
-                .picture(DEFAULT_PICTURE)
-                .role(Role.FOREMAN)
-                .build();
+        return new MemberEntity("username", "name", "phone", DEFAULT_PICTURE, Role.FOREMAN);
     }
 
     public static MemberEntity createEntity(String username, String phone, Role role) {
-        return MemberEntity.builder()
-                .username(username)
-                .phone(phone)
-                .name("name")
-                .picture(DEFAULT_PICTURE)
-                .role(role)
-                .build();
+        return new MemberEntity(username, "name", phone, DEFAULT_PICTURE, role);
     }
 
     public static RegisterMemberRequest registerRequest() {

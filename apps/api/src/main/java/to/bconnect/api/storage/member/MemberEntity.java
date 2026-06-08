@@ -2,7 +2,7 @@ package to.bconnect.api.storage.member;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
@@ -10,6 +10,7 @@ import to.bconnect.api.storage.BaseEntity;
 @Entity
 @Table(name = "members")
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberEntity extends BaseEntity {
 
@@ -28,15 +29,6 @@ public class MemberEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-
-    @Builder
-    public MemberEntity(String username, String name, String phone, String picture, Role role) {
-        this.username = username;
-        this.name = name;
-        this.phone = phone;
-        this.picture = picture;
-        this.role = role;
-    }
 
     public void update(String name, String picture, Role role) {
         this.name = name;

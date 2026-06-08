@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChatService {
 
-    private final MessageService messageService;
     private final MemberResolver memberResolver;
     private final ChatRepository chatRepository;
     private final ParticipantRepository participantRepository;
@@ -45,7 +44,7 @@ public class ChatService {
 
         Map<Long, Message> lastMessageMap = messageRepository.findLatestMessagesByChatIdIn(chatIds)
                 .stream()
-                .collect(Collectors.toMap(MessageEntity::getChatId, Message::of));
+                .collect(Collectors.toMap(MessageEntity::getChatId, this::toMessage));
 
         Map<Long, Long> unreadCountMap = messageRepository
                 .findUnreadCountByChatIdsAndMemberId(chatIds, memberId)
@@ -60,7 +59,7 @@ public class ChatService {
                 .distinct()
                 .toList();
 
-        Map<Long, Member> members = memberResolver.resolveMap(memberIds);
+        Map<Long, Member> members = memberResolver.map(memberIds);
 
         return chats.stream()
                 .map(chat -> new Chat(
@@ -89,9 +88,7 @@ public class ChatService {
         if (participants.size() != participantIds.size())
             throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
 
-        ChatEntity chat = chatRepository.save(ChatEntity.builder()
-                .title(command.title())
-                .build());
+        ChatEntity chat = chatRepository.save(new ChatEntity(command.title()));
 
         participantRepository.saveAll(participantIds.stream()
                 .map(id -> ParticipantEntity.builder()
@@ -100,12 +97,12 @@ public class ChatService {
                         .build())
                 .toList());
 
-        messageRepository.save(MessageEntity.builder()
-                .chatId(chat.getId())
-                .memberId(Member.SYSTEM_ID)
-                .type(MessageType.SYSTEM)
-                .content(MessageTemplate.CHAT_CREATED)
-                .build());
+        messageRepository.save(new MessageEntity(
+                chat.getId(),
+                Member.SYSTEM_ID,
+                MessageType.SYSTEM,
+                MessageTemplate.CHAT_CREATED
+        ));
 
         return chat.getId();
     }
@@ -115,7 +112,25 @@ public class ChatService {
         if (!participantRepository.existsByChatIdAndMemberId(chatId, user.id()))
             throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
 
-        Window<Message> window = messageService.findAllByChatId(chatId, cursor);
-        return CursorPage.from(window, Message::id);
+        Window<MessageEntity> entities = messageRepository.findAllByChatId(
+                chatId,
+                cursor.toScrollPosition(),
+                cursor.toLimit(),
+                cursor.toSort()
+        );
+
+        return CursorPage.from(entities.map(this::toMessage), Message::id);
+    }
+
+    private Message toMessage(MessageEntity entity) {
+        return new Message(
+                entity.getId(),
+                entity.getChatId(),
+                entity.getMemberId(),
+                entity.getType(),
+                entity.getContent(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt()
+        );
     }
 }

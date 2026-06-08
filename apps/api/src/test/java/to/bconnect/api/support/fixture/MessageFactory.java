@@ -13,11 +13,7 @@ public class MessageFactory {
     @Autowired private MessageRepository messageRepository;
 
     public MessageEntity create(Long chatId, Long memberId) {
-        return messageRepository.save(MessageEntity.builder()
-                .chatId(chatId)
-                .memberId(memberId)
-                .content("content")
-                .build());
+        return messageRepository.save(new MessageEntity(chatId, memberId, null, "content"));
     }
 
     public static SendMessageRequest createRequest() {
