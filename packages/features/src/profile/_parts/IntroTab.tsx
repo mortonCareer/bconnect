@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { getCredentialLabel } from '@bconnect/api-client'
 import type { Credential, Profile, Recommendation } from '@bconnect/api-client'
 import { Skeleton, Tag } from '@bconnect/ui'
-import { RecommendationList } from './RecommendationList'
+import { RecommendationList } from '../RecommendationList'
 
 /** owner 전용 편집 링크. 없으면 편집 어포던스 안 그림 (viewer/plan). */
 export interface ProfileEditHrefs {

@@ -7,9 +7,9 @@ import { Skeleton, Tab } from '@bconnect/ui'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
 import { PanelMessage } from '../_shared/PanelMessage'
-import { ProfileSummary, type ProfileStatHrefs } from './ProfileSummary'
-import { IntroTab, type ProfileEditHrefs } from './IntroTab'
-import { WorksTab } from './WorksTab'
+import { ProfileSummary, type ProfileStatHrefs } from './_parts/ProfileSummary'
+import { IntroTab, type ProfileEditHrefs } from './_parts/IntroTab'
+import { WorksTab } from './_parts/WorksTab'
 
 type TabKey = 'intro' | 'works'
 
