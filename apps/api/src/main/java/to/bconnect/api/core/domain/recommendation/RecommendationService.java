@@ -17,8 +17,6 @@ import to.bconnect.api.security.User;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -65,13 +63,12 @@ public class RecommendationService {
         if (recommendationRepository.existsByFromIdAndToId(fromId, toId))
             throw new CodeException(RecommendationExceptionCode.ALREADY_EXISTS);
 
-        RecommendationEntity persisted = recommendationRepository.save(
-                new RecommendationEntity(fromId, toId, request.content())
-        );
+        RecommendationEntity created = new RecommendationEntity(fromId, toId, request.content());
+        recommendationRepository.save(created);
 
         // TODO: 알림 전송 (toId 프로필 소유자에게)
 
-        return Recommendation.of(persisted);
+        return Recommendation.of(created);
     }
 
     @Transactional
@@ -127,16 +124,9 @@ public class RecommendationService {
         List<Long> profileIds = recommendations.stream()
                 .map(r -> counterpart == Side.FROM ? r.fromId() : r.toId())
                 .toList();
-
-        Map<Long, Profile> profileMap = profileFinder.findAllByIds(profileIds).stream()
-                .collect(Collectors.toMap(Profile::id, Function.identity()));
-
-        List<Long> memberIds = profileMap.values().stream()
-                .map(Profile::memberId)
-                .toList();
-
-        Map<Long, Member> memberMap = memberFinder.findAllByIds(memberIds).stream()
-                .collect(Collectors.toMap(Member::id, Function.identity()));
+        Map<Long, Profile> profileMap = profileFinder.resolveMapByMemberId(profileIds);
+        List<Long> memberIds = profileFinder.resolveMemberIdsIn(profileIds);
+        Map<Long, Member> memberMap = memberFinder.resolveMap(memberIds);
 
         return recommendations.stream()
                 .map(r -> {

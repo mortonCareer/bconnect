@@ -9,6 +9,9 @@ import to.bconnect.api.common.CommonExceptionCode;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -40,5 +43,12 @@ public class MemberFinder {
                 .stream()
                 .map(Member::of)
                 .toList();
+    }
+
+    public Map<Long, Member> resolveMap(Collection<Long> memberIds) {
+        return memberRepository.findByIdIn(memberIds)
+                .stream()
+                .map(Member::of)
+                .collect(Collectors.toMap(Member::id, Function.identity()));
     }
 }

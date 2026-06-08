@@ -8,20 +8,19 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 public record ProfileDetail(
-        Member member,
-        Long id,
-        Long memberId,
-        Trade primaryTrade,
-        Set<Trade> trades,
-        int experience,
-        String headline,
-        String about,
-        Address address,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt,
-        int postCount,
-        int recommendationCount,
-        int coworkerCount
+    Long id,
+    Member member,
+    Trade primaryTrade,
+    Set<Trade> trades,
+    int experience,
+    String headline,
+    String about,
+    Address address,
+    LocalDateTime createdAt,
+    LocalDateTime modifiedAt,
+    int postCount,
+    int recommendationCount,
+    int coworkerCount
 ) {
     public static ProfileDetail of(
             Member member,
@@ -31,9 +30,8 @@ public record ProfileDetail(
             int coworkerCount
     ) {
         return new ProfileDetail(
-                member,
                 profile.id(),
-                profile.memberId(),
+                member,
                 profile.primaryTrade(),
                 profile.trades(),
                 profile.experience(),

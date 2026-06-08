@@ -62,8 +62,7 @@ public class ChatService {
                 .distinct()
                 .toList();
 
-        Map<Long, Member> members = memberFinder.findAllByIds(memberIds).stream()
-                .collect(Collectors.toMap(Member::id, Function.identity()));
+        Map<Long, Member> members = memberFinder.resolveMap(memberIds);
 
         return chats.stream()
                 .map(chat -> new Chat(

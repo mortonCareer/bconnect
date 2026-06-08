@@ -13,8 +13,6 @@ import to.bconnect.api.core.domain.profile.ProfileFinder;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,19 +30,14 @@ public class FeedService {
                 .toList();
 
         List<Long> profileIds = posts.stream().map(Post::profileId).toList();
-
-        Map<Long, Profile> profileById = profileFinder.findAllByIds(profileIds).stream()
-                .collect(Collectors.toMap(Profile::memberId, Function.identity()));
-
-        List<Long> memberIds = profileById.values().stream().map(Profile::memberId).toList();
-
-        Map<Long, Member> memberById = memberFinder.findAllByIds(memberIds).stream()
-                .collect(Collectors.toMap(Member::id, Function.identity()));
+        Map<Long, Profile> profileMap = profileFinder.resolveMapByMemberId(profileIds);
+        List<Long> memberIds = profileMap.values().stream().map(Profile::memberId).toList();
+        Map<Long, Member> memberMap = memberFinder.resolveMap(memberIds);
 
         return posts.stream()
                 .map(post -> new Feed(
-                        memberById.get(post.profileId()),
-                        profileById.get(post.profileId()),
+                        memberMap.get(post.profileId()),
+                        profileMap.get(post.profileId()),
                         post
                 ))
                 .toList();

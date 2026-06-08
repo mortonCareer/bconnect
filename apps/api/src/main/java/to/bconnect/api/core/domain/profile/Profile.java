@@ -21,7 +21,6 @@ public record Profile(
     LocalDateTime modifiedAt
 ) {
     public static Profile of(ProfileEntity entity) {
-        Hibernate.initialize(entity.getTrades());
         return new Profile(
                 entity.getId(),
                 entity.getMemberId(),

@@ -28,7 +28,10 @@ public class TaskService {
     @Transactional(readOnly = true)
     public List<Task> list(User user) {
         Profile profile = profileFinder.findByMemberId(user.id());
-        return taskFinder.findAllByProfileId(profile.id());
+        return taskRepository.findAllByProfileId(profile.id())
+                .stream()
+                .map(Task::of)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -36,7 +39,11 @@ public class TaskService {
         Profile profile = profileFinder.findByMemberId(user.id());
         if (!coworkerFinder.isCoworker(profile.id(), targetId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
-        return taskFinder.findAllByProfileId(targetId);
+
+        return taskRepository.findAllByProfileId(profile.id())
+                .stream()
+                .map(Task::of)
+                .toList();
     }
 
     @Transactional

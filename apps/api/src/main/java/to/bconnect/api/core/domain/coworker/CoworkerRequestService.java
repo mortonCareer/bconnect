@@ -39,7 +39,7 @@ public class CoworkerRequestService {
 
         if (profileId.equals(targetId))
             throw new CodeException(CoworkerExceptionCode.SELF_REQUEST);
-        if (!profileFinder.existsById(targetId))
+        if (!profileRepository.existsById(targetId))
             throw new CodeException(CoworkerExceptionCode.TARGET_NOT_FOUND);
         if (coworkerRepository.existsByMinIdAndMaxId(Math.min(profileId, targetId), Math.max(profileId, targetId)))
             throw new CodeException(CoworkerExceptionCode.ALREADY_COWORKER);
