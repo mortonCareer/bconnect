@@ -1,10 +1,18 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { getTradeLabel } from '@bconnect/api-client'
 import type { MaskedMember, Profile } from '@bconnect/api-client'
 import { Skeleton } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
+
+/** 클릭 가능한 stat 타겟. 없으면 비-링크 (plan 기본). */
+export interface ProfileStatHrefs {
+  works?: string
+  coworkers?: string
+  recommendations?: string
+}
 
 interface ProfileSummaryProps {
   member?: MaskedMember
@@ -12,6 +20,7 @@ interface ProfileSummaryProps {
   postCount?: number
   coworkerCount?: number
   recommendationCount?: number
+  statHrefs?: ProfileStatHrefs
 }
 
 export function ProfileSummary({
@@ -20,6 +29,7 @@ export function ProfileSummary({
   postCount,
   coworkerCount,
   recommendationCount,
+  statHrefs,
 }: ProfileSummaryProps) {
   const name = member?.name ?? '이름 없음'
   const meta = [
@@ -49,9 +59,9 @@ export function ProfileSummary({
           />
         </div>
         <div className="flex flex-1 justify-around">
-          <Stat label="작업물" value={postCount} />
-          <Stat label="동료" value={coworkerCount} />
-          <Stat label="추천서" value={recommendationCount} />
+          <Stat label="작업물" value={postCount} href={statHrefs?.works} />
+          <Stat label="동료" value={coworkerCount} href={statHrefs?.coworkers} />
+          <Stat label="추천서" value={recommendationCount} href={statHrefs?.recommendations} />
         </div>
       </div>
 
@@ -66,15 +76,23 @@ export function ProfileSummary({
   )
 }
 
-function Stat({ label, value }: { label: string; value?: number }) {
-  return (
-    <div className="flex flex-col items-center gap-1">
+function Stat({ label, value, href }: { label: string; value?: number; href?: string }) {
+  const className = 'flex flex-col items-center gap-1'
+  const content = (
+    <>
       {value === undefined ? (
         <Skeleton className="h-6 w-6" />
       ) : (
         <span className="text-sb-16 text-gray-900">{value}</span>
       )}
       <span className="text-r-14 text-gray-900">{label}</span>
-    </div>
+    </>
+  )
+  return href ? (
+    <Link href={href} className={className}>
+      {content}
+    </Link>
+  ) : (
+    <div className={className}>{content}</div>
   )
 }

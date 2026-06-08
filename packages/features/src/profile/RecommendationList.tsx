@@ -2,11 +2,8 @@
 
 import Image from 'next/image'
 import { useState } from 'react'
-import {
-  getTradeLabel,
-  useGetReceivedRecommendations,
-  useGetSentRecommendations,
-} from '@bconnect/api-client'
+import Link from 'next/link'
+import { getTradeLabel } from '@bconnect/api-client'
 import type { Recommendation } from '@bconnect/api-client'
 import { cn, Skeleton, useExpandableText } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
@@ -14,25 +11,39 @@ import { getAvatarUrl } from '@bconnect/config/avatar'
 type Mode = 'received' | 'sent'
 
 interface RecommendationListProps {
-  profileId: number
+  /** 앱이 resolve 해 내려줌. undefined = 아직 로딩 중 (스켈레톤) */
+  received?: Recommendation[]
+  sent?: Recommendation[]
+  /** owner 전용 편집 링크. 없으면 헤더 편집 링크 안 그림 */
+  editHref?: string
+  /** 상단 '추천서' 헤더 숨김 — 전용 페이지(TopBar 가 타이틀 보유)에서 사용 */
+  hideHeader?: boolean
 }
 
-export function RecommendationList({ profileId }: RecommendationListProps) {
+export function RecommendationList({
+  received,
+  sent,
+  editHref,
+  hideHeader,
+}: RecommendationListProps) {
   const [mode, setMode] = useState<Mode>('received')
-  const enabled = Number.isFinite(profileId) && profileId > 0
-
-  const received = useGetReceivedRecommendations({ profileId }, { query: { enabled } })
-  const sent = useGetSentRecommendations(
-    { profileId },
-    { query: { enabled: enabled && mode === 'sent' } }
-  )
 
   const active = mode === 'received' ? received : sent
-  const items = active.data ?? []
+  const isLoading = active === undefined
+  const items = active ?? []
 
   return (
     <section className="flex flex-col gap-3">
-      <h3 className="text-sb-16 text-gray-900">추천서</h3>
+      {!hideHeader && (
+        <div className="flex items-center justify-between">
+          <h3 className="text-sb-16 text-gray-900">추천서</h3>
+          {editHref && (
+            <Link href={editHref} className="cursor-pointer text-r-12 text-primary underline">
+              편집
+            </Link>
+          )}
+        </div>
+      )}
 
       <div className="flex gap-2">
         <ToggleButton active={mode === 'received'} onClick={() => setMode('received')}>
@@ -43,7 +54,7 @@ export function RecommendationList({ profileId }: RecommendationListProps) {
         </ToggleButton>
       </div>
 
-      {active.isLoading ? (
+      {isLoading ? (
         <ul className="flex flex-col divide-y divide-gray-200">
           {Array.from({ length: 3 }).map((_, i) => (
             <li key={i} className="flex gap-3 py-3">

@@ -1,28 +1,42 @@
 'use client'
 
 import { Fragment } from 'react'
-import { getCredentialLabel, useGetCredentials } from '@bconnect/api-client'
-import type { Profile } from '@bconnect/api-client'
+import Link from 'next/link'
+import { getCredentialLabel } from '@bconnect/api-client'
+import type { Credential, Profile, Recommendation } from '@bconnect/api-client'
 import { Skeleton, Tag } from '@bconnect/ui'
-import { RecommendationList } from './RecommendationList'
+import { RecommendationList } from '../RecommendationList'
 
-interface IntroTabProps {
-  profileId: number
-  profile?: Profile
+/** owner 전용 편집 링크. 없으면 편집 어포던스 안 그림 (viewer/plan). */
+export interface ProfileEditHrefs {
+  certifications?: string
+  about?: string
+  recommendations?: string
 }
 
-export function IntroTab({ profileId, profile }: IntroTabProps) {
-  const enabled = Number.isFinite(profileId) && profileId > 0
-  const { data: credentials, isLoading: credentialsLoading } = useGetCredentials(
-    { profileId },
-    { query: { enabled } }
-  )
+interface IntroTabProps {
+  profile?: Profile
+  /** 앱이 resolve 해 내려줌. undefined = 로딩 중 */
+  credentials?: Credential[]
+  receivedRecommendations?: Recommendation[]
+  sentRecommendations?: Recommendation[]
+  editHrefs?: ProfileEditHrefs
+}
+
+export function IntroTab({
+  profile,
+  credentials,
+  receivedRecommendations,
+  sentRecommendations,
+  editHrefs,
+}: IntroTabProps) {
+  const credentialsLoading = credentials === undefined
   const accepted = (credentials ?? []).filter((c) => c.status === 'ACCEPTED')
 
   return (
     <div className="flex flex-col gap-6 px-4 py-4">
       <section className="flex flex-col gap-3">
-        <h3 className="text-sb-16 text-gray-900">인증</h3>
+        <SectionHeader title="인증" editHref={editHrefs?.certifications} />
         {credentialsLoading ? (
           <div className="flex flex-wrap gap-2">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -43,7 +57,7 @@ export function IntroTab({ profileId, profile }: IntroTabProps) {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h3 className="text-sb-16 text-gray-900">소개</h3>
+        <SectionHeader title="소개" editHref={editHrefs?.about} />
         {profile?.about ? (
           <p className="whitespace-pre-wrap text-r-14 leading-[22.4px] text-gray-900">
             {renderWithHashtags(profile.about)}
@@ -53,7 +67,24 @@ export function IntroTab({ profileId, profile }: IntroTabProps) {
         )}
       </section>
 
-      <RecommendationList profileId={profileId} />
+      <RecommendationList
+        received={receivedRecommendations}
+        sent={sentRecommendations}
+        editHref={editHrefs?.recommendations}
+      />
+    </div>
+  )
+}
+
+function SectionHeader({ title, editHref }: { title: string; editHref?: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <h3 className="text-sb-16 text-gray-900">{title}</h3>
+      {editHref && (
+        <Link href={editHref} className="cursor-pointer text-r-12 text-primary underline">
+          편집
+        </Link>
+      )}
     </div>
   )
 }
