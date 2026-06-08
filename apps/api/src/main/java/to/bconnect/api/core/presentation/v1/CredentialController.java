@@ -28,8 +28,8 @@ public class CredentialController {
     }
 
     @GetMapping
-    public ApiResponse<List<CredentialResponse>> list(@RequestParam Long profileId) {
-        List<CredentialResponse> credentials = credentialService.list(profileId).stream()
+    public ApiResponse<List<CredentialResponse>> list(@RequestParam Long memberId) {
+        List<CredentialResponse> credentials = credentialService.list(memberId).stream()
                 .map(CredentialResponse::of)
                 .toList();
         return ApiResponse.success(credentials);
@@ -37,24 +37,24 @@ public class CredentialController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateCredentialRequest request) {
-        Credential saved = credentialService.create(authUser, request);
+        Credential saved = credentialService.create(user, request);
         return ApiResponse.success(saved.id());
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
-        credentialService.delete(authUser, id);
+        credentialService.delete(user, id);
         return ApiResponse.success(null);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/accept")
     public ApiResponse<Void> accept(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
         credentialService.accept(id);
         return ApiResponse.success(null);
@@ -63,7 +63,7 @@ public class CredentialController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/deny")
     public ApiResponse<Void> deny(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
         credentialService.deny(id);
         return ApiResponse.success(null);

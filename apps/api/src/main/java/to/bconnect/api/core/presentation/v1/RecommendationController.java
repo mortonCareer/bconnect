@@ -31,23 +31,23 @@ public class RecommendationController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateRecommendationRequest request) {
-        Recommendation recommendation = recommendationService.create(authUser, request);
+        Recommendation recommendation = recommendationService.create(user, request);
         return ApiResponse.success(recommendation.id());
     }
 
     @GetMapping("/received")
-    public ApiResponse<List<RecommendationResponse>> listReceived(@RequestParam Long profileId) {
-        List<RecommendationResponse> responses = recommendationService.listReceived(profileId).stream()
+    public ApiResponse<List<RecommendationResponse>> listReceived(@RequestParam Long memberId) {
+        List<RecommendationResponse> responses = recommendationService.listReceived(memberId).stream()
                 .map(RecommendationResponse::of)
                 .toList();
         return ApiResponse.success(responses);
     }
 
     @GetMapping("/sent")
-    public ApiResponse<List<RecommendationResponse>> listSent(@RequestParam Long profileId) {
-        List<RecommendationResponse> responses = recommendationService.listSent(profileId).stream()
+    public ApiResponse<List<RecommendationResponse>> listSent(@RequestParam Long memberId) {
+        List<RecommendationResponse> responses = recommendationService.listSent(memberId).stream()
                 .map(RecommendationResponse::of)
                 .toList();
         return ApiResponse.success(responses);
@@ -55,8 +55,8 @@ public class RecommendationController {
 
     @GetMapping("/me/received")
     public ApiResponse<List<RecommendationResponse>> listMyReceived(
-            @AuthenticationPrincipal AuthUser authUser) {
-        List<RecommendationResponse> responses = recommendationService.listMyReceived(authUser).stream()
+            @AuthenticationPrincipal AuthUser user) {
+        List<RecommendationResponse> responses = recommendationService.listMyReceived(user).stream()
                 .map(RecommendationResponse::of)
                 .toList();
         return ApiResponse.success(responses);
@@ -64,8 +64,8 @@ public class RecommendationController {
 
     @GetMapping("/me/sent")
     public ApiResponse<List<RecommendationResponse>> listMySent(
-            @AuthenticationPrincipal AuthUser authUser) {
-        List<RecommendationResponse> responses = recommendationService.listMySent(authUser).stream()
+            @AuthenticationPrincipal AuthUser user) {
+        List<RecommendationResponse> responses = recommendationService.listMySent(user).stream()
                 .map(RecommendationResponse::of)
                 .toList();
         return ApiResponse.success(responses);
@@ -73,34 +73,34 @@ public class RecommendationController {
 
     @PutMapping("/{id}")
     public ApiResponse<Void> update(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
             @RequestBody @Valid UpdateRecommendationRequest request) {
-        recommendationService.update(authUser, id, request.content());
+        recommendationService.update(user, id, request.content());
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
-        recommendationService.delete(authUser, id);
+        recommendationService.delete(user, id);
         return ApiResponse.success(null);
     }
 
     @PostMapping("/{id}/hide")
     public ApiResponse<Void> hide(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
-        recommendationService.hide(authUser, id);
+        recommendationService.hide(user, id);
         return ApiResponse.success(null);
     }
 
     @PostMapping("/{id}/show")
     public ApiResponse<Void> show(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
-        recommendationService.show(authUser, id);
+        recommendationService.show(user, id);
         return ApiResponse.success(null);
     }
 }

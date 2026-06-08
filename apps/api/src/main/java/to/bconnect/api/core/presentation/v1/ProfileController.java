@@ -45,32 +45,32 @@ public class ProfileController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateProfileRequest request) {
-        Profile profile = profileService.create(authUser, request);
+        Profile profile = profileService.create(user, request);
         return ApiResponse.success(profile.id());
     }
 
     @PutMapping("/me")
     public ApiResponse<Void> update(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid UpdateProfileRequest request) {
-        profileService.update(authUser, request);
+        profileService.update(user, request);
         return ApiResponse.success(null);
     }
 
     @PatchMapping("/me/about")
     public ApiResponse<Void> updateAbout(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @RequestBody UpdateProfileAboutRequest request) {
-        profileService.updateAbout(authUser, request.about());
+        profileService.updateAbout(user, request.about());
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/me")
     public ApiResponse<Void> delete(
-            @AuthenticationPrincipal AuthUser authUser) {
-        profileService.delete(authUser);
+            @AuthenticationPrincipal AuthUser user) {
+        profileService.delete(user);
         return ApiResponse.success(null);
     }
 }

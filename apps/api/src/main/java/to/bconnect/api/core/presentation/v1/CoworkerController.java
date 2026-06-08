@@ -12,7 +12,6 @@ import to.bconnect.api.core.presentation.v1.response.CoworkerResponse;
 import to.bconnect.api.core.domain.coworker.CoworkerService;
 import to.bconnect.api.security.member.Member;
 import to.bconnect.api.security.member.MemberFinder;
-import to.bconnect.api.core.domain.profile.ProfileFinder;
 import to.bconnect.api.core.storage.coworker.CoworkerStatus;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
@@ -25,20 +24,19 @@ import java.util.List;
 public class CoworkerController {
 
     private final CoworkerService coworkerService;
-    private final ProfileFinder profileFinder;
     private final MemberFinder memberFinder;
 
     @GetMapping
     public ApiResponse<List<CoworkerResponse>> list(
-            @AuthenticationPrincipal AuthUser authUser,
-            @RequestParam Long profileId) {
-        List<CoworkerResponse> coworkers = coworkerService.list(authUser, profileId).stream()
+            @AuthenticationPrincipal AuthUser user,
+            @RequestParam Long memberId) {
+        // TODO: CoworkerStatus 함께 조회
+        List<CoworkerResponse> coworkers = coworkerService.list(memberId).stream()
                 .map(coworker -> {
-                    Long counterpartProfileId = coworker.minId().equals(profileId)
+                    Long counterpartId = coworker.minId().equals(memberId)
                             ? coworker.maxId()
                             : coworker.minId();
-                    Member member = memberFinder.find(
-                            profileFinder.find(counterpartProfileId).memberId());
+                    Member member = memberFinder.find(counterpartId);
                     return CoworkerResponse.of(coworker, member, CoworkerStatus.COWORKER);
                 })
                 .toList();
@@ -47,9 +45,9 @@ public class CoworkerController {
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
-        coworkerService.delete(authUser, id);
+        coworkerService.delete(user, id);
         return ApiResponse.success(null);
     }
 }

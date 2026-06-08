@@ -1,7 +1,6 @@
 package to.bconnect.api.core.presentation.v1.response;
 
 import to.bconnect.api.core.domain.coworker.Coworker;
-import to.bconnect.api.security.member.MaskedMemberResponse;
 import to.bconnect.api.security.member.Member;
 import to.bconnect.api.core.storage.coworker.CoworkerStatus;
 

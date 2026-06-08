@@ -7,7 +7,7 @@ import java.util.List;
 
 public record PostResponse(
         Long id,
-        Long profileId,
+        Long memberId,
         Long taskId,
         List<String> images,
         String content,
@@ -17,7 +17,7 @@ public record PostResponse(
     public static PostResponse of(Post post) {
         return new PostResponse(
                 post.id(),
-                post.profileId(),
+                post.memberId(),
                 post.taskId(),
                 post.images(),
                 post.content(),

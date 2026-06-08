@@ -29,8 +29,8 @@ public class ChatController {
     private final ChatService chatService;
 
     @GetMapping
-    public ApiResponse<List<ChatResponse>> list(@AuthenticationPrincipal AuthUser authUser) {
-        List<ChatResponse> response = chatService.list(authUser.id()).stream()
+    public ApiResponse<List<ChatResponse>> list(@AuthenticationPrincipal AuthUser user) {
+        List<ChatResponse> response = chatService.list(user.id()).stream()
                 .map(ChatResponse::of)
                 .toList();
         return ApiResponse.success(response);
@@ -38,18 +38,18 @@ public class ChatController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateChatRequest request) {
-        Long id = chatService.create(authUser, request);
+        Long id = chatService.create(user, request);
         return ApiResponse.success(id);
     }
 
     @GetMapping("/{chatId}/messages")
     public ApiResponse<CursorPage<MessageResponse>> listMessages(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long chatId,
             CursorLimit cursorLimit) {
-        CursorPage<Message> page = chatService.listMessages(authUser, chatId, cursorLimit);
+        CursorPage<Message> page = chatService.listMessages(user, chatId, cursorLimit);
         CursorPage<MessageResponse> response = new CursorPage<>(
                 MessageResponse.of(page.content()),
                 page.nextCursor(),

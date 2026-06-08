@@ -1,7 +1,6 @@
 package to.bconnect.api.core.presentation.v1.response;
 
 import to.bconnect.api.core.domain.chat.Chat;
-import to.bconnect.api.security.member.MaskedMemberResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;

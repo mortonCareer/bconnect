@@ -31,8 +31,8 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping
-    public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal AuthUser authUser) {
-        List<TaskResponse> tasks = taskService.list(authUser).stream()
+    public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal AuthUser user) {
+        List<TaskResponse> tasks = taskService.list(user).stream()
                 .map(TaskResponse::of)
                 .toList();
         return ApiResponse.success(tasks);
@@ -40,9 +40,9 @@ public class TaskController {
 
     @GetMapping("/coworker")
     public ApiResponse<List<CoworkerTaskResponse>> listByCoworker(
-            @AuthenticationPrincipal AuthUser authUser,
-            @RequestParam Long profileId) {
-        List<CoworkerTaskResponse> tasks = taskService.listByCoworker(authUser, profileId).stream()
+            @AuthenticationPrincipal AuthUser user,
+            @RequestParam Long memberId) {
+        List<CoworkerTaskResponse> tasks = taskService.listByCoworker(user, memberId).stream()
                 .map(CoworkerTaskResponse::of)
                 .toList();
         return ApiResponse.success(tasks);
@@ -50,26 +50,26 @@ public class TaskController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateTaskRequest request) {
-        Task task = taskService.create(authUser, request);
+        Task task = taskService.create(user, request);
         return ApiResponse.success(task.id());
     }
 
     @PutMapping("/{id}")
     public ApiResponse<Void> update(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
             @RequestBody @Valid UpdateTaskRequest request) {
-        taskService.update(authUser, id, request);
+        taskService.update(user, id, request);
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
-        taskService.delete(authUser, id);
+        taskService.delete(user, id);
         return ApiResponse.success(null);
     }
 }

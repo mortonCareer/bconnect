@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 public record CredentialResponse(
         Long id,
-        Long profileId,
+        Long memberId,
         CredentialType type,
         CredentialStatus status,
         LocalDate expiredAt,
@@ -19,7 +19,7 @@ public record CredentialResponse(
     public static CredentialResponse of(Credential credential) {
         return new CredentialResponse(
                 credential.id(),
-                credential.profileId(),
+                credential.memberId(),
                 credential.type(),
                 credential.status(),
                 credential.expiredAt(),

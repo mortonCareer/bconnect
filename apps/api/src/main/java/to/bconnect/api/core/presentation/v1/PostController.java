@@ -20,26 +20,26 @@ public class PostController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreatePostRequest request) {
-        Post post = postService.create(authUser, request);
+        Post post = postService.create(user, request);
         return ApiResponse.success(post.id());
     }
 
     @PutMapping("/{id}")
     public ApiResponse<Void> update(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
             @RequestBody @Valid UpdatePostRequest request) {
-        postService.update(authUser, id, request.content());
+        postService.update(user, id, request.content());
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
-        postService.delete(authUser, id);
+        postService.delete(user, id);
         return ApiResponse.success(null);
     }
 }

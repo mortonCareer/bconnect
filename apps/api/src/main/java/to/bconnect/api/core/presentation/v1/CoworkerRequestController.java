@@ -28,16 +28,16 @@ public class CoworkerRequestController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateCoworkerRequest request) {
-        CoworkerRequest coworkerRequest = coworkerRequestService.create(authUser, request.toId());
+        CoworkerRequest coworkerRequest = coworkerRequestService.create(user, request.toId());
         return ApiResponse.success(coworkerRequest.id());
     }
 
     @GetMapping("/received")
     public ApiResponse<List<CoworkerRequestResponse>> listReceived(
-            @AuthenticationPrincipal AuthUser authUser) {
-        List<CoworkerRequestResponse> requests = coworkerRequestService.listReceived(authUser).stream()
+            @AuthenticationPrincipal AuthUser user) {
+        List<CoworkerRequestResponse> requests = coworkerRequestService.listReceived(user).stream()
                 .map(CoworkerRequestResponse::of)
                 .toList();
         return ApiResponse.success(requests);
@@ -45,8 +45,8 @@ public class CoworkerRequestController {
 
     @GetMapping("/sent")
     public ApiResponse<List<CoworkerRequestResponse>> listSent(
-            @AuthenticationPrincipal AuthUser authUser) {
-        List<CoworkerRequestResponse> requests = coworkerRequestService.listSent(authUser).stream()
+            @AuthenticationPrincipal AuthUser user) {
+        List<CoworkerRequestResponse> requests = coworkerRequestService.listSent(user).stream()
                 .map(CoworkerRequestResponse::of)
                 .toList();
         return ApiResponse.success(requests);
@@ -54,25 +54,25 @@ public class CoworkerRequestController {
 
     @PostMapping("/{id}/accept")
     public ApiResponse<Void> accept(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
-        coworkerRequestService.accept(authUser, id);
+        coworkerRequestService.accept(user, id);
         return ApiResponse.success(null);
     }
 
     @PostMapping("/{id}/deny")
     public ApiResponse<Void> deny(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
-        coworkerRequestService.deny(authUser, id);
+        coworkerRequestService.deny(user, id);
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> cancel(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
-        coworkerRequestService.cancel(authUser, id);
+        coworkerRequestService.cancel(user, id);
         return ApiResponse.success(null);
     }
 }
