@@ -28,6 +28,6 @@ public record AuthUser(
 
     @Override @NonNull
     public String getUsername() {
-        return username;
+        return id.toString();
     }
 }

@@ -14,7 +14,7 @@ import to.bconnect.api.core.storage.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CredentialEntity extends BaseEntity {
 
-    @Column(name = "member_id", nullable = false)
+    @Column(nullable = false)
     private Long memberId;
 
     @Enumerated(EnumType.STRING)
