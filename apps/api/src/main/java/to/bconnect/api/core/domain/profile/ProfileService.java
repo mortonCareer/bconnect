@@ -23,7 +23,7 @@ public class ProfileService {
         if (!command.trades().contains(command.primaryTrade()))
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
-        ProfileEntity profile = ProfileEntity.builder()
+        ProfileEntity created = ProfileEntity.builder()
                 .memberId(user.id())
                 .primaryTrade(command.primaryTrade())
                 .trades(command.trades())
@@ -33,7 +33,7 @@ public class ProfileService {
                 .address(command.address())
                 .build();
 
-        return profileRepository.save(profile).getId();
+        return profileRepository.save(created).getId();
     }
 
     @Transactional

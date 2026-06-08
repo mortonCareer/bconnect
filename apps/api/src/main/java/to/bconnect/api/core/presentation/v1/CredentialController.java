@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import to.bconnect.api.core.presentation.v1.request.CreateCredentialRequest;
 import to.bconnect.api.core.presentation.v1.response.CredentialResponse;
-import to.bconnect.api.core.domain.credential.Credential;
 import to.bconnect.api.core.domain.credential.CredentialService;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.credential.CredentialType;
@@ -39,8 +38,8 @@ public class CredentialController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateCredentialRequest request) {
-        Credential saved = credentialService.create(user, request.toCommand());
-        return ApiResponse.success(saved.id());
+        Long id = credentialService.create(user, request.toCommand());
+        return ApiResponse.success(id);
     }
 
     @DeleteMapping("/{id}")

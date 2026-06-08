@@ -15,16 +15,16 @@ public class CoworkerRequestQueryService {
     private final CoworkerRequestRepository requestRepository;
 
     @Transactional(readOnly = true)
-    public List<Coworker> listReceived(AuthUser user) {
+    public List<CoworkerRequest> listReceived(AuthUser user) {
         return requestRepository.findByToId(user.id()).stream()
-                .map(it -> Coworker.of(it, it.getFromId()))
+                .map(it -> CoworkerRequest.of(it, it.getFromId()))
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<Coworker> listSent(AuthUser user) {
+    public List<CoworkerRequest> listSent(AuthUser user) {
         return requestRepository.findByFromId(user.id()).stream()
-                .map(it -> Coworker.of(it, it.getToId()))
+                .map(it -> CoworkerRequest.of(it, it.getToId()))
                 .toList();
     }
 }

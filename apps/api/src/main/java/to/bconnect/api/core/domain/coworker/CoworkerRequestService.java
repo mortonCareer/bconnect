@@ -35,10 +35,10 @@ public class CoworkerRequestService {
         requestRepository.findByFromIdAndToId(targetId, user.id())
                 .ifPresent(request -> accept(user, request.getId()));
 
-        CoworkerRequestEntity entity = requestRepository.save(
+        CoworkerRequestEntity created = requestRepository.save(
                 new CoworkerRequestEntity(user.id(), targetId));
 
-        return entity.getId();
+        return created.getId();
     }
 
     @Transactional

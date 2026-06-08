@@ -6,7 +6,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.core.presentation.v1.request.CreatePostRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdatePostRequest;
-import to.bconnect.api.core.domain.post.Post;
 import to.bconnect.api.core.domain.post.PostService;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
@@ -22,8 +21,8 @@ public class PostController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreatePostRequest request) {
-        Post post = postService.create(user, request.toCommand());
-        return ApiResponse.success(post.id());
+        Long id = postService.create(user, request.toCommand());
+        return ApiResponse.success(id);
     }
 
     @PutMapping("/{id}")

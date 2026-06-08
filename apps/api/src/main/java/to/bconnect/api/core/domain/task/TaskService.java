@@ -39,7 +39,7 @@ public class TaskService {
     }
 
     @Transactional
-    public Task create(AuthUser user, CreateTask command) {
+    public Long create(AuthUser user, CreateTask command) {
         TaskEntity task = TaskEntity.builder()
                 .memberId(user.id())
                 .company(command.company())
@@ -51,8 +51,7 @@ public class TaskService {
                 .end(command.end())
                 .build();
 
-        taskRepository.save(task);
-        return Task.of(task);
+        return taskRepository.save(task).getId();
     }
 
     @Transactional

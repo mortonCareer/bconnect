@@ -8,8 +8,8 @@ import to.bconnect.api.core.domain.chat.CreateChat;
 import java.util.List;
 
 public record CreateChatRequest(
-        @NotEmpty @Size(min = 2) List<Long> participantIds,
-        @NotBlank String title
+        @NotBlank String title,
+        @NotEmpty @Size(min = 2) List<Long> participantIds
 ) {
     public CreateChat toCommand() {
         return new CreateChat(title, participantIds);

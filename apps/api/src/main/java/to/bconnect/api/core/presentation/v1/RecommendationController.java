@@ -65,15 +65,6 @@ public class RecommendationController {
         return ApiResponse.success(assemble(recommendationQueryService.listMySent(user)));
     }
 
-    private List<RecommendationResponse> assemble(List<Recommendation> recommendations) {
-        List<Long> memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.map(memberIds);
-
-        return recommendations.stream()
-                .map(r -> RecommendationResponse.of(r, memberMap.get(r.memberId())))
-                .toList();
-    }
-
     @PutMapping("/{id}")
     public ApiResponse<Void> update(
             @AuthenticationPrincipal AuthUser user,
@@ -105,5 +96,14 @@ public class RecommendationController {
             @PathVariable Long id) {
         recommendationService.show(user, id);
         return ApiResponse.success(null);
+    }
+
+    private List<RecommendationResponse> assemble(List<Recommendation> recommendations) {
+        List<Long> memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
+        Map<Long, Member> memberMap = memberResolver.map(memberIds);
+
+        return recommendations.stream()
+                .map(r -> RecommendationResponse.of(r, memberMap.get(r.memberId())))
+                .toList();
     }
 }

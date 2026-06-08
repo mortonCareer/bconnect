@@ -69,23 +69,23 @@ public class ChatService {
         if (!participantIds.contains(user.id()))
             throw new CodeException(ChatExceptionCode.SELF_NOT_INCLUDED);
 
-        ChatEntity chat = chatRepository.save(new ChatEntity(command.title()));
+        ChatEntity created = chatRepository.save(new ChatEntity(command.title()));
 
         participantRepository.saveAll(participantIds.stream()
                 .map(id -> ParticipantEntity.builder()
-                        .chatId(chat.getId())
+                        .chatId(created.getId())
                         .memberId(id)
                         .build())
                 .toList());
 
         messageRepository.save(new MessageEntity(
-                chat.getId(),
+                created.getId(),
                 Member.SYSTEM_ID,
                 MessageType.SYSTEM,
                 MessageTemplate.CHAT_CREATED
         ));
 
-        return chat.getId();
+        return created.getId();
     }
 
     @Transactional(readOnly = true)
@@ -93,13 +93,13 @@ public class ChatService {
         if (!participantRepository.existsByChatIdAndMemberId(chatId, user.id()))
             throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
 
-        Window<MessageEntity> entities = messageRepository.findAllByChatId(
+        Window<MessageEntity> messages = messageRepository.findAllByChatId(
                 chatId,
                 cursor.toScrollPosition(),
                 cursor.toLimit(),
                 cursor.toSort()
         );
 
-        return CursorPage.from(entities.map(Message::of), Message::id);
+        return CursorPage.from(messages.map(Message::of), Message::id);
     }
 }

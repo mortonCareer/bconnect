@@ -10,8 +10,4 @@ public record Coworker(
     public static Coworker of(CoworkerEntity entity, Long memberId) {
         return new Coworker(entity.getId(), memberId);
     }
-
-    public static Coworker of(CoworkerRequestEntity entity, Long memberId) {
-        return new Coworker(entity.getId(), memberId);
-    }
 }

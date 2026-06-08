@@ -39,15 +39,14 @@ public class CredentialService {
     }
 
     @Transactional
-    public Credential create(AuthUser user, CreateCredential command) {
-        CredentialEntity entity = new CredentialEntity(
+    public Long create(AuthUser user, CreateCredential command) {
+        CredentialEntity created = new CredentialEntity(
                 user.id(),
                 command.type(),
                 command.expiredAt()
         );
 
-        credentialRepository.save(entity);
-        return Credential.of(entity);
+        return credentialRepository.save(created).getId();
     }
 
     @Transactional

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import to.bconnect.api.core.domain.coworker.CoworkerRequest;
 import to.bconnect.api.core.presentation.v1.request.CreateCoworkerRequest;
 import to.bconnect.api.core.presentation.v1.response.CoworkerRequestResponse;
 import to.bconnect.api.core.domain.coworker.Coworker;
@@ -52,15 +53,6 @@ public class CoworkerRequestController {
         return ApiResponse.success(assemble(coworkerRequestQueryService.listSent(user)));
     }
 
-    private List<CoworkerRequestResponse> assemble(List<Coworker> requests) {
-        List<Long> memberIds = requests.stream().map(Coworker::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.map(memberIds);
-
-        return requests.stream()
-                .map(request -> CoworkerRequestResponse.of(request, memberMap.get(request.memberId())))
-                .toList();
-    }
-
     @PostMapping("/{id}/accept")
     public ApiResponse<Void> accept(
             @AuthenticationPrincipal AuthUser user,
@@ -83,5 +75,14 @@ public class CoworkerRequestController {
             @PathVariable Long id) {
         coworkerRequestService.cancel(user, id);
         return ApiResponse.success(null);
+    }
+
+    private List<CoworkerRequestResponse> assemble(List<CoworkerRequest> requests) {
+        List<Long> memberIds = requests.stream().map(CoworkerRequest::memberId).distinct().toList();
+        Map<Long, Member> memberMap = memberResolver.map(memberIds);
+
+        return requests.stream()
+                .map(request -> CoworkerRequestResponse.of(request, memberMap.get(request.memberId())))
+                .toList();
     }
 }

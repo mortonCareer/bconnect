@@ -1,9 +1,13 @@
 package to.bconnect.api.core.domain.coworker;
 
-import to.bconnect.api.security.member.Member;
+import to.bconnect.api.storage.coworker.CoworkerRequestEntity;
 
 
 public record CoworkerRequest(
     Long id,
-    Member member
-) {}
+    Long memberId
+) {
+    public static CoworkerRequest of(CoworkerRequestEntity entity, Long memberId) {
+        return new CoworkerRequest(entity.getId(), memberId);
+    }
+}

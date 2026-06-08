@@ -33,16 +33,15 @@ public class PostService {
     }
 
     @Transactional
-    public Post create(AuthUser user, CreatePost command) {
-        PostEntity post = PostEntity.builder()
+    public Long create(AuthUser user, CreatePost command) {
+        PostEntity created = PostEntity.builder()
                 .memberId(user.id())
                 .taskId(command.taskId())
                 .images(command.images())
                 .content(command.content())
                 .build();
 
-        postRepository.save(post);
-        return Post.of(post);
+        return postRepository.save(created).getId();
     }
 
     @Transactional

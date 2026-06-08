@@ -16,7 +16,6 @@ import to.bconnect.api.core.presentation.v1.request.CreateTaskRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateTaskRequest;
 import to.bconnect.api.core.presentation.v1.response.CoworkerTaskResponse;
 import to.bconnect.api.core.presentation.v1.response.TaskResponse;
-import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.core.domain.task.TaskService;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
@@ -52,8 +51,8 @@ public class TaskController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateTaskRequest request) {
-        Task task = taskService.create(user, request.toCommand());
-        return ApiResponse.success(task.id());
+        Long id = taskService.create(user, request.toCommand());
+        return ApiResponse.success(id);
     }
 
     @PutMapping("/{id}")
