@@ -1,4 +1,4 @@
 export { MessagesView } from './MessagesView'
-export type { MessagesViewProps } from './MessagesView'
+export type { MessagesViewProps, MessagesViewData } from './MessagesView'
 export { ChatView } from './ChatView'
-export type { ChatViewProps } from './ChatView'
+export type { ChatViewProps, ChatViewData } from './ChatView'

@@ -4,25 +4,10 @@
  */
 'use client'
 
-import { useParams, useRouter } from 'next/navigation'
-import { ChatView } from '@bconnect/features'
-import { TopBar } from '@bconnect/ui'
+import { useParams } from 'next/navigation'
+import { CareerChatRoom } from '../_adapters/CareerMessagesView'
 
 export default function ChatRoomPage() {
   const params = useParams<{ chatId: string }>()
-  const router = useRouter()
-  const chatId = Number(params.chatId)
-
-  return (
-    <ChatView
-      chatId={chatId}
-      profileHref={(id) => `/profile/${id}`}
-      renderShell={({ title, children }) => (
-        <div className="flex min-h-0 flex-1 flex-col">
-          <TopBar variant="default" title={title} showAction={false} onBack={() => router.back()} />
-          {children}
-        </div>
-      )}
-    />
-  )
+  return <CareerChatRoom chatId={Number(params.chatId)} />
 }

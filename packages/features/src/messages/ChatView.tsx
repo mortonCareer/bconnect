@@ -2,23 +2,31 @@
 
 import { useCallback, useState, type ReactNode } from 'react'
 import Link from 'next/link'
-import {
-  useGetChat,
-  useGetMyMember,
-  useGetProfile,
-  MessageType,
-  TRADE_LABELS,
-} from '@bconnect/api-client'
-import type { Message } from '@bconnect/api-client'
+import { MessageType, TRADE_LABELS } from '@bconnect/api-client'
+import type { Chat, Message, Profile } from '@bconnect/api-client'
 import { ChatInput, ChatListItem, Skeleton } from '@bconnect/ui'
 import { PanelShell } from '../_shared/PanelShell'
-import { MessageThread } from './MessageThread'
+import { MessageThread } from './_parts/MessageThread'
 
-type ChatViewProps = {
+/** 앱이 resolve 해 내려주는 데이터. career/plan 어댑터가 useGetChat·useGetProfile·useGetMyMember 로 채운다. */
+export interface ChatViewData {
+  chat?: Chat
+  /** 본인 member id — "나" 호출(useGetMyMember)은 앱에서 (ADR-0020: features 엔 "나" 호출 없음) */
+  currentUserId?: number
+  /** 상대 프로필 보강 — chat 응답에 없는 풍부 정보(address.city, primaryTrade). 발산 없는 by-id 보강 */
+  otherProfile?: Profile
+  isLoading: boolean
+  isError: boolean
+}
+
+type ChatViewBaseProps = {
   chatId: number
+  data: ChatViewData
   /** 상대 프로필 패널/페이지 href 빌더 — 앱이 주입 (plan: panelHref, career: '/profile/'+id) */
   profileHref?: (memberId: number) => string
-} & (
+}
+
+type ChatViewShellProps =
   | {
       /** 풀페이지 등 비-패널 쉘 주입 (career 풀페이지 라우트). title 은 비동기 도출분을 전달받음 */
       renderShell: (props: { title: string; children: ReactNode }) => ReactNode
@@ -33,22 +41,16 @@ type ChatViewProps = {
       onClose: () => void
       backHref: string
     }
-)
 
-export type { ChatViewProps }
+export type ChatViewProps = ChatViewBaseProps & ChatViewShellProps
 
 export function ChatView(props: ChatViewProps) {
-  const { chatId, profileHref } = props
-  const enabled = Number.isFinite(chatId) && chatId > 0
-  const currentUserId = useGetMyMember().data?.id
-  const { data: chat, isLoading, isError } = useGetChat(chatId, { query: { enabled } })
+  const { chatId, data, profileHref } = props
+  const { chat, currentUserId, otherProfile, isLoading, isError } = data
   const other = chat?.participants.find((p) => p.id !== currentUserId)
   const otherId = other?.id
   const title = other?.name ?? chat?.title ?? '채팅'
-  const { data: otherProfile } = useGetProfile(otherId ?? 0, {
-    query: { enabled: otherId != null },
-  })
-  const profile = otherProfile?.profile
+  const profile = otherProfile
 
   const [localMessages, setLocalMessages] = useState<Message[]>([])
   const [message, setMessage] = useState('')
