@@ -4,7 +4,7 @@
 'use client'
 
 import {
-  AddressSearchSheet,
+  AddressSearchDrawer,
   cn,
   Form,
   FormControl,
@@ -155,7 +155,7 @@ export default function EditWorkPage() {
               <FormError error={form.formState.errors.address?.message} />
             </div>
           </div>
-          <AddressSearchSheet
+          <AddressSearchDrawer
             open={addressOpen}
             onOpenChange={setAddressOpen}
             onComplete={(result) =>
