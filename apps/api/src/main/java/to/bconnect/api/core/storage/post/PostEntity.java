@@ -16,14 +16,14 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostEntity extends BaseEntity {
 
-    @Column(name = "member_id")
+    @Column
     private Long memberId;
 
-    @Column(name = "task_id")
+    @Column
     private Long taskId;
 
     // TODO: MappingTableEntity 분리
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
     private List<String> images = new ArrayList<>();
 

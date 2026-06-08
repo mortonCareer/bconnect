@@ -39,7 +39,7 @@ public class TaskEntity extends BaseEntity {
     private String eventTitle;
 
     // TODO: MappingTableEntity 분리
-    @ElementCollection(targetClass = Trade.class)
+    @ElementCollection(targetClass = Trade.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "task_trades", joinColumns = @JoinColumn(name = "task_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "trade")
