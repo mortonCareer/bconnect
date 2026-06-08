@@ -18,10 +18,13 @@ import to.bconnect.api.core.presentation.v1.response.RecommendationResponse;
 import to.bconnect.api.core.domain.recommendation.Recommendation;
 import to.bconnect.api.core.domain.recommendation.RecommendationQueryService;
 import to.bconnect.api.core.domain.recommendation.RecommendationService;
+import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/recommendations")
@@ -30,47 +33,45 @@ public class RecommendationController {
 
     private final RecommendationService recommendationService;
     private final RecommendationQueryService recommendationQueryService;
+    private final MemberResolver memberResolver;
 
     @PostMapping
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateRecommendationRequest request) {
-        Recommendation recommendation = recommendationService.create(user, request.toCommand());
-        return ApiResponse.success(recommendation.id());
+        Long id = recommendationService.create(user, request.toCommand());
+        return ApiResponse.success(id);
     }
 
     @GetMapping("/received")
     public ApiResponse<List<RecommendationResponse>> listReceived(@RequestParam Long memberId) {
-        List<RecommendationResponse> responses = recommendationQueryService.listReceived(memberId).stream()
-                .map(RecommendationResponse::of)
-                .toList();
-        return ApiResponse.success(responses);
+        return ApiResponse.success(assemble(recommendationQueryService.listReceived(memberId)));
     }
 
     @GetMapping("/sent")
     public ApiResponse<List<RecommendationResponse>> listSent(@RequestParam Long memberId) {
-        List<RecommendationResponse> responses = recommendationQueryService.listSent(memberId).stream()
-                .map(RecommendationResponse::of)
-                .toList();
-        return ApiResponse.success(responses);
+        return ApiResponse.success(assemble(recommendationQueryService.listSent(memberId)));
     }
 
     @GetMapping("/me/received")
     public ApiResponse<List<RecommendationResponse>> listMyReceived(
             @AuthenticationPrincipal AuthUser user) {
-        List<RecommendationResponse> responses = recommendationQueryService.listMyReceived(user).stream()
-                .map(RecommendationResponse::of)
-                .toList();
-        return ApiResponse.success(responses);
+        return ApiResponse.success(assemble(recommendationQueryService.listMyReceived(user)));
     }
 
     @GetMapping("/me/sent")
     public ApiResponse<List<RecommendationResponse>> listMySent(
             @AuthenticationPrincipal AuthUser user) {
-        List<RecommendationResponse> responses = recommendationQueryService.listMySent(user).stream()
-                .map(RecommendationResponse::of)
+        return ApiResponse.success(assemble(recommendationQueryService.listMySent(user)));
+    }
+
+    private List<RecommendationResponse> assemble(List<Recommendation> recommendations) {
+        List<Long> memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
+        Map<Long, Member> memberMap = memberResolver.map(memberIds);
+
+        return recommendations.stream()
+                .map(r -> RecommendationResponse.of(r, memberMap.get(r.memberId())))
                 .toList();
-        return ApiResponse.success(responses);
     }
 
     @PutMapping("/{id}")

@@ -18,7 +18,7 @@ public class RecommendationService {
     private final CoworkerService coworkerService;
 
     @Transactional
-    public Recommendation create(AuthUser user, CreateRecommendation command) {
+    public Long create(AuthUser user, CreateRecommendation command) {
         Long fromId = user.id();
         Long toId = command.toId();
 
@@ -34,15 +34,7 @@ public class RecommendationService {
 
         // TODO: 알림 전송 (toId 회원에게)
 
-        return new Recommendation(
-                created.getId(),
-                created.getFromId(),
-                created.getToId(),
-                created.getContent(),
-                created.isVisible(),
-                created.getCreatedAt(),
-                created.getModifiedAt()
-        );
+        return created.getId();
     }
 
     @Transactional

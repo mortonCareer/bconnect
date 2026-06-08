@@ -1,13 +1,25 @@
 package to.bconnect.api.core.domain.recommendation;
 
+import to.bconnect.api.storage.recommendation.RecommendationEntity;
+
 import java.time.LocalDateTime;
 
 public record Recommendation(
-    Long id,
-    Long fromId,
-    Long toId,
-    String content,
-    boolean visible,
-    LocalDateTime createdAt,
-    LocalDateTime modifiedAt
-) {}
+        Long id,
+        Long memberId,
+        String content,
+        boolean visible,
+        LocalDateTime createdAt,
+        LocalDateTime modifiedAt
+) {
+    public static Recommendation of(RecommendationEntity entity, Long memberId) {
+        return new Recommendation(
+                entity.getId(),
+                memberId,
+                entity.getContent(),
+                entity.isVisible(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt()
+        );
+    }
+}

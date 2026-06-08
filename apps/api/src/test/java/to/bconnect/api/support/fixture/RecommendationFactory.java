@@ -9,8 +9,8 @@ import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
 public class RecommendationFactory {
 
-    public static Recommendation create(Long id, Long fromId, Long toId) {
-        return new Recommendation(id, fromId, toId, "content", false,
+    public static Recommendation create(Long id, Long memberId) {
+        return new Recommendation(id, memberId, "content", false,
                 MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
