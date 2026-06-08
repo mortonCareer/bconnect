@@ -16,7 +16,7 @@ career·plan 두 Next.js App Router 앱의 공통 프론트엔드 규칙. 각 �
 
 ## Figma 매핑 — `@figma` JSDoc
 
-모든 `page.tsx` 상단 `@figma <url>` JSDoc 필수(ESLint 강제). 디자인 없으면 `@figma-scaffold <reason>`. 형식·마커: [packages/ui/CLAUDE.md](../packages/ui/CLAUDE.md).
+모든 `page.tsx` 상단 `@figma <url>` JSDoc 필수(ESLint 강제). 디자인 없으면 `@figma-scaffold <reason>`. 형식·마커: [packages/ui/CLAUDE.md](../packages/ui/CLAUDE.md). 코드 `@figma` 태그 ↔ Figma 노드 drift는 주간 CI가 감지(상세: [scripts/figma-checks/CLAUDE.md](../scripts/figma-checks/CLAUDE.md)).
 
 ## Navigation — `<Link>`, `router.push` 금지
 

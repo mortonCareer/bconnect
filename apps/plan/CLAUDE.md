@@ -2,7 +2,6 @@
 
 업체+건축주 웹앱. Next.js App Router + Tailwind v4.
 
-> **현재 대부분 placeholder** — Sprint 2 디자인(Figma `1415-1339`), 코드 미구현 다수. 프로필 `@panel`만 구현됨(#541).
 > 공통 FE 패턴은 [CLAUDE-FE.md](../CLAUDE-FE.md) (아래 `@import`). 여기는 plan 전용만.
 
 @../CLAUDE-FE.md
@@ -15,13 +14,10 @@ pnpm build:plan
 pnpm lint:plan
 ```
 
-## 미래 (Sprint 2+)
+## Plan-only — 병렬 라우트 `@panel` + 3-pane 셸
 
-Figma Sprint 2에 정의된 화면들 (코드 미구현):
+plan은 `(main)` 라우트 그룹에 **parallel route `@panel`** 슬롯을 둠 (career엔 없음). `(main)/layout.tsx`가 한 화면에 좌측 사이드바(인증 분기: `MemberSidebar`/`GuestSidebar`) + 본문(`children`) + 우측 패널(`panel`)을 합성.
 
-- 로그인, 회원가입 (멤버/업체)
-- 기술자 탐색
-- 메시지/채팅방
-- 알림
-
-`scripts/figma-checks/` cron이 매주 미구현 frame을 issue로 보고 중.
+- 본문(`(main)/page.tsx`): 기술자 탐색 — `ExploreContent`·`TechnicianList`·`FilterBar` (`_components/`)
+- 패널(`@panel/…`): `profile/[profileId]`, `messages`·`messages/[chatId]`, `notifications` (슬롯 비활성 시 `@panel/default.tsx`)
+- 비패널 라우트: `login`, `signup/{corp,member}`

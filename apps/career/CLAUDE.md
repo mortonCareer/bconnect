@@ -32,23 +32,12 @@ pnpm lint:career
 - `app/one-click/_clients/fetch-business.ts` — orchestration
 - `app/one-click/_clients/*-client.ts` — 각 데이터소스별 client
 
-### KISCON S3 sync
+### KISCON sync — 크롤링 → Railway Postgres
 
-kiscon.net이 cloud IP 차단 → self-hosted runner(homelab K3s ARC)에서 크롤링 → S3 JSON 저장 → career 앱이 S3 직접 read.
+kiscon.net이 cloud IP(AWS/Vercel) 차단 → self-hosted runner(`morton-runner`)에서 주간 크롤링 → Railway Postgres 적재(매 동기화 시 DELETE→INSERT 전체 교체) → career 앱이 위 `lib/db.ts`로 직접 read. 원클릭과 같은 Postgres를 공유.
 
 핵심 파일:
 
-- `scripts/kiscon-sync.ts` (워크플로우 트리거)
-- `app/one-click/_clients/kiscon-s3-client.ts` (S3 read)
-- `.github/workflows/kiscon-sync.yml` (매주 월 09:00 KST)
-
-### Mock fallback — `useMock` 패턴 (legacy, 제거 대상)
-
-대부분 page.tsx에 API 에러 시 `MOCK_*` constants로 폴백하는 임시 패턴 존재:
-
-```tsx
-const useMock = isProfileError || (!isProfileLoading && !profileId)
-const data = useMock ? MOCK_DATA : (apiData ?? [])
-```
-
-**방향**: 신규 추가 금지. 발견 시 점진적 제거 (MSW 기반 mock으로 대체 — [development-workflow.md](../../docs/how-to/development-workflow.md) Mock API 섹션 참조). 제거 시 BE 연동 상태 확인 후 진행.
+- `scripts/kiscon-sync.ts` — 크롤링 후 `kiscon_arrears`·`kiscon_subcon_limits` 테이블 적재
+- `app/one-click/_clients/kiscon-db-client.ts` — Postgres read (14일 freshness 체크), `kiscon-construction-client.ts`(면허 등록), `kiscon-crawl-client.ts`(live 크롤 폴백)
+- `.github/workflows/kiscon-sync.yml` — 매주 월 09:00 KST, `morton-runner`
