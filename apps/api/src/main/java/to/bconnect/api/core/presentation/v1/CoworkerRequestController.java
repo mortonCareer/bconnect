@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.request.CreateCoworkerRequest;
 import to.bconnect.api.core.presentation.v1.response.CoworkerRequestResponse;
+import to.bconnect.api.core.domain.coworker.CoworkerRequestQueryService;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestService;
 import to.bconnect.api.core.domain.coworker.CoworkerRequest;
 import to.bconnect.api.security.AuthUser;
@@ -25,19 +26,20 @@ import java.util.List;
 public class CoworkerRequestController {
 
     private final CoworkerRequestService coworkerRequestService;
+    private final CoworkerRequestQueryService coworkerRequestQueryService;
 
     @PostMapping
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateCoworkerRequest request) {
-        CoworkerRequest coworkerRequest = coworkerRequestService.create(user, request.toId());
-        return ApiResponse.success(coworkerRequest.id());
+        Long id = coworkerRequestService.create(user, request.toId());
+        return ApiResponse.success(id);
     }
 
     @GetMapping("/received")
     public ApiResponse<List<CoworkerRequestResponse>> listReceived(
             @AuthenticationPrincipal AuthUser user) {
-        List<CoworkerRequestResponse> requests = coworkerRequestService.listReceived(user).stream()
+        List<CoworkerRequestResponse> requests = coworkerRequestQueryService.listReceived(user).stream()
                 .map(CoworkerRequestResponse::of)
                 .toList();
         return ApiResponse.success(requests);
@@ -46,7 +48,7 @@ public class CoworkerRequestController {
     @GetMapping("/sent")
     public ApiResponse<List<CoworkerRequestResponse>> listSent(
             @AuthenticationPrincipal AuthUser user) {
-        List<CoworkerRequestResponse> requests = coworkerRequestService.listSent(user).stream()
+        List<CoworkerRequestResponse> requests = coworkerRequestQueryService.listSent(user).stream()
                 .map(CoworkerRequestResponse::of)
                 .toList();
         return ApiResponse.success(requests);
