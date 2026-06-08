@@ -2,9 +2,8 @@ package to.bconnect.api.support.fixture;
 
 import to.bconnect.api.core.presentation.v1.request.CreateCoworkerRequest;
 import to.bconnect.api.core.domain.coworker.CoworkerRequest;
-import to.bconnect.api.core.domain.coworker.CoworkerProfile;
+import to.bconnect.api.core.domain.coworker.CoworkerMember;
 import to.bconnect.api.security.member.Member;
-import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.storage.coworker.CoworkerRequestEntity;
 
 public class CoworkerRequestFactory {
@@ -24,7 +23,7 @@ public class CoworkerRequestFactory {
         return new CreateCoworkerRequest(toId);
     }
 
-    public static CoworkerProfile createDetail(Long id, Member member, Profile profile) {
-        return new CoworkerProfile(id, member, profile);
+    public static CoworkerMember createDetail(Long id, Member member) {
+        return new CoworkerMember(id, member);
     }
 }

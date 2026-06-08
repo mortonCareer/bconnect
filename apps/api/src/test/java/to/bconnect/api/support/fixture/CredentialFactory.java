@@ -11,15 +11,15 @@ import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
 public class CredentialFactory {
 
-    public static Credential create(Long id, Long profileId) {
-        return new Credential(id, profileId, CredentialType.SOLE_PROPRIETOR,
+    public static Credential create(Long id, Long memberId) {
+        return new Credential(id, memberId, CredentialType.SOLE_PROPRIETOR,
                 CredentialStatus.PENDING, MAX_DATE,
                 MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
-    public static CredentialEntity createEntity(Long profileId) {
+    public static CredentialEntity createEntity(Long memberId) {
         return CredentialEntity.builder()
-                .profileId(profileId)
+                .memberId(memberId)
                 .type(CredentialType.SOLE_PROPRIETOR)
                 .build();
     }

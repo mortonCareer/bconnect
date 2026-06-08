@@ -15,15 +15,15 @@ public class TaskFactory {
     private static final LocalDate START_DATE = LocalDate.of(2026, 6, 1);
     private static final LocalDate END_DATE = LocalDate.of(2026, 6, 31);
 
-    public static Task create(Long id, Long profileId) {
-        return new Task(id, profileId, "company", ProfileFactory.DEFAULT_ADDRESS, "task", "event",
+    public static Task create(Long id, Long memberId) {
+        return new Task(id, memberId, "company", ProfileFactory.DEFAULT_ADDRESS, "task", "event",
                 Set.of(Trade.ELECTRICAL), START_DATE, END_DATE,
                 LocalDateTime.now(), LocalDateTime.now());
     }
 
-    public static TaskEntity createEntity(Long profileId) {
+    public static TaskEntity createEntity(Long memberId) {
         return TaskEntity.builder()
-                .profileId(profileId)
+                .memberId(memberId)
                 .company("company")
                 .address(ProfileFactory.DEFAULT_ADDRESS)
                 .taskTitle("task")
