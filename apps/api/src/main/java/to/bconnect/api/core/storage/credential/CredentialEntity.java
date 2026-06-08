@@ -14,8 +14,8 @@ import to.bconnect.api.core.storage.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CredentialEntity extends BaseEntity {
 
-    @Column(name = "profile_id", nullable = false)
-    private Long profileId;
+    @Column(name = "member_id", nullable = false)
+    private Long memberId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -30,8 +30,8 @@ public class CredentialEntity extends BaseEntity {
     // TODO 파일 첨부
 
     @Builder
-    public CredentialEntity(Long profileId, CredentialType type, LocalDate expiredAt) {
-        this.profileId = profileId;
+    public CredentialEntity(Long memberId, CredentialType type, LocalDate expiredAt) {
+        this.memberId = memberId;
         this.type = type;
         this.expiredAt = expiredAt;
     }

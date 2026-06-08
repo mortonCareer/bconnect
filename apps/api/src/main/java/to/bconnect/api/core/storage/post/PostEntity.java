@@ -16,8 +16,8 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostEntity extends BaseEntity {
 
-    @Column(name = "profile_id")
-    private Long profileId;
+    @Column(name = "member_id")
+    private Long memberId;
 
     @Column(name = "task_id")
     private Long taskId;
@@ -31,8 +31,8 @@ public class PostEntity extends BaseEntity {
     private String content;
 
     @Builder
-    public PostEntity(Long profileId, Long taskId, List<String> images, String content) {
-        this.profileId = profileId;
+    public PostEntity(Long memberId, Long taskId, List<String> images, String content) {
+        this.memberId = memberId;
         this.taskId = taskId;
         this.images = images != null ? images : new ArrayList<>();
         this.content = content;

@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
-    List<PostEntity> findByProfileId(Long profileId);
+    List<PostEntity> findByMemberId(Long memberId);
 
     List<PostEntity> findByTaskId(Long taskId);
 
-    long countByProfileId(Long profileId);
+    long countByMemberId(Long memberId);
 }

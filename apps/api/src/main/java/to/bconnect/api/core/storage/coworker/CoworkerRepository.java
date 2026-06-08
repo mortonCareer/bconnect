@@ -13,9 +13,9 @@ public interface CoworkerRepository extends JpaRepository<CoworkerEntity, Long> 
 
     boolean existsByMinIdAndMaxId(Long minId, Long maxId);
 
-    @Query("SELECT c FROM CoworkerEntity c WHERE c.minId = :profileId OR c.maxId = :profileId")
-    List<CoworkerEntity> findByProfileId(@Param("profileId") Long profileId);
+    @Query("SELECT c FROM CoworkerEntity c WHERE c.minId = :memberId OR c.maxId = :memberId")
+    List<CoworkerEntity> findByMemberId(@Param("memberId") Long memberId);
 
-    @Query("SELECT COUNT(c) FROM CoworkerEntity c WHERE c.minId = :profileId OR c.maxId = :profileId")
-    long countByProfileId(@Param("profileId") Long profileId);
+    @Query("SELECT COUNT(c) FROM CoworkerEntity c WHERE c.minId = :memberId OR c.maxId = :memberId")
+    long countByMemberId(@Param("memberId") Long memberId);
 }
