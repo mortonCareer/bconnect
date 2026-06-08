@@ -23,7 +23,7 @@ public class MemberService {
     @Transactional(readOnly = true)
     public Member get(AuthUser user) {
         return memberRepository.findById(user.id())
-                .map(this::toMember)
+                .map(Member::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
@@ -31,7 +31,7 @@ public class MemberService {
     public List<Member> list() {
         return memberRepository.findAll()
                 .stream()
-                .map(this::toMember)
+                .map(Member::of)
                 .toList();
     }
 
@@ -59,7 +59,7 @@ public class MemberService {
         );
 
         memberRepository.save(member);
-        return toMember(member);
+        return Member.of(member);
     }
 
     @Transactional
@@ -78,18 +78,5 @@ public class MemberService {
     public void withdraw(AuthUser user) {
         memberRepository.findById(user.id())
                 .ifPresent(memberRepository::delete);
-    }
-
-    private Member toMember(MemberEntity entity) {
-        return new Member(
-                entity.getId(),
-                entity.getUsername(),
-                entity.getName(),
-                entity.getPhone(),
-                entity.getPicture(),
-                entity.getRole(),
-                entity.getCreatedAt(),
-                entity.getModifiedAt()
-        );
     }
 }

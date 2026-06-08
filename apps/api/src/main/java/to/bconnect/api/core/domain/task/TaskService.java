@@ -23,7 +23,7 @@ public class TaskService {
     public List<Task> list(AuthUser user) {
         return taskRepository.findAllByMemberId(user.id())
                 .stream()
-                .map(this::toTask)
+                .map(Task::of)
                 .toList();
     }
 
@@ -34,7 +34,7 @@ public class TaskService {
 
         return taskRepository.findAllByMemberId(user.id())
                 .stream()
-                .map(this::toTask)
+                .map(Task::of)
                 .toList();
     }
 
@@ -52,7 +52,7 @@ public class TaskService {
                 .build();
 
         taskRepository.save(task);
-        return toTask(task);
+        return Task.of(task);
     }
 
     @Transactional
@@ -81,21 +81,5 @@ public class TaskService {
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
             taskRepository.delete(found);
         });
-    }
-
-    private Task toTask(TaskEntity entity) {
-        return new Task(
-                entity.getId(),
-                entity.getMemberId(),
-                entity.getCompany(),
-                entity.getAddress(),
-                entity.getTaskTitle(),
-                entity.getEventTitle(),
-                entity.getTrades(),
-                entity.getStart(),
-                entity.getEnd(),
-                entity.getCreatedAt(),
-                entity.getModifiedAt()
-        );
     }
 }

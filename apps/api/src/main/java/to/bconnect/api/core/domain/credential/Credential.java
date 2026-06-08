@@ -1,5 +1,6 @@
 package to.bconnect.api.core.domain.credential;
 
+import to.bconnect.api.storage.credential.CredentialEntity;
 import to.bconnect.api.storage.credential.CredentialStatus;
 import to.bconnect.api.storage.credential.CredentialType;
 
@@ -14,4 +15,16 @@ public record Credential(
     LocalDate expiredAt,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
-) {}
+) {
+    public static Credential of(CredentialEntity entity) {
+        return new Credential(
+                entity.getId(),
+                entity.getMemberId(),
+                entity.getType(),
+                entity.getStatus(),
+                entity.getExpiredAt(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt()
+        );
+    }
+}

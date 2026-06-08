@@ -1,6 +1,7 @@
 package to.bconnect.api.core.domain.task;
 
 import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.profile.Trade;
 
 import java.time.LocalDate;
@@ -24,4 +25,20 @@ public record Task(
     // status: TaskStatus
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
-) {}
+) {
+    public static Task of(TaskEntity entity) {
+        return new Task(
+                entity.getId(),
+                entity.getMemberId(),
+                entity.getCompany(),
+                entity.getAddress(),
+                entity.getTaskTitle(),
+                entity.getEventTitle(),
+                entity.getTrades(),
+                entity.getStart(),
+                entity.getEnd(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt()
+        );
+    }
+}

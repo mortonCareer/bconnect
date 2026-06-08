@@ -2,7 +2,6 @@ package to.bconnect.api.core.domain;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.CodeException;
@@ -22,34 +21,21 @@ public class MemberResolver {
 
     public Member find(Long memberId) {
         return memberRepository.findById(memberId)
-                .map(this::toMember)
+                .map(Member::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
     public List<Member> findAllByIds(Collection<Long> memberIds) {
         return memberRepository.findByIdIn(memberIds)
                 .stream()
-                .map(this::toMember)
+                .map(Member::of)
                 .toList();
     }
 
     public Map<Long, Member> map(Collection<Long> memberIds) {
         return memberRepository.findByIdIn(memberIds)
                 .stream()
-                .map(this::toMember)
+                .map(Member::of)
                 .collect(Collectors.toMap(Member::id, Function.identity()));
-    }
-
-    private Member toMember(MemberEntity entity) {
-        return new Member(
-                entity.getId(),
-                entity.getUsername(),
-                entity.getName(),
-                entity.getPhone(),
-                entity.getPicture(),
-                entity.getRole(),
-                entity.getCreatedAt(),
-                entity.getModifiedAt()
-        );
     }
 }

@@ -1,5 +1,6 @@
 package to.bconnect.api.core.domain.chat;
 
+import to.bconnect.api.storage.chat.MessageEntity;
 import to.bconnect.api.storage.chat.MessageType;
 
 import java.time.LocalDateTime;
@@ -12,4 +13,16 @@ public record Message(
     String content,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
-) {}
+) {
+    public static Message of(MessageEntity entity) {
+        return new Message(
+                entity.getId(),
+                entity.getChatId(),
+                entity.getMemberId(),
+                entity.getType(),
+                entity.getContent(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt()
+        );
+    }
+}
