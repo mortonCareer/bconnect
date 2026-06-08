@@ -37,16 +37,16 @@ INSERT INTO profile_trades (profile_id, trade) VALUES
 (5, 'FILM_SHEET');
 
 INSERT INTO coworker_requests (id, from_id, to_id) VALUES
-(1, 3, 1),
-(2, 4, 1);
+(1, 4, 1),
+(2, 5, 1);
 
 INSERT INTO coworkers (id, min_id, max_id) VALUES
-(1, 1, 5);
+(1, 1, 6);
 
 INSERT INTO recommendations (id, from_id, to_id, content, visible, created_at, modified_at) VALUES
-(1, 5, 1, '추천서1', true, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(1, 6, 1, '추천서1', true, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
-INSERT INTO credentials (id, profile_id, type, status, expired_at, created_at, modified_at) VALUES
+INSERT INTO credentials (id, member_id, type, status, expired_at, created_at, modified_at) VALUES
 (1, 1, 'IDENTITY_VERIFICATION', 'PENDING', DATE '2026-12-31', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (2, 1, 'SKILL_GRADE_CERTIFICATE', 'PENDING', DATE '2026-12-31', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
