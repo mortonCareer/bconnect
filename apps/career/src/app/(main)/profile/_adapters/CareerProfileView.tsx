@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState, type ReactNode } from 'react'
+import { useCallback, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -18,7 +18,7 @@ import {
   useCreateDirectChat,
 } from '@bconnect/api-client'
 import { ProfileView, type ProfileViewData } from '@bconnect/features'
-import { Button, TopBar } from '@bconnect/ui'
+import { Button, TopBar, toast, isApiErrorShape } from '@bconnect/ui'
 
 /** career 풀페이지 쉘 — 모든 career feature view 가 동일 TopBar 래핑을 재사용한다. */
 const careerShell = (onBack?: () => void) =>
@@ -39,7 +39,6 @@ const careerShell = (onBack?: () => void) =>
 
 /** 현재 URL 공유 — Web Share API → 클립보드 폴백. career 정책이라 패키지 밖(앱)에 둔다. */
 function useShareCurrentUrl() {
-  const [copied, setCopied] = useState(false)
   const share = useCallback(async () => {
     const shareData = { title: document.title, url: window.location.href }
     if (navigator.canShare?.(shareData)) {
@@ -47,15 +46,14 @@ function useShareCurrentUrl() {
       return
     }
     await navigator.clipboard.writeText(window.location.href)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
+    toast({ description: '링크가 복사되었어요', variant: 'success' })
   }, [])
-  return { share, copied }
+  return { share }
 }
 
 /** 본인 프로필 (/profile) — My* 훅 + 수정/공유 어포던스 */
 export function OwnerProfileView() {
-  const { share, copied } = useShareCurrentUrl()
+  const { share } = useShareCurrentUrl()
 
   const member = useGetMyMember()
   const profile = useGetMyProfile()
@@ -103,7 +101,7 @@ export function OwnerProfileView() {
             <Link href="/profile/edit">프로필 수정</Link>
           </Button>
           <Button variant="outline" size="full" className="h-10 flex-1" onClick={share}>
-            {copied ? '복사됨' : '공유하기'}
+            공유하기
           </Button>
         </div>
       }
@@ -129,9 +127,29 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
   )
   const sent = useGetSentRecommendations({ profileId: pid }, { query: { enabled: pidEnabled } })
 
-  const coworker = useCreateCoworkerRequest()
+  const coworker = useCreateCoworkerRequest({
+    mutation: {
+      onSuccess: () => toast({ description: '동료 요청을 보냈어요', variant: 'success' }),
+      onError: (error) =>
+        toast({
+          description: isApiErrorShape(error)
+            ? error.message
+            : '동료 요청에 실패했어요. 다시 시도해주세요',
+          variant: 'error',
+        }),
+    },
+  })
   const chat = useCreateDirectChat({
-    mutation: { onSuccess: (created) => router.push(`/messages/${created.id}`) },
+    mutation: {
+      onSuccess: (created) => router.push(`/messages/${created.id}`),
+      onError: (error) =>
+        toast({
+          description: isApiErrorShape(error)
+            ? error.message
+            : '대화를 시작하지 못했어요. 다시 시도해주세요',
+          variant: 'error',
+        }),
+    },
   })
 
   const data: ProfileViewData = {
