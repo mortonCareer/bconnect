@@ -22,8 +22,8 @@ public class MemberService {
     private final OtpService otpService;
 
     @Transactional(readOnly = true)
-    public Member get(AuthUser authUser) {
-        return memberFinder.find(authUser.id());
+    public Member get(AuthUser user) {
+        return memberFinder.find(user.id());
     }
 
     @Transactional(readOnly = true)
@@ -59,8 +59,8 @@ public class MemberService {
     }
 
     @Transactional
-    public void update(AuthUser authUser, UpdateMemberRequest request) {
-        MemberEntity found = memberRepository.findById(authUser.id())
+    public void update(AuthUser user, UpdateMemberRequest request) {
+        MemberEntity found = memberRepository.findById(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         found.update(
@@ -71,8 +71,8 @@ public class MemberService {
     }
 
     @Transactional
-    public void withdraw(AuthUser authUser) {
-        memberRepository.findById(authUser.id())
+    public void withdraw(AuthUser user) {
+        memberRepository.findById(user.id())
                 .ifPresent(memberRepository::delete);
     }
 }

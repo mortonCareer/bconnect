@@ -42,7 +42,7 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        if (authToken.getPrincipal() instanceof AuthUser authUser) {
+        if (authToken.getPrincipal() instanceof AuthUser user) {
             if (log.isDebugEnabled()) {
                 log.debug("Generate access token and refresh token");
             }
@@ -52,7 +52,7 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
 
             String agent = request.getHeader("User-Agent");
             String ip = request.getRemoteAddr();
-            sessionService.login(authUser.getUsername(), agent, ip, refreshToken);
+            sessionService.login(user.getUsername(), agent, ip, refreshToken);
 
             var data = new VerifyOtpLoginResponse(accessToken, refreshToken);
 

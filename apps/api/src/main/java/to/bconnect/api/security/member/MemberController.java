@@ -19,15 +19,15 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping("/me")
-    public ApiResponse<MemberResponse> get(@AuthenticationPrincipal AuthUser authUser) {
-        Member member = memberService.get(authUser);
+    public ApiResponse<MemberResponse> get(@AuthenticationPrincipal AuthUser user) {
+        Member member = memberService.get(user);
         return ApiResponse.success(MemberResponse.of(member));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ApiResponse<List<MemberResponse>> listMembers() {
-        List<MemberResponse> members = memberService.listMembers().stream()
+        List<MemberResponse> members = memberService.list().stream()
                 .map(MemberResponse::of)
                 .toList();
         return ApiResponse.success(members);
@@ -47,15 +47,15 @@ public class MemberController {
 
     @PutMapping("/me")
     public ApiResponse<Void> update(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid UpdateMemberRequest request) {
-        memberService.update(authUser, request);
+        memberService.update(user, request);
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/me")
-    public ApiResponse<Void> withdraw(@AuthenticationPrincipal AuthUser authUser) {
-        memberService.withdraw(authUser);
+    public ApiResponse<Void> withdraw(@AuthenticationPrincipal AuthUser user) {
+        memberService.withdraw(user);
         return ApiResponse.success(null);
     }
 }

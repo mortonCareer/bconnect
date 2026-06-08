@@ -25,12 +25,6 @@ public class MemberFinder {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
-    public Member findByUsername(String username) {
-        return memberRepository.findByUsername(username)
-                .map(Member::of)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-    }
-
     public List<Member> findAll() {
         return memberRepository.findAll()
                 .stream()
