@@ -16,7 +16,7 @@ import to.bconnect.api.core.presentation.v1.request.CreateProfileRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProfileRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProfileAboutRequest;
 import to.bconnect.api.core.presentation.v1.response.ProfileDetailResponse;
-import to.bconnect.api.core.domain.profile.Profile;
+import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.core.domain.profile.ProfileService;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
@@ -29,10 +29,11 @@ import java.util.List;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final ProfileQueryService profileQueryService;
 
     @GetMapping
     public ApiResponse<List<ProfileDetailResponse>> list() {
-        List<ProfileDetailResponse> profiles = profileService.list().stream()
+        List<ProfileDetailResponse> profiles = profileQueryService.list().stream()
                 .map(ProfileDetailResponse::of)
                 .toList();
         return ApiResponse.success(profiles);
@@ -40,15 +41,15 @@ public class ProfileController {
 
     @GetMapping("/{id}")
     public ApiResponse<ProfileDetailResponse> get(@PathVariable Long id) {
-        return ApiResponse.success(ProfileDetailResponse.of(profileService.get(id)));
+        return ApiResponse.success(ProfileDetailResponse.of(profileQueryService.get(id)));
     }
 
     @PostMapping
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateProfileRequest request) {
-        Profile profile = profileService.create(user, request.toCommand());
-        return ApiResponse.success(profile.id());
+        Long id = profileService.create(user, request.toCommand());
+        return ApiResponse.success(id);
     }
 
     @PutMapping("/me")

@@ -5,9 +5,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.storage.post.PostRepository;
-import to.bconnect.api.security.member.Member;
 import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.security.member.Member;
+import to.bconnect.api.storage.post.PostEntity;
+import to.bconnect.api.storage.post.PostRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -21,29 +22,32 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public List<Feed> list() {
-        List<Post> posts =  postRepository.findAll()
-                .stream()
-                .map(Post::of)
-                .toList();
-
-        List<Long> memberIds = posts.stream().map(Post::memberId).toList();
-        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
+        List<PostEntity> posts =  postRepository.findAll();
+        List<Long> memberIds = posts.stream().map(PostEntity::getMemberId).toList();
+        Map<Long, Member> memberMap = memberResolver.map(memberIds);
 
         return posts.stream()
-                .map(post -> new Feed(
-                        memberMap.get(post.memberId()),
-                        post
-                ))
+                .map(post -> toFeed(post, memberMap.get(post.getMemberId())))
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public Feed get(Long postId) {
-        Post post = postRepository.findById(postId)
-                .map(Post::of)
+        PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        Member member = memberResolver.find(post.memberId());
-        return new Feed(member, post);
+        Member member = memberResolver.find(post.getMemberId());
+        return toFeed(post, member);
     }
 
+    private Feed toFeed(PostEntity entity, Member member) {
+        return new Feed(
+                entity.getId(),
+                member,
+                entity.getTaskId(),
+                entity.getImages(),
+                entity.getContent(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt()
+        );
+    }
 }

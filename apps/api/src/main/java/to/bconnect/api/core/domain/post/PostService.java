@@ -3,11 +3,13 @@ package to.bconnect.api.core.domain.post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.post.PostEntity;
 import to.bconnect.api.storage.post.PostRepository;
-import to.bconnect.api.common.CodeException;
-import to.bconnect.api.common.CommonExceptionCode;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -15,9 +17,16 @@ public class PostService {
 
     private final PostRepository postRepository;
 
+    @Transactional(readOnly = true)
+    public List<Post> list() {
+        return postRepository.findAll()
+                .stream()
+                .map(this::toPost)
+                .toList();
+    }
+
     @Transactional
     public Post create(AuthUser user, CreatePost command) {
-
         PostEntity post = PostEntity.builder()
                 .memberId(user.id())
                 .taskId(command.taskId())
@@ -26,7 +35,7 @@ public class PostService {
                 .build();
 
         postRepository.save(post);
-        return Post.of(post);
+        return toPost(post);
     }
 
     @Transactional
@@ -49,5 +58,17 @@ public class PostService {
 
             postRepository.delete(found);
         });
+    }
+
+    private Post toPost(PostEntity entity) {
+        return new Post(
+                entity.getId(),
+                entity.getMemberId(),
+                entity.getTaskId(),
+                entity.getImages(),
+                entity.getContent(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt()
+        );
     }
 }
