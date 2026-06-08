@@ -52,8 +52,8 @@ public class ChatController {
         CursorPage<Message> page = chatService.listMessages(user, chatId, cursorLimit);
         CursorPage<MessageResponse> response = new CursorPage<>(
                 MessageResponse.of(page.content()),
-                page.nextCursor(),
-                page.hasNext()
+                page.hasNext(),
+                page.nextCursor()
         );
         return ApiResponse.success(response);
     }

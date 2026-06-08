@@ -1,6 +1,9 @@
 package to.bconnect.api.storage.chat;
 
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.ScrollPosition;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Window;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -9,9 +12,7 @@ import java.util.List;
 
 public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
-    List<MessageEntity> findByChatId(Long chatId, Pageable pageable);
-
-    List<MessageEntity> findByChatIdAndIdLessThan(Long chatId, Long cursor, Pageable pageable);
+    Window<MessageEntity> findAllByChatId(Long chatId, ScrollPosition position, Limit limit, Sort sort);
 
     @Query("SELECT m FROM MessageEntity m WHERE m.id IN " +
            "(SELECT MAX(m2.id) FROM MessageEntity m2 WHERE m2.chatId IN :chatIds GROUP BY m2.chatId)")

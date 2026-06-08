@@ -1,6 +1,7 @@
 package to.bconnect.api.core.domain.chat;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Window;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
@@ -114,18 +115,7 @@ public class ChatService {
         if (!participantRepository.existsByChatIdAndMemberId(chatId, user.id()))
             throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
 
-        CursorLimit fetchCursor = new CursorLimit(
-                cursor.cursor(),
-                cursor.limit() + 1,
-                cursor.reverse()
-        );
-
-        List<Message> messages = messageService.findAllByChatId(chatId, fetchCursor);
-
-        boolean hasNext = messages.size() > cursor.limit();
-        List<Message> content = hasNext ? messages.subList(0, cursor.limit()) : messages;
-        Long nextCursor = hasNext ? content.getLast().id() : null;
-
-        return new CursorPage<>(content, nextCursor, hasNext);
+        Window<Message> window = messageService.findAllByChatId(chatId, cursor);
+        return CursorPage.from(window, Message::id);
     }
 }

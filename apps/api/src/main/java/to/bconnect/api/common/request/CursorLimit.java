@@ -1,8 +1,10 @@
 package to.bconnect.api.common.request;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.ScrollPosition;
 import org.springframework.data.domain.Sort;
+
+import java.util.Map;
 
 public record CursorLimit(
         Long cursor,
@@ -16,10 +18,19 @@ public record CursorLimit(
         if (reverse == null) reverse = false;
     }
 
-    public Pageable toPageable() {
-        Sort sort = reverse
+    public ScrollPosition toScrollPosition() {
+        return cursor == null
+                ? ScrollPosition.keyset()
+                : ScrollPosition.of(Map.of("id", cursor), ScrollPosition.Direction.FORWARD);
+    }
+
+    public Limit toLimit() {
+        return Limit.of(limit);
+    }
+
+    public Sort toSort() {
+        return reverse
                 ? Sort.by(Sort.Direction.ASC, "id")
                 : Sort.by(Sort.Direction.DESC, "id");
-        return PageRequest.of(0, limit, sort);
     }
 }
