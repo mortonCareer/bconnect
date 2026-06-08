@@ -94,7 +94,7 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
       chatId={chatId}
       data={data}
       profileHref={(id) => `/profile/${id}`}
-      renderShell={careerShell(() => router.back())}
+      renderShell={careerShell(() => router.back(), { fill: true })}
     />
   )
 }
