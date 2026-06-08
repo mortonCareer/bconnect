@@ -14,7 +14,7 @@ import to.bconnect.api.core.presentation.v1.request.CreateCoworkerRequest;
 import to.bconnect.api.core.presentation.v1.response.CoworkerRequestResponse;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestService;
 import to.bconnect.api.core.domain.coworker.CoworkerRequest;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
@@ -28,16 +28,16 @@ public class CoworkerRequestController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestBody @Valid CreateCoworkerRequest request) {
-        CoworkerRequest coworkerRequest = coworkerRequestService.create(user, request.toId());
+        CoworkerRequest coworkerRequest = coworkerRequestService.create(authUser, request.toId());
         return ApiResponse.success(coworkerRequest.id());
     }
 
     @GetMapping("/received")
     public ApiResponse<List<CoworkerRequestResponse>> listReceived(
-            @AuthenticationPrincipal User user) {
-        List<CoworkerRequestResponse> requests = coworkerRequestService.listReceived(user).stream()
+            @AuthenticationPrincipal AuthUser authUser) {
+        List<CoworkerRequestResponse> requests = coworkerRequestService.listReceived(authUser).stream()
                 .map(CoworkerRequestResponse::of)
                 .toList();
         return ApiResponse.success(requests);
@@ -45,8 +45,8 @@ public class CoworkerRequestController {
 
     @GetMapping("/sent")
     public ApiResponse<List<CoworkerRequestResponse>> listSent(
-            @AuthenticationPrincipal User user) {
-        List<CoworkerRequestResponse> requests = coworkerRequestService.listSent(user).stream()
+            @AuthenticationPrincipal AuthUser authUser) {
+        List<CoworkerRequestResponse> requests = coworkerRequestService.listSent(authUser).stream()
                 .map(CoworkerRequestResponse::of)
                 .toList();
         return ApiResponse.success(requests);
@@ -54,25 +54,25 @@ public class CoworkerRequestController {
 
     @PostMapping("/{id}/accept")
     public ApiResponse<Void> accept(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id) {
-        coworkerRequestService.accept(user, id);
+        coworkerRequestService.accept(authUser, id);
         return ApiResponse.success(null);
     }
 
     @PostMapping("/{id}/deny")
     public ApiResponse<Void> deny(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id) {
-        coworkerRequestService.deny(user, id);
+        coworkerRequestService.deny(authUser, id);
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> cancel(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id) {
-        coworkerRequestService.cancel(user, id);
+        coworkerRequestService.cancel(authUser, id);
         return ApiResponse.success(null);
     }
 }

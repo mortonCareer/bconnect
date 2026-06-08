@@ -17,7 +17,7 @@ import to.bconnect.api.core.presentation.v1.request.UpdateRecommendationRequest;
 import to.bconnect.api.core.presentation.v1.response.RecommendationResponse;
 import to.bconnect.api.core.domain.recommendation.Recommendation;
 import to.bconnect.api.core.domain.recommendation.RecommendationService;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
@@ -31,9 +31,9 @@ public class RecommendationController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestBody @Valid CreateRecommendationRequest request) {
-        Recommendation recommendation = recommendationService.create(user, request);
+        Recommendation recommendation = recommendationService.create(authUser, request);
         return ApiResponse.success(recommendation.id());
     }
 
@@ -55,8 +55,8 @@ public class RecommendationController {
 
     @GetMapping("/me/received")
     public ApiResponse<List<RecommendationResponse>> listMyReceived(
-            @AuthenticationPrincipal User user) {
-        List<RecommendationResponse> responses = recommendationService.listMyReceived(user).stream()
+            @AuthenticationPrincipal AuthUser authUser) {
+        List<RecommendationResponse> responses = recommendationService.listMyReceived(authUser).stream()
                 .map(RecommendationResponse::of)
                 .toList();
         return ApiResponse.success(responses);
@@ -64,8 +64,8 @@ public class RecommendationController {
 
     @GetMapping("/me/sent")
     public ApiResponse<List<RecommendationResponse>> listMySent(
-            @AuthenticationPrincipal User user) {
-        List<RecommendationResponse> responses = recommendationService.listMySent(user).stream()
+            @AuthenticationPrincipal AuthUser authUser) {
+        List<RecommendationResponse> responses = recommendationService.listMySent(authUser).stream()
                 .map(RecommendationResponse::of)
                 .toList();
         return ApiResponse.success(responses);
@@ -73,34 +73,34 @@ public class RecommendationController {
 
     @PutMapping("/{id}")
     public ApiResponse<Void> update(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id,
             @RequestBody @Valid UpdateRecommendationRequest request) {
-        recommendationService.update(user, id, request.content());
+        recommendationService.update(authUser, id, request.content());
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id) {
-        recommendationService.delete(user, id);
+        recommendationService.delete(authUser, id);
         return ApiResponse.success(null);
     }
 
     @PostMapping("/{id}/hide")
     public ApiResponse<Void> hide(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id) {
-        recommendationService.hide(user, id);
+        recommendationService.hide(authUser, id);
         return ApiResponse.success(null);
     }
 
     @PostMapping("/{id}/show")
     public ApiResponse<Void> show(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id) {
-        recommendationService.show(user, id);
+        recommendationService.show(authUser, id);
         return ApiResponse.success(null);
     }
 }

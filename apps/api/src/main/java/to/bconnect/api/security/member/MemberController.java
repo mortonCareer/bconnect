@@ -6,7 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.core.presentation.v1.response.CheckUsernameResponse;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
@@ -19,8 +19,8 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping("/me")
-    public ApiResponse<MemberResponse> get(@AuthenticationPrincipal User user) {
-        Member member = memberService.get(user);
+    public ApiResponse<MemberResponse> get(@AuthenticationPrincipal AuthUser authUser) {
+        Member member = memberService.get(authUser);
         return ApiResponse.success(MemberResponse.of(member));
     }
 
@@ -47,15 +47,15 @@ public class MemberController {
 
     @PutMapping("/me")
     public ApiResponse<Void> update(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestBody @Valid UpdateMemberRequest request) {
-        memberService.update(user, request);
+        memberService.update(authUser, request);
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/me")
-    public ApiResponse<Void> withdraw(@AuthenticationPrincipal User user) {
-        memberService.withdraw(user);
+    public ApiResponse<Void> withdraw(@AuthenticationPrincipal AuthUser authUser) {
+        memberService.withdraw(authUser);
         return ApiResponse.success(null);
     }
 }

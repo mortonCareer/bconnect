@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-public record User(
+public record AuthUser(
     Long id,
     String username,
     String role

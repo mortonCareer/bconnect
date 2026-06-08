@@ -11,7 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.security.AuthenticationTypeMismatchException;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.security.jwt.JwtProvider;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.security.session.SessionService;
@@ -42,7 +42,7 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        if (authToken.getPrincipal() instanceof User user) {
+        if (authToken.getPrincipal() instanceof AuthUser authUser) {
             if (log.isDebugEnabled()) {
                 log.debug("Generate access token and refresh token");
             }
@@ -52,7 +52,7 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
 
             String agent = request.getHeader("User-Agent");
             String ip = request.getRemoteAddr();
-            sessionService.login(user.getUsername(), agent, ip, refreshToken);
+            sessionService.login(authUser.getUsername(), agent, ip, refreshToken);
 
             var data = new VerifyOtpLoginResponse(accessToken, refreshToken);
 

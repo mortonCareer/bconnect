@@ -13,7 +13,7 @@ import to.bconnect.api.core.storage.recommendation.RecommendationEntity;
 import to.bconnect.api.core.storage.recommendation.RecommendationRepository;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 
 import java.util.List;
 import java.util.Map;
@@ -39,20 +39,20 @@ public class RecommendationService {
     }
 
     @Transactional(readOnly = true)
-    public List<RecommendationDetail> listMyReceived(User user) {
-        Profile me = profileFinder.findByMemberId(user.id());
+    public List<RecommendationDetail> listMyReceived(AuthUser authUser) {
+        Profile me = profileFinder.findByMemberId(authUser.id());
         return toDetails(recommendationFinder.findAllMyReceived(me.id()), Side.FROM);
     }
 
     @Transactional(readOnly = true)
-    public List<RecommendationDetail> listMySent(User user) {
-        Profile me = profileFinder.findByMemberId(user.id());
+    public List<RecommendationDetail> listMySent(AuthUser authUser) {
+        Profile me = profileFinder.findByMemberId(authUser.id());
         return toDetails(recommendationFinder.findAllMySent(me.id()), Side.TO);
     }
 
     @Transactional
-    public Recommendation create(User user, CreateRecommendationRequest request) {
-        Profile fromProfile = profileFinder.findByMemberId(user.id());
+    public Recommendation create(AuthUser authUser, CreateRecommendationRequest request) {
+        Profile fromProfile = profileFinder.findByMemberId(authUser.id());
         Long fromId = fromProfile.id();
         Long toId = request.toId();
 
@@ -72,8 +72,8 @@ public class RecommendationService {
     }
 
     @Transactional
-    public void update(User user, Long id, String content) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public void update(AuthUser authUser, Long id, String content) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
         RecommendationEntity found = recommendationRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
@@ -84,8 +84,8 @@ public class RecommendationService {
     }
 
     @Transactional
-    public void delete(User user, Long id) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public void delete(AuthUser authUser, Long id) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
         recommendationRepository.findById(id).ifPresent(found -> {
             if (!found.getFromId().equals(profile.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
@@ -95,8 +95,8 @@ public class RecommendationService {
     }
 
     @Transactional
-    public void hide(User user, Long id) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public void hide(AuthUser authUser, Long id) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
         RecommendationEntity found = recommendationRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
@@ -107,8 +107,8 @@ public class RecommendationService {
     }
 
     @Transactional
-    public void show(User user, Long id) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public void show(AuthUser authUser, Long id) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
         RecommendationEntity found = recommendationRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 

@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.core.presentation.v1.request.CreatePostRequest;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileFinder;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.core.storage.post.PostEntity;
 import to.bconnect.api.core.storage.post.PostRepository;
 import to.bconnect.api.common.CodeException;
@@ -20,8 +20,8 @@ public class PostService {
     private final ProfileFinder profileFinder;
 
     @Transactional
-    public Post create(User user, CreatePostRequest request) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public Post create(AuthUser authUser, CreatePostRequest request) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
 
         PostEntity post = PostEntity.builder()
                 .profileId(profile.id())
@@ -35,8 +35,8 @@ public class PostService {
     }
 
     @Transactional
-    public void update(User user, Long postId, String content) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public void update(AuthUser authUser, Long postId, String content) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
 
         PostEntity found = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
@@ -48,8 +48,8 @@ public class PostService {
     }
 
     @Transactional
-    public void delete(User user, Long postId) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public void delete(AuthUser authUser, Long postId) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
 
         postRepository.findById(postId).ifPresent(found -> {
             if (!found.getProfileId().equals(profile.id()))

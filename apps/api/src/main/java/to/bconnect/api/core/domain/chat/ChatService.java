@@ -9,14 +9,13 @@ import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.core.presentation.v1.request.CreateChatRequest;
 import to.bconnect.api.core.storage.chat.*;
 import to.bconnect.api.core.storage.chat.MessageType;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.security.member.Member;
 import to.bconnect.api.security.member.MemberFinder;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,10 +79,10 @@ public class ChatService {
     }
 
     @Transactional
-    public Long create(User user, CreateChatRequest request) {
+    public Long create(AuthUser authUser, CreateChatRequest request) {
         List<Long> participantIds = request.participantIds().stream().distinct().toList();
 
-        if (!participantIds.contains(user.id()))
+        if (!participantIds.contains(authUser.id()))
             throw new CodeException(ChatExceptionCode.SELF_NOT_INCLUDED);
 
         List<Member> participants = memberFinder.findAllByIds(participantIds);
@@ -113,8 +112,8 @@ public class ChatService {
     }
 
     @Transactional(readOnly = true)
-    public CursorPage<Message> listMessages(User user, Long chatId, CursorLimit cursor) {
-        if (!participantRepository.existsByChatIdAndMemberId(chatId, user.id()))
+    public CursorPage<Message> listMessages(AuthUser authUser, Long chatId, CursorLimit cursor) {
+        if (!participantRepository.existsByChatIdAndMemberId(chatId, authUser.id()))
             throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
 
         CursorLimit fetchCursor = new CursorLimit(

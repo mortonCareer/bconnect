@@ -1,5 +1,6 @@
 package to.bconnect.api.security.member;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import to.bconnect.api.core.storage.member.MemberEntity;
 import to.bconnect.api.core.storage.member.Role;
 

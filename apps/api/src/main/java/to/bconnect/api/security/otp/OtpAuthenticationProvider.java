@@ -11,18 +11,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.Assert;
 import to.bconnect.api.common.CodeException;
-import to.bconnect.api.security.UserService;
+import to.bconnect.api.security.AuthUserService;
 
 import java.util.List;
 
 import static to.bconnect.api.core.storage.member.Role.GUEST;
-import static to.bconnect.api.security.User.ROLE_PREFIX;
+import static to.bconnect.api.security.AuthUser.ROLE_PREFIX;
 
 @RequiredArgsConstructor
 public class OtpAuthenticationProvider implements AuthenticationProvider {
 
     private final OtpService otpService;
-    private final UserService userService;
+    private final AuthUserService authUserService;
 
     @Override
     public Authentication authenticate(@NonNull Authentication authentication) throws AuthenticationException {
@@ -44,7 +44,7 @@ public class OtpAuthenticationProvider implements AuthenticationProvider {
         }
 
         try {
-            UserDetails user = userService.loadUserByPhone(phone);
+            UserDetails user = authUserService.loadUserByPhone(phone);
             return new OtpAuthenticationToken(user, null, user.getAuthorities());
         } catch (UsernameNotFoundException ex) {
             return new OtpAuthenticationToken(phone, null, List.of(new SimpleGrantedAuthority(ROLE_PREFIX + GUEST)));

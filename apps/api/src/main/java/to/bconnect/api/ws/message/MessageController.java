@@ -8,7 +8,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 
 @Controller
 @RequiredArgsConstructor
@@ -20,8 +20,8 @@ public class MessageController {
     @SendTo("/topic/chats/{chatId}")
     public void send(
             @DestinationVariable Long chatId,
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @Payload @Valid SendMessageRequest request) {
-        messageSocketService.broadcast(user, chatId, request);
+        messageSocketService.broadcast(authUser, chatId, request);
     }
 }

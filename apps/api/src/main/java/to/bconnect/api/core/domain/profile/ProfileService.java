@@ -12,7 +12,7 @@ import to.bconnect.api.core.storage.post.PostRepository;
 import to.bconnect.api.core.storage.profile.ProfileEntity;
 import to.bconnect.api.core.storage.profile.ProfileRepository;
 import to.bconnect.api.core.storage.recommendation.RecommendationRepository;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.security.member.Member;
 import to.bconnect.api.security.member.MemberFinder;
 
@@ -61,15 +61,15 @@ public class ProfileService {
     }
 
     @Transactional
-    public Profile create(User user, CreateProfileRequest request) {
-        if (profileRepository.existsByMemberId(user.id()))
+    public Profile create(AuthUser authUser, CreateProfileRequest request) {
+        if (profileRepository.existsByMemberId(authUser.id()))
             throw new CodeException(ProfileExceptionCode.ALREADY_EXISTS);
 
         if (!request.trades().contains(request.primaryTrade()))
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
         ProfileEntity profile = ProfileEntity.builder()
-                .memberId(user.id())
+                .memberId(authUser.id())
                 .primaryTrade(request.primaryTrade())
                 .trades(request.trades())
                 .experience(request.experience())
@@ -83,11 +83,11 @@ public class ProfileService {
     }
 
     @Transactional
-    public void update(User user, UpdateProfileRequest request) {
-        ProfileEntity found = profileRepository.findByMemberId(user.id())
+    public void update(AuthUser authUser, UpdateProfileRequest request) {
+        ProfileEntity found = profileRepository.findByMemberId(authUser.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!found.getMemberId().equals(user.id()))
+        if (!found.getMemberId().equals(authUser.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         if (!request.trades().contains(request.primaryTrade()))
@@ -103,20 +103,20 @@ public class ProfileService {
     }
 
     @Transactional
-    public void updateAbout(User user, String about) {
-        ProfileEntity found = profileRepository.findByMemberId(user.id())
+    public void updateAbout(AuthUser authUser, String about) {
+        ProfileEntity found = profileRepository.findByMemberId(authUser.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!found.getMemberId().equals(user.id()))
+        if (!found.getMemberId().equals(authUser.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         found.updateAbout(about);
     }
 
     @Transactional
-    public void delete(User user) {
-        profileRepository.findByMemberId(user.id()).ifPresent(found -> {
-            if (!found.getMemberId().equals(user.id()))
+    public void delete(AuthUser authUser) {
+        profileRepository.findByMemberId(authUser.id()).ifPresent(found -> {
+            if (!found.getMemberId().equals(authUser.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
             profileRepository.delete(found);

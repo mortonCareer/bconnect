@@ -14,7 +14,7 @@ import to.bconnect.api.security.member.Member;
 import to.bconnect.api.security.member.MemberFinder;
 import to.bconnect.api.core.domain.profile.ProfileFinder;
 import to.bconnect.api.core.storage.coworker.CoworkerStatus;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
@@ -30,9 +30,9 @@ public class CoworkerController {
 
     @GetMapping
     public ApiResponse<List<CoworkerResponse>> list(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestParam Long profileId) {
-        List<CoworkerResponse> coworkers = coworkerService.list(user, profileId).stream()
+        List<CoworkerResponse> coworkers = coworkerService.list(authUser, profileId).stream()
                 .map(coworker -> {
                     Long counterpartProfileId = coworker.minId().equals(profileId)
                             ? coworker.maxId()
@@ -47,9 +47,9 @@ public class CoworkerController {
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id) {
-        coworkerService.delete(user, id);
+        coworkerService.delete(authUser, id);
         return ApiResponse.success(null);
     }
 }

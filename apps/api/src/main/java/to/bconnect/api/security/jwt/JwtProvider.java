@@ -12,7 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import to.bconnect.api.security.UserService;
+import to.bconnect.api.security.AuthUserService;
 
 import java.time.Duration;
 import javax.crypto.SecretKey;
@@ -39,14 +39,14 @@ public class JwtProvider {
     private final SecretKey secret;
     private final Duration accessTokenExpiration;
     private final Duration refreshTokenExpiration;
-    private final UserService userService;
+    private final AuthUserService authUserService;
 
-    public JwtProvider(ApiConfigProps apiConfigProps, UserService userService) {
+    public JwtProvider(ApiConfigProps apiConfigProps, AuthUserService authUserService) {
         ApiConfigProps.Jwt properties = apiConfigProps.jwt();
         this.secret = Keys.hmacShaKeyFor(properties.secret().getBytes());
         this.accessTokenExpiration = properties.accessTokenExpiration();
         this.refreshTokenExpiration = properties.refreshTokenExpiration();
-        this.userService = userService;
+        this.authUserService = authUserService;
     }
 
     public String generateAccessToken(Authentication authentication) {
@@ -108,7 +108,7 @@ public class JwtProvider {
 
         if (isRefreshToken(token)) {
             String username = getUsername(token);
-            UserDetails user = userService.loadUserByUsername(username);
+            UserDetails user = authUserService.loadUserByUsername(username);
             return generateAccessToken(user);
         }
 

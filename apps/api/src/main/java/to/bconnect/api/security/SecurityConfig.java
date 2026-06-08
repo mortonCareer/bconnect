@@ -40,13 +40,13 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(
-            UserService userService,
+            AuthUserService authUserService,
             JwtProvider jwtProvider,
             OtpService otpService,
             SessionService sessionService) {
 
-        JwtAuthenticationProvider jwtAuthenticationProvider = new JwtAuthenticationProvider(userService, sessionService, jwtProvider);
-        OtpAuthenticationProvider otpAuthenticationProvider = new OtpAuthenticationProvider(otpService, userService);
+        JwtAuthenticationProvider jwtAuthenticationProvider = new JwtAuthenticationProvider(authUserService, sessionService, jwtProvider);
+        OtpAuthenticationProvider otpAuthenticationProvider = new OtpAuthenticationProvider(otpService, authUserService);
         return new ProviderManager(jwtAuthenticationProvider, otpAuthenticationProvider);
     }
 

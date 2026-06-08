@@ -14,7 +14,7 @@ import to.bconnect.api.core.presentation.v1.response.ChatResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.core.domain.chat.ChatService;
 import to.bconnect.api.core.domain.chat.Message;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.common.response.CursorPage;
@@ -29,8 +29,8 @@ public class ChatController {
     private final ChatService chatService;
 
     @GetMapping
-    public ApiResponse<List<ChatResponse>> list(@AuthenticationPrincipal User user) {
-        List<ChatResponse> response = chatService.list(user.id()).stream()
+    public ApiResponse<List<ChatResponse>> list(@AuthenticationPrincipal AuthUser authUser) {
+        List<ChatResponse> response = chatService.list(authUser.id()).stream()
                 .map(ChatResponse::of)
                 .toList();
         return ApiResponse.success(response);
@@ -38,18 +38,18 @@ public class ChatController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestBody @Valid CreateChatRequest request) {
-        Long id = chatService.create(user, request);
+        Long id = chatService.create(authUser, request);
         return ApiResponse.success(id);
     }
 
     @GetMapping("/{chatId}/messages")
     public ApiResponse<CursorPage<MessageResponse>> listMessages(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long chatId,
             CursorLimit cursorLimit) {
-        CursorPage<Message> page = chatService.listMessages(user, chatId, cursorLimit);
+        CursorPage<Message> page = chatService.listMessages(authUser, chatId, cursorLimit);
         CursorPage<MessageResponse> response = new CursorPage<>(
                 MessageResponse.of(page.content()),
                 page.nextCursor(),

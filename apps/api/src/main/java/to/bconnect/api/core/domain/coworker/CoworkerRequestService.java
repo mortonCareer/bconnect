@@ -14,11 +14,10 @@ import to.bconnect.api.core.storage.member.MemberRepository;
 import to.bconnect.api.core.storage.profile.ProfileRepository;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,8 +32,8 @@ public class CoworkerRequestService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public CoworkerRequest create(User user, Long targetId) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public CoworkerRequest create(AuthUser authUser, Long targetId) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
         Long profileId = profile.id();
 
         if (profileId.equals(targetId))
@@ -48,7 +47,7 @@ public class CoworkerRequestService {
 
         // accept
         requestRepository.findByFromIdAndToId(targetId, profileId)
-                .ifPresent(request -> accept(user, request.getId()));
+                .ifPresent(request -> accept(authUser, request.getId()));
 
         CoworkerRequestEntity persisted = requestRepository.save(CoworkerRequestEntity.builder()
                 .fromId(profileId)
@@ -58,8 +57,8 @@ public class CoworkerRequestService {
     }
 
     @Transactional(readOnly = true)
-    public List<CoworkerProfile> listReceived(User user) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public List<CoworkerProfile> listReceived(AuthUser authUser) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
         List<CoworkerRequest> requests = requestRepository.findByToId(profile.id())
                 .stream().map(CoworkerRequest::of).toList();
 
@@ -89,8 +88,8 @@ public class CoworkerRequestService {
     }
 
     @Transactional(readOnly = true)
-    public List<CoworkerProfile> listSent(User user) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public List<CoworkerProfile> listSent(AuthUser authUser) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
         List<CoworkerRequest> requests = requestRepository.findByFromId(profile.id())
                 .stream().map(CoworkerRequest::of).toList();
 
@@ -120,8 +119,8 @@ public class CoworkerRequestService {
     }
 
     @Transactional
-    public void accept(User user, Long id) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public void accept(AuthUser authUser, Long id) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
         CoworkerRequestEntity found = requestRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
 
@@ -140,8 +139,8 @@ public class CoworkerRequestService {
     }
 
     @Transactional
-    public void deny(User user, Long id) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public void deny(AuthUser authUser, Long id) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
         CoworkerRequestEntity found = requestRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
 
@@ -152,8 +151,8 @@ public class CoworkerRequestService {
     }
 
     @Transactional
-    public void cancel(User user, Long id) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public void cancel(AuthUser authUser, Long id) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
         requestRepository.findById(id).ifPresent(found -> {
             if (!found.getFromId().equals(profile.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);

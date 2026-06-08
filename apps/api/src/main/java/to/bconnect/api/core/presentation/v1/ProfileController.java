@@ -18,7 +18,7 @@ import to.bconnect.api.core.presentation.v1.request.UpdateProfileAboutRequest;
 import to.bconnect.api.core.presentation.v1.response.ProfileDetailResponse;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileService;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
@@ -45,32 +45,32 @@ public class ProfileController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestBody @Valid CreateProfileRequest request) {
-        Profile profile = profileService.create(user, request);
+        Profile profile = profileService.create(authUser, request);
         return ApiResponse.success(profile.id());
     }
 
     @PutMapping("/me")
     public ApiResponse<Void> update(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestBody @Valid UpdateProfileRequest request) {
-        profileService.update(user, request);
+        profileService.update(authUser, request);
         return ApiResponse.success(null);
     }
 
     @PatchMapping("/me/about")
     public ApiResponse<Void> updateAbout(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestBody UpdateProfileAboutRequest request) {
-        profileService.updateAbout(user, request.about());
+        profileService.updateAbout(authUser, request.about());
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/me")
     public ApiResponse<Void> delete(
-            @AuthenticationPrincipal User user) {
-        profileService.delete(user);
+            @AuthenticationPrincipal AuthUser authUser) {
+        profileService.delete(authUser);
         return ApiResponse.success(null);
     }
 }

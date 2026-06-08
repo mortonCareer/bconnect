@@ -8,7 +8,7 @@ import to.bconnect.api.core.presentation.v1.request.CreatePostRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdatePostRequest;
 import to.bconnect.api.core.domain.post.Post;
 import to.bconnect.api.core.domain.post.PostService;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 @RestController
@@ -20,26 +20,26 @@ public class PostController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestBody @Valid CreatePostRequest request) {
-        Post post = postService.create(user, request);
+        Post post = postService.create(authUser, request);
         return ApiResponse.success(post.id());
     }
 
     @PutMapping("/{id}")
     public ApiResponse<Void> update(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id,
             @RequestBody @Valid UpdatePostRequest request) {
-        postService.update(user, id, request.content());
+        postService.update(authUser, id, request.content());
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id) {
-        postService.delete(user, id);
+        postService.delete(authUser, id);
         return ApiResponse.success(null);
     }
 }

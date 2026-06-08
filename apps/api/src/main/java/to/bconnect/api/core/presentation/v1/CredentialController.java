@@ -9,7 +9,7 @@ import to.bconnect.api.core.presentation.v1.request.CreateCredentialRequest;
 import to.bconnect.api.core.presentation.v1.response.CredentialResponse;
 import to.bconnect.api.core.domain.credential.Credential;
 import to.bconnect.api.core.domain.credential.CredentialService;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.core.storage.credential.CredentialType;
 import to.bconnect.api.common.response.ApiResponse;
 
@@ -37,24 +37,24 @@ public class CredentialController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestBody @Valid CreateCredentialRequest request) {
-        Credential saved = credentialService.create(user, request);
+        Credential saved = credentialService.create(authUser, request);
         return ApiResponse.success(saved.id());
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id) {
-        credentialService.delete(user, id);
+        credentialService.delete(authUser, id);
         return ApiResponse.success(null);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/accept")
     public ApiResponse<Void> accept(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id) {
         credentialService.accept(id);
         return ApiResponse.success(null);
@@ -63,7 +63,7 @@ public class CredentialController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/deny")
     public ApiResponse<Void> deny(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id) {
         credentialService.deny(id);
         return ApiResponse.success(null);

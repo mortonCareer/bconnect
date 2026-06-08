@@ -12,7 +12,7 @@ import to.bconnect.api.core.storage.credential.CredentialRepository;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.storage.credential.CredentialStatus;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 
 import java.util.Comparator;
 import java.util.List;
@@ -43,8 +43,8 @@ public class CredentialService {
     }
 
     @Transactional
-    public Credential create(User user, CreateCredentialRequest request) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public Credential create(AuthUser authUser, CreateCredentialRequest request) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
 
         CredentialEntity entity = CredentialEntity.builder()
                 .profileId(profile.id())
@@ -57,8 +57,8 @@ public class CredentialService {
     }
 
     @Transactional
-    public void delete(User user, Long id) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public void delete(AuthUser authUser, Long id) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
 
         credentialRepository.findById(id).ifPresent(found -> {
             if (!found.getProfileId().equals(profile.id()))

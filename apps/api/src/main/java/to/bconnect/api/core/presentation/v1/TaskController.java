@@ -18,7 +18,7 @@ import to.bconnect.api.core.presentation.v1.response.CoworkerTaskResponse;
 import to.bconnect.api.core.presentation.v1.response.TaskResponse;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.core.domain.task.TaskService;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
@@ -31,8 +31,8 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping
-    public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal User user) {
-        List<TaskResponse> tasks = taskService.list(user).stream()
+    public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal AuthUser authUser) {
+        List<TaskResponse> tasks = taskService.list(authUser).stream()
                 .map(TaskResponse::of)
                 .toList();
         return ApiResponse.success(tasks);
@@ -40,9 +40,9 @@ public class TaskController {
 
     @GetMapping("/coworker")
     public ApiResponse<List<CoworkerTaskResponse>> listByCoworker(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestParam Long profileId) {
-        List<CoworkerTaskResponse> tasks = taskService.listByCoworker(user, profileId).stream()
+        List<CoworkerTaskResponse> tasks = taskService.listByCoworker(authUser, profileId).stream()
                 .map(CoworkerTaskResponse::of)
                 .toList();
         return ApiResponse.success(tasks);
@@ -50,26 +50,26 @@ public class TaskController {
 
     @PostMapping
     public ApiResponse<Long> create(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestBody @Valid CreateTaskRequest request) {
-        Task task = taskService.create(user, request);
+        Task task = taskService.create(authUser, request);
         return ApiResponse.success(task.id());
     }
 
     @PutMapping("/{id}")
     public ApiResponse<Void> update(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id,
             @RequestBody @Valid UpdateTaskRequest request) {
-        taskService.update(user, id, request);
+        taskService.update(authUser, id, request);
         return ApiResponse.success(null);
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long id) {
-        taskService.delete(user, id);
+        taskService.delete(authUser, id);
         return ApiResponse.success(null);
     }
 }

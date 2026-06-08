@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.core.storage.member.MemberEntity;
 import to.bconnect.api.core.storage.member.MemberRepository;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
@@ -22,8 +22,8 @@ public class MemberService {
     private final OtpService otpService;
 
     @Transactional(readOnly = true)
-    public Member get(User user) {
-        return memberFinder.find(user.id());
+    public Member get(AuthUser authUser) {
+        return memberFinder.find(authUser.id());
     }
 
     @Transactional(readOnly = true)
@@ -59,8 +59,8 @@ public class MemberService {
     }
 
     @Transactional
-    public void update(User user, UpdateMemberRequest request) {
-        MemberEntity found = memberRepository.findById(user.id())
+    public void update(AuthUser authUser, UpdateMemberRequest request) {
+        MemberEntity found = memberRepository.findById(authUser.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         found.update(
@@ -71,8 +71,8 @@ public class MemberService {
     }
 
     @Transactional
-    public void withdraw(User user) {
-        memberRepository.findById(user.id())
+    public void withdraw(AuthUser authUser) {
+        memberRepository.findById(authUser.id())
                 .ifPresent(memberRepository::delete);
     }
 }

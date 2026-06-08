@@ -10,19 +10,19 @@ import to.bconnect.api.core.storage.member.MemberRepository;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserDetailsService {
+public class AuthUserService implements UserDetailsService {
     private final MemberRepository memberRepository;
 
     @Override @NonNull
     public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
         return memberRepository.findByUsername(username)
-            .map(e -> new User(e.getId(), e.getUsername(), e.getRole().name()))
+            .map(e -> new AuthUser(e.getId(), e.getUsername(), e.getRole().name()))
             .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
     public UserDetails loadUserByPhone(@NonNull String phone) throws UsernameNotFoundException {
         return memberRepository.findByPhone(phone)
-            .map(e -> new User(e.getId(), e.getUsername(), e.getRole().name()))
+            .map(e -> new AuthUser(e.getId(), e.getUsername(), e.getRole().name()))
             .orElseThrow(() -> new UsernameNotFoundException(phone));
     }
 }

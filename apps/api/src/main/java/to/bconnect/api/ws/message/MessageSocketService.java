@@ -11,7 +11,7 @@ import to.bconnect.api.core.storage.member.MemberRepository;
 import to.bconnect.api.core.storage.chat.MessageType;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.ws.WebSocketAuthorizationConfig;
 
 import java.util.HashSet;
@@ -29,13 +29,13 @@ public class MessageSocketService {
     private final SimpUserRegistry simpUserRegistry;
 
     @Transactional
-    public void broadcast(User user, Long chatId, SendMessageRequest request) {
+    public void broadcast(AuthUser authUser, Long chatId, SendMessageRequest request) {
         if (request.type() == MessageType.SYSTEM)
             throw new CodeException(CommonExceptionCode.NOT_VALID);
 
         MessageEntity entity = messageRepository.save(MessageEntity.builder()
                 .chatId(chatId)
-                .memberId(user.id())
+                .memberId(authUser.id())
                 .type(request.type())
                 .content(request.content())
                 .build());

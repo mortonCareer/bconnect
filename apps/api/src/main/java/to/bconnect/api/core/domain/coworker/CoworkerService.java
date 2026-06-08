@@ -8,7 +8,7 @@ import to.bconnect.api.core.domain.profile.ProfileFinder;
 import to.bconnect.api.core.storage.coworker.CoworkerRepository;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.security.User;
+import to.bconnect.api.security.AuthUser;
 
 import java.util.List;
 
@@ -21,8 +21,8 @@ public class CoworkerService {
     private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public List<Coworker> list(User user, Long targetId) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public List<Coworker> list(AuthUser authUser, Long targetId) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
 
         if (!profile.id().equals(targetId) && !coworkerFinder.isCoworker(profile.id(), targetId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
@@ -31,8 +31,8 @@ public class CoworkerService {
     }
 
     @Transactional
-    public void delete(User user, Long id) {
-        Profile profile = profileFinder.findByMemberId(user.id());
+    public void delete(AuthUser authUser, Long id) {
+        Profile profile = profileFinder.findByMemberId(authUser.id());
         coworkerRepository.findById(id).ifPresent(found -> {
             if (!found.getMinId().equals(profile.id()) && !found.getMaxId().equals(profile.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
