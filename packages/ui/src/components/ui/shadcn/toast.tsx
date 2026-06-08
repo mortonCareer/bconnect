@@ -26,7 +26,7 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = 'ToastViewport'
 
 const toastVariants = cva(
-  'pointer-events-auto flex w-full touch-none items-center gap-2.5 rounded-lg px-5 py-3 text-m-14 data-[swipe=move]:translate-y-[var(--radix-toast-swipe-move-y)] data-[swipe=move]:transition-none data-[swipe=cancel]:translate-y-0 data-[swipe=cancel]:transition-transform data-[swipe=end]:translate-y-[var(--radix-toast-swipe-end-y)]',
+  'pointer-events-auto flex w-full items-center gap-2.5 rounded-lg px-5 py-3 text-m-14 transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)]',
   {
     variants: {
       variant: {

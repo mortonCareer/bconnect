@@ -18,11 +18,8 @@ import {
 export function Toaster() {
   const { toasts } = useToast()
 
-  // duration={Infinity} — radix 내부 타이머는 hover/focus/window-blur 에 pause 되어
-  // "안 사라짐" 으로 보일 수 있어 비활성화하고, 자동 닫힘은 use-toast 의 자체 타이머가 구동.
-  // swipe(아래로)·닫기 버튼은 radix 가 그대로 처리.
   return (
-    <ToastProvider swipeDirection="down" duration={Infinity}>
+    <ToastProvider swipeDirection="right">
       {toasts.map(({ id, title, description, variant = 'success', ...props }) => {
         const Icon = variant === 'error' ? XIcon : CheckCircleFilledIcon
         return (
