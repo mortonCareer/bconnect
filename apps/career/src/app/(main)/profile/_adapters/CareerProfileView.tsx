@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, type ReactNode } from 'react'
+import { useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -18,24 +18,8 @@ import {
   useCreateDirectChat,
 } from '@bconnect/api-client'
 import { ProfileView, type ProfileViewData } from '@bconnect/features'
-import { Button, TopBar, toast, isApiErrorShape } from '@bconnect/ui'
-
-/** career 풀페이지 쉘 — 모든 career feature view 가 동일 TopBar 래핑을 재사용한다. */
-const careerShell = (onBack?: () => void) =>
-  function CareerProfileShell({ title, children }: { title: string; children: ReactNode }) {
-    return (
-      <div className="flex flex-col">
-        <TopBar
-          variant="default"
-          title={title}
-          showAction={false}
-          showBack={onBack != null}
-          onBack={onBack}
-        />
-        {children}
-      </div>
-    )
-  }
+import { Button, toast, isApiErrorShape } from '@bconnect/ui'
+import { careerShell } from '@/app/(main)/_adapters/careerShell'
 
 /** 현재 URL 공유 — Web Share API → 클립보드 폴백. career 정책이라 패키지 밖(앱)에 둔다. */
 function useShareCurrentUrl() {
