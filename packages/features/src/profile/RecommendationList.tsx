@@ -5,7 +5,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { getTradeLabel } from '@bconnect/api-client'
 import type { Recommendation } from '@bconnect/api-client'
-import { cn, Skeleton, useExpandableText } from '@bconnect/ui'
+import { ActionDrawer, cn, MoreVerticalIcon, Skeleton, useExpandableText } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 
 type Mode = 'received' | 'sent'
@@ -18,6 +18,10 @@ interface RecommendationListProps {
   editHref?: string
   /** 상단 '추천서' 헤더 숨김 — 전용 페이지(TopBar 가 타이틀 보유)에서 사용 */
   hideHeader?: boolean
+  /** owner 전용. 받은 추천서 카드 ⋮ → 숨김. 없으면 받은 탭 케밥 안 그림 (viewer/plan) */
+  onHide?: (id: number) => void
+  /** owner 전용. 보낸 추천서 카드 ⋮ → 삭제. 없으면 보낸 탭 케밥 안 그림 (viewer/plan) */
+  onDelete?: (id: number) => void
 }
 
 export function RecommendationList({
@@ -25,12 +29,17 @@ export function RecommendationList({
   sent,
   editHref,
   hideHeader,
+  onHide,
+  onDelete,
 }: RecommendationListProps) {
   const [mode, setMode] = useState<Mode>('received')
+  const [openId, setOpenId] = useState<number | null>(null)
 
   const active = mode === 'received' ? received : sent
   const isLoading = active === undefined
   const items = active ?? []
+  const canAct = mode === 'received' ? !!onHide : !!onDelete
+  const openRec = items.find((rec) => rec.id === openId)
 
   return (
     <section className="flex flex-col gap-3">
@@ -73,10 +82,29 @@ export function RecommendationList({
       ) : (
         <ul className="flex flex-col divide-y divide-gray-200">
           {items.map((rec) => (
-            <RecommendationItem key={rec.id} recommendation={rec} />
+            <RecommendationItem
+              key={rec.id}
+              recommendation={rec}
+              showMenu={canAct}
+              onMenuClick={() => setOpenId(rec.id)}
+            />
           ))}
         </ul>
       )}
+
+      <ActionDrawer
+        open={openId !== null}
+        onOpenChange={(open) => {
+          if (!open) setOpenId(null)
+        }}
+        items={
+          openRec == null
+            ? []
+            : mode === 'received'
+              ? [{ label: '숨김', onSelect: () => onHide?.(openRec.id) }]
+              : [{ label: '삭제', destructive: true, onSelect: () => onDelete?.(openRec.id) }]
+        }
+      />
     </section>
   )
 }
@@ -105,7 +133,15 @@ function ToggleButton({
   )
 }
 
-function RecommendationItem({ recommendation }: { recommendation: Recommendation }) {
+function RecommendationItem({
+  recommendation,
+  showMenu,
+  onMenuClick,
+}: {
+  recommendation: Recommendation
+  showMenu?: boolean
+  onMenuClick?: () => void
+}) {
   const { member, content, profile } = recommendation
   const { ref, expanded, showToggle, toggle } = useExpandableText([content], 'height')
   const textId = `recommendation-${recommendation.id}`
@@ -153,6 +189,16 @@ function RecommendationItem({ recommendation }: { recommendation: Recommendation
           </button>
         )}
       </div>
+      {showMenu && (
+        <button
+          type="button"
+          onClick={onMenuClick}
+          aria-label="추천서 작업"
+          className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center self-start text-gray-500"
+        >
+          <MoreVerticalIcon size={16} />
+        </button>
+      )}
     </li>
   )
 }
