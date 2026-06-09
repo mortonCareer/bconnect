@@ -102,7 +102,10 @@ export function RecommendationList({
             ? []
             : mode === 'received'
               ? [{ label: '숨김', onSelect: () => onHide?.(openRec.id) }]
-              : [{ label: '삭제', destructive: true, onSelect: () => onDelete?.(openRec.id) }]
+              : [
+                  { label: '수정', disabled: true, onSelect: () => {} },
+                  { label: '삭제', destructive: true, onSelect: () => onDelete?.(openRec.id) },
+                ]
         }
       />
     </section>

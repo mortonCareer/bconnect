@@ -43,7 +43,8 @@ export function ActionDrawer({ open, onOpenChange, title, items }: ActionDrawerP
                 item.onSelect()
               }}
               className={cn(
-                'px-4 py-4 text-left text-m-16 disabled:opacity-40',
+                'cursor-pointer px-4 py-4 text-left text-m-16 transition-colors hover:bg-gray-50',
+                'disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent',
                 item.destructive ? 'text-destructive' : 'text-gray-900'
               )}
             >
