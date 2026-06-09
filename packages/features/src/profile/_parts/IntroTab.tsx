@@ -21,6 +21,9 @@ interface IntroTabProps {
   receivedRecommendations?: Recommendation[]
   sentRecommendations?: Recommendation[]
   editHrefs?: ProfileEditHrefs
+  /** owner 전용 추천서 액션. 없으면 카드 케밥 안 그림 (viewer/plan) */
+  onHideRecommendation?: (id: number) => void
+  onDeleteRecommendation?: (id: number) => void
 }
 
 export function IntroTab({
@@ -29,6 +32,8 @@ export function IntroTab({
   receivedRecommendations,
   sentRecommendations,
   editHrefs,
+  onHideRecommendation,
+  onDeleteRecommendation,
 }: IntroTabProps) {
   const credentialsLoading = credentials === undefined
   const accepted = (credentials ?? []).filter((c) => c.status === 'ACCEPTED')
@@ -71,6 +76,8 @@ export function IntroTab({
         received={receivedRecommendations}
         sent={sentRecommendations}
         editHref={editHrefs?.recommendations}
+        onHide={onHideRecommendation}
+        onDelete={onDeleteRecommendation}
       />
     </div>
   )

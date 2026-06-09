@@ -20,6 +20,7 @@ import {
 import { ProfileView, type ProfileViewData } from '@bconnect/features'
 import { Button, toast, isApiErrorShape } from '@bconnect/ui'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
+import { useRecommendationActions } from './useRecommendationActions'
 
 /** 현재 URL 공유 — Web Share API → 클립보드 폴백. career 정책이라 패키지 밖(앱)에 둔다. */
 function useShareCurrentUrl() {
@@ -38,6 +39,7 @@ function useShareCurrentUrl() {
 /** 본인 프로필 (/profile) — My* 훅 + 수정/공유 어포던스 */
 export function OwnerProfileView() {
   const { share } = useShareCurrentUrl()
+  const { onHideRecommendation, onDeleteRecommendation } = useRecommendationActions()
 
   const member = useGetMyMember()
   const profile = useGetMyProfile()
@@ -80,6 +82,8 @@ export function OwnerProfileView() {
         recommendations: '/profile/recommendations',
       }}
       workEditHref={(postId) => `/profile/edit/work/${postId}`}
+      onHideRecommendation={onHideRecommendation}
+      onDeleteRecommendation={onDeleteRecommendation}
       actionSlot={
         <div className="flex gap-2 px-4 py-3">
           <Button asChild variant="outline" size="full" className="h-10 flex-1">
