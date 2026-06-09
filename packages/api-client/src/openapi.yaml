@@ -300,7 +300,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseListProfileDetailResponse"
+                $ref: "#/components/schemas/ApiResponseListProfileResponse"
     post:
       tags:
       - profile-controller
@@ -371,7 +371,7 @@ paths:
       - credential-controller
       operationId: list_2
       parameters:
-      - name: profileId
+      - name: memberId
         in: query
         required: true
         schema:
@@ -523,7 +523,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseChatResponse"
+                $ref: "#/components/schemas/ApiResponseLong"
   /api/v1/auth/otp/send:
     post:
       tags:
@@ -578,7 +578,7 @@ paths:
       - task-controller
       operationId: listByCoworker
       parameters:
-      - name: profileId
+      - name: memberId
         in: query
         required: true
         schema:
@@ -597,7 +597,7 @@ paths:
       - recommendation-controller
       operationId: listSent
       parameters:
-      - name: profileId
+      - name: memberId
         in: query
         required: true
         schema:
@@ -616,7 +616,7 @@ paths:
       - recommendation-controller
       operationId: listReceived
       parameters:
-      - name: profileId
+      - name: memberId
         in: query
         required: true
         schema:
@@ -671,7 +671,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseProfileDetailResponse"
+                $ref: "#/components/schemas/ApiResponseProfileResponse"
   /api/v1/members/check-username:
     get:
       tags:
@@ -695,13 +695,6 @@ paths:
       tags:
       - feed-controller
       operationId: list_4
-      parameters:
-      - name: profileId
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int64
       responses:
         "200":
           description: OK
@@ -746,7 +739,7 @@ paths:
       - coworker-controller
       operationId: list_5
       parameters:
-      - name: profileId
+      - name: memberId
         in: query
         required: true
         schema:
@@ -1193,6 +1186,9 @@ components:
     RegisterMemberRequest:
       type: object
       properties:
+        phone:
+          type: string
+          minLength: 1
         signupToken:
           type: string
           minLength: 1
@@ -1208,6 +1204,7 @@ components:
           $ref: "#/components/schemas/Role"
       required:
       - name
+      - phone
       - role
       - signupToken
       - username
@@ -1245,6 +1242,9 @@ components:
     CreateChatRequest:
       type: object
       properties:
+        title:
+          type: string
+          minLength: 1
         participantIds:
           type: array
           items:
@@ -1252,93 +1252,9 @@ components:
             format: int64
           maxItems: 2147483647
           minItems: 2
-        title:
-          type: string
-          minLength: 1
       required:
       - participantIds
       - title
-    ApiResponseChatResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        error:
-          $ref: "#/components/schemas/ExceptionCode"
-        data:
-          $ref: "#/components/schemas/ChatResponse"
-    ChatResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        title:
-          type: string
-        participants:
-          type: array
-          items:
-            $ref: "#/components/schemas/MaskedMemberResponse"
-        lastMessage:
-          $ref: "#/components/schemas/MessageResponse"
-        unreadCount:
-          type: integer
-          format: int64
-        createdAt:
-          type: string
-          format: date-time
-        modifiedAt:
-          type: string
-          format: date-time
-    MaskedMemberResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        username:
-          type: string
-        name:
-          type: string
-        picture:
-          type: string
-        role:
-          $ref: "#/components/schemas/Role"
-        createdAt:
-          type: string
-          format: date-time
-        modifiedAt:
-          type: string
-          format: date-time
-    MessageResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        chatId:
-          type: integer
-          format: int64
-        memberId:
-          type: integer
-          format: int64
-        type:
-          $ref: "#/components/schemas/MessageType"
-        content:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        modifiedAt:
-          type: string
-          format: date-time
-    MessageType:
-      type: string
-      enum:
-      - TEXT
-      - IMAGE
-      - FILE
-      - SYSTEM
     SendCodeRequest:
       type: object
       properties:
@@ -1385,7 +1301,7 @@ components:
         id:
           type: integer
           format: int64
-        profileId:
+        memberId:
           type: integer
           format: int64
         company:
@@ -1430,7 +1346,7 @@ components:
         id:
           type: integer
           format: int64
-        profileId:
+        memberId:
           type: integer
           format: int64
         start:
@@ -1450,37 +1366,38 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/RecommendationResponse"
-    ProfileResponse:
+    MemberSummaryResponse:
       type: object
       properties:
         id:
           type: integer
           format: int64
-        memberId:
-          type: integer
-          format: int64
-        primaryTrade:
-          $ref: "#/components/schemas/Trade"
-        trades:
-          type: array
-          items:
-            $ref: "#/components/schemas/Trade"
-          uniqueItems: true
-        experience:
-          type: integer
-          format: int32
-        headline:
+        username:
           type: string
-        about:
+        name:
           type: string
-        address:
-          $ref: "#/components/schemas/Address"
+        picture:
+          type: string
+        role:
+          $ref: "#/components/schemas/Role"
         createdAt:
           type: string
           format: date-time
         modifiedAt:
           type: string
           format: date-time
+    ProfileSummaryResponse:
+      type: object
+      properties:
+        primaryTrade:
+          $ref: "#/components/schemas/Trade"
+        experience:
+          type: integer
+          format: int32
+        headline:
+          type: string
+        address:
+          $ref: "#/components/schemas/Address"
     RecommendationResponse:
       type: object
       properties:
@@ -1488,9 +1405,9 @@ components:
           type: integer
           format: int64
         member:
-          $ref: "#/components/schemas/MaskedMemberResponse"
+          $ref: "#/components/schemas/MemberSummaryResponse"
         profile:
-          $ref: "#/components/schemas/ProfileResponse"
+          $ref: "#/components/schemas/ProfileSummaryResponse"
         content:
           type: string
         visible:
@@ -1501,7 +1418,7 @@ components:
         modifiedAt:
           type: string
           format: date-time
-    ApiResponseListProfileDetailResponse:
+    ApiResponseListProfileResponse:
       type: object
       properties:
         success:
@@ -1511,18 +1428,15 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/ProfileDetailResponse"
-    ProfileDetailResponse:
+            $ref: "#/components/schemas/ProfileResponse"
+    ProfileResponse:
       type: object
       properties:
-        member:
-          $ref: "#/components/schemas/MaskedMemberResponse"
         id:
           type: integer
           format: int64
-        memberId:
-          type: integer
-          format: int64
+        member:
+          $ref: "#/components/schemas/MemberSummaryResponse"
         primaryTrade:
           $ref: "#/components/schemas/Trade"
         trades:
@@ -1554,7 +1468,7 @@ components:
         coworkerCount:
           type: integer
           format: int32
-    ApiResponseProfileDetailResponse:
+    ApiResponseProfileResponse:
       type: object
       properties:
         success:
@@ -1562,7 +1476,7 @@ components:
         error:
           $ref: "#/components/schemas/ExceptionCode"
         data:
-          $ref: "#/components/schemas/ProfileDetailResponse"
+          $ref: "#/components/schemas/ProfileResponse"
     ApiResponseListMemberResponse:
       type: object
       properties:
@@ -1634,9 +1548,9 @@ components:
       type: object
       properties:
         member:
-          $ref: "#/components/schemas/MaskedMemberResponse"
+          $ref: "#/components/schemas/MemberSummaryResponse"
         profile:
-          $ref: "#/components/schemas/ProfileResponse"
+          $ref: "#/components/schemas/ProfileSummaryResponse"
         post:
           $ref: "#/components/schemas/PostResponse"
     PostResponse:
@@ -1645,7 +1559,7 @@ components:
         id:
           type: integer
           format: int64
-        profileId:
+        memberId:
           type: integer
           format: int64
         taskId:
@@ -1689,7 +1603,7 @@ components:
         id:
           type: integer
           format: int64
-        profileId:
+        memberId:
           type: integer
           format: int64
         type:
@@ -1740,7 +1654,9 @@ components:
           type: integer
           format: int64
         member:
-          $ref: "#/components/schemas/MaskedMemberResponse"
+          $ref: "#/components/schemas/MemberSummaryResponse"
+        profile:
+          $ref: "#/components/schemas/ProfileSummaryResponse"
         status:
           $ref: "#/components/schemas/CoworkerStatus"
     CoworkerStatus:
@@ -1768,9 +1684,9 @@ components:
           type: integer
           format: int64
         member:
-          $ref: "#/components/schemas/MaskedMemberResponse"
+          $ref: "#/components/schemas/MemberSummaryResponse"
         profile:
-          $ref: "#/components/schemas/ProfileResponse"
+          $ref: "#/components/schemas/ProfileSummaryResponse"
     ApiResponseListChatResponse:
       type: object
       properties:
@@ -1782,6 +1698,58 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ChatResponse"
+    ChatResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        participants:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemberSummaryResponse"
+        lastMessage:
+          $ref: "#/components/schemas/MessageResponse"
+        unreadCount:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+    MessageResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        chatId:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        type:
+          $ref: "#/components/schemas/MessageType"
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+    MessageType:
+      type: string
+      enum:
+      - TEXT
+      - IMAGE
+      - FILE
+      - SYSTEM
     CursorLimit:
       type: object
       properties:
@@ -1809,8 +1777,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/MessageResponse"
+        hasNext:
+          type: boolean
         nextCursor:
           type: integer
           format: int64
-        hasNext:
-          type: boolean
