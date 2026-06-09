@@ -42,6 +42,8 @@ interface ProfileViewBaseProps {
   statHrefs?: ProfileStatHrefs
   /** owner 전용 작업물 수정 href 빌더. 없으면 케밥 메뉴 없음 (viewer/plan) */
   workEditHref?: (postId: number) => string
+  /** owner 전용 작업물 삭제. 없으면 케밥 삭제 메뉴 없음 (viewer/plan) */
+  onDeleteWork?: (postId: number) => void
   /** owner 전용 추천서 액션. 없으면 추천서 카드 케밥 없음 (viewer/plan) */
   onHideRecommendation?: (id: number) => void
   onDeleteRecommendation?: (id: number) => void
@@ -73,6 +75,7 @@ export function ProfileView(props: ProfileViewProps) {
     editHrefs,
     statHrefs,
     workEditHref,
+    onDeleteWork,
     onHideRecommendation,
     onDeleteRecommendation,
     fallbackTitle,
@@ -114,7 +117,11 @@ export function ProfileView(props: ProfileViewProps) {
               onDeleteRecommendation={onDeleteRecommendation}
             />
           ) : (
-            <WorksTab profileId={profileId} workEditHref={workEditHref} />
+            <WorksTab
+              profileId={profileId}
+              workEditHref={workEditHref}
+              onDeleteWork={onDeleteWork}
+            />
           )}
         </>
       )}
