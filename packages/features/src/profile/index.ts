@@ -1,3 +1,7 @@
 export { ProfileView } from './ProfileView'
 export type { ProfileViewProps, ProfileViewData } from './ProfileView'
 export { RecommendationList } from './RecommendationList'
+export { CoworkersView } from './CoworkersView'
+export type { CoworkersViewProps, CoworkersViewData } from './CoworkersView'
+export { RecommendationsView } from './RecommendationsView'
+export type { RecommendationsViewProps, RecommendationsViewData } from './RecommendationsView'

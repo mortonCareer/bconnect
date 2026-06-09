@@ -103,6 +103,7 @@ export function ProfileView(props: ProfileViewProps) {
             coworkerCount={data.coworkerCount}
             recommendationCount={data.recommendationCount}
             statHrefs={statHrefs}
+            statScroll={props.renderShell ? undefined : false}
           />
           {actionSlot}
           <Tab items={TAB_ITEMS} activeKey={tab} onChange={(key) => setTab(key as TabKey)} />
