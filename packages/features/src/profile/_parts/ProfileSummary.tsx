@@ -21,6 +21,8 @@ interface ProfileSummaryProps {
   coworkerCount?: number
   recommendationCount?: number
   statHrefs?: ProfileStatHrefs
+  /** stat 링크 네비 시 scroll 리셋 여부. 패널(plan)=false 로 배경 스크롤 보존, 풀페이지(career)=기본 */
+  statScroll?: boolean
 }
 
 export function ProfileSummary({
@@ -30,6 +32,7 @@ export function ProfileSummary({
   coworkerCount,
   recommendationCount,
   statHrefs,
+  statScroll,
 }: ProfileSummaryProps) {
   const name = member?.name ?? '이름 없음'
   const meta = [
@@ -59,9 +62,19 @@ export function ProfileSummary({
           />
         </div>
         <div className="flex flex-1 justify-around">
-          <Stat label="작업물" value={postCount} href={statHrefs?.works} />
-          <Stat label="동료" value={coworkerCount} href={statHrefs?.coworkers} />
-          <Stat label="추천서" value={recommendationCount} href={statHrefs?.recommendations} />
+          <Stat label="작업물" value={postCount} href={statHrefs?.works} scroll={statScroll} />
+          <Stat
+            label="동료"
+            value={coworkerCount}
+            href={statHrefs?.coworkers}
+            scroll={statScroll}
+          />
+          <Stat
+            label="추천서"
+            value={recommendationCount}
+            href={statHrefs?.recommendations}
+            scroll={statScroll}
+          />
         </div>
       </div>
 
@@ -76,7 +89,17 @@ export function ProfileSummary({
   )
 }
 
-function Stat({ label, value, href }: { label: string; value?: number; href?: string }) {
+function Stat({
+  label,
+  value,
+  href,
+  scroll,
+}: {
+  label: string
+  value?: number
+  href?: string
+  scroll?: boolean
+}) {
   const className = 'flex flex-col items-center gap-1'
   const content = (
     <>
@@ -89,7 +112,7 @@ function Stat({ label, value, href }: { label: string; value?: number; href?: st
     </>
   )
   return href ? (
-    <Link href={href} className={className}>
+    <Link href={href} scroll={scroll} className={className}>
       {content}
     </Link>
   ) : (
