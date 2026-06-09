@@ -4,8 +4,9 @@
 'use client'
 
 import { cva, type VariantProps } from 'class-variance-authority'
+import Link from 'next/link'
 import * as React from 'react'
-import { ChevronIcon, FilterIcon, ChatIcon } from '../../icons'
+import { ChevronIcon, FilterIcon, ChatIcon, NotificationIcon } from '../../icons'
 import { cn } from '../../lib/utils'
 
 const topBarVariants = cva('sticky top-0 z-40 flex h-15 w-full items-center bg-white px-4', {
@@ -21,17 +22,31 @@ const topBarVariants = cva('sticky top-0 z-40 flex h-15 w-full items-center bg-w
   },
 })
 
+function CountBadge({ count }: { count?: number }) {
+  if (count === undefined || count <= 0) return null
+  return (
+    <div className="absolute -right-[7.5px] -top-[3.5px] flex min-w-[15px] items-center justify-center rounded-full bg-destructive px-1">
+      <span className="text-[10px] font-bold leading-[15px] text-white">
+        {count > 99 ? '99+' : count}
+      </span>
+    </div>
+  )
+}
+
 function ChatBadgeIcon({ count }: { count?: number }) {
   return (
     <div className="relative size-5">
       <ChatIcon className="text-[#a5a5a5]" />
-      {count !== undefined && count > 0 && (
-        <div className="absolute -right-[7.5px] -top-[3.5px] flex min-w-[15px] items-center justify-center rounded-full bg-destructive px-1">
-          <span className="text-[10px] font-bold leading-[15px] text-white">
-            {count > 99 ? '99+' : count}
-          </span>
-        </div>
-      )}
+      <CountBadge count={count} />
+    </div>
+  )
+}
+
+function NotifyBadgeIcon({ count }: { count?: number }) {
+  return (
+    <div className="relative size-5">
+      <NotificationIcon className="text-[#a5a5a5]" />
+      <CountBadge count={count} />
     </div>
   )
 }
@@ -60,11 +75,17 @@ export interface TopBarProps
   actionDisabled?: boolean
   showBack?: boolean
   chatCount?: number
+  notifyCount?: number
   onFilter?: () => void
   onChat?: () => void
+  onNotify?: () => void
   onBack?: () => void
   /** backHref가 있으면 Link로 렌더링 (prefetch), 없으면 button + onBack */
   backHref?: string
+  /** chatHref가 있으면 Link(prefetch)로 렌더링, 없으면 button + onChat */
+  chatHref?: string
+  /** notifyHref/onNotify 중 하나라도 있으면 알림 버튼 렌더. href면 Link(prefetch) */
+  notifyHref?: string
 }
 
 const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
@@ -81,23 +102,29 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       actionDisabled = false,
       showBack = true,
       chatCount,
+      notifyCount,
       onFilter,
       onChat,
+      onNotify,
       onBack,
       backHref,
+      chatHref,
+      notifyHref,
       ...props
     },
     ref
   ) => {
     const backButtonClass =
       'flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
+    const iconActionClass =
+      'flex cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
 
     const BackButton = !showBack ? (
       <div className="size-5" />
     ) : backHref ? (
-      <a href={backHref} className={backButtonClass} aria-label="뒤로가기">
+      <Link href={backHref} className={backButtonClass} aria-label="뒤로가기">
         <ChevronIcon direction="left" className="text-[#a5a5a5]" />
-      </a>
+      </Link>
     ) : (
       <button type="button" onClick={onBack} className={backButtonClass} aria-label="뒤로가기">
         <ChevronIcon direction="left" className="text-[#a5a5a5]" />
@@ -138,23 +165,42 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
         )}
         {variant === 'home' && (
           <>
-            <button
-              type="button"
-              onClick={onFilter}
-              className="flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]"
-              aria-label="필터"
-            >
+            <button type="button" onClick={onFilter} className={backButtonClass} aria-label="필터">
               <FilterIcon className="text-[#a5a5a5]" />
             </button>
             <div className="flex-1" />
-            <button
-              type="button"
-              onClick={onChat}
-              className="flex cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]"
-              aria-label="채팅"
-            >
-              <ChatBadgeIcon count={chatCount} />
-            </button>
+            <div className="flex items-center gap-4">
+              {notifyHref ? (
+                <Link href={notifyHref} className={iconActionClass} aria-label="알림">
+                  <NotifyBadgeIcon count={notifyCount} />
+                </Link>
+              ) : (
+                onNotify && (
+                  <button
+                    type="button"
+                    onClick={onNotify}
+                    className={iconActionClass}
+                    aria-label="알림"
+                  >
+                    <NotifyBadgeIcon count={notifyCount} />
+                  </button>
+                )
+              )}
+              {chatHref ? (
+                <Link href={chatHref} className={iconActionClass} aria-label="채팅">
+                  <ChatBadgeIcon count={chatCount} />
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onChat}
+                  className={iconActionClass}
+                  aria-label="채팅"
+                >
+                  <ChatBadgeIcon count={chatCount} />
+                </button>
+              )}
+            </div>
           </>
         )}
       </header>
