@@ -79,7 +79,6 @@ export default function FeedDetailPage() {
                     }}
                     canManage
                     editHref="/profile/edit/work/1"
-                    LinkComponent={Link}
                     onDelete={() => setConfirmOpen(true)}
                   />
                   <ConfirmDialog
@@ -146,18 +145,6 @@ export default function FeedDetailPage() {
                   </tr>
                   <tr>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">LinkComponent</code>
-                    </td>
-                    <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">ElementType</code>
-                    </td>
-                    <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">a</code>
-                    </td>
-                    <td className="p-3">수정 링크 컴포넌트 (Next.js Link 등)</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3">
                       <code className="rounded bg-gray-100 px-1">onDelete</code>
                     </td>
                     <td className="p-3">
@@ -188,7 +175,6 @@ export default function FeedDetailPage() {
   }}
   canManage
   editHref="/profile/edit/work/1"
-  LinkComponent={Link}
   onDelete={() => setPendingDelete(1)}
 />`}
             </pre>

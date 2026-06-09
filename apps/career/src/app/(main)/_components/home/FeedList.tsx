@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useCallback, useState } from 'react'
-import Link from 'next/link'
 import { useDeletePost, useQueryClient, getGetFeedsQueryKey } from '@bconnect/api-client'
 import { Feed, ConfirmDialog } from '@bconnect/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
@@ -82,7 +81,6 @@ export function FeedList() {
           content={item.content}
           canManage={item.isMine}
           editHref={`/profile/edit/work/${item.postId}`}
-          LinkComponent={Link}
           onDelete={() => setPendingDeleteId(item.postId)}
         />
       ))}

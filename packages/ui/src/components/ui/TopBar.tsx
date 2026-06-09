@@ -122,9 +122,9 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
     const BackButton = !showBack ? (
       <div className="size-5" />
     ) : backHref ? (
-      <a href={backHref} className={backButtonClass} aria-label="뒤로가기">
+      <Link href={backHref} className={backButtonClass} aria-label="뒤로가기">
         <ChevronIcon direction="left" className="text-[#a5a5a5]" />
-      </a>
+      </Link>
     ) : (
       <button type="button" onClick={onBack} className={backButtonClass} aria-label="뒤로가기">
         <ChevronIcon direction="left" className="text-[#a5a5a5]" />
