@@ -21,6 +21,7 @@ import { ProfileView, type ProfileViewData } from '@bconnect/features'
 import { Button, toast, isApiErrorShape } from '@bconnect/ui'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
 import { useRecommendationActions } from './useRecommendationActions'
+import { useWorkActions } from './useWorkActions'
 
 /** 현재 URL 공유 — Web Share API → 클립보드 폴백. career 정책이라 패키지 밖(앱)에 둔다. */
 function useShareCurrentUrl() {
@@ -45,6 +46,7 @@ export function OwnerProfileView() {
   const profile = useGetMyProfile()
   const pid = profile.data?.id ?? 0
   const enabled = pid > 0
+  const { onDeleteWork } = useWorkActions(pid)
 
   const coworkers = useGetCoworkers({ profileId: pid }, { query: { enabled } })
   const credentials = useGetCredentials({ profileId: pid }, { query: { enabled } })
@@ -82,6 +84,7 @@ export function OwnerProfileView() {
         recommendations: '/profile/recommendations',
       }}
       workEditHref={(postId) => `/profile/edit/work/${postId}`}
+      onDeleteWork={onDeleteWork}
       onHideRecommendation={onHideRecommendation}
       onDeleteRecommendation={onDeleteRecommendation}
       actionSlot={

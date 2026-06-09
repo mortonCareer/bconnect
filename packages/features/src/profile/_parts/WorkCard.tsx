@@ -1,37 +1,57 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
-import { cn, MoreVerticalIcon, useExpandableText } from '@bconnect/ui'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { ActionDrawer, cn, MoreVerticalIcon, useExpandableText } from '@bconnect/ui'
 
 interface WorkCardProps {
   image: string
   imageAlt?: string
   timestamp: string
   description: string
-  /** owner 전용 수정 링크. 없으면 케밥(수정) 메뉴 안 그림 (viewer/plan) */
+  /** owner 전용 수정 페이지 경로. 없으면 케밥에 수정 메뉴 안 그림 (viewer/plan) */
   editHref?: string
+  /** owner 전용 삭제 핸들러. 없으면 케밥에 삭제 메뉴 안 그림 (viewer/plan) */
+  onDelete?: () => void
 }
 
-export function WorkCard({ image, imageAlt, timestamp, description, editHref }: WorkCardProps) {
+// TODO(#556): 업체명·기간은 Task 소속인데 Feed 에 미노출 — BE Feed 확장 시 실데이터 연결.
+// 업체명·소요일 둘 다 mock 이라 각각 (Mocked) 명시.
+const MOCK_HEADER = '업체명(Mocked) · N일 소요(Mocked)'
+
+export function WorkCard({
+  image,
+  imageAlt,
+  timestamp,
+  description,
+  editHref,
+  onDelete,
+}: WorkCardProps) {
+  const router = useRouter()
+  const [menuOpen, setMenuOpen] = useState(false)
   const { ref, expanded, showToggle, toggle } = useExpandableText([description], 'width')
+
+  const canManage = !!editHref || !!onDelete
 
   return (
     <div className="flex flex-col">
-      {(timestamp || editHref) && (
-        <div className="flex items-center justify-end gap-2 px-4 py-2">
+      <div className="flex items-center justify-between gap-2 px-4 py-2">
+        <span className="text-r-12 text-gray-500">{MOCK_HEADER}</span>
+        <div className="flex items-center gap-2">
           {timestamp && <span className="text-r-12 text-gray-500">{timestamp}</span>}
-          {editHref && (
-            <Link
-              href={editHref}
-              aria-label="작업물 수정"
-              className="flex h-6 w-6 items-center justify-center text-gray-500"
+          {canManage && (
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              aria-label="작업물 메뉴"
+              className="flex h-6 w-6 cursor-pointer items-center justify-center text-gray-500"
             >
               <MoreVerticalIcon size={16} />
-            </Link>
+            </button>
           )}
         </div>
-      )}
+      </div>
 
       {image && (
         <div className="relative h-[220px] w-full overflow-hidden bg-gray-100">
@@ -70,6 +90,15 @@ export function WorkCard({ image, imageAlt, timestamp, description, editHref }: 
           )}
         </div>
       </div>
+
+      <ActionDrawer
+        open={menuOpen}
+        onOpenChange={setMenuOpen}
+        items={[
+          ...(editHref ? [{ label: '수정', onSelect: () => router.push(editHref) }] : []),
+          ...(onDelete ? [{ label: '삭제', destructive: true, onSelect: onDelete }] : []),
+        ]}
+      />
     </div>
   )
 }

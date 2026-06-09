@@ -9,9 +9,11 @@ interface WorksTabProps {
   profileId: number
   /** owner 전용 작업물 수정 href 빌더. 없으면 케밥 메뉴 안 그림 (viewer/plan) */
   workEditHref?: (postId: number) => string
+  /** owner 전용 작업물 삭제. 없으면 케밥 삭제 메뉴 안 그림 (viewer/plan) */
+  onDeleteWork?: (postId: number) => void
 }
 
-export function WorksTab({ profileId, workEditHref }: WorksTabProps) {
+export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProps) {
   const enabled = Number.isFinite(profileId) && profileId > 0
   const { data: feeds, isLoading } = useGetFeeds({ profileId }, { query: { enabled } })
 
@@ -47,6 +49,7 @@ export function WorksTab({ profileId, workEditHref }: WorksTabProps) {
           timestamp={post.createdAt ? formatRelativeTime(post.createdAt) : ''}
           description={post.content ?? ''}
           editHref={workEditHref?.(post.id)}
+          onDelete={onDeleteWork ? () => onDeleteWork(post.id) : undefined}
         />
       ))}
     </div>
