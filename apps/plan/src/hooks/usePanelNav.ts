@@ -4,8 +4,15 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 /**
  * 현재 지원하는 패널 경로. 프로필(#344)·메시지(#345/#346)·알림(#347) 트리거가 공유.
+ * 프로필 하위 패널(동료·추천서, #557)은 프로필 stats 클릭으로 진입.
  */
-type PanelSegment = `/profile/${number}` | '/messages' | `/messages/${number}` | '/notifications'
+type PanelSegment =
+  | `/profile/${number}`
+  | `/profile/${number}/coworkers`
+  | `/profile/${number}/recommendations`
+  | '/messages'
+  | `/messages/${number}`
+  | '/notifications'
 
 /**
  * plan `@panel` 슬롯 네비게이션 공통화 — 현재 query string 보존 + scroll:false.

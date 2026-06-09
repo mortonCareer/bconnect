@@ -18,7 +18,7 @@ import { usePanelNav } from '@/hooks/usePanelNav'
 export default function ProfilePanelPage() {
   const params = useParams<{ profileId: string }>()
   const profileId = Number(params.profileId)
-  const { closeHref, close } = usePanelNav()
+  const { panelHref, closeHref, close } = usePanelNav()
 
   const enabled = Number.isFinite(profileId) && profileId > 0
   const {
@@ -49,7 +49,17 @@ export default function ProfilePanelPage() {
 
   return (
     <PanelAside label="기술자 프로필">
-      <ProfileView profileId={profileId} data={data} closeHref={closeHref} onClose={close} />
+      <ProfileView
+        profileId={profileId}
+        data={data}
+        closeHref={closeHref}
+        onClose={close}
+        statHrefs={{
+          works: '?tab=works',
+          coworkers: panelHref(`/profile/${profileId}/coworkers`),
+          recommendations: panelHref(`/profile/${profileId}/recommendations`),
+        }}
+      />
     </PanelAside>
   )
 }
