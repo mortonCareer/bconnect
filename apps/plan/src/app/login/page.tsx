@@ -1,5 +1,6 @@
 /**
  * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1416-1534
+ * @figma-state 인증오류 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1506-15119
  */
 'use client'
 

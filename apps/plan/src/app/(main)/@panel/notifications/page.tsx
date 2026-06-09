@@ -1,5 +1,5 @@
 /**
- * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1472-11199
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1472-10215
  */
 'use client'
 

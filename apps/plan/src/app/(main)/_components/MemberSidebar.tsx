@@ -1,6 +1,3 @@
-/**
- * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1504-13254
- */
 'use client'
 
 import { usePanelNav } from '@/hooks/usePanelNav'
