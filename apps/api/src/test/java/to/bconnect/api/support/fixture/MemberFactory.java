@@ -1,10 +1,10 @@
 package to.bconnect.api.support.fixture;
 
-import to.bconnect.api.api.controller.v1.request.RegisterMemberRequest;
-import to.bconnect.api.api.controller.v1.request.UpdateMemberRequest;
-import to.bconnect.api.domain.member.Member;
-import to.bconnect.api.storage.domain.member.MemberEntity;
-import to.bconnect.api.storage.common.value.Role;
+import to.bconnect.api.security.member.RegisterMemberRequest;
+import to.bconnect.api.security.member.UpdateMemberRequest;
+import to.bconnect.api.security.member.Member;
+import to.bconnect.api.storage.member.MemberEntity;
+import to.bconnect.api.storage.member.Role;
 
 import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
@@ -18,27 +18,15 @@ public class MemberFactory {
     }
 
     public static MemberEntity createEntity() {
-        return MemberEntity.builder()
-                .username("username")
-                .name("name")
-                .phone("phone")
-                .picture(DEFAULT_PICTURE)
-                .role(Role.FOREMAN)
-                .build();
+        return new MemberEntity("username", "name", "phone", DEFAULT_PICTURE, Role.FOREMAN);
     }
 
     public static MemberEntity createEntity(String username, String phone, Role role) {
-        return MemberEntity.builder()
-                .username(username)
-                .phone(phone)
-                .name("name")
-                .picture(DEFAULT_PICTURE)
-                .role(role)
-                .build();
+        return new MemberEntity(username, "name", phone, DEFAULT_PICTURE, role);
     }
 
     public static RegisterMemberRequest registerRequest() {
-        return new RegisterMemberRequest("signupToken", "username", "name", DEFAULT_PICTURE, Role.FOREMAN);
+        return new RegisterMemberRequest("phone", "signupToken", "username", "name", DEFAULT_PICTURE, Role.FOREMAN);
     }
 
     public static UpdateMemberRequest updateRequest() {

@@ -1,10 +1,10 @@
 package to.bconnect.api.support.fixture;
 
-import to.bconnect.api.api.controller.v1.request.CreateTaskRequest;
-import to.bconnect.api.api.controller.v1.request.UpdateTaskRequest;
-import to.bconnect.api.domain.task.Task;
-import to.bconnect.api.storage.domain.task.TaskEntity;
-import to.bconnect.api.storage.common.value.Trade;
+import to.bconnect.api.core.presentation.v1.request.CreateTaskRequest;
+import to.bconnect.api.core.presentation.v1.request.UpdateTaskRequest;
+import to.bconnect.api.core.domain.task.Task;
+import to.bconnect.api.storage.task.TaskEntity;
+import to.bconnect.api.storage.profile.Trade;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,15 +15,15 @@ public class TaskFactory {
     private static final LocalDate START_DATE = LocalDate.of(2026, 6, 1);
     private static final LocalDate END_DATE = LocalDate.of(2026, 6, 31);
 
-    public static Task create(Long id, Long profileId) {
-        return new Task(id, profileId, "company", ProfileFactory.DEFAULT_ADDRESS, "task", "event",
+    public static Task create(Long id, Long memberId) {
+        return new Task(id, memberId, "company", ProfileFactory.DEFAULT_ADDRESS, "task", "event",
                 Set.of(Trade.ELECTRICAL), START_DATE, END_DATE,
                 LocalDateTime.now(), LocalDateTime.now());
     }
 
-    public static TaskEntity createEntity(Long profileId) {
+    public static TaskEntity createEntity(Long memberId) {
         return TaskEntity.builder()
-                .profileId(profileId)
+                .memberId(memberId)
                 .company("company")
                 .address(ProfileFactory.DEFAULT_ADDRESS)
                 .taskTitle("task")

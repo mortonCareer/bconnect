@@ -5,12 +5,12 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/v1/tasks/coworker?profileId=5
+  url: {{baseUrl}}/api/v1/tasks/coworker?memberId=6
   auth: inherit
 }
 
 params:query {
-  profileId: 5
+  memberId: 6
 }
 
 tests {
@@ -22,5 +22,5 @@ tests {
 }
 
 docs {
-  동료(seed coworker 1-5)인 profile 5의 작업 목록(바쁨 여부)을 조회한다.
+  동료(seed coworker 1-6)인 member 6의 작업 목록(바쁨 여부)을 조회한다.
 }

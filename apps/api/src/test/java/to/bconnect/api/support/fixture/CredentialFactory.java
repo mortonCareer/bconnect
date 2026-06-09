@@ -1,27 +1,24 @@
 package to.bconnect.api.support.fixture;
 
-import to.bconnect.api.api.controller.v1.request.CreateCredentialRequest;
-import to.bconnect.api.domain.credential.Credential;
-import to.bconnect.api.storage.domain.credential.CredentialEntity;
-import to.bconnect.api.storage.common.value.CredentialStatus;
-import to.bconnect.api.storage.common.value.CredentialType;
+import to.bconnect.api.core.presentation.v1.request.CreateCredentialRequest;
+import to.bconnect.api.core.domain.credential.Credential;
+import to.bconnect.api.storage.credential.CredentialEntity;
+import to.bconnect.api.storage.credential.CredentialStatus;
+import to.bconnect.api.storage.credential.CredentialType;
 
 import static to.bconnect.api.support.fixture.FixtureConstant.MAX_DATE;
 import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
 public class CredentialFactory {
 
-    public static Credential create(Long id, Long profileId) {
-        return new Credential(id, profileId, CredentialType.SOLE_PROPRIETOR,
+    public static Credential create(Long id, Long memberId) {
+        return new Credential(id, memberId, CredentialType.SOLE_PROPRIETOR,
                 CredentialStatus.PENDING, MAX_DATE,
                 MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
-    public static CredentialEntity createEntity(Long profileId) {
-        return CredentialEntity.builder()
-                .profileId(profileId)
-                .type(CredentialType.SOLE_PROPRIETOR)
-                .build();
+    public static CredentialEntity createEntity(Long memberId) {
+        return new CredentialEntity(memberId, CredentialType.SOLE_PROPRIETOR, null);
     }
 
     public static CreateCredentialRequest createRequest() {

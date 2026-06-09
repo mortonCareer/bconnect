@@ -1,0 +1,39 @@
+package to.bconnect.api.core.presentation.v1.response;
+
+import to.bconnect.api.core.domain.task.Task;
+import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.profile.Trade;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Set;
+
+public record TaskResponse(
+        Long id,
+        Long memberId,
+        String company,
+        Address address,
+        String taskTitle,
+        String eventTitle,
+        Set<Trade> trades,
+        LocalDate start,
+        LocalDate end,
+        LocalDateTime createdAt,
+        LocalDateTime modifiedAt
+) {
+    public static TaskResponse of(Task task) {
+        return new TaskResponse(
+                task.id(),
+                task.memberId(),
+                task.company(),
+                task.address(),
+                task.taskTitle(),
+                task.eventTitle(),
+                task.trades(),
+                task.start(),
+                task.end(),
+                task.createdAt(),
+                task.modifiedAt()
+        );
+    }
+}

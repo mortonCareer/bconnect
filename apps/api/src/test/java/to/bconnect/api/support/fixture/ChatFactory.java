@@ -2,8 +2,8 @@ package to.bconnect.api.support.fixture;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import to.bconnect.api.storage.domain.chat.ChatEntity;
-import to.bconnect.api.storage.domain.chat.ChatRepository;
+import to.bconnect.api.storage.chat.ChatEntity;
+import to.bconnect.api.storage.chat.ChatRepository;
 
 @Component
 public class ChatFactory {
@@ -11,8 +11,6 @@ public class ChatFactory {
     @Autowired private ChatRepository chatRepository;
 
     public ChatEntity create() {
-        return chatRepository.save(ChatEntity.builder()
-                .title("title")
-                .build());
+        return chatRepository.save(new ChatEntity("title"));
     }
 }

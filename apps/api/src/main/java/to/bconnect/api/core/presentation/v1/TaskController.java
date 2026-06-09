@@ -1,0 +1,74 @@
+package to.bconnect.api.core.presentation.v1;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import to.bconnect.api.core.presentation.v1.request.CreateTaskRequest;
+import to.bconnect.api.core.presentation.v1.request.UpdateTaskRequest;
+import to.bconnect.api.core.presentation.v1.response.CoworkerTaskResponse;
+import to.bconnect.api.core.presentation.v1.response.TaskResponse;
+import to.bconnect.api.core.domain.task.TaskService;
+import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.common.response.ApiResponse;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/tasks")
+@RequiredArgsConstructor
+public class TaskController {
+
+    private final TaskService taskService;
+
+    @GetMapping
+    public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal AuthUser user) {
+        List<TaskResponse> response = taskService.list(user).stream()
+                .map(TaskResponse::of)
+                .toList();
+        return ApiResponse.success(response);
+    }
+
+    @GetMapping("/coworker")
+    public ApiResponse<List<CoworkerTaskResponse>> listByCoworker(
+            @AuthenticationPrincipal AuthUser user,
+            @RequestParam Long memberId) {
+        List<CoworkerTaskResponse> response = taskService.listByCoworker(user, memberId).stream()
+                .map(CoworkerTaskResponse::of)
+                .toList();
+        return ApiResponse.success(response);
+    }
+
+    @PostMapping
+    public ApiResponse<Long> create(
+            @AuthenticationPrincipal AuthUser user,
+            @RequestBody @Valid CreateTaskRequest request) {
+        Long id = taskService.create(user, request.toCommand());
+        return ApiResponse.success(id);
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<Void> update(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateTaskRequest request) {
+        taskService.update(user, id, request.toCommand());
+        return ApiResponse.success(null);
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> delete(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id) {
+        taskService.delete(user, id);
+        return ApiResponse.success(null);
+    }
+}
