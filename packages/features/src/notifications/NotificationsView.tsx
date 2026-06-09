@@ -1,26 +1,34 @@
 'use client'
 
-import { useQuery, useQueryClient, customFetch } from '@bconnect/api-client'
+import type { ReactNode } from 'react'
+import { useQueryClient } from '@bconnect/api-client'
 import { NotificationItem, Skeleton } from '@bconnect/ui'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
 import { PanelMessage } from '../_shared/PanelMessage'
+import { useNotifications } from './useNotifications'
 import type { AppNotification } from './types'
 
-export interface NotificationsViewProps {
-  closeHref: string
-  onClose: () => void
-}
+type NotificationsViewShellProps =
+  | {
+      /** 풀페이지 등 비-패널 쉘 주입 (career 풀페이지 라우트) */
+      renderShell: (props: { title: string; children: ReactNode }) => ReactNode
+      closeHref?: never
+      onClose?: never
+    }
+  | {
+      /** 기본 @panel 쉘 (plan) */
+      renderShell?: never
+      closeHref: string
+      onClose: () => void
+    }
 
-export function NotificationsView({ closeHref, onClose }: NotificationsViewProps) {
+export type NotificationsViewProps = NotificationsViewShellProps
+
+export function NotificationsView(props: NotificationsViewProps) {
   const queryClient = useQueryClient()
-  // TODO(BE notification 도메인 #347): 스펙 확정 시 generated useQuery 훅으로 교체.
-  // 현재는 독립 MSW placeholder(`/api/v1/notifications`) — customFetch 가 envelope unwrap.
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['notifications'],
-    queryFn: () => customFetch<AppNotification[]>('/api/v1/notifications'),
-  })
+  const { data, isLoading, isError } = useNotifications()
 
   const markAllRead = () => {
     queryClient.setQueryData<AppNotification[]>(['notifications'], (prev) =>
@@ -28,22 +36,21 @@ export function NotificationsView({ closeHref, onClose }: NotificationsViewProps
     )
   }
 
-  return (
-    <PanelShell
-      title="알림"
-      closeLabel="알림 패널 닫기"
-      closeHref={closeHref}
-      onClose={onClose}
-      rightSlot={
-        <button
-          type="button"
-          onClick={markAllRead}
-          className="cursor-pointer whitespace-nowrap text-m-12 text-primary-500"
-        >
-          모두 읽음
-        </button>
-      }
-    >
+  const hasItems = !!data && data.length > 0
+
+  const body = (
+    <>
+      {hasItems && (
+        <div className="flex justify-end px-4 py-2">
+          <button
+            type="button"
+            onClick={markAllRead}
+            className="cursor-pointer whitespace-nowrap text-m-12 text-primary-500"
+          >
+            모두 읽음
+          </button>
+        </div>
+      )}
       <PanelScroll>
         {isLoading ? (
           <NotificationsSkeleton />
@@ -65,6 +72,21 @@ export function NotificationsView({ closeHref, onClose }: NotificationsViewProps
           </ul>
         )}
       </PanelScroll>
+    </>
+  )
+
+  if (props.renderShell) {
+    return <>{props.renderShell({ title: '알림', children: body })}</>
+  }
+
+  return (
+    <PanelShell
+      title="알림"
+      closeLabel="알림 패널 닫기"
+      closeHref={props.closeHref}
+      onClose={props.onClose}
+    >
+      {body}
     </PanelShell>
   )
 }
