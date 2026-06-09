@@ -1,16 +1,24 @@
 export type TaskStatus = 'completed' | 'in_progress' | 'recruited' | 'recruiting' | 'not_started'
 
-export type GanttTask = {
-  id: string
+export type TaskAssignee = {
   name: string
+  region: string
+  level: string
+  specialty: string
+}
+
+export type ScheduleTask = {
+  id: string
   category: string
+  ganttName: string
   startDate: string
   endDate: string
   status: TaskStatus
+  assignee?: TaskAssignee
 }
 
-export type GanttChartProps = {
-  tasks: GanttTask[]
+export type ScheduleGridProps = {
+  tasks: ScheduleTask[]
   startDate: string
   endDate: string
   today?: string
