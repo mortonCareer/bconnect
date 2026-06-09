@@ -1,16 +1,10 @@
-/**
- * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1504-13642
- */
 'use client'
 
-import { useParams } from 'next/navigation'
 import { useGetChat, useGetMyMember, useGetProfile } from '@bconnect/api-client'
 import { ChatView, PanelAside, type ChatViewData } from '@bconnect/features'
 import { usePanelNav } from '@/hooks/usePanelNav'
 
-export default function ChatPanelPage() {
-  const params = useParams<{ chatId: string }>()
-  const chatId = Number(params.chatId)
+export function PanelChat({ chatId }: { chatId: number }) {
   const { panelHref, closeHref, close } = usePanelNav()
 
   const enabled = Number.isFinite(chatId) && chatId > 0

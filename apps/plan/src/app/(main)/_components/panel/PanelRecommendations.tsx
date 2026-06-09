@@ -1,16 +1,10 @@
-/**
- * @figma-pending 추천서 패널 — 시안 미정, 프로필 stats 진입 (#557)
- */
 'use client'
 
-import { useParams } from 'next/navigation'
 import { useGetReceivedRecommendations, useGetSentRecommendations } from '@bconnect/api-client'
 import { RecommendationsView, PanelAside, type RecommendationsViewData } from '@bconnect/features'
 import { usePanelNav } from '@/hooks/usePanelNav'
 
-export default function RecommendationsPanelPage() {
-  const params = useParams<{ profileId: string }>()
-  const profileId = Number(params.profileId)
+export function PanelRecommendations({ profileId }: { profileId: number }) {
   const { panelHref, closeHref, close } = usePanelNav()
 
   const enabled = Number.isFinite(profileId) && profileId > 0
