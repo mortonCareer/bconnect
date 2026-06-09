@@ -3,12 +3,15 @@
 import type { Recommendation } from '@bconnect/api-client'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
+import { PanelMessage } from '../_shared/PanelMessage'
 import { RecommendationList } from './RecommendationList'
 
 /** 앱이 resolve 해 내려주는 데이터. plan 어댑터가 useGetReceived/SentRecommendations(by-id) 로 채운다. */
 export interface RecommendationsViewData {
   received?: Recommendation[]
   sent?: Recommendation[]
+  /** received·sent 중 하나라도 실패. RecommendationList 는 에러 상태가 없어 무한 스켈레톤이 되므로 패널이 가드 */
+  isError: boolean
 }
 
 export interface RecommendationsViewProps {
@@ -36,9 +39,13 @@ export function RecommendationsView({
       onClose={onClose}
     >
       <PanelScroll>
-        <div className="px-4 py-4">
-          <RecommendationList received={data.received} sent={data.sent} hideHeader />
-        </div>
+        {data.isError ? (
+          <PanelMessage>추천서를 불러올 수 없습니다</PanelMessage>
+        ) : (
+          <div className="px-4 py-4">
+            <RecommendationList received={data.received} sent={data.sent} hideHeader />
+          </div>
+        )}
       </PanelScroll>
     </PanelShell>
   )

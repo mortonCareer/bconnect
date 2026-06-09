@@ -14,10 +14,16 @@ export default function RecommendationsPanelPage() {
   const { panelHref, closeHref, close } = usePanelNav()
 
   const enabled = Number.isFinite(profileId) && profileId > 0
-  const { data: received } = useGetReceivedRecommendations({ profileId }, { query: { enabled } })
-  const { data: sent } = useGetSentRecommendations({ profileId }, { query: { enabled } })
+  const { data: received, isError: receivedError } = useGetReceivedRecommendations(
+    { profileId },
+    { query: { enabled } }
+  )
+  const { data: sent, isError: sentError } = useGetSentRecommendations(
+    { profileId },
+    { query: { enabled } }
+  )
 
-  const data: RecommendationsViewData = { received, sent }
+  const data: RecommendationsViewData = { received, sent, isError: receivedError || sentError }
 
   return (
     <PanelAside label="추천서">
