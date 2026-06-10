@@ -1,5 +1,7 @@
 'use client'
 
+import { usePanelNav } from '@/hooks/usePanelNav'
+import Link from 'next/link'
 import type { ScheduleGridProps, ScheduleTask, TaskStatus } from './types'
 
 const COL_CATEGORY = 120
@@ -86,9 +88,11 @@ function StatusPill({ status }: { status: TaskStatus }) {
 /** 좌측 고정 컬럼 (공종 / 상태 / 기술자). 행 단위로 gantt 트랙과 같은 flex row 안에 들어가 정렬을 보장한다. */
 function LeftCells({
   task,
+  assigneeHref,
   onFindTechnician,
 }: {
   task: ScheduleTask
+  assigneeHref: (profileId: number) => string
   onFindTechnician: () => void
 }) {
   return (
@@ -110,7 +114,12 @@ function LeftCells({
         style={{ width: COL_ASSIGNEE }}
       >
         {task.assignee ? (
-          <div data-testid="assignee" className="flex w-full items-center gap-2">
+          <Link
+            href={assigneeHref(task.assignee.profileId)}
+            scroll={false}
+            data-testid="assignee"
+            className="flex w-full items-center gap-2 rounded-[6px] px-1 py-1 hover:bg-gray-100"
+          >
             <div aria-hidden="true" className="size-[34px] shrink-0 rounded-full bg-[#d9d9d9]" />
             <div className="flex min-w-0 flex-col">
               <p className="text-sb-14 text-gray-900">{task.assignee.name}</p>
@@ -118,7 +127,7 @@ function LeftCells({
                 {task.assignee.region} | {task.assignee.level} | {task.assignee.specialty}
               </p>
             </div>
-          </div>
+          </Link>
         ) : (
           <button
             type="button"
@@ -203,6 +212,7 @@ function GanttTrack({
 }
 
 export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridProps) {
+  const { panelHref } = usePanelNav()
   const dates = buildDates(startDate, endDate)
   const monthGroups = groupByMonth(dates)
   const ganttWidth = dates.length * DAY_WIDTH + RIGHT_PAD_WIDTH
@@ -312,7 +322,11 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
               className="flex border-b border-solid border-[#f5f5f5] has-[:focus-visible]:z-50 has-[:hover]:z-50"
               style={{ height: ROW_HEIGHT }}
             >
-              <LeftCells task={task} onFindTechnician={handleFindTechnician} />
+              <LeftCells
+                task={task}
+                assigneeHref={(profileId) => panelHref(`profile/${profileId}`)}
+                onFindTechnician={handleFindTechnician}
+              />
               <GanttTrack task={task} dates={dates} startDate={startDate} todayIso={today} />
             </div>
           ))}

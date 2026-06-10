@@ -1,6 +1,7 @@
 export type TaskStatus = 'completed' | 'in_progress' | 'recruited' | 'recruiting' | 'not_started'
 
 export type TaskAssignee = {
+  profileId: number
   name: string
   region: string
   level: string
