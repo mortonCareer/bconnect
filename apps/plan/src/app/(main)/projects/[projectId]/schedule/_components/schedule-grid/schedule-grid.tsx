@@ -168,7 +168,7 @@ function GanttBars({
       })}
       <div
         {...moveHandleProps}
-        className={`group absolute flex touch-none items-center rounded pl-2.5 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${drag ? 'z-10 cursor-grabbing opacity-90' : 'cursor-grab'}`}
+        className={`absolute flex touch-none items-center rounded pl-2.5 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${drag ? 'z-10 cursor-grabbing opacity-90' : 'cursor-grab'}`}
         style={{ left, top: BAR_TOP, width, height: BAR_HEIGHT, backgroundColor: style.bg }}
         tabIndex={0}
         aria-label={`${task.ganttName} · ${task.startDate} ~ ${task.endDate} · ${label}`}
@@ -179,18 +179,6 @@ function GanttBars({
         >
           {task.ganttName}
         </p>
-        <div
-          className="pointer-events-none invisible absolute left-0 top-full z-10 mt-1 whitespace-nowrap rounded bg-neutral-900 px-2 py-1 text-[11px] text-white opacity-0 shadow-lg transition-opacity group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100"
-          role="tooltip"
-        >
-          <span className="font-semibold">{task.ganttName}</span>
-          <span className="mx-1 text-neutral-400">·</span>
-          <span>
-            {task.startDate} ~ {task.endDate}
-          </span>
-          <span className="mx-1 text-neutral-400">·</span>
-          <span>{label}</span>
-        </div>
         <div
           aria-hidden="true"
           onPointerDown={startHandleDown}
