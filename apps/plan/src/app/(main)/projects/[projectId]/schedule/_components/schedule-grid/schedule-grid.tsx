@@ -1,6 +1,7 @@
 'use client'
 
 import { usePanelNav } from '@/hooks/usePanelNav'
+import { Button } from '@bconnect/ui'
 import Link from 'next/link'
 import type { WheelEvent } from 'react'
 import type { ScheduleGridProps, ScheduleTask, TaskStatus } from './types'
@@ -309,13 +310,14 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
                     </span>
                   </Link>
                 ) : (
-                  <button
+                  <Button
+                    variant="outline"
                     type="button"
                     onClick={handleFindTechnician}
-                    className="text-m-14 h-[33.5px] w-full rounded-[6px] border border-solid border-[#c0d0ff] text-primary hover:bg-primary-50"
+                    className="text-m-14 h-[33.5px] w-full rounded-[6px] border-[#c0d0ff] px-0 font-medium hover:bg-primary-50"
                   >
                     + 기술자 탐색
-                  </button>
+                  </Button>
                 )}
               </td>
               <td
@@ -333,13 +335,14 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
               className={`${stickyCell} border-r border-solid border-[#e5e5e5] p-2`}
               style={{ left: STICKY_LEFT[0] }}
             >
-              <button
+              <Button
+                variant="outline"
                 type="button"
                 onClick={handleCreateTask}
-                className="text-m-14 h-[33.5px] w-[103px] rounded-[6px] border border-dashed border-[#c0d0ff] text-primary hover:bg-primary-50"
+                className="text-m-14 h-[33.5px] w-[103px] rounded-[6px] border-dashed border-[#c0d0ff] px-0 font-medium hover:bg-primary-50"
               >
                 + 작업 생성
-              </button>
+              </Button>
             </td>
             <td
               className={`${stickyCell} border-r border-solid border-[#e5e5e5]`}
