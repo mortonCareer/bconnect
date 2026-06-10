@@ -26,8 +26,8 @@ const BAR_STYLES: Record<TaskStatus, { bg: string; text: string }> = {
 
 const PILL_STYLES: Record<TaskStatus, string> = {
   completed: 'bg-[#f0f0f0] border border-[#d0d0d0] text-[#3d3d3d]',
-  in_progress: 'bg-[#386dff] text-white',
-  recruited: 'bg-[#eef4ff] border border-[#c0d0ff] text-[#386dff]',
+  in_progress: 'bg-primary text-white',
+  recruited: 'bg-primary-50 border border-[#c0d0ff] text-primary',
   recruiting: 'bg-[#fff3e0] border border-[#ffe0b2] text-[#e6780a]',
   not_started: 'bg-white border border-[#d0d0d0] text-[#a5a5a5]',
 }
@@ -123,7 +123,7 @@ function LeftCells({
           <button
             type="button"
             onClick={onFindTechnician}
-            className="text-m-14 h-[33.5px] w-full rounded-[6px] border border-solid border-[#c0d0ff] text-[#386dff] hover:bg-[#eef4ff]"
+            className="text-m-14 h-[33.5px] w-full rounded-[6px] border border-solid border-[#c0d0ff] text-primary hover:bg-primary-50"
           >
             + 기술자 탐색
           </button>
@@ -330,7 +330,7 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
                 <button
                   type="button"
                   onClick={handleCreateTask}
-                  className="text-m-14 h-[33.5px] w-[103px] rounded-[6px] border border-dashed border-[#c0d0ff] text-[#386dff] hover:bg-[#eef4ff]"
+                  className="text-m-14 h-[33.5px] w-[103px] rounded-[6px] border border-dashed border-[#c0d0ff] text-primary hover:bg-primary-50"
                 >
                   + 작업 생성
                 </button>
