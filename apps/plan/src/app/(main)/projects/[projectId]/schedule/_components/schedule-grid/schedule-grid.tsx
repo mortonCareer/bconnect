@@ -157,11 +157,12 @@ function GanttBars({
     <>
       {dates.map((d, i) => {
         const iso = toIsoDate(d)
+        const isMonthEnd = d.getMonth() !== dates[i + 1]?.getMonth()
         return (
           <div
             key={iso}
             aria-hidden="true"
-            className="absolute top-0 border-r border-solid border-[#f5f5f5]"
+            className={`absolute top-0 border-r border-solid ${isMonthEnd ? 'border-[#d0d0d0]' : 'border-[#f5f5f5]'}`}
             style={{
               left: i * DAY_WIDTH,
               width: DAY_WIDTH,
@@ -236,9 +237,26 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
 
   const dates = buildDates(startDate, endDate)
   const monthGroups = groupByMonth(dates)
-  const ganttWidth = dates.length * DAY_WIDTH + RIGHT_PAD_WIDTH
 
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [containerWidth, setContainerWidth] = useState(0)
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const observer = new ResizeObserver(() => setContainerWidth(el.clientWidth))
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  // 간트 영역이 컨테이너 잔여 폭을 항상 채우도록 우측 패드를 늘린다 (#3).
+  // 콘텐츠(일자 셀)가 더 길면 기존대로 가로 스크롤.
+  const daysWidth = dates.length * DAY_WIDTH
+  const padWidth = Math.max(
+    RIGHT_PAD_WIDTH,
+    containerWidth - (COL_CATEGORY + COL_STATUS + COL_ASSIGNEE) - daysWidth
+  )
+  const ganttWidth = daysWidth + padWidth
+
   const didInitScroll = useRef(false)
   useEffect(() => {
     if (didInitScroll.current || !today) return
@@ -304,7 +322,7 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
                 {monthGroups.map((g, i) => (
                   <div
                     key={`${g.month}-${i}`}
-                    className="flex items-center justify-center"
+                    className={`flex items-center justify-center ${i < monthGroups.length - 1 ? 'border-r border-solid border-[#d0d0d0]' : ''}`}
                     style={{ width: g.count * DAY_WIDTH }}
                   >
                     <span className="text-[13px] font-semibold leading-[19.5px] text-[#3d3d3d]">
@@ -312,7 +330,7 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
                     </span>
                   </div>
                 ))}
-                <div style={{ width: RIGHT_PAD_WIDTH }} />
+                <div style={{ width: padWidth }} />
               </div>
             </th>
           </tr>
@@ -334,13 +352,14 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
               style={{ backgroundColor: '#fafafa' }}
             >
               <div className="flex" style={{ width: ganttWidth, height: HEADER_HEIGHT }}>
-                {dates.map((d) => {
+                {dates.map((d, i) => {
                   const iso = toIsoDate(d)
                   const isToday = iso === today
+                  const isMonthEnd = d.getMonth() !== dates[i + 1]?.getMonth()
                   return (
                     <div
                       key={iso}
-                      className="flex items-center justify-center border-r border-solid border-[#f0f0f0]"
+                      className={`flex items-center justify-center border-r border-solid ${isMonthEnd ? 'border-[#d0d0d0]' : 'border-[#f0f0f0]'}`}
                       style={{ width: DAY_WIDTH, backgroundColor: isToday ? '#fff0f0' : undefined }}
                     >
                       <span
@@ -355,7 +374,7 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
                     </div>
                   )
                 })}
-                <div style={{ width: RIGHT_PAD_WIDTH }} />
+                <div style={{ width: padWidth }} />
               </div>
             </th>
           </tr>
@@ -377,14 +396,14 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
                 <StatusPill status={task.status} />
               </td>
               <td
-                className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] p-2 align-middle`}
+                className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] align-middle ${task.assignee ? 'px-1 py-2' : 'p-2'}`}
                 style={{ left: STICKY_LEFT[2] }}
               >
                 {task.assignee ? (
                   <Link
                     href={panelHref(`profile/${task.assignee.profileId}`)}
                     scroll={false}
-                    className="flex w-full items-center gap-2 rounded-[8px] hover:bg-gray-100"
+                    className="flex w-full items-center gap-2 rounded-[8px] px-1 hover:bg-gray-100"
                   >
                     <span
                       aria-hidden="true"
