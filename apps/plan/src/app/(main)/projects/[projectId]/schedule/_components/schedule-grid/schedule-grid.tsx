@@ -1,10 +1,11 @@
 'use client'
 
 import { usePanelNav } from '@/hooks/usePanelNav'
-import { Button } from '@bconnect/ui'
+import { Button, ConfirmDialog } from '@bconnect/ui'
 import Link from 'next/link'
+import { ContextMenu } from 'radix-ui'
 import type { WheelEvent } from 'react'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ScheduleGridProps, ScheduleTask, TaskStatus } from './types'
 import type { DragMode } from './use-bar-drag'
 import { useBarDrag } from './use-bar-drag'
@@ -126,12 +127,16 @@ function GanttBars({
   startDate,
   todayIso,
   onUpdate,
+  onEdit,
+  onDelete,
 }: {
   task: ScheduleTask
   dates: Date[]
   startDate: string
   todayIso: string | undefined
   onUpdate: (id: string, patch: Partial<Omit<ScheduleTask, 'id'>>) => void
+  onEdit: (id: string) => void
+  onDelete: (id: string) => void
 }) {
   const { drag, moveHandleProps, startHandleDown, endHandleDown } = useBarDrag(
     DAY_WIDTH,
@@ -166,37 +171,58 @@ function GanttBars({
           />
         )
       })}
-      <div
-        {...moveHandleProps}
-        className={`absolute flex touch-none items-center rounded pl-2.5 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${drag ? 'z-10 cursor-grabbing opacity-90' : 'cursor-grab'}`}
-        style={{ left, top: BAR_TOP, width, height: BAR_HEIGHT, backgroundColor: style.bg }}
-        tabIndex={0}
-        aria-label={`${task.ganttName} · ${task.startDate} ~ ${task.endDate} · ${label}`}
-      >
-        <p
-          className="truncate text-[12px] font-semibold leading-[18px]"
-          style={{ color: style.text }}
-        >
-          {task.ganttName}
-        </p>
-        <div
-          aria-hidden="true"
-          onPointerDown={startHandleDown}
-          className="absolute inset-y-0 left-0 w-2 cursor-ew-resize rounded-l hover:bg-black/15"
-        />
-        <div
-          aria-hidden="true"
-          onPointerDown={endHandleDown}
-          className="absolute inset-y-0 right-0 w-2 cursor-ew-resize rounded-r hover:bg-black/15"
-        />
-      </div>
+      <ContextMenu.Root>
+        <ContextMenu.Trigger asChild>
+          <div
+            {...moveHandleProps}
+            className={`absolute flex touch-none items-center rounded pl-2.5 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${drag ? 'z-10 cursor-grabbing opacity-90' : 'cursor-grab'}`}
+            style={{ left, top: BAR_TOP, width, height: BAR_HEIGHT, backgroundColor: style.bg }}
+            tabIndex={0}
+            aria-label={`${task.ganttName} · ${task.startDate} ~ ${task.endDate} · ${label}`}
+          >
+            <p
+              className="truncate text-[12px] font-semibold leading-[18px]"
+              style={{ color: style.text }}
+            >
+              {task.ganttName}
+            </p>
+            <div
+              aria-hidden="true"
+              onPointerDown={startHandleDown}
+              className="absolute inset-y-0 left-0 w-2 cursor-ew-resize rounded-l hover:bg-black/15"
+            />
+            <div
+              aria-hidden="true"
+              onPointerDown={endHandleDown}
+              className="absolute inset-y-0 right-0 w-2 cursor-ew-resize rounded-r hover:bg-black/15"
+            />
+          </div>
+        </ContextMenu.Trigger>
+        <ContextMenu.Portal>
+          <ContextMenu.Content className="z-50 min-w-[120px] rounded-lg border border-solid border-gray-200 bg-white py-1 shadow-lg">
+            <ContextMenu.Item
+              onSelect={() => onEdit(task.id)}
+              className="flex cursor-pointer items-center px-4 py-2 text-r-14 text-gray-900 outline-none data-[highlighted]:bg-gray-50"
+            >
+              수정
+            </ContextMenu.Item>
+            <ContextMenu.Item
+              onSelect={() => onDelete(task.id)}
+              className="flex cursor-pointer items-center px-4 py-2 text-r-14 text-[#FF4242] outline-none data-[highlighted]:bg-gray-50"
+            >
+              삭제
+            </ContextMenu.Item>
+          </ContextMenu.Content>
+        </ContextMenu.Portal>
+      </ContextMenu.Root>
     </>
   )
 }
 
 export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) {
-  const { panelHref } = usePanelNav()
-  const { tasks, updateTask } = useScheduleTasks(initialTasks)
+  const { panelHref, openPanel } = usePanelNav()
+  const { tasks, updateTask, deleteTask } = useScheduleTasks(initialTasks)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   // 범위 = 최초 start ~ 최후 end. tasks 파생이라 drop(상태 변경) 시에만 재계산된다 (#6)
   const { startDate, endDate } = useMemo(() => {
@@ -392,6 +418,8 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
                   startDate={startDate}
                   todayIso={today}
                   onUpdate={updateTask}
+                  onEdit={(id) => openPanel(`task/${id}`)}
+                  onDelete={setDeleteTargetId}
                 />
               </td>
             </tr>
@@ -424,6 +452,20 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
           </tr>
         </tbody>
       </table>
+      <ConfirmDialog
+        open={deleteTargetId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTargetId(null)
+        }}
+        title="작업을 삭제할까요?"
+        description="삭제한 작업은 복구할 수 없어요."
+        confirmLabel="삭제"
+        destructive
+        onConfirm={() => {
+          if (deleteTargetId) deleteTask(deleteTargetId)
+          setDeleteTargetId(null)
+        }}
+      />
     </div>
   )
 }
