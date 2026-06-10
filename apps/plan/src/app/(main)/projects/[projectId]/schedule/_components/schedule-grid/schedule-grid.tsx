@@ -4,7 +4,9 @@ import { usePanelNav } from '@/hooks/usePanelNav'
 import { Button } from '@bconnect/ui'
 import Link from 'next/link'
 import type { WheelEvent } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import type { ScheduleGridProps, ScheduleTask, TaskStatus } from './types'
+import { useScheduleTasks } from './use-schedule-tasks'
 
 const COL_CATEGORY = 120
 const COL_STATUS = 100
@@ -18,6 +20,9 @@ const BAR_HEIGHT = 36
 const BAR_TOP = 7.5
 
 const ISO_DAY_MS = 86_400_000
+
+// 초기 스크롤: 오늘 기준 과거를 며칠 보여줄지 (과거 약간 + 미래 위주)
+const PAST_CONTEXT_DAYS = 3
 
 // 좌측 고정 컬럼의 sticky left 오프셋 (공종 / 상태 / 기술자)
 const STICKY_LEFT = [0, COL_CATEGORY, COL_CATEGORY + COL_STATUS]
@@ -155,11 +160,33 @@ function GanttBars({
   )
 }
 
-export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridProps) {
+export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) {
   const { panelHref } = usePanelNav()
+  const { tasks } = useScheduleTasks(initialTasks)
+
+  // 범위 = 최초 start ~ 최후 end. tasks 파생이라 drop(상태 변경) 시에만 재계산된다 (#6)
+  const { startDate, endDate } = useMemo(() => {
+    const start = tasks[0]?.startDate ?? today ?? ''
+    let end = start
+    for (const t of tasks) {
+      if (t.endDate > end) end = t.endDate
+    }
+    return { startDate: start, endDate: end }
+  }, [tasks, today])
+
   const dates = buildDates(startDate, endDate)
   const monthGroups = groupByMonth(dates)
   const ganttWidth = dates.length * DAY_WIDTH + RIGHT_PAD_WIDTH
+
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const didInitScroll = useRef(false)
+  useEffect(() => {
+    if (didInitScroll.current || !today) return
+    didInitScroll.current = true
+    const todayIndex = daysBetween(startDate, today)
+    const el = scrollRef.current
+    if (el) el.scrollLeft = Math.max(0, (todayIndex - PAST_CONTEXT_DAYS) * DAY_WIDTH)
+  }, [today, startDate])
 
   function handleCreateTask() {
     alert('준비 중')
@@ -183,6 +210,7 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
 
   return (
     <div
+      ref={scrollRef}
       onWheel={handleWheel}
       className="w-full overflow-x-auto bg-white font-sans [scrollbar-color:#d0d0d0_transparent] [scrollbar-width:thin]"
     >

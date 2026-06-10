@@ -20,7 +20,5 @@ export type ScheduleTask = {
 
 export type ScheduleGridProps = {
   tasks: ScheduleTask[]
-  startDate: string
-  endDate: string
   today?: string
 }
