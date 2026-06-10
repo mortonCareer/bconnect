@@ -28,7 +28,6 @@ export function PanelProfile({ profileId }: { profileId: number }) {
   const { data: sent } = useGetSentRecommendations({ profileId }, { query: { enabled } })
   const { data: feeds } = useGetFeeds({ profileId }, { query: { enabled } })
 
-  // 작업물 탭 진입 href — 현재 panel/필터 param 을 보존하며 tab 만 추가
   const worksParams = new URLSearchParams(searchParams.toString())
   worksParams.set('tab', 'works')
 

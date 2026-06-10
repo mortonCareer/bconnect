@@ -31,7 +31,6 @@ export function usePanelNav() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  // panel 값만 set/clear, 나머지 search param 은 보존
   const hrefWithPanel = (panelValue: string | null) => {
     const params = new URLSearchParams(searchParams.toString())
     if (panelValue) params.set('panel', panelValue)

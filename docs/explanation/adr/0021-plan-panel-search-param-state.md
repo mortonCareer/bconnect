@@ -1,6 +1,6 @@
 # ADR-0021: plan 우측 패널 — search param 상태 (parallel route 제거)
 
-- **Status**: Proposed
+- **Status**: Accepted
 - **Date**: 2026-06-09
 - **Deciders**: @manamana32321
 - **Related**: [ADR-0017](./0017-plan-panel-parallel-routes-shared-features.md) (이 결정이 supersede) · [ADR-0020](./0020-dual-shell-view-sharing-rendershell-resolved-data.md) (공유 뷰 계약, 유지) · [#568](https://github.com/mortonCareer/bconnect/issues/568) · [#375](https://github.com/mortonCareer/bconnect/issues/375) (공정표, PR [#566](https://github.com/mortonCareer/bconnect/pull/566))
