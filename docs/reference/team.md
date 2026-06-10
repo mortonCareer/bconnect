@@ -179,4 +179,3 @@ PR 생성 + 리뷰어 할당
 
 - [Git Workflow](../how-to/git-workflow.md) - 이슈/PR 프로세스
 - [Development Workflow](../how-to/development-workflow.md) - 개발 프로세스
-- [QA & Testing](../how-to/qa-and-testing.md) - 버그 판단 기준

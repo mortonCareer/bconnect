@@ -45,11 +45,11 @@ main 머지 → 프로덕션 배포
 
 - **`dev`**: 개발 브랜치 (GitHub 기본 브랜치)
   - BE 코드를 API 기준(SSOT)으로 하는 BE-first 개발 사이클 ([ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md)). 일반적으로 **BE 구현 → 스펙 갱신 → FE 작업** 순서로 진행
-  - FE는 MSW mock으로 BE 미구현 상태에서도 일부 작업 가능 (preview 환경에서 mock 응답으로 동작)
+  - FE는 로컬에서 MSW mock으로 BE 미구현 상태에서도 작업 가능 (dev 배포는 dev BE(Railway)에 연동)
   - 모든 feature/fix PR의 타겟
   - CI: lint, format, BE 빌드/테스트, **FE typecheck 포함** (강제 green 정책)
   - 스펙만 갱신하는 PR(BE 구현 후 따라가는 갱신)은 paths-filter로 ci-career/ci-plan skip — BE-first에선 일반적으로 BE 변경과 스펙 갱신이 같은 PR에 묶이거나, 스펙 갱신이 FE 호출부 영향 없는 형태로 들어옴
-  - Vercel preview build 항상 green — 디자이너 검수 / 시각 QA 사이클 보장
+  - dev 환경 always-green — 스프린트 단위 QA 사이클 보장
 
 ### 작업 브랜치
 
@@ -283,9 +283,7 @@ PR 본문 템플릿: [.github/pull_request_template.md](../../.github/pull_reque
 ```
 PR 생성
     ↓
-Vercel 프리뷰 자동 배포 (1-2분 소요)
-    ↓
-디자이너: UI 검수 (프리뷰 URL)
+CI 체크 통과 (lint/format/BE·FE typecheck)
     ↓
 CTO: 코드 리뷰 + 기능 테스트
     ↓
@@ -295,8 +293,10 @@ CEO: 최종 QA (실사용자 관점)
     ↓
 Approve
     ↓
-main 브랜치로 머지
+dev 브랜치로 머지
 ```
+
+> 디자이너 UI 검수·실사용자 QA 는 스프린트 단위 dev 환경에서 수행합니다.
 
 ### PR 머지 방법
 
@@ -313,46 +313,9 @@ main 브랜치로 머지
 - 머지 커밋 메시지는 PR 제목 사용
 - 프로덕션 자동 배포 (`main` 머지 시)
 
-#### Sync PR (head=main)의 Vercel checks 예외
+## QA
 
-`main → dev` sync PR은 head가 `main`이라 Vercel preview가 main 코드를 빌드합니다. main에 typecheck drift 등 broken 상태가 있으면 preview가 실패하지만, 이는 sync PR이 만든 문제가 아니라 기존 main 상태를 비추는 것이므로 머지 금지 사유에 해당하지 않습니다. main의 drift는 다음 `dev → main` 통합 사이클에서 별도로 해소합니다.
-
----
-
-## Vercel 프리뷰 배포
-
-### 자동 배포
-
-PR 생성 시 자동으로 프리뷰 환경이 배포됩니다:
-
-```
-PR 생성/업데이트
-    ↓
-Vercel 빌드 시작 (1-2분)
-    ↓
-프리뷰 URL 생성
-    ↓
-GitHub PR 댓글에 링크 추가
-```
-
-### 프리뷰 URL 예시
-
-URL 패턴은 [tools.md](../reference/tools.md#terraform-선언적-관리) Vercel 섹션 참조.
-
-```
-https://morton-career-git-feat-123-add-profile-upload-<team>.vercel.app
-https://morton-plan-git-feat-123-add-profile-upload-<team>.vercel.app
-```
-
-### QA on Preview
-
-프리뷰 환경에서 다음을 확인합니다:
-
-- UI/UX 시안 대비 확인 (디자이너)
-- 기능 동작 테스트 (CTO)
-- 실사용자 관점 검증 (CEO)
-
-상세 QA 프로세스: **[qa-and-testing.md](./qa-and-testing.md)** 참조
+QA 는 dev 환경에서 **스프린트 단위**로 수행합니다 — 디자이너 UI 검수, CTO 기능 테스트, CEO 실사용자 관점 검증. production 배포는 main 머지 시 career(`bconnect.to`)·plan(`plan.bconnect.to`)으로 자동 진행됩니다.
 
 ---
 
@@ -364,7 +327,7 @@ https://morton-plan-git-feat-123-add-profile-upload-<team>.vercel.app
 - 이슈 번호 기반 브랜치 생성
 - 의미 있는 커밋 메시지 작성
 - PR에 테스트 결과 명시
-- 프리뷰 환경에서 충분히 테스트
+- 스프린트 단위로 dev 환경에서 충분히 테스트
 - 리뷰어 피드백 적극 반영
 
 ### DON'T ❌
