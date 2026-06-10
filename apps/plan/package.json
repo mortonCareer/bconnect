@@ -21,7 +21,6 @@
     "react-hook-form": "catalog:",
     "zod": "catalog:",
     "nuqs": "catalog:",
-    "radix-ui": "catalog:",
     "zustand": "catalog:"
   },
   "devDependencies": {

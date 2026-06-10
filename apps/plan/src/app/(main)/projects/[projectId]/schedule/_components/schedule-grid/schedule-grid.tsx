@@ -1,9 +1,8 @@
 'use client'
 
 import { usePanelNav } from '@/hooks/usePanelNav'
-import { Button, ConfirmDialog } from '@bconnect/ui'
+import { Button, ConfirmDialog, ContextMenu } from '@bconnect/ui'
 import Link from 'next/link'
-import { ContextMenu } from 'radix-ui'
 import type { WheelEvent } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ScheduleGridProps, ScheduleTask, TaskStatus } from './types'
@@ -26,9 +25,6 @@ const ISO_DAY_MS = 86_400_000
 
 // 초기 스크롤: 오늘 기준 과거를 며칠 보여줄지 (과거 약간 + 미래 위주)
 const PAST_CONTEXT_DAYS = 3
-
-// 렌더 범위 여유: 최초 시작일 -N ~ 최후 종료일 +N
-const RANGE_PAD_DAYS = 5
 
 // 좌측 고정 컬럼의 sticky left 오프셋 (공종 / 상태 / 기술자)
 const STICKY_LEFT = [0, COL_CATEGORY, COL_CATEGORY + COL_STATUS]
@@ -67,6 +63,14 @@ function daysBetween(a: string, b: string): number {
 
 function addDays(iso: string, n: number): string {
   return toIsoDate(new Date(new Date(iso).getTime() + n * ISO_DAY_MS))
+}
+
+function monthStartOf(iso: string): string {
+  return `${iso.slice(0, 8)}01`
+}
+
+function monthEndOf(iso: string): string {
+  return toIsoDate(new Date(Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)), 0)))
 }
 
 function buildDates(start: string, end: string): Date[] {
@@ -165,18 +169,17 @@ function GanttBars({
           <div
             key={iso}
             aria-hidden="true"
-            className={`absolute top-0 border-r border-solid ${isMonthEnd ? 'border-[#d0d0d0]' : 'border-[#f5f5f5]'}`}
+            className={`absolute inset-y-0 border-r border-solid ${isMonthEnd ? 'border-[#d0d0d0]' : 'border-[#f5f5f5]'}`}
             style={{
               left: i * DAY_WIDTH,
               width: DAY_WIDTH,
-              height: ROW_HEIGHT,
               backgroundColor: iso === todayIso ? '#fff8f8' : undefined,
             }}
           />
         )
       })}
-      <ContextMenu.Root>
-        <ContextMenu.Trigger asChild>
+      <ContextMenu
+        trigger={
           <div
             {...moveHandleProps}
             className={`absolute flex touch-none items-center rounded pl-2.5 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${drag ? 'z-10 cursor-grabbing opacity-90' : 'cursor-grab'}`}
@@ -201,24 +204,12 @@ function GanttBars({
               className="absolute inset-y-0 right-0 w-2 cursor-ew-resize rounded-r hover:bg-black/15"
             />
           </div>
-        </ContextMenu.Trigger>
-        <ContextMenu.Portal>
-          <ContextMenu.Content className="z-50 min-w-[120px] rounded-lg border border-solid border-gray-200 bg-white py-1 shadow-lg">
-            <ContextMenu.Item
-              onSelect={() => onEdit(task.id)}
-              className="flex cursor-pointer items-center px-4 py-2 text-r-14 text-gray-900 outline-none data-[highlighted]:bg-gray-50"
-            >
-              수정
-            </ContextMenu.Item>
-            <ContextMenu.Item
-              onSelect={() => onDelete(task.id)}
-              className="flex cursor-pointer items-center px-4 py-2 text-r-14 text-[#FF4242] outline-none data-[highlighted]:bg-gray-50"
-            >
-              삭제
-            </ContextMenu.Item>
-          </ContextMenu.Content>
-        </ContextMenu.Portal>
-      </ContextMenu.Root>
+        }
+        items={[
+          { label: '수정', onSelect: () => onEdit(task.id) },
+          { label: '삭제', onSelect: () => onDelete(task.id), destructive: true },
+        ]}
+      />
     </>
   )
 }
@@ -228,7 +219,7 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
   const { tasks, updateTask, deleteTask } = useScheduleTasks(initialTasks)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
-  // 범위 = 최초 start ~ 최후 end ± 여유. tasks 파생이라 drop(상태 변경) 시에만 재계산된다 (#6)
+  // 범위 = 최초 start 의 달 1일 ~ 최후 end 의 달 말일. tasks 파생이라 drop(상태 변경) 시에만 재계산 (#6)
   const { startDate, endDate } = useMemo(() => {
     const start = tasks[0]?.startDate ?? today ?? ''
     let end = start
@@ -236,7 +227,7 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
       if (t.endDate > end) end = t.endDate
     }
     if (!start) return { startDate: start, endDate: end }
-    return { startDate: addDays(start, -RANGE_PAD_DAYS), endDate: addDays(end, RANGE_PAD_DAYS) }
+    return { startDate: monthStartOf(start), endDate: monthEndOf(end) }
   }, [tasks, today])
 
   const dates = buildDates(startDate, endDate)
