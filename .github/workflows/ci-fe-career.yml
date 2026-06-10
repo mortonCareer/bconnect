@@ -1,0 +1,51 @@
+# career 앱이 영향받는 변경에만 트리거 → 무관 PR 엔 체크 행 자체가 안 뜸(skip 노이즈 0).
+# 검사 본체는 _fe-app-check.yml(SSOT). 이 파일은 트리거 + 호출만.
+name: ci-fe-career
+
+on:
+  # GitHub Actions 는 on.paths 에 YAML alias 를 못 받음 → push/pull_request 에 literal 중복.
+  push:
+    branches: [dev]
+    paths:
+      - 'apps/career/**'
+      - 'packages/ui/**'
+      - 'packages/config/**'
+      - 'packages/mocks/**'
+      - 'packages/api-client/src/*.ts'
+      - 'packages/api-client/orval.*.ts'
+      - 'packages/api-client/package.json'
+      - 'packages/api-client/tsconfig.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/ci-fe-career.yml'
+      - '.github/workflows/_fe-app-check.yml'
+      - '.github/actions/setup-node-pnpm/action.yml'
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'apps/career/**'
+      - 'packages/ui/**'
+      - 'packages/config/**'
+      - 'packages/mocks/**'
+      - 'packages/api-client/src/*.ts'
+      - 'packages/api-client/orval.*.ts'
+      - 'packages/api-client/package.json'
+      - 'packages/api-client/tsconfig.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/ci-fe-career.yml'
+      - '.github/workflows/_fe-app-check.yml'
+      - '.github/actions/setup-node-pnpm/action.yml'
+
+concurrency:
+  group: ci-fe-career-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  career:
+    uses: ./.github/workflows/_fe-app-check.yml
+    with:
+      app: morton-career

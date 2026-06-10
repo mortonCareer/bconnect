@@ -1,0 +1,50 @@
+# plan 앱이 영향받는 변경에만 트리거. 검사 본체는 _fe-app-check.yml(SSOT).
+name: ci-fe-plan
+
+on:
+  # GitHub Actions 는 on.paths 에 YAML alias 를 못 받음 → push/pull_request 에 literal 중복.
+  push:
+    branches: [dev]
+    paths:
+      - 'apps/plan/**'
+      - 'packages/ui/**'
+      - 'packages/config/**'
+      - 'packages/mocks/**'
+      - 'packages/api-client/src/*.ts'
+      - 'packages/api-client/orval.*.ts'
+      - 'packages/api-client/package.json'
+      - 'packages/api-client/tsconfig.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/ci-fe-plan.yml'
+      - '.github/workflows/_fe-app-check.yml'
+      - '.github/actions/setup-node-pnpm/action.yml'
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'apps/plan/**'
+      - 'packages/ui/**'
+      - 'packages/config/**'
+      - 'packages/mocks/**'
+      - 'packages/api-client/src/*.ts'
+      - 'packages/api-client/orval.*.ts'
+      - 'packages/api-client/package.json'
+      - 'packages/api-client/tsconfig.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/ci-fe-plan.yml'
+      - '.github/workflows/_fe-app-check.yml'
+      - '.github/actions/setup-node-pnpm/action.yml'
+
+concurrency:
+  group: ci-fe-plan-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    uses: ./.github/workflows/_fe-app-check.yml
+    with:
+      app: morton-plan

@@ -56,7 +56,7 @@ spec/ 갱신 (BE 코드 형태에 맞춰)
     ↓
 GitHub PR 생성 (보통 BE 변경과 같은 PR)
     ↓
-ci-api-spec (redocly lint) 자동 실행
+ci-api 워크플로 자동 실행 (BE 빌드·Bruno + OpenAPI 생성/커밋)
     ↓
 리뷰 → dev 머지
     ↓
@@ -137,7 +137,7 @@ function EditProfile() {
 - `spec/` 수정 후 반드시 `pnpm api:generate` 실행 (bundle + orval 자동 chain)
 - 생성된 파일 (`generated/`, `openapi.bundled.yaml`) 은 모두 gitignored — 직접 수정하지 않음
 - 타입 불일치 시 spec 수정 후 재생성
-- `pnpm api:lint` 로 spec 품질 사전 검증 가능 (CI 에서 `ci-api-spec` 자동 실행)
+- `pnpm api:lint` 로 spec 품질 사전 검증 가능 (CI 에서 `ci-api` 워크플로 자동 실행)
 
 ---
 

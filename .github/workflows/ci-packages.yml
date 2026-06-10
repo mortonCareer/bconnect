@@ -1,0 +1,53 @@
+# 워크스페이스 의존 정합(syncpack) + @bconnect/ui lint. package.json/catalog/ui 변경에만.
+name: ci-packages
+
+on:
+  # GitHub Actions 는 on.paths 에 YAML alias 를 못 받음 → push/pull_request 에 literal 중복.
+  push:
+    branches: [dev]
+    paths:
+      - '**/package.json'
+      - 'pnpm-workspace.yaml'
+      - 'pnpm-lock.yaml'
+      - '.syncpackrc.json'
+      - 'packages/ui/**'
+      - 'packages/config/eslint/**'
+      - '.github/workflows/ci-packages.yml'
+      - '.github/actions/setup-node-pnpm/action.yml'
+  pull_request:
+    branches: [dev]
+    paths:
+      - '**/package.json'
+      - 'pnpm-workspace.yaml'
+      - 'pnpm-lock.yaml'
+      - '.syncpackrc.json'
+      - 'packages/ui/**'
+      - 'packages/config/eslint/**'
+      - '.github/workflows/ci-packages.yml'
+      - '.github/actions/setup-node-pnpm/action.yml'
+
+concurrency:
+  group: ci-packages-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup-node-pnpm
+        id: setup
+
+      # syncpack 으로 같은 dep 의 spec 불일치 차단(workspace 전체).
+      # 새 dep 이 2+ package 에 있으면 pnpm-workspace.yaml catalog 사용 권장.
+      - name: Check package versions
+        if: ${{ !cancelled() && steps.setup.conclusion == 'success' }}
+        run: pnpm package:check
+
+      - name: Lint @bconnect/ui
+        if: ${{ !cancelled() && steps.setup.conclusion == 'success' }}
+        run: pnpm --filter @bconnect/ui lint

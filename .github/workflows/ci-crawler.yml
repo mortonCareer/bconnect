@@ -1,0 +1,41 @@
+# 크롤러(Python/uv) 테스트 — apps/crawler 변경에만.
+name: ci-crawler
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'apps/crawler/**'
+      - '.github/workflows/ci-crawler.yml'
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'apps/crawler/**'
+      - '.github/workflows/ci-crawler.yml'
+
+concurrency:
+  group: ci-crawler-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  crawler:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/crawler
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Run tests
+        env:
+          NAVER_CLIENT_ID: dummy
+          NAVER_CLIENT_SECRET: dummy
+          NOTION_TOKEN: dummy
+        run: uv run --dev pytest tests/ -v

@@ -1,0 +1,36 @@
+# FE 앱 검사 본체 — career/plan 이 input(app) 만 바꿔 호출. 검사 로직 단일 SSOT.
+# 검사 step 은 setup 성공 시 서로 독립 실행(!cancelled): typecheck 실패해도 build·lint 결과까지 한 번에 보고.
+name: _fe-app-check
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        description: pnpm filter 대상 (morton-career | morton-plan)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # 전체 install — postinstall 이 api:generate + msw:init 수행
+      - uses: ./.github/actions/setup-node-pnpm
+        id: setup
+
+      - name: Type check
+        if: ${{ !cancelled() && steps.setup.conclusion == 'success' }}
+        run: pnpm --filter ${{ inputs.app }} typecheck
+
+      - name: Build
+        if: ${{ !cancelled() && steps.setup.conclusion == 'success' }}
+        run: pnpm --filter ${{ inputs.app }} build
+
+      - name: Lint
+        if: ${{ !cancelled() && steps.setup.conclusion == 'success' }}
+        run: pnpm --filter ${{ inputs.app }} lint

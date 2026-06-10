@@ -1,0 +1,120 @@
+# BE(Spring Boot) 빌드·Bruno 검증 + OpenAPI 문서 생성/커밋. apps/api 변경에만.
+name: ci-api
+
+on:
+  # self-path 미포함 의도적 — spec job 이 브랜치에 auto-commit push 하므로,
+  # 워크플로 파일 수정만으로 트리거되면 무관 PR 에 spurious 커밋 발생. apps/api 변경에만.
+  push:
+    branches: [dev]
+    paths:
+      - 'apps/api/**'
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'apps/api/**'
+
+concurrency:
+  group: ci-api-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install Bruno CLI
+        run: npm install -g @usebruno/cli
+
+      - name: Build with Gradle
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        working-directory: apps/api
+        run: ./gradlew build
+
+      - name: Start API server
+        working-directory: apps/api
+        run: ./gradlew bootRun > /dev/null 2>&1 &
+
+      - name: Wait for health
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8080/actuator/health && break || sleep 1
+          done
+
+      - name: Run Bruno demo collection
+        working-directory: apps/api/bruno
+        run: bru run --exclude-tags=ws --reporter-html bruno-report.html
+
+      - name: Upload Bruno report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: bruno-report
+          path: apps/api/bruno/bruno-report.html
+          if-no-files-found: error
+
+  # OpenAPI 문서를 생성해 PR 브랜치에 커밋(BE 코드 = API SSOT, ADR-0015).
+  # head_ref 가 빈 push 이벤트에선 실행 불가 → pull_request 한정.
+  spec:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Generate Open API Docs
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        working-directory: apps/api
+        run: |
+          ./gradlew build
+          ./gradlew generateOpenApiDocs
+
+      - name: Commit and Push changes
+        # head_ref 는 신뢰 불가 입력 → 인라인 스크립트 직접 보간 대신 env 경유(injection 하드닝)
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          mv apps/api/build/openapi.yaml packages/api-client/src
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+          # 생성된 openapi 가 기존과 동일하면 빈 커밋으로 실패하지 않게 가드
+          if git diff --cached --quiet; then
+            echo "openapi 변경 없음 — 커밋 skip"
+          else
+            git commit -m "docs(api): generate open api document"
+            git push origin "HEAD:$HEAD_REF"
+          fi

@@ -1,0 +1,20 @@
+name: Setup Node + pnpm
+description: pnpm/action-setup + Node 24 + frozen install (pnpm store 캐시). 설치 step 의 단일 SSOT.
+
+inputs:
+  ignore-scripts:
+    description: postinstall(api:generate·msw:init) 가 불필요한 job 은 'true' 로 codegen skip
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v4
+
+    - uses: actions/setup-node@v6
+      with:
+        node-version: 24
+        cache: pnpm
+
+    - shell: bash
+      run: pnpm install --frozen-lockfile ${{ inputs.ignore-scripts == 'true' && '--ignore-scripts' || '' }}
