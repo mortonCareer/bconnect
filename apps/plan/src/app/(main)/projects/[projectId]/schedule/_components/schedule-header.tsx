@@ -27,7 +27,7 @@ function EditButton({ label }: { label: string }) {
 
 export function ScheduleHeader({ projectName, address }: ScheduleHeaderProps) {
   return (
-    <header className="flex flex-col gap-[10px] border-b border-solid border-[#f0f0f0] pb-[22px]">
+    <header className="flex flex-col gap-[10px] border-b border-solid border-[#f0f0f0] px-10 pt-7 pb-[22px]">
       <div className="flex h-[26px] items-center gap-[12px]">
         <span
           className="w-[60px] shrink-0 whitespace-nowrap font-semibold text-gray-500"

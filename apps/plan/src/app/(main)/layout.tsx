@@ -7,6 +7,7 @@ import { MemberSidebar } from './_components/MemberSidebar'
 import { PanelHost } from './_components/panel/PanelHost'
 import { useTechnicianItems } from '@/hooks/useTechnicianItems'
 import { useAuthStore } from '@/stores/auth-store'
+import { usePathname } from 'next/navigation'
 
 function GuestSidebarWithCount() {
   const { totalCount } = useTechnicianItems()
@@ -15,6 +16,7 @@ function GuestSidebarWithCount() {
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const flush = usePathname().startsWith('/projects/')
 
   return (
     <div className="flex h-screen overflow-hidden bg-white">
@@ -28,8 +30,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         )}
       </aside>
       <LoginGateProvider>
-        <main className="flex h-full min-w-0 flex-1 justify-start overflow-y-auto px-10 py-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex w-full max-w-269 flex-col">{children}</div>
+        <main
+          className={`flex h-full min-w-0 flex-1 justify-start overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${flush ? '' : 'px-10 py-10'}`}
+        >
+          <div className={`flex w-full flex-col ${flush ? '' : 'max-w-269'}`}>{children}</div>
         </main>
         <Suspense>
           <PanelHost />
