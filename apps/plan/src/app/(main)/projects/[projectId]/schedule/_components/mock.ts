@@ -1,10 +1,15 @@
-import type { ProjectInfo } from './types'
 import type { ScheduleTask } from './schedule-grid'
+
+type ProjectInfo = {
+  id: string
+  name: string
+  address: string
+}
 
 export const MOCK_PROJECT: ProjectInfo = {
   id: '1',
-  name: '모튼아파트 리모델링 01',
-  address: '경기도 수원시 율전로 00번길 00-00, 000호',
+  name: '모튼아파트 리모델링 01 (Mocked)',
+  address: '경기도 수원시 율전로 00번길 00-00, 000호 (Mocked)',
 }
 
 export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
@@ -17,7 +22,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
     status: 'completed',
     assignee: {
       profileId: 1,
-      name: '이송목',
+      name: '이송목 (Mocked)',
       region: '경기도',
       level: '준기공',
       specialty: '도배',
@@ -30,7 +35,13 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
     startDate: '2026-05-01',
     endDate: '2026-05-03',
     status: 'in_progress',
-    assignee: { profileId: 2, name: '손장수', region: '서울', level: '기공', specialty: '전기' },
+    assignee: {
+      profileId: 2,
+      name: '손장수 (Mocked)',
+      region: '서울',
+      level: '기공',
+      specialty: '전기',
+    },
   },
   {
     id: '3',
@@ -39,7 +50,13 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
     startDate: '2026-05-03',
     endDate: '2026-05-04',
     status: 'in_progress',
-    assignee: { profileId: 3, name: '홍길동', region: '인천', level: '반장', specialty: '목재' },
+    assignee: {
+      profileId: 3,
+      name: '홍길동 (Mocked)',
+      region: '인천',
+      level: '반장',
+      specialty: '목재',
+    },
   },
   {
     id: '4',
@@ -50,7 +67,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
     status: 'recruited',
     assignee: {
       profileId: 4,
-      name: '탁재훈',
+      name: '탁재훈 (Mocked)',
       region: '경기도',
       level: '준기공',
       specialty: '타일',
@@ -63,7 +80,13 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
     startDate: '2026-05-06',
     endDate: '2026-05-07',
     status: 'recruited',
-    assignee: { profileId: 5, name: '송중기', region: '서울', level: '기공', specialty: '필름' },
+    assignee: {
+      profileId: 5,
+      name: '송중기 (Mocked)',
+      region: '서울',
+      level: '기공',
+      specialty: '필름',
+    },
   },
   {
     id: '6',
@@ -72,7 +95,13 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
     startDate: '2026-05-08',
     endDate: '2026-05-09',
     status: 'recruited',
-    assignee: { profileId: 6, name: '박세리', region: '인천', level: '반장', specialty: '페인트' },
+    assignee: {
+      profileId: 6,
+      name: '박세리 (Mocked)',
+      region: '인천',
+      level: '반장',
+      specialty: '페인트',
+    },
   },
   {
     id: '7',
@@ -83,7 +112,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
     status: 'recruiting',
     assignee: {
       profileId: 7,
-      name: '최수종',
+      name: '최수종 (Mocked)',
       region: '경기도',
       level: '준기공',
       specialty: '방수',

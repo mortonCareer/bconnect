@@ -12,14 +12,17 @@ import {
 
 export default function SchedulePage() {
   return (
-    <div data-testid="schedule-page" className="flex flex-col gap-[28px]">
-      <ScheduleHeader projectName={MOCK_PROJECT.name} address={MOCK_PROJECT.address} />
-      <ScheduleGrid
-        tasks={MOCK_SCHEDULE_TASKS}
-        startDate={MOCK_DATE_RANGE.startDate}
-        endDate={MOCK_DATE_RANGE.endDate}
-        today={MOCK_DATE_RANGE.today}
-      />
+    <div className="flex min-h-full flex-col">
+      <div className="flex flex-col gap-[28px]">
+        <ScheduleHeader projectName={MOCK_PROJECT.name} address={MOCK_PROJECT.address} />
+        <ScheduleGrid
+          tasks={MOCK_SCHEDULE_TASKS}
+          startDate={MOCK_DATE_RANGE.startDate}
+          endDate={MOCK_DATE_RANGE.endDate}
+          today={MOCK_DATE_RANGE.today}
+        />
+      </div>
+      <div className="flex-1" />
       <ScheduleFooter />
     </div>
   )

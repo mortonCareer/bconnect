@@ -171,10 +171,7 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
   const stickyCell = 'sticky z-20 bg-white'
 
   return (
-    <div
-      data-testid="schedule-grid"
-      className="w-full overflow-x-auto bg-white font-sans [scrollbar-color:#d0d0d0_transparent] [scrollbar-width:thin]"
-    >
+    <div className="w-full overflow-x-auto bg-white font-sans [scrollbar-color:#d0d0d0_transparent] [scrollbar-width:thin]">
       <table
         aria-label="공정표"
         className="text-left"
@@ -224,7 +221,7 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
               <th
                 key={label}
                 scope="col"
-                className={`${stickyCell} border-b border-r border-solid text-sb-14 text-[#3d3d3d] ${i === 2 ? 'border-gray-300' : 'border-[#e5e5e5]'}`}
+                className={`${stickyCell} border-b border-r border-solid border-[#e5e5e5] text-sb-14 text-[#3d3d3d]`}
                 style={{ left: STICKY_LEFT[i], backgroundColor: '#fafafa' }}
               >
                 <span className="block text-center">{label}</span>
@@ -264,28 +261,27 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
 
         <tbody>
           {tasks.map((task) => (
-            <tr key={task.id} data-testid={`task-row-${task.id}`} style={{ height: ROW_HEIGHT }}>
+            <tr key={task.id} style={{ height: ROW_HEIGHT }}>
               <td
-                className={`${stickyCell} border-b border-r border-solid border-[#f5f5f5] text-center align-middle text-r-14 text-[#3d3d3d]`}
+                className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle text-r-14 text-[#3d3d3d]`}
                 style={{ left: STICKY_LEFT[0] }}
               >
                 {task.category}
               </td>
               <td
-                className={`${stickyCell} border-b border-r border-solid border-[#f5f5f5] text-center align-middle`}
+                className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle`}
                 style={{ left: STICKY_LEFT[1] }}
               >
                 <StatusPill status={task.status} />
               </td>
               <td
-                className={`${stickyCell} border-b border-r border-solid border-gray-300 p-2 align-middle`}
+                className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] p-2 align-middle`}
                 style={{ left: STICKY_LEFT[2] }}
               >
                 {task.assignee ? (
                   <Link
                     href={panelHref(`profile/${task.assignee.profileId}`)}
                     scroll={false}
-                    data-testid="assignee"
                     className="flex w-full items-center gap-2 rounded-[8px] hover:bg-gray-100"
                   >
                     <span
@@ -321,7 +317,7 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
           {/* 작업 생성 행 */}
           <tr style={{ height: ROW_HEIGHT }}>
             <td
-              className={`${stickyCell} border-r border-solid border-[#f5f5f5] p-2`}
+              className={`${stickyCell} border-r border-solid border-[#e5e5e5] p-2`}
               style={{ left: STICKY_LEFT[0] }}
             >
               <button
@@ -333,11 +329,11 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
               </button>
             </td>
             <td
-              className={`${stickyCell} border-r border-solid border-[#f5f5f5]`}
+              className={`${stickyCell} border-r border-solid border-[#e5e5e5]`}
               style={{ left: STICKY_LEFT[1] }}
             />
             <td
-              className={`${stickyCell} border-r border-solid border-gray-300`}
+              className={`${stickyCell} border-r border-solid border-[#e5e5e5]`}
               style={{ left: STICKY_LEFT[2] }}
             />
             <td style={{ width: ganttWidth }} />

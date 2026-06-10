@@ -3,10 +3,11 @@
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useGetMyChats, useGetMyMember } from '@bconnect/api-client'
 import { getAvatarUrl } from '@bconnect/config/avatar'
-import { ChevronIcon } from '@bconnect/ui'
+import { Select } from '@bconnect/ui'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState } from 'react'
 import { SidebarFooter } from './SidebarFooter'
 
 // TODO(신규 BE 이슈 필요 — notification 도메인): 엔드포인트 추가 시
@@ -15,8 +16,12 @@ import { SidebarFooter } from './SidebarFooter'
 const NOTIFICATION_COUNT = 4
 const MAX_BADGE_COUNT = 99
 
-// TODO(신규 BE 이슈 필요 — Project 도메인): projectId 로 Project 조회 시 실제 이름으로 교체.
-const MOCK_PROJECT_NAME = '모튼아파트 리모델링 01'
+// TODO(신규 BE 이슈 필요 — Project 도메인): 내 프로젝트 목록 조회 API 로 교체.
+const MOCK_PROJECTS = [
+  { value: '1', label: '모튼아파트 리모델링 01 (Mocked)' },
+  { value: '2', label: '래미안 리모델링 02 (Mocked)' },
+  { value: '3', label: '자담 사옥 인테리어 (Mocked)' },
+]
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null
@@ -63,6 +68,7 @@ const PROJECT_ITEM_CLASS =
   'flex h-10 w-full items-center rounded-[8px] px-3 text-[13px] leading-[19.5px]'
 
 function ProjectSection({ projectId, activeSlug }: { projectId: string; activeSlug: string }) {
+  const [selectedProject, setSelectedProject] = useState(projectId)
   const items: ProjectMenuItem[] = [
     { slug: 'schedule', label: '공정표', href: `/projects/${projectId}/schedule` },
     // TODO: 페이지 구현 시 href 연결 (#375 follow-up — 모집 관리 / 문서 저장소)
@@ -76,10 +82,12 @@ function ProjectSection({ projectId, activeSlug }: { projectId: string; activeSl
         프로젝트
       </p>
       <div className="flex flex-col gap-1">
-        <div className="flex h-10 items-center justify-between rounded-[8px] border border-solid border-gray-300 bg-white px-2.5">
-          <p className="truncate text-m-14 text-gray-900">{MOCK_PROJECT_NAME}</p>
-          <ChevronIcon direction="down" size={16} className="shrink-0 text-gray-400" />
-        </div>
+        <Select
+          value={selectedProject}
+          onChange={(v) => setSelectedProject(Array.isArray(v) ? (v[0] ?? '') : v)}
+          options={MOCK_PROJECTS}
+          placeholder="프로젝트 선택"
+        />
         {items.map((item) => {
           const active = item.slug === activeSlug
           return item.href ? (
