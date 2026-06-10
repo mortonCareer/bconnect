@@ -219,7 +219,8 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
   const { tasks, updateTask, deleteTask } = useScheduleTasks(initialTasks)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
-  // 범위 = 최초 start 의 달 1일 ~ 최후 end 의 달 말일. tasks 파생이라 drop(상태 변경) 시에만 재계산 (#6)
+  // 범위 = (최초 start -5일)의 달 1일 ~ (최후 end +5일)의 달 말일.
+  // tasks 파생이라 drop(상태 변경) 시에만 재계산 (#6)
   const { startDate, endDate } = useMemo(() => {
     const start = tasks[0]?.startDate ?? today ?? ''
     let end = start
@@ -227,7 +228,7 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
       if (t.endDate > end) end = t.endDate
     }
     if (!start) return { startDate: start, endDate: end }
-    return { startDate: monthStartOf(start), endDate: monthEndOf(end) }
+    return { startDate: monthStartOf(addDays(start, -5)), endDate: monthEndOf(addDays(end, 5)) }
   }, [tasks, today])
 
   const dates = buildDates(startDate, endDate)
