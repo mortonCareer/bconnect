@@ -13,7 +13,7 @@ import {
 export default function SchedulePage() {
   return (
     <div className="flex min-h-full flex-col">
-      <div className="flex flex-col gap-[28px]">
+      <div className="flex flex-col">
         <ScheduleHeader projectName={MOCK_PROJECT.name} address={MOCK_PROJECT.address} />
         <ScheduleGrid
           tasks={MOCK_SCHEDULE_TASKS}

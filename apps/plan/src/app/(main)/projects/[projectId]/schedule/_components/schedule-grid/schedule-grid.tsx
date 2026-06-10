@@ -2,6 +2,7 @@
 
 import { usePanelNav } from '@/hooks/usePanelNav'
 import Link from 'next/link'
+import type { WheelEvent } from 'react'
 import type { ScheduleGridProps, ScheduleTask, TaskStatus } from './types'
 
 const COL_CATEGORY = 120
@@ -167,11 +168,23 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
     alert('준비 중')
   }
 
-  // 좌측 고정 컬럼 공통 className (sticky + 배경). 헤더는 bg override.
+  function handleWheel(e: WheelEvent<HTMLDivElement>) {
+    const el = e.currentTarget
+    if (el.scrollWidth <= el.clientWidth || e.deltaY === 0) return
+    const scroller = el.closest('main')
+    const canScrollVertically = scroller != null && scroller.scrollHeight > scroller.clientHeight
+    if (!canScrollVertically) {
+      el.scrollLeft += e.deltaY
+    }
+  }
+
   const stickyCell = 'sticky z-20 bg-white'
 
   return (
-    <div className="w-full overflow-x-auto bg-white font-sans [scrollbar-color:#d0d0d0_transparent] [scrollbar-width:thin]">
+    <div
+      onWheel={handleWheel}
+      className="w-full overflow-x-auto bg-white font-sans [scrollbar-color:#d0d0d0_transparent] [scrollbar-width:thin]"
+    >
       <table
         aria-label="공정표"
         className="text-left"
