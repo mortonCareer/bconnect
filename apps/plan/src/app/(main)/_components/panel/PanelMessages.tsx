@@ -1,9 +1,6 @@
-/**
- * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1504-13106
- */
 'use client'
 
-import { Suspense, useMemo } from 'react'
+import { useMemo } from 'react'
 import {
   useQueries,
   useGetMyChats,
@@ -14,7 +11,7 @@ import type { Profile } from '@bconnect/api-client'
 import { MessagesView, PanelAside, type MessagesViewData } from '@bconnect/features'
 import { usePanelNav } from '@/hooks/usePanelNav'
 
-function MessagesPanel() {
+export function PanelMessages() {
   const { panelHref, closeHref, close } = usePanelNav()
   const { data: me, isLoading: isMeLoading } = useGetMyMember()
   const currentUserId = me?.id
@@ -59,19 +56,10 @@ function MessagesPanel() {
     <PanelAside label="메시지 목록">
       <MessagesView
         data={data}
-        chatHref={(chatId) => panelHref(`/messages/${chatId}`)}
+        chatHref={(chatId) => panelHref(`messages/${chatId}`)}
         closeHref={closeHref}
         onClose={close}
       />
     </PanelAside>
-  )
-}
-
-// usePanelNav 가 useSearchParams 를 쓰므로 static prerender(/messages) 에서 Suspense 필요.
-export default function MessagesPanelPage() {
-  return (
-    <Suspense>
-      <MessagesPanel />
-    </Suspense>
   )
 }

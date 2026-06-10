@@ -1,9 +1,5 @@
-/**
- * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1504-12630
- */
 'use client'
 
-import { useParams } from 'next/navigation'
 import {
   useGetProfile,
   useGetCoworkers,
@@ -13,26 +9,27 @@ import {
   useGetFeeds,
 } from '@bconnect/api-client'
 import { ProfileView, PanelAside, type ProfileViewData } from '@bconnect/features'
+import { useSearchParams } from 'next/navigation'
 import { usePanelNav } from '@/hooks/usePanelNav'
 
-export default function ProfilePanelPage() {
-  const params = useParams<{ profileId: string }>()
-  const profileId = Number(params.profileId)
+export function PanelProfile({ profileId }: { profileId: number }) {
   const { panelHref, closeHref, close } = usePanelNav()
+  const searchParams = useSearchParams()
 
   const enabled = Number.isFinite(profileId) && profileId > 0
   const {
     data: profileAndMember,
     isLoading,
     isError,
-  } = useGetProfile(profileId, {
-    query: { enabled },
-  })
+  } = useGetProfile(profileId, { query: { enabled } })
   const { data: coworkers } = useGetCoworkers({ profileId }, { query: { enabled } })
   const { data: credentials } = useGetCredentials({ profileId }, { query: { enabled } })
   const { data: received } = useGetReceivedRecommendations({ profileId }, { query: { enabled } })
   const { data: sent } = useGetSentRecommendations({ profileId }, { query: { enabled } })
   const { data: feeds } = useGetFeeds({ profileId }, { query: { enabled } })
+
+  const worksParams = new URLSearchParams(searchParams.toString())
+  worksParams.set('tab', 'works')
 
   const data: ProfileViewData = {
     member: profileAndMember?.member,
@@ -55,9 +52,9 @@ export default function ProfilePanelPage() {
         closeHref={closeHref}
         onClose={close}
         statHrefs={{
-          works: '?tab=works',
-          coworkers: panelHref(`/profile/${profileId}/coworkers`),
-          recommendations: panelHref(`/profile/${profileId}/recommendations`),
+          works: `?${worksParams.toString()}`,
+          coworkers: panelHref(`profile/${profileId}/coworkers`),
+          recommendations: panelHref(`profile/${profileId}/recommendations`),
         }}
       />
     </PanelAside>

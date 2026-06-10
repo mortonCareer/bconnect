@@ -58,7 +58,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
   const { requireLogin } = useLoginGate()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const { panelHref, openPanel } = usePanelNav()
-  const profileHref = panelHref(`/profile/${item.profileId}`)
+  const profileHref = panelHref(`profile/${item.profileId}`)
   const { mutate: createDirectChat, isPending: isCreatingChat } = useCreateDirectChat()
 
   const metaParts = [
@@ -152,7 +152,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
                   createDirectChat(
                     { data: { participantId: item.memberId } },
                     {
-                      onSuccess: (chat) => openPanel(`/messages/${chat.id}`),
+                      onSuccess: (chat) => openPanel(`messages/${chat.id}`),
                       onError: (error) =>
                         toast({
                           description: isApiErrorShape(error)
