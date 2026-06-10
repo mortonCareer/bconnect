@@ -3,7 +3,7 @@
 - **Status**: Accepted
 - **Date**: 2026-06-02
 - **Deciders**: CTO (@manamana32321)
-- **Related**: [#453](https://github.com/mortonCareer/bconnect/issues/453), [PR #455](https://github.com/mortonCareer/bconnect/pull/455)(머지+apply 완료), [ADR-0006](./0006-dev-as-staging.md), [ADR-0010](./0010-dev-branch-staging-be.md), [Vercel — Skipping unaffected projects](https://vercel.com/docs/monorepos#skipping-unaffected-projects). 선행 땜질 이력: #440, #443, #445
+- **Related**: [#453](https://github.com/mortonCareer/bconnect/issues/453), [PR #455](https://github.com/mortonCareer/bconnect/pull/455)(머지+apply 완료), [ADR-0006](./0006-dev-as-staging.md), [ADR-0010](./0010-dev-branch-staging-be.md), [ADR-0022](./0022-drop-vercel-preview-team-owner-shared-account.md)(PR 프리뷰 폐기로 프리뷰 측면 무력화), [Vercel — Skipping unaffected projects](https://vercel.com/docs/monorepos#skipping-unaffected-projects). 선행 땜질 이력: #440, #443, #445
 
 ## Context
 

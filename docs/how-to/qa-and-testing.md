@@ -1,18 +1,18 @@
 # QA & 테스팅
 
 > **For**: PR 리뷰어, QA 수행자.
-> **You'll be able to**: PR 프리뷰 환경에서 happy path / 엣지 케이스 / 에러 검증, 버그 분류.
+> **You'll be able to**: dev 환경(스프린트 단위)에서 happy path / 엣지 케이스 / 에러 검증, 버그 분류.
 
 Morton 프로젝트의 QA 및 테스팅 가이드입니다.
 
 ---
 
-## QA 플로우 (PR 프리뷰 기반)
+## QA 플로우 (스프린트 단위 dev 기반)
 
 ```
-FE 연동 완료 + PR 생성
+스프린트 변경 dev 반영
     ↓
-Vercel 프리뷰 자동 배포 (1-2분)
+dev 환경 배포 (안정 도메인)
     ↓
 디자이너: UI 검수
   └─ 시안 대비 확인
@@ -29,12 +29,12 @@ CEO: 최종 QA
   └─ 비즈니스 로직 확인
   └─ 엣지 케이스 테스트
     ↓
-수정 필요 시: 피드백 반영 → 재검수
+수정 필요 시: 피드백 반영 → 후속 dev 반영
     ↓
-승인 (Approve)
-    ↓
-main 머지 → 프로덕션 배포
+승인 → dev → main 통합 → 프로덕션 배포
 ```
+
+> QA 는 **PR 단위 Vercel 프리뷰가 아니라 스프린트 단위 dev 환경**에서 수행합니다 ([ADR-0022](../explanation/adr/0022-drop-vercel-preview-team-owner-shared-account.md)). dev 도메인은 [ADR-0016](../explanation/adr/0016-environment-service-domain-naming.md), dev=staging 운영은 [ADR-0006](../explanation/adr/0006-dev-as-staging.md) 참조.
 
 ---
 
@@ -216,7 +216,7 @@ QA 중 발견된 문제는 다음 기준으로 분류 (레이블은 [labels.md](
 
 ## 환경
 
-- URL: https://morton-career-git-feat-123-<team>.vercel.app/profile (패턴은 [tools.md](../reference/tools.md#terraform-선언적-관리) Vercel 섹션 참조)
+- URL: https://dev.bconnect.to/profile ([도메인 현황](../reference/domains.md) 참조)
 - 브라우저: Chrome 120
 - 디바이스: iPhone 15 Pro
 
@@ -253,7 +253,7 @@ QA 중 발견된 문제는 다음 기준으로 분류 (레이블은 [labels.md](
 
 ### 반응형 테스트
 
-프리뷰 환경에서 다음 해상도 확인:
+dev 환경에서 다음 해상도 확인:
 
 | 디바이스    | 해상도    |
 | ----------- | --------- |
@@ -295,9 +295,9 @@ cd apps/api
 
 Frontend는 현재 수동 QA로 진행합니다.
 
-**PR 프리뷰 환경에서 수동 테스트:**
+**dev 환경에서 수동 테스트 (스프린트 단위):**
 
-1. Vercel 프리뷰 URL 접속
+1. dev 환경 URL 접속 ([도메인 현황](../reference/domains.md))
 2. 테스트 범위 항목 체크 (Happy Path, Empty State, 로딩, 에러)
 3. 데스크톱/모바일 환경 테스트
 4. 이슈 발견 시 GitHub Issue 생성
@@ -349,10 +349,10 @@ PR 생성 시 다음 체크리스트를 확인합니다:
 
 ## 문제 해결
 
-### Vercel 프리뷰가 안 뜰 때
+### Vercel 빌드(dev·production)가 실패할 때
 
 1. **Vercel 빌드 로그 확인**
-   - GitHub PR 댓글의 "Details" 클릭
+   - Vercel 대시보드 → 해당 배포 → 빌드 로그
    - 빌드 에러 메시지 확인
 
 2. **흔한 원인**
@@ -380,7 +380,7 @@ CEO: +821012345678 (김철수, 업체)
 CTO: +821087654321 (이영희, 기술자)
 ```
 
-### 프리뷰 환경에서 로그인 안 될 때
+### dev 환경에서 로그인 안 될 때
 
 - Mock API 서버가 실행 중인지 확인
 - 실제 API 사용 시: 백엔드 배포 상태 확인
