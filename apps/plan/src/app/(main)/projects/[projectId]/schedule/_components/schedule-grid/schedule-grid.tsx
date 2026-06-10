@@ -6,6 +6,8 @@ import Link from 'next/link'
 import type { WheelEvent } from 'react'
 import { useEffect, useMemo, useRef } from 'react'
 import type { ScheduleGridProps, ScheduleTask, TaskStatus } from './types'
+import type { DragMode } from './use-bar-drag'
+import { useBarDrag } from './use-bar-drag'
 import { useScheduleTasks } from './use-schedule-tasks'
 
 const COL_CATEGORY = 120
@@ -59,6 +61,10 @@ function daysBetween(a: string, b: string): number {
   return Math.round((new Date(b).getTime() - new Date(a).getTime()) / ISO_DAY_MS)
 }
 
+function addDays(iso: string, n: number): string {
+  return toIsoDate(new Date(new Date(iso).getTime() + n * ISO_DAY_MS))
+}
+
 function buildDates(start: string, end: string): Date[] {
   const out: Date[] = []
   const cursor = new Date(start)
@@ -95,19 +101,45 @@ function StatusPill({ status }: { status: TaskStatus }) {
 }
 
 /** gantt 타임라인 셀 내용 — 일자 배경 + 작업 바. relative td 안에 absolute 로 배치된다. */
+/** 드래그 모드별로 snap 된 deltaDays 를 시작/종료일에 반영. 리사이즈는 최소 1일 보장 클램프. */
+function applyDrag(
+  task: ScheduleTask,
+  mode: DragMode,
+  deltaDays: number
+): Pick<ScheduleTask, 'startDate' | 'endDate'> {
+  const span = daysBetween(task.startDate, task.endDate)
+  if (mode === 'move') {
+    return {
+      startDate: addDays(task.startDate, deltaDays),
+      endDate: addDays(task.endDate, deltaDays),
+    }
+  }
+  if (mode === 'resize-start') {
+    return { startDate: addDays(task.startDate, Math.min(deltaDays, span)), endDate: task.endDate }
+  }
+  return { startDate: task.startDate, endDate: addDays(task.endDate, Math.max(deltaDays, -span)) }
+}
+
 function GanttBars({
   task,
   dates,
   startDate,
   todayIso,
+  onUpdate,
 }: {
   task: ScheduleTask
   dates: Date[]
   startDate: string
   todayIso: string | undefined
+  onUpdate: (id: string, patch: Partial<Omit<ScheduleTask, 'id'>>) => void
 }) {
-  const offsetDays = daysBetween(startDate, task.startDate)
-  const spanDays = daysBetween(task.startDate, task.endDate) + 1
+  const { drag, moveHandleProps } = useBarDrag(DAY_WIDTH, (mode, deltaDays) => {
+    onUpdate(task.id, applyDrag(task, mode, deltaDays))
+  })
+
+  const preview = drag ? applyDrag(task, drag.mode, drag.deltaDays) : task
+  const offsetDays = daysBetween(startDate, preview.startDate)
+  const spanDays = daysBetween(preview.startDate, preview.endDate) + 1
   const left = offsetDays * DAY_WIDTH + 2
   const width = spanDays * DAY_WIDTH - 4
   const style = BAR_STYLES[task.status]
@@ -132,7 +164,8 @@ function GanttBars({
         )
       })}
       <div
-        className="group absolute flex items-center rounded pl-2.5 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+        {...moveHandleProps}
+        className={`group absolute flex touch-none items-center rounded pl-2.5 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${drag ? 'z-10 cursor-grabbing opacity-90' : 'cursor-grab'}`}
         style={{ left, top: BAR_TOP, width, height: BAR_HEIGHT, backgroundColor: style.bg }}
         tabIndex={0}
         aria-label={`${task.ganttName} · ${task.startDate} ~ ${task.endDate} · ${label}`}
@@ -162,7 +195,7 @@ function GanttBars({
 
 export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) {
   const { panelHref } = usePanelNav()
-  const { tasks } = useScheduleTasks(initialTasks)
+  const { tasks, updateTask } = useScheduleTasks(initialTasks)
 
   // 범위 = 최초 start ~ 최후 end. tasks 파생이라 drop(상태 변경) 시에만 재계산된다 (#6)
   const { startDate, endDate } = useMemo(() => {
@@ -352,7 +385,13 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
                 className="relative border-b border-solid border-[#f5f5f5] p-0"
                 style={{ width: ganttWidth, height: ROW_HEIGHT }}
               >
-                <GanttBars task={task} dates={dates} startDate={startDate} todayIso={today} />
+                <GanttBars
+                  task={task}
+                  dates={dates}
+                  startDate={startDate}
+                  todayIso={today}
+                  onUpdate={updateTask}
+                />
               </td>
             </tr>
           ))}
