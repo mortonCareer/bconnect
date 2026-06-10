@@ -27,6 +27,9 @@ const ISO_DAY_MS = 86_400_000
 // 초기 스크롤: 오늘 기준 과거를 며칠 보여줄지 (과거 약간 + 미래 위주)
 const PAST_CONTEXT_DAYS = 3
 
+// 렌더 범위 여유: 최초 시작일 -N ~ 최후 종료일 +N
+const RANGE_PAD_DAYS = 5
+
 // 좌측 고정 컬럼의 sticky left 오프셋 (공종 / 상태 / 기술자)
 const STICKY_LEFT = [0, COL_CATEGORY, COL_CATEGORY + COL_STATUS]
 
@@ -225,14 +228,15 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
   const { tasks, updateTask, deleteTask } = useScheduleTasks(initialTasks)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
-  // 범위 = 최초 start ~ 최후 end. tasks 파생이라 drop(상태 변경) 시에만 재계산된다 (#6)
+  // 범위 = 최초 start ~ 최후 end ± 여유. tasks 파생이라 drop(상태 변경) 시에만 재계산된다 (#6)
   const { startDate, endDate } = useMemo(() => {
     const start = tasks[0]?.startDate ?? today ?? ''
     let end = start
     for (const t of tasks) {
       if (t.endDate > end) end = t.endDate
     }
-    return { startDate: start, endDate: end }
+    if (!start) return { startDate: start, endDate: end }
+    return { startDate: addDays(start, -RANGE_PAD_DAYS), endDate: addDays(end, RANGE_PAD_DAYS) }
   }, [tasks, today])
 
   const dates = buildDates(startDate, endDate)
