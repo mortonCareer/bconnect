@@ -45,7 +45,7 @@ main 머지 → 프로덕션 배포
 
 - **`dev`**: 개발 브랜치 (GitHub 기본 브랜치)
   - BE 코드를 API 기준(SSOT)으로 하는 BE-first 개발 사이클 ([ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md)). 일반적으로 **BE 구현 → 스펙 갱신 → FE 작업** 순서로 진행
-  - FE는 MSW mock으로 BE 미구현 상태에서도 일부 작업 가능 (dev 환경에서 mock 응답으로 동작)
+  - FE는 로컬에서 MSW mock으로 BE 미구현 상태에서도 작업 가능 (dev 배포는 dev BE(Railway)에 연동)
   - 모든 feature/fix PR의 타겟
   - CI: lint, format, BE 빌드/테스트, **FE typecheck 포함** (강제 green 정책)
   - 스펙만 갱신하는 PR(BE 구현 후 따라가는 갱신)은 paths-filter로 ci-career/ci-plan skip — BE-first에선 일반적으로 BE 변경과 스펙 갱신이 같은 PR에 묶이거나, 스펙 갱신이 FE 호출부 영향 없는 형태로 들어옴

@@ -30,7 +30,7 @@ BE 코드를 API 기준(SSOT)으로 하는 BE-first 사이클 ([ADR-0015](../exp
 5. FE 작업 (CTO, FE 개발자)
    └─ 퍼블리싱 (Figma → Tailwind 컴포넌트)
    └─ Generated hooks + MSW mock으로 동작 구현
-   └─ 실제 API 연동 확인 (preview 환경)
+   └─ 실제 API 연동 확인 (dev 환경)
 
 6. QA
    └─ dev 환경 스프린트 단위 검수
