@@ -7,7 +7,6 @@ import type { ScheduleGridProps, ScheduleTask, TaskStatus } from './types'
 const COL_CATEGORY = 120
 const COL_STATUS = 100
 const COL_ASSIGNEE = 220
-const LEFT_WIDTH = COL_CATEGORY + COL_STATUS + COL_ASSIGNEE
 
 const DAY_WIDTH = 44
 const RIGHT_PAD_WIDTH = 88
@@ -17,6 +16,9 @@ const BAR_HEIGHT = 36
 const BAR_TOP = 7.5
 
 const ISO_DAY_MS = 86_400_000
+
+// 좌측 고정 컬럼의 sticky left 오프셋 (공종 / 상태 / 기술자)
+const STICKY_LEFT = [0, COL_CATEGORY, COL_CATEGORY + COL_STATUS]
 
 const BAR_STYLES: Record<TaskStatus, { bg: string; text: string }> = {
   completed: { bg: '#b0b0b0', text: '#5a5a5a' },
@@ -85,65 +87,8 @@ function StatusPill({ status }: { status: TaskStatus }) {
   )
 }
 
-/** 좌측 고정 컬럼 (공종 / 상태 / 기술자). 행 단위로 gantt 트랙과 같은 flex row 안에 들어가 정렬을 보장한다. */
-function LeftCells({
-  task,
-  assigneeHref,
-  onFindTechnician,
-}: {
-  task: ScheduleTask
-  assigneeHref: (profileId: number) => string
-  onFindTechnician: () => void
-}) {
-  return (
-    <div className="sticky left-0 z-20 flex shrink-0 bg-white" style={{ width: LEFT_WIDTH }}>
-      <div
-        className="flex items-center justify-center border-r border-solid border-[#f5f5f5]"
-        style={{ width: COL_CATEGORY }}
-      >
-        <p className="text-r-14 text-[#3d3d3d]">{task.category}</p>
-      </div>
-      <div
-        className="flex items-center justify-center border-r border-solid border-[#f5f5f5]"
-        style={{ width: COL_STATUS }}
-      >
-        <StatusPill status={task.status} />
-      </div>
-      <div
-        className="flex items-center border-r border-solid border-gray-300 px-[10px]"
-        style={{ width: COL_ASSIGNEE }}
-      >
-        {task.assignee ? (
-          <Link
-            href={assigneeHref(task.assignee.profileId)}
-            scroll={false}
-            data-testid="assignee"
-            className="flex w-full items-center gap-2 rounded-[6px] px-1 py-1 hover:bg-gray-100"
-          >
-            <div aria-hidden="true" className="size-[34px] shrink-0 rounded-full bg-[#d9d9d9]" />
-            <div className="flex min-w-0 flex-col">
-              <p className="text-sb-14 text-gray-900">{task.assignee.name}</p>
-              <p className="text-r-12 text-gray-500">
-                {task.assignee.region} | {task.assignee.level} | {task.assignee.specialty}
-              </p>
-            </div>
-          </Link>
-        ) : (
-          <button
-            type="button"
-            onClick={onFindTechnician}
-            className="text-m-14 h-[33.5px] w-full rounded-[6px] border border-solid border-[#c0d0ff] text-primary hover:bg-primary-50"
-          >
-            + 기술자 탐색
-          </button>
-        )}
-      </div>
-    </div>
-  )
-}
-
-/** gantt 타임라인 트랙 (일자 배경 셀 + 작업 바). LeftCells 와 같은 행 높이를 공유한다. */
-function GanttTrack({
+/** gantt 타임라인 셀 내용 — 일자 배경 + 작업 바. relative td 안에 absolute 로 배치된다. */
+function GanttBars({
   task,
   dates,
   startDate,
@@ -162,23 +107,20 @@ function GanttTrack({
   const label = STATUS_LABELS[task.status]
 
   return (
-    <div
-      className="relative shrink-0"
-      style={{ width: dates.length * DAY_WIDTH + RIGHT_PAD_WIDTH, height: ROW_HEIGHT }}
-    >
+    <>
       {dates.map((d, i) => {
         const iso = toIsoDate(d)
         return (
           <div
             key={iso}
+            aria-hidden="true"
             className="absolute top-0 border-r border-solid border-[#f5f5f5]"
             style={{
               left: i * DAY_WIDTH,
               width: DAY_WIDTH,
-              height: ROW_HEIGHT - 1,
+              height: ROW_HEIGHT,
               backgroundColor: iso === todayIso ? '#fff8f8' : undefined,
             }}
-            role="gridcell"
           />
         )
       })}
@@ -207,7 +149,7 @@ function GanttTrack({
           <span>{label}</span>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
@@ -225,143 +167,183 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
     alert('준비 중')
   }
 
+  // 좌측 고정 컬럼 공통 className (sticky + 배경). 헤더는 bg override.
+  const stickyCell = 'sticky z-20 bg-white'
+
   return (
     <div
-      role="grid"
-      aria-label="공정표"
       data-testid="schedule-grid"
       className="w-full overflow-x-auto bg-white font-sans [scrollbar-color:#d0d0d0_transparent] [scrollbar-width:thin]"
     >
-      <div className="flex flex-col" style={{ width: LEFT_WIDTH + ganttWidth }}>
-        {/* 헤더 1행: 좌측 빈 spacer + 월 헤더 */}
-        <div className="flex" style={{ height: HEADER_HEIGHT }} role="row">
-          <div
-            className="sticky left-0 z-20 shrink-0 border-b border-r border-solid border-[#e5e5e5] bg-white"
-            style={{ width: LEFT_WIDTH }}
-          />
-          <div
-            className="flex shrink-0 border-b border-solid border-[#e5e5e5]"
-            style={{ width: ganttWidth }}
-          >
-            {monthGroups.map((g, i) => (
-              <div
-                key={`${g.month}-${i}`}
-                className="flex items-center justify-center"
-                style={{ width: g.count * DAY_WIDTH }}
-              >
-                <p className="text-[13px] font-semibold leading-[19.5px] text-[#3d3d3d]">
-                  {g.month}월
-                </p>
-              </div>
-            ))}
-            <div style={{ width: RIGHT_PAD_WIDTH }} />
-          </div>
-        </div>
+      <table
+        aria-label="공정표"
+        className="text-left"
+        style={{
+          borderCollapse: 'separate',
+          borderSpacing: 0,
+          tableLayout: 'fixed',
+          width: COL_CATEGORY + COL_STATUS + COL_ASSIGNEE + ganttWidth,
+        }}
+      >
+        <colgroup>
+          <col style={{ width: COL_CATEGORY }} />
+          <col style={{ width: COL_STATUS }} />
+          <col style={{ width: COL_ASSIGNEE }} />
+          <col style={{ width: ganttWidth }} />
+        </colgroup>
 
-        {/* 헤더 2행: 공종 / 상태 / 기술자 + 일자 헤더 */}
-        <div className="flex" style={{ height: HEADER_HEIGHT }} role="row">
-          <div
-            className="sticky left-0 z-20 flex shrink-0 bg-[#fafafa]"
-            style={{ width: LEFT_WIDTH }}
-          >
-            <div
-              className="flex items-center justify-center border-b border-r border-solid border-[#e5e5e5]"
-              style={{ width: COL_CATEGORY }}
-            >
-              <p className="text-sb-14 text-[#3d3d3d]">공종</p>
-            </div>
-            <div
-              className="flex items-center justify-center border-b border-r border-solid border-[#e5e5e5]"
-              style={{ width: COL_STATUS }}
-            >
-              <p className="text-sb-14 text-[#3d3d3d]">상태</p>
-            </div>
-            <div
-              className="flex items-center justify-center border-b border-r border-solid border-gray-300"
-              style={{ width: COL_ASSIGNEE }}
-            >
-              <p className="text-sb-14 text-[#3d3d3d]">기술자</p>
-            </div>
-          </div>
-          <div
-            className="flex shrink-0 border-b border-solid border-[#e5e5e5] bg-[#fafafa]"
-            style={{ width: ganttWidth }}
-          >
-            {dates.map((d) => {
-              const iso = toIsoDate(d)
-              const isToday = iso === today
-              return (
-                <div
-                  key={iso}
-                  className="flex items-center justify-center border-r border-solid border-[#f0f0f0]"
-                  style={{ width: DAY_WIDTH, backgroundColor: isToday ? '#fff0f0' : undefined }}
-                >
-                  <p
-                    className="text-[13px] leading-[19.5px]"
-                    style={{
-                      color: isToday ? '#e03d3d' : '#3d3d3d',
-                      fontWeight: isToday ? 700 : 400,
-                    }}
+        <thead>
+          {/* 월 헤더 */}
+          <tr style={{ height: HEADER_HEIGHT }}>
+            <th
+              colSpan={3}
+              className={`${stickyCell} border-b border-r border-solid border-[#e5e5e5]`}
+              style={{ left: 0 }}
+            />
+            <th className="border-b border-solid border-[#e5e5e5] p-0 font-normal">
+              <div className="flex" style={{ width: ganttWidth, height: HEADER_HEIGHT }}>
+                {monthGroups.map((g, i) => (
+                  <div
+                    key={`${g.month}-${i}`}
+                    className="flex items-center justify-center"
+                    style={{ width: g.count * DAY_WIDTH }}
                   >
-                    {d.getDate()}
-                  </p>
-                </div>
-              )
-            })}
-            <div style={{ width: RIGHT_PAD_WIDTH }} />
-          </div>
-        </div>
+                    <span className="text-[13px] font-semibold leading-[19.5px] text-[#3d3d3d]">
+                      {g.month}월
+                    </span>
+                  </div>
+                ))}
+                <div style={{ width: RIGHT_PAD_WIDTH }} />
+              </div>
+            </th>
+          </tr>
 
-        {/* 본문 행 (공종/상태/기술자 + gantt 바) — 좌우 같은 flex row 로 정렬 보장 */}
-        <div role="rowgroup">
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              role="row"
-              data-testid={`task-row-${task.id}`}
-              className="flex border-b border-solid border-[#f5f5f5] has-[:focus-visible]:z-50 has-[:hover]:z-50"
-              style={{ height: ROW_HEIGHT }}
+          {/* 공종 / 상태 / 기술자 + 일자 헤더 */}
+          <tr style={{ height: HEADER_HEIGHT }}>
+            {['공종', '상태', '기술자'].map((label, i) => (
+              <th
+                key={label}
+                scope="col"
+                className={`${stickyCell} border-b border-r border-solid text-sb-14 text-[#3d3d3d] ${i === 2 ? 'border-gray-300' : 'border-[#e5e5e5]'}`}
+                style={{ left: STICKY_LEFT[i], backgroundColor: '#fafafa' }}
+              >
+                <span className="block text-center">{label}</span>
+              </th>
+            ))}
+            <th
+              className="border-b border-solid border-[#e5e5e5] p-0 font-normal"
+              style={{ backgroundColor: '#fafafa' }}
             >
-              <LeftCells
-                task={task}
-                assigneeHref={(profileId) => panelHref(`profile/${profileId}`)}
-                onFindTechnician={handleFindTechnician}
-              />
-              <GanttTrack task={task} dates={dates} startDate={startDate} todayIso={today} />
-            </div>
+              <div className="flex" style={{ width: ganttWidth, height: HEADER_HEIGHT }}>
+                {dates.map((d) => {
+                  const iso = toIsoDate(d)
+                  const isToday = iso === today
+                  return (
+                    <div
+                      key={iso}
+                      className="flex items-center justify-center border-r border-solid border-[#f0f0f0]"
+                      style={{ width: DAY_WIDTH, backgroundColor: isToday ? '#fff0f0' : undefined }}
+                    >
+                      <span
+                        className="text-[13px] leading-[19.5px]"
+                        style={{
+                          color: isToday ? '#e03d3d' : '#3d3d3d',
+                          fontWeight: isToday ? 700 : 400,
+                        }}
+                      >
+                        {d.getDate()}
+                      </span>
+                    </div>
+                  )
+                })}
+                <div style={{ width: RIGHT_PAD_WIDTH }} />
+              </div>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {tasks.map((task) => (
+            <tr key={task.id} data-testid={`task-row-${task.id}`} style={{ height: ROW_HEIGHT }}>
+              <td
+                className={`${stickyCell} border-b border-r border-solid border-[#f5f5f5] text-center align-middle text-r-14 text-[#3d3d3d]`}
+                style={{ left: STICKY_LEFT[0] }}
+              >
+                {task.category}
+              </td>
+              <td
+                className={`${stickyCell} border-b border-r border-solid border-[#f5f5f5] text-center align-middle`}
+                style={{ left: STICKY_LEFT[1] }}
+              >
+                <StatusPill status={task.status} />
+              </td>
+              <td
+                className={`${stickyCell} border-b border-r border-solid border-gray-300 p-2 align-middle`}
+                style={{ left: STICKY_LEFT[2] }}
+              >
+                {task.assignee ? (
+                  <Link
+                    href={panelHref(`profile/${task.assignee.profileId}`)}
+                    scroll={false}
+                    data-testid="assignee"
+                    className="flex w-full items-center gap-2 rounded-[8px] hover:bg-gray-100"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="size-[34px] shrink-0 rounded-full bg-[#d9d9d9]"
+                    />
+                    <span className="flex min-w-0 flex-col">
+                      <span className="text-sb-14 text-gray-900">{task.assignee.name}</span>
+                      <span className="text-r-12 text-gray-500">
+                        {task.assignee.region} | {task.assignee.level} | {task.assignee.specialty}
+                      </span>
+                    </span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleFindTechnician}
+                    className="text-m-14 h-[33.5px] w-full rounded-[6px] border border-solid border-[#c0d0ff] text-primary hover:bg-primary-50"
+                  >
+                    + 기술자 탐색
+                  </button>
+                )}
+              </td>
+              <td
+                className="relative border-b border-solid border-[#f5f5f5] p-0"
+                style={{ width: ganttWidth, height: ROW_HEIGHT }}
+              >
+                <GanttBars task={task} dates={dates} startDate={startDate} todayIso={today} />
+              </td>
+            </tr>
           ))}
 
           {/* 작업 생성 행 */}
-          <div className="flex" role="row" style={{ height: ROW_HEIGHT }}>
-            <div
-              className="sticky left-0 z-20 flex shrink-0 bg-white"
-              style={{ width: LEFT_WIDTH }}
+          <tr style={{ height: ROW_HEIGHT }}>
+            <td
+              className={`${stickyCell} border-r border-solid border-[#f5f5f5] p-2`}
+              style={{ left: STICKY_LEFT[0] }}
             >
-              <div
-                className="flex items-center justify-center border-r border-solid border-[#f5f5f5] p-2"
-                style={{ width: COL_CATEGORY }}
+              <button
+                type="button"
+                onClick={handleCreateTask}
+                className="text-m-14 h-[33.5px] w-[103px] rounded-[6px] border border-dashed border-[#c0d0ff] text-primary hover:bg-primary-50"
               >
-                <button
-                  type="button"
-                  onClick={handleCreateTask}
-                  className="text-m-14 h-[33.5px] w-[103px] rounded-[6px] border border-dashed border-[#c0d0ff] text-primary hover:bg-primary-50"
-                >
-                  + 작업 생성
-                </button>
-              </div>
-              <div
-                className="border-r border-solid border-[#f5f5f5]"
-                style={{ width: COL_STATUS }}
-              />
-              <div
-                className="border-r border-solid border-gray-300"
-                style={{ width: COL_ASSIGNEE }}
-              />
-            </div>
-            <div className="shrink-0" style={{ width: ganttWidth }} />
-          </div>
-        </div>
-      </div>
+                + 작업 생성
+              </button>
+            </td>
+            <td
+              className={`${stickyCell} border-r border-solid border-[#f5f5f5]`}
+              style={{ left: STICKY_LEFT[1] }}
+            />
+            <td
+              className={`${stickyCell} border-r border-solid border-gray-300`}
+              style={{ left: STICKY_LEFT[2] }}
+            />
+            <td style={{ width: ganttWidth }} />
+          </tr>
+        </tbody>
+      </table>
     </div>
   )
 }
