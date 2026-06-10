@@ -28,8 +28,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         )}
       </aside>
       <LoginGateProvider>
-        <main className="flex h-full min-w-0 flex-1 justify-start overflow-y-auto px-10 py-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex w-full max-w-269 flex-col">{children}</div>
+        <main className="flex h-full min-w-0 flex-1 justify-start overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex min-h-full w-full flex-col">{children}</div>
         </main>
         <Suspense>
           <PanelHost />
