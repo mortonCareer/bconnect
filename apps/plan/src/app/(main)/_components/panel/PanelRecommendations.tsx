@@ -23,7 +23,7 @@ export function PanelRecommendations({ profileId }: { profileId: number }) {
     <PanelAside label="추천서">
       <RecommendationsView
         data={data}
-        backHref={panelHref(`/profile/${profileId}`)}
+        backHref={panelHref(`profile/${profileId}`)}
         closeHref={closeHref}
         onClose={close}
       />

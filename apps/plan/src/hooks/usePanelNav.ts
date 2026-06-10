@@ -3,19 +3,16 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 /**
- * 현재 지원하는 패널 경로. 프로필(#344)·메시지(#345/#346)·알림(#347) 트리거가 공유.
- * 프로필 하위 패널(동료·추천서, #557)은 프로필 stats 클릭으로 진입.
- *
- * leading slash 형태(`/profile/5`)는 호출부 가독성을 위한 표기 — 내부적으로 `?panel=profile/5`
- * search param 으로 인코딩된다 (ADR-0021).
+ * 현재 지원하는 패널 세그먼트 (= `?panel=` 값 그대로). 프로필(#344)·메시지(#345/#346)·알림(#347)
+ * 트리거가 공유. 프로필 하위 패널(동료·추천서, #557)은 프로필 stats 클릭으로 진입 (ADR-0021).
  */
 type PanelSegment =
-  | `/profile/${number}`
-  | `/profile/${number}/coworkers`
-  | `/profile/${number}/recommendations`
-  | '/messages'
-  | `/messages/${number}`
-  | '/notifications'
+  | `profile/${number}`
+  | `profile/${number}/coworkers`
+  | `profile/${number}/recommendations`
+  | 'messages'
+  | `messages/${number}`
+  | 'notifications'
 
 /**
  * plan 패널 네비게이션 공통화 (ADR-0021: search param 기반).
@@ -39,13 +36,11 @@ export function usePanelNav() {
     return qs ? `${pathname}?${qs}` : pathname
   }
 
-  const toParam = (segment: PanelSegment) => segment.replace(/^\//, '')
   const closeHref = hrefWithPanel(null)
 
   return {
-    panelHref: (segment: PanelSegment) => hrefWithPanel(toParam(segment)),
-    openPanel: (segment: PanelSegment) =>
-      router.push(hrefWithPanel(toParam(segment)), { scroll: false }),
+    panelHref: (segment: PanelSegment) => hrefWithPanel(segment),
+    openPanel: (segment: PanelSegment) => router.push(hrefWithPanel(segment), { scroll: false }),
     closeHref,
     close: () => router.push(closeHref, { scroll: false }),
   }

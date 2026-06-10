@@ -20,10 +20,10 @@ export function PanelCoworkers({ profileId }: { profileId: number }) {
     <PanelAside label="동료">
       <CoworkersView
         data={data}
-        backHref={panelHref(`/profile/${profileId}`)}
+        backHref={panelHref(`profile/${profileId}`)}
         closeHref={closeHref}
         onClose={close}
-        coworkerHref={(id) => panelHref(`/profile/${id}`)}
+        coworkerHref={(id) => panelHref(`profile/${id}`)}
       />
     </PanelAside>
   )

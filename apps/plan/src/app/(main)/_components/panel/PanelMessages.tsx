@@ -56,7 +56,7 @@ export function PanelMessages() {
     <PanelAside label="메시지 목록">
       <MessagesView
         data={data}
-        chatHref={(chatId) => panelHref(`/messages/${chatId}`)}
+        chatHref={(chatId) => panelHref(`messages/${chatId}`)}
         closeHref={closeHref}
         onClose={close}
       />

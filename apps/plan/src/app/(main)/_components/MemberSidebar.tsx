@@ -101,8 +101,8 @@ export function MemberSidebar() {
         <ProfileSection />
         <div className="h-px bg-gray-300" />
         <div className="flex flex-col gap-0.5">
-          <NavItem label="알림" count={NOTIFICATION_COUNT} href={panelHref('/notifications')} />
-          <NavItem label="메시지" count={messageCount} href={panelHref('/messages')} />
+          <NavItem label="알림" count={NOTIFICATION_COUNT} href={panelHref('notifications')} />
+          <NavItem label="메시지" count={messageCount} href={panelHref('messages')} />
         </div>
       </div>
 

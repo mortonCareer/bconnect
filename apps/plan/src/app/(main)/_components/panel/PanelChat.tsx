@@ -30,8 +30,8 @@ export function PanelChat({ chatId }: { chatId: number }) {
         data={data}
         closeHref={closeHref}
         onClose={close}
-        backHref={panelHref('/messages')}
-        profileHref={(id) => panelHref(`/profile/${id}`)}
+        backHref={panelHref('messages')}
+        profileHref={(id) => panelHref(`profile/${id}`)}
       />
     </PanelAside>
   )

@@ -53,8 +53,8 @@ export function PanelProfile({ profileId }: { profileId: number }) {
         onClose={close}
         statHrefs={{
           works: `?${worksParams.toString()}`,
-          coworkers: panelHref(`/profile/${profileId}/coworkers`),
-          recommendations: panelHref(`/profile/${profileId}/recommendations`),
+          coworkers: panelHref(`profile/${profileId}/coworkers`),
+          recommendations: panelHref(`profile/${profileId}/recommendations`),
         }}
       />
     </PanelAside>
