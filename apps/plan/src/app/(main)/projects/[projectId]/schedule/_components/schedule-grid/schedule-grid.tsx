@@ -133,9 +133,12 @@ function GanttBars({
   todayIso: string | undefined
   onUpdate: (id: string, patch: Partial<Omit<ScheduleTask, 'id'>>) => void
 }) {
-  const { drag, moveHandleProps } = useBarDrag(DAY_WIDTH, (mode, deltaDays) => {
-    onUpdate(task.id, applyDrag(task, mode, deltaDays))
-  })
+  const { drag, moveHandleProps, startHandleDown, endHandleDown } = useBarDrag(
+    DAY_WIDTH,
+    (mode, deltaDays) => {
+      onUpdate(task.id, applyDrag(task, mode, deltaDays))
+    }
+  )
 
   const preview = drag ? applyDrag(task, drag.mode, drag.deltaDays) : task
   const offsetDays = daysBetween(startDate, preview.startDate)
@@ -188,6 +191,16 @@ function GanttBars({
           <span className="mx-1 text-neutral-400">·</span>
           <span>{label}</span>
         </div>
+        <div
+          aria-hidden="true"
+          onPointerDown={startHandleDown}
+          className="absolute inset-y-0 left-0 w-2 cursor-ew-resize rounded-l hover:bg-black/15"
+        />
+        <div
+          aria-hidden="true"
+          onPointerDown={endHandleDown}
+          className="absolute inset-y-0 right-0 w-2 cursor-ew-resize rounded-r hover:bg-black/15"
+        />
       </div>
     </>
   )
