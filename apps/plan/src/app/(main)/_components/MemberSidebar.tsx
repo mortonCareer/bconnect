@@ -6,7 +6,7 @@ import { getAvatarUrl } from '@bconnect/config/avatar'
 import { Select } from '@bconnect/ui'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { SidebarFooter } from './SidebarFooter'
 
@@ -74,6 +74,7 @@ function ProjectSection({
   pathProjectId: string | undefined
   activeSlug: string
 }) {
+  const router = useRouter()
   const [selectedProject, setSelectedProject] = useState(
     pathProjectId ?? MOCK_PROJECTS[0]?.value ?? ''
   )
@@ -101,7 +102,11 @@ function ProjectSection({
       <div className="flex flex-col gap-1">
         <Select
           value={selectedProject}
-          onChange={(v) => setSelectedProject(Array.isArray(v) ? (v[0] ?? '') : v)}
+          onChange={(v) => {
+            const next = Array.isArray(v) ? (v[0] ?? '') : v
+            setSelectedProject(next)
+            if (next) router.push(`/projects/${next}/schedule`)
+          }}
           options={MOCK_PROJECTS}
           placeholder="프로젝트 선택"
         />
