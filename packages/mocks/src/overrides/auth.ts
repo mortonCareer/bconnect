@@ -5,7 +5,7 @@ import {
   getLogoutMockHandler,
 } from '@bconnect/api-client'
 
-// dev 편의용 고정값 — docs/how-to/qa-and-testing.md "테스트 데이터 생성" 섹션과 일치.
+// dev 편의용 고정값.
 const MOCK_OTP_CODE = '123456'
 // 01099 로 시작하는 번호만 기존 회원(로그인) 으로 취급. 그 외는 모두 신규(signup).
 const REGISTERED_PHONE_PREFIX = '01099'

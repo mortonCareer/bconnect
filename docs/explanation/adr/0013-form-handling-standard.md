@@ -13,7 +13,7 @@ BConnect 프론트엔드의 폼 처리가 페이지마다 갈라져 있다. `app
 
 - [#369](https://github.com/mortonCareer/bconnect/pull/369) — login 입력에 에러 표시용 prop 누락 → 에러 시 테두리가 안 변함. **실제 출시된 버그.**
 - 서버 에러 staleness — 잘못된 OTP 입력 후 값을 고쳐도 에러가 안 풀림.
-- 접근성 전무 — 수동 폼은 `aria-invalid`·`aria-describedby`·label 연결이 없다. [qa-and-testing.md](../../how-to/qa-and-testing.md)의 접근성 체크리스트("폼 input에 label 연결")를 위반한 상태.
+- 접근성 전무 — 수동 폼은 `aria-invalid`·`aria-describedby`·label 연결이 없다.
 
 근본 원인은 **표준 부재**다. 폼을 어떻게 구성하고, 에러를 어떻게 다루며, 어떤 입력 컴포넌트를 쓰는지가 정해져 있지 않다. 표준을 정해 이 버그 클래스를 구조적으로 제거한다.
 

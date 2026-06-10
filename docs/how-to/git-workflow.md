@@ -49,7 +49,7 @@ main 머지 → 프로덕션 배포
   - 모든 feature/fix PR의 타겟
   - CI: lint, format, BE 빌드/테스트, **FE typecheck 포함** (강제 green 정책)
   - 스펙만 갱신하는 PR(BE 구현 후 따라가는 갱신)은 paths-filter로 ci-career/ci-plan skip — BE-first에선 일반적으로 BE 변경과 스펙 갱신이 같은 PR에 묶이거나, 스펙 갱신이 FE 호출부 영향 없는 형태로 들어옴
-  - dev 환경 always-green — 스프린트 단위 QA 사이클 보장 (PR 단위 Vercel 프리뷰는 폐기, [ADR-0022](../explanation/adr/0022-drop-vercel-preview-team-owner-shared-account.md))
+  - dev 환경 always-green — 스프린트 단위 QA 사이클 보장
 
 ### 작업 브랜치
 
@@ -296,7 +296,7 @@ Approve
 dev 브랜치로 머지
 ```
 
-> 디자이너 UI 검수·실사용자 QA 는 **PR 단위 프리뷰가 아니라 스프린트 단위 dev 환경**에서 수행합니다 ([ADR-0022](../explanation/adr/0022-drop-vercel-preview-team-owner-shared-account.md)). 상세 절차는 [qa-and-testing.md](./qa-and-testing.md).
+> 디자이너 UI 검수·실사용자 QA 는 스프린트 단위 dev 환경에서 수행합니다.
 
 ### PR 머지 방법
 
@@ -313,21 +313,9 @@ dev 브랜치로 머지
 - 머지 커밋 메시지는 PR 제목 사용
 - 프로덕션 자동 배포 (`main` 머지 시)
 
-#### Sync PR (head=main)의 Vercel checks 예외
+## QA
 
-`main → dev` sync PR은 head가 `main`이라 Vercel preview가 main 코드를 빌드합니다. main에 typecheck drift 등 broken 상태가 있으면 preview가 실패하지만, 이는 sync PR이 만든 문제가 아니라 기존 main 상태를 비추는 것이므로 머지 금지 사유에 해당하지 않습니다. main의 drift는 다음 `dev → main` 통합 사이클에서 별도로 해소합니다.
-
-> PR 프리뷰는 [ADR-0022](../explanation/adr/0022-drop-vercel-preview-team-owner-shared-account.md) 로 폐기됩니다. Vercel PR 체크 비활성화가 완료되면([#571](https://github.com/mortonCareer/bconnect/issues/571)) 본 예외 자체가 불필요해집니다.
-
----
-
-## PR 프리뷰 폐기 → 스프린트 단위 dev QA
-
-PR 단위 Vercel 프리뷰 배포는 **폐기되었습니다** ([ADR-0022](../explanation/adr/0022-drop-vercel-preview-team-owner-shared-account.md)). 디자이너 PR 검수가 사실상 생략돼 왔고, 안정 도메인의 dev 환경([ADR-0016](../explanation/adr/0016-environment-service-domain-naming.md))이 갖춰져 QA 를 **스프린트 단위로 dev 환경**에서 수행합니다.
-
-- **production 배포는 유지**: main 머지 시 career(`bconnect.to`)·plan(`plan.bconnect.to`) 자동 배포는 그대로입니다. 폐기 대상은 **PR 프리뷰**뿐입니다.
-- **QA 절차**: dev 환경 기반 스프린트 QA — **[qa-and-testing.md](./qa-and-testing.md)** 참조.
-- **Vercel PR 체크/코멘트 비활성화 방법은 후속 조사** ([#571](https://github.com/mortonCareer/bconnect/issues/571)). 비활성화 전까지는 PR 에 Vercel 체크가 남아 보일 수 있으며, CANCELED 로 떠도 머지 금지 사유가 아닙니다.
+QA 는 dev 환경에서 **스프린트 단위**로 수행합니다 — 디자이너 UI 검수, CTO 기능 테스트, CEO 실사용자 관점 검증. production 배포는 main 머지 시 career(`bconnect.to`)·plan(`plan.bconnect.to`)으로 자동 진행됩니다.
 
 ---
 

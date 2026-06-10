@@ -71,4 +71,3 @@ BConnect는 휴대폰 OTP 로 로그인·회원가입을 인증한다(Phone OTP 
 
 - **벤더 재평가 트리거**: 사용자 규모 확대로 OTP 월 단가가 유의미해지면 뿌리오(단가 우위) vs Solapi(운영 단순) 재비교. 어댑터 경계가 있으면 교체 비용은 낮다.
 - **알림톡 템플릿**: OTP 용 일회용 비밀번호 템플릿을 Solapi 콘솔에서 사전 등록·승인받아 사용([템플릿 관리](https://console.solapi.com/kakao/templates)).
-- OTP 테스트 번호/코드 운용은 [qa-and-testing.md](../../how-to/qa-and-testing.md) 의 "테스트 데이터 생성" 참조.
