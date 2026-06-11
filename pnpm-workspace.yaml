@@ -17,6 +17,7 @@ catalog:
   msw: ^2.13.6
   next: 16.2.7
   nuqs: ^2.8.9
+  radix-ui: ^1.4.3
   react: 19.2.3
   react-dom: 19.2.3
   react-hook-form: ^7.70.0

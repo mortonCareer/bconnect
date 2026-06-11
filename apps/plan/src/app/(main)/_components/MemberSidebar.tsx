@@ -6,7 +6,7 @@ import { getAvatarUrl } from '@bconnect/config/avatar'
 import { Select } from '@bconnect/ui'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { SidebarFooter } from './SidebarFooter'
 
@@ -67,14 +67,39 @@ type ProjectMenuItem = { slug: string; label: string; href: string | null }
 const PROJECT_ITEM_CLASS =
   'flex h-10 w-full items-center rounded-[8px] px-3 text-[13px] leading-[19.5px]'
 
-function ProjectSection({ projectId, activeSlug }: { projectId: string; activeSlug: string }) {
-  const [selectedProject, setSelectedProject] = useState(projectId)
+function ProjectSection({
+  pathProjectId,
+  activeSlug,
+}: {
+  pathProjectId: string | undefined
+  activeSlug: string
+}) {
+  const router = useRouter()
+  const [selectedProject, setSelectedProject] = useState(
+    pathProjectId ?? MOCK_PROJECTS[0]?.value ?? ''
+  )
+  // path 로 다른 프로젝트에 진입하면 셀렉트를 따라가게 동기화 (render-time adjustment)
+  const [prevPathId, setPrevPathId] = useState(pathProjectId)
+  if (pathProjectId !== prevPathId) {
+    setPrevPathId(pathProjectId)
+    if (pathProjectId) setSelectedProject(pathProjectId)
+  }
+
+  // Select 는 Link 로 표현 불가 — 선택 즉시 해당 프로젝트 공정표로 imperative 이동
+  function handleProjectChange(v: string | string[]) {
+    const next = Array.isArray(v) ? (v[0] ?? '') : v
+    setSelectedProject(next)
+    if (next) router.push(`/projects/${next}/schedule`)
+  }
+
   const items: ProjectMenuItem[] = [
-    { slug: 'schedule', label: '공정표', href: `/projects/${projectId}/schedule` },
+    { slug: 'schedule', label: '공정표', href: `/projects/${selectedProject}/schedule` },
     // TODO: 페이지 구현 시 href 연결 (#375 follow-up — 모집 관리 / 문서 저장소)
     { slug: 'recruit', label: '모집 관리', href: null },
     { slug: 'docs', label: '문서 저장소', href: null },
   ]
+  // active 표시는 현재 path 의 프로젝트를 보고 있을 때만
+  const onSelectedProject = pathProjectId === selectedProject
 
   return (
     <div className="flex flex-col gap-3">
@@ -84,12 +109,12 @@ function ProjectSection({ projectId, activeSlug }: { projectId: string; activeSl
       <div className="flex flex-col gap-1">
         <Select
           value={selectedProject}
-          onChange={(v) => setSelectedProject(Array.isArray(v) ? (v[0] ?? '') : v)}
+          onChange={handleProjectChange}
           options={MOCK_PROJECTS}
           placeholder="프로젝트 선택"
         />
         {items.map((item) => {
-          const active = item.slug === activeSlug
+          const active = onSelectedProject && item.slug === activeSlug
           return item.href ? (
             <Link
               key={item.slug}
@@ -173,7 +198,7 @@ export function MemberSidebar() {
           <NavItem label="메시지" count={messageCount} href={panelHref('messages')} />
           <NavItem label="기술자 탐색" count={0} href="/" active={pathname === '/'} />
         </div>
-        {projectId ? <ProjectSection projectId={projectId} activeSlug={projectSlug} /> : null}
+        <ProjectSection pathProjectId={projectId} activeSlug={projectSlug} />
       </div>
 
       <SidebarFooter />

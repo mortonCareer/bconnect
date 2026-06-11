@@ -63,6 +63,8 @@ export {
 } from './ui/shadcn/drawer'
 export { ConfirmDialog } from './ui/ConfirmDialog'
 export type { ConfirmDialogProps } from './ui/ConfirmDialog'
+export { ContextMenu } from './ui/ContextMenu'
+export type { ContextMenuItem } from './ui/ContextMenu'
 export { Toaster } from './ui/Toaster'
 export {
   Toast,

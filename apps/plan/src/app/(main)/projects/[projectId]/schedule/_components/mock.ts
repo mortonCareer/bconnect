@@ -136,8 +136,4 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   },
 ]
 
-export const MOCK_DATE_RANGE = {
-  startDate: '2026-04-28',
-  endDate: '2026-05-16',
-  today: '2026-05-04',
-}
+export const MOCK_TODAY = '2026-05-04'

@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 /**
  * 현재 지원하는 패널 세그먼트 (= `?panel=` 값 그대로). 프로필(#344)·메시지(#345/#346)·알림(#347)
  * 트리거가 공유. 프로필 하위 패널(동료·추천서, #557)은 프로필 stats 클릭으로 진입 (ADR-0021).
+ * 작업 편집 패널(task)은 공정표 우클릭 수정(#576)으로 진입 — PanelHost 측 구현은 #575-B.
  */
 type PanelSegment =
   | `profile/${number}`
@@ -13,6 +14,7 @@ type PanelSegment =
   | 'messages'
   | `messages/${number}`
   | 'notifications'
+  | `task/${string}`
 
 /**
  * plan 패널 네비게이션 공통화 (ADR-0021: search param 기반).

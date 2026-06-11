@@ -1,83 +1,35 @@
 'use client'
 
 import { usePanelNav } from '@/hooks/usePanelNav'
-import { Button } from '@bconnect/ui'
+import { Button, ConfirmDialog } from '@bconnect/ui'
 import Link from 'next/link'
 import type { WheelEvent } from 'react'
-import type { ScheduleGridProps, ScheduleTask, TaskStatus } from './types'
-
-const COL_CATEGORY = 120
-const COL_STATUS = 100
-const COL_ASSIGNEE = 220
-
-const DAY_WIDTH = 44
-const RIGHT_PAD_WIDTH = 88
-const ROW_HEIGHT = 52
-const HEADER_HEIGHT = 40
-const BAR_HEIGHT = 36
-const BAR_TOP = 7.5
-
-const ISO_DAY_MS = 86_400_000
-
-// 좌측 고정 컬럼의 sticky left 오프셋 (공종 / 상태 / 기술자)
-const STICKY_LEFT = [0, COL_CATEGORY, COL_CATEGORY + COL_STATUS]
-
-const BAR_STYLES: Record<TaskStatus, { bg: string; text: string }> = {
-  completed: { bg: '#b0b0b0', text: '#5a5a5a' },
-  in_progress: { bg: '#284dbc', text: '#ffffff' },
-  recruited: { bg: '#569365', text: '#ffffff' },
-  recruiting: { bg: '#ffbf70', text: '#2d2d2d' },
-  not_started: { bg: '#d0d0d0', text: '#2d2d2d' },
-}
-
-const PILL_STYLES: Record<TaskStatus, string> = {
-  completed: 'bg-[#f0f0f0] border border-[#d0d0d0] text-[#3d3d3d]',
-  in_progress: 'bg-primary text-white',
-  recruited: 'bg-primary-50 border border-[#c0d0ff] text-primary',
-  recruiting: 'bg-[#fff3e0] border border-[#ffe0b2] text-[#e6780a]',
-  not_started: 'bg-white border border-[#d0d0d0] text-[#a5a5a5]',
-}
-
-const STATUS_LABELS: Record<TaskStatus, string> = {
-  completed: '완료됨',
-  in_progress: '진행 중',
-  recruited: '섭외됨',
-  recruiting: '섭외 중',
-  not_started: '시작 전',
-}
-
-function toIsoDate(d: Date): string {
-  return d.toISOString().slice(0, 10)
-}
-
-function daysBetween(a: string, b: string): number {
-  return Math.round((new Date(b).getTime() - new Date(a).getTime()) / ISO_DAY_MS)
-}
-
-function buildDates(start: string, end: string): Date[] {
-  const out: Date[] = []
-  const cursor = new Date(start)
-  const last = new Date(end)
-  while (cursor.getTime() <= last.getTime()) {
-    out.push(new Date(cursor))
-    cursor.setDate(cursor.getDate() + 1)
-  }
-  return out
-}
-
-function groupByMonth(dates: Date[]): { month: number; count: number }[] {
-  const groups: { month: number; count: number }[] = []
-  for (const d of dates) {
-    const m = d.getMonth() + 1
-    const last = groups[groups.length - 1]
-    if (last && last.month === m) {
-      last.count += 1
-    } else {
-      groups.push({ month: m, count: 1 })
-    }
-  }
-  return groups
-}
+import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  COL_ASSIGNEE,
+  COL_CATEGORY,
+  COL_STATUS,
+  DAY_WIDTH,
+  HEADER_HEIGHT,
+  PAST_CONTEXT_DAYS,
+  PILL_STYLES,
+  RIGHT_PAD_WIDTH,
+  ROW_HEIGHT,
+  STATUS_LABELS,
+  STICKY_LEFT,
+} from './constants'
+import {
+  addDays,
+  buildDates,
+  daysBetween,
+  groupByMonth,
+  monthEndOf,
+  monthStartOf,
+  toIsoDate,
+} from './date-utils'
+import { GanttBars } from './gantt-bars'
+import type { ScheduleGridProps, TaskStatus } from './types'
+import { useScheduleTasks } from './use-schedule-tasks'
 
 function StatusPill({ status }: { status: TaskStatus }) {
   return (
@@ -89,77 +41,53 @@ function StatusPill({ status }: { status: TaskStatus }) {
   )
 }
 
-/** gantt 타임라인 셀 내용 — 일자 배경 + 작업 바. relative td 안에 absolute 로 배치된다. */
-function GanttBars({
-  task,
-  dates,
-  startDate,
-  todayIso,
-}: {
-  task: ScheduleTask
-  dates: Date[]
-  startDate: string
-  todayIso: string | undefined
-}) {
-  const offsetDays = daysBetween(startDate, task.startDate)
-  const spanDays = daysBetween(task.startDate, task.endDate) + 1
-  const left = offsetDays * DAY_WIDTH + 2
-  const width = spanDays * DAY_WIDTH - 4
-  const style = BAR_STYLES[task.status]
-  const label = STATUS_LABELS[task.status]
+export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) {
+  const { panelHref, openPanel } = usePanelNav()
+  const { tasks, updateTask, deleteTask } = useScheduleTasks(initialTasks)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
-  return (
-    <>
-      {dates.map((d, i) => {
-        const iso = toIsoDate(d)
-        return (
-          <div
-            key={iso}
-            aria-hidden="true"
-            className="absolute top-0 border-r border-solid border-[#f5f5f5]"
-            style={{
-              left: i * DAY_WIDTH,
-              width: DAY_WIDTH,
-              height: ROW_HEIGHT,
-              backgroundColor: iso === todayIso ? '#fff8f8' : undefined,
-            }}
-          />
-        )
-      })}
-      <div
-        className="group absolute flex items-center rounded pl-2.5 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-        style={{ left, top: BAR_TOP, width, height: BAR_HEIGHT, backgroundColor: style.bg }}
-        tabIndex={0}
-        aria-label={`${task.ganttName} · ${task.startDate} ~ ${task.endDate} · ${label}`}
-      >
-        <p
-          className="truncate text-[12px] font-semibold leading-[18px]"
-          style={{ color: style.text }}
-        >
-          {task.ganttName}
-        </p>
-        <div
-          className="pointer-events-none invisible absolute left-0 top-full z-10 mt-1 whitespace-nowrap rounded bg-neutral-900 px-2 py-1 text-[11px] text-white opacity-0 shadow-lg transition-opacity group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100"
-          role="tooltip"
-        >
-          <span className="font-semibold">{task.ganttName}</span>
-          <span className="mx-1 text-neutral-400">·</span>
-          <span>
-            {task.startDate} ~ {task.endDate}
-          </span>
-          <span className="mx-1 text-neutral-400">·</span>
-          <span>{label}</span>
-        </div>
-      </div>
-    </>
-  )
-}
+  // 범위 = (최초 start -5일)의 달 1일 ~ (최후 end +5일)의 달 말일.
+  // tasks 파생이라 drop(상태 변경) 시에만 재계산 (#6)
+  const { startDate, endDate } = useMemo(() => {
+    const start = tasks[0]?.startDate ?? today ?? ''
+    let end = start
+    for (const t of tasks) {
+      if (t.endDate > end) end = t.endDate
+    }
+    if (!start) return { startDate: start, endDate: end }
+    return { startDate: monthStartOf(addDays(start, -5)), endDate: monthEndOf(addDays(end, 5)) }
+  }, [tasks, today])
 
-export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridProps) {
-  const { panelHref } = usePanelNav()
   const dates = buildDates(startDate, endDate)
   const monthGroups = groupByMonth(dates)
-  const ganttWidth = dates.length * DAY_WIDTH + RIGHT_PAD_WIDTH
+
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [containerWidth, setContainerWidth] = useState(0)
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const observer = new ResizeObserver(() => setContainerWidth(el.clientWidth))
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  // 간트 영역이 컨테이너 잔여 폭을 항상 채우도록 우측 패드를 늘린다 (#3).
+  // 콘텐츠(일자 셀)가 더 길면 기존대로 가로 스크롤.
+  const daysWidth = dates.length * DAY_WIDTH
+  const padWidth = Math.max(
+    RIGHT_PAD_WIDTH,
+    containerWidth - (COL_CATEGORY + COL_STATUS + COL_ASSIGNEE) - daysWidth
+  )
+  const ganttWidth = daysWidth + padWidth
+
+  const didInitScroll = useRef(false)
+  useEffect(() => {
+    if (didInitScroll.current || !today) return
+    didInitScroll.current = true
+    const todayIndex = daysBetween(startDate, today)
+    const el = scrollRef.current
+    if (el) el.scrollLeft = Math.max(0, (todayIndex - PAST_CONTEXT_DAYS) * DAY_WIDTH)
+  }, [today, startDate])
 
   function handleCreateTask() {
     alert('준비 중')
@@ -183,6 +111,7 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
 
   return (
     <div
+      ref={scrollRef}
       onWheel={handleWheel}
       className="w-full overflow-x-auto bg-white font-sans [scrollbar-color:#d0d0d0_transparent] [scrollbar-width:thin]"
     >
@@ -216,7 +145,7 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
                 {monthGroups.map((g, i) => (
                   <div
                     key={`${g.month}-${i}`}
-                    className="flex items-center justify-center"
+                    className={`flex items-center justify-center ${i < monthGroups.length - 1 ? 'border-r border-solid border-[#d0d0d0]' : ''}`}
                     style={{ width: g.count * DAY_WIDTH }}
                   >
                     <span className="text-[13px] font-semibold leading-[19.5px] text-[#3d3d3d]">
@@ -224,7 +153,7 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
                     </span>
                   </div>
                 ))}
-                <div style={{ width: RIGHT_PAD_WIDTH }} />
+                <div style={{ width: padWidth }} />
               </div>
             </th>
           </tr>
@@ -246,13 +175,14 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
               style={{ backgroundColor: '#fafafa' }}
             >
               <div className="flex" style={{ width: ganttWidth, height: HEADER_HEIGHT }}>
-                {dates.map((d) => {
+                {dates.map((d, i) => {
                   const iso = toIsoDate(d)
                   const isToday = iso === today
+                  const isMonthEnd = d.getMonth() !== dates[i + 1]?.getMonth()
                   return (
                     <div
                       key={iso}
-                      className="flex items-center justify-center border-r border-solid border-[#f0f0f0]"
+                      className={`flex items-center justify-center border-r border-solid ${isMonthEnd ? 'border-[#d0d0d0]' : 'border-[#f0f0f0]'}`}
                       style={{ width: DAY_WIDTH, backgroundColor: isToday ? '#fff0f0' : undefined }}
                     >
                       <span
@@ -267,7 +197,7 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
                     </div>
                   )
                 })}
-                <div style={{ width: RIGHT_PAD_WIDTH }} />
+                <div style={{ width: padWidth }} />
               </div>
             </th>
           </tr>
@@ -289,14 +219,14 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
                 <StatusPill status={task.status} />
               </td>
               <td
-                className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] p-2 align-middle`}
+                className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] align-middle ${task.assignee ? 'px-1 py-2' : 'p-2'}`}
                 style={{ left: STICKY_LEFT[2] }}
               >
                 {task.assignee ? (
                   <Link
                     href={panelHref(`profile/${task.assignee.profileId}`)}
                     scroll={false}
-                    className="flex w-full items-center gap-2 rounded-[8px] hover:bg-gray-100"
+                    className="flex w-full items-center gap-2 rounded-[8px] px-1 hover:bg-gray-100"
                   >
                     <span
                       aria-hidden="true"
@@ -324,7 +254,15 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
                 className="relative border-b border-solid border-[#f5f5f5] p-0"
                 style={{ width: ganttWidth, height: ROW_HEIGHT }}
               >
-                <GanttBars task={task} dates={dates} startDate={startDate} todayIso={today} />
+                <GanttBars
+                  task={task}
+                  dates={dates}
+                  startDate={startDate}
+                  todayIso={today}
+                  onUpdate={updateTask}
+                  onEdit={(id) => openPanel(`task/${id}`)}
+                  onDelete={setDeleteTargetId}
+                />
               </td>
             </tr>
           ))}
@@ -356,6 +294,20 @@ export function ScheduleGrid({ tasks, startDate, endDate, today }: ScheduleGridP
           </tr>
         </tbody>
       </table>
+      <ConfirmDialog
+        open={deleteTargetId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTargetId(null)
+        }}
+        title="작업을 삭제할까요?"
+        description="삭제한 작업은 복구할 수 없어요."
+        confirmLabel="삭제"
+        destructive
+        onConfirm={() => {
+          if (deleteTargetId) deleteTask(deleteTargetId)
+          setDeleteTargetId(null)
+        }}
+      />
     </div>
   )
 }
