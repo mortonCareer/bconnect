@@ -1,102 +1,35 @@
 'use client'
 
 import { usePanelNav } from '@/hooks/usePanelNav'
-import { Button, ConfirmDialog, ContextMenu } from '@bconnect/ui'
+import { Button, ConfirmDialog } from '@bconnect/ui'
 import Link from 'next/link'
 import type { WheelEvent } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { ScheduleGridProps, ScheduleTask, TaskStatus } from './types'
-import type { DragMode } from './use-bar-drag'
-import { useBarDrag } from './use-bar-drag'
+import {
+  COL_ASSIGNEE,
+  COL_CATEGORY,
+  COL_STATUS,
+  DAY_WIDTH,
+  HEADER_HEIGHT,
+  PAST_CONTEXT_DAYS,
+  PILL_STYLES,
+  RIGHT_PAD_WIDTH,
+  ROW_HEIGHT,
+  STATUS_LABELS,
+  STICKY_LEFT,
+} from './constants'
+import {
+  addDays,
+  buildDates,
+  daysBetween,
+  groupByMonth,
+  monthEndOf,
+  monthStartOf,
+  toIsoDate,
+} from './date-utils'
+import { GanttBars } from './gantt-bars'
+import type { ScheduleGridProps, TaskStatus } from './types'
 import { useScheduleTasks } from './use-schedule-tasks'
-
-const COL_CATEGORY = 120
-const COL_STATUS = 100
-const COL_ASSIGNEE = 220
-
-const DAY_WIDTH = 44
-const RIGHT_PAD_WIDTH = 88
-const ROW_HEIGHT = 52
-const HEADER_HEIGHT = 40
-const BAR_HEIGHT = 36
-const BAR_TOP = 7.5
-
-const ISO_DAY_MS = 86_400_000
-
-// 초기 스크롤: 오늘 기준 과거를 며칠 보여줄지 (과거 약간 + 미래 위주)
-const PAST_CONTEXT_DAYS = 3
-
-// 좌측 고정 컬럼의 sticky left 오프셋 (공종 / 상태 / 기술자)
-const STICKY_LEFT = [0, COL_CATEGORY, COL_CATEGORY + COL_STATUS]
-
-const BAR_STYLES: Record<TaskStatus, { bg: string; text: string }> = {
-  completed: { bg: '#b0b0b0', text: '#5a5a5a' },
-  in_progress: { bg: '#284dbc', text: '#ffffff' },
-  recruited: { bg: '#569365', text: '#ffffff' },
-  recruiting: { bg: '#ffbf70', text: '#2d2d2d' },
-  not_started: { bg: '#d0d0d0', text: '#2d2d2d' },
-}
-
-const PILL_STYLES: Record<TaskStatus, string> = {
-  completed: 'bg-[#f0f0f0] border border-[#d0d0d0] text-[#3d3d3d]',
-  in_progress: 'bg-primary text-white',
-  recruited: 'bg-primary-50 border border-[#c0d0ff] text-primary',
-  recruiting: 'bg-[#fff3e0] border border-[#ffe0b2] text-[#e6780a]',
-  not_started: 'bg-white border border-[#d0d0d0] text-[#a5a5a5]',
-}
-
-const STATUS_LABELS: Record<TaskStatus, string> = {
-  completed: '완료됨',
-  in_progress: '진행 중',
-  recruited: '섭외됨',
-  recruiting: '섭외 중',
-  not_started: '시작 전',
-}
-
-function toIsoDate(d: Date): string {
-  return d.toISOString().slice(0, 10)
-}
-
-function daysBetween(a: string, b: string): number {
-  return Math.round((new Date(b).getTime() - new Date(a).getTime()) / ISO_DAY_MS)
-}
-
-function addDays(iso: string, n: number): string {
-  return toIsoDate(new Date(new Date(iso).getTime() + n * ISO_DAY_MS))
-}
-
-function monthStartOf(iso: string): string {
-  return `${iso.slice(0, 8)}01`
-}
-
-function monthEndOf(iso: string): string {
-  return toIsoDate(new Date(Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)), 0)))
-}
-
-function buildDates(start: string, end: string): Date[] {
-  const out: Date[] = []
-  const cursor = new Date(start)
-  const last = new Date(end)
-  while (cursor.getTime() <= last.getTime()) {
-    out.push(new Date(cursor))
-    cursor.setDate(cursor.getDate() + 1)
-  }
-  return out
-}
-
-function groupByMonth(dates: Date[]): { month: number; count: number }[] {
-  const groups: { month: number; count: number }[] = []
-  for (const d of dates) {
-    const m = d.getMonth() + 1
-    const last = groups[groups.length - 1]
-    if (last && last.month === m) {
-      last.count += 1
-    } else {
-      groups.push({ month: m, count: 1 })
-    }
-  }
-  return groups
-}
 
 function StatusPill({ status }: { status: TaskStatus }) {
   return (
@@ -105,112 +38,6 @@ function StatusPill({ status }: { status: TaskStatus }) {
     >
       {STATUS_LABELS[status]}
     </span>
-  )
-}
-
-/** gantt 타임라인 셀 내용 — 일자 배경 + 작업 바. relative td 안에 absolute 로 배치된다. */
-/** 드래그 모드별로 snap 된 deltaDays 를 시작/종료일에 반영. 리사이즈는 최소 1일 보장 클램프. */
-function applyDrag(
-  task: ScheduleTask,
-  mode: DragMode,
-  deltaDays: number
-): Pick<ScheduleTask, 'startDate' | 'endDate'> {
-  const span = daysBetween(task.startDate, task.endDate)
-  if (mode === 'move') {
-    return {
-      startDate: addDays(task.startDate, deltaDays),
-      endDate: addDays(task.endDate, deltaDays),
-    }
-  }
-  if (mode === 'resize-start') {
-    return { startDate: addDays(task.startDate, Math.min(deltaDays, span)), endDate: task.endDate }
-  }
-  return { startDate: task.startDate, endDate: addDays(task.endDate, Math.max(deltaDays, -span)) }
-}
-
-function GanttBars({
-  task,
-  dates,
-  startDate,
-  todayIso,
-  onUpdate,
-  onEdit,
-  onDelete,
-}: {
-  task: ScheduleTask
-  dates: Date[]
-  startDate: string
-  todayIso: string | undefined
-  onUpdate: (id: string, patch: Partial<Omit<ScheduleTask, 'id'>>) => void
-  onEdit: (id: string) => void
-  onDelete: (id: string) => void
-}) {
-  const { drag, moveHandleProps, startHandleDown, endHandleDown } = useBarDrag(
-    DAY_WIDTH,
-    (mode, deltaDays) => {
-      onUpdate(task.id, applyDrag(task, mode, deltaDays))
-    }
-  )
-
-  const preview = drag ? applyDrag(task, drag.mode, drag.deltaDays) : task
-  const offsetDays = daysBetween(startDate, preview.startDate)
-  const spanDays = daysBetween(preview.startDate, preview.endDate) + 1
-  const left = offsetDays * DAY_WIDTH + 2
-  const width = spanDays * DAY_WIDTH - 4
-  const style = BAR_STYLES[task.status]
-  const label = STATUS_LABELS[task.status]
-
-  return (
-    <>
-      {dates.map((d, i) => {
-        const iso = toIsoDate(d)
-        const isMonthEnd = d.getMonth() !== dates[i + 1]?.getMonth()
-        return (
-          <div
-            key={iso}
-            aria-hidden="true"
-            className={`absolute inset-y-0 border-r border-solid ${isMonthEnd ? 'border-[#d0d0d0]' : 'border-[#f5f5f5]'}`}
-            style={{
-              left: i * DAY_WIDTH,
-              width: DAY_WIDTH,
-              backgroundColor: iso === todayIso ? '#fff8f8' : undefined,
-            }}
-          />
-        )
-      })}
-      <ContextMenu
-        trigger={
-          <div
-            {...moveHandleProps}
-            className={`absolute flex touch-none items-center rounded pl-2.5 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${drag ? 'z-10 cursor-grabbing opacity-90' : 'cursor-grab'}`}
-            style={{ left, top: BAR_TOP, width, height: BAR_HEIGHT, backgroundColor: style.bg }}
-            tabIndex={0}
-            aria-label={`${task.ganttName} · ${task.startDate} ~ ${task.endDate} · ${label}`}
-          >
-            <p
-              className="truncate text-[12px] font-semibold leading-[18px]"
-              style={{ color: style.text }}
-            >
-              {task.ganttName}
-            </p>
-            <div
-              aria-hidden="true"
-              onPointerDown={startHandleDown}
-              className="absolute inset-y-0 left-0 w-2 cursor-ew-resize rounded-l hover:bg-black/15"
-            />
-            <div
-              aria-hidden="true"
-              onPointerDown={endHandleDown}
-              className="absolute inset-y-0 right-0 w-2 cursor-ew-resize rounded-r hover:bg-black/15"
-            />
-          </div>
-        }
-        items={[
-          { label: '수정', onSelect: () => onEdit(task.id) },
-          { label: '삭제', onSelect: () => onDelete(task.id), destructive: true },
-        ]}
-      />
-    </>
   )
 }
 
