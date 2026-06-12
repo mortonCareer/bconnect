@@ -115,9 +115,11 @@ export function TextareaField<T extends FieldValues>({
                   transform ? (e) => field.onChange(transform(e.target.value)) : field.onChange
                 }
                 className={cn(
+                  FIELD_BASE_CLASSES,
+                  FIELD_DEFAULT_VARIANT_CLASSES,
                   layout === 'row'
-                    ? cn('w-full resize-none', ROW_INPUT_CLASSES, fieldSlot({ layout }))
-                    : cn(FIELD_BASE_CLASSES, FIELD_DEFAULT_VARIANT_CLASSES, 'flex resize-y'),
+                    ? cn('resize-none', ROW_INPUT_CLASSES, fieldSlot({ layout }))
+                    : 'flex resize-y',
                   className
                 )}
               />

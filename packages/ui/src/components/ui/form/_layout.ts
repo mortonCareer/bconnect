@@ -35,6 +35,10 @@ export const fieldSlot = cva('', {
   defaultVariants: { layout: 'stacked' },
 })
 
-/** row 레이아웃의 인라인 입력 — 박스 없이 값 텍스트처럼 보이는 input */
+/**
+ * row 레이아웃의 인라인 입력 — 박스 없이 값 텍스트처럼 보이는 input.
+ * FIELD_BASE 를 유지한 채 박스 시각(border/ring/padding/height)만 중화한다 —
+ * outline/disabled/transition 등 동작 클래스는 FIELD_BASE 그대로.
+ */
 export const ROW_INPUT_CLASSES =
-  'rounded-none border-0 p-0 text-r-14 text-[#1b1b1b] placeholder:text-[#777777] focus:ring-0 aria-invalid:ring-0'
+  'h-auto rounded-none border-0 p-0 text-r-14 text-[#1b1b1b] placeholder:text-[#777777] focus:ring-0 aria-invalid:ring-0'
