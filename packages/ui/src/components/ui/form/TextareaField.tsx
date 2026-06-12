@@ -8,6 +8,7 @@ import { Slot } from 'radix-ui'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
 import { cn } from '../../../lib/utils'
 import { FIELD_BASE_CLASSES, FIELD_DEFAULT_VARIANT_CLASSES } from '../_field-base'
+import { fieldItem, fieldLabel, fieldSlot, ROW_INPUT_CLASSES, type FieldLayout } from './_layout'
 import {
   FormDescription,
   FormField,
@@ -35,6 +36,8 @@ interface TextareaFieldProps<T extends FieldValues> extends Omit<
   serverError?: string
   /** 입력값 변환기 — RHF 에 저장하기 전 가공. */
   transform?: (raw: string) => string
+  /** 레이아웃 변형 — row 는 패널형 수평(라벨 좌측 고정폭 + 하단 구분선, #581). 기본 stacked. */
+  layout?: FieldLayout
 }
 
 /**
@@ -77,6 +80,7 @@ export function TextareaField<T extends FieldValues>({
   transform,
   className,
   rows = 4,
+  layout = 'stacked',
   ...textareaProps
 }: TextareaFieldProps<T>) {
   return (
@@ -86,9 +90,9 @@ export function TextareaField<T extends FieldValues>({
       render={({ field, fieldState }) => {
         const hasError = !!fieldState.error || !!serverError
         return (
-          <FormItem className="gap-3">
+          <FormItem className={fieldItem({ layout })}>
             {label && (
-              <FormLabel className="text-m-16 text-gray-900">
+              <FormLabel className={fieldLabel({ layout })}>
                 {label}
                 {required && (
                   <span className="ml-0.5 text-destructive" aria-hidden>
@@ -98,26 +102,32 @@ export function TextareaField<T extends FieldValues>({
               </FormLabel>
             )}
             {description && (
-              <FormDescription className="text-r-14 text-gray-700">{description}</FormDescription>
+              <FormDescription className={cn('text-r-14 text-gray-700', fieldSlot({ layout }))}>
+                {description}
+              </FormDescription>
             )}
             <TextareaFieldControl serverError={serverError}>
               <textarea
                 {...field}
                 {...textareaProps}
-                rows={rows}
+                rows={layout === 'row' ? 1 : rows}
                 onChange={
                   transform ? (e) => field.onChange(transform(e.target.value)) : field.onChange
                 }
                 className={cn(
                   FIELD_BASE_CLASSES,
                   FIELD_DEFAULT_VARIANT_CLASSES,
-                  'flex resize-y',
+                  layout === 'row'
+                    ? cn('resize-none', ROW_INPUT_CLASSES, fieldSlot({ layout }))
+                    : 'flex resize-y',
                   className
                 )}
               />
             </TextareaFieldControl>
-            <FormMessage>{serverError}</FormMessage>
-            {hint && !hasError && <p className="text-r-14 text-gray-500">{hint}</p>}
+            <FormMessage className={fieldSlot({ layout })}>{serverError}</FormMessage>
+            {hint && !hasError && (
+              <p className={cn('text-r-14 text-gray-500', fieldSlot({ layout }))}>{hint}</p>
+            )}
           </FormItem>
         )
       }}
