@@ -41,9 +41,9 @@ function StatusPill({ status }: { status: TaskStatus }) {
   )
 }
 
-export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) {
+export function ScheduleGrid({ today }: ScheduleGridProps) {
   const { panelHref, openPanel } = usePanelNav()
-  const { tasks, updateTask, deleteTask } = useScheduleTasks(initialTasks)
+  const { tasks, updateTask, deleteTask } = useScheduleTasks()
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   // 범위 = (최초 start -5일)의 달 1일 ~ (최후 end +5일)의 달 말일.
@@ -90,7 +90,7 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
   }, [today, startDate])
 
   function handleCreateTask() {
-    alert('준비 중')
+    openPanel('task/new')
   }
 
   function handleFindTechnician() {

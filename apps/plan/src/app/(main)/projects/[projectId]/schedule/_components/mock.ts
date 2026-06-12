@@ -16,6 +16,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   {
     id: '1',
     category: '철거',
+    trades: ['철거'],
     ganttName: '철거작업',
     startDate: '2026-04-28',
     endDate: '2026-04-30',
@@ -31,6 +32,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   {
     id: '2',
     category: '전기',
+    trades: ['전기'],
     ganttName: '전기 시공',
     startDate: '2026-05-01',
     endDate: '2026-05-03',
@@ -46,6 +48,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   {
     id: '3',
     category: '목공 · 창호',
+    trades: ['목공', '창호'],
     ganttName: '목재/창호 설치',
     startDate: '2026-05-03',
     endDate: '2026-05-04',
@@ -61,7 +64,13 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   {
     id: '4',
     category: '타일',
+    trades: ['타일', '도배'],
     ganttName: '타일',
+    corpName: '서정 건축',
+    address: '경기도 수원시 율전로 00번길 00-00',
+    addressDetail: '000호',
+    request: '타일 시공 및 단일 벽면 일부 도배',
+    memo: '세밀한 작업이 필요함',
     startDate: '2026-05-04',
     endDate: '2026-05-05',
     status: 'recruited',
@@ -76,6 +85,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   {
     id: '5',
     category: '필름',
+    trades: ['필름'],
     ganttName: '필름',
     startDate: '2026-05-06',
     endDate: '2026-05-07',
@@ -91,6 +101,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   {
     id: '6',
     category: '도배',
+    trades: ['도배'],
     ganttName: '도배',
     startDate: '2026-05-08',
     endDate: '2026-05-09',
@@ -106,6 +117,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   {
     id: '7',
     category: '바닥',
+    trades: ['바닥'],
     ganttName: '바닥 및 마무리',
     startDate: '2026-05-10',
     endDate: '2026-05-11',
@@ -121,6 +133,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   {
     id: '8',
     category: '싱크대 · 가구',
+    trades: ['싱크대', '가구'],
     ganttName: '가구 설치',
     startDate: '2026-05-12',
     endDate: '2026-05-13',
@@ -129,6 +142,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   {
     id: '9',
     category: '조명',
+    trades: ['조명'],
     ganttName: '조명 설치',
     startDate: '2026-05-12',
     endDate: '2026-05-14',

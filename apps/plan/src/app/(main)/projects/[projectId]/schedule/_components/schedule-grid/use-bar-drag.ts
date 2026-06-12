@@ -11,10 +11,12 @@ const DRAG_THRESHOLD_PX = 4
 /**
  * 간트 바 1축 제약 드래그 (#576). 이동/좌우 리사이즈가 같은 snap 메커니즘 공유:
  * pointerdown → deltaX 추적 → round(deltaX/dayWidth) 일 단위 snap → pointerup 에 commit.
+ * 임계 미만으로 끝난 좌클릭은 onTap (작업 편집 패널 진입, #582).
  */
 export function useBarDrag(
   dayWidth: number,
-  onCommit: (mode: DragMode, deltaDays: number) => void
+  onCommit: (mode: DragMode, deltaDays: number) => void,
+  onTap?: () => void
 ) {
   const [drag, setDrag] = useState<{ mode: DragMode; deltaDays: number } | null>(null)
   const originX = useRef(0)
@@ -41,7 +43,10 @@ export function useBarDrag(
   }
 
   function handleUp() {
-    if (drag && activated.current && drag.deltaDays !== 0) onCommit(drag.mode, drag.deltaDays)
+    if (drag) {
+      if (activated.current && drag.deltaDays !== 0) onCommit(drag.mode, drag.deltaDays)
+      else if (!activated.current) onTap?.()
+    }
     activated.current = false
     setDrag(null)
   }

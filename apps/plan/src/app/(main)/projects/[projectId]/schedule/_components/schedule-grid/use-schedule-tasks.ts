@@ -1,14 +1,17 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
-import type { ScheduleTask } from './types'
+import { useScheduleTaskStore } from '@/stores/schedule-task-store'
+import { useMemo } from 'react'
 
 /**
- * 공정표 작업 로컬 상태 seam (#576).
- * BE 연동(C) 시 이 훅 내부만 React Query mutation 으로 교체한다 — 호출부 시그니처 유지.
+ * 공정표 작업 상태 소비 훅 (#576). 진실원은 schedule-task-store (작업 패널과 공유, #582).
+ * 정렬(start asc → end asc)을 렌더 전 여기서 강제한다 — 변경 시마다 자동 재적용.
  */
-export function useScheduleTasks(initialTasks: ScheduleTask[]) {
-  const [rawTasks, setRawTasks] = useState(initialTasks)
+export function useScheduleTasks() {
+  const rawTasks = useScheduleTaskStore((s) => s.tasks)
+  const updateTask = useScheduleTaskStore((s) => s.updateTask)
+  const createTask = useScheduleTaskStore((s) => s.createTask)
+  const deleteTask = useScheduleTaskStore((s) => s.deleteTask)
 
   const tasks = useMemo(
     () =>
@@ -17,18 +20,6 @@ export function useScheduleTasks(initialTasks: ScheduleTask[]) {
       ),
     [rawTasks]
   )
-
-  const updateTask = useCallback((id: string, patch: Partial<Omit<ScheduleTask, 'id'>>) => {
-    setRawTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)))
-  }, [])
-
-  const createTask = useCallback((task: ScheduleTask) => {
-    setRawTasks((prev) => [...prev, task])
-  }, [])
-
-  const deleteTask = useCallback((id: string) => {
-    setRawTasks((prev) => prev.filter((t) => t.id !== id))
-  }, [])
 
   return { tasks, updateTask, createTask, deleteTask }
 }

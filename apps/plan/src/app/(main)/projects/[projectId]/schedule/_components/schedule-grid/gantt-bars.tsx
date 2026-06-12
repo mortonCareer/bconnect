@@ -48,7 +48,8 @@ export function GanttBars({
     DAY_WIDTH,
     (mode, deltaDays) => {
       onUpdate(task.id, applyDrag(task, mode, deltaDays))
-    }
+    },
+    () => onEdit(task.id)
   )
 
   const preview = drag ? applyDrag(task, drag.mode, drag.deltaDays) : task
