@@ -26,8 +26,6 @@ interface DateRangeFieldProps<T extends FieldValues> {
   layout?: FieldLayout
 }
 
-const DATE_INPUT_CLASSES = 'rounded-lg border-[#e0e0e0] px-3 py-2 text-r-14'
-
 /**
  * 시작일 ~ 종료일 범위 입력 (#581). RHF 필드 2개(startName/endName)를 한 행에 합성한다.
  * 두 필드가 한 시각 단위라 `*Field` 의 단일 FormItem 모델에 안 맞아 aria 를 직접 배선
@@ -76,10 +74,10 @@ export function DateRangeField<T extends FieldValues>({
                     {...startField}
                     id={startId}
                     type="date"
+                    size="small"
                     disabled={disabled}
                     aria-invalid={invalid}
                     aria-describedby={invalid ? messageId : undefined}
-                    className={DATE_INPUT_CLASSES}
                   />
                   <span aria-hidden className="shrink-0 text-r-14 text-gray-900">
                     ~
@@ -87,11 +85,11 @@ export function DateRangeField<T extends FieldValues>({
                   <Input
                     {...endField}
                     type="date"
+                    size="small"
                     disabled={disabled}
                     aria-label={label ? `${label} 종료일` : '종료일'}
                     aria-invalid={invalid}
                     aria-describedby={invalid ? messageId : undefined}
-                    className={DATE_INPUT_CLASSES}
                   />
                 </div>
                 {errorMessage && (
