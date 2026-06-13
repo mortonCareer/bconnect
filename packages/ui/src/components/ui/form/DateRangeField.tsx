@@ -10,6 +10,18 @@ import { Input } from '../Input'
 import { FormField } from '../shadcn/form'
 import { fieldItem, fieldLabel, fieldSlot, type FieldLayout } from './_layout'
 
+/**
+ * native date 의 캘린더 아이콘(`::-webkit-calendar-picker-indicator`, UA stylesheet 렌더)을
+ * 투명화해 시안(텍스트만)에 맞추되, input 전체를 덮어 어디를 눌러도 picker 가 열리도록 한다.
+ */
+const DATE_PICKER_RESET = cn(
+  'relative',
+  '[&::-webkit-calendar-picker-indicator]:absolute',
+  '[&::-webkit-calendar-picker-indicator]:inset-0',
+  '[&::-webkit-calendar-picker-indicator]:cursor-pointer',
+  '[&::-webkit-calendar-picker-indicator]:opacity-0'
+)
+
 interface DateRangeFieldProps<T extends FieldValues> {
   control: Control<T>
   /** 시작일 필드명 — 종료일과 별개 RHF 필드. start>end 류 교차 검증은 zod refine 이 담당. */
@@ -78,6 +90,7 @@ export function DateRangeField<T extends FieldValues>({
                     disabled={disabled}
                     aria-invalid={invalid}
                     aria-describedby={invalid ? messageId : undefined}
+                    className={DATE_PICKER_RESET}
                   />
                   <span aria-hidden className="shrink-0 text-r-14 text-gray-900">
                     ~
@@ -90,6 +103,7 @@ export function DateRangeField<T extends FieldValues>({
                     aria-label={label ? `${label} 종료일` : '종료일'}
                     aria-invalid={invalid}
                     aria-describedby={invalid ? messageId : undefined}
+                    className={DATE_PICKER_RESET}
                   />
                 </div>
                 {errorMessage && (
