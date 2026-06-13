@@ -18,8 +18,10 @@ import {
 import { PanelAside, PanelScroll, PanelShell } from '@bconnect/features'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import type { ScheduleTask } from '@/app/(main)/projects/[projectId]/schedule/_components/schedule-grid/types'
 
 const TRADE_OPTIONS = [
   '철거',
@@ -56,10 +58,39 @@ const taskSchema = z
 
 type TaskFormValues = z.infer<typeof taskSchema>
 
+const EMPTY_FORM: TaskFormValues = {
+  ganttName: '',
+  corpName: '',
+  startDate: '',
+  endDate: '',
+  address: '',
+  addressDetail: '',
+  trades: [],
+  request: '',
+  memo: '',
+}
+
+function toFormValues(task: ScheduleTask): TaskFormValues {
+  return {
+    ganttName: task.ganttName ?? '',
+    corpName: task.corpName ?? '',
+    startDate: task.startDate ?? '',
+    endDate: task.endDate ?? '',
+    address: task.address ?? '',
+    addressDetail: task.addressDetail ?? '',
+    trades: task.trades ?? [],
+    request: task.request ?? '',
+    memo: task.memo ?? '',
+  }
+}
+
 /**
- * 공정표 작업 생성/편집 패널 (#582). `?panel=task/new` = 빈 폼(생성),
- * `?panel=task/{id}` = 채워진 폼(편집). 저장은 schedule-task-store seam 경유 —
- * 그리드와 같은 tasks 를 보고, BE 연동(C)은 스토어 교체로 흡수.
+ * 공정표 작업 생성/편집 패널 (#582). `?panel=task/new` = 빈 폼(생성, 명시 '작업 생성'),
+ * `?panel=task/{id}` = 채워진 폼(편집, 즉시저장). 저장은 schedule-task-store seam 경유.
+ *
+ * 편집 모드는 store ↔ 폼 양방향:
+ * - store → 폼: `useForm({ values })` 로 외부 변경(간트바 드래그/리사이즈)을 input 에 반영
+ * - 폼 → store: useWatch 로 유효한 값만 즉시 updateTask. 외부 반영분과 동일하면 no-op (루프 차단)
  */
 export function PanelTask({ taskId }: { taskId?: string }) {
   const { close, closeHref } = usePanelNav()
@@ -70,21 +101,28 @@ export function PanelTask({ taskId }: { taskId?: string }) {
   const updateTask = useScheduleTaskStore((s) => s.updateTask)
   const isEdit = !!taskId
 
+  const values = useMemo(() => (isEdit && task ? toFormValues(task) : undefined), [isEdit, task])
+
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
-    mode: 'onTouched',
-    defaultValues: {
-      ganttName: task?.ganttName ?? '',
-      corpName: task?.corpName ?? '',
-      startDate: task?.startDate ?? '',
-      endDate: task?.endDate ?? '',
-      address: task?.address ?? '',
-      addressDetail: task?.addressDetail ?? '',
-      trades: task?.trades ?? [],
-      request: task?.request ?? '',
-      memo: task?.memo ?? '',
-    },
+    mode: 'onChange',
+    defaultValues: EMPTY_FORM,
+    values,
   })
+
+  // 폼 → store 즉시저장 (편집 모드). 사용자 입력(type==='change')만 반영한다 —
+  // store→폼 역방향 sync(useForm values 가 일으키는 reset)까지 되쓰면 드래그값↔폼값이
+  // 진동해 무한 루프가 난다. 출처를 구분해 단방향만 흘려보낸다.
+  useEffect(() => {
+    if (!isEdit || !taskId) return
+    const sub = form.watch((value, { type }) => {
+      if (type !== 'change') return
+      const parsed = taskSchema.safeParse(value)
+      if (!parsed.success) return
+      updateTask(taskId, { ...parsed.data, category: parsed.data.trades.join(' · ') })
+    })
+    return () => sub.unsubscribe()
+  }, [isEdit, taskId, form, updateTask])
 
   if (isEdit && !task) {
     return (
@@ -96,10 +134,10 @@ export function PanelTask({ taskId }: { taskId?: string }) {
     )
   }
 
-  const onSubmit = form.handleSubmit((values) => {
-    const patch = { ...values, category: values.trades.join(' · ') }
-    if (isEdit && task) updateTask(task.id, patch)
-    else createTask({ ...patch, status: 'not_started' })
+  // 생성 모드만 명시 제출 (빈 작업 자동생성 방지). 편집은 즉시저장이라 submit no-op.
+  const onSubmit = form.handleSubmit((vals) => {
+    if (isEdit) return
+    createTask({ ...vals, category: vals.trades.join(' · '), status: 'not_started' })
     close()
   })
 
@@ -139,9 +177,12 @@ export function PanelTask({ taskId }: { taskId?: string }) {
               <p className="mt-3 text-r-12 text-gray-500">
                 * 작성된 메모는 기술자에게 공개되지 않아요
               </p>
-              <FormSubmitButton className="mt-5" requireAllFilled={false} isLoading={false}>
-                {isEdit ? '저장' : '작업 생성'}
-              </FormSubmitButton>
+              {/* 편집은 즉시저장(시안에 저장 버튼 없음), 생성만 명시 제출 */}
+              {!isEdit && (
+                <FormSubmitButton className="mt-5" requireAllFilled={false}>
+                  작업 생성
+                </FormSubmitButton>
+              )}
             </form>
           </Form>
 
