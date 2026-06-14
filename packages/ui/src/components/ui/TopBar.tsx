@@ -51,6 +51,37 @@ function NotifyBadgeIcon({ count }: { count?: number }) {
   )
 }
 
+const iconButtonClass =
+  'flex h-15 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
+
+/** 우측 알림·채팅 아이콘 그룹 — home + default(최상위 라우트, 예: 프로필) 우측에서 공유. 항상 라우트 이동(Link) */
+function UtilityIcons({
+  notifyHref,
+  notifyCount,
+  chatHref,
+  chatCount,
+}: {
+  notifyHref?: string
+  notifyCount?: number
+  chatHref?: string
+  chatCount?: number
+}) {
+  return (
+    <div className="flex items-center">
+      {notifyHref && (
+        <Link href={notifyHref} className={cn(iconButtonClass, 'pl-4 pr-2')} aria-label="알림">
+          <NotifyBadgeIcon count={notifyCount} />
+        </Link>
+      )}
+      {chatHref && (
+        <Link href={chatHref} className={cn(iconButtonClass, '-mr-4 pl-2 pr-4')} aria-label="채팅">
+          <ChatBadgeIcon count={chatCount} />
+        </Link>
+      )}
+    </div>
+  )
+}
+
 function ProgressBarInline({ step, total }: { step: number; total: number }) {
   return (
     <div className="flex h-[3px] w-[330px] gap-1">
@@ -77,14 +108,12 @@ export interface TopBarProps
   chatCount?: number
   notifyCount?: number
   onFilter?: () => void
-  onChat?: () => void
-  onNotify?: () => void
   onBack?: () => void
   /** backHref가 있으면 Link로 렌더링 (prefetch), 없으면 button + onBack */
   backHref?: string
-  /** chatHref가 있으면 Link(prefetch)로 렌더링, 없으면 button + onChat */
+  /** 채팅 라우트 — 있으면 우측 채팅 아이콘(Link, prefetch) 렌더 */
   chatHref?: string
-  /** notifyHref/onNotify 중 하나라도 있으면 알림 버튼 렌더. href면 Link(prefetch) */
+  /** 알림 라우트 — 있으면 우측 알림 아이콘(Link, prefetch) 렌더 */
   notifyHref?: string
 }
 
@@ -104,8 +133,6 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       chatCount,
       notifyCount,
       onFilter,
-      onChat,
-      onNotify,
       onBack,
       backHref,
       chatHref,
@@ -116,8 +143,7 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
   ) => {
     const backButtonClass =
       'flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
-    const homeIconClass =
-      'flex h-15 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
+    const hasUtility = !!(chatHref || notifyHref)
 
     const BackButton = !showBack ? (
       <div className="size-5" />
@@ -144,7 +170,14 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
           <>
             {BackButton}
             <p className="text-sb-16 text-gray-900">{title}</p>
-            {showAction ? (
+            {hasUtility ? (
+              <UtilityIcons
+                notifyHref={notifyHref}
+                notifyCount={notifyCount}
+                chatHref={chatHref}
+                chatCount={chatCount}
+              />
+            ) : showAction ? (
               <button
                 type="button"
                 onClick={onAction}
@@ -168,52 +201,18 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             <button
               type="button"
               onClick={onFilter}
-              className={cn(homeIconClass, '-ml-4 px-4')}
+              className={cn(iconButtonClass, '-ml-4 px-4')}
               aria-label="필터"
             >
               <FilterIcon className="text-[#a5a5a5]" />
             </button>
             <div className="flex-1" />
-            <div className="flex items-center">
-              {notifyHref ? (
-                <Link
-                  href={notifyHref}
-                  className={cn(homeIconClass, 'pl-4 pr-2')}
-                  aria-label="알림"
-                >
-                  <NotifyBadgeIcon count={notifyCount} />
-                </Link>
-              ) : (
-                onNotify && (
-                  <button
-                    type="button"
-                    onClick={onNotify}
-                    className={cn(homeIconClass, 'pl-4 pr-2')}
-                    aria-label="알림"
-                  >
-                    <NotifyBadgeIcon count={notifyCount} />
-                  </button>
-                )
-              )}
-              {chatHref ? (
-                <Link
-                  href={chatHref}
-                  className={cn(homeIconClass, '-mr-4 pl-2 pr-4')}
-                  aria-label="채팅"
-                >
-                  <ChatBadgeIcon count={chatCount} />
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  onClick={onChat}
-                  className={cn(homeIconClass, '-mr-4 pl-2 pr-4')}
-                  aria-label="채팅"
-                >
-                  <ChatBadgeIcon count={chatCount} />
-                </button>
-              )}
-            </div>
+            <UtilityIcons
+              notifyHref={notifyHref}
+              notifyCount={notifyCount}
+              chatHref={chatHref}
+              chatCount={chatCount}
+            />
           </>
         )}
       </header>

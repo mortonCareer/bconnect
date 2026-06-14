@@ -1,12 +1,9 @@
 'use client'
 
-import { getTradeLabel, useGetProfile } from '@bconnect/api-client'
 import type { Coworker } from '@bconnect/api-client'
-import { ProfileCard, ProfileCardSkeleton } from '@bconnect/ui'
-import { getAvatarUrl } from '@bconnect/config/avatar'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
-import { PanelMessage } from '../_shared/PanelMessage'
+import { CoworkerList } from './CoworkerList'
 
 /** 앱이 resolve 해 내려주는 데이터. plan 어댑터가 useGetCoworkers(by-id) 로 채운다. */
 export interface CoworkersViewData {
@@ -44,65 +41,13 @@ export function CoworkersView({
       onClose={onClose}
     >
       <PanelScroll>
-        {isLoading ? (
-          <CoworkerSkeletonList />
-        ) : isError ? (
-          <PanelMessage>동료를 불러올 수 없습니다</PanelMessage>
-        ) : !coworkers || coworkers.length === 0 ? (
-          <PanelMessage>등록된 동료가 없습니다</PanelMessage>
-        ) : (
-          <ul className="flex flex-col">
-            {coworkers.map((coworker) => (
-              <CoworkerRow
-                key={coworker.id}
-                profileId={coworker.member.id}
-                href={coworkerHref(coworker.member.id)}
-              />
-            ))}
-          </ul>
-        )}
+        <CoworkerList
+          coworkers={coworkers}
+          isLoading={isLoading}
+          isError={isError}
+          coworkerHref={coworkerHref}
+        />
       </PanelScroll>
     </PanelShell>
-  )
-}
-
-/** 동료 한 명 — 마스킹 무관 by-id 보강(useGetProfile)으로 분야/지역/소개 채움. career CoworkerCard 대응. */
-function CoworkerRow({ profileId, href }: { profileId: number; href: string }) {
-  const { data: profileAndMember, isLoading } = useGetProfile(profileId)
-  const member = profileAndMember?.member
-  const profile = profileAndMember?.profile
-
-  if (isLoading) {
-    return <ProfileCardSkeleton as="li" className="px-4" />
-  }
-
-  if (!profile) return null
-
-  const name = member?.name ?? '이름 없음'
-
-  return (
-    <ProfileCard
-      as="li"
-      className="px-4"
-      avatarUrl={member?.picture || getAvatarUrl(name)}
-      name={name}
-      meta={{
-        region: profile.address.city,
-        trade: getTradeLabel(profile.primaryTrade),
-        // features 동료는 등급 미표시(현행 유지). #473 후 통일 가능
-      }}
-      description={profile.headline ?? undefined}
-      href={href}
-    />
-  )
-}
-
-function CoworkerSkeletonList() {
-  return (
-    <ul className="flex flex-col">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <ProfileCardSkeleton key={i} as="li" className="px-4" />
-      ))}
-    </ul>
   )
 }

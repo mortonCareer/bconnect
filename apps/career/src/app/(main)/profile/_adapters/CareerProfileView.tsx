@@ -14,14 +14,28 @@ import {
   useGetReceivedRecommendations,
   useGetSentRecommendations,
   useGetFeeds,
+  useGetMyChats,
   useCreateCoworkerRequest,
   useCreateDirectChat,
 } from '@bconnect/api-client'
-import { ProfileView, type ProfileViewData } from '@bconnect/features'
+import { ProfileView, type ProfileViewData, useUnreadNotificationCount } from '@bconnect/features'
 import { Button, toast, isApiErrorShape } from '@bconnect/ui'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
 import { useRecommendationActions } from './useRecommendationActions'
 import { useWorkActions } from './useWorkActions'
+
+/** 최상위 프로필 라우트(본인·타인) 상단 알림·채팅 아이콘 — 홈 피드와 동등 */
+function useTopBarUtility() {
+  const { data: chats } = useGetMyChats()
+  const chatCount = chats?.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0) ?? 0
+  const notifyCount = useUnreadNotificationCount()
+  return {
+    chatHref: '/messages',
+    chatCount,
+    notifyHref: '/notifications',
+    notifyCount,
+  }
+}
 
 /** 현재 URL 공유 — Web Share API → 클립보드 폴백. career 정책이라 패키지 밖(앱)에 둔다. */
 function useShareCurrentUrl() {
@@ -40,6 +54,7 @@ function useShareCurrentUrl() {
 /** 본인 프로필 (/profile) — My* 훅 + 수정/공유 어포던스 */
 export function OwnerProfileView() {
   const { share } = useShareCurrentUrl()
+  const utility = useTopBarUtility()
   const { onHideRecommendation, onDeleteRecommendation } = useRecommendationActions()
 
   const member = useGetMyMember()
@@ -71,7 +86,7 @@ export function OwnerProfileView() {
     <ProfileView
       profileId={pid}
       data={data}
-      renderShell={careerShell()}
+      renderShell={careerShell(undefined, { utility })}
       fallbackTitle="내 프로필"
       statHrefs={{
         works: '?tab=works',
@@ -104,6 +119,7 @@ export function OwnerProfileView() {
 /** 타인 프로필 (/profile/[memberId]) — by-id 훅 + 동료추가/메시지 mutation */
 export function ViewerProfileView({ memberId }: { memberId: number }) {
   const router = useRouter()
+  const utility = useTopBarUtility()
   const enabled = Number.isFinite(memberId) && memberId > 0
 
   const profileAndMember = useGetProfile(memberId, { query: { enabled } })
@@ -161,7 +177,12 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
     <ProfileView
       profileId={memberId}
       data={data}
-      renderShell={careerShell(() => router.back())}
+      renderShell={careerShell(undefined, { utility })}
+      statHrefs={{
+        works: '?tab=works',
+        coworkers: `/profile/${memberId}/coworkers`,
+        recommendations: `/profile/${memberId}/recommendations`,
+      }}
       actionSlot={
         <div className="flex gap-2 px-4 py-3">
           <Button
