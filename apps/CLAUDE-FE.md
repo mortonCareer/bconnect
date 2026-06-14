@@ -16,7 +16,7 @@ career·plan 두 Next.js App Router 앱의 공통 프론트엔드 규칙. 각 �
 
 ## 도메인 enum/라벨 — `@bconnect/api-client` SSOT
 
-값이 enum으로 정해진 도메인 어휘(`Trade` 등)는 **mock 포함** 항상 api-client SSOT를 쓴다. 옵션 배열은 `TRADE_LIST`(=`[{value,label}]`), 표시 라벨은 `TRADE_LABELS[t]`/`getTradeLabel(t)` 파생. 한글 하드코딩·자체 옵션 배열·별도 표시 필드(`category` 등) 저장 금지 — enum 배열에서 파생. generated enum은 BE OpenAPI→orval 산출(`generated/` 직접수정 금지)이라, mock이 별도 어휘를 쓰면 BE 연동 시 값 불일치·라벨 drift. enum에 없는 개념은 임의 추가 말고 근접 매핑 + BE spec 이슈로 enum 확장 요청. (작업 데이터 자체는 BE 도메인 부재 시 FE 로컬 mock 정당 — 단 그 안의 enum 필드는 SSOT 값.)
+값이 enum인 도메인 어휘(`Trade` 등)는 **mock 포함** api-client SSOT 사용 — 옵션 `TRADE_LIST`, 라벨 `TRADE_LABELS[t]` 파생. 한글 하드코딩·자체 옵션 배열·별도 표시필드(`category`) 금지(`generated/`는 orval 산출, 직접수정 X). enum에 없는 값은 BE spec 이슈로 확장.
 
 ## Figma 매핑 — `@figma` JSDoc
 
