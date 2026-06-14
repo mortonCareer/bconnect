@@ -14,6 +14,7 @@
     "./format": "./format/index.ts",
     "./address": "./address/index.ts",
     "./phone": "./phone/index.ts",
+    "./search": "./search/index.ts",
     "./sentry": "./sentry/index.ts",
     "./site": "./site/index.ts",
     "./username": "./username/index.ts"
@@ -31,6 +32,7 @@
   },
   "dependencies": {
     "@bconnect/api-client": "workspace:*",
+    "es-hangul": "^2.3.8",
     "libphonenumber-js": "^1.12.33",
     "zod": "catalog:"
   }

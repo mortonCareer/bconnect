@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useGetCoworkers, useGetMyProfile } from '@bconnect/api-client'
 import { TopBar, SearchIcon } from '@bconnect/ui'
+import { matchHangul } from '@bconnect/config/search'
 import { CoworkerCard } from './_components/CoworkerCard'
 
 export default function CoworkersPage() {
@@ -24,7 +25,7 @@ export default function CoworkersPage() {
   const isLoading = isProfileLoading || (!!myProfileId && isCoworkersLoading)
 
   const coworkerMemberIds = (coworkers ?? [])
-    .filter((c) => !search || c.member.name.includes(search))
+    .filter((c) => matchHangul(c.member.name, search))
     .map((c) => c.member.id)
 
   return (
@@ -36,8 +37,8 @@ export default function CoworkersPage() {
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
           <SearchIcon className="text-gray-400" />
           <input
-            type="text"
-            placeholder="검색..."
+            type="search"
+            placeholder="이름·초성 검색 (예: ㄱㅎㄷ)"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1 bg-transparent text-r-14 text-gray-900 outline-none placeholder:text-gray-500"
