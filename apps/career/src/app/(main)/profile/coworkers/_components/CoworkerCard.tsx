@@ -1,8 +1,7 @@
 'use client'
 
-import Link from 'next/link'
-import { TRADE_LABELS, useGetProfile } from '@bconnect/api-client'
-import { ChevronIcon } from '@bconnect/ui'
+import { getTradeLabel, useGetProfile } from '@bconnect/api-client'
+import { ProfileCard } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 
 interface CoworkerCardProps {
@@ -17,8 +16,8 @@ export function CoworkerCard({ profileId }: CoworkerCardProps) {
 
   if (isLoading) {
     return (
-      <div className="flex animate-pulse items-center gap-3 px-4 py-3">
-        <div className="h-12 w-12 shrink-0 rounded-full bg-gray-200" />
+      <div className="flex animate-pulse items-center gap-4 px-4 py-3">
+        <div className="size-[50px] shrink-0 rounded-full bg-gray-200" />
         <div className="flex flex-1 flex-col gap-2">
           <div className="h-4 w-24 rounded bg-gray-200" />
           <div className="h-3 w-40 rounded bg-gray-200" />
@@ -30,39 +29,20 @@ export function CoworkerCard({ profileId }: CoworkerCardProps) {
   if (!profile) return null
 
   const name = member?.name ?? '이름 없음'
-  const picture = member?.picture
-  const trade = profile?.primaryTrade ? TRADE_LABELS[profile.primaryTrade] : null
-  const city = profile?.address?.city
-  // TODO(#473): role 은 MaskedMember 에 없음 (BE public masking) — 추가 시 실제 연결
-  const role = '준기공'
-  const subtitle = [city, role, trade].filter(Boolean).join(' | ')
-  const intro = profile?.headline
 
   return (
-    <Link
+    <ProfileCard
+      className="px-4"
+      avatarUrl={member?.picture || getAvatarUrl(name)}
+      name={name}
+      meta={{
+        region: profile.address.city,
+        trade: getTradeLabel(profile.primaryTrade),
+        // TODO(#473): role 은 MaskedMember 에 없음 (BE public masking) — 추가 시 실제 연결
+        role: '준기공(Mocked)',
+      }}
+      description={profile.headline ?? undefined}
       href={`/profile/${profileId}`}
-      className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 transition-colors active:bg-gray-100"
-    >
-      {/* 프로필 이미지 */}
-      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-100">
-        <img
-          src={picture || getAvatarUrl(name)}
-          alt={name}
-          className="h-full w-full object-cover"
-        />
-      </div>
-
-      {/* 이름 + 분야/역할 + 소개 */}
-      <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-sb-16 text-gray-900">{name}</span>
-          {subtitle && <span className="text-r-12 text-gray-500">{subtitle}</span>}
-        </div>
-        {intro && <p className="line-clamp-2 text-left text-r-14 text-gray-500">{intro}</p>}
-      </div>
-
-      {/* 오른쪽 화살표 */}
-      <ChevronIcon direction="right" className="text-gray-400" />
-    </Link>
+    />
   )
 }

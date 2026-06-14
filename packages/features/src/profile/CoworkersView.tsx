@@ -1,10 +1,8 @@
 'use client'
 
-import Image from 'next/image'
-import Link from 'next/link'
 import { getTradeLabel, useGetProfile } from '@bconnect/api-client'
 import type { Coworker } from '@bconnect/api-client'
-import { ChevronIcon, Skeleton } from '@bconnect/ui'
+import { ProfileCard, Skeleton } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
@@ -53,14 +51,13 @@ export function CoworkersView({
         ) : !coworkers || coworkers.length === 0 ? (
           <PanelMessage>등록된 동료가 없습니다</PanelMessage>
         ) : (
-          <ul className="flex flex-col divide-y divide-gray-200">
+          <ul className="flex flex-col">
             {coworkers.map((coworker) => (
-              <li key={coworker.id}>
-                <CoworkerRow
-                  profileId={coworker.member.id}
-                  href={coworkerHref(coworker.member.id)}
-                />
-              </li>
+              <CoworkerRow
+                key={coworker.id}
+                profileId={coworker.member.id}
+                href={coworkerHref(coworker.member.id)}
+              />
             ))}
           </ul>
         )}
@@ -77,50 +74,34 @@ function CoworkerRow({ profileId, href }: { profileId: number; href: string }) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-3 px-4 py-3">
-        <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
+      <li className="flex items-center gap-4 border-b border-[#E5E5E5] px-4 py-3">
+        <Skeleton className="size-[50px] shrink-0 rounded-full" />
         <div className="flex flex-1 flex-col gap-2">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-3 w-40" />
         </div>
-      </div>
+      </li>
     )
   }
 
   if (!profile) return null
 
   const name = member?.name ?? '이름 없음'
-  const trade = profile.primaryTrade ? getTradeLabel(profile.primaryTrade) : null
-  const subtitle = [profile.address?.city, trade].filter(Boolean).join(' · ')
 
   return (
-    <Link
+    <ProfileCard
+      as="li"
+      className="px-4"
+      avatarUrl={member?.picture || getAvatarUrl(name)}
+      name={name}
+      meta={{
+        region: profile.address.city,
+        trade: getTradeLabel(profile.primaryTrade),
+        // features 동료는 등급 미표시(현행 유지). #473 후 통일 가능
+      }}
+      description={profile.headline ?? undefined}
       href={href}
-      scroll={false}
-      className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 transition-colors active:bg-gray-100"
-    >
-      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-100">
-        {/* TODO: 출시 전 unoptimized 제거 + next/image remotePatterns/loader 구성 (dicebear SVG·외부 업로드 대응) */}
-        <Image
-          src={member?.picture || getAvatarUrl(name)}
-          alt={name}
-          fill
-          sizes="48px"
-          unoptimized
-          className="object-cover"
-        />
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-sb-16 text-gray-900">{name}</span>
-          {subtitle && <span className="text-r-12 text-gray-500">{subtitle}</span>}
-        </div>
-        {profile.headline && (
-          <p className="line-clamp-2 text-left text-r-14 text-gray-500">{profile.headline}</p>
-        )}
-      </div>
-      <ChevronIcon direction="right" className="text-gray-400" />
-    </Link>
+    />
   )
 }
 

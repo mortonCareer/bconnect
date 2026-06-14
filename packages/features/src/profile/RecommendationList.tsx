@@ -1,11 +1,10 @@
 'use client'
 
-import Image from 'next/image'
 import { useState, type ReactNode } from 'react'
 import { parseAsStringLiteral, useQueryState } from 'nuqs'
 import { getTradeLabel } from '@bconnect/api-client'
 import type { Recommendation } from '@bconnect/api-client'
-import { ActionDrawer, cn, MoreVerticalIcon, Skeleton, Tab, useExpandableText } from '@bconnect/ui'
+import { ActionDrawer, cn, MoreVerticalIcon, ProfileCard, Skeleton, Tab } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 
 type Mode = 'received' | 'sent'
@@ -43,7 +42,8 @@ export function RecommendationList({
   const active = mode === 'received' ? received : sent
   const isLoading = active === undefined
   const items = active ?? []
-  const canAct = mode === 'received' ? !!onHide : !!onDelete
+  // 케밥(숨김/삭제)은 편집 페이지(full)에서만 — 소개탭 인라인(inline)은 표시 전용
+  const canAct = variant === 'full' && (mode === 'received' ? !!onHide : !!onDelete)
   const openRec = items.find((rec) => rec.id === openId)
   const rowPx = variant === 'full' ? 'px-4' : ''
 
@@ -72,8 +72,8 @@ export function RecommendationList({
       {isLoading ? (
         <ul className="flex flex-col divide-y divide-gray-200">
           {Array.from({ length: 3 }).map((_, i) => (
-            <li key={i} className={cn('flex gap-3 py-3', rowPx)}>
-              <Skeleton className="h-16 w-16 shrink-0 rounded-full" />
+            <li key={i} className={cn('flex gap-4 py-3', rowPx)}>
+              <Skeleton className="size-[50px] shrink-0 rounded-full" />
               <div className="flex flex-1 flex-col gap-2 pt-1">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-3 w-full" />
@@ -86,7 +86,7 @@ export function RecommendationList({
           {mode === 'received' ? '받은 추천서가 없습니다' : '보낸 추천서가 없습니다'}
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-gray-200">
+        <ul className="flex flex-col">
           {items.map((rec) => (
             <RecommendationItem
               key={rec.id}
@@ -155,62 +155,33 @@ function RecommendationItem({
   rowClassName?: string
 }) {
   const { member, content, profile } = recommendation
-  const { ref, expanded, showToggle, toggle } = useExpandableText([content], 'height')
-  const textId = `recommendation-${recommendation.id}`
-  // TODO(#473): BE가 MaskedMember.role 미제공 — 추가되면 실제 role 연결
-  const role = '반장(Mocked)'
-  const subtitle = [getTradeLabel(profile.primaryTrade), role].join(' · ')
 
   return (
-    <li className={cn('flex gap-3 py-3', rowClassName)}>
-      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-gray-100">
-        {/* TODO: 출시 전 unoptimized 제거 + next/image remotePatterns/loader 구성 (dicebear SVG·외부 업로드 대응) */}
-        <Image
-          src={member.picture || getAvatarUrl(member.name)}
-          alt={member.name}
-          fill
-          sizes="64px"
-          unoptimized
-          className="object-cover"
-        />
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-m-14 text-[#1B1B1B]">{member.name}</span>
-          <span className="text-r-12 text-[#7B7B7B]">{subtitle}</span>
-        </div>
-        <p
-          id={textId}
-          ref={ref}
-          className={cn(
-            'whitespace-pre-wrap text-r-12 text-[#1B1B1B]',
-            !expanded && 'line-clamp-2'
-          )}
-        >
-          {content}
-        </p>
-        {showToggle && (
+    <ProfileCard
+      as="li"
+      className={rowClassName}
+      avatarUrl={member.picture || getAvatarUrl(member.name)}
+      name={member.name}
+      profileHref={`/profile/${member.id}`}
+      meta={{
+        region: profile.address.city,
+        trade: getTradeLabel(profile.primaryTrade),
+        // TODO(#473): BE가 MaskedMember.role 미제공 — 추가되면 실제 role 연결
+        role: '반장(Mocked)',
+      }}
+      description={content}
+      rightSlot={
+        showMenu ? (
           <button
             type="button"
-            onClick={toggle}
-            aria-expanded={expanded}
-            aria-controls={textId}
-            className="cursor-pointer self-start text-r-12 text-[#A5A5A5] underline"
+            onClick={onMenuClick}
+            aria-label="추천서 작업"
+            className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center self-start text-gray-500"
           >
-            {expanded ? '접기' : '더보기'}
+            <MoreVerticalIcon size={16} />
           </button>
-        )}
-      </div>
-      {showMenu && (
-        <button
-          type="button"
-          onClick={onMenuClick}
-          aria-label="추천서 작업"
-          className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center self-start text-gray-500"
-        >
-          <MoreVerticalIcon size={16} />
-        </button>
-      )}
-    </li>
+        ) : undefined
+      }
+    />
   )
 }
