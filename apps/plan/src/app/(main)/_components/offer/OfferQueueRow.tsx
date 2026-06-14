@@ -3,16 +3,19 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import Image from 'next/image'
+import Link from 'next/link'
 import { getAvatarUrl } from '@bconnect/config/avatar'
-import { Button, DragHandleIcon, cn } from '@bconnect/ui'
+import { DragHandleIcon, cn } from '@bconnect/ui'
 import type { OfferQueueItem } from '@/stores/offer-queue-store'
 import { OfferStatusBadge } from './OfferStatusBadge'
 
 export function OfferQueueRow({
   item,
+  profileHref,
   onRemove,
 }: {
   item: OfferQueueItem
+  profileHref: string
   onRemove: (profileId: number) => void
 }) {
   const isWaiting = item.status === 'waiting'
@@ -26,7 +29,10 @@ export function OfferQueueRow({
     <div
       ref={setNodeRef}
       style={style}
-      className={cn('flex items-center gap-2 py-[10px]', isDragging && 'opacity-60')}
+      className={cn(
+        'flex items-center gap-2.5 border-b border-[#f0f0f0] pb-[11px] pt-[10px]',
+        isDragging && 'opacity-60'
+      )}
     >
       <button
         type="button"
@@ -42,31 +48,41 @@ export function OfferQueueRow({
 
       <OfferStatusBadge status={item.status} />
 
-      <div className="size-9 shrink-0 overflow-hidden rounded-full bg-gray-50">
-        <Image
-          src={item.picture || getAvatarUrl(item.name)}
-          alt={item.name}
-          width={36}
-          height={36}
-          unoptimized
-          className="size-full object-cover"
-        />
-      </div>
+      <Link
+        href={profileHref}
+        scroll={false}
+        className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1 py-1 transition-colors hover:bg-gray-50"
+      >
+        <div className="size-9 shrink-0 overflow-hidden rounded-full bg-[#d9d9d9]">
+          <Image
+            src={item.picture || getAvatarUrl(item.name)}
+            alt={item.name}
+            width={36}
+            height={36}
+            unoptimized
+            className="size-full object-cover"
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sb-14 truncate text-gray-900">{item.name}</p>
+          <p className="truncate text-[11px] leading-[16.5px] text-[#a5a5a5]">
+            {[item.region, item.level, item.specialty].filter(Boolean).join(' · ')}
+          </p>
+        </div>
+      </Link>
 
-      <div className="min-w-0 flex-1">
-        <p className="text-r-14 truncate text-gray-900">{item.name}</p>
-        <p className="text-r-12 truncate text-gray-500">
-          {[item.region, item.level, item.specialty].filter(Boolean).join(' · ')}
-        </p>
-      </div>
-
-      <Button
-        variant="ghost"
+      <button
+        type="button"
         onClick={() => onRemove(item.profileId)}
-        className="text-r-12 h-7 w-auto shrink-0 px-3"
+        className={cn(
+          'h-7 shrink-0 rounded-[6px] border bg-white px-3 text-[12px] leading-[18px] transition-colors',
+          isWaiting
+            ? 'border-[#e5e5e5] text-[#7b7b7b] hover:bg-gray-50'
+            : 'border-destructive text-destructive hover:bg-destructive/5'
+        )}
       >
         {isWaiting ? '삭제' : '취소'}
-      </Button>
+      </button>
     </div>
   )
 }

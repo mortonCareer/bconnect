@@ -20,6 +20,7 @@ import {
 import Link from 'next/link'
 import { Button, SearchIcon } from '@bconnect/ui'
 import { useOfferQueue } from '@/hooks/useOfferQueue'
+import { usePanelNav } from '@/hooks/usePanelNav'
 import { OfferQueueRow } from './OfferQueueRow'
 
 function EmptyState({ actionHref }: { actionHref?: string }) {
@@ -50,6 +51,7 @@ export function OfferQueue({
   emptyActionHref?: string
 }) {
   const { items, removeFromQueue, reorderQueue } = useOfferQueue(taskId)
+  const { panelHref } = usePanelNav()
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -70,7 +72,12 @@ export function OfferQueue({
         >
           <div className="flex flex-col">
             {items.map((item) => (
-              <OfferQueueRow key={item.profileId} item={item} onRemove={removeFromQueue} />
+              <OfferQueueRow
+                key={item.profileId}
+                item={item}
+                profileHref={panelHref(`profile/${item.profileId}`)}
+                onRemove={removeFromQueue}
+              />
             ))}
           </div>
         </SortableContext>

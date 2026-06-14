@@ -19,7 +19,7 @@ export function OfferProposeButton({
 
   if (isQueued(candidate.profileId)) {
     return (
-      <Button variant="secondary" size="full" disabled>
+      <Button variant="secondary" size="full" className="h-10" disabled>
         섭외 대기열에 추가됨
       </Button>
     )
@@ -29,6 +29,7 @@ export function OfferProposeButton({
     <Button
       variant="outline"
       size="full"
+      className="h-10"
       onClick={() => {
         addToQueue(candidate)
         toast({ description: '섭외 대기열에 추가했어요', variant: 'success' })
