@@ -16,28 +16,13 @@ import {
   TextareaField,
 } from '@bconnect/ui'
 import { PanelAside, PanelScroll, PanelShell } from '@bconnect/features'
+import { Trade, TRADE_LABELS, TRADE_LIST } from '@bconnect/api-client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import type { ScheduleTask } from '@/app/(main)/projects/[projectId]/schedule/_components/schedule-grid/types'
-
-const TRADE_OPTIONS = [
-  '철거',
-  '전기',
-  '목공',
-  '창호',
-  '타일',
-  '필름',
-  '도배',
-  '페인트',
-  '바닥',
-  '방수',
-  '싱크대',
-  '가구',
-  '조명',
-].map((v) => ({ value: v, label: v }))
 
 const taskSchema = z
   .object({
@@ -47,7 +32,7 @@ const taskSchema = z
     endDate: z.string().min(1, '종료일을 선택해주세요.'),
     address: z.string(),
     addressDetail: z.string(),
-    trades: z.array(z.string()).min(1, '공종을 1개 이상 선택해주세요.'),
+    trades: z.array(z.nativeEnum(Trade)).min(1, '공종을 1개 이상 선택해주세요.'),
     request: z.string(),
     memo: z.string(),
   })
@@ -119,7 +104,7 @@ export function PanelTask({ taskId }: { taskId?: string }) {
       if (type !== 'change') return
       const parsed = taskSchema.safeParse(value)
       if (!parsed.success) return
-      updateTask(taskId, { ...parsed.data, category: parsed.data.trades.join(' · ') })
+      updateTask(taskId, parsed.data)
     })
     return () => sub.unsubscribe()
   }, [isEdit, taskId, form, updateTask])
@@ -137,11 +122,13 @@ export function PanelTask({ taskId }: { taskId?: string }) {
   // 생성 모드만 명시 제출 (빈 작업 자동생성 방지). 편집은 즉시저장이라 submit no-op.
   const onSubmit = form.handleSubmit((vals) => {
     if (isEdit) return
-    createTask({ ...vals, category: vals.trades.join(' · '), status: 'not_started' })
+    createTask({ ...vals, status: 'not_started' })
     close()
   })
 
-  const title = isEdit ? `${(task?.trades ?? []).join('/') || task?.category} 시공` : '작업 생성'
+  const title = isEdit
+    ? `${(task?.trades ?? []).map((t) => TRADE_LABELS[t]).join('/')} 시공`
+    : '작업 생성'
 
   return (
     <PanelAside label={isEdit ? '작업 편집' : '작업 생성'}>
@@ -168,7 +155,7 @@ export function PanelTask({ taskId }: { taskId?: string }) {
               <TagSelectField
                 control={form.control}
                 name="trades"
-                options={TRADE_OPTIONS}
+                options={TRADE_LIST}
                 label="공종"
                 layout="row"
               />

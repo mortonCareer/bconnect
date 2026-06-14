@@ -1,4 +1,10 @@
+import { TRADE_LABELS, type Trade } from '@bconnect/api-client'
 import type { TaskStatus } from './types'
+
+/** 공종 배열 → 그리드 공종 컬럼/패널 타이틀 표시 라벨 ('타일 · 도배'). category 필드 대체 파생. */
+export function tradesLabel(trades: Trade[]): string {
+  return trades.map((t) => TRADE_LABELS[t] ?? t).join(' · ')
+}
 
 export const COL_CATEGORY = 120
 export const COL_STATUS = 100

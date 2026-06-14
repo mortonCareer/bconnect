@@ -14,7 +14,6 @@ interface ScheduleTaskState {
 let nextId = MOCK_SCHEDULE_TASKS.length + 1
 
 const SCALAR_KEYS = [
-  'category',
   'ganttName',
   'startDate',
   'endDate',

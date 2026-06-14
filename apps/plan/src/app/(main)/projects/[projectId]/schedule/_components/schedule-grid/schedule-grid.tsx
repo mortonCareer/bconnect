@@ -17,6 +17,7 @@ import {
   ROW_HEIGHT,
   STATUS_LABELS,
   STICKY_LEFT,
+  tradesLabel,
 } from './constants'
 import {
   addDays,
@@ -210,7 +211,7 @@ export function ScheduleGrid({ today }: ScheduleGridProps) {
                 className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle text-r-14 text-[#3d3d3d]`}
                 style={{ left: STICKY_LEFT[0] }}
               >
-                {task.category}
+                {tradesLabel(task.trades)}
               </td>
               <td
                 className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle`}

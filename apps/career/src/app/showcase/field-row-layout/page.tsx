@@ -3,6 +3,7 @@
  */
 'use client'
 
+import { Trade, TRADE_LIST } from '@bconnect/api-client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   DateRangeField,
@@ -16,13 +17,6 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-const TRADE_OPTIONS = [
-  { value: 'tile', label: '타일' },
-  { value: 'paper', label: '도배' },
-  { value: 'paint', label: '페인트' },
-  { value: 'demolition', label: '철거' },
-]
-
 const demoSchema = z
   .object({
     corpName: z.string().min(1, '업체명을 입력해주세요.'),
@@ -30,7 +24,7 @@ const demoSchema = z
     endDate: z.string().min(1, '종료일을 선택해주세요.'),
     address: z.string().min(1, '현장주소를 입력해주세요.'),
     addressDetail: z.string(),
-    trades: z.array(z.string()).min(1, '공종을 1개 이상 선택해주세요.'),
+    trades: z.array(z.nativeEnum(Trade)).min(1, '공종을 1개 이상 선택해주세요.'),
     request: z.string(),
     memo: z.string(),
   })
@@ -51,7 +45,7 @@ export default function FieldRowLayoutShowcasePage() {
       endDate: '',
       address: '경기도 수원시 율전로 00번길 00-00',
       addressDetail: '000호',
-      trades: ['tile', 'paper'],
+      trades: [Trade.TILING, Trade.WALLPAPER],
       request: '타일 시공 및 단일 벽면 일부 도배',
       memo: '세밀한 작업이 필요함',
     },
@@ -98,7 +92,7 @@ export default function FieldRowLayoutShowcasePage() {
                   <TagSelectField
                     control={form.control}
                     name="trades"
-                    options={TRADE_OPTIONS}
+                    options={TRADE_LIST}
                     label="공종"
                     layout="row"
                   />
@@ -132,7 +126,7 @@ export default function FieldRowLayoutShowcasePage() {
                   <TagSelectField
                     control={form.control}
                     name="trades"
-                    options={TRADE_OPTIONS}
+                    options={TRADE_LIST}
                     label="공종"
                   />
                 </div>
