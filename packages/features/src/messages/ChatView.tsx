@@ -1,10 +1,10 @@
 'use client'
 
 import { useCallback, useState, type ReactNode } from 'react'
-import Link from 'next/link'
-import { MessageType, TRADE_LABELS } from '@bconnect/api-client'
+import { MessageType, getTradeLabel } from '@bconnect/api-client'
 import type { Chat, Message, Profile } from '@bconnect/api-client'
-import { ChatInput, ChatListItem, Skeleton } from '@bconnect/ui'
+import { ChatInput, ProfileCard, Skeleton } from '@bconnect/ui'
+import { getAvatarUrl } from '@bconnect/config/avatar'
 import { PanelShell } from '../_shared/PanelShell'
 import { MessageThread } from './_parts/MessageThread'
 
@@ -76,14 +76,16 @@ export function ChatView(props: ChatViewProps) {
 
   const profilePanelHref = profileHref && otherId != null ? profileHref(otherId) : undefined
   const headerItem = (
-    <ChatListItem
-      variant="default"
-      showChevron={profilePanelHref != null}
-      profileImage={other?.picture ?? undefined}
+    <ProfileCard
+      className="px-4"
+      avatarUrl={other?.picture || getAvatarUrl(title)}
       name={title}
-      location={profile?.address?.city}
-      specialty={profile?.primaryTrade ? TRADE_LABELS[profile.primaryTrade] : undefined}
-      lastMessage={profile?.about ?? profile?.headline ?? undefined}
+      meta={{
+        region: profile?.address?.city ?? '',
+        trade: profile?.primaryTrade ? getTradeLabel(profile.primaryTrade) : '',
+      }}
+      description={profile?.about ?? profile?.headline ?? undefined}
+      href={profilePanelHref}
     />
   )
 
@@ -99,13 +101,7 @@ export function ChatView(props: ChatViewProps) {
     </div>
   ) : (
     <>
-      {profilePanelHref ? (
-        <Link href={profilePanelHref} scroll={false} className="block shrink-0">
-          {headerItem}
-        </Link>
-      ) : (
-        <div className="shrink-0">{headerItem}</div>
-      )}
+      <div className="shrink-0">{headerItem}</div>
       <MessageThread
         chatId={chatId}
         currentUserId={currentUserId}

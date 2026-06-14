@@ -55,7 +55,7 @@ export default function CoworkersPage() {
           <p className="text-m-14 text-gray-500">등록된 동료가 없습니다</p>
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-gray-300">
+        <div className="flex flex-col">
           {coworkerMemberIds.map((memberId) => (
             <CoworkerCard key={memberId} profileId={memberId} />
           ))}

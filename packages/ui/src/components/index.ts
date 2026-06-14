@@ -70,6 +70,8 @@ export {
 } from './ui/shadcn/drawer'
 export { ConfirmDialog } from './ui/ConfirmDialog'
 export type { ConfirmDialogProps } from './ui/ConfirmDialog'
+export { ProfileCard, ProfileCardSkeleton } from './ui/ProfileCard'
+export type { ProfileCardProps, ProfileCardMeta, ProfileCardSkeletonProps } from './ui/ProfileCard'
 export { ContextMenu } from './ui/ContextMenu'
 export type { ContextMenuItem } from './ui/ContextMenu'
 export { Toaster } from './ui/Toaster'
