@@ -69,7 +69,7 @@ export default function SignupUsernamePage() {
               type="text"
               autoComplete="username"
               description="ID는 프로필과 검색에 활용되며, 한 번 설정하면 변경이 불가해요."
-              placeholder="내용을 입력해주세요"
+              placeholder="아이디를 입력해주세요"
               transform={formatUsername}
               serverError={server.fieldError('username')}
             />
