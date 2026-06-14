@@ -52,9 +52,9 @@ export function PanelProfile({ profileId }: { profileId: number }) {
     isError,
   }
 
-  // 선택 모드(작업 선택됨)에서만 섭외 제안 버튼 주입 — features 는 presentation-only 유지(ADR-0020)
-  const offerCandidate: OfferQueueItem | null =
-    taskId && member && profile
+  // 섭외 제안 추가용 candidate — 프로필 로드 후에만. (취소는 큐 멤버십만으로 동작하므로 불필요)
+  const offerCandidate: OfferQueueItem | undefined =
+    member && profile
       ? {
           profileId,
           name: member.name,
@@ -64,7 +64,7 @@ export function PanelProfile({ profileId }: { profileId: number }) {
           picture: member.picture ?? undefined,
           status: 'waiting',
         }
-      : null
+      : undefined
 
   return (
     <PanelAside label="기술자 프로필">
@@ -74,9 +74,14 @@ export function PanelProfile({ profileId }: { profileId: number }) {
         closeHref={closeHref}
         onClose={close}
         actionSlot={
-          taskId && offerCandidate ? (
+          // 작업 컨텍스트(?task=)가 있으면 항상 노출 — features 는 presentation-only 유지(ADR-0020)
+          taskId ? (
             <div className="px-4 pb-2">
-              <OfferProposeButton taskId={taskId} candidate={offerCandidate} />
+              <OfferProposeButton
+                taskId={taskId}
+                profileId={profileId}
+                candidate={offerCandidate}
+              />
             </div>
           ) : undefined
         }

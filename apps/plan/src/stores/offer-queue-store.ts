@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { MOCK_SCHEDULE_TASKS } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
 
 /** 대기중(큐만, 정렬·삭제) | 섭외중(발송됨, 취소만·정렬잠금). 미래 BE enum 매핑. */
 export type OfferStatus = 'waiting' | 'offered'
@@ -24,51 +25,49 @@ interface OfferQueueState {
   reorderQueue: (taskId: string, activeProfileId: number, overProfileId: number) => void
 }
 
-/** Figma 노드2(1572-13227) 재현 — 타일 작업(id '4')에 섭외중 1 + 대기중 4. BE 연동 시 제거. */
-const MOCK_OFFER_QUEUES: Record<string, OfferQueueItem[]> = {
-  '4': [
-    {
-      profileId: 901,
-      name: '최수종 (Mocked)',
-      region: '경기도',
-      level: '준기공',
-      specialty: '방수',
-      status: 'offered',
-    },
-    {
-      profileId: 902,
-      name: '이민호 (Mocked)',
-      region: '서울',
-      level: '반장',
-      specialty: '타일',
-      status: 'waiting',
-    },
-    {
-      profileId: 903,
-      name: '김태현 (Mocked)',
-      region: '인천',
-      level: '기공',
-      specialty: '도배',
-      status: 'waiting',
-    },
-    {
-      profileId: 904,
-      name: '박지성 (Mocked)',
-      region: '경기도',
-      level: '준기공',
-      specialty: '타일',
-      status: 'waiting',
-    },
-    {
-      profileId: 905,
-      name: '정재영 (Mocked)',
-      region: '서울',
-      level: '기공',
-      specialty: '방수',
-      status: 'waiting',
-    },
-  ],
+/**
+ * 시드 — 간트 각 작업의 배정자(assignee)를 그 작업 큐에 'offered'로 등록 + 데모 작업(타일 id '4')에
+ * 대기중 후보 추가(Figma 노드2 1572-13227 재현). BE 연동 시 제거.
+ */
+const MOCK_OFFER_QUEUES: Record<string, OfferQueueItem[]> = {}
+for (const task of MOCK_SCHEDULE_TASKS) {
+  if (task.assignee) MOCK_OFFER_QUEUES[task.id] = [{ ...task.assignee, status: 'offered' }]
 }
+MOCK_OFFER_QUEUES['4'] = [
+  ...(MOCK_OFFER_QUEUES['4'] ?? []),
+  {
+    profileId: 902,
+    name: '이민호 (Mocked)',
+    region: '서울',
+    level: '반장',
+    specialty: '타일',
+    status: 'waiting',
+  },
+  {
+    profileId: 903,
+    name: '김태현 (Mocked)',
+    region: '인천',
+    level: '기공',
+    specialty: '도배',
+    status: 'waiting',
+  },
+  {
+    profileId: 904,
+    name: '박지성 (Mocked)',
+    region: '경기도',
+    level: '준기공',
+    specialty: '타일',
+    status: 'waiting',
+  },
+  {
+    profileId: 905,
+    name: '정재영 (Mocked)',
+    region: '서울',
+    level: '기공',
+    specialty: '방수',
+    status: 'waiting',
+  },
+]
 
 /**
  * 섭외 대기열 로컬 상태 seam (#575). 탐색(섭외 제안)·작업 패널·큐 패널이 같은 queues 를 공유한다.
