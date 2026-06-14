@@ -44,7 +44,7 @@ export function FeedList() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-4 px-4 py-6">
+      <div className="flex flex-col gap-6 px-4 py-6">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="animate-pulse">
             <div className="mb-3 flex items-center gap-3">
@@ -74,7 +74,7 @@ export function FeedList() {
   }
 
   return (
-    <div className="flex flex-col gap-4 px-4 py-2">
+    <div className="flex flex-col gap-6 px-4 py-2">
       {feedItems.map((item) => (
         <Feed
           key={item.postId}
