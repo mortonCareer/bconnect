@@ -116,8 +116,8 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
   ) => {
     const backButtonClass =
       'flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
-    const iconActionClass =
-      'flex cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
+    const homeIconClass =
+      'flex h-15 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
 
     const BackButton = !showBack ? (
       <div className="size-5" />
@@ -165,13 +165,22 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
         )}
         {variant === 'home' && (
           <>
-            <button type="button" onClick={onFilter} className={backButtonClass} aria-label="필터">
+            <button
+              type="button"
+              onClick={onFilter}
+              className={cn(homeIconClass, '-ml-4 px-4')}
+              aria-label="필터"
+            >
               <FilterIcon className="text-[#a5a5a5]" />
             </button>
             <div className="flex-1" />
-            <div className="flex items-center gap-4">
+            <div className="flex items-center">
               {notifyHref ? (
-                <Link href={notifyHref} className={iconActionClass} aria-label="알림">
+                <Link
+                  href={notifyHref}
+                  className={cn(homeIconClass, 'pl-4 pr-2')}
+                  aria-label="알림"
+                >
                   <NotifyBadgeIcon count={notifyCount} />
                 </Link>
               ) : (
@@ -179,7 +188,7 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
                   <button
                     type="button"
                     onClick={onNotify}
-                    className={iconActionClass}
+                    className={cn(homeIconClass, 'pl-4 pr-2')}
                     aria-label="알림"
                   >
                     <NotifyBadgeIcon count={notifyCount} />
@@ -187,14 +196,18 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
                 )
               )}
               {chatHref ? (
-                <Link href={chatHref} className={iconActionClass} aria-label="채팅">
+                <Link
+                  href={chatHref}
+                  className={cn(homeIconClass, '-mr-4 pl-2 pr-4')}
+                  aria-label="채팅"
+                >
                   <ChatBadgeIcon count={chatCount} />
                 </Link>
               ) : (
                 <button
                   type="button"
                   onClick={onChat}
-                  className={iconActionClass}
+                  className={cn(homeIconClass, '-mr-4 pl-2 pr-4')}
                   aria-label="채팅"
                 >
                   <ChatBadgeIcon count={chatCount} />
