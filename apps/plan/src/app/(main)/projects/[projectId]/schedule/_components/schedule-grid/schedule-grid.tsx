@@ -17,6 +17,7 @@ import {
   ROW_HEIGHT,
   STATUS_LABELS,
   STICKY_LEFT,
+  tradesLabel,
 } from './constants'
 import {
   addDays,
@@ -41,9 +42,9 @@ function StatusPill({ status }: { status: TaskStatus }) {
   )
 }
 
-export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) {
+export function ScheduleGrid({ today }: ScheduleGridProps) {
   const { panelHref, openPanel } = usePanelNav()
-  const { tasks, updateTask, deleteTask } = useScheduleTasks(initialTasks)
+  const { tasks, updateTask, deleteTask } = useScheduleTasks()
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   // 범위 = (최초 start -5일)의 달 1일 ~ (최후 end +5일)의 달 말일.
@@ -90,7 +91,7 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
   }, [today, startDate])
 
   function handleCreateTask() {
-    alert('준비 중')
+    openPanel('task/new')
   }
 
   function handleFindTechnician() {
@@ -210,7 +211,7 @@ export function ScheduleGrid({ tasks: initialTasks, today }: ScheduleGridProps) 
                 className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle text-r-14 text-[#3d3d3d]`}
                 style={{ left: STICKY_LEFT[0] }}
               >
-                {task.category}
+                {tradesLabel(task.trades)}
               </td>
               <td
                 className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle`}

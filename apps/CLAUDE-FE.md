@@ -14,6 +14,10 @@ career·plan 두 Next.js App Router 앱의 공통 프론트엔드 규칙. 각 �
 
 색상 hex 직접 X, CSS variables (`❌ bg-[#386dff]` → `✓ bg-primary`). 토큰: `packages/ui/src/styles/globals.css`. 신규 색상은 globals.css 먼저.
 
+## 도메인 enum/라벨 — `@bconnect/api-client` SSOT
+
+값이 enum인 도메인 어휘(`Trade` 등)는 **mock 포함** api-client SSOT 사용 — 옵션 `TRADE_LIST`, 라벨 `TRADE_LABELS[t]` 파생. 한글 하드코딩·자체 옵션 배열·별도 표시필드(`category`) 금지(`generated/`는 orval 산출, 직접수정 X). enum에 없는 값은 BE spec 이슈로 확장.
+
 ## Figma 매핑 — `@figma` JSDoc
 
 모든 `page.tsx` 상단 `@figma <url>` JSDoc 필수(ESLint 강제). 디자인 없으면 `@figma-scaffold <reason>`. 형식·마커: [packages/ui/CLAUDE.md](../packages/ui/CLAUDE.md). 코드 `@figma` 태그 ↔ Figma 노드 drift는 주간 CI가 감지(상세: [scripts/figma-checks/CLAUDE.md](../scripts/figma-checks/CLAUDE.md)).

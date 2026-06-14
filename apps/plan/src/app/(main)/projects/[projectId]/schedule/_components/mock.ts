@@ -1,3 +1,4 @@
+import { Trade } from '@bconnect/api-client'
 import type { ScheduleTask } from './schedule-grid'
 
 type ProjectInfo = {
@@ -15,7 +16,7 @@ export const MOCK_PROJECT: ProjectInfo = {
 export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   {
     id: '1',
-    category: '철거',
+    trades: [Trade.DEMOLITION],
     ganttName: '철거작업',
     startDate: '2026-04-28',
     endDate: '2026-04-30',
@@ -30,7 +31,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   },
   {
     id: '2',
-    category: '전기',
+    trades: [Trade.ELECTRICAL],
     ganttName: '전기 시공',
     startDate: '2026-05-01',
     endDate: '2026-05-03',
@@ -45,7 +46,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   },
   {
     id: '3',
-    category: '목공 · 창호',
+    trades: [Trade.CARPENTRY, Trade.GLAZING],
     ganttName: '목재/창호 설치',
     startDate: '2026-05-03',
     endDate: '2026-05-04',
@@ -60,8 +61,13 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   },
   {
     id: '4',
-    category: '타일',
+    trades: [Trade.TILING, Trade.WALLPAPER],
     ganttName: '타일',
+    corpName: '서정 건축',
+    address: '경기도 수원시 율전로 00번길 00-00',
+    addressDetail: '000호',
+    request: '타일 시공 및 단일 벽면 일부 도배',
+    memo: '세밀한 작업이 필요함',
     startDate: '2026-05-04',
     endDate: '2026-05-05',
     status: 'recruited',
@@ -75,7 +81,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   },
   {
     id: '5',
-    category: '필름',
+    trades: [Trade.FILM_SHEET],
     ganttName: '필름',
     startDate: '2026-05-06',
     endDate: '2026-05-07',
@@ -90,7 +96,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   },
   {
     id: '6',
-    category: '도배',
+    trades: [Trade.WALLPAPER],
     ganttName: '도배',
     startDate: '2026-05-08',
     endDate: '2026-05-09',
@@ -105,7 +111,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   },
   {
     id: '7',
-    category: '바닥',
+    trades: [Trade.HARDWOOD],
     ganttName: '바닥 및 마무리',
     startDate: '2026-05-10',
     endDate: '2026-05-11',
@@ -120,7 +126,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   },
   {
     id: '8',
-    category: '싱크대 · 가구',
+    trades: [Trade.SINK, Trade.FURNITURE],
     ganttName: '가구 설치',
     startDate: '2026-05-12',
     endDate: '2026-05-13',
@@ -128,7 +134,7 @@ export const MOCK_SCHEDULE_TASKS: ScheduleTask[] = [
   },
   {
     id: '9',
-    category: '조명',
+    trades: [Trade.ELECTRICAL],
     ganttName: '조명 설치',
     startDate: '2026-05-12',
     endDate: '2026-05-14',

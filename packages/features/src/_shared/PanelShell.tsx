@@ -22,7 +22,8 @@ export function PanelShell({ onClose, children, ...header }: PanelShellProps) {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      // 내부 오버레이(Select 드롭다운 등)가 Esc 를 소비(preventDefault)했으면 패널은 유지
+      if (e.key === 'Escape' && !e.defaultPrevented) onClose()
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)

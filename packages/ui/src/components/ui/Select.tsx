@@ -29,7 +29,10 @@ function useCloseOnOutside(open: boolean, close: () => void) {
       if (rootRef.current && !rootRef.current.contains(e.target as Node)) close()
     }
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close()
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        close()
+      }
     }
     document.addEventListener('mousedown', handlePointer)
     document.addEventListener('keydown', handleKey)

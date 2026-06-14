@@ -10,6 +10,18 @@ import { Input } from '../Input'
 import { FormField } from '../shadcn/form'
 import { fieldItem, fieldLabel, fieldSlot, type FieldLayout } from './_layout'
 
+/**
+ * native date 의 캘린더 아이콘(`::-webkit-calendar-picker-indicator`, UA stylesheet 렌더)을
+ * 투명화해 시안(텍스트만)에 맞추되, input 전체를 덮어 어디를 눌러도 picker 가 열리도록 한다.
+ */
+const DATE_PICKER_RESET = cn(
+  'relative',
+  '[&::-webkit-calendar-picker-indicator]:absolute',
+  '[&::-webkit-calendar-picker-indicator]:inset-0',
+  '[&::-webkit-calendar-picker-indicator]:cursor-pointer',
+  '[&::-webkit-calendar-picker-indicator]:opacity-0'
+)
+
 interface DateRangeFieldProps<T extends FieldValues> {
   control: Control<T>
   /** 시작일 필드명 — 종료일과 별개 RHF 필드. start>end 류 교차 검증은 zod refine 이 담당. */
@@ -25,8 +37,6 @@ interface DateRangeFieldProps<T extends FieldValues> {
   /** 레이아웃 변형 — row 는 패널형 수평(라벨 좌측 고정폭 + 하단 구분선, #581). 기본 stacked. */
   layout?: FieldLayout
 }
-
-const DATE_INPUT_CLASSES = 'rounded-lg border-[#e0e0e0] px-3 py-2 text-r-14'
 
 /**
  * 시작일 ~ 종료일 범위 입력 (#581). RHF 필드 2개(startName/endName)를 한 행에 합성한다.
@@ -76,10 +86,11 @@ export function DateRangeField<T extends FieldValues>({
                     {...startField}
                     id={startId}
                     type="date"
+                    size="small"
                     disabled={disabled}
                     aria-invalid={invalid}
                     aria-describedby={invalid ? messageId : undefined}
-                    className={DATE_INPUT_CLASSES}
+                    className={DATE_PICKER_RESET}
                   />
                   <span aria-hidden className="shrink-0 text-r-14 text-gray-900">
                     ~
@@ -87,11 +98,12 @@ export function DateRangeField<T extends FieldValues>({
                   <Input
                     {...endField}
                     type="date"
+                    size="small"
                     disabled={disabled}
                     aria-label={label ? `${label} 종료일` : '종료일'}
                     aria-invalid={invalid}
                     aria-describedby={invalid ? messageId : undefined}
-                    className={DATE_INPUT_CLASSES}
+                    className={DATE_PICKER_RESET}
                   />
                 </div>
                 {errorMessage && (
