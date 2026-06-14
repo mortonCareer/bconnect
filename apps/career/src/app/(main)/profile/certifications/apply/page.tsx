@@ -19,10 +19,11 @@ import {
   getGetCredentialsQueryKey,
 } from '@bconnect/api-client'
 import { Tab, TopBar } from '@bconnect/ui'
-import { useQueryState } from 'nuqs'
+import { useQueryState, parseAsStringLiteral } from 'nuqs'
 import { OneClickTab } from './_components/OneClickTab'
 import { CertificateTab } from './_components/CertificateTab'
 import { QualificationTab } from './_components/QualificationTab'
+import { APPLY_TAB_KEYS } from '../_lib/applyTabs'
 
 const TAB_ITEMS = [
   { key: 'one-click', label: '원클릭 조회' },
@@ -33,7 +34,16 @@ const TAB_ITEMS = [
 export default function CertificationApplyPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const [activeTab, setActiveTab] = useQueryState('tab', { defaultValue: 'one-click' })
+  const [activeTab, setActiveTab] = useQueryState(
+    'tab',
+    parseAsStringLiteral(APPLY_TAB_KEYS).withDefault('one-click').withOptions({ history: 'push' })
+  )
+  const [, setSubTab] = useQueryState('sub', { history: 'push' })
+
+  const handleTabChange = (key: string) => {
+    setActiveTab(key as (typeof APPLY_TAB_KEYS)[number])
+    setSubTab(null)
+  }
 
   const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
   const profileId = profile?.id
@@ -89,7 +99,7 @@ export default function CertificationApplyPage() {
     <div className="flex flex-col">
       <TopBar variant="default" title="인증 신청" showAction={false} onBack={() => router.back()} />
 
-      <Tab items={TAB_ITEMS} activeKey={activeTab} onChange={setActiveTab} />
+      <Tab items={TAB_ITEMS} activeKey={activeTab} onChange={handleTabChange} />
 
       {activeTab === 'one-click' && (
         <OneClickTab

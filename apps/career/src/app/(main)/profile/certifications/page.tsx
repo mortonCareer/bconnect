@@ -4,6 +4,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   useQueryClient,
@@ -11,9 +12,8 @@ import {
   useGetCredentials,
   useDeleteCredential,
   getGetCredentialsQueryKey,
-  getCredentialLabel,
 } from '@bconnect/api-client'
-import { Button, Tag, TopBar } from '@bconnect/ui'
+import { Button, ConfirmDialog, TopBar } from '@bconnect/ui'
 import { CredentialItem } from './_components/CredentialItem'
 
 export default function CertificationsPage() {
@@ -28,7 +28,7 @@ export default function CertificationsPage() {
     { query: { enabled: !!profileId } }
   )
 
-  const { mutate: deleteCredential, isPending: isDeleting } = useDeleteCredential({
+  const { mutate: deleteCredential } = useDeleteCredential({
     mutation: {
       onSuccess: () => {
         if (profileId) {
@@ -40,12 +40,10 @@ export default function CertificationsPage() {
     },
   })
 
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
+
   const credentialsList = credentials ?? []
   const isLoading = isProfileLoading || isCredentialsLoading
-
-  const handleDelete = (credentialId: number) => {
-    deleteCredential({ credentialId })
-  }
 
   if (isLoading) {
     return (
@@ -58,32 +56,14 @@ export default function CertificationsPage() {
     )
   }
 
-  const acceptedCredentials = credentialsList.filter((c) => c.status === 'ACCEPTED')
-
   return (
     <div className="flex flex-col">
       <TopBar variant="default" title="인증" showAction={false} onBack={() => router.back()} />
 
-      {/* 인증 태그 배지 */}
-      {acceptedCredentials.length > 0 && (
-        <div className="flex flex-wrap gap-2 px-4 py-3">
-          {acceptedCredentials.map((credential) => (
-            <Tag key={credential.id} variant="default" size="sm">
-              {credential.type ? getCredentialLabel(credential.type) : '알 수 없음'}
-            </Tag>
-          ))}
-        </div>
-      )}
-
-      {/* 인증 추가하기 버튼 */}
-      <div className="px-4 py-3">
-        <Button asChild variant="outline" size="full">
-          <Link href="/profile/certifications/apply">인증 추가하기</Link>
-        </Button>
-        <p className="mt-2 text-r-12 text-gray-500">
-          인증 정보를 프로필에 표시하고 신뢰도를 높여보세요
-        </p>
-      </div>
+      {/* 설명 문구 */}
+      <p className="px-4 py-3 text-r-12 text-gray-500">
+        인증 정보를 프로필에 표시하고 신뢰도를 높여보세요
+      </p>
 
       {/* 인증 목록 */}
       {credentialsList.length > 0 ? (
@@ -92,9 +72,7 @@ export default function CertificationsPage() {
             <CredentialItem
               key={credential.id}
               credential={credential}
-              onDelete={handleDelete}
-              onRenew={credential.status === 'ACCEPTED' ? handleDelete : undefined}
-              isDeleting={isDeleting}
+              onRequestDelete={setPendingDeleteId}
             />
           ))}
         </div>
@@ -103,6 +81,28 @@ export default function CertificationsPage() {
           <p className="text-m-14 text-gray-500">등록된 인증이 없습니다</p>
         </div>
       )}
+
+      {/* 인증 추가하기 버튼 */}
+      <div className="px-4 py-3">
+        <Button asChild variant="primary" size="full">
+          <Link href="/profile/certifications/apply">인증 추가하기</Link>
+        </Button>
+      </div>
+
+      <ConfirmDialog
+        open={pendingDeleteId != null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteId(null)
+        }}
+        title="인증을 삭제할까요?"
+        description="삭제한 인증은 복구할 수 없어요."
+        confirmLabel="삭제"
+        destructive
+        onConfirm={() => {
+          if (pendingDeleteId == null) return
+          deleteCredential({ credentialId: pendingDeleteId })
+        }}
+      />
     </div>
   )
 }
