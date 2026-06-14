@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Select, cn } from '@bconnect/ui'
 import { useAuthStore } from '@/stores/auth-store'
 import { useScheduleTaskStore } from '@/stores/schedule-task-store'
@@ -19,6 +20,7 @@ export function TaskSelectBar() {
   const { taskId, select } = useSelectedTask()
   const { panelHref } = usePanelNav()
   const { count } = useOfferQueue(taskId)
+  const isQueueOpen = useSearchParams().get('panel') === `task/${taskId}`
 
   if (!isAuthenticated) return null
 
@@ -42,10 +44,14 @@ export function TaskSelectBar() {
           href={panelHref(`task/${taskId}`)}
           scroll={false}
           className={cn(
-            'text-m-14 inline-flex h-10 shrink-0 items-center rounded-lg border border-primary bg-secondary px-3.5 font-semibold text-primary'
+            'text-m-14 inline-flex h-10 shrink-0 items-center gap-1 rounded-lg border px-3.5 font-semibold',
+            isQueueOpen
+              ? 'border-primary bg-secondary text-primary'
+              : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
           )}
         >
-          섭외 대기열 ({count})
+          섭외 대기열
+          <span className="text-primary">({count})</span>
         </Link>
       )}
     </div>
