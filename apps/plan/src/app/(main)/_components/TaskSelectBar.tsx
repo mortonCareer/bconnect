@@ -18,7 +18,7 @@ export function TaskSelectBar() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const tasks = useScheduleTaskStore((s) => s.tasks)
   const { taskId, select } = useSelectedTask()
-  const { panelHref } = usePanelNav()
+  const { panelHref, closeHref } = usePanelNav()
   const { count } = useOfferQueue(taskId)
   const isQueueOpen = useSearchParams().get('panel') === `task/${taskId}`
 
@@ -41,7 +41,7 @@ export function TaskSelectBar() {
       />
       {taskId && (
         <Link
-          href={panelHref(`task/${taskId}`)}
+          href={isQueueOpen ? closeHref : panelHref(`task/${taskId}`)}
           scroll={false}
           className={cn(
             'text-m-14 inline-flex h-10 shrink-0 items-center gap-1 rounded-lg border px-3.5 font-semibold',
