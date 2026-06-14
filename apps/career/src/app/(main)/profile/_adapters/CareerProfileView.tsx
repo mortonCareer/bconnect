@@ -89,10 +89,10 @@ export function OwnerProfileView() {
       onDeleteRecommendation={onDeleteRecommendation}
       actionSlot={
         <div className="flex gap-2 px-4 py-3">
-          <Button asChild variant="outline" size="full" className="h-10 flex-1">
+          <Button asChild variant="outline" size="sm" className="flex-1">
             <Link href="/profile/edit">프로필 수정</Link>
           </Button>
-          <Button variant="outline" size="full" className="h-10 flex-1" onClick={share}>
+          <Button variant="outline" size="sm" className="flex-1" onClick={share}>
             공유하기
           </Button>
         </div>
@@ -166,7 +166,7 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
         <div className="flex gap-2 px-4 py-3">
           <Button
             variant="outline"
-            size="full"
+            size="sm"
             className="flex-1"
             disabled={coworker.isPending || coworker.isSuccess}
             onClick={() => pid > 0 && coworker.mutate({ data: { toId: pid } })}
@@ -175,7 +175,7 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
           </Button>
           <Button
             variant="outline"
-            size="full"
+            size="sm"
             className="flex-1"
             disabled={chat.isPending}
             onClick={() => enabled && chat.mutate({ data: { participantId: memberId } })}
