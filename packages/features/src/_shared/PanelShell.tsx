@@ -31,7 +31,7 @@ export function PanelShell({ onClose, children, ...header }: PanelShellProps) {
 
   return (
     <div ref={rootRef} tabIndex={-1} className="flex h-full flex-col bg-white outline-none">
-      <PanelHeader {...header} />
+      <PanelHeader {...header} onClose={onClose} />
       {children}
     </div>
   )

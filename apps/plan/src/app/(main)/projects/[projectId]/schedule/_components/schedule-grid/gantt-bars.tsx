@@ -83,7 +83,15 @@ export function GanttBars({
           <div
             {...moveHandleProps}
             className={`absolute flex touch-none items-center rounded pl-2.5 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${drag ? 'z-10 cursor-grabbing opacity-90' : 'cursor-grab'}`}
-            style={{ left, top: BAR_TOP, width, height: BAR_HEIGHT, backgroundColor: style.bg }}
+            style={{
+              left,
+              top: BAR_TOP,
+              width,
+              height: BAR_HEIGHT,
+              backgroundColor: style.bg,
+              // 드래그-생성 직후 미확정(draft) 바는 살짝 연하게
+              opacity: task.draft ? 0.5 : undefined,
+            }}
             tabIndex={0}
             aria-label={`${task.ganttName} · ${task.startDate} ~ ${task.endDate} · ${label}`}
           >

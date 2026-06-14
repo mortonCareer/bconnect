@@ -7,6 +7,7 @@ import { GRADE_OPTIONS } from '@/lib/grade'
 import type { Grade } from '@/lib/grade'
 import { useFilterParams } from '@/hooks/useFilterParams'
 import type { ExperienceLevel } from '@/lib/experience'
+import { TaskSelectBar } from './TaskSelectBar'
 
 const REGION_OPTIONS = [
   '서울',
@@ -61,6 +62,8 @@ export function FilterBar() {
 
   return (
     <div className="flex flex-col gap-[13px]">
+      <TaskSelectBar />
+
       {/* Dropdowns */}
       <div className="flex items-center gap-[9px]">
         <Select

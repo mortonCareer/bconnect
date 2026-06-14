@@ -8,6 +8,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { MOCK_PROJECTS } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
 import { SidebarFooter } from './SidebarFooter'
 
 // TODO(신규 BE 이슈 필요 — notification 도메인): 엔드포인트 추가 시
@@ -16,12 +17,7 @@ import { SidebarFooter } from './SidebarFooter'
 const NOTIFICATION_COUNT = 4
 const MAX_BADGE_COUNT = 99
 
-// TODO(신규 BE 이슈 필요 — Project 도메인): 내 프로젝트 목록 조회 API 로 교체.
-const MOCK_PROJECTS = [
-  { value: '1', label: '모튼아파트 리모델링 01 (Mocked)' },
-  { value: '2', label: '래미안 리모델링 02 (Mocked)' },
-  { value: '3', label: '자담 사옥 인테리어 (Mocked)' },
-]
+const PROJECT_OPTIONS = MOCK_PROJECTS.map((p) => ({ value: p.id, label: p.name }))
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null
@@ -76,7 +72,7 @@ function ProjectSection({
 }) {
   const router = useRouter()
   const [selectedProject, setSelectedProject] = useState(
-    pathProjectId ?? MOCK_PROJECTS[0]?.value ?? ''
+    pathProjectId ?? PROJECT_OPTIONS[0]?.value ?? ''
   )
   // path 로 다른 프로젝트에 진입하면 셀렉트를 따라가게 동기화 (render-time adjustment)
   const [prevPathId, setPrevPathId] = useState(pathProjectId)
@@ -110,7 +106,7 @@ function ProjectSection({
         <Select
           value={selectedProject}
           onChange={handleProjectChange}
-          options={MOCK_PROJECTS}
+          options={PROJECT_OPTIONS}
           placeholder="프로젝트 선택"
         />
         {items.map((item) => {
