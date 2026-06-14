@@ -39,7 +39,7 @@ export function TaskSelectBar() {
       />
       {taskId && (
         <Link
-          href={panelHref('offer-queue')}
+          href={panelHref(`task/${taskId}`)}
           scroll={false}
           className={cn(
             'text-m-14 inline-flex h-10 shrink-0 items-center rounded-lg border border-primary bg-secondary px-3.5 font-semibold text-primary'

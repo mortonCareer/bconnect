@@ -8,14 +8,13 @@ import { PanelMessages } from './PanelMessages'
 import { PanelChat } from './PanelChat'
 import { PanelNotifications } from './PanelNotifications'
 import { PanelTask } from './PanelTask'
-import { PanelOfferQueue } from './PanelOfferQueue'
 
 /**
  * 패널 호스트 (ADR-0021). `(main)` 셸에 상주하며 `?panel=` search param 을 읽어 dispatch.
  * 어떤 메인 콘텐츠(children) 위에도 떠 있고, 새로고침/뒤로/앞으로/공유가 URL 로 추적된다.
  *
  * `?panel=` 값 형태: `profile/5` · `profile/5/coworkers` · `profile/5/recommendations`
- *                   · `messages` · `messages/3` · `notifications` · `task/new` · `task/4` · `offer-queue`
+ *                   · `messages` · `messages/3` · `notifications` · `task/new` · `task/4`
  */
 export function PanelHost() {
   const panel = useSearchParams().get('panel')
@@ -45,8 +44,6 @@ export function PanelHost() {
     if (seg[1]) return <PanelTask key={seg[1]} taskId={seg[1]} />
     return null
   }
-
-  if (seg[0] === 'offer-queue') return <PanelOfferQueue />
 
   return null
 }
