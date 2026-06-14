@@ -1,49 +1,40 @@
 'use client'
 
+import Link from 'next/link'
 import { getCredentialLabel } from '@bconnect/api-client'
 import type { Credential } from '@bconnect/api-client'
-import { CheckCircleIcon } from '@bconnect/ui'
+import { Button, CheckCircleFilledIcon } from '@bconnect/ui'
 import { formatDate } from '@bconnect/config/format'
+import { getApplyLocation } from '../_lib/applyTabs'
 
 interface CredentialItemProps {
   credential: Credential
-  onDelete: (id: number) => void
-  onRenew?: (id: number) => void
-  isDeleting?: boolean
+  onRequestDelete: (id: number) => void
 }
 
-export function CredentialItem({ credential, onDelete, onRenew, isDeleting }: CredentialItemProps) {
-  const label = credential.type ? getCredentialLabel(credential.type) : '알 수 없음'
+export function CredentialItem({ credential, onRequestDelete }: CredentialItemProps) {
+  const label = getCredentialLabel(credential.type)
   const expiryText = credential.expiredAt ? `${formatDate(credential.expiredAt)} 만료` : null
+  const canRenew = credential.status === 'ACCEPTED'
+  const { tab, sub } = getApplyLocation(credential.type)
+  const renewHref = `/profile/certifications/apply?tab=${tab}${sub ? `&sub=${sub}` : ''}`
 
   return (
-    <div className="flex items-center justify-between px-4 py-3">
-      <div className="flex items-center gap-2">
-        <CheckCircleIcon className="text-primary" />
-        {/* 인증명 + 만료일 — 같은 줄 */}
-        <div className="flex items-baseline gap-2">
-          <span className="text-sb-14 text-gray-900">{label}</span>
-          {expiryText && <span className="text-r-12 text-gray-500">{expiryText}</span>}
-        </div>
+    <div className="flex items-center gap-3 px-4 py-3">
+      <CheckCircleFilledIcon className="shrink-0 text-primary" />
+      <div className="flex flex-1 items-baseline gap-2">
+        <span className="text-m-14 text-gray-900">{label}</span>
+        {expiryText && <span className="text-r-12 text-gray-500">{expiryText}</span>}
       </div>
-      <div className="flex items-center gap-2">
-        {onRenew && credential.id !== undefined && (
-          <button
-            className="rounded border border-primary px-3 py-1 text-r-14 text-primary"
-            onClick={() => onRenew(credential.id!)}
-          >
-            갱신
-          </button>
+      <div className="flex shrink-0 items-center gap-2">
+        {canRenew && (
+          <Button asChild variant="outline" size="small">
+            <Link href={renewHref}>갱신</Link>
+          </Button>
         )}
-        {credential.id !== undefined && (
-          <button
-            className="rounded border border-gray-500 px-3 py-1 text-r-14 text-gray-500"
-            onClick={() => onDelete(credential.id!)}
-            disabled={isDeleting}
-          >
-            삭제
-          </button>
-        )}
+        <Button variant="destructive" size="small" onClick={() => onRequestDelete(credential.id)}>
+          삭제
+        </Button>
       </div>
     </div>
   )

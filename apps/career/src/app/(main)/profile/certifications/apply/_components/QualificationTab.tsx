@@ -1,11 +1,15 @@
 'use client'
 
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useQueryState, parseAsStringLiteral } from 'nuqs'
 import { getCredentialLabel } from '@bconnect/api-client'
-import type { Credential, CredentialType } from '@bconnect/api-client'
+import type { Credential } from '@bconnect/api-client'
 import { Button, Form, FormSubmitButton, Tag, TextareaField } from '@bconnect/ui'
 import { formatDate } from '@bconnect/config/format'
+import {
+  QUALIFICATION_SUB_KEYS,
+  QUALIFICATION_SUB_TABS,
+} from '@/app/(main)/profile/certifications/_lib/applyTabs'
 
 interface QualificationTabProps {
   credentials: Credential[]
@@ -14,40 +18,18 @@ interface QualificationTabProps {
   isDeleting: boolean
 }
 
-const SUB_TABS = [
-  { key: 'national', label: '국가기술자격증' },
-  { key: 'skilled', label: '숙련기술인' },
-  { key: 'other', label: '그 외' },
-]
-
-const SUB_TAB_TYPE_MAP: Record<string, CredentialType> = {
-  national: 'NATIONAL_TECHNICAL_QUALIFICATION',
-  skilled: 'SKILLED_TECHNICIAN',
-  other: 'OTHER_QUALIFICATION',
-}
-
-const SUB_TAB_INFO: Record<string, { title: string; description: string }> = {
-  national: {
-    title: '국가기술자격증',
-    description: '한국산업인력공단이 평가·운영하는 국가자격이에요.',
-  },
-  skilled: {
-    title: '숙련기술인',
-    description: '한국산업인력공단이 인정한 숙련기술 보유자에요.',
-  },
-  other: {
-    title: '기타 자격증',
-    description: '다른 항목에 해당하지 않는 자격증이에요. 검토 후 승인된 경우에 프로필에 반영돼요.',
-  },
-}
-
 export function QualificationTab({
   credentials,
   onDelete,
   onSubmitOther,
   isDeleting,
 }: QualificationTabProps) {
-  const [activeSubTab, setActiveSubTab] = useState('national')
+  const [activeSubTab, setActiveSubTab] = useQueryState(
+    'sub',
+    parseAsStringLiteral(QUALIFICATION_SUB_KEYS)
+      .withDefault('national')
+      .withOptions({ history: 'push' })
+  )
 
   const form = useForm<{ note: string }>({ mode: 'onTouched', defaultValues: { note: '' } })
   const submitOther = form.handleSubmit((data) => {
@@ -55,22 +37,21 @@ export function QualificationTab({
     form.reset({ note: '' })
   })
 
-  const currentType = SUB_TAB_TYPE_MAP[activeSubTab]
-  const filteredCredentials = credentials.filter((c) => c.type === currentType)
-  const info = SUB_TAB_INFO[activeSubTab]
+  const info = QUALIFICATION_SUB_TABS[activeSubTab]
+  const filteredCredentials = credentials.filter((c) => c.type === info.type)
 
   return (
     <div className="flex flex-col gap-4 px-4 py-4">
       {/* 서브 탭 */}
       <div className="flex flex-wrap gap-2">
-        {SUB_TABS.map((tab) => (
+        {QUALIFICATION_SUB_KEYS.map((key) => (
           <Tag
-            key={tab.key}
-            variant={activeSubTab === tab.key ? 'selected' : 'default'}
+            key={key}
+            variant={activeSubTab === key ? 'selected' : 'default'}
             size="sm"
-            onClick={() => setActiveSubTab(tab.key)}
+            onClick={() => setActiveSubTab(key)}
           >
-            {tab.label}
+            {QUALIFICATION_SUB_TABS[key].label}
           </Tag>
         ))}
       </div>

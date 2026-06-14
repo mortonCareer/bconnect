@@ -1,11 +1,15 @@
 'use client'
 
 import { getCredentialLabel } from '@bconnect/api-client'
-import type { Credential, CredentialType } from '@bconnect/api-client'
+import type { Credential } from '@bconnect/api-client'
 import { Button, Form, FormSubmitButton, Tag, TextareaField } from '@bconnect/ui'
-import { useState } from 'react'
+import { useQueryState, parseAsStringLiteral } from 'nuqs'
 import { useForm } from 'react-hook-form'
 import { formatDate } from '@bconnect/config/format'
+import {
+  CERTIFICATE_SUB_KEYS,
+  CERTIFICATE_SUB_TABS,
+} from '@/app/(main)/profile/certifications/_lib/applyTabs'
 
 interface CertificateTabProps {
   credentials: Credential[]
@@ -14,40 +18,18 @@ interface CertificateTabProps {
   isDeleting: boolean
 }
 
-const SUB_TABS = [
-  { key: 'career', label: '경력증명서' },
-  { key: 'skill-grade', label: '기능등급증명서' },
-  { key: 'other', label: '그 외' },
-]
-
-const SUB_TAB_TYPE_MAP: Record<string, CredentialType> = {
-  career: 'CAREER_CERTIFICATE',
-  'skill-grade': 'SKILL_GRADE_CERTIFICATE',
-  other: 'OTHER_CERTIFICATE',
-}
-
-const SUB_TAB_INFO: Record<string, { title: string; description: string }> = {
-  career: {
-    title: '경력증명서',
-    description: '건설근로자공제회에 등록된 건설업 경력 현황이에요.',
-  },
-  'skill-grade': {
-    title: '기능등급증명서',
-    description: '건설근로자공제회 기준 기능등급 현황이에요.',
-  },
-  other: {
-    title: '기타 증명서',
-    description: '다른 항목에 해당하지 않는 증명서에요. 검토 후 승인된 경우에 프로필에 반영돼요.',
-  },
-}
-
 export function CertificateTab({
   credentials,
   onDelete,
   onSubmitOther,
   isDeleting,
 }: CertificateTabProps) {
-  const [activeSubTab, setActiveSubTab] = useState('career')
+  const [activeSubTab, setActiveSubTab] = useQueryState(
+    'sub',
+    parseAsStringLiteral(CERTIFICATE_SUB_KEYS)
+      .withDefault('career')
+      .withOptions({ history: 'push' })
+  )
 
   const form = useForm<{ note: string }>({ mode: 'onTouched', defaultValues: { note: '' } })
   const submitOther = form.handleSubmit((data) => {
@@ -55,22 +37,21 @@ export function CertificateTab({
     form.reset({ note: '' })
   })
 
-  const currentType = SUB_TAB_TYPE_MAP[activeSubTab]
-  const filteredCredentials = credentials.filter((c) => c.type === currentType)
-  const info = SUB_TAB_INFO[activeSubTab]
+  const info = CERTIFICATE_SUB_TABS[activeSubTab]
+  const filteredCredentials = credentials.filter((c) => c.type === info.type)
 
   return (
     <div className="flex flex-col gap-4 px-4 py-4">
       {/* 서브 탭 */}
       <div className="flex flex-wrap gap-2">
-        {SUB_TABS.map((tab) => (
+        {CERTIFICATE_SUB_KEYS.map((key) => (
           <Tag
-            key={tab.key}
-            variant={activeSubTab === tab.key ? 'selected' : 'default'}
+            key={key}
+            variant={activeSubTab === key ? 'selected' : 'default'}
             size="sm"
-            onClick={() => setActiveSubTab(tab.key)}
+            onClick={() => setActiveSubTab(key)}
           >
-            {tab.label}
+            {CERTIFICATE_SUB_TABS[key].label}
           </Tag>
         ))}
       </div>

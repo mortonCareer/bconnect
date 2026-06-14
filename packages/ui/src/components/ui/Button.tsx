@@ -28,6 +28,11 @@ const buttonVariants = cva(
           'border border-primary bg-transparent text-primary font-semibold hover:bg-primary/10',
         // 비활성_stroke - 회색 테두리
         ghost: 'border border-gray-500 bg-transparent text-gray-500 font-medium',
+        // 파괴적 - 빨강 테두리 (삭제 등)
+        destructive:
+          'border border-destructive bg-transparent text-destructive font-semibold hover:bg-destructive/10',
+        // 텍스트형 - 테두리·채움 없음, 호버 bg (다이얼로그 액션 등)
+        text: 'bg-transparent text-gray-700 hover:bg-gray-100',
       },
       size: {
         // default: 360x50
