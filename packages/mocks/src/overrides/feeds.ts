@@ -8,6 +8,7 @@ interface FeedSeed {
   headline: string
   content: string
   daysAgo: number
+  imageCount: number
 }
 
 const FEED_SEEDS: FeedSeed[] = [
@@ -19,6 +20,7 @@ const FEED_SEEDS: FeedSeed[] = [
     content:
       '골프장 전원주택 도배 시공을 진행했습니다. 합지와 실크를 혼합해 결 방향까지 맞춰 마감했고, 모서리 들뜸 없이 깔끔하게 마무리했습니다.',
     daysAgo: 3,
+    imageCount: 3,
   },
   {
     name: '김철수',
@@ -28,6 +30,7 @@ const FEED_SEEDS: FeedSeed[] = [
     content:
       '신축 아파트 32평 욕실 2개소 타일 시공을 마쳤습니다. 줄눈 간격을 균일하게 잡아 마감 평탄도를 살렸습니다.',
     daysAgo: 6,
+    imageCount: 1,
   },
   {
     name: '박영희',
@@ -36,6 +39,7 @@ const FEED_SEEDS: FeedSeed[] = [
     headline: '전기 17년 경력',
     content: '상가 전기 배선 작업 마무리했습니다.',
     daysAgo: 10,
+    imageCount: 2,
   },
   {
     name: '이준호',
@@ -45,6 +49,7 @@ const FEED_SEEDS: FeedSeed[] = [
     content:
       '20평 카페 인테리어를 설계부터 시공 감리까지 한 번에 진행했습니다. 좁은 동선을 풀고 간접 조명 배치에 특히 신경 썼습니다.',
     daysAgo: 14,
+    imageCount: 4,
   },
   {
     name: '최민수',
@@ -53,6 +58,7 @@ const FEED_SEEDS: FeedSeed[] = [
     headline: '도장 5년',
     content: '외벽 도장 작업 완료.',
     daysAgo: 21,
+    imageCount: 1,
   },
   {
     name: '정해성',
@@ -62,12 +68,20 @@ const FEED_SEEDS: FeedSeed[] = [
     content:
       '원목 붙박이장을 제작해 설치했습니다. 무늬결을 맞춰 이어 붙여 한 판처럼 보이도록 작업했습니다.',
     daysAgo: 30,
+    imageCount: 2,
   },
 ]
 
 function daysAgoIso(days: number): string {
   const date = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
   return date.toISOString().slice(0, 19) + 'Z'
+}
+
+function buildImages(count: number): string[] {
+  return Array.from(
+    { length: count },
+    (_, i) => `https://placehold.co/600x400/e5e5e5/767676?text=${i + 1}`
+  )
 }
 
 export const feedsOverrides = [
@@ -91,6 +105,7 @@ export const feedsOverrides = [
           post: {
             ...template.post,
             id: 400 + i,
+            images: buildImages(seed.imageCount),
             content: seed.content,
             createdAt: daysAgoIso(seed.daysAgo),
           },

@@ -11,6 +11,7 @@ import { SquarePen, Trash2 } from 'lucide-react'
 import { MoreVerticalIcon } from '../../icons'
 import { useExpandableText } from '../../hooks'
 import { cn } from '../../lib/utils'
+import { ImageCarousel } from './ImageCarousel'
 
 /**
  * Feed variants:
@@ -35,7 +36,7 @@ export interface FeedProps
    * 피드 컨텐츠
    */
   content: {
-    image: string
+    images: string[]
     imageAlt?: string
     company: string
     duration: string
@@ -63,7 +64,7 @@ export interface FeedProps
  * ```tsx
  * <Feed
  *   content={{
- *     image: '/work.jpg',
+ *     images: ['/work.jpg'],
  *     company: '서정 건축',
  *     duration: '4일 소요',
  *     timestamp: '3일 전',
@@ -115,14 +116,8 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
           </div>
         </div>
 
-        {/* 이미지 */}
-        <div className="relative h-55 w-full overflow-hidden rounded-sm">
-          <img
-            src={content.image}
-            alt={content.imageAlt || content.description}
-            className="h-full w-full object-cover"
-          />
-        </div>
+        {/* 이미지 (다중 이미지 시 캐러셀 + 인덱스 점) */}
+        <ImageCarousel images={content.images} alt={content.imageAlt || content.description} />
 
         {/* 본문 캡션 + 더보기/접기 버튼 */}
         <div

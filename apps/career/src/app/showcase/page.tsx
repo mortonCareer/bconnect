@@ -85,8 +85,9 @@ const components: ComponentPreview[] = [
       <div className="w-48 scale-[0.4] origin-center">
         <Feed
           content={{
-            image:
+            images: [
               'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop',
+            ],
             company: '서정 건축',
             duration: '4일 소요',
             timestamp: '3일 전',
