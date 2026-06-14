@@ -1,7 +1,7 @@
 'use client'
 
 import { getTradeLabel, useGetProfile } from '@bconnect/api-client'
-import { ProfileCard } from '@bconnect/ui'
+import { ProfileCard, ProfileCardSkeleton } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 
 interface CoworkerCardProps {
@@ -15,15 +15,7 @@ export function CoworkerCard({ profileId }: CoworkerCardProps) {
   const profile = profileAndMember?.profile
 
   if (isLoading) {
-    return (
-      <div className="flex animate-pulse items-center gap-4 px-4 py-3">
-        <div className="size-[50px] shrink-0 rounded-full bg-gray-200" />
-        <div className="flex flex-1 flex-col gap-2">
-          <div className="h-4 w-24 rounded bg-gray-200" />
-          <div className="h-3 w-40 rounded bg-gray-200" />
-        </div>
-      </div>
-    )
+    return <ProfileCardSkeleton className="px-4" />
   }
 
   if (!profile) return null

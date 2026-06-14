@@ -4,7 +4,14 @@ import { useState, type ReactNode } from 'react'
 import { parseAsStringLiteral, useQueryState } from 'nuqs'
 import { getTradeLabel } from '@bconnect/api-client'
 import type { Recommendation } from '@bconnect/api-client'
-import { ActionDrawer, cn, MoreVerticalIcon, ProfileCard, Skeleton, Tab } from '@bconnect/ui'
+import {
+  ActionDrawer,
+  cn,
+  MoreVerticalIcon,
+  ProfileCard,
+  ProfileCardSkeleton,
+  Tab,
+} from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 
 type Mode = 'received' | 'sent'
@@ -70,15 +77,9 @@ export function RecommendationList({
       )}
 
       {isLoading ? (
-        <ul className="flex flex-col divide-y divide-gray-200">
+        <ul className="flex flex-col">
           {Array.from({ length: 3 }).map((_, i) => (
-            <li key={i} className={cn('flex gap-4 py-3', rowPx)}>
-              <Skeleton className="size-[50px] shrink-0 rounded-full" />
-              <div className="flex flex-1 flex-col gap-2 pt-1">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-3 w-full" />
-              </div>
-            </li>
+            <ProfileCardSkeleton key={i} as="li" className={rowPx} />
           ))}
         </ul>
       ) : items.length === 0 ? (

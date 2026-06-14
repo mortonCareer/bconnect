@@ -2,7 +2,7 @@
 
 import { getTradeLabel, useGetProfile } from '@bconnect/api-client'
 import type { Coworker } from '@bconnect/api-client'
-import { ProfileCard, Skeleton } from '@bconnect/ui'
+import { ProfileCard, ProfileCardSkeleton } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
@@ -73,15 +73,7 @@ function CoworkerRow({ profileId, href }: { profileId: number; href: string }) {
   const profile = profileAndMember?.profile
 
   if (isLoading) {
-    return (
-      <li className="flex items-center gap-4 border-b border-[#E5E5E5] px-4 py-3">
-        <Skeleton className="size-[50px] shrink-0 rounded-full" />
-        <div className="flex flex-1 flex-col gap-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-3 w-40" />
-        </div>
-      </li>
-    )
+    return <ProfileCardSkeleton as="li" className="px-4" />
   }
 
   if (!profile) return null
@@ -107,15 +99,9 @@ function CoworkerRow({ profileId, href }: { profileId: number; href: string }) {
 
 function CoworkerSkeletonList() {
   return (
-    <ul className="flex flex-col divide-y divide-gray-200">
+    <ul className="flex flex-col">
       {Array.from({ length: 4 }).map((_, i) => (
-        <li key={i} className="flex items-center gap-3 px-4 py-3">
-          <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
-          <div className="flex flex-1 flex-col gap-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-3 w-40" />
-          </div>
-        </li>
+        <ProfileCardSkeleton key={i} as="li" className="px-4" />
       ))}
     </ul>
   )

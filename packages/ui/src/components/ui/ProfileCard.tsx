@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { cn } from '../../lib/utils'
 import { ChevronIcon } from '../../icons/ChevronIcon'
 import { useExpandableText } from '../../hooks/useExpandableText'
+import { Skeleton } from './shadcn/skeleton'
 
 export interface ProfileCardMeta {
   /** 지역 — address.city */
@@ -136,6 +137,25 @@ export function ProfileCard({
       ) : href ? (
         <ChevronIcon direction="right" size={16} className="shrink-0 text-gray-400" />
       ) : null}
+    </Root>
+  )
+}
+
+export interface ProfileCardSkeletonProps {
+  /** 루트 엘리먼트 — 리스트 항목은 'li' */
+  as?: 'div' | 'li'
+  className?: string
+}
+
+/** ProfileCard 로딩 플레이스홀더 — 카드 레이아웃(아바타 50·gap-4·gap-1·border-b·py-3)과 정합 */
+export function ProfileCardSkeleton({ as: Root = 'div', className }: ProfileCardSkeletonProps) {
+  return (
+    <Root className={cn('flex items-center gap-4 border-b border-[#E5E5E5] py-3', className)}>
+      <Skeleton className="size-[50px] shrink-0 rounded-full" />
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-3 w-3/5" />
+      </div>
     </Root>
   )
 }
