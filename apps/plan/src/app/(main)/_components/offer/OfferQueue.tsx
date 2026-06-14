@@ -92,6 +92,12 @@ export function OfferQueue({
         * 이미 섭외 요청이 발송된 경우 섭외 순서를 조정할 수 없어요
       </p>
 
+      {emptyActionHref && (
+        <Button asChild variant="outline" className="mt-4 h-10 w-full">
+          <Link href={emptyActionHref}>기술자 탐색</Link>
+        </Button>
+      )}
+
       <ConfirmDialog
         open={pending != null}
         onOpenChange={(open) => {
