@@ -65,7 +65,7 @@ export function MessagesView(props: MessagesViewProps) {
             const trade = otherProfile?.primaryTrade
               ? TRADE_LABELS[otherProfile.primaryTrade]
               : undefined
-            // TODO(#473): 등급=member role 을 BE 가 미제공 — mock 표시 (CoworkerCard 등과 동일 패턴)
+            // TODO(#473): 등급=member role 을 BE 가 미제공 — mock 표시
             const grade = '준기공(Mocked)'
             return (
               <Link key={chat.id} href={chatHref(chat.id)} scroll={false} className="block px-4">
