@@ -62,16 +62,19 @@ export function MessagesView(props: MessagesViewProps) {
             const otherMember = chat.participants.find((p) => p.id !== currentUserId)
             const otherId = otherMember?.id
             const otherProfile = otherId != null ? profileMap?.get(otherId) : undefined
+            const trade = otherProfile?.primaryTrade
+              ? TRADE_LABELS[otherProfile.primaryTrade]
+              : undefined
+            // TODO(#473): 등급=member role 을 BE 가 미제공 — mock 표시 (CoworkerCard 등과 동일 패턴)
+            const grade = '준기공(Mocked)'
             return (
               <Link key={chat.id} href={chatHref(chat.id)} scroll={false} className="block px-4">
                 <ChatListItem
                   variant="badge"
                   profileImage={otherMember?.picture ?? undefined}
                   name={otherMember?.name ?? chat.title ?? '채팅'}
-                  location={otherProfile?.address?.city}
-                  specialty={
-                    otherProfile?.primaryTrade ? TRADE_LABELS[otherProfile.primaryTrade] : undefined
-                  }
+                  jobType={trade}
+                  specialty={grade}
                   lastMessage={chat.lastMessage.content}
                   timestamp={formatRelativeTime(chat.modifiedAt)}
                   unreadCount={chat.unreadCount}
