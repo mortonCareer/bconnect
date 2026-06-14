@@ -32,8 +32,10 @@ const buttonVariants = cva(
       size: {
         // default: 360x50
         default: 'h-[50px] w-90 px-4',
-        // small: 206x40
+        // sm: 206x40
         sm: 'h-10 w-[206px] px-3',
+        // small: h-28, 콘텐츠폭 — 행/카드 인라인 액션 (취소/삭제 등)
+        small: 'h-7 rounded-md px-3 text-r-12',
         // full width
         full: 'h-[50px] w-full px-4',
       },

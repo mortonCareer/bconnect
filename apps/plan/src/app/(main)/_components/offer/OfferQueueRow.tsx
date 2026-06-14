@@ -5,7 +5,7 @@ import { CSS } from '@dnd-kit/utilities'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getAvatarUrl } from '@bconnect/config/avatar'
-import { DragHandleIcon, cn } from '@bconnect/ui'
+import { Button, DragHandleIcon, cn } from '@bconnect/ui'
 import type { OfferQueueItem } from '@/stores/offer-queue-store'
 import { OfferStatusBadge } from './OfferStatusBadge'
 
@@ -51,7 +51,7 @@ export function OfferQueueRow({
       <Link
         href={profileHref}
         scroll={false}
-        className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1 py-1 transition-colors hover:bg-gray-50"
+        className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-gray-100"
       >
         <div className="size-9 shrink-0 overflow-hidden rounded-full bg-[#d9d9d9]">
           <Image
@@ -71,18 +71,19 @@ export function OfferQueueRow({
         </div>
       </Link>
 
-      <button
-        type="button"
+      <Button
+        size="small"
+        variant={isWaiting ? 'ghost' : 'outline'}
         onClick={() => onRemove(item.profileId)}
         className={cn(
-          'h-7 shrink-0 rounded-[6px] border bg-white px-3 text-[12px] leading-[18px] transition-colors',
+          'shrink-0 bg-white font-normal',
           isWaiting
             ? 'border-[#e5e5e5] text-[#7b7b7b] hover:bg-gray-50'
-            : 'border-destructive text-destructive hover:bg-destructive/5'
+            : 'border-destructive text-destructive hover:bg-destructive/10'
         )}
       >
         {isWaiting ? '삭제' : '취소'}
-      </button>
+      </Button>
     </div>
   )
 }
