@@ -1,27 +1,27 @@
 'use client'
 
-import { parseAsString, useQueryStates } from 'nuqs'
+import { parseAsString, useQueryState } from 'nuqs'
 import { useScheduleTaskStore } from '@/stores/schedule-task-store'
-import { MOCK_PROJECT } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
+import { getMockProject } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
 
 /**
- * 탐색 '선택 모드' — URL `?project=&task=` 가 진실원 (#575 리다이렉트 계약, nuqs).
- * 선택 대상은 프로젝트 + 그 안의 작업(task). task 메타는 schedule-task-store 에서 조회해 라벨 파생.
- * 큐 store 키는 taskId (현재 mock 단일 프로젝트, task→project 유일).
+ * 탐색 '선택 모드' — URL `?task=` 가 진실원 (nuqs). 선택 대상은 작업(task)이고,
+ * 소속 프로젝트는 task.projectId 에서 파생(멀티 프로젝트). #575 리다이렉트도 ?task= 로 컨텍스트 전달.
  */
 export function useSelectedTask() {
-  const [{ task: taskId, project: projectParam }, setParams] = useQueryStates({
-    task: parseAsString,
-    project: parseAsString,
-  })
+  const [taskId, setTaskId] = useQueryState('task', parseAsString)
   const task = useScheduleTaskStore((s) =>
     taskId ? s.tasks.find((t) => t.id === taskId) : undefined
   )
-  const label = task ? `${MOCK_PROJECT.name} | ${task.ganttName}` : null
-  const projectId = projectParam ?? (taskId ? MOCK_PROJECT.id : null)
+  const project = task ? getMockProject(task.projectId) : undefined
+  const label = task ? `${project?.name ?? '프로젝트'} | ${task.ganttName}` : null
 
-  const select = (nextTaskId: string | null) =>
-    setParams({ task: nextTaskId, project: nextTaskId ? MOCK_PROJECT.id : null })
-
-  return { projectId, taskId, task, label, select }
+  return {
+    taskId,
+    task,
+    projectId: task?.projectId ?? null,
+    project,
+    label,
+    select: (nextTaskId: string | null) => setTaskId(nextTaskId),
+  }
 }

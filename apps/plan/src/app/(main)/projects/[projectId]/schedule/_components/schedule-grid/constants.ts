@@ -1,9 +1,14 @@
 import { TRADE_LABELS, type Trade } from '@bconnect/api-client'
-import type { TaskStatus } from './types'
+import type { OfferQueueItem, ScheduleTask, TaskStatus } from './types'
 
 /** 공종 배열 → 그리드 공종 컬럼/패널 타이틀 표시 라벨 ('타일 · 도배'). category 필드 대체 파생. */
 export function tradesLabel(trades: Trade[]): string {
   return trades.map((t) => TRADE_LABELS[t] ?? t).join(' · ')
+}
+
+/** 대표 기술자 — 섭외 대기열의 'offered'(섭외중) 멤버에서 파생(SSOT, #575). 없으면 미배정. */
+export function taskAssignee(task: ScheduleTask): OfferQueueItem | undefined {
+  return task.offerQueue?.find((o) => o.status === 'offered')
 }
 
 export const COL_CATEGORY = 120

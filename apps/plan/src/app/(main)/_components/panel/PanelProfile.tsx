@@ -14,7 +14,7 @@ import { useSearchParams } from 'next/navigation'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useSelectedTask } from '@/hooks/useSelectedTask'
 import { OfferProposeButton } from '../offer/OfferProposeButton'
-import type { OfferQueueItem } from '@/stores/offer-queue-store'
+import type { OfferQueueItem } from '@/app/(main)/projects/[projectId]/schedule/_components/schedule-grid/types'
 
 export function PanelProfile({ profileId }: { profileId: number }) {
   const { panelHref, closeHref, close } = usePanelNav()

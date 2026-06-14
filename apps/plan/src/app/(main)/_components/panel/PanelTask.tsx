@@ -17,6 +17,7 @@ import {
 import { PanelAside, PanelScroll, PanelShell } from '@bconnect/features'
 import { Trade, TRADE_LABELS, TRADE_LIST } from '@bconnect/api-client'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { usePathname } from 'next/navigation'
 import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -79,6 +80,9 @@ function toFormValues(task: ScheduleTask): TaskFormValues {
  */
 export function PanelTask({ taskId }: { taskId?: string }) {
   const { close, closeHref } = usePanelNav()
+  const pathname = usePathname()
+  // 생성 시 소속 프로젝트 — 공정표 라우트(/projects/{id}/schedule)에서 진입. 없으면 기본 프로젝트.
+  const projectId = pathname.match(/^\/projects\/([^/]+)/)?.[1] ?? MOCK_PROJECT.id
   const task = useScheduleTaskStore((s) =>
     taskId ? s.tasks.find((t) => t.id === taskId) : undefined
   )
@@ -122,7 +126,7 @@ export function PanelTask({ taskId }: { taskId?: string }) {
   // 생성 모드만 명시 제출 (빈 작업 자동생성 방지). 편집은 즉시저장이라 submit no-op.
   const onSubmit = form.handleSubmit((vals) => {
     if (isEdit) return
-    createTask({ ...vals, status: 'not_started' })
+    createTask({ ...vals, projectId, status: 'not_started' })
     close()
   })
 
@@ -178,7 +182,7 @@ export function PanelTask({ taskId }: { taskId?: string }) {
             {isEdit && taskId ? (
               <OfferQueue
                 taskId={taskId}
-                emptyActionHref={`/?project=${MOCK_PROJECT.id}&task=${taskId}&trade=${(task?.trades ?? []).join(',')}`}
+                emptyActionHref={`/?task=${taskId}&trade=${(task?.trades ?? []).join(',')}`}
               />
             ) : (
               <div className="flex flex-col items-center pb-4 pt-8">

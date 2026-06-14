@@ -1,5 +1,5 @@
 import { cn } from '@bconnect/ui'
-import type { OfferStatus } from '@/stores/offer-queue-store'
+import type { OfferStatus } from '@/app/(main)/projects/[projectId]/schedule/_components/schedule-grid/types'
 
 const STYLES: Record<OfferStatus, string> = {
   offered: 'border-primary bg-secondary font-semibold text-primary',

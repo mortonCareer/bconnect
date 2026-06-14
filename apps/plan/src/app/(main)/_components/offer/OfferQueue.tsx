@@ -22,7 +22,7 @@ import Link from 'next/link'
 import { Button, ConfirmDialog, SearchIcon, toast } from '@bconnect/ui'
 import { useOfferQueue } from '@/hooks/useOfferQueue'
 import { usePanelNav } from '@/hooks/usePanelNav'
-import type { OfferQueueItem } from '@/stores/offer-queue-store'
+import type { OfferQueueItem } from '@/app/(main)/projects/[projectId]/schedule/_components/schedule-grid/types'
 import { OfferQueueRow } from './OfferQueueRow'
 
 function EmptyState({ actionHref }: { actionHref?: string }) {

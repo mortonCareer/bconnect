@@ -17,6 +17,7 @@ import {
   ROW_HEIGHT,
   STATUS_LABELS,
   STICKY_LEFT,
+  taskAssignee,
   tradesLabel,
 } from './constants'
 import {
@@ -42,9 +43,9 @@ function StatusPill({ status }: { status: TaskStatus }) {
   )
 }
 
-export function ScheduleGrid({ today }: ScheduleGridProps) {
+export function ScheduleGrid({ projectId, today }: ScheduleGridProps) {
   const { panelHref, openPanel } = usePanelNav()
-  const { tasks, updateTask, deleteTask } = useScheduleTasks()
+  const { tasks, updateTask, deleteTask } = useScheduleTasks(projectId)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   // 범위 = (최초 start -5일)의 달 1일 ~ (최후 end +5일)의 달 말일.
@@ -92,10 +93,6 @@ export function ScheduleGrid({ today }: ScheduleGridProps) {
 
   function handleCreateTask() {
     openPanel('task/new')
-  }
-
-  function handleFindTechnician() {
-    alert('준비 중')
   }
 
   function handleWheel(e: WheelEvent<HTMLDivElement>) {
@@ -205,68 +202,72 @@ export function ScheduleGrid({ today }: ScheduleGridProps) {
         </thead>
 
         <tbody>
-          {tasks.map((task) => (
-            <tr key={task.id} style={{ height: ROW_HEIGHT }}>
-              <td
-                className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle text-r-14 text-[#3d3d3d]`}
-                style={{ left: STICKY_LEFT[0] }}
-              >
-                {tradesLabel(task.trades)}
-              </td>
-              <td
-                className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle`}
-                style={{ left: STICKY_LEFT[1] }}
-              >
-                <StatusPill status={task.status} />
-              </td>
-              <td
-                className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] align-middle ${task.assignee ? 'px-1 py-2' : 'p-2'}`}
-                style={{ left: STICKY_LEFT[2] }}
-              >
-                {task.assignee ? (
-                  <Link
-                    href={panelHref(`profile/${task.assignee.profileId}`, { task: task.id })}
-                    scroll={false}
-                    className="flex w-full items-center gap-2 rounded-[8px] px-1 hover:bg-gray-100"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="size-[34px] shrink-0 rounded-full bg-[#d9d9d9]"
-                    />
-                    <span className="flex min-w-0 flex-col">
-                      <span className="text-sb-14 text-gray-900">{task.assignee.name}</span>
-                      <span className="text-r-12 text-gray-500">
-                        {task.assignee.region} | {task.assignee.level} | {task.assignee.specialty}
+          {tasks.map((task) => {
+            const assignee = taskAssignee(task)
+            return (
+              <tr key={task.id} style={{ height: ROW_HEIGHT }}>
+                <td
+                  className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle text-r-14 text-[#3d3d3d]`}
+                  style={{ left: STICKY_LEFT[0] }}
+                >
+                  {tradesLabel(task.trades)}
+                </td>
+                <td
+                  className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle`}
+                  style={{ left: STICKY_LEFT[1] }}
+                >
+                  <StatusPill status={task.status} />
+                </td>
+                <td
+                  className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] align-middle ${assignee ? 'px-1 py-2' : 'p-2'}`}
+                  style={{ left: STICKY_LEFT[2] }}
+                >
+                  {assignee ? (
+                    <Link
+                      href={panelHref(`profile/${assignee.profileId}`, { task: task.id })}
+                      scroll={false}
+                      className="flex w-full items-center gap-2 rounded-[8px] px-1 hover:bg-gray-100"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="size-[34px] shrink-0 rounded-full bg-[#d9d9d9]"
+                      />
+                      <span className="flex min-w-0 flex-col">
+                        <span className="text-sb-14 text-gray-900">{assignee.name}</span>
+                        <span className="text-r-12 text-gray-500">
+                          {assignee.region} | {assignee.level} | {assignee.specialty}
+                        </span>
                       </span>
-                    </span>
-                  </Link>
-                ) : (
-                  <Button
-                    variant="outline"
-                    type="button"
-                    onClick={handleFindTechnician}
-                    className="text-m-14 h-[33.5px] w-full rounded-[6px] border-[#c0d0ff] px-0 font-medium hover:bg-primary-50"
-                  >
-                    + 기술자 탐색
-                  </Button>
-                )}
-              </td>
-              <td
-                className="relative border-b border-solid border-[#f5f5f5] p-0"
-                style={{ width: ganttWidth, height: ROW_HEIGHT }}
-              >
-                <GanttBars
-                  task={task}
-                  dates={dates}
-                  startDate={startDate}
-                  todayIso={today}
-                  onUpdate={updateTask}
-                  onEdit={(id) => openPanel(`task/${id}`)}
-                  onDelete={setDeleteTargetId}
-                />
-              </td>
-            </tr>
-          ))}
+                    </Link>
+                  ) : (
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="text-m-14 h-[33.5px] w-full rounded-[6px] border-[#c0d0ff] px-0 font-medium hover:bg-primary-50"
+                    >
+                      <Link href={`/?task=${task.id}&trade=${task.trades.join(',')}`}>
+                        + 기술자 탐색
+                      </Link>
+                    </Button>
+                  )}
+                </td>
+                <td
+                  className="relative border-b border-solid border-[#f5f5f5] p-0"
+                  style={{ width: ganttWidth, height: ROW_HEIGHT }}
+                >
+                  <GanttBars
+                    task={task}
+                    dates={dates}
+                    startDate={startDate}
+                    todayIso={today}
+                    onUpdate={updateTask}
+                    onEdit={(id) => openPanel(`task/${id}`)}
+                    onDelete={setDeleteTargetId}
+                  />
+                </td>
+              </tr>
+            )
+          })}
 
           {/* 작업 생성 행 */}
           <tr style={{ height: ROW_HEIGHT }}>

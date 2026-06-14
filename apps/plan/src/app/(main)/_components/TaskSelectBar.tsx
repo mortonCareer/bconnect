@@ -8,7 +8,7 @@ import { useScheduleTaskStore } from '@/stores/schedule-task-store'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useSelectedTask } from '@/hooks/useSelectedTask'
 import { useOfferQueue } from '@/hooks/useOfferQueue'
-import { MOCK_PROJECT } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
+import { getMockProject } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
 
 /**
  * 탐색 '선택 모드' 바 (#575) — 프로젝트+작업 선택 셀렉트 + 섭외 대기열 칩.
@@ -26,7 +26,7 @@ export function TaskSelectBar() {
 
   const options = tasks.map((t) => ({
     value: t.id,
-    label: `${MOCK_PROJECT.name} | ${t.ganttName}`,
+    label: `${getMockProject(t.projectId)?.name ?? '프로젝트'} | ${t.ganttName}`,
   }))
 
   return (

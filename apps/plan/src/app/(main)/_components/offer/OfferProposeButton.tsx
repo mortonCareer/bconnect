@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button, ConfirmDialog, toast } from '@bconnect/ui'
 import { useOfferQueue } from '@/hooks/useOfferQueue'
-import type { OfferQueueItem } from '@/stores/offer-queue-store'
+import type { OfferQueueItem } from '@/app/(main)/projects/[projectId]/schedule/_components/schedule-grid/types'
 
 /**
  * 프로필 패널 '섭외 제안하기' 토글 (#575) — 선택된 작업(taskId)의 대기열 멤버십에 따라 분기.

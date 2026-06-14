@@ -6,7 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 import { Button, DragHandleIcon, cn } from '@bconnect/ui'
-import type { OfferQueueItem } from '@/stores/offer-queue-store'
+import type { OfferQueueItem } from '@/app/(main)/projects/[projectId]/schedule/_components/schedule-grid/types'
 import { OfferStatusBadge } from './OfferStatusBadge'
 
 export function OfferQueueRow({
