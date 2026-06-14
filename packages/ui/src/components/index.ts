@@ -17,6 +17,8 @@ export type { CertTagProps } from './ui/CertTag'
 export { Slider } from './ui/Slider'
 export type { SliderProps } from './ui/Slider'
 export { Feed, feedVariants } from './ui/Feed'
+export { ImageCarousel } from './ui/ImageCarousel'
+export type { ImageCarouselProps } from './ui/ImageCarousel'
 export { Tab } from './ui/Tab'
 export type { TabProps, TabItem } from './ui/Tab'
 export { Skeleton } from './ui/shadcn/skeleton'
@@ -26,6 +28,8 @@ export { ChatListItem, chatListItemVariants } from './ui/ChatListItem'
 export { NotificationItem } from './ui/NotificationItem'
 export type { NotificationItemProps } from './ui/NotificationItem'
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './ui/shadcn/accordion'
+export { Carousel, CarouselContent, CarouselItem } from './ui/shadcn/carousel'
+export type { CarouselApi } from './ui/shadcn/carousel'
 
 // shadcn Form suite (ADR 0013 / #400) — shadcn 디렉토리에 격리, 우리 wrapper 는 ui/ 루트
 export {

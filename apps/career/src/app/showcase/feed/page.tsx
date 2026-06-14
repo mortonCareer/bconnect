@@ -69,8 +69,9 @@ export default function FeedDetailPage() {
                 <div className="mx-auto max-w-md">
                   <Feed
                     content={{
-                      image:
+                      images: [
                         'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop',
+                      ],
                       company: '현대 건설',
                       duration: '7일 소요',
                       timestamp: '1주일 전',
@@ -167,7 +168,7 @@ export default function FeedDetailPage() {
 // Basic usage
 <Feed
   content={{
-    image: '/work.jpg',
+    images: ['/work.jpg'],
     company: '서정 건축',
     duration: '4일 소요',
     timestamp: '3일 전',
