@@ -54,55 +54,29 @@ function NotifyBadgeIcon({ count }: { count?: number }) {
 const iconButtonClass =
   'flex h-15 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
 
-/** 우측 알림·채팅 아이콘 그룹 — home + default(최상위 라우트, 예: 프로필) 우측에서 공유 */
+/** 우측 알림·채팅 아이콘 그룹 — home + default(최상위 라우트, 예: 프로필) 우측에서 공유. 항상 라우트 이동(Link) */
 function UtilityIcons({
   notifyHref,
-  onNotify,
   notifyCount,
   chatHref,
-  onChat,
   chatCount,
 }: {
   notifyHref?: string
-  onNotify?: () => void
   notifyCount?: number
   chatHref?: string
-  onChat?: () => void
   chatCount?: number
 }) {
   return (
     <div className="flex items-center">
-      {notifyHref ? (
+      {notifyHref && (
         <Link href={notifyHref} className={cn(iconButtonClass, 'pl-4 pr-2')} aria-label="알림">
           <NotifyBadgeIcon count={notifyCount} />
         </Link>
-      ) : (
-        onNotify && (
-          <button
-            type="button"
-            onClick={onNotify}
-            className={cn(iconButtonClass, 'pl-4 pr-2')}
-            aria-label="알림"
-          >
-            <NotifyBadgeIcon count={notifyCount} />
-          </button>
-        )
       )}
-      {chatHref ? (
+      {chatHref && (
         <Link href={chatHref} className={cn(iconButtonClass, '-mr-4 pl-2 pr-4')} aria-label="채팅">
           <ChatBadgeIcon count={chatCount} />
         </Link>
-      ) : (
-        onChat && (
-          <button
-            type="button"
-            onClick={onChat}
-            className={cn(iconButtonClass, '-mr-4 pl-2 pr-4')}
-            aria-label="채팅"
-          >
-            <ChatBadgeIcon count={chatCount} />
-          </button>
-        )
       )}
     </div>
   )
@@ -134,14 +108,12 @@ export interface TopBarProps
   chatCount?: number
   notifyCount?: number
   onFilter?: () => void
-  onChat?: () => void
-  onNotify?: () => void
   onBack?: () => void
   /** backHref가 있으면 Link로 렌더링 (prefetch), 없으면 button + onBack */
   backHref?: string
-  /** chatHref가 있으면 Link(prefetch)로 렌더링, 없으면 button + onChat */
+  /** 채팅 라우트 — 있으면 우측 채팅 아이콘(Link, prefetch) 렌더 */
   chatHref?: string
-  /** notifyHref/onNotify 중 하나라도 있으면 알림 버튼 렌더. href면 Link(prefetch) */
+  /** 알림 라우트 — 있으면 우측 알림 아이콘(Link, prefetch) 렌더 */
   notifyHref?: string
 }
 
@@ -161,8 +133,6 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       chatCount,
       notifyCount,
       onFilter,
-      onChat,
-      onNotify,
       onBack,
       backHref,
       chatHref,
@@ -173,7 +143,7 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
   ) => {
     const backButtonClass =
       'flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
-    const hasUtility = !!(chatHref || onChat || notifyHref || onNotify)
+    const hasUtility = !!(chatHref || notifyHref)
 
     const BackButton = !showBack ? (
       <div className="size-5" />
@@ -203,10 +173,8 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             {hasUtility ? (
               <UtilityIcons
                 notifyHref={notifyHref}
-                onNotify={onNotify}
                 notifyCount={notifyCount}
                 chatHref={chatHref}
-                onChat={onChat}
                 chatCount={chatCount}
               />
             ) : showAction ? (
@@ -241,10 +209,8 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             <div className="flex-1" />
             <UtilityIcons
               notifyHref={notifyHref}
-              onNotify={onNotify}
               notifyCount={notifyCount}
               chatHref={chatHref}
-              onChat={onChat}
               chatCount={chatCount}
             />
           </>
