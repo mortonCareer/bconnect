@@ -29,6 +29,8 @@ export type ScheduleTask = {
   startDate: string
   endDate: string
   status: TaskStatus
+  /** 드래그-생성 직후 미확정 상태 (#575). true 면 간트바 흐리게 + 패널 닫기 가드. 폼 유효 시 해제. */
+  draft?: boolean
   /** 섭외 대기열 (#575) — SSOT. 대표 기술자(assignee)는 'offered' 멤버에서 파생(taskAssignee) */
   offerQueue?: OfferQueueItem[]
   /** 이하 작업 생성/편집 패널(#582) 필드 — mock 단계, BE 도메인 확정 시 정합 */

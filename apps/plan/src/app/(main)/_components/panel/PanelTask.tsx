@@ -6,6 +6,7 @@
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useScheduleTaskStore } from '@/stores/schedule-task-store'
 import {
+  ConfirmDialog,
   DateRangeField,
   Form,
   FormSubmitButton,
@@ -18,7 +19,7 @@ import { PanelAside, PanelScroll, PanelShell } from '@bconnect/features'
 import { Trade, TRADE_LABELS, TRADE_LIST } from '@bconnect/api-client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { usePathname } from 'next/navigation'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import type { ScheduleTask } from '@/app/(main)/projects/[projectId]/schedule/_components/schedule-grid/types'
@@ -88,7 +89,11 @@ export function PanelTask({ taskId }: { taskId?: string }) {
   )
   const createTask = useScheduleTaskStore((s) => s.createTask)
   const updateTask = useScheduleTaskStore((s) => s.updateTask)
+  const deleteTask = useScheduleTaskStore((s) => s.deleteTask)
   const isEdit = !!taskId
+  // 드래그-생성 직후 미확정 작업 — 닫기 가드 + 흐린 간트바. 폼 유효 후 확정(draft 해제).
+  const isDraft = !!task?.draft
+  const [cancelOpen, setCancelOpen] = useState(false)
 
   const values = useMemo(() => (isEdit && task ? toFormValues(task) : undefined), [isEdit, task])
 
@@ -113,6 +118,27 @@ export function PanelTask({ taskId }: { taskId?: string }) {
     return () => sub.unsubscribe()
   }, [isEdit, taskId, form, updateTask])
 
+  // 닫기 요청 공통 경로(>> 버튼·ESC·backdrop). draft + 미완성이면 가드, 완성이면 확정 후 닫기.
+  // 유효성은 RHF isValid 초기 타이밍 의존 대신 safeParse 로 결정적 판정.
+  function requestClose() {
+    if (isDraft) {
+      if (!taskSchema.safeParse(form.getValues()).success) {
+        setCancelOpen(true)
+        return
+      }
+      if (taskId) updateTask(taskId, { draft: false })
+    }
+    close()
+  }
+
+  // 브라우저 닫기/새로고침 가드 — draft(미확정) 동안 (네이티브 다이얼로그).
+  useEffect(() => {
+    if (!isDraft) return
+    const handler = (e: BeforeUnloadEvent) => e.preventDefault()
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isDraft])
+
   if (isEdit && !task) {
     return (
       <PanelAside label="작업 편집">
@@ -123,78 +149,109 @@ export function PanelTask({ taskId }: { taskId?: string }) {
     )
   }
 
-  // 생성 모드만 명시 제출 (빈 작업 자동생성 방지). 편집은 즉시저장이라 submit no-op.
+  // draft(드래그-생성) 확정 = draft 해제 + 닫기. 일반 편집은 즉시저장이라 submit no-op. 생성은 createTask.
   const onSubmit = form.handleSubmit((vals) => {
+    if (isDraft && taskId) {
+      updateTask(taskId, { ...vals, draft: false })
+      close()
+      return
+    }
     if (isEdit) return
     createTask({ ...vals, projectId, status: 'not_started' })
     close()
   })
 
-  const title = isEdit
-    ? `${(task?.trades ?? []).map((t) => TRADE_LABELS[t]).join('/')} 시공`
-    : '작업 생성'
+  const title =
+    isEdit && !isDraft
+      ? `${(task?.trades ?? []).map((t) => TRADE_LABELS[t]).join('/')} 시공`
+      : '작업 생성'
 
   return (
-    <PanelAside label={isEdit ? '작업 편집' : '작업 생성'}>
-      <PanelShell title={title} closeHref={closeHref} onClose={close}>
-        <PanelScroll>
-          <Form {...form}>
-            <form onSubmit={onSubmit} className="flex flex-col px-4 pb-6">
-              <TextField control={form.control} name="ganttName" label="작업명" layout="row" />
-              <TextField control={form.control} name="corpName" label="업체명" layout="row" />
-              <DateRangeField
-                control={form.control}
-                startName="startDate"
-                endName="endDate"
-                label="작업기간"
-                layout="row"
-              />
-              <TextField control={form.control} name="address" label="현장주소" layout="row" />
-              <TextField
-                control={form.control}
-                name="addressDetail"
-                label="상세주소"
-                layout="row"
-              />
-              <TagSelectField
-                control={form.control}
-                name="trades"
-                options={TRADE_LIST}
-                label="공종"
-                layout="row"
-              />
-              <TextField control={form.control} name="request" label="요청사항" layout="row" />
-              <TextareaField control={form.control} name="memo" label="메모" layout="row" />
-              <p className="mt-3 text-r-12 text-gray-500">
-                * 작성된 메모는 기술자에게 공개되지 않아요
-              </p>
-              {/* 편집은 즉시저장(시안에 저장 버튼 없음), 생성만 명시 제출 */}
-              {!isEdit && (
-                <FormSubmitButton className="mt-5" requireAllFilled={false}>
-                  작업 생성
-                </FormSubmitButton>
-              )}
-            </form>
-          </Form>
+    <>
+      {/* draft 작성 중 인앱 이탈 차단(모달) — 바깥 클릭 시 닫기 가드 */}
+      {isDraft && (
+        <div className="fixed inset-0 z-30 bg-black/20" onClick={requestClose} aria-hidden="true" />
+      )}
+      <PanelAside label={isEdit && !isDraft ? '작업 편집' : '작업 생성'}>
+        <PanelShell
+          title={title}
+          closeHref={closeHref}
+          onClose={requestClose}
+          closeAsButton={isDraft}
+        >
+          <PanelScroll>
+            <Form {...form}>
+              <form onSubmit={onSubmit} className="flex flex-col px-4 pb-6">
+                <TextField control={form.control} name="ganttName" label="작업명" layout="row" />
+                <TextField control={form.control} name="corpName" label="업체명" layout="row" />
+                <DateRangeField
+                  control={form.control}
+                  startName="startDate"
+                  endName="endDate"
+                  label="작업기간"
+                  layout="row"
+                />
+                <TextField control={form.control} name="address" label="현장주소" layout="row" />
+                <TextField
+                  control={form.control}
+                  name="addressDetail"
+                  label="상세주소"
+                  layout="row"
+                />
+                <TagSelectField
+                  control={form.control}
+                  name="trades"
+                  options={TRADE_LIST}
+                  label="공종"
+                  layout="row"
+                />
+                <TextField control={form.control} name="request" label="요청사항" layout="row" />
+                <TextareaField control={form.control} name="memo" label="메모" layout="row" />
+                <p className="mt-3 text-r-12 text-gray-500">
+                  * 작성된 메모는 기술자에게 공개되지 않아요
+                </p>
+                {/* 일반 편집은 즉시저장(버튼 없음). 생성·draft 확정만 명시 제출. */}
+                {(!isEdit || isDraft) && (
+                  <FormSubmitButton className="mt-5" requireAllFilled={false}>
+                    작업 생성
+                  </FormSubmitButton>
+                )}
+              </form>
+            </Form>
 
-          <div className="mt-2 border-t border-solid border-[#e5e5e5] px-5 py-4">
-            <h3 className="text-sb-14 text-gray-900">섭외대기열</h3>
-            {isEdit && taskId ? (
-              <OfferQueue
-                taskId={taskId}
-                emptyActionHref={`/?task=${taskId}&trade=${(task?.trades ?? []).join(',')}`}
-              />
-            ) : (
-              <div className="flex flex-col items-center pb-4 pt-8">
-                <div className="flex size-[140px] items-center justify-center rounded-full bg-secondary">
-                  <SearchIcon size={72} className="text-primary" />
+            <div className="mt-2 border-t border-solid border-[#e5e5e5] px-5 py-4">
+              <h3 className="text-sb-14 text-gray-900">섭외대기열</h3>
+              {isEdit && taskId ? (
+                <OfferQueue
+                  taskId={taskId}
+                  emptyActionHref={`/?task=${taskId}&trade=${(task?.trades ?? []).join(',')}`}
+                />
+              ) : (
+                <div className="flex flex-col items-center pb-4 pt-8">
+                  <div className="flex size-[140px] items-center justify-center rounded-full bg-secondary">
+                    <SearchIcon size={72} className="text-primary" />
+                  </div>
+                  <p className="text-r-14 mt-4 text-gray-600">작업을 먼저 생성해주세요</p>
                 </div>
-                <p className="text-r-14 mt-4 text-gray-600">작업을 먼저 생성해주세요</p>
-              </div>
-            )}
-          </div>
-        </PanelScroll>
-      </PanelShell>
-    </PanelAside>
+              )}
+            </div>
+          </PanelScroll>
+        </PanelShell>
+      </PanelAside>
+
+      <ConfirmDialog
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        title="작업 생성을 취소할까요?"
+        description="작성 중인 작업이 사라져요."
+        confirmLabel="취소하기"
+        destructive
+        onConfirm={() => {
+          if (taskId) deleteTask(taskId)
+          setCancelOpen(false)
+          close()
+        }}
+      />
+    </>
   )
 }

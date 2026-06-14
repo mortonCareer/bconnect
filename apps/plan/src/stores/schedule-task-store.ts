@@ -26,6 +26,7 @@ const SCALAR_KEYS = [
   'startDate',
   'endDate',
   'status',
+  'draft',
   'corpName',
   'address',
   'addressDetail',
