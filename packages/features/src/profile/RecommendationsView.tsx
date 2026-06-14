@@ -42,9 +42,7 @@ export function RecommendationsView({
         {data.isError ? (
           <PanelMessage>추천서를 불러올 수 없습니다</PanelMessage>
         ) : (
-          <div className="px-4 py-4">
-            <RecommendationList received={data.received} sent={data.sent} hideHeader />
-          </div>
+          <RecommendationList received={data.received} sent={data.sent} variant="full" />
         )}
       </PanelScroll>
     </PanelShell>

@@ -18,15 +18,13 @@ export default function RecommendationsPage() {
   return (
     <div className="flex flex-col">
       <TopBar variant="default" title="추천서" showAction={false} onBack={() => router.back()} />
-      <div className="px-4 py-4">
-        <RecommendationList
-          received={received}
-          sent={sent}
-          hideHeader
-          onHide={onHideRecommendation}
-          onDelete={onDeleteRecommendation}
-        />
-      </div>
+      <RecommendationList
+        received={received}
+        sent={sent}
+        variant="full"
+        onHide={onHideRecommendation}
+        onDelete={onDeleteRecommendation}
+      />
     </div>
   )
 }

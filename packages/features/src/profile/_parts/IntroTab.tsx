@@ -72,13 +72,16 @@ export function IntroTab({
         )}
       </section>
 
-      <RecommendationList
-        received={receivedRecommendations}
-        sent={sentRecommendations}
-        editHref={editHrefs?.recommendations}
-        onHide={onHideRecommendation}
-        onDelete={onDeleteRecommendation}
-      />
+      <section className="flex flex-col gap-3">
+        <SectionHeader title="추천서" editHref={editHrefs?.recommendations} />
+        <RecommendationList
+          received={receivedRecommendations}
+          sent={sentRecommendations}
+          variant="inline"
+          onHide={onHideRecommendation}
+          onDelete={onDeleteRecommendation}
+        />
+      </section>
     </div>
   )
 }
