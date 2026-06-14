@@ -30,10 +30,17 @@ export function usePanelNav() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const hrefWithPanel = (panelValue: string | null) => {
+  // 패널 외 추가 search param 동시 set/clear (null = 삭제). 예: 프로필 열며 task 컨텍스트(`?task=`) 동봉.
+  const hrefWithPanel = (panelValue: string | null, extra?: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString())
     if (panelValue) params.set('panel', panelValue)
     else params.delete('panel')
+    if (extra) {
+      for (const [key, value] of Object.entries(extra)) {
+        if (value === null) params.delete(key)
+        else params.set(key, value)
+      }
+    }
     const qs = params.toString()
     return qs ? `${pathname}?${qs}` : pathname
   }
@@ -41,8 +48,10 @@ export function usePanelNav() {
   const closeHref = hrefWithPanel(null)
 
   return {
-    panelHref: (segment: PanelSegment) => hrefWithPanel(segment),
-    openPanel: (segment: PanelSegment) => router.push(hrefWithPanel(segment), { scroll: false }),
+    panelHref: (segment: PanelSegment, extra?: Record<string, string | null>) =>
+      hrefWithPanel(segment, extra),
+    openPanel: (segment: PanelSegment, extra?: Record<string, string | null>) =>
+      router.push(hrefWithPanel(segment, extra), { scroll: false }),
     closeHref,
     close: () => router.push(closeHref, { scroll: false }),
   }

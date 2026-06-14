@@ -3,6 +3,7 @@
  */
 'use client'
 
+import { useState } from 'react'
 import {
   DndContext,
   KeyboardSensor,
@@ -18,9 +19,10 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import Link from 'next/link'
-import { Button, SearchIcon } from '@bconnect/ui'
+import { Button, ConfirmDialog, SearchIcon, toast } from '@bconnect/ui'
 import { useOfferQueue } from '@/hooks/useOfferQueue'
 import { usePanelNav } from '@/hooks/usePanelNav'
+import type { OfferQueueItem } from '@/stores/offer-queue-store'
 import { OfferQueueRow } from './OfferQueueRow'
 
 function EmptyState({ actionHref }: { actionHref?: string }) {
@@ -40,8 +42,9 @@ function EmptyState({ actionHref }: { actionHref?: string }) {
 }
 
 /**
- * 섭외 대기열 목록 (#575) — 탐색 칩 패널·작업 패널 공유. 헤더/패딩은 소비처가 제공.
- * 대기중 항목만 @dnd-kit 으로 정렬, 섭외중은 잠금(useSortable disabled).
+ * 섭외 대기열 목록 (#575) — 작업 패널 하단. 헤더/패딩은 소비처가 제공.
+ * 대기중 항목만 @dnd-kit 으로 정렬, 섭외중은 잠금. 삭제/취소는 ConfirmDialog 가드 경유.
+ * 프로필 링크는 `?task=` 를 동봉해, 그 프로필 패널에서도 섭외 제안/취소 액션이 보이게 한다.
  */
 export function OfferQueue({
   taskId,
@@ -52,6 +55,7 @@ export function OfferQueue({
 }) {
   const { items, removeFromQueue, reorderQueue } = useOfferQueue(taskId)
   const { panelHref } = usePanelNav()
+  const [pending, setPending] = useState<OfferQueueItem | null>(null)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -62,6 +66,8 @@ export function OfferQueue({
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (over && active.id !== over.id) reorderQueue(Number(active.id), Number(over.id))
   }
+
+  const isOffered = pending?.status === 'offered'
 
   return (
     <div>
@@ -75,8 +81,8 @@ export function OfferQueue({
               <OfferQueueRow
                 key={item.profileId}
                 item={item}
-                profileHref={panelHref(`profile/${item.profileId}`)}
-                onRemove={removeFromQueue}
+                profileHref={panelHref(`profile/${item.profileId}`, { task: taskId })}
+                onRequestRemove={setPending}
               />
             ))}
           </div>
@@ -85,6 +91,27 @@ export function OfferQueue({
       <p className="text-r-12 mt-2 text-gray-500">
         * 이미 섭외 요청이 발송된 경우 섭외 순서를 조정할 수 없어요
       </p>
+
+      <ConfirmDialog
+        open={pending != null}
+        onOpenChange={(open) => {
+          if (!open) setPending(null)
+        }}
+        title={isOffered ? '섭외를 취소할까요?' : '대기열에서 삭제할까요?'}
+        description="섭외 대기열에서 제거돼요."
+        confirmLabel={isOffered ? '섭외 취소' : '삭제'}
+        destructive
+        onConfirm={() => {
+          if (pending) {
+            removeFromQueue(pending.profileId)
+            toast({
+              description: isOffered ? '섭외를 취소했어요' : '대기열에서 삭제했어요',
+              variant: 'success',
+            })
+          }
+          setPending(null)
+        }}
+      />
     </div>
   )
 }

@@ -12,11 +12,11 @@ import { OfferStatusBadge } from './OfferStatusBadge'
 export function OfferQueueRow({
   item,
   profileHref,
-  onRemove,
+  onRequestRemove,
 }: {
   item: OfferQueueItem
   profileHref: string
-  onRemove: (profileId: number) => void
+  onRequestRemove: (item: OfferQueueItem) => void
 }) {
   const isWaiting = item.status === 'waiting'
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -74,7 +74,7 @@ export function OfferQueueRow({
       <Button
         size="small"
         variant={isWaiting ? 'ghost' : 'outline'}
-        onClick={() => onRemove(item.profileId)}
+        onClick={() => onRequestRemove(item)}
         className={cn(
           'shrink-0 bg-white font-normal',
           isWaiting

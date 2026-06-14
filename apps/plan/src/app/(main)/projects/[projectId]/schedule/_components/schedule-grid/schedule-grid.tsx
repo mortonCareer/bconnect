@@ -225,7 +225,7 @@ export function ScheduleGrid({ today }: ScheduleGridProps) {
               >
                 {task.assignee ? (
                   <Link
-                    href={panelHref(`profile/${task.assignee.profileId}`)}
+                    href={panelHref(`profile/${task.assignee.profileId}`, { task: task.id })}
                     scroll={false}
                     className="flex w-full items-center gap-2 rounded-[8px] px-1 hover:bg-gray-100"
                   >
