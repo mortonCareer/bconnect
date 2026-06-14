@@ -58,7 +58,7 @@ export function ImageCarousel({ images, alt, className }: ImageCarouselProps) {
         ))}
       </CarouselContent>
       <div
-        className="absolute bottom-[10px] left-1/2 flex -translate-x-1/2 items-center gap-1 drop-shadow-[0_0_2px_rgba(0,0,0,0.55)]"
+        className="absolute bottom-[10px] left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-black/30 px-2 py-1"
         aria-hidden
       >
         {Array.from({ length: count }).map((_, i) => (
