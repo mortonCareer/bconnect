@@ -4,7 +4,7 @@ import { Fragment } from 'react'
 import Link from 'next/link'
 import { getCredentialLabel } from '@bconnect/api-client'
 import type { Credential, Profile, Recommendation } from '@bconnect/api-client'
-import { Skeleton, Tag } from '@bconnect/ui'
+import { Skeleton } from '@bconnect/ui'
 import { RecommendationList } from '../RecommendationList'
 
 /** owner 전용 편집 링크. 없으면 편집 어포던스 안 그림 (viewer/plan). */
@@ -45,15 +45,18 @@ export function IntroTab({
         {credentialsLoading ? (
           <div className="flex flex-wrap gap-2">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-[34px] w-20 rounded-[7px]" />
+              <Skeleton key={i} className="h-[35px] w-20 rounded" />
             ))}
           </div>
         ) : accepted.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {accepted.map((c) => (
-              <Tag key={c.id} size="sm">
+              <span
+                key={c.id}
+                className="inline-flex items-center rounded border border-[#E5E5E5] bg-white px-3 py-1.5 text-r-14 text-[#7B7B7B]"
+              >
                 {getCredentialLabel(c.type)}
-              </Tag>
+              </span>
             ))}
           </div>
         ) : (
@@ -72,13 +75,16 @@ export function IntroTab({
         )}
       </section>
 
-      <RecommendationList
-        received={receivedRecommendations}
-        sent={sentRecommendations}
-        editHref={editHrefs?.recommendations}
-        onHide={onHideRecommendation}
-        onDelete={onDeleteRecommendation}
-      />
+      <section className="flex flex-col gap-3">
+        <SectionHeader title="추천서" editHref={editHrefs?.recommendations} />
+        <RecommendationList
+          received={receivedRecommendations}
+          sent={sentRecommendations}
+          variant="inline"
+          onHide={onHideRecommendation}
+          onDelete={onDeleteRecommendation}
+        />
+      </section>
     </div>
   )
 }
