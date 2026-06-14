@@ -7,14 +7,19 @@ import {
   useGetReceivedRecommendations,
   useGetSentRecommendations,
   useGetFeeds,
+  TRADE_LABELS,
 } from '@bconnect/api-client'
 import { ProfileView, PanelAside, type ProfileViewData } from '@bconnect/features'
 import { useSearchParams } from 'next/navigation'
 import { usePanelNav } from '@/hooks/usePanelNav'
+import { useSelectedTask } from '@/hooks/useSelectedTask'
+import { OfferProposeButton } from '../offer/OfferProposeButton'
+import type { OfferQueueItem } from '@/stores/offer-queue-store'
 
 export function PanelProfile({ profileId }: { profileId: number }) {
   const { panelHref, closeHref, close } = usePanelNav()
   const searchParams = useSearchParams()
+  const { taskId } = useSelectedTask()
 
   const enabled = Number.isFinite(profileId) && profileId > 0
   const {
@@ -31,9 +36,12 @@ export function PanelProfile({ profileId }: { profileId: number }) {
   const worksParams = new URLSearchParams(searchParams.toString())
   worksParams.set('tab', 'works')
 
+  const member = profileAndMember?.member
+  const profile = profileAndMember?.profile
+
   const data: ProfileViewData = {
-    member: profileAndMember?.member,
-    profile: profileAndMember?.profile,
+    member,
+    profile,
     postCount: feeds?.content.length,
     coworkerCount: coworkers?.length,
     recommendationCount: received?.length,
@@ -44,6 +52,20 @@ export function PanelProfile({ profileId }: { profileId: number }) {
     isError,
   }
 
+  // 선택 모드(작업 선택됨)에서만 섭외 제안 버튼 주입 — features 는 presentation-only 유지(ADR-0020)
+  const offerCandidate: OfferQueueItem | null =
+    taskId && member && profile
+      ? {
+          profileId,
+          name: member.name,
+          region: profile.address?.state ?? '',
+          level: '',
+          specialty: TRADE_LABELS[profile.primaryTrade] ?? '',
+          picture: member.picture ?? undefined,
+          status: 'waiting',
+        }
+      : null
+
   return (
     <PanelAside label="기술자 프로필">
       <ProfileView
@@ -51,6 +73,13 @@ export function PanelProfile({ profileId }: { profileId: number }) {
         data={data}
         closeHref={closeHref}
         onClose={close}
+        actionSlot={
+          taskId && offerCandidate ? (
+            <div className="px-4 pb-2">
+              <OfferProposeButton taskId={taskId} candidate={offerCandidate} />
+            </div>
+          ) : undefined
+        }
         statHrefs={{
           works: `?${worksParams.toString()}`,
           coworkers: panelHref(`profile/${profileId}/coworkers`),

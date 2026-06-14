@@ -15,6 +15,7 @@ type PanelSegment =
   | `messages/${number}`
   | 'notifications'
   | `task/${string}`
+  | 'offer-queue'
 
 /**
  * plan 패널 네비게이션 공통화 (ADR-0021: search param 기반).

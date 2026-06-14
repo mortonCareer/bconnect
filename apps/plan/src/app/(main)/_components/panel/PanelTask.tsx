@@ -6,7 +6,6 @@
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useScheduleTaskStore } from '@/stores/schedule-task-store'
 import {
-  Button,
   DateRangeField,
   Form,
   FormSubmitButton,
@@ -18,11 +17,12 @@ import {
 import { PanelAside, PanelScroll, PanelShell } from '@bconnect/features'
 import { Trade, TRADE_LABELS, TRADE_LIST } from '@bconnect/api-client'
 import { zodResolver } from '@hookform/resolvers/zod'
-import Link from 'next/link'
 import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import type { ScheduleTask } from '@/app/(main)/projects/[projectId]/schedule/_components/schedule-grid/types'
+import { MOCK_PROJECT } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
+import { OfferQueue } from '../offer/OfferQueue'
 
 const taskSchema = z
   .object({
@@ -175,15 +175,19 @@ export function PanelTask({ taskId }: { taskId?: string }) {
 
           <div className="mt-2 border-t border-solid border-[#e5e5e5] px-5 py-4">
             <h3 className="text-sb-14 text-gray-900">섭외대기열</h3>
-            <div className="flex flex-col items-center pb-4 pt-8">
-              <div className="flex size-[140px] items-center justify-center rounded-full bg-secondary">
-                <SearchIcon size={72} className="text-primary" />
+            {isEdit && taskId ? (
+              <OfferQueue
+                taskId={taskId}
+                emptyActionHref={`/?project=${MOCK_PROJECT.id}&task=${taskId}&trade=${(task?.trades ?? []).join(',')}`}
+              />
+            ) : (
+              <div className="flex flex-col items-center pb-4 pt-8">
+                <div className="flex size-[140px] items-center justify-center rounded-full bg-secondary">
+                  <SearchIcon size={72} className="text-primary" />
+                </div>
+                <p className="text-r-14 mt-4 text-gray-600">작업을 먼저 생성해주세요</p>
               </div>
-              <p className="mt-4 text-r-14 text-gray-600">기술자를 탐색하고 섭외해보세요</p>
-              <Button asChild className="mt-4 w-full">
-                <Link href="/">기술자 탐색</Link>
-              </Button>
-            </div>
+            )}
           </div>
         </PanelScroll>
       </PanelShell>
