@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Select, Slider, Tag, TopBar } from '@bconnect/ui'
 import type { Trade } from '@bconnect/api-client'
-import { TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
+import { TRADE_GROUPS, TRADE_LABELS, TRADE_LIST } from '@bconnect/api-client'
 import {
   EXPERIENCE_MAX,
   EXPERIENCE_MIN,
@@ -87,11 +87,6 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
         : pendingTrades
 
     setPendingTrades(next)
-
-    // 대표분야는 비필수 — 자동 지정 안 함. 단 선택 해제된 분야면 대표도 해제
-    if (pendingPrimary && !next.includes(pendingPrimary)) {
-      setPendingPrimary(null)
-    }
   }
 
   if (!mounted) return null
@@ -137,24 +132,19 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
             ))}
           </div>
 
-          {/* 대표분야 */}
-          {pendingTrades.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <p className="text-sb-16 text-gray-900">대표분야</p>
-              <Select
-                className="w-fit"
-                placeholder="대표분야 선택"
-                value={pendingPrimary || ''}
-                onChange={(v) => {
-                  if (typeof v === 'string') setPendingPrimary(v as Trade)
-                }}
-                options={pendingTrades.map((trade) => ({
-                  value: trade,
-                  label: TRADE_LABELS[trade],
-                }))}
-              />
-            </div>
-          )}
+          {/* 대표분야 — 시공분야와 독립 필터 (전체 분야에서 선택) */}
+          <div className="flex flex-col gap-2">
+            <p className="text-sb-16 text-gray-900">대표분야</p>
+            <Select
+              className="w-fit"
+              placeholder="대표분야 선택"
+              value={pendingPrimary || ''}
+              onChange={(v) => {
+                if (typeof v === 'string') setPendingPrimary(v as Trade)
+              }}
+              options={TRADE_LIST}
+            />
+          </div>
 
           {/* 경력 */}
           <div className="flex flex-col gap-3">

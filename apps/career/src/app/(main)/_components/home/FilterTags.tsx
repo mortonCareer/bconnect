@@ -11,19 +11,24 @@ export function FilterTags() {
     primaryTrade,
     experience: selectedExperience,
     removeTrade,
+    clearPrimary,
     clearExperience,
   } = useFilterParams()
 
-  if (trades.length === 0 && !selectedExperience) return null
+  if (trades.length === 0 && !primaryTrade && !selectedExperience) return null
 
   return (
     <div className="flex flex-wrap items-center gap-2 px-4 py-2">
       {trades.map((trade) => (
         <Tag key={trade} variant="filter" onRemove={() => removeTrade(trade)}>
           {TRADE_LABELS[trade]}
-          {trade === primaryTrade && ' (대표)'}
         </Tag>
       ))}
+      {primaryTrade && (
+        <Tag variant="filter" onRemove={clearPrimary}>
+          {TRADE_LABELS[primaryTrade]} (대표)
+        </Tag>
+      )}
       {selectedExperience && (
         <Tag variant="filter" onRemove={clearExperience}>
           {formatExperienceRange(selectedExperience)}

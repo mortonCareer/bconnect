@@ -24,14 +24,11 @@ export function useFilterParams() {
     newExperience: ExperienceRange | null
   ) => setParams({ trades: newTrades, trade: newPrimaryTrade, exp: newExperience })
 
-  const removeTrade = (target: Trade) => {
-    const nextTrades = (trades as Trade[]).filter((t) => t !== target)
-    const nextPrimary =
-      primaryTrade && nextTrades.includes(primaryTrade as Trade) ? primaryTrade : null
-    setParams({ trades: nextTrades, trade: nextPrimary })
-  }
+  // 시공분야·대표분야는 독립 필터 — 개별 제거 시 서로 연동 안 함
+  const removeTrade = (target: Trade) =>
+    setParams({ trades: (trades as Trade[]).filter((t) => t !== target) })
 
-  const clearTrade = () => setParams({ trades: [], trade: null })
+  const clearPrimary = () => setParams({ trade: null })
   const clearExperience = () => setParams({ exp: null })
   const clearFilter = () => setParams({ trades: [], trade: null, exp: null })
 
@@ -42,7 +39,7 @@ export function useFilterParams() {
     expRange,
     applyFilters,
     removeTrade,
-    clearTrade,
+    clearPrimary,
     clearExperience,
     clearFilter,
   }
