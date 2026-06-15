@@ -9,6 +9,7 @@
  */
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   useQueryClient,
@@ -18,7 +19,8 @@ import {
   useDeleteCredential,
   getGetCredentialsQueryKey,
 } from '@bconnect/api-client'
-import { Tab, TopBar } from '@bconnect/ui'
+import type { CredentialType } from '@bconnect/api-client'
+import { ConfirmDialog, Tab, TopBar, toast } from '@bconnect/ui'
 import { useQueryState, parseAsStringLiteral } from 'nuqs'
 import { OneClickTab } from './_components/OneClickTab'
 import { CertificateTab } from './_components/CertificateTab'
@@ -39,19 +41,27 @@ export default function CertificationApplyPage() {
     parseAsStringLiteral(APPLY_TAB_KEYS).withDefault('one-click').withOptions({ history: 'push' })
   )
   const [, setSubTab] = useQueryState('sub', { history: 'push' })
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as (typeof APPLY_TAB_KEYS)[number])
     setSubTab(null)
   }
 
-  const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
+  const {
+    data: profile,
+    isLoading: isProfileLoading,
+    isError: isProfileError,
+    refetch: refetchProfile,
+  } = useGetMyProfile()
   const profileId = profile?.id
 
-  const { data: credentials, isLoading: isCredentialsLoading } = useGetCredentials(
-    { profileId: profileId! },
-    { query: { enabled: !!profileId } }
-  )
+  const {
+    data: credentials,
+    isLoading: isCredentialsLoading,
+    isError: isCredentialsError,
+    refetch: refetchCredentials,
+  } = useGetCredentials({ profileId: profileId! }, { query: { enabled: !!profileId } })
 
   const invalidateCredentials = () => {
     if (profileId) {
@@ -65,31 +75,30 @@ export default function CertificationApplyPage() {
     mutation: { onSuccess: invalidateCredentials },
   })
 
-  const { mutate: deleteCredential, isPending: isDeleting } = useDeleteCredential({
+  const { mutate: deleteCredential } = useDeleteCredential({
     mutation: { onSuccess: invalidateCredentials },
   })
 
-  const isLoading = isProfileLoading || isCredentialsLoading
-
-  const handleDelete = (credentialId: number) => {
-    deleteCredential({ credentialId })
+  // 하단 인증 목록 상태 — profile/credentials 한 쿼리 쌍을 공유해 각 탭에 주입.
+  const listIsLoading = isProfileLoading || isCredentialsLoading
+  const listIsError = isProfileError || isCredentialsError
+  const handleRetry = () => {
+    if (isProfileError) refetchProfile()
+    refetchCredentials()
   }
 
-  const handleSubmitOther = (_note: string) => {
-    // TODO: 기타 증명서/자격증 제출 API 연동 (파일 업로드 포함)
-    const type =
-      activeTab === 'certificate' ? 'OTHER_CERTIFICATE' : ('OTHER_QUALIFICATION' as const)
-    createCredential({ data: { type } })
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col">
-        <TopBar variant="default" title="인증 신청" showAction={false} />
-        <div className="flex flex-1 items-center justify-center py-20">
-          <p className="text-m-14 text-gray-500">로딩 중...</p>
-        </div>
-      </div>
+  // 파일/메모 제출 — presign(#340) 전까지 실제 업로드(payload)는 보류하고 타입만 생성한다.
+  const handleSubmit = (type: CredentialType) => {
+    const isOther = type === 'OTHER_CERTIFICATE' || type === 'OTHER_QUALIFICATION'
+    createCredential(
+      { data: { type } },
+      {
+        onSuccess: () =>
+          toast({
+            description: isOther ? '제출했어요. 검토 후 반영돼요' : '인증 정보가 갱신되었어요',
+            variant: 'success',
+          }),
+      }
     )
   }
 
@@ -104,28 +113,49 @@ export default function CertificationApplyPage() {
       {activeTab === 'one-click' && (
         <OneClickTab
           credentials={credentialsList}
-          onDelete={handleDelete}
-          isDeleting={isDeleting}
+          onRequestDelete={setPendingDeleteId}
+          isLoading={listIsLoading}
+          isError={listIsError}
+          onRetry={handleRetry}
         />
       )}
 
       {activeTab === 'certificate' && (
         <CertificateTab
           credentials={credentialsList}
-          onDelete={handleDelete}
-          onSubmitOther={handleSubmitOther}
-          isDeleting={isDeleting}
+          onRequestDelete={setPendingDeleteId}
+          onSubmit={handleSubmit}
+          isLoading={listIsLoading}
+          isError={listIsError}
+          onRetry={handleRetry}
         />
       )}
 
       {activeTab === 'qualification' && (
         <QualificationTab
           credentials={credentialsList}
-          onDelete={handleDelete}
-          onSubmitOther={handleSubmitOther}
-          isDeleting={isDeleting}
+          onRequestDelete={setPendingDeleteId}
+          onSubmit={handleSubmit}
+          isLoading={listIsLoading}
+          isError={listIsError}
+          onRetry={handleRetry}
         />
       )}
+
+      <ConfirmDialog
+        open={pendingDeleteId != null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteId(null)
+        }}
+        title="인증을 삭제할까요?"
+        description="삭제한 인증은 복구할 수 없어요."
+        confirmLabel="삭제"
+        destructive
+        onConfirm={() => {
+          if (pendingDeleteId == null) return
+          deleteCredential({ credentialId: pendingDeleteId })
+        }}
+      />
     </div>
   )
 }

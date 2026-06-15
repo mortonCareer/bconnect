@@ -1,28 +1,46 @@
 'use client'
 
-import { getCredentialLabel } from '@bconnect/api-client'
-import type { Credential } from '@bconnect/api-client'
-import { Button, Form, FormSubmitButton, Tag, TextareaField } from '@bconnect/ui'
+import { useEffect } from 'react'
+import Link from 'next/link'
+import type { Credential, CredentialType } from '@bconnect/api-client'
+import {
+  Button,
+  FileField,
+  Form,
+  FormSubmitButton,
+  Tag,
+  TextareaField,
+  type FileValue,
+} from '@bconnect/ui'
 import { useQueryState, parseAsStringLiteral } from 'nuqs'
-import { useForm } from 'react-hook-form'
-import { formatDate } from '@bconnect/config/format'
+import { useForm, useWatch } from 'react-hook-form'
 import {
   CERTIFICATE_SUB_KEYS,
   CERTIFICATE_SUB_TABS,
 } from '@/app/(main)/profile/certifications/_lib/applyTabs'
+import { CredentialList } from '@/app/(main)/profile/certifications/_components/CredentialList'
 
 interface CertificateTabProps {
   credentials: Credential[]
-  onDelete: (id: number) => void
-  onSubmitOther: (note: string) => void
-  isDeleting: boolean
+  onRequestDelete: (id: number) => void
+  onSubmit: (type: CredentialType, payload: { file: FileValue | null; note?: string }) => void
+  isLoading: boolean
+  isError: boolean
+  onRetry: () => void
+}
+
+interface FormValues {
+  file: FileValue | null
+  note: string
 }
 
 export function CertificateTab({
   credentials,
-  onDelete,
-  onSubmitOther,
-  isDeleting,
+  onRequestDelete,
+  onSubmit,
+  isLoading,
+  isError,
+  onRetry,
 }: CertificateTabProps) {
   const [activeSubTab, setActiveSubTab] = useQueryState(
     'sub',
@@ -31,100 +49,100 @@ export function CertificateTab({
       .withOptions({ history: 'push' })
   )
 
-  const form = useForm<{ note: string }>({ mode: 'onTouched', defaultValues: { note: '' } })
-  const submitOther = form.handleSubmit((data) => {
-    onSubmitOther(data.note)
-    form.reset({ note: '' })
-  })
+  const form = useForm<FormValues>({ mode: 'onTouched', defaultValues: { file: null, note: '' } })
+  const file = useWatch({ control: form.control, name: 'file' })
+  const hasFile = file != null
 
   const info = CERTIFICATE_SUB_TABS[activeSubTab]
+  const isOther = activeSubTab === 'other'
   const filteredCredentials = credentials.filter((c) => c.type === info.type)
 
+  // 서브탭 전환 시 입력값 초기화 — 한 탭에서 고른 파일이 다른 탭으로 새지 않게.
+  useEffect(() => {
+    form.reset({ file: null, note: '' })
+  }, [activeSubTab, form])
+
+  const submit = form.handleSubmit((data) => {
+    onSubmit(info.type, { file: data.file, note: isOther ? data.note : undefined })
+    form.reset({ file: null, note: '' })
+  })
+
   return (
-    <div className="flex flex-col gap-4 px-4 py-4">
-      {/* 서브 탭 */}
-      <div className="flex flex-wrap gap-2">
-        {CERTIFICATE_SUB_KEYS.map((key) => (
-          <Tag
-            key={key}
-            variant={activeSubTab === key ? 'selected' : 'default'}
-            size="sm"
-            onClick={() => setActiveSubTab(key)}
-          >
-            {CERTIFICATE_SUB_TABS[key].label}
-          </Tag>
-        ))}
-      </div>
-
-      {/* 타이틀 + 설명 */}
-      <div className="flex flex-col gap-1">
-        <h3 className="text-sb-16 text-gray-900">{info.title}</h3>
-        <p className="text-r-12 text-gray-700">
-          {info.description} <span className="text-primary underline">자세히보기</span>
-        </p>
-      </div>
-
-      {/* 버튼 영역 */}
-      {activeSubTab !== 'other' ? (
-        <div className="flex flex-col gap-3">
-          <Button variant="outline" size="full">
-            발급받기
-          </Button>
-          {/* TODO: 파일 업로드 컴포넌트 구현 */}
-          <Button variant="secondary" size="full" disabled>
-            파일 업로드
-          </Button>
-          <p className="text-center text-r-12 text-gray-700">2026.02.21 업데이트됨</p>
-        </div>
-      ) : (
-        <Form {...form}>
-          <form onSubmit={submitOther} className="flex flex-col gap-3">
-            {/* TODO: 파일 업로드 컴포넌트 구현 */}
-            <Button type="button" variant="secondary" size="full" disabled>
-              파일 업로드
-            </Button>
-            <TextareaField
-              control={form.control}
-              name="note"
-              rows={4}
-              placeholder="검토시 참고할 내용을 작성해주세요..."
-            />
-            <FormSubmitButton variant="primary" size="full">
-              제출하기
-            </FormSubmitButton>
-          </form>
-        </Form>
-      )}
-
-      {/* 하단 인증 목록 — 심플 리스트 */}
-      {filteredCredentials.length > 0 && (
-        <div className="flex flex-col">
-          {filteredCredentials.map((credential) => (
-            <div
-              key={credential.id}
-              className="flex items-center justify-between border-b border-gray-300 py-3"
+    <div className="flex flex-col">
+      <div className="flex flex-col gap-4 px-4 py-4">
+        {/* 서브 탭 */}
+        <div className="flex flex-wrap gap-2">
+          {CERTIFICATE_SUB_KEYS.map((key) => (
+            <Tag
+              key={key}
+              variant={activeSubTab === key ? 'selected' : 'default'}
+              size="sm"
+              onClick={() => setActiveSubTab(key)}
             >
-              <div className="flex items-baseline gap-2">
-                <span className="text-r-14 text-gray-900">
-                  {credential.type ? getCredentialLabel(credential.type) : '알 수 없음'}
-                </span>
-                {credential.expiredAt && (
-                  <span className="text-r-10 text-gray-700">
-                    {formatDate(credential.expiredAt)} 만료
-                  </span>
-                )}
-              </div>
-              <button
-                className="rounded border border-gray-500 px-3 py-1 text-r-14 text-gray-700"
-                onClick={() => onDelete(credential.id!)}
-                disabled={isDeleting}
-              >
-                삭제
-              </button>
-            </div>
+              {CERTIFICATE_SUB_TABS[key].label}
+            </Tag>
           ))}
         </div>
-      )}
+
+        {/* 타이틀 + 설명 */}
+        <div className="flex flex-col gap-1">
+          <h3 className="text-sb-14 text-gray-900">{info.title}</h3>
+          <p className="whitespace-pre-line text-r-12 text-gray-500">
+            {info.description}
+            {!isOther && (
+              <>
+                {' '}
+                {/* TODO: 자세히보기 가이드 페이지 href 연결 (서브탭 유형별 경로, 미정) */}
+                <Link href="#" className="text-gray-500 underline">
+                  자세히보기
+                </Link>
+              </>
+            )}
+          </p>
+        </div>
+
+        {/* 폼 — 발급받기 / 파일 업로드 / (그 외) 메모 + 제출 */}
+        <Form {...form}>
+          <form onSubmit={submit} className="flex flex-col gap-3">
+            {!isOther && info.issueHref && (
+              <Button asChild variant="primary" size="full">
+                <a href={info.issueHref} target="_blank" rel="noreferrer">
+                  발급받기
+                </a>
+              </Button>
+            )}
+            <FileField control={form.control} name="file" />
+            {isOther && (
+              <TextareaField
+                control={form.control}
+                name="note"
+                rows={4}
+                placeholder="검토시 참고할 내용을 작성해주세요..."
+              />
+            )}
+            {(isOther || hasFile) && (
+              <FormSubmitButton
+                variant="primary"
+                size="full"
+                requireAllFilled={false}
+                disabled={!hasFile}
+              >
+                제출하기
+              </FormSubmitButton>
+            )}
+          </form>
+        </Form>
+      </div>
+
+      {/* 하단 인증 목록 */}
+      <CredentialList
+        credentials={filteredCredentials}
+        isLoading={isLoading}
+        isError={isError}
+        onRetry={onRetry}
+        onRequestDelete={onRequestDelete}
+        emptyText="아직 등록된 증명서가 없어요"
+      />
     </div>
   )
 }
