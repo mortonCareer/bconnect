@@ -1,4 +1,4 @@
-import type { CategoryGroup } from '../_clients/types'
+import type { CategoryGroup } from '@/lib/business/types'
 
 /** 카테고리별 검사 항목 그룹 */
 export const CATEGORY_GROUPS: CategoryGroup[] = [

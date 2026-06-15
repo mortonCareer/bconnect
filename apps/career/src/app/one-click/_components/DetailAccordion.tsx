@@ -1,7 +1,7 @@
 'use client'
 
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@bconnect/ui'
-import type { CheckItem } from '../_clients/types'
+import type { CheckItem } from '@/lib/business/types'
 import { StatusBadge } from './StatusBadge'
 import { DetailTable } from './DetailTable'
 import { OwnerVerifyForm } from './OwnerVerifyForm'
