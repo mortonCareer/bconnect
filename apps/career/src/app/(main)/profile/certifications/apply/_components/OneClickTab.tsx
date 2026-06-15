@@ -4,13 +4,16 @@ import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { Credential } from '@bconnect/api-client'
-import { Form, FormSubmitButton, TextField, toast } from '@bconnect/ui'
+import type { Credential, CreateCredentialRequest, CredentialType } from '@bconnect/api-client'
+import { Form, FormError, FormSubmitButton, TextField, toast } from '@bconnect/ui'
 import { formatRegistrationNumber, registrationNumberSchema } from '@bconnect/config/biz-number'
 import { CredentialList } from '@/app/(main)/profile/certifications/_components/CredentialList'
+import type { CheckItem } from '@/app/one-click/_clients/types'
+import { lookupBusinessForApply } from '../_actions/lookupBusinessForApply'
 
 interface OneClickTabProps {
   credentials: Credential[]
+  onApply: (requests: CreateCredentialRequest[]) => Promise<void>
   onRequestDelete: (id: number) => void
   isLoading: boolean
   isError: boolean
@@ -44,14 +47,39 @@ const oneClickSchema = z.object({
 type OneClickInput = z.input<typeof oneClickSchema>
 type OneClickOutput = z.output<typeof oneClickSchema>
 
+const EXPIRY_KEYS = ['만료', '유효기간']
+
+const extractExpiry = (item: CheckItem): string | null => {
+  const detail = item.details.find((d) => EXPIRY_KEYS.some((key) => d.key.includes(key)))
+  const digits = detail?.value.replace(/\D/g, '')
+  if (!digits || digits.length !== 8) return null
+  return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`
+}
+
+const mapCheckItemToType = (item: CheckItem): CredentialType | null => {
+  const hasLicense = item.statusType === 'positive' || item.statusType === 'negative'
+  switch (item.id) {
+    case 'BUSINESS_STATUS':
+      return item.statusType === 'positive' ? 'SOLE_PROPRIETOR' : null
+    case 'CONSTRUCTION_LICENSE':
+      return hasLicense ? 'CONSTRUCTION_LICENSE' : null
+    case 'SPECIALTY_LICENSE':
+      return hasLicense ? 'SPECIALTY_CONSTRUCTION_LICENSE' : null
+    default:
+      return null
+  }
+}
+
 export function OneClickTab({
   credentials,
+  onApply,
   onRequestDelete,
   isLoading,
   isError,
   onRetry,
 }: OneClickTabProps) {
   const [isSearching, setIsSearching] = useState(false)
+  const [verifyError, setVerifyError] = useState('')
 
   const form = useForm<OneClickInput, unknown, OneClickOutput>({
     resolver: zodResolver(oneClickSchema),
@@ -64,16 +92,32 @@ export function OneClickTab({
     (c) => c.type && (ONE_CLICK_TYPES as readonly string[]).includes(c.type)
   )
 
-  const onSearch = form.handleSubmit(() => {
+  const onSearch = form.handleSubmit(async ({ businessNumber, ownerName, openDate }) => {
     setIsSearching(true)
-    // TODO: 진위확인 + 조회 연동 (기존 /one-click 로직 재활용). businessNumber 는 digit-only.
-    //   1) POST /api/one-click/verify-owner (번호+대표자명+개업일자) → valid 확인
-    //   2) getCompanyInfo(번호) 조회 — server-only 라 API route 신설 후 호출
-    //   3) 일치 시 사업자/면허 createCredential 등록
-    setTimeout(() => {
+    setVerifyError('')
+    try {
+      const result = await lookupBusinessForApply(businessNumber, ownerName, openDate)
+      if (!result.valid) {
+        setVerifyError(result.message)
+        return
+      }
+
+      const existingTypes = new Set(oneClickCredentials.map((c) => c.type))
+      const requests: CreateCredentialRequest[] = [
+        { type: 'IDENTITY_VERIFICATION', expiredAt: null } satisfies CreateCredentialRequest,
+        ...(result.checkItems ?? []).flatMap((item): CreateCredentialRequest[] => {
+          const type = mapCheckItemToType(item)
+          return type ? [{ type, expiredAt: extractExpiry(item) }] : []
+        }),
+      ].filter((request) => !existingTypes.has(request.type))
+
+      await onApply(requests)
+      toast({ description: '인증 정보가 갱신되었어요', variant: 'success' })
+    } catch {
+      setVerifyError('조회에 실패했어요. 잠시 후 다시 시도해주세요.')
+    } finally {
       setIsSearching(false)
-      toast({ description: '면허 정보가 갱신되었어요', variant: 'success' })
-    }, 1000)
+    }
   })
 
   return (
@@ -83,6 +127,7 @@ export function OneClickTab({
 
         <Form {...form}>
           <form onSubmit={onSearch} className="flex flex-col gap-3">
+            <FormError error={verifyError} />
             <TextField
               control={form.control}
               name="businessNumber"

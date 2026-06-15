@@ -19,7 +19,7 @@ import {
   useDeleteCredential,
   getGetCredentialsQueryKey,
 } from '@bconnect/api-client'
-import type { CredentialType } from '@bconnect/api-client'
+import type { CredentialType, CreateCredentialRequest } from '@bconnect/api-client'
 import { ConfirmDialog, Tab, TopBar, toast } from '@bconnect/ui'
 import { useQueryState, parseAsStringLiteral } from 'nuqs'
 import { OneClickTab } from './_components/OneClickTab'
@@ -71,9 +71,13 @@ export default function CertificationApplyPage() {
     }
   }
 
-  const { mutate: createCredential } = useCreateCredential({
+  const { mutate: createCredential, mutateAsync: createCredentialAsync } = useCreateCredential({
     mutation: { onSuccess: invalidateCredentials },
   })
+
+  const handleOneClickApply = async (requests: CreateCredentialRequest[]) => {
+    await Promise.all(requests.map((data) => createCredentialAsync({ data })))
+  }
 
   const { mutate: deleteCredential } = useDeleteCredential({
     mutation: { onSuccess: invalidateCredentials },
@@ -113,6 +117,7 @@ export default function CertificationApplyPage() {
       {activeTab === 'one-click' && (
         <OneClickTab
           credentials={credentialsList}
+          onApply={handleOneClickApply}
           onRequestDelete={setPendingDeleteId}
           isLoading={listIsLoading}
           isError={listIsError}
