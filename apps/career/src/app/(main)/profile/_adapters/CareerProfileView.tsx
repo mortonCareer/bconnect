@@ -19,7 +19,7 @@ import {
   useCreateDirectChat,
 } from '@bconnect/api-client'
 import { ProfileView, type ProfileViewData, useUnreadNotificationCount } from '@bconnect/features'
-import { Button, toast, isApiErrorShape } from '@bconnect/ui'
+import { Button, SettingsIcon, toast, isApiErrorShape } from '@bconnect/ui'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
 import { useRecommendationActions } from './useRecommendationActions'
 import { useWorkActions } from './useWorkActions'
@@ -103,13 +103,20 @@ export function OwnerProfileView() {
       onHideRecommendation={onHideRecommendation}
       onDeleteRecommendation={onDeleteRecommendation}
       actionSlot={
-        <div className="flex gap-2 px-4 py-3">
+        <div className="flex items-center gap-2 px-4 py-3">
           <Button asChild variant="outline" size="sm" className="flex-1">
             <Link href="/profile/edit">프로필 수정</Link>
           </Button>
           <Button variant="outline" size="sm" className="flex-1" onClick={share}>
             공유하기
           </Button>
+          <Link
+            href="/settings"
+            aria-label="설정"
+            className="flex size-10 shrink-0 items-center justify-center text-gray-600 transition-opacity hover:opacity-60"
+          >
+            <SettingsIcon />
+          </Link>
         </div>
       }
     />
