@@ -98,6 +98,7 @@ export const feedsOverrides = [
           id: 300 + i,
           memberId: 200 + i,
           primaryTrade: seed.trade,
+          trades: [seed.trade],
           experience: seed.experience,
           headline: seed.headline,
         },
