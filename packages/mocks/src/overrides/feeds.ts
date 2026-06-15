@@ -1,5 +1,5 @@
 import { getGetFeedsMockHandler, getGetFeedsResponseMock, Trade } from '@bconnect/api-client'
-import type { Feed, FeedOffsetPage } from '@bconnect/api-client'
+import type { Feed } from '@bconnect/api-client'
 
 interface FeedSeed {
   name: string
@@ -85,33 +85,30 @@ function buildImages(count: number): string[] {
 }
 
 export const feedsOverrides = [
-  getGetFeedsMockHandler((): FeedOffsetPage => {
-    const template = getGetFeedsResponseMock().content[0]
-    if (!template) return { content: [], hasNext: false }
+  getGetFeedsMockHandler((): Feed[] => {
+    const template = getGetFeedsResponseMock()[0]
+    if (!template) return []
 
-    return {
-      content: FEED_SEEDS.map(
-        (seed, i): Feed => ({
-          ...template,
-          member: { ...template.member, id: 200 + i, name: seed.name, picture: null },
-          profile: {
-            ...template.profile,
-            id: 300 + i,
-            memberId: 200 + i,
-            primaryTrade: seed.trade,
-            experience: seed.experience,
-            headline: seed.headline,
-          },
-          post: {
-            ...template.post,
-            id: 400 + i,
-            images: buildImages(seed.imageCount),
-            content: seed.content,
-            createdAt: daysAgoIso(seed.daysAgo),
-          },
-        })
-      ),
-      hasNext: false,
-    }
+    return FEED_SEEDS.map(
+      (seed, i): Feed => ({
+        ...template,
+        member: { ...template.member, id: 200 + i, name: seed.name, picture: null },
+        profile: {
+          ...template.profile,
+          id: 300 + i,
+          memberId: 200 + i,
+          primaryTrade: seed.trade,
+          experience: seed.experience,
+          headline: seed.headline,
+        },
+        post: {
+          ...template.post,
+          id: 400 + i,
+          images: buildImages(seed.imageCount),
+          content: seed.content,
+          createdAt: daysAgoIso(seed.daysAgo),
+        },
+      })
+    )
   }),
 ]

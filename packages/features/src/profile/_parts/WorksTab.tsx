@@ -30,7 +30,7 @@ export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProp
     )
   }
 
-  const posts = feeds?.content ?? []
+  const posts = feeds ?? []
 
   if (posts.length === 0) {
     return (

@@ -49,8 +49,7 @@ export function useFeedItems({
   const feedItems: FeedItem[] = useMemo(() => {
     if (!feeds) return []
 
-    // useGetFeeds 응답 = FeedOffsetPage = { content: Feed[], hasNext } — content 풀어냄
-    return feeds.content
+    return feeds
       .filter((feed) => {
         if (trade && feed.profile.primaryTrade !== trade) return false
         if (minExperience != null && (feed.profile.experience ?? 0) < minExperience) return false
