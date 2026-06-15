@@ -2,8 +2,10 @@ import {
   CredentialStatus,
   CredentialType,
   getGetCredentialsMockHandler,
+  getCreateCredentialMockHandler,
+  getDeleteCredentialMockHandler,
 } from '@bconnect/api-client'
-import type { Credential } from '@bconnect/api-client'
+import type { Credential, CreateCredentialRequest } from '@bconnect/api-client'
 
 let nextId = 1
 const cred = (
@@ -41,4 +43,16 @@ const CREDENTIALS: Credential[] = [
   cred(CredentialType.NATIONAL_TECHNICAL_QUALIFICATION, CredentialStatus.ACCEPTED, '2029-11-30'),
 ]
 
-export const credentialsOverrides = [getGetCredentialsMockHandler(() => CREDENTIALS)]
+export const credentialsOverrides = [
+  getGetCredentialsMockHandler(() => CREDENTIALS),
+  getCreateCredentialMockHandler(async ({ request }) => {
+    const body = (await request.json()) as CreateCredentialRequest
+    const created = cred(body.type, CredentialStatus.ACCEPTED, body.expiredAt ?? null)
+    CREDENTIALS.push(created)
+    return created.id
+  }),
+  getDeleteCredentialMockHandler(({ params }) => {
+    const index = CREDENTIALS.findIndex((c) => c.id === Number(params.credentialId))
+    if (index !== -1) CREDENTIALS.splice(index, 1)
+  }),
+]
