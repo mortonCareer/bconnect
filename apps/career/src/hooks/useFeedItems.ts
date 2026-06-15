@@ -30,6 +30,7 @@ export interface FeedItem {
 }
 
 interface UseFeedItemsOptions {
+  trades?: Trade[]
   trade?: Trade | null
   minExperience?: number
   maxExperience?: number
@@ -38,6 +39,7 @@ interface UseFeedItemsOptions {
 }
 
 export function useFeedItems({
+  trades,
   trade,
   minExperience,
   maxExperience,
@@ -51,6 +53,8 @@ export function useFeedItems({
 
     return feeds
       .filter((feed) => {
+        if (trades?.length && !trades.some((t) => feed.profile.trades?.includes(t)))
+          return false
         if (trade && feed.profile.primaryTrade !== trade) return false
         if (minExperience != null && (feed.profile.experience ?? 0) < minExperience) return false
         if (maxExperience != null && (feed.profile.experience ?? 0) > maxExperience) return false
@@ -88,7 +92,7 @@ export function useFeedItems({
         }
       })
       .filter((item): item is FeedItem => item !== null)
-  }, [feeds, trade, minExperience, maxExperience, authorId, currentUserId])
+  }, [feeds, trades, trade, minExperience, maxExperience, authorId, currentUserId])
 
   return {
     feedItems,

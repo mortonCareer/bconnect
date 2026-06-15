@@ -24,6 +24,13 @@ export function useFilterParams() {
     newExperience: ExperienceRange | null
   ) => setParams({ trades: newTrades, trade: newPrimaryTrade, exp: newExperience })
 
+  const removeTrade = (target: Trade) => {
+    const nextTrades = (trades as Trade[]).filter((t) => t !== target)
+    const nextPrimary =
+      primaryTrade && nextTrades.includes(primaryTrade as Trade) ? primaryTrade : null
+    setParams({ trades: nextTrades, trade: nextPrimary })
+  }
+
   const clearTrade = () => setParams({ trades: [], trade: null })
   const clearExperience = () => setParams({ exp: null })
   const clearFilter = () => setParams({ trades: [], trade: null, exp: null })
@@ -34,6 +41,7 @@ export function useFilterParams() {
     experience,
     expRange,
     applyFilters,
+    removeTrade,
     clearTrade,
     clearExperience,
     clearFilter,

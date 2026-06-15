@@ -88,10 +88,8 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
 
     setPendingTrades(next)
 
-    // Auto-set primary trade
-    if (next.length > 0 && (!pendingPrimary || !next.includes(pendingPrimary))) {
-      setPendingPrimary(next[0])
-    } else if (next.length === 0) {
+    // 대표분야는 비필수 — 자동 지정 안 함. 단 선택 해제된 분야면 대표도 해제
+    if (pendingPrimary && !next.includes(pendingPrimary)) {
       setPendingPrimary(null)
     }
   }
@@ -120,9 +118,7 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
         <div className="flex flex-col gap-6 overflow-y-auto px-4 pb-4 pt-4">
           {/* 시공분야 */}
           <div className="flex flex-col gap-3">
-            <p className="text-sb-16 text-gray-900">
-              시공분야 <span className="text-destructive">*</span>
-            </p>
+            <p className="text-sb-16 text-gray-900">시공분야</p>
             {TRADE_GROUPS.map((group) => (
               <div key={group.label} className="flex flex-col gap-3">
                 <p className="text-m-14 text-gray-700">{group.label}</p>
@@ -144,11 +140,10 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
           {/* 대표분야 */}
           {pendingTrades.length > 0 && (
             <div className="flex flex-col gap-2">
-              <p className="text-sb-16 text-gray-900">
-                대표분야 <span className="text-destructive">*</span>
-              </p>
+              <p className="text-sb-16 text-gray-900">대표분야</p>
               <Select
                 className="w-fit"
+                placeholder="대표분야 선택"
                 value={pendingPrimary || ''}
                 onChange={(v) => {
                   if (typeof v === 'string') setPendingPrimary(v as Trade)
