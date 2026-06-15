@@ -16,6 +16,7 @@ import {
   TopBar,
   ChatMessage,
   ImageInput,
+  FileInput,
   ChevronIcon,
 } from '@bconnect/ui'
 
@@ -120,6 +121,16 @@ const components: ComponentPreview[] = [
     preview: (
       <div className="w-40 origin-center scale-[0.5]">
         <ImageInput value={null} onChange={() => undefined} />
+      </div>
+    ),
+  },
+  {
+    name: 'FileField',
+    description: '파일(문서) 업로드 — outline 트리거→파일명 칩 (폼: FileField, 제어: FileInput)',
+    href: '/showcase/file-field',
+    preview: (
+      <div className="w-44">
+        <FileInput value={null} onChange={() => undefined} />
       </div>
     ),
   },

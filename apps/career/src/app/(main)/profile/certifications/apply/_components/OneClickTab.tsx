@@ -66,7 +66,10 @@ export function OneClickTab({
 
   const onSearch = form.handleSubmit(() => {
     setIsSearching(true)
-    // TODO: 원클릭 조회 API 연동 — form 값 전송 (businessNumber 는 digit-only 정규화 값)
+    // TODO: 진위확인 + 조회 연동 (기존 /one-click 로직 재활용). businessNumber 는 digit-only.
+    //   1) POST /api/one-click/verify-owner (번호+대표자명+개업일자) → valid 확인
+    //   2) getCompanyInfo(번호) 조회 — server-only 라 API route 신설 후 호출
+    //   3) 일치 시 사업자/면허 createCredential 등록
     setTimeout(() => {
       setIsSearching(false)
       toast({ description: '면허 정보가 갱신되었어요', variant: 'success' })
