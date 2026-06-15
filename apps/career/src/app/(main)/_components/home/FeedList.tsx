@@ -10,10 +10,11 @@ export function FeedList() {
   const queryClient = useQueryClient()
   const { mutate: deletePost } = useDeletePost()
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
-  const { primaryTrade, expRange } = useFilterParams()
+  const { trades, primaryTrade, expRange } = useFilterParams()
 
   const { feedItems, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, error } =
     useFeedItems({
+      trades,
       trade: primaryTrade,
       minExperience: expRange?.min,
       maxExperience: expRange?.max,
