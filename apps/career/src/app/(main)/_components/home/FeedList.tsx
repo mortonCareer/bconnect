@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { useDeletePost, useQueryClient, getGetFeedsQueryKey } from '@bconnect/api-client'
-import { Feed, ConfirmDialog } from '@bconnect/ui'
+import { Feed, ConfirmDialog, Button } from '@bconnect/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { useFilterParams } from '@/hooks/useFilterParams'
 
@@ -12,11 +12,12 @@ export function FeedList() {
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
   const { primaryTrade, expRange } = useFilterParams()
 
-  const { feedItems, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useFeedItems({
-    trade: primaryTrade,
-    minExperience: expRange?.min,
-    maxExperience: expRange?.max,
-  })
+  const { feedItems, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, error } =
+    useFeedItems({
+      trade: primaryTrade,
+      minExperience: expRange?.min,
+      maxExperience: expRange?.max,
+    })
 
   const observerRef = useRef<HTMLDivElement | null>(null)
 
@@ -61,6 +62,21 @@ export function FeedList() {
             </div>
           </div>
         ))}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20">
+        <p className="text-m-14 text-gray-400">피드를 불러오지 못했어요</p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => queryClient.invalidateQueries({ queryKey: getGetFeedsQueryKey() })}
+        >
+          다시 시도
+        </Button>
       </div>
     )
   }

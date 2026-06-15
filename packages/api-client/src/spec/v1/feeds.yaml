@@ -13,24 +13,6 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: offset
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 0
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 20
-        - name: reverse
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: false
       responses:
         '200':
           description: OK
@@ -44,7 +26,9 @@ paths:
                       - data
                     properties:
                       data:
-                        $ref: '#/components/schemas/FeedOffsetPage'
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Feed'
   /api/v1/feeds/{feedId}:
     get:
       operationId: getFeed
@@ -88,15 +72,3 @@ components:
           $ref: ../v1/profiles.yaml#/components/schemas/Profile
         post:
           $ref: ../v1/posts.yaml#/components/schemas/Post
-    FeedOffsetPage:
-      type: object
-      required:
-        - content
-        - hasNext
-      properties:
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/Feed'
-        hasNext:
-          type: boolean

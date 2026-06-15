@@ -42,7 +42,7 @@ export function PanelProfile({ profileId }: { profileId: number }) {
   const data: ProfileViewData = {
     member,
     profile,
-    postCount: feeds?.content.length,
+    postCount: feeds?.length,
     coworkerCount: coworkers?.length,
     recommendationCount: received?.length,
     credentials,

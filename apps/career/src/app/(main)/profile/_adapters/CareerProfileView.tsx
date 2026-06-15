@@ -72,7 +72,7 @@ export function OwnerProfileView() {
   const data: ProfileViewData = {
     member: member.data,
     profile: profile.data,
-    postCount: feeds.data?.content.length,
+    postCount: feeds.data?.length,
     coworkerCount: coworkers.data?.length,
     recommendationCount: received.data?.length,
     credentials: credentials.data,
@@ -163,7 +163,7 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
   const data: ProfileViewData = {
     member: profileAndMember.data?.member,
     profile: profileAndMember.data?.profile,
-    postCount: feeds.data?.content.length,
+    postCount: feeds.data?.length,
     coworkerCount: coworkers.data?.length,
     recommendationCount: received.data?.length,
     credentials: credentials.data,
