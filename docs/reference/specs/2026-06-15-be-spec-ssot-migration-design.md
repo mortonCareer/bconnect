@@ -50,8 +50,8 @@ apps/api (BE 코드 = SSOT)
               · 스키마명 규칙 (Response strip + 예외)             ← 신규
               · envelope unwrap (flat success/data)              ← 기존
               · info.title override (mock 집계자명)               ← 신규
-              · enum hoist                                       ← BE enumsAsRef=true 라 no-op (방어용)
               · orphan prune (envelope wrapper 제거)             ← 신규
+              (enum 처리 없음 — BE enumsAsRef=true 로 named $ref emit)
               └─ src/generated/ (hooks + mock + types)
 삭제: src/spec/**, redocly(bundle+lint+@redocly/cli+.redocly.yaml), openapi.bundled.yaml,
       becompat config (becompat transformer는 프로덕션 transformer로 승격)
@@ -74,7 +74,7 @@ springdoc opId는 쓰레기(`get_4`/`getAll_3`/`update_2`)라 무시하고 **(me
 
 ### 5.2 enum = BE가 이미 처리
 
-`enumsAsRef=true` → BE가 named enum emit → FE 작업 **불필요**. transformer의 enum hoist는 방어용 no-op으로만 유지.
+`enumsAsRef=true` → BE가 named enum emit (Trade/Role/CredentialType/MessageType) → **FE 작업 불필요**. transformer에 enum 처리 없음(PoC의 inline-hoist는 dead code라 제거). enum 회귀(BE가 enumsAsRef 끄면)는 compat:check harness가 감지.
 
 ### 5.3 A. 필터 엔드포인트 보충 (영구 최소 수동면)
 

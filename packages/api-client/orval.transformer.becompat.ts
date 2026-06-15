@@ -13,24 +13,17 @@ import { authSupplementPaths, authSupplementSchemas } from './auth-supplement'
  * BE-springdoc → FE-canonical 호환 transformer (배선 PoC).
  *
  * 손-spec 폐기 후 orval 이 BE springdoc 산출 spec 을 직접 먹게 하기 위한 compat
- * 레이어. 4단계로 springdoc 의 Java 파생 모양을 FE 가 기대하는 캐논 모양으로 정렬:
- *   1. enum hoisting — inline enum → named 컴포넌트 ($ref). Trade/Role/CredentialType/MessageType.
- *   2. schema rename — `*Response` strip (엔티티) + 예외맵. 그 외(Request/op-response) 유지.
- *   3. operationId rewrite — springdoc 의 쓰레기 opId(get_4 등) 무시, (method+path) 규칙 + 예외맵.
- *   4. envelope unwrap — flat `{success,error,data}` 에서 data 만. 그 후 orphan 컴포넌트 prune.
+ * 레이어. springdoc 의 Java 파생 모양을 FE 가 기대하는 캐논 모양으로 정렬:
+ *   - schema rename — `*Response` strip (엔티티) + 예외맵. 그 외(Request/op-response) 유지.
+ *   - operationId rewrite — springdoc 의 쓰레기 opId(get_4 등) 무시, (method+path) 규칙 + 예외맵.
+ *   - envelope unwrap — flat `{success,error,data}` 에서 data 만. 그 후 orphan 컴포넌트 prune.
+ *   - auth 보충 병합 + info.title override.
  *
- * 규칙 기반(2·3)이라 새 CRUD 엔드포인트는 자동 커버. 도메인 동사·shape 차이만 예외맵.
+ * 규칙 기반이라 새 CRUD 엔드포인트는 자동 커버. 도메인 동사·shape 차이만 예외맵.
+ * enum 은 BE 가 `ModelResolver.enumsAsRef=true` 로 named $ref 로 emit → FE 처리 불필요.
  */
 
-// ── 1. enum hoist: 값집합 sentinel → 캐논 이름 ──────────────────────────────
-const ENUM_HOISTS: Array<{ name: string; has: string[] }> = [
-  { name: 'Trade', has: ['DESIGN', 'TILING', 'WALLPAPER'] },
-  { name: 'Role', has: ['GUEST', 'FOREMAN', 'ADMIN'] },
-  { name: 'CredentialType', has: ['IDENTITY_VERIFICATION', 'CAREER_CERTIFICATE'] },
-  { name: 'MessageType', has: ['TEXT', 'IMAGE', 'FILE'] },
-]
-
-// ── 2. schema rename 예외 (Response-strip 규칙으로 안 풀리는 것) ──────────────
+// ── schema rename 예외 (Response-strip 규칙으로 안 풀리는 것) ──────────────
 const SCHEMA_RENAME: Record<string, string> = {
   CursorPageMessageResponse: 'MessageCursorPage',
 }
@@ -83,9 +76,6 @@ export default defineTransformer((spec) => {
     if (!schemas[name]) schemas[name] = s
   }
 
-  // enum 은 BE 가 ModelResolver.enumsAsRef=true 로 이미 named $ref 로 emit →
-  // hoistEnums 는 fresh spec 에선 no-op (inline enum 없음). 방어적으로 유지.
-  hoistEnums(schemas)
   const renameMap = buildRenameMap(schemas)
   applyRename(api, schemas, renameMap)
   rewriteOperationIds(api)
@@ -95,47 +85,7 @@ export default defineTransformer((spec) => {
   return api
 })
 
-// ── 1. enum hoisting ────────────────────────────────────────────────────────
-function hoistEnums(schemas: Record<string, SchemaObject>): void {
-  const ensure = (name: string, values: string[]) => {
-    if (!schemas[name]) schemas[name] = { type: 'string', enum: values }
-  }
-  const matchName = (values: string[]): string | undefined =>
-    ENUM_HOISTS.find((h) => h.has.every((v) => values.includes(v)))?.name
-
-  const visit = (node: unknown): void => {
-    if (Array.isArray(node)) {
-      node.forEach(visit)
-      return
-    }
-    if (!node || typeof node !== 'object') return
-    const obj = node as Record<string, unknown>
-    for (const key of Object.keys(obj)) {
-      const child = obj[key] as Record<string, unknown> | undefined
-      if (
-        child &&
-        typeof child === 'object' &&
-        child.type === 'string' &&
-        Array.isArray(child.enum)
-      ) {
-        const name = matchName(child.enum as string[])
-        if (name) {
-          ensure(name, child.enum as string[])
-          obj[key] = { $ref: `#/components/schemas/${name}` }
-          continue
-        }
-      }
-      visit(obj[key])
-    }
-  }
-  // 컴포넌트 본문만 순회 (방금 만든 named enum 자신은 건드리지 않게 스냅샷)
-  for (const name of Object.keys(schemas)) {
-    if (ENUM_HOISTS.some((h) => h.name === name)) continue
-    visit(schemas[name])
-  }
-}
-
-// ── 2. schema rename ────────────────────────────────────────────────────────
+// ── schema rename ────────────────────────────────────────────────────────────
 function buildRenameMap(schemas: Record<string, SchemaObject>): Record<string, string> {
   const map: Record<string, string> = { ...SCHEMA_RENAME }
   for (const name of Object.keys(schemas)) {
