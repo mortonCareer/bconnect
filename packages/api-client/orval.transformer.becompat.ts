@@ -14,20 +14,19 @@ import { authSupplementPaths, authSupplementSchemas } from './auth-supplement'
  *
  * 손-spec 폐기 후 orval 이 BE springdoc 산출 spec 을 직접 먹게 하기 위한 compat
  * 레이어. springdoc 의 Java 파생 모양을 FE 가 기대하는 캐논 모양으로 정렬:
- *   - schema rename — `*Response` strip (엔티티) + 예외맵. 그 외(Request/op-response) 유지.
- *   - operationId rewrite — springdoc 의 쓰레기 opId(get_4 등) 무시, (method+path) 규칙 + 예외맵.
+ *   - schema rename — 엔티티 `*Response` strip. op-response DTO 만 keep-list 로 유지.
+ *   - operationId rewrite — springdoc 쓰레기 opId 무시, (method+path) 규칙. /auth 는 분기
+ *     (springdoc/보충 opId 유지), 소수 GET 라우트만 OPID_SPECIAL.
  *   - envelope unwrap — flat `{success,error,data}` 에서 data 만. 그 후 orphan 컴포넌트 prune.
  *   - auth 보충 병합 + info.title override.
  *
- * 규칙 기반이라 새 CRUD 엔드포인트는 자동 커버. 도메인 동사·shape 차이만 예외맵.
+ * 규칙 기반 — 새 CRUD 엔드포인트 자동 커버. force-match 예외맵 없음: 규칙 출력과 다른
+ * FE 호출부(도메인 동사 등)는 플립 시 FE 가 규칙 출력에 맞춘다(억지 예외 대신).
  * enum 은 BE 가 `ModelResolver.enumsAsRef=true` 로 named $ref 로 emit → FE 처리 불필요.
  */
 
-// ── schema rename 예외 (Response-strip 규칙으로 안 풀리는 것) ──────────────
-const SCHEMA_RENAME: Record<string, string> = {
-  CursorPageMessageResponse: 'MessageCursorPage',
-}
-// Response 를 strip 하지 않고 그대로 둘 op-response DTO
+// Response 를 strip 하지 않고 그대로 둘 op-response DTO (엔티티 아님 — strip 시 CheckUsername
+// 등 어색한 타입명). 엔티티 vs op-DTO 구분은 규칙화 어려워 명시 목록 유지.
 const SCHEMA_KEEP_RESPONSE = new Set([
   'CheckUsernameResponse',
   'SendOtpResponse',
@@ -38,22 +37,16 @@ const SCHEMA_KEEP_RESPONSE = new Set([
   'VerifyOtpSignupResponse',
 ])
 
-// ── 3. operationId 예외 (도메인 동사 — 규칙으로 안 풀림) ──────────────────────
-const OPID_EXCEPTIONS: Record<string, string> = {
-  'DELETE /api/v1/members/me': 'withdraw',
-  'POST /api/v1/members': 'registerMember',
-  'POST /api/v1/devices': 'registerDevice',
-  'DELETE /api/v1/devices': 'unregisterDevice',
-  'DELETE /api/v1/coworker-requests/{id}': 'cancelCoworkerRequest',
-  'GET /api/v1/tasks': 'getMyTasks',
-  'GET /api/v1/chats': 'getMyChats',
-  'GET /api/v1/chats/{chatId}/messages': 'getChatMessages',
-  'POST /api/v1/chats/direct': 'createDirectChat',
+// operationId 규칙으로 깔끔히 안 나오는 소수 GET 라우트만 (옵션-리스트 등).
+// 도메인 동사(withdraw/register/cancel...)는 예외로 강제하지 않고 규칙의 CRUD 출력
+// (deleteMyMember/createMember/...)을 따르며 FE 가 플립 시 호출부를 맞춘다.
+const OPID_SPECIAL: Record<string, string> = {
+  'GET /api/v1/members/check-username': 'checkUsername',
+  'GET /api/v1/credentials/types': 'getCredentialTypes',
+  // /auth verb-path — springdoc opId 가 'send'(컨트롤러 메서드명) 등 불안정. 명시.
+  // verify/refresh 는 auth-supplement 가 operationId 지정 → /auth 분기가 유지.
   'POST /api/v1/auth/otp/send': 'sendOtp',
-  'POST /api/v1/auth/otp/verify': 'verifyOtp',
   'POST /api/v1/auth/logout': 'logout',
-  'POST /api/v1/auth/refresh': 'refreshToken',
-  'PATCH /api/v1/profiles/me/about': 'updateMyProfileAbout',
 }
 
 const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'patch', 'options', 'head', 'trace'] as const
@@ -87,9 +80,8 @@ export default defineTransformer((spec) => {
 
 // ── schema rename ────────────────────────────────────────────────────────────
 function buildRenameMap(schemas: Record<string, SchemaObject>): Record<string, string> {
-  const map: Record<string, string> = { ...SCHEMA_RENAME }
+  const map: Record<string, string> = {}
   for (const name of Object.keys(schemas)) {
-    if (map[name]) continue
     if (name.startsWith('ApiResponse')) continue // envelope wrapper — unwrap 이 제거
     if (name.endsWith('Response') && !SCHEMA_KEEP_RESPONSE.has(name)) {
       map[name] = name.slice(0, -'Response'.length)
@@ -162,25 +154,25 @@ function pascal(seg: string): string {
     .join('')
 }
 
-function deriveOperationId(method: string, path: string): string {
+function deriveOperationId(
+  method: string,
+  path: string,
+  springdocOpId: string | undefined
+): string {
   const key = `${method.toUpperCase()} ${path}`
-  if (OPID_EXCEPTIONS[key]) return OPID_EXCEPTIONS[key]
+  if (OPID_SPECIAL[key]) return OPID_SPECIAL[key]
 
   const segs = path.replace(/^\/api\/v1\//, '').split('/')
   const resource = segs[0]
+
+  // /auth/* : 컨트롤러 메서드명이 의미적(sendOtp/logout) + verify/refresh 는 보충물이
+  // operationId 지정 → springdoc/보충 opId 유지. verb-path 라 일반 규칙 부적합.
+  if (resource === 'auth') return springdocOpId ?? key
+
   const rest = segs.slice(1)
   const isParam = (s: string) => s.startsWith('{')
   const last = rest[rest.length - 1]
-
-  // 말단 액션 세그먼트 (accept/deny/show/hide 등) → verb + 단수
-  const ACTIONS = ['accept', 'deny', 'show', 'hide']
-  if (last && ACTIONS.includes(last)) return `${last}${SINGULARIZE[resource] ?? pascal(resource)}`
-
-  // 한정자 (me / sent / received) 수집
-  const quals = rest.filter((s) => !isParam(s))
-  const hasMe = quals.includes('me')
-  const otherQuals = quals.filter((q) => q !== 'me')
-  const hasItemParam = rest.some(isParam)
+  const singular = SINGULARIZE[resource] ?? pascal(resource)
 
   const verb =
     method === 'get'
@@ -191,26 +183,38 @@ function deriveOperationId(method: string, path: string): string {
           ? 'update'
           : 'delete'
 
-  // 특수 단일 한정자 라우트: check-username 등
-  if (resource === 'members' && otherQuals.includes('check-username')) return 'checkUsername'
-  if (resource === 'credentials' && otherQuals.includes('types')) return 'getCredentialTypes'
+  // 말단 액션 세그먼트 (accept/deny/show/hide) → verb + 단수 (acceptCredential)
+  const ACTIONS = ['accept', 'deny', 'show', 'hide']
+  if (last && ACTIONS.includes(last)) return `${last}${singular}`
 
-  const qualPrefix = otherQuals.map(pascal).join('')
+  // 중첩 서브컬렉션 /{res}/{id}/{sub} → verb + 단수(부모) + Pascal(sub) (getChatMessages)
+  if (rest.length >= 2 && isParam(rest[rest.length - 2]) && !isParam(last)) {
+    return `${verb}${singular}${pascal(last)}`
+  }
 
-  // 복수/단수 결정:
-  //   - item 파라미터 있음 → 단수 (getFeed)
-  //   - me 단독(목록 한정자 없음) → 단수 (getMyMember/getMyProfile)
-  //   - 그 외 GET → 복수 (getFeeds, getSentRecommendations, getMySentRecommendations)
-  //   - 비-GET → 단수 (createPost)
+  const quals = rest.filter((s) => !isParam(s))
+  const hasMe = quals.includes('me')
+  const otherQuals = quals.filter((q) => q !== 'me')
+  const hasItemParam = rest.some(isParam)
+
+  // 한정자 위치: 목록 한정자(sent/received)는 명사 앞(getMySentRecommendations),
+  // 서브필드 한정자(about 등)는 명사 뒤(updateMyProfileAbout).
   const LIST_QUALS = ['sent', 'received']
-  const listQual = otherQuals.some((q) => LIST_QUALS.includes(q))
-  const plural = method === 'get' && !hasItemParam && !(hasMe && !listQual)
-  const noun = plural
-    ? (PLURALIZE[resource] ?? pascal(resource) + 's')
-    : (SINGULARIZE[resource] ?? pascal(resource))
+  const listPrefix = otherQuals
+    .filter((q) => LIST_QUALS.includes(q))
+    .map(pascal)
+    .join('')
+  const subSuffix = otherQuals
+    .filter((q) => !LIST_QUALS.includes(q))
+    .map(pascal)
+    .join('')
+
+  // 복수/단수: item 있음 → 단수, me 단독(목록한정자 없음) → 단수, 그 외 GET → 복수
+  const plural = method === 'get' && !hasItemParam && !(hasMe && listPrefix === '')
+  const noun = plural ? (PLURALIZE[resource] ?? pascal(resource) + 's') : singular
 
   const myPart = hasMe ? 'My' : ''
-  return `${verb}${myPart}${qualPrefix}${noun}`
+  return `${verb}${myPart}${listPrefix}${noun}${subSuffix}`
 }
 
 function rewriteOperationIds(api: OpenAPIObject): void {
@@ -219,7 +223,7 @@ function rewriteOperationIds(api: OpenAPIObject): void {
     for (const method of HTTP_METHODS) {
       const op = (item as Record<string, unknown>)[method] as OperationObject | undefined
       if (!op || typeof op !== 'object') continue
-      op.operationId = deriveOperationId(method, path)
+      op.operationId = deriveOperationId(method, path, op.operationId)
     }
   }
 }

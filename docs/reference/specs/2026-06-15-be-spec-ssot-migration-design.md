@@ -46,7 +46,7 @@ apps/api (BE 코드 = SSOT)
      └─ packages/api-client/src/openapi.yaml (커밋)            ← 단일 파일, 번들 불요
          └─ orval + transformer:
               · auth 보충 병합 (필터 엔드포인트 verify/refresh)   ← 신규, 영구 최소 수동면
-              · operationId 규칙 재작성 (method+path+예외맵)      ← 신규
+              · operationId 규칙 재작성 (method+path, /auth 분기)  ← 신규
               · 스키마명 규칙 (Response strip + 예외)             ← 신규
               · envelope unwrap (flat success/data)              ← 기존
               · info.title override (mock 집계자명)               ← 신규
@@ -65,12 +65,19 @@ springdoc opId는 쓰레기(`get_4`/`getAll_3`/`update_2`)라 무시하고 **(me
 
 - GET 컬렉션 → `get`+복수 (`getFeeds`), GET 단건 → `get`+단수 (`getFeed`)
 - POST/PUT/PATCH/DELETE → `create`/`update`/`delete`+단수
-- `me` → `My` (`getMyMember`), 목록 한정자(`sent`/`received`) prepend + 복수 (`getMySentRecommendations`)
+- `me` → `My` (`getMyMember`), 목록 한정자(`sent`/`received`) 명사 앞+복수 (`getMySentRecommendations`)
+- 서브필드 한정자(`about`) 명사 뒤 (`updateMyProfileAbout`)
 - 말단 액션 세그먼트(`accept`/`deny`/`show`/`hide`) → verb+단수 (`acceptCredential`)
+- 중첩 서브컬렉션 `/{res}/{id}/{sub}` → verb+단수(부모)+sub (`getChatMessages`)
 
-**예외맵** (도메인 동사 — 규칙으로 안 풀림): `withdraw`, `registerMember`, `cancelCoworkerRequest`, `getMyChats`, `getMyTasks`, `getChatMessages`, `createDirectChat`, auth 4종, `updateMyProfileAbout` 등 ~14.
+**force-match 예외맵 없음.** 규칙으로 안 풀리는 것만 최소 처리:
 
-스키마명: 엔티티 `*Response` strip (`FeedResponse`→`Feed`), Request DTO 유지, op-response DTO keep-list, 예외(`CursorPageMessageResponse`→`MessageCursorPage`). envelope wrapper(`ApiResponse*`)는 unwrap+prune으로 제거.
+- `/auth/*` 분기 — verb-path라 일반 규칙 부적합. verify/refresh 는 보충물이 operationId 지정, send/logout 은 `OPID_SPECIAL`에 명시(springdoc opId가 `send` 등 불안정)
+- `OPID_SPECIAL` 4개: `checkUsername`, `getCredentialTypes`, `sendOtp`, `logout`
+
+도메인 동사(`withdraw`/`registerMember`/...)는 **억지 예외로 강제하지 않고** 규칙 CRUD 출력(`deleteMyMember`/`createMember`)을 따른다. 규칙 출력과 다른 FE 호출부는 **플립 시 FE가 맞춘다** (§6.C 참조).
+
+스키마명: 엔티티 `*Response` strip (`FeedResponse`→`Feed`), Request DTO 유지, op-response DTO만 `SCHEMA_KEEP_RESPONSE` 목록(strip 시 `CheckUsername` 등 어색). force-rename 예외 없음. envelope wrapper(`ApiResponse*`)는 unwrap+prune으로 제거.
 
 ### 5.2 enum = BE가 이미 처리
 
@@ -90,15 +97,15 @@ springdoc opId는 쓰레기(`get_4`/`getAll_3`/`update_2`)라 무시하고 **(me
 
 ## 6. 잔여 = BE 계약 정합 3트랙 (배선 밖)
 
-PoC 측정: career 119 / plan 85 (배선·A 적용 후). 잔여는 전부 BE-FE 계약 발산:
+PoC 측정: career 128 / plan 89 (force-match 예외 제거 후; 제거 전 119/85, 차이 +13 = 아래 C 의 FE-리네임이 드러난 것). 잔여는 전부 BE-FE 계약 발산:
 
-| 트랙                     | 내용                                                                                                                                            | 처리                                      | 소유  |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ----- |
-| **nullability** ⭐       | springdoc이 `required` 미emit → 전 필드 optional → `feed.profile` 등 possibly-undefined (TS18048 ×26)                                           | BE가 required emit (enumsAsRef 동급 설정) | BE    |
-| **B. 환상 엔드포인트**   | `getMyProfile`(GET /profiles/me 없음), `devices`(컨트롤러 없음), `getChat`(GET /chats/{id} 없음), `roles`/`trades`/`coworkers/tasks`            | BE 구현 or FE 제거 — **BE 논의**          | BE+FE |
-| **C. path/엔티티 drift** | `createDirectChat`(/chats/direct) vs BE `/chats`; `MaskedMember` vs BE `MemberSummaryResponse`; `ProfileAndMember` vs BE flat `ProfileResponse` | FE 정합                                   | FE    |
+| 트랙                                 | 내용                                                                                                                                                                                                                                                                                                           | 처리                                      | 소유  |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ----- |
+| **nullability** ⭐                   | springdoc이 `required` 미emit → 전 필드 optional → `feed.profile` 등 possibly-undefined (TS18048 ×26)                                                                                                                                                                                                          | BE가 required emit (enumsAsRef 동급 설정) | BE    |
+| **B. 환상 엔드포인트**               | `getMyProfile`(GET /profiles/me 없음), `devices`(컨트롤러 없음), `getChat`(GET /chats/{id} 없음), `roles`/`trades`/`coworkers/tasks`                                                                                                                                                                           | BE 구현 or FE 제거 — **BE 논의**          | BE+FE |
+| **C. FE 정합** (drift + 규칙 네이밍) | path/엔티티 drift: `createDirectChat` vs BE `/chats`, `MaskedMember` vs `MemberSummaryResponse`, `ProfileAndMember` vs flat `ProfileResponse`. + 규칙 네이밍: `useGetMyChats`→`useGetChats`, `useRegisterMember`→`useCreateMember`, `useWithdraw`→`useDeleteMyMember`, `MessageCursorPage`→`CursorPageMessage` | FE 호출부 정합 (플립 시)                  | FE    |
 
-> nullability가 최대 단일 레버(에러의 ~지배). BE 한 설정으로 대량 해소 예상 — 플립 전 우선 검증 권장.
+> nullability가 최대 단일 레버(에러의 ~지배). BE 한 설정으로 대량 해소 예상 — 플립 전 우선 검증 권장. C 의 규칙-네이밍 정합은 ~4 호출부(억지 예외 대신 FE 변경 선택).
 
 ## 7. 롤아웃 (staged, 각 단계 becompat로 독립 검증)
 
