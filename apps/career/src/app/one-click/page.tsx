@@ -3,7 +3,7 @@
  */
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import { getCompanyInfo } from './_clients/fetch-business'
+import { getCompanyInfo } from '@/lib/business/fetch-business'
 import { formatRegistrationNumber, isValidRegistrationNumber } from '@bconnect/config/biz-number'
 import { SearchBar } from './_components/SearchBar'
 import { TipBanner } from './_components/TipBanner'

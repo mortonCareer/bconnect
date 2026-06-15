@@ -1,5 +1,5 @@
 import { cn } from '@bconnect/ui'
-import type { StatusType } from '../_clients/types'
+import type { StatusType } from '@/lib/business/types'
 
 const variantClasses: Record<StatusType, string> = {
   positive: 'bg-[#E8F5E9] text-[#2E7D32]',
