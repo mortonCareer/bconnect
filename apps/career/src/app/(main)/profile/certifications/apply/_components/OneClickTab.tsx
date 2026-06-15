@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { Credential, CreateCredentialRequest, CredentialType } from '@bconnect/api-client'
-import { Form, FormError, FormSubmitButton, TextField, toast } from '@bconnect/ui'
+import { Form, FormError, FormSubmitButton, TextField, toast, useServerError } from '@bconnect/ui'
 import { formatRegistrationNumber, registrationNumberSchema } from '@bconnect/config/biz-number'
 import { CredentialList } from '@/app/(main)/profile/certifications/_components/CredentialList'
 import type { CheckItem } from '@/app/one-click/_clients/types'
@@ -79,7 +79,6 @@ export function OneClickTab({
   onRetry,
 }: OneClickTabProps) {
   const [isSearching, setIsSearching] = useState(false)
-  const [verifyError, setVerifyError] = useState('')
 
   const form = useForm<OneClickInput, unknown, OneClickOutput>({
     resolver: zodResolver(oneClickSchema),
@@ -88,17 +87,23 @@ export function OneClickTab({
   })
   const { isValid } = form.formState
 
+  const server = useServerError(form.control, (error) =>
+    typeof error === 'string'
+      ? { message: error }
+      : { message: '조회에 실패했어요. 잠시 후 다시 시도해주세요.' }
+  )
+
   const oneClickCredentials = credentials.filter(
     (c) => c.type && (ONE_CLICK_TYPES as readonly string[]).includes(c.type)
   )
 
   const onSearch = form.handleSubmit(async ({ businessNumber, ownerName, openDate }) => {
     setIsSearching(true)
-    setVerifyError('')
+    server.reset()
     try {
       const result = await lookupBusinessForApply(businessNumber, ownerName, openDate)
       if (!result.valid) {
-        setVerifyError(result.message)
+        server.capture(result.message, form.getValues())
         return
       }
 
@@ -113,8 +118,8 @@ export function OneClickTab({
 
       await onApply(requests)
       toast({ description: '인증 정보가 갱신되었어요', variant: 'success' })
-    } catch {
-      setVerifyError('조회에 실패했어요. 잠시 후 다시 시도해주세요.')
+    } catch (error) {
+      server.capture(error, form.getValues())
     } finally {
       setIsSearching(false)
     }
@@ -127,7 +132,7 @@ export function OneClickTab({
 
         <Form {...form}>
           <form onSubmit={onSearch} className="flex flex-col gap-3">
-            <FormError error={verifyError} />
+            <FormError error={server.formError} />
             <TextField
               control={form.control}
               name="businessNumber"
