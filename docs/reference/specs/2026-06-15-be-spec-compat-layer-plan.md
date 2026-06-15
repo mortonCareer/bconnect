@@ -25,46 +25,35 @@
 
 ---
 
-## Task 1: becompat 입력을 CI-커밋 BE spec으로 고정
+## Task 1: src/openapi.yaml 신선도 보장 (입력 고정은 완료)
 
-PoC config는 로컬 gradle 산출물(`api-docs.fresh.yaml`)을 가리킨다. CI에서 재현되려면 `ci-api-spec`이 커밋하는 `packages/api-client/src/openapi.yaml`(BE springdoc 산출)을 입력으로 써야 한다.
+becompat config 입력은 이미 `packages/api-client/src/openapi.yaml`(`ci-api-spec` 잡이 `apps/api/**` 변경 시 재생성·커밋하는 BE springdoc 산출)로 설정됨 (커밋 `b2223791`). 이 Task는 그 입력이 **현재 BE와 정합**한지 보장한다 — drift 체크 정확도의 전제.
 
 **Files:**
 
-- Modify: `packages/api-client/orval.config.becompat.ts`
+- (검증용, 수정 없음) `packages/api-client/orval.config.becompat.ts` (target=`./src/openapi.yaml`)
 
-- [ ] **Step 1: 입력 target 전환**
+- [ ] **Step 1: 입력이 src/openapi.yaml 인지 확인**
 
-`orval.config.becompat.ts`의 `input.target`을 교체:
+Run: `grep "target:" packages/api-client/orval.config.becompat.ts`
+Expected: `target: './src/openapi.yaml',`
 
-```ts
-    input: {
-      // BE springdoc 산출 spec — ci-api-spec 잡이 apps/api/** 변경 시 재생성·커밋.
-      // 로컬 갱신: cd apps/api && ./gradlew generateOpenApiDocs && cp build/openapi.yaml ../../packages/api-client/src/openapi.yaml
-      target: './src/openapi.yaml',
-      override: {
-        transformer: './orval.transformer.becompat.ts',
-      },
-    },
-```
-
-- [ ] **Step 2: 로컬 BE spec 갱신 + 생성 확인**
+- [ ] **Step 2: src/openapi.yaml 신선도 확인 (현재 BE와 일치)**
 
 Run:
 
 ```bash
-cd apps/api && ./gradlew generateOpenApiDocs && cp build/openapi.yaml ../../packages/api-client/src/openapi.yaml && cd ../..
-pnpm --filter @bconnect/api-client exec orval --config orval.config.becompat.ts
+cd apps/api && ./gradlew generateOpenApiDocs && cd ../..
+diff <(python3 -c "import yaml; print(sorted(yaml.safe_load(open('apps/api/build/openapi.yaml')).get('paths',{})))") \
+     <(python3 -c "import yaml; print(sorted(yaml.safe_load(open('packages/api-client/src/openapi.yaml')).get('paths',{})))")
 ```
 
+Expected: diff 없음 (커밋 spec = 현재 BE). diff 있으면 → `cp apps/api/build/openapi.yaml packages/api-client/src/openapi.yaml` 후 커밋.
+
+- [ ] **Step 3: becompat 생성 확인**
+
+Run: `pnpm --filter @bconnect/api-client exec orval --config orval.config.becompat.ts`
 Expected: `🎉 morton - Your OpenAPI spec has been converted` (에러 없음)
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add packages/api-client/orval.config.becompat.ts packages/api-client/src/openapi.yaml
-git commit -m "chore(api-client): becompat 입력을 ci-커밋 src/openapi.yaml로 고정"
-```
 
 ---
 
