@@ -26,3 +26,6 @@ export const SIGNUP_ROLES: Role[] = [
   Role.SEMI_SKILLED,
   Role.HELPER,
 ]
+
+/** 홈 피드 필터에서 선택 가능한 역할 — 반장/기공/준기공/조공 (Figma 기준) */
+export const FILTER_ROLES: Role[] = [Role.FOREMAN, Role.SKILLED, Role.SEMI_SKILLED, Role.HELPER]
