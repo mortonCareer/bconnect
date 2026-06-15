@@ -11,9 +11,10 @@ import { defineConfig } from 'orval'
 export default defineConfig({
   morton: {
     input: {
-      // api-docs.fresh.yaml = 로컬 gradle generateOpenApiDocs 산출(현재 BE).
+      // BE springdoc 산출 spec — ci-api-spec 잡이 apps/api/** 변경 시 재생성·커밋.
       // enumsAsRef=true 라 enum named, illegal key 없음 → sanitize 불필요.
-      target: '../../api-docs.fresh.yaml',
+      // 로컬 갱신: cd apps/api && ./gradlew generateOpenApiDocs && cp build/openapi.yaml ../../packages/api-client/src/openapi.yaml
+      target: './src/openapi.yaml',
       override: {
         transformer: './orval.transformer.becompat.ts',
       },
