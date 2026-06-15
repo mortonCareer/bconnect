@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "to.bconnect.career",
+      "sha256_cert_fingerprints": [
+        "96:4E:B4:64:0C:89:B5:70:E3:FB:2E:19:FC:AD:17:15:19:B0:DE:BE:3A:14:8A:8F:16:D9:DA:48:CC:2A:DC:35"
+      ]
+    }
+  }
+]
