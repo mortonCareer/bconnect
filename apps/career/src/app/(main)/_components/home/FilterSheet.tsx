@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Select, Slider, Tag, TopBar } from '@bconnect/ui'
 import type { Trade } from '@bconnect/api-client'
-import { TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
+import { TRADE_GROUPS, TRADE_LABELS, TRADE_LIST } from '@bconnect/api-client'
 import {
   EXPERIENCE_MAX,
   EXPERIENCE_MIN,
@@ -87,13 +87,6 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
         : pendingTrades
 
     setPendingTrades(next)
-
-    // Auto-set primary trade
-    if (next.length > 0 && (!pendingPrimary || !next.includes(pendingPrimary))) {
-      setPendingPrimary(next[0])
-    } else if (next.length === 0) {
-      setPendingPrimary(null)
-    }
   }
 
   if (!mounted) return null
@@ -120,9 +113,7 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
         <div className="flex flex-col gap-6 overflow-y-auto px-4 pb-4 pt-4">
           {/* 시공분야 */}
           <div className="flex flex-col gap-3">
-            <p className="text-sb-16 text-gray-900">
-              시공분야 <span className="text-destructive">*</span>
-            </p>
+            <p className="text-sb-16 text-gray-900">시공분야</p>
             {TRADE_GROUPS.map((group) => (
               <div key={group.label} className="flex flex-col gap-3">
                 <p className="text-m-14 text-gray-700">{group.label}</p>
@@ -141,25 +132,19 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
             ))}
           </div>
 
-          {/* 대표분야 */}
-          {pendingTrades.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <p className="text-sb-16 text-gray-900">
-                대표분야 <span className="text-destructive">*</span>
-              </p>
-              <Select
-                className="w-fit"
-                value={pendingPrimary || ''}
-                onChange={(v) => {
-                  if (typeof v === 'string') setPendingPrimary(v as Trade)
-                }}
-                options={pendingTrades.map((trade) => ({
-                  value: trade,
-                  label: TRADE_LABELS[trade],
-                }))}
-              />
-            </div>
-          )}
+          {/* 대표분야 — 시공분야와 독립 필터 (전체 분야에서 선택) */}
+          <div className="flex flex-col gap-2">
+            <p className="text-sb-16 text-gray-900">대표분야</p>
+            <Select
+              className="w-fit"
+              placeholder="대표분야 선택"
+              value={pendingPrimary || ''}
+              onChange={(v) => {
+                if (typeof v === 'string') setPendingPrimary(v as Trade)
+              }}
+              options={TRADE_LIST}
+            />
+          </div>
 
           {/* 경력 */}
           <div className="flex flex-col gap-3">
