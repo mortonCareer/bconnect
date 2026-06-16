@@ -32,7 +32,7 @@ public class MemberResolver {
                 .toList();
     }
 
-    public Map<Long, Member> map(Collection<Long> memberIds) {
+    public Map<Long, Member> resolveMap(Collection<Long> memberIds) {
         return memberRepository.findByIdIn(memberIds)
                 .stream()
                 .map(Member::of)

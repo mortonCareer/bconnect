@@ -6,7 +6,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,7 +40,7 @@ public class ProfileController {
         List<Profile> profiles = profileQueryService.list();
 
         List<Long> memberIds = profiles.stream().map(Profile::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.map(memberIds);
+        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
 
         List<ProfileResponse> response = profiles.stream()
                 .map(it -> ProfileResponse.of(it, memberMap.get(it.memberId())))
@@ -72,7 +71,7 @@ public class ProfileController {
         return ApiResponse.success(null);
     }
 
-    @PatchMapping("/me/about")
+    @PutMapping("/me/about")
     public ApiResponse<Void> updateAbout(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody UpdateProfileAboutRequest request) {

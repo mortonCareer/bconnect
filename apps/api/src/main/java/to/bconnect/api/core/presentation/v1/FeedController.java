@@ -31,8 +31,8 @@ public class FeedController {
         List<Post> posts = postService.list();
 
         List<Long> memberIds = posts.stream().map(Post::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.map(memberIds);
-        Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
+        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
+        Map<Long, Profile> profileMap = profileQueryService.resolveMap(memberIds);
 
         List<FeedResponse> response = posts.stream()
                 .map(it -> FeedResponse.of(
@@ -47,7 +47,7 @@ public class FeedController {
     public ApiResponse<FeedResponse> get(@PathVariable Long id) {
         Post post = postService.get(id);
         Member member = memberResolver.find(post.memberId());
-        Profile profile = profileQueryService.summaries(List.of(post.memberId())).get(post.memberId());
+        Profile profile = profileQueryService.resolveMap(List.of(post.memberId())).get(post.memberId());
         return ApiResponse.success(FeedResponse.of(post, member, profile));
     }
 }

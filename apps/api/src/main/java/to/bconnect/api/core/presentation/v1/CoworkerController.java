@@ -35,19 +35,19 @@ public class CoworkerController {
     public ApiResponse<List<CoworkerResponse>> list(
             @AuthenticationPrincipal AuthUser user,
             @RequestParam Long memberId) {
-        // TODO: CoworkerStatus 함께 조회
         List<Coworker> coworkers = coworkerService.list(memberId);
 
         List<Long> memberIds = coworkers.stream().map(Coworker::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.map(memberIds);
-        Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
+        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
+        Map<Long, Profile> profileMap = profileQueryService.resolveMap(memberIds);
+        Map<Long, CoworkerStatus> statusMap = coworkerService.resolveStatusMap(user.id(), memberIds);
 
         List<CoworkerResponse> response = coworkers.stream()
                 .map(it -> CoworkerResponse.of(
                         it,
                         memberMap.get(it.memberId()),
                         profileMap.get(it.memberId()),
-                        CoworkerStatus.COWORKER))
+                        statusMap.get(it.memberId())))
                 .toList();
         return ApiResponse.success(response);
     }
