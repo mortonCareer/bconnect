@@ -2,10 +2,9 @@ package to.bconnect.api.security.otp;
 
 public record VerifyOtpLoginResponse(
         boolean registered,
-        String accessToken,
-        String refreshToken
+        String accessToken
 ) {
-    public VerifyOtpLoginResponse(String accessToken, String refreshToken) {
-        this(true, accessToken, refreshToken);
+    public VerifyOtpLoginResponse(String accessToken) {
+        this(true, accessToken);
     }
 }
