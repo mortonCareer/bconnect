@@ -13,7 +13,7 @@ import to.bconnect.api.core.presentation.v1.response.CoworkerResponse;
 import to.bconnect.api.core.presentation.v1.response.CoworkerTaskResponse;
 import to.bconnect.api.core.domain.coworker.Coworker;
 import to.bconnect.api.core.domain.coworker.CoworkerService;
-import to.bconnect.api.core.domain.task.TaskService;
+import to.bconnect.api.core.domain.task.TaskQueryService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.security.AuthUser;
@@ -27,7 +27,7 @@ import java.util.List;
 public class CoworkerController {
 
     private final CoworkerService coworkerService;
-    private final TaskService taskService;
+    private final TaskQueryService taskQueryService;
     private final MemberResolver memberResolver;
     private final ProfileQueryService profileQueryService;
 
@@ -56,7 +56,7 @@ public class CoworkerController {
     public ApiResponse<List<CoworkerTaskResponse>> listTasks(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long memberId) {
-        val response = taskService.listByCoworker(user, memberId).stream()
+        val response = taskQueryService.listByCoworker(user, memberId).stream()
                 .map(CoworkerTaskResponse::of)
                 .toList();
         return ApiResponse.success(response);
