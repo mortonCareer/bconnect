@@ -92,9 +92,9 @@ public class TaskEntity extends BaseEntity {
         this.trades = command.trades() != null ? command.trades() : new HashSet<>();
         this.start = command.start();
         this.end = command.end();
-        this.workerTitle = command.workerTitle();
-        this.workerMemo = command.workerMemo();
-        this.workerCompany = command.workerCompany();
+        this.workerTitle = command.title();
+        this.workerMemo = command.memo();
+        this.workerCompany = command.company();
         this.address = command.address();
     }
 
@@ -102,13 +102,13 @@ public class TaskEntity extends BaseEntity {
         this.trades = command.trades() != null ? command.trades() : new HashSet<>();
         this.start = command.start();
         this.end = command.end();
-        this.projectTitle = command.projectTitle();
-        this.projectRequirement = command.projectRequirement();
-        this.projectMemo = command.projectMemo();
+        this.projectTitle = command.title();
+        this.projectRequirement = command.requirement();
+        this.projectMemo = command.memo();
     }
 
     public void update(UpdateAssigneeTask command) {
-        this.workerTitle = command.workerTitle();
-        this.workerMemo = command.workerMemo();
+        this.workerTitle = command.title();
+        this.workerMemo = command.memo();
     }
 }
