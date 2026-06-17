@@ -10,9 +10,15 @@ import java.util.Optional;
 
 public interface CoworkerRepository extends JpaRepository<CoworkerEntity, Long> {
 
-    Optional<CoworkerEntity> findByMinIdAndMaxId(Long minId, Long maxId);
+    @Query("SELECT COUNT(c) > 0 FROM CoworkerEntity c "
+            + "WHERE (c.minId = :memberId AND c.maxId = :coworkerId) "
+            + "OR (c.minId = :coworkerId AND c.maxId = :memberId)")
+    boolean existsByMembers(@Param("memberId") Long memberId, @Param("coworkerId") Long coworkerId);
 
-    boolean existsByMinIdAndMaxId(Long minId, Long maxId);
+    @Query("SELECT c FROM CoworkerEntity c "
+            + "WHERE (c.minId = :memberId AND c.maxId = :coworkerId) "
+            + "OR (c.minId = :coworkerId AND c.maxId = :memberId)")
+    Optional<CoworkerEntity> findByMembers(@Param("memberId") Long memberId, @Param("coworkerId") Long coworkerId);
 
     @Query("SELECT c FROM CoworkerEntity c WHERE c.minId = :memberId OR c.maxId = :memberId")
     List<CoworkerEntity> findByMemberId(@Param("memberId") Long memberId);

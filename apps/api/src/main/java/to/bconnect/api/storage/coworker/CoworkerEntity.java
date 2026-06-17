@@ -23,8 +23,16 @@ public class CoworkerEntity {
     @Column(nullable = false)
     private Long maxId;
 
-    public CoworkerEntity(Long minId, Long maxId) {
+    private CoworkerEntity(Long minId, Long maxId) {
         this.minId = minId;
         this.maxId = maxId;
+    }
+
+    public static CoworkerEntity of(Long memberId, Long otherId) {
+        return new CoworkerEntity(Math.min(memberId, otherId), Math.max(memberId, otherId));
+    }
+
+    public Long coworkerIdOf(Long memberId) {
+        return minId.equals(memberId) ? maxId : minId;
     }
 }
