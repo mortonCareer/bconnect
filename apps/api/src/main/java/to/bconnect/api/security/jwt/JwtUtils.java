@@ -2,6 +2,7 @@ package to.bconnect.api.security.jwt;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.val;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.StringUtils;
@@ -18,7 +19,7 @@ public class JwtUtils {
     }
 
     public static String resolveCookie(HttpServletRequest request, String name) {
-        Cookie[] cookies = request.getCookies();
+        val cookies = request.getCookies();
         if (cookies == null) return null;
 
         for (Cookie cookie : cookies)

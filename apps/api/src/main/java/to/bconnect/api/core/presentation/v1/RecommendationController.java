@@ -2,6 +2,7 @@ package to.bconnect.api.core.presentation.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,7 +43,7 @@ public class RecommendationController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateRecommendationRequest request) {
-        Long id = recommendationService.create(user, request.toCommand());
+        val id = recommendationService.create(user, request.toCommand());
         return ApiResponse.success(id);
     }
 
@@ -102,9 +103,9 @@ public class RecommendationController {
     }
 
     private List<RecommendationResponse> assemble(List<Recommendation> recommendations) {
-        List<Long> memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
-        Map<Long, Profile> profileMap = profileQueryService.resolveMap(memberIds);
+        val memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
+        val memberMap = memberResolver.resolveMap(memberIds);
+        val profileMap = profileQueryService.resolveMap(memberIds);
 
         return recommendations.stream()
                 .map(it -> RecommendationResponse.of(

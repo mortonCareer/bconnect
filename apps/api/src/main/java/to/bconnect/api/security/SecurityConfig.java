@@ -2,6 +2,7 @@ package to.bconnect.api.security;
 
 import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,8 +23,8 @@ import to.bconnect.api.security.jwt.JwtProvider;
 import to.bconnect.api.security.jwt.RefreshTokenAuthenticationFilter;
 import to.bconnect.api.security.otp.OtpAuthenticationProvider;
 import to.bconnect.api.security.otp.OtpService;
-import to.bconnect.api.security.session.SessionService;
 import to.bconnect.api.security.otp.VerifyOtpAuthenticationFilter;
+import to.bconnect.api.security.session.SessionService;
 
 import java.util.Collections;
 
@@ -45,8 +46,8 @@ public class SecurityConfig {
             OtpService otpService,
             SessionService sessionService) {
 
-        JwtAuthenticationProvider jwtAuthenticationProvider = new JwtAuthenticationProvider(authUserService, sessionService, jwtProvider);
-        OtpAuthenticationProvider otpAuthenticationProvider = new OtpAuthenticationProvider(otpService, authUserService);
+        val jwtAuthenticationProvider = new JwtAuthenticationProvider(authUserService, sessionService, jwtProvider);
+        val otpAuthenticationProvider = new OtpAuthenticationProvider(otpService, authUserService);
         return new ProviderManager(jwtAuthenticationProvider, otpAuthenticationProvider);
     }
 
@@ -59,7 +60,7 @@ public class SecurityConfig {
             RefreshTokenAuthenticationFilter refreshTokenAuthenticationFilter,
             @Qualifier("VerifyOtpAuthenticationSuccessHandler") AuthenticationSuccessHandler verifyOtpSuccessHandler
     ) throws Exception {
-        VerifyOtpAuthenticationFilter verifyOtpFilter = new VerifyOtpAuthenticationFilter(authenticationManager, objectMapper);
+        val verifyOtpFilter = new VerifyOtpAuthenticationFilter(authenticationManager, objectMapper);
         verifyOtpFilter.setAuthenticationSuccessHandler(verifyOtpSuccessHandler);
 
         http
@@ -67,7 +68,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(hc -> hc.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .cors(cc -> cc.configurationSource(req -> {
-                    CorsConfiguration config = new CorsConfiguration();
+                    val config = new CorsConfiguration();
                     config.setAllowedOrigins(apiConfigProps.cors().allowedOrigins());
                     config.setAllowedOriginPatterns(apiConfigProps.cors().allowedOriginPatterns());
                     config.setAllowedMethods(Collections.singletonList("*"));

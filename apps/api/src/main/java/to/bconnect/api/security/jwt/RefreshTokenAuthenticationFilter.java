@@ -5,12 +5,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.log.LogMessage;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -58,21 +58,21 @@ public class RefreshTokenAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = resolveCookie(request, "refreshToken");
+        val token = resolveCookie(request, "refreshToken");
         if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            JwtAuthenticationToken authRequest = new JwtAuthenticationToken(token);
-            JwtAuthenticationToken authResult = (JwtAuthenticationToken) this.authenticationManager.authenticate(authRequest);
+            val authRequest = new JwtAuthenticationToken(token);
+            val authResult = (JwtAuthenticationToken) this.authenticationManager.authenticate(authRequest);
 
             if (!authResult.isRefreshToken()) {
                 throw new AuthenticationTypeMismatchException("Only refresh token is supported");
             }
 
-            SecurityContext context = this.securityContextHolderStrategy.createEmptyContext();
+            val context = this.securityContextHolderStrategy.createEmptyContext();
             context.setAuthentication(authResult);
             this.securityContextHolderStrategy.setContext(context);
             if (this.logger.isDebugEnabled()) {

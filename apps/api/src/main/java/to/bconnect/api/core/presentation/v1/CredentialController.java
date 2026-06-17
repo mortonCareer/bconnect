@@ -2,6 +2,7 @@ package to.bconnect.api.core.presentation.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +23,7 @@ public class CredentialController {
 
     @GetMapping
     public ApiResponse<List<CredentialResponse>> list(@RequestParam Long memberId) {
-        List<CredentialResponse> response = credentialService.list(memberId).stream()
+        val response = credentialService.list(memberId).stream()
                 .map(CredentialResponse::of)
                 .toList();
         return ApiResponse.success(response);
@@ -32,7 +33,7 @@ public class CredentialController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateCredentialRequest request) {
-        Long id = credentialService.create(user, request.toCommand());
+        val id = credentialService.create(user, request.toCommand());
         return ApiResponse.success(id);
     }
 

@@ -2,12 +2,12 @@ package to.bconnect.api.security.otp;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.Assert;
 import to.bconnect.api.common.CodeException;
@@ -29,9 +29,9 @@ public class OtpAuthenticationProvider implements AuthenticationProvider {
         Assert.isInstanceOf(OtpAuthenticationToken.class, authentication,
                 "Only OtpAuthenticationToken is supported");
 
-        OtpAuthenticationToken token = (OtpAuthenticationToken) authentication;
-        String phone = (String) token.getPrincipal();
-        String code = (String) token.getCredentials();
+        val token = (OtpAuthenticationToken) authentication;
+        val phone = (String) token.getPrincipal();
+        val code = (String) token.getCredentials();
         
         if (code == null) {
             throw new IllegalStateException("OTP code is required for authentication");
@@ -44,7 +44,7 @@ public class OtpAuthenticationProvider implements AuthenticationProvider {
         }
 
         try {
-            UserDetails user = authUserService.loadUserByPhone(phone);
+            val user = authUserService.loadUserByPhone(phone);
             return new OtpAuthenticationToken(user, null, user.getAuthorities());
         } catch (UsernameNotFoundException ex) {
             return new OtpAuthenticationToken(phone, null, List.of(new SimpleGrantedAuthority(ROLE_PREFIX + GUEST)));

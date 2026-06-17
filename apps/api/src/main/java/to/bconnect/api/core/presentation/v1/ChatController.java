@@ -2,6 +2,7 @@ package to.bconnect.api.core.presentation.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,18 +14,14 @@ import to.bconnect.api.core.presentation.v1.request.CreateChatRequest;
 import to.bconnect.api.core.presentation.v1.response.ChatResponse;
 import to.bconnect.api.core.presentation.v1.response.MemberSummaryResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
-import to.bconnect.api.core.domain.chat.Chat;
 import to.bconnect.api.core.domain.chat.ChatService;
-import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.common.response.CursorPage;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -37,15 +34,15 @@ public class ChatController {
 
     @GetMapping
     public ApiResponse<List<ChatResponse>> list(@AuthenticationPrincipal AuthUser user) {
-        List<Chat> chats = chatService.list(user.id());
+        val chats = chatService.list(user.id());
 
-        List<Long> memberIds = chats.stream()
+        val memberIds = chats.stream()
                 .flatMap(it -> it.participantIds().stream())
                 .distinct()
                 .toList();
-        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
+        val memberMap = memberResolver.resolveMap(memberIds);
 
-        List<ChatResponse> response = chats.stream()
+        val response = chats.stream()
                 .map(it -> ChatResponse.of(
                         it,
                         it.participantIds().stream()
@@ -62,7 +59,7 @@ public class ChatController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateChatRequest request) {
-        Long id = chatService.create(user, request.toCommand());
+        val id = chatService.create(user, request.toCommand());
         return ApiResponse.success(id);
     }
 
@@ -71,7 +68,7 @@ public class ChatController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long chatId,
             CursorLimit cursorLimit) {
-        CursorPage<Message> page = chatService.listMessages(user, chatId, cursorLimit);
+        val page = chatService.listMessages(user, chatId, cursorLimit);
         CursorPage<MessageResponse> response = new CursorPage<>(
                 MessageResponse.of(page.content()),
                 page.hasNext(),

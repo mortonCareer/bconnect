@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -45,12 +46,12 @@ public class RefreshTokenAuthenticationSuccessHandler implements AuthenticationS
                 log.debug("Generate access token from refresh token");
             }
 
-            String username = authentication.getName();
-            String accessToken = jwtProvider.generateAccessToken(authentication);
-            String refreshToken = jwtProvider.generateRefreshToken(username);
+            val username = authentication.getName();
+            val accessToken = jwtProvider.generateAccessToken(authentication);
+            val refreshToken = jwtProvider.generateRefreshToken(username);
             sessionService.rotate(username, refreshToken);
 
-            String cookie = cookieProvider.create(refreshToken).toString();
+            val cookie = cookieProvider.create(refreshToken).toString();
             response.addHeader(HttpHeaders.SET_COOKIE, cookie);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getWriter().write(objectMapper.writeValueAsString(

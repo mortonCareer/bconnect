@@ -1,6 +1,7 @@
 package to.bconnect.api.core.domain.company;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
@@ -27,7 +28,7 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public Company get(Long companyId) {
-        CompanyEntity found = companyRepository.findById(companyId)
+        val found = companyRepository.findById(companyId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         return Company.of(found);
@@ -41,7 +42,7 @@ public class CompanyService {
         if (companyRepository.existsByBrn(command.brn()))
             throw new CodeException(CompanyExceptionCode.ALREADY_EXISTS);
 
-        CompanyEntity created = new CompanyEntity(
+        val created = new CompanyEntity(
                 user.id(),
                 command.name(),
                 command.brn(),
@@ -53,7 +54,7 @@ public class CompanyService {
 
     @Transactional
     public void update(AuthUser user, UpdateCompany command) {
-        CompanyEntity found = companyRepository.findByMemberId(user.id())
+        val found = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         found.update(command.picture());

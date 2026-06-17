@@ -1,6 +1,7 @@
 package to.bconnect.api.security.session;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.member.MemberRepository;
@@ -12,8 +13,6 @@ import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.support.sms.SmsProvider;
 import to.bconnect.api.support.sms.SmsTemplate;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -24,7 +23,7 @@ public class SessionService {
     private final SmsProvider smsProvider;
 
     public void verify(String username, String refreshToken) {
-        SessionEntity found = sessionRepository.findByUsername(username)
+        val found = sessionRepository.findByUsername(username)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
 
         if (!AuthUtils.sha256(refreshToken).equals(found.getRefreshToken())) {
@@ -37,8 +36,8 @@ public class SessionService {
     }
 
     public void login(String username, String agent, String ip, String refreshToken) {
-        Optional<SessionEntity> optional = sessionRepository.findByUsername(username);
-        String encrypted = AuthUtils.sha256(refreshToken);
+        val optional = sessionRepository.findByUsername(username);
+        val encrypted = AuthUtils.sha256(refreshToken);
 
         if (optional.isPresent()) {
             optional.get().update(agent, ip, encrypted);
@@ -55,14 +54,14 @@ public class SessionService {
     }
 
     public void rotate(String username, String refreshToken) {
-        SessionEntity found = sessionRepository.findByUsername(username)
+        val found = sessionRepository.findByUsername(username)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
 
         found.rotate(AuthUtils.sha256(refreshToken));
     }
 
     public void logout(String username) {
-        SessionEntity found = sessionRepository.findByUsername(username)
+        val found = sessionRepository.findByUsername(username)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
 
         found.revoke();

@@ -67,6 +67,8 @@ dependencies {
     // dev
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
     // docs
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'

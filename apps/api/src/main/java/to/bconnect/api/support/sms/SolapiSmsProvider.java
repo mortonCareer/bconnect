@@ -1,6 +1,7 @@
 package to.bconnect.api.support.sms;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
@@ -26,7 +27,7 @@ public class SolapiSmsProvider implements SmsProvider {
 
     @Override
     public void send(String phone, String message) {
-        Message sms = new Message();
+        val sms = new Message();
         sms.setFrom(senderNumber);
         sms.setTo(phone);
         sms.setText(message);

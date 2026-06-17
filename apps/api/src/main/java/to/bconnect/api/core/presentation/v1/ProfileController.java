@@ -2,6 +2,7 @@ package to.bconnect.api.core.presentation.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,12 +38,12 @@ public class ProfileController {
 
     @GetMapping
     public ApiResponse<List<ProfileResponse>> list() {
-        List<Profile> profiles = profileQueryService.list();
+        val profiles = profileQueryService.list();
 
-        List<Long> memberIds = profiles.stream().map(Profile::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
+        val memberIds = profiles.stream().map(Profile::memberId).distinct().toList();
+        val memberMap = memberResolver.resolveMap(memberIds);
 
-        List<ProfileResponse> response = profiles.stream()
+        val response = profiles.stream()
                 .map(it -> ProfileResponse.of(it, memberMap.get(it.memberId())))
                 .toList();
         return ApiResponse.success(response);
@@ -50,8 +51,8 @@ public class ProfileController {
 
     @GetMapping("/{id}")
     public ApiResponse<ProfileResponse> get(@PathVariable Long id) {
-        Profile profile = profileQueryService.get(id);
-        Member member = memberResolver.find(profile.memberId());
+        val profile = profileQueryService.get(id);
+        val member = memberResolver.find(profile.memberId());
         return ApiResponse.success(ProfileResponse.of(profile, member));
     }
 
@@ -59,7 +60,7 @@ public class ProfileController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateProfileRequest request) {
-        Long id = profileService.create(user, request.toCommand());
+        val id = profileService.create(user, request.toCommand());
         return ApiResponse.success(id);
     }
 

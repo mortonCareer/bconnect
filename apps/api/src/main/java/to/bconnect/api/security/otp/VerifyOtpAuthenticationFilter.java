@@ -1,5 +1,6 @@
 package to.bconnect.api.security.otp;
 
+import lombok.val;
 import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,14 +43,14 @@ public class VerifyOtpAuthenticationFilter extends AbstractAuthenticationProcess
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
         try {
-            VerifyCodeRequest body = objectMapper.readValue(request.getInputStream(), VerifyCodeRequest.class);
-            String phone = body.phone() != null ? body.phone().trim() : "";
-            String code = body.code() != null ? body.code().trim() : "";
+            val body = objectMapper.readValue(request.getInputStream(), VerifyCodeRequest.class);
+            val phone = body.phone() != null ? body.phone().trim() : "";
+            val code = body.code() != null ? body.code().trim() : "";
 
             if (!PHONE_PATTERN.matcher(phone).matches()) throw new AuthenticationServiceException("유효하지 않은 전화번호 형식입니다");
             if (!OTP_CODE_PATTERN.matcher(code).matches()) throw new AuthenticationServiceException("유효하지 않은 인증코드 형식입니다");
 
-            OtpAuthenticationToken authRequest = new OtpAuthenticationToken(phone, code);
+            val authRequest = new OtpAuthenticationToken(phone, code);
             setDetails(request, authRequest);
             return this.getAuthenticationManager().authenticate(authRequest);
         } catch (IOException e) {

@@ -1,5 +1,6 @@
 package to.bconnect.api.support.fixture;
 
+import lombok.val;
 import to.bconnect.api.security.otp.SendCodeRequest;
 import to.bconnect.api.storage.otp.OtpEntity;
 
@@ -18,7 +19,7 @@ public class OtpFactory {
     }
 
     public static OtpEntity createEntity(String phone, int count) {
-        OtpEntity entity = createEntity(phone);
+        val entity = createEntity(phone);
         for (int i = 0; i < count; i++) entity.attempt();
         return entity;
     }
