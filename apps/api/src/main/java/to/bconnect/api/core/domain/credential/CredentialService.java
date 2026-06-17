@@ -1,6 +1,7 @@
 package to.bconnect.api.core.domain.credential;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.credential.CredentialEntity;
@@ -40,7 +41,7 @@ public class CredentialService {
 
     @Transactional
     public Long create(AuthUser user, CreateCredential command) {
-        CredentialEntity created = new CredentialEntity(
+        val created = new CredentialEntity(
                 user.id(),
                 command.type(),
                 command.expiredAt()
@@ -61,7 +62,7 @@ public class CredentialService {
 
     @Transactional
     public void accept(Long id) {
-        CredentialEntity found = credentialRepository.findById(id)
+        val found = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         found.accept();
@@ -69,7 +70,7 @@ public class CredentialService {
 
     @Transactional
     public void deny(Long id) {
-        CredentialEntity found = credentialRepository.findById(id)
+        val found = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         found.deny();

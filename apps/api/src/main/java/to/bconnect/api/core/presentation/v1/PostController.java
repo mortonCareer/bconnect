@@ -2,6 +2,7 @@ package to.bconnect.api.core.presentation.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.core.presentation.v1.request.CreatePostRequest;
@@ -21,7 +22,7 @@ public class PostController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreatePostRequest request) {
-        Long id = postService.create(user, request.toCommand());
+        val id = postService.create(user, request.toCommand());
         return ApiResponse.success(id);
     }
 

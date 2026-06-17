@@ -1,6 +1,7 @@
 package to.bconnect.api.core.presentation.v1;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,14 +17,11 @@ import to.bconnect.api.core.presentation.v1.response.CoworkerRequestResponse;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestQueryService;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestService;
 import to.bconnect.api.core.domain.MemberResolver;
-import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileQueryService;
-import to.bconnect.api.security.member.Member;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/coworker-requests")
@@ -39,7 +37,7 @@ public class CoworkerRequestController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateCoworkerRequest request) {
-        Long id = coworkerRequestService.create(user, request.toId());
+        val id = coworkerRequestService.create(user, request.toId());
         return ApiResponse.success(id);
     }
 
@@ -80,9 +78,9 @@ public class CoworkerRequestController {
     }
 
     private List<CoworkerRequestResponse> assemble(List<CoworkerRequest> requests) {
-        List<Long> memberIds = requests.stream().map(CoworkerRequest::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
-        Map<Long, Profile> profileMap = profileQueryService.resolveMap(memberIds);
+        val memberIds = requests.stream().map(CoworkerRequest::memberId).distinct().toList();
+        val memberMap = memberResolver.resolveMap(memberIds);
+        val profileMap = profileQueryService.resolveMap(memberIds);
 
         return requests.stream()
                 .map(it -> CoworkerRequestResponse.of(

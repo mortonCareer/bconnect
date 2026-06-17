@@ -1,5 +1,6 @@
 package to.bconnect.api.core.presentation;
 
+import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import org.springframework.boot.logging.LogLevel;
 import to.bconnect.api.common.response.ApiResponse;
 
 @RestControllerAdvice
@@ -27,7 +27,7 @@ public class ApiControllerAdvice {
 
     @ExceptionHandler(CodeException.class)
     public ResponseEntity<ApiResponse<Void>> handleCodeException(CodeException e) {
-        LogLevel logLevel = e.getExceptionCode().getLogLevel();
+        val logLevel = e.getExceptionCode().getLogLevel();
         switch (logLevel) {
             case ERROR -> log.error("CodeException : {}", e.getMessage(), e);
             case WARN -> log.warn("CodeException : {}", e.getMessage(), e);

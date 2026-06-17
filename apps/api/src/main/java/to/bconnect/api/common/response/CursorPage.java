@@ -1,5 +1,6 @@
 package to.bconnect.api.common.response;
 
+import lombok.val;
 import org.springframework.data.domain.Window;
 
 import java.util.List;
@@ -11,9 +12,9 @@ public record CursorPage<T>(
         Long nextCursor
 ) {
     public static <T> CursorPage<T> from(Window<T> window, Function<T, Long> cursorExtractor) {
-        List<T> content = window.getContent();
-        boolean hasNext = window.hasNext();
-        Long nextCursor = hasNext ? cursorExtractor.apply(content.getLast()) : null;
+        val content = window.getContent();
+        val hasNext = window.hasNext();
+        val nextCursor = hasNext ? cursorExtractor.apply(content.getLast()) : null;
         return new CursorPage<>(content, hasNext, nextCursor);
     }
 }

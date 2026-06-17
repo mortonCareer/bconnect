@@ -1,6 +1,7 @@
 package to.bconnect.api.socket.message;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,8 +16,6 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.socket.WebSocketAuthorizationConfig;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,22 +32,22 @@ public class MessageSocketService {
         if (request.type() == MessageType.SYSTEM)
             throw new CodeException(CommonExceptionCode.NOT_VALID);
 
-        MessageEntity created = messageRepository.save(new MessageEntity(
+        val created = messageRepository.save(new MessageEntity(
                 chatId,
                 user.id(),
                 request.type(),
                 request.content()
         ));
 
-        String dest = WebSocketAuthorizationConfig.CHAT_TOPIC_PREFIX + chatId;
+        val dest = WebSocketAuthorizationConfig.CHAT_TOPIC_PREFIX + chatId;
 
-        Set<String> usernames = simpUserRegistry
+        val usernames = simpUserRegistry
                 .findSubscriptions(it -> dest.equals(it.getDestination()))
                 .stream()
                 .map(it -> it.getSession().getUser().getName())
                 .collect(Collectors.toCollection(HashSet::new));
 
-        List<Long> memberIds = memberRepository.findIdsByUsernameIn(usernames);
+        val memberIds = memberRepository.findIdsByUsernameIn(usernames);
         participantRepository.updateLastIdxIn(chatId, memberIds, created.getId());
     }
 }

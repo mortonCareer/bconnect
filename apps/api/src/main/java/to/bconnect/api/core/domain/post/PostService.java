@@ -1,6 +1,7 @@
 package to.bconnect.api.core.domain.post;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
@@ -34,7 +35,7 @@ public class PostService {
 
     @Transactional
     public Long create(AuthUser user, CreatePost command) {
-        PostEntity created = new PostEntity(
+        val created = new PostEntity(
                 user.id(),
                 command.taskId(),
                 command.images(),
@@ -47,7 +48,7 @@ public class PostService {
     @Transactional
     public void update(AuthUser user, Long postId, String content) {
 
-        PostEntity found = postRepository.findById(postId)
+        val found = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getMemberId().equals(user.id()))

@@ -1,6 +1,7 @@
 package to.bconnect.api.security.otp;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.otp.OtpEntity;
@@ -11,7 +12,6 @@ import to.bconnect.api.common.CodeException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,10 +30,10 @@ public class OtpService {
     private final OtpRepository otpRepository;
 
     public Otp sendCode(String phone) {
-        String code = String.format(CODE_FORMAT, RANDOM.nextInt(CODE_BOUND));
-        LocalDateTime expiredAt = LocalDateTime.now().plusSeconds(EXPIRY_SECONDS);
+        val code = String.format(CODE_FORMAT, RANDOM.nextInt(CODE_BOUND));
+        val expiredAt = LocalDateTime.now().plusSeconds(EXPIRY_SECONDS);
 
-        Optional<OtpEntity> optional = otpRepository.findByPhone(phone);
+        val optional = otpRepository.findByPhone(phone);
         OtpEntity otp;
         if (optional.isPresent()) {
             otp = optional.get();
@@ -52,7 +52,7 @@ public class OtpService {
 
     @Transactional
     public void verifyCode(String phone, String code) {
-        OtpEntity found = otpRepository.findByCode(code)
+        val found = otpRepository.findByCode(code)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_OTP));
 
         if (!found.getPhone().equals(phone)) throw new CodeException(AuthExceptionCode.INVALID_OTP);
@@ -67,18 +67,18 @@ public class OtpService {
     }
 
     public String generateToken(String phone) {
-        OtpEntity found = otpRepository.findByPhone(phone)
+        val found = otpRepository.findByPhone(phone)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_OTP));
 
-        String token = java.util.UUID.randomUUID().toString();
-        LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(SIGNUP_TOKEN_EXPIRY_MINUTES);
+        val token = java.util.UUID.randomUUID().toString();
+        val expiredAt = LocalDateTime.now().plusMinutes(SIGNUP_TOKEN_EXPIRY_MINUTES);
         found.generateToken(token, expiredAt);
 
         return token;
     }
 
     public void verifyToken(String token) {
-        OtpEntity found = otpRepository.findByToken_Token(token)
+        val found = otpRepository.findByToken_Token(token)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_SIGNUP_TOKEN));
 
         if (found.getToken().isRevoked()) throw new CodeException(AuthExceptionCode.SIGNUP_TOKEN_REVOKED);

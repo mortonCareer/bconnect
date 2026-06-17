@@ -2,11 +2,11 @@ package to.bconnect.api.security.jwt;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.Assert;
 import to.bconnect.api.common.CodeException;
@@ -31,11 +31,11 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         Assert.isInstanceOf(JwtAuthenticationToken.class, authentication,
                 "Only JwtTokenAuthenticationToken is supported");
 
-        String token = Objects.requireNonNull(authentication.getCredentials()).toString();
+        val token = Objects.requireNonNull(authentication.getCredentials()).toString();
         jwtProvider.validateToken(token);
-        String username = jwtProvider.getUsername(token);
-        JwtType type = JwtType.valueOf(jwtProvider.getTokenType(token).toUpperCase());
-        UserDetails user = this.userDetailsService.loadUserByUsername(username);
+        val username = jwtProvider.getUsername(token);
+        val type = JwtType.valueOf(jwtProvider.getTokenType(token).toUpperCase());
+        val user = this.userDetailsService.loadUserByUsername(username);
 
         if (type == JwtType.REFRESH) {
             try {

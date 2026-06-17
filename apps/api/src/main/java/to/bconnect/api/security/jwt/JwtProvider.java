@@ -6,6 +6,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import to.bconnect.api.ApiConfigProps;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,7 +43,7 @@ public class JwtProvider {
     private final AuthUserService authUserService;
 
     public JwtProvider(ApiConfigProps apiConfigProps, AuthUserService authUserService) {
-        ApiConfigProps.Jwt properties = apiConfigProps.jwt();
+        val properties = apiConfigProps.jwt();
         this.secret = Keys.hmacShaKeyFor(properties.secret().getBytes());
         this.accessTokenExpiration = properties.accessTokenExpiration();
         this.refreshTokenExpiration = properties.refreshTokenExpiration();
@@ -50,15 +51,15 @@ public class JwtProvider {
     }
 
     public String generateAccessToken(Authentication authentication) {
-        String username = authentication.getName();
-        String authorities = authentication.getAuthorities()
+        val username = authentication.getName();
+        val authorities = authentication.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .map(it -> it.substring(AUTHORITY_PREFIX.length()))
                 .collect(Collectors.joining(AUTHORITIES_DELIMITER));
 
-        Date now = new Date();
-        Date expiration = new Date(now.getTime() + accessTokenExpiration.toMillis());
+        val now = new Date();
+        val expiration = new Date(now.getTime() + accessTokenExpiration.toMillis());
 
         return Jwts.builder()
                 .subject(username)
@@ -71,14 +72,14 @@ public class JwtProvider {
     }
 
     public String generateAccessToken(UserDetails user) {
-        String authorities = user.getAuthorities()
+        val authorities = user.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .map(it -> it.substring(AUTHORITY_PREFIX.length()))
                 .collect(Collectors.joining(AUTHORITIES_DELIMITER));
 
-        Date now = new Date();
-        Date expiration = new Date(now.getTime() + accessTokenExpiration.toMillis());
+        val now = new Date();
+        val expiration = new Date(now.getTime() + accessTokenExpiration.toMillis());
 
         return Jwts.builder()
                 .subject(user.getUsername())
@@ -91,8 +92,8 @@ public class JwtProvider {
     }
 
     public String generateRefreshToken(String username) {
-        Date now = new Date();
-        Date expiration = new Date(now.getTime() + refreshTokenExpiration.toMillis());
+        val now = new Date();
+        val expiration = new Date(now.getTime() + refreshTokenExpiration.toMillis());
 
         return Jwts.builder()
                 .subject(username)
@@ -107,8 +108,8 @@ public class JwtProvider {
         validateToken(token);
 
         if (isRefreshToken(token)) {
-            String username = getUsername(token);
-            UserDetails user = authUserService.loadUserByUsername(username);
+            val username = getUsername(token);
+            val user = authUserService.loadUserByUsername(username);
             return generateAccessToken(user);
         }
 
@@ -124,7 +125,7 @@ public class JwtProvider {
     }
 
     public Collection<GrantedAuthority> getAuthorities(String token) {
-        String[] authorities = getClaims(token)
+        val authorities = getClaims(token)
                 .get(SCOPE_CLAIM_KEY, String.class)
                 .split(AUTHORITIES_DELIMITER);
 

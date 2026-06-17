@@ -1,6 +1,7 @@
 package to.bconnect.api.security.member;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.security.AuthUser;
@@ -50,7 +51,7 @@ public class MemberService {
         memberRepository.findByPhone(request.phone())
                 .ifPresent(it -> { throw new CodeException(MemberExceptionCode.DUPLICATE_PHONE); });
 
-        MemberEntity created = new MemberEntity(
+        val created = new MemberEntity(
                 request.username(),
                 request.name(),
                 request.phone(),
@@ -64,7 +65,7 @@ public class MemberService {
 
     @Transactional
     public void update(AuthUser user, UpdateMemberRequest request) {
-        MemberEntity found = memberRepository.findById(user.id())
+        val found = memberRepository.findById(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         found.update(

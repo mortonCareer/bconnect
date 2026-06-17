@@ -1,6 +1,7 @@
 package to.bconnect.api.core.domain.profile;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
@@ -23,7 +24,7 @@ public class ProfileService {
         if (!command.trades().contains(command.primaryTrade()))
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
-        ProfileEntity created = new ProfileEntity(
+        val created = new ProfileEntity(
                 user.id(),
                 command.primaryTrade(),
                 command.trades(),
@@ -38,7 +39,7 @@ public class ProfileService {
 
     @Transactional
     public void update(AuthUser user, UpdateProfile command) {
-        ProfileEntity found = profileRepository.findByMemberId(user.id())
+        val found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getMemberId().equals(user.id()))
@@ -58,7 +59,7 @@ public class ProfileService {
 
     @Transactional
     public void updateAbout(AuthUser user, String about) {
-        ProfileEntity found = profileRepository.findByMemberId(user.id())
+        val found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getMemberId().equals(user.id()))

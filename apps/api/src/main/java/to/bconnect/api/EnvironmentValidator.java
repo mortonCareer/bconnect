@@ -1,6 +1,7 @@
 package to.bconnect.api;
 
 import jakarta.annotation.PostConstruct;
+import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -34,7 +35,7 @@ public class EnvironmentValidator {
 
     @PostConstruct
     public void validate() {
-        List<String> missing = REQUIRED_VARS.stream()
+        val missing = REQUIRED_VARS.stream()
                 .filter(it -> !StringUtils.hasText(env.getProperty(it)))
                 .toList();
 

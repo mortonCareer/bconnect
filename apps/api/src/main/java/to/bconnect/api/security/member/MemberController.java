@@ -2,6 +2,7 @@ package to.bconnect.api.security.member;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,14 +20,14 @@ public class MemberController {
 
     @GetMapping("/me")
     public ApiResponse<MemberResponse> get(@AuthenticationPrincipal AuthUser user) {
-        Member member = memberService.get(user);
+        val member = memberService.get(user);
         return ApiResponse.success(MemberResponse.of(member));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ApiResponse<List<MemberResponse>> listMembers() {
-        List<MemberResponse> response = memberService.list().stream()
+        val response = memberService.list().stream()
                 .map(MemberResponse::of)
                 .toList();
         return ApiResponse.success(response);
@@ -34,13 +35,13 @@ public class MemberController {
 
     @GetMapping("/check-username")
     public ApiResponse<CheckUsernameResponse> checkUsername(@RequestParam String username) {
-        boolean available = memberService.checkUsername(username);
+        val available = memberService.checkUsername(username);
         return ApiResponse.success(new CheckUsernameResponse(available));
     }
 
     @PostMapping
     public ApiResponse<Long> register(@RequestBody @Valid RegisterMemberRequest request) {
-        Member member = memberService.register(request);
+        val member = memberService.register(request);
         return ApiResponse.success(member.id());
     }
 
