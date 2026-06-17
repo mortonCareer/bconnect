@@ -29,7 +29,7 @@ public class RefreshTokenAuthenticationSuccessHandler implements AuthenticationS
 
     private final ObjectMapper objectMapper;
     private final JwtProvider jwtProvider;
-    private final cookieProvider cookieProvider;
+    private final CookieProvider cookieProvider;
     private final SessionService sessionService;
 
     @Override

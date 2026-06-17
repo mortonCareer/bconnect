@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.common.response.ApiResponse;
-import to.bconnect.api.security.jwt.cookieProvider;
+import to.bconnect.api.security.jwt.CookieProvider;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -16,7 +16,7 @@ import to.bconnect.api.security.jwt.cookieProvider;
 public class AuthController {
 
     private final SessionService sessionService;
-    private final cookieProvider cookieProvider;
+    private final CookieProvider cookieProvider;
 
     @PostMapping("/logout")
     public ApiResponse<Void> logout(Authentication authentication, HttpServletResponse response) {
