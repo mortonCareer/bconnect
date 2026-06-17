@@ -8,14 +8,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.security.AuthenticationTypeMismatchException;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.security.jwt.JwtProvider;
-import to.bconnect.api.security.jwt.cookieProvider;
+import to.bconnect.api.security.jwt.CookieProvider;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.security.session.SessionService;
 import tools.jackson.databind.ObjectMapper;
@@ -32,7 +31,7 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
 
     private final ObjectMapper objectMapper;
     private final JwtProvider jwtProvider;
-    private final cookieProvider cookieProvider;
+    private final CookieProvider cookieProvider;
     private final OtpService otpService;
     private final SessionService sessionService;
 
