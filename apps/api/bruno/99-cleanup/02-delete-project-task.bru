@@ -1,18 +1,12 @@
 meta {
-  name: 내 프로필 소개 수정
+  name: 업체 작업 삭제
   type: http
-  seq: 5
+  seq: 2
 }
 
-put {
-  url: {{baseUrl}}/api/v1/profiles/me/about
+delete {
+  url: {{baseUrl}}/api/v1/tasks/{{projectTaskId}}
   auth: inherit
-}
-
-body {
-  {
-    "about": "새로운 소개"
-  }
 }
 
 tests {

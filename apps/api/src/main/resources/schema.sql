@@ -153,7 +153,7 @@ create table tasks (
     status varchar(255) not null,
     start_date date not null,
     end_date date not null,
-    member_id bigint references members(id),
+    worker_id bigint references members(id),
     worker_title varchar(255),
     worker_memo varchar(255),
     worker_company varchar(255),

@@ -1,0 +1,46 @@
+meta {
+  name: 기술자 작업 생성
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tasks/worker
+  auth: inherit
+}
+
+body {
+  {
+    "trades": ["TILING", "FILM_SHEET"],
+    "start": "2026-06-01",
+    "end": "2026-06-03",
+    "title": "작업",
+    "memo": "메모",
+    "company": "업체",
+    "address": {
+      "zipcode": "00000",
+      "city": "경기도",
+      "state": "수원시 장안구",
+      "street": "도로명주소",
+      "detail": "상세주소",
+      "latitude": 37.294000,
+      "longitude": 126.974000
+    }
+  }
+}
+
+script:post-response {
+  bru.setVar("workerTaskId", res.body.data);
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.a('number');
+  });
+}
+
+docs {
+  기술자(member 1)가 본인 작업을 생성한다.
+}
