@@ -59,7 +59,7 @@ public class ProfileQueryService {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, Profile> summaries(Collection<Long> memberIds) {
+    public Map<Long, Profile> resolveMap(Collection<Long> memberIds) {
         return profileRepository.findByMemberIdIn(memberIds).stream()
                 .collect(Collectors.toMap(
                         ProfileEntity::getMemberId,

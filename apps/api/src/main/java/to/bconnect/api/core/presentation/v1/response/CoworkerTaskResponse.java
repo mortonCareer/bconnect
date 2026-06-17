@@ -11,6 +11,6 @@ public record CoworkerTaskResponse(
         LocalDate end
 ) {
     public static CoworkerTaskResponse of(Task task) {
-        return new CoworkerTaskResponse(task.id(), task.memberId(), task.start(), task.end());
+        return new CoworkerTaskResponse(task.id(), task.workerId(), task.start(), task.end());
     }
 }

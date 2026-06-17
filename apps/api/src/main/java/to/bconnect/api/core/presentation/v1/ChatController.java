@@ -43,7 +43,7 @@ public class ChatController {
                 .flatMap(it -> it.participantIds().stream())
                 .distinct()
                 .toList();
-        Map<Long, Member> memberMap = memberResolver.map(memberIds);
+        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
 
         List<ChatResponse> response = chats.stream()
                 .map(it -> ChatResponse.of(

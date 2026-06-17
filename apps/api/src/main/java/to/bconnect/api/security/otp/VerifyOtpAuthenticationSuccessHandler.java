@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import to.bconnect.api.security.AuthenticationTypeMismatchException;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.security.jwt.JwtProvider;
+import to.bconnect.api.security.jwt.CookieProvider;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.security.session.SessionService;
 import tools.jackson.databind.ObjectMapper;
@@ -29,6 +31,7 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
 
     private final ObjectMapper objectMapper;
     private final JwtProvider jwtProvider;
+    private final CookieProvider cookieProvider;
     private final OtpService otpService;
     private final SessionService sessionService;
 
@@ -53,8 +56,9 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
             String agent = request.getHeader("User-Agent");
             String ip = request.getRemoteAddr();
             sessionService.login(user.getUsername(), agent, ip, refreshToken);
-
-            var data = new VerifyOtpLoginResponse(accessToken, refreshToken);
+            String cookie = cookieProvider.create(refreshToken).toString();
+            response.addHeader(HttpHeaders.SET_COOKIE, cookie);
+            var data = new VerifyOtpLoginResponse(accessToken);
 
             response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.success(data)));
         } else {

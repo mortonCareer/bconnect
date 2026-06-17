@@ -1,6 +1,7 @@
 package to.bconnect.api.core.domain.coworker;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.coworker.CoworkerEntity;
@@ -26,16 +27,18 @@ public class CoworkerRequestService {
             throw new CodeException(CoworkerExceptionCode.SELF_REQUEST);
         if (!memberRepository.existsById(targetId))
             throw new CodeException(CoworkerExceptionCode.TARGET_NOT_FOUND);
-        if (coworkerRepository.existsByMinIdAndMaxId(Math.min(user.id(), targetId), Math.max(user.id(), targetId)))
+        if (coworkerRepository.existsByMembers(user.id(), targetId))
             throw new CodeException(CoworkerExceptionCode.ALREADY_COWORKER);
-        if (coworkerRequestRepository.findByFromIdAndToId(user.id(), targetId).isPresent())
-            throw new CodeException(CoworkerExceptionCode.ALREADY_REQUESTED);
 
-        // accept
+        // idempotent
+        val optional = coworkerRequestRepository.findByFromIdAndToId(user.id(), targetId);
+        if (optional.isPresent())
+            return optional.get().getId();
+
         coworkerRequestRepository.findByFromIdAndToId(targetId, user.id())
                 .ifPresent(it -> accept(user, it.getId()));
 
-        CoworkerRequestEntity created = coworkerRequestRepository.save(
+        val created = coworkerRequestRepository.save(
                 new CoworkerRequestEntity(user.id(), targetId));
 
         return created.getId();
@@ -43,28 +46,19 @@ public class CoworkerRequestService {
 
     @Transactional
     public void accept(AuthUser user, Long id) {
-        CoworkerRequestEntity found = coworkerRequestRepository.findById(id)
+        val found = coworkerRequestRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
 
         if (!found.getToId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        Long fromId = found.getFromId();
-        Long toId = found.getToId();
-
         coworkerRequestRepository.delete(found);
-
-        CoworkerEntity created = new CoworkerEntity(
-                Math.min(fromId, toId),
-                Math.max(fromId, toId)
-        );
-
-        coworkerRepository.save(created);
+        coworkerRepository.save(CoworkerEntity.of(found.getFromId(), found.getToId()));
     }
 
     @Transactional
     public void deny(AuthUser user, Long id) {
-        CoworkerRequestEntity found = coworkerRequestRepository.findById(id)
+        val found = coworkerRequestRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
 
         if (!found.getToId().equals(user.id()))
@@ -75,11 +69,14 @@ public class CoworkerRequestService {
 
     @Transactional
     public void cancel(AuthUser user, Long id) {
-        coworkerRequestRepository.findById(id).ifPresent(it -> {
-            if (!it.getFromId().equals(user.id()))
+        val optional = coworkerRequestRepository.findById(id);
+        if (optional.isPresent()) {
+            val found = optional.get();
+            if (!found.getFromId().equals(user.id()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-            coworkerRequestRepository.delete(it);
-        });
+            coworkerRequestRepository.delete(found);
+        }
+
     }
 }

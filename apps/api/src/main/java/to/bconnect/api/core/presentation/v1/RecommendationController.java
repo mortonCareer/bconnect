@@ -103,8 +103,8 @@ public class RecommendationController {
 
     private List<RecommendationResponse> assemble(List<Recommendation> recommendations) {
         List<Long> memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.map(memberIds);
-        Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
+        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
+        Map<Long, Profile> profileMap = profileQueryService.resolveMap(memberIds);
 
         return recommendations.stream()
                 .map(it -> RecommendationResponse.of(

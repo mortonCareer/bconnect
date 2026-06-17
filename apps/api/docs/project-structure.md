@@ -23,10 +23,22 @@ to.bconnect.api
 - 레이어드 아키텍처(layer-first) 구조를 따릅니다.
 - 패키지의 의존성 규칙은 ArchUnit로 강제합니다.
 
+```mermaid
+flowchart TD
+    socket --> core
+    core --> security
+    security --> storage
+    security --> support
+    storage --> common
+```
+
 ## 레이어 구조
 
 ```mermaid
-# TODO
+flowchart TD
+    presentation --> domain
+    domain --> storage
+    presentation --> storage
 ```
 
 | 레이어         | 패키지          | 행위 클래스     | 데이터 객체 | 변환 책임    | 도메인 교차                             |

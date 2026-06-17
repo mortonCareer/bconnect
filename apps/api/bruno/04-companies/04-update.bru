@@ -1,0 +1,23 @@
+meta {
+  name: 내 업체 수정
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/companies/me
+  auth: inherit
+}
+
+body {
+  {
+    "picture": "https://image.com/updated"
+  }
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}

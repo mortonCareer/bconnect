@@ -43,14 +43,7 @@ public class SessionService {
         if (optional.isPresent()) {
             optional.get().update(agent, ip, encrypted);
         } else {
-            sessionRepository.save(
-                    SessionEntity.builder()
-                            .username(username)
-                            .agent(agent)
-                            .ip(ip)
-                            .refreshToken(encrypted)
-                            .build()
-            );
+            sessionRepository.save(new SessionEntity(username, agent, ip, encrypted));
 
             // TODO: 새로운 기기에서 로그인시 세션 덮어쓰기 → RT 무효화
             memberRepository.findByUsername(username)

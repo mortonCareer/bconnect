@@ -31,6 +31,7 @@ public record ApiConfigProps(
         @NotNull(message = "app.jwt.access-token-expiration must not be null")
         Duration accessTokenExpiration,
         @NotNull(message = "app.jwt.refresh-token-expiration must not be null")
-        Duration refreshTokenExpiration
+        Duration refreshTokenExpiration,
+        String cookieDomain
     ) {}
 }

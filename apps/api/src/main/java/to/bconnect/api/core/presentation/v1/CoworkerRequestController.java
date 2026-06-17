@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.domain.coworker.CoworkerRequest;
 import to.bconnect.api.core.presentation.v1.request.CreateCoworkerRequest;
 import to.bconnect.api.core.presentation.v1.response.CoworkerRequestResponse;
-import to.bconnect.api.core.domain.coworker.Coworker;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestQueryService;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestService;
 import to.bconnect.api.core.domain.MemberResolver;
@@ -82,8 +81,8 @@ public class CoworkerRequestController {
 
     private List<CoworkerRequestResponse> assemble(List<CoworkerRequest> requests) {
         List<Long> memberIds = requests.stream().map(CoworkerRequest::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.map(memberIds);
-        Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
+        Map<Long, Member> memberMap = memberResolver.resolveMap(memberIds);
+        Map<Long, Profile> profileMap = profileQueryService.resolveMap(memberIds);
 
         return requests.stream()
                 .map(it -> CoworkerRequestResponse.of(

@@ -1,0 +1,30 @@
+meta {
+  name: 업체 생성
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/companies
+  auth: inherit
+}
+
+body {
+  {
+    "name": "업체",
+    "brn": "0000000000",
+    "picture": "https://image.com"
+  }
+}
+
+script:post-response {
+  bru.setVar("companyId", res.body.data);
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.a('number');
+  });
+}

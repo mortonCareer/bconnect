@@ -11,10 +11,6 @@ public class ParticipantFactory {
     @Autowired private ParticipantRepository participantRepository;
 
     public ParticipantEntity create(Long chatId, Long memberId) {
-        return participantRepository.save(ParticipantEntity.builder()
-                .chatId(chatId)
-                .memberId(memberId)
-                .lastIdx(0L)
-                .build());
+        return participantRepository.save(new ParticipantEntity(chatId, memberId, 0L));
     }
 }

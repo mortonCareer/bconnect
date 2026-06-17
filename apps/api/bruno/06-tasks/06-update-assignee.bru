@@ -1,0 +1,24 @@
+meta {
+  name: 할당된 작업 수정
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}/api/v1/tasks/{{workerTaskId}}/assignee
+  auth: inherit
+}
+
+body {
+  {
+    "title": "작업 수정",
+    "memo": "메모 수정"
+  }
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}

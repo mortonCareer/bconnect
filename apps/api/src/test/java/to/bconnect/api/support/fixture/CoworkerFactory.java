@@ -11,7 +11,7 @@ public class CoworkerFactory {
         return new Coworker(id, memberId);
     }
 
-    public static CoworkerEntity createEntity(Long minId, Long maxId) {
-        return new CoworkerEntity(minId, maxId);
+    public static CoworkerEntity createEntity(Long memberId, Long otherId) {
+        return CoworkerEntity.of(memberId, otherId);
     }
 }
