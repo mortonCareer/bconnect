@@ -2,7 +2,6 @@ package to.bconnect.api.storage.post;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
@@ -30,7 +29,6 @@ public class PostEntity extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Builder
     public PostEntity(Long memberId, Long taskId, List<String> images, String content) {
         this.memberId = memberId;
         this.taskId = taskId;

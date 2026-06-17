@@ -2,7 +2,6 @@ package to.bconnect.api.storage.chat;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
@@ -22,7 +21,6 @@ public class ParticipantEntity extends BaseEntity {
     @Column(nullable = false)
     private Long lastIdx;
 
-    @Builder
     public ParticipantEntity(Long chatId, Long memberId, Long lastIdx) {
         this.chatId = chatId;
         this.memberId = memberId;

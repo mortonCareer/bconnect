@@ -26,15 +26,15 @@ public class ProfileFactory {
     }
 
     public static ProfileEntity createEntity(Long memberId) {
-        return ProfileEntity.builder()
-                .memberId(memberId)
-                .primaryTrade(Trade.ELECTRICAL)
-                .trades(Set.of(Trade.ELECTRICAL))
-                .experience(5)
-                .headline("headline")
-                .about("about")
-                .address(DEFAULT_ADDRESS)
-                .build();
+        return new ProfileEntity(
+                memberId,
+                Trade.ELECTRICAL,
+                Set.of(Trade.ELECTRICAL),
+                5,
+                "headline",
+                "about",
+                DEFAULT_ADDRESS
+        );
     }
 
     public static CreateProfileRequest createRequest() {

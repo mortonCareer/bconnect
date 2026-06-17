@@ -4,7 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
@@ -27,7 +26,6 @@ public class CompanyEntity extends BaseEntity {
     @Column
     private String picture;
 
-    @Builder
     public CompanyEntity(Long memberId, String name, String brn, String picture) {
         this.memberId = memberId;
         this.name = name;

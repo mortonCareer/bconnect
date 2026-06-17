@@ -18,12 +18,12 @@ public class PostFactory {
     }
 
     public static PostEntity createEntity(Long memberId, Long taskId) {
-        return PostEntity.builder()
-                .memberId(memberId)
-                .taskId(taskId)
-                .images(List.of(DEFAULT_IMAGE))
-                .content("content")
-                .build();
+        return new PostEntity(
+                memberId,
+                taskId,
+                List.of(DEFAULT_IMAGE),
+                "content"
+        );
     }
 
     public static CreatePostRequest createRequest() {
