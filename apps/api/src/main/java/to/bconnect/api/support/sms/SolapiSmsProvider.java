@@ -8,6 +8,7 @@ import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+// TODO : https://github.com/solapi/solapi-kotlin 기반 최신화
 @Slf4j
 @Component
 @Profile({"prod", "dev"})
