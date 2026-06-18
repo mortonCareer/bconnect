@@ -36,7 +36,7 @@ export async function GET() {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? '',
   }
 
-  const script = SW_TEMPLATE.replace('__FIREBASE_CONFIG__', JSON.stringify(config))
+  const script = SW_TEMPLATE.replaceAll('__FIREBASE_CONFIG__', JSON.stringify(config))
 
   return new NextResponse(script, {
     headers: {
