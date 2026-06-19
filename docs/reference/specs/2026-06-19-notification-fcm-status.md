@@ -94,6 +94,25 @@ FCM은 **프로젝트 등록만** 된 게 아니라 **FE·인프라가 통째로
 2. 구인 매칭 — 새 매칭 제안 (향후)
 3. 시스템 — 공지 (향후)
 
+### 3.6 알림 데이터 모델 — 세 표현 + canonical
+
+FCM 푸시는 **일시적**(fire-and-forget) — FCM 은 아무것도 저장하지 않는다. 알림 패널([NotificationsView](../../../packages/features/src/notifications/NotificationsView.tsx))의 히스토리·안읽음은 BE 가 **`notification` 테이블에 저장**해야 성립한다. 한 이벤트 = sink 2개: ① DB INSERT(영구) + ② FCM 발송(일시적).
+
+같은 도메인 알림의 **세 표현**, DB 가 canonical(정본):
+
+|           | ① DB 엔티티 (테이블)                 | ② 푸시 payload (FCM data)         | ③ 목록 아이템 (GET 응답)     |
+| --------- | ------------------------------------ | --------------------------------- | ---------------------------- |
+| 성격      | **canonical**, 영구                  | 전송 와이어, 일시적 (string-only) | 읽기모델 (`AppNotification`) |
+| 소유      | BE (#211)                            | BE→FE 계약 (3.3 의 ④)             | BE→FE (FE provisional 존재)  |
+| 고유 필드 | `id`·`member_id`·`read`·`created_at` | `icon`(파생)                      | —                            |
+
+②·③ 은 ①의 투영(projection). 충돌 시 ① 이 정답. `read`(사용자 상태)·`member_id`(수신자)는 테이블에만, `icon`(발신자 아바타)은 발송 시점 파생이라 컬럼 없을 수 있음.
+
+**결정 (2026-06-19, CTO — #211 BE 설계 입력)**: **canonical 스냅샷.** `title`·`body` 를 알림 생성 시점에 **테이블에 스냅샷 저장**(denormalize)한다 — reference 만 들고 조회 때 재계산하지 않음.
+
+- **왜**: 알림은 "그 시점 그 일이 있었다"는 **사건 기록**. 발신자가 나중에 이름을 바꿔도 "김철수님이 보냈음"은 당시 사실 → 스냅샷이어야 역사가 안 왜곡됨. 매번 재계산하면 과거 알림이 현재값으로 바뀜.
+- **경계**: `reference_type`+`reference_id`(딥링크 좌표)·`type`·`read`·`created_at` 은 저장, `icon` 은 발송 시 파생. `title`/`body` 만 "스냅샷이냐 계산이냐"의 선택지였고 → **스냅샷 확정**.
+
 ---
 
 ## 4. E2E 푸시 흐름 — 어디가 끊겼나
