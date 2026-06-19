@@ -108,10 +108,25 @@ FCM 푸시는 **일시적**(fire-and-forget) — FCM 은 아무것도 저장하�
 
 ②·③ 은 ①의 투영(projection). 충돌 시 ① 이 정답. `read`(사용자 상태)·`member_id`(수신자)는 테이블에만, `icon`(발신자 아바타)은 발송 시점 파생이라 컬럼 없을 수 있음.
 
-**결정 (2026-06-19, CTO — #211 BE 설계 입력)**: **canonical 스냅샷.** `title`·`body` 를 알림 생성 시점에 **테이블에 스냅샷 저장**(denormalize)한다 — reference 만 들고 조회 때 재계산하지 않음.
+**결정 (2026-06-19, 외부 사례 조사 기반 — #211 BE 설계 입력)**: **하이브리드 — 스냅샷 기본 + 휘발 필드만 재계산.**
 
-- **왜**: 알림은 "그 시점 그 일이 있었다"는 **사건 기록**. 발신자가 나중에 이름을 바꿔도 "김철수님이 보냈음"은 당시 사실 → 스냅샷이어야 역사가 안 왜곡됨. 매번 재계산하면 과거 알림이 현재값으로 바뀜.
-- **경계**: `reference_type`+`reference_id`(딥링크 좌표)·`type`·`read`·`created_at` 은 저장, `icon` 은 발송 시 파생. `title`/`body` 만 "스냅샷이냐 계산이냐"의 선택지였고 → **스냅샷 확정**.
+조사 결론: 알림 **인박스** 제품(Knock·Novu·MagicBell)은 생성 시점 렌더 텍스트를 **스냅샷 저장** + template/payload ref 병행. 소셜 **fan-out 피드**(Twitter·Stream)만 ID 저장 + 조회시 하이드레이트 — 단 1:수백만 fan-out + 편집반영이 필요한 다른 문제군이라 우리 1:1 알림엔 해당 안 됨. 우리 패널 = 인박스 케이스.
+
+스냅샷 우세 동인: ① 목록 read-heavy → N+1 회피 ② 참조 삭제(메시지/공고)돼도 텍스트 생존 ③ **푸시가 본질적 스냅샷이라 패널도 스냅샷이어야 두 채널 일치**.
+
+per-field (휘발성 기준):
+
+| 필드                     | 방식                             | 이유                                                |
+| ------------------------ | -------------------------------- | --------------------------------------------------- |
+| 메시지 미리보기(채팅)    | **스냅샷**                       | 편집/삭제돼도 당시값, 푸시 일치                     |
+| 발신자 표시이름          | body 엔 스냅샷 + `actor_id` 보관 | 칩만 현재이름 재계산 옵션                           |
+| 카운트/집계 ("매칭 3건") | **재계산**                       | frozen 숫자는 stale → 무의미 (Stream 집계피드 모델) |
+| 추천/시스템              | 스냅샷 + `entity_id`             | 딥링크, 원본 삭제 대비                              |
+| 현지화                   | 스냅샷 (한국어 전용)             | `data` 보관해 미래 i18n 대비                        |
+
+→ 테이블에 `title`·`body`(스냅샷) **+** `actor_id`·`entity_type`·`entity_id`·`data` JSONB(ref/재렌더용) **둘 다**. 렌더는 BE 가 생성 시 1회(= 푸시 payload 와 동일 렌더) → 푸시·패널 영구 일치, 목록은 조인 0 SELECT. (Knock/Novu 하이브리드 패턴.)
+
+> 근거: [Knock 피드 스키마](https://docs.knock.app/in-app-ui/api-overview)(블록마다 `content`+`rendered`), [Stream 활동피드 아키텍처](https://getstream.io/blog/scalable-activity-feed-architecture/)(피드는 ID만 저장·하이드레이트, 랭킹 필드만 denormalize), [oneuptime MySQL 알림](https://oneuptime.com/blog/post/2026-03-31-mysql-notification-system/view)(렌더 컨텍스트 스냅샷으로 N+1 회피).
 
 ---
 
