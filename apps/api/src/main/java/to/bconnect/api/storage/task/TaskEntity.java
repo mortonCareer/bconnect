@@ -2,7 +2,6 @@ package to.bconnect.api.storage.task;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.Address;
@@ -54,7 +53,6 @@ public class TaskEntity extends BaseEntity {
     // TODO: 추가
     // status: TaskStatus
 
-    @Builder
     public TaskEntity(Long memberId, String company, Address address, String taskTitle, String eventTitle,
                       Set<Trade> trades, LocalDate start, LocalDate end) {
         this.memberId = memberId;

@@ -40,16 +40,16 @@ public class TaskService {
 
     @Transactional
     public Long create(AuthUser user, CreateTask command) {
-        TaskEntity created = TaskEntity.builder()
-                .memberId(user.id())
-                .company(command.company())
-                .address(command.address())
-                .taskTitle(command.taskTitle())
-                .eventTitle(command.eventTitle())
-                .trades(command.trades())
-                .start(command.start())
-                .end(command.end())
-                .build();
+        TaskEntity created = new TaskEntity(
+                user.id(),
+                command.company(),
+                command.address(),
+                command.taskTitle(),
+                command.eventTitle(),
+                command.trades(),
+                command.start(),
+                command.end()
+        );
 
         return taskRepository.save(created).getId();
     }

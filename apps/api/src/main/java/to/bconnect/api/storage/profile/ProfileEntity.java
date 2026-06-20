@@ -2,7 +2,6 @@ package to.bconnect.api.storage.profile;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.Address;
@@ -43,7 +42,6 @@ public class ProfileEntity extends BaseEntity {
     @Embedded
     private Address address;
 
-    @Builder
     public ProfileEntity(Long memberId, Trade primaryTrade, Set<Trade> trades, int experience,
                          String headline, String about, Address address) {
         this.memberId = memberId;

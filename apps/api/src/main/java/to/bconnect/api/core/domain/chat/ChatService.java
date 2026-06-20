@@ -72,10 +72,7 @@ public class ChatService {
         ChatEntity created = chatRepository.save(new ChatEntity(command.title()));
 
         participantRepository.saveAll(participantIds.stream()
-                .map(it -> ParticipantEntity.builder()
-                        .chatId(created.getId())
-                        .memberId(it)
-                        .build())
+                .map(it -> new ParticipantEntity(created.getId(), it))
                 .toList());
 
         messageRepository.save(new MessageEntity(

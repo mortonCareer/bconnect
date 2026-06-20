@@ -23,15 +23,15 @@ public class ProfileService {
         if (!command.trades().contains(command.primaryTrade()))
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
-        ProfileEntity created = ProfileEntity.builder()
-                .memberId(user.id())
-                .primaryTrade(command.primaryTrade())
-                .trades(command.trades())
-                .experience(command.experience())
-                .headline(command.headline())
-                .about(command.about())
-                .address(command.address())
-                .build();
+        ProfileEntity created = new ProfileEntity(
+                user.id(),
+                command.primaryTrade(),
+                command.trades(),
+                command.experience(),
+                command.headline(),
+                command.about(),
+                command.address()
+        );
 
         return profileRepository.save(created).getId();
     }

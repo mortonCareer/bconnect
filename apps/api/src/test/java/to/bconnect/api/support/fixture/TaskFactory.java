@@ -22,16 +22,16 @@ public class TaskFactory {
     }
 
     public static TaskEntity createEntity(Long memberId) {
-        return TaskEntity.builder()
-                .memberId(memberId)
-                .company("company")
-                .address(ProfileFactory.DEFAULT_ADDRESS)
-                .taskTitle("task")
-                .eventTitle("event")
-                .trades(Set.of(Trade.ELECTRICAL))
-                .start(START_DATE)
-                .end(END_DATE)
-                .build();
+        return new TaskEntity(
+                memberId,
+                "company",
+                ProfileFactory.DEFAULT_ADDRESS,
+                "task",
+                "event",
+                Set.of(Trade.ELECTRICAL),
+                START_DATE,
+                END_DATE
+        );
     }
 
     public static CreateTaskRequest createRequest() {
