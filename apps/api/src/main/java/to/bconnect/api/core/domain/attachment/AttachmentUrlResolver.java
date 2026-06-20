@@ -1,8 +1,6 @@
-package to.bconnect.api.core.presentation;
+package to.bconnect.api.core.domain.attachment;
 
 import org.springframework.stereotype.Component;
-import to.bconnect.api.core.domain.attachment.Attachment;
-import to.bconnect.api.core.domain.attachment.ImageSize;
 import to.bconnect.api.support.cloudfront.CloudFrontProperties;
 
 import java.util.List;
@@ -10,18 +8,17 @@ import java.util.List;
 import static to.bconnect.api.core.domain.attachment.AttachmentKeyUtils.key;
 
 @Component
-public class AttachmentUrlUtils {
+public class AttachmentUrlResolver {
 
-    private static final String DELIMITER = "/";
     private static final String URL_FORMAT = "https://%s/%s"; // domain + key
     private final String domain;
 
-    public AttachmentUrlUtils(CloudFrontProperties cloudFrontProperties) {
+    public AttachmentUrlResolver(CloudFrontProperties cloudFrontProperties) {
         this.domain = cloudFrontProperties.domain();
     }
 
     public String urlOf(Attachment attachment) {
-        return URL_FORMAT.formatted(domain, key(attachment));
+        return URL_FORMAT.formatted(domain, attachment.key());
     }
 
     public String urlOf(Attachment attachment, ImageSize size) {
