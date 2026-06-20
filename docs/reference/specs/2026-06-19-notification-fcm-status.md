@@ -77,6 +77,8 @@ FCM은 **프로젝트 등록만** 된 게 아니라 **FE·인프라가 통째로
 
 **④ 제네릭 리다이렉트 라우트**: SW·앱은 매핑 없이 `/n/{reference_type}/{reference_id}` 로만 이동, 각 앱의 `/n/[referenceType]/[referenceId]` 라우트 1곳이 `type→실경로` resolve+redirect. → **맵 SSOT 1곳**(SW(JS)/앱(TS) 중복 제거), 푸시+목록 통일.
 
+> **왜 `/n/` 인가**: 알림 클릭 시 `reference_type`(chat_room)+`reference_id`(42)를 실경로(`/messages/42`)로 바꾸는 **맵**이 필요하다. 근데 SW(plain JS)는 앱의 TS 맵을 import 못 함 → ② 맵을 SW·앱 양쪽에 복제하거나, ④ **`/n/` 라우트 1곳에 맵을 모으고** SW·앱은 `/n/{type}/{id}` 만 조립해 이동. `/n/` 은 그 변환을 전담하는 경유 라우트(이름은 임의 — notification 약자, `/go/` 등 무엇이든 됨). ④를 택한 건 맵 중복(②)을 없애려고.
+
 - career = full-page (`/n/chat_room/42` → `/messages/42`)
 - plan = 패널 (`/n/chat_room/42` → `?panel=messages/42`)
 - → 앱별 맵이 달라서 `/n/` 라우트가 그 차이를 흡수. SW/payload 는 동일.
@@ -97,7 +99,7 @@ FCM은 **프로젝트 등록만** 된 게 아니라 **FE·인프라가 통째로
 
 FCM 푸시는 **일시적**(fire-and-forget) — FCM 은 아무것도 저장 안 함. 알림 패널([NotificationsView](../../../packages/features/src/notifications/NotificationsView.tsx))의 히스토리·안읽음은 BE 가 DB 저장해야 성립. 한 이벤트 = sink 2개: ① DB INSERT(영구) + ② FCM 발송(일시).
 
-**CEO ERD (Figma board `AzZ7IkJOg1kRo6y7B7Ceyj`, node 391:458 / 695:1370) 기준 — 두 엔티티:**
+**CEO ERD (Figma board — [Notification 391:458](https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj/?node-id=391-458) · [NotificationType 695:1370](https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj/?node-id=695-1370)) 기준 — 두 엔티티:**
 
 ```
 Notification                         NotificationType  (타입당 1행 = 레지스트리)
@@ -133,9 +135,9 @@ Notification                         NotificationType  (타입당 1행 = 레지�
 
 `actor=sender_id 렌더`는 셋 다 공통 (콘텐츠 변수 한 축만 다름). 콘텐츠는 **스냅샷**(삭제·편집 안전, 푸시 정합) — 재계산(reference 조회)은 chat_room→어느 메시지 모호 + 삭제 깨짐으로 버림. **CTO 추천 = C** (채팅 한 덩이면 충분, C→A 비파괴 이관). 프라이버시(잠금화면 노출)는 스키마와 별개 정책 — OS 설정 + Phase3 토글. **CEO 결정 필요: 미리보기 담나 + 담으면 A/C.**
 
-### 3.7 알림 시나리오 (CEO Figma `1469:4999`)
+### 3.7 알림 시나리오 ([CEO Figma 1469:4999](https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS/?node-id=1469-4999))
 
-각 시나리오 = `NotificationType` 1행 (`code` + `reference_type` + `message`) + per-알림 `sender_id`/`reference_id`. 설정은 초기 미지원·모두 발송.
+각 시나리오 = `NotificationType` 1행 (`code` + `reference_type` + `message`) + per-알림 `sender_id`/`reference_id`. 설정은 초기 미지원·모두 발송. (아래 `ref=` 는 `reference_type` = 딥링크 대상 엔티티 타입, 3.3)
 
 - **시스템** (sender 보통 null): 회원가입 축하 · 업데이트 공지(+link) · 프로필 관리 제안 · 문의/신고 접수·응답
 - **기능** (sender=행위자): 동료요청(ref=`coworker_request`) · 추천서 작성(ref=`recommendation`) · 추천인(`Recommendation.from_id` 기반 — 트리거 #12 확인 필요) · 섭외요청(ref=`chat_room`)
