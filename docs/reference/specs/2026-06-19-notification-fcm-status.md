@@ -81,7 +81,7 @@ FCM은 **프로젝트 등록만** 된 게 아니라 **FE·인프라가 통째로
 - plan = 패널 (`/n/chat_room/42` → `?panel=messages/42`)
 - → 앱별 맵이 달라서 `/n/` 라우트가 그 차이를 흡수. SW/payload 는 동일.
 
-> 본 문서 "완료된 것"의 SW `data.url` 은 **로컬 테스트 현행**이며, 별도 PR(9장)에서 `/n/` 방식으로 교체된다.
+> 본 문서 "완료된 것"의 SW `data.url` 은 **로컬 테스트 현행**이며, 별도 PR(8장)에서 `/n/` 방식으로 교체된다.
 
 ### 3.4 알림 설정 정책
 
@@ -142,7 +142,7 @@ Notification                         NotificationType  (타입당 1행 = 레지�
 - **모집관리** (plan 측): 섭외 승낙/거절 · 섭외 요청
 - **확장성** (향후 — **새 `type` 추가만으로 흡수, 스키마 불변**): 고객 요청사항 · 권한 요청/승낙·거절 · 견적 등록 · 계약 등록(타인/자신) · 전자서명 · 청구서 생성(자신/타인)
 
-> **양방향**(채팅·동료·섭외 = career↔plan 둘 다 수신) → plan 도 푸시 스택 필요(9.2). 집계형(프로필 조회수 등)은 별도(재계산·주기집계, 향후). **OTP·FCM 토큰등록은 알림 테이블 대상 아님** (다른 채널).
+> **양방향**(채팅·동료·섭외 = career↔plan 둘 다 수신) → plan 도 푸시 스택 필요(8.2). 집계형(프로필 조회수 등)은 별도(재계산·주기집계, 향후). **OTP·FCM 토큰등록은 알림 테이블 대상 아님** (다른 채널).
 
 ---
 
@@ -254,25 +254,11 @@ Notification                         NotificationType  (타입당 1행 = 레지�
 - [ ] 안 읽음 카운트 (전용 엔드포인트 또는 user profile 포함)
 - [ ] 읽음 처리 엔드포인트
 
-> BE가 위 엔드포인트를 구현하면 → 스펙 갱신 → `pnpm api:generate` → FE의 임시 fetch/더미를 generated 훅으로 교체. 딥링크 ④(`/n/`) 전환은 9.1(별도 PR).
+> BE가 위 엔드포인트를 구현하면 → 스펙 갱신 → `pnpm api:generate` → FE의 임시 fetch/더미를 generated 훅으로 교체. 딥링크 ④(`/n/`) 전환은 8.1(별도 PR).
 
 ---
 
-## 7. 스테일 참조 정리 (정합 필요)
-
-`#211`로 일원화되면서 코드·문서에 옛 이슈 번호가 남았다. BE 구현 PR에서 같이 정리 권장.
-
-| 위치                                                                                         | 현재                                | 고칠 방향                        |
-| -------------------------------------------------------------------------------------------- | ----------------------------------- | -------------------------------- |
-| [register-device-token.ts:10](../../../apps/career/src/lib/register-device-token.ts#L10)     | "BE 가 #233 으로 구현 예정"         | #211                             |
-| [devices.ts:7](../../../packages/mocks/src/overrides/devices.ts#L7)                          | "#233 BE 구현 후"                   | #211                             |
-| [useNotifications.ts:6](../../../packages/features/src/notifications/useNotifications.ts#L6) | "TODO(BE notification 도메인 #347)" | #211 (#347은 FE 패널 이슈, 오기) |
-| [types.ts:3](../../../packages/features/src/notifications/types.ts#L3)                       | "TODO(... #347)"                    | #211                             |
-| `#233` 본문이 참조한 `docs/NOTIFICATION_DEEPLINKS.md`                                        | **파일 없음** (삭제됨/미작성)       | 딥링크 SSOT를 3.3 또는 #211로    |
-
----
-
-## 8. 담당 + 다음 액션
+## 7. 담당 + 다음 액션
 
 - **BE 알림 담당**: 신규 팀원 **전지원** ([#211](https://github.com/mortonCareer/bconnect/issues/211))
 - **CTO(손장수)**: BE에게 본 문서로 아키텍처 공유. 딥링크 ④·render-on-read·category 제거는 ERD 정합 확정. **CEO 확정 대기 = 미리보기 저장(3.6 A/C)** + 시나리오 type 목록(3.7)
@@ -280,11 +266,11 @@ Notification                         NotificationType  (타입당 1행 = 레지�
 
 ---
 
-## 9. 다음 작업 (별도 PR — FE)
+## 8. 다음 작업 (별도 PR — FE)
 
 본 브랜치(`fix/notification-local-test`)는 **로컬 테스트 세팅까지만** 담는다 (SW 버그픽스·firebase-admin·dev 트리거 패널·IAM·본 문서). 아래는 의도적으로 분리한 후속 작업 — 설계 비중이 커 별도 PR(들)로 진행한다.
 
-### 9.1 푸시 payload 스키마 + 딥링크 ④ 구현
+### 8.1 푸시 payload 스키마 + 딥링크 ④ 구현
 
 3.3 의 FE 결정(제네릭 리다이렉트)을 코드화:
 
@@ -293,7 +279,7 @@ Notification                         NotificationType  (타입당 1행 = 레지�
 - [ ] SW·훅·dev 도구를 `data.url` → `/n/{reference_type}/{reference_id}` 로 전환
 - [ ] 현행 `data.url`/`data.icon` 임시 키 정리
 
-### 9.2 푸시 인프라 공유화 (career → packages, plan 재사용)
+### 8.2 푸시 인프라 공유화 (career → packages, plan 재사용)
 
 plan 도 동일 푸시 시스템 필요(데스크톱 백/포그라운드 알림). 현재 career 전용인 플러밍을 공유로 승격:
 
@@ -302,7 +288,7 @@ plan 도 동일 푸시 시스템 필요(데스크톱 백/포그라운드 알림)
 - [ ] plan 측 배선 (SW 라우트·/n/·마운트)
 - [ ] ([ADR-0020](../../explanation/adr/0020-dual-shell-view-sharing-rendershell-resolved-data.md) 듀얼셸 패턴과 동형 — 로직 공유, 데이터·셸은 앱)
 
-### 9.3 크로스 언어 동기화 (BE Java ↔ FE TS)
+### 8.3 크로스 언어 동기화 (BE Java ↔ FE TS)
 
 payload 계약을 두 언어가 공유하되 drift 방지:
 

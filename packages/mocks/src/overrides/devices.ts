@@ -4,7 +4,7 @@ import type { DevicePlatform } from '@bconnect/api-client'
 
 // FCM 디바이스 토큰 등록 — UPSERT 의미를 살리는 stateful override.
 // 동일 토큰 재등록 시 last_active_at 갱신, 신규 토큰은 추가.
-// (#233 BE 구현 후 prod 에선 실서버 호출, 본 mock 은 dev 전용)
+// (#211 BE 구현 후 prod 에선 실서버 호출, 본 mock 은 dev 전용)
 
 interface DeviceRecord {
   id: number
