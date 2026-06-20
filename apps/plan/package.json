@@ -18,6 +18,8 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "catalog:",
     "@sentry/nextjs": "catalog:",
+    "@vercel/analytics": "catalog:",
+    "@vercel/speed-insights": "catalog:",
     "next": "catalog:",
     "nuqs": "catalog:",
     "react": "catalog:",
