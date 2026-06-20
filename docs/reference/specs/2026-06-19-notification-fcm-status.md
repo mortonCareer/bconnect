@@ -66,23 +66,22 @@ FCM은 **프로젝트 등록만** 된 게 아니라 **FE·인프라가 통째로
 
 → BE는 **발송 시점(push)** 과 **저장/조회(list)** 둘 다 구현해야 한다. 같은 알림 이벤트가 FCM 발송 + DB 저장 양쪽으로 가야 목록에도 남는다.
 
-### 3.3 딥링크 계약 — BE가 정해야 할 핵심 결정
+### 3.3 딥링크 — reference 기반 (④ 제네릭 리다이렉트)
 
-알림 클릭 시 어디로 보낼지를 BE 응답이 결정한다. #211 코멘트에서 **CEO가 제안한 방식**:
+알림 클릭 목적지는 **참조 기반**으로 정한다 (CEO ERD 정합 — 완성 URL 아님):
 
-> 응답에 `reference_type`(엔티티 타입) + `reference_id`(엔티티 ID)를 포함 → **FE가 URL 조립**.
-> 예: `profile`/`1` → `/profiles/1`, 동료 요청 → `coworker-req`/... 형태.
+- `Notification.reference_id` = 가리키는 엔티티 ID
+- `NotificationType.reference_type` (EntityType) = 그 엔티티 타입 — **`type` 경유로 결정** (Notification 행엔 reference_type 없음, 3.6 참조)
 
-반면 **현재 FE Service Worker는 FCM payload의 `data.url`(완성된 URL)** 을 그대로 읽어 네비게이트한다([firebase-messaging.sw.template.js](../../../apps/career/src/service-workers/firebase-messaging.sw.template.js)).
+→ 딥링크 = `reference_type`(type 경유) + `reference_id`. **CEO Figma 요구사항의 단일 `link` 필드는 stale** — ERD 의 `NotificationType.reference_type` + `Notification.reference_id` 로 **확정**.
 
-**→ 둘을 통일해야 한다. BE 결정 사항:**
+**④ 제네릭 리다이렉트 라우트**: SW·앱은 매핑 없이 `/n/{reference_type}/{reference_id}` 로만 이동, 각 앱의 `/n/[referenceType]/[referenceId]` 라우트 1곳이 `type→실경로` resolve+redirect. → **맵 SSOT 1곳**(SW(JS)/앱(TS) 중복 제거), 푸시+목록 통일.
 
-- (A) `reference_type`+`reference_id`로 통일 → 푸시 payload에도 이걸 넣고, **SW를 조립 방식으로 수정** (FE 소폭 변경 필요)
-- (B) BE가 서버에서 URL 조립 → `data.url`로 통일 (현재 SW 무수정, 목록 응답도 `url` 필드 제공)
+- career = full-page (`/n/chat_room/42` → `/messages/42`)
+- plan = 패널 (`/n/chat_room/42` → `?panel=messages/42`)
+- → 앱별 맵이 달라서 `/n/` 라우트가 그 차이를 흡수. SW/payload 는 동일.
 
-**FE 결정 (2026-06-19, CTO ↔ Claude 검토 — #211 BE 합의 대기)**: (A)의 변형 — `reference_type`+`reference_id` + **제네릭 리다이렉트 라우트**. BE 는 `reference_type`+`reference_id` 만 보내고(도메인만), SW·앱은 매핑 없이 `/n/{reference_type}/{reference_id}` 로만 이동, 각 앱의 `/n/[referenceType]/[referenceId]` 라우트 1곳이 `type→실경로` resolve+redirect. → **맵 SSOT 1곳**(SW(JS)/앱(TS) 중복 제거), 푸시+목록 통일. 구현은 아래 9장(별도 PR)으로 분리.
-
-> 본 문서의 "완료된 것"의 SW `data.url` 은 **로컬 테스트용 현행**이며, 위 FE 결정에 따라 별도 PR 에서 `/n/` 방식으로 교체된다. BE([#211](https://github.com/mortonCareer/bconnect/issues/211)) 가 `reference_type`+`reference_id` 로 합의되면 그대로 정합.
+> 본 문서 "완료된 것"의 SW `data.url` 은 **로컬 테스트 현행**이며, 별도 PR(9장)에서 `/n/` 방식으로 교체된다.
 
 ### 3.4 알림 설정 정책
 
@@ -94,39 +93,56 @@ FCM은 **프로젝트 등록만** 된 게 아니라 **FE·인프라가 통째로
 2. 구인 매칭 — 새 매칭 제안 (향후)
 3. 시스템 — 공지 (향후)
 
-### 3.6 알림 데이터 모델 — 세 표현 + canonical
+### 3.6 알림 데이터 모델 — ERD (CEO 확정)
 
-FCM 푸시는 **일시적**(fire-and-forget) — FCM 은 아무것도 저장하지 않는다. 알림 패널([NotificationsView](../../../packages/features/src/notifications/NotificationsView.tsx))의 히스토리·안읽음은 BE 가 **`notification` 테이블에 저장**해야 성립한다. 한 이벤트 = sink 2개: ① DB INSERT(영구) + ② FCM 발송(일시적).
+FCM 푸시는 **일시적**(fire-and-forget) — FCM 은 아무것도 저장 안 함. 알림 패널([NotificationsView](../../../packages/features/src/notifications/NotificationsView.tsx))의 히스토리·안읽음은 BE 가 DB 저장해야 성립. 한 이벤트 = sink 2개: ① DB INSERT(영구) + ② FCM 발송(일시).
 
-같은 도메인 알림의 **세 표현**, DB 가 canonical(정본):
+**CEO ERD (Figma board `AzZ7IkJOg1kRo6y7B7Ceyj`, node 391:458 / 695:1370) 기준 — 두 엔티티:**
 
-|           | ① DB 엔티티 (테이블)                 | ② 푸시 payload (FCM data)         | ③ 목록 아이템 (GET 응답)     |
-| --------- | ------------------------------------ | --------------------------------- | ---------------------------- |
-| 성격      | **canonical**, 영구                  | 전송 와이어, 일시적 (string-only) | 읽기모델 (`AppNotification`) |
-| 소유      | BE (#211)                            | BE→FE 계약 (3.3 의 ④)             | BE→FE (FE provisional 존재)  |
-| 고유 필드 | `id`·`member_id`·`read`·`created_at` | `icon`(파생)                      | —                            |
+```
+Notification                         NotificationType  (타입당 1행 = 레지스트리)
+  id            PK                      code           String  (타입 코드, COWORKER_REQUEST 등)
+  sender_id     FK, nullable (시스템)   reference_type EntityType (reference_id 가 가리키는 타입 — 딥링크용)
+  receiver_id   FK (수신자)             message        String  (템플릿, 변수 포함)
+  type          → NotificationType
+  reference_id  Long (대상 엔티티 ID)
+  is_read       boolean
+  (created_at)  ※ ERD 미표기 — 목록 정렬에 필요, BaseTimeEntity 추정
+```
 
-②·③ 은 ①의 투영(projection). 충돌 시 ① 이 정답. `read`(사용자 상태)·`member_id`(수신자)는 테이블에만, `icon`(발신자 아바타)은 발송 시점 파생이라 컬럼 없을 수 있음.
+**렌더 (render-on-read)**: `Notification.type` → `NotificationType.message`(템플릿)+`reference_type` 조회 → 템플릿 변수를 Notification 행에서 채움. `{sender}` 는 `sender_id` 로 **조회 시 렌더** → 발신자 개명해도 항상 최신.
 
-**결정 (2026-06-19, 외부 사례 조사 기반 — #211 BE 설계 입력)**: **하이브리드 — 스냅샷 기본 + 휘발 필드만 재계산.**
+**핵심 설계 포인트:**
 
-조사 결론: 알림 **인박스** 제품(Knock·Novu·MagicBell)은 생성 시점 렌더 텍스트를 **스냅샷 저장** + template/payload ref 병행. 소셜 **fan-out 피드**(Twitter·Stream)만 ID 저장 + 조회시 하이드레이트 — 단 1:수백만 fan-out + 편집반영이 필요한 다른 문제군이라 우리 1:1 알림엔 해당 안 됨. 우리 패널 = 인박스 케이스.
+- **category 없음** — `type`(NotificationType)이 분류·아이콘·템플릿·딥링크엔티티를 모두 결정. 별도 카테고리 레이어 불필요 (논의 종결, 제거). Phase2 on/off 설정도 `type` 단위 토글이면 됨.
+- **template 은 per-row 아님** — `NotificationType.message` 에 타입당 1개 (DB 레지스트리). 오타 수정 일괄 반영, 알림 행은 가벼움.
+- **reference_type 도 per-row 아님** — `NotificationType.reference_type` 에 타입당 1개. 알림 행엔 `reference_id` 만 (3.3 딥링크).
+- **actor = render-on-read** (`sender_id` → 현재 이름).
 
-스냅샷 우세 동인: ① 목록 read-heavy → N+1 회피 ② 참조 삭제(메시지/공고)돼도 텍스트 생존 ③ **푸시가 본질적 스냅샷이라 패널도 스냅샷이어야 두 채널 일치**.
+**세 표현** (DB 엔티티 = canonical, 푸시·목록은 투영): 같은 알림이 ① DB(Notification+NotificationType, 영구) ② 푸시 payload(발송시 렌더 스냅샷) ③ 목록 응답(render-on-read)로 나타남. 충돌 시 ① 이 정답.
 
-per-field (휘발성 기준):
+**⚠️ 미결 (CEO 확정 대기) — 콘텐츠 변수(채팅 미리보기) 저장 위치:**
 
-| 필드                     | 방식                             | 이유                                                |
-| ------------------------ | -------------------------------- | --------------------------------------------------- |
-| 메시지 미리보기(채팅)    | **스냅샷**                       | 편집/삭제돼도 당시값, 푸시 일치                     |
-| 발신자 표시이름          | body 엔 스냅샷 + `actor_id` 보관 | 칩만 현재이름 재계산 옵션                           |
-| 카운트/집계 ("매칭 3건") | **재계산**                       | frozen 숫자는 stale → 무의미 (Stream 집계피드 모델) |
-| 추천/시스템              | 스냅샷 + `entity_id`             | 딥링크, 원본 삭제 대비                              |
-| 현지화                   | 스냅샷 (한국어 전용)             | `data` 보관해 미래 i18n 대비                        |
+현 ERD 엔 알림 행에 콘텐츠 저장 필드가 없다 → `{preview}` 같은 **per-row 변수**를 둘 곳이 없다 (message 템플릿은 타입당 공유라 sender 등 행 필드만 채움). 3안:
 
-→ 테이블에 `title`·`body`(스냅샷) **+** `actor_id`·`entity_type`·`entity_id`·`data` JSONB(ref/재렌더용) **둘 다**. 렌더는 BE 가 생성 시 1회(= 푸시 payload 와 동일 렌더) → 푸시·패널 영구 일치, 목록은 조인 0 SELECT. (Knock/Novu 하이브리드 패턴.)
+| 안    | 방식                                               | 스키마                      |
+| ----- | -------------------------------------------------- | --------------------------- |
+| **A** | `args` JSON 변수맵 (범용, 다변수·미래 대비)        | `Notification.args` JSONB   |
+| **B** | 미리보기 없음 ("{sender}님이 메시지를 보냈습니다") | ERD 무변경                  |
+| **C** | 단순 콘텐츠 스냅샷 1덩이                           | `Notification.content` text |
 
-> 근거: [Knock 피드 스키마](https://docs.knock.app/in-app-ui/api-overview)(블록마다 `content`+`rendered`), [Stream 활동피드 아키텍처](https://getstream.io/blog/scalable-activity-feed-architecture/)(피드는 ID만 저장·하이드레이트, 랭킹 필드만 denormalize), [oneuptime MySQL 알림](https://oneuptime.com/blog/post/2026-03-31-mysql-notification-system/view)(렌더 컨텍스트 스냅샷으로 N+1 회피).
+`actor=sender_id 렌더`는 셋 다 공통 (콘텐츠 변수 한 축만 다름). 콘텐츠는 **스냅샷**(삭제·편집 안전, 푸시 정합) — 재계산(reference 조회)은 chat_room→어느 메시지 모호 + 삭제 깨짐으로 버림. **CTO 추천 = C** (채팅 한 덩이면 충분, C→A 비파괴 이관). 프라이버시(잠금화면 노출)는 스키마와 별개 정책 — OS 설정 + Phase3 토글. **CEO 결정 필요: 미리보기 담나 + 담으면 A/C.**
+
+### 3.7 알림 시나리오 (CEO Figma `1469:4999`)
+
+각 시나리오 = `NotificationType` 1행 (`code` + `reference_type` + `message`) + per-알림 `sender_id`/`reference_id`. 설정은 초기 미지원·모두 발송.
+
+- **시스템** (sender 보통 null): 회원가입 축하 · 업데이트 공지(+link) · 프로필 관리 제안 · 문의/신고 접수·응답
+- **기능** (sender=행위자): 동료요청(ref=`coworker_request`) · 추천서 작성(ref=`recommendation`) · 추천인(`Recommendation.from_id` 기반 — 트리거 #12 확인 필요) · 섭외요청(ref=`chat_room`)
+- **모집관리** (plan 측): 섭외 승낙/거절 · 섭외 요청
+- **확장성** (향후 — **새 `type` 추가만으로 흡수, 스키마 불변**): 고객 요청사항 · 권한 요청/승낙·거절 · 견적 등록 · 계약 등록(타인/자신) · 전자서명 · 청구서 생성(자신/타인)
+
+> **양방향**(채팅·동료·섭외 = career↔plan 둘 다 수신) → plan 도 푸시 스택 필요(9.2). 집계형(프로필 조회수 등)은 별도(재계산·주기집계, 향후). **OTP·FCM 토큰등록은 알림 테이블 대상 아님** (다른 채널).
 
 ---
 
@@ -149,7 +165,7 @@ per-field (휘발성 기준):
    ↓
 ✅ OS 알림 (백그라운드) / in-app 토스트 (포그라운드)
    ↓
-✅ 클릭 → 딥링크 네비게이트 (단 3.3 계약 확정 필요)
+✅ 클릭 → 딥링크 네비게이트 (`/n/{reference_type}/{reference_id}`, 3.3)
 ```
 
 가운데 BE 두 칸만 채우면 켜진다.
@@ -227,8 +243,9 @@ per-field (휘발성 기준):
 
 **알림 발송 + 저장**
 
-- [ ] `notification` 테이블 (`member_id`, `type`, `title`, `body`, `reference_type`, `reference_id`, `read`, `created_at`)
-- [ ] 채팅 메시지 트리거 — 수신자 토큰 조회 → FCM 발송 + DB 저장. payload `notification.title`(발신자), `notification.body`(내용), 딥링크(3.3 계약)
+- [ ] `Notification` 엔티티 (`id`·`sender_id`(nullable)·`receiver_id`·`type`→NotificationType·`reference_id`·`is_read`·`created_at`) + `NotificationType` (`code`·`reference_type`·`message` 템플릿) — CEO ERD (3.6)
+- [ ] 채팅 메시지 트리거 — 수신자 토큰 조회 → FCM 발송 + Notification INSERT. 텍스트는 `message` 템플릿 렌더(`{sender}`=sender_id) + 딥링크(`reference_type`(type 경유)+`reference_id`, 3.3)
+- [ ] (미리보기 담을 경우) Notification 콘텐츠 필드 — A/C 중 CEO 확정 (3.6 미결)
 - [ ] 발송 정책 — 수신자가 해당 채팅방 WebSocket 활성이 아닐 때만
 
 **조회**
@@ -237,7 +254,7 @@ per-field (휘발성 기준):
 - [ ] 안 읽음 카운트 (전용 엔드포인트 또는 user profile 포함)
 - [ ] 읽음 처리 엔드포인트
 
-> BE가 위 엔드포인트를 구현하면 → 스펙 갱신 → `pnpm api:generate` → FE의 임시 fetch/더미를 generated 훅으로 교체. 단 딥링크를 (A) 방식으로 가면 SW 조립 로직 FE 변경 1건 필요(3.3).
+> BE가 위 엔드포인트를 구현하면 → 스펙 갱신 → `pnpm api:generate` → FE의 임시 fetch/더미를 generated 훅으로 교체. 딥링크 ④(`/n/`) 전환은 9.1(별도 PR).
 
 ---
 
@@ -258,7 +275,7 @@ per-field (휘발성 기준):
 ## 8. 담당 + 다음 액션
 
 - **BE 알림 담당**: 신규 팀원 **전지원** ([#211](https://github.com/mortonCareer/bconnect/issues/211))
-- **CTO(손장수)**: BE에게 본 문서로 아키텍처 공유 + 딥링크 계약(3.3) 합의. BE 엔드포인트 확정 후 스펙 갱신
+- **CTO(손장수)**: BE에게 본 문서로 아키텍처 공유. 딥링크 ④·render-on-read·category 제거는 ERD 정합 확정. **CEO 확정 대기 = 미리보기 저장(3.6 A/C)** + 시나리오 type 목록(3.7)
 - **검증**: BE 두 칸 채워지면 [test-push.ts](../../../apps/career/scripts/test-push.ts) 수동 발송이 아닌 **실 채팅 이벤트**로 E2E 푸시 확인
 
 ---
@@ -271,8 +288,8 @@ per-field (휘발성 기준):
 
 3.3 의 FE 결정(제네릭 리다이렉트)을 코드화:
 
-- [ ] `PushNotificationData` 공유 타입 ([packages/features](../../../packages/features/src/notifications/)) — `type`·`title`·`body`·`reference_type`·`reference_id`·`icon?` (FCM data 는 string-only)
-- [ ] 각 앱 `/n/[referenceType]/[referenceId]` 리다이렉트 라우트 + `type→경로` 맵(앱별 SSOT)
+- [ ] 푸시/목록 FE 타입 ([packages/features](../../../packages/features/src/notifications/)) — ERD 정합: `type`·렌더된 텍스트(`message` 결과)·`reference_type`(type 경유)·`reference_id`·`icon?` (FCM data 는 string-only). BE 확정 후 orval generated 로 교체
+- [ ] 각 앱 `/n/[referenceType]/[referenceId]` 리다이렉트 라우트 + `reference_type→경로` 맵(앱별 SSOT)
 - [ ] SW·훅·dev 도구를 `data.url` → `/n/{reference_type}/{reference_id}` 로 전환
 - [ ] 현행 `data.url`/`data.icon` 임시 키 정리
 
