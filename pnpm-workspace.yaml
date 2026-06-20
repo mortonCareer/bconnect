@@ -10,6 +10,7 @@ catalog:
   '@types/react': ^19
   '@types/react-dom': ^19
   '@vercel/analytics': ^2.0.1
+  '@vercel/speed-insights': ^2.0.0
   eslint: ^9
   lucide-react: ^0.562.0
   msw: ^2.13.6

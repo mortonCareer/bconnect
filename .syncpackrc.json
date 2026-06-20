@@ -23,6 +23,7 @@
         "@types/react",
         "@types/react-dom",
         "@vercel/analytics",
+        "@vercel/speed-insights",
         "eslint",
         "msw",
         "next",

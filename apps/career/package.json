@@ -18,6 +18,7 @@
     "@hookform/resolvers": "catalog:",
     "@sentry/nextjs": "catalog:",
     "@vercel/analytics": "catalog:",
+    "@vercel/speed-insights": "catalog:",
     "cheerio": "^1.2.0",
     "fast-xml-parser": "^5.3.7",
     "firebase": "^12.12.0",
