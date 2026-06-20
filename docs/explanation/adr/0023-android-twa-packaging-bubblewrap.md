@@ -1,6 +1,6 @@
 # ADR-0023: career 앱 Google Play 안드로이드 패키징 — Bubblewrap (TWA)
 
-- **Status**: Proposed
+- **Status**: Accepted
 - **Date**: 2026-06-15
 - **Deciders**: @manamana32321
 - **Related**: career PWA (`apps/career`, https://bconnect.to), `apps/career/src/app/manifest.ts`, `apps/career/src/app/firebase-messaging-sw.js`
