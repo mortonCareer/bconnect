@@ -14,3 +14,12 @@ spring:
 app:
   jwt:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
+  sms:
+    api-key: test-dummy-api-key
+    api-secret: test-dummy-api-secret
+    sender-number: "01000000000"
+  s3:
+    bucket: test-dummy-bucket
+  cloudfront:
+    key-pair-id: test-dummy-key-pair-id
+    private-key: test-dummy-private-key

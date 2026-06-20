@@ -36,11 +36,9 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     // implementation 'org.flywaydb:flyway-database-postgresql'
 
-    // TODO: aws
-    // implementation 'software.amazon.awssdk:s3:2.42.0'
-    // implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:4.0.0')
-    // implementation 'io.awspring.cloud:spring-cloud-aws-starter'
-    // implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
+    implementation platform('software.amazon.awssdk:bom:2.46.11')
+    implementation 'software.amazon.awssdk:s3'
+    implementation 'software.amazon.awssdk:cloudfront'
 
     // jwt
     implementation('io.jsonwebtoken:jjwt-api:0.13.0')

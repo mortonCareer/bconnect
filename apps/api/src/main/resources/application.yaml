@@ -22,15 +22,6 @@ spring:
   flyway:
     enabled: false
 
-  # TODO: aws
-  # cloud:
-  #   aws:
-  #     region:
-  #       static: ${AWS_REGION}
-  #     credentials:
-  #       access-key: ${AWS_ACCESS_KEY_ID}
-  #       secret-key: ${AWS_SECRET_ACCESS_KEY}
-
 management:
   endpoints:
     web:
@@ -57,9 +48,28 @@ app:
     refresh-token-expiration: 7d
 
   sms:
-    api-key: ${SOLAPI_API_KEY:}
-    api-secret: ${SOLAPI_API_SECRET:}
-    sender-number: ${SOLAPI_SENDER_NUMBER:}
+    api-key: ${SOLAPI_API_KEY}
+    api-secret: ${SOLAPI_API_SECRET}
+    sender-number: ${SOLAPI_SENDER_NUMBER}
+
+  s3:
+    region: ${AWS_REGION:ap-northeast-2}
+    bucket: ${AWS_S3_BUCKET}
+
+  cloudfront:
+    domain: ${CLOUDFRONT_DOMAIN:static.bconnect.to}
+    key-pair-id: ${CLOUDFRONT_KEY_PAIR_ID}
+    private-key: ${CLOUDFRONT_PRIVATE_KEY}
+    cookie-domain: ${CLOUDFRONT_COOKIE_DOMAIN:.bconnect.to}
+    cookie-ttl: 1h
+
+  attachment:
+    max-file-size: 20MB
+    max-batch-size: 50
+    presign-ttl: 10m
+    allowed-content-types:
+      - image/*
+      - application/*
 
 springdoc:
   swagger-ui:
