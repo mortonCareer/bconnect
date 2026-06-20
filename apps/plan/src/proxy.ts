@@ -1,3 +1,4 @@
+import { isApiMockingEnabled } from '@bconnect/config/env'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -12,13 +13,14 @@ export function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // TODO: 인증 보호 임시 해제 — 로그인 플로우 완성 후 복구
-  // const refreshToken = request.cookies.get('refreshToken')
-  // if (!refreshToken) {
-  //   const loginUrl = new URL('/login', request.url)
-  //   loginUrl.searchParams.set('redirect', pathname)
-  //   return NextResponse.redirect(loginUrl)
-  // }
+  if (!isApiMockingEnabled()) {
+    const refreshToken = request.cookies.get('refreshToken')
+    if (!refreshToken) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+  }
 
   return NextResponse.next()
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { isApiMockingEnabled } from '@bconnect/config/env'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
@@ -10,9 +11,7 @@ import type { ReactNode } from 'react'
 // production 배포에선 import 자체가 tree-shake 되어 mock 코드가 번들에 포함되지 않음.
 // NEXT_PUBLIC_API_MOCKING=disabled 인 환경(dev custom env → 실 staging BE)은 제외 (#352).
 export function MSWProvider({ children }: { children: ReactNode }) {
-  const enabled =
-    (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview') &&
-    process.env.NEXT_PUBLIC_API_MOCKING !== 'disabled'
+  const enabled = isApiMockingEnabled()
   const [ready, setReady] = useState(!enabled)
 
   useEffect(() => {
