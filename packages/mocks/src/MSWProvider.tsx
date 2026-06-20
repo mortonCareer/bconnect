@@ -19,7 +19,7 @@ export function MSWProvider({ children }: { children: ReactNode }) {
     if (!enabled) return
     let cancelled = false
     ;(async () => {
-      const { worker } = await import('@bconnect/mocks/browser')
+      const { worker } = await import('./browser')
       await worker.start({
         onUnhandledRequest: 'bypass',
         serviceWorker: { url: '/mockServiceWorker.js' },
