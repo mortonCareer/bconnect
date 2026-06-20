@@ -14,6 +14,7 @@ import '../env'
 import { MSWProvider, DevToolbar } from '@bconnect/mocks/react'
 import { usePushNotifications } from '@/hooks/use-push-notifications'
 import { InAppNotification } from '@/components/in-app-notification'
+import { DevPushPanel } from '@/components/dev/DevPushPanel'
 
 // MSW 가 fetch 를 가로채야 하는 모든 부수효과(refresh token, FCM device 등록)는
 // MSWProvider 가 ready 가 된 후 실행되어야 함. 그렇지 않으면 dev 첫 페이지 로드 시
@@ -27,9 +28,14 @@ function PostMSWBootstrap({ children }: { children: ReactNode }) {
     refreshAccessToken()
   }, [])
 
-  usePushNotifications()
+  const { token } = usePushNotifications()
 
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      {process.env.NODE_ENV !== 'production' && <DevPushPanel token={token} />}
+    </>
+  )
 }
 
 export function Providers({ children }: { children: ReactNode }) {

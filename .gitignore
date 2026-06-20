@@ -122,3 +122,6 @@ docs/superpowers/
 # 임시 산출물 (분석 노트, 스크린샷 등)
 .tmp/
 .lycheecache
+
+# 시크릿 (firebase-admin 서비스계정 키 등 — 절대 커밋 금지)
+.secrets/
