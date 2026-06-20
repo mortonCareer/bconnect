@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@bconnect/config": "workspace:*",
+    "@bconnect/devtools": "workspace:*",
     "@bconnect/mocks": "workspace:*",
     "@types/cheerio": "^1.0.0",
     "@types/node": "catalog:",

@@ -3,7 +3,7 @@
 import { QueryClientProvider, ReactQueryDevtools, getQueryClient } from '@bconnect/api-client'
 import { Toaster } from '@bconnect/ui'
 import type { ReactNode } from 'react'
-import { MSWProvider, DevToolbar } from '@bconnect/mocks/react'
+import { MSWProvider, DevToolbar } from '@bconnect/devtools'
 import '../env'
 
 export function Providers({ children }: { children: ReactNode }) {
