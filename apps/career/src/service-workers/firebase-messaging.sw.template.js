@@ -19,8 +19,8 @@ messaging.onBackgroundMessage((payload) => {
   const title = payload.notification?.title ?? payload.data?.title ?? '새 알림'
   const options = {
     body: payload.notification?.body ?? payload.data?.body ?? '',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-192x192.png',
+    icon: payload.data?.icon ?? '/icon-192.png',
+    badge: '/icon-192.png',
     data: payload.data,
   }
   self.registration.showNotification(title, options)
@@ -38,11 +38,12 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
-      for (const client of clients) {
-        if (client.url.includes(self.location.origin)) {
-          return client.navigate(targetPath).then(() => client.focus())
-        }
+      const client = clients[0]
+      if (client) {
+        // 이미 열린 탭 재사용 — 딥링크로 이동 후 포커스
+        return client.navigate(targetPath).then(() => client.focus())
       }
+      // 열린 탭 없음 — 새 창으로 딥링크 열기
       return self.clients.openWindow(targetPath)
     })
   )

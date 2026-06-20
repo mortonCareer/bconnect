@@ -7,7 +7,7 @@
  * 같은 토큰이면 `last_active_at` 만 갱신, 바뀌었으면 교체.
  *
  * dev 환경에선 MSW 가 `apps/career/src/mocks/handlers/devices.ts` 로 응답.
- * prod 환경에선 BE 가 #233 으로 구현 예정. 그 때까지 prod 에선 404.
+ * prod 환경에선 BE 가 #211 로 구현 예정. 그 때까지 prod 에선 404.
  * BE 완료 후 orval 생성 훅 `useRegisterDevice` 로 전환 예정.
  */
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? ''
