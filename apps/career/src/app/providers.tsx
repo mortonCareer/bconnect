@@ -12,7 +12,7 @@ import { Toaster } from '@bconnect/ui'
 import type { ReactNode } from 'react'
 import '../env'
 import { MSWProvider, DevToolbar } from '@bconnect/devtools'
-import { usePushNotifications } from '@/hooks/use-push-notifications'
+import { usePushNotificationListener } from '@/hooks/use-push-notification-listener'
 import { InAppNotification } from '@/components/in-app-notification'
 import { DevPushPanel } from '@/components/dev/DevPushPanel'
 
@@ -28,12 +28,12 @@ function PostMSWBootstrap({ children }: { children: ReactNode }) {
     refreshAccessToken()
   }, [])
 
-  const { token } = usePushNotifications()
+  usePushNotificationListener()
 
   return (
     <>
       {children}
-      {process.env.NODE_ENV !== 'production' && <DevPushPanel token={token} />}
+      {process.env.NODE_ENV !== 'production' && <DevPushPanel />}
     </>
   )
 }

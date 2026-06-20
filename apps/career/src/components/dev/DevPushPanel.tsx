@@ -2,6 +2,7 @@
 
 import { Button, Input } from '@bconnect/ui'
 import { useState } from 'react'
+import { usePushStore } from '@/stores/push-store'
 
 interface Preset {
   label: string
@@ -24,7 +25,8 @@ const PRESETS: Preset[] = [
 ]
 
 /** 개발 전용 — 현재 디바이스 토큰으로 FCM 푸시를 즉시 발송하는 트리거 패널. prod 빌드에선 마운트 안 됨. */
-export function DevPushPanel({ token }: { token: string | null }) {
+export function DevPushPanel() {
+  const token = usePushStore((s) => s.token)
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState('')
   const [custom, setCustom] = useState({
