@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import '@bconnect/ui/styles'
 import { SERVICE_NAME, SITE_URL, BRAND_COLOR } from '@bconnect/config/site'
 import { Providers } from './providers'
+import { Analytics } from '@vercel/analytics/next'
 
 const pretendard = localFont({
   src: '../../../../packages/ui/src/fonts/PretendardVariable.woff2',
@@ -63,6 +64,7 @@ export default function RootLayout({
     <html lang="ko" className={pretendard.variable}>
       <body className="antialiased">
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   )

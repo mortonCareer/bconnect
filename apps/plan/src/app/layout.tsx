@@ -4,6 +4,7 @@ import localFont from 'next/font/local'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { SERVICE_NAME, SITE_URL, BRAND_COLOR } from '@bconnect/config/site'
 import { Providers } from './providers'
+import { Analytics } from '@vercel/analytics/next'
 
 const pretendard = localFont({
   src: '../../../../packages/ui/src/fonts/PretendardVariable.woff2',
@@ -65,6 +66,7 @@ export default function RootLayout({
         <NuqsAdapter>
           <Providers>{children}</Providers>
         </NuqsAdapter>
+        <Analytics />
       </body>
     </html>
   )
