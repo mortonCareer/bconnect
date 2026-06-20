@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@bconnect/config": "workspace:*",
+    "@bconnect/devtools": "workspace:*",
     "@bconnect/mocks": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:",

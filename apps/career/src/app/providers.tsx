@@ -11,9 +11,9 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { Toaster } from '@bconnect/ui'
 import type { ReactNode } from 'react'
 import '../env'
+import { MSWProvider, DevToolbar } from '@bconnect/devtools'
 import { usePushNotifications } from '@/hooks/use-push-notifications'
 import { InAppNotification } from '@/components/in-app-notification'
-import { MSWProvider } from '@/components/msw-provider'
 import { DevPushPanel } from '@/components/dev/DevPushPanel'
 
 // MSW 가 fetch 를 가로채야 하는 모든 부수효과(refresh token, FCM device 등록)는
@@ -50,6 +50,7 @@ export function Providers({ children }: { children: ReactNode }) {
             {children}
             <Toaster />
             <ReactQueryDevtools initialIsOpen={false} />
+            <DevToolbar />
           </PostMSWBootstrap>
         </QueryClientProvider>
       </NuqsAdapter>
