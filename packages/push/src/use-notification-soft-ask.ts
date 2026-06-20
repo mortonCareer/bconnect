@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { usePushStore } from '@/stores/push-store'
-import { requestPushPermission } from '@/lib/request-push-permission'
+import { usePushStore } from './push-store'
+import { requestPushPermission } from './request-push-permission'
 
 const SUPPRESS_KEY = 'bconnect:notif-softask-suppressed-until'
 const SESSION_KEY = 'bconnect:notif-softask-shown'
@@ -22,7 +22,7 @@ function shownThisSession(): boolean {
  * 푸시 알림 soft-ask 게이트.
  *
  * 노출 조건: 지원 + 권한 미결정(prompt) + 7일 억제창 밖 + 세션 첫 노출.
- * 컨텍스트 트리거(채팅방 진입 등) 위치에서 마운트 → 마운트 시점이 곧 "언제".
+ * 컨텍스트 트리거(앱 런치 등) 위치에서 마운트 → 마운트 시점이 곧 "언제".
  *
  * - accept: 네이티브 권한 요청(수락 시 토큰 동기화). denied 1회성이라 명시 수락 때만 호출
  * - dismiss: 7일 재노출 억제 — prompt 상태가 영구 미결정으로 남아 매 방문 nagging 되는 것 방지

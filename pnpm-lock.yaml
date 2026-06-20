@@ -131,6 +131,9 @@ importers:
       '@bconnect/features':
         specifier: workspace:*
         version: link:../../packages/features
+      '@bconnect/push':
+        specifier: workspace:*
+        version: link:../../packages/push
       '@bconnect/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -152,9 +155,6 @@ importers:
       fast-xml-parser:
         specifier: ^5.3.7
         version: 5.3.7
-      firebase:
-        specifier: ^12.12.0
-        version: 12.12.0
       next:
         specifier: 'catalog:'
         version: 16.2.7(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -450,6 +450,46 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 20.19.35
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/push:
+    dependencies:
+      '@bconnect/ui':
+        specifier: workspace:*
+        version: link:../ui
+      firebase:
+        specifier: ^12.12.0
+        version: 12.12.0
+      next:
+        specifier: 'catalog:'
+        version: 16.2.7(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      react:
+        specifier: 'catalog:'
+        version: 19.2.3
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.3(react@19.2.3)
+      zustand:
+        specifier: 'catalog:'
+        version: 5.0.9(@types/react@19.2.7)(immer@9.0.21)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
+    devDependencies:
+      '@bconnect/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 20.19.35
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.3(@types/react@19.2.7)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -9746,7 +9786,7 @@ snapshots:
     dependencies:
       lodash.camelcase: 4.3.0
       long: 5.3.2
-      protobufjs: 7.5.4
+      protobufjs: 7.6.4
       yargs: 17.7.2
 
   '@grpc/proto-loader@0.8.1':
@@ -10458,13 +10498,11 @@ snapshots:
 
   '@protobufjs/codegen@2.0.4': {}
 
-  '@protobufjs/codegen@2.0.5':
-    optional: true
+  '@protobufjs/codegen@2.0.5': {}
 
   '@protobufjs/eventemitter@1.1.0': {}
 
-  '@protobufjs/eventemitter@1.1.1':
-    optional: true
+  '@protobufjs/eventemitter@1.1.1': {}
 
   '@protobufjs/fetch@1.1.0':
     dependencies:
@@ -10474,7 +10512,6 @@ snapshots:
   '@protobufjs/fetch@1.1.1':
     dependencies:
       '@protobufjs/aspromise': 1.1.2
-    optional: true
 
   '@protobufjs/float@1.0.2': {}
 
@@ -10486,8 +10523,7 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
-  '@protobufjs/utf8@1.1.1':
-    optional: true
+  '@protobufjs/utf8@1.1.1': {}
 
   '@radix-ui/number@1.1.1': {}
 
@@ -15839,7 +15875,6 @@ snapshots:
       '@protobufjs/utf8': 1.1.1
       '@types/node': 20.19.35
       long: 5.3.2
-    optional: true
 
   proxy-from-env@1.1.0: {}
 

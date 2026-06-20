@@ -8,6 +8,7 @@ import { getMessaging, type Messaging, isSupported } from 'firebase/messaging'
  * config가 없으면 undefined 반환 (로컬 개발 등)
  *
  * NOTE: process.env.NEXT_PUBLIC_* 를 직접 접근해야 Next.js 빌드 타임에 인라인됨.
+ * 소비 앱이 이 패키지를 소스로 빌드하므로 앱별 env 가 주입됨.
  * `env` 객체 경유하면 동적 property lookup 이 되어 브라우저 번들에서 undefined.
  */
 let app: FirebaseApp | undefined

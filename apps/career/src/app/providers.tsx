@@ -12,8 +12,7 @@ import { Toaster } from '@bconnect/ui'
 import type { ReactNode } from 'react'
 import '../env'
 import { MSWProvider, DevToolbar } from '@bconnect/devtools'
-import { usePushNotificationListener } from '@/hooks/use-push-notification-listener'
-import { InAppNotification } from '@/components/in-app-notification'
+import { usePushNotificationListener, InAppNotification } from '@bconnect/push'
 import { DevPushPanel } from '@/components/dev/DevPushPanel'
 
 // MSW 가 fetch 를 가로채야 하는 모든 부수효과(refresh token, FCM device 등록)는

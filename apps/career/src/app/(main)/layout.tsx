@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { BottomNavigation } from './_components/BottomNavigation'
 import { MainContent } from './_components/MainContent'
-import { NotificationPrompt } from '@/components/notification-prompt'
+import { NotificationPrompt } from '@bconnect/push'
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (

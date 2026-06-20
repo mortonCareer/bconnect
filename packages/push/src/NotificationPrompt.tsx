@@ -11,12 +11,12 @@ import {
   DrawerDescription,
   NotificationIcon,
 } from '@bconnect/ui'
-import { useNotificationSoftAsk } from '@/hooks/use-notification-soft-ask'
+import { useNotificationSoftAsk } from './use-notification-soft-ask'
 
 /**
  * 푸시 알림 권한 soft-ask.
  *
- * 알림 가치가 드러나는 컨텍스트(채팅방 진입 등)에서 마운트한다 — 마운트 시점이 곧 트리거.
+ * 알림 가치가 드러나는 컨텍스트(앱 런치 등)에서 마운트한다 — 마운트 시점이 곧 트리거.
  * 노출/억제 판단은 useNotificationSoftAsk 가 소유하고, 이 컴포넌트는 표현만 담당한다.
  */
 export function NotificationPrompt() {

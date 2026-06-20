@@ -16,7 +16,6 @@ interface PushStore {
  *
  * 부수효과(use-push-notification-listener)는 앱 전역 1회만 마운트되어 여기에 write 하고,
  * soft-ask UI·DevPushPanel 등 소비자는 훅을 재인스턴스화하지 않고 여기서 read 한다.
- * (과거 usePushNotifications 를 두 곳에서 호출해 onMessage 리스너가 중복되던 버그 해소)
  */
 export const usePushStore = create<PushStore>(() => ({
   permissionStatus: 'prompt',

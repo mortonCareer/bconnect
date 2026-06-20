@@ -2,7 +2,7 @@
 
 import { Button, Input } from '@bconnect/ui'
 import { useState } from 'react'
-import { usePushStore } from '@/stores/push-store'
+import { usePushStore } from '@bconnect/push'
 
 interface Preset {
   label: string
