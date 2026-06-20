@@ -12,11 +12,13 @@
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.965.0",
     "@aws-sdk/client-s3": "^3.965.0",
-    "@hookform/resolvers": "catalog:",
     "@bconnect/api-client": "workspace:*",
     "@bconnect/features": "workspace:*",
     "@bconnect/ui": "workspace:*",
+    "@hookform/resolvers": "catalog:",
     "@sentry/nextjs": "catalog:",
+    "@vercel/analytics": "catalog:",
+    "@vercel/speed-insights": "catalog:",
     "cheerio": "^1.2.0",
     "fast-xml-parser": "^5.3.7",
     "firebase": "^12.12.0",
@@ -32,6 +34,7 @@
   },
   "devDependencies": {
     "@bconnect/config": "workspace:*",
+    "@bconnect/devtools": "workspace:*",
     "@bconnect/mocks": "workspace:*",
     "@types/cheerio": "^1.0.0",
     "@types/node": "catalog:",
