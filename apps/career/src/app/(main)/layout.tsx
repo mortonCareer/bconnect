@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { BottomNavigation } from './_components/BottomNavigation'
 import { MainContent } from './_components/MainContent'
+import { NotificationPrompt } from '@/components/notification-prompt'
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,6 +10,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <MainContent>{children}</MainContent>
       </Suspense>
       <BottomNavigation />
+      <NotificationPrompt />
     </div>
   )
 }
