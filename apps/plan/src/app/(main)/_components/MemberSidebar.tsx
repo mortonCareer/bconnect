@@ -90,9 +90,9 @@ function ProjectSection({
 
   const items: ProjectMenuItem[] = [
     { slug: 'schedule', label: '공정표', href: `/projects/${selectedProject}/schedule` },
-    // TODO: 페이지 구현 시 href 연결 (#375 follow-up — 모집 관리 / 문서 저장소)
+    // TODO: 페이지 구현 시 href 연결 (#375 follow-up — 모집 관리)
     { slug: 'recruit', label: '모집 관리', href: null },
-    { slug: 'docs', label: '문서 저장소', href: null },
+    { slug: 'docs', label: '문서 저장소', href: `/projects/${selectedProject}/docs` },
   ]
   // active 표시는 현재 path 의 프로젝트를 보고 있을 때만
   const onSelectedProject = pathProjectId === selectedProject

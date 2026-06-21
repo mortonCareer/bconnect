@@ -1,0 +1,40 @@
+'use client'
+
+import { getMockProject } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
+import { useFolder, useStorageUsage } from '@/lib/storage-mock/hooks'
+
+const toMB = (bytes: number) => `${Math.round(bytes / 1_000_000)}MB`
+const toGB = (bytes: number) => `${Math.round(bytes / 1_073_741_824)}GB`
+
+/** 동산보드 헤더 — 프로젝트명 + breadcrumb(프로젝트 › 폴더) + TIP + 용량바. */
+export function DocsHeader({ projectId, folderId }: { projectId: string; folderId?: string }) {
+  const project = getMockProject(projectId)
+  const { data: folder } = useFolder(folderId ?? '')
+  const { data: usage } = useStorageUsage(projectId)
+
+  const projectName = project?.name ?? '프로젝트'
+  const pct =
+    usage && usage.totalBytes ? Math.min(100, (usage.usedBytes / usage.totalBytes) * 100) : 0
+
+  return (
+    <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-5">
+      <div className="min-w-0">
+        <h1 className="truncate text-lg font-semibold text-gray-900">
+          {projectName}
+          {folder ? <span className="font-normal text-gray-400"> › {folder.title}</span> : null}
+        </h1>
+        <p className="mt-1 text-xs text-gray-500">TIP. 폴더를 현장/공종별로 관리해보세요</p>
+      </div>
+      {usage && (
+        <div className="flex shrink-0 items-center gap-2 pt-1">
+          <div className="h-1.5 w-28 overflow-hidden rounded-full bg-gray-200">
+            <div className="h-full rounded-full bg-gray-400" style={{ width: `${pct}%` }} />
+          </div>
+          <span className="text-xs text-gray-400">
+            {toMB(usage.usedBytes)}/{toGB(usage.totalBytes)}
+          </span>
+        </div>
+      )}
+    </div>
+  )
+}

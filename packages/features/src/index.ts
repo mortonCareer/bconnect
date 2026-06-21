@@ -1,6 +1,7 @@
 export * from './profile'
 export * from './messages'
 export * from './notifications'
+export * from './storage'
 export { PanelAside, type PanelAsideProps } from './_shared/PanelAside'
 export { PanelShell } from './_shared/PanelShell'
 export { PanelScroll } from './_shared/PanelScroll'
