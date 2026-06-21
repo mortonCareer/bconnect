@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useNotificationStore } from '@/stores/notification-store'
+import { useNotificationStore } from './notification-store'
 
 const AUTO_DISMISS_MS = 4000
 

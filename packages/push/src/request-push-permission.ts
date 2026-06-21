@@ -1,9 +1,9 @@
 'use client'
 
 import { getToken } from 'firebase/messaging'
-import { getFcmMessaging } from '@/lib/firebase'
-import { registerDeviceToken } from '@/lib/register-device-token'
-import { usePushStore, type PushPermissionStatus } from '@/stores/push-store'
+import { getFcmMessaging } from './firebase'
+import { registerDeviceToken } from './register-device-token'
+import { usePushStore, type PushPermissionStatus } from './push-store'
 
 export function mapPermission(p: NotificationPermission): PushPermissionStatus {
   switch (p) {

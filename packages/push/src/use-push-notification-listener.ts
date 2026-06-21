@@ -2,10 +2,10 @@
 
 import { useEffect, useRef } from 'react'
 import { onMessage } from 'firebase/messaging'
-import { getFcmMessaging } from '@/lib/firebase'
-import { useNotificationStore } from '@/stores/notification-store'
-import { usePushStore } from '@/stores/push-store'
-import { mapPermission, syncDeviceToken } from '@/lib/request-push-permission'
+import { getFcmMessaging } from './firebase'
+import { useNotificationStore } from './notification-store'
+import { usePushStore } from './push-store'
+import { mapPermission, syncDeviceToken } from './request-push-permission'
 
 /**
  * FCM Web Push 부수효과 설치 — 앱 전역에서 단 1회(providers)만 마운트한다.
