@@ -54,3 +54,11 @@ export function validateEnv<T extends z.ZodRawShape>(
 
   return parsed.data
 }
+
+/** MSW(API mocking) 활성 여부 — msw-provider(SW 등록 게이트)·proxy(인증 가드 우회) 공용 SSOT. */
+export function isApiMockingEnabled(): boolean {
+  return (
+    (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview') &&
+    process.env.NEXT_PUBLIC_API_MOCKING !== 'disabled'
+  )
+}

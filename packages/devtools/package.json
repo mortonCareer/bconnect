@@ -9,6 +9,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@bconnect/config": "workspace:*",
     "@bconnect/mocks": "workspace:*",
     "agentation": "^3.0.2"
   },

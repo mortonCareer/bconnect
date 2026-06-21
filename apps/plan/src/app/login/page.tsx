@@ -85,7 +85,10 @@ export default function LoginPage() {
       if ('accessToken' in result) {
         // 기존 회원 — 바로 로그인
         login(result.accessToken)
-        router.push('/')
+        const redirect = new URLSearchParams(window.location.search).get('redirect')
+        router.push(
+          redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/'
+        )
       } else {
         // 미가입 유저 — signupToken 저장 후 회원가입 진행
         setSignupPhone(toE164(phone))

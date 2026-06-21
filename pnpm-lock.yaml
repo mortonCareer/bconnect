@@ -384,6 +384,9 @@ importers:
 
   packages/devtools:
     dependencies:
+      '@bconnect/config':
+        specifier: workspace:*
+        version: link:../config
       '@bconnect/mocks':
         specifier: workspace:*
         version: link:../mocks

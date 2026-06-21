@@ -1,24 +1,35 @@
+import { isApiMockingEnabled } from '@bconnect/config/env'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 // PUBLIC route — middleware 는 실행되지만 인증 가드만 우회. matcher 의 제외 대상과 위계가 다름.
 const PUBLIC_EXACT = ['/']
 const PUBLIC_PREFIX = ['/login', '/signup']
+const PROTECTED_PANELS = ['messages', 'notifications', 'task']
 
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  const { pathname, search, searchParams } = request.nextUrl
 
-  if (PUBLIC_EXACT.includes(pathname) || PUBLIC_PREFIX.some((path) => pathname.startsWith(path))) {
+  const panelRoot = searchParams.get('panel')?.split('/')[0]
+  const hasProtectedPanel =
+    PUBLIC_EXACT.includes(pathname) &&
+    panelRoot !== undefined &&
+    PROTECTED_PANELS.includes(panelRoot)
+  const isPublic =
+    PUBLIC_EXACT.includes(pathname) || PUBLIC_PREFIX.some((path) => pathname.startsWith(path))
+
+  if (isPublic && !hasProtectedPanel) {
     return NextResponse.next()
   }
 
-  // TODO: 인증 보호 임시 해제 — 로그인 플로우 완성 후 복구
-  // const refreshToken = request.cookies.get('refreshToken')
-  // if (!refreshToken) {
-  //   const loginUrl = new URL('/login', request.url)
-  //   loginUrl.searchParams.set('redirect', pathname)
-  //   return NextResponse.redirect(loginUrl)
-  // }
+  if (!isApiMockingEnabled()) {
+    const refreshToken = request.cookies.get('refreshToken')
+    if (!refreshToken) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('redirect', pathname + search)
+      return NextResponse.redirect(loginUrl)
+    }
+  }
 
   return NextResponse.next()
 }
