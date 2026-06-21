@@ -142,7 +142,7 @@ jobs:
   ci-api:
     needs: changes
     if: ${{ needs.changes.outputs.api == 'true' }}
-    runs-on: morton-runner
+    runs-on: morton-runner-dind
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
@@ -194,7 +194,7 @@ jobs:
   ci-api-spec:
     needs: changes
     if: ${{ needs.changes.outputs.api-spec == 'true' }}
-    runs-on: morton-runner
+    runs-on: morton-runner-dind
     permissions: write-all
     steps:
       - name: Checkout sources
