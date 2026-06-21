@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthUser;
@@ -18,6 +19,7 @@ import to.bconnect.api.support.s3.StoredObject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -72,17 +74,23 @@ public class AttachmentService {
         if (!isAllowedContentType(file.contentType()))
             throw new CodeException(AttachmentExceptionCode.UNSUPPORTED_FILE_TYPE);
 
+        String uuid = UUID.randomUUID().toString();
+        String stem = StringUtils.stripFilenameExtension(file.filename());
+        String ext = StringUtils.getFilenameExtension(file.filename());
+        String key = AttachmentKeyUtils.key(context, contextId, type, ImageSize.ORIGINAL, uuid, ext);
+
         AttachmentEntity created = attachmentRepository.save(new AttachmentEntity(
                 user.id(),
-                context,
                 type,
+                context,
                 contextId,
-                file.filename(),
+                uuid,
+                stem,
+                ext,
                 file.contentType(),
                 file.size()
         ));
 
-        String key = AttachmentKeyUtils.key(created);
         String uploadUrl = fileStorage.presignPut(key, file.contentType(), attachmentProperties.presignTtl());
         return new PresignedFile(created.getId(), uploadUrl);
     }
@@ -93,7 +101,9 @@ public class AttachmentService {
         if (!attachment.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        String key = AttachmentKeyUtils.key(attachment);
+        String key = AttachmentKeyUtils.key(
+                attachment.getContext(), attachment.getContextId(), attachment.getType(),
+                ImageSize.ORIGINAL, attachment.getUuid(), attachment.getExt());
         Optional<StoredObject> optional = fileStorage.head(key);
 
         if (optional.isEmpty() || !matches(attachment, optional.get())) {

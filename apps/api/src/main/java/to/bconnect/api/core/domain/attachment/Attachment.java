@@ -7,20 +7,19 @@ import to.bconnect.api.storage.attachment.AttachmentType;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 public record Attachment(
     Long id,
     Long memberId,
-    AttachmentContext context,
     AttachmentType type,
+    AttachmentStatus status,
+    AttachmentContext context,
     Long contextId,
-    UUID uuid,
-    String filename,
-    String extension,
+    String uuid,
+    String stem,
+    String ext,
     String contentType,
     Long size,
-    AttachmentStatus status,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
@@ -28,15 +27,15 @@ public record Attachment(
         return new Attachment(
                 entity.getId(),
                 entity.getMemberId(),
-                entity.getContext(),
                 entity.getType(),
+                entity.getStatus(),
+                entity.getContext(),
                 entity.getContextId(),
                 entity.getUuid(),
-                entity.getFilename(),
-                entity.extensionOf(),
+                entity.getStem(),
+                entity.getExt(),
                 entity.getContentType(),
                 entity.getSize(),
-                entity.getStatus(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt()
         );

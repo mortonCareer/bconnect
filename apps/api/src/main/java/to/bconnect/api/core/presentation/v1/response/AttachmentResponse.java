@@ -1,7 +1,6 @@
 package to.bconnect.api.core.presentation.v1.response;
 
 import to.bconnect.api.core.domain.attachment.Attachment;
-import to.bconnect.api.storage.attachment.AttachmentStatus;
 import to.bconnect.api.storage.attachment.AttachmentType;
 
 import java.time.LocalDateTime;
@@ -13,7 +12,6 @@ public record AttachmentResponse(
         String filename,
         String contentType,
         Long size,
-        AttachmentStatus status,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt,
         String url
@@ -23,10 +21,9 @@ public record AttachmentResponse(
                 attachment.id(),
                 attachment.memberId(),
                 attachment.type(),
-                attachment.filename(),
+                attachment.stem() + "." + attachment.ext(),
                 attachment.contentType(),
                 attachment.size(),
-                attachment.status(),
                 attachment.createdAt(),
                 attachment.modifiedAt(),
                 url

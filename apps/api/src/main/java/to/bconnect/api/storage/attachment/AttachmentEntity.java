@@ -4,11 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.util.StringUtils;
 import to.bconnect.api.storage.BaseEntity;
-
-import java.util.Locale;
-import java.util.UUID;
 
 @Entity
 @Table(name = "attachments")
@@ -21,20 +17,27 @@ public class AttachmentEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AttachmentContext context;
+    private AttachmentType type;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AttachmentType type;
+    private AttachmentStatus status = AttachmentStatus.PENDING;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AttachmentContext context;
 
     @Column(nullable = false)
     private Long contextId;
 
-    @Column(nullable = false)
-    private String filename;
-
     @Column(nullable = false, unique = true)
-    private UUID uuid;
+    private String uuid;
+
+    @Column(nullable = false)
+    private String stem;
+
+    @Column(nullable = false)
+    private String ext;
 
     @Column(nullable = false)
     private String contentType;
@@ -42,28 +45,20 @@ public class AttachmentEntity extends BaseEntity {
     @Column(nullable = false)
     private Long size;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AttachmentStatus status = AttachmentStatus.PENDING;
-
-    public AttachmentEntity(Long memberId, AttachmentContext context, AttachmentType type, Long contextId,
-                            String filename, String contentType, Long size) {
+    public AttachmentEntity(Long memberId, AttachmentType type, AttachmentContext context, Long contextId,
+                            String uuid, String stem, String ext, String contentType, Long size) {
         this.memberId = memberId;
-        this.context = context;
         this.type = type;
+        this.context = context;
         this.contextId = contextId;
-        this.filename = filename;
-        this.uuid = UUID.randomUUID();
+        this.uuid = uuid;
+        this.stem = stem;
+        this.ext = ext;
         this.contentType = contentType;
         this.size = size;
     }
 
     public void complete() {
         this.status = AttachmentStatus.COMPLETED;
-    }
-
-    public String extensionOf() {
-        String extension = StringUtils.getFilenameExtension(filename);
-        return extension == null ? "" : extension.toLowerCase(Locale.ROOT);
     }
 }
