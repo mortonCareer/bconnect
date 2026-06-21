@@ -4,7 +4,7 @@ import { QueryClientProvider, ReactQueryDevtools, getQueryClient } from '@bconne
 import { Toaster } from '@bconnect/ui'
 import type { ReactNode } from 'react'
 import { MSWProvider, DevToolbar } from '@bconnect/devtools'
-import { usePushNotificationListener, InAppNotification } from '@bconnect/push'
+import { usePushNotificationListener, InAppNotification, PushToaster } from '@bconnect/push'
 import '../env'
 
 // FCM 부수효과(SW·onMessage·토큰 등록)는 MSWProvider ready 후 실행되어야 함 —
@@ -23,6 +23,7 @@ export function Providers({ children }: { children: ReactNode }) {
         <PushBootstrap />
         {children}
         <Toaster />
+        <PushToaster />
         <ReactQueryDevtools initialIsOpen={false} />
         <DevToolbar />
       </QueryClientProvider>

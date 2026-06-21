@@ -5,7 +5,7 @@ import { GuestSidebar } from './_components/GuestSidebar'
 import { LoginGateProvider } from './_components/LoginGateProvider'
 import { MemberSidebar } from './_components/MemberSidebar'
 import { PanelHost } from './_components/panel/PanelHost'
-import { NotificationPromptBar } from '@bconnect/push'
+import { NotificationPromptToast } from '@bconnect/push'
 import { useTechnicianItems } from '@/hooks/useTechnicianItems'
 import { useAuthStore } from '@/stores/auth-store'
 
@@ -36,7 +36,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <PanelHost />
         </Suspense>
       </LoginGateProvider>
-      <NotificationPromptBar />
+      <NotificationPromptToast />
     </div>
   )
 }
