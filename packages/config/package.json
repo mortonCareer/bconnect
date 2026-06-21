@@ -10,6 +10,7 @@
     "./tsconfig/base": "./tsconfig/base.json",
     "./avatar": "./avatar/index.ts",
     "./biz-number": "./biz-number/index.ts",
+    "./date": "./date/index.ts",
     "./env": "./env/validate.ts",
     "./format": "./format/index.ts",
     "./address": "./address/index.ts",
