@@ -16,13 +16,13 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class SessionService {
 
     private final SessionRepository sessionRepository;
     private final MemberRepository memberRepository;
     private final SmsProvider smsProvider;
 
+    @Transactional(readOnly = true)
     public void verify(String username, String refreshToken) {
         SessionEntity found = sessionRepository.findByUsername(username)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
@@ -36,6 +36,7 @@ public class SessionService {
         }
     }
 
+    @Transactional
     public void login(String username, String agent, String ip, String refreshToken) {
         Optional<SessionEntity> optional = sessionRepository.findByUsername(username);
         String encrypted = AuthUtils.sha256(refreshToken);
@@ -56,6 +57,7 @@ public class SessionService {
         }
     }
 
+    @Transactional
     public void rotate(String username, String refreshToken) {
         SessionEntity found = sessionRepository.findByUsername(username)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
@@ -63,6 +65,7 @@ public class SessionService {
         found.rotate(AuthUtils.sha256(refreshToken));
     }
 
+    @Transactional
     public void logout(String username) {
         SessionEntity found = sessionRepository.findByUsername(username)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
