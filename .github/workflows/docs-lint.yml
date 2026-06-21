@@ -59,10 +59,11 @@ jobs:
           restore-keys: lychee-
 
       - name: lychee
-        uses: lycheeverse/lychee-action@v2
+        # @v2 (구 SHA) 는 installer 가 v0.24.2 자산 URL(lychee- 태그 prefix)을 못 만들어
+        # 다운로드 실패 → @v2.8.0 으로 고정. lycheeVersion 핀과 함께 stable 강제.
+        uses: lycheeverse/lychee-action@v2.8.0
         with:
-          # stable 버전 핀 — self-hosted 러너가 stable 다운 실패 시 nightly 로
-          # fallback 하면 file:// 상대링크 해석 회귀로 오탐(파일 존재해도 not found).
+          # stable 핀 — 미지정 시 nightly 가 file:// 상대링크 해석 회귀로 오탐(파일 존재해도 not found).
           lycheeVersion: v0.24.2
           # markdownlint 와 동일 scope. lychee 는 `--base` 에 절대 경로 또는 URL 만 허용
           # — 생략하면 source 파일 위치 기준 상대 링크 자동 해결.
