@@ -13,6 +13,7 @@
   "dependencies": {
     "@bconnect/ui": "workspace:*",
     "firebase": "^12.12.0",
+    "sonner": "^2.0.7",
     "zustand": "catalog:"
   },
   "peerDependencies": {
