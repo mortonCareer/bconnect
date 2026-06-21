@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.attachment.AttachmentService;
+import to.bconnect.api.core.domain.attachment.AttachmentResolver;
 import to.bconnect.api.core.domain.attachment.ImageSize;
-import to.bconnect.api.core.domain.attachment.AttachmentUrlResolver;
 import to.bconnect.api.core.presentation.v1.request.ConfirmRequest;
 import to.bconnect.api.core.presentation.v1.request.PresignRequest;
 import to.bconnect.api.core.presentation.v1.response.AttachmentResponse;
@@ -25,7 +25,7 @@ import java.util.List;
 public class AttachmentController {
 
     private final AttachmentService attachmentService;
-    private final AttachmentUrlResolver attachmentUrlResolver;
+    private final AttachmentResolver attachmentResolver;
 
     @PostMapping("/presign")
     public ApiResponse<List<PresignedFileResponse>> presign(
@@ -43,9 +43,7 @@ public class AttachmentController {
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid ConfirmRequest request) {
         List<AttachmentResponse> response = attachmentService.confirm(user, request.attachmentIds()).stream()
-                .map(it -> AttachmentResponse.of(
-                        it,
-                        attachmentUrlResolver.urlOf(it, ImageSize.SMALL)))
+                .map(it -> AttachmentResponse.of(it, attachmentResolver.url(it, ImageSize.SMALL)))
                 .toList();
         return ApiResponse.success(response);
     }

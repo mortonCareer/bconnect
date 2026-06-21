@@ -23,8 +23,6 @@ import java.util.stream.Stream;
 @Profile({"prod", "dev"})
 public class CloudFrontSignedCookieIssuer implements SignedCookieIssuer {
 
-    private static final String RESOURCE_URL_FORMAT = "https://%s/%s";
-
     private final CloudFrontProperties properties;
     private final CloudFrontUtilities utilities;
     private final PrivateKey key;
@@ -37,8 +35,9 @@ public class CloudFrontSignedCookieIssuer implements SignedCookieIssuer {
 
     @Override
     public List<ResponseCookie> issue(String path) {
+        String url = "https://" + properties.domain() + "/" + path;
         CustomSignerRequest request = CustomSignerRequest.builder()
-                .resourceUrl(RESOURCE_URL_FORMAT.formatted(properties.domain(), path))
+                .resourceUrl(url)
                 .privateKey(key)
                 .keyPairId(properties.keyPairId())
                 .expirationDate(Instant.now().plus(properties.cookieTtl()))
