@@ -14,7 +14,8 @@ public record Credential(
     CredentialStatus status,
     LocalDate expiredAt,
     LocalDateTime createdAt,
-    LocalDateTime modifiedAt
+    LocalDateTime modifiedAt,
+    Long attachmentId
 ) {
     public static Credential of(CredentialEntity entity) {
         return new Credential(
@@ -24,7 +25,8 @@ public record Credential(
                 entity.getStatus(),
                 entity.getExpiredAt(),
                 entity.getCreatedAt(),
-                entity.getModifiedAt()
+                entity.getModifiedAt(),
+                entity.getAttachmentId()
         );
     }
 }

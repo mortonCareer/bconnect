@@ -11,6 +11,9 @@ public class AttachmentResolver {
     private final CloudFrontProperties properties;
 
     public String url(Attachment attachment, ImageSize size) {
+        if (attachment == null)
+            return null;
+
         String key = AttachmentKeyUtils.key(
                 attachment.context(), attachment.contextId(), attachment.type(),
                 size, attachment.uuid(), attachment.ext());
