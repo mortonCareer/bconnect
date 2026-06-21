@@ -92,7 +92,7 @@ ADR-0006 의 3 layer 중 변경 범위:
 
 ### 후속 작업 (별도 이슈)
 
-- MSW gate 수정 — dev 브랜치 preview 제외 ([`apps/career/src/components/msw-provider.tsx`](../../../apps/career/src/components/msw-provider.tsx), [`apps/plan/src/components/msw-provider.tsx`](../../../apps/plan/src/components/msw-provider.tsx))
+- MSW gate 수정 — dev 브랜치 preview 제외 ([`packages/devtools/src/MSWProvider.tsx`](../../../packages/devtools/src/MSWProvider.tsx), career/plan 공용)
 - dev 브랜치 식별 메커니즘 확정 — `VERCEL_TARGET_ENV` / `VERCEL_GIT_COMMIT_REF` 등 후보, 구현 시 결정
 - Vercel dev custom environment 에 staging BE URL env 변수 추가 — [`infra/vercel/`](../../../infra/vercel/) terraform
 - staging BE CORS 에 dev 브랜치 도메인 허용 — BE 측 (CEO)
