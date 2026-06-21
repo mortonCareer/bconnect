@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { buildFcmServiceWorker } from '@bconnect/push'
+import { buildFcmServiceWorker } from '@bconnect/push/server'
 
 /**
  * Firebase Cloud Messaging Service Worker 를 동적으로 서빙.

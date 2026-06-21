@@ -14,5 +14,4 @@ export { useNotificationStore, type InAppNotificationItem } from './notification
 export { NotificationPrompt } from './NotificationPrompt'
 export { InAppNotification } from './InAppNotification'
 
-// Service Worker
-export { buildFcmServiceWorker, type FcmServiceWorkerConfig } from './build-service-worker'
+// Service Worker 빌더는 node:fs 를 쓰는 서버 전용 → '@bconnect/push/server' 서브패스 (./server.ts)
