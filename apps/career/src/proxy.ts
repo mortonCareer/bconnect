@@ -6,8 +6,8 @@ import type { NextRequest } from 'next/server'
 const PUBLIC_EXACT = ['/']
 const PUBLIC_PREFIX = ['/login', '/signup', '/component', '/instagram', '/showcase', '/one-click']
 
-/** /profile/123 같은 타인 프로필은 public, /profile (내 프로필)과 /profile/edit는 보호 */
-const PUBLIC_PROFILE_PATTERN = /^\/profile\/\d+$/
+/** /profile/123 및 그 하위(/coworkers·/recommendations 등) 타인 프로필은 public, /profile (내 프로필)과 /profile/edit는 보호 */
+const PUBLIC_PROFILE_PATTERN = /^\/profile\/\d+(\/.*)?$/
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
