@@ -18,6 +18,11 @@
       "type": "stdio",
       "command": "npx",
       "args": ["-y", "next-devtools-mcp@latest"]
+    },
+    "agentation": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "agentation-mcp", "server"]
     }
   }
 }

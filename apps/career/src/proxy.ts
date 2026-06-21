@@ -1,3 +1,4 @@
+import { isApiMockingEnabled } from '@bconnect/config/env'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -5,8 +6,8 @@ import type { NextRequest } from 'next/server'
 const PUBLIC_EXACT = ['/']
 const PUBLIC_PREFIX = ['/login', '/signup', '/component', '/instagram', '/showcase', '/one-click']
 
-/** /profile/123 같은 타인 프로필은 public, /profile (내 프로필)과 /profile/edit는 보호 */
-const PUBLIC_PROFILE_PATTERN = /^\/profile\/\d+$/
+/** /profile/123 및 그 하위(/coworkers·/recommendations 등) 타인 프로필은 public, /profile (내 프로필)과 /profile/edit는 보호 */
+const PUBLIC_PROFILE_PATTERN = /^\/profile\/\d+(\/.*)?$/
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -19,13 +20,14 @@ export function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // TODO: 인증 보호 임시 해제 — 로그인 플로우 완성 후 복구
-  // const refreshToken = request.cookies.get('refreshToken')
-  // if (!refreshToken) {
-  //   const loginUrl = new URL('/login', request.url)
-  //   loginUrl.searchParams.set('redirect', pathname)
-  //   return NextResponse.redirect(loginUrl)
-  // }
+  if (!isApiMockingEnabled()) {
+    const refreshToken = request.cookies.get('refreshToken')
+    if (!refreshToken) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+  }
 
   return NextResponse.next()
 }

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export interface InAppNotification {
+export interface InAppNotificationItem {
   id: string
   title: string
   body: string
@@ -11,8 +11,8 @@ export interface InAppNotification {
 
 interface NotificationStore {
   /** 현재 표시 중인 인앱 알림 (포그라운드 수신 시) */
-  current: InAppNotification | null
-  show: (notification: Omit<InAppNotification, 'id' | 'timestamp'>) => void
+  current: InAppNotificationItem | null
+  show: (notification: Omit<InAppNotificationItem, 'id' | 'timestamp'>) => void
   dismiss: () => void
 }
 

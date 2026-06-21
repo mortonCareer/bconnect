@@ -50,6 +50,16 @@ resource "google_firebase_project" "bconnect" {
   depends_on = [google_project_service.required]
 }
 
+# Firebase Admin SDK 서비스계정에 FCM 발송 권한 부여.
+# firebase-admin SDK 서버 푸시(messages:send)는 cloudmessaging.messages.create 가 필요한데
+# adminsdk 서비스계정에 기본 부여되지 않음 → 명시적으로 바인딩 (없으면 403 mismatched-credential).
+resource "google_project_iam_member" "adminsdk_fcm_sender" {
+  provider = google-beta
+  project  = google_firebase_project.bconnect.project
+  role     = "roles/firebasecloudmessaging.admin"
+  member   = "serviceAccount:firebase-adminsdk-fbsvc@${google_project.bconnect.project_id}.iam.gserviceaccount.com"
+}
+
 # Firebase 웹 앱 등록 (프론트엔드 앱별로 분리)
 #
 # FCM 자체는 projectId + messagingSenderId + VAPID로 라우팅되어 web app이 공통이어도 동작하지만,

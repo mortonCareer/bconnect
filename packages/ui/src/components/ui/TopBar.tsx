@@ -13,7 +13,7 @@ const topBarVariants = cva('sticky top-0 z-40 flex h-15 w-full items-center bg-w
   variants: {
     variant: {
       progress: 'justify-between',
-      default: 'justify-between',
+      default: 'relative justify-between',
       home: 'justify-between',
     },
   },
@@ -169,7 +169,9 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
         {variant === 'default' && (
           <>
             {BackButton}
-            <p className="text-sb-16 text-gray-900">{title}</p>
+            <p className="pointer-events-none absolute left-1/2 max-w-[60%] -translate-x-1/2 truncate text-center text-sb-16 text-gray-900">
+              {title}
+            </p>
             {hasUtility ? (
               <UtilityIcons
                 notifyHref={notifyHref}
