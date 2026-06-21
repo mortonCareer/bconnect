@@ -59,12 +59,13 @@ jobs:
           restore-keys: lychee-
 
       - name: lychee
-        # @v2 (구 SHA) 는 installer 가 v0.24.2 자산 URL(lychee- 태그 prefix)을 못 만들어
-        # 다운로드 실패 → @v2.8.0 으로 고정. lycheeVersion 핀과 함께 stable 강제.
         uses: lycheeverse/lychee-action@v2.8.0
         with:
-          # stable 핀 — 미지정 시 nightly 가 file:// 상대링크 해석 회귀로 오탐(파일 존재해도 not found).
-          lycheeVersion: v0.24.2
+          # v0.15.0 핀. self-hosted bare 러너엔 lychee 가 없어 action 이 직접 다운로드하는데:
+          # - 미지정(기본) → nightly: file:// 상대링크 해석 회귀로 오탐(파일 존재해도 not found)
+          # - v0.16+ : tarball 이 subdir 구조라 action installer(루트 lychee 기대)가 stat 실패
+          # v0.15.x 는 if-branch(루트 단일 바이너리 tarball) → 설치 성공 + nightly 버그 없음.
+          lycheeVersion: v0.15.0
           # markdownlint 와 동일 scope. lychee 는 `--base` 에 절대 경로 또는 URL 만 허용
           # — 생략하면 source 파일 위치 기준 상대 링크 자동 해결.
           args: >-
