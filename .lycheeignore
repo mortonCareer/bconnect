@@ -41,3 +41,9 @@
 # 외부 도구 — SPA 라 lychee 가 timeout (링크 자체는 살아있음)
 # - uicolors.app: Tailwind 색 스케일 생성기 (ADR-0012 에서 참조)
 ^https://uicolors\.app
+
+# Railway prod·dev API — 익명 health/root 는 비공개(404), 또 Railway 일시정지 시에도 404
+# (CI 를 BE uptime 에 묶지 않음. bconnect.to/_health 와 동일 취지)
+^https://api(\.dev)?\.bconnect\.to
+# Claude Code 푸터 링크 — 302→claude.ai 봇 차단(403)
+^https://claude\.com/code
