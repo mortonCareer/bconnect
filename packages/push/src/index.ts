@@ -10,8 +10,9 @@ export { registerDeviceToken, unregisterDeviceToken } from './register-device-to
 export { usePushStore, type PushPermissionStatus } from './push-store'
 export { useNotificationStore, type InAppNotificationItem } from './notification-store'
 
-// UI
+// UI — soft-ask 시트(career·모바일) / 코너 카드(plan·데스크톱), 게이트 로직 공유
 export { NotificationPrompt } from './NotificationPrompt'
+export { NotificationPromptCard } from './NotificationPromptCard'
 export { InAppNotification } from './InAppNotification'
 
 // Service Worker 빌더는 node:fs 를 쓰는 서버 전용 → '@bconnect/push/server' 서브패스 (./server.ts)
