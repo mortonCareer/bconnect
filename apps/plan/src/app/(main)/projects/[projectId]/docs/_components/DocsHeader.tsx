@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Progress } from '@bconnect/ui'
 import { getMockProject } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
 import { useFolder, useStorageUsage } from '@/lib/storage-mock/hooks'
@@ -21,7 +22,9 @@ export function DocsHeader({ projectId, folderId }: { projectId: string; folderI
     <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-5">
       <div className="min-w-0">
         <h1 className="truncate text-lg font-semibold text-gray-900">
-          {projectName}
+          <Link href={`/projects/${projectId}/docs`} className="hover:underline">
+            {projectName}
+          </Link>
           {folder ? <span className="font-normal text-gray-400"> › {folder.title}</span> : null}
         </h1>
         <p className="mt-1 text-xs text-gray-500">TIP. 폴더를 현장/공종별로 관리해보세요</p>
