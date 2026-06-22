@@ -11,6 +11,7 @@ import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentStatus;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,10 +23,19 @@ public class AttachmentQueryService {
     private final AttachmentRepository attachmentRepository;
 
     @Transactional(readOnly = true)
-    public Map<Long, Attachment> resolveMap(Collection<Long> attachmentIds) {
-        return attachmentRepository.findAllById(attachmentIds).stream()
-                .map(Attachment::of)
-                .collect(Collectors.toMap(Attachment::id, Function.identity()));
+    public List<Attachment> list(AuthUser user, List<Long> attachmentIds) {
+        List<AttachmentEntity> attachments = attachmentRepository.findAllById(attachmentIds);
+        if (attachments.size() != attachmentIds.size())
+            throw new CodeException(AttachmentExceptionCode.NOT_FOUND);
+
+        attachments.forEach(it -> {
+            if (!it.getMemberId().equals(user.id()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+            if (it.getStatus() != AttachmentStatus.COMPLETED)
+                throw new CodeException(AttachmentExceptionCode.NOT_COMPLETED);
+        });
+
+        return Attachment.of(attachments);
     }
 
     @Transactional(readOnly = true)
@@ -38,5 +48,12 @@ public class AttachmentQueryService {
             throw new CodeException(AttachmentExceptionCode.NOT_COMPLETED);
 
         return Attachment.of(attachment);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Attachment> resolveMap(Collection<Long> attachmentIds) {
+        return attachmentRepository.findAllById(attachmentIds).stream()
+                .map(Attachment::of)
+                .collect(Collectors.toMap(Attachment::id, Function.identity()));
     }
 }

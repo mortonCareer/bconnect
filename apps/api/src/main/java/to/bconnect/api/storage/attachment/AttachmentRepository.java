@@ -15,7 +15,7 @@ public interface AttachmentRepository extends JpaRepository<AttachmentEntity, Lo
             SELECT a FROM AttachmentEntity a
             WHERE a.status = :status AND a.createdAt < :before
             AND NOT EXISTS (SELECT c FROM CredentialEntity c WHERE c.attachmentId = a.id)
-            AND NOT EXISTS (SELECT m FROM MessageEntity m JOIN m.attachments ma WHERE ma = a)
+            AND NOT EXISTS (SELECT ma FROM MessageAttachmentMappingEntity ma WHERE ma.attachmentId = a.id)
             """)
     List<AttachmentEntity> findOrphans(@Param("status") AttachmentStatus status, @Param("before") LocalDateTime before);
 }

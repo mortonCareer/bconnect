@@ -17,10 +17,10 @@ public class MessageFactory {
     }
 
     public static SendMessageRequest createRequest() {
-        return new SendMessageRequest(MessageType.TEXT, "content");
+        return new SendMessageRequest(MessageType.TEXT, "content", null);
     }
 
     public static SendMessageRequest createRequest(MessageType type, String content) {
-        return new SendMessageRequest(type, content);
+        return new SendMessageRequest(type, content, null);
     }
 }

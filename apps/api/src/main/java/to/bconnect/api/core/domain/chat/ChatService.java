@@ -24,6 +24,7 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final ParticipantRepository participantRepository;
     private final MessageRepository messageRepository;
+    private final MessageAttachmentMappingRepository messageAttachmentMappingRepository;
 
     @Transactional(readOnly = true)
     public List<Chat> list(Long memberId) {
@@ -97,6 +98,17 @@ public class ChatService {
                 cursor.toSort()
         );
 
-        return CursorPage.from(messages.map(Message::of), Message::id);
+        List<Long> messageIds = messages.getContent().stream().map(MessageEntity::getId).toList();
+        Map<Long, List<Long>> attachmentIdMap = messageAttachmentMappingRepository.findByMessageIdIn(messageIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        MessageAttachmentMappingEntity::getMessageId,
+                        Collectors.mapping(MessageAttachmentMappingEntity::getAttachmentId, Collectors.toList())
+                ));
+
+        return CursorPage.from(
+                messages.map(it -> Message.of(it, attachmentIdMap.getOrDefault(it.getId(), List.of()))),
+                Message::id
+        );
     }
 }
