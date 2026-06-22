@@ -35,8 +35,9 @@ export function CareerFolderView({ folderId }: { folderId: string }) {
 
   const title = folder?.title ?? '폴더'
   const onBack = () => {
-    if (file) setFile(null)
-    else router.back()
+    if (file)
+      setFile(null) // 파일 포커스 해제 → 갤러리
+    else router.push('/storage') // 히스토리 이전이 아니라 상위 path(탐색기)로
   }
 
   // 데스크톱 Ctrl+휠 줌 — passive:false 로 브라우저 확대 막고 열 수 조정
