@@ -1,10 +1,12 @@
 import { cn } from '@bconnect/ui'
+import type { MouseEvent } from 'react'
 import { barColor } from './constants'
 import type { BarSegment } from './types'
 
 interface TaskBarProps {
   segment: BarSegment
-  onSelect: () => void
+  /** 클릭 지점 기준으로 날짜를 고르도록 이벤트를 넘긴다. */
+  onSelect: (e: MouseEvent) => void
   /** 같은 작업의 다른 세그먼트(주 경계로 분할)와 hover 연동 — true 면 강조. */
   hovered: boolean
   onHover: (taskId: number | null) => void
