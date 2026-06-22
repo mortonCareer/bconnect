@@ -9,7 +9,6 @@ import to.bconnect.api.core.presentation.v1.request.CreateCredentialRequest;
 import to.bconnect.api.core.presentation.v1.response.CredentialResponse;
 import to.bconnect.api.core.presentation.v1.response.CredentialSummaryResponse;
 import to.bconnect.api.core.domain.attachment.Attachment;
-import to.bconnect.api.core.domain.attachment.AttachmentQueryService;
 import to.bconnect.api.core.domain.attachment.AttachmentResolver;
 import to.bconnect.api.core.domain.attachment.ImageSize;
 import to.bconnect.api.core.domain.credential.Credential;
@@ -27,7 +26,6 @@ import java.util.Objects;
 public class CredentialController {
 
     private final CredentialService credentialService;
-    private final AttachmentQueryService attachmentQueryService;
     private final AttachmentResolver attachmentResolver;
 
     @GetMapping
@@ -46,7 +44,7 @@ public class CredentialController {
                 .map(Credential::attachmentId)
                 .filter(Objects::nonNull)
                 .toList();
-        Map<Long, Attachment> attachmentMap = attachmentQueryService.resolveMap(attachmentIds);
+        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(attachmentIds);
 
         List<CredentialResponse> response = credentials.stream()
                 .map(it -> {

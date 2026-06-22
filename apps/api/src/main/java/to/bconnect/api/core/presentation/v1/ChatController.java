@@ -15,7 +15,6 @@ import to.bconnect.api.core.presentation.v1.response.ChatResponse;
 import to.bconnect.api.core.presentation.v1.response.MemberSummaryResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.core.domain.attachment.Attachment;
-import to.bconnect.api.core.domain.attachment.AttachmentQueryService;
 import to.bconnect.api.core.domain.attachment.AttachmentResolver;
 import to.bconnect.api.core.domain.attachment.ImageSize;
 import to.bconnect.api.core.domain.chat.Chat;
@@ -39,7 +38,6 @@ public class ChatController {
 
     private final ChatService chatService;
     private final MemberResolver memberResolver;
-    private final AttachmentQueryService attachmentQueryService;
     private final AttachmentResolver attachmentResolver;
 
     @GetMapping
@@ -85,7 +83,7 @@ public class ChatController {
                 .distinct()
                 .toList();
 
-        Map<Long, Attachment> attachmentMap = attachmentQueryService.resolveMap(attachmentIds);
+        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(attachmentIds);
 
         List<MessageResponse> content = page.content().stream()
                 .map(it -> MessageResponse.of(it, it.attachmentIds().stream()

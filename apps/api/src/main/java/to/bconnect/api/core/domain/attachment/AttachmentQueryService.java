@@ -10,11 +10,7 @@ import to.bconnect.api.storage.attachment.AttachmentEntity;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentStatus;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,12 +44,5 @@ public class AttachmentQueryService {
             throw new CodeException(AttachmentExceptionCode.NOT_COMPLETED);
 
         return Attachment.of(attachment);
-    }
-
-    @Transactional(readOnly = true)
-    public Map<Long, Attachment> resolveMap(Collection<Long> attachmentIds) {
-        return attachmentRepository.findAllById(attachmentIds).stream()
-                .map(Attachment::of)
-                .collect(Collectors.toMap(Attachment::id, Function.identity()));
     }
 }

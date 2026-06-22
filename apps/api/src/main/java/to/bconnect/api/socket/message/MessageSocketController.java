@@ -9,7 +9,6 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import to.bconnect.api.core.domain.attachment.Attachment;
-import to.bconnect.api.core.domain.attachment.AttachmentQueryService;
 import to.bconnect.api.core.domain.attachment.AttachmentResolver;
 import to.bconnect.api.core.domain.attachment.ImageSize;
 import to.bconnect.api.core.domain.chat.Message;
@@ -26,7 +25,6 @@ import java.util.Objects;
 public class MessageSocketController {
 
     private final MessageSocketService messageSocketService;
-    private final AttachmentQueryService attachmentQueryService;
     private final AttachmentResolver attachmentResolver;
 
     @MessageMapping("/chats/{chatId}/messages")
@@ -37,7 +35,7 @@ public class MessageSocketController {
             @Payload @Valid SendMessageRequest request) {
         Message message = messageSocketService.broadcast(user, chatId, request.toCommand());
 
-        Map<Long, Attachment> attachmentMap = attachmentQueryService.resolveMap(message.attachmentIds());
+        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(message.attachmentIds());
         List<AttachmentResponse> attachments = message.attachmentIds().stream()
                 .map(attachmentMap::get)
                 .filter(Objects::nonNull)

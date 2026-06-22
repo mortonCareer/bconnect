@@ -7,10 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
-import to.bconnect.api.core.domain.MemberResolver;
-import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.security.member.Member;
+import to.bconnect.api.storage.chat.*;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChatService {
 
-    private final MemberResolver memberResolver;
     private final ChatRepository chatRepository;
     private final ParticipantRepository participantRepository;
     private final MessageRepository messageRepository;
