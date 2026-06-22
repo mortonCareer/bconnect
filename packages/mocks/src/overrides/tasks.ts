@@ -1,14 +1,18 @@
-import { getGetMyTasksMockHandler, Trade } from '@bconnect/api-client'
-import type { Address, Task } from '@bconnect/api-client'
+import {
+  getCreateTaskMockHandler,
+  getDeleteTaskMockHandler,
+  getGetMyTasksMockHandler,
+  getUpdateTaskMockHandler,
+  Trade,
+} from '@bconnect/api-client'
+import type { Address, CreateTaskRequest, Task, UpdateTaskRequest } from '@bconnect/api-client'
 
 /**
- * 캘린더(#650) QA 시드. 현재 월에 앵커되어 어느 달에 켜든 이번 달엔 항상 바가 보인다.
+ * 캘린더(#650) QA 시드 + **stateful** mock. 생성/수정/삭제가 모듈 메모리에 반영돼
+ * getMyTasks 재조회 시 캘린더에 즉시 보인다 (실 BE 동작 모사). 하드 리로드 시 SEED 로 리셋.
  *
- * 커버: 멀티데이 + 주(週) 경계 교차(세그먼트 분할), 한 날 3중첩(레인 패킹/오버플로),
- * 제안작업(업체 작업), 단기 작업.
- *
- * `profileId === null` = 업체 제안작업(미수락) — FE 가 `제안됨` 으로 파생한다.
- * 현재 tasks.yaml 에 status/proposed 필드가 없어 이 sentinel 로 대신한다 (BE 스펙 보강 전까지 mock 전용).
+ * 현재 월에 앵커. 커버: 멀티데이 + 주(週) 경계 교차, 한 날 3중첩(레인/오버플로), 제안작업, 단기.
+ * `profileId === null` = 업체 제안작업(미수락) — FE 가 `제안됨` 으로 파생. status 필드 추가 전까지의 sentinel.
  */
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -87,12 +91,15 @@ const SEEDS: TaskSeed[] = [
   },
 ]
 
+function nowStamp(): string {
+  return new Date().toISOString().slice(0, 19) + 'Z'
+}
+
 function buildSeedTasks(): Task[] {
   const now = new Date()
   const year = now.getFullYear()
   const month1 = now.getMonth() + 1
-  const stamp = now.toISOString().slice(0, 19) + 'Z'
-
+  const stamp = nowStamp()
   return SEEDS.map((seed) => ({
     id: seed.id,
     profileId: seed.proposed ? null : 1,
@@ -108,7 +115,11 @@ function buildSeedTasks(): Task[] {
   }))
 }
 
-/** [aStart,aEnd] 와 [bStart,bEnd] 가 겹치면 true (ISO 문자열 비교로 충분 — 동일 포맷). */
+// 모듈 메모리 상태 — 핸들러들이 공유(closure가 변수 바인딩 캡처). 하드 리로드 시 재초기화.
+let tasks: Task[] = buildSeedTasks()
+let nextId = 9100
+
+/** [aStart,aEnd] 와 [bStart,bEnd] 가 겹치면 true (동일 ISO 포맷 문자열 비교). */
 function intersects(aStart: string, aEnd: string, bStart: string, bEnd: string): boolean {
   return aStart <= bEnd && bStart <= aEnd
 }
@@ -118,8 +129,27 @@ export const tasksOverrides = [
     const url = new URL(info.request.url)
     const start = url.searchParams.get('start')
     const end = url.searchParams.get('end')
-    const tasks = buildSeedTasks()
     if (!start || !end) return tasks
     return tasks.filter((t) => intersects(t.start, t.end, start, end))
+  }),
+
+  getCreateTaskMockHandler(async (info): Promise<number> => {
+    const body = (await info.request.json()) as CreateTaskRequest
+    const id = nextId++
+    const stamp = nowStamp()
+    tasks.push({ id, profileId: 1, ...body, createdAt: stamp, modifiedAt: stamp })
+    return id
+  }),
+
+  getUpdateTaskMockHandler(async (info): Promise<void> => {
+    const id = Number(info.params.taskId)
+    const body = (await info.request.json()) as UpdateTaskRequest
+    const stamp = nowStamp()
+    tasks = tasks.map((t) => (t.id === id ? { ...t, ...body, modifiedAt: stamp } : t))
+  }),
+
+  getDeleteTaskMockHandler((info): void => {
+    const id = Number(info.params.taskId)
+    tasks = tasks.filter((t) => t.id !== id)
   }),
 ]
