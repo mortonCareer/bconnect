@@ -65,9 +65,27 @@ export function MonthCarousel({
     if (api) api.scrollTo(1, true)
   }, [api, month])
 
+  // auto-height — 트랙 높이를 활성(현재 월) 슬라이드에 맞춤.
+  // 안 하면 flex 트랙이 가장 큰 이웃 달(6주)에 stretch 돼 5주 달 아래 빈 공간이 생김.
+  useEffect(() => {
+    if (!api) return
+    const setHeight = () => {
+      const node = api.slideNodes()[api.selectedScrollSnap()]
+      if (node) api.containerNode().style.height = `${node.offsetHeight}px`
+    }
+    const raf = requestAnimationFrame(setHeight)
+    api.on('select', setHeight)
+    api.on('reInit', setHeight)
+    return () => {
+      cancelAnimationFrame(raf)
+      api.off('select', setHeight)
+      api.off('reInit', setHeight)
+    }
+  }, [api, month])
+
   return (
     <Carousel setApi={setApi} opts={{ startIndex: 1, watchDrag: true }} className="w-full">
-      <CarouselContent className="ml-0">
+      <CarouselContent className="ml-0 items-start">
         {months.map((m) => (
           <CarouselItem key={m} className="pl-0">
             <MonthSlide month={m} selectedDay={selectedDay} onSelectDay={onSelectDay} />

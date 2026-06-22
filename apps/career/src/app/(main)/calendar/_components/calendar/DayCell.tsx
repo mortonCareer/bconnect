@@ -28,7 +28,7 @@ export function DayCell({
     <button
       type="button"
       onClick={onSelect}
-      className="flex min-h-[72px] cursor-pointer flex-col items-start px-2 pt-1.5"
+      className="flex min-h-[72px] cursor-pointer flex-col items-start rounded-lg px-2 pt-1.5 transition-colors hover:bg-gray-50"
     >
       <span
         className={cn(

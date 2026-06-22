@@ -9,9 +9,19 @@ interface WeekRowProps {
   today: string
   selectedDay: string
   onSelectDay: (iso: string) => void
+  hoveredTaskId: number | null
+  onHoverTask: (taskId: number | null) => void
 }
 
-export function WeekRow({ row, monthIso, today, selectedDay, onSelectDay }: WeekRowProps) {
+export function WeekRow({
+  row,
+  monthIso,
+  today,
+  selectedDay,
+  onSelectDay,
+  hoveredTaskId,
+  onHoverTask,
+}: WeekRowProps) {
   return (
     <div className="relative">
       <div className="grid grid-cols-7">
@@ -36,6 +46,8 @@ export function WeekRow({ row, monthIso, today, selectedDay, onSelectDay }: Week
             key={`${seg.task.id}-${seg.colStart}`}
             segment={seg}
             onSelect={() => onSelectDay(row.cells[seg.colStart] ?? row.cells[0]!)}
+            hovered={seg.task.id === hoveredTaskId}
+            onHover={onHoverTask}
           />
         ))}
       </div>

@@ -6,6 +6,7 @@ import {
   useCreateTask,
   useQueryClient,
 } from '@bconnect/api-client'
+import { monthStartOf } from '@bconnect/config/date'
 import {
   DateRangeField,
   Form,
@@ -69,7 +70,8 @@ export function TaskCreateForm() {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetMyTasksQueryKey() })
           toast({ description: '작업이 생성되었어요', variant: 'success' })
-          router.back()
+          // 생성한 작업의 시작일로 포커스 (월·선택일 동기화)
+          router.replace(`/calendar?day=${data.start}&month=${monthStartOf(data.start)}`)
         },
         onError: (err) => server.capture(err, data),
       }
@@ -81,7 +83,7 @@ export function TaskCreateForm() {
       <TopBar
         variant="default"
         title="작업 생성"
-        actionLabel="완료"
+        actionLabel={isPending ? '저장 중...' : '완료'}
         actionDisabled={isPending}
         onAction={handleSubmit(onSubmit, scrollToError)}
         onBack={() => router.back()}
