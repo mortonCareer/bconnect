@@ -4,6 +4,7 @@ import { useState } from 'react'
 import {
   Button,
   ConfirmDialog,
+  EditIcon,
   MenuButton,
   ResizableHandle,
   ResizablePanel,
@@ -18,8 +19,9 @@ import { useFolders, useStorageMutations } from '@/lib/storage-mock/hooks'
 /** plan 동산보드 루트 — 폴더 목록(좌) + 빈 상태 안내(우), 컬럼 비율 드래그 리사이즈. 폴더 미선택 시. */
 export function DocsRoot({ projectId }: { projectId: string }) {
   const { data: folders, isLoading, isError } = useFolders(projectId)
-  const { createFolder, deleteFolder } = useStorageMutations()
+  const { createFolder, updateFolder, deleteFolder } = useStorageMutations()
   const [creating, setCreating] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [pendingDelete, setPendingDelete] = useState<Folder | null>(null)
 
   return (
@@ -50,10 +52,21 @@ export function DocsRoot({ projectId }: { projectId: string }) {
                 setCreating(false)
               }}
               onCreateCancel={() => setCreating(false)}
+              editingId={editingId}
+              onRenameSubmit={(id, title) => {
+                updateFolder(id, { title })
+                setEditingId(null)
+              }}
+              onRenameCancel={() => setEditingId(null)}
               renderKebab={(folder) => (
                 <MenuButton
                   ariaLabel="폴더 메뉴"
                   items={[
+                    {
+                      label: '이름 수정',
+                      icon: <EditIcon size={16} />,
+                      onSelect: () => setEditingId(folder.id),
+                    },
                     {
                       label: '삭제',
                       icon: <TrashIcon size={16} />,
