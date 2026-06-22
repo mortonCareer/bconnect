@@ -29,10 +29,14 @@ export function WeekRow({ row, monthIso, today, selectedDay, onSelectDay }: Week
           />
         ))}
       </div>
-      {/* 바 레이어 — 숫자 아래 overlay, 클릭은 셀로 통과 */}
+      {/* 바 레이어 — 숫자 아래 overlay. 컨테이너는 클릭 통과(셀 선택), 각 바만 클릭 가능 */}
       <div className="pointer-events-none absolute inset-x-0 top-7 grid grid-cols-7 gap-y-0.5">
         {row.segments.map((seg) => (
-          <TaskBar key={`${seg.task.id}-${seg.colStart}`} segment={seg} />
+          <TaskBar
+            key={`${seg.task.id}-${seg.colStart}`}
+            segment={seg}
+            onSelect={() => onSelectDay(row.cells[seg.colStart] ?? row.cells[0]!)}
+          />
         ))}
       </div>
     </div>

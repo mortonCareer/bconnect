@@ -13,9 +13,9 @@ import type { Address, Task } from '@bconnect/api-client'
 import {
   ConfirmDialog,
   DateRangeField,
+  FilterChip,
   Form,
   MoreVerticalIcon,
-  Tag,
   TagSelectField,
   TextField,
   TextareaField,
@@ -138,7 +138,7 @@ export function TaskDetailCard({ task }: { task: CalendarTask }) {
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
-              className="flex size-6 items-center justify-center text-gray-500 hover:opacity-60"
+              className="flex size-6 cursor-pointer items-center justify-center text-gray-500 transition-opacity hover:opacity-60"
               aria-label="작업 메뉴"
             >
               <MoreVerticalIcon />
@@ -148,7 +148,12 @@ export function TaskDetailCard({ task }: { task: CalendarTask }) {
               type="button"
               onClick={onSubmit}
               disabled={saving}
-              className={cn('text-sb-16', saving ? 'text-gray-400' : 'text-primary')}
+              className={cn(
+                'text-sb-16 transition-opacity',
+                saving
+                  ? 'cursor-default text-gray-400'
+                  : 'cursor-pointer text-primary hover:opacity-60'
+              )}
             >
               {saving ? '저장 중...' : '저장'}
             </button>
@@ -167,11 +172,10 @@ export function TaskDetailCard({ task }: { task: CalendarTask }) {
           <Row label="공종">
             <span className="flex flex-wrap gap-1.5">
               {task.raw.trades.map((t) => (
-                <Tag key={t}>{TRADE_LABELS[t]}</Tag>
+                <FilterChip key={t} label={TRADE_LABELS[t]} />
               ))}
             </span>
           </Row>
-          {task.raw.taskTitle && <Row label="메모">{task.raw.taskTitle}</Row>}
         </div>
       ) : (
         <Form {...form}>
@@ -184,7 +188,7 @@ export function TaskDetailCard({ task }: { task: CalendarTask }) {
               label="작업기간"
               layout="row"
             />
-            <AddressField control={form.control} name="address" label="현장주소" />
+            <AddressField control={form.control} name="address" label="현장주소" layout="row" />
             <TagSelectField
               control={form.control}
               name="trades"
@@ -203,6 +207,7 @@ export function TaskDetailCard({ task }: { task: CalendarTask }) {
         onShare={share}
         onEdit={() => setMode('edit')}
         onDelete={() => setConfirmOpen(true)}
+        canEdit={!task.isProposed}
       />
 
       <ConfirmDialog

@@ -25,7 +25,11 @@ export function DayCell({
     weekday === 0 ? 'text-red-500' : weekday === 6 ? 'text-blue-500' : 'text-gray-900'
 
   return (
-    <button type="button" onClick={onSelect} className="flex min-h-16 flex-col items-center pt-1">
+    <button
+      type="button"
+      onClick={onSelect}
+      className="flex min-h-[72px] cursor-pointer flex-col items-start px-2 pt-1.5"
+    >
       <span
         className={cn(
           'flex size-6 items-center justify-center rounded-full text-m-14',

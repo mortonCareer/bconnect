@@ -11,7 +11,7 @@ interface CalendarHeaderProps {
 export function CalendarHeader({ monthIso, onPrev, onNext }: CalendarHeaderProps) {
   const { month, year } = formatMonthHeader(monthIso)
   const arrowClass =
-    'flex size-8 items-center justify-center text-gray-500 transition-all hover:opacity-60 active:scale-[0.95]'
+    'flex size-8 cursor-pointer items-center justify-center text-gray-500 transition-all hover:opacity-60 active:scale-[0.95]'
 
   return (
     <div className="flex items-center justify-between px-4 py-3">
