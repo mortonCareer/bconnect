@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.response.FeedResponse;
+import to.bconnect.api.core.domain.attachment.Attachment;
+import to.bconnect.api.core.domain.attachment.AttachmentResolver;
+import to.bconnect.api.core.domain.attachment.ImageSize;
 import to.bconnect.api.core.domain.post.Post;
 import to.bconnect.api.core.domain.post.PostService;
 import to.bconnect.api.core.domain.MemberResolver;
@@ -16,6 +19,7 @@ import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/feeds")
@@ -25,6 +29,7 @@ public class FeedController {
     private final PostService postService;
     private final MemberResolver memberResolver;
     private final ProfileQueryService profileQueryService;
+    private final AttachmentResolver attachmentResolver;
 
     @GetMapping
     public ApiResponse<List<FeedResponse>> list() {
@@ -34,11 +39,18 @@ public class FeedController {
         Map<Long, Member> memberMap = memberResolver.map(memberIds);
         Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
 
+        List<Long> attachmentIds = posts.stream()
+                .flatMap(it -> it.attachmentIds().stream())
+                .distinct()
+                .toList();
+        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(attachmentIds);
+
         List<FeedResponse> response = posts.stream()
                 .map(it -> FeedResponse.of(
                         it,
                         memberMap.get(it.memberId()),
-                        profileMap.get(it.memberId())))
+                        profileMap.get(it.memberId()),
+                        imageUrls(it.attachmentIds(), attachmentMap)))
                 .toList();
         return ApiResponse.success(response);
     }
@@ -48,6 +60,16 @@ public class FeedController {
         Post post = postService.get(id);
         Member member = memberResolver.find(post.memberId());
         Profile profile = profileQueryService.summaries(List.of(post.memberId())).get(post.memberId());
-        return ApiResponse.success(FeedResponse.of(post, member, profile));
+
+        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(post.attachmentIds());
+        return ApiResponse.success(FeedResponse.of(post, member, profile, imageUrls(post.attachmentIds(), attachmentMap)));
+    }
+
+    private List<String> imageUrls(List<Long> attachmentIds, Map<Long, Attachment> attachmentMap) {
+        return attachmentIds.stream()
+                .map(attachmentMap::get)
+                .filter(Objects::nonNull)
+                .map(it -> attachmentResolver.url(it, ImageSize.MEDIUM))
+                .toList();
     }
 }

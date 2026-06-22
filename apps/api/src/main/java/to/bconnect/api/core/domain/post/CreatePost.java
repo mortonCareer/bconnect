@@ -4,6 +4,6 @@ import java.util.List;
 
 public record CreatePost(
         Long taskId,
-        List<String> images,
+        List<Long> attachmentIds,
         String content
 ) {}

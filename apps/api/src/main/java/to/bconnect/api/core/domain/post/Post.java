@@ -9,17 +9,21 @@ public record Post(
     Long id,
     Long memberId,
     Long taskId,
-    List<String> images,
+    List<Long> attachmentIds,
     String content,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
     public static Post of(PostEntity entity) {
+        return of(entity, List.of());
+    }
+
+    public static Post of(PostEntity entity, List<Long> attachmentIds) {
         return new Post(
                 entity.getId(),
                 entity.getMemberId(),
                 entity.getTaskId(),
-                entity.getImages(),
+                attachmentIds,
                 entity.getContent(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt()

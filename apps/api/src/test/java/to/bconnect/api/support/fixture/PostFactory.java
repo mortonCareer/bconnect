@@ -7,27 +7,21 @@ import to.bconnect.api.storage.post.PostEntity;
 
 import java.util.List;
 
-import static to.bconnect.api.support.fixture.FixtureConstant.DEFAULT_IMAGE;
 import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
 public class PostFactory {
 
     public static Post create(Long id, Long memberId, Long taskId) {
-        return new Post(id, memberId, taskId, List.of(DEFAULT_IMAGE), "content",
+        return new Post(id, memberId, taskId, List.of(1L), "content",
                 MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
     public static PostEntity createEntity(Long memberId, Long taskId) {
-        return new PostEntity(
-                memberId,
-                taskId,
-                List.of(DEFAULT_IMAGE),
-                "content"
-        );
+        return new PostEntity(memberId, taskId, "content");
     }
 
     public static CreatePostRequest createRequest() {
-        return new CreatePostRequest(1L, List.of(DEFAULT_IMAGE), "content");
+        return new CreatePostRequest(1L, List.of(1L), "content");
     }
 
     public static UpdatePostRequest updateRequest() {
