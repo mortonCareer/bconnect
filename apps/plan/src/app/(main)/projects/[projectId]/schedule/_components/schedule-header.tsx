@@ -5,7 +5,14 @@ import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import { z } from 'zod'
 import { mapKakaoAddress } from '@bconnect/config/address'
-import { AddressSearchDialog, Button, Form, Input, TextField } from '@bconnect/ui'
+import {
+  AddressSearchDialog,
+  Button,
+  Form,
+  Input,
+  ROW_INPUT_CLASSES,
+  TextField,
+} from '@bconnect/ui'
 import type { Address } from '@bconnect/api-client'
 
 export type ScheduleHeaderProps = {
@@ -46,12 +53,14 @@ function ProjectNameRow({ initialName }: { initialName: string }) {
     return (
       <Form {...form}>
         <form onSubmit={onDone} className="flex w-fit items-center gap-[12px]">
-          <div className="w-[360px]">
+          <span className={LABEL_CLASSES} style={LABEL_STYLE}>
+            프로젝트명
+          </span>
+          <div className="w-[280px]">
             <TextField
               control={form.control}
               name="name"
-              label="프로젝트명"
-              layout="row"
+              className={`${ROW_INPUT_CLASSES} text-sb-14 text-gray-900`}
               autoFocus
             />
           </div>
