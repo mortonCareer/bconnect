@@ -12,10 +12,10 @@ function formatMemoDate(iso: string): string {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`
 }
 
-/** 메모 표시 카드 (날짜 + 케밥 + 멀티라인 본문). */
+/** 메모 표시 (날짜 + 케밥 + 멀티라인 본문). 테두리 없음 — 목록에서 divider 로 구분. */
 export function MemoCard({ memo, renderKebab }: MemoCardProps) {
   return (
-    <div className="rounded-lg border border-gray-200 p-4">
+    <div>
       <div className="flex items-start justify-between gap-2">
         <span className="text-xs text-gray-400">{formatMemoDate(memo.createdAt)}</span>
         {renderKebab?.(memo)}

@@ -1,4 +1,7 @@
-import type { BoardImage, Folder, Memo, MetaTemplate } from '@bconnect/features'
+import type { BoardImage, BoardPosition, Folder, Memo, MetaTemplate } from '@bconnect/features'
+
+// 보드 스탬프 위치 — 사실감 위해 코너 섞음(전부 좌상단 통일 X).
+const SEED_POSITIONS: BoardPosition[] = ['tl', 'br', 'tr', 'bl', 'tr', 'br']
 
 /** 시안의 회색 "이미지" 박스를 그대로 재현하는 self-contained placeholder (네트워크/파일 불필요, refresh 생존). */
 export const placeholderImage = (label = '이미지'): string =>
@@ -71,7 +74,7 @@ export const SEED_IMAGES: BoardImage[] = Array.from({ length: 6 }, (_, i) => ({
   boardRows: livingRows(
     `101동 1502호 ${['거실', '거실 창측', '주방', '복도', '베란다 입구', '현관'][i]} (Mocked)`
   ),
-  boardPosition: 'tl',
+  boardPosition: SEED_POSITIONS[i],
   description: '',
   createdAt: `2026-02-2${i}T00:00:00.000Z`,
 }))

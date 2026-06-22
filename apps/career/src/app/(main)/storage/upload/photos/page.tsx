@@ -1,11 +1,11 @@
 /**
- * @figma-scaffold 동산보드 업로드 3단계 사진 정보 입력 — 사진별 배치/메타/폴더/설명, 와이어프레임만 (SPRINT4 pre-build, 기획 node-id=1095-424)
+ * @figma-scaffold 저장소 업로드 사진 정보 입력 — 사진별 배치/메타/폴더/설명, 와이어프레임만 (SPRINT4 pre-build, 기획 node-id=1095-424)
  */
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronIcon, TopBar } from '@bconnect/ui'
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi, TopBar } from '@bconnect/ui'
 import { BoardOverlay, ImageBoardDetail } from '@bconnect/features'
 import type { BoardPosition } from '@bconnect/features'
 import { useAllFolders, useStorageMutations } from '@/lib/storage-mock/hooks'
@@ -20,9 +20,21 @@ export default function UploadPhotosPage() {
     () => files.map((f) => URL.createObjectURL(f)), // TODO(orval): 업로드 후 CloudFront URL 로 교체. revoke 생략(누수, 와이어프레임 허용).
     [files]
   )
-  const [cursor, setCursor] = useState(0)
 
   const active = files.map((_, i) => i).filter((i) => !perPhoto[i]?.deselected)
+  const [api, setApi] = useState<CarouselApi>()
+  const [cursor, setCursor] = useState(0)
+  useEffect(() => {
+    if (!api) return
+    const sync = () => setCursor(api.selectedScrollSnap())
+    api.on('select', sync)
+    api.on('reInit', sync)
+    return () => {
+      api.off('select', sync)
+      api.off('reInit', sync)
+    }
+  }, [api])
+
   const safeCursor = Math.min(cursor, Math.max(0, active.length - 1))
   const idx = active[safeCursor] ?? -1
 
@@ -91,30 +103,21 @@ export default function UploadPhotosPage() {
         onAction={complete}
       />
       <div className="flex flex-col gap-4 p-4">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            aria-label="이전 사진"
-            onClick={() => setCursor((c) => Math.max(0, c - 1))}
-            disabled={safeCursor === 0}
-            className="shrink-0 text-gray-400 disabled:opacity-30"
-          >
-            <ChevronIcon direction="left" size={24} />
-          </button>
-          <div className="relative min-w-0 flex-1 overflow-hidden rounded-md">
-            <img src={urls[idx]} alt="" className="aspect-square w-full object-cover" />
-            <BoardOverlay rows={p.rows} position={p.position} size="md" />
-          </div>
-          <button
-            type="button"
-            aria-label="다음 사진"
-            onClick={() => setCursor((c) => Math.min(active.length - 1, c + 1))}
-            disabled={safeCursor >= active.length - 1}
-            className="shrink-0 text-gray-400 disabled:opacity-30"
-          >
-            <ChevronIcon direction="right" size={24} />
-          </button>
-        </div>
+        <Carousel setApi={setApi} className="w-full">
+          <CarouselContent className="ml-0">
+            {active.map((i) => {
+              const pp = per(i)
+              return (
+                <CarouselItem key={i} className="pl-0">
+                  <div className="relative overflow-hidden rounded-md">
+                    <img src={urls[i]} alt="" className="aspect-square w-full object-cover" />
+                    <BoardOverlay rows={pp.rows} position={pp.position} size="md" />
+                  </div>
+                </CarouselItem>
+              )
+            })}
+          </CarouselContent>
+        </Carousel>
         <p className="text-center text-xs text-gray-400">
           {safeCursor + 1} / {active.length}
         </p>
@@ -126,10 +129,7 @@ export default function UploadPhotosPage() {
           onChangePosition={(position) => setPerPhoto(idx, { position })}
           onChangeDescription={(description) => setPerPhoto(idx, { description })}
           onMoveFolder={(folderId) => setPerPhoto(idx, { folderId })}
-          onDeselect={() => {
-            setPerPhoto(idx, { deselected: true })
-            setCursor((c) => Math.max(0, c - 1))
-          }}
+          onDeselect={() => setPerPhoto(idx, { deselected: true })}
           showPositionPicker
           submitLabel="완료"
         />

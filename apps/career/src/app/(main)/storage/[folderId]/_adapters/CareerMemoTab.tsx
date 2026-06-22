@@ -1,15 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { ActionDrawer, ConfirmDialog, MoreVerticalIcon } from '@bconnect/ui'
+import { ActionDrawer, ConfirmDialog, Fab, MoreVerticalIcon, PlusIcon } from '@bconnect/ui'
 import { MemoListView } from '@bconnect/features'
 import type { Memo } from '@bconnect/features'
 import { useFolderMemos, useStorageMutations } from '@/lib/storage-mock/hooks'
 
-/** career 폴더 메모 탭 — 메모 CRUD (케밥=ActionDrawer 바텀시트, 삭제=ConfirmDialog 가드). */
+/** career 폴더 메모 탭 — 메모 CRUD (작성=FAB, 케밥=ActionDrawer, 삭제=ConfirmDialog 가드). */
 export function CareerMemoTab({ folderId }: { folderId: string }) {
   const { data: memos, isLoading, isError } = useFolderMemos(folderId)
   const { createMemo, updateMemo, deleteMemo } = useStorageMutations()
+  const [composing, setComposing] = useState(false)
   const [kebab, setKebab] = useState<{ memo: Memo; edit: () => void; remove: () => void } | null>(
     null
   )
@@ -22,6 +23,8 @@ export function CareerMemoTab({ folderId }: { folderId: string }) {
         isLoading={isLoading}
         isError={isError}
         canManage
+        composing={composing}
+        onComposingChange={setComposing}
         onCreate={(content) => createMemo(folderId, content)}
         onUpdate={(id, content) => updateMemo(id, content)}
         onDelete={(id) => deleteMemo(id)}
@@ -37,6 +40,15 @@ export function CareerMemoTab({ folderId }: { folderId: string }) {
           </button>
         )}
       />
+
+      {!composing && (
+        <Fab
+          aria-label="메모 작성"
+          onClick={() => setComposing(true)}
+          icon={<PlusIcon size={22} />}
+        />
+      )}
+
       <ActionDrawer
         open={kebab != null}
         onOpenChange={(open) => {

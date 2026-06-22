@@ -8,6 +8,7 @@ export interface FolderImagesViewProps {
   selectedId?: string
   imageHref?: (imageId: string) => string
   onSelect?: (imageId: string) => void
+  columns?: number
   emptyLabel?: string
 }
 
@@ -19,6 +20,7 @@ export function FolderImagesView({
   selectedId,
   imageHref,
   onSelect,
+  columns,
   emptyLabel,
 }: FolderImagesViewProps) {
   if (isLoading) {
@@ -35,6 +37,7 @@ export function FolderImagesView({
       selectedId={selectedId}
       imageHref={imageHref}
       onSelect={onSelect}
+      columns={columns}
       emptyLabel={emptyLabel}
     />
   )

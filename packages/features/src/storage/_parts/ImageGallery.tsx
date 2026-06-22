@@ -11,22 +11,33 @@ export interface ImageGalleryProps {
   imageHref?: (imageId: string) => string
   /** career: 콜백으로 상세 오픈. */
   onSelect?: (imageId: string) => void
+  /** 그리드 열 수 (기본 3, 줌으로 2~5 변경). */
+  columns?: number
   emptyLabel?: string
 }
 
-/** 2열 썸네일 그리드 (각 썸네일에 BoardOverlay 스탬프). */
+const COLS_CLASS: Record<number, string> = {
+  2: 'grid-cols-2',
+  3: 'grid-cols-3',
+  4: 'grid-cols-4',
+  5: 'grid-cols-5',
+}
+
+/** 썸네일 그리드 (각 썸네일에 BoardOverlay 스탬프). 기본 3열. */
 export function ImageGallery({
   images,
   selectedId,
   imageHref,
   onSelect,
+  columns = 3,
   emptyLabel = '이미지가 없습니다',
 }: ImageGalleryProps) {
   if (images.length === 0) {
     return <p className="px-1 py-8 text-center text-sm text-gray-500">{emptyLabel}</p>
   }
+  const colsClass = COLS_CLASS[Math.min(5, Math.max(2, columns))] ?? COLS_CLASS[3]
   return (
-    <ul className="grid grid-cols-2 gap-3">
+    <ul className={`grid gap-2 ${colsClass}`}>
       {images.map((img) => {
         const selected = img.id === selectedId
         const cls = `relative block overflow-hidden rounded-md ${selected ? 'ring-2 ring-primary' : ''}`

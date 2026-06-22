@@ -9,16 +9,30 @@ import { useFolderMemos, useStorageMutations } from '@/lib/storage-mock/hooks'
 export function DocsMemoPanel({ folderId }: { folderId: string }) {
   const { data: memos, isLoading, isError } = useFolderMemos(folderId)
   const { createMemo, updateMemo, deleteMemo } = useStorageMutations()
+  const [composing, setComposing] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<{ run: () => void } | null>(null)
 
   return (
     <div className="flex flex-col gap-3 p-6">
-      <h2 className="text-base font-semibold text-gray-900">메모</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-base font-semibold text-gray-900">메모</h2>
+        {!composing && (
+          <button
+            type="button"
+            onClick={() => setComposing(true)}
+            className="rounded-md px-3 py-1.5 text-sm text-primary transition-colors hover:bg-primary/10"
+          >
+            + 메모 작성
+          </button>
+        )}
+      </div>
       <MemoListView
         memos={memos ?? []}
         isLoading={isLoading}
         isError={isError}
         canManage
+        composing={composing}
+        onComposingChange={setComposing}
         onCreate={(content) => createMemo(folderId, content)}
         onUpdate={(id, content) => updateMemo(id, content)}
         onDelete={(id) => deleteMemo(id)}
