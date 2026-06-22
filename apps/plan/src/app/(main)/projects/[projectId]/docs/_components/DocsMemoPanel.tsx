@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ConfirmDialog, EditIcon, MenuButton, TrashIcon } from '@bconnect/ui'
+import { Button, ConfirmDialog, EditIcon, MenuButton, TrashIcon } from '@bconnect/ui'
 import { MemoListView } from '@bconnect/features'
 import { useFolderMemos, useStorageMutations } from '@/lib/storage-mock/hooks'
 
@@ -17,13 +17,9 @@ export function DocsMemoPanel({ folderId }: { folderId: string }) {
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-gray-900">메모</h2>
         {!composing && (
-          <button
-            type="button"
-            onClick={() => setComposing(true)}
-            className="rounded-md px-3 py-1.5 text-sm text-primary transition-colors hover:bg-primary/10"
-          >
+          <Button variant="primary" size="small" onClick={() => setComposing(true)}>
             + 메모 작성
-          </button>
+          </Button>
         )}
       </div>
       <MemoListView

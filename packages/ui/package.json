@@ -22,6 +22,7 @@
     "lucide-react": "catalog:",
     "radix-ui": "catalog:",
     "react-daum-postcode": "^4.0.0",
+    "react-resizable-panels": "^2.1.9",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "catalog:",
     "vaul": "^1.1.2"

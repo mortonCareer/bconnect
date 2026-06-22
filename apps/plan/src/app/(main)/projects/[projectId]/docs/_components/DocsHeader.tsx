@@ -1,5 +1,6 @@
 'use client'
 
+import { Progress } from '@bconnect/ui'
 import { getMockProject } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
 import { useFolder, useStorageUsage } from '@/lib/storage-mock/hooks'
 
@@ -27,9 +28,7 @@ export function DocsHeader({ projectId, folderId }: { projectId: string; folderI
       </div>
       {usage && (
         <div className="flex shrink-0 items-center gap-2 pt-1">
-          <div className="h-1.5 w-28 overflow-hidden rounded-full bg-gray-200">
-            <div className="h-full rounded-full bg-gray-400" style={{ width: `${pct}%` }} />
-          </div>
+          <Progress value={pct} className="w-28" />
           <span className="text-xs text-gray-400">
             {toMB(usage.usedBytes)}/{toGB(usage.totalBytes)}
           </span>

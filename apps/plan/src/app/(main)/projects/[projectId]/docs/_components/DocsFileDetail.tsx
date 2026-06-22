@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useToast, XIcon } from '@bconnect/ui'
 import { BoardOverlay, ImageBoardDetail } from '@bconnect/features'
-import type { BoardRow } from '@bconnect/features'
+import type { BoardPosition, BoardRow } from '@bconnect/features'
 import { useFolderImages, useFolders, useStorageMutations } from '@/lib/storage-mock/hooks'
 
 interface DocsFileDetailProps {
@@ -28,6 +28,7 @@ export function DocsFileDetail({ projectId, folderId, fileId, closeHref }: DocsF
   const image = images?.find((i) => i.id === fileId)
   const [rows, setRows] = useState<BoardRow[]>(image?.boardRows ?? [])
   const [description, setDescription] = useState(image?.description ?? '')
+  const [position, setPosition] = useState<BoardPosition>(image?.boardPosition ?? 'tl')
   const [targetFolder, setTargetFolder] = useState(image?.folderId ?? folderId)
 
   if (!image) {
@@ -42,7 +43,7 @@ export function DocsFileDetail({ projectId, folderId, fileId, closeHref }: DocsF
   }
 
   const submit = () => {
-    updateImage(image.id, { boardRows: rows, description })
+    updateImage(image.id, { boardRows: rows, description, boardPosition: position })
     if (targetFolder !== image.folderId) moveImage(image.id, targetFolder)
     toast({ title: '저장되었어요' })
   }
@@ -56,16 +57,23 @@ export function DocsFileDetail({ projectId, folderId, fileId, closeHref }: DocsF
       </div>
       <div className="relative overflow-hidden rounded-md">
         <img src={image.imageUrl} alt="" className="aspect-square w-full object-cover" />
-        <BoardOverlay rows={rows} position={image.boardPosition} size="md" />
+        <BoardOverlay rows={rows} position={position} size="md" />
       </div>
       <ImageBoardDetail
-        image={{ ...image, boardRows: rows, description, folderId: targetFolder }}
+        image={{
+          ...image,
+          boardRows: rows,
+          description,
+          boardPosition: position,
+          folderId: targetFolder,
+        }}
         folders={folders ?? []}
         onChangeRows={setRows}
+        onChangePosition={setPosition}
         onChangeDescription={setDescription}
         onMoveFolder={setTargetFolder}
         onSubmit={submit}
-        showPositionPicker={false}
+        showPositionPicker
         submitLabel="저장"
       />
     </div>
