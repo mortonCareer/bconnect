@@ -23,4 +23,6 @@ export { SettingsIcon } from './SettingsIcon'
 export { PlusIcon } from './PlusIcon'
 export { FolderAddIcon } from './FolderAddIcon'
 export { ImageUploadIcon } from './ImageUploadIcon'
+// 액션 메뉴(수정/삭제/숨김)용 — lucide 재export (size·currentColor 지원). 별도 시안 노드 없음.
+export { Pencil as EditIcon, Trash2 as TrashIcon, EyeOff as HideIcon } from 'lucide-react'
 export { Logo } from './Logo'

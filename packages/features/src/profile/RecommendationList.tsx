@@ -7,10 +7,13 @@ import type { Recommendation } from '@bconnect/api-client'
 import {
   ActionDrawer,
   cn,
+  EditIcon,
+  HideIcon,
   MoreVerticalIcon,
   ProfileCard,
   ProfileCardSkeleton,
   Tab,
+  TrashIcon,
 } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 
@@ -109,10 +112,26 @@ export function RecommendationList({
           openRec == null
             ? []
             : mode === 'received'
-              ? [{ label: '숨김', onSelect: () => onHide?.(openRec.id) }]
+              ? [
+                  {
+                    label: '숨김',
+                    icon: <HideIcon size={18} />,
+                    onSelect: () => onHide?.(openRec.id),
+                  },
+                ]
               : [
-                  { label: '수정', disabled: true, onSelect: () => {} },
-                  { label: '삭제', destructive: true, onSelect: () => onDelete?.(openRec.id) },
+                  {
+                    label: '수정',
+                    icon: <EditIcon size={18} />,
+                    disabled: true,
+                    onSelect: () => {},
+                  },
+                  {
+                    label: '삭제',
+                    icon: <TrashIcon size={18} />,
+                    destructive: true,
+                    onSelect: () => onDelete?.(openRec.id),
+                  },
                 ]
         }
       />

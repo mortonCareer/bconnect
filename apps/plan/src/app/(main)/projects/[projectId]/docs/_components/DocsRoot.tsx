@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, ConfirmDialog, Input, MenuButton } from '@bconnect/ui'
+import { Button, ConfirmDialog, Input, MenuButton, TrashIcon } from '@bconnect/ui'
 import { DocsExplorerView } from '@bconnect/features'
 import type { Folder } from '@bconnect/features'
 import { DocsHeader } from './DocsHeader'
@@ -61,7 +61,12 @@ export function DocsRoot({ projectId }: { projectId: string }) {
               <MenuButton
                 ariaLabel="폴더 메뉴"
                 items={[
-                  { label: '삭제', destructive: true, onSelect: () => setPendingDelete(folder) },
+                  {
+                    label: '삭제',
+                    icon: <TrashIcon size={16} />,
+                    destructive: true,
+                    onSelect: () => setPendingDelete(folder),
+                  },
                 ]}
               />
             )}

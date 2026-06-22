@@ -4,11 +4,13 @@ import { useMemo, useState } from 'react'
 import {
   ActionDrawer,
   ConfirmDialog,
+  EditIcon,
   Fab,
   FolderAddIcon,
   MoreVerticalIcon,
   SearchIcon,
   TopBar,
+  TrashIcon,
 } from '@bconnect/ui'
 import { DocsExplorerView } from '@bconnect/features'
 import type { Folder } from '@bconnect/features'
@@ -92,8 +94,17 @@ export function CareerDocsExplorer() {
         items={
           kebabFor
             ? [
-                { label: '이름 수정', onSelect: () => setEditingId(kebabFor.id) },
-                { label: '삭제', destructive: true, onSelect: () => setPendingDelete(kebabFor) },
+                {
+                  label: '이름 수정',
+                  icon: <EditIcon size={18} />,
+                  onSelect: () => setEditingId(kebabFor.id),
+                },
+                {
+                  label: '삭제',
+                  icon: <TrashIcon size={18} />,
+                  destructive: true,
+                  onSelect: () => setPendingDelete(kebabFor),
+                },
               ]
             : []
         }

@@ -3,12 +3,15 @@
  */
 'use client'
 
+import type { ReactNode } from 'react'
 import { DropdownMenu } from 'radix-ui'
 import { MoreVertical } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
 export interface MenuButtonItem {
   label: string
+  /** 좌측 아이콘. */
+  icon?: ReactNode
   onSelect: () => void
   destructive?: boolean
   disabled?: boolean
@@ -51,10 +54,15 @@ export function MenuButton({ items, ariaLabel = '메뉴', className }: MenuButto
               disabled={item.disabled}
               onSelect={item.onSelect}
               className={cn(
-                'cursor-pointer px-3 py-2 text-m-14 outline-none data-[highlighted]:bg-gray-50 data-[disabled]:cursor-default data-[disabled]:opacity-40',
+                'flex cursor-pointer items-center gap-2 px-3 py-2 text-m-14 outline-none data-[highlighted]:bg-gray-50 data-[disabled]:cursor-default data-[disabled]:opacity-40',
                 item.destructive ? 'text-destructive' : 'text-gray-900'
               )}
             >
+              {item.icon && (
+                <span className="flex h-4 w-4 shrink-0 items-center justify-center">
+                  {item.icon}
+                </span>
+              )}
               {item.label}
             </DropdownMenu.Item>
           ))}

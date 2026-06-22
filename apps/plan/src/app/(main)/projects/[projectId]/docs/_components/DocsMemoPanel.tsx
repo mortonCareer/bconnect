@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ConfirmDialog, MenuButton } from '@bconnect/ui'
+import { ConfirmDialog, EditIcon, MenuButton, TrashIcon } from '@bconnect/ui'
 import { MemoListView } from '@bconnect/features'
 import { useFolderMemos, useStorageMutations } from '@/lib/storage-mock/hooks'
 
@@ -41,8 +41,13 @@ export function DocsMemoPanel({ folderId }: { folderId: string }) {
           <MenuButton
             ariaLabel="메모 메뉴"
             items={[
-              { label: '수정', onSelect: actions.edit },
-              { label: '삭제', destructive: true, onSelect: actions.remove },
+              { label: '수정', icon: <EditIcon size={16} />, onSelect: actions.edit },
+              {
+                label: '삭제',
+                icon: <TrashIcon size={16} />,
+                destructive: true,
+                onSelect: actions.remove,
+              },
             ]}
           />
         )}

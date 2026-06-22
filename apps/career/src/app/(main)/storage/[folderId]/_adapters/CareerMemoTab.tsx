@@ -1,7 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { ActionDrawer, ConfirmDialog, Fab, MoreVerticalIcon, PlusIcon } from '@bconnect/ui'
+import {
+  ActionDrawer,
+  ConfirmDialog,
+  EditIcon,
+  Fab,
+  MoreVerticalIcon,
+  PlusIcon,
+  TrashIcon,
+} from '@bconnect/ui'
 import { MemoListView } from '@bconnect/features'
 import type { Memo } from '@bconnect/features'
 import { useFolderMemos, useStorageMutations } from '@/lib/storage-mock/hooks'
@@ -57,8 +65,13 @@ export function CareerMemoTab({ folderId }: { folderId: string }) {
         items={
           kebab
             ? [
-                { label: '수정', onSelect: kebab.edit },
-                { label: '삭제', destructive: true, onSelect: kebab.remove },
+                { label: '수정', icon: <EditIcon size={18} />, onSelect: kebab.edit },
+                {
+                  label: '삭제',
+                  icon: <TrashIcon size={18} />,
+                  destructive: true,
+                  onSelect: kebab.remove,
+                },
               ]
             : []
         }

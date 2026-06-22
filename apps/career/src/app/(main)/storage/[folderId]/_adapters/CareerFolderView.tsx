@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { parseAsString, parseAsStringEnum, useQueryState } from 'nuqs'
 import { Fab, ImageUploadIcon, Tab, TopBar } from '@bconnect/ui'
@@ -10,7 +10,11 @@ import { useUploadStore } from '@/app/(main)/storage/upload/_store/upload-store'
 import { CareerMemoTab } from './CareerMemoTab'
 import { CareerFileDetail } from './CareerFileDetail'
 
-/** career 폴더 화면 — 고정 앱바+Tab + 갤러리(줌)/메모 + 업로드 FAB(OS 다중선택). ?file= 시 캐러셀 파일상세. */
+const MIN_COLS = 2
+const MAX_COLS = 5
+const clampCols = (n: number) => Math.min(MAX_COLS, Math.max(MIN_COLS, n))
+
+/** career 폴더 화면 — 고정 앱바+Tab + 갤러리(핀치/Ctrl휠 줌)/메모 + 업로드 FAB(OS 다중선택). ?file= 시 캐러셀 파일상세. */
 export function CareerFolderView({ folderId }: { folderId: string }) {
   const router = useRouter()
   const { data: folder } = useFolder(folderId)
@@ -23,7 +27,11 @@ export function CareerFolderView({ folderId }: { folderId: string }) {
   // ?file 은 push (뒤로가기로 갤러리 복귀 — replace 아님)
   const [file, setFile] = useQueryState('file', parseAsString.withOptions({ history: 'push' }))
   const [columns, setColumns] = useState(3)
+
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const galleryRef = useRef<HTMLDivElement>(null)
+  const lastPinch = useRef(0)
+  const lastZoomAt = useRef(0)
 
   const title = folder?.title ?? '폴더'
   const onBack = () => {
@@ -31,7 +39,42 @@ export function CareerFolderView({ folderId }: { folderId: string }) {
     else router.back()
   }
 
-  // 업로드 FAB → OS 파일 선택기 직접 호출(별도 선택 페이지 없음). 명명 함수로 분리(인라인 router.push 룰 회피).
+  // 데스크톱 Ctrl+휠 줌 — passive:false 로 브라우저 확대 막고 열 수 조정
+  useEffect(() => {
+    const el = galleryRef.current
+    if (!el) return
+    const onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey) return
+      e.preventDefault()
+      const now = Date.now()
+      if (now - lastZoomAt.current < 120) return
+      lastZoomAt.current = now
+      setColumns((c) => clampCols(e.deltaY < 0 ? c - 1 : c + 1))
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [])
+
+  // 모바일 핀치 줌 (두 손가락) — 벌리면 확대(열↓), 오므리면 축소(열↑)
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length !== 2) return
+    const [a, b] = [e.touches[0], e.touches[1]]
+    const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)
+    if (lastPinch.current === 0) {
+      lastPinch.current = dist
+      return
+    }
+    const delta = dist - lastPinch.current
+    if (Math.abs(delta) > 40) {
+      setColumns((c) => clampCols(delta > 0 ? c - 1 : c + 1))
+      lastPinch.current = dist
+    }
+  }
+  const resetPinch = () => {
+    lastPinch.current = 0
+  }
+
+  // 업로드 FAB → OS 파일 선택기 직접 호출. 명명 함수로 분리(인라인 router.push 룰 회피).
   const handlePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = Array.from(e.target.files ?? [])
     e.target.value = ''
@@ -66,21 +109,12 @@ export function CareerFolderView({ folderId }: { folderId: string }) {
         />
       ) : tab === 'images' ? (
         <>
-          <div className="flex items-center justify-end gap-1 px-4 pt-3">
-            <ZoomButton
-              label="축소"
-              disabled={columns >= 5}
-              onClick={() => setColumns((c) => Math.min(5, c + 1))}
-              sign="−"
-            />
-            <ZoomButton
-              label="확대"
-              disabled={columns <= 2}
-              onClick={() => setColumns((c) => Math.max(2, c - 1))}
-              sign="+"
-            />
-          </div>
-          <div className="p-4 pt-2">
+          <div
+            ref={galleryRef}
+            onTouchMove={onTouchMove}
+            onTouchEnd={resetPinch}
+            className="touch-pan-y p-4"
+          >
             <FolderImagesView
               images={images ?? []}
               isLoading={isLoading}
@@ -111,30 +145,5 @@ export function CareerFolderView({ folderId }: { folderId: string }) {
         </div>
       )}
     </div>
-  )
-}
-
-/** 갤러리 줌 버튼. 더 작은 열 수 = 확대(+), 더 많은 열 = 축소(−). */
-function ZoomButton({
-  label,
-  sign,
-  disabled,
-  onClick,
-}: {
-  label: string
-  sign: string
-  disabled: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      disabled={disabled}
-      onClick={onClick}
-      className="flex h-7 w-7 items-center justify-center rounded-md border border-gray-300 text-gray-500 disabled:opacity-30"
-    >
-      {sign}
-    </button>
   )
 }

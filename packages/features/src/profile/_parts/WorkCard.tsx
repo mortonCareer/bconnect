@@ -3,7 +3,14 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ActionDrawer, cn, MoreVerticalIcon, useExpandableText } from '@bconnect/ui'
+import {
+  ActionDrawer,
+  cn,
+  EditIcon,
+  MoreVerticalIcon,
+  TrashIcon,
+  useExpandableText,
+} from '@bconnect/ui'
 
 interface WorkCardProps {
   image: string
@@ -95,8 +102,25 @@ export function WorkCard({
         open={menuOpen}
         onOpenChange={setMenuOpen}
         items={[
-          ...(editHref ? [{ label: '수정', onSelect: () => router.push(editHref) }] : []),
-          ...(onDelete ? [{ label: '삭제', destructive: true, onSelect: onDelete }] : []),
+          ...(editHref
+            ? [
+                {
+                  label: '수정',
+                  icon: <EditIcon size={18} />,
+                  onSelect: () => router.push(editHref),
+                },
+              ]
+            : []),
+          ...(onDelete
+            ? [
+                {
+                  label: '삭제',
+                  icon: <TrashIcon size={18} />,
+                  destructive: true,
+                  onSelect: onDelete,
+                },
+              ]
+            : []),
         ]}
       />
     </div>
