@@ -23,6 +23,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class S3FileStorage {
 
+    private static final int MAX_DELETE_BATCH = 1000;
+
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
     private final S3Properties properties;
@@ -69,15 +71,17 @@ public class S3FileStorage {
     public void deleteAll(List<String> keys) {
         if (keys.isEmpty()) return;
 
-        List<ObjectIdentifier> identifiers = keys.stream()
-                .map(it -> ObjectIdentifier.builder().key(it).build())
-                .toList();
+        for (int from = 0; from < keys.size(); from += MAX_DELETE_BATCH) {
+            List<ObjectIdentifier> identifiers = keys.subList(from, Math.min(from + MAX_DELETE_BATCH, keys.size())).stream()
+                    .map(it -> ObjectIdentifier.builder().key(it).build())
+                    .toList();
 
-        DeleteObjectsRequest request = DeleteObjectsRequest.builder()
-                .bucket(properties.bucket())
-                .delete(Delete.builder().objects(identifiers).build())
-                .build();
+            DeleteObjectsRequest request = DeleteObjectsRequest.builder()
+                    .bucket(properties.bucket())
+                    .delete(Delete.builder().objects(identifiers).build())
+                    .build();
 
-        s3Client.deleteObjects(request);
+            s3Client.deleteObjects(request);
+        }
     }
 }
