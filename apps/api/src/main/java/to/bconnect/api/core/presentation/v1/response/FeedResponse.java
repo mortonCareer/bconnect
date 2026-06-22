@@ -11,10 +11,10 @@ public record FeedResponse(
         ProfileSummaryResponse profile,
         PostResponse post
 ) {
-    public static FeedResponse of(Post post, Member member, Profile profile, List<String> images) {
+    public static FeedResponse of(Post post, Member member, Profile profile, List<String> images, String picture) {
         return new FeedResponse(
                 MemberSummaryResponse.of(member),
-                profile == null ? null : ProfileSummaryResponse.of(profile),
+                profile == null ? null : ProfileSummaryResponse.of(profile, picture),
                 PostResponse.of(post, images)
         );
     }

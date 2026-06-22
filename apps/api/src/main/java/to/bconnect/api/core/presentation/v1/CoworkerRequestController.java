@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.domain.coworker.CoworkerRequest;
 import to.bconnect.api.core.presentation.v1.request.CreateCoworkerRequest;
 import to.bconnect.api.core.presentation.v1.response.CoworkerRequestResponse;
+import to.bconnect.api.core.domain.attachment.Attachment;
+import to.bconnect.api.core.domain.attachment.AttachmentResolver;
+import to.bconnect.api.core.domain.attachment.ImageSize;
 import to.bconnect.api.core.domain.coworker.Coworker;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestQueryService;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestService;
@@ -25,6 +28,7 @@ import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/coworker-requests")
@@ -35,6 +39,7 @@ public class CoworkerRequestController {
     private final CoworkerRequestQueryService coworkerRequestQueryService;
     private final MemberResolver memberResolver;
     private final ProfileQueryService profileQueryService;
+    private final AttachmentResolver attachmentResolver;
 
     @PostMapping
     public ApiResponse<Long> create(
@@ -85,11 +90,19 @@ public class CoworkerRequestController {
         Map<Long, Member> memberMap = memberResolver.map(memberIds);
         Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
 
+        List<Long> pictureIds = profileMap.values().stream()
+                .map(Profile::pictureId).filter(Objects::nonNull).toList();
+        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(pictureIds);
+
         return requests.stream()
-                .map(it -> CoworkerRequestResponse.of(
-                        it,
-                        memberMap.get(it.memberId()),
-                        profileMap.get(it.memberId())))
+                .map(it -> {
+                    Profile profile = profileMap.get(it.memberId());
+                    return CoworkerRequestResponse.of(
+                            it,
+                            memberMap.get(it.memberId()),
+                            profile,
+                            profile == null ? null : attachmentResolver.url(attachmentMap.get(profile.pictureId()), ImageSize.SMALL));
+                })
                 .toList();
     }
 }

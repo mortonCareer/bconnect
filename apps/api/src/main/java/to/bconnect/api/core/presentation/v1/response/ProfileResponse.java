@@ -17,13 +17,14 @@ public record ProfileResponse(
         String headline,
         String about,
         Address address,
+        String picture,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt,
         int postCount,
         int recommendationCount,
         int coworkerCount
 ) {
-    public static ProfileResponse of(Profile detail, Member member) {
+    public static ProfileResponse of(Profile detail, Member member, String picture) {
         return new ProfileResponse(
                 detail.id(),
                 MemberSummaryResponse.of(member),
@@ -33,6 +34,7 @@ public record ProfileResponse(
                 detail.headline(),
                 detail.about(),
                 detail.address(),
+                picture,
                 detail.createdAt(),
                 detail.modifiedAt(),
                 detail.postCount().intValue(),

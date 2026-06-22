@@ -11,11 +11,11 @@ public record CoworkerResponse(
         ProfileSummaryResponse profile,
         CoworkerStatus status
 ) {
-    public static CoworkerResponse of(Coworker coworker, Member member, Profile profile, CoworkerStatus status) {
+    public static CoworkerResponse of(Coworker coworker, Member member, Profile profile, CoworkerStatus status, String picture) {
         return new CoworkerResponse(
                 coworker.id(),
                 MemberSummaryResponse.of(member),
-                profile == null ? null : ProfileSummaryResponse.of(profile),
+                profile == null ? null : ProfileSummaryResponse.of(profile, picture),
                 status
         );
     }

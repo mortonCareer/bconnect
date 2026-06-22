@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum AttachmentContext {
     CHAT("chats"),
     CREDENTIAL("credentials"),
-    POST("posts");
+    POST("posts"),
+    PROFILE("profiles");
 
     private final String path;
 }
