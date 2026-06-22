@@ -42,7 +42,7 @@ export function CareerMemoTab({ folderId }: { folderId: string }) {
             type="button"
             aria-label="메모 메뉴"
             onClick={() => setKebab({ memo, edit: actions.edit, remove: actions.remove })}
-            className="flex h-7 w-7 items-center justify-center text-gray-400"
+            className="flex h-7 w-7 cursor-pointer items-center justify-center text-gray-400"
           >
             <MoreVerticalIcon size={18} />
           </button>

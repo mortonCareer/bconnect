@@ -30,12 +30,7 @@ export function DocsRoot({ projectId }: { projectId: string }) {
           <div className="h-full overflow-y-auto p-6">
             <div className="mb-4 flex items-center justify-between gap-2">
               <h2 className="text-base font-semibold text-gray-900">폴더</h2>
-              <Button
-                variant="primary"
-                size="small"
-                onClick={() => setCreating(true)}
-                disabled={creating}
-              >
+              <Button variant="primary" onClick={() => setCreating(true)} disabled={creating}>
                 + 폴더 추가
               </Button>
             </div>

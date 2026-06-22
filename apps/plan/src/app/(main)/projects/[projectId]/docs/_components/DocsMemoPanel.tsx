@@ -17,7 +17,7 @@ export function DocsMemoPanel({ folderId }: { folderId: string }) {
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-gray-900">메모</h2>
         {!composing && (
-          <Button variant="primary" size="small" onClick={() => setComposing(true)}>
+          <Button variant="primary" onClick={() => setComposing(true)}>
             + 메모 작성
           </Button>
         )}

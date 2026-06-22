@@ -35,7 +35,7 @@ export function MenuButton({ items, ariaLabel = '메뉴', className }: MenuButto
           type="button"
           aria-label={ariaLabel}
           className={cn(
-            'inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-500 outline-none transition-colors hover:bg-gray-100 focus-visible:ring-1 focus-visible:ring-primary',
+            'inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-gray-500 outline-none transition-colors hover:bg-gray-100 focus-visible:ring-1 focus-visible:ring-primary',
             className
           )}
         >

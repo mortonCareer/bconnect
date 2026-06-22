@@ -72,7 +72,7 @@ export function CareerDocsExplorer() {
               type="button"
               aria-label="폴더 메뉴"
               onClick={() => setKebabFor(folder)}
-              className="flex h-7 w-7 shrink-0 items-center justify-center text-gray-400"
+              className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center text-gray-400"
             >
               <MoreVerticalIcon size={18} />
             </button>
