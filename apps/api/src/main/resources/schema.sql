@@ -105,6 +105,7 @@ create table profiles (
     detail varchar(255),
     latitude numeric(10,7) not null,
     longitude numeric(10,7) not null,
+    picture_id bigint references attachments(id),
     created_at timestamp(6) not null,
     modified_at timestamp(6) not null,
     deleted_at timestamp,

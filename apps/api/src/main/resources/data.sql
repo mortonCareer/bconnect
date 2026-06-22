@@ -50,6 +50,9 @@ INSERT INTO credentials (id, member_id, type, status, expired_at, created_at, mo
 (1, 1, 'IDENTITY_VERIFICATION', 'PENDING', DATE '2026-12-31', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (2, 1, 'SKILL_GRADE_CERTIFICATE', 'PENDING', DATE '2026-12-31', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
+INSERT INTO attachments (id, member_id, type, status, context, context_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
+(1, 1, 'IMAGE', 'COMPLETED', 'PROFILE', 1, 'seed-attachment-1', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+
 -- for special entities
 ALTER TABLE otps ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE members ALTER COLUMN id RESTART WITH 100;
@@ -61,6 +64,7 @@ ALTER TABLE profiles ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE tasks ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE posts ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE credentials ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE attachments ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE coworkers ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE coworker_requests ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE recommendations ALTER COLUMN id RESTART WITH 100;
