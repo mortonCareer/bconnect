@@ -43,6 +43,10 @@ public class AttachmentService {
         this.fileStorage = fileStorage;
         this.resolvers = resolvers.stream()
                 .collect(Collectors.toUnmodifiableMap(AttachmentContextValidator::context, Function.identity()));
+        for (AttachmentContext context : AttachmentContext.values()) {
+            if (!this.resolvers.containsKey(context))
+                throw new IllegalStateException("AttachmentContextValidator 미등록 context: " + context);
+        }
         this.allowedContentTypes = attachmentProperties.allowedContentTypes().stream()
                 .map(MediaType::parseMediaType)
                 .toList();
