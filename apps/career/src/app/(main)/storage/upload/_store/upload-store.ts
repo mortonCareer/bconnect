@@ -1,50 +1,27 @@
 import { create } from 'zustand'
-import type { BoardPosition, BoardRow } from '@bconnect/features'
-
-export interface PerPhoto {
-  rows: BoardRow[]
-  position: BoardPosition
-  description: string
-  folderId?: string
-  deselected: boolean
-}
+import type { BoardRow } from '@bconnect/features'
 
 interface UploadState {
   files: File[]
-  /** 공통 보드(모든 사진에 기본 적용). */
+  /** 공통 보드(선택 사진 전체에 적용). */
   sharedRows: BoardRow[]
-  /** 사진별(인덱스) 오버라이드. */
-  perPhoto: Record<number, PerPhoto>
   targetFolderId?: string
   setFiles: (files: File[]) => void
   setSharedRows: (rows: BoardRow[]) => void
-  setPerPhoto: (index: number, patch: Partial<PerPhoto>) => void
   setTargetFolder: (folderId: string) => void
   reset: () => void
 }
 
 /**
- * career 동산보드 업로드 위저드 cross-step state (signup-store 패턴).
- * select(파일) → board(공통 보드) → photos(사진별 배치) 단계가 공유. 완료 시 reset.
+ * career 저장소 업로드 cross-step state. 흐름: OS 다중선택 → board(공통 보드) → 완료 커밋.
+ * 사진별 세부(위치/메타/설명/삭제)는 업로드 후 갤러리 상세에서 — 별도 photos 스텝 제거.
  */
 export const useUploadStore = create<UploadState>()((set) => ({
   files: [],
   sharedRows: [],
-  perPhoto: {},
   targetFolderId: undefined,
   setFiles: (files) => set({ files }),
   setSharedRows: (sharedRows) => set({ sharedRows }),
-  setPerPhoto: (index, patch) =>
-    set((s) => {
-      const base: PerPhoto = s.perPhoto[index] ?? {
-        rows: s.sharedRows,
-        position: 'tl',
-        description: '',
-        folderId: s.targetFolderId,
-        deselected: false,
-      }
-      return { perPhoto: { ...s.perPhoto, [index]: { ...base, ...patch } } }
-    }),
   setTargetFolder: (targetFolderId) => set({ targetFolderId }),
-  reset: () => set({ files: [], sharedRows: [], perPhoto: {}, targetFolderId: undefined }),
+  reset: () => set({ files: [], sharedRows: [], targetFolderId: undefined }),
 }))
