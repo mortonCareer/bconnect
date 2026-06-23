@@ -1,5 +1,6 @@
 package to.bconnect.api.core.domain.post;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import to.bconnect.api.storage.post.PostRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService {

@@ -1,5 +1,6 @@
 package to.bconnect.api.security.session;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.support.sms.SmsProvider;
 import to.bconnect.api.support.sms.SmsTemplate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SessionService {

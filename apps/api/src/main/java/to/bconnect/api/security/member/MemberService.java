@@ -1,5 +1,6 @@
 package to.bconnect.api.security.member;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import to.bconnect.api.storage.member.MemberRepository;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberService {

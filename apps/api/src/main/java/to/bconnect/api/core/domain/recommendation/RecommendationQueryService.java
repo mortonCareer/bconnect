@@ -1,5 +1,6 @@
 package to.bconnect.api.core.domain.recommendation;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +10,7 @@ import to.bconnect.api.storage.recommendation.RecommendationRepository;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecommendationQueryService {

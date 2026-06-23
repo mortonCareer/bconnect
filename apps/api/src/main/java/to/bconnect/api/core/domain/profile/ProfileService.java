@@ -1,5 +1,6 @@
 package to.bconnect.api.core.domain.profile;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import to.bconnect.api.storage.profile.ProfileEntity;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.security.AuthUser;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProfileService {

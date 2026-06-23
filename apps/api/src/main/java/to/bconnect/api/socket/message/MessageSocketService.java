@@ -1,5 +1,6 @@
 package to.bconnect.api.socket.message;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
@@ -20,6 +21,7 @@ import to.bconnect.api.storage.member.MemberRepository;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MessageSocketService {
