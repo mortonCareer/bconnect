@@ -14,8 +14,8 @@ public record CloudFrontProperties(
     String domain,
     @NotBlank(message = "app.cloudfront.key-pair-id must not be blank")
     String keyPairId,
-    @NotBlank(message = "app.cloudfront.private-key must not be blank")
-    String privateKey,
+    @NotBlank(message = "app.cloudfront.private-key-path must not be blank")
+    String privateKeyPath,
     @NotBlank(message = "app.cloudfront.cookie-domain must not be blank")
     String cookieDomain,
     @NotNull(message = "app.cloudfront.cookie-ttl must not be null")

@@ -60,7 +60,7 @@ app:
   cloudfront:
     domain: ${CLOUDFRONT_DOMAIN:static.bconnect.to}
     key-pair-id: ${CLOUDFRONT_KEY_PAIR_ID}
-    private-key: ${CLOUDFRONT_PRIVATE_KEY}
+    private-key-path: ${CLOUDFRONT_PRIVATE_KEY_PATH}
     cookie-domain: ${CLOUDFRONT_COOKIE_DOMAIN:.bconnect.to}
     cookie-ttl: 1h
 

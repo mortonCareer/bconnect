@@ -27,7 +27,7 @@ app:
     bucket: local-dummy-bucket
   cloudfront:
     key-pair-id: local-dummy-key-pair-id
-    private-key: local-dummy-private-key
+    private-key-path: local-dummy-private-key-path
 
 logging:
   level:
