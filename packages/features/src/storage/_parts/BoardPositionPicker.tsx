@@ -34,7 +34,7 @@ export function BoardPositionPicker({ value, onChange }: BoardPositionPickerProp
             aria-label={`보드 위치 ${label}`}
             aria-pressed={active}
             onClick={() => onChange(pos)}
-            className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-colors ${
+            className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border outline-none transition-colors focus-visible:ring-1 focus-visible:ring-primary active:scale-95 ${
               active
                 ? 'border-primary text-primary'
                 : 'border-gray-300 text-gray-500 hover:border-gray-400'

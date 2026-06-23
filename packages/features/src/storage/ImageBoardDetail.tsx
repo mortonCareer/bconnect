@@ -26,7 +26,7 @@ export interface ImageBoardDetailProps {
 
 /**
  * 동산보드 상세/편집 폼 (메타표 + 위치 + 폴더 + 설명 + 제출). 사진/캐러셀은 부모가 렌더.
- * 소비처: plan 우측 파일상세(showPositionPicker=false), career 사진정보입력 step3(showPositionPicker=true, onDeselect).
+ * 소비처: plan 우측 파일상세, career 파일상세 — 둘 다 showPositionPicker. career 업로드 게이트는 onDeselect 추가.
  */
 export function ImageBoardDetail({
   image,

@@ -40,13 +40,13 @@ export function ImageGallery({
     <ul className={`grid gap-2 ${colsClass}`}>
       {images.map((img) => {
         const selected = img.id === selectedId
-        const cls = `group relative block cursor-pointer overflow-hidden rounded-md ${selected ? 'ring-2 ring-primary' : ''}`
+        const cls = `group relative block cursor-pointer overflow-hidden rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${selected ? 'ring-2 ring-primary' : ''}`
         const inner = (
           <>
             <img src={img.imageUrl} alt="" className="aspect-square w-full object-cover" />
             <BoardOverlay rows={img.boardRows} position={img.boardPosition} />
-            {/* 호버 색 변경 효과 */}
-            <div className="pointer-events-none absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/15" />
+            {/* 호버/액티브 색 변경 효과 */}
+            <div className="pointer-events-none absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/15 group-active:bg-black/25" />
           </>
         )
         return (
