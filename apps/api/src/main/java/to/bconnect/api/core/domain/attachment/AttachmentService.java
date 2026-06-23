@@ -1,8 +1,7 @@
 package to.bconnect.api.core.domain.attachment;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +14,7 @@ import to.bconnect.api.storage.attachment.AttachmentEntity;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentType;
 import to.bconnect.api.support.s3.S3FileStorage;
-import to.bconnect.api.support.s3.StoredObject;
+import to.bconnect.api.support.s3.ObjectHead;
 
 import java.util.List;
 import java.util.Map;
@@ -23,10 +22,10 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class AttachmentService {
 
-    private static final Logger log = LoggerFactory.getLogger(AttachmentService.class);
 
     private final AttachmentRepository attachmentRepository;
     private final AttachmentProperties attachmentProperties;
@@ -130,7 +129,7 @@ public class AttachmentService {
         return allowedContentTypes.stream().anyMatch(it -> it.includes(type));
     }
 
-    private boolean matches(AttachmentEntity attachment, StoredObject stored) {
+    private boolean matches(AttachmentEntity attachment, ObjectHead stored) {
         return attachment.getSize().equals(stored.size())
                 && attachment.getContentType().equals(stored.contentType());
     }
