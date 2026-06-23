@@ -1,7 +1,7 @@
 package to.bconnect.api.core.domain.chat;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Window;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
@@ -12,7 +12,6 @@ import to.bconnect.api.security.member.Member;
 import to.bconnect.api.storage.chat.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,25 +25,25 @@ public class ChatService {
 
     @Transactional(readOnly = true)
     public List<Chat> list(Long memberId) {
-        List<Long> chatIds = participantRepository.findByMemberId(memberId)
+        val chatIds = participantRepository.findByMemberId(memberId)
                 .stream().map(ParticipantEntity::getChatId).toList();
 
         if (chatIds.isEmpty()) return List.of();
 
-        List<ChatEntity> chats = chatRepository.findAllById(chatIds);
+        val chats = chatRepository.findAllById(chatIds);
 
-        Map<Long, List<Long>> participantMap = participantRepository.findByChatIdIn(chatIds)
+        val participantMap = participantRepository.findByChatIdIn(chatIds)
                 .stream()
                 .collect(Collectors.groupingBy(
                         ParticipantEntity::getChatId,
                         Collectors.mapping(ParticipantEntity::getMemberId, Collectors.toList())
                 ));
 
-        Map<Long, Message> lastMessageMap = messageRepository.findLatestMessagesByChatIdIn(chatIds)
+        val lastMessageMap = messageRepository.findLatestMessagesByChatIdIn(chatIds)
                 .stream()
                 .collect(Collectors.toMap(MessageEntity::getChatId, Message::of));
 
-        Map<Long, Long> unreadCountMap = messageRepository
+        val unreadCountMap = messageRepository
                 .findUnreadCountByChatIdsAndMemberId(chatIds, memberId)
                 .stream()
                 .collect(Collectors.toMap(
@@ -63,12 +62,12 @@ public class ChatService {
 
     @Transactional
     public Long create(AuthUser user, CreateChat command) {
-        List<Long> participantIds = command.participantIds().stream().distinct().toList();
+        val participantIds = command.participantIds().stream().distinct().toList();
 
         if (!participantIds.contains(user.id()))
             throw new CodeException(ChatExceptionCode.SELF_NOT_INCLUDED);
 
-        ChatEntity created = chatRepository.save(new ChatEntity(command.title()));
+        val created = chatRepository.save(new ChatEntity(command.title()));
 
         participantRepository.saveAll(participantIds.stream()
                 .map(it -> new ParticipantEntity(created.getId(), it))
@@ -89,15 +88,15 @@ public class ChatService {
         if (!participantRepository.existsByChatIdAndMemberId(chatId, user.id()))
             throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
 
-        Window<MessageEntity> messages = messageRepository.findAllByChatId(
+        val messages = messageRepository.findAllByChatId(
                 chatId,
                 cursor.toScrollPosition(),
                 cursor.toLimit(),
                 cursor.toSort()
         );
 
-        List<Long> messageIds = messages.getContent().stream().map(MessageEntity::getId).toList();
-        Map<Long, List<Long>> attachmentIdMap = messageAttachmentMappingRepository.findByMessageIdIn(messageIds)
+        val messageIds = messages.getContent().stream().map(MessageEntity::getId).toList();
+        val attachmentIdMap = messageAttachmentMappingRepository.findByMessageIdIn(messageIds)
                 .stream()
                 .collect(Collectors.groupingBy(
                         MessageAttachmentMappingEntity::getMessageId,

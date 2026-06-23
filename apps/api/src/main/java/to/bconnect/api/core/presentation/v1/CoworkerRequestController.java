@@ -1,6 +1,7 @@
 package to.bconnect.api.core.presentation.v1;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,16 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.domain.coworker.CoworkerRequest;
 import to.bconnect.api.core.presentation.v1.request.CreateCoworkerRequest;
 import to.bconnect.api.core.presentation.v1.response.CoworkerRequestResponse;
-import to.bconnect.api.core.domain.attachment.Attachment;
 import to.bconnect.api.core.domain.attachment.AttachmentResolver;
 import to.bconnect.api.core.domain.attachment.ImageSize;
-import to.bconnect.api.core.domain.coworker.Coworker;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestQueryService;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileQueryService;
-import to.bconnect.api.security.member.Member;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
@@ -45,7 +43,7 @@ public class CoworkerRequestController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateCoworkerRequest request) {
-        Long id = coworkerRequestService.create(user, request.toId());
+        val id = coworkerRequestService.create(user, request.toId());
         return ApiResponse.success(id);
     }
 
@@ -86,17 +84,17 @@ public class CoworkerRequestController {
     }
 
     private List<CoworkerRequestResponse> assemble(List<CoworkerRequest> requests) {
-        List<Long> memberIds = requests.stream().map(CoworkerRequest::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.map(memberIds);
-        Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
+        val memberIds = requests.stream().map(CoworkerRequest::memberId).distinct().toList();
+        val memberMap = memberResolver.resolveMap(memberIds);
+        val profileMap = profileQueryService.resolveMap(memberIds);
 
-        List<Long> pictureIds = profileMap.values().stream()
+        val pictureIds = profileMap.values().stream()
                 .map(Profile::pictureId).filter(Objects::nonNull).toList();
-        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(pictureIds);
+        val attachmentMap = attachmentResolver.resolveMap(pictureIds);
 
         return requests.stream()
                 .map(it -> {
-                    Profile profile = profileMap.get(it.memberId());
+                    val profile = profileMap.get(it.memberId());
                     return CoworkerRequestResponse.of(
                             it,
                             memberMap.get(it.memberId()),

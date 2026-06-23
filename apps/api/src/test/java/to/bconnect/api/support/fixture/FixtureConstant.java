@@ -10,4 +10,6 @@ public class FixtureConstant {
 
     public static final LocalDateTime MIN_DATE_TIME = LocalDateTime.of(2000, 1, 1, 0, 0, 0);
     public static final LocalDateTime MAX_DATE_TIME = LocalDateTime.of(2050, 12, 31, 23, 59, 59);
+
+    public static final Long DEFAULT_ATTACHMENT_ID = 1L;
 }

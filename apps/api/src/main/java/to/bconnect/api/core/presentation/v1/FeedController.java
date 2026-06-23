@@ -1,12 +1,12 @@
 package to.bconnect.api.core.presentation.v1;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.response.FeedResponse;
-import to.bconnect.api.core.domain.attachment.Attachment;
 import to.bconnect.api.core.domain.attachment.AttachmentResolver;
 import to.bconnect.api.core.domain.attachment.ImageSize;
 import to.bconnect.api.core.domain.post.Post;
@@ -14,7 +14,6 @@ import to.bconnect.api.core.domain.post.PostService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileQueryService;
-import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.ArrayList;
@@ -34,21 +33,21 @@ public class FeedController {
 
     @GetMapping
     public ApiResponse<List<FeedResponse>> list() {
-        List<Post> posts = postService.list();
+        val posts = postService.list();
 
-        List<Long> memberIds = posts.stream().map(Post::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.map(memberIds);
-        Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
+        val memberIds = posts.stream().map(Post::memberId).distinct().toList();
+        val memberMap = memberResolver.resolveMap(memberIds);
+        val profileMap = profileQueryService.resolveMap(memberIds);
 
-        List<Long> attachmentIds = new ArrayList<>(posts.stream()
+        val attachmentIds = new ArrayList<Long>(posts.stream()
                 .flatMap(it -> it.attachmentIds().stream())
                 .toList());
         profileMap.values().stream().map(Profile::pictureId).filter(Objects::nonNull).forEach(attachmentIds::add);
-        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(attachmentIds);
+        val attachmentMap = attachmentResolver.resolveMap(attachmentIds);
 
-        List<FeedResponse> response = posts.stream()
+        val response = posts.stream()
                 .map(it -> {
-                    Profile profile = profileMap.get(it.memberId());
+                    val profile = profileMap.get(it.memberId());
                     return FeedResponse.of(
                             it,
                             memberMap.get(it.memberId()),
@@ -64,14 +63,14 @@ public class FeedController {
 
     @GetMapping("/{id}")
     public ApiResponse<FeedResponse> get(@PathVariable Long id) {
-        Post post = postService.get(id);
-        Member member = memberResolver.find(post.memberId());
-        Profile profile = profileQueryService.summaries(List.of(post.memberId())).get(post.memberId());
+        val post = postService.get(id);
+        val member = memberResolver.find(post.memberId());
+        val profile = profileQueryService.resolveMap(List.of(post.memberId())).get(post.memberId());
 
-        List<Long> attachmentIds = new ArrayList<>(post.attachmentIds());
+        val attachmentIds = new ArrayList<Long>(post.attachmentIds());
         if (profile != null && profile.pictureId() != null)
             attachmentIds.add(profile.pictureId());
-        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(attachmentIds);
+        val attachmentMap = attachmentResolver.resolveMap(attachmentIds);
 
         return ApiResponse.success(FeedResponse.of(
                 post, member, profile,

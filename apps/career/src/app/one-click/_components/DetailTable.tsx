@@ -1,4 +1,4 @@
-import type { CheckDetail } from '../_clients/types'
+import type { CheckDetail } from '@/lib/business/types'
 
 interface DetailTableProps {
   details: CheckDetail[]

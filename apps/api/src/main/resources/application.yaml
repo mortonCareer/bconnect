@@ -46,6 +46,7 @@ app:
     secret: ${JWT_SECRET}
     access-token-expiration: 1h
     refresh-token-expiration: 7d
+    cookie-domain: ${COOKIE_DOMAIN:}
 
   sms:
     api-key: ${SOLAPI_API_KEY}

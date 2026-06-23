@@ -1,6 +1,7 @@
 package to.bconnect.api.socket;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
@@ -22,15 +23,15 @@ public class ChatAuthorizationManager
     public AuthorizationDecision authorize(
             Supplier<? extends Authentication> authentication,
             MessageAuthorizationContext<?> context) {
-        Authentication auth = authentication.get();
+        val auth = authentication.get();
         if (auth == null || !auth.isAuthenticated())
             return new AuthorizationDecision(false);
         if (!(auth.getPrincipal() instanceof AuthUser user))
             return new AuthorizationDecision(false);
 
-        Long chatId = Long.parseLong(context.getVariables().get("chatId"));
+        val chatId = Long.parseLong(context.getVariables().get("chatId"));
         try {
-            boolean granted = participantRepository.existsByChatIdAndMemberId(chatId, user.id());
+            val granted = participantRepository.existsByChatIdAndMemberId(chatId, user.id());
             return new AuthorizationDecision(granted);
         } catch (NumberFormatException e) {
             return new AuthorizationDecision(false);

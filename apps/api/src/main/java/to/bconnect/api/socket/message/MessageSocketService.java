@@ -1,6 +1,7 @@
 package to.bconnect.api.socket.message;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +18,6 @@ import to.bconnect.api.storage.chat.ParticipantRepository;
 import to.bconnect.api.storage.member.MemberRepository;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,12 +33,12 @@ public class MessageSocketService {
 
     @Transactional
     public Message broadcast(AuthUser user, Long chatId, SendMessage command) {
-        List<Long> attachmentIds = command.attachmentIds();
+        val attachmentIds = command.attachmentIds();
 
         if (!attachmentIds.isEmpty())
             attachmentQueryService.list(user, attachmentIds);
 
-        MessageEntity created = messageRepository.save(new MessageEntity(
+        val created = messageRepository.save(new MessageEntity(
                 chatId,
                 user.id(),
                 command.type(),
@@ -52,15 +51,15 @@ public class MessageSocketService {
                     .toList());
 
         // mark as read
-        String dest = WebSocketAuthorizationConfig.CHAT_TOPIC_PREFIX + chatId;
+        val dest = WebSocketAuthorizationConfig.CHAT_TOPIC_PREFIX + chatId;
 
-        Set<String> usernames = simpUserRegistry
+        val usernames = simpUserRegistry
                 .findSubscriptions(it -> dest.equals(it.getDestination()))
                 .stream()
                 .map(it -> it.getSession().getUser().getName())
                 .collect(Collectors.toCollection(HashSet::new));
 
-        List<Long> memberIds = memberRepository.findIdsByUsernameIn(usernames);
+        val memberIds = memberRepository.findIdsByUsernameIn(usernames);
         participantRepository.updateLastIdxIn(chatId, memberIds, created.getId());
 
         return Message.of(created, attachmentIds);

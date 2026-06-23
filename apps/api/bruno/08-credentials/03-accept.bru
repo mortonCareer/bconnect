@@ -1,0 +1,27 @@
+meta {
+  name: 자격 승인 (ADMIN)
+  type: http
+  seq: 3
+  tags: [
+    admin
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/credentials/1/accept
+  auth: inherit
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  ADMIN 권한(member 1)으로 시드 자격(credential 1, PENDING)을 승인한다.
+  @seed members : 1
+  @seed profiles : 1
+  @seed credentials : 1
+}

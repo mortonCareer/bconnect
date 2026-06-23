@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useCallback, useState } from 'react'
-import Link from 'next/link'
 import { useDeletePost, useQueryClient, getGetFeedsQueryKey } from '@bconnect/api-client'
-import { Feed, ConfirmDialog } from '@bconnect/ui'
+import { Feed, ConfirmDialog, Button } from '@bconnect/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { useFilterParams } from '@/hooks/useFilterParams'
 
@@ -11,13 +10,16 @@ export function FeedList() {
   const queryClient = useQueryClient()
   const { mutate: deletePost } = useDeletePost()
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
-  const { primaryTrade, expRange } = useFilterParams()
+  const { trades, roles, regions, expRange } = useFilterParams()
 
-  const { feedItems, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useFeedItems({
-    trade: primaryTrade,
-    minExperience: expRange?.min,
-    maxExperience: expRange?.max,
-  })
+  const { feedItems, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, error } =
+    useFeedItems({
+      trades,
+      roles,
+      regions,
+      minExperience: expRange?.min,
+      maxExperience: expRange?.max,
+    })
 
   const observerRef = useRef<HTMLDivElement | null>(null)
 
@@ -45,7 +47,7 @@ export function FeedList() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-4 px-4 py-6">
+      <div className="flex flex-col gap-6 px-4 py-6">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="animate-pulse">
             <div className="mb-3 flex items-center gap-3">
@@ -66,6 +68,21 @@ export function FeedList() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20">
+        <p className="text-m-14 text-gray-400">피드를 불러오지 못했어요</p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => queryClient.invalidateQueries({ queryKey: getGetFeedsQueryKey() })}
+        >
+          다시 시도
+        </Button>
+      </div>
+    )
+  }
+
   if (feedItems.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -75,14 +92,13 @@ export function FeedList() {
   }
 
   return (
-    <div className="flex flex-col gap-4 px-4 py-2">
+    <div className="flex flex-col gap-6 px-4 py-2">
       {feedItems.map((item) => (
         <Feed
           key={item.postId}
           content={item.content}
           canManage={item.isMine}
           editHref={`/profile/edit/work/${item.postId}`}
-          LinkComponent={Link}
           onDelete={() => setPendingDeleteId(item.postId)}
         />
       ))}

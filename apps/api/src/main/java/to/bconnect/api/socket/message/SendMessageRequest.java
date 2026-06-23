@@ -1,6 +1,7 @@
 package to.bconnect.api.socket.message;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.val;
 import org.springframework.util.StringUtils;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
@@ -17,8 +18,8 @@ public record SendMessageRequest(
 ) {
     public SendMessage toCommand() {
         List<Long> ids = attachmentIds == null ? List.of() : attachmentIds.stream().distinct().toList();
-        boolean hasContent = StringUtils.hasText(content);
-        boolean hasAttachments = !ids.isEmpty();
+        val hasContent = StringUtils.hasText(content);
+        val hasAttachments = !ids.isEmpty();
 
         switch (type) {
             case TEXT -> {

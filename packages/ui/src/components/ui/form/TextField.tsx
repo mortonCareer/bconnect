@@ -8,6 +8,7 @@ import * as React from 'react'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
 import { cn } from '../../../lib/utils'
 import { Input } from '../Input'
+import { fieldItem, fieldLabel, fieldSlot, ROW_INPUT_CLASSES, type FieldLayout } from './_layout'
 import {
   FormDescription,
   FormField,
@@ -37,6 +38,8 @@ interface TextFieldProps<T extends FieldValues> extends Omit<
   rightElement?: React.ReactNode
   /** 입력값 변환기 — RHF 에 저장하기 전 가공 (전화번호 포맷팅 등) */
   transform?: (raw: string) => string
+  /** 레이아웃 변형 — row 는 패널형 수평(라벨 좌측 고정폭 + 하단 구분선, #581). 기본 stacked. */
+  layout?: FieldLayout
 }
 
 /**
@@ -84,6 +87,7 @@ export function TextField<T extends FieldValues>({
   rightElement,
   transform,
   className,
+  layout = 'stacked',
   ...inputProps
 }: TextFieldProps<T>) {
   return (
@@ -93,9 +97,9 @@ export function TextField<T extends FieldValues>({
       render={({ field, fieldState }) => {
         const hasError = !!fieldState.error || !!serverError
         return (
-          <FormItem className="gap-3">
+          <FormItem className={fieldItem({ layout })}>
             {label && (
-              <FormLabel className="text-m-16 text-gray-900">
+              <FormLabel className={fieldLabel({ layout })}>
                 {label}
                 {required && (
                   <span className="ml-0.5 text-destructive" aria-hidden>
@@ -105,9 +109,11 @@ export function TextField<T extends FieldValues>({
               </FormLabel>
             )}
             {description && (
-              <FormDescription className="text-r-14 text-gray-500">{description}</FormDescription>
+              <FormDescription className={cn('text-r-14 text-gray-500', fieldSlot({ layout }))}>
+                {description}
+              </FormDescription>
             )}
-            <div className="relative">
+            <div className={cn('relative', fieldSlot({ layout }))}>
               <TextFieldControl serverError={serverError}>
                 <Input
                   {...field}
@@ -115,15 +121,21 @@ export function TextField<T extends FieldValues>({
                   onChange={
                     transform ? (e) => field.onChange(transform(e.target.value)) : field.onChange
                   }
-                  className={cn(rightElement && 'pr-28', className)}
+                  className={cn(
+                    layout === 'row' && ROW_INPUT_CLASSES,
+                    rightElement && 'pr-28',
+                    className
+                  )}
                 />
               </TextFieldControl>
               {rightElement && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightElement}</div>
               )}
             </div>
-            <FormMessage>{serverError}</FormMessage>
-            {hint && !hasError && <p className="text-r-14 text-gray-500">{hint}</p>}
+            <FormMessage className={fieldSlot({ layout })}>{serverError}</FormMessage>
+            {hint && !hasError && (
+              <p className={cn('text-r-14 text-gray-500', fieldSlot({ layout }))}>{hint}</p>
+            )}
           </FormItem>
         )
       }}

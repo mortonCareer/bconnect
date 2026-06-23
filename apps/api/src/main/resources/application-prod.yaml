@@ -7,5 +7,9 @@ spring:
 sentry:
   dsn: ${SENTRY_DSN:}
   send-default-pii: true
-  traces-sample-rate: 1.0 # TODO: 트래픽 증가 시 0.1~0.2로 낮출 것
+  traces-sample-rate: 1.0
   environment: ${SENTRY_ENVIRONMENT:production}
+
+app:
+  jwt:
+    cookie-domain: ${COOKIE_DOMAIN:.bconnect.to}

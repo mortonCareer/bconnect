@@ -5,11 +5,13 @@
 
 import * as React from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
+import Link from 'next/link'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { SquarePen, Trash2 } from 'lucide-react'
 import { MoreVerticalIcon } from '../../icons'
 import { useExpandableText } from '../../hooks'
 import { cn } from '../../lib/utils'
+import { ImageCarousel } from './ImageCarousel'
 
 /**
  * Feed variants:
@@ -34,7 +36,7 @@ export interface FeedProps
    * 피드 컨텐츠
    */
   content: {
-    image: string
+    images: string[]
     imageAlt?: string
     company: string
     duration: string
@@ -50,10 +52,6 @@ export interface FeedProps
    */
   editHref?: string
   /**
-   * 링크 컴포넌트 (Next.js Link 등). 미지정 시 <a> 태그 사용
-   */
-  LinkComponent?: React.ElementType
-  /**
    * 삭제 액션 (케밥 → 삭제)
    */
   onDelete?: () => void
@@ -66,7 +64,7 @@ export interface FeedProps
  * ```tsx
  * <Feed
  *   content={{
- *     image: '/work.jpg',
+ *     images: ['/work.jpg'],
  *     company: '서정 건축',
  *     duration: '4일 소요',
  *     timestamp: '3일 전',
@@ -74,16 +72,12 @@ export interface FeedProps
  *   }}
  *   canManage
  *   editHref="/profile/edit/work/1"
- *   LinkComponent={Link}
  *   onDelete={() => deletePost(1)}
  * />
  * ```
  */
 export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
-  (
-    { className, content, canManage = false, editHref, LinkComponent, onDelete, variant, ...props },
-    ref
-  ) => {
+  ({ className, content, canManage = false, editHref, onDelete, variant, ...props }, ref) => {
     const {
       ref: textRef,
       expanded: isExpanded,
@@ -91,7 +85,6 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
       toggle: handleToggle,
     } = useExpandableText([content.description], 'width')
     const [menuOpen, setMenuOpen] = React.useState(false)
-    const EditLink = LinkComponent ?? 'a'
 
     const effectiveVariant = isExpanded ? 'expanded' : 'collapsed'
 
@@ -123,14 +116,8 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
           </div>
         </div>
 
-        {/* 이미지 */}
-        <div className="relative h-55 w-full overflow-hidden rounded-sm">
-          <img
-            src={content.image}
-            alt={content.imageAlt || content.description}
-            className="h-full w-full object-cover"
-          />
-        </div>
+        {/* 이미지 (다중 이미지 시 캐러셀 + 인덱스 점) */}
+        <ImageCarousel images={content.images} alt={content.imageAlt || content.description} />
 
         {/* 본문 캡션 + 더보기/접기 버튼 */}
         <div
@@ -177,14 +164,16 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
                   <div className="h-1 w-9 rounded-full bg-gray-300" />
                 </div>
                 <div className="flex flex-col py-2">
-                  <EditLink
-                    href={editHref}
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-5 py-3.5 text-m-16 text-gray-900 hover:bg-gray-50"
-                  >
-                    <SquarePen size={20} />
-                    수정
-                  </EditLink>
+                  {editHref && (
+                    <Link
+                      href={editHref}
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-3 px-5 py-3.5 text-m-16 text-gray-900 hover:bg-gray-50"
+                    >
+                      <SquarePen size={20} />
+                      수정
+                    </Link>
+                  )}
                   <button
                     type="button"
                     onClick={() => {

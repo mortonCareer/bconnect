@@ -1,6 +1,7 @@
 package to.bconnect.api.core.domain.profile;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
@@ -28,7 +29,7 @@ public class ProfileService {
         if (command.pictureId() != null)
             attachmentQueryService.get(user, command.pictureId());
 
-        ProfileEntity created = new ProfileEntity(
+        val created = new ProfileEntity(
                 user.id(),
                 command.primaryTrade(),
                 command.trades(),
@@ -44,7 +45,7 @@ public class ProfileService {
 
     @Transactional
     public void update(AuthUser user, UpdateProfile command) {
-        ProfileEntity found = profileRepository.findByMemberId(user.id())
+        val found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getMemberId().equals(user.id()))
@@ -64,7 +65,7 @@ public class ProfileService {
 
     @Transactional
     public void updateAbout(AuthUser user, String about) {
-        ProfileEntity found = profileRepository.findByMemberId(user.id())
+        val found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getMemberId().equals(user.id()))
@@ -75,7 +76,7 @@ public class ProfileService {
 
     @Transactional
     public void updatePicture(AuthUser user, Long pictureId) {
-        ProfileEntity found = profileRepository.findByMemberId(user.id())
+        val found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (pictureId != null)

@@ -2,22 +2,19 @@ package to.bconnect.api.socket.message;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import to.bconnect.api.core.domain.attachment.Attachment;
 import to.bconnect.api.core.domain.attachment.AttachmentResolver;
 import to.bconnect.api.core.domain.attachment.ImageSize;
-import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.presentation.v1.response.AttachmentResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.security.AuthUser;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Controller
@@ -33,10 +30,10 @@ public class MessageSocketController {
             @DestinationVariable Long chatId,
             @AuthenticationPrincipal AuthUser user,
             @Payload @Valid SendMessageRequest request) {
-        Message message = messageSocketService.broadcast(user, chatId, request.toCommand());
+        val message = messageSocketService.broadcast(user, chatId, request.toCommand());
 
-        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(message.attachmentIds());
-        List<AttachmentResponse> attachments = message.attachmentIds().stream()
+        val attachmentMap = attachmentResolver.resolveMap(message.attachmentIds());
+        val attachments = message.attachmentIds().stream()
                 .map(attachmentMap::get)
                 .filter(Objects::nonNull)
                 .map(att -> AttachmentResponse.of(att, attachmentResolver.url(att, ImageSize.SMALL)))

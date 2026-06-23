@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
-import type { CheckItemId } from '../_clients/types'
-import { fetchCheckItemById } from '../_clients/fetch-business'
+import type { CheckItemId } from '@/lib/business/types'
+import { fetchCheckItemById } from '@/lib/business/fetch-business'
 import { CATEGORY_GROUPS } from './constants'
 import { AccordionShell, DetailAccordionItem } from './DetailAccordion'
 

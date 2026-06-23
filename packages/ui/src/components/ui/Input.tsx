@@ -12,12 +12,13 @@ import {
 
 /**
  * Input variants:
- * - default: 기본 상태 (회색 테두리)
- * - error: 에러 상태 (빨간 테두리)
+ * - variant: default(회색 테두리) / error(빨간 테두리)
+ * - size: default(h-50, text-base) / small(h-33, text-14) — 패널 row 필드(작업기간 등)용
  *
  * Figma: https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=189-626
+ *        size=small https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1879-13366
  */
-const inputVariants = cva(`${FIELD_BASE_CLASSES} flex items-center h-[50px]`, {
+const inputVariants = cva(`${FIELD_BASE_CLASSES} flex items-center`, {
   variants: {
     variant: {
       // 기본 상태 — 회색 보더 + primary 포커스
@@ -25,14 +26,22 @@ const inputVariants = cva(`${FIELD_BASE_CLASSES} flex items-center h-[50px]`, {
       // 에러 상태 — destructive 보더·포커스
       error: FIELD_ERROR_VARIANT_CLASSES,
     },
+    size: {
+      default: 'h-[50px]',
+      // 컴팩트 — FIELD_BASE 의 py-[7px]/text-base 를 덮어 Figma 33px 박스에 맞춘다
+      small: 'h-[33px] py-0 text-r-14',
+    },
   },
   defaultVariants: {
     variant: 'default',
+    size: 'default',
   },
 })
 
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement>, VariantProps<typeof inputVariants> {
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
+    VariantProps<typeof inputVariants> {
   /** 에러 메시지 (variant="error"일 때 하단에 표시) */
   errorMessage?: string
 }
@@ -56,13 +65,13 @@ export interface InputProps
  * ```
  */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, variant, type, errorMessage, ...props }, ref) => {
+  ({ className, variant, size, type, errorMessage, ...props }, ref) => {
     const inputElement = (
       <input
         type={type}
         ref={ref}
         data-slot="input"
-        className={cn(inputVariants({ variant, className }))}
+        className={cn(inputVariants({ variant, size, className }))}
         {...props}
       />
     )

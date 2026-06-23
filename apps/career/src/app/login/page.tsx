@@ -84,7 +84,10 @@ export default function LoginPage() {
       if ('accessToken' in result) {
         // 기존 회원 — 바로 로그인 (member 정보는 useGetMyMember 로 별도 조회)
         login(result.accessToken)
-        router.push('/')
+        const redirect = new URLSearchParams(window.location.search).get('redirect')
+        router.push(
+          redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/'
+        )
       } else {
         // 미가입 유저 — signupToken 저장 후 회원가입 진행 (OTP 재인증 불필요)
         setSignupPhone(toE164(phone))

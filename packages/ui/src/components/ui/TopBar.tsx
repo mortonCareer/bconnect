@@ -4,15 +4,16 @@
 'use client'
 
 import { cva, type VariantProps } from 'class-variance-authority'
+import Link from 'next/link'
 import * as React from 'react'
-import { ChevronIcon, FilterIcon, ChatIcon } from '../../icons'
+import { ChevronIcon, FilterIcon, ChatIcon, NotificationIcon } from '../../icons'
 import { cn } from '../../lib/utils'
 
 const topBarVariants = cva('sticky top-0 z-40 flex h-15 w-full items-center bg-white px-4', {
   variants: {
     variant: {
       progress: 'justify-between',
-      default: 'justify-between',
+      default: 'relative justify-between',
       home: 'justify-between',
     },
   },
@@ -21,16 +22,61 @@ const topBarVariants = cva('sticky top-0 z-40 flex h-15 w-full items-center bg-w
   },
 })
 
+function CountBadge({ count }: { count?: number }) {
+  if (count === undefined || count <= 0) return null
+  return (
+    <div className="absolute -right-[7.5px] -top-[3.5px] flex min-w-[15px] items-center justify-center rounded-full bg-destructive px-1">
+      <span className="text-[10px] font-bold leading-[15px] text-white">
+        {count > 99 ? '99+' : count}
+      </span>
+    </div>
+  )
+}
+
 function ChatBadgeIcon({ count }: { count?: number }) {
   return (
     <div className="relative size-5">
       <ChatIcon className="text-[#a5a5a5]" />
-      {count !== undefined && count > 0 && (
-        <div className="absolute -right-[7.5px] -top-[3.5px] flex min-w-[15px] items-center justify-center rounded-full bg-destructive px-1">
-          <span className="text-[10px] font-bold leading-[15px] text-white">
-            {count > 99 ? '99+' : count}
-          </span>
-        </div>
+      <CountBadge count={count} />
+    </div>
+  )
+}
+
+function NotifyBadgeIcon({ count }: { count?: number }) {
+  return (
+    <div className="relative size-5">
+      <NotificationIcon className="text-[#a5a5a5]" />
+      <CountBadge count={count} />
+    </div>
+  )
+}
+
+const iconButtonClass =
+  'flex h-15 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
+
+/** 우측 알림·채팅 아이콘 그룹 — home + default(최상위 라우트, 예: 프로필) 우측에서 공유. 항상 라우트 이동(Link) */
+function UtilityIcons({
+  notifyHref,
+  notifyCount,
+  chatHref,
+  chatCount,
+}: {
+  notifyHref?: string
+  notifyCount?: number
+  chatHref?: string
+  chatCount?: number
+}) {
+  return (
+    <div className="flex items-center">
+      {notifyHref && (
+        <Link href={notifyHref} className={cn(iconButtonClass, 'pl-4 pr-2')} aria-label="알림">
+          <NotifyBadgeIcon count={notifyCount} />
+        </Link>
+      )}
+      {chatHref && (
+        <Link href={chatHref} className={cn(iconButtonClass, '-mr-4 pl-2 pr-4')} aria-label="채팅">
+          <ChatBadgeIcon count={chatCount} />
+        </Link>
       )}
     </div>
   )
@@ -60,11 +106,15 @@ export interface TopBarProps
   actionDisabled?: boolean
   showBack?: boolean
   chatCount?: number
+  notifyCount?: number
   onFilter?: () => void
-  onChat?: () => void
   onBack?: () => void
   /** backHref가 있으면 Link로 렌더링 (prefetch), 없으면 button + onBack */
   backHref?: string
+  /** 채팅 라우트 — 있으면 우측 채팅 아이콘(Link, prefetch) 렌더 */
+  chatHref?: string
+  /** 알림 라우트 — 있으면 우측 알림 아이콘(Link, prefetch) 렌더 */
+  notifyHref?: string
 }
 
 const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
@@ -81,23 +131,26 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       actionDisabled = false,
       showBack = true,
       chatCount,
+      notifyCount,
       onFilter,
-      onChat,
       onBack,
       backHref,
+      chatHref,
+      notifyHref,
       ...props
     },
     ref
   ) => {
     const backButtonClass =
       'flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]'
+    const hasUtility = !!(chatHref || notifyHref)
 
     const BackButton = !showBack ? (
       <div className="size-5" />
     ) : backHref ? (
-      <a href={backHref} className={backButtonClass} aria-label="뒤로가기">
+      <Link href={backHref} className={backButtonClass} aria-label="뒤로가기">
         <ChevronIcon direction="left" className="text-[#a5a5a5]" />
-      </a>
+      </Link>
     ) : (
       <button type="button" onClick={onBack} className={backButtonClass} aria-label="뒤로가기">
         <ChevronIcon direction="left" className="text-[#a5a5a5]" />
@@ -116,8 +169,17 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
         {variant === 'default' && (
           <>
             {BackButton}
-            <p className="text-sb-16 text-gray-900">{title}</p>
-            {showAction ? (
+            <p className="pointer-events-none absolute left-1/2 max-w-[60%] -translate-x-1/2 truncate text-center text-sb-16 text-gray-900">
+              {title}
+            </p>
+            {hasUtility ? (
+              <UtilityIcons
+                notifyHref={notifyHref}
+                notifyCount={notifyCount}
+                chatHref={chatHref}
+                chatCount={chatCount}
+              />
+            ) : showAction ? (
               <button
                 type="button"
                 onClick={onAction}
@@ -141,20 +203,18 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             <button
               type="button"
               onClick={onFilter}
-              className="flex size-5 cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]"
+              className={cn(iconButtonClass, '-ml-4 px-4')}
               aria-label="필터"
             >
               <FilterIcon className="text-[#a5a5a5]" />
             </button>
             <div className="flex-1" />
-            <button
-              type="button"
-              onClick={onChat}
-              className="flex cursor-pointer items-center justify-center transition-all hover:opacity-60 active:scale-[0.95]"
-              aria-label="채팅"
-            >
-              <ChatBadgeIcon count={chatCount} />
-            </button>
+            <UtilityIcons
+              notifyHref={notifyHref}
+              notifyCount={notifyCount}
+              chatHref={chatHref}
+              chatCount={chatCount}
+            />
           </>
         )}
       </header>

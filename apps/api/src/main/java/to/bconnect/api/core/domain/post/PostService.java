@@ -1,6 +1,7 @@
 package to.bconnect.api.core.domain.post;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
@@ -13,7 +14,6 @@ import to.bconnect.api.storage.post.PostEntity;
 import to.bconnect.api.storage.post.PostRepository;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,10 +26,10 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public List<Post> list() {
-        List<PostEntity> posts = postRepository.findAll();
+        val posts = postRepository.findAll();
 
-        List<Long> postIds = posts.stream().map(PostEntity::getId).toList();
-        Map<Long, List<Long>> attachmentIdMap = postAttachmentMappingRepository.findByPostIdIn(postIds)
+        val postIds = posts.stream().map(PostEntity::getId).toList();
+        val attachmentIdMap = postAttachmentMappingRepository.findByPostIdIn(postIds)
                 .stream()
                 .collect(Collectors.groupingBy(
                         PostAttachmentMappingEntity::getPostId,
@@ -43,10 +43,10 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Post get(Long postId) {
-        PostEntity post = postRepository.findById(postId)
+        val post = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        List<Long> attachmentIds = postAttachmentMappingRepository.findByPostIdIn(List.of(postId))
+        val attachmentIds = postAttachmentMappingRepository.findByPostIdIn(List.of(postId))
                 .stream()
                 .map(PostAttachmentMappingEntity::getAttachmentId)
                 .toList();
@@ -58,7 +58,7 @@ public class PostService {
     public Long create(AuthUser user, CreatePost command) {
         attachmentQueryService.list(user, command.attachmentIds());
 
-        PostEntity created = postRepository.save(new PostEntity(
+        val created = postRepository.save(new PostEntity(
                 user.id(),
                 command.taskId(),
                 command.content()
@@ -73,7 +73,7 @@ public class PostService {
 
     @Transactional
     public void update(AuthUser user, Long postId, String content) {
-        PostEntity found = postRepository.findById(postId)
+        val found = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getMemberId().equals(user.id()))

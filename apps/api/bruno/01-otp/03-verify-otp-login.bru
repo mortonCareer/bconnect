@@ -22,7 +22,7 @@ body:json {
 
 script:post-response {
   bru.setVar("accessToken", res.body.data.accessToken);
-  bru.setVar("refreshToken", res.body.data.refreshToken);
+  bru.setVar("refreshToken", res.headers["set-cookie"][0].match(/refreshToken=([^;]+)/)[1]);
 }
 
 tests {
@@ -31,7 +31,6 @@ tests {
     expect(res.body.success).to.equal(true);
     expect(res.body.data.registered).to.equal(true);
     expect(res.body.data.accessToken).to.be.a('string');
-    expect(res.body.data.refreshToken).to.be.a('string');
   });
 }
 

@@ -135,11 +135,7 @@ export default function TopBarDetailPage() {
             <div className="space-y-4">
               <div className="overflow-hidden rounded-lg border">
                 <p className="bg-gray-50 p-3 text-sm font-medium text-gray-500">알림 없음</p>
-                <TopBar
-                  variant="home"
-                  onFilter={() => alert('필터')}
-                  onChat={() => alert('채팅')}
-                />
+                <TopBar variant="home" onFilter={() => alert('필터')} chatHref="/messages" />
               </div>
               <div className="overflow-hidden rounded-lg border">
                 <p className="bg-gray-50 p-3 text-sm font-medium text-gray-500">알림 4개</p>
@@ -147,7 +143,7 @@ export default function TopBarDetailPage() {
                   variant="home"
                   chatCount={4}
                   onFilter={() => alert('필터')}
-                  onChat={() => alert('채팅')}
+                  chatHref="/messages"
                 />
               </div>
               <div className="overflow-hidden rounded-lg border">
@@ -156,7 +152,7 @@ export default function TopBarDetailPage() {
                   variant="home"
                   chatCount={150}
                   onFilter={() => alert('필터')}
-                  onChat={() => alert('채팅')}
+                  chatHref="/messages"
                 />
               </div>
             </div>
@@ -190,7 +186,8 @@ export default function TopBarDetailPage() {
   variant="home"
   chatCount={4}
   onFilter={() => openFilter()}
-  onChat={() => openChat()}
+  chatHref="/messages"
+  notifyHref="/notifications"
 />`}
             </pre>
           </section>

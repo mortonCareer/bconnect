@@ -4,7 +4,7 @@
 'use client'
 
 import { AlertDialog } from 'radix-ui'
-import { cn } from '../../lib/utils'
+import { Button } from './Button'
 
 export interface ConfirmDialogProps {
   open: boolean
@@ -37,7 +37,10 @@ export function ConfirmDialog({
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Portal>
-        <AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/40" />
+        <AlertDialog.Overlay
+          className="fixed inset-0 z-50 bg-black/40"
+          onClick={() => onOpenChange(false)}
+        />
         <AlertDialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2.5rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-5 focus:outline-none">
           <AlertDialog.Title className="text-sb-16 text-gray-900">{title}</AlertDialog.Title>
           {description && (
@@ -47,24 +50,23 @@ export function ConfirmDialog({
           )}
           <div className="mt-5 flex justify-end gap-1">
             <AlertDialog.Cancel asChild>
-              <button
-                type="button"
-                className="cursor-pointer rounded-lg px-4 py-2 text-m-14 text-gray-600 hover:bg-gray-50"
-              >
+              <Button variant="text" size="small">
                 {cancelLabel}
-              </button>
+              </Button>
             </AlertDialog.Cancel>
             <AlertDialog.Action asChild>
-              <button
-                type="button"
+              <Button
+                variant="text"
+                size="small"
                 onClick={onConfirm}
-                className={cn(
-                  'cursor-pointer rounded-lg px-4 py-2 text-sb-14 hover:bg-gray-50',
-                  destructive ? 'text-[#FF4242]' : 'text-primary'
-                )}
+                className={
+                  destructive
+                    ? 'text-destructive hover:bg-destructive/10'
+                    : 'text-primary hover:bg-primary/10'
+                }
               >
                 {confirmLabel}
-              </button>
+              </Button>
             </AlertDialog.Action>
           </div>
         </AlertDialog.Content>

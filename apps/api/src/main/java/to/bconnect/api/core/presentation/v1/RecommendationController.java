@@ -2,6 +2,7 @@ package to.bconnect.api.core.presentation.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.request.CreateRecommendationRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateRecommendationRequest;
 import to.bconnect.api.core.presentation.v1.response.RecommendationResponse;
-import to.bconnect.api.core.domain.attachment.Attachment;
 import to.bconnect.api.core.domain.attachment.AttachmentResolver;
 import to.bconnect.api.core.domain.attachment.ImageSize;
 import to.bconnect.api.core.domain.recommendation.Recommendation;
@@ -25,11 +25,9 @@ import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -47,7 +45,7 @@ public class RecommendationController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateRecommendationRequest request) {
-        Long id = recommendationService.create(user, request.toCommand());
+        val id = recommendationService.create(user, request.toCommand());
         return ApiResponse.success(id);
     }
 
@@ -107,17 +105,17 @@ public class RecommendationController {
     }
 
     private List<RecommendationResponse> assemble(List<Recommendation> recommendations) {
-        List<Long> memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.map(memberIds);
-        Map<Long, Profile> profileMap = profileQueryService.summaries(memberIds);
+        val memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
+        val memberMap = memberResolver.resolveMap(memberIds);
+        val profileMap = profileQueryService.resolveMap(memberIds);
 
-        List<Long> pictureIds = profileMap.values().stream()
+        val pictureIds = profileMap.values().stream()
                 .map(Profile::pictureId).filter(Objects::nonNull).toList();
-        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(pictureIds);
+        val attachmentMap = attachmentResolver.resolveMap(pictureIds);
 
         return recommendations.stream()
                 .map(it -> {
-                    Profile profile = profileMap.get(it.memberId());
+                    val profile = profileMap.get(it.memberId());
                     return RecommendationResponse.of(
                             it,
                             memberMap.get(it.memberId()),

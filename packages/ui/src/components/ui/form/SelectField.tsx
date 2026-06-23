@@ -13,6 +13,8 @@ import {
   useFormField,
 } from '../shadcn/form'
 import { Select, type SelectOption, type SelectProps } from '../Select'
+import { cn } from '../../../lib/utils'
+import { fieldItem, fieldLabel, fieldSlot, type FieldLayout } from './_layout'
 
 interface SelectFieldProps<T extends FieldValues> {
   control: Control<T>
@@ -34,6 +36,8 @@ interface SelectFieldProps<T extends FieldValues> {
   required?: boolean
   /** useServerError 의 fieldError 결과 — zod 클라이언트 에러와 한 슬롯에 합성. */
   serverError?: string
+  /** 레이아웃 변형 — row 는 패널형 수평(라벨 좌측 고정폭 + 하단 구분선, #581). 기본 stacked. */
+  layout?: FieldLayout
 }
 
 type RHFFieldArg = {
@@ -91,6 +95,7 @@ export function SelectField<T extends FieldValues>({
   disabled,
   fitContent,
   className,
+  layout = 'stacked',
 }: SelectFieldProps<T>) {
   return (
     <FormField
@@ -99,9 +104,9 @@ export function SelectField<T extends FieldValues>({
       render={({ field, fieldState }) => {
         const hasError = !!fieldState.error || !!serverError
         return (
-          <FormItem className="gap-3">
+          <FormItem className={fieldItem({ layout })}>
             {label && (
-              <FormLabel className="text-m-16 text-gray-900">
+              <FormLabel className={fieldLabel({ layout })}>
                 {label}
                 {required && (
                   <span className="ml-0.5 text-destructive" aria-hidden>
@@ -111,7 +116,9 @@ export function SelectField<T extends FieldValues>({
               </FormLabel>
             )}
             {description && (
-              <FormDescription className="text-r-14 text-gray-500">{description}</FormDescription>
+              <FormDescription className={cn('text-r-14 text-gray-500', fieldSlot({ layout }))}>
+                {description}
+              </FormDescription>
             )}
             <SelectFieldControl
               field={field as unknown as RHFFieldArg}
@@ -121,10 +128,12 @@ export function SelectField<T extends FieldValues>({
               placeholder={placeholder}
               disabled={disabled}
               fitContent={fitContent}
-              className={className}
+              className={cn(fieldSlot({ layout }), className)}
             />
-            <FormMessage>{serverError}</FormMessage>
-            {hint && !hasError && <p className="text-r-14 text-gray-500">{hint}</p>}
+            <FormMessage className={fieldSlot({ layout })}>{serverError}</FormMessage>
+            {hint && !hasError && (
+              <p className={cn('text-r-14 text-gray-500', fieldSlot({ layout }))}>{hint}</p>
+            )}
           </FormItem>
         )
       }}

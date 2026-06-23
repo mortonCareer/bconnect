@@ -11,9 +11,9 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { Toaster } from '@bconnect/ui'
 import type { ReactNode } from 'react'
 import '../env'
-import { usePushNotifications } from '@/hooks/use-push-notifications'
-import { InAppNotification } from '@/components/in-app-notification'
-import { MSWProvider } from '@/components/msw-provider'
+import { MSWProvider, DevToolbar } from '@bconnect/devtools'
+import { usePushNotificationListener, InAppNotification } from '@bconnect/push'
+import { DevPushPanel } from '@/components/dev/DevPushPanel'
 
 // MSW 가 fetch 를 가로채야 하는 모든 부수효과(refresh token, FCM device 등록)는
 // MSWProvider 가 ready 가 된 후 실행되어야 함. 그렇지 않으면 dev 첫 페이지 로드 시
@@ -27,9 +27,14 @@ function PostMSWBootstrap({ children }: { children: ReactNode }) {
     refreshAccessToken()
   }, [])
 
-  usePushNotifications()
+  usePushNotificationListener()
 
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      {process.env.NODE_ENV !== 'production' && <DevPushPanel />}
+    </>
+  )
 }
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -44,6 +49,7 @@ export function Providers({ children }: { children: ReactNode }) {
             {children}
             <Toaster />
             <ReactQueryDevtools initialIsOpen={false} />
+            <DevToolbar />
           </PostMSWBootstrap>
         </QueryClientProvider>
       </NuqsAdapter>

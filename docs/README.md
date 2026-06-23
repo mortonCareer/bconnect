@@ -34,8 +34,7 @@ docs는 [Diátaxis](https://diataxis.fr) 4분할로 정리됨. "지금 무슨 �
 
 1. [`how-to/git-workflow.md`](./how-to/git-workflow.md) — 이슈 생성 + 브랜치 + 커밋 + PR
 2. [`how-to/development-workflow.md`](./how-to/development-workflow.md) — API 스펙 + 클라이언트 생성 + 병렬 개발
-3. [`how-to/qa-and-testing.md`](./how-to/qa-and-testing.md) — PR 프리뷰 QA
-4. [`how-to/deployment.md`](./how-to/deployment.md) — dev → production 배포
+3. [`how-to/deployment.md`](./how-to/deployment.md) — dev → production 배포
 
 ### 사실 lookup (자주 찾는 것)
 

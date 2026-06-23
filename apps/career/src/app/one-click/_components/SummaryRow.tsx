@@ -1,4 +1,4 @@
-import type { CheckItem } from '../_clients/types'
+import type { CheckItem } from '@/lib/business/types'
 import { StatusBadge } from './StatusBadge'
 
 interface SummaryRowProps {

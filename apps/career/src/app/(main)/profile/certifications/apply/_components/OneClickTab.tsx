@@ -1,108 +1,186 @@
 'use client'
 
 import { useState } from 'react'
-import { getCredentialLabel } from '@bconnect/api-client'
-import type { Credential } from '@bconnect/api-client'
-import { Button, Input } from '@bconnect/ui'
-import { formatDate } from '@bconnect/config/format'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type { Credential, CreateCredentialRequest, CredentialType } from '@bconnect/api-client'
+import { Form, FormError, FormSubmitButton, TextField, toast, useServerError } from '@bconnect/ui'
+import { formatRegistrationNumber, registrationNumberSchema } from '@bconnect/config/biz-number'
+import { CredentialList } from '@/app/(main)/profile/certifications/_components/CredentialList'
+import type { CheckItem } from '@/lib/business/types'
+import { lookupBusinessForApply } from '../_actions/lookupBusinessForApply'
 
 interface OneClickTabProps {
   credentials: Credential[]
-  onDelete: (id: number) => void
-  isDeleting: boolean
+  onApply: (requests: CreateCredentialRequest[]) => Promise<void>
+  onRequestDelete: (id: number) => void
+  isLoading: boolean
+  isError: boolean
+  onRetry: () => void
 }
 
-export function OneClickTab({ credentials, onDelete, isDeleting }: OneClickTabProps) {
-  const [businessNumber, setBusinessNumber] = useState('')
-  const [ownerName, setOwnerName] = useState('')
-  const [openDate, setOpenDate] = useState('')
+const ONE_CLICK_TYPES = [
+  'IDENTITY_VERIFICATION',
+  'SOLE_PROPRIETOR',
+  'CONSTRUCTION_LICENSE',
+  'SPECIALTY_CONSTRUCTION_LICENSE',
+] as const
+
+/** 개업일자 마스킹 (YYYY-MM-DD). 8자리 초과 입력은 잘림. */
+const formatOpenDate = (value: string): string => {
+  const d = value.replace(/\D/g, '').slice(0, 8)
+  if (d.length <= 4) return d
+  if (d.length <= 6) return `${d.slice(0, 4)}-${d.slice(4)}`
+  return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}`
+}
+
+const oneClickSchema = z.object({
+  businessNumber: registrationNumberSchema,
+  ownerName: z.string().trim().min(1, '대표자 성명을 입력해주세요'),
+  openDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, '개업일자를 YYYY-MM-DD 형식으로 입력해주세요')
+    .refine((v) => !Number.isNaN(Date.parse(v)), '올바른 날짜가 아니에요'),
+})
+
+type OneClickInput = z.input<typeof oneClickSchema>
+type OneClickOutput = z.output<typeof oneClickSchema>
+
+const EXPIRY_KEYS = ['만료', '유효기간']
+
+const extractExpiry = (item: CheckItem): string | null => {
+  const detail = item.details.find((d) => EXPIRY_KEYS.some((key) => d.key.includes(key)))
+  const digits = detail?.value.replace(/\D/g, '')
+  if (!digits || digits.length !== 8) return null
+  return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`
+}
+
+const mapCheckItemToType = (item: CheckItem): CredentialType | null => {
+  const hasLicense = item.statusType === 'positive' || item.statusType === 'negative'
+  switch (item.id) {
+    case 'BUSINESS_STATUS':
+      return item.statusType === 'positive' ? 'SOLE_PROPRIETOR' : null
+    case 'CONSTRUCTION_LICENSE':
+      return hasLicense ? 'CONSTRUCTION_LICENSE' : null
+    case 'SPECIALTY_LICENSE':
+      return hasLicense ? 'SPECIALTY_CONSTRUCTION_LICENSE' : null
+    default:
+      return null
+  }
+}
+
+export function OneClickTab({
+  credentials,
+  onApply,
+  onRequestDelete,
+  isLoading,
+  isError,
+  onRetry,
+}: OneClickTabProps) {
   const [isSearching, setIsSearching] = useState(false)
 
-  const oneClickTypes = [
-    'IDENTITY_VERIFICATION',
-    'SOLE_PROPRIETOR',
-    'CONSTRUCTION_LICENSE',
-    'SPECIALTY_CONSTRUCTION_LICENSE',
-  ] as const
+  const form = useForm<OneClickInput, unknown, OneClickOutput>({
+    resolver: zodResolver(oneClickSchema),
+    mode: 'onTouched',
+    defaultValues: { businessNumber: '', ownerName: '', openDate: '' },
+  })
+  const { isValid } = form.formState
 
-  const oneClickCredentials = credentials.filter(
-    (c) => c.type && (oneClickTypes as readonly string[]).includes(c.type)
+  const server = useServerError(form.control, (error) =>
+    typeof error === 'string'
+      ? { message: error }
+      : { message: '조회에 실패했어요. 잠시 후 다시 시도해주세요.' }
   )
 
-  const handleSearch = () => {
+  const oneClickCredentials = credentials.filter(
+    (c) => c.type && (ONE_CLICK_TYPES as readonly string[]).includes(c.type)
+  )
+
+  const onSearch = form.handleSubmit(async ({ businessNumber, ownerName, openDate }) => {
     setIsSearching(true)
-    // TODO: 원클릭 조회 API 연동
-    setTimeout(() => setIsSearching(false), 1000)
-  }
+    server.reset()
+    try {
+      const result = await lookupBusinessForApply(businessNumber, ownerName, openDate)
+      if (!result.valid) {
+        server.capture(result.message, form.getValues())
+        return
+      }
+
+      const existingTypes = new Set(oneClickCredentials.map((c) => c.type))
+      const requests: CreateCredentialRequest[] = [
+        { type: 'IDENTITY_VERIFICATION', expiredAt: null } satisfies CreateCredentialRequest,
+        ...(result.checkItems ?? []).flatMap((item): CreateCredentialRequest[] => {
+          const type = mapCheckItemToType(item)
+          return type ? [{ type, expiredAt: extractExpiry(item) }] : []
+        }),
+      ].filter((request) => !existingTypes.has(request.type))
+
+      await onApply(requests)
+      toast({ description: '인증 정보가 갱신되었어요', variant: 'success' })
+    } catch (error) {
+      server.capture(error, form.getValues())
+    } finally {
+      setIsSearching(false)
+    }
+  })
 
   return (
-    <div className="flex flex-col gap-4 px-4 py-4">
-      <p className="text-r-12 text-gray-700">사업자 및 면허 정보를 한 번에 인증하세요.</p>
+    <div className="flex flex-col">
+      <div className="flex flex-col gap-4 px-4 py-4">
+        <p className="text-r-12 text-gray-500">사업자 및 면허 정보를 한 번에 인증하세요.</p>
 
-      {/* 입력 폼 */}
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-2">
-          <label className="text-m-14 text-gray-900">사업자등록번호</label>
-          <Input
-            placeholder="000-00-00000"
-            value={businessNumber}
-            onChange={(e) => setBusinessNumber(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <label className="text-m-14 text-gray-900">대표자 성명</label>
-          <Input
-            placeholder="홍길동"
-            value={ownerName}
-            onChange={(e) => setOwnerName(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <label className="text-m-14 text-gray-900">개업일자</label>
-          <Input
-            placeholder="0000-00-00"
-            value={openDate}
-            onChange={(e) => setOpenDate(e.target.value)}
-          />
-        </div>
+        <Form {...form}>
+          <form onSubmit={onSearch} className="flex flex-col gap-3">
+            <FormError error={server.formError} />
+            <TextField
+              control={form.control}
+              name="businessNumber"
+              label="사업자등록번호"
+              required
+              placeholder="000-00-00000"
+              inputMode="numeric"
+              transform={formatRegistrationNumber}
+            />
+            <TextField
+              control={form.control}
+              name="ownerName"
+              label="대표자 성명"
+              required
+              placeholder="홍길동"
+            />
+            <TextField
+              control={form.control}
+              name="openDate"
+              label="개업일자"
+              required
+              placeholder="0000-00-00"
+              inputMode="numeric"
+              transform={formatOpenDate}
+            />
+
+            <FormSubmitButton
+              variant="primary"
+              size="full"
+              requireAllFilled={false}
+              disabled={!isValid}
+              isLoading={isSearching}
+            >
+              조회하기
+            </FormSubmitButton>
+          </form>
+        </Form>
       </div>
 
-      <Button variant="primary" size="full" onClick={handleSearch} isLoading={isSearching}>
-        조회하기
-      </Button>
-
-      {/* 업데이트 날짜 */}
-      <p className="text-center text-r-12 text-gray-700">2026.02.21 업데이트됨</p>
-
-      {/* 하단 인증 목록 — 심플 리스트 */}
-      {oneClickCredentials.length > 0 && (
-        <div className="flex flex-col border-t border-gray-300 pt-4">
-          {oneClickCredentials.map((credential) => (
-            <div
-              key={credential.id}
-              className="flex items-center justify-between border-b border-gray-300 py-3"
-            >
-              <div className="flex items-baseline gap-2">
-                <span className="text-r-14 text-gray-900">
-                  {credential.type ? getCredentialLabel(credential.type) : '알 수 없음'}
-                </span>
-                {credential.expiredAt && (
-                  <span className="text-r-10 text-gray-700">
-                    {formatDate(credential.expiredAt)} 만료
-                  </span>
-                )}
-              </div>
-              <button
-                className="rounded border border-gray-500 px-3 py-1 text-r-14 text-gray-700"
-                onClick={() => onDelete(credential.id!)}
-                disabled={isDeleting}
-              >
-                삭제
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* 하단 인증 목록 */}
+      <CredentialList
+        credentials={oneClickCredentials}
+        isLoading={isLoading}
+        isError={isError}
+        onRetry={onRetry}
+        onRequestDelete={onRequestDelete}
+        emptyText="아직 인증된 정보가 없어요"
+      />
     </div>
   )
 }

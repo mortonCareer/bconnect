@@ -346,5 +346,4 @@ PR 생성 후:
 ## 참고 문서
 
 - [Git Workflow](../../../docs/how-to/git-workflow.md) - PR 프로세스
-- [QA & Testing](../../../docs/how-to/qa-and-testing.md) - QA 체크리스트
-- [Deployment](../../../docs/how-to/deployment.md) - Vercel 프리뷰 배포
+- [Deployment](../../../docs/how-to/deployment.md) - 배포

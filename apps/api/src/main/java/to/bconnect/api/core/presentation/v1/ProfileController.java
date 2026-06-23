@@ -2,11 +2,12 @@ package to.bconnect.api.core.presentation.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +18,6 @@ import to.bconnect.api.core.presentation.v1.request.UpdateProfileRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProfileAboutRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProfilePictureRequest;
 import to.bconnect.api.core.presentation.v1.response.ProfileResponse;
-import to.bconnect.api.core.domain.attachment.Attachment;
 import to.bconnect.api.core.domain.attachment.AttachmentResolver;
 import to.bconnect.api.core.domain.attachment.ImageSize;
 import to.bconnect.api.core.domain.profile.Profile;
@@ -25,7 +25,6 @@ import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.core.domain.profile.ProfileService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
@@ -44,15 +43,15 @@ public class ProfileController {
 
     @GetMapping
     public ApiResponse<List<ProfileResponse>> list() {
-        List<Profile> profiles = profileQueryService.list();
+        val profiles = profileQueryService.list();
 
-        List<Long> memberIds = profiles.stream().map(Profile::memberId).distinct().toList();
-        Map<Long, Member> memberMap = memberResolver.map(memberIds);
+        val memberIds = profiles.stream().map(Profile::memberId).distinct().toList();
+        val memberMap = memberResolver.resolveMap(memberIds);
 
-        List<Long> pictureIds = profiles.stream().map(Profile::pictureId).filter(Objects::nonNull).toList();
-        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(pictureIds);
+        val pictureIds = profiles.stream().map(Profile::pictureId).filter(Objects::nonNull).toList();
+        val attachmentMap = attachmentResolver.resolveMap(pictureIds);
 
-        List<ProfileResponse> response = profiles.stream()
+        val response = profiles.stream()
                 .map(it -> ProfileResponse.of(
                         it,
                         memberMap.get(it.memberId()),
@@ -63,12 +62,12 @@ public class ProfileController {
 
     @GetMapping("/{id}")
     public ApiResponse<ProfileResponse> get(@PathVariable Long id) {
-        Profile profile = profileQueryService.get(id);
-        Member member = memberResolver.find(profile.memberId());
+        val profile = profileQueryService.get(id);
+        val member = memberResolver.find(profile.memberId());
 
         List<Long> pictureIds = profile.pictureId() == null ? List.of() : List.of(profile.pictureId());
-        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(pictureIds);
-        String picture = attachmentResolver.url(attachmentMap.get(profile.pictureId()), ImageSize.SMALL);
+        val attachmentMap = attachmentResolver.resolveMap(pictureIds);
+        val picture = attachmentResolver.url(attachmentMap.get(profile.pictureId()), ImageSize.SMALL);
 
         return ApiResponse.success(ProfileResponse.of(profile, member, picture));
     }
@@ -77,7 +76,7 @@ public class ProfileController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateProfileRequest request) {
-        Long id = profileService.create(user, request.toCommand());
+        val id = profileService.create(user, request.toCommand());
         return ApiResponse.success(id);
     }
 
@@ -89,7 +88,7 @@ public class ProfileController {
         return ApiResponse.success(null);
     }
 
-    @PatchMapping("/me/about")
+    @PutMapping("/me/about")
     public ApiResponse<Void> updateAbout(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody UpdateProfileAboutRequest request) {

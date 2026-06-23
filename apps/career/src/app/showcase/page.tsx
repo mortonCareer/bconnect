@@ -16,6 +16,7 @@ import {
   TopBar,
   ChatMessage,
   ImageInput,
+  FileInput,
   ChevronIcon,
 } from '@bconnect/ui'
 
@@ -85,8 +86,9 @@ const components: ComponentPreview[] = [
       <div className="w-48 scale-[0.4] origin-center">
         <Feed
           content={{
-            image:
+            images: [
               'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop',
+            ],
             company: '서정 건축',
             duration: '4일 소요',
             timestamp: '3일 전',
@@ -119,6 +121,16 @@ const components: ComponentPreview[] = [
     preview: (
       <div className="w-40 origin-center scale-[0.5]">
         <ImageInput value={null} onChange={() => undefined} />
+      </div>
+    ),
+  },
+  {
+    name: 'FileField',
+    description: '파일(문서) 업로드 — outline 트리거→파일명 칩 (폼: FileField, 제어: FileInput)',
+    href: '/showcase/file-field',
+    preview: (
+      <div className="w-44">
+        <FileInput value={null} onChange={() => undefined} />
       </div>
     ),
   },

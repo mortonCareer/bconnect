@@ -19,7 +19,7 @@ import {
   parseArrearsHtml,
   parseSubconLimitHtml,
   parseTotalCount,
-} from '../src/app/one-click/_clients/kiscon-parser'
+} from '../src/lib/business/kiscon-parser'
 
 // ─── 설정 ───────────────────────────────────────
 

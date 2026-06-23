@@ -65,4 +65,3 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 ## 참고 문서
 
 - [Git Workflow](../../../docs/how-to/git-workflow.md) - 이슈 기반 개발 프로세스
-- [QA & Testing](../../../docs/how-to/qa-and-testing.md) - 버그 판단 기준

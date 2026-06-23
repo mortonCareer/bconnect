@@ -2,6 +2,7 @@ package to.bconnect.api.socket;
 
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.messaging.Message;
@@ -10,7 +11,6 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.security.AuthExceptionCode;
@@ -29,7 +29,7 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(@NotNull Message<?> message, @NotNull MessageChannel channel) {
-        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+        val accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         if (accessor == null) return message;
         if (StompCommand.CONNECT.equals(accessor.getCommand()))
             authenticate(accessor);
@@ -38,8 +38,8 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
     }
 
     private void authenticate(StompHeaderAccessor accessor) {
-        String authorization = accessor.getFirstNativeHeader(HttpHeaders.AUTHORIZATION);
-        String token = JwtUtils.resolveBearerToken(authorization);
+        val authorization = accessor.getFirstNativeHeader(HttpHeaders.AUTHORIZATION);
+        val token = JwtUtils.resolveBearerToken(authorization);
         if (token == null)
             throw new CodeException(AuthExceptionCode.INVALID_ACCESS_TOKEN);
 
@@ -52,10 +52,10 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
         if (!jwtProvider.isAccessToken(token))
             throw new CodeException(AuthExceptionCode.INVALID_ACCESS_TOKEN);
 
-        String username = jwtProvider.getUsername(token);
-        UserDetails user = userDetailsService.loadUserByUsername(username);
+        val username = jwtProvider.getUsername(token);
+        val user = userDetailsService.loadUserByUsername(username);
 
-        JwtAuthenticationToken auth = new JwtAuthenticationToken(user, token, JwtType.ACCESS, user.getAuthorities());
+        val auth = new JwtAuthenticationToken(user, token, JwtType.ACCESS, user.getAuthorities());
         accessor.setUser(auth);
     }
 }

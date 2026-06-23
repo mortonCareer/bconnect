@@ -1,8 +1,7 @@
 # 프로젝트 구조
 
 ## 범위
-- 패키지 · 레이어 구조
-- 도메인 의존성 · 교차
+- 패키지 구조 (도메인 · 레이어)
 - 공용 도메인 (Member · Profile · Attachment)
 
 ## 패키지 구조
@@ -25,6 +24,15 @@ to.bconnect.api
 ```
 - 레이어드 아키텍처(layer-first) 구조를 따릅니다.
 - 패키지의 의존성 규칙은 ArchUnit로 강제합니다.
+
+```mermaid
+flowchart TD
+    socket --> core
+    core --> security
+    security --> storage
+    security --> support
+    storage --> common
+```
 
 ## 레이어 구조
 

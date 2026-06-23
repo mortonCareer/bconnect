@@ -2,6 +2,7 @@ package to.bconnect.api.core.presentation.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,7 +32,7 @@ public class AttachmentController {
     public ApiResponse<List<PresignedFileResponse>> presign(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid PresignRequest request) {
-        List<PresignedFileResponse> response = attachmentService
+        val response = attachmentService
                 .presign(user, request.context(), request.type(), request.contextId(), request.toCommands()).stream()
                 .map(PresignedFileResponse::of)
                 .toList();
@@ -42,7 +43,7 @@ public class AttachmentController {
     public ApiResponse<List<AttachmentResponse>> confirm(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid ConfirmRequest request) {
-        List<AttachmentResponse> response = attachmentService.confirm(user, request.attachmentIds()).stream()
+        val response = attachmentService.confirm(user, request.attachmentIds()).stream()
                 .map(it -> AttachmentResponse.of(it, attachmentResolver.url(it, ImageSize.SMALL)))
                 .toList();
         return ApiResponse.success(response);

@@ -2,26 +2,44 @@
 
 import { Tag } from '@bconnect/ui'
 import { TRADE_LABELS } from '@bconnect/api-client'
+import { ROLE_LABELS } from '@/lib/role-labels'
+import { REGION_LABELS } from '@/lib/region'
 import { formatExperienceRange } from '@/lib/experience-range'
 import { useFilterParams } from '@/hooks/useFilterParams'
 
 export function FilterTags() {
   const {
-    primaryTrade,
+    trades,
+    roles,
+    regions,
     experience: selectedExperience,
-    clearTrade,
+    removeTrade,
+    removeRole,
+    removeRegion,
     clearExperience,
   } = useFilterParams()
 
-  if (!primaryTrade && !selectedExperience) return null
+  if (trades.length === 0 && roles.length === 0 && regions.length === 0 && !selectedExperience) {
+    return null
+  }
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2">
-      {primaryTrade && (
-        <Tag variant="filter" onRemove={clearTrade}>
-          {TRADE_LABELS[primaryTrade]}
+    <div className="flex flex-wrap items-center gap-2 px-4 py-2">
+      {trades.map((trade) => (
+        <Tag key={trade} variant="filter" onRemove={() => removeTrade(trade)}>
+          {TRADE_LABELS[trade]}
         </Tag>
-      )}
+      ))}
+      {roles.map((role) => (
+        <Tag key={role} variant="filter" onRemove={() => removeRole(role)}>
+          {ROLE_LABELS[role]}
+        </Tag>
+      ))}
+      {regions.map((region) => (
+        <Tag key={region} variant="filter" onRemove={() => removeRegion(region)}>
+          {REGION_LABELS[region]}
+        </Tag>
+      ))}
       {selectedExperience && (
         <Tag variant="filter" onRemove={clearExperience}>
           {formatExperienceRange(selectedExperience)}

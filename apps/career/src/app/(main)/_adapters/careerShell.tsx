@@ -10,8 +10,15 @@ import { TopBar } from '@bconnect/ui'
  * `fill`: 채팅방처럼 본문이 뷰포트를 꽉 채우고 하단(입력창)을 바닥에 고정해야 하는 화면용.
  * MainContent 가 chat 상세 라우트에서 `h-dvh flex-col` 을 주므로 `flex-1 min-h-0` 로 그 높이를 채운다.
  * 목록·프로필 등 문서 스크롤 화면은 기본값(content-height).
+ *
+ * `utility`: 최상위 라우트(하단 네비 — 예: 내 정보) 우측 알림·채팅 아이콘. 홈 피드와 동등.
  */
-export const careerShell = (onBack?: () => void, opts?: { fill?: boolean }) =>
+interface CareerShellOpts {
+  fill?: boolean
+  utility?: { chatHref?: string; chatCount?: number; notifyHref?: string; notifyCount?: number }
+}
+
+export const careerShell = (onBack?: () => void, opts?: CareerShellOpts) =>
   function CareerShell({ title, children }: { title: string; children: ReactNode }) {
     return (
       <div className={opts?.fill ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-col'}>
@@ -21,6 +28,10 @@ export const careerShell = (onBack?: () => void, opts?: { fill?: boolean }) =>
           showAction={false}
           showBack={onBack != null}
           onBack={onBack}
+          chatHref={opts?.utility?.chatHref}
+          chatCount={opts?.utility?.chatCount}
+          notifyHref={opts?.utility?.notifyHref}
+          notifyCount={opts?.utility?.notifyCount}
         />
         {children}
       </div>

@@ -1,18 +1,17 @@
 package to.bconnect.api.support.s3;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
-import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.time.Duration;
@@ -30,29 +29,29 @@ public class S3FileStorage {
     private final S3Properties properties;
 
     public String presignPut(String key, String contentType, Duration ttl) {
-        PutObjectRequest objectRequest = PutObjectRequest.builder()
+        val objectRequest = PutObjectRequest.builder()
                 .bucket(properties.bucket())
                 .key(key)
                 .contentType(contentType)
                 .build();
 
-        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+        val presignRequest = PutObjectPresignRequest.builder()
                 .signatureDuration(ttl)
                 .putObjectRequest(objectRequest)
                 .build();
 
-        PresignedPutObjectRequest presigned = s3Presigner.presignPutObject(presignRequest);
+        val presigned = s3Presigner.presignPutObject(presignRequest);
         return presigned.url().toExternalForm();
     }
 
     public Optional<StoredObject> head(String key) {
-        HeadObjectRequest request = HeadObjectRequest.builder()
+        val request = HeadObjectRequest.builder()
                 .bucket(properties.bucket())
                 .key(key)
                 .build();
 
         try {
-            HeadObjectResponse response = s3Client.headObject(request);
+            val response = s3Client.headObject(request);
             return Optional.of(new StoredObject(response.contentType(), response.contentLength()));
         } catch (NoSuchKeyException e) {
             return Optional.empty();
@@ -60,7 +59,7 @@ public class S3FileStorage {
     }
 
     public void delete(String key) {
-        DeleteObjectRequest request = DeleteObjectRequest.builder()
+        val request = DeleteObjectRequest.builder()
                 .bucket(properties.bucket())
                 .key(key)
                 .build();
@@ -72,11 +71,11 @@ public class S3FileStorage {
         if (keys.isEmpty()) return;
 
         for (int from = 0; from < keys.size(); from += MAX_DELETE_BATCH) {
-            List<ObjectIdentifier> identifiers = keys.subList(from, Math.min(from + MAX_DELETE_BATCH, keys.size())).stream()
+            val identifiers = keys.subList(from, Math.min(from + MAX_DELETE_BATCH, keys.size())).stream()
                     .map(it -> ObjectIdentifier.builder().key(it).build())
                     .toList();
 
-            DeleteObjectsRequest request = DeleteObjectsRequest.builder()
+            val request = DeleteObjectsRequest.builder()
                     .bucket(properties.bucket())
                     .delete(Delete.builder().objects(identifiers).build())
                     .build();

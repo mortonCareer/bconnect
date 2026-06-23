@@ -18,14 +18,13 @@ BConnect is a job matching platform (업체-기술자 연결 구인구직 플랫
 - **Generated API client**: `packages/api-client/src/generated/`는 orval 자동 생성, 직접 수정 금지. spec 수정 → `pnpm api:generate` 재생성
 - **Authentication**: Phone OTP → tokens (access in memory, refresh in httpOnly cookie)
 - **Data formats**: 공통 데이터 (phone, address 등)는 `@bconnect/config/*` 유틸 통일 사용. 직접 string parsing 금지
-- **Env vars**: `@bconnect/config/env`의 Zod 검증된 `env` 객체 사용. `process.env.X` 직접 접근 금지
+- **Env vars**: `@bconnect/config/env`의 Zod 검증된 `env` 객체 사용. `process.env.X` 직접 접근 금지. **새 env var 추가 시 해당 앱/서비스의 `.env.example`에도 추가 필수** — 비밀은 placeholder(실값 금지), `NEXT_PUBLIC_*` 공개값은 실값 기재
 
 ## Workflow & Processes
 
 - @docs/how-to/git-workflow.md
 - @docs/reference/team.md — Team roles, GitHub/Notion mapping
 - @docs/how-to/development-workflow.md — API spec, API client generation, Mock API (MSW)
-- @docs/how-to/qa-and-testing.md — QA process, test coverage, bug classification
 - @docs/how-to/deployment.md — Deployment environments, process, infrastructure
 - @docs/how-to/write-docs.md — 문서 작성 룰 (Diátaxis 4분할, ADR 가이드)
 - @docs/explanation/adr/README.md — Architecture Decision Records 인덱스

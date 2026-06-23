@@ -1,5 +1,6 @@
 package to.bconnect.api.support;
 
+import lombok.val;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import to.bconnect.api.common.CodeException;
@@ -16,14 +17,14 @@ public class CodeExceptionAssert
     }
 
     public static CodeExceptionAssert assertCodeException(ThrowingCallable callable) {
-        Throwable throwable = catchThrowable(callable);
+        val throwable = catchThrowable(callable);
         assertThat(throwable).isInstanceOf(CodeException.class);
         return new CodeExceptionAssert((CodeException) throwable);
     }
 
     public CodeExceptionAssert hasExceptionCode(ExceptionCode expected) {
         isNotNull();
-        ExceptionCode actualCode = actual.getExceptionCode();
+        val actualCode = actual.getExceptionCode();
         if (!actualCode.equals(expected)) {
             failWithMessage(
                     "Expected exception code <%s> but was <%s>",

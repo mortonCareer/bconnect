@@ -132,7 +132,9 @@ const ChatListItem = React.forwardRef<HTMLDivElement, ChatListItemProps>(
                   <div className="flex items-center gap-2 text-m-12 text-[#A5A5A5]">
                     {tags.map((tag, index) => (
                       <React.Fragment key={index}>
-                        {index > 0 && <span className="text-[#A5A5A5]">|</span>}
+                        {index > 0 && (
+                          <span className="h-2 w-px shrink-0 bg-gray-300" aria-hidden />
+                        )}
                         <span>{tag}</span>
                       </React.Fragment>
                     ))}

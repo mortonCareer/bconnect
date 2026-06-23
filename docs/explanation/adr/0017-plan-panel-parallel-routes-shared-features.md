@@ -1,6 +1,6 @@
 # ADR-0017: plan 우측 패널 — parallel route slot + 공유 feature 패키지
 
-- **Status**: Accepted
+- **Status**: Superseded by [ADR-0021](./0021-plan-panel-search-param-state.md) (패널 URL/렌더 메커니즘만 — 공유 feature 패키지 `@bconnect/features` 결정은 유효)
 - **Date**: 2026-06-01
 - **Deciders**: @manamana32321
 - **Related**: [ADR-0012](./0012-design-system-ssot-figma.md) · [ADR-0014](./0014-design-system-tokens-krds-tailwind.md) (패키지 레이어링 맥락) · 대상 패널 [#344](https://github.com/mortonCareer/bconnect/issues/344) [#345](https://github.com/mortonCareer/bconnect/issues/345) [#347](https://github.com/mortonCareer/bconnect/issues/347)

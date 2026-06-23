@@ -3,8 +3,12 @@
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useGetMyChats, useGetMyMember } from '@bconnect/api-client'
 import { getAvatarUrl } from '@bconnect/config/avatar'
+import { Select } from '@bconnect/ui'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { MOCK_PROJECTS } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
 import { SidebarFooter } from './SidebarFooter'
 
 // TODO(신규 BE 이슈 필요 — notification 도메인): 엔드포인트 추가 시
@@ -12,6 +16,8 @@ import { SidebarFooter } from './SidebarFooter'
 //   형태로 교체. count=0 이면 CountBadge 자동 숨김.
 const NOTIFICATION_COUNT = 4
 const MAX_BADGE_COUNT = 99
+
+const PROJECT_OPTIONS = MOCK_PROJECTS.map((p) => ({ value: p.id, label: p.name }))
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null
@@ -27,12 +33,14 @@ interface NavItemProps {
   count: number
   href?: string
   onClick?: () => void
+  active?: boolean
 }
 
 const NAV_ITEM_CLASS =
   'flex h-[44px] w-full items-center justify-between rounded-[8px] px-3 text-r-14 text-gray-900 hover:bg-gray-100'
 
-function NavItem({ label, count, href, onClick }: NavItemProps) {
+function NavItem({ label, count, href, onClick, active }: NavItemProps) {
+  const className = `${NAV_ITEM_CLASS} ${active ? 'bg-gray-100' : ''}`
   const inner = (
     <>
       <span>{label}</span>
@@ -40,13 +48,89 @@ function NavItem({ label, count, href, onClick }: NavItemProps) {
     </>
   )
   return href ? (
-    <Link href={href} scroll={false} className={NAV_ITEM_CLASS}>
+    <Link href={href} scroll={false} className={className}>
       {inner}
     </Link>
   ) : (
-    <button type="button" onClick={onClick} className={NAV_ITEM_CLASS}>
+    <button type="button" onClick={onClick} className={className}>
       {inner}
     </button>
+  )
+}
+
+type ProjectMenuItem = { slug: string; label: string; href: string | null }
+
+const PROJECT_ITEM_CLASS =
+  'flex h-10 w-full items-center rounded-[8px] px-3 text-[13px] leading-[19.5px]'
+
+function ProjectSection({
+  pathProjectId,
+  activeSlug,
+}: {
+  pathProjectId: string | undefined
+  activeSlug: string
+}) {
+  const router = useRouter()
+  const [selectedProject, setSelectedProject] = useState(
+    pathProjectId ?? PROJECT_OPTIONS[0]?.value ?? ''
+  )
+  // path 로 다른 프로젝트에 진입하면 셀렉트를 따라가게 동기화 (render-time adjustment)
+  const [prevPathId, setPrevPathId] = useState(pathProjectId)
+  if (pathProjectId !== prevPathId) {
+    setPrevPathId(pathProjectId)
+    if (pathProjectId) setSelectedProject(pathProjectId)
+  }
+
+  // Select 는 Link 로 표현 불가 — 선택 즉시 해당 프로젝트 공정표로 imperative 이동
+  function handleProjectChange(v: string | string[]) {
+    const next = Array.isArray(v) ? (v[0] ?? '') : v
+    setSelectedProject(next)
+    if (next) router.push(`/projects/${next}/schedule`)
+  }
+
+  const items: ProjectMenuItem[] = [
+    { slug: 'schedule', label: '공정표', href: `/projects/${selectedProject}/schedule` },
+    // TODO: 페이지 구현 시 href 연결 (#375 follow-up — 모집 관리 / 문서 저장소)
+    { slug: 'recruit', label: '모집 관리', href: null },
+    { slug: 'docs', label: '문서 저장소', href: null },
+  ]
+  // active 표시는 현재 path 의 프로젝트를 보고 있을 때만
+  const onSelectedProject = pathProjectId === selectedProject
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="px-1 text-[11px] font-semibold uppercase tracking-[0.44px] text-gray-400">
+        프로젝트
+      </p>
+      <div className="flex flex-col gap-1">
+        <Select
+          value={selectedProject}
+          onChange={handleProjectChange}
+          options={PROJECT_OPTIONS}
+          placeholder="프로젝트 선택"
+        />
+        {items.map((item) => {
+          const active = onSelectedProject && item.slug === activeSlug
+          return item.href ? (
+            <Link
+              key={item.slug}
+              href={item.href}
+              className={`${PROJECT_ITEM_CLASS} ${active ? 'bg-gray-100 font-medium text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
+            >
+              {item.label}
+            </Link>
+          ) : (
+            <span
+              key={item.slug}
+              aria-disabled="true"
+              className={`${PROJECT_ITEM_CLASS} cursor-not-allowed text-gray-400`}
+            >
+              {item.label}
+            </span>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
@@ -94,6 +178,11 @@ export function MemberSidebar() {
   const { data: chats } = useGetMyChats()
   const messageCount = chats?.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0) ?? 0
   const { panelHref } = usePanelNav()
+  const pathname = usePathname()
+
+  const projectMatch = pathname.match(/^\/projects\/([^/]+)(?:\/([^/]+))?/)
+  const projectId = projectMatch?.[1]
+  const projectSlug = projectMatch?.[2] ?? ''
 
   return (
     <div className="flex h-full flex-col justify-between">
@@ -101,9 +190,11 @@ export function MemberSidebar() {
         <ProfileSection />
         <div className="h-px bg-gray-300" />
         <div className="flex flex-col gap-0.5">
-          <NavItem label="알림" count={NOTIFICATION_COUNT} href={panelHref('/notifications')} />
-          <NavItem label="메시지" count={messageCount} href={panelHref('/messages')} />
+          <NavItem label="알림" count={NOTIFICATION_COUNT} href={panelHref('notifications')} />
+          <NavItem label="메시지" count={messageCount} href={panelHref('messages')} />
+          <NavItem label="기술자 탐색" count={0} href="/" active={pathname === '/'} />
         </div>
+        <ProjectSection pathProjectId={projectId} activeSlug={projectSlug} />
       </div>
 
       <SidebarFooter />

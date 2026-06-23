@@ -1,12 +1,12 @@
 package to.bconnect.api.socket;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.simp.config.ChannelRegistration;
-import org.springframework.security.authorization.AuthorizationEventPublisher;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.authorization.SpringAuthorizationEventPublisher;
 import org.springframework.security.messaging.access.intercept.AuthorizationChannelInterceptor;
@@ -31,8 +31,8 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        AuthorizationChannelInterceptor authz = new AuthorizationChannelInterceptor(authorizationManager);
-        AuthorizationEventPublisher publisher = new SpringAuthorizationEventPublisher(applicationContext);
+        val authz = new AuthorizationChannelInterceptor(authorizationManager);
+        val publisher = new SpringAuthorizationEventPublisher(applicationContext);
         authz.setAuthorizationEventPublisher(publisher);
         registration.interceptors(new SecurityContextChannelInterceptor(), authz);
     }

@@ -18,14 +18,16 @@
     "@tailwindcss/postcss": "^4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "embla-carousel-react": "^8.6.0",
     "lucide-react": "catalog:",
-    "radix-ui": "^1.4.3",
+    "radix-ui": "catalog:",
     "react-daum-postcode": "^4.0.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "catalog:",
     "vaul": "^1.1.2"
   },
   "peerDependencies": {
+    "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-hook-form": "catalog:"

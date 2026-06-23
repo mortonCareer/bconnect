@@ -14,14 +14,28 @@ import {
   useGetReceivedRecommendations,
   useGetSentRecommendations,
   useGetFeeds,
+  useGetMyChats,
   useCreateCoworkerRequest,
   useCreateDirectChat,
 } from '@bconnect/api-client'
-import { ProfileView, type ProfileViewData } from '@bconnect/features'
-import { Button, toast, isApiErrorShape } from '@bconnect/ui'
+import { ProfileView, type ProfileViewData, useUnreadNotificationCount } from '@bconnect/features'
+import { Button, SettingsIcon, toast, isApiErrorShape } from '@bconnect/ui'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
 import { useRecommendationActions } from './useRecommendationActions'
 import { useWorkActions } from './useWorkActions'
+
+/** 최상위 프로필 라우트(본인·타인) 상단 알림·채팅 아이콘 — 홈 피드와 동등 */
+function useTopBarUtility() {
+  const { data: chats } = useGetMyChats()
+  const chatCount = chats?.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0) ?? 0
+  const notifyCount = useUnreadNotificationCount()
+  return {
+    chatHref: '/messages',
+    chatCount,
+    notifyHref: '/notifications',
+    notifyCount,
+  }
+}
 
 /** 현재 URL 공유 — Web Share API → 클립보드 폴백. career 정책이라 패키지 밖(앱)에 둔다. */
 function useShareCurrentUrl() {
@@ -40,6 +54,7 @@ function useShareCurrentUrl() {
 /** 본인 프로필 (/profile) — My* 훅 + 수정/공유 어포던스 */
 export function OwnerProfileView() {
   const { share } = useShareCurrentUrl()
+  const utility = useTopBarUtility()
   const { onHideRecommendation, onDeleteRecommendation } = useRecommendationActions()
 
   const member = useGetMyMember()
@@ -57,7 +72,7 @@ export function OwnerProfileView() {
   const data: ProfileViewData = {
     member: member.data,
     profile: profile.data,
-    postCount: feeds.data?.content.length,
+    postCount: feeds.data?.length,
     coworkerCount: coworkers.data?.length,
     recommendationCount: received.data?.length,
     credentials: credentials.data,
@@ -71,7 +86,7 @@ export function OwnerProfileView() {
     <ProfileView
       profileId={pid}
       data={data}
-      renderShell={careerShell()}
+      renderShell={careerShell(undefined, { utility })}
       fallbackTitle="내 프로필"
       statHrefs={{
         works: '?tab=works',
@@ -88,13 +103,20 @@ export function OwnerProfileView() {
       onHideRecommendation={onHideRecommendation}
       onDeleteRecommendation={onDeleteRecommendation}
       actionSlot={
-        <div className="flex gap-2 px-4 py-3">
-          <Button asChild variant="outline" size="full" className="h-10 flex-1">
+        <div className="flex items-center gap-2 px-4 py-3">
+          <Button asChild variant="outline" size="sm" className="flex-1">
             <Link href="/profile/edit">프로필 수정</Link>
           </Button>
-          <Button variant="outline" size="full" className="h-10 flex-1" onClick={share}>
+          <Button variant="outline" size="sm" className="flex-1" onClick={share}>
             공유하기
           </Button>
+          <Link
+            href="/settings"
+            aria-label="설정"
+            className="flex size-10 shrink-0 items-center justify-center text-gray-600 transition-opacity hover:opacity-60"
+          >
+            <SettingsIcon />
+          </Link>
         </div>
       }
     />
@@ -104,6 +126,7 @@ export function OwnerProfileView() {
 /** 타인 프로필 (/profile/[memberId]) — by-id 훅 + 동료추가/메시지 mutation */
 export function ViewerProfileView({ memberId }: { memberId: number }) {
   const router = useRouter()
+  const utility = useTopBarUtility()
   const enabled = Number.isFinite(memberId) && memberId > 0
 
   const profileAndMember = useGetProfile(memberId, { query: { enabled } })
@@ -147,7 +170,7 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
   const data: ProfileViewData = {
     member: profileAndMember.data?.member,
     profile: profileAndMember.data?.profile,
-    postCount: feeds.data?.content.length,
+    postCount: feeds.data?.length,
     coworkerCount: coworkers.data?.length,
     recommendationCount: received.data?.length,
     credentials: credentials.data,
@@ -161,12 +184,17 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
     <ProfileView
       profileId={memberId}
       data={data}
-      renderShell={careerShell(() => router.back())}
+      renderShell={careerShell(undefined, { utility })}
+      statHrefs={{
+        works: '?tab=works',
+        coworkers: `/profile/${memberId}/coworkers`,
+        recommendations: `/profile/${memberId}/recommendations`,
+      }}
       actionSlot={
         <div className="flex gap-2 px-4 py-3">
           <Button
             variant="outline"
-            size="full"
+            size="sm"
             className="flex-1"
             disabled={coworker.isPending || coworker.isSuccess}
             onClick={() => pid > 0 && coworker.mutate({ data: { toId: pid } })}
@@ -175,7 +203,7 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
           </Button>
           <Button
             variant="outline"
-            size="full"
+            size="sm"
             className="flex-1"
             disabled={chat.isPending}
             onClick={() => enabled && chat.mutate({ data: { participantId: memberId } })}

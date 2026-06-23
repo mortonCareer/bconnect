@@ -1,5 +1,6 @@
 package to.bconnect.api.core.domain.attachment;
 
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.attachment.AttachmentContext;
@@ -14,7 +15,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,7 +35,7 @@ public class AttachmentCleanupService {
         this.fileStorage = fileStorage;
         this.referenceProviders = referenceProviders.stream()
                 .collect(Collectors.toUnmodifiableMap(AttachmentReferenceProvider::context, Function.identity()));
-        for (AttachmentContext context : AttachmentContext.values()) {
+        for (val context : AttachmentContext.values()) {
             if (!this.referenceProviders.containsKey(context))
                 throw new IllegalStateException("AttachmentReferenceProvider 미등록 context: " + context);
         }
@@ -51,8 +51,8 @@ public class AttachmentCleanupService {
 
     // presigned but not confirmed
     private int cleanupPending() {
-        LocalDateTime before = LocalDateTime.now().minus(PENDING_RETENTION);
-        List<AttachmentEntity> attachments =
+        val before = LocalDateTime.now().minus(PENDING_RETENTION);
+        val attachments =
                 attachmentRepository.findByStatusAndCreatedAtBefore(AttachmentStatus.PENDING, before);
 
         purge(attachments);
@@ -61,15 +61,15 @@ public class AttachmentCleanupService {
 
     // completed but not related
     private int cleanupOrphans() {
-        LocalDateTime before = LocalDateTime.now().minus(ORPHAN_RETENTION);
-        List<AttachmentEntity> orphans = new ArrayList<>();
-        for (AttachmentReferenceProvider provider : referenceProviders.values()) {
-            List<AttachmentEntity> candidates = attachmentRepository
+        val before = LocalDateTime.now().minus(ORPHAN_RETENTION);
+        val orphans = new ArrayList<AttachmentEntity>();
+        for (val provider : referenceProviders.values()) {
+            val candidates = attachmentRepository
                     .findByContextAndStatusAndCreatedAtBefore(provider.context(), AttachmentStatus.COMPLETED, before);
             if (candidates.isEmpty())
                 continue;
 
-            Set<Long> referenced = provider.referencedIds(candidates.stream().map(AttachmentEntity::getId).toList());
+            val referenced = provider.referencedIds(candidates.stream().map(AttachmentEntity::getId).toList());
             candidates.stream()
                     .filter(it -> !referenced.contains(it.getId()))
                     .forEach(orphans::add);
@@ -83,7 +83,7 @@ public class AttachmentCleanupService {
         if (attachments.isEmpty())
             return;
 
-        List<String> keys = attachments.stream()
+        val keys = attachments.stream()
                 .flatMap(it -> AttachmentKeyUtils.allKeys(
                         it.getContext(), it.getContextId(), it.getType(), it.getUuid(), it.getExt()).stream())
                 .toList();

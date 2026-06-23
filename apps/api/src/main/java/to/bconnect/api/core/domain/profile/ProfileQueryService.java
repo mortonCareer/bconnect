@@ -1,6 +1,7 @@
 package to.bconnect.api.core.domain.profile;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
@@ -27,7 +28,7 @@ public class ProfileQueryService {
 
     @Transactional(readOnly = true)
     public Profile get(Long memberId) {
-        ProfileEntity profile = profileRepository.findByMemberId(memberId)
+        val profile = profileRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
         return Profile.of(
                 profile,
@@ -39,14 +40,14 @@ public class ProfileQueryService {
 
     @Transactional(readOnly = true)
     public List<Profile> list() {
-        List<ProfileEntity> profiles = profileRepository.findAll();
+        val profiles = profileRepository.findAll();
         if (profiles.isEmpty()) return List.of();
 
-        List<Long> memberIds = profiles.stream().map(ProfileEntity::getMemberId).toList();
+        val memberIds = profiles.stream().map(ProfileEntity::getMemberId).toList();
 
-        Map<Long, Long> postCounts = toCountMap(postRepository.countByMemberIdIn(memberIds));
-        Map<Long, Long> recommendationCounts = toCountMap(recommendationRepository.countByToIdInAndVisibleTrue(memberIds));
-        Map<Long, Long> coworkerCounts = toCountMap(coworkerRepository.countByMemberIdIn(memberIds));
+        val postCounts = toCountMap(postRepository.countByMemberIdIn(memberIds));
+        val recommendationCounts = toCountMap(recommendationRepository.countByToIdInAndVisibleTrue(memberIds));
+        val coworkerCounts = toCountMap(coworkerRepository.countByMemberIdIn(memberIds));
 
         return profiles.stream()
                 .map(it -> Profile.of(
@@ -59,7 +60,7 @@ public class ProfileQueryService {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, Profile> summaries(Collection<Long> memberIds) {
+    public Map<Long, Profile> resolveMap(Collection<Long> memberIds) {
         return profileRepository.findByMemberIdIn(memberIds).stream()
                 .collect(Collectors.toMap(
                         ProfileEntity::getMemberId,

@@ -66,8 +66,8 @@ Diátaxis 자체는 명시적 줄 수 룰을 두지 않는다. 줄 수보다 **�
 
 다른 docs 파일을 본문에서 인용할 때 plain text path 금지. 항상 마크다운 링크 형식.
 
-- ✅ `[qa-and-testing.md](./qa-and-testing.md)` 또는 `[QA & 테스팅](../how-to/qa-and-testing.md)`
-- ❌ `상세는 docs/how-to/qa-and-testing.md 참조`
+- ✅ `[git-workflow.md](./git-workflow.md)` 또는 `[Git 워크플로우](../how-to/git-workflow.md)`
+- ❌ `상세는 docs/how-to/git-workflow.md 참조`
 
 **왜**: lychee CI는 마크다운 링크 또는 plain URL만 검증. plain text path 인용은 stale 되어도 자동 검출 X — 코드/파일 이동 시 깨진 인용 누락 위험.
 

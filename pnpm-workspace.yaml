@@ -2,9 +2,6 @@ packages:
   - apps/*
   - packages/*
 
-# 여러 workspace package 가 같은 라이브러리 의존 시 버전 spec SSoT.
-# 각 package.json 은 'catalog:' 로 reference — 버전 bump 는 여기 한 곳만.
-# https://pnpm.io/catalogs
 catalog:
   '@faker-js/faker': ^10.4.0
   '@hookform/resolvers': 5.2.2
@@ -12,11 +9,14 @@ catalog:
   '@types/node': ^20
   '@types/react': ^19
   '@types/react-dom': ^19
+  '@vercel/analytics': ^2.0.1
+  '@vercel/speed-insights': ^2.0.0
   eslint: ^9
   lucide-react: ^0.562.0
   msw: ^2.13.6
   next: 16.2.7
   nuqs: ^2.8.9
+  radix-ui: ^1.4.3
   react: 19.2.3
   react-dom: 19.2.3
   react-hook-form: ^7.70.0

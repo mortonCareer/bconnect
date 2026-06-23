@@ -1,6 +1,7 @@
 package to.bconnect.api.core.domain.attachment;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
@@ -29,7 +30,7 @@ public class AttachmentResolver {
         if (attachment == null)
             return null;
 
-        String key = AttachmentKeyUtils.key(
+        val key = AttachmentKeyUtils.key(
                 attachment.context(), attachment.contextId(), attachment.type(),
                 size, attachment.uuid(), attachment.ext());
         return "https://" + properties.domain() + "/" + key;

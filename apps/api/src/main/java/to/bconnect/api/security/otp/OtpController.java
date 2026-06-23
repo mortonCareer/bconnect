@@ -2,6 +2,7 @@ package to.bconnect.api.security.otp;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,7 @@ public class OtpController {
 
     @PostMapping("/send")
     public ApiResponse<SendOtpResponse> send(@RequestBody @Valid SendCodeRequest request) {
-        Otp otp = otpService.sendCode(request.phone());
+        val otp = otpService.sendCode(request.phone());
         smsProvider.send(request.phone(), String.format(SmsTemplate.OTP_CODE, otp.code()));
 
         return ApiResponse.success(new SendOtpResponse(otp.expiredAt()));

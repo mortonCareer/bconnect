@@ -69,8 +69,9 @@ export default function FeedDetailPage() {
                 <div className="mx-auto max-w-md">
                   <Feed
                     content={{
-                      image:
+                      images: [
                         'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop',
+                      ],
                       company: '현대 건설',
                       duration: '7일 소요',
                       timestamp: '1주일 전',
@@ -79,7 +80,6 @@ export default function FeedDetailPage() {
                     }}
                     canManage
                     editHref="/profile/edit/work/1"
-                    LinkComponent={Link}
                     onDelete={() => setConfirmOpen(true)}
                   />
                   <ConfirmDialog
@@ -146,18 +146,6 @@ export default function FeedDetailPage() {
                   </tr>
                   <tr>
                     <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">LinkComponent</code>
-                    </td>
-                    <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">ElementType</code>
-                    </td>
-                    <td className="p-3">
-                      <code className="rounded bg-gray-100 px-1">a</code>
-                    </td>
-                    <td className="p-3">수정 링크 컴포넌트 (Next.js Link 등)</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3">
                       <code className="rounded bg-gray-100 px-1">onDelete</code>
                     </td>
                     <td className="p-3">
@@ -180,7 +168,7 @@ export default function FeedDetailPage() {
 // Basic usage
 <Feed
   content={{
-    image: '/work.jpg',
+    images: ['/work.jpg'],
     company: '서정 건축',
     duration: '4일 소요',
     timestamp: '3일 전',
@@ -188,7 +176,6 @@ export default function FeedDetailPage() {
   }}
   canManage
   editHref="/profile/edit/work/1"
-  LinkComponent={Link}
   onDelete={() => setPendingDelete(1)}
 />`}
             </pre>

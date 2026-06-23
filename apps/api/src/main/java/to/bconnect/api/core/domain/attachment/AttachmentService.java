@@ -1,5 +1,6 @@
 package to.bconnect.api.core.domain.attachment;
 
+import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -18,7 +19,6 @@ import to.bconnect.api.support.s3.StoredObject;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -43,7 +43,7 @@ public class AttachmentService {
         this.fileStorage = fileStorage;
         this.resolvers = resolvers.stream()
                 .collect(Collectors.toUnmodifiableMap(AttachmentContextValidator::context, Function.identity()));
-        for (AttachmentContext context : AttachmentContext.values()) {
+        for (val context : AttachmentContext.values()) {
             if (!this.resolvers.containsKey(context))
                 throw new IllegalStateException("AttachmentContextValidator 미등록 context: " + context);
         }
@@ -57,7 +57,7 @@ public class AttachmentService {
         if (files.size() > attachmentProperties.maxBatchSize())
             throw new CodeException(AttachmentExceptionCode.TOO_MANY_FILES);
 
-        AttachmentContextValidator resolver = resolvers.get(context);
+        val resolver = resolvers.get(context);
         resolver.validate(user, contextId);
 
         return files.stream()
@@ -78,12 +78,12 @@ public class AttachmentService {
         if (!isAllowedContentType(file.contentType()))
             throw new CodeException(AttachmentExceptionCode.UNSUPPORTED_FILE_TYPE);
 
-        String uuid = UUID.randomUUID().toString();
-        String stem = StringUtils.stripFilenameExtension(file.filename());
-        String ext = StringUtils.getFilenameExtension(file.filename());
-        String key = AttachmentKeyUtils.key(context, contextId, type, ImageSize.ORIGINAL, uuid, ext);
+        val uuid = UUID.randomUUID().toString();
+        val stem = StringUtils.stripFilenameExtension(file.filename());
+        val ext = StringUtils.getFilenameExtension(file.filename());
+        val key = AttachmentKeyUtils.key(context, contextId, type, ImageSize.ORIGINAL, uuid, ext);
 
-        AttachmentEntity created = attachmentRepository.save(new AttachmentEntity(
+        val created = attachmentRepository.save(new AttachmentEntity(
                 user.id(),
                 type,
                 context,
@@ -95,20 +95,20 @@ public class AttachmentService {
                 file.size()
         ));
 
-        String uploadUrl = fileStorage.presignPut(key, file.contentType(), attachmentProperties.presignTtl());
+        val uploadUrl = fileStorage.presignPut(key, file.contentType(), attachmentProperties.presignTtl());
         return new PresignedFile(created.getId(), uploadUrl);
     }
 
     private Attachment confirmOne(AuthUser user, Long attachmentId) {
-        AttachmentEntity attachment = attachmentRepository.findById(attachmentId)
+        val attachment = attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new CodeException(AttachmentExceptionCode.NOT_FOUND));
         if (!attachment.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        String key = AttachmentKeyUtils.key(
+        val key = AttachmentKeyUtils.key(
                 attachment.getContext(), attachment.getContextId(), attachment.getType(),
                 ImageSize.ORIGINAL, attachment.getUuid(), attachment.getExt());
-        Optional<StoredObject> optional = fileStorage.head(key);
+        val optional = fileStorage.head(key);
 
         if (optional.isEmpty() || !matches(attachment, optional.get())) {
             log.warn("attachment confirm 실패: id={}, cause={}",
@@ -124,7 +124,7 @@ public class AttachmentService {
     }
 
     private boolean isAllowedContentType(String contentType) {
-        MediaType type = MediaType.parseMediaType(contentType);
+        val type = MediaType.parseMediaType(contentType);
         if (!type.isConcrete())
             return false;
         return allowedContentTypes.stream().anyMatch(it -> it.includes(type));

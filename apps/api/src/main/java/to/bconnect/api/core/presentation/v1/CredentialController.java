@@ -2,13 +2,13 @@ package to.bconnect.api.core.presentation.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import to.bconnect.api.core.presentation.v1.request.CreateCredentialRequest;
 import to.bconnect.api.core.presentation.v1.response.CredentialResponse;
 import to.bconnect.api.core.presentation.v1.response.CredentialSummaryResponse;
-import to.bconnect.api.core.domain.attachment.Attachment;
 import to.bconnect.api.core.domain.attachment.AttachmentResolver;
 import to.bconnect.api.core.domain.attachment.ImageSize;
 import to.bconnect.api.core.domain.credential.Credential;
@@ -30,7 +30,7 @@ public class CredentialController {
 
     @GetMapping
     public ApiResponse<List<CredentialSummaryResponse>> list(@RequestParam Long memberId) {
-        List<CredentialSummaryResponse> response = credentialService.listPublic(memberId).stream()
+        val response = credentialService.listPublic(memberId).stream()
                 .map(CredentialSummaryResponse::of)
                 .toList();
         return ApiResponse.success(response);
@@ -38,17 +38,17 @@ public class CredentialController {
 
     @GetMapping("/me")
     public ApiResponse<List<CredentialResponse>> listMine(@AuthenticationPrincipal AuthUser user) {
-        List<Credential> credentials = credentialService.list(user.id());
+        val credentials = credentialService.list(user.id());
 
-        List<Long> attachmentIds = credentials.stream()
+        val attachmentIds = credentials.stream()
                 .map(Credential::attachmentId)
                 .filter(Objects::nonNull)
                 .toList();
-        Map<Long, Attachment> attachmentMap = attachmentResolver.resolveMap(attachmentIds);
+        val attachmentMap = attachmentResolver.resolveMap(attachmentIds);
 
-        List<CredentialResponse> response = credentials.stream()
+        val response = credentials.stream()
                 .map(it -> {
-                    Attachment attachment = attachmentMap.get(it.attachmentId());
+                    val attachment = attachmentMap.get(it.attachmentId());
                     return CredentialResponse.of(it, attachment, attachmentResolver.url(attachment, ImageSize.SMALL));
                 })
                 .toList();
@@ -59,7 +59,7 @@ public class CredentialController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateCredentialRequest request) {
-        Long id = credentialService.create(user, request.toCommand());
+        val id = credentialService.create(user, request.toCommand());
         return ApiResponse.success(id);
     }
 

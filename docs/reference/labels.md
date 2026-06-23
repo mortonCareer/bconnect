@@ -68,5 +68,4 @@ PR/이슈에 변경되는 영역을 표시. 한 PR/이슈에 여러 개 조합 �
 ## 관련 문서
 
 - [git-workflow.md](../how-to/git-workflow.md) — 이슈/PR 워크플로
-- [qa-and-testing.md](../how-to/qa-and-testing.md) — 버그 판단 기준
 - [team.md](./team.md) — 담당자/리뷰어 매핑
