@@ -5,7 +5,7 @@ import lombok.val;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.core.domain.attachment.AttachmentQueryService;
+import to.bconnect.api.core.domain.attachment.AttachmentValidator;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.security.AuthUser;
@@ -28,7 +28,7 @@ public class MessageSocketService {
     private final MessageAttachmentMappingRepository messageAttachmentMappingRepository;
     private final ParticipantRepository participantRepository;
     private final MemberRepository memberRepository;
-    private final AttachmentQueryService attachmentQueryService;
+    private final AttachmentValidator attachmentValidator;
     private final SimpUserRegistry simpUserRegistry;
 
     @Transactional
@@ -36,7 +36,7 @@ public class MessageSocketService {
         val attachmentIds = command.attachmentIds();
 
         if (!attachmentIds.isEmpty())
-            attachmentQueryService.list(user, attachmentIds);
+            attachmentValidator.validate(user, attachmentIds);
 
         val created = messageRepository.save(new MessageEntity(
                 chatId,

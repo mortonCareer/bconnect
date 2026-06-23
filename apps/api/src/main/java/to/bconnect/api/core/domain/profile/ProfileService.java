@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.core.domain.attachment.AttachmentQueryService;
+import to.bconnect.api.core.domain.attachment.AttachmentValidator;
 import to.bconnect.api.storage.profile.ProfileEntity;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.security.AuthUser;
@@ -16,7 +16,7 @@ import to.bconnect.api.security.AuthUser;
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
-    private final AttachmentQueryService attachmentQueryService;
+    private final AttachmentValidator attachmentValidator;
 
     @Transactional
     public Long create(AuthUser user, CreateProfile command) {
@@ -27,7 +27,7 @@ public class ProfileService {
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
         if (command.pictureId() != null)
-            attachmentQueryService.get(user, command.pictureId());
+            attachmentValidator.validate(user, command.pictureId());
 
         val created = new ProfileEntity(
                 user.id(),
@@ -80,7 +80,7 @@ public class ProfileService {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (pictureId != null)
-            attachmentQueryService.get(user, pictureId);
+            attachmentValidator.validate(user, pictureId);
 
         found.updatePicture(pictureId);
     }
