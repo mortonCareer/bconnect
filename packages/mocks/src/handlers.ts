@@ -10,6 +10,7 @@ import { membersOverrides } from './overrides/members'
 import { notificationsOverrides } from './overrides/notifications'
 import { profilesOverrides, myProfileOverride } from './overrides/profiles'
 import { recommendationsOverrides } from './overrides/recommendations'
+import { tasksOverrides } from './overrides/tasks'
 
 // API mock(`/api/*`) 응답만 2초 지연 — 실 네트워크 지연 모사로 로딩 UI 검증. mock 응답이
 // 즉시라 로딩 UI 가 안 보이는 문제 해소. RSC 네비게이션(`?_rsc`)·청크·외부 이미지엔 적용
@@ -42,5 +43,6 @@ export const handlers = [
   ...notificationsOverrides,
   ...profilesOverrides,
   ...recommendationsOverrides,
+  ...tasksOverrides,
   ...getBconnectAPIMock(),
 ]

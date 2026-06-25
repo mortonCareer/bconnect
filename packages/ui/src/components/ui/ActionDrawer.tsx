@@ -11,6 +11,8 @@ export interface ActionDrawerItem {
   onSelect: () => void
   destructive?: boolean
   disabled?: boolean
+  /** 라벨 좌측 리딩 아이콘. currentColor 를 쓰면 destructive 색(빨강)이 자동 전파된다. */
+  icon?: React.ReactNode
 }
 
 interface ActionDrawerProps {
@@ -43,12 +45,13 @@ export function ActionDrawer({ open, onOpenChange, title, items }: ActionDrawerP
                 item.onSelect()
               }}
               className={cn(
-                'cursor-pointer px-4 py-4 text-left text-m-16 transition-colors hover:bg-gray-50',
+                'flex cursor-pointer items-center gap-3 px-4 py-4 text-left text-m-16 transition-colors hover:bg-gray-50',
                 'disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent',
                 item.destructive ? 'text-destructive' : 'text-gray-900'
               )}
             >
-              {item.label}
+              {item.icon && <span className="shrink-0">{item.icon}</span>}
+              <span>{item.label}</span>
             </button>
           ))}
         </div>
