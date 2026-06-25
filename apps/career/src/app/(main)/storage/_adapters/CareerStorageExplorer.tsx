@@ -12,13 +12,13 @@ import {
   TopBar,
   TrashIcon,
 } from '@bconnect/ui'
-import { DocsExplorerView } from '@bconnect/features'
+import { StorageExplorerView } from '@bconnect/features'
 import type { Folder } from '@bconnect/features'
 import { matchHangul } from '@bconnect/config/search'
 import { useAllFolders, useStorageMutations } from '@/lib/storage-mock/hooks'
 
 /** career 저장소 탐색기 루트 — 검색(초성) + 폴더 목록 + 인라인 생성/이름수정 + FAB(폴더 추가). */
-export function CareerDocsExplorer() {
+export function CareerStorageExplorer() {
   const { data: folders, isLoading, isError } = useAllFolders()
   const { createFolder, updateFolder, deleteFolder } = useStorageMutations()
   const [query, setQuery] = useState('')
@@ -37,7 +37,7 @@ export function CareerDocsExplorer() {
     <>
       <TopBar variant="default" title="저장소" showAction={false} />
       <div className="p-4">
-        <DocsExplorerView
+        <StorageExplorerView
           folders={filtered}
           isLoading={isLoading}
           isError={isError}

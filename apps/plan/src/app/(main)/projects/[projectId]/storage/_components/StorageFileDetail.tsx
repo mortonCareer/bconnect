@@ -7,7 +7,7 @@ import { BoardOverlay, ImageBoardDetail } from '@bconnect/features'
 import type { BoardPosition, BoardRow } from '@bconnect/features'
 import { useFolderImages, useFolders, useStorageMutations } from '@/lib/storage-mock/hooks'
 
-interface DocsFileDetailProps {
+interface StorageFileDetailProps {
   projectId: string
   folderId: string
   fileId: string
@@ -19,7 +19,12 @@ interface DocsFileDetailProps {
  * plan 우측 컬럼 — 파일 상세/편집 (포커스 시). 동산보드 메타·폴더·설명 즉시 편집 + 설명 아래 저장.
  * fileId 변경 시 부모가 key 로 리마운트 → 드래프트 초기화.
  */
-export function DocsFileDetail({ projectId, folderId, fileId, closeHref }: DocsFileDetailProps) {
+export function StorageFileDetail({
+  projectId,
+  folderId,
+  fileId,
+  closeHref,
+}: StorageFileDetailProps) {
   const { data: images } = useFolderImages(folderId)
   const { data: folders } = useFolders(projectId)
   const { updateImage, moveImage } = useStorageMutations()

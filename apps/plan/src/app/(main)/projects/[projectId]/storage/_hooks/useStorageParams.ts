@@ -7,7 +7,7 @@ import { parseAsString, parseAsStringEnum, useQueryStates } from 'nuqs'
  * - file: 포커스된 BoardImage id (목록 위 오버레이 패널 — Notion peek 패턴)
  * - view: 갤러리/리스트 뷰모드 (기본 gallery)
  */
-export function useDocsParams() {
+export function useStorageParams() {
   return useQueryStates({
     file: parseAsString,
     view: parseAsStringEnum<'gallery' | 'list'>(['gallery', 'list']).withDefault('gallery'),

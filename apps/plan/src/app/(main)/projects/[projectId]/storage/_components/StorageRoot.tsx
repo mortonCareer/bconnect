@@ -11,13 +11,13 @@ import {
   ResizablePanelGroup,
   TrashIcon,
 } from '@bconnect/ui'
-import { DocsExplorerView } from '@bconnect/features'
+import { StorageExplorerView } from '@bconnect/features'
 import type { Folder } from '@bconnect/features'
-import { DocsHeader } from './DocsHeader'
+import { StorageHeader } from './StorageHeader'
 import { useFolders, useStorageMutations } from '@/lib/storage-mock/hooks'
 
 /** plan 동산보드 루트 — 폴더 목록(좌) + 빈 상태 안내(우), 컬럼 비율 드래그 리사이즈. 폴더 미선택 시. */
-export function DocsRoot({ projectId }: { projectId: string }) {
+export function StorageRoot({ projectId }: { projectId: string }) {
   const { data: folders, isLoading, isError } = useFolders(projectId)
   const { createFolder, updateFolder, deleteFolder } = useStorageMutations()
   const [creating, setCreating] = useState(false)
@@ -26,7 +26,7 @@ export function DocsRoot({ projectId }: { projectId: string }) {
 
   return (
     <div className="flex h-full flex-col">
-      <DocsHeader projectId={projectId} />
+      <StorageHeader projectId={projectId} />
       <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
         <ResizablePanel defaultSize={68} minSize={40}>
           <div className="h-full overflow-y-auto p-6">
@@ -41,11 +41,11 @@ export function DocsRoot({ projectId }: { projectId: string }) {
                 + 폴더 추가
               </Button>
             </div>
-            <DocsExplorerView
+            <StorageExplorerView
               folders={folders ?? []}
               isLoading={isLoading}
               isError={isError}
-              folderHref={(id) => `/projects/${projectId}/docs/${id}`}
+              folderHref={(id) => `/projects/${projectId}/storage/${id}`}
               creating={creating}
               onCreateSubmit={(title) => {
                 createFolder({ projectId, title })

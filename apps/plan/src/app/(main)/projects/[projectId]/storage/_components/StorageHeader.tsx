@@ -9,7 +9,7 @@ const toMB = (bytes: number) => `${Math.round(bytes / 1_000_000)}MB`
 const toGB = (bytes: number) => `${Math.round(bytes / 1_073_741_824)}GB`
 
 /** 동산보드 헤더 — 프로젝트명 + breadcrumb(프로젝트 › 폴더) + TIP + 용량바. */
-export function DocsHeader({ projectId, folderId }: { projectId: string; folderId?: string }) {
+export function StorageHeader({ projectId, folderId }: { projectId: string; folderId?: string }) {
   const project = getMockProject(projectId)
   const { data: folder } = useFolder(folderId ?? '')
   const { data: usage } = useStorageUsage(projectId)
@@ -22,7 +22,7 @@ export function DocsHeader({ projectId, folderId }: { projectId: string; folderI
     <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-5">
       <div className="min-w-0">
         <h1 className="truncate text-lg font-semibold text-gray-900">
-          <Link href={`/projects/${projectId}/docs`} className="hover:underline">
+          <Link href={`/projects/${projectId}/storage`} className="hover:underline">
             {projectName}
           </Link>
           {folder ? <span className="font-normal text-gray-400"> › {folder.title}</span> : null}

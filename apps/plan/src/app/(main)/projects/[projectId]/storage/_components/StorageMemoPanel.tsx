@@ -6,7 +6,7 @@ import { MemoListView } from '@bconnect/features'
 import { useFolderMemos, useStorageMutations } from '@/lib/storage-mock/hooks'
 
 /** plan 우측 컬럼 — 폴더 메모 CRUD (포커스 없을 때). */
-export function DocsMemoPanel({ folderId }: { folderId: string }) {
+export function StorageMemoPanel({ folderId }: { folderId: string }) {
   const { data: memos, isLoading, isError } = useFolderMemos(folderId)
   const { createMemo, updateMemo, deleteMemo } = useStorageMutations()
   const [composing, setComposing] = useState(false)

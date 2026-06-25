@@ -2,21 +2,21 @@
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@bconnect/ui'
 import { FolderImagesView } from '@bconnect/features'
-import { DocsHeader } from './DocsHeader'
-import { DocsMemoPanel } from './DocsMemoPanel'
-import { DocsFileDetail } from './DocsFileDetail'
+import { StorageHeader } from './StorageHeader'
+import { StorageMemoPanel } from './StorageMemoPanel'
+import { StorageFileDetail } from './StorageFileDetail'
 import { useFolderImages } from '@/lib/storage-mock/hooks'
-import { useDocsParams } from '../_hooks/useDocsParams'
+import { useStorageParams } from '../_hooks/useStorageParams'
 
 /** plan 동산보드 폴더 — 갤러리(좌) + 메모|파일상세(우, ?file= 유무), 컬럼 비율 드래그 리사이즈. */
-export function DocsFolder({ projectId, folderId }: { projectId: string; folderId: string }) {
-  const [{ file }] = useDocsParams()
+export function StorageFolder({ projectId, folderId }: { projectId: string; folderId: string }) {
+  const [{ file }] = useStorageParams()
   const { data: images, isLoading, isError } = useFolderImages(folderId)
-  const basePath = `/projects/${projectId}/docs/${folderId}`
+  const basePath = `/projects/${projectId}/storage/${folderId}`
 
   return (
     <div className="flex h-full flex-col">
-      <DocsHeader projectId={projectId} folderId={folderId} />
+      <StorageHeader projectId={projectId} folderId={folderId} />
       <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
         <ResizablePanel defaultSize={68} minSize={40}>
           <div className="h-full overflow-y-auto p-6">
@@ -34,7 +34,7 @@ export function DocsFolder({ projectId, folderId }: { projectId: string; folderI
         <ResizablePanel defaultSize={32} minSize={20}>
           <div className="h-full overflow-y-auto">
             {file ? (
-              <DocsFileDetail
+              <StorageFileDetail
                 key={file}
                 projectId={projectId}
                 folderId={folderId}
@@ -42,7 +42,7 @@ export function DocsFolder({ projectId, folderId }: { projectId: string; folderI
                 closeHref={basePath}
               />
             ) : (
-              <DocsMemoPanel folderId={folderId} />
+              <StorageMemoPanel folderId={folderId} />
             )}
           </div>
         </ResizablePanel>

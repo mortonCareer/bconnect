@@ -3,7 +3,7 @@ import { ExplorerFolderList } from './_parts/ExplorerFolderList'
 import { FolderRowEditor } from './_parts/FolderRowEditor'
 import type { Folder } from './types'
 
-export interface DocsExplorerViewProps {
+export interface StorageExplorerViewProps {
   folders: Folder[]
   isLoading: boolean
   isError: boolean
@@ -23,7 +23,7 @@ export interface DocsExplorerViewProps {
 }
 
 /** 탐색기 루트 — 폴더 목록 뷰(컬럼/셸 무관). career 풀페이지·plan 좌측 컬럼 공용. */
-export function DocsExplorerView({
+export function StorageExplorerView({
   folders,
   isLoading,
   isError,
@@ -37,7 +37,7 @@ export function DocsExplorerView({
   onRenameSubmit,
   onRenameCancel,
   emptyLabel,
-}: DocsExplorerViewProps) {
+}: StorageExplorerViewProps) {
   return (
     <div className="flex flex-col gap-4">
       {searchSlot}

@@ -1,7 +1,7 @@
 export * from './types'
 
-export { DocsExplorerView } from './DocsExplorerView'
-export type { DocsExplorerViewProps } from './DocsExplorerView'
+export { StorageExplorerView } from './StorageExplorerView'
+export type { StorageExplorerViewProps } from './StorageExplorerView'
 export { FolderImagesView } from './FolderImagesView'
 export type { FolderImagesViewProps } from './FolderImagesView'
 export { MemoListView } from './MemoListView'
