@@ -1,11 +1,6 @@
 # stomp-architecture
-
-## 범위
-- `/socket`
-- 채팅(Chat)
-- 메시지(Message)
-- 웹 소켓(WebSocket)
-- STOMP
+- 위치 : `/socket`
+- 범위 : 채팅(Chat), 메시지(Message)
 
 ## 클래스 구조
 - ChatAuthorizationManager : 인가 처리
