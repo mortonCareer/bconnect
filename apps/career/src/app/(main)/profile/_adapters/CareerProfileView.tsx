@@ -1,6 +1,5 @@
 'use client'
 
-import { useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -21,6 +20,7 @@ import {
 import { ProfileView, type ProfileViewData, useUnreadNotificationCount } from '@bconnect/features'
 import { Button, SettingsIcon, toast, isApiErrorShape } from '@bconnect/ui'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
+import { useShareCurrentUrl } from '@/hooks/useShareCurrentUrl'
 import { useRecommendationActions } from './useRecommendationActions'
 import { useWorkActions } from './useWorkActions'
 
@@ -37,23 +37,9 @@ function useTopBarUtility() {
   }
 }
 
-/** 현재 URL 공유 — Web Share API → 클립보드 폴백. career 정책이라 패키지 밖(앱)에 둔다. */
-function useShareCurrentUrl() {
-  const share = useCallback(async () => {
-    const shareData = { title: document.title, url: window.location.href }
-    if (navigator.canShare?.(shareData)) {
-      await navigator.share(shareData)
-      return
-    }
-    await navigator.clipboard.writeText(window.location.href)
-    toast({ description: '링크가 복사되었어요', variant: 'success' })
-  }, [])
-  return { share }
-}
-
 /** 본인 프로필 (/profile) — My* 훅 + 수정/공유 어포던스 */
 export function OwnerProfileView() {
-  const { share } = useShareCurrentUrl()
+  const share = useShareCurrentUrl()
   const utility = useTopBarUtility()
   const { onHideRecommendation, onDeleteRecommendation } = useRecommendationActions()
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { usePushStore } from './push-store'
 import { requestPushPermission } from './request-push-permission'
 
@@ -46,17 +46,18 @@ export function useNotificationSoftAsk() {
     if (open) sessionStorage.setItem(SESSION_KEY, '1')
   }, [open])
 
-  const accept = async () => {
+  // 안정 핸들러 — sonner 토스트 trigger 의 effect 의존성에서 재발화 방지
+  const accept = useCallback(async () => {
     setDecided(true)
     await requestPushPermission()
-  }
+  }, [])
 
-  const dismiss = () => {
+  const dismiss = useCallback(() => {
     setDecided(true)
     if (typeof window !== 'undefined') {
       localStorage.setItem(SUPPRESS_KEY, String(Date.now() + SUPPRESS_DAYS * 24 * 60 * 60 * 1000))
     }
-  }
+  }, [])
 
   return { open, accept, dismiss }
 }

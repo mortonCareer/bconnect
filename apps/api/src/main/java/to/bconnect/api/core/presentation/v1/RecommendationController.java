@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.request.CreateRecommendationRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateRecommendationRequest;
 import to.bconnect.api.core.presentation.v1.response.RecommendationResponse;
+import to.bconnect.api.core.domain.attachment.AttachmentResolver;
+import to.bconnect.api.core.domain.attachment.ImageSize;
 import to.bconnect.api.core.domain.recommendation.Recommendation;
 import to.bconnect.api.core.domain.recommendation.RecommendationQueryService;
 import to.bconnect.api.core.domain.recommendation.RecommendationService;
@@ -23,11 +25,10 @@ import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/recommendations")
@@ -38,6 +39,7 @@ public class RecommendationController {
     private final RecommendationQueryService recommendationQueryService;
     private final MemberResolver memberResolver;
     private final ProfileQueryService profileQueryService;
+    private final AttachmentResolver attachmentResolver;
 
     @PostMapping
     public ApiResponse<Long> create(
@@ -107,11 +109,19 @@ public class RecommendationController {
         val memberMap = memberResolver.resolveMap(memberIds);
         val profileMap = profileQueryService.resolveMap(memberIds);
 
+        val pictureIds = profileMap.values().stream()
+                .map(Profile::pictureId).filter(Objects::nonNull).toList();
+        val attachmentMap = attachmentResolver.resolveMap(pictureIds);
+
         return recommendations.stream()
-                .map(it -> RecommendationResponse.of(
-                        it,
-                        memberMap.get(it.memberId()),
-                        profileMap.get(it.memberId())))
+                .map(it -> {
+                    val profile = profileMap.get(it.memberId());
+                    return RecommendationResponse.of(
+                            it,
+                            memberMap.get(it.memberId()),
+                            profile,
+                            profile == null ? null : attachmentResolver.url(attachmentMap.get(profile.pictureId()), ImageSize.SMALL));
+                })
                 .toList();
     }
 }

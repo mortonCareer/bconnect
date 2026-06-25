@@ -85,6 +85,7 @@ public class SecurityConfig {
                         .requestMatchers(GET, "/api/v1/members").hasRole("ADMIN")
                         .requestMatchers(GET, "/api/v1/profiles/**").permitAll()
                         .requestMatchers(GET, "/api/v1/feeds/**").permitAll()
+                        .requestMatchers(GET, "/api/v1/credentials/me").authenticated()
                         .requestMatchers(GET, "/api/v1/credentials/**").permitAll()
                         .requestMatchers(POST, "/api/v1/credentials/*/accept", "/api/v1/credentials/*/deny").hasRole("ADMIN")
                         .requestMatchers(GET, "/api/v1/recommendations/received", "/api/v1/recommendations/sent").permitAll()

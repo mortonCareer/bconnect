@@ -15,11 +15,11 @@ public record RecommendationResponse(
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {
-    public static RecommendationResponse of(Recommendation recommendation, Member member, Profile profile) {
+    public static RecommendationResponse of(Recommendation recommendation, Member member, Profile profile, String picture) {
         return new RecommendationResponse(
                 recommendation.id(),
                 MemberSummaryResponse.of(member),
-                profile == null ? null : ProfileSummaryResponse.of(profile),
+                profile == null ? null : ProfileSummaryResponse.of(profile, picture),
                 recommendation.content(),
                 recommendation.visible(),
                 recommendation.createdAt(),

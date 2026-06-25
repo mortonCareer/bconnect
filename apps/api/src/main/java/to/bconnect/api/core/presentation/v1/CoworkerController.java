@@ -11,15 +11,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.response.CoworkerResponse;
 import to.bconnect.api.core.presentation.v1.response.CoworkerTaskResponse;
+import to.bconnect.api.core.domain.attachment.AttachmentResolver;
+import to.bconnect.api.core.domain.attachment.ImageSize;
 import to.bconnect.api.core.domain.coworker.Coworker;
 import to.bconnect.api.core.domain.coworker.CoworkerService;
 import to.bconnect.api.core.domain.task.TaskQueryService;
 import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/coworkers")
@@ -30,6 +35,7 @@ public class CoworkerController {
     private final TaskQueryService taskQueryService;
     private final MemberResolver memberResolver;
     private final ProfileQueryService profileQueryService;
+    private final AttachmentResolver attachmentResolver;
 
     @GetMapping
     public ApiResponse<List<CoworkerResponse>> list(
@@ -42,12 +48,20 @@ public class CoworkerController {
         val profileMap = profileQueryService.resolveMap(memberIds);
         val statusMap = coworkerService.resolveStatusMap(user.id(), memberIds);
 
+        val pictureIds = profileMap.values().stream()
+                .map(Profile::pictureId).filter(Objects::nonNull).toList();
+        val attachmentMap = attachmentResolver.resolveMap(pictureIds);
+
         val response = coworkers.stream()
-                .map(it -> CoworkerResponse.of(
-                        it,
-                        memberMap.get(it.memberId()),
-                        profileMap.get(it.memberId()),
-                        statusMap.get(it.memberId())))
+                .map(it -> {
+                    val profile = profileMap.get(it.memberId());
+                    return CoworkerResponse.of(
+                            it,
+                            memberMap.get(it.memberId()),
+                            profile,
+                            statusMap.get(it.memberId()),
+                            profile == null ? null : attachmentResolver.url(attachmentMap.get(profile.pictureId()), ImageSize.SMALL));
+                })
                 .toList();
         return ApiResponse.success(response);
     }

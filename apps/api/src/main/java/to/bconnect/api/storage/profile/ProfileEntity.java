@@ -42,8 +42,10 @@ public class ProfileEntity extends BaseEntity {
     @Embedded
     private Address address;
 
+    private Long pictureId;
+
     public ProfileEntity(Long memberId, Trade primaryTrade, Set<Trade> trades, int experience,
-                         String headline, String about, Address address) {
+                         String headline, String about, Address address, Long pictureId) {
         this.memberId = memberId;
         this.primaryTrade = primaryTrade;
         this.trades = trades != null ? trades : new HashSet<>();
@@ -51,6 +53,7 @@ public class ProfileEntity extends BaseEntity {
         this.headline = headline;
         this.about = about;
         this.address = address;
+        this.pictureId = pictureId;
     }
 
     public void update(Trade primaryTrade, Set<Trade> trades, int experience,
@@ -64,5 +67,9 @@ public class ProfileEntity extends BaseEntity {
 
     public void updateAbout(String about) {
         this.about = about;
+    }
+
+    public void updatePicture(Long pictureId) {
+        this.pictureId = pictureId;
     }
 }

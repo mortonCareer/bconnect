@@ -3,7 +3,7 @@
 > **For**: 파일 인프라 (S3/CloudFront/Lambda) 작업자.
 > **You'll be able to**: 단일 버킷 + path prefix 격리 결정의 컨텍스트, 데이터 모델, 업로드 플로우 이해.
 
-**작성일**: 2026-04-12 (v2 업데이트: 2026-04-17)
+**작성일**: 2026-04-12 (v2 업데이트: 2026-04-17, v3 업데이트: 2026-06-12)
 **관련 이슈**: [mortonCareer/bconnect#174](https://github.com/mortonCareer/bconnect/issues/174)
 **관련 디자인**: [MVP-2 동산보드판 (Figma)](https://www.figma.com/design/iGTu8r553JZ7TZ5FVdxkoB/?node-id=1143-793)
 **관련 ERD**: [Attachment 엔티티 (FigJam)](https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj/?node-id=381-560)
@@ -35,22 +35,23 @@ Morton 서비스 전반에서 사용될 **파일 저장·조회·권한 제어**
 
 ## 2. 핵심 설계 결정 요약
 
-| 영역           | 결정                                                               |
-| -------------- | ------------------------------------------------------------------ |
-| 업로드 방식    | Presigned PUT URL                                                  |
-| 업로드 플로우  | 2-step — `/presign` → S3 PUT → `/confirm` (단일 엔드포인트)        |
-| 리사이즈       | **Lambda** (S3 ObjectCreated 이벤트 트리거, 업계표준)              |
-| 사이즈         | `o` (original), `m` (medium 800px), `s` (small 400px)              |
-| 읽기 (private) | CloudFront + Signed Cookie, path 패턴 scope                        |
-| 읽기 (public)  | CloudFront (인증 없음, capability URL)                             |
-| 버킷           | **`static` 단일 버킷**, `public/` + `private/` path 분리           |
-| 도메인         | `static.bconnect.to` 단일                                          |
-| DB 모델        | **Storage + Attachment + 엔티티별 매핑 테이블** (polymorphic 폐기) |
-| 이미지 서빙    | `<img>` + CloudFront. Next.js `<Image>`는 정적 자산 전용           |
-| 크론           | GitHub Actions → 내부 API                                          |
-| 암호화         | SSE-S3 기본. KMS는 법적 필요 시                                    |
-| 감사 로그      | 기존 SessionEntity/BaseEntity/Credential 활용 (신규 테이블 없음)   |
-| MIME 검증      | FE에서 처리 (S3 `application/*` 와일드카드 미지원)                 |
+| 영역           | 결정                                                                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 업로드 방식    | Presigned PUT URL                                                                                                                          |
+| 업로드 플로우  | 2-step — `/presign` → S3 PUT → `/confirm` (단일 엔드포인트)                                                                                |
+| 리사이즈       | **Lambda** (S3 ObjectCreated 이벤트 트리거, 업계표준)                                                                                      |
+| 사이즈         | `o` (original), `m` (medium 800px), `s` (small 400px)                                                                                      |
+| 읽기 (private) | CloudFront + Signed Cookie, path 패턴 scope                                                                                                |
+| 읽기 (public)  | CloudFront (인증 없음, capability URL)                                                                                                     |
+| 버킷           | **`static` 단일 버킷**, `public/` + `private/` path 분리                                                                                   |
+| 도메인         | `static.bconnect.to` 단일                                                                                                                  |
+| DB 모델        | **Attachment(분해 컬럼)** + context별 참조: `CHAT`·`POST` = N:M 매핑, `CREDENTIAL`·`PROFILE` = 1:1 FK (polymorphic 폐기, Storage는 future) |
+| 고아 판정      | **AttachmentReferenceProvider** DIP — context별 repo가 `referencedIds` 제공, `AttachmentCleanupService`가 주입받아 계산                    |
+| 이미지 서빙    | `<img>` + CloudFront. Next.js `<Image>`는 정적 자산 전용                                                                                   |
+| 크론           | Spring `@Scheduled` (앱 내장, 매주 수 06:00 KST). ShedLock은 멀티 인스턴스 전환 시 도입                                                    |
+| 암호화         | SSE-S3 기본. KMS는 법적 필요 시                                                                                                            |
+| 감사 로그      | 기존 SessionEntity/BaseEntity/Credential 활용 (신규 테이블 없음)                                                                           |
+| MIME 검증      | FE에서 처리 (S3 `application/*` 와일드카드 미지원)                                                                                         |
 
 ---
 
@@ -62,10 +63,9 @@ Morton 서비스 전반에서 사용될 **파일 저장·조회·권한 제어**
 
 ```
 static/                                            ← 버킷 (단일)
-├── profiles/{profileId}/images/{o,m,s}/{imageId}      ← public (CF Behavior)
-├── posts/{postId}/images/{o,m,s}/{imageId}            ← public
-├── businesses/{businessId}/images/{o,m,s}/{imageId}   ← public
-├── credentials/{credentialId}/files/{fileId}          ← private (CF Signed Cookie)
+├── profiles/{memberId}/images/{o,m,s}/{imageId}       ← public (CF Behavior)
+├── posts/{memberId}/images/{o,m,s}/{imageId}          ← public
+├── credentials/{memberId}/files/{fileId}              ← private (CF Signed Cookie)
 ├── chats/{chatId}/images/{o,m,s}/{imageId}            ← private
 ├── chats/{chatId}/files/{fileId}                      ← private
 ├── storages/{storageId}/images/{o,m,s}/{imageId}      ← private
@@ -74,7 +74,7 @@ static/                                            ← 버킷 (단일)
 
 **경로 컨벤션:**
 
-- `{entity}/{entityId}/` — 엔티티 단위 권한 scope. Signed Cookie는 이 prefix 기준으로 발급
+- `{entity}/{scopeId}/` — 권한 집합 단위 scope. Signed Cookie는 이 prefix 기준으로 발급. scopeId는 선존재 컨테이너 ID(chatId, storageId) 또는 소유자 memberId — 후생성 엔티티(post, credential)는 presign 시점에 자기 ID가 없으므로 소유자(memberId) 기준
 - `images/{o,m,s}/` — 이미지는 사이즈 디렉토리 필수
   - `o` = original (무변환)
   - `m` = medium (긴변 800px, WebP)
@@ -90,7 +90,7 @@ static/                                            ← 버킷 (단일)
 
 | Path pattern (CloudFront Behavior)          | Signed Cookie | Cache-Control                         | 용도             |
 | ------------------------------------------- | ------------- | ------------------------------------- | ---------------- |
-| `/profiles/*`, `/posts/*`, `/businesses/*`  | 불필요        | `public, max-age=31536000, immutable` | 공개 엔티티      |
+| `/profiles/*`, `/posts/*`                   | 불필요        | `public, max-age=31536000, immutable` | 공개 엔티티      |
 | `/chats/*`, `/credentials/*`, `/storages/*` | 필수          | `public, max-age=31536000, immutable` | 권한 제한 엔티티 |
 
 **캐시 정책 통일**: 모든 파일 ID가 UUID(immutable)라 동일 URL이 다른 콘텐츠를 가리키지 않음. private도 1년 캐시 안전. 권한 변경 시에는 쿠키 만료/재발급으로 차단 (콘텐츠 캐시 무효화 불필요).
@@ -126,40 +126,45 @@ Lambda 리사이즈 함수 전용 role:
 
 ```sql
 CREATE TABLE attachments (
-  id               BIGSERIAL PRIMARY KEY,
-  member_id        BIGINT NOT NULL REFERENCES members(id),  -- 업로더 (JWT에서)
-  filename         VARCHAR(255) NOT NULL,                   -- 원본 파일명 (확장자 포함)
-  path             VARCHAR(500) NOT NULL,                   -- S3 key 디렉토리 prefix (context/contextId/images 또는 .../files)
-  content_type     VARCHAR(100) NOT NULL,                   -- MIME
-  size             BIGINT NOT NULL,                         -- bytes
-  status           VARCHAR(20) NOT NULL DEFAULT 'PENDING',  -- PENDING | COMPLETED | FAILED
-  created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at       TIMESTAMP NOT NULL DEFAULT NOW(),
-  deleted_at       TIMESTAMP                                -- soft delete
+  id            BIGSERIAL PRIMARY KEY,
+  member_id     BIGINT NOT NULL REFERENCES members(id),    -- 업로더 (JWT에서)
+  type          VARCHAR(20) NOT NULL,                       -- IMAGE | FILE
+  status        VARCHAR(20) NOT NULL DEFAULT 'PENDING',     -- PENDING | COMPLETED
+  context       VARCHAR(20) NOT NULL,                       -- 권한 scope 종류 (CHAT | CREDENTIAL | POST | PROFILE)
+  context_id    BIGINT NOT NULL,                            -- scope 식별자 (chatId | 소유자 memberId)
+  uuid          VARCHAR(36) NOT NULL UNIQUE,                -- 파일 식별자 (S3 key 구성)
+  stem          VARCHAR(255) NOT NULL,                      -- 원본 파일명 (확장자 제외)
+  ext           VARCHAR(20) NOT NULL,                       -- 확장자
+  content_type  VARCHAR(100) NOT NULL,                      -- MIME
+  size          BIGINT NOT NULL,                            -- bytes
+  created_at    TIMESTAMP NOT NULL DEFAULT NOW(),
+  modified_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+  deleted_at    TIMESTAMP                                   -- soft delete (BaseEntity @SoftDelete TIMESTAMP, null = 활성)
 );
 
--- 인덱스 최적화는 본 PR 범위 외 (별도 PR에서 다룸).
--- 후보 인덱스: (member_id), (status, created_at), (path) — 운영 데이터 기반 결정.
+-- 인덱스 최적화는 별도 PR. 후보: (member_id), (status, created_at), (context, context_id).
 ```
 
-**`path` 필드 의미:** S3 key의 **디렉토리 prefix**만 저장. 같은 컨텍스트(예: `chats/42/images`)에 여러 첨부가 있으면 path 값이 동일함 (UNIQUE 제약 없음). 실제 S3 key는 FE/BE가 `path` + `id` + `size` + `ext`로 조합 (§6.4 참고).
+> **갱신(2026-06-22)**: 초안의 `path`(디렉토리 prefix) 단일 컬럼을 폐기하고 S3 key를 **분해 컬럼**(`context`·`context_id`·`type`·`uuid`·`ext`)으로 보관한다. key는 `AttachmentKeyUtils`, URL은 `AttachmentResolver`가 BE에서 조립(§6.4). `FAILED` 상태는 미도입.
+
+**S3 key 구성:** key rule = `{context}/{context_id}/{type}/{size}/{uuid}.{ext}` (size 세그먼트는 IMAGE만). 같은 scope의 여러 첨부는 `uuid`로 구분.
 
 **예시:**
 
-- 채팅 이미지: `path = "chats/42/images"`, 실제 S3 key = `chats/42/images/o/{id}.{ext}`
-- 자격증 파일: `path = "credentials/7/files"`, 실제 S3 key = `credentials/7/files/{id}.{ext}`
+- 채팅 이미지: `context=CHAT, context_id=42, type=IMAGE` → `chats/42/images/o/{uuid}.{ext}`
+- 자격증 파일: `context=CREDENTIAL, context_id=7(소유자 memberId), type=FILE` → `credentials/7/files/{uuid}.{ext}`
 
-**Status 전이:**
+**Status 전이:** 구현은 `PENDING`·`COMPLETED` 2종 (`FAILED` 미도입)
 
 ```
   [presign]                      [confirm + HeadObject OK]
      │                                    │
      ▼                                    ▼
-  PENDING ─────────────────────────→ COMPLETED
-     │                                    │
-     │ [confirm + HeadObject 404]         │ [soft delete]
-     ▼                                    ▼
-  FAILED                            (deleted_at set)
+  PENDING ─────────────────────────→ COMPLETED ──[soft delete]──→ (deleted_at set)
+     │
+     │ [confirm 실패: 객체 없음 / 메타 불일치]
+     ▼
+  S3 객체 삭제 + soft delete + NOT_COMPLETED 예외   (FAILED 상태값 없음, 사유는 WARN 로그)
 ```
 
 ### 4.2 Storage
@@ -196,51 +201,42 @@ Polymorphic reference 패턴을 **폐기**하고 엔티티별 N:M 매핑 테이�
 매핑 테이블은 Spring JPA `@ManyToMany`가 자동 생성하므로 메타 컬럼 없이 두 FK만 가짐.
 
 ```sql
--- 동산보드판 / 개인 저장소
-CREATE TABLE storage_attachments (
-  storage_id     BIGINT NOT NULL REFERENCES storages(id) ON DELETE CASCADE,
-  attachment_id  BIGINT NOT NULL REFERENCES attachments(id) ON DELETE CASCADE,
-  PRIMARY KEY (storage_id, attachment_id)
-);
-
--- 게시글 이미지
-CREATE TABLE post_attachments (
-  post_id        BIGINT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-  attachment_id  BIGINT NOT NULL REFERENCES attachments(id) ON DELETE CASCADE,
-  PRIMARY KEY (post_id, attachment_id)
-);
-
--- 메시지 첨부
+-- 메시지 첨부 (N:M) — 구현됨
 CREATE TABLE message_attachments (
   message_id     BIGINT NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
   attachment_id  BIGINT NOT NULL REFERENCES attachments(id) ON DELETE CASCADE,
   PRIMARY KEY (message_id, attachment_id)
 );
 
--- 인증서 파일
-CREATE TABLE credential_attachments (
-  credential_id  BIGINT NOT NULL REFERENCES credentials(id) ON DELETE CASCADE,
+-- 게시글 첨부 (N:M) — 구현됨
+CREATE TABLE post_attachments (
+  post_id        BIGINT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
   attachment_id  BIGINT NOT NULL REFERENCES attachments(id) ON DELETE CASCADE,
-  PRIMARY KEY (credential_id, attachment_id)
+  PRIMARY KEY (post_id, attachment_id)
+);
+
+-- 동산보드판 / 개인 저장소 (N:M) — future
+CREATE TABLE storage_attachments (
+  storage_id     BIGINT NOT NULL REFERENCES storages(id) ON DELETE CASCADE,
+  attachment_id  BIGINT NOT NULL REFERENCES attachments(id) ON DELETE CASCADE,
+  PRIMARY KEY (storage_id, attachment_id)
 );
 ```
 
-**프로필 이미지**: Profile 테이블의 `picture_attachment_id` 단일 FK (N:M 불필요, 1:1 관계).
+> **갱신(2026-06-23)**: context별 참조 모델 확정.
+>
+> - **N:M 매핑 테이블**: `CHAT`(message_attachments), `POST`(post_attachments) — 둘 다 구현됨.
+> - **1:1 FK**: `CREDENTIAL`(`credentials.attachment_id`, `CredentialEntity.detach()`로 해제), `PROFILE`(`profiles.picture_id`).
+> - 각 context repo가 **`AttachmentReferenceProvider`**(`context()` + `referencedIds(ids)`)를 구현 → 고아 판정 시 attachment가 주입받아 사용(§9.1). 매핑 지식이 attachment 패키지에 집중되지 않음(DIP, OCP).
 
 ### 4.4 엔티티 관계 요약
 
 ```
-                     ┌──→ storage_attachments    ─→ Attachment
-                     │                             │
-   Storage           │                             │ member_id FK
-   (Board/Personal)  │                             │ path (S3 key)
-     ↑ 폴더          │                             │ content_type
-                     │                             │ size
-   Post ──→ post_attachments ─→                    │ status
-   Message ──→ message_attachments ─→              │
-   Credential ──→ credential_attachments ─→        │
-                                                   │
-   Profile ──(picture_attachment_id FK)──→ ────────┘
+   Message    ──→ message_attachments (N:M)       ─┐
+   Post       ──→ post_attachments (N:M)           ─┤
+   Credential ──(credentials.attachment_id, 1:1)    ─┼─→ Attachment
+   Profile    ──(profiles.picture_id, 1:1)          ─┤    (분해 컬럼 · member_id · status …)
+   Storage    ──→ storage_attachments (N:M, future) ─┘
 ```
 
 ---
@@ -255,13 +251,14 @@ CREATE TABLE credential_attachments (
 [Client]                        [Spring]                         [S3]
    │                               │                               │
    │ 1. POST /api/v1/attachments/presign                          │
-   │    body: { files: [{ filename, size, contentType, ...}] }   │
+   │    body: { context, contextId?, files: [{ filename, ...}] } │
    │──────────────────────────→    │                               │
-   │                               │ ① 권한 체크                    │
+   │                               │ ① context write 권한 검증      │
+   │                               │   (CHAT: 참여자, 그 외: 본인)   │
    │                               │ ② attachments INSERT (PENDING) │
    │                               │ ③ S3 key 생성, presigned URL  │
    │  ←────────────────────────    │                               │
-   │  { items: [{ attachmentId,   │                               │
+   │  { items: [{ attachmentId,    │                               │
    │    uploadUrl }] }             │                               │
    │                               │                               │
    │ 2. PUT {uploadUrl}                                            │
@@ -280,7 +277,7 @@ CREATE TABLE credential_attachments (
    │                               │  ←── 200 / 404 ───────────── │
    │                               │ ⑤ UPDATE status=COMPLETED     │
    │  ←────────────────────────    │                               │
-   │  { items: [{ attachmentId,   │                               │
+   │  { items: [{ attachmentId,    │                               │
    │    status, path }] }          │                               │
 ```
 
@@ -319,18 +316,26 @@ CREATE TABLE credential_attachments (
 
 ### 5.3 Presign 요청 body
 
-context 정보(어떤 엔티티에 붙을지)는 **Spring 내부에서 결정**. FE는 파일 메타만 전달.
+context(어떤 엔티티에 붙을지)는 FE가 enum으로 명시하고, path 규칙·write 권한 검증·허용 파일 종류는 context별로 Spring이 결정.
 
 ```json
 POST /api/v1/attachments/presign
 {
+  "context": "CHAT",
+  "type": "IMAGE",
+  "contextId": 42,
   "files": [
     { "filename": "photo.jpg", "size": 2400000, "contentType": "image/jpeg" }
   ]
 }
 ```
 
-Spring은 요청 경로/세션 컨텍스트 기반으로 `path` 생성 (세부 결정은 BE 책임).
+> **갱신(2026-06-22)**: `contextId`는 **항상 필수**(`PresignRequest @NotNull`), `type`(`IMAGE`|`FILE`)도 요청에 명시.
+
+- `contextId` — scope 식별자로 S3 key·write 권한 검증에 사용. context별 `AttachmentContextValidator`가 presign 시점에 검증
+  - `CHAT`: chatId — 참여자 여부 (`ChatAttachmentValidator`)
+  - `CREDENTIAL`·`POST`·`PROFILE`: 소유자 memberId — 본인 여부 `contextId == 인증 사용자` (`Credential`·`Post`·`ProfileAttachmentValidator`)
+- `type` — `IMAGE`만 size 디렉토리(`o/m/s`) 생성, `FILE`은 리사이즈 제외
 
 ---
 
@@ -341,7 +346,7 @@ Spring은 요청 경로/세션 컨텍스트 기반으로 `path` 생성 (세부 �
 ```
 [Client]                       [Spring]                  [CloudFront]        [S3]
    │                              │                            │               │
-   │ GET /api/v1/chat-rooms/{id}/messages                                       │
+   │ GET /api/v1/chats/{id}/messages                                       │
    │───────────────────────────→  │                            │               │
    │                              │ 권한 체크                  │               │
    │                              │ 메시지 + attachmentIds 조회│               │
@@ -363,6 +368,7 @@ Spring은 요청 경로/세션 컨텍스트 기반으로 `path` 생성 (세부 �
 ### 6.2 Signed Cookie 라이프사이클
 
 - **발급 주체**: Spring (로컬 RSA 서명, AWS 호출 없음)
+- **최초 발급 지점**: 권한 검증이 있는 조회 API 응답에 동봉 — chats: `GET /chats/{id}/messages`, credentials: `GET /credentials/me` (본인 전체 이력 + 파일 메타 조회, 신설)
 - **저장**: 브라우저 쿠키 (HttpOnly, Secure, SameSite=Lax)
 - **검증**: CloudFront edge (Key Group 공개키로 서명 검증)
 - **TTL**: 1시간 (슬라이딩 갱신 — 활동 중 매 API 응답에 Set-Cookie 재발급)
@@ -383,9 +389,11 @@ Scope는 엔티티 ID가 경로에 포함되므로 prefix 와일드카드로 지
 }
 ```
 
-한 Signed Cookie 의 custom policy 는 **단일 `Resource`** 만 지원한다 — `Statement` 배열에 여러 요소를 넣어도 첫 요소만 적용된다 ([CloudFront custom policy spec](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-setting-signed-cookie-custom-policy.html), [AWS re:Post](https://repost.aws/questions/QUEFDu9ScTRfqXrFe7BWIjUA/support-multiple-resource-paths-in-aws-cloudfront-cookie)). 여러 context 에 동시 접근이 필요하면 context 별로 **별도의 Set-Cookie 를 발급**한다 (각 쿠키 3종 세트 × context 수). 단 브라우저 쿠키 총량 제한 유의. 대부분의 화면은 단일 entity context (한 chat, 한 storage) 이므로 다중 발급은 예외적 케이스다.
+한 Signed Cookie 의 custom policy 는 **단일 `Resource`** 만 지원한다 — `Statement` 배열에 여러 요소를 넣어도 첫 요소만 적용된다 ([CloudFront custom policy spec](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-setting-signed-cookie-custom-policy.html), [AWS re:Post](https://repost.aws/questions/QUEFDu9ScTRfqXrFe7BWIjUA/support-multiple-resource-paths-in-aws-cloudfront-cookie)). 여러 context 에 동시 접근이 필요하면 context 별로 **별도의 Set-Cookie 를 발급**한다 (각 쿠키 3종 세트 × context 수). 단 브라우저 쿠키 총량 제한 유의. 대부분의 화면은 단일 entity context (한 chat, 한 storage) 이므로 다중 발급은 예외적 케이스다. credentials 는 scope 가 member 단위(`credentials/{memberId}/*`)라 자격증 N건도 쿠키 1장으로 커버된다.
 
-### 6.4 FE URL 조립 규칙
+### 6.4 URL 조립 규칙
+
+> **갱신(2026-06-22)**: 현재 구현은 **BE(`AttachmentResolver`)가 CloudFront URL을 조립해 응답(`AttachmentResponse.url`)에 포함**한다(key는 분해 컬럼에서 `AttachmentKeyUtils`로 생성, §4.1). 아래 FE 조립 규약은 참고/대안용.
 
 API는 엔티티 조회 시 연결된 **attachment 메타**를 함께 반환. FE가 메타를 기반으로 URL 조립.
 
@@ -448,33 +456,31 @@ function fileUrl(att: AttachmentMeta): string {
 
 권한은 **two-tier**로 나뉜다 — (1) 엔티티 메타데이터 API와 (2) 첨부 파일 바이트(S3 object). 같은 도메인이라도 두 레이어 정책이 다를 수 있음.
 
-> **`Attachment` 자체는 권한 boundary가 아님.** 본 표는 권한 경계를 정의하는 엔티티(`Storage`, `Post`, `Credential` 등)만 나열한다. Attachment는 부모 엔티티의 정책을 상속하는 **substrate**라 자체 행 없음 — 매핑 테이블(§4.3) 모델의 직접 결과. 업로드 endpoint(`POST /attachments/presign|confirm`)는 데이터 권한이 아니라 **API 권한**(인증된 유저면 OK)으로, 부모 엔티티 연결은 §5.2 시나리오의 후속 API 호출에서 검증된다.
+> **`Attachment` 자체는 권한 boundary가 아님.** 본 표는 권한 경계를 정의하는 엔티티(`Storage`, `Post`, `Credential` 등)만 나열한다. Attachment는 부모 엔티티의 정책을 상속하는 **substrate**라 자체 행 없음 — 매핑 테이블(§4.3) 모델의 직접 결과. 업로드 endpoint(`POST /attachments/presign`)는 presign 시점에 **context write 권한을 검증**한다 — path 가 곧 읽기 권한 경계(Signed Cookie scope)이므로 타인 prefix 에 객체를 심는 것을 차단해야 한다. 부모 엔티티 연결은 §5.2 시나리오의 후속 API 호출에서 추가 검증된다.
 
 #### 메타데이터 (REST API 응답)
 
 엔티티 record와 그에 포함된 `AttachmentMeta` 필드(id, path, filename, contentType, size).
 
-| context       | Read 허용                          | Write 허용     |
-| ------------- | ---------------------------------- | -------------- |
-| `profiles`    | 누구나                             | 본인           |
-| `posts`       | 누구나                             | 작성자         |
-| `businesses`  | 누구나                             | 업체 멤버      |
-| `chats`       | 채팅방 참여자                      | 메시지 작성자  |
-| `credentials` | **누구나** (프로필 공개 신뢰 지표) | 본인           |
-| `storages`    | 권한 보유 멤버                     | 권한 보유 멤버 |
+| context       | Read 허용                                                                                                                             | Write 허용     |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `profiles`    | 누구나                                                                                                                                | 본인           |
+| `posts`       | 누구나                                                                                                                                | 작성자         |
+| `chats`       | 채팅방 참여자                                                                                                                         | 메시지 작성자  |
+| `credentials` | 누구나 (프로필 공개 신뢰 지표) — 단 ACCEPTED만·type별 최신 1건·**파일 메타 제외**. 본인은 `GET /credentials/me`로 전체 이력+파일 메타 | 본인           |
+| `storages`    | 권한 보유 멤버                                                                                                                        | 권한 보유 멤버 |
 
 #### 파일 바이트 (CloudFront 통한 S3 object)
 
 실제 이미지/PDF 등 첨부 파일 본문. CloudFront Signed Cookie scope으로 제한.
 
-| context       | Scope                          | 접근 허용                     |
-| ------------- | ------------------------------ | ----------------------------- |
-| `profiles`    | `profiles/{profileId}/*`       | 누구나 (capability URL)       |
-| `posts`       | `posts/{postId}/*`             | 누구나 (capability URL)       |
-| `businesses`  | `businesses/{businessId}/*`    | 누구나 (capability URL)       |
-| `chats`       | `chats/{chatId}/*`             | 채팅방 참여자                 |
-| `credentials` | `credentials/{credentialId}/*` | **본인 + 매칭된 업체 + 운영** |
-| `storages`    | `storages/{storageId}/*`       | 권한 보유 멤버                |
+| context       | Scope                      | 접근 허용                     |
+| ------------- | -------------------------- | ----------------------------- |
+| `profiles`    | `profiles/{memberId}/*`    | 누구나 (capability URL)       |
+| `posts`       | `posts/{memberId}/*`       | 누구나 (capability URL)       |
+| `chats`       | `chats/{chatId}/*`         | 채팅방 참여자                 |
+| `credentials` | `credentials/{memberId}/*` | **본인 + 매칭된 업체 + 운영** |
+| `storages`    | `storages/{storageId}/*`   | 권한 보유 멤버                |
 
 **핵심 차이:** `credentials`는 메타데이터(어떤 자격증을 보유 중인지)는 공개되지만, 실제 인증서 파일(신분증/자격증 사본 등 민감 정보)은 본인 외에 매칭된 업체와 운영만 접근. 메타가 공개돼도 파일 자체는 보호됨 — [피그마 디자인](https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS/?node-id=1238-5348)이 메타 공개 의도 확정.
 
@@ -512,31 +518,31 @@ S3 presigned PUT은 `Content-Type` 조건을 단일 문자열로만 지원 (`app
 
 ## 9. 운영 / 라이프사이클
 
-### 9.1 크론 작업 (GitHub Actions)
+### 9.1 정리 스케줄러 (Spring `@Scheduled` + ShedLock)
 
-```yaml
-# .github/workflows/attachment-cleanup.yml
-on:
-  schedule:
-    - cron: '0 18 * * *' # 매일 03:00 KST
-jobs:
-  cleanup:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          curl -X POST https://api.bconnect.to/api/v1/internal/attachments/cleanup \
-            -H "X-Internal-Secret: ${{ secrets.INTERNAL_API_SECRET }}"
+> 초안의 GitHub Actions cron → 내부 API 방식은 폐기. GHA 스케줄은 60일 레포 비활성 시 자동 비활성화(조용한 정지), 피크 시 수십 분 지연·드롭 등 운영 잡으로 부적합하여, 앱 내장 스케줄러 + 분산 락으로 대체했다. 이에 따라 `/api/v1/internal/*` 엔드포인트와 `INTERNAL_API_SECRET`도 제거됨.
+
+```java
+// AttachmentCleanupScheduler
+@Scheduled(cron = "0 0 6 * * WED", zone = "Asia/Seoul") // 매주 수요일 06:00 KST
+public void run() {
+    CleanupResult result = attachmentCleanupService.cleanup();
+    log.info("attachment cleanup 완료: {}", result);
+}
 ```
 
-Spring의 `/api/v1/internal/*`는 `X-Internal-Secret` 헤더로 보호. 다중 컨테이너 환경에서도 GHA가 단일 실행을 보장.
+> **갱신(2026-06-22)**: 단일 인스턴스 전제로 `@Scheduled`만 사용 — **ShedLock 미도입**(멀티 인스턴스 전환 시 도입). 정리는 아래 **2단계**(`@Transactional`)이며, 각 단계가 S3 객체 삭제 + DB soft delete 까지 수행. **soft-deleted 행의 물리 삭제 단계는 아직 없다.**
 
-| 작업                | 주기   | 대상                                                                              |
-| ------------------- | ------ | --------------------------------------------------------------------------------- |
-| PENDING 청소        | 매시   | `status='PENDING' AND created_at < NOW() - 24h` → soft delete                     |
-| FAILED 보존 후 청소 | 매일   | `status='FAILED' AND created_at < NOW() - 7d` → soft delete                       |
-| 물리 삭제           | 매일   | `deleted_at < NOW() - 30d` → S3 삭제 + DB 물리 삭제                               |
-| 고아 첨부 정리      | 매일   | `status='COMPLETED' AND created_at < NOW() - 24h` AND 매핑 row 없음 → soft delete |
-| 고아 매핑 정리      | 주 1회 | 참조 대상 없는 매핑 row 정리                                                      |
+| 단계      | 대상                                                            | 처리                       |
+| --------- | --------------------------------------------------------------- | -------------------------- |
+| PENDING   | `status='PENDING' AND created_at < NOW() - 24h`                 | S3 객체 삭제 + soft delete |
+| 고아 첨부 | `status='COMPLETED' AND created_at < NOW() - 24h` AND 참조 없음 | S3 객체 삭제 + soft delete |
+
+confirm 실패 첨부는 confirm 시점에 즉시 S3 객체 삭제 + soft delete 된다(별도 상태값 없음, §4.1). **고아 판정은 `AttachmentReferenceProvider` DIP** — context별 repo(`MessageAttachmentMappingRepository`·`PostAttachmentMappingRepository`·`CredentialRepository`·`ProfileRepository`)가 `referencedIds`를 제공하고, `AttachmentCleanupService`가 context별 후보(`findByContextAndStatusAndCreatedAtBefore`)에서 미참조분을 orphan으로 삭제. 모든 `AttachmentContext`에 provider 등록 필수(미등록 시 기동 실패). 이전 `AttachmentRepository.findOrphans`(타 도메인 엔티티 직접 참조)는 폐기됨.
+
+주 1회 실행이므로 각 단계의 실제 정리 시점은 "retention 경과 후 다음 수요일" (최대 +7일).
+
+> **물리 삭제(향후)**: `deleted_at IS NOT NULL` 행 hard delete + S3 파생본 정리 단계는 미구현. 도입 시 별도 단계로 추가.
 
 ### 9.2 S3 버킷 설정
 
@@ -580,8 +586,8 @@ Spring의 `/api/v1/internal/*`는 `X-Internal-Secret` 헤더로 보호. 다중 �
 
 Credential은 제출/승인/거절/만료 흐름을 가지며, 파일 자체는 다음 정책을 따른다:
 
-- **승인/거절 후**: `deleted_at` 세팅 (soft delete), 30일 후 물리 삭제
-- **즉시 파기 아님**: 이의 제기 등 분쟁 가능 기간 확보
+- **승인/거절 후**: FK 해제(detach) 후 soft delete — 다음 cleanup 주기(매주 수요일)에 물리 삭제
+- **즉시 파기 아님**: 주 1회 cleanup 주기 덕에 soft delete 후 최대 7일의 복구 여지 존재
 - **만료**: Credential 엔티티 자체에 `expired_at` 존재 (별도 관리)
 - **감사 로그**: 기존 Credential 엔티티의 승인/거절 이력 + BaseEntity의 생성/수정 로그로 충분
 
@@ -639,10 +645,44 @@ on-the-fly 리사이즈는 Lambda@Edge. Header 조작은 CF Functions.
 - **Storage 엔티티 운영 시나리오 확정** — 동산보드판 UI 흐름 정착 후 `parent_id` 등 확장 검토
 - **이미지 사이즈 Figma 실측** — MVP-2 동산보드판 그리드/상세 뷰 치수 확인 후 400/800px 조정 필요 시 업데이트
 - **Post 이미지 수정 UX 확정** — 삭제 + 재등록 플로우 UI 상세 (디자인 의존)
+- **매칭된 업체의 credentials 파일 열람** — "매칭" 판별 규칙(coworker/task 중 어느 관계인지)과 업체용 쿠키 발급 API는 해당 화면 기획 확정 시 결정
 
 ---
 
-## 14. 참고 자료
+## 14. 구현 현황 (apps/api)
+
+> 기준 2026-06-23. 초안과 다르게 구현된 항목은 §2~§9 본문에 **설계 갱신으로 반영 완료**(각 절 "갱신" 인용 참조). 빌드 green. 본 절은 구현 요약과 남은 작업만 유지.
+
+### 14.1 반영 완료 (설계 = 구현)
+
+| 영역                                                                                        | 반영 위치        |
+| ------------------------------------------------------------------------------------------- | ---------------- |
+| key 분해 컬럼 모델(`context`/`context_id`/`type`/`uuid`/`stem`/`ext`), BE가 key·URL 조립    | §3.1, §4.1, §6.4 |
+| `AttachmentContext` 4종(CHAT·CREDENTIAL·POST·PROFILE) + context별 validator 4종             | §5.3, §7         |
+| 참조 모델: CHAT·POST = N:M 매핑, CREDENTIAL(`attachment_id`)·PROFILE(`picture_id`) = 1:1 FK | §4.3             |
+| 고아 판정 `AttachmentReferenceProvider` DIP (context별 repo가 `referencedIds` 제공)         | §4.3, §9.1       |
+| `FAILED` 미도입 — confirm 실패 시 S3 삭제 + soft delete + 예외                              | §4.1             |
+| cleanup 2단계 soft delete, 물리삭제 단계·ShedLock 미도입                                    | §9.1             |
+| presign `contextId` 항상 필수 + `type` 명시                                                 | §5.3             |
+| soft delete(`BaseEntity @SoftDelete`)                                                       | §4.1             |
+
+### 14.2 남은 작업 (코드)
+
+- 물리 삭제 단계(soft-deleted 행 hard purge + S3 파생본) — 향후
+- ShedLock — 멀티 인스턴스 전환 시
+
+### 14.3 미구현 (future, 정상)
+
+- Storage 엔티티 + `storage_attachments`
+- Lambda 이미지 리사이즈(`infra/aws`), 매직바이트/바이러스 스캔(v2), 매칭 업체 credentials 열람
+
+### 14.4 확인 필요
+
+- `schema.sql`은 attachment·매핑 테이블 create 없이 FK(`profiles.picture_id` 등)만 참조 — Hibernate `ddl-auto` 생성에 의존. 운영 마이그레이션 시 명시적 DDL 정합 확인 필요.
+
+---
+
+## 15. 참고 자료
 
 - [이슈 #174](https://github.com/mortonCareer/bconnect/issues/174)
 - [ERD Attachment 엔티티 (FigJam)](https://www.figma.com/board/AzZ7IkJOg1kRo6y7B7Ceyj/?node-id=381-560)

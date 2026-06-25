@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class OtpService {
     private static final int RATE_LIMIT_SECONDS = 60;
     private static final int EXPIRY_SECONDS = 180;
@@ -29,6 +28,7 @@ public class OtpService {
 
     private final OtpRepository otpRepository;
 
+    @Transactional
     public Otp sendCode(String phone) {
         val code = String.format(CODE_FORMAT, RANDOM.nextInt(CODE_BOUND));
         val expiredAt = LocalDateTime.now().plusSeconds(EXPIRY_SECONDS);
@@ -66,6 +66,7 @@ public class OtpService {
         found.invalidateCode();
     }
 
+    @Transactional
     public String generateToken(String phone) {
         val found = otpRepository.findByPhone(phone)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_OTP));
@@ -77,6 +78,7 @@ public class OtpService {
         return token;
     }
 
+    @Transactional
     public void verifyToken(String token) {
         val found = otpRepository.findByToken_Token(token)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_SIGNUP_TOKEN));

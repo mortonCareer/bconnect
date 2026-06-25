@@ -9,7 +9,7 @@ import { cn } from '../../lib/utils'
 
 export interface ActionDrawerItem {
   label: string
-  /** 좌측 아이콘 (필수) — 모든 액션은 아이콘을 가진다. */
+  /** 좌측 아이콘 (필수) — 모든 액션은 아이콘을 가진다. currentColor 면 destructive 색(빨강) 자동 전파. */
   icon: ReactNode
   onSelect: () => void
   destructive?: boolean
@@ -52,7 +52,7 @@ export function ActionDrawer({ open, onOpenChange, title, items }: ActionDrawerP
               )}
             >
               <span className="flex h-5 w-5 shrink-0 items-center justify-center">{item.icon}</span>
-              {item.label}
+              <span>{item.label}</span>
             </button>
           ))}
         </div>

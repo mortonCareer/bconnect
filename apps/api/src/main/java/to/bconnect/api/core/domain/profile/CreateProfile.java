@@ -11,5 +11,6 @@ public record CreateProfile(
         int experience,
         String headline,
         String about,
-        Address address
+        Address address,
+        Long pictureId
 ) {}

@@ -7,10 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
-import to.bconnect.api.core.domain.MemberResolver;
-import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.security.member.Member;
+import to.bconnect.api.storage.chat.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,10 +18,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChatService {
 
-    private final MemberResolver memberResolver;
     private final ChatRepository chatRepository;
     private final ParticipantRepository participantRepository;
     private final MessageRepository messageRepository;
+    private final MessageAttachmentMappingRepository messageAttachmentMappingRepository;
 
     @Transactional(readOnly = true)
     public List<Chat> list(Long memberId) {
@@ -71,7 +70,7 @@ public class ChatService {
         val created = chatRepository.save(new ChatEntity(command.title()));
 
         participantRepository.saveAll(participantIds.stream()
-                .map(it -> new ParticipantEntity(created.getId(), it, null))
+                .map(it -> new ParticipantEntity(created.getId(), it))
                 .toList());
 
         messageRepository.save(new MessageEntity(
@@ -96,6 +95,17 @@ public class ChatService {
                 cursor.toSort()
         );
 
-        return CursorPage.from(messages.map(Message::of), Message::id);
+        val messageIds = messages.getContent().stream().map(MessageEntity::getId).toList();
+        val attachmentIdMap = messageAttachmentMappingRepository.findByMessageIdIn(messageIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        MessageAttachmentMappingEntity::getMessageId,
+                        Collectors.mapping(MessageAttachmentMappingEntity::getAttachmentId, Collectors.toList())
+                ));
+
+        return CursorPage.from(
+                messages.map(it -> Message.of(it, attachmentIdMap.getOrDefault(it.getId(), List.of()))),
+                Message::id
+        );
     }
 }

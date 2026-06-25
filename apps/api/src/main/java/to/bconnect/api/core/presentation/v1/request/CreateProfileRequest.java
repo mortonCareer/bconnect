@@ -15,9 +15,10 @@ public record CreateProfileRequest(
         @NotNull @PositiveOrZero int experience,
         String headline,
         String about,
-        @NotNull Address address
+        @NotNull Address address,
+        Long pictureId
 ) {
     public CreateProfile toCommand() {
-        return new CreateProfile(primaryTrade, trades, experience, headline, about, address);
+        return new CreateProfile(primaryTrade, trades, experience, headline, about, address, pictureId);
     }
 }
