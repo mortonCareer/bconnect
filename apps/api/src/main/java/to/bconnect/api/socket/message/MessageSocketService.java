@@ -10,6 +10,7 @@ import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.socket.WebSocketAuthorizationConfig;
+import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.chat.MessageAttachmentMappingEntity;
 import to.bconnect.api.storage.chat.MessageAttachmentMappingRepository;
 import to.bconnect.api.storage.chat.MessageEntity;
@@ -40,6 +41,7 @@ public class MessageSocketService {
 
         val created = messageRepository.save(new MessageEntity(
                 chatId,
+                ChatType.GROUP,
                 user.id(),
                 command.type(),
                 command.content()

@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChatService {
 
-    private final ChatRepository chatRepository;
+    private final GroupChatRepository groupChatRepository;
     private final ParticipantRepository participantRepository;
     private final MessageRepository messageRepository;
     private final MessageAttachmentMappingRepository messageAttachmentMappingRepository;
@@ -30,7 +30,7 @@ public class ChatService {
 
         if (chatIds.isEmpty()) return List.of();
 
-        val chats = chatRepository.findAllById(chatIds);
+        val chats = groupChatRepository.findAllById(chatIds);
 
         val participantMap = participantRepository.findByChatIdIn(chatIds)
                 .stream()
@@ -67,7 +67,7 @@ public class ChatService {
         if (!participantIds.contains(user.id()))
             throw new CodeException(ChatExceptionCode.SELF_NOT_INCLUDED);
 
-        val created = chatRepository.save(new ChatEntity(command.title()));
+        val created = groupChatRepository.save(new GroupChatEntity(command.title()));
 
         participantRepository.saveAll(participantIds.stream()
                 .map(it -> new ParticipantEntity(created.getId(), it))
@@ -75,6 +75,7 @@ public class ChatService {
 
         messageRepository.save(new MessageEntity(
                 created.getId(),
+                ChatType.GROUP,
                 Member.SYSTEM_ID,
                 MessageType.SYSTEM,
                 MessageTemplate.CHAT_CREATED

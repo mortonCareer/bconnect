@@ -19,9 +19,9 @@
 | Coworker      | Coworker       | 동료     | 동료 기술자                   |
 | Coworker      | CoworkerRequest | 동료 요청  |                          |
 | Recommendation | Recommendation | 추천     |                          |
-| Chat          | Chat           | 채팅방    |                          |
+| Chat          | GroupChat      | 그룹 채팅방 | 참여자 N명, 제목 보유             |
 | Chat          | Message        | 메시지    |                          |
-| Chat          | Participant    | 참여자    | 채팅방-회원 매핑 정보             |
+| Chat          | Participant    | 참여자    | 그룹 채팅방-회원 매핑 정보           |
 | Credential    | Credential     | 인증뱃지  |                          |
 | Attachment    | Attachment     | 첨부     | 업로드 파일 메타데이터             |
 | Attachment    | Signed cookie  |        | CloudFront 비공개 콘텐츠 열람 권한 |
@@ -102,6 +102,13 @@
 | SENT | 보낸 요청 |
 | RECEIVED | 받은 요청 |
 | COWORKER | 동료 |
+
+### 채팅 유형(ChatType)
+
+| 영문 | 국문 |
+|---|---|
+| GROUP | 그룹 채팅방 |
+| DIRECT | 1:1 채팅방 |
 
 ### 채팅방(Chat)
 

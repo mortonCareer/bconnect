@@ -1,6 +1,6 @@
 package to.bconnect.api.core.domain.chat;
 
-import to.bconnect.api.storage.chat.ChatEntity;
+import to.bconnect.api.storage.chat.GroupChatEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,7 +14,7 @@ public record Chat(
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
-    public static Chat of(ChatEntity entity, List<Long> participantIds, Message lastMessage, Long unreadCount) {
+    public static Chat of(GroupChatEntity entity, List<Long> participantIds, Message lastMessage, Long unreadCount) {
         return new Chat(
                 entity.getId(),
                 entity.getTitle(),
