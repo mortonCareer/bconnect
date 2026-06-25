@@ -23,7 +23,7 @@ import to.bconnect.api.core.domain.recommendation.RecommendationQueryService;
 import to.bconnect.api.core.domain.recommendation.RecommendationService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.core.domain.profile.ProfileQueryService;
+import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
@@ -38,7 +38,7 @@ public class RecommendationController {
     private final RecommendationService recommendationService;
     private final RecommendationQueryService recommendationQueryService;
     private final MemberResolver memberResolver;
-    private final ProfileQueryService profileQueryService;
+    private final ProfileResolver profileResolver;
     private final AttachmentResolver attachmentResolver;
 
     @PostMapping
@@ -107,7 +107,7 @@ public class RecommendationController {
     private List<RecommendationResponse> assemble(List<Recommendation> recommendations) {
         val memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
-        val profileMap = profileQueryService.resolveMap(memberIds);
+        val profileMap = profileResolver.resolveMap(memberIds);
 
         val pictureIds = profileMap.values().stream()
                 .map(Profile::pictureId).filter(Objects::nonNull).toList();
