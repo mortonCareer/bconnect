@@ -15,8 +15,8 @@ import java.time.LocalDate;
 @Table(
         name = "offers",
         indexes = @Index(
-                name = "udx_offer_task_profile",
-                columnList = "taskId, profileId",
+                name = "udx_offer_task_worker",
+                columnList = "taskId, workerId",
                 unique = true
         )
 )
@@ -28,14 +28,14 @@ public class OfferEntity extends BaseEntity {
     private Long taskId;
 
     @Column(nullable = false)
-    private Long profileId;
+    private Long workerId;
 
     @Column(nullable = false)
     private LocalDate due;
 
-    public OfferEntity(Long taskId, Long profileId, LocalDate due) {
+    public OfferEntity(Long taskId, Long workerId, LocalDate due) {
         this.taskId = taskId;
-        this.profileId = profileId;
+        this.workerId = workerId;
         this.due = due;
     }
 }

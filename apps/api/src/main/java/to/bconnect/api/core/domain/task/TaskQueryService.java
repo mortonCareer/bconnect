@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
+import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
@@ -25,6 +26,33 @@ public class TaskQueryService {
     private final CoworkerRepository coworkerRepository;
     private final CompanyRepository companyRepository;
     private final ProjectRepository projectRepository;
+    private final OfferRepository offerRepository;
+
+    @Transactional(readOnly = true)
+    public Task get(AuthUser user, Long taskId) {
+        val found = taskRepository.findById(taskId)
+                .orElseThrow(() -> new CodeException(TaskExceptionCode.NOT_FOUND));
+
+        if (found.getType() == TaskType.WORKER) {
+            if (!found.getWorkerId().equals(user.id()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+            return Task.of(found);
+        }
+
+        if (offerRepository.existsByTaskIdAndWorkerId(taskId, user.id()))
+            return Task.of(found);
+
+        val companyId = companyRepository.findByMemberId(user.id())
+                .map(CompanyEntity::getId)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.FORBIDDEN));
+
+        val project = projectRepository.findById(found.getProjectId())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        if (!project.getCompanyId().equals(companyId))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        return Task.of(found);
+    }
 
     @Transactional(readOnly = true)
     public List<Task> list(AuthUser user) {
