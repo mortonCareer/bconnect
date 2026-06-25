@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.core.domain.attachment.AttachmentQueryService;
 import to.bconnect.api.storage.profile.ProfileEntity;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.security.AuthUser;
@@ -15,6 +16,7 @@ import to.bconnect.api.security.AuthUser;
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
+    private final AttachmentQueryService attachmentQueryService;
 
     @Transactional
     public Long create(AuthUser user, CreateProfile command) {
@@ -24,6 +26,9 @@ public class ProfileService {
         if (!command.trades().contains(command.primaryTrade()))
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
+        if (command.pictureId() != null)
+            attachmentQueryService.get(user, command.pictureId());
+
         val created = new ProfileEntity(
                 user.id(),
                 command.primaryTrade(),
@@ -31,7 +36,8 @@ public class ProfileService {
                 command.experience(),
                 command.headline(),
                 command.about(),
-                command.address()
+                command.address(),
+                command.pictureId()
         );
 
         return profileRepository.save(created).getId();
@@ -66,6 +72,17 @@ public class ProfileService {
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         found.updateAbout(about);
+    }
+
+    @Transactional
+    public void updatePicture(AuthUser user, Long pictureId) {
+        val found = profileRepository.findByMemberId(user.id())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        if (pictureId != null)
+            attachmentQueryService.get(user, pictureId);
+
+        found.updatePicture(pictureId);
     }
 
     @Transactional

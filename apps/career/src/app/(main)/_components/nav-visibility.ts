@@ -3,5 +3,9 @@ export function isChatDetailRoute(pathname: string): boolean {
 }
 
 export function isBottomNavHidden(pathname: string): boolean {
-  return isChatDetailRoute(pathname) || /^\/profile\/edit(\/|$)/.test(pathname)
+  return (
+    isChatDetailRoute(pathname) ||
+    /^\/profile\/edit(\/|$)/.test(pathname) ||
+    /^\/calendar\/new(\/|$)/.test(pathname)
+  )
 }

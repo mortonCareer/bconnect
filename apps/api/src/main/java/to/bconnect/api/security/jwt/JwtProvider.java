@@ -129,8 +129,8 @@ public class JwtProvider {
                 .get(SCOPE_CLAIM_KEY, String.class)
                 .split(AUTHORITIES_DELIMITER);
 
-        Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        for (String authority : authorities) {
+        val grantedAuthorities = new ArrayList<GrantedAuthority>();
+        for (val authority : authorities) {
             grantedAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_PREFIX + authority));
         }
         return grantedAuthorities;

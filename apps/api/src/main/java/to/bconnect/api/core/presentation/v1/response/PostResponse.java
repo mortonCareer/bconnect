@@ -14,12 +14,12 @@ public record PostResponse(
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {
-    public static PostResponse of(Post post) {
+    public static PostResponse of(Post post, List<String> images) {
         return new PostResponse(
                 post.id(),
                 post.memberId(),
                 post.taskId(),
-                post.images(),
+                images,
                 post.content(),
                 post.createdAt(),
                 post.modifiedAt()

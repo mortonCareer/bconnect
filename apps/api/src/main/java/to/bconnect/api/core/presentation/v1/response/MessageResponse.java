@@ -13,9 +13,14 @@ public record MessageResponse(
         MessageType type,
         String content,
         LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        LocalDateTime modifiedAt,
+        List<AttachmentResponse> attachments
 ) {
     public static MessageResponse of(Message message) {
+        return of(message, List.of());
+    }
+
+    public static MessageResponse of(Message message, List<AttachmentResponse> attachments) {
         return new MessageResponse(
                 message.id(),
                 message.chatId(),
@@ -23,10 +28,8 @@ public record MessageResponse(
                 message.type(),
                 message.content(),
                 message.createdAt(),
-                message.modifiedAt()
+                message.modifiedAt(),
+                attachments
         );
-    }
-    public static List<MessageResponse> of(List<Message> messages) {
-        return messages.stream().map(MessageResponse::of).toList();
     }
 }

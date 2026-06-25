@@ -1,5 +1,6 @@
 package to.bconnect.api.core.presentation.v1.response;
 
+import to.bconnect.api.core.domain.attachment.Attachment;
 import to.bconnect.api.core.domain.credential.Credential;
 import to.bconnect.api.storage.credential.CredentialStatus;
 import to.bconnect.api.storage.credential.CredentialType;
@@ -14,9 +15,10 @@ public record CredentialResponse(
         CredentialStatus status,
         LocalDate expiredAt,
         LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        LocalDateTime modifiedAt,
+        AttachmentResponse attachment
 ) {
-    public static CredentialResponse of(Credential credential) {
+    public static CredentialResponse of(Credential credential, Attachment attachment, String url) {
         return new CredentialResponse(
                 credential.id(),
                 credential.memberId(),
@@ -24,7 +26,8 @@ public record CredentialResponse(
                 credential.status(),
                 credential.expiredAt(),
                 credential.createdAt(),
-                credential.modifiedAt()
+                credential.modifiedAt(),
+                attachment == null ? null : AttachmentResponse.of(attachment, url)
         );
     }
 }

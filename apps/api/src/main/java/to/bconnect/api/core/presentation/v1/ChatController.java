@@ -11,9 +11,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.request.CreateChatRequest;
+import to.bconnect.api.core.presentation.v1.response.AttachmentResponse;
 import to.bconnect.api.core.presentation.v1.response.ChatResponse;
 import to.bconnect.api.core.presentation.v1.response.MemberSummaryResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
+import to.bconnect.api.core.domain.attachment.AttachmentResolver;
+import to.bconnect.api.core.domain.attachment.ImageSize;
+import to.bconnect.api.core.domain.chat.Chat;
 import to.bconnect.api.core.domain.chat.ChatService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.security.AuthUser;
@@ -31,6 +35,7 @@ public class ChatController {
 
     private final ChatService chatService;
     private final MemberResolver memberResolver;
+    private final AttachmentResolver attachmentResolver;
 
     @GetMapping
     public ApiResponse<List<ChatResponse>> list(@AuthenticationPrincipal AuthUser user) {
@@ -69,8 +74,24 @@ public class ChatController {
             @PathVariable Long chatId,
             CursorLimit cursorLimit) {
         val page = chatService.listMessages(user, chatId, cursorLimit);
-        CursorPage<MessageResponse> response = new CursorPage<>(
-                MessageResponse.of(page.content()),
+
+        val attachmentIds = page.content().stream()
+                .flatMap(it -> it.attachmentIds().stream())
+                .distinct()
+                .toList();
+
+        val attachmentMap = attachmentResolver.resolveMap(attachmentIds);
+
+        val content = page.content().stream()
+                .map(it -> MessageResponse.of(it, it.attachmentIds().stream()
+                        .map(attachmentMap::get)
+                        .filter(Objects::nonNull)
+                        .map(att -> AttachmentResponse.of(att, attachmentResolver.url(att, ImageSize.SMALL)))
+                        .toList()))
+                .toList();
+
+        val response = new CursorPage<MessageResponse>(
+                content,
                 page.hasNext(),
                 page.nextCursor()
         );

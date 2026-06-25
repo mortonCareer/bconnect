@@ -21,9 +21,9 @@ public class ParticipantEntity extends BaseEntity {
     @Column(nullable = false)
     private Long lastIdx;
 
-    public ParticipantEntity(Long chatId, Long memberId, Long lastIdx) {
+    public ParticipantEntity(Long chatId, Long memberId) {
         this.chatId = chatId;
         this.memberId = memberId;
-        this.lastIdx = lastIdx != null ? lastIdx : 0L;
+        this.lastIdx = 0L;
     }
 }

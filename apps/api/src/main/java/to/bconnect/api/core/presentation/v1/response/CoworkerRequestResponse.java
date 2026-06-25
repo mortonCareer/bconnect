@@ -9,11 +9,11 @@ public record CoworkerRequestResponse(
         MemberSummaryResponse member,
         ProfileSummaryResponse profile
 ) {
-    public static CoworkerRequestResponse of(CoworkerRequest request, Member member, Profile profile) {
+    public static CoworkerRequestResponse of(CoworkerRequest request, Member member, Profile profile, String picture) {
         return new CoworkerRequestResponse(
                 request.id(),
                 MemberSummaryResponse.of(member),
-                profile == null ? null : ProfileSummaryResponse.of(profile)
+                profile == null ? null : ProfileSummaryResponse.of(profile, picture)
         );
     }
 }

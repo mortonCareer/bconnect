@@ -15,13 +15,13 @@ import to.bconnect.api.support.sms.SmsTemplate;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class SessionService {
 
     private final SessionRepository sessionRepository;
     private final MemberRepository memberRepository;
     private final SmsProvider smsProvider;
 
+    @Transactional(readOnly = true)
     public void verify(String username, String refreshToken) {
         val found = sessionRepository.findByUsername(username)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
@@ -35,6 +35,7 @@ public class SessionService {
         }
     }
 
+    @Transactional
     public void login(String username, String agent, String ip, String refreshToken) {
         val optional = sessionRepository.findByUsername(username);
         val encrypted = AuthUtils.sha256(refreshToken);
@@ -42,7 +43,9 @@ public class SessionService {
         if (optional.isPresent()) {
             optional.get().update(agent, ip, encrypted);
         } else {
-            sessionRepository.save(new SessionEntity(username, agent, ip, encrypted));
+            sessionRepository.save(
+                    new SessionEntity(username, agent, ip, encrypted)
+            );
 
             // TODO: 새로운 기기에서 로그인시 세션 덮어쓰기 → RT 무효화
             memberRepository.findByUsername(username)
@@ -53,6 +56,7 @@ public class SessionService {
         }
     }
 
+    @Transactional
     public void rotate(String username, String refreshToken) {
         val found = sessionRepository.findByUsername(username)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
@@ -60,6 +64,7 @@ public class SessionService {
         found.rotate(AuthUtils.sha256(refreshToken));
     }
 
+    @Transactional
     public void logout(String username) {
         val found = sessionRepository.findByUsername(username)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
