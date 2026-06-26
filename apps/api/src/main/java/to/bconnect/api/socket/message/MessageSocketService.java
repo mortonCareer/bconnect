@@ -11,6 +11,7 @@ import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.socket.WebSocketAuthorizationConfig;
 import to.bconnect.api.storage.chat.ChatType;
+import to.bconnect.api.storage.chat.DirectChatRepository;
 import to.bconnect.api.storage.chat.MessageAttachmentMappingEntity;
 import to.bconnect.api.storage.chat.MessageAttachmentMappingRepository;
 import to.bconnect.api.storage.chat.MessageEntity;
@@ -28,12 +29,13 @@ public class MessageSocketService {
     private final MessageRepository messageRepository;
     private final MessageAttachmentMappingRepository messageAttachmentMappingRepository;
     private final ParticipantRepository participantRepository;
+    private final DirectChatRepository directChatRepository;
     private final MemberRepository memberRepository;
     private final AttachmentValidator attachmentValidator;
     private final SimpUserRegistry simpUserRegistry;
 
     @Transactional
-    public Message broadcast(AuthUser user, Long chatId, SendMessage command) {
+    public Message broadcast(AuthUser user, Long chatId, ChatType chatType, SendMessage command) {
         val attachmentIds = command.attachmentIds();
 
         if (!attachmentIds.isEmpty())
@@ -41,7 +43,7 @@ public class MessageSocketService {
 
         val created = messageRepository.save(new MessageEntity(
                 chatId,
-                ChatType.GROUP,
+                chatType,
                 user.id(),
                 command.type(),
                 command.content()
@@ -52,8 +54,16 @@ public class MessageSocketService {
                     .map(it -> new MessageAttachmentMappingEntity(created.getId(), it))
                     .toList());
 
-        // mark as read
-        val dest = WebSocketAuthorizationConfig.CHAT_TOPIC_PREFIX + chatId;
+        markAsRead(chatId, chatType, created.getId());
+
+        return Message.of(created, attachmentIds);
+    }
+
+    private void markAsRead(Long chatId, ChatType chatType, Long messageId) {
+        val prefix = chatType == ChatType.DIRECT
+                ? WebSocketAuthorizationConfig.DIRECT_CHAT_TOPIC_PREFIX
+                : WebSocketAuthorizationConfig.GROUP_CHAT_TOPIC_PREFIX;
+        val dest = prefix + chatId;
 
         val usernames = simpUserRegistry
                 .findSubscriptions(it -> dest.equals(it.getDestination()))
@@ -62,8 +72,10 @@ public class MessageSocketService {
                 .collect(Collectors.toCollection(HashSet::new));
 
         val memberIds = memberRepository.findIdsByUsernameIn(usernames);
-        participantRepository.updateLastIdxIn(chatId, memberIds, created.getId());
 
-        return Message.of(created, attachmentIds);
+        if (chatType == ChatType.DIRECT)
+            memberIds.forEach(it -> directChatRepository.updateLastIdx(chatId, it, messageId));
+        else
+            participantRepository.updateLastIdxIn(chatId, memberIds, messageId);
     }
 }

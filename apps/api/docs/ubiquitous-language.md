@@ -20,6 +20,7 @@
 | Coworker      | CoworkerRequest | 동료 요청  |                          |
 | Recommendation | Recommendation | 추천     |                          |
 | Chat          | GroupChat      | 그룹 채팅방 | 참여자 N명, 제목 보유             |
+| Chat          | DirectChat     | 1:1 채팅방 | 두 회원 간 1:1, 제목 없음          |
 | Chat          | Message        | 메시지    |                          |
 | Chat          | Participant    | 참여자    | 그룹 채팅방-회원 매핑 정보           |
 | Credential    | Credential     | 인증뱃지  |                          |

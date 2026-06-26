@@ -17,8 +17,7 @@ import to.bconnect.api.core.presentation.v1.response.MemberSummaryResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.core.domain.attachment.AttachmentResolver;
 import to.bconnect.api.core.domain.attachment.ImageSize;
-import to.bconnect.api.core.domain.chat.Chat;
-import to.bconnect.api.core.domain.chat.ChatService;
+import to.bconnect.api.core.domain.chat.GroupChatService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.request.CursorLimit;
@@ -29,17 +28,17 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/api/v1/chats")
+@RequestMapping("/api/v1/group-chats")
 @RequiredArgsConstructor
-public class ChatController {
+public class GroupChatController {
 
-    private final ChatService chatService;
+    private final GroupChatService groupChatService;
     private final MemberResolver memberResolver;
     private final AttachmentResolver attachmentResolver;
 
     @GetMapping
     public ApiResponse<List<ChatResponse>> list(@AuthenticationPrincipal AuthUser user) {
-        val chats = chatService.list(user.id());
+        val chats = groupChatService.list(user.id());
 
         val memberIds = chats.stream()
                 .flatMap(it -> it.participantIds().stream())
@@ -64,7 +63,7 @@ public class ChatController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateChatRequest request) {
-        val id = chatService.create(user, request.toCommand());
+        val id = groupChatService.create(user, request.toCommand());
         return ApiResponse.success(id);
     }
 
@@ -73,7 +72,7 @@ public class ChatController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long chatId,
             CursorLimit cursorLimit) {
-        val page = chatService.listMessages(user, chatId, cursorLimit);
+        val page = groupChatService.listMessages(user, chatId, cursorLimit);
 
         val attachmentIds = page.content().stream()
                 .flatMap(it -> it.attachmentIds().stream())

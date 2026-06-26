@@ -85,7 +85,8 @@ graph TD
 ```mermaid
 graph TD
   subgraph Presentation
-    ChatC[ChatController]
+    GChatC[GroupChatController]
+    DChatC[DirectChatController]
     CowC[CoworkerController]
     CowRC[CoworkerRequestController]
     FeedC[FeedController]
@@ -96,7 +97,8 @@ graph TD
     MemR[MemberResolver]
   end
 
-  ChatC --> MemR
+  GChatC --> MemR
+  DChatC --> MemR
   CowC --> MemR
   CowRC --> MemR
   FeedC --> MemR
@@ -131,7 +133,8 @@ graph TD
 ```mermaid
 graph TD
   subgraph Presentation
-    ChatC[ChatController]
+    GChatC[GroupChatController]
+    DChatC[DirectChatController]
     CredC[CredentialController]
     FeedC[FeedController]
   end
@@ -148,7 +151,8 @@ graph TD
     AttR[AttachmentResolver]
   end
 
-  ChatC -->|resolveMap · url| AttR
+  GChatC -->|resolveMap · url| AttR
+  DChatC -->|resolveMap · url| AttR
   CredC -->|resolveMap · url| AttR
   FeedC -->|resolveMap · url| AttR
   MsgC -->|resolveMap · url| AttR
@@ -192,7 +196,7 @@ graph TD
   CowRS -->|existsById| MemRepo
 ```
 - MemberService.register → OtpService.verifyToken
-- ChatService.create → Member.SYSTEM_ID
+- GroupChatService.create → Member.SYSTEM_ID
 
 ## 래퍼런스
 - [Java Bean Validation](https://docs.spring.io/spring-framework/reference/core/validation/beanvalidation.html)
