@@ -11,14 +11,8 @@ import to.bconnect.api.core.domain.attachment.AttachmentValidator;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.socket.WebSocketAuthorizationConfig;
-import to.bconnect.api.storage.chat.ChatType;
-import to.bconnect.api.storage.chat.DirectChatRepository;
-import to.bconnect.api.storage.chat.MessageAttachmentMappingEntity;
-import to.bconnect.api.storage.chat.MessageAttachmentMappingRepository;
-import to.bconnect.api.storage.chat.MessageEntity;
-import to.bconnect.api.storage.chat.MessageRepository;
-import to.bconnect.api.storage.chat.ParticipantRepository;
+import to.bconnect.api.socket.WebSocketSecurityConfig;
+import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
 
@@ -67,8 +61,8 @@ public class MessageSocketService {
 
     private void markAsRead(Long chatId, ChatType chatType, Long messageId) {
         val prefix = chatType == ChatType.DIRECT
-                ? WebSocketAuthorizationConfig.DIRECT_CHAT_TOPIC_PREFIX
-                : WebSocketAuthorizationConfig.GROUP_CHAT_TOPIC_PREFIX;
+                ? WebSocketSecurityConfig.DIRECT_CHAT_TOPIC_PREFIX
+                : WebSocketSecurityConfig.GROUP_CHAT_TOPIC_PREFIX;
         val dest = prefix + chatId;
 
         val usernames = simpUserRegistry

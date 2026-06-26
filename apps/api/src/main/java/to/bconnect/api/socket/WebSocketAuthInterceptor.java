@@ -20,6 +20,9 @@ import to.bconnect.api.security.jwt.JwtProvider;
 import to.bconnect.api.security.jwt.JwtType;
 import to.bconnect.api.security.jwt.JwtUtils;
 
+/**
+ * @see <a href="https://docs.spring.io/spring-framework/reference/web/websocket/stomp/authentication-token-based.html">Token Authentication</a>
+ */
 @Component
 @RequiredArgsConstructor
 public class WebSocketAuthInterceptor implements ChannelInterceptor {

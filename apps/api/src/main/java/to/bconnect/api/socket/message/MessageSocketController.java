@@ -19,6 +19,9 @@ import to.bconnect.api.storage.chat.ChatType;
 
 import java.util.Objects;
 
+/**
+ * @see <a href="https://docs.spring.io/spring-framework/reference/web/websocket/stomp/handle-annotations.html">Annotated Controllers</a>
+ */
 @Controller
 @RequiredArgsConstructor
 public class MessageSocketController {
