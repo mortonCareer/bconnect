@@ -23,12 +23,10 @@ public class DirectChatService {
 
     @Transactional
     public Long create(AuthUser user, CreateDirectChat command) {
-        val minId = Math.min(user.id(), command.memberId());
-        val maxId = Math.max(user.id(), command.memberId());
-
-        return directChatRepository.findByMinIdAndMaxId(minId, maxId)
+        return directChatRepository.findByMembers(user.id(), command.memberId())
                 .map(DirectChatEntity::getId)
-                .orElseGet(() -> directChatRepository.save(new DirectChatEntity(minId, maxId)).getId());
+                .orElseGet(() -> directChatRepository.save(
+                        DirectChatEntity.of(user.id(), command.memberId())).getId());
     }
 
     @Transactional(readOnly = true)
@@ -54,7 +52,7 @@ public class DirectChatService {
         return chats.stream()
                 .map(it -> DirectChat.of(
                         it,
-                        it.getMinId().equals(memberId) ? it.getMaxId() : it.getMinId(),
+                        it.counterpartIdOf(memberId),
                         lastMessageMap.get(it.getId()),
                         unreadCountMap.getOrDefault(it.getId(), 0L)
                 )).toList();

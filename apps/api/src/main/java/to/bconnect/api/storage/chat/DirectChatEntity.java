@@ -27,11 +27,19 @@ public class DirectChatEntity extends BaseEntity {
     @Column(nullable = false)
     private Long maxLastIdx;
 
-    public DirectChatEntity(Long minId, Long maxId) {
+    private DirectChatEntity(Long minId, Long maxId) {
         this.minId = minId;
         this.maxId = maxId;
         this.minLastIdx = 0L;
         this.maxLastIdx = 0L;
+    }
+
+    public static DirectChatEntity of(Long memberId, Long otherId) {
+        return new DirectChatEntity(Math.min(memberId, otherId), Math.max(memberId, otherId));
+    }
+
+    public Long counterpartIdOf(Long memberId) {
+        return minId.equals(memberId) ? maxId : minId;
     }
 
     public void markRead(Long memberId, Long messageId) {

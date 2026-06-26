@@ -7,6 +7,10 @@ import java.util.Optional;
 
 public interface DirectChatRepository extends JpaRepository<DirectChatEntity, Long> {
 
+    default Optional<DirectChatEntity> findByMembers(Long memberId, Long otherId) {
+        return findByMinIdAndMaxId(Math.min(memberId, otherId), Math.max(memberId, otherId));
+    }
+
     Optional<DirectChatEntity> findByMinIdAndMaxId(Long minId, Long maxId);
 
     default List<DirectChatEntity> findAllByMember(Long memberId) {
