@@ -5,6 +5,8 @@ import lombok.val;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.attachment.AttachmentValidator;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.chat.SendMessage;
@@ -17,11 +19,15 @@ import to.bconnect.api.storage.chat.MessageAttachmentMappingRepository;
 import to.bconnect.api.storage.chat.MessageEntity;
 import to.bconnect.api.storage.chat.MessageRepository;
 import to.bconnect.api.storage.chat.ParticipantRepository;
+import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
 
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
+/**
+ * @see org.springframework.messaging.simp.user.SimpUserRegistry
+ */
 @Service
 @RequiredArgsConstructor
 public class MessageSocketService {
@@ -71,11 +77,17 @@ public class MessageSocketService {
                 .map(it -> it.getSession().getUser().getName())
                 .collect(Collectors.toCollection(HashSet::new));
 
-        val memberIds = memberRepository.findIdsByUsernameIn(usernames);
+        val memberIds = memberRepository.findByUsernameIn(usernames).stream()
+                .map(MemberEntity::getId)
+                .toList();
 
-        if (chatType == ChatType.DIRECT)
-            memberIds.forEach(it -> directChatRepository.updateLastIdx(chatId, it, messageId));
-        else
-            participantRepository.updateLastIdxIn(chatId, memberIds, messageId);
+        if (chatType == ChatType.DIRECT) {
+            val chat = directChatRepository.findById(chatId)
+                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+            memberIds.forEach(it -> chat.markRead(it, messageId));
+        } else {
+            participantRepository.findByChatIdAndMemberIdIn(chatId, memberIds)
+                    .forEach(it -> it.markRead(messageId));
+        }
     }
 }

@@ -10,26 +10,33 @@ import java.util.Optional;
 
 public interface CoworkerRepository extends JpaRepository<CoworkerEntity, Long> {
 
-    @Query("SELECT COUNT(c) > 0 FROM CoworkerEntity c "
-            + "WHERE (c.minId = :memberId AND c.maxId = :coworkerId) "
-            + "OR (c.minId = :coworkerId AND c.maxId = :memberId)")
-    boolean existsByMembers(@Param("memberId") Long memberId, @Param("coworkerId") Long coworkerId);
+    default boolean existsByMembers(Long memberId, Long coworkerId) {
+        return existsByMinIdAndMaxId(Math.min(memberId, coworkerId), Math.max(memberId, coworkerId));
+    }
 
-    @Query("SELECT c FROM CoworkerEntity c "
-            + "WHERE (c.minId = :memberId AND c.maxId = :coworkerId) "
-            + "OR (c.minId = :coworkerId AND c.maxId = :memberId)")
-    Optional<CoworkerEntity> findByMembers(@Param("memberId") Long memberId, @Param("coworkerId") Long coworkerId);
+    boolean existsByMinIdAndMaxId(Long minId, Long maxId);
 
-    @Query("SELECT c FROM CoworkerEntity c WHERE c.minId = :memberId OR c.maxId = :memberId")
-    List<CoworkerEntity> findByMemberId(@Param("memberId") Long memberId);
+    default Optional<CoworkerEntity> findByMembers(Long memberId, Long coworkerId) {
+        return findByMinIdAndMaxId(Math.min(memberId, coworkerId), Math.max(memberId, coworkerId));
+    }
 
-    @Query("SELECT COUNT(c) FROM CoworkerEntity c WHERE c.minId = :memberId OR c.maxId = :memberId")
-    long countByMemberId(@Param("memberId") Long memberId);
+    Optional<CoworkerEntity> findByMinIdAndMaxId(Long minId, Long maxId);
 
-    @Query(value = "SELECT member_id, COUNT(*) FROM ("
-            + "SELECT min_id AS member_id FROM coworkers WHERE min_id IN :memberIds "
-            + "UNION ALL "
-            + "SELECT max_id AS member_id FROM coworkers WHERE max_id IN :memberIds"
-            + ") t GROUP BY member_id", nativeQuery = true)
-    List<Object[]> countByMemberIdIn(@Param("memberIds") Collection<Long> memberIds);
+    default List<CoworkerEntity> findByMemberId(Long memberId) {
+        return findByMinIdOrMaxId(memberId, memberId);
+    }
+
+    List<CoworkerEntity> findByMinIdOrMaxId(Long minId, Long maxId);
+
+    default long countByMemberId(Long memberId) {
+        return countByMinIdOrMaxId(memberId, memberId);
+    }
+
+    long countByMinIdOrMaxId(Long minId, Long maxId);
+
+    @Query("SELECT c.minId, COUNT(c) FROM CoworkerEntity c WHERE c.minId IN :memberIds GROUP BY c.minId")
+    List<Object[]> countByMinIdIn(@Param("memberIds") Collection<Long> memberIds);
+
+    @Query("SELECT c.maxId, COUNT(c) FROM CoworkerEntity c WHERE c.maxId IN :memberIds GROUP BY c.maxId")
+    List<Object[]> countByMaxIdIn(@Param("memberIds") Collection<Long> memberIds);
 }

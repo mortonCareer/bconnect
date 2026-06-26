@@ -15,6 +15,7 @@ import to.bconnect.api.storage.recommendation.RecommendationRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +47,10 @@ public class ProfileQueryService {
 
         val postCounts = toCountMap(postRepository.countByMemberIdIn(memberIds));
         val recommendationCounts = toCountMap(recommendationRepository.countByToIdInAndVisibleTrue(memberIds));
-        val coworkerCounts = toCountMap(coworkerRepository.countByMemberIdIn(memberIds));
+        val minCounts = toCountMap(coworkerRepository.countByMinIdIn(memberIds));
+        val maxCounts = toCountMap(coworkerRepository.countByMaxIdIn(memberIds));
+        val coworkerCounts = Stream.concat(minCounts.entrySet().stream(), maxCounts.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Long::sum));
 
         return profiles.stream()
                 .map(it -> Profile.of(
