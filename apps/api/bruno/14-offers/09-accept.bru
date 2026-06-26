@@ -1,0 +1,25 @@
+meta {
+  name: 제안 승낙
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/v1/offers/{{acceptOfferId}}/accept
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{profileToken}}
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  반장1(profileToken)이 제안(acceptOfferId)을 승낙해 작업에 배정된다.
+}

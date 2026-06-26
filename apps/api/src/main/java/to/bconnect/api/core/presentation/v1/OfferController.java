@@ -4,19 +4,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.offer.OfferService;
-import to.bconnect.api.core.domain.project.ProjectService;
-import to.bconnect.api.core.domain.task.TaskQueryService;
 import to.bconnect.api.core.presentation.v1.request.CreateOfferRequest;
-import to.bconnect.api.core.presentation.v1.response.OfferResponse;
-import to.bconnect.api.core.presentation.v1.response.TaskResponse;
+import to.bconnect.api.core.presentation.v1.request.ReorderOfferRequest;
 import to.bconnect.api.security.AuthUser;
 
 @RestController
@@ -25,8 +22,6 @@ import to.bconnect.api.security.AuthUser;
 public class OfferController {
 
     private final OfferService offerService;
-    private final TaskQueryService taskQueryService;
-    private final ProjectService projectService;
 
     @PostMapping
     public ApiResponse<Long> create(
@@ -37,14 +32,12 @@ public class OfferController {
         return ApiResponse.success(id);
     }
 
-    @GetMapping("/{id}")
-    public ApiResponse<OfferResponse> get(
+    @PutMapping("/reorder")
+    public ApiResponse<Void> reorder(
             @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long id) {
-        val offer = offerService.get(user, id);
-        val task = taskQueryService.get(user, offer.taskId());
-        val address = projectService.get(task.projectId()).address();
-        return ApiResponse.success(OfferResponse.of(offer, TaskResponse.of(task, address)));
+            @RequestBody @Valid ReorderOfferRequest request) {
+        offerService.reorder(user, request.toCommand());
+        return ApiResponse.success(null);
     }
 
     @PostMapping("/{id}/accept")
@@ -60,6 +53,14 @@ public class OfferController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
         offerService.deny(user, id);
+        return ApiResponse.success(null);
+    }
+
+    @PostMapping("/{id}/cancel")
+    public ApiResponse<Void> cancel(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id) {
+        offerService.cancel(user, id);
         return ApiResponse.success(null);
     }
 }

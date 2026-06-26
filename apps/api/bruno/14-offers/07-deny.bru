@@ -1,0 +1,25 @@
+meta {
+  name: 제안 거절
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/offers/{{offerId}}/deny
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{profileToken}}
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  제안받은 반장1(profileToken)이 제안(offerId)을 거절한다.
+}
