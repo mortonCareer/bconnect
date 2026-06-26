@@ -70,6 +70,7 @@ graph TD
   - 하향식 도메인 교차는 모두 허용되며, 응집도에 따른 의존성을 고려해야 합니다.
   - 비즈니스 로직이 복잡한 경우 하위 컴포넌트를 생성해 관심사를 분리할 수 있습니다. (e.g. Finder, Validator, etc)
 - 메서드명은 **비즈니스 관점**에서 작성합니다. (e.g. listLatestAccepted x, listPublic o)
+- 저장 구조는 Storage 레이어에 캡슐화합니다. 서비스는 비즈니스 의미 단위로만 호출하고, 컬럼 구조(e.g. min/max)를 알지 못합니다.
 - 유효성 검사 위치
   - Java Bean Validation : DTO 필드
   - 비즈니스 로직 : DTO → Command 변환
