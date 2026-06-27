@@ -43,13 +43,7 @@ public class GroupChatService {
                 .stream()
                 .collect(Collectors.toMap(MessageEntity::getChatId, Message::of));
 
-        val unreadCountMap = messageRepository
-                .findGroupUnreadCountByChatIdsAndMemberId(chatIds, memberId)
-                .stream()
-                .collect(Collectors.toMap(
-                        it -> (Long) it[0],
-                        it -> (Long) it[1]
-                ));
+        val unreadCountMap = messageRepository.findGroupUnreadCountByChatIdsAndMemberId(chatIds, memberId);
 
         return chats.stream()
                 .map(it -> Chat.of(
