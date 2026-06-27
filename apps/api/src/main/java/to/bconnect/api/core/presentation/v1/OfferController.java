@@ -47,8 +47,7 @@ public class OfferController {
     public ApiResponse<Void> reorder(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid ReorderOfferRequest request) {
-        offerService.reorder(user, request.toCommand());
-        // TODO 이벤트 발송
+        offerService.reorder(user, request.offerIds());
         return ApiResponse.success(null);
     }
 

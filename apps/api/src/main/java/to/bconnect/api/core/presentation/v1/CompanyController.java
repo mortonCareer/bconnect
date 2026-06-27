@@ -64,7 +64,7 @@ public class CompanyController {
     public ApiResponse<Void> update(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid UpdateCompanyRequest request) {
-        companyService.update(user, request.toCommand());
+        companyService.update(user, request.picture());
         return ApiResponse.success(null);
     }
 

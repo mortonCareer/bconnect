@@ -53,11 +53,11 @@ public class CompanyService {
     }
 
     @Transactional
-    public void update(AuthUser user, UpdateCompany command) {
+    public void update(AuthUser user, String picture) {
         val found = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        found.update(command.picture());
+        found.update(picture);
     }
 
     @Transactional

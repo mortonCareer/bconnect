@@ -114,9 +114,8 @@ public class OfferService {
     }
 
     @Transactional
-    public void reorder(AuthUser user, ReorderOffers command) {
+    public void reorder(AuthUser user, List<Long> offerIds) {
         // check duplicated
-        val offerIds = command.offerIds();
         if (offerIds.size() != Set.copyOf(offerIds).size())
             throw new CodeException(OfferExceptionCode.INVALID_REORDER);
 
