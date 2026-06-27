@@ -12,7 +12,6 @@ import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyP
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
-@Disabled("temp (#664)")
 @AnalyzeClasses(packages = "to.bconnect.api", importOptions = DoNotIncludeTests.class)
 public class PackageDependencyTest {
 
