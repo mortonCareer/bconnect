@@ -73,13 +73,12 @@ public class GroupChatService {
                 .map(it -> new ParticipantEntity(created.getId(), it))
                 .toList());
 
-        messageRepository.save(new MessageEntity(
+        messageService.send(
                 created.getId(),
                 ChatType.GROUP,
                 Member.SYSTEM_ID,
-                MessageType.SYSTEM,
-                MessageTemplate.CHAT_CREATED
-        ));
+                new SendMessage(MessageType.SYSTEM, MessageTemplate.CHAT_CREATED, List.of())
+        );
 
         return created.getId();
     }

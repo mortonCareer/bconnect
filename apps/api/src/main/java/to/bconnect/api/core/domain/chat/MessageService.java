@@ -22,6 +22,20 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final MessageAttachmentMappingRepository messageAttachmentMappingRepository;
 
+    @Transactional
+    public Message send(Long chatId, ChatType chatType, Long senderId, SendMessage command) {
+        val created = messageRepository.save(new MessageEntity(
+                chatId, chatType, senderId, command.type(), command.content()));
+
+        val attachmentIds = command.attachmentIds();
+        if (!attachmentIds.isEmpty())
+            messageAttachmentMappingRepository.saveAll(attachmentIds.stream()
+                    .map(it -> new MessageAttachmentMappingEntity(created.getId(), it))
+                    .toList());
+
+        return Message.of(created, attachmentIds);
+    }
+
     @Transactional(readOnly = true)
     public CursorPage<Message> list(Long chatId, ChatType chatType, CursorLimit cursor) {
         val messages = messageRepository.findAllByChatIdAndChatType(

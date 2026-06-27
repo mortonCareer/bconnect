@@ -163,38 +163,21 @@ graph TD
 ```
 
 ### 도메인 교차
-공용 도메인을 제외한 도메인 간 교차
+공용 도메인을 제외한 서비스 ↔ 서비스 도메인 간 교차
 
 ```mermaid
 graph TD
   subgraph recommendation
     RecS[RecommendationService]
-    RecRepo[(RecommendationRepository)]
   end
   subgraph coworker
     CowS[CoworkerService]
-    CowRS[CoworkerRequestService]
-    CowRepo[(CoworkerRepository)]
   end
   subgraph task
     TaskS[TaskService]
   end
-  subgraph profile
-    ProfQ[ProfileQueryService]
-  end
-  subgraph post
-    PostRepo[(PostRepository)]
-  end
-  subgraph member
-    MemRepo[(MemberRepository)]
-  end
-
   RecS -->|isCoworker| CowS
   TaskS -->|isCoworker| CowS
-  ProfQ -->|"countByMemberId(In)"| PostRepo
-  ProfQ -->|"countByToId(In)AndVisibleTrue"| RecRepo
-  ProfQ -->|"countByMemberId(In)"| CowRepo
-  CowRS -->|existsById| MemRepo
 ```
 - MemberService.register → OtpService.verifyToken
 - GroupChatService.create → Member.SYSTEM_ID

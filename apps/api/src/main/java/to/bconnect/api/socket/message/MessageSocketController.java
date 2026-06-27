@@ -11,7 +11,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import to.bconnect.api.core.domain.attachment.AttachmentResolver;
 import to.bconnect.api.core.domain.attachment.ImageSize;
-import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.presentation.v1.response.AttachmentResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.security.AuthUser;
@@ -35,7 +34,13 @@ public class MessageSocketController {
             @DestinationVariable Long chatId,
             @AuthenticationPrincipal AuthUser user,
             @Payload @Valid SendMessageRequest request) {
-        return toResponse(messageSocketService.broadcast(user, chatId, ChatType.GROUP, request.toCommand()));
+        val message = messageSocketService.broadcast(user, chatId, ChatType.GROUP, request.toCommand());
+        val attachmentMap = attachmentResolver.resolveMap(message.attachmentIds());
+        return MessageResponse.of(message, message.attachmentIds().stream()
+                .map(attachmentMap::get)
+                .filter(Objects::nonNull)
+                .map(it -> AttachmentResponse.of(it, attachmentResolver.url(it, ImageSize.SMALL)))
+                .toList());
     }
 
     @MessageMapping("/direct-chats/{chatId}/messages")
@@ -44,17 +49,12 @@ public class MessageSocketController {
             @DestinationVariable Long chatId,
             @AuthenticationPrincipal AuthUser user,
             @Payload @Valid SendMessageRequest request) {
-        return toResponse(messageSocketService.broadcast(user, chatId, ChatType.DIRECT, request.toCommand()));
-    }
-
-    private MessageResponse toResponse(Message message) {
+        val message = messageSocketService.broadcast(user, chatId, ChatType.DIRECT, request.toCommand());
         val attachmentMap = attachmentResolver.resolveMap(message.attachmentIds());
-        val attachments = message.attachmentIds().stream()
+        return MessageResponse.of(message, message.attachmentIds().stream()
                 .map(attachmentMap::get)
                 .filter(Objects::nonNull)
-                .map(att -> AttachmentResponse.of(att, attachmentResolver.url(att, ImageSize.SMALL)))
-                .toList();
-
-        return MessageResponse.of(message, attachments);
+                .map(it -> AttachmentResponse.of(it, attachmentResolver.url(it, ImageSize.SMALL)))
+                .toList());
     }
 }

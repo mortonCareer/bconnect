@@ -60,7 +60,7 @@ public class DirectChatController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateDirectChatRequest request) {
-        val id = directChatService.create(user, request.toCommand());
+        val id = directChatService.findOrCreate(user, request.toCommand());
         return ApiResponse.success(id);
     }
 

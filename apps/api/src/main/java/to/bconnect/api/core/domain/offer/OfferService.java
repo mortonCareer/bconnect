@@ -19,6 +19,7 @@ import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,7 @@ public class OfferService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public Long create(AuthUser user, CreateOffer command) {
+    public Offer create(AuthUser user, CreateOffer command) {
         val company = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
@@ -52,15 +53,15 @@ public class OfferService {
 
         val seq = offerRepository.findFirstByTaskIdOrderBySeqDesc(command.taskId())
                 .map(OfferEntity::getSeq).orElse(0) + 1;
-        val created = new OfferEntity(command.taskId(), command.workerId(), seq, command.due());
-        val id = offerRepository.save(created).getId();
+        val created = offerRepository.save(
+                new OfferEntity(command.taskId(), command.workerId(), seq, command.due()));
 
         promoteNext(command.taskId(), 0);
-        return id;
+        return Offer.of(created);
     }
 
     @Transactional
-    public void accept(AuthUser user, Long offerId) {
+    public Offer accept(AuthUser user, Long offerId) {
         val found = offerRepository.findById(offerId)
                 .orElseThrow(() -> new CodeException(OfferExceptionCode.NOT_FOUND));
 
@@ -78,10 +79,12 @@ public class OfferService {
         // cancel other offers
         offerRepository.findAllByTaskIdAndStatus(found.getTaskId(), OfferStatus.PENDING)
                 .forEach(OfferEntity::cancel);
+
+        return Offer.of(found);
     }
 
     @Transactional
-    public void deny(AuthUser user, Long offerId) {
+    public Optional<Offer> deny(AuthUser user, Long offerId) {
         val found = offerRepository.findById(offerId)
                 .orElseThrow(() -> new CodeException(OfferExceptionCode.NOT_FOUND));
 
@@ -91,11 +94,11 @@ public class OfferService {
             throw new CodeException(OfferExceptionCode.INVALID_STATUS);
 
         found.deny();
-        promoteNext(found.getTaskId(), found.getSeq());
+        return promoteNext(found.getTaskId(), found.getSeq());
     }
 
     @Transactional
-    public void cancel(AuthUser user, Long offerId) {
+    public Optional<Offer> cancel(AuthUser user, Long offerId) {
         val found = offerRepository.findById(offerId)
                 .orElseThrow(() -> new CodeException(OfferExceptionCode.NOT_FOUND));
 
@@ -107,7 +110,7 @@ public class OfferService {
             throw new CodeException(OfferExceptionCode.INVALID_STATUS);
 
         found.cancel();
-        promoteNext(found.getTaskId(), found.getSeq());
+        return promoteNext(found.getTaskId(), found.getSeq());
     }
 
     @Transactional
@@ -166,15 +169,26 @@ public class OfferService {
                 .toList();
     }
 
-    private void promoteNext(Long taskId, int curr) {
+    private Optional<Offer> promoteNext(Long taskId, int curr) {
         if (offerRepository.existsByTaskIdAndStatus(taskId, OfferStatus.OFFERED))
-            return;
+            return Optional.empty();
 
-        offerRepository.findFirstByTaskIdAndStatusAndSeqGreaterThanOrderBySeqAsc(taskId, OfferStatus.PENDING, curr)
-                .ifPresent(it -> {
+        return offerRepository.findFirstByTaskIdAndStatusAndSeqGreaterThanOrderBySeqAsc(taskId, OfferStatus.PENDING, curr)
+                .map(it -> {
                     it.offered();
-                    // TODO: 메시지 발송
+                    return Offer.of(it);
                 });
+    }
+
+    @Transactional(readOnly = true)
+    public Long getCompanyOwnerId(Long taskId) {
+        val task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new CodeException(TaskExceptionCode.NOT_FOUND));
+        val project = projectRepository.findById(task.getProjectId())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        val company = companyRepository.findById(project.getCompanyId())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        return company.getMemberId();
     }
 
     private void authenticate(AuthUser user, TaskEntity task) {

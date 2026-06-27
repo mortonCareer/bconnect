@@ -8,6 +8,7 @@ import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.storage.chat.*;
 
 import java.util.List;
@@ -22,11 +23,20 @@ public class DirectChatService {
     private final MessageService messageService;
 
     @Transactional
-    public Long create(AuthUser user, CreateDirectChat command) {
-        return directChatRepository.findByMembers(user.id(), command.memberId())
+    public Long findOrCreate(AuthUser user, CreateDirectChat command) {
+        return findOrCreate(user.id(), command.memberId());
+    }
+
+    @Transactional
+    public Long findOrCreate(Long memberId, Long otherId) {
+        return directChatRepository.findByMembers(memberId, otherId)
                 .map(DirectChatEntity::getId)
-                .orElseGet(() -> directChatRepository.save(
-                        DirectChatEntity.of(user.id(), command.memberId())).getId());
+                .orElseGet(() -> {
+                    val chatId = directChatRepository.save(DirectChatEntity.of(memberId, otherId)).getId();
+                    messageService.send(chatId, ChatType.DIRECT, Member.SYSTEM_ID,
+                            new SendMessage(MessageType.SYSTEM, MessageTemplate.CHAT_CREATED, List.of()));
+                    return chatId;
+                });
     }
 
     @Transactional(readOnly = true)
