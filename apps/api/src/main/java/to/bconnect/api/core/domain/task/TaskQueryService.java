@@ -15,6 +15,7 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -25,6 +26,13 @@ public class TaskQueryService {
     private final CoworkerRepository coworkerRepository;
     private final CompanyRepository companyRepository;
     private final ProjectRepository projectRepository;
+
+    @Transactional(readOnly = true)
+    public List<Task> listByIds(Collection<Long> taskIds) {
+        return taskRepository.findAllById(taskIds).stream()
+                .map(Task::of)
+                .toList();
+    }
 
     @Transactional(readOnly = true)
     public List<Task> list(AuthUser user) {

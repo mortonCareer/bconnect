@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 
 @Component
 @RequiredArgsConstructor
-public class ChatAuthorizationManager
+public class GroupChatAuthorizationManager
         implements AuthorizationManager<MessageAuthorizationContext<?>> {
 
     private final ParticipantRepository participantRepository;
@@ -29,8 +29,8 @@ public class ChatAuthorizationManager
         if (!(auth.getPrincipal() instanceof AuthUser user))
             return new AuthorizationDecision(false);
 
-        val chatId = Long.parseLong(context.getVariables().get("chatId"));
         try {
+            val chatId = Long.parseLong(context.getVariables().get("chatId"));
             val granted = participantRepository.existsByChatIdAndMemberId(chatId, user.id());
             return new AuthorizationDecision(granted);
         } catch (NumberFormatException e) {

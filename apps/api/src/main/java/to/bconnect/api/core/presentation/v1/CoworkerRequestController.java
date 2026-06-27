@@ -20,7 +20,7 @@ import to.bconnect.api.core.domain.coworker.CoworkerRequestQueryService;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.core.domain.profile.ProfileQueryService;
+import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
@@ -36,7 +36,7 @@ public class CoworkerRequestController {
     private final CoworkerRequestService coworkerRequestService;
     private final CoworkerRequestQueryService coworkerRequestQueryService;
     private final MemberResolver memberResolver;
-    private final ProfileQueryService profileQueryService;
+    private final ProfileResolver profileResolver;
     private final AttachmentResolver attachmentResolver;
 
     @PostMapping
@@ -86,7 +86,7 @@ public class CoworkerRequestController {
     private List<CoworkerRequestResponse> assemble(List<CoworkerRequest> requests) {
         val memberIds = requests.stream().map(CoworkerRequest::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
-        val profileMap = profileQueryService.resolveMap(memberIds);
+        val profileMap = profileResolver.resolveMap(memberIds);
 
         val pictureIds = profileMap.values().stream()
                 .map(Profile::pictureId).filter(Objects::nonNull).toList();

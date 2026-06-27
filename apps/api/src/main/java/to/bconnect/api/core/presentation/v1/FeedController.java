@@ -13,7 +13,7 @@ import to.bconnect.api.core.domain.post.Post;
 import to.bconnect.api.core.domain.post.PostService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.core.domain.profile.ProfileQueryService;
+import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class FeedController {
 
     private final PostService postService;
     private final MemberResolver memberResolver;
-    private final ProfileQueryService profileQueryService;
+    private final ProfileResolver profileResolver;
     private final AttachmentResolver attachmentResolver;
 
     @GetMapping
@@ -37,7 +37,7 @@ public class FeedController {
 
         val memberIds = posts.stream().map(Post::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
-        val profileMap = profileQueryService.resolveMap(memberIds);
+        val profileMap = profileResolver.resolveMap(memberIds);
 
         val attachmentIds = new ArrayList<Long>(posts.stream()
                 .flatMap(it -> it.attachmentIds().stream())
@@ -65,7 +65,7 @@ public class FeedController {
     public ApiResponse<FeedResponse> get(@PathVariable Long id) {
         val post = postService.get(id);
         val member = memberResolver.find(post.memberId());
-        val profile = profileQueryService.resolveMap(List.of(post.memberId())).get(post.memberId());
+        val profile = profileResolver.resolveMap(List.of(post.memberId())).get(post.memberId());
 
         val attachmentIds = new ArrayList<Long>(post.attachmentIds());
         if (profile != null && profile.pictureId() != null)

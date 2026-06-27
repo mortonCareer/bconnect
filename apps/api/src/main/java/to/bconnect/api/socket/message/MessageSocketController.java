@@ -14,9 +14,13 @@ import to.bconnect.api.core.domain.attachment.ImageSize;
 import to.bconnect.api.core.presentation.v1.response.AttachmentResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.chat.ChatType;
 
 import java.util.Objects;
 
+/**
+ * @see <a href="https://docs.spring.io/spring-framework/reference/web/websocket/stomp/handle-annotations.html">Annotated Controllers</a>
+ */
 @Controller
 @RequiredArgsConstructor
 public class MessageSocketController {
@@ -24,21 +28,33 @@ public class MessageSocketController {
     private final MessageSocketService messageSocketService;
     private final AttachmentResolver attachmentResolver;
 
-    @MessageMapping("/chats/{chatId}/messages")
-    @SendTo("/topic/chats/{chatId}")
-    public MessageResponse send(
+    @MessageMapping("/group-chats/{chatId}/messages")
+    @SendTo("/topic/group-chats/{chatId}")
+    public MessageResponse sendGroup(
             @DestinationVariable Long chatId,
             @AuthenticationPrincipal AuthUser user,
             @Payload @Valid SendMessageRequest request) {
-        val message = messageSocketService.broadcast(user, chatId, request.toCommand());
-
+        val message = messageSocketService.broadcast(user, chatId, ChatType.GROUP, request.toCommand());
         val attachmentMap = attachmentResolver.resolveMap(message.attachmentIds());
-        val attachments = message.attachmentIds().stream()
+        return MessageResponse.of(message, message.attachmentIds().stream()
                 .map(attachmentMap::get)
                 .filter(Objects::nonNull)
-                .map(att -> AttachmentResponse.of(att, attachmentResolver.url(att, ImageSize.SMALL)))
-                .toList();
+                .map(it -> AttachmentResponse.of(it, attachmentResolver.url(it, ImageSize.SMALL)))
+                .toList());
+    }
 
-        return MessageResponse.of(message, attachments);
+    @MessageMapping("/direct-chats/{chatId}/messages")
+    @SendTo("/topic/direct-chats/{chatId}")
+    public MessageResponse sendDirect(
+            @DestinationVariable Long chatId,
+            @AuthenticationPrincipal AuthUser user,
+            @Payload @Valid SendMessageRequest request) {
+        val message = messageSocketService.broadcast(user, chatId, ChatType.DIRECT, request.toCommand());
+        val attachmentMap = attachmentResolver.resolveMap(message.attachmentIds());
+        return MessageResponse.of(message, message.attachmentIds().stream()
+                .map(attachmentMap::get)
+                .filter(Objects::nonNull)
+                .map(it -> AttachmentResponse.of(it, attachmentResolver.url(it, ImageSize.SMALL)))
+                .toList());
     }
 }

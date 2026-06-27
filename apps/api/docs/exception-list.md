@@ -1,4 +1,7 @@
 # ExceptionCode 목록
+- 위치 : 전체
+- 범위 : 예외 코드(ExceptionCode)
+
 ## Prefix 체계
 
 | Prefix | 도메인 | 위치 |

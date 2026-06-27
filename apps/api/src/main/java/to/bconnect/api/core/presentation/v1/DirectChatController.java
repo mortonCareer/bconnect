@@ -10,15 +10,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import to.bconnect.api.core.presentation.v1.request.CreateChatRequest;
+import to.bconnect.api.core.presentation.v1.request.CreateDirectChatRequest;
 import to.bconnect.api.core.presentation.v1.response.AttachmentResponse;
-import to.bconnect.api.core.presentation.v1.response.ChatResponse;
+import to.bconnect.api.core.presentation.v1.response.DirectChatResponse;
 import to.bconnect.api.core.presentation.v1.response.MemberSummaryResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.core.domain.attachment.AttachmentResolver;
 import to.bconnect.api.core.domain.attachment.ImageSize;
-import to.bconnect.api.core.domain.chat.Chat;
-import to.bconnect.api.core.domain.chat.ChatService;
+import to.bconnect.api.core.domain.chat.DirectChat;
+import to.bconnect.api.core.domain.chat.DirectChatService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.request.CursorLimit;
@@ -29,33 +29,29 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/api/v1/chats")
+@RequestMapping("/api/v1/direct-chats")
 @RequiredArgsConstructor
-public class ChatController {
+public class DirectChatController {
 
-    private final ChatService chatService;
+    private final DirectChatService directChatService;
     private final MemberResolver memberResolver;
     private final AttachmentResolver attachmentResolver;
 
     @GetMapping
-    public ApiResponse<List<ChatResponse>> list(@AuthenticationPrincipal AuthUser user) {
-        val chats = chatService.list(user.id());
+    public ApiResponse<List<DirectChatResponse>> list(@AuthenticationPrincipal AuthUser user) {
+        val directChats = directChatService.list(user.id());
 
-        val memberIds = chats.stream()
-                .flatMap(it -> it.participantIds().stream())
+        val memberIds = directChats.stream()
+                .map(DirectChat::memberId)
                 .distinct()
                 .toList();
         val memberMap = memberResolver.resolveMap(memberIds);
 
-        val response = chats.stream()
-                .map(it -> ChatResponse.of(
-                        it,
-                        it.participantIds().stream()
-                                .map(memberMap::get)
-                                .filter(Objects::nonNull)
-                                .map(MemberSummaryResponse::of)
-                                .toList()
-                ))
+        val response = directChats.stream()
+                .map(it -> {
+                    val member = memberMap.get(it.memberId());
+                    return DirectChatResponse.of(it, member != null ? MemberSummaryResponse.of(member) : null);
+                })
                 .toList();
         return ApiResponse.success(response);
     }
@@ -63,8 +59,8 @@ public class ChatController {
     @PostMapping
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
-            @RequestBody @Valid CreateChatRequest request) {
-        val id = chatService.create(user, request.toCommand());
+            @RequestBody @Valid CreateDirectChatRequest request) {
+        val id = directChatService.findOrCreate(user, request.toCommand());
         return ApiResponse.success(id);
     }
 
@@ -73,7 +69,7 @@ public class ChatController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long chatId,
             CursorLimit cursorLimit) {
-        val page = chatService.listMessages(user, chatId, cursorLimit);
+        val page = directChatService.listMessages(user, chatId, cursorLimit);
 
         val attachmentIds = page.content().stream()
                 .flatMap(it -> it.attachmentIds().stream())

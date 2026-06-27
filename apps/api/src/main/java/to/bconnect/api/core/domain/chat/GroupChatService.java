@@ -16,12 +16,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ChatService {
+public class GroupChatService {
 
-    private final ChatRepository chatRepository;
+    private final GroupChatRepository groupChatRepository;
     private final ParticipantRepository participantRepository;
     private final MessageRepository messageRepository;
-    private final MessageAttachmentMappingRepository messageAttachmentMappingRepository;
+    private final MessageService messageService;
 
     @Transactional(readOnly = true)
     public List<Chat> list(Long memberId) {
@@ -30,7 +30,7 @@ public class ChatService {
 
         if (chatIds.isEmpty()) return List.of();
 
-        val chats = chatRepository.findAllById(chatIds);
+        val chats = groupChatRepository.findAllById(chatIds);
 
         val participantMap = participantRepository.findByChatIdIn(chatIds)
                 .stream()
@@ -39,12 +39,12 @@ public class ChatService {
                         Collectors.mapping(ParticipantEntity::getMemberId, Collectors.toList())
                 ));
 
-        val lastMessageMap = messageRepository.findLatestMessagesByChatIdIn(chatIds)
+        val lastMessageMap = messageRepository.findLatestMessagesByChatIdInAndChatType(chatIds, ChatType.GROUP)
                 .stream()
                 .collect(Collectors.toMap(MessageEntity::getChatId, Message::of));
 
         val unreadCountMap = messageRepository
-                .findUnreadCountByChatIdsAndMemberId(chatIds, memberId)
+                .findGroupUnreadCountByChatIdsAndMemberId(chatIds, memberId)
                 .stream()
                 .collect(Collectors.toMap(
                         it -> (Long) it[0],
@@ -67,18 +67,18 @@ public class ChatService {
         if (!participantIds.contains(user.id()))
             throw new CodeException(ChatExceptionCode.SELF_NOT_INCLUDED);
 
-        val created = chatRepository.save(new ChatEntity(command.title()));
+        val created = groupChatRepository.save(new GroupChatEntity(command.title()));
 
         participantRepository.saveAll(participantIds.stream()
                 .map(it -> new ParticipantEntity(created.getId(), it))
                 .toList());
 
-        messageRepository.save(new MessageEntity(
+        messageService.send(
                 created.getId(),
+                ChatType.GROUP,
                 Member.SYSTEM_ID,
-                MessageType.SYSTEM,
-                MessageTemplate.CHAT_CREATED
-        ));
+                new SendMessage(MessageType.SYSTEM, MessageTemplate.CHAT_CREATED, List.of())
+        );
 
         return created.getId();
     }
@@ -88,24 +88,6 @@ public class ChatService {
         if (!participantRepository.existsByChatIdAndMemberId(chatId, user.id()))
             throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
 
-        val messages = messageRepository.findAllByChatId(
-                chatId,
-                cursor.toScrollPosition(),
-                cursor.toLimit(),
-                cursor.toSort()
-        );
-
-        val messageIds = messages.getContent().stream().map(MessageEntity::getId).toList();
-        val attachmentIdMap = messageAttachmentMappingRepository.findByMessageIdIn(messageIds)
-                .stream()
-                .collect(Collectors.groupingBy(
-                        MessageAttachmentMappingEntity::getMessageId,
-                        Collectors.mapping(MessageAttachmentMappingEntity::getAttachmentId, Collectors.toList())
-                ));
-
-        return CursorPage.from(
-                messages.map(it -> Message.of(it, attachmentIdMap.getOrDefault(it.getId(), List.of()))),
-                Message::id
-        );
+        return messageService.list(chatId, ChatType.GROUP, cursor);
     }
 }

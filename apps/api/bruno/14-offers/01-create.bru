@@ -1,0 +1,34 @@
+meta {
+  name: 제안 생성
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/offers
+  auth: inherit
+}
+
+body {
+  {
+    "taskId": {{projectTaskId}},
+    "workerId": 2,
+    "due": "2026-12-31"
+  }
+}
+
+script:post-response {
+  bru.setVar("offerId", res.body.data);
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.a('number');
+  });
+}
+
+docs {
+  업체(로그인 유저)가 프로젝트 작업(projectTaskId)을 반장1(member 2)에게 제안한다. 큐가 비어 있어 OFFERED로 승격된다.
+}

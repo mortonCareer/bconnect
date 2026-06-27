@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.core.domain.attachment.AttachmentQueryService;
+import to.bconnect.api.core.domain.attachment.AttachmentValidator;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.post.PostAttachmentMappingEntity;
 import to.bconnect.api.storage.post.PostAttachmentMappingRepository;
@@ -22,7 +22,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostAttachmentMappingRepository postAttachmentMappingRepository;
-    private final AttachmentQueryService attachmentQueryService;
+    private final AttachmentValidator attachmentValidator;
 
     @Transactional(readOnly = true)
     public List<Post> list() {
@@ -56,7 +56,7 @@ public class PostService {
 
     @Transactional
     public Long create(AuthUser user, CreatePost command) {
-        attachmentQueryService.list(user, command.attachmentIds());
+        attachmentValidator.validate(user, command.attachmentIds());
 
         val created = postRepository.save(new PostEntity(
                 user.id(),
