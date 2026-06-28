@@ -6,11 +6,11 @@
 
 ```
 to.bconnect.api
+├── attachment              # 첨부 모듈
 ├── common                  # 공통 모듈
 ├── core                    # 비즈니스 코어
-│   ├── presentation     # Presentation 레이어
+│   ├── presentation        # Presentation 레이어
 │   └── domain              # Domain 레이어
-│       ├── attachment
 │       ├── chat
 │       └── ...
 ├── storage                 # Storage 레이어
@@ -29,9 +29,10 @@ to.bconnect.api
 flowchart TD
     socket --> core
     core --> security
-    security --> storage
-    security --> support
     storage --> common
+    security --> attachment
+    attachment --> storage
+    attachment --> support
 ```
 - `PackageDependencyTest.java` 참고
 
@@ -134,32 +135,24 @@ graph TD
 ```mermaid
 graph TD
   subgraph Presentation
-    GChatC[GroupChatController]
-    DChatC[DirectChatController]
-    CredC[CredentialController]
-    FeedC[FeedController]
+    MemberC[MemberController]
+    AttC[AttachmentController]
   end
   subgraph Domain
     PostS[PostService]
     CredS[CredentialService]
+    Reg[AttachmentContextValidatorRegistry]
   end
-  subgraph Socket
-    MsgC[MessageSocketController]
-    MsgS[MessageSocketService]
-  end
-  subgraph Attachment["Attachment Domain"]
-    AttQ[AttachmentQueryService]
+  subgraph Attachment
     AttR[AttachmentResolver]
+    AttS[AttachmentService]
+    AttV[AttachmentValidator]
   end
 
-  GChatC -->|resolveMap · url| AttR
-  DChatC -->|resolveMap · url| AttR
-  CredC -->|resolveMap · url| AttR
-  FeedC -->|resolveMap · url| AttR
-  MsgC -->|resolveMap · url| AttR
-  MsgS -->|list| AttQ
-  PostS -->|list| AttQ
-  CredS -->|get| AttQ
+  MemberC -->|urlMap · url| AttR
+  AttC -->|presign · confirm| AttS
+  AttC -->|context validate| Reg
+  PostS & CredS -->|validate| AttV
 ```
 
 ### 도메인 교차
@@ -176,11 +169,16 @@ graph TD
   subgraph task
     TaskS[TaskService]
   end
+  subgraph member
+    MemS[MemberService]
+  end
+  subgraph otp
+    OtpS[OtpService]
+  end
   RecS -->|isCoworker| CowS
   TaskS -->|isCoworker| CowS
+  MemS -->|verifyToken| OtpS
 ```
-- MemberService.register → OtpService.verifyToken
-- GroupChatService.create → Member.SYSTEM_ID
 
 ## 래퍼런스
 - [Java Bean Validation](https://docs.spring.io/spring-framework/reference/core/validation/beanvalidation.html)
