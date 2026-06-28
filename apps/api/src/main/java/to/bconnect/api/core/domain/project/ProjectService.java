@@ -76,13 +76,16 @@ public class ProjectService {
 
     @Transactional
     public void delete(AuthUser user, Long projectId) {
-        projectRepository.findById(projectId).ifPresent(it -> {
-            val company = findCompany(user);
-            if (!it.getCompanyId().equals(company.getId()))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        val optional = projectRepository.findById(projectId);
+        if (optional.isEmpty())
+            return;
+        val found = optional.get();
 
-            projectRepository.delete(it);
-        });
+        val company = findCompany(user);
+        if (!found.getCompanyId().equals(company.getId()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        projectRepository.delete(found);
     }
 
     private CompanyEntity findCompany(AuthUser user) {

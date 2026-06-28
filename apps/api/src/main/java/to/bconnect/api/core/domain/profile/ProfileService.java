@@ -87,11 +87,14 @@ public class ProfileService {
 
     @Transactional
     public void delete(AuthUser user) {
-        profileRepository.findByMemberId(user.id()).ifPresent(it -> {
-            if (!it.getMemberId().equals(user.id()))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        val optional = profileRepository.findByMemberId(user.id());
+        if (optional.isEmpty())
+            return;
+        val found = optional.get();
 
-            profileRepository.delete(it);
-        });
+        if (!found.getMemberId().equals(user.id()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        profileRepository.delete(found);
     }
 }

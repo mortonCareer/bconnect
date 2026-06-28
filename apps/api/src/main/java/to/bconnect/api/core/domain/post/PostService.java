@@ -84,12 +84,15 @@ public class PostService {
 
     @Transactional
     public void delete(AuthUser user, Long postId) {
-        postRepository.findById(postId).ifPresent(it -> {
-            if (!it.getMemberId().equals(user.id()))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        val optional = postRepository.findById(postId);
+        if (optional.isEmpty())
+            return;
+        val found = optional.get();
 
-            postAttachmentMappingRepository.deleteByPostId(it.getId());
-            postRepository.delete(it);
-        });
+        if (!found.getMemberId().equals(user.id()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        postAttachmentMappingRepository.deleteByPostId(found.getId());
+        postRepository.delete(found);
     }
 }

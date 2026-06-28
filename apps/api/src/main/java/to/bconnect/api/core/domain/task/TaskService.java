@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskEntity;
@@ -47,8 +46,8 @@ public class TaskService {
     @Transactional
     public Long createByCompany(AuthUser user, CreateProjectTask command) {
         val companyId = companyRepository.findByMemberId(user.id())
-                .map(CompanyEntity::getId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
+                .getId();
 
         val project = projectRepository.findById(command.projectId())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
@@ -94,8 +93,8 @@ public class TaskService {
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         val companyId = companyRepository.findByMemberId(user.id())
-                .map(CompanyEntity::getId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
+                .getId();
 
         val project = projectRepository.findById(task.getProjectId())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
@@ -129,8 +128,8 @@ public class TaskService {
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
         } else {
             val companyId = companyRepository.findByMemberId(user.id())
-                    .map(CompanyEntity::getId)
-                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
+                    .getId();
 
             val project = projectRepository.findById(task.getProjectId())
                     .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));

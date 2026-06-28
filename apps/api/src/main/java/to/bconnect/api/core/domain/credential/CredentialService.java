@@ -65,12 +65,15 @@ public class CredentialService {
 
     @Transactional
     public void delete(AuthUser user, Long id) {
-        credentialRepository.findById(id).ifPresent(it -> {
-            if (!it.getMemberId().equals(user.id()))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        val optional = credentialRepository.findById(id);
+        if (optional.isEmpty())
+            return;
+        val found = optional.get();
 
-            credentialRepository.delete(it);
-        });
+        if (!found.getMemberId().equals(user.id()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        credentialRepository.delete(found);
     }
 
     @Transactional
