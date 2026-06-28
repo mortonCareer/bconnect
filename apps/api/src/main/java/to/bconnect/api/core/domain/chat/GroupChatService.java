@@ -27,7 +27,6 @@ public class GroupChatService {
     public List<Chat> list(Long memberId) {
         val chatIds = participantRepository.findByMemberId(memberId)
                 .stream().map(ParticipantEntity::getChatId).toList();
-
         if (chatIds.isEmpty()) return List.of();
 
         val chats = groupChatRepository.findAllById(chatIds);
@@ -67,7 +66,7 @@ public class GroupChatService {
                 .map(it -> new ParticipantEntity(created.getId(), it))
                 .toList());
 
-        messageService.send(
+        messageService.create(
                 created.getId(),
                 ChatType.GROUP,
                 Member.SYSTEM_ID,

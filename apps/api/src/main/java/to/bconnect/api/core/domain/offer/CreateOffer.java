@@ -6,5 +6,4 @@ public record CreateOffer(
         Long taskId,
         Long workerId,
         LocalDate due
-) {
-}
+) { }

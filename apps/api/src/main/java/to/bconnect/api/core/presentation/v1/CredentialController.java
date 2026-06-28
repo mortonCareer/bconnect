@@ -17,7 +17,6 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -30,7 +29,7 @@ public class CredentialController {
 
     @GetMapping
     public ApiResponse<List<CredentialSummaryResponse>> list(@RequestParam Long memberId) {
-        val response = credentialService.listPublic(memberId).stream()
+        val response = credentialService.listLatestAccepted(memberId).stream()
                 .map(CredentialSummaryResponse::of)
                 .toList();
         return ApiResponse.success(response);

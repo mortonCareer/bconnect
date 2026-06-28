@@ -42,7 +42,7 @@ public class OfferEntity extends BaseEntity {
     }
 
     public void offered() {
-        this.status = OfferStatus.OFFERED;
+        this.status = OfferStatus.ACTIVE;
     }
 
     public void accept() {

@@ -55,7 +55,6 @@ public class MessageSocketService {
                     .toList());
 
         markAsRead(chatId, chatType, created.getId());
-
         return Message.of(created, attachmentIds);
     }
 

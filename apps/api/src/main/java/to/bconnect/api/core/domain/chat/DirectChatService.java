@@ -22,27 +22,9 @@ public class DirectChatService {
     private final MessageRepository messageRepository;
     private final MessageService messageService;
 
-    @Transactional
-    public Long findOrCreate(AuthUser user, CreateDirectChat command) {
-        return findOrCreate(user.id(), command.memberId());
-    }
-
-    @Transactional
-    public Long findOrCreate(Long memberId, Long otherId) {
-        return directChatRepository.findByMembers(memberId, otherId)
-                .map(DirectChatEntity::getId)
-                .orElseGet(() -> {
-                    val chatId = directChatRepository.save(DirectChatEntity.of(memberId, otherId)).getId();
-                    messageService.send(chatId, ChatType.DIRECT, Member.SYSTEM_ID,
-                            new SendMessage(MessageType.SYSTEM, MessageTemplate.CHAT_CREATED, List.of()));
-                    return chatId;
-                });
-    }
-
     @Transactional(readOnly = true)
     public List<DirectChat> list(Long memberId) {
         val chats = directChatRepository.findAllByMember(memberId);
-
         if (chats.isEmpty()) return List.of();
 
         val chatIds = chats.stream().map(DirectChatEntity::getId).toList();
@@ -68,5 +50,16 @@ public class DirectChatService {
             throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
 
         return messageService.list(chatId, ChatType.DIRECT, cursor);
+    }
+
+    @Transactional
+    public Long findOrCreate(Long memberId, Long otherId) {
+        val optional = directChatRepository.findByMembers(memberId, otherId);
+        if (optional.isPresent())
+            return optional.get().getId();
+
+        val created = directChatRepository.save(DirectChatEntity.of(memberId, otherId));
+        messageService.createSystemMessage(created.getId(), ChatType.DIRECT, MessageTemplate.CHAT_CREATED);
+        return created.getId();
     }
 }

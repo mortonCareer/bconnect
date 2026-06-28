@@ -33,7 +33,7 @@ public class CredentialService {
     }
 
     @Transactional(readOnly = true)
-    public List<Credential> listPublic(Long memberId) {
+    public List<Credential> listLatestAccepted(Long memberId) {
         // latest one per type
         return credentialRepository.findByMemberId(memberId)
                 .stream()
