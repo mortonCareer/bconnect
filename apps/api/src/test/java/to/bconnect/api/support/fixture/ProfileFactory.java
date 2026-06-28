@@ -21,7 +21,7 @@ public class ProfileFactory {
 
     public static Profile create(Long id, Long memberId) {
         return new Profile(id, memberId, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL),
-                5, "headline", "about", DEFAULT_ADDRESS, null,
+                5, "headline", "about", DEFAULT_ADDRESS,
                 MIN_DATE_TIME, MIN_DATE_TIME, 0L, 0L, 0L);
     }
 
@@ -33,15 +33,14 @@ public class ProfileFactory {
                 5,
                 "headline",
                 "about",
-                DEFAULT_ADDRESS,
-                null
+                DEFAULT_ADDRESS
         );
     }
 
     public static CreateProfileRequest createRequest() {
         return new CreateProfileRequest(
                 Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL), 5,
-                "headline", "about", DEFAULT_ADDRESS, null);
+                "headline", "about", DEFAULT_ADDRESS);
     }
 
     public static UpdateProfileRequest updateRequest() {
