@@ -9,8 +9,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import to.bconnect.api.core.presentation.v1.request.CreateCredentialRequest;
 import to.bconnect.api.core.presentation.v1.response.CredentialResponse;
 import to.bconnect.api.core.presentation.v1.response.CredentialSummaryResponse;
-import to.bconnect.api.core.domain.attachment.AttachmentResolver;
-import to.bconnect.api.core.domain.attachment.ImageSize;
+import to.bconnect.api.attachment.AttachmentResolver;
+import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.core.domain.credential.Credential;
 import to.bconnect.api.core.domain.credential.CredentialService;
 import to.bconnect.api.security.AuthUser;
@@ -48,7 +48,7 @@ public class CredentialController {
         val response = credentials.stream()
                 .map(it -> {
                     val attachment = attachmentMap.get(it.attachmentId());
-                    return CredentialResponse.of(it, attachment, attachmentResolver.url(attachment, ImageSize.SMALL));
+                    return CredentialResponse.of(it, attachment, attachmentResolver.getUrl(attachment, ImageSize.SMALL));
                 })
                 .toList();
         return ApiResponse.success(response);

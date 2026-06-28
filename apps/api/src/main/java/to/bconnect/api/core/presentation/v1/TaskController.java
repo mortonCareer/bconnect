@@ -19,22 +19,21 @@ import to.bconnect.api.core.presentation.v1.request.UpdateProjectTaskRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateWorkerTaskRequest;
 import to.bconnect.api.core.presentation.v1.response.OfferResponse;
 import to.bconnect.api.core.presentation.v1.response.TaskResponse;
-import to.bconnect.api.core.domain.attachment.AttachmentResolver;
-import to.bconnect.api.core.domain.attachment.ImageSize;
+import to.bconnect.api.attachment.AttachmentResolver;
+import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.domain.offer.Offer;
 import to.bconnect.api.core.domain.offer.OfferService;
-import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.core.domain.task.TaskService;
 import to.bconnect.api.core.domain.task.TaskQueryService;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -85,18 +84,17 @@ public class TaskController {
         val workerIds = offers.stream().map(Offer::workerId).distinct().toList();
         val memberMap = memberResolver.resolveMap(workerIds);
         val profileMap = profileResolver.resolveMap(workerIds);
-        val pictureIds = profileMap.values().stream()
-                .map(Profile::pictureId).filter(Objects::nonNull).toList();
-        val attachmentMap = attachmentResolver.resolveMap(pictureIds);
+        val urlMap = attachmentResolver.resolveUrlMap(
+                memberMap.values().stream().map(Member::pictureId).toList(), ImageSize.SMALL);
 
         val response = offers.stream()
                 .map(it -> {
-                    val profile = profileMap.get(it.workerId());
+                    val member = memberMap.get(it.workerId());
                     return OfferResponse.of(
                             it,
-                            memberMap.get(it.workerId()),
-                            profile,
-                            profile == null ? null : attachmentResolver.url(attachmentMap.get(profile.pictureId()), ImageSize.SMALL));
+                            member,
+                            profileMap.get(it.workerId()),
+                            urlMap.get(member.pictureId()));
                 })
                 .toList();
         return ApiResponse.success(response);

@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.common.response.ApiResponse;
-import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.attachment.AttachmentResolver;
+import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.core.domain.company.Company;
 import to.bconnect.api.core.domain.company.CompanyService;
 import to.bconnect.api.core.presentation.v1.request.CreateCompanyRequest;
@@ -30,17 +31,17 @@ import java.util.List;
 public class CompanyController {
 
     private final CompanyService companyService;
-    private final MemberResolver memberResolver;
+    private final AttachmentResolver attachmentResolver;
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ApiResponse<List<CompanyResponse>> list() {
         val companies = companyService.list();
-        val memberIds = companies.stream().map(Company::memberId).distinct().toList();
-        val memberMap = memberResolver.resolveMap(memberIds);
+        val urlMap = attachmentResolver.resolveUrlMap(
+                companies.stream().map(Company::pictureId).toList(), ImageSize.SMALL);
 
         val response = companies.stream()
-                .map(it -> CompanyResponse.of(it, memberMap.get(it.memberId())))
+                .map(it -> CompanyResponse.of(it, urlMap.get(it.pictureId())))
                 .toList();
         return ApiResponse.success(response);
     }
@@ -48,8 +49,8 @@ public class CompanyController {
     @GetMapping("/{id}")
     public ApiResponse<CompanyResponse> get(@PathVariable Long id) {
         val company = companyService.get(id);
-        val member = memberResolver.find(company.memberId());
-        return ApiResponse.success(CompanyResponse.of(company, member));
+        return ApiResponse.success(
+                CompanyResponse.of(company, attachmentResolver.getUrl(company.pictureId(), ImageSize.SMALL)));
     }
 
     @PostMapping
@@ -64,7 +65,7 @@ public class CompanyController {
     public ApiResponse<Void> update(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid UpdateCompanyRequest request) {
-        companyService.update(user, request.picture());
+        companyService.update(user, request.pictureId());
         return ApiResponse.success(null);
     }
 

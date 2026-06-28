@@ -2,7 +2,7 @@ package to.bconnect.api.storage.chat;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import to.bconnect.api.storage.attachment.AttachmentContext;
-import to.bconnect.api.storage.attachment.AttachmentReferenceProvider;
+import to.bconnect.api.storage.AttachmentReferenceProvider;
 
 import java.util.Collection;
 import java.util.List;

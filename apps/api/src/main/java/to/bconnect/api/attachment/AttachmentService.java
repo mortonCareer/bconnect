@@ -1,4 +1,4 @@
-package to.bconnect.api.core.domain.attachment;
+package to.bconnect.api.attachment;
 
 import lombok.val;
 import org.slf4j.Logger;
@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.AttachmentEntity;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
@@ -18,10 +17,7 @@ import to.bconnect.api.support.s3.S3FileStorage;
 import to.bconnect.api.support.s3.StoredObject;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class AttachmentService {
@@ -31,48 +27,37 @@ public class AttachmentService {
     private final AttachmentRepository attachmentRepository;
     private final AttachmentProperties attachmentProperties;
     private final S3FileStorage fileStorage;
-    private final Map<AttachmentContext, AttachmentContextValidator> resolvers;
     private final List<MediaType> allowedContentTypes;
 
     public AttachmentService(AttachmentRepository attachmentRepository,
                              AttachmentProperties attachmentProperties,
-                             S3FileStorage fileStorage,
-                             List<AttachmentContextValidator> resolvers) {
+                             S3FileStorage fileStorage) {
         this.attachmentRepository = attachmentRepository;
         this.attachmentProperties = attachmentProperties;
         this.fileStorage = fileStorage;
-        this.resolvers = resolvers.stream()
-                .collect(Collectors.toUnmodifiableMap(AttachmentContextValidator::context, Function.identity()));
-        for (val context : AttachmentContext.values()) {
-            if (!this.resolvers.containsKey(context))
-                throw new IllegalStateException("AttachmentContextValidator 미등록 context: " + context);
-        }
         this.allowedContentTypes = attachmentProperties.allowedContentTypes().stream()
                 .map(MediaType::parseMediaType)
                 .toList();
     }
 
     @Transactional
-    public List<PresignedFile> presign(AuthUser user, AttachmentContext context, AttachmentType type, Long contextId, List<PresignFile> files) {
+    public List<PresignedFile> presign(Long memberId, AttachmentContext context, AttachmentType type, Long contextId, List<PresignFile> files) {
         if (files.size() > attachmentProperties.maxBatchSize())
             throw new CodeException(AttachmentExceptionCode.TOO_MANY_FILES);
 
-        val resolver = resolvers.get(context);
-        resolver.validate(user, contextId);
-
         return files.stream()
-                .map(it -> presignOne(user, context, type, contextId, it))
+                .map(it -> presignOne(memberId, context, type, contextId, it))
                 .toList();
     }
 
     @Transactional
-    public List<Attachment> confirm(AuthUser user, List<Long> attachmentIds) {
+    public List<Attachment> confirm(Long memberId, List<Long> attachmentIds) {
         return attachmentIds.stream()
-                .map(it -> confirmOne(user, it))
+                .map(it -> confirmOne(memberId, it))
                 .toList();
     }
 
-    private PresignedFile presignOne(AuthUser user, AttachmentContext context, AttachmentType type, Long contextId, PresignFile file) {
+    private PresignedFile presignOne(Long memberId, AttachmentContext context, AttachmentType type, Long contextId, PresignFile file) {
         if (file.size() > attachmentProperties.maxFileSize().toBytes())
             throw new CodeException(AttachmentExceptionCode.FILE_TOO_LARGE);
         if (!isAllowedContentType(file.contentType()))
@@ -84,7 +69,7 @@ public class AttachmentService {
         val key = AttachmentKeyUtils.key(context, contextId, type, ImageSize.ORIGINAL, uuid, ext);
 
         val created = attachmentRepository.save(new AttachmentEntity(
-                user.id(),
+                memberId,
                 type,
                 context,
                 contextId,
@@ -99,10 +84,10 @@ public class AttachmentService {
         return new PresignedFile(created.getId(), uploadUrl);
     }
 
-    private Attachment confirmOne(AuthUser user, Long attachmentId) {
+    private Attachment confirmOne(Long memberId, Long attachmentId) {
         val attachment = attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new CodeException(AttachmentExceptionCode.NOT_FOUND));
-        if (!attachment.getMemberId().equals(user.id()))
+        if (!attachment.getMemberId().equals(memberId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         val key = AttachmentKeyUtils.key(

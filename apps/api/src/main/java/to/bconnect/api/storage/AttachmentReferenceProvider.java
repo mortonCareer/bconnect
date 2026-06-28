@@ -1,4 +1,6 @@
-package to.bconnect.api.storage.attachment;
+package to.bconnect.api.storage;
+
+import to.bconnect.api.storage.attachment.AttachmentContext;
 
 import java.util.Collection;
 import java.util.Set;

@@ -1,4 +1,4 @@
-package to.bconnect.api.core.domain.attachment;
+package to.bconnect.api.attachment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -9,6 +9,7 @@ import to.bconnect.api.support.cloudfront.CloudFrontProperties;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,27 @@ public class AttachmentResolver {
                 .collect(Collectors.toMap(Attachment::id, Function.identity()));
     }
 
-    public String url(Attachment attachment, ImageSize size) {
+    @Transactional(readOnly = true)
+    public Map<Long, String> resolveUrlMap(Collection<Long> attachmentIds, ImageSize size) {
+        if (attachmentIds == null)
+            return Map.of();
+
+        val ids = attachmentIds.stream().filter(Objects::nonNull).distinct().toList();
+        return resolveMap(ids).values().stream()
+                .collect(Collectors.toMap(Attachment::id, it -> getUrl(it, size)));
+    }
+
+    @Transactional(readOnly = true)
+    public String getUrl(Long attachmentId, ImageSize size) {
+        if (attachmentId == null)
+            return null;
+
+        return attachmentRepository.findById(attachmentId)
+                .map(it -> getUrl(Attachment.of(it), size))
+                .orElse(null);
+    }
+
+    public String getUrl(Attachment attachment, ImageSize size) {
         if (attachment == null)
             return null;
 

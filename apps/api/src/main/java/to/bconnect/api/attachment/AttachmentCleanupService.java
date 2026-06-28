@@ -1,11 +1,11 @@
-package to.bconnect.api.core.domain.attachment;
+package to.bconnect.api.attachment;
 
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.AttachmentEntity;
-import to.bconnect.api.storage.attachment.AttachmentReferenceProvider;
+import to.bconnect.api.storage.AttachmentReferenceProvider;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentStatus;
 import to.bconnect.api.support.s3.S3FileStorage;

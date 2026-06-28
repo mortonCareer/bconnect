@@ -1,4 +1,4 @@
-package to.bconnect.api.core.domain.attachment;
+package to.bconnect.api.attachment;
 
 import lombok.AccessLevel;
 import lombok.Getter;

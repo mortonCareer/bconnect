@@ -14,6 +14,8 @@ import to.bconnect.api.storage.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberEntity extends BaseEntity {
 
+    public static final Long SYSTEM_ID = 0L;
+
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -24,15 +26,15 @@ public class MemberEntity extends BaseEntity {
     private String phone;
 
     @Column
-    private String picture;
+    private Long pictureId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
-    public void update(String name, String picture, Role role) {
+    public void update(String name, Long pictureId, Role role) {
         this.name = name;
-        this.picture = picture;
+        this.pictureId = pictureId;
         this.role = role;
     }
 }

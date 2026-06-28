@@ -1,11 +1,10 @@
-package to.bconnect.api.core.domain.attachment;
+package to.bconnect.api.core.domain;
 
-import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 
 public interface AttachmentContextValidator {
 
     AttachmentContext context();
 
-    void validate(AuthUser user, Long contextId);
+    void validate(Long memberId, Long contextId);
 }

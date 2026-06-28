@@ -1,4 +1,4 @@
-package to.bconnect.api.core.domain.credential;
+package to.bconnect.api.security.member;
 
 import org.springframework.stereotype.Component;
 import to.bconnect.api.common.CodeException;
@@ -7,11 +7,11 @@ import to.bconnect.api.core.domain.AttachmentContextValidator;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 
 @Component
-public class CredentialAttachmentValidator implements AttachmentContextValidator {
+public class MemberAttachmentValidator implements AttachmentContextValidator {
 
     @Override
     public AttachmentContext context() {
-        return AttachmentContext.CREDENTIAL;
+        return AttachmentContext.MEMBER;
     }
 
     @Override

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.core.domain.attachment.AttachmentValidator;
+import to.bconnect.api.attachment.AttachmentValidator;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.credential.CredentialEntity;
 import to.bconnect.api.storage.credential.CredentialRepository;
@@ -51,7 +51,7 @@ public class CredentialService {
     @Transactional
     public Long create(AuthUser user, CreateCredential command) {
         if (command.attachmentId() != null)
-            attachmentValidator.validate(user, command.attachmentId());
+            attachmentValidator.validate(user.id(), command.attachmentId());
 
         val created = new CredentialEntity(
                 user.id(),

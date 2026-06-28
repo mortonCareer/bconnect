@@ -17,7 +17,6 @@ public record ProfileResponse(
         String headline,
         String about,
         Address address,
-        String picture,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt,
         int postCount,
@@ -27,14 +26,13 @@ public record ProfileResponse(
     public static ProfileResponse of(Profile detail, Member member, String picture) {
         return new ProfileResponse(
                 detail.id(),
-                MemberSummaryResponse.of(member),
+                MemberSummaryResponse.of(member, picture),
                 detail.primaryTrade(),
                 detail.trades(),
                 detail.experience(),
                 detail.headline(),
                 detail.about(),
                 detail.address(),
-                picture,
                 detail.createdAt(),
                 detail.modifiedAt(),
                 detail.postCount().intValue(),

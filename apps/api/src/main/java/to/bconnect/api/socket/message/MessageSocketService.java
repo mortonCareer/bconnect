@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.core.domain.attachment.AttachmentValidator;
+import to.bconnect.api.attachment.AttachmentValidator;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.security.AuthUser;
@@ -39,7 +39,7 @@ public class MessageSocketService {
         val attachmentIds = command.attachmentIds();
 
         if (!attachmentIds.isEmpty())
-            attachmentValidator.validate(user, attachmentIds);
+            attachmentValidator.validate(user.id(), attachmentIds);
 
         val created = messageRepository.save(new MessageEntity(
                 chatId,

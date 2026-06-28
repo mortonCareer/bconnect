@@ -1,6 +1,6 @@
 package to.bconnect.api.core.presentation.v1.response;
 
-import to.bconnect.api.core.domain.attachment.PresignedFile;
+import to.bconnect.api.attachment.PresignedFile;
 
 public record PresignedFileResponse(
         Long id,

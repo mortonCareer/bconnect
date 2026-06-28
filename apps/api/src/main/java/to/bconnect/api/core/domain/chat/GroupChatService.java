@@ -8,8 +8,8 @@ import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.security.member.Member;
 import to.bconnect.api.storage.chat.*;
+import to.bconnect.api.storage.member.MemberEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,7 +69,7 @@ public class GroupChatService {
         messageService.create(
                 created.getId(),
                 ChatType.GROUP,
-                Member.SYSTEM_ID,
+                MemberEntity.SYSTEM_ID,
                 new SendMessage(MessageType.SYSTEM, MessageTemplate.CHAT_CREATED, List.of())
         );
 

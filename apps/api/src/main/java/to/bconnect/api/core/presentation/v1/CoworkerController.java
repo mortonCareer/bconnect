@@ -11,20 +11,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.response.CoworkerResponse;
 import to.bconnect.api.core.presentation.v1.response.CoworkerTaskResponse;
-import to.bconnect.api.core.domain.attachment.AttachmentResolver;
-import to.bconnect.api.core.domain.attachment.ImageSize;
+import to.bconnect.api.attachment.AttachmentResolver;
+import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.core.domain.coworker.Coworker;
 import to.bconnect.api.core.domain.coworker.CoworkerService;
 import to.bconnect.api.core.domain.task.TaskQueryService;
 import to.bconnect.api.core.domain.MemberResolver;
-import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/coworkers")
@@ -47,20 +45,18 @@ public class CoworkerController {
         val memberMap = memberResolver.resolveMap(memberIds);
         val profileMap = profileResolver.resolveMap(memberIds);
         val statusMap = coworkerService.resolveStatusMap(user.id(), memberIds);
-
-        val pictureIds = profileMap.values().stream()
-                .map(Profile::pictureId).filter(Objects::nonNull).toList();
-        val attachmentMap = attachmentResolver.resolveMap(pictureIds);
+        val urlMap = attachmentResolver.resolveUrlMap(
+                memberMap.values().stream().map(Member::pictureId).toList(), ImageSize.SMALL);
 
         val response = coworkers.stream()
                 .map(it -> {
-                    val profile = profileMap.get(it.memberId());
+                    val member = memberMap.get(it.memberId());
                     return CoworkerResponse.of(
                             it,
-                            memberMap.get(it.memberId()),
-                            profile,
+                            member,
+                            profileMap.get(it.memberId()),
                             statusMap.get(it.memberId()),
-                            profile == null ? null : attachmentResolver.url(attachmentMap.get(profile.pictureId()), ImageSize.SMALL));
+                            urlMap.get(member.pictureId()));
                 })
                 .toList();
         return ApiResponse.success(response);

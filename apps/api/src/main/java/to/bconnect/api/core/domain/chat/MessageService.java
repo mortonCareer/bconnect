@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
-import to.bconnect.api.security.member.Member;
 import to.bconnect.api.storage.chat.*;
+import to.bconnect.api.storage.member.MemberEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +36,7 @@ public class MessageService {
         messageRepository.save(new MessageEntity(
                 chatId,
                 type,
-                Member.SYSTEM_ID,
+                MemberEntity.SYSTEM_ID,
                 MessageType.SYSTEM,
                 content
         ));

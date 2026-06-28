@@ -18,8 +18,8 @@ public record RecommendationResponse(
     public static RecommendationResponse of(Recommendation recommendation, Member member, Profile profile, String picture) {
         return new RecommendationResponse(
                 recommendation.id(),
-                MemberSummaryResponse.of(member),
-                profile == null ? null : ProfileSummaryResponse.of(profile, picture),
+                MemberSummaryResponse.of(member, picture),
+                profile == null ? null : ProfileSummaryResponse.of(profile),
                 recommendation.content(),
                 recommendation.visible(),
                 recommendation.createdAt(),

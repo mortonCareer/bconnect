@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.request.CreateDirectChatRequest;
 import to.bconnect.api.core.presentation.v1.response.AttachmentResponse;
 import to.bconnect.api.core.presentation.v1.response.DirectChatResponse;
-import to.bconnect.api.core.presentation.v1.response.MemberSummaryResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
-import to.bconnect.api.core.domain.attachment.AttachmentResolver;
-import to.bconnect.api.core.domain.attachment.ImageSize;
+import to.bconnect.api.attachment.AttachmentResolver;
+import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.core.domain.chat.DirectChat;
 import to.bconnect.api.core.domain.chat.DirectChatService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.common.response.CursorPage;
@@ -46,11 +46,13 @@ public class DirectChatController {
                 .distinct()
                 .toList();
         val memberMap = memberResolver.resolveMap(memberIds);
+        val urlMap = attachmentResolver.resolveUrlMap(
+                memberMap.values().stream().map(Member::pictureId).toList(), ImageSize.SMALL);
 
         val response = directChats.stream()
                 .map(it -> {
                     val member = memberMap.get(it.memberId());
-                    return DirectChatResponse.of(it, member != null ? MemberSummaryResponse.of(member) : null);
+                    return DirectChatResponse.of(it, member, urlMap.get(member == null ? null : member.pictureId()));
                 })
                 .toList();
         return ApiResponse.success(response);
@@ -82,7 +84,7 @@ public class DirectChatController {
                 .map(it -> MessageResponse.of(it, it.attachmentIds().stream()
                         .map(attachmentMap::get)
                         .filter(Objects::nonNull)
-                        .map(att -> AttachmentResponse.of(att, attachmentResolver.url(att, ImageSize.SMALL)))
+                        .map(att -> AttachmentResponse.of(att, attachmentResolver.getUrl(att, ImageSize.SMALL)))
                         .toList()))
                 .toList();
 
