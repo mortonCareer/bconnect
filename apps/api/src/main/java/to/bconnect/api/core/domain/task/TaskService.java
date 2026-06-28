@@ -14,6 +14,8 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TaskService {
@@ -21,6 +23,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final CompanyRepository companyRepository;
     private final ProjectRepository projectRepository;
+    private final TaskManager taskManager;
 
     @Transactional
     public Long createByWorker(AuthUser user, CreateWorkerTask command) {
@@ -137,6 +140,6 @@ public class TaskService {
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
         }
 
-        taskRepository.delete(task);
+        taskManager.deleteByIds(List.of(task.getId()));
     }
 }

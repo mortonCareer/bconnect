@@ -15,6 +15,8 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
     List<PostEntity> findByTaskId(Long taskId);
 
+    List<PostEntity> findByTaskIdIn(Collection<Long> taskIds);
+
     long countByMemberId(Long memberId);
 
     default Map<Long, Long> countByMemberIdIn(Collection<Long> memberIds) {

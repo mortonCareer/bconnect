@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface OfferRepository extends JpaRepository<OfferEntity, Long> {
 
+    void deleteByTaskIdIn(Collection<Long> taskIds);
+
     boolean existsByTaskIdAndStatus(Long taskId, OfferStatus status);
 
     long countByTaskIdAndStatus(Long taskId, OfferStatus status);

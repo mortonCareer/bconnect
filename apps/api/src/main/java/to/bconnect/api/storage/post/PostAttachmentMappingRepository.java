@@ -17,6 +17,8 @@ public interface PostAttachmentMappingRepository extends JpaRepository<PostAttac
 
     void deleteByPostId(Long postId);
 
+    void deleteByPostIdIn(Collection<Long> postIds);
+
     @Override
     default AttachmentContext context() {
         return AttachmentContext.POST;

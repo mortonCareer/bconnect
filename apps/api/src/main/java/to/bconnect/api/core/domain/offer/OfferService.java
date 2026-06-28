@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.task.TaskExceptionCode;
+import to.bconnect.api.core.domain.task.TaskManager;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.member.MemberRepository;
@@ -31,6 +32,7 @@ public class OfferService {
     private final TaskRepository taskRepository;
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final TaskManager taskManager;
 
     @Transactional
     public Long create(AuthUser user, CreateOffer command) {
@@ -79,7 +81,7 @@ public class OfferService {
         offerRepository.findAllByTaskIdAndStatus(found.getTaskId(), OfferStatus.PENDING)
                 .forEach(OfferEntity::cancel);
 
-        val ownerId = getCompanyOwnerId(found.getTaskId());
+        val ownerId = taskManager.getCompanyOwnerId(found.getTaskId());
         eventPublisher.publishEvent(
                 new OfferAcceptedEvent(found.getId(), found.getWorkerId(), ownerId));
     }
@@ -103,7 +105,7 @@ public class OfferService {
         val found = offerRepository.findById(offerId)
                 .orElseThrow(() -> new CodeException(OfferExceptionCode.NOT_FOUND));
 
-        val ownerId = getCompanyOwnerId(found.getTaskId());
+        val ownerId = taskManager.getCompanyOwnerId(found.getTaskId());
         if (!user.id().equals(ownerId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
@@ -134,7 +136,7 @@ public class OfferService {
             throw new CodeException(OfferExceptionCode.INVALID_REORDER);
 
         // check ownership
-        val ownerId = getCompanyOwnerId(taskId);
+        val ownerId = taskManager.getCompanyOwnerId(taskId);
         if (!user.id().equals(ownerId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
@@ -150,7 +152,7 @@ public class OfferService {
 
     @Transactional(readOnly = true)
     public List<Offer> listByTask(AuthUser user, Long taskId) {
-        val ownerId = getCompanyOwnerId(taskId);
+        val ownerId = taskManager.getCompanyOwnerId(taskId);
         if (!user.id().equals(ownerId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
@@ -176,18 +178,8 @@ public class OfferService {
 
         val found = optional.get();
         found.offered();
-        val ownerId = getCompanyOwnerId(taskId);
+        val ownerId = taskManager.getCompanyOwnerId(taskId);
         eventPublisher.publishEvent(
                 new OfferActivatedEvent(found.getId(), found.getWorkerId(), ownerId));
-    }
-
-    private Long getCompanyOwnerId(Long taskId) {
-        val task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new CodeException(TaskExceptionCode.NOT_FOUND));
-        val project = projectRepository.findById(task.getProjectId())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        val company = companyRepository.findById(project.getCompanyId())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        return company.getMemberId();
     }
 }
