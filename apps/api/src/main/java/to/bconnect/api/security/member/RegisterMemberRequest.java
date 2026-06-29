@@ -2,7 +2,8 @@ package to.bconnect.api.security.member;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.validator.constraints.URL;
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.member.Role;
 
 public record RegisterMemberRequest(
@@ -10,6 +11,13 @@ public record RegisterMemberRequest(
         @NotBlank String signupToken,
         @NotBlank String username,
         @NotBlank String name,
-        @URL String picture,
+        Long pictureId,
         @NotNull Role role
-) {}
+) {
+    public RegisterMember toCommand() {
+        if (role == Role.ADMIN || role == Role.GUEST)
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        return new RegisterMember(phone, signupToken, username, name, pictureId, role);
+    }
+}

@@ -7,18 +7,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.response.FeedResponse;
-import to.bconnect.api.core.domain.attachment.AttachmentResolver;
-import to.bconnect.api.core.domain.attachment.ImageSize;
+import to.bconnect.api.attachment.AttachmentResolver;
+import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.core.domain.post.Post;
 import to.bconnect.api.core.domain.post.PostService;
 import to.bconnect.api.core.domain.MemberResolver;
-import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
+import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.response.ApiResponse;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -38,24 +36,25 @@ public class FeedController {
         val memberIds = posts.stream().map(Post::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
         val profileMap = profileResolver.resolveMap(memberIds);
+        val pictureMap = attachmentResolver.resolveUrlMap(
+                memberMap.values().stream().map(Member::pictureId).toList(), ImageSize.SMALL);
 
-        val attachmentIds = new ArrayList<Long>(posts.stream()
+        val attachmentIds = posts.stream()
                 .flatMap(it -> it.attachmentIds().stream())
-                .toList());
-        profileMap.values().stream().map(Profile::pictureId).filter(Objects::nonNull).forEach(attachmentIds::add);
+                .toList();
         val attachmentMap = attachmentResolver.resolveMap(attachmentIds);
 
         val response = posts.stream()
                 .map(it -> {
-                    val profile = profileMap.get(it.memberId());
+                    val member = memberMap.get(it.memberId());
                     return FeedResponse.of(
                             it,
-                            memberMap.get(it.memberId()),
-                            profile,
+                            member,
+                            profileMap.get(it.memberId()),
                             it.attachmentIds().stream()
                                     .map(attachmentMap::get).filter(Objects::nonNull)
-                                    .map(att -> attachmentResolver.url(att, ImageSize.MEDIUM)).toList(),
-                            profile == null ? null : attachmentResolver.url(attachmentMap.get(profile.pictureId()), ImageSize.SMALL));
+                                    .map(att -> attachmentResolver.getUrl(att, ImageSize.MEDIUM)).toList(),
+                            pictureMap.get(member.pictureId()));
                 })
                 .toList();
         return ApiResponse.success(response);
@@ -67,16 +66,13 @@ public class FeedController {
         val member = memberResolver.find(post.memberId());
         val profile = profileResolver.resolveMap(List.of(post.memberId())).get(post.memberId());
 
-        val attachmentIds = new ArrayList<Long>(post.attachmentIds());
-        if (profile != null && profile.pictureId() != null)
-            attachmentIds.add(profile.pictureId());
-        val attachmentMap = attachmentResolver.resolveMap(attachmentIds);
+        val attachmentMap = attachmentResolver.resolveMap(post.attachmentIds());
 
         return ApiResponse.success(FeedResponse.of(
                 post, member, profile,
                 post.attachmentIds().stream()
                         .map(attachmentMap::get).filter(Objects::nonNull)
-                        .map(att -> attachmentResolver.url(att, ImageSize.MEDIUM)).toList(),
-                profile == null ? null : attachmentResolver.url(attachmentMap.get(profile.pictureId()), ImageSize.SMALL)));
+                        .map(att -> attachmentResolver.getUrl(att, ImageSize.MEDIUM)).toList(),
+                attachmentResolver.getUrl(member.pictureId(), ImageSize.SMALL)));
     }
 }

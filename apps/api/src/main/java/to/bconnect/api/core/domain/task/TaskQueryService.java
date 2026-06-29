@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.project.ProjectRepository;
@@ -64,8 +63,8 @@ public class TaskQueryService {
     @Transactional(readOnly = true)
     public List<Task> listByProject(AuthUser user, Long projectId) {
         val companyId = companyRepository.findByMemberId(user.id())
-                .map(CompanyEntity::getId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
+                .getId();
 
         val project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));

@@ -6,11 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
-import to.bconnect.api.storage.chat.ChatType;
-import to.bconnect.api.storage.chat.MessageAttachmentMappingEntity;
-import to.bconnect.api.storage.chat.MessageAttachmentMappingRepository;
-import to.bconnect.api.storage.chat.MessageEntity;
-import to.bconnect.api.storage.chat.MessageRepository;
+import to.bconnect.api.storage.chat.*;
+import to.bconnect.api.storage.member.MemberEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,24 +20,33 @@ public class MessageService {
     private final MessageAttachmentMappingRepository messageAttachmentMappingRepository;
 
     @Transactional
-    public Message send(Long chatId, ChatType chatType, Long senderId, SendMessage command) {
+    public void create(Long chatId, ChatType type, Long senderId, SendMessage command) {
         val created = messageRepository.save(new MessageEntity(
-                chatId, chatType, senderId, command.type(), command.content()));
+                chatId, type, senderId, command.type(), command.content()));
 
         val attachmentIds = command.attachmentIds();
         if (!attachmentIds.isEmpty())
             messageAttachmentMappingRepository.saveAll(attachmentIds.stream()
                     .map(it -> new MessageAttachmentMappingEntity(created.getId(), it))
                     .toList());
+    }
 
-        return Message.of(created, attachmentIds);
+    @Transactional
+    public void createSystemMessage(Long chatId, ChatType type, String content) {
+        messageRepository.save(new MessageEntity(
+                chatId,
+                type,
+                MemberEntity.SYSTEM_ID,
+                MessageType.SYSTEM,
+                content
+        ));
     }
 
     @Transactional(readOnly = true)
-    public CursorPage<Message> list(Long chatId, ChatType chatType, CursorLimit cursor) {
+    public CursorPage<Message> list(Long chatId, ChatType type, CursorLimit cursor) {
         val messages = messageRepository.findAllByChatIdAndChatType(
                 chatId,
-                chatType,
+                type,
                 cursor.toScrollPosition(),
                 cursor.toLimit(),
                 cursor.toSort()

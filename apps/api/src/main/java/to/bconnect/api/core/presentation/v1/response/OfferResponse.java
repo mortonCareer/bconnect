@@ -26,8 +26,8 @@ public record OfferResponse(
                 offer.seq(),
                 offer.due(),
                 offer.status(),
-                MemberSummaryResponse.of(member),
-                profile == null ? null : ProfileSummaryResponse.of(profile, picture),
+                MemberSummaryResponse.of(member, picture),
+                profile == null ? null : ProfileSummaryResponse.of(profile),
                 offer.createdAt(),
                 offer.modifiedAt()
         );

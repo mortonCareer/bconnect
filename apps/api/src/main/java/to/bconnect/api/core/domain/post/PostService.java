@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.core.domain.attachment.AttachmentValidator;
+import to.bconnect.api.attachment.AttachmentValidator;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.post.PostAttachmentMappingEntity;
 import to.bconnect.api.storage.post.PostAttachmentMappingRepository;
@@ -56,7 +56,7 @@ public class PostService {
 
     @Transactional
     public Long create(AuthUser user, CreatePost command) {
-        attachmentValidator.validate(user, command.attachmentIds());
+        attachmentValidator.validate(user.id(), command.attachmentIds());
 
         val created = postRepository.save(new PostEntity(
                 user.id(),
@@ -84,12 +84,15 @@ public class PostService {
 
     @Transactional
     public void delete(AuthUser user, Long postId) {
-        postRepository.findById(postId).ifPresent(it -> {
-            if (!it.getMemberId().equals(user.id()))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        val optional = postRepository.findById(postId);
+        if (optional.isEmpty())
+            return;
+        val found = optional.get();
 
-            postAttachmentMappingRepository.deleteByPostId(it.getId());
-            postRepository.delete(it);
-        });
+        if (!found.getMemberId().equals(user.id()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        postAttachmentMappingRepository.deleteByPostId(found.getId());
+        postRepository.delete(found);
     }
 }

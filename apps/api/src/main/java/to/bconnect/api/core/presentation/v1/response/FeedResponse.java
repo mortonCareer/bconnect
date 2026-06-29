@@ -13,8 +13,8 @@ public record FeedResponse(
 ) {
     public static FeedResponse of(Post post, Member member, Profile profile, List<String> images, String picture) {
         return new FeedResponse(
-                MemberSummaryResponse.of(member),
-                profile == null ? null : ProfileSummaryResponse.of(profile, picture),
+                MemberSummaryResponse.of(member, picture),
+                profile == null ? null : ProfileSummaryResponse.of(profile),
                 PostResponse.of(post, images)
         );
     }

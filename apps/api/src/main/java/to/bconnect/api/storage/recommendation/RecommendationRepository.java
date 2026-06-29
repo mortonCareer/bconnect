@@ -6,6 +6,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public interface RecommendationRepository extends JpaRepository<RecommendationEntity, Long> {
 
@@ -21,6 +23,14 @@ public interface RecommendationRepository extends JpaRepository<RecommendationEn
 
     long countByToIdAndVisibleTrue(Long toId);
 
+    default Map<Long, Long> countByToIdInAndVisibleTrue(Collection<Long> memberIds) {
+        return countByToIdInAndVisibleTrueRows(memberIds).stream()
+                .collect(Collectors.toMap(
+                        it -> ((Number) it[0]).longValue(),
+                        it -> ((Number) it[1]).longValue()
+                ));
+    }
+
     @Query("SELECT r.toId, COUNT(r) FROM RecommendationEntity r WHERE r.visible = true AND r.toId IN :memberIds GROUP BY r.toId")
-    List<Object[]> countByToIdInAndVisibleTrue(@Param("memberIds") Collection<Long> memberIds);
+    List<Object[]> countByToIdInAndVisibleTrueRows(@Param("memberIds") Collection<Long> memberIds);
 }

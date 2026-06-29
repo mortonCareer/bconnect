@@ -6,6 +6,8 @@ import lombok.val;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import to.bconnect.api.attachment.AttachmentResolver;
+import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
@@ -17,18 +19,22 @@ import java.util.List;
 public class MemberController {
 
     private final MemberService memberService;
+    private final AttachmentResolver attachmentResolver;
 
     @GetMapping("/me")
     public ApiResponse<MemberResponse> get(@AuthenticationPrincipal AuthUser user) {
         val member = memberService.get(user);
-        return ApiResponse.success(MemberResponse.of(member));
+        return ApiResponse.success(MemberResponse.of(member, attachmentResolver.getUrl(member.pictureId(), ImageSize.SMALL)));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ApiResponse<List<MemberResponse>> listMembers() {
-        val response = memberService.list().stream()
-                .map(MemberResponse::of)
+        val members = memberService.list();
+        val urlMap = attachmentResolver.resolveUrlMap(members.stream().map(Member::pictureId).toList(), ImageSize.SMALL);
+
+        val response = members.stream()
+                .map(it -> MemberResponse.of(it, urlMap.get(it.pictureId())))
                 .toList();
         return ApiResponse.success(response);
     }
@@ -41,7 +47,7 @@ public class MemberController {
 
     @PostMapping
     public ApiResponse<Long> register(@RequestBody @Valid RegisterMemberRequest request) {
-        val member = memberService.register(request);
+        val member = memberService.register(request.toCommand());
         return ApiResponse.success(member.id());
     }
 
@@ -49,7 +55,7 @@ public class MemberController {
     public ApiResponse<Void> update(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid UpdateMemberRequest request) {
-        memberService.update(user, request);
+        memberService.update(user, request.toCommand());
         return ApiResponse.success(null);
     }
 

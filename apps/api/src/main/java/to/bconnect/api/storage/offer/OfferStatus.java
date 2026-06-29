@@ -2,7 +2,7 @@ package to.bconnect.api.storage.offer;
 
 public enum OfferStatus {
     PENDING,
-    OFFERED,
+    ACTIVE,
     ACCEPTED,
     DENIED,
     CANCELED,

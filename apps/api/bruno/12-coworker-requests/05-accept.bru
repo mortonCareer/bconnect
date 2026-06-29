@@ -1,0 +1,30 @@
+meta {
+  name: 동료 요청 승낙
+  type: http
+  seq: 5
+  tags: [
+    seed
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/coworker-requests/:id/accept
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  다른 멤버(4)가 보낸 동료 요청(1)을 승낙한다.
+  @seed members : 4
+  @seed coworker_requests : 1
+}

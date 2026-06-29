@@ -25,13 +25,6 @@ public class MemberResolver {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
-    public List<Member> findAllByIds(Collection<Long> memberIds) {
-        return memberRepository.findByIdIn(memberIds)
-                .stream()
-                .map(Member::of)
-                .toList();
-    }
-
     public Map<Long, Member> resolveMap(Collection<Long> memberIds) {
         return memberRepository.findByIdIn(memberIds)
                 .stream()

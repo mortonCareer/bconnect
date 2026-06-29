@@ -24,16 +24,16 @@ public class CompanyEntity extends BaseEntity {
     private String brn;
 
     @Column
-    private String picture;
+    private Long pictureId;
 
-    public CompanyEntity(Long memberId, String name, String brn, String picture) {
+    public CompanyEntity(Long memberId, String name, String brn, Long pictureId) {
         this.memberId = memberId;
         this.name = name;
         this.brn = brn;
-        this.picture = picture;
+        this.pictureId = pictureId;
     }
 
-    public void update(String picture) {
-        this.picture = picture;
+    public void update(Long pictureId) {
+        this.pictureId = pictureId;
     }
 }

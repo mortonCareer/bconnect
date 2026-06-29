@@ -2,7 +2,7 @@ package to.bconnect.api.storage.post;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import to.bconnect.api.storage.attachment.AttachmentContext;
-import to.bconnect.api.storage.attachment.AttachmentReferenceProvider;
+import to.bconnect.api.storage.AttachmentReferenceProvider;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,6 +16,8 @@ public interface PostAttachmentMappingRepository extends JpaRepository<PostAttac
     List<PostAttachmentMappingEntity> findByAttachmentIdIn(Collection<Long> attachmentIds);
 
     void deleteByPostId(Long postId);
+
+    void deleteByPostIdIn(Collection<Long> postIds);
 
     @Override
     default AttachmentContext context() {

@@ -2,6 +2,10 @@ meta {
   name: 프로젝트 삭제
   type: http
   seq: 6
+  tags: [
+    chain
+    idempotent
+  ]
 }
 
 delete {
@@ -14,4 +18,10 @@ tests {
     expect(res.status).to.equal(200);
     expect(res.body.success).to.equal(true);
   });
+}
+
+docs {
+  @chain
+  - 04-companies/01-create
+  - 05-projects/01-create
 }

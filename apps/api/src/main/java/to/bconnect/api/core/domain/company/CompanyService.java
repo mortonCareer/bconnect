@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.attachment.AttachmentValidator;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
@@ -17,6 +18,7 @@ import java.util.List;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
+    private final AttachmentValidator attachmentValidator;
 
     @Transactional(readOnly = true)
     public List<Company> list() {
@@ -42,22 +44,28 @@ public class CompanyService {
         if (companyRepository.existsByBrn(command.brn()))
             throw new CodeException(CompanyExceptionCode.ALREADY_EXISTS);
 
+        if (command.pictureId() != null)
+            attachmentValidator.validate(user.id(), command.pictureId());
+
         val created = new CompanyEntity(
                 user.id(),
                 command.name(),
                 command.brn(),
-                command.picture()
+                command.pictureId()
         );
 
         return companyRepository.save(created).getId();
     }
 
     @Transactional
-    public void update(AuthUser user, UpdateCompany command) {
+    public void update(AuthUser user, Long pictureId) {
         val found = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        found.update(command.picture());
+        if (pictureId != null)
+            attachmentValidator.validate(user.id(), pictureId);
+
+        found.update(pictureId);
     }
 
     @Transactional

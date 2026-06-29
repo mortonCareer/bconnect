@@ -9,8 +9,8 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import to.bconnect.api.core.domain.attachment.AttachmentResolver;
-import to.bconnect.api.core.domain.attachment.ImageSize;
+import to.bconnect.api.attachment.AttachmentResolver;
+import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.core.presentation.v1.response.AttachmentResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.security.AuthUser;
@@ -39,7 +39,7 @@ public class MessageSocketController {
         return MessageResponse.of(message, message.attachmentIds().stream()
                 .map(attachmentMap::get)
                 .filter(Objects::nonNull)
-                .map(it -> AttachmentResponse.of(it, attachmentResolver.url(it, ImageSize.SMALL)))
+                .map(it -> AttachmentResponse.of(it, attachmentResolver.getUrl(it, ImageSize.SMALL)))
                 .toList());
     }
 
@@ -54,7 +54,7 @@ public class MessageSocketController {
         return MessageResponse.of(message, message.attachmentIds().stream()
                 .map(attachmentMap::get)
                 .filter(Objects::nonNull)
-                .map(it -> AttachmentResponse.of(it, attachmentResolver.url(it, ImageSize.SMALL)))
+                .map(it -> AttachmentResponse.of(it, attachmentResolver.getUrl(it, ImageSize.SMALL)))
                 .toList());
     }
 }

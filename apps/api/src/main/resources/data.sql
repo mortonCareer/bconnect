@@ -2,39 +2,18 @@
 INSERT INTO otps (id, phone, code, code_expired_at, code_revoked, attempts, daily_count, last_sent_at, token, token_expired_at, token_revoked, created_at, modified_at) VALUES
 (1, '01000000001', '000001', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', NULL, NULL, NULL, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (2, '01000000002', '000002', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', NULL, NULL, NULL, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(3, '01000000003', '000003', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', 'signup-token', TIMESTAMP '2026-12-31 00:00:00', false, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(4, '01000000005', '000005', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', NULL, NULL, NULL, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(4, '01000000003', '000003', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', 'signup-token', TIMESTAMP '2026-12-31 00:00:00', false, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(3, '01000000004', '000004', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', NULL, NULL, NULL, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO members (id, username, name, phone, picture, role, created_at, modified_at) VALUES
 (0, 'system', '시스템', '01000000000', 'https://image.com', 'ADMIN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(1, 'test', '테스트', '01000000001', 'https://image.com', 'ADMIN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(2, 'foreman1', '반장1', '01000000005', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(3, 'foreman2', '반장2', '01000000006', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(4, 'foreman3', '반장3', '01000000007', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(5, 'foreman4', '반장4', '01000000008', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(6, 'foreman5', '반장5', '01000000009', 'https://image.com', 'FOREMAN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
-
-INSERT INTO sessions (id, username, agent, ip, refresh_token, revoked, created_at, modified_at) VALUES
-(1, 'foreman1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', '000.000.000.000', 'refresh-token', false, TIMESTAMP '2026-12-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
-
-INSERT INTO profiles (id, member_id, primary_trade, experience, headline, about, zipcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
-(1, 1, 'TILING', 10, '프로필1', '소개', '00000', '경기도', '수원시 장안구', '도로명주소', NULL, 37.294000, 126.974000, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(2, 3, 'TILING', 10, '프로필2', '소개', '00000', '경기도', '수원시 장안구', '도로명주소', NULL, 37.294000, 126.974000, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(3, 4, 'TILING', 10, '프로필3', '소개', '00000', '경기도', '수원시 장안구', '도로명주소', NULL, 37.294000, 126.974000, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(4, 5, 'TILING', 10, '프로필4', '소개', '00000', '경기도', '수원시 장안구', '도로명주소', NULL, 37.294000, 126.974000, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(5, 6, 'TILING', 10, '프로필5', '소개', '00000', '경기도', '수원시 장안구', '도로명주소', NULL, 37.294000, 126.974000, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
-
-INSERT INTO profile_trades (profile_id, trade) VALUES
-(1, 'TILING'),
-(1, 'FILM_SHEET'),
-(2, 'TILING'),
-(2, 'FILM_SHEET'),
-(3, 'TILING'),
-(3, 'FILM_SHEET'),
-(4, 'TILING'),
-(4, 'FILM_SHEET'),
-(5, 'TILING'),
-(5, 'FILM_SHEET');
+(1, 'test', '테스트', '01000000002', 'https://image.com', 'ADMIN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(2, 'foreman1', '반장1', '01000000004', 'https://image.com', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(3, 'foreman2', '반장2', '01000000006', 'https://image.com', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(4, 'foreman3', '반장3', '01000000007', 'https://image.com', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(5, 'foreman4', '반장4', '01000000008', 'https://image.com', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(6, 'foreman5', '반장5', '01000000009', 'https://image.com', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(7, 'foreman6', '반장6', '01000000011', 'https://image.com', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO coworker_requests (id, from_id, to_id) VALUES
 (1, 4, 1),
@@ -52,6 +31,9 @@ INSERT INTO credentials (id, member_id, type, status, expired_at, created_at, mo
 
 INSERT INTO attachments (id, member_id, type, status, context, context_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
 (1, 1, 'IMAGE', 'COMPLETED', 'PROFILE', 1, 'seed-attachment-1', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+
+INSERT INTO tasks (id, dtype, start_date, end_date, status, worker_id, project_id, project_title, project_requirement, project_memo, created_at, modified_at) VALUES
+(1, 'PROJECT', DATE '2026-06-01', DATE '2026-06-03', 'SCHEDULED', 2, 1, '작업', '요구사항', '메모', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 -- for special entities
 ALTER TABLE otps ALTER COLUMN id RESTART WITH 100;

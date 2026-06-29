@@ -1,5 +1,5 @@
 meta {
-  name: 프로젝트 목록 조회
+  name: 업체 프로젝트 목록 조회
   type: http
   seq: 2
 }
@@ -15,4 +15,8 @@ tests {
     expect(res.body.success).to.equal(true);
     expect(res.body.data).to.be.an('array');
   });
+}
+
+docs {
+  사용자가 소속된 업체의 프로젝트 목록 조회
 }

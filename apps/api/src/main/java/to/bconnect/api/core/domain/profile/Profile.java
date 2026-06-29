@@ -2,6 +2,7 @@ package to.bconnect.api.core.domain.profile;
 
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.profile.ProfileEntity;
+import to.bconnect.api.storage.profile.ProfileRole;
 import to.bconnect.api.storage.profile.Trade;
 
 import java.time.LocalDateTime;
@@ -10,13 +11,13 @@ import java.util.Set;
 public record Profile(
     Long id,
     Long memberId,
+    ProfileRole role,
     Trade primaryTrade,
     Set<Trade> trades,
     int experience,
     String headline,
     String about,
     Address address,
-    Long pictureId,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt,
     Long postCount,
@@ -27,13 +28,13 @@ public record Profile(
         return new Profile(
                 entity.getId(),
                 entity.getMemberId(),
+                entity.getRole(),
                 entity.getPrimaryTrade(),
                 entity.getTrades(),
                 entity.getExperience(),
                 entity.getHeadline(),
                 entity.getAbout(),
                 entity.getAddress(),
-                entity.getPictureId(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt(),
                 postCount,

@@ -10,16 +10,14 @@ public record ProfileSummaryResponse(
         Trade primaryTrade,
         int experience,
         String headline,
-        Address address,
-        String picture
+        Address address
 ) {
-    public static ProfileSummaryResponse of(Profile profile, String picture) {
+    public static ProfileSummaryResponse of(Profile profile) {
         return new ProfileSummaryResponse(
                 profile.primaryTrade(),
                 profile.experience(),
                 profile.headline(),
-                profile.address(),
-                picture
+                profile.address()
         );
     }
 }

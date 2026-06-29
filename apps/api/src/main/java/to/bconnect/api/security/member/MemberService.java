@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.security.AuthUser;
 
+import to.bconnect.api.attachment.AttachmentValidator;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.otp.OtpService;
@@ -20,6 +21,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final OtpService otpService;
+    private final AttachmentValidator attachmentValidator;
 
     @Transactional(readOnly = true)
     public Member get(AuthUser user) {
@@ -42,21 +44,21 @@ public class MemberService {
     }
 
     @Transactional
-    public Member register(RegisterMemberRequest request) {
-        otpService.verifyToken(request.signupToken());
+    public Member register(RegisterMember command) {
+        otpService.verifyToken(command.signupToken());
 
-        memberRepository.findByUsername(request.username())
+        memberRepository.findByUsername(command.username())
                 .ifPresent(it -> { throw new CodeException(MemberExceptionCode.DUPLICATE_USERNAME); });
 
-        memberRepository.findByPhone(request.phone())
+        memberRepository.findByPhone(command.phone())
                 .ifPresent(it -> { throw new CodeException(MemberExceptionCode.DUPLICATE_PHONE); });
 
         val created = new MemberEntity(
-                request.username(),
-                request.name(),
-                request.phone(),
-                request.picture(),
-                request.role()
+                command.username(),
+                command.name(),
+                command.phone(),
+                command.pictureId(),
+                command.role()
         );
 
         memberRepository.save(created);
@@ -64,14 +66,17 @@ public class MemberService {
     }
 
     @Transactional
-    public void update(AuthUser user, UpdateMemberRequest request) {
+    public void update(AuthUser user, UpdateMember command) {
         val found = memberRepository.findById(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
+        if (command.pictureId() != null)
+            attachmentValidator.validate(user.id(), command.pictureId());
+
         found.update(
-                request.name(),
-                request.picture(),
-                request.role()
+                command.name(),
+                command.pictureId(),
+                command.role()
         );
     }
 

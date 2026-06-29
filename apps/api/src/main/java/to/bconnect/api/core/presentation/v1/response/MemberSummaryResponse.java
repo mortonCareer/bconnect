@@ -14,12 +14,12 @@ public record MemberSummaryResponse(
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {
-    public static MemberSummaryResponse of(Member member) {
+    public static MemberSummaryResponse of(Member member, String picture) {
         return new MemberSummaryResponse(
                 member.id(),
                 member.username(),
                 member.name(),
-                member.picture(),
+                picture,
                 member.role(),
                 member.createdAt(),
                 member.modifiedAt()

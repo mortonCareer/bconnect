@@ -17,8 +17,8 @@ body {
     "signupToken": "signup-token",
     "username": "new-username",
     "name": "이름",
-    "picture": "https://image.com",
-    "role": "FOREMAN"
+    "pictureId": 1,
+    "role": "WORKER"
   }
 }
 
@@ -31,6 +31,7 @@ tests {
 }
 
 docs {
-  발급된 signupToken으로 회원가입한다.
-  @seed otps : 3
+  발급된 Signup Token으로 회원가입한다.
+  @seed otps : 4
+  @seed attachments : 1
 }
