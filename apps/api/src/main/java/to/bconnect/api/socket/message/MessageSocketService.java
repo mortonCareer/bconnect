@@ -6,6 +6,7 @@ import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.core.domain.attachment.AttachmentQueryService;
+import to.bconnect.api.core.domain.notification.NotificationService;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.security.AuthUser;
@@ -30,6 +31,7 @@ public class MessageSocketService {
     private final MemberRepository memberRepository;
     private final AttachmentQueryService attachmentQueryService;
     private final SimpUserRegistry simpUserRegistry;
+    private final NotificationService notificationService;
 
     @Transactional
     public Message broadcast(AuthUser user, Long chatId, SendMessage command) {
@@ -59,8 +61,14 @@ public class MessageSocketService {
                 .map(it -> it.getSession().getUser().getName())
                 .collect(Collectors.toCollection(HashSet::new));
 
-        val memberIds = memberRepository.findIdsByUsernameIn(usernames);
-        participantRepository.updateLastIdxIn(chatId, memberIds, created.getId());
+        val activeMemberIds = memberRepository.findIdsByUsernameIn(usernames);
+        participantRepository.updateLastIdxIn(chatId, activeMemberIds, created.getId());
+
+        val recipientIds = participantRepository.findMemberIdsByChatId(chatId).stream()
+                .filter(id -> !id.equals(user.id()))
+                .toList();
+        notificationService.notifyChatMessage(
+                user.id(), chatId, recipientIds, new HashSet<>(activeMemberIds), command.content());
 
         return Message.of(created, attachmentIds);
     }

@@ -14,6 +14,9 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
 
     List<ParticipantEntity> findByChatIdIn(Collection<Long> chatIds);
 
+    @Query("SELECT p.memberId FROM ParticipantEntity p WHERE p.chatId = :chatId")
+    List<Long> findMemberIdsByChatId(@Param("chatId") Long chatId);
+
     boolean existsByChatIdAndMemberId(Long chatId, Long memberId);
 
     @Modifying
