@@ -3,6 +3,7 @@ package to.bconnect.api.core.presentation.v1.response;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.security.member.Member;
 import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.profile.ProfileRole;
 import to.bconnect.api.storage.profile.Trade;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.util.Set;
 public record ProfileResponse(
         Long id,
         MemberSummaryResponse member,
+        ProfileRole role,
         Trade primaryTrade,
         Set<Trade> trades,
         int experience,
@@ -27,6 +29,7 @@ public record ProfileResponse(
         return new ProfileResponse(
                 detail.id(),
                 MemberSummaryResponse.of(member, picture),
+                detail.role(),
                 detail.primaryTrade(),
                 detail.trades(),
                 detail.experience(),

@@ -12,7 +12,7 @@ public record UpdateMemberRequest(
         @NotNull Role role
 ) {
     public UpdateMember toCommand() {
-        if (role == Role.ADMIN)
+        if (role == Role.ADMIN || role == Role.GUEST)
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         return new UpdateMember(name, pictureId, role);

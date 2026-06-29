@@ -26,6 +26,7 @@ public class ProfileService {
 
         val created = new ProfileEntity(
                 user.id(),
+                command.role(),
                 command.primaryTrade(),
                 command.trades(),
                 command.experience(),
@@ -49,6 +50,7 @@ public class ProfileService {
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
         found.update(
+                command.role(),
                 command.primaryTrade(),
                 command.trades(),
                 command.experience(),

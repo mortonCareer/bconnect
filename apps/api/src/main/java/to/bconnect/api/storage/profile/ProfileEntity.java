@@ -22,6 +22,10 @@ public class ProfileEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    private ProfileRole role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Trade primaryTrade;
 
     // TODO: MappingTableEntity 분리
@@ -42,9 +46,10 @@ public class ProfileEntity extends BaseEntity {
     @Embedded
     private Address address;
 
-    public ProfileEntity(Long memberId, Trade primaryTrade, Set<Trade> trades, int experience,
+    public ProfileEntity(Long memberId, ProfileRole role, Trade primaryTrade, Set<Trade> trades, int experience,
                          String headline, String about, Address address) {
         this.memberId = memberId;
+        this.role = role;
         this.primaryTrade = primaryTrade;
         this.trades = trades != null ? trades : new HashSet<>();
         this.experience = experience;
@@ -53,8 +58,9 @@ public class ProfileEntity extends BaseEntity {
         this.address = address;
     }
 
-    public void update(Trade primaryTrade, Set<Trade> trades, int experience,
+    public void update(ProfileRole role, Trade primaryTrade, Set<Trade> trades, int experience,
                        String headline, Address address) {
+        this.role = role;
         this.primaryTrade = primaryTrade;
         this.trades = trades != null ? trades : new HashSet<>();
         this.experience = experience;

@@ -15,7 +15,7 @@ public record RegisterMemberRequest(
         @NotNull Role role
 ) {
     public RegisterMember toCommand() {
-        if (role == Role.ADMIN)
+        if (role == Role.ADMIN || role == Role.GUEST)
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         return new RegisterMember(phone, signupToken, username, name, pictureId, role);
