@@ -113,6 +113,9 @@ public class TaskService {
         val found = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CodeException(TaskExceptionCode.NOT_FOUND));
 
+        if (found.getType() != TaskType.PROJECT || found.getWorkerId() == null)
+            throw new CodeException(TaskExceptionCode.NOT_ASSIGNED);
+
         if (!user.id().equals(found.getWorkerId()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
