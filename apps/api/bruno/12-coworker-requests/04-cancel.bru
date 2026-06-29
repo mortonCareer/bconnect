@@ -1,0 +1,26 @@
+meta {
+  name: 동료 요청 취소
+  type: http
+  seq: 4
+  tags: [
+    chain
+    idempotent
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/coworker-requests/{{coworkerRequestId}}
+  auth: inherit
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  @chain
+  - 12-coworker-requests/01-create
+}

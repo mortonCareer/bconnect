@@ -2,6 +2,9 @@ meta {
   name: 프로젝트 생성
   type: http
   seq: 1
+  tags: [
+    chain
+  ]
 }
 
 post {
@@ -34,4 +37,10 @@ tests {
     expect(res.body.success).to.equal(true);
     expect(res.body.data).to.be.a('number');
   });
+}
+
+docs {
+  사용자가 소속된 업체의 프로젝트 생성
+  @chain
+  - 04-companies/01-create
 }

@@ -1,0 +1,44 @@
+meta {
+  name: 기술자 할당 작업 수정
+  type: http
+  seq: 1
+  tags: [
+    chain
+    idempotent
+  ]
+}
+
+put {
+  url: {{baseUrl}}/api/v1/tasks/:id/assignee
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken2}}
+}
+
+body {
+  {
+    "title": "작업 수정",
+    "memo": "메모 수정"
+  }
+}
+
+params:path {
+  id: 1
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  반장1(member 2)이 시드로 할당된 프로젝트 작업(task 1)을 수정한다.
+  @seed members : 2
+  @seed tasks : 1
+  @chain
+  - 01-otp/04-verify-otp-login-2
+}

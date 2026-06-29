@@ -9,15 +9,12 @@ meta {
 
 post {
   url: {{baseUrl}}/api/v1/profiles
-  auth: bearer
-}
-
-auth:bearer {
-  token: {{profileToken}}
+  auth: inherit
 }
 
 body {
   {
+    "role": "FOREMAN",
     "primaryTrade": "TILING",
     "trades": ["TILING", "FILM_SHEET"],
     "experience": 10,
@@ -41,9 +38,4 @@ tests {
     expect(res.body.success).to.equal(true);
     expect(res.body.data).to.be.a('number');
   });
-}
-
-docs {
-  프로필 미보유 전용 유저(profileToken)로 프로필을 생성해 기존 로그인 유저의 프로필 중복 충돌을 피한다.
-  @seed members : 5
 }

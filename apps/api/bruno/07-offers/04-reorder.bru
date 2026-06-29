@@ -1,0 +1,34 @@
+meta {
+  name: 제안 순서 변경
+  type: http
+  seq: 4
+  tags: [
+    chain
+    idempotent
+  ]
+}
+
+put {
+  url: {{baseUrl}}/api/v1/offers/reorder
+  auth: inherit
+}
+
+body {
+  {
+    "offerIds": [{{offerId}}]
+  }
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  @chain
+  - 04-companies/01-create
+  - 05-projects/01-create
+  - 06-company-tasks/01-create-company-task
+}
