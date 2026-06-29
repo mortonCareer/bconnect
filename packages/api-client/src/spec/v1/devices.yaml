@@ -51,8 +51,8 @@ paths:
             schema:
               $ref: '#/components/schemas/UnregisterDeviceRequest'
       responses:
-        '204':
-          description: 해제 성공 (응답 바디 없음)
+        '200':
+          description: 해제 성공 (idempotent — 없는 토큰도 성공)
         '400':
           description: |
             - `C001` 유효하지 않은 입력값입니다 (token 누락)
