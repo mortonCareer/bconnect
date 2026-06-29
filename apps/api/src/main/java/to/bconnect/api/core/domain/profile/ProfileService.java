@@ -69,17 +69,4 @@ public class ProfileService {
 
         found.updateAbout(about);
     }
-
-    @Transactional
-    public void delete(AuthUser user) {
-        val optional = profileRepository.findByMemberId(user.id());
-        if (optional.isEmpty())
-            return;
-        val found = optional.get();
-
-        if (!found.getMemberId().equals(user.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        profileRepository.delete(found);
-    }
 }

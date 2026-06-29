@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -86,13 +85,6 @@ public class ProfileController {
             @AuthenticationPrincipal AuthUser user,
             @RequestBody UpdateProfileAboutRequest request) {
         profileService.updateAbout(user, request.about());
-        return ApiResponse.success(null);
-    }
-
-    @DeleteMapping("/me")
-    public ApiResponse<Void> delete(
-            @AuthenticationPrincipal AuthUser user) {
-        profileService.delete(user);
         return ApiResponse.success(null);
     }
 }
