@@ -15,7 +15,7 @@ import to.bconnect.api.storage.BaseEntity;
 public class SessionEntity extends BaseEntity {
 
     @Column(nullable = false, unique = true)
-    private String username;
+    private Long memberId;
 
     @Column(nullable = false)
     private String agent;
@@ -29,8 +29,8 @@ public class SessionEntity extends BaseEntity {
     @Column(nullable = false)
     private boolean revoked;
 
-    public SessionEntity(String username, String agent, String ip, String refreshToken) {
-        this.username = username;
+    public SessionEntity(Long memberId, String agent, String ip, String refreshToken) {
+        this.memberId = memberId;
         this.agent = agent;
         this.ip = ip;
         this.refreshToken = refreshToken;

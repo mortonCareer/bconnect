@@ -23,8 +23,7 @@ public class SessionService {
 
     @Transactional(readOnly = true)
     public void verify(String username, String refreshToken) {
-        val found = sessionRepository.findByUsername(username)
-                .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
+        val found = findSession(username);
 
         if (!AuthUtils.sha256(refreshToken).equals(found.getRefreshToken())) {
             throw new CodeException(AuthExceptionCode.INVALID_REFRESH_TOKEN);
@@ -37,38 +36,38 @@ public class SessionService {
 
     @Transactional
     public void login(String username, String agent, String ip, String refreshToken) {
-        val optional = sessionRepository.findByUsername(username);
+        val member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
         val encrypted = AuthUtils.sha256(refreshToken);
+        val optional = sessionRepository.findByMemberId(member.getId());
 
         if (optional.isPresent()) {
             optional.get().update(agent, ip, encrypted);
         } else {
             sessionRepository.save(
-                    new SessionEntity(username, agent, ip, encrypted)
+                    new SessionEntity(member.getId(), agent, ip, encrypted)
             );
 
             // TODO: 새로운 기기에서 로그인시 세션 덮어쓰기 → RT 무효화
-            memberRepository.findByUsername(username)
-                    .ifPresent(it -> smsProvider.send(
-                            it.getPhone(),
-                            SmsTemplate.NEW_DEVICE_LOGIN
-                    ));
+            smsProvider.send(member.getPhone(), SmsTemplate.NEW_DEVICE_LOGIN);
         }
     }
 
     @Transactional
     public void rotate(String username, String refreshToken) {
-        val found = sessionRepository.findByUsername(username)
-                .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
-
-        found.rotate(AuthUtils.sha256(refreshToken));
+        findSession(username).rotate(AuthUtils.sha256(refreshToken));
     }
 
     @Transactional
     public void logout(String username) {
-        val found = sessionRepository.findByUsername(username)
+        findSession(username).revoke();
+    }
+
+    private SessionEntity findSession(String username) {
+        val member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
 
-        found.revoke();
+        return sessionRepository.findByMemberId(member.getId())
+                .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
     }
 }
