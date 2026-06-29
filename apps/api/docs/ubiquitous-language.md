@@ -2,34 +2,79 @@
 - 위치 : 전체
 - 범위 : 도메인 용어, Enum 값
 
+## 도메인 다이어그램
+```mermaid
+graph TD
+    subgraph Chat
+        DirectChat
+        GroupChat
+        Participant
+        Message
+        Participant -->|N:1| GroupChat
+        Message -.->|N:1| DirectChat
+        Message -.->|N:1| GroupChat
+    end
+    subgraph Social
+        CoworkerRequest
+        Coworker
+        Recommendation
+        CoworkerRequest -.->|수락| Coworker
+        Coworker -.->|작성| Recommendation
+    end
+    subgraph Task
+        Company
+        Project
+        CompanyTask
+        Offer
+        Project -->|N:1| Company
+        CompanyTask -->|N:1| Project
+        Offer -->|N:1| CompanyTask
+    end
+    subgraph Post
+        WorkerTask
+        post[Post]
+        post -.->|N:1| WorkerTask
+    end
+    subgraph Profile
+        profile[Profile]
+        Credential
+    end
+    subgraph Security
+        Member
+        Otp
+        Session
+        Otp -.->|인증| Member
+        Member -.->|로그인| Session
+    end
+```
+
 ## 도메인 개념
 
-| 도메인           | 영문             | 국문     | 의미                       |
-|---------------|----------------|--------|--------------------------|
-| Member        | Member         | 회원     | 사용자                      |
-| Auth          | Otp            | 인증코드   | 본인확인용 6자리 코드             |
-| Auth          | SignupToken    | 가입 토큰  | 미가입자 회원가입용 임시 토큰         |
-| Auth          | Session        | 세션     | 로그인 정보(IP, Agent 등)      |
-| Auth          | Access Token   | 액세스 토큰 |                          |
-| Auth          | Refresh Token  | 리프레시 토큰 |                          |
-| Profile       | Profile        | 프로필    | 회원 프로필                   |
-| Task          | Task           | 작업     | 프로젝트 공종별 작업 단위           |
-| Post          | Post           | 게시글    |                          |
-| Post          | Feed           | 피드     | 게시글 + 작성자 + 프로필 View     |
-| Coworker      | Coworker       | 동료     | 동료 기술자                   |
-| Coworker      | CoworkerRequest | 동료 요청  |                          |
-| Recommendation | Recommendation | 추천     |                          |
-| Chat          | GroupChat      | 그룹 채팅방 | 참여자 N명, 제목 보유             |
-| Chat          | DirectChat     | 1:1 채팅방 | 두 회원 간 1:1, 제목 없음          |
-| Chat          | Message        | 메시지    |                          |
-| Chat          | Participant    | 참여자    | 그룹 채팅방-회원 매핑 정보           |
-| Credential    | Credential     | 인증뱃지  |                          |
-| Attachment    | Attachment     | 첨부     | 업로드 파일 메타데이터             |
-| Attachment    | Signed cookie  |        | CloudFront 비공개 콘텐츠 열람 권한 |
-| Company       | Company        | 인테리어 업체 |                          |
-| Project       | Project        | 프로젝트   |                     |
-| Offer         | Offer          | 제안     | 기술자 제안                   |
-| Offer         | Offer          | 제안     | 기술자 제안                   |
+| 도메인           | 영문             | 국문      | 의미                 |
+|---------------|----------------|---------|--------------------|
+| Member        | Member         | 회원      | 사용자                |
+| Auth          | Otp            | 인증코드    | 본인확인용 6자리 코드       |
+| Auth          | SignupToken    | 가입 토큰   | 미가입자 회원가입용 임시 토큰   |
+| Auth          | Session        | 세션      | 로그인 정보(IP, Agent 등) |
+| Auth          | Access Token   | 액세스 토큰  |                    |
+| Auth          | Refresh Token  | 리프레시 토큰 | 액세스 토큰 재발급용 토큰     |
+| Profile       | Profile        | 프로필     | 사용자 프로필            |
+| Task          | Task           | 작업      | 프로젝트 공종별 작업 단위     |
+| Post          | Post           | 게시글     |                    |
+| Post          | Feed           | 피드      | 게시글 + 작성자 + 프로필 View |
+| Coworker      | Coworker       | 동료      | 동료 기술자             |
+| Coworker      | CoworkerRequest | 동료 요청   |                    |
+| Recommendation | Recommendation | 추천서     | 동료 기술자가 작성한 추천서    |
+| Chat          | GroupChat      | 그룹 채팅방  | 채팅방 제목 있음          |
+| Chat          | DirectChat     | 1:1 채팅방 | 채팅방 제목 없음          |
+| Chat          | Message        | 메시지     |                    |
+| Chat          | Participant    | 참여자     | 그룹 채팅방 참여자 정보      |
+| Credential    | Credential     | 인증뱃지    | 면허 · 자격 · 보험 등     |
+| Attachment    | Attachment     | 첨부      | 업로드 파일 메타데이터       |
+| Attachment    | Signed cookie  |         | CloudFront 접근 권한   |
+| Company       | Company        | 인테리어 업체 |                    |
+| Project       | Project        | 프로젝트    |                    |
+| Offer         | Offer          | 제안      | 기술자 제안             |
 
 ## 열거형 (Enum)
 
@@ -47,7 +92,8 @@
 | HELPER | 조공     |
 | ADMIN | 어드민    |
 
-### 프로필(Profile)
+### 공종(TRADE)
+미확정
 
 | 영문 | 국문   |
 |---|------|
@@ -77,13 +123,6 @@
 | CLEANING | 청소   |
 | GENERAL_LABOR | 조공   |
 
-### 작업(Task)
-
-| 영문 | 국문 |
-|---|---|
-| WORKER | 기술자 |
-| PROJECT | 프로젝트 |
-
 ### 작업 상태(TaskStatus)
 
 | 영문 | 프로젝트(업체) | 기술자 |
@@ -104,29 +143,15 @@
 | RECEIVED | 받은 요청 |
 | COWORKER | 동료 |
 
-### 채팅 유형(ChatType)
+### 메시지 유형(MessageType)
 
-| 영문 | 국문 |
-|---|---|
-| GROUP | 그룹 채팅방 |
-| DIRECT | 1:1 채팅방 |
-
-### 채팅방(Chat)
-
-| 영문 | 국문 |
-|---|---|
-| TEXT | 텍스트 |
-| IMAGE | 이미지 |
-| FILE | 파일 |
+| 영문     | 국문 |
+|--------|----|
+| TEXT   | 텍스트 |
+| IMAGE  | 이미지 |
+| FILE   | 파일 |
 | SYSTEM | 시스템 |
-
-### 인증뱃지(Credential)
-
-| 영문 | 국문 |
-|---|---|
-| PENDING | 대기 |
-| ACCEPTED | 승인 |
-| DENIED | 반려 |
+| OFFER  | 제안 |
 
 ### 인증뱃지 유형(CredentialType)
 
