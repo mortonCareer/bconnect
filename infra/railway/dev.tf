@@ -16,6 +16,8 @@ locals {
     JAVA_TOOL_OPTIONS      = "-XX:-UseContainerSupport"
     SENTRY_DSN             = var.sentry_dsn
     SENTRY_ENVIRONMENT     = "dev"
+
+    AWS_SNS_PLATFORM_APPLICATION_ARN = var.sns_platform_application_arn
   }
 
   dev_postgres_variables = {

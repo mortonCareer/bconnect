@@ -157,6 +157,16 @@ resource "railway_variable" "api_sentry_environment" {
   depends_on = [railway_variable.api_sentry_dsn]
 }
 
+# SNS 웹 푸시 — 플랫폼 애플리케이션 ARN (region 은 AWS_REGION 재사용)
+resource "railway_variable" "api_sns_platform_application_arn" {
+  name           = "AWS_SNS_PLATFORM_APPLICATION_ARN"
+  value          = var.sns_platform_application_arn
+  service_id     = railway_service.api.id
+  environment_id = railway_project.morton.default_environment.id
+
+  depends_on = [railway_variable.api_sentry_environment]
+}
+
 # ===========================================================================
 # Custom Domain for API
 # ===========================================================================

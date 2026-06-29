@@ -13,7 +13,7 @@ resource "aws_iam_access_key" "app_key" {
 resource "aws_iam_policy" "app_access" {
   name        = "MortonAppAccess"
   path        = "/"
-  description = "Allows access to S3 bucket and SNS for SMS OTP"
+  description = "Allows access to S3 bucket and SNS for SMS OTP + web push endpoints"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -37,8 +37,13 @@ resource "aws_iam_policy" "app_access" {
       {
         Sid    = "SNSAccess"
         Effect = "Allow"
+        # Publish: SMS OTP + 웹 푸시 발송 / 나머지: 푸시 디바이스 endpoint 생명주기 관리
         Action = [
-          "sns:Publish"
+          "sns:Publish",
+          "sns:CreatePlatformEndpoint",
+          "sns:GetEndpointAttributes",
+          "sns:SetEndpointAttributes",
+          "sns:DeleteEndpoint"
         ]
         Resource = ["*"]
       }
