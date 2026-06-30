@@ -13,7 +13,7 @@ import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 public class PostFactory {
 
     public static Post create(Long id, Long memberId, Long taskId) {
-        return new Post(id, memberId, taskId, List.of(DEFAULT_ATTACHMENT_ID), "content",
+        return new Post(id, memberId, taskId, "content",
                 MIN_DATE_TIME, MIN_DATE_TIME);
     }
 

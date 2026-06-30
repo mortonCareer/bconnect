@@ -6,7 +6,7 @@ import to.bconnect.api.storage.chat.GroupChatEntity;
 import to.bconnect.api.storage.chat.GroupChatRepository;
 
 @Component
-public class ChatFactory {
+public class GroupChatFactory {
 
     @Autowired private GroupChatRepository groupChatRepository;
 
