@@ -3,16 +3,17 @@
  */
 'use client'
 
+import type { ReactNode } from 'react'
 import { Drawer, DrawerContent, DrawerTitle } from './shadcn/drawer'
 import { cn } from '../../lib/utils'
 
 export interface ActionDrawerItem {
   label: string
+  /** 좌측 아이콘 (필수) — 모든 액션은 아이콘을 가진다. currentColor 면 destructive 색(빨강) 자동 전파. */
+  icon: ReactNode
   onSelect: () => void
   destructive?: boolean
   disabled?: boolean
-  /** 라벨 좌측 리딩 아이콘. currentColor 를 쓰면 destructive 색(빨강)이 자동 전파된다. */
-  icon?: React.ReactNode
 }
 
 interface ActionDrawerProps {
@@ -50,7 +51,7 @@ export function ActionDrawer({ open, onOpenChange, title, items }: ActionDrawerP
                 item.destructive ? 'text-destructive' : 'text-gray-900'
               )}
             >
-              {item.icon && <span className="shrink-0">{item.icon}</span>}
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center">{item.icon}</span>
               <span>{item.label}</span>
             </button>
           ))}

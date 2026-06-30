@@ -15,7 +15,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { href: '/', label: '홈', icon: HomeIcon },
   { href: '/jobs', label: '공고', icon: JobsIcon, disabled: true },
-  { href: '/upload', label: '업로드', icon: UploadIcon, disabled: true },
+  { href: '/storage', label: '업로드', icon: UploadIcon },
   { href: '/calendar', label: '캘린더', icon: CalendarIcon },
   { href: '/profile', label: '내 정보', icon: ProfileIcon },
 ]

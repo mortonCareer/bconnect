@@ -32,6 +32,8 @@ export type { NotificationItemProps } from './ui/NotificationItem'
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './ui/shadcn/accordion'
 export { Carousel, CarouselContent, CarouselItem } from './ui/shadcn/carousel'
 export type { CarouselApi } from './ui/shadcn/carousel'
+export { Progress } from './ui/shadcn/progress'
+export { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './ui/shadcn/resizable'
 
 // shadcn Form suite (ADR 0013 / #400) — shadcn 디렉토리에 격리, 우리 wrapper 는 ui/ 루트
 export {
@@ -80,6 +82,10 @@ export { ProfileCard, ProfileCardSkeleton } from './ui/ProfileCard'
 export type { ProfileCardProps, ProfileCardMeta, ProfileCardSkeletonProps } from './ui/ProfileCard'
 export { ContextMenu } from './ui/ContextMenu'
 export type { ContextMenuItem } from './ui/ContextMenu'
+export { MenuButton } from './ui/MenuButton'
+export type { MenuButtonItem, MenuButtonProps } from './ui/MenuButton'
+export { Fab } from './ui/Fab'
+export type { FabProps } from './ui/Fab'
 export { Toaster } from './ui/Toaster'
 export {
   Toast,

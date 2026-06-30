@@ -25,4 +25,8 @@ export { PlusIcon } from './PlusIcon'
 export { ShareIcon } from './ShareIcon'
 export { PencilIcon } from './PencilIcon'
 export { TrashIcon } from './TrashIcon'
+export { FolderAddIcon } from './FolderAddIcon'
+export { ImageUploadIcon } from './ImageUploadIcon'
+// 액션 메뉴(수정/숨김)용 — lucide 재export (size·currentColor). 삭제는 위 TrashIcon(figma) 사용.
+export { Pencil as EditIcon, EyeOff as HideIcon } from 'lucide-react'
 export { Logo } from './Logo'

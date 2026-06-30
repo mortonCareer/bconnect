@@ -35,23 +35,23 @@ Morton 서비스 전반에서 사용될 **파일 저장·조회·권한 제어**
 
 ## 2. 핵심 설계 결정 요약
 
-| 영역           | 결정                                                               |
-| -------------- | ------------------------------------------------------------------ |
-| 업로드 방식    | Presigned PUT URL                                                  |
-| 업로드 플로우  | 2-step — `/presign` → S3 PUT → `/confirm` (단일 엔드포인트)        |
-| 리사이즈       | **Lambda** (S3 ObjectCreated 이벤트 트리거, 업계표준)              |
-| 사이즈         | `o` (original), `m` (medium 800px), `s` (small 400px)              |
-| 읽기 (private) | CloudFront + Signed Cookie, path 패턴 scope                        |
-| 읽기 (public)  | CloudFront (인증 없음, capability URL)                             |
-| 버킷           | **`static` 단일 버킷**, `public/` + `private/` path 분리           |
-| 도메인         | `static.bconnect.to` 단일                                          |
+| 영역           | 결정                                                                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 업로드 방식    | Presigned PUT URL                                                                                                                          |
+| 업로드 플로우  | 2-step — `/presign` → S3 PUT → `/confirm` (단일 엔드포인트)                                                                                |
+| 리사이즈       | **Lambda** (S3 ObjectCreated 이벤트 트리거, 업계표준)                                                                                      |
+| 사이즈         | `o` (original), `m` (medium 800px), `s` (small 400px)                                                                                      |
+| 읽기 (private) | CloudFront + Signed Cookie, path 패턴 scope                                                                                                |
+| 읽기 (public)  | CloudFront (인증 없음, capability URL)                                                                                                     |
+| 버킷           | **`static` 단일 버킷**, `public/` + `private/` path 분리                                                                                   |
+| 도메인         | `static.bconnect.to` 단일                                                                                                                  |
 | DB 모델        | **Attachment(분해 컬럼)** + context별 참조: `CHAT`·`POST` = N:M 매핑, `CREDENTIAL`·`PROFILE` = 1:1 FK (polymorphic 폐기, Storage는 future) |
-| 고아 판정      | **AttachmentReferenceProvider** DIP — context별 repo가 `referencedIds` 제공, `AttachmentCleanupService`가 주입받아 계산 |
-| 이미지 서빙    | `<img>` + CloudFront. Next.js `<Image>`는 정적 자산 전용           |
-| 크론           | Spring `@Scheduled` (앱 내장, 매주 수 06:00 KST). ShedLock은 멀티 인스턴스 전환 시 도입 |
-| 암호화         | SSE-S3 기본. KMS는 법적 필요 시                                    |
-| 감사 로그      | 기존 SessionEntity/BaseEntity/Credential 활용 (신규 테이블 없음)   |
-| MIME 검증      | FE에서 처리 (S3 `application/*` 와일드카드 미지원)                 |
+| 고아 판정      | **AttachmentReferenceProvider** DIP — context별 repo가 `referencedIds` 제공, `AttachmentCleanupService`가 주입받아 계산                    |
+| 이미지 서빙    | `<img>` + CloudFront. Next.js `<Image>`는 정적 자산 전용                                                                                   |
+| 크론           | Spring `@Scheduled` (앱 내장, 매주 수 06:00 KST). ShedLock은 멀티 인스턴스 전환 시 도입                                                    |
+| 암호화         | SSE-S3 기본. KMS는 법적 필요 시                                                                                                            |
+| 감사 로그      | 기존 SessionEntity/BaseEntity/Credential 활용 (신규 테이블 없음)                                                                           |
+| MIME 검증      | FE에서 처리 (S3 `application/*` 와일드카드 미지원)                                                                                         |
 
 ---
 
@@ -224,6 +224,7 @@ CREATE TABLE storage_attachments (
 ```
 
 > **갱신(2026-06-23)**: context별 참조 모델 확정.
+>
 > - **N:M 매핑 테이블**: `CHAT`(message_attachments), `POST`(post_attachments) — 둘 다 구현됨.
 > - **1:1 FK**: `CREDENTIAL`(`credentials.attachment_id`, `CredentialEntity.detach()`로 해제), `PROFILE`(`profiles.picture_id`).
 > - 각 context repo가 **`AttachmentReferenceProvider`**(`context()` + `referencedIds(ids)`)를 구현 → 고아 판정 시 attachment가 주입받아 사용(§9.1). 매핑 지식이 attachment 패키지에 집중되지 않음(DIP, OCP).
@@ -461,25 +462,25 @@ function fileUrl(att: AttachmentMeta): string {
 
 엔티티 record와 그에 포함된 `AttachmentMeta` 필드(id, path, filename, contentType, size).
 
-| context       | Read 허용                          | Write 허용     |
-| ------------- | ---------------------------------- | -------------- |
-| `profiles`    | 누구나                             | 본인           |
-| `posts`       | 누구나                             | 작성자         |
-| `chats`       | 채팅방 참여자                      | 메시지 작성자  |
-| `credentials` | 누구나 (프로필 공개 신뢰 지표) — 단 ACCEPTED만·type별 최신 1건·**파일 메타 제외**. 본인은 `GET /credentials/me`로 전체 이력+파일 메타 | 본인 |
-| `storages`    | 권한 보유 멤버                     | 권한 보유 멤버 |
+| context       | Read 허용                                                                                                                             | Write 허용     |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `profiles`    | 누구나                                                                                                                                | 본인           |
+| `posts`       | 누구나                                                                                                                                | 작성자         |
+| `chats`       | 채팅방 참여자                                                                                                                         | 메시지 작성자  |
+| `credentials` | 누구나 (프로필 공개 신뢰 지표) — 단 ACCEPTED만·type별 최신 1건·**파일 메타 제외**. 본인은 `GET /credentials/me`로 전체 이력+파일 메타 | 본인           |
+| `storages`    | 권한 보유 멤버                                                                                                                        | 권한 보유 멤버 |
 
 #### 파일 바이트 (CloudFront 통한 S3 object)
 
 실제 이미지/PDF 등 첨부 파일 본문. CloudFront Signed Cookie scope으로 제한.
 
-| context       | Scope                          | 접근 허용                     |
-| ------------- | ------------------------------ | ----------------------------- |
-| `profiles`    | `profiles/{memberId}/*`        | 누구나 (capability URL)       |
-| `posts`       | `posts/{memberId}/*`           | 누구나 (capability URL)       |
-| `chats`       | `chats/{chatId}/*`             | 채팅방 참여자                 |
-| `credentials` | `credentials/{memberId}/*`     | **본인 + 매칭된 업체 + 운영** |
-| `storages`    | `storages/{storageId}/*`       | 권한 보유 멤버                |
+| context       | Scope                      | 접근 허용                     |
+| ------------- | -------------------------- | ----------------------------- |
+| `profiles`    | `profiles/{memberId}/*`    | 누구나 (capability URL)       |
+| `posts`       | `posts/{memberId}/*`       | 누구나 (capability URL)       |
+| `chats`       | `chats/{chatId}/*`         | 채팅방 참여자                 |
+| `credentials` | `credentials/{memberId}/*` | **본인 + 매칭된 업체 + 운영** |
+| `storages`    | `storages/{storageId}/*`   | 권한 보유 멤버                |
 
 **핵심 차이:** `credentials`는 메타데이터(어떤 자격증을 보유 중인지)는 공개되지만, 실제 인증서 파일(신분증/자격증 사본 등 민감 정보)은 본인 외에 매칭된 업체와 운영만 접근. 메타가 공개돼도 파일 자체는 보호됨 — [피그마 디자인](https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS/?node-id=1238-5348)이 메타 공개 의도 확정.
 
@@ -532,9 +533,9 @@ public void run() {
 
 > **갱신(2026-06-22)**: 단일 인스턴스 전제로 `@Scheduled`만 사용 — **ShedLock 미도입**(멀티 인스턴스 전환 시 도입). 정리는 아래 **2단계**(`@Transactional`)이며, 각 단계가 S3 객체 삭제 + DB soft delete 까지 수행. **soft-deleted 행의 물리 삭제 단계는 아직 없다.**
 
-| 단계      | 대상                                                           | 처리                       |
-| --------- | -------------------------------------------------------------- | -------------------------- |
-| PENDING   | `status='PENDING' AND created_at < NOW() - 24h`                | S3 객체 삭제 + soft delete |
+| 단계      | 대상                                                            | 처리                       |
+| --------- | --------------------------------------------------------------- | -------------------------- |
+| PENDING   | `status='PENDING' AND created_at < NOW() - 24h`                 | S3 객체 삭제 + soft delete |
 | 고아 첨부 | `status='COMPLETED' AND created_at < NOW() - 24h` AND 참조 없음 | S3 객체 삭제 + soft delete |
 
 confirm 실패 첨부는 confirm 시점에 즉시 S3 객체 삭제 + soft delete 된다(별도 상태값 없음, §4.1). **고아 판정은 `AttachmentReferenceProvider` DIP** — context별 repo(`MessageAttachmentMappingRepository`·`PostAttachmentMappingRepository`·`CredentialRepository`·`ProfileRepository`)가 `referencedIds`를 제공하고, `AttachmentCleanupService`가 context별 후보(`findByContextAndStatusAndCreatedAtBefore`)에서 미참조분을 orphan으로 삭제. 모든 `AttachmentContext`에 provider 등록 필수(미등록 시 기동 실패). 이전 `AttachmentRepository.findOrphans`(타 도메인 엔티티 직접 참조)는 폐기됨.
@@ -654,16 +655,16 @@ on-the-fly 리사이즈는 Lambda@Edge. Header 조작은 CF Functions.
 
 ### 14.1 반영 완료 (설계 = 구현)
 
-| 영역 | 반영 위치 |
-| ---- | --------- |
-| key 분해 컬럼 모델(`context`/`context_id`/`type`/`uuid`/`stem`/`ext`), BE가 key·URL 조립 | §3.1, §4.1, §6.4 |
-| `AttachmentContext` 4종(CHAT·CREDENTIAL·POST·PROFILE) + context별 validator 4종 | §5.3, §7 |
-| 참조 모델: CHAT·POST = N:M 매핑, CREDENTIAL(`attachment_id`)·PROFILE(`picture_id`) = 1:1 FK | §4.3 |
-| 고아 판정 `AttachmentReferenceProvider` DIP (context별 repo가 `referencedIds` 제공) | §4.3, §9.1 |
-| `FAILED` 미도입 — confirm 실패 시 S3 삭제 + soft delete + 예외 | §4.1 |
-| cleanup 2단계 soft delete, 물리삭제 단계·ShedLock 미도입 | §9.1 |
-| presign `contextId` 항상 필수 + `type` 명시 | §5.3 |
-| soft delete(`BaseEntity @SoftDelete`) | §4.1 |
+| 영역                                                                                        | 반영 위치        |
+| ------------------------------------------------------------------------------------------- | ---------------- |
+| key 분해 컬럼 모델(`context`/`context_id`/`type`/`uuid`/`stem`/`ext`), BE가 key·URL 조립    | §3.1, §4.1, §6.4 |
+| `AttachmentContext` 4종(CHAT·CREDENTIAL·POST·PROFILE) + context별 validator 4종             | §5.3, §7         |
+| 참조 모델: CHAT·POST = N:M 매핑, CREDENTIAL(`attachment_id`)·PROFILE(`picture_id`) = 1:1 FK | §4.3             |
+| 고아 판정 `AttachmentReferenceProvider` DIP (context별 repo가 `referencedIds` 제공)         | §4.3, §9.1       |
+| `FAILED` 미도입 — confirm 실패 시 S3 삭제 + soft delete + 예외                              | §4.1             |
+| cleanup 2단계 soft delete, 물리삭제 단계·ShedLock 미도입                                    | §9.1             |
+| presign `contextId` 항상 필수 + `type` 명시                                                 | §5.3             |
+| soft delete(`BaseEntity @SoftDelete`)                                                       | §4.1             |
 
 ### 14.2 남은 작업 (코드)
 
