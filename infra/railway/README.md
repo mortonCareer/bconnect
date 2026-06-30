@@ -9,7 +9,7 @@ Morton 백엔드 인프라를 Terraform으로 관리합니다.
 | PostgreSQL | 메인 데이터베이스  |
 | API        | Spring Boot 백엔드 |
 
-환경: `production`(prod) + `dev`(staging, `dev` 브랜치 추적). 설계 배경은
+환경: `prod` + `dev`(`dev` 브랜치 추적, staging 역할). 설계 배경은
 [2026-05-15-railway-staging-environment-design.md](../../docs/reference/specs/2026-05-15-railway-staging-environment-design.md) 참조.
 
 ## dev 환경 — GUI 수동 단계 (TF 시야 밖)

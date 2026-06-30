@@ -150,7 +150,7 @@ resource "railway_variable" "api_sentry_dsn" {
 
 resource "railway_variable" "api_sentry_environment" {
   name           = "SENTRY_ENVIRONMENT"
-  value          = "production"
+  value          = "prod"
   service_id     = railway_service.api.id
   environment_id = railway_project.morton.default_environment.id
 
