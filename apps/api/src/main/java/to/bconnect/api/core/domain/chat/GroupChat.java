@@ -5,7 +5,7 @@ import to.bconnect.api.storage.chat.GroupChatEntity;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record Chat(
+public record GroupChat(
     Long id,
     String title,
     List<Long> participantIds,
@@ -14,8 +14,8 @@ public record Chat(
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
-    public static Chat of(GroupChatEntity entity, List<Long> participantIds, Message lastMessage, Long unreadCount) {
-        return new Chat(
+    public static GroupChat of(GroupChatEntity entity, List<Long> participantIds, Message lastMessage, Long unreadCount) {
+        return new GroupChat(
                 entity.getId(),
                 entity.getTitle(),
                 participantIds,

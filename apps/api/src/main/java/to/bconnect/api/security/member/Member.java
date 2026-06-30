@@ -10,7 +10,6 @@ public record Member(
     String username,
     String name,
     String phone,
-    Long pictureId,
     Role role,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
@@ -21,7 +20,6 @@ public record Member(
                 entity.getUsername(),
                 entity.getName(),
                 entity.getPhone(),
-                entity.getPictureId(),
                 entity.getRole(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt()

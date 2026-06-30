@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.AttachmentResolver;
 import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
@@ -24,17 +25,19 @@ public class MemberController {
     @GetMapping("/me")
     public ApiResponse<MemberResponse> get(@AuthenticationPrincipal AuthUser user) {
         val member = memberService.get(user);
-        return ApiResponse.success(MemberResponse.of(member, attachmentResolver.getUrl(member.pictureId(), ImageSize.SMALL)));
+        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        return ApiResponse.success(MemberResponse.of(member, picture));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ApiResponse<List<MemberResponse>> listMembers() {
         val members = memberService.list();
-        val urlMap = attachmentResolver.resolveUrlMap(members.stream().map(Member::pictureId).toList(), ImageSize.SMALL);
+        val urlMap = attachmentResolver.resolveUrlMap(
+                ReferenceType.MEMBER, members.stream().map(Member::id).toList(), ImageSize.SMALL);
 
         val response = members.stream()
-                .map(it -> MemberResponse.of(it, urlMap.get(it.pictureId())))
+                .map(it -> MemberResponse.of(it, urlMap.get(it.id())))
                 .toList();
         return ApiResponse.success(response);
     }

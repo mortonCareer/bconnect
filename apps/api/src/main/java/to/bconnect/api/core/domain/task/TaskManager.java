@@ -5,9 +5,10 @@ import lombok.val;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.attachment.AttachmentLinker;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.offer.OfferRepository;
-import to.bconnect.api.storage.post.PostAttachmentMappingRepository;
 import to.bconnect.api.storage.post.PostEntity;
 import to.bconnect.api.storage.post.PostRepository;
 import to.bconnect.api.storage.project.ProjectRepository;
@@ -24,7 +25,7 @@ public class TaskManager {
     private final CompanyRepository companyRepository;
     private final OfferRepository offerRepository;
     private final PostRepository postRepository;
-    private final PostAttachmentMappingRepository postAttachmentMappingRepository;
+    private final AttachmentLinker attachmentLinker;
 
     public void deleteByIds(Collection<Long> taskIds) {
         if (taskIds.isEmpty())
@@ -35,7 +36,7 @@ public class TaskManager {
         val posts = postRepository.findByTaskIdIn(taskIds);
         val postIds = posts.stream().map(PostEntity::getId).toList();
         if (!postIds.isEmpty())
-            postAttachmentMappingRepository.deleteByPostIdIn(postIds);
+            attachmentLinker.unlink(ReferenceType.POST, postIds);
         postRepository.deleteAll(posts);
 
         taskRepository.deleteAllById(taskIds);

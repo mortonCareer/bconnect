@@ -1,11 +1,11 @@
 package to.bconnect.api.core.presentation.v1.response;
 
-import to.bconnect.api.core.domain.chat.Chat;
+import to.bconnect.api.core.domain.chat.GroupChat;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record ChatResponse(
+public record GroupChatResponse(
         Long id,
         String title,
         List<MemberSummaryResponse> participants,
@@ -14,8 +14,8 @@ public record ChatResponse(
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {
-    public static ChatResponse of(Chat chat, List<MemberSummaryResponse> participants) {
-        return new ChatResponse(
+    public static GroupChatResponse of(GroupChat chat, List<MemberSummaryResponse> participants) {
+        return new GroupChatResponse(
                 chat.id(),
                 chat.title(),
                 participants,

@@ -9,7 +9,6 @@ public record Company(
         Long memberId,
         String name,
         String brn,
-        Long pictureId,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {
@@ -19,7 +18,6 @@ public record Company(
                 entity.getMemberId(),
                 entity.getName(),
                 entity.getBrn(),
-                entity.getPictureId(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt()
         );

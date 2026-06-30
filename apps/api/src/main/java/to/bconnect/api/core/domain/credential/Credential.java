@@ -13,7 +13,6 @@ public record Credential(
     CredentialType type,
     CredentialStatus status,
     LocalDate expiredAt,
-    Long attachmentId,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
@@ -24,7 +23,6 @@ public record Credential(
                 entity.getType(),
                 entity.getStatus(),
                 entity.getExpiredAt(),
-                entity.getAttachmentId(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt()
         );

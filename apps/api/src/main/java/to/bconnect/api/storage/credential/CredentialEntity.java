@@ -26,13 +26,10 @@ public class CredentialEntity extends BaseEntity {
 
     private LocalDate expiredAt;
 
-    private Long attachmentId;
-
-    public CredentialEntity(Long memberId, CredentialType type, LocalDate expiredAt, Long attachmentId) {
+    public CredentialEntity(Long memberId, CredentialType type, LocalDate expiredAt) {
         this.memberId = memberId;
         this.type = type;
         this.expiredAt = expiredAt;
-        this.attachmentId = attachmentId;
     }
 
     public void accept() {
@@ -41,9 +38,5 @@ public class CredentialEntity extends BaseEntity {
 
     public void deny() {
         this.status = CredentialStatus.DENIED;
-    }
-
-    public void detach() {
-        this.attachmentId = null;
     }
 }

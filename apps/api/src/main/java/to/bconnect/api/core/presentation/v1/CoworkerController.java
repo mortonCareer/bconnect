@@ -3,24 +3,19 @@ package to.bconnect.api.core.presentation.v1;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import to.bconnect.api.core.presentation.v1.response.CoworkerResponse;
-import to.bconnect.api.core.presentation.v1.response.CoworkerTaskResponse;
+import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.AttachmentResolver;
 import to.bconnect.api.attachment.ImageSize;
+import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.domain.coworker.Coworker;
 import to.bconnect.api.core.domain.coworker.CoworkerService;
-import to.bconnect.api.core.domain.task.TaskQueryService;
-import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
+import to.bconnect.api.core.domain.task.TaskQueryService;
+import to.bconnect.api.core.presentation.v1.response.CoworkerResponse;
+import to.bconnect.api.core.presentation.v1.response.CoworkerTaskResponse;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.security.member.Member;
-import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.storage.attachment.ReferenceType;
 
 import java.util.List;
 
@@ -40,13 +35,11 @@ public class CoworkerController {
             @AuthenticationPrincipal AuthUser user,
             @RequestParam Long memberId) {
         val coworkers = coworkerService.list(memberId);
-
         val memberIds = coworkers.stream().map(Coworker::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
         val profileMap = profileResolver.resolveMap(memberIds);
         val statusMap = coworkerService.resolveStatusMap(user.id(), memberIds);
-        val urlMap = attachmentResolver.resolveUrlMap(
-                memberMap.values().stream().map(Member::pictureId).toList(), ImageSize.SMALL);
+        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         val response = coworkers.stream()
                 .map(it -> {
@@ -56,7 +49,7 @@ public class CoworkerController {
                             member,
                             profileMap.get(it.memberId()),
                             statusMap.get(it.memberId()),
-                            urlMap.get(member.pictureId()));
+                            urlMap.get(member.id()));
                 })
                 .toList();
         return ApiResponse.success(response);

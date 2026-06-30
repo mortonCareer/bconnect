@@ -21,7 +21,7 @@ import to.bconnect.api.core.domain.coworker.CoworkerRequestService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.security.member.Member;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
@@ -48,13 +48,15 @@ public class CoworkerRequestController {
     @GetMapping("/received")
     public ApiResponse<List<CoworkerRequestResponse>> listReceived(
             @AuthenticationPrincipal AuthUser user) {
-        return ApiResponse.success(assemble(coworkerRequestQueryService.listReceived(user)));
+        val requests = coworkerRequestQueryService.listReceived(user);
+        return ApiResponse.success(assemble(requests));
     }
 
     @GetMapping("/sent")
     public ApiResponse<List<CoworkerRequestResponse>> listSent(
             @AuthenticationPrincipal AuthUser user) {
-        return ApiResponse.success(assemble(coworkerRequestQueryService.listSent(user)));
+        val requests = coworkerRequestQueryService.listSent(user);
+        return ApiResponse.success(assemble(requests));
     }
 
     @PostMapping("/{id}/accept")
@@ -85,8 +87,7 @@ public class CoworkerRequestController {
         val memberIds = requests.stream().map(CoworkerRequest::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
         val profileMap = profileResolver.resolveMap(memberIds);
-        val urlMap = attachmentResolver.resolveUrlMap(
-                memberMap.values().stream().map(Member::pictureId).toList(), ImageSize.SMALL);
+        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         return requests.stream()
                 .map(it -> {
@@ -95,7 +96,7 @@ public class CoworkerRequestController {
                             it,
                             member,
                             profileMap.get(it.memberId()),
-                            urlMap.get(member.pictureId()));
+                            urlMap.get(member.id()));
                 })
                 .toList();
     }

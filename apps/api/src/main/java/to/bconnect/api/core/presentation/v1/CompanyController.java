@@ -22,6 +22,7 @@ import to.bconnect.api.core.presentation.v1.request.CreateCompanyRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateCompanyRequest;
 import to.bconnect.api.core.presentation.v1.response.CompanyResponse;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.ReferenceType;
 
 import java.util.List;
 
@@ -37,11 +38,10 @@ public class CompanyController {
     @GetMapping
     public ApiResponse<List<CompanyResponse>> list() {
         val companies = companyService.list();
-        val urlMap = attachmentResolver.resolveUrlMap(
-                companies.stream().map(Company::pictureId).toList(), ImageSize.SMALL);
-
+        val companyIds = companies.stream().map(Company::id).toList();
+        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.COMPANY, companyIds, ImageSize.SMALL);
         val response = companies.stream()
-                .map(it -> CompanyResponse.of(it, urlMap.get(it.pictureId())))
+                .map(it -> CompanyResponse.of(it, urlMap.get(it.id())))
                 .toList();
         return ApiResponse.success(response);
     }
@@ -49,8 +49,8 @@ public class CompanyController {
     @GetMapping("/{id}")
     public ApiResponse<CompanyResponse> get(@PathVariable Long id) {
         val company = companyService.get(id);
-        return ApiResponse.success(
-                CompanyResponse.of(company, attachmentResolver.getUrl(company.pictureId(), ImageSize.SMALL)));
+        val picture = attachmentResolver.getUrl(ReferenceType.COMPANY, company.id(), ImageSize.SMALL);
+        return ApiResponse.success(CompanyResponse.of(company, picture));
     }
 
     @PostMapping

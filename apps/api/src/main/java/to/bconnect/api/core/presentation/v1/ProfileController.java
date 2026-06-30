@@ -22,7 +22,7 @@ import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.core.domain.profile.ProfileService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.security.member.Member;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
@@ -43,13 +43,12 @@ public class ProfileController {
 
         val memberIds = profiles.stream().map(Profile::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
-        val urlMap = attachmentResolver.resolveUrlMap(
-                memberMap.values().stream().map(Member::pictureId).toList(), ImageSize.SMALL);
+        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         val response = profiles.stream()
                 .map(it -> {
                     val member = memberMap.get(it.memberId());
-                    return ProfileResponse.of(it, member, urlMap.get(member.pictureId()));
+                    return ProfileResponse.of(it, member, urlMap.get(member.id()));
                 })
                 .toList();
         return ApiResponse.success(response);
@@ -59,9 +58,9 @@ public class ProfileController {
     public ApiResponse<ProfileResponse> get(@PathVariable Long id) {
         val profile = profileQueryService.get(id);
         val member = memberResolver.find(profile.memberId());
+        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
-        return ApiResponse.success(
-                ProfileResponse.of(profile, member, attachmentResolver.getUrl(member.pictureId(), ImageSize.SMALL)));
+        return ApiResponse.success(ProfileResponse.of(profile, member, picture));
     }
 
     @PostMapping

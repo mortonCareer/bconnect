@@ -9,6 +9,9 @@ import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.task.TaskManager;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.board.BoardEntity;
+import to.bconnect.api.storage.board.BoardRepository;
+import to.bconnect.api.storage.board.BoardType;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.project.ProjectEntity;
@@ -29,6 +32,7 @@ public class ProjectService {
     private final CompanyRepository companyRepository;
     private final TaskRepository taskRepository;
     private final TaskManager taskManager;
+    private final BoardRepository boardRepository;
 
     @Transactional(readOnly = true)
     public List<Project> list(AuthUser user) {
@@ -64,7 +68,10 @@ public class ProjectService {
                 command.address()
         );
 
-        return projectRepository.save(created).getId();
+        val projectId = projectRepository.save(created).getId();
+        boardRepository.save(new BoardEntity(BoardType.PROJECT, projectId, null));
+
+        return projectId;
     }
 
     @Transactional
