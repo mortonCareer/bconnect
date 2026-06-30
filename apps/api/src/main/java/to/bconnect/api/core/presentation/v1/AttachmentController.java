@@ -48,7 +48,7 @@ public class AttachmentController {
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid ConfirmRequest request) {
         val response = attachmentService.confirm(user.id(), request.attachmentIds()).stream()
-                .map(it -> AttachmentResponse.of(it, attachmentResolver.getUrl(it, ImageSize.SMALL)))
+                .map(it -> AttachmentResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.SMALL)))
                 .toList();
         return ApiResponse.success(response);
     }

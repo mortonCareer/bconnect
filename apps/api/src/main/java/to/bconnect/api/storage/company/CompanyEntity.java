@@ -23,17 +23,9 @@ public class CompanyEntity extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String brn;
 
-    @Column
-    private Long pictureId;
-
-    public CompanyEntity(Long memberId, String name, String brn, Long pictureId) {
+    public CompanyEntity(Long memberId, String name, String brn) {
         this.memberId = memberId;
         this.name = name;
         this.brn = brn;
-        this.pictureId = pictureId;
-    }
-
-    public void update(Long pictureId) {
-        this.pictureId = pictureId;
     }
 }

@@ -4,31 +4,26 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.attachment.AttachmentLinker;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.storage.member.MemberEntity;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MessageService {
 
     private final MessageRepository messageRepository;
-    private final MessageAttachmentMappingRepository messageAttachmentMappingRepository;
+    private final AttachmentLinker attachmentLinker;
 
     @Transactional
     public void create(Long chatId, ChatType type, Long senderId, SendMessage command) {
         val created = messageRepository.save(new MessageEntity(
                 chatId, type, senderId, command.type(), command.content()));
 
-        val attachmentIds = command.attachmentIds();
-        if (!attachmentIds.isEmpty())
-            messageAttachmentMappingRepository.saveAll(attachmentIds.stream()
-                    .map(it -> new MessageAttachmentMappingEntity(created.getId(), it))
-                    .toList());
+        attachmentLinker.link(senderId, ReferenceType.MESSAGE, created.getId(), command.attachmentIds());
     }
 
     @Transactional
@@ -52,16 +47,8 @@ public class MessageService {
                 cursor.toSort()
         );
 
-        val messageIds = messages.getContent().stream().map(MessageEntity::getId).toList();
-        val attachmentIdMap = messageAttachmentMappingRepository.findByMessageIdIn(messageIds)
-                .stream()
-                .collect(Collectors.groupingBy(
-                        MessageAttachmentMappingEntity::getMessageId,
-                        Collectors.mapping(MessageAttachmentMappingEntity::getAttachmentId, Collectors.toList())
-                ));
-
         return CursorPage.from(
-                messages.map(it -> Message.of(it, attachmentIdMap.getOrDefault(it.getId(), List.of()))),
+                messages.map(Message::of),
                 Message::id
         );
     }

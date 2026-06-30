@@ -24,7 +24,7 @@ public class GroupChatService {
     private final MessageService messageService;
 
     @Transactional(readOnly = true)
-    public List<Chat> list(Long memberId) {
+    public List<GroupChat> list(Long memberId) {
         val chatIds = participantRepository.findByMemberId(memberId)
                 .stream().map(ParticipantEntity::getChatId).toList();
         if (chatIds.isEmpty()) return List.of();
@@ -45,7 +45,7 @@ public class GroupChatService {
         val unreadCountMap = messageRepository.findGroupUnreadCountByChatIdsAndMemberId(chatIds, memberId);
 
         return chats.stream()
-                .map(it -> Chat.of(
+                .map(it -> GroupChat.of(
                         it,
                         participantMap.getOrDefault(it.getId(), List.of()),
                         lastMessageMap.get(it.getId()),
@@ -54,7 +54,7 @@ public class GroupChatService {
     }
 
     @Transactional
-    public Long create(AuthUser user, CreateChat command) {
+    public Long create(AuthUser user, CreateGroupChat command) {
         val participantIds = command.participantIds().stream().distinct().toList();
 
         if (!participantIds.contains(user.id()))

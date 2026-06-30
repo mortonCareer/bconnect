@@ -5,6 +5,7 @@
 ## 컴포넌트
 - AttachmentKeyUtils : S3 object key 생성
 - AttachmentResolver : Attachment 읽기 경로 조립
+- AttachmentLinker : 도메인 ↔ Attachment 참조 연결 · 해제
 - AttachmentQueryService : Attachment 조회 및 권한 검증
 - AttachmentCleanupService : PENDING·고아 첨부 정리 (크론)
 - S3FileStorage : presigned 로직 처리
@@ -21,12 +22,15 @@
 
 ### Enum
 
-| Enum | 레이어    | 값 (path/ext)                                                                 | 의미                  |
-|---|--------|------------------------------------------------------------------------------|---------------------|
-| AttachmentContext | Storage | `CHAT`(chats), `COMPANY`(companies), `CREDENTIAL`(credentials), `POST`(posts), `PROFILE`(profiles) | 권한 scope 종류 + path  |
-| AttachmentType | Storage | `IMAGE`(images), `FILE`(files)                                               | 파일 종류 + path        |
-| AttachmentStatus | Storage | `PENDING`, `COMPLETED`                                                       | 파일 업로드 상태           |
+| Enum | 레이어    | 값 (path/ext)                                                                 | 의미                   |
+|---|--------|------------------------------------------------------------------------------|----------------------|
+| AttachmentContext | Storage | `CHAT`(chats), `COMPANY`(companies), `CREDENTIAL`(credentials), `MEMBER`(members), `POST`(posts) | 권한 scope 종류 + path   |
+| ReferenceType | Storage | `POST`, `MESSAGE`, `COMPANY`, `MEMBER`, `CREDENTIAL`                          | 엔티티 소유(참조)           |
+| AttachmentType | Storage | `IMAGE`(images), `FILE`(files)                                               | 파일 종류 + path         |
+| AttachmentStatus | Storage | `PENDING`, `COMPLETED`                                                       | 파일 업로드 상태            |
 | ImageSize | Domain | `ORIGINAL`(o), `MEDIUM`(m/webp), `SMALL`(s/webp)                             | 이미지 사이즈 + path + ext |
+- Context는 S3 저장 경로 · Signed Cookie 범위를 나타냄
+- Reference는 DB 참조 · 도메인 소유를 나타냄
 
 
 ## Validator · Cleanup 구조
@@ -70,22 +74,12 @@ graph TD
         Clean[AttachmentCleanupService]
     end
     subgraph storage
-        PostR[("PostAttachmentMappingRepository")]
-        MsgR[("MessageAttachmentMappingRepository")]
-        CompR[("CompanyRepository")]
-        CredR[("CredentialRepository")]
-        ProfR[("ProfileRepository")]
-        P{{AttachmentReferenceProvider}}
+        AttR[("AttachmentRepository")]
     end
     Sched --> Clean
-    Clean --> P
-    PostR -.implements.-> P
-    MsgR -.implements.-> P
-    CompR -.implements.-> P
-    CredR -.implements.-> P
-    ProfR -.implements.-> P
+    Clean --> AttR
 ```
-- AttachmentReferenceProvider : 해당 컨텍스트의 연관된 엔티티 조회 → Orphan 판정
+- Orphan 판정 : `referenceId is null`(도메인 미참조)인 COMPLETED Attachment
 
 ## Life cycle
 
@@ -94,14 +88,15 @@ graph TD
 | presign         | 권한 검증 (ContextValidator) 후 presigned URL 발급 | PENDING   | ○        | -           | -  |
 | upload          | 클라이언트가 presigned URL로 파일 업로드                | PENDING   | ○        | ○           | -  |
 | confirm         | Attachment ↔ S3 head 일치 확인                  | COMPLETED | ○        | ○           | -  |
-| create          | 각 도메인별 Validator 검증 + Attachment 참조 저장      | COMPLETED | ○        | ○           | ○  |
+| create          | AttachmentLinker 검증 + referenceType·referenceId 세팅 | COMPLETED | ○        | ○           | ○  |
 | read            | Resolver.url → CloudFront URL + Signe Cookie | COMPLETED | ○        | ○           | ○  |
 | update · delete | Attachment 참조 교체 · 삭제                       | COMPLETED | ○        | ○           | ✕  |
 | cleanup         | Cleanup 규칙에 따라 회수                           | -         | Soft Del | Hard Del | -  |
 
-Cleanup 규칙
+
+### Cleanup 규칙
 
 | 대상 | 조건 | 의미                |
 |---|---|-------------------|
 | Pending | `status=PENDING` & `createdAt` 24h 경과 | presign 후 미confirm |
-| Orphan | context별 `status=COMPLETED` & `createdAt` 24h 경과 & ReferenceProvider 미참조 | DB 삭제 후 S3 미삭제    |
+| Orphan | `status=COMPLETED` & `createdAt` 24h 경과 & `referenceId is null` | DB 삭제 후 S3 미삭제    |

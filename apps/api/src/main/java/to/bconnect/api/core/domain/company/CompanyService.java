@@ -6,8 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.attachment.AttachmentValidator;
+import to.bconnect.api.attachment.AttachmentLinker;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 
@@ -18,7 +19,7 @@ import java.util.List;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
-    private final AttachmentValidator attachmentValidator;
+    private final AttachmentLinker attachmentLinker;
 
     @Transactional(readOnly = true)
     public List<Company> list() {
@@ -44,17 +45,15 @@ public class CompanyService {
         if (companyRepository.existsByBrn(command.brn()))
             throw new CodeException(CompanyExceptionCode.ALREADY_EXISTS);
 
-        if (command.pictureId() != null)
-            attachmentValidator.validate(user.id(), command.pictureId());
-
         val created = new CompanyEntity(
                 user.id(),
                 command.name(),
-                command.brn(),
-                command.pictureId()
+                command.brn()
         );
 
-        return companyRepository.save(created).getId();
+        val companyId = companyRepository.save(created).getId();
+        attachmentLinker.relink(user.id(), ReferenceType.COMPANY, companyId, command.pictureId());
+        return companyId;
     }
 
     @Transactional
@@ -62,15 +61,16 @@ public class CompanyService {
         val found = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (pictureId != null)
-            attachmentValidator.validate(user.id(), pictureId);
-
-        found.update(pictureId);
+        attachmentLinker.relink(user.id(), ReferenceType.COMPANY, found.getId(), pictureId);
     }
 
     @Transactional
     public void delete(AuthUser user) {
-        companyRepository.findByMemberId(user.id())
-                .ifPresent(companyRepository::delete);
+        val optional = companyRepository.findByMemberId(user.id());
+        if(optional.isPresent()) {
+            val found = optional.get();
+            attachmentLinker.unlink(ReferenceType.COMPANY, List.of(found.getId()));
+            companyRepository.delete(found);
+        }
     }
 }

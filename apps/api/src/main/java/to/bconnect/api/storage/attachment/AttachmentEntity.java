@@ -30,6 +30,11 @@ public class AttachmentEntity extends BaseEntity {
     @Column(nullable = false)
     private Long contextId;
 
+    @Enumerated(EnumType.STRING)
+    private ReferenceType referenceType;
+
+    private Long referenceId;
+
     @Column(nullable = false, unique = true)
     private String uuid;
 
@@ -60,5 +65,15 @@ public class AttachmentEntity extends BaseEntity {
 
     public void complete() {
         this.status = AttachmentStatus.COMPLETED;
+    }
+
+    public void link(ReferenceType referenceType, Long referenceId) {
+        this.referenceType = referenceType;
+        this.referenceId = referenceId;
+    }
+
+    public void unlink() {
+        this.referenceType = null;
+        this.referenceId = null;
     }
 }

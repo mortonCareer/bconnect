@@ -5,15 +5,15 @@ INSERT INTO otps (id, phone, code, code_expired_at, code_revoked, attempts, dail
 (4, '01000000003', '000003', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', 'signup-token', TIMESTAMP '2026-12-31 00:00:00', false, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (3, '01000000004', '000004', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', NULL, NULL, NULL, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
-INSERT INTO members (id, username, name, phone, picture, role, created_at, modified_at) VALUES
-(0, 'system', '시스템', '01000000000', 'https://image.com', 'ADMIN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(1, 'test', '테스트', '01000000002', 'https://image.com', 'ADMIN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(2, 'foreman1', '반장1', '01000000004', 'https://image.com', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(3, 'foreman2', '반장2', '01000000006', 'https://image.com', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(4, 'foreman3', '반장3', '01000000007', 'https://image.com', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(5, 'foreman4', '반장4', '01000000008', 'https://image.com', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(6, 'foreman5', '반장5', '01000000009', 'https://image.com', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(7, 'foreman6', '반장6', '01000000011', 'https://image.com', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+INSERT INTO members (id, username, name, phone, role, created_at, modified_at) VALUES
+(0, 'system', '시스템', '01000000000', 'ADMIN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(1, 'test', '테스트', '01000000002', 'ADMIN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(2, 'foreman1', '반장1', '01000000004', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(3, 'foreman2', '반장2', '01000000006', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(4, 'foreman3', '반장3', '01000000007', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(5, 'foreman4', '반장4', '01000000008', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(6, 'foreman5', '반장5', '01000000009', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(7, 'foreman6', '반장6', '01000000011', 'WORKER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO coworker_requests (id, from_id, to_id) VALUES
 (1, 4, 1),

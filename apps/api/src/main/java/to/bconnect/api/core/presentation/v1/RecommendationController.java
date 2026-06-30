@@ -18,13 +18,13 @@ import to.bconnect.api.core.presentation.v1.request.UpdateRecommendationRequest;
 import to.bconnect.api.core.presentation.v1.response.RecommendationResponse;
 import to.bconnect.api.attachment.AttachmentResolver;
 import to.bconnect.api.attachment.ImageSize;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.core.domain.recommendation.Recommendation;
 import to.bconnect.api.core.domain.recommendation.RecommendationQueryService;
 import to.bconnect.api.core.domain.recommendation.RecommendationService;
 import to.bconnect.api.core.domain.MemberResolver;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
@@ -50,24 +50,28 @@ public class RecommendationController {
 
     @GetMapping("/received")
     public ApiResponse<List<RecommendationResponse>> listReceived(@RequestParam Long memberId) {
-        return ApiResponse.success(assemble(recommendationQueryService.listReceived(memberId)));
+        val recommendations = recommendationQueryService.listReceived(memberId);
+        return ApiResponse.success(assemble(recommendations));
     }
 
     @GetMapping("/sent")
     public ApiResponse<List<RecommendationResponse>> listSent(@RequestParam Long memberId) {
-        return ApiResponse.success(assemble(recommendationQueryService.listSent(memberId)));
+        val recommendations = recommendationQueryService.listSent(memberId);
+        return ApiResponse.success(assemble(recommendations));
     }
 
     @GetMapping("/me/received")
     public ApiResponse<List<RecommendationResponse>> listMyReceived(
             @AuthenticationPrincipal AuthUser user) {
-        return ApiResponse.success(assemble(recommendationQueryService.listMyReceived(user)));
+        val recommendations = recommendationQueryService.listMyReceived(user);
+        return ApiResponse.success(assemble(recommendations));
     }
 
     @GetMapping("/me/sent")
     public ApiResponse<List<RecommendationResponse>> listMySent(
             @AuthenticationPrincipal AuthUser user) {
-        return ApiResponse.success(assemble(recommendationQueryService.listMySent(user)));
+        val recommendations = recommendationQueryService.listMySent(user);
+        return ApiResponse.success(assemble(recommendations));
     }
 
     @PutMapping("/{id}")
@@ -107,8 +111,7 @@ public class RecommendationController {
         val memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
         val profileMap = profileResolver.resolveMap(memberIds);
-        val urlMap = attachmentResolver.resolveUrlMap(
-                memberMap.values().stream().map(Member::pictureId).toList(), ImageSize.SMALL);
+        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         return recommendations.stream()
                 .map(it -> {
@@ -117,7 +120,7 @@ public class RecommendationController {
                             it,
                             member,
                             profileMap.get(it.memberId()),
-                            urlMap.get(member.pictureId()));
+                            urlMap.get(member.id()));
                 })
                 .toList();
     }

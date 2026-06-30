@@ -14,10 +14,10 @@ import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.core.domain.credential.Credential;
 import to.bconnect.api.core.domain.credential.CredentialService;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/credentials")
@@ -39,16 +39,16 @@ public class CredentialController {
     public ApiResponse<List<CredentialResponse>> listMine(@AuthenticationPrincipal AuthUser user) {
         val credentials = credentialService.list(user.id());
 
-        val attachmentIds = credentials.stream()
-                .map(Credential::attachmentId)
-                .filter(Objects::nonNull)
+        val credentialIds = credentials.stream()
+                .map(Credential::id)
                 .toList();
-        val attachmentMap = attachmentResolver.resolveMap(attachmentIds);
+        val attachmentMap = attachmentResolver.resolveMap(ReferenceType.CREDENTIAL, credentialIds);
 
         val response = credentials.stream()
                 .map(it -> {
-                    val attachment = attachmentMap.get(it.attachmentId());
-                    return CredentialResponse.of(it, attachment, attachmentResolver.getUrl(attachment, ImageSize.SMALL));
+                    val attachment = attachmentMap.get(it.id());
+                    val url = attachmentResolver.parseUrl(attachment, ImageSize.SMALL);
+                    return CredentialResponse.of(it, attachment, url);
                 })
                 .toList();
         return ApiResponse.success(response);

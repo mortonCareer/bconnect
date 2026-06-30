@@ -32,7 +32,7 @@ public record TaskResponse(
         LocalDateTime modifiedAt
 ) {
     public static TaskResponse of(Task task, Address address) {
-        return of(task, address, (Offer) null);
+        return of(task, address, null);
     }
 
     public static TaskResponse of(Task task, Address address, Offer offer) {

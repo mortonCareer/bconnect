@@ -7,7 +7,7 @@
 | Prefix | 도메인 | 위치 |
 | --- | --- | --- |
 | `C` | 공통 | `common` |
-| `A` | 인증(OTP/JWT/세션) | `security` |
+| `A` | 인증 | `security` |
 | `M` | 회원 | `security/member` |
 | `P` | 프로필 | `core/domain/profile` |
 | `CO` | 업체 | `core/domain/company` |
@@ -18,7 +18,7 @@
 
 ---
 
-## 공통 — `CommonExceptionCode`
+## CommonExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
@@ -30,7 +30,7 @@
 | C006 | UNSUPPORTED_MEDIA_TYPE | 415 | WARN | 지원하지 않는 미디어 형식입니다. |
 | C007 | INTERNAL_SERVER_ERROR | 500 | ERROR | 서버 내부 오류입니다. |
 
-## 인증 — `AuthExceptionCode`
+## AuthExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
@@ -45,33 +45,33 @@
 | A009 | INVALID_SIGNUP_TOKEN | 400 | INFO | 유효하지 않은 가입 토큰입니다. |
 | A010 | SIGNUP_TOKEN_REVOKED | 400 | INFO | 가입 토큰이 만료되었습니다. |
 
-## 회원 — `MemberExceptionCode`
+## MemberExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
 | M001 | DUPLICATE_USERNAME | 409 | INFO | 이미 사용 중인 사용자명입니다. |
 | M002 | DUPLICATE_PHONE | 409 | INFO | 이미 사용 중인 전화번호입니다. |
 
-## 프로필 — `ProfileExceptionCode`
+## ProfileExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
 | P001 | ALREADY_EXISTS | 409 | INFO | 이미 프로필이 존재합니다. |
 | P002 | INVALID_PRIMARY_TRADE | 400 | INFO | 대표 공종은 선택한 공종 중에서만 지정할 수 있습니다. |
 
-## 업체 — `CompanyExceptionCode`
+## CompanyExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
 | CO001 | ALREADY_EXISTS | 409 | INFO | 이미 업체가 존재합니다. |
 
-## 작업 — `TaskExceptionCode`
+## TaskExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
 | T001 | NOT_FOUND | 404 | INFO | 작업을 찾을 수 없습니다. |
 
-## 동료 — `CoworkerExceptionCode`
+## CoworkerExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
@@ -82,7 +82,7 @@
 | CW005 | ALREADY_REQUESTED | 409 | INFO | 이미 동료 요청을 보낸 사용자입니다. |
 | CW006 | NOT_FOUND | 404 | INFO | 동료 관계를 찾을 수 없습니다. |
 
-## 추천서 — `RecommendationExceptionCode`
+## RecommendationExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
@@ -90,7 +90,7 @@
 | RC002 | NOT_COWORKER | 400 | INFO | 동료 관계인 사용자에게만 추천서를 작성할 수 있습니다. |
 | RC003 | ALREADY_EXISTS | 409 | INFO | 이미 추천서를 작성한 사용자입니다. |
 
-## 채팅 — `ChatExceptionCode`
+## ChatExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |

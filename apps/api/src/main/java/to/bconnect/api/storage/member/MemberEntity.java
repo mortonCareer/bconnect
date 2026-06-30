@@ -25,16 +25,12 @@ public class MemberEntity extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String phone;
 
-    @Column
-    private Long pictureId;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
-    public void update(String name, Long pictureId, Role role) {
+    public void update(String name, Role role) {
         this.name = name;
-        this.pictureId = pictureId;
         this.role = role;
     }
 }
