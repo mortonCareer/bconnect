@@ -135,7 +135,7 @@ graph TD
 ```mermaid
 graph TD
   subgraph Presentation
-    MemberC[MemberController]
+    CS[Other Controllers]
     AttC[AttachmentController]
   end
   subgraph Domain
@@ -146,13 +146,13 @@ graph TD
   subgraph Attachment
     AttR[AttachmentResolver]
     AttS[AttachmentService]
-    AttV[AttachmentValidator]
+    AttL[AttachmentLinker]
   end
 
-  MemberC -->|urlMap · url| AttR
+  CS -->|resolve| AttR
   AttC -->|presign · confirm| AttS
   AttC -->|context validate| Reg
-  PostS & CredS -->|validate| AttV
+  PostS & CredS -->|link| AttL
 ```
 
 ### 도메인 교차
