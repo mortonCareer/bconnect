@@ -1,4 +1,4 @@
-package to.bconnect.api.core.domain;
+package to.bconnect.api.attachment;
 
 import to.bconnect.api.storage.attachment.AttachmentContext;
 

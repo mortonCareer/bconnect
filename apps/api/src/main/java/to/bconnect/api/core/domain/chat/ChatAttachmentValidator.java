@@ -3,7 +3,7 @@ package to.bconnect.api.core.domain.chat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.common.CodeException;
-import to.bconnect.api.core.domain.AttachmentContextValidator;
+import to.bconnect.api.attachment.AttachmentContextValidator;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.chat.ParticipantRepository;
 
