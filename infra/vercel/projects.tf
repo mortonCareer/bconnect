@@ -24,6 +24,15 @@ resource "vercel_project" "morton-career" {
 
   # ignore_command 없음 — 매 푸시 빌드(Vercel 기본; native skip 미작동, 실측 ADR-0018). 경위 #453
 
+  # 표준 ephemeral 프리뷰 배포 비활성 (ADR-0022 프리뷰 폐기). dev QA는 custom env "dev"가 담당
+  preview_deployments_disabled = true
+
+  # Vercel 봇 PR/커밋 코멘트 비활성
+  git_comments = {
+    on_commit       = false
+    on_pull_request = false
+  }
+
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
     deployment_type = "none"
@@ -242,6 +251,15 @@ resource "vercel_project" "morton-plan" {
   root_directory = "apps/plan"
 
   # ignore_command 없음 — 매 푸시 빌드(Vercel 기본; native skip 미작동, 실측 ADR-0018). 경위 #453
+
+  # 표준 ephemeral 프리뷰 배포 비활성 (ADR-0022 프리뷰 폐기). dev QA는 custom env "dev"가 담당
+  preview_deployments_disabled = true
+
+  # Vercel 봇 PR/커밋 코멘트 비활성
+  git_comments = {
+    on_commit       = false
+    on_pull_request = false
+  }
 
   # Preview deployments are publicly accessible (no Vercel authentication required)
   vercel_authentication = {
