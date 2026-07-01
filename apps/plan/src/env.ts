@@ -3,6 +3,7 @@ import { validateEnv, commonSchemas } from '@bconnect/config/env'
 
 const planEnvSchema = z.object({
   NEXT_PUBLIC_API_URL: commonSchemas.apiUrl,
+  NEXT_PUBLIC_API_MOCKING: commonSchemas.apiMocking,
 })
 
 export type PlanEnv = z.infer<typeof planEnvSchema>

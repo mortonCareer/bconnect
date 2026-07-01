@@ -23,7 +23,7 @@ resource "google_project" "bconnect" {
   billing_account = var.billing_account_id
 
   labels = {
-    environment = "production"
+    environment = "prod"
     managed_by  = "terraform"
   }
 }

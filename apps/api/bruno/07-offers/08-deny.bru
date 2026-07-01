@@ -1,14 +1,14 @@
 meta {
-  name: 기술자 작업 목록 - 제안 포함
+  name: 제안 거절
   type: http
-  seq: 3
+  seq: 8
   tags: [
     chain
   ]
 }
 
-get {
-  url: {{baseUrl}}/api/v1/tasks
+post {
+  url: {{baseUrl}}/api/v1/offers/{{denyOfferId}}/deny
   auth: bearer
 }
 
@@ -20,11 +20,14 @@ tests {
   test("성공", function() {
     expect(res.status).to.equal(200);
     expect(res.body.success).to.equal(true);
-    expect(res.body.data).to.be.an('array');
   });
 }
 
 docs {
   @chain
   - 01-otp/04-verify-otp-login-2
+  - 04-companies/01-create
+  - 05-projects/01-create
+  - 06-company-tasks/01-create-company-task
+  - 07-offers/06-create-deny
 }

@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import to.bconnect.api.core.domain.task.UpdateAssigneeTask;
-import to.bconnect.api.core.domain.task.UpdateProjectTask;
-import to.bconnect.api.core.domain.task.UpdateWorkerTask;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.BaseEntity;
 import to.bconnect.api.storage.profile.Trade;
@@ -86,28 +83,30 @@ public class TaskEntity extends BaseEntity {
         this.projectMemo = projectMemo;
     }
 
-    public void update(UpdateWorkerTask command) {
-        this.trades = command.trades() != null ? command.trades() : new HashSet<>();
-        this.start = command.start();
-        this.end = command.end();
-        this.workerTitle = command.title();
-        this.workerMemo = command.memo();
-        this.workerCompany = command.company();
-        this.address = command.address();
+    public void update(Set<Trade> trades, LocalDate start, LocalDate end,
+                       String title, String memo, String company, Address address) {
+        this.trades = trades != null ? trades : new HashSet<>();
+        this.start = start;
+        this.end = end;
+        this.workerTitle = title;
+        this.workerMemo = memo;
+        this.workerCompany = company;
+        this.address = address;
     }
 
-    public void update(UpdateProjectTask command) {
-        this.trades = command.trades() != null ? command.trades() : new HashSet<>();
-        this.start = command.start();
-        this.end = command.end();
-        this.projectTitle = command.title();
-        this.projectRequirement = command.requirement();
-        this.projectMemo = command.memo();
+    public void update(Set<Trade> trades, LocalDate start, LocalDate end,
+                       String title, String requirement, String memo) {
+        this.trades = trades != null ? trades : new HashSet<>();
+        this.start = start;
+        this.end = end;
+        this.projectTitle = title;
+        this.projectRequirement = requirement;
+        this.projectMemo = memo;
     }
 
-    public void update(UpdateAssigneeTask command) {
-        this.workerTitle = command.title();
-        this.workerMemo = command.memo();
+    public void update(String title, String memo) {
+        this.workerTitle = title;
+        this.workerMemo = memo;
     }
 
     public void assign(Long workerId) {

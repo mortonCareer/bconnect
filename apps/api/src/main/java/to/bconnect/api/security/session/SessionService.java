@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.security.AuthExceptionCode;
 import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthUtils;
 import to.bconnect.api.storage.session.SessionEntity;
 import to.bconnect.api.storage.session.SessionRepository;
@@ -36,8 +37,8 @@ public class SessionService {
 
     @Transactional
     public void login(String username, String agent, String ip, String refreshToken) {
-        val member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
+        val member = memberRepository.findById(Long.valueOf(username))
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
         val encrypted = AuthUtils.sha256(refreshToken);
         val optional = sessionRepository.findByMemberId(member.getId());
 
@@ -64,8 +65,8 @@ public class SessionService {
     }
 
     private SessionEntity findSession(String username) {
-        val member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
+        val member = memberRepository.findById(Long.valueOf(username))
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         return sessionRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
