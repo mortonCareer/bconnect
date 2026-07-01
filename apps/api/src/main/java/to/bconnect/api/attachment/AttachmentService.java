@@ -86,7 +86,7 @@ public class AttachmentService {
 
     private Attachment confirmOne(Long memberId, Long attachmentId) {
         val attachment = attachmentRepository.findById(attachmentId)
-                .orElseThrow(() -> new CodeException(AttachmentExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
         if (!attachment.getMemberId().equals(memberId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 

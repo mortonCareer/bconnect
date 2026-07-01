@@ -148,10 +148,10 @@ public class JwtProvider {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (ExpiredJwtException ex) {
-            log.error("Expired token: {}", ex.getMessage());
+            log.info("Expired token: {}", ex.getMessage());
             throw new JwtException("Expired token", ex);
         } catch (JwtException | IllegalArgumentException ex) {
-            log.error("Invalid token: {}", ex.getMessage());
+            log.warn("Invalid token: {}", ex.getMessage());
             throw new JwtException("Invalid token", ex);
         }
     }

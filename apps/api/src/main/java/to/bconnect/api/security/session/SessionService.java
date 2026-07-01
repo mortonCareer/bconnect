@@ -26,7 +26,7 @@ public class SessionService {
         val found = findSession(username);
 
         if (!AuthUtils.sha256(refreshToken).equals(found.getRefreshToken())) {
-            throw new CodeException(AuthExceptionCode.INVALID_REFRESH_TOKEN);
+            throw new CodeException(AuthExceptionCode.INVALID_TOKEN);
         }
 
         if (found.isRevoked()) {

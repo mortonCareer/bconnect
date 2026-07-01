@@ -44,16 +44,16 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
         val authorization = accessor.getFirstNativeHeader(HttpHeaders.AUTHORIZATION);
         val token = JwtUtils.resolveBearerToken(authorization);
         if (token == null)
-            throw new CodeException(AuthExceptionCode.INVALID_ACCESS_TOKEN);
+            throw new CodeException(AuthExceptionCode.INVALID_TOKEN);
 
         try {
             jwtProvider.validateToken(token);
         } catch (JwtException e) {
-            throw new CodeException(AuthExceptionCode.INVALID_ACCESS_TOKEN);
+            throw new CodeException(AuthExceptionCode.INVALID_TOKEN);
         }
 
         if (!jwtProvider.isAccessToken(token))
-            throw new CodeException(AuthExceptionCode.INVALID_ACCESS_TOKEN);
+            throw new CodeException(AuthExceptionCode.INVALID_TOKEN);
 
         val username = jwtProvider.getUsername(token);
         val user = userDetailsService.loadUserByUsername(username);

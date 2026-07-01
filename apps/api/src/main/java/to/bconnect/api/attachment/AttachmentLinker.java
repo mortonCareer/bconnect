@@ -27,7 +27,7 @@ public class AttachmentLinker {
 
         val attachments = attachmentRepository.findAllById(attachmentIds);
         if (attachments.size() != attachmentIds.size())
-            throw new CodeException(AttachmentExceptionCode.NOT_FOUND);
+            throw new CodeException(CommonExceptionCode.NOT_FOUND);
 
         attachments.forEach(it -> {
             validate(it, memberId);
@@ -42,7 +42,7 @@ public class AttachmentLinker {
             return;
 
         val attachment = attachmentRepository.findById(attachmentId)
-                .orElseThrow(() -> new CodeException(AttachmentExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
         validate(attachment, memberId);
         attachment.link(referenceType, referenceId);
     }

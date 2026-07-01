@@ -44,7 +44,7 @@ public class TaskManager {
 
     public Long getCompanyOwnerId(Long taskId) {
         val task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new CodeException(TaskExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
         val project = projectRepository.findById(task.getProjectId())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
         val company = companyRepository.findById(project.getCompanyId())

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.core.domain.task.TaskExceptionCode;
 import to.bconnect.api.core.domain.task.TaskManager;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.company.CompanyRepository;
@@ -40,7 +39,7 @@ public class OfferService {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         val task = taskRepository.findById(command.taskId())
-                .orElseThrow(() -> new CodeException(TaskExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
         if (task.getType() != TaskType.PROJECT)
             throw new CodeException(OfferExceptionCode.NOT_PROJECT_TASK);
 
@@ -64,7 +63,7 @@ public class OfferService {
     @Transactional
     public void accept(AuthUser user, Long offerId) {
         val found = offerRepository.findById(offerId)
-                .orElseThrow(() -> new CodeException(OfferExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getWorkerId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
@@ -74,7 +73,7 @@ public class OfferService {
         found.accept();
 
         val task = taskRepository.findById(found.getTaskId())
-                .orElseThrow(() -> new CodeException(TaskExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
         task.assign(found.getWorkerId());
 
         // cancel other offers
@@ -89,7 +88,7 @@ public class OfferService {
     @Transactional
     public void deny(AuthUser user, Long offerId) {
         val found = offerRepository.findById(offerId)
-                .orElseThrow(() -> new CodeException(OfferExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getWorkerId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
@@ -103,7 +102,7 @@ public class OfferService {
     @Transactional
     public void cancel(AuthUser user, Long offerId) {
         val found = offerRepository.findById(offerId)
-                .orElseThrow(() -> new CodeException(OfferExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         val ownerId = taskManager.getCompanyOwnerId(found.getTaskId());
         if (!user.id().equals(ownerId))

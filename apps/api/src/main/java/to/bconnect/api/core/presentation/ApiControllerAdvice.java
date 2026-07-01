@@ -42,8 +42,8 @@ public class ApiControllerAdvice {
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNotFound(NoResourceFoundException e) {
         return ResponseEntity
-                .status(CommonExceptionCode.NOT_FOUND.getStatus())
-                .body(ApiResponse.error(CommonExceptionCode.NOT_FOUND));
+                .status(CommonExceptionCode.PATH_NOT_FOUND.getStatus())
+                .body(ApiResponse.error(CommonExceptionCode.PATH_NOT_FOUND));
     }
 
     @ExceptionHandler(Exception.class)

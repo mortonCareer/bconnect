@@ -79,7 +79,7 @@ public class TaskService {
     @Transactional
     public void updateByWorker(AuthUser user, Long taskId, UpdateWorkerTask command) {
         val found = taskRepository.findById(taskId)
-                .orElseThrow(() -> new CodeException(TaskExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (found.getType() != TaskType.WORKER || !found.getWorkerId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
@@ -90,7 +90,7 @@ public class TaskService {
     @Transactional
     public void updateByCompany(AuthUser user, Long taskId, UpdateProjectTask command) {
         val task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new CodeException(TaskExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (task.getType() != TaskType.PROJECT)
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
@@ -111,7 +111,7 @@ public class TaskService {
     @Transactional
     public void updateByAssignee(AuthUser user, Long taskId, UpdateAssigneeTask command) {
         val found = taskRepository.findById(taskId)
-                .orElseThrow(() -> new CodeException(TaskExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (found.getType() != TaskType.PROJECT || found.getWorkerId() == null)
             throw new CodeException(TaskExceptionCode.NOT_ASSIGNED);

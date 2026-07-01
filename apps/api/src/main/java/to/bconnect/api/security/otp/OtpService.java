@@ -60,7 +60,7 @@ public class OtpService {
 
         found.attempt();
 
-        if (found.isRevoked()) throw new CodeException(AuthExceptionCode.OTP_REVOKED);
+        if (found.isRevoked()) throw new CodeException(AuthExceptionCode.INVALID_OTP);
         if (!found.getCode().equals(code)) throw new CodeException(AuthExceptionCode.INVALID_OTP);
 
         found.invalidateCode();
@@ -83,7 +83,7 @@ public class OtpService {
         val found = otpRepository.findByToken_Token(token)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_SIGNUP_TOKEN));
 
-        if (found.getToken().isRevoked()) throw new CodeException(AuthExceptionCode.SIGNUP_TOKEN_REVOKED);
+        if (found.getToken().isRevoked()) throw new CodeException(AuthExceptionCode.INVALID_SIGNUP_TOKEN);
 
         found.invalidateToken();
     }
