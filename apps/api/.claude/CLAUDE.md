@@ -16,7 +16,7 @@
 - 명시적으로 승인받지 않은 내용은 절대 구현하지 마세요 (단순 컴파일 에러·오타 제외).
 - 코드 변경사항 제안시 추가(NEW)와 변경(MOD) 태그를 작성해주세요.
 - 코드 변경사항 제안시 다음 순서에 따라 논의·구현하세요.
-  - 한 도메인에 대해 Entity → Controller → DTO → Command → Service → Repository 순서
+  - 한 도메인에 대해 Entity → Controller → DTO → Command → Service → Repository 순서 
   - 한 파일에 대해 Class → Structure → Implement 순서
   - 한 번에 하나의 사항에 대해서만 논의합니다.
   - 이전 대화에서 결정된 경우 생략 가능합니다.
