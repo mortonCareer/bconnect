@@ -38,6 +38,9 @@ module "railway" {
   s3_bucket_name        = var.s3_bucket_name
   dev_s3_bucket_name    = var.dev_s3_bucket_name
 
+  cloudfront_private_key = module.aws.cloudfront_private_key_base64
+  cloudfront_key_pair_id = module.aws.cloudfront_key_pair_id
+
   domain = var.domain
 
   sentry_dsn = var.sentry_dsn
