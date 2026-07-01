@@ -58,13 +58,12 @@ export function validateEnv<T extends z.ZodRawShape>(
 
 /**
  * MSW(API mocking) 활성 여부 — msw-provider(SW 등록 게이트)·proxy(인증 가드 우회) 공용 SSOT.
+ * 로컬 개발(NODE_ENV=development)에서만 기본 ON. Vercel 배포(dev/preview/prod)는 런타임
+ * NODE_ENV=production 이라 기본 OFF → 실 BE 연동. 로컬에서 실 BE 테스트 시 disabled 로 opt-out.
  * NEXT_PUBLIC_API_MOCKING 은 commonSchemas.apiMocking 으로 parse — 잘못된 값('disable' 오타 등)은
  * 조용히 mock 을 켜둔 채 넘어가지 않고 즉시 throw (client·server 전 경로).
  */
 export function isApiMockingEnabled(): boolean {
   const mocking = commonSchemas.apiMocking.parse(process.env.NEXT_PUBLIC_API_MOCKING)
-  return (
-    (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview') &&
-    mocking !== 'disabled'
-  )
+  return process.env.NODE_ENV === 'development' && mocking !== 'disabled'
 }
