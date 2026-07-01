@@ -114,7 +114,11 @@ export function NumberField<T extends FieldValues>({
                   const digits = e.target.value.replace(/[^0-9]/g, '')
                   field.onChange(digits === '' ? undefined : Number(digits))
                 }}
-                className={cn(layout === 'row' && ROW_INPUT_CLASSES, className)}
+                className={cn(
+                  layout === 'row' && ROW_INPUT_CLASSES,
+                  fieldSlot({ layout }),
+                  className
+                )}
               />
             </NumberFieldControl>
             <FormMessage className={fieldSlot({ layout })}>{serverError}</FormMessage>
