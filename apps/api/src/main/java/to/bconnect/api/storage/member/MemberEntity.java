@@ -29,8 +29,7 @@ public class MemberEntity extends BaseEntity {
     @Column(nullable = false)
     private Role role;
 
-    public void update(String name, Role role) {
+    public void update(String name) {
         this.name = name;
-        this.role = role;
     }
 }

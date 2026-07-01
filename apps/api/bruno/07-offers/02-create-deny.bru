@@ -1,7 +1,7 @@
 meta {
-  name: 제안 생성 - 승낙용
+  name: 제안 생성 - 거절용
   type: http
-  seq: 8
+  seq: 2
   tags: [
     chain
     seed
@@ -22,7 +22,7 @@ body {
 }
 
 script:post-response {
-  bru.setVar("acceptOfferId", res.body.data);
+  bru.setVar("denyOfferId", res.body.data);
 }
 
 tests {

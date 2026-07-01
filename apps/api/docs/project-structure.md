@@ -87,25 +87,13 @@ graph TD
 ```mermaid
 graph TD
   subgraph Presentation
-    GChatC[GroupChatController]
-    DChatC[DirectChatController]
-    CowC[CoworkerController]
-    CowRC[CoworkerRequestController]
-    FeedC[FeedController]
-    ProfC[ProfileController]
-    RecC[RecommendationController]
+    DC[Domain Controllers]
   end
   subgraph Domain
     MemR[MemberResolver]
   end
 
-  GChatC --> MemR
-  DChatC --> MemR
-  CowC --> MemR
-  CowRC --> MemR
-  FeedC --> MemR
-  ProfC --> MemR
-  RecC --> MemR
+  DC --> MemR
 ```
 
 ### Profile
@@ -141,12 +129,12 @@ graph TD
   subgraph Domain
     PostS[PostService]
     CredS[CredentialService]
-    Reg[AttachmentContextValidatorRegistry]
   end
   subgraph Attachment
     AttR[AttachmentResolver]
     AttS[AttachmentService]
     AttL[AttachmentLinker]
+    Reg[AttachmentContextValidatorRegistry]
   end
 
   CS -->|resolve| AttR
