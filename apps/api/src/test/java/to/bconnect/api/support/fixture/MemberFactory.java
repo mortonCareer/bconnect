@@ -13,16 +13,16 @@ public class MemberFactory {
     public static final Long DEFAULT_PICTURE_ID = 1L;
 
     public static Member create(Long id) {
-        return new Member(id, "username", "name", "phone", DEFAULT_PICTURE_ID, Role.WORKER,
+        return new Member(id, "username", "name", "phone", Role.WORKER,
                 MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
     public static MemberEntity createEntity() {
-        return new MemberEntity("username", "name", "phone", DEFAULT_PICTURE_ID, Role.WORKER);
+        return new MemberEntity("username", "name", "phone", Role.WORKER);
     }
 
     public static MemberEntity createEntity(String username, String phone, Role role) {
-        return new MemberEntity(username, "name", phone, DEFAULT_PICTURE_ID, role);
+        return new MemberEntity(username, "name", phone, role);
     }
 
     public static RegisterMemberRequest registerRequest() {
@@ -30,6 +30,6 @@ public class MemberFactory {
     }
 
     public static UpdateMemberRequest updateRequest() {
-        return new UpdateMemberRequest("name", DEFAULT_PICTURE_ID, Role.CONTRACTOR);
+        return new UpdateMemberRequest("name", DEFAULT_PICTURE_ID);
     }
 }
