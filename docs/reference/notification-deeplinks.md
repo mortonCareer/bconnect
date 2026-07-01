@@ -93,7 +93,7 @@ URL 컨벤션 변경은 **FE/BE 동시 작업** 으로 처리합니다.
 
 ## 관련 구현
 
-- SW: [apps/career/src/service-workers/firebase-messaging.sw.template.js](../../apps/career/src/service-workers/firebase-messaging.sw.template.js)
-- Foreground 훅: [apps/career/src/hooks/use-push-notifications.ts](../../apps/career/src/hooks/use-push-notifications.ts)
+- SW: [packages/push/src/firebase-messaging.sw.template.js](../../packages/push/src/firebase-messaging.sw.template.js)
+- Foreground 훅: [packages/push/src/use-push-notification-listener.ts](../../packages/push/src/use-push-notification-listener.ts)
 - 테스트 스크립트: [apps/career/scripts/test-push.ts](../../apps/career/scripts/test-push.ts)
 - Notion 아키텍처 문서: [알림 인프라 (FCM Web Push)](https://www.notion.so/340965d2888b815b929ce3ddc3fe493f)
