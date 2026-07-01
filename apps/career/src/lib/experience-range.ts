@@ -16,9 +16,11 @@ export const formatExperienceRange = ([min, max]: ExperienceRange) => `${min}~${
 
 export const formatExperienceYears = (years: number) => `${years}년`
 
-/** 프로필 경력(단일 정수) 입력 스키마 — signup/profile 폼의 SSOT. 필터는 범위라 별도. */
+/**
+ * 프로필 경력(단일 정수) 입력 스키마 — signup/profile 폼의 SSOT. 필터는 범위라 별도.
+ * 상한 없음 — BE `@PositiveOrZero`(하한만, 상한 없음)에 정합. 기존 max=10 은 슬라이더 잔재였음(#684).
+ */
 export const experienceSchema = z
   .number({ error: '경력을 입력해주세요' })
   .int()
-  .min(EXPERIENCE_MIN, `경력은 ${EXPERIENCE_MIN}~${EXPERIENCE_MAX}년 사이로 입력해주세요`)
-  .max(EXPERIENCE_MAX, `경력은 ${EXPERIENCE_MIN}~${EXPERIENCE_MAX}년 사이로 입력해주세요`)
+  .min(EXPERIENCE_MIN, `경력은 ${EXPERIENCE_MIN}년 이상으로 입력해주세요`)
