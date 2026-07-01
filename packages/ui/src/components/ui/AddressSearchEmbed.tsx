@@ -18,6 +18,10 @@ export function AddressSearchEmbed({
   onComplete: (data: AddressSearchResult) => void
 }) {
   return (
-    <KakaoPostcodeEmbed onComplete={onComplete} autoClose={false} style={{ width: '100%', height: 480 }} />
+    <KakaoPostcodeEmbed
+      onComplete={onComplete}
+      autoClose={false}
+      style={{ width: '100%', height: 480 }}
+    />
   )
 }
