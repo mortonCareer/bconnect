@@ -71,10 +71,7 @@ public class MemberService {
         val found = memberRepository.findById(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        found.update(
-                command.name(),
-                command.role()
-        );
+        found.update(command.name());
         attachmentLinker.relink(user.id(), ReferenceType.MEMBER, user.id(), command.pictureId());
     }
 
