@@ -49,6 +49,7 @@ export {
 export { Label } from './ui/shadcn/label'
 export { TextField } from './ui/form/TextField'
 export { TextareaField } from './ui/form/TextareaField'
+export { NumberField } from './ui/form/NumberField'
 export { DateRangeField } from './ui/form/DateRangeField'
 export { TagSelectField } from './ui/form/TagSelectField'
 export type { FieldLayout } from './ui/form/_layout'

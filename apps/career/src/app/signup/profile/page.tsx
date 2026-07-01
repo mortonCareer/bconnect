@@ -4,14 +4,6 @@
 'use client'
 
 import { AddressField } from '@/components/AddressField'
-import {
-  DEFAULT_EXPERIENCE_RANGE,
-  EXPERIENCE_MAX,
-  EXPERIENCE_MIN,
-  EXPERIENCE_THUMB_LABELS,
-  formatExperienceYears,
-  rangeToApiExperience,
-} from '@/lib/experience-range'
 import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
@@ -26,8 +18,8 @@ import {
   FormLabel,
   FormMessage,
   FormSubmitButton,
+  NumberField,
   SelectField,
-  Slider,
   Tag,
   TextField,
   passthroughError,
@@ -56,7 +48,7 @@ export default function SignupProfilePage() {
       name: formData.name || '',
       fields: formData.fields || [],
       primaryField: formData.primaryField || undefined,
-      experience: formData.experience ?? DEFAULT_EXPERIENCE_RANGE,
+      experience: formData.experience ?? undefined,
       affiliation: formData.affiliation || '',
       role: undefined,
       address: undefined,
@@ -115,7 +107,7 @@ export default function SignupProfilePage() {
         data: {
           primaryTrade: data.primaryField as Trade,
           trades: data.fields as Trade[],
-          experience: rangeToApiExperience(data.experience),
+          experience: data.experience,
           headline: data.headline || undefined,
           address: data.address ?? mapKakaoAddress(null),
         },
@@ -174,26 +166,13 @@ export default function SignupProfilePage() {
             />
 
             {/* 경력 */}
-            <FormField
+            <NumberField
               control={control}
               name="experience"
-              render={({ field }) => (
-                <FormItem className="gap-3">
-                  <FormLabel required>경력</FormLabel>
-                  <FormControl>
-                    <Slider
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      min={EXPERIENCE_MIN}
-                      max={EXPERIENCE_MAX}
-                      formatLabel={formatExperienceYears}
-                      thumbLabels={EXPERIENCE_THUMB_LABELS}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="경력"
+              required
+              maxLength={2}
+              placeholder="경력을 입력해주세요 (년)"
             />
 
             {/* 소속 */}

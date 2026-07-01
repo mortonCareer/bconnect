@@ -1,7 +1,7 @@
 import type { Address } from '@bconnect/api-client'
 import { Role } from '@bconnect/api-client'
 import { z } from 'zod'
-import { experienceRangeSchema } from '@/lib/experience-range'
+import { experienceSchema } from '@/lib/experience-range'
 
 export const MAX_TRADES = 3
 
@@ -12,7 +12,7 @@ export const profileSchema = z.object({
     .min(1, '시공분야를 1개 이상 선택해주세요.')
     .max(MAX_TRADES, `시공분야는 최대 ${MAX_TRADES}개까지 선택 가능합니다.`),
   primaryField: z.string(),
-  experience: experienceRangeSchema,
+  experience: experienceSchema,
   affiliation: z.string().min(1, '소속을 입력해주세요.'),
   role: z.enum(Role, { error: '유형을 선택해주세요.' }),
   address: z.custom<Address>().nullish(),
