@@ -1,13 +1,10 @@
 # security-architecture
+- 위치 : `/security`
+- 범위 : 회원(AuthUser), JWT, OTP, 세션(Session)
 
-## 범위
-- 인증(Authentication)
-- 인가(Authorization)
-- OTP
-- 세션(Session)
-- 회원(AuthUser)
+## 클래스 구조
 
-## Spring Security Architecture
+### Spring Security Architecture
 - SecurityFilterChain : 보안 필터 체인
 - AuthenticationFilter : 인증 요청을 Manager에 위임, 인증 후 처리를 SuccessHandler에 위임 (Presentation 계층)
 - AuthenticationProvider : 실제 인증 로직
@@ -17,12 +14,6 @@
 - UserDetailsService / UserDetails : 회원 정보를 담는 데이터 객체
 - GrantedAuthority : 권한 표현 (`ROLE_` 접두사)
 - AuthenticationSuccessHandler : 인증 성공 후처리
-
-### 래퍼런스
-- [Spring Security : Architecture](https://docs.spring.io/spring-security/reference/servlet/architecture.html)
-- [Spring Security : Authentication](https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html)
-
-## 클래스 구조
 
 ### 공통
 - AuthUser (UserDetails) : 인증 주체
@@ -46,9 +37,6 @@
 ### session
 - SessionService : 세션 처리 (다른 기기에서 로그인 등)
 
-## 의존성
-- MemberService.register → OtpService.verifyToken
-- ChatService.create → Member.SYSTEM_ID
-
-## Scope
-- `security` module
+## 래퍼런스
+- [Spring Security : Architecture](https://docs.spring.io/spring-security/reference/servlet/architecture.html)
+- [Spring Security : Authentication](https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html)

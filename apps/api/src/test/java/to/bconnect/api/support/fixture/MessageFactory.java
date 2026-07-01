@@ -3,6 +3,7 @@ package to.bconnect.api.support.fixture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.socket.message.SendMessageRequest;
+import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.chat.MessageEntity;
 import to.bconnect.api.storage.chat.MessageRepository;
 import to.bconnect.api.storage.chat.MessageType;
@@ -13,7 +14,7 @@ public class MessageFactory {
     @Autowired private MessageRepository messageRepository;
 
     public MessageEntity create(Long chatId, Long memberId) {
-        return messageRepository.save(new MessageEntity(chatId, memberId, null, "content"));
+        return messageRepository.save(new MessageEntity(chatId, ChatType.GROUP, memberId, null, "content"));
     }
 
     public static SendMessageRequest createRequest() {

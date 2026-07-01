@@ -1,5 +1,6 @@
 package to.bconnect.api.core.presentation.v1.response;
 
+import to.bconnect.api.core.domain.offer.Offer;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.task.TaskStatus;
@@ -26,10 +27,15 @@ public record TaskResponse(
         String projectTitle,
         String projectRequirement,
         String projectMemo,
+        OfferSummaryResponse offer,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {
     public static TaskResponse of(Task task, Address address) {
+        return of(task, address, null);
+    }
+
+    public static TaskResponse of(Task task, Address address, Offer offer) {
         return new TaskResponse(
                 task.id(),
                 task.type(),
@@ -46,6 +52,7 @@ public record TaskResponse(
                 task.projectTitle(),
                 task.projectRequirement(),
                 task.projectMemo(),
+                offer == null ? null : OfferSummaryResponse.of(offer),
                 task.createdAt(),
                 task.modifiedAt()
         );

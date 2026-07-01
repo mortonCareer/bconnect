@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskEntity;
@@ -15,6 +14,8 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TaskService {
@@ -22,6 +23,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final CompanyRepository companyRepository;
     private final ProjectRepository projectRepository;
+    private final TaskManager taskManager;
 
     @Transactional
     public Long createByWorker(AuthUser user, CreateWorkerTask command) {
@@ -47,8 +49,8 @@ public class TaskService {
     @Transactional
     public Long createByCompany(AuthUser user, CreateProjectTask command) {
         val companyId = companyRepository.findByMemberId(user.id())
-                .map(CompanyEntity::getId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
+                .getId();
 
         val project = projectRepository.findById(command.projectId())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
@@ -94,8 +96,8 @@ public class TaskService {
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         val companyId = companyRepository.findByMemberId(user.id())
-                .map(CompanyEntity::getId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
+                .getId();
 
         val project = projectRepository.findById(task.getProjectId())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
@@ -110,6 +112,9 @@ public class TaskService {
     public void updateByAssignee(AuthUser user, Long taskId, UpdateAssigneeTask command) {
         val found = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CodeException(TaskExceptionCode.NOT_FOUND));
+
+        if (found.getType() != TaskType.PROJECT || found.getWorkerId() == null)
+            throw new CodeException(TaskExceptionCode.NOT_ASSIGNED);
 
         if (!user.id().equals(found.getWorkerId()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
@@ -129,8 +134,8 @@ public class TaskService {
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
         } else {
             val companyId = companyRepository.findByMemberId(user.id())
-                    .map(CompanyEntity::getId)
-                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
+                    .getId();
 
             val project = projectRepository.findById(task.getProjectId())
                     .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
@@ -138,6 +143,6 @@ public class TaskService {
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
         }
 
-        taskRepository.delete(task);
+        taskManager.deleteByIds(List.of(task.getId()));
     }
 }

@@ -1,0 +1,24 @@
+meta {
+  name: JWT 토큰 재발급
+  type: http
+  seq: 5
+  tags: [
+    chain
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/refresh
+}
+
+headers {
+  Cookie: refreshToken={{refreshToken}}
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.accessToken).to.be.a('string');
+  });
+}

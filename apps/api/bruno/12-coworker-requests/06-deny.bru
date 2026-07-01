@@ -1,0 +1,30 @@
+meta {
+  name: 동료 요청 거절
+  type: http
+  seq: 6
+  tags: [
+    seed
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/coworker-requests/:id/deny
+  auth: inherit
+}
+
+params:path {
+  id: 2
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  다른 멤버(5)가 보낸 동료 요청(2)을 거절한다.
+  @seed members : 5
+  @seed coworker_requests : 2
+}

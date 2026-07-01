@@ -2,6 +2,10 @@ meta {
   name: 업체 작업 삭제
   type: http
   seq: 2
+  tags: [
+    chain
+    idempotent
+  ]
 }
 
 delete {
@@ -14,4 +18,11 @@ tests {
     expect(res.status).to.equal(200);
     expect(res.body.success).to.equal(true);
   });
+}
+
+docs {
+  @chain
+  - 04-companies/01-create
+  - 05-projects/01-create
+  - 06-company-tasks/01-create-company-task
 }

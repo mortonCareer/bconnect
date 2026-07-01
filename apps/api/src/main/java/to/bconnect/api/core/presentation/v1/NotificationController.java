@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import to.bconnect.api.attachment.AttachmentResolver;
+import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
@@ -18,6 +20,7 @@ import to.bconnect.api.core.domain.notification.NotificationExceptionCode;
 import to.bconnect.api.core.domain.notification.NotificationQueryService;
 import to.bconnect.api.core.presentation.v1.response.NotificationResponse;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.notification.NotificationTypeEntity;
 import to.bconnect.api.storage.notification.NotificationTypeRepository;
 
@@ -32,6 +35,7 @@ public class NotificationController {
 
     private final NotificationQueryService notificationQueryService;
     private final MemberResolver memberResolver;
+    private final AttachmentResolver attachmentResolver;
     private final NotificationTypeRepository notificationTypeRepository;
 
     @GetMapping
@@ -46,6 +50,7 @@ public class NotificationController {
                 .distinct()
                 .toList();
         val memberMap = memberResolver.resolveMap(senderIds);
+        val pictureMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, senderIds, ImageSize.SMALL);
 
         val typeCodes = page.content().stream().map(Notification::typeCode).distinct().toList();
         val typeMap = notificationTypeRepository.findByCodeIn(typeCodes).stream()
@@ -56,7 +61,9 @@ public class NotificationController {
                     val type = typeMap.get(it.typeCode());
                     if (type == null) throw new CodeException(NotificationExceptionCode.UNKNOWN_TYPE);
                     val sender = it.senderId() == null ? null : memberMap.get(it.senderId());
-                    return NotificationResponse.of(it, type.getMessage(), type.getReferenceType(), sender);
+                    return NotificationResponse.of(
+                            it, type.getMessage(), type.getReferenceType(), sender,
+                            sender == null ? null : pictureMap.get(sender.id()));
                 })
                 .toList();
 

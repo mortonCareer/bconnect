@@ -102,7 +102,7 @@ class NotificationServiceTest {
         MemberResolver resolver = new MemberResolver(null) {
             @Override
             public Member find(Long memberId) {
-                return new Member(memberId, "u" + memberId, "홍길동", "010", null, null, null, null);
+                return new Member(memberId, "u" + memberId, "홍길동", "010", null, null, null);
             }
         };
         var service = service(null, null, typeRepo, deviceRepo, resolver, sender);
@@ -131,7 +131,7 @@ class NotificationServiceTest {
         MemberResolver resolver = new MemberResolver(null) {
             @Override
             public Member find(Long memberId) {
-                return new Member(memberId, "u", "n", "010", null, null, null, null);
+                return new Member(memberId, "u", "n", "010", null, null, null);
             }
         };
         var service = service(null, null, typeRepo, deviceRepo, resolver, sender);
@@ -177,7 +177,7 @@ class NotificationServiceTest {
         return new MemberResolver(null) {
             @Override
             public Member find(Long memberId) {
-                return new Member(memberId, "u", name, "010", null, null, null, null);
+                return new Member(memberId, "u", name, "010", null, null, null);
             }
         };
     }

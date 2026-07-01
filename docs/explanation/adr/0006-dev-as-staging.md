@@ -116,5 +116,5 @@ MSW provider gate         NODE_ENV + NEXT_PUBLIC_VERCEL_ENV          #309
 ### 관련 코드
 
 - [`packages/api-client/src/client.ts`](../../../packages/api-client/src/client.ts) — customFetch wire format 흡수
-- [`apps/career/src/components/msw-provider.tsx`](../../../apps/career/src/components/msw-provider.tsx), [`apps/plan/src/components/msw-provider.tsx`](../../../apps/plan/src/components/msw-provider.tsx) — MSW gate
+- [`packages/devtools/src/MSWProvider.tsx`](../../../packages/devtools/src/MSWProvider.tsx) — MSW gate (career·plan 공유)
 - [`infra/vercel/projects.tf`](../../../infra/vercel/projects.tf) — `vercel_custom_environment.career_dev`, `vercel_custom_environment.plan_dev`

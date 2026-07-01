@@ -18,7 +18,7 @@ public record NotificationResponse(
         LocalDateTime createdAt
 ) {
     public static NotificationResponse of(Notification notification, String template,
-                                          NotificationReferenceType referenceType, Member sender) {
+                                          NotificationReferenceType referenceType, Member sender, String senderPicture) {
         return new NotificationResponse(
                 notification.id(),
                 notification.typeCode(),
@@ -26,7 +26,7 @@ public record NotificationResponse(
                 notification.content(),
                 referenceType.name().toLowerCase(),
                 notification.referenceId(),
-                sender == null ? null : MemberSummaryResponse.of(sender),
+                sender == null ? null : MemberSummaryResponse.of(sender, senderPicture),
                 notification.read(),
                 notification.createdAt()
         );

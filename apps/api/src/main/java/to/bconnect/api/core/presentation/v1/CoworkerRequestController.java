@@ -14,19 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.domain.coworker.CoworkerRequest;
 import to.bconnect.api.core.presentation.v1.request.CreateCoworkerRequest;
 import to.bconnect.api.core.presentation.v1.response.CoworkerRequestResponse;
-import to.bconnect.api.core.domain.attachment.AttachmentResolver;
-import to.bconnect.api.core.domain.attachment.ImageSize;
+import to.bconnect.api.attachment.AttachmentResolver;
+import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestQueryService;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestService;
 import to.bconnect.api.core.domain.MemberResolver;
-import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.core.domain.profile.ProfileQueryService;
+import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/coworker-requests")
@@ -36,7 +34,7 @@ public class CoworkerRequestController {
     private final CoworkerRequestService coworkerRequestService;
     private final CoworkerRequestQueryService coworkerRequestQueryService;
     private final MemberResolver memberResolver;
-    private final ProfileQueryService profileQueryService;
+    private final ProfileResolver profileResolver;
     private final AttachmentResolver attachmentResolver;
 
     @PostMapping
@@ -50,13 +48,15 @@ public class CoworkerRequestController {
     @GetMapping("/received")
     public ApiResponse<List<CoworkerRequestResponse>> listReceived(
             @AuthenticationPrincipal AuthUser user) {
-        return ApiResponse.success(assemble(coworkerRequestQueryService.listReceived(user)));
+        val requests = coworkerRequestQueryService.listReceived(user);
+        return ApiResponse.success(assemble(requests));
     }
 
     @GetMapping("/sent")
     public ApiResponse<List<CoworkerRequestResponse>> listSent(
             @AuthenticationPrincipal AuthUser user) {
-        return ApiResponse.success(assemble(coworkerRequestQueryService.listSent(user)));
+        val requests = coworkerRequestQueryService.listSent(user);
+        return ApiResponse.success(assemble(requests));
     }
 
     @PostMapping("/{id}/accept")
@@ -86,20 +86,17 @@ public class CoworkerRequestController {
     private List<CoworkerRequestResponse> assemble(List<CoworkerRequest> requests) {
         val memberIds = requests.stream().map(CoworkerRequest::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
-        val profileMap = profileQueryService.resolveMap(memberIds);
-
-        val pictureIds = profileMap.values().stream()
-                .map(Profile::pictureId).filter(Objects::nonNull).toList();
-        val attachmentMap = attachmentResolver.resolveMap(pictureIds);
+        val profileMap = profileResolver.resolveMap(memberIds);
+        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         return requests.stream()
                 .map(it -> {
-                    val profile = profileMap.get(it.memberId());
+                    val member = memberMap.get(it.memberId());
                     return CoworkerRequestResponse.of(
                             it,
-                            memberMap.get(it.memberId()),
-                            profile,
-                            profile == null ? null : attachmentResolver.url(attachmentMap.get(profile.pictureId()), ImageSize.SMALL));
+                            member,
+                            profileMap.get(it.memberId()),
+                            urlMap.get(member.id()));
                 })
                 .toList();
     }

@@ -2,6 +2,9 @@ meta {
   name: 프로젝트 단건 조회
   type: http
   seq: 3
+  tags: [
+    chain
+  ]
 }
 
 get {
@@ -15,4 +18,11 @@ tests {
     expect(res.body.success).to.equal(true);
     expect(res.body.data.id).to.be.a('number');
   });
+}
+
+docs {
+  사용자가 소속된 업체의 프로젝트 단건 조회
+  @chain
+  - 04-companies/01-create
+  - 05-projects/01-create
 }

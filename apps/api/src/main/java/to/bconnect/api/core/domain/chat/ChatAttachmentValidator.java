@@ -3,8 +3,7 @@ package to.bconnect.api.core.domain.chat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.common.CodeException;
-import to.bconnect.api.core.domain.attachment.AttachmentContextValidator;
-import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.core.domain.AttachmentContextValidator;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.chat.ParticipantRepository;
 
@@ -20,8 +19,8 @@ public class ChatAttachmentValidator implements AttachmentContextValidator {
     }
 
     @Override
-    public void validate(AuthUser user, Long contextId) {
-        if (!participantRepository.existsByChatIdAndMemberId(contextId, user.id()))
+    public void validate(Long memberId, Long contextId) {
+        if (!participantRepository.existsByChatIdAndMemberId(contextId, memberId))
             throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
     }
 }

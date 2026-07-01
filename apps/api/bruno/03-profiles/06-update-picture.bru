@@ -1,10 +1,13 @@
 meta {
-  name: 프로필 사진 변경
+  name: 내 프로필 사진 수정
   type: http
   seq: 6
+  tags: [
+    idempotent
+  ]
 }
 
-patch {
+put {
   url: {{baseUrl}}/api/v1/profiles/me/picture
   auth: inherit
 }
@@ -23,8 +26,7 @@ tests {
 }
 
 docs {
-  로그인 사용자(member 1)의 프로필(profile 1) 사진을 시드 첨부(attachment 1, 본인 소유·COMPLETED)로 변경한다.
-  @seed members : 1
-  @seed profiles : 1
   @seed attachments : 1
+  @chain
+  - 03-profiles/01-create
 }

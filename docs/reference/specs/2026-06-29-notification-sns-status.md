@@ -6,7 +6,7 @@
 **작성일**: 2026-06-29
 **상태**: **BE 구현 완료** · **인프라(Terraform) 코드 작성·미적용** · **FE 재배선 남음**
 **이슈**: [#211 feat(be): implement notification apis](https://github.com/mortonCareer/bconnect/issues/211)
-**관련 문서**: [딥링크 규칙](../notification-deeplinks.md) · [배경: FCM 시절 현황](./2026-06-19-notification-fcm-status.md)(전송 채널을 FCM→SNS로 바꾸기 전 문서. 본 문서가 최신.)
+**관련 문서**: [배경: FCM 시절 현황](./2026-06-19-notification-fcm-status.md) (3.3 딥링크 규칙 포함, 전송 채널을 FCM→SNS로 바꾸기 전 문서. 본 문서가 최신.)
 
 ---
 
@@ -49,7 +49,7 @@
 1. **토큰 등록**: FE가 브라우저 푸시 토큰을 발급해 `POST /api/v1/devices`로 보낸다. BE는 이 토큰으로 SNS에 "엔드포인트(endpoint)"를 만들고, `토큰 ↔ endpoint ARN ↔ 회원` 매핑을 `device_tokens`에 저장한다.
 2. **이벤트 발생**: 채팅 메시지가 오면 BE가 수신자를 계산한다.
 3. **저장 + 발송**: 알림을 DB에 저장하고(목록에 남도록), 푸시 대상에게 SNS로 발송한다(브라우저에 OS 알림이 뜨도록).
-4. **클릭**: 알림을 누르면 딥링크(`/n/{대상타입}/{대상ID}`, 예 `/n/chat_room/42`)로 이동한다. 상세 규칙은 [딥링크 문서](../notification-deeplinks.md).
+4. **클릭**: 알림을 누르면 딥링크(`/n/{대상타입}/{대상ID}`, 예 `/n/chat_room/42`)로 이동한다. 상세 규칙은 [배경 문서의 3.3 딥링크 설명](./2026-06-19-notification-fcm-status.md)에 있다.
 
 ### 누구에게 저장하고, 누구에게 푸시하나 (중요)
 

@@ -1,0 +1,33 @@
+meta {
+  name: 제안 승낙
+  type: http
+  seq: 9
+  tags: [
+    chain
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/offers/{{acceptOfferId}}/accept
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken2}}
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  @chain
+  - 01-otp/04-verify-otp-login-2
+  - 04-companies/01-create
+  - 05-projects/01-create
+  - 06-company-tasks/01-create-company-task
+  - 07-offers/08-create-accept
+}

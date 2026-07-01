@@ -16,19 +16,18 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.request.CreateRecommendationRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateRecommendationRequest;
 import to.bconnect.api.core.presentation.v1.response.RecommendationResponse;
-import to.bconnect.api.core.domain.attachment.AttachmentResolver;
-import to.bconnect.api.core.domain.attachment.ImageSize;
+import to.bconnect.api.attachment.AttachmentResolver;
+import to.bconnect.api.attachment.ImageSize;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.core.domain.recommendation.Recommendation;
 import to.bconnect.api.core.domain.recommendation.RecommendationQueryService;
 import to.bconnect.api.core.domain.recommendation.RecommendationService;
 import to.bconnect.api.core.domain.MemberResolver;
-import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.core.domain.profile.ProfileQueryService;
+import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/recommendations")
@@ -38,7 +37,7 @@ public class RecommendationController {
     private final RecommendationService recommendationService;
     private final RecommendationQueryService recommendationQueryService;
     private final MemberResolver memberResolver;
-    private final ProfileQueryService profileQueryService;
+    private final ProfileResolver profileResolver;
     private final AttachmentResolver attachmentResolver;
 
     @PostMapping
@@ -51,24 +50,28 @@ public class RecommendationController {
 
     @GetMapping("/received")
     public ApiResponse<List<RecommendationResponse>> listReceived(@RequestParam Long memberId) {
-        return ApiResponse.success(assemble(recommendationQueryService.listReceived(memberId)));
+        val recommendations = recommendationQueryService.listReceived(memberId);
+        return ApiResponse.success(assemble(recommendations));
     }
 
     @GetMapping("/sent")
     public ApiResponse<List<RecommendationResponse>> listSent(@RequestParam Long memberId) {
-        return ApiResponse.success(assemble(recommendationQueryService.listSent(memberId)));
+        val recommendations = recommendationQueryService.listSent(memberId);
+        return ApiResponse.success(assemble(recommendations));
     }
 
     @GetMapping("/me/received")
     public ApiResponse<List<RecommendationResponse>> listMyReceived(
             @AuthenticationPrincipal AuthUser user) {
-        return ApiResponse.success(assemble(recommendationQueryService.listMyReceived(user)));
+        val recommendations = recommendationQueryService.listMyReceived(user);
+        return ApiResponse.success(assemble(recommendations));
     }
 
     @GetMapping("/me/sent")
     public ApiResponse<List<RecommendationResponse>> listMySent(
             @AuthenticationPrincipal AuthUser user) {
-        return ApiResponse.success(assemble(recommendationQueryService.listMySent(user)));
+        val recommendations = recommendationQueryService.listMySent(user);
+        return ApiResponse.success(assemble(recommendations));
     }
 
     @PutMapping("/{id}")
@@ -107,20 +110,17 @@ public class RecommendationController {
     private List<RecommendationResponse> assemble(List<Recommendation> recommendations) {
         val memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
-        val profileMap = profileQueryService.resolveMap(memberIds);
-
-        val pictureIds = profileMap.values().stream()
-                .map(Profile::pictureId).filter(Objects::nonNull).toList();
-        val attachmentMap = attachmentResolver.resolveMap(pictureIds);
+        val profileMap = profileResolver.resolveMap(memberIds);
+        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         return recommendations.stream()
                 .map(it -> {
-                    val profile = profileMap.get(it.memberId());
+                    val member = memberMap.get(it.memberId());
                     return RecommendationResponse.of(
                             it,
-                            memberMap.get(it.memberId()),
-                            profile,
-                            profile == null ? null : attachmentResolver.url(attachmentMap.get(profile.pictureId()), ImageSize.SMALL));
+                            member,
+                            profileMap.get(it.memberId()),
+                            urlMap.get(member.id()));
                 })
                 .toList();
     }

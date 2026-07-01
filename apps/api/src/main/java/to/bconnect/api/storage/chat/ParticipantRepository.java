@@ -1,12 +1,11 @@
 package to.bconnect.api.storage.chat;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 import java.util.Collection;
+import java.util.List;
 
 public interface ParticipantRepository extends JpaRepository<ParticipantEntity, Long> {
 
@@ -17,12 +16,7 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
     @Query("SELECT p.memberId FROM ParticipantEntity p WHERE p.chatId = :chatId")
     List<Long> findMemberIdsByChatId(@Param("chatId") Long chatId);
 
-    boolean existsByChatIdAndMemberId(Long chatId, Long memberId);
+    List<ParticipantEntity> findByChatIdAndMemberIdIn(Long chatId, Collection<Long> memberIds);
 
-    @Modifying
-    @Query("UPDATE ParticipantEntity p SET p.lastIdx = :messageId " +
-           "WHERE p.chatId = :chatId AND p.memberId IN :memberIds")
-    int updateLastIdxIn(@Param("chatId") Long chatId,
-                        @Param("memberIds") Collection<Long> memberIds,
-                        @Param("messageId") Long messageId);
+    boolean existsByChatIdAndMemberId(Long chatId, Long memberId);
 }

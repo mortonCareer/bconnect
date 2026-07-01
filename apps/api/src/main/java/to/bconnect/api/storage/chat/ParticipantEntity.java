@@ -26,4 +26,8 @@ public class ParticipantEntity extends BaseEntity {
         this.memberId = memberId;
         this.lastIdx = 0L;
     }
+
+    public void markRead(Long messageId) {
+        this.lastIdx = messageId;
+    }
 }

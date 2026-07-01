@@ -6,67 +6,44 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.core.domain.attachment.AttachmentQueryService;
+import to.bconnect.api.attachment.AttachmentLinker;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.post.PostAttachmentMappingEntity;
-import to.bconnect.api.storage.post.PostAttachmentMappingRepository;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.post.PostEntity;
 import to.bconnect.api.storage.post.PostRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
-    private final PostAttachmentMappingRepository postAttachmentMappingRepository;
-    private final AttachmentQueryService attachmentQueryService;
+    private final AttachmentLinker attachmentLinker;
 
     @Transactional(readOnly = true)
     public List<Post> list() {
-        val posts = postRepository.findAll();
-
-        val postIds = posts.stream().map(PostEntity::getId).toList();
-        val attachmentIdMap = postAttachmentMappingRepository.findByPostIdIn(postIds)
-                .stream()
-                .collect(Collectors.groupingBy(
-                        PostAttachmentMappingEntity::getPostId,
-                        Collectors.mapping(PostAttachmentMappingEntity::getAttachmentId, Collectors.toList())
-                ));
-
-        return posts.stream()
-                .map(it -> Post.of(it, attachmentIdMap.getOrDefault(it.getId(), List.of())))
+        return postRepository.findAll().stream()
+                .map(Post::of)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public Post get(Long postId) {
-        val post = postRepository.findById(postId)
+        return postRepository.findById(postId)
+                .map(Post::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-
-        val attachmentIds = postAttachmentMappingRepository.findByPostIdIn(List.of(postId))
-                .stream()
-                .map(PostAttachmentMappingEntity::getAttachmentId)
-                .toList();
-
-        return Post.of(post, attachmentIds);
     }
 
     @Transactional
     public Long create(AuthUser user, CreatePost command) {
-        attachmentQueryService.list(user, command.attachmentIds());
-
         val created = postRepository.save(new PostEntity(
                 user.id(),
                 command.taskId(),
                 command.content()
         ));
 
-        postAttachmentMappingRepository.saveAll(command.attachmentIds().stream()
-                .map(it -> new PostAttachmentMappingEntity(created.getId(), it))
-                .toList());
+        attachmentLinker.link(user.id(), ReferenceType.POST, created.getId(), command.attachmentIds());
 
         return created.getId();
     }
@@ -84,12 +61,15 @@ public class PostService {
 
     @Transactional
     public void delete(AuthUser user, Long postId) {
-        postRepository.findById(postId).ifPresent(it -> {
-            if (!it.getMemberId().equals(user.id()))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        val optional = postRepository.findById(postId);
+        if (optional.isEmpty())
+            return;
+        val found = optional.get();
 
-            postAttachmentMappingRepository.deleteByPostId(it.getId());
-            postRepository.delete(it);
-        });
+        if (!found.getMemberId().equals(user.id()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        attachmentLinker.unlink(ReferenceType.POST, List.of(found.getId()));
+        postRepository.delete(found);
     }
 }

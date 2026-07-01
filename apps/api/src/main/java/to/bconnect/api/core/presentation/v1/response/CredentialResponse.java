@@ -1,6 +1,6 @@
 package to.bconnect.api.core.presentation.v1.response;
 
-import to.bconnect.api.core.domain.attachment.Attachment;
+import to.bconnect.api.attachment.Attachment;
 import to.bconnect.api.core.domain.credential.Credential;
 import to.bconnect.api.storage.credential.CredentialStatus;
 import to.bconnect.api.storage.credential.CredentialType;

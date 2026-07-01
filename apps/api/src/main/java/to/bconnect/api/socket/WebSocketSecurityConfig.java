@@ -16,10 +16,18 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 import java.util.List;
 
-// to disable CSRF
+/**
+ * CSRF 비활성화를 위해 {@code @EnableWebSocketSecurity} 미사용
+ * @see <a href="https://docs.spring.io/spring-security/reference/servlet/integrations/websocket.html">WebSocket Security</a>
+ */
 @Configuration
 @RequiredArgsConstructor
 public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer {
+
+    public static final String GROUP_CHAT_TOPIC_PREFIX = "/topic/group-chats/";
+    public static final String GROUP_CHAT_APP_PREFIX = "/app/group-chats/";
+    public static final String DIRECT_CHAT_TOPIC_PREFIX = "/topic/direct-chats/";
+    public static final String DIRECT_CHAT_APP_PREFIX = "/app/direct-chats/";
 
     private final ApplicationContext applicationContext;
     private final AuthorizationManager<Message<?>> authorizationManager;

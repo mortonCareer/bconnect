@@ -12,10 +12,7 @@ import to.bconnect.api.storage.profile.ProfileEntity;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.storage.recommendation.RecommendationRepository;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,9 +42,9 @@ public class ProfileQueryService {
 
         val memberIds = profiles.stream().map(ProfileEntity::getMemberId).toList();
 
-        val postCounts = toCountMap(postRepository.countByMemberIdIn(memberIds));
-        val recommendationCounts = toCountMap(recommendationRepository.countByToIdInAndVisibleTrue(memberIds));
-        val coworkerCounts = toCountMap(coworkerRepository.countByMemberIdIn(memberIds));
+        val postCounts = postRepository.countByMemberIdIn(memberIds);
+        val recommendationCounts = recommendationRepository.countByToIdInAndVisibleTrue(memberIds);
+        val coworkerCounts = coworkerRepository.countByMemberIdIn(memberIds);
 
         return profiles.stream()
                 .map(it -> Profile.of(
@@ -57,21 +54,5 @@ public class ProfileQueryService {
                         coworkerCounts.getOrDefault(it.getMemberId(), 0L)
                 ))
                 .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public Map<Long, Profile> resolveMap(Collection<Long> memberIds) {
-        return profileRepository.findByMemberIdIn(memberIds).stream()
-                .collect(Collectors.toMap(
-                        ProfileEntity::getMemberId,
-                        it -> Profile.of(it, null, null, null)
-                ));
-    }
-
-    private Map<Long, Long> toCountMap(List<Object[]> rows) {
-        return rows.stream().collect(Collectors.toMap(
-                it -> ((Number) it[0]).longValue(),
-                it -> ((Number) it[1]).longValue()
-        ));
     }
 }
