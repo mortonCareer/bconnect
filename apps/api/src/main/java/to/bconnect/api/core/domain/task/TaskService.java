@@ -84,7 +84,8 @@ public class TaskService {
         if (found.getType() != TaskType.WORKER || !found.getWorkerId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        found.update(command);
+        found.update(command.trades(), command.start(), command.end(),
+                command.title(), command.memo(), command.company(), command.address());
     }
 
     @Transactional
@@ -105,7 +106,8 @@ public class TaskService {
         if (!project.getCompanyId().equals(companyId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        task.update(command);
+        task.update(command.trades(), command.start(), command.end(),
+                command.title(), command.requirement(), command.memo());
     }
 
     @Transactional
@@ -119,7 +121,7 @@ public class TaskService {
         if (!user.id().equals(found.getWorkerId()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        found.update(command);
+        found.update(command.title(), command.memo());
     }
 
     @Transactional
