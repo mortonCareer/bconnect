@@ -58,7 +58,7 @@ public class NotificationService {
         }
     }
 
-    // 커밋 후 발송(채팅 롤백과 분리). REQUIRES_NEW 라야 disable() 이 새 트랜잭션에서 영속화됨.
+    // 커밋 후 발송(채팅 롤백과 분리). REQUIRES_NEW disable() 이 새 트랜잭션에서 영속화됨.
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void dispatchChatPush(ChatPushRequested event) {

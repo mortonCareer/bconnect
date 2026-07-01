@@ -42,7 +42,7 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/NotificationCursorPage'
-  /api/v1/notifications/unread-count:
+  /api/v1/notifications/unread/count:
     get:
       operationId: getUnreadNotificationCount
       tags:
@@ -98,7 +98,7 @@ paths:
             application/json:
               schema:
                 $ref: ../_shared.yaml#/components/schemas/ApiErrorResponse
-  /api/v1/notifications/read-all:
+  /api/v1/notifications/read:
     patch:
       operationId: markAllNotificationsRead
       tags:

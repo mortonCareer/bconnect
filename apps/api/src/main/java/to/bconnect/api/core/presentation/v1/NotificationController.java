@@ -63,7 +63,7 @@ public class NotificationController {
         return ApiResponse.success(new CursorPage<>(content, page.hasNext(), page.nextCursor()));
     }
 
-    @GetMapping("/unread-count")
+    @GetMapping("/unread/count")
     public ApiResponse<Long> unreadCount(@AuthenticationPrincipal AuthUser user) {
         return ApiResponse.success(notificationQueryService.unreadCount(user));
     }
@@ -74,7 +74,7 @@ public class NotificationController {
         return ApiResponse.success(null);
     }
 
-    @PatchMapping("/read-all")
+    @PatchMapping("/read")
     public ApiResponse<Void> markAllRead(@AuthenticationPrincipal AuthUser user) {
         notificationQueryService.markAllRead(user);
         return ApiResponse.success(null);

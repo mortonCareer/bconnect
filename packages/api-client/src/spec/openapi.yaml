@@ -140,12 +140,12 @@ paths:
     $ref: v1/devices.yaml#/paths/~1api~1v1~1devices
   /api/v1/notifications:
     $ref: v1/notifications.yaml#/paths/~1api~1v1~1notifications
-  /api/v1/notifications/unread-count:
-    $ref: v1/notifications.yaml#/paths/~1api~1v1~1notifications~1unread-count
+  /api/v1/notifications/unread/count:
+    $ref: v1/notifications.yaml#/paths/~1api~1v1~1notifications~1unread~1count
   /api/v1/notifications/{id}/read:
     $ref: v1/notifications.yaml#/paths/~1api~1v1~1notifications~1{id}~1read
-  /api/v1/notifications/read-all:
-    $ref: v1/notifications.yaml#/paths/~1api~1v1~1notifications~1read-all
+  /api/v1/notifications/read:
+    $ref: v1/notifications.yaml#/paths/~1api~1v1~1notifications~1read
 components:
   securitySchemes:
     bearerAuth:

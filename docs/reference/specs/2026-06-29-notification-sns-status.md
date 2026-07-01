@@ -106,9 +106,9 @@ Notification (알림 1건)                 NotificationType (알림 종류, 종�
 | POST   | `/api/v1/devices`                    | 디바이스 토큰 등록(중복 등록은 갱신, endpoint 자동 생성) |
 | DELETE | `/api/v1/devices`                    | 토큰 해제(endpoint·행 삭제)                              |
 | GET    | `/api/v1/notifications`              | 알림 목록(커서 페이징)                                   |
-| GET    | `/api/v1/notifications/unread-count` | 안 읽은 알림 개수                                        |
+| GET    | `/api/v1/notifications/unread/count` | 안 읽은 알림 개수                                        |
 | PATCH  | `/api/v1/notifications/{id}/read`    | 단건 읽음(본인 알림만)                                   |
-| PATCH  | `/api/v1/notifications/read-all`     | 모두 읽음                                                |
+| PATCH  | `/api/v1/notifications/read`         | 모두 읽음                                                |
 
 OpenAPI 스펙은 `packages/api-client/src/spec/v1/notifications.yaml`(+ `openapi.yaml` 등록)에 있고, `pnpm api:generate`로 FE 클라이언트가 생성된다.
 
