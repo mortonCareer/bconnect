@@ -2,8 +2,8 @@
 INSERT INTO otps (id, phone, code, code_expired_at, code_revoked, attempts, daily_count, last_sent_at, token, token_expired_at, token_revoked, created_at, modified_at) VALUES
 (1, '01000000001', '000001', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', NULL, NULL, NULL, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (2, '01000000002', '000002', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', NULL, NULL, NULL, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(4, '01000000003', '000003', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', 'signup-token', TIMESTAMP '2026-12-31 00:00:00', false, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(3, '01000000004', '000004', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', NULL, NULL, NULL, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(3, '01000000003', '000003', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', NULL, NULL, NULL, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(4, '01000000004', '000004', TIMESTAMP '2026-12-31 00:00:00', false, 0, 1, TIMESTAMP '2026-01-01 00:00:00', 'signup-token', TIMESTAMP '2026-12-31 00:00:00', false, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO members (id, username, name, phone, role, created_at, modified_at) VALUES
 (0, 'system', '시스템', '01000000000', 'ADMIN', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
@@ -30,10 +30,10 @@ INSERT INTO credentials (id, member_id, type, status, expired_at, created_at, mo
 (2, 1, 'SKILL_GRADE_CERTIFICATE', 'PENDING', DATE '2026-12-31', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO attachments (id, member_id, type, status, context, context_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
-(1, 1, 'IMAGE', 'COMPLETED', 'PROFILE', 1, 'seed-attachment-1', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(1, 1, 'IMAGE', 'COMPLETED', 'MEMBER', 1, 'seed-attachment-1', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO tasks (id, dtype, start_date, end_date, status, worker_id, project_id, project_title, project_requirement, project_memo, created_at, modified_at) VALUES
-(1, 'PROJECT', DATE '2026-06-01', DATE '2026-06-03', 'SCHEDULED', 2, 1, '작업', '요구사항', '메모', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(1, 'PROJECT', DATE '2026-06-01', DATE '2026-06-03', 'SCHEDULED', 2, null, '작업', '요구사항', '메모', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 -- for special entities
 ALTER TABLE otps ALTER COLUMN id RESTART WITH 100;
