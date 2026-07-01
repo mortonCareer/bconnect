@@ -1,5 +1,5 @@
 # attachment-architecture
-- 위치 : `/attachment`, `/storage/attachment`, `/core/domain`
+- 위치 : `/attachment`, `/storage/attachment`, `/core/domain`, `/security/member`
 - 범위 : 첨부파일(Attachment)
 
 ## 컴포넌트
@@ -44,24 +44,20 @@ graph TD
     end
     subgraph attachment
         Service[AttachmentService]
-    end
-    subgraph core.domain
-        ChatV[ChatAttachmentValidator]
-        CompV[CompanyAttachmentValidator]
-        CredV[CredentialAttachmentValidator]
-        PostV[PostAttachmentValidator]
-        ProfV[ProfileAttachmentValidator]
         Reg[AttachmentContextValidatorRegistry]
         V{{AttachmentContextValidator}}
+    end
+    subgraph core.domain
+        VImpl[AttachmentValidatorImpl]
+    end
+    subgraph security.member
+        MemV[MemberAttachmentValidator]
     end
     Ctrl --> Reg
     Ctrl --> Service
     Reg --> V
-    ChatV -.implements.-> V
-    CompV -.implements.-> V
-    CredV -.implements.-> V
-    PostV -.implements.-> V
-    ProfV -.implements.-> V
+    VImpl -.implements.-> V
+    MemV -.implements.-> V
 ```
 - AttachmentContextValidator : Context별 presign 권한 검증 인터페이스
 - AttachmentContextValidatorRegistry : Validator 등록 · 위임
