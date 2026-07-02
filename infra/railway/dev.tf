@@ -16,6 +16,8 @@ locals {
     JAVA_TOOL_OPTIONS      = "-XX:-UseContainerSupport"
     SENTRY_DSN             = var.sentry_dsn
     SENTRY_ENVIRONMENT     = "dev"
+    CLOUDFRONT_PRIVATE_KEY = var.cloudfront_private_key
+    CLOUDFRONT_KEY_PAIR_ID = var.cloudfront_key_pair_id
   }
 
   dev_postgres_variables = {

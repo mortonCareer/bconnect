@@ -157,6 +157,24 @@ resource "railway_variable" "api_sentry_environment" {
   depends_on = [railway_variable.api_sentry_dsn]
 }
 
+resource "railway_variable" "api_cloudfront_private_key" {
+  name           = "CLOUDFRONT_PRIVATE_KEY"
+  value          = var.cloudfront_private_key
+  service_id     = railway_service.api.id
+  environment_id = railway_project.morton.default_environment.id
+
+  depends_on = [railway_variable.api_sentry_environment]
+}
+
+resource "railway_variable" "api_cloudfront_key_pair_id" {
+  name           = "CLOUDFRONT_KEY_PAIR_ID"
+  value          = var.cloudfront_key_pair_id
+  service_id     = railway_service.api.id
+  environment_id = railway_project.morton.default_environment.id
+
+  depends_on = [railway_variable.api_cloudfront_private_key]
+}
+
 # ===========================================================================
 # Custom Domain for API
 # ===========================================================================

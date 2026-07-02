@@ -151,3 +151,18 @@ variable "domain" {
   description = "Root domain for the project (e.g., bconnect.to)"
   type        = string
 }
+
+# =============================================================================
+# CloudFront (signed cookie)
+# =============================================================================
+
+variable "cloudfront_private_key" {
+  description = "CloudFront 서명 개인키 base64 (infra/aws output cloudfront_private_key_base64)"
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudfront_key_pair_id" {
+  description = "CloudFront에 등록한 공개키의 ID (AWS 자동 발급). 서명 쿠키가 '이 공개키로 검증'을 지목하는 용도. infra/aws output cloudfront_key_pair_id"
+  type        = string
+}
