@@ -1,5 +1,7 @@
 # BE-spec Compat Layer (Phase 1) Implementation Plan
 
+> **Status**: 완료 — flip 포함 전체 마이그레이션이 [PR #690](https://github.com/mortonCareer/bconnect/pull/690)에서 실행됨 ([ADR-0024](../../explanation/adr/0024-orval-consumes-be-springdoc-spec.md)). 본 문서는 무-BE-의존 1단계 계획의 역사 기록.
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 손-작성 OpenAPI spec 폐기 마이그레이션의 **FE 전용·무-BE-의존 1단계** — BE springdoc spec을 orval이 소비하는 compat 레이어(PoC 검증 완료)를 프로덕션 품질로 굳히고, BE↔FE drift를 **비차단 CI 체크**로 상시 가시화한다. 플립(손-spec 삭제)은 하지 않는다.

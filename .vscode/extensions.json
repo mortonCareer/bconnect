@@ -4,7 +4,7 @@
   //  - dbaeumer.vscode-eslint        : ESLint 통합. settings.json 의 codeActionsOnSave 와 짝.
   //  - esbenp.prettier-vscode        : Prettier formatter (format-on-save 의 default formatter).
   //  - bradlc.vscode-tailwindcss     : Tailwind 클래스 자동완성 + cn/cva/clsx regex 인식.
-  //  - 42crunch.vscode-openapi       : OpenAPI spec 실시간 검증/시각화 (packages/api-client/src/spec).
+  //  - 42crunch.vscode-openapi       : OpenAPI spec 실시간 검증/시각화 (packages/api-client/src/openapi.yaml, BE springdoc 산출).
   //  - usernamehw.errorlens          : 에러/경고를 인라인으로 즉시 표시 (편집 중 빠른 피드백).
   //  - yzhang.markdown-all-in-one    : markdown 편집 보조 (TOC, table, list 등).
   //  - DavidAnson.vscode-markdownlint: 본 repo 의 .markdownlint.jsonc 룰을 IDE 에서 실시간 검증.

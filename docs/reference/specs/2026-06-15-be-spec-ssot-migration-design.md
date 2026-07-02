@@ -3,7 +3,7 @@
 > **For**: 이 마이그레이션을 구현/리뷰하는 사람 (CTO·CEO).
 > **You'll be able to**: 왜·무엇을·어떤 순서로 바꾸는지 파악하고, 구현 계획(별도 plan)을 실행한다.
 
-> **Status**: Design (승인 대기) · **Date**: 2026-06-15 · **PoC**: `chore/be-spec-wiring` 브랜치 (검증 완료)
+> **Status**: 실행 완료 — flip 이 [PR #690](https://github.com/mortonCareer/bconnect/pull/690)에서 착륙 ([ADR-0024](../../explanation/adr/0024-orval-consumes-be-springdoc-spec.md)) · **Date**: 2026-06-15
 > **Related**: [ADR-0015](../../explanation/adr/0015-be-code-as-api-ssot.md) (BE 코드 SSOT — 본 설계가 그 "스펙 산출 방식" 보류 결정을 종결)
 
 ---

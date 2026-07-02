@@ -13,7 +13,7 @@ PR/이슈에 변경되는 영역을 표시. 한 PR/이슈에 여러 개 조합 �
 
 | 레이블          | 용도                                                                                                                |
 | --------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `📋 api-spec`   | API 스펙 설계 — [packages/api-client/src/spec/](../../packages/api-client/src/spec/)                                |
+| `📋 api-spec`   | API 스펙 (BE springdoc 산출) — [src/openapi.yaml](../../packages/api-client/src/openapi.yaml)                       |
 | `⚙️ be`         | 백엔드 (포괄) — [apps/api/](../../apps/api/)                                                                        |
 | `⚙️be:api`      | 백엔드 API 계층 — 컨트롤러/DTO/엔드포인트                                                                           |
 | `⚙️be:service`  | 백엔드 서비스 로직                                                                                                  |
