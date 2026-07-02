@@ -1,6 +1,5 @@
 package to.bconnect.api.storage.session;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -14,19 +13,14 @@ import to.bconnect.api.storage.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SessionEntity extends BaseEntity {
 
-    @Column(nullable = false, unique = true)
     private Long memberId;
 
-    @Column(nullable = false)
     private String agent;
 
-    @Column(nullable = false)
     private String ip;
 
-    @Column(nullable = false)
     private String refreshToken;
 
-    @Column(nullable = false)
     private boolean revoked;
 
     public SessionEntity(Long memberId, String agent, String ip, String refreshToken) {

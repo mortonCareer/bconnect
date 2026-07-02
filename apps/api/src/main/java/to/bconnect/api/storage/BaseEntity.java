@@ -25,10 +25,8 @@ public class BaseEntity {
     protected Long id;
 
     @CreatedDate
-    @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime modifiedAt = LocalDateTime.now();
+    private LocalDateTime modifiedAt;
 }

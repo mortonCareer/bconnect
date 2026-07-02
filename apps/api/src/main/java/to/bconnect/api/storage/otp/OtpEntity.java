@@ -19,19 +19,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OtpEntity extends BaseEntity {
 
-    @Column(nullable = false)
     private String phone;
 
-    @Column(nullable = false)
     private String code;
 
-    @Column(name = "code_expired_at", nullable = false)
+    @Column(name = "code_expired_at")
     private LocalDateTime expiredAt;
 
-    @Column(nullable = false)
     private int attempts = 0;
 
-    @Column(name = "code_revoked", nullable = false)
+    @Column(name = "code_revoked")
     private boolean revoked = true;
 
     @AttributeOverrides({
@@ -41,10 +38,8 @@ public class OtpEntity extends BaseEntity {
     @Embedded
     private SignupToken token;
 
-    @Column(nullable = false)
     private int dailyCount;
 
-    @Column(nullable = false)
     private LocalDateTime lastSentAt;
 
     public OtpEntity(String phone, String code, LocalDateTime expiredAt) {
