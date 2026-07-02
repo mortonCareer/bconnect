@@ -27,7 +27,7 @@ public class AttachmentResolver {
         if (referenceId == null)
             return null;
 
-        return attachmentRepository.findByReferenceTypeAndReferenceIdIn(referenceType, List.of(referenceId)).stream()
+        return attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, List.of(referenceId)).stream()
                 .findFirst()
                 .map(it -> parseUrl(Attachment.of(it), size))
                 .orElse(null);
@@ -38,7 +38,7 @@ public class AttachmentResolver {
         if (referenceId == null)
             return List.of();
 
-        return attachmentRepository.findByReferenceTypeAndReferenceIdIn(referenceType, List.of(referenceId)).stream()
+        return attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, List.of(referenceId)).stream()
                 .map(Attachment::of)
                 .toList();
     }
@@ -59,7 +59,7 @@ public class AttachmentResolver {
         if (ids.isEmpty())
             return Map.of();
 
-        return attachmentRepository.findByReferenceTypeAndReferenceIdIn(referenceType, ids).stream()
+        return attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, ids).stream()
                 .map(Attachment::of)
                 .collect(Collectors.toMap(Attachment::referenceId, Function.identity(), (a, b) -> a));
     }
@@ -79,7 +79,7 @@ public class AttachmentResolver {
         if (ids.isEmpty())
             return Map.of();
 
-        return attachmentRepository.findByReferenceTypeAndReferenceIdIn(referenceType, ids).stream()
+        return attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, ids).stream()
                 .map(Attachment::of)
                 .collect(Collectors.groupingBy(Attachment::referenceId));
     }

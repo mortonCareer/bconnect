@@ -18,7 +18,7 @@ public class ProfileResolver {
 
     @Transactional(readOnly = true)
     public Map<Long, Profile> resolveMap(Collection<Long> memberIds) {
-        return profileRepository.findByMemberIdIn(memberIds).stream()
+        return profileRepository.findAllByMemberIdIn(memberIds).stream()
                 .collect(Collectors.toMap(
                         ProfileEntity::getMemberId,
                         Profile::of

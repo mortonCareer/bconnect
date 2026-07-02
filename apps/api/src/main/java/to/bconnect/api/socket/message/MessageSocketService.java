@@ -61,7 +61,7 @@ public class MessageSocketService {
                 .map(it -> it.getSession().getUser().getName())
                 .collect(Collectors.toCollection(HashSet::new));
 
-        val memberIds = memberRepository.findByUsernameIn(usernames).stream()
+        val memberIds = memberRepository.findAllByUsernameIn(usernames).stream()
                 .map(MemberEntity::getId)
                 .toList();
 
@@ -70,7 +70,7 @@ public class MessageSocketService {
                     .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
             memberIds.forEach(it -> chat.markRead(it, messageId));
         } else {
-            participantRepository.findByChatIdAndMemberIdIn(chatId, memberIds)
+            participantRepository.findAllByChatIdAndMemberIdIn(chatId, memberIds)
                     .forEach(it -> it.markRead(messageId));
         }
     }

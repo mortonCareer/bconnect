@@ -27,7 +27,7 @@ public class CredentialService {
 
     @Transactional(readOnly = true)
     public List<Credential> list(Long memberId) {
-        return credentialRepository.findByMemberId(memberId)
+        return credentialRepository.findAllByMemberId(memberId)
                 .stream()
                 .map(Credential::of)
                 .toList();
@@ -36,7 +36,7 @@ public class CredentialService {
     @Transactional(readOnly = true)
     public List<Credential> listLatestAccepted(Long memberId) {
         // latest one per type
-        return credentialRepository.findByMemberId(memberId)
+        return credentialRepository.findAllByMemberId(memberId)
                 .stream()
                 .filter(it -> it.getStatus() == CredentialStatus.ACCEPTED)
                 .collect(Collectors.groupingBy(

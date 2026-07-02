@@ -35,7 +35,7 @@ public class AttachmentCleanupService {
     private int cleanupPending() {
         val before = LocalDateTime.now().minus(PENDING_RETENTION);
         val attachments =
-                attachmentRepository.findByStatusAndCreatedAtBefore(AttachmentStatus.PENDING, before);
+                attachmentRepository.findAllByStatusAndCreatedAtBefore(AttachmentStatus.PENDING, before);
 
         purge(attachments);
         return attachments.size();
@@ -45,7 +45,7 @@ public class AttachmentCleanupService {
     private int cleanupOrphans() {
         val before = LocalDateTime.now().minus(ORPHAN_RETENTION);
         val orphans = attachmentRepository
-                .findByStatusAndCreatedAtBeforeAndReferenceIdIsNull(AttachmentStatus.COMPLETED, before);
+                .findAllByStatusAndCreatedAtBeforeAndReferenceIdIsNull(AttachmentStatus.COMPLETED, before);
 
         purge(orphans);
         return orphans.size();

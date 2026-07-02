@@ -26,7 +26,7 @@ public class MemberResolver {
     }
 
     public Map<Long, Member> resolveMap(Collection<Long> memberIds) {
-        return memberRepository.findByIdIn(memberIds)
+        return memberRepository.findAllByIdIn(memberIds)
                 .stream()
                 .map(Member::of)
                 .collect(Collectors.toMap(Member::id, Function.identity()));

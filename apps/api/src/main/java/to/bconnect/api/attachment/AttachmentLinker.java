@@ -52,7 +52,7 @@ public class AttachmentLinker {
         if (referenceIds.isEmpty())
             return;
 
-        attachmentRepository.findByReferenceTypeAndReferenceIdIn(referenceType, referenceIds)
+        attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, referenceIds)
                 .forEach(AttachmentEntity::unlink);
     }
 

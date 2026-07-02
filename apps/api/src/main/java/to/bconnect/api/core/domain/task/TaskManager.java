@@ -33,7 +33,7 @@ public class TaskManager {
 
         offerRepository.deleteByTaskIdIn(taskIds);
 
-        val posts = postRepository.findByTaskIdIn(taskIds);
+        val posts = postRepository.findAllByTaskIdIn(taskIds);
         val postIds = posts.stream().map(PostEntity::getId).toList();
         if (!postIds.isEmpty())
             attachmentLinker.unlink(ReferenceType.POST, postIds);

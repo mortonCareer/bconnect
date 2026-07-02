@@ -25,20 +25,20 @@ public class CoworkerService {
 
     @Transactional(readOnly = true)
     public List<Coworker> list(Long targetId) {
-        return coworkerRepository.findByMemberId(targetId).stream()
+        return coworkerRepository.findAllByMemberId(targetId).stream()
                 .map(it -> Coworker.of(it, it.coworkerIdOf(targetId)))
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public Map<Long, CoworkerStatus> resolveStatusMap(Long memberId, Collection<Long> targetIds) {
-        val coworkerIds = coworkerRepository.findByMemberId(memberId).stream()
+        val coworkerIds = coworkerRepository.findAllByMemberId(memberId).stream()
                 .map(it -> it.coworkerIdOf(memberId))
                 .collect(Collectors.toSet());
-        val sentIds = coworkerRequestRepository.findByFromId(memberId).stream()
+        val sentIds = coworkerRequestRepository.findAllByFromId(memberId).stream()
                 .map(CoworkerRequestEntity::getToId)
                 .collect(Collectors.toSet());
-        val receivedIds = coworkerRequestRepository.findByToId(memberId).stream()
+        val receivedIds = coworkerRequestRepository.findAllByToId(memberId).stream()
                 .map(CoworkerRequestEntity::getFromId)
                 .collect(Collectors.toSet());
 

@@ -25,13 +25,13 @@ public class GroupChatService {
 
     @Transactional(readOnly = true)
     public List<GroupChat> list(Long memberId) {
-        val chatIds = participantRepository.findByMemberId(memberId)
+        val chatIds = participantRepository.findAllByMemberId(memberId)
                 .stream().map(ParticipantEntity::getChatId).toList();
         if (chatIds.isEmpty()) return List.of();
 
         val chats = groupChatRepository.findAllById(chatIds);
 
-        val participantMap = participantRepository.findByChatIdIn(chatIds)
+        val participantMap = participantRepository.findAllByChatIdIn(chatIds)
                 .stream()
                 .collect(Collectors.groupingBy(
                         ParticipantEntity::getChatId,
