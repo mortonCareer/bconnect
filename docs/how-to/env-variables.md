@@ -1,19 +1,23 @@
-# 환경 변수 추가하기
+# 환경 변수 관리
 
-> **For**: bconnect에 새 환경 변수(API 키, 도메인, 기능 플래그 등)를 추가하는 개발자.
-> **You'll be able to**: 변수의 성격에 맞는 저장 위치를 고르고, fail-fast 검증까지 배선해 silent-fail 없이 추가한다.
+> **For**: bconnect의 환경 변수(API 키, 도메인, 기능 플래그 등)를 추가·수정·삭제하는 개발자.
+> **You'll be able to**: 변수의 성격에 맞는 저장 위치를 고르고, fail-fast 검증까지 배선해 silent-fail 없이 관리한다.
 
-새 환경 변수가 필요할 때 "어디에 무엇을 어떻게 넣는지"의 단일 출처(SSOT)다.
+환경 변수가 필요/변경/제거될 때 "어디에 무엇을 어떻게 넣고 빼는지"의 단일 출처(SSOT)다.
 
 ---
 
-## 핵심 원칙 2가지
+## 핵심 원칙 3가지
 
 ### 1. `.env.example`로 계약을 남긴다
 
 실값은 gitignore되지만, **어떤 변수가 어떤 형태로 필요한지**는 `.env.example`(FE·crawler) / `terraform.tfvars.example`(infra)에 항상 남긴다. 비밀은 placeholder, `NEXT_PUBLIC_*` 공개값은 실값을 기재한다. 예시가 없으면 신규 팀원은 무엇을 채워야 할지 알 수 없다.
 
-### 2. fail-fast — 주입 안 되면 부팅 시 즉시 터진다
+### 2. 민감값의 SSOT는 Notion 환경변수 페이지
+
+실제 비밀값(토큰·자격증명·비밀키)은 git에 절대 넣지 않는다. **Notion [로컬 환경변수](https://www.notion.so/morton-so/384965d2888b8092be18f7bab46d0f8d) 페이지가 민감값의 SSOT**이며, 개발자는 이 값을 각자 로컬(`.env`·`.envrc.local` 등)에 복사해 사용한다. `.env.example`은 "어떤 키가 필요한가"(계약)를, Notion은 "그 값이 무엇인가"(실값)를 담당한다.
+
+### 3. fail-fast — 주입 안 되면 부팅 시 즉시 터진다
 
 기대한 변수가 없으면 런타임 중간에 `undefined`로 조용히 오작동(silent-fail)하는 대신, **애플리케이션 시작 시점에 크래시**시킨다.
 
@@ -24,14 +28,14 @@
 
 ## 어디에 넣을까 — 결정 트리
 
-| 변수 성격                                                | 위치                                                              |
-| -------------------------------------------------------- | ---------------------------------------------------------------- |
-| 프로젝트 전역, 서비스 무관, **공개해도 되는** 값         | [`.envrc`](#envrc--프로젝트-전역-공개값)                          |
-| 프로젝트 전역이지만 **비밀**인 값 (개인 자격증명 등)     | `.envrc.local` (gitignored, [ONBOARDING](../tutorials/ONBOARDING.md) 참조) |
-| Career / Plan 앱 런타임에서 읽는 값                      | [`apps/{app}/.env` + `src/env.ts`](#nextjscareer--plan-앱-변수)  |
-| API(Spring) 런타임에서 읽는 값                           | [`application.yaml`](#apispring-boot-변수)                       |
-| Terraform이 리소스를 만들 때 쓰는 값                     | [`infra/variables.tf` + `terraform.tfvars`](#인프라terraform-변수) |
-| 로컬 개발에서만 쓰는 값                                  | [로컬 전용](#로컬-전용-값)                                        |
+| 변수 성격                                            | 위치                                                                       |
+| ---------------------------------------------------- | -------------------------------------------------------------------------- |
+| 프로젝트 전역, 서비스 무관, **공개해도 되는** 값     | [`.envrc`](#envrc--프로젝트-전역-공개값)                                   |
+| 프로젝트 전역이지만 **비밀**인 값 (개인 자격증명 등) | `.envrc.local` (gitignored, [ONBOARDING](../tutorials/ONBOARDING.md) 참조) |
+| Career / Plan 앱 런타임에서 읽는 값                  | [`apps/{app}/.env` + `src/env.ts`](#nextjscareer--plan-앱-변수)            |
+| API(Spring) 런타임에서 읽는 값                       | [`application.yaml`](#apispring-boot-변수)                                 |
+| Terraform이 리소스를 만들 때 쓰는 값                 | [`infra/variables.tf` + `terraform.tfvars`](#인프라terraform-변수)         |
+| 로컬 개발에서만 쓰는 값                              | [로컬 전용](#로컬-전용-값)                                                 |
 
 배포 플랫폼(Vercel·Railway)에서 실제 주입하는 절차는 [deployment.md](./deployment.md) 참조. 도메인 literal은 [infra/](../../infra/)가 SSOT이며 현황은 [domains.md](../reference/domains.md)를 본다.
 
@@ -96,7 +100,7 @@ NEXT_PUBLIC_MY_VAR=https://real.value
 
 ### 3. 배포 환경에 주입
 
-Vercel Dashboard(또는 Terraform `vercel_project_environment_variable`)에 등록한다. 상세: [deployment.md](./deployment.md).
+**Terraform으로 관리한다** — [`infra/vercel/`](../../infra/vercel/)의 `vercel_project_environment_variable` 리소스로 선언(환경별 `target` 지정). 대시보드 수동 조작은 IaC 위반이므로 긴급/예외 시에만. 상세: [deployment.md](./deployment.md).
 
 ### ⚠️ `NEXT_PUBLIC_*` 클라이언트 인라인 함정
 
@@ -109,20 +113,7 @@ Vercel Dashboard(또는 Terraform `vercel_project_environment_variable`)에 등�
 
 ## API(Spring Boot) 변수
 
-[`application.yaml`](../../apps/api/src/main/resources/application.yaml)에서 `${VAR}` placeholder로 주입받는다.
-
-```yaml
-app:
-  jwt:
-    secret: ${JWT_SECRET} # default 없음 → 미주입 시 부팅 실패 (fail-fast)
-  s3:
-    region: ${AWS_REGION:ap-northeast-2} # :default → 옵셔널
-```
-
-- **필수 변수**: `${VAR}` (default 미기재) — 없으면 시작 시 크래시. 이것이 API의 fail-fast다.
-- **옵셔널/기본값**: `${VAR:기본값}`.
-
-로컬 개발은 [`application-local.yaml`](../../apps/api/src/main/resources/application-local.yaml)이 더미값을 하드코딩해 별도 주입 없이 뜬다. prod 주입은 Railway 대시보드(또는 Terraform), 배포 절차는 [deployment.md](./deployment.md).
+TODO: BE 개발자 설명 필요.
 
 ---
 
@@ -162,18 +153,18 @@ apply 절차는 `morton-terraform` 스킬(MFA 세션 + S3 backend)을 따른다.
 
 ## 시나리오별 요약
 
-| 시나리오                                     | 위치                                                  |
-| -------------------------------------------- | ----------------------------------------------------- |
-| 공개, 모든 개발자, 서비스 무관               | `.envrc`                                              |
-| prod·preview·dev 공통 (FE)                   | `src/env.ts` 스키마 + Vercel 전 환경                  |
-| prod·preview·dev 공통 (API)                  | `application.yaml` `${VAR}` + Railway                 |
-| 특정 환경에서만                              | 배포 대시보드에서 해당 환경 스코프로만 주입           |
-| 특정 환경 + 특정 앱에서만                    | 해당 앱 `src/env.ts` + 그 앱 프로젝트의 해당 환경     |
-| 로컬 개발 전용                               | `.env.local` / `application-local.yaml` / `.envrc.local` |
-| 신규 팀원 온보딩                             | `.env.example` + [ONBOARDING](../tutorials/ONBOARDING.md) |
+| 시나리오                       | 위치                                                      |
+| ------------------------------ | --------------------------------------------------------- |
+| 공개, 모든 개발자, 서비스 무관 | `.envrc`                                                  |
+| prod·preview·dev 공통 (FE)     | `src/env.ts` 스키마 + Vercel 전 환경                      |
+| prod·preview·dev 공통 (API)    | `application.yaml` `${VAR}` + Railway                     |
+| 특정 환경에서만                | Terraform env var 리소스에 해당 `target`만 지정           |
+| 특정 환경 + 특정 앱에서만      | 해당 앱 `src/env.ts` + 그 앱 Terraform 리소스의 `target`  |
+| 로컬 개발 전용                 | `.env.local` / `application-local.yaml` / `.envrc.local`  |
+| 신규 팀원 온보딩               | `.env.example` + [ONBOARDING](../tutorials/ONBOARDING.md) |
 
 ---
 
 ## 신규 팀원 온보딩과의 관계
 
-`.env.example`과 이 문서가 계약이라면, 실제 비밀값 배포는 [ONBOARDING](../tutorials/ONBOARDING.md)이 다룬다 (`.envrc.local`은 Notion으로 관리). 새 비밀 변수를 추가했다면 온보딩 자료에도 반영해 신규 팀원이 막히지 않게 한다.
+`.env.example`과 이 문서가 "어떤 키가 필요한가"(계약)라면, 실제 비밀값은 Notion [로컬 환경변수](https://www.notion.so/morton-so/384965d2888b8092be18f7bab46d0f8d) 페이지가 SSOT다(핵심 원칙 2). 신규 팀원은 [ONBOARDING](../tutorials/ONBOARDING.md) 절차에 따라 이 Notion 값을 로컬로 복사한다. 새 비밀 변수를 추가했다면 이 Notion 페이지와 `.env.example`에 함께 반영해 신규 팀원이 막히지 않게 한다.

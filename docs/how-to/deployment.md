@@ -127,8 +127,10 @@ Docker 이미지 생성
 
 새 환경 변수를 어디에 넣고 어떻게 fail-fast로 검증하는지(계층별 저장 위치, `.env.example` 계약, Zod/Spring placeholder)는 [env-variables.md](./env-variables.md)가 SSOT다. 본 문서는 **배포 관점**만 다룬다.
 
-- **Frontend(Vercel)**: Vercel Dashboard → Project Settings → Environment Variables (또는 Terraform `vercel_project_environment_variable`). 환경별(prod/preview/dev) 스코프 지정 가능.
-- **Backend(Railway)**: Railway Dashboard → Variables (또는 Terraform). 로컬은 [`application-local.yaml`](../../apps/api/src/main/resources/application-local.yaml) 더미값으로 주입 없이 뜬다.
+환경 변수 주입은 **Terraform(IaC)으로 관리**한다 — 대시보드 수동 조작은 IaC 위반이므로 긴급/예외 시에만.
+
+- **Frontend(Vercel)**: [`infra/vercel/`](../../infra/vercel/)의 `vercel_project_environment_variable` 리소스로 선언. 환경별(prod/preview/dev)은 `target`으로 스코프 지정.
+- **Backend(Railway)**: [`infra/railway/`](../../infra/railway/)의 `railway_variable` 리소스로 선언. 로컬은 [`application-local.yaml`](../../apps/api/src/main/resources/application-local.yaml) 더미값으로 주입 없이 뜬다.
 - **주입 누락 시**: FE는 Zod 검증 실패, API는 `${VAR}` placeholder 미해결로 **부팅 실패**(fail-fast) — silent-fail 방지.
 
 ---
