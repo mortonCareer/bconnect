@@ -21,6 +21,26 @@ community provider 제약상 아래는 Railway GUI 1회 수동 (postgres volume 
 3. **postgres volume**: `dev` 환경 postgres volume (복제 시 자동 생성, prod 패턴 동일)
 4. **(dev 전용 DB 비밀번호 적용 시)** postgres 는 빈 데이터 디렉토리 첫 init 때만 `POSTGRES_PASSWORD` 반영 → 클론 직후 volume 재초기화 필요 (dev 는 데이터 없어 안전)
 
+## 볼륨 백업 (TF 밖)
+
+Railway Pro 볼륨 백업(스냅샷). community provider 가 미지원(리소스 9종에 backup 없음,
+`volume.size` 도 read-only)이고, 배포마다 안 바뀌는 set-once 설정이라 IaC 밖에서
+관리한다(Railway Service → Backups).
+
+**정책**: prod 볼륨만 `DAILY`(6일 보관) + `WEEKLY`(1개월 보관). dev 는 테스트 데이터라
+제외. 과금은 볼륨과 동일 CoW 증분($0.15/GB/월, 고유 델타만) — prod ~0.25GB 기준 월 $0.1
+미만. 복원/PITR 도 Railway Backups 패널.
+
+### 볼륨 크기 조정 (TF 밖)
+
+`volume.size` 는 provider read-only → 리사이즈는 GUI live-resize(확장만, 축소 불가).
+Pro 최대 50GB. prod 볼륨이 50% 이상 차면 확장 필요.
+
+## 계정 사용량 한도 (account-level, TF 밖)
+
+지출 폭주 방지 워크스페이스 한도: **soft $80**(초과 시 이메일 경고) / **hard $100**
+(초과 시 워크로드 일시중단). 계정(billing customer) 단위라 프로젝트 IaC(SSOT) 밖.
+
 ## 사전 요구사항
 
 1. [Terraform](https://www.terraform.io/downloads) >= 1.0
