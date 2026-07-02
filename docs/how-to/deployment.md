@@ -125,61 +125,13 @@ Docker 이미지 생성
 
 ## 환경 변수 관리
 
-환경 변수는 다음과 같이 관리됩니다:
+새 환경 변수를 어디에 넣고 어떻게 fail-fast로 검증하는지(계층별 저장 위치, `.env.example` 계약, Zod/Spring placeholder)는 [env-variables.md](./env-variables.md)가 SSOT다. 본 문서는 **배포 관점**만 다룬다.
 
-### Frontend 환경 변수
+환경 변수 주입은 **Terraform(IaC)으로 관리**한다 — 대시보드 수동 조작은 IaC 위반이므로 긴급/예외 시에만.
 
-**Zod 스키마로 검증** (`packages/config/env/validate.ts`)
-
-```typescript
-export const envSchema = z.object({
-  NEXT_PUBLIC_API_URL: z.string().url(),
-  NEXT_PUBLIC_VERCEL_ENV: z.enum(['development', 'preview', 'production']),
-  // ...
-})
-```
-
-**사용 방법**:
-
-```typescript
-import { env } from '@bconnect/config/env'
-
-const apiUrl = env.NEXT_PUBLIC_API_URL
-```
-
-**주의사항**:
-
-- `NEXT_PUBLIC_*` 접두사: 클라이언트에 노출됨
-- 접두사 없음: 서버 전용
-
-### Backend 환경 변수
-
-**application.yml**:
-
-```yaml
-spring:
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:development}
-  datasource:
-    url: ${DATABASE_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
-jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION:3600000}
-```
-
-### 환경 변수 추가 시
-
-환경 변수 관리: 각 앱의 `.env.example` + `scripts/link-env.sh` (워크트리 자동 심링크).
-
-**간단 가이드**:
-
-1. Zod 스키마 추가 (`packages/config/env/validate.ts`)
-2. `.env.example` 업데이트
-3. Vercel/Railway 대시보드에 변수 추가
-4. (선택) Terraform 리소스 추가 (`infra/`)
+- **Frontend(Vercel)**: [`infra/vercel/`](../../infra/vercel/)의 `vercel_project_environment_variable` 리소스로 선언. 환경별(prod/preview/dev)은 `target`으로 스코프 지정.
+- **Backend(Railway)**: [`infra/railway/`](../../infra/railway/)의 `railway_variable` 리소스로 선언. 로컬은 [`application-local.yaml`](../../apps/api/src/main/resources/application-local.yaml) 더미값으로 주입 없이 뜬다.
+- **주입 누락 시**: FE는 Zod 검증 실패, API는 `${VAR}` placeholder 미해결로 **부팅 실패**(fail-fast) — silent-fail 방지.
 
 ---
 

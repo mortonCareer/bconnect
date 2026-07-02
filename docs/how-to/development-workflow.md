@@ -232,7 +232,7 @@ Day 8: QA
 
 ### 환경 변수
 
-환경 변수 관리는 [CLAUDE.md](../CLAUDE.md)의 "Environment Variables" 섹션 참조
+새 환경 변수 추가 절차(저장 위치·fail-fast 검증·`.env.example` 계약)는 [env-variables.md](./env-variables.md) 참조.
 
 ### 로컬 개발 서버 실행
 
