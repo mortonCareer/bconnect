@@ -14,8 +14,7 @@ public enum CoworkerExceptionCode implements ExceptionCode {
     ALREADY_COWORKER("CW002", HttpStatus.CONFLICT, "이미 동료인 사용자입니다.", LogLevel.INFO),
     TARGET_NOT_FOUND("CW003", HttpStatus.NOT_FOUND, "요청 대상 프로필을 찾을 수 없습니다.", LogLevel.INFO),
     REQUEST_NOT_FOUND("CW004", HttpStatus.NOT_FOUND, "동료 요청을 찾을 수 없습니다.", LogLevel.INFO),
-    ALREADY_REQUESTED("CW005", HttpStatus.CONFLICT, "이미 동료 요청을 보낸 사용자입니다.", LogLevel.INFO),
-    NOT_FOUND("CW006", HttpStatus.NOT_FOUND, "동료 관계를 찾을 수 없습니다.", LogLevel.INFO);
+    NOT_FOUND("CW005", HttpStatus.NOT_FOUND, "동료 관계를 찾을 수 없습니다.", LogLevel.INFO);
 
     private final String code;
     private final HttpStatus status;

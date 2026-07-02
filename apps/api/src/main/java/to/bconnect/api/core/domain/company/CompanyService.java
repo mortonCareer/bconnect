@@ -43,7 +43,7 @@ public class CompanyService {
             throw new CodeException(CompanyExceptionCode.ALREADY_EXISTS);
 
         if (companyRepository.existsByBrn(command.brn()))
-            throw new CodeException(CompanyExceptionCode.ALREADY_EXISTS);
+            throw new CodeException(CompanyExceptionCode.DUPLICATE_BRN);
 
         val created = new CompanyEntity(
                 user.id(),
@@ -67,10 +67,11 @@ public class CompanyService {
     @Transactional
     public void delete(AuthUser user) {
         val optional = companyRepository.findByMemberId(user.id());
-        if(optional.isPresent()) {
-            val found = optional.get();
-            attachmentLinker.unlink(ReferenceType.COMPANY, List.of(found.getId()));
-            companyRepository.delete(found);
-        }
+        if (optional.isEmpty())
+            return;
+        val found = optional.get();
+
+        attachmentLinker.unlink(ReferenceType.COMPANY, List.of(found.getId()));
+        companyRepository.delete(found);
     }
 }

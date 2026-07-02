@@ -21,7 +21,7 @@ public class ProfileResolver {
         return profileRepository.findByMemberIdIn(memberIds).stream()
                 .collect(Collectors.toMap(
                         ProfileEntity::getMemberId,
-                        it -> Profile.of(it, null, null, null)
+                        Profile::of
                 ));
     }
 }

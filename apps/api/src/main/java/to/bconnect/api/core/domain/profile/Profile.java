@@ -24,6 +24,10 @@ public record Profile(
     Long recommendationCount,
     Long coworkerCount
 ) {
+    public static Profile of(ProfileEntity entity) {
+        return of(entity, 0L, 0L, 0L);
+    }
+
     public static Profile of(ProfileEntity entity, Long postCount, Long recommendationCount, Long coworkerCount) {
         return new Profile(
                 entity.getId(),

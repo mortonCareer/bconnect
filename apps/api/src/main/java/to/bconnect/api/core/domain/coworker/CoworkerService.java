@@ -55,7 +55,10 @@ public class CoworkerService {
 
     @Transactional
     public void delete(AuthUser user, Long memberId) {
-        coworkerRepository.findByMembers(user.id(), memberId)
-                .ifPresent(coworkerRepository::delete);
+        val optional = coworkerRepository.findByMembers(user.id(), memberId);
+        if (optional.isEmpty())
+            return;
+
+        coworkerRepository.delete(optional.get());
     }
 }
