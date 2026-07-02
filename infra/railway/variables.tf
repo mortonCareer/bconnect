@@ -14,6 +14,12 @@ variable "project_name" {
   default     = "morton"
 }
 
+variable "railway_region" {
+  description = "Railway 배포 리전 (싱가폴 = 한국 최근접, #695). 볼륨 리전과 일치해야 함"
+  type        = string
+  default     = "asia-southeast1-eqsg3a"
+}
+
 # =============================================================================
 # GitHub
 # =============================================================================

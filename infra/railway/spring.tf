@@ -5,6 +5,11 @@ resource "railway_service" "api" {
   source_repo        = var.github_repo
   source_repo_branch = var.github_branch
   root_directory     = "apps/api"
+
+  regions = [{
+    region       = var.railway_region
+    num_replicas = 1
+  }]
 }
 
 # Database connection
