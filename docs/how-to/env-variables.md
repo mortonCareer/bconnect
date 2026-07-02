@@ -22,7 +22,7 @@
 기대한 변수가 없으면 런타임 중간에 `undefined`로 조용히 오작동(silent-fail)하는 대신, **애플리케이션 시작 시점에 크래시**시킨다.
 
 - **NextJS(Career·Plan)**: [`apps/{career,plan}/src/env.ts`](../../apps/career/src/env.ts)에서 Zod 스키마로 검증. 실패 시 `throw` ([validate.ts](../../packages/config/env/validate.ts)).
-- **API(Spring Boot)**: [`application.yaml`](../../apps/api/src/main/resources/application.yaml)에서 `${VAR}` placeholder. default가 없으면 미주입 시 `Could not resolve placeholder`로 부팅 실패.
+- **API(Spring Boot)**: TODO — BE 개발자 설명 필요.
 
 ---
 
@@ -153,7 +153,6 @@ apply 절차는 `morton-terraform` 스킬(MFA 세션 + S3 backend)을 따른다.
 | ------------------------------ | --------------------------------------------------------- |
 | 공개, 모든 개발자, 서비스 무관 | `.envrc`                                                  |
 | prod·preview·dev 공통 (FE)     | `src/env.ts` 스키마 + Vercel 전 환경                      |
-| prod·preview·dev 공통 (API)    | `application.yaml` `${VAR}` + Railway                     |
 | 특정 환경에서만                | Terraform env var 리소스에 해당 `target`만 지정           |
 | 특정 환경 + 특정 앱에서만      | 해당 앱 `src/env.ts` + 그 앱 Terraform 리소스의 `target`  |
 | 로컬 개발 전용                 | `.env.local` / `application-local.yaml` / `.envrc.local`  |
