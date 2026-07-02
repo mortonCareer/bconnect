@@ -71,7 +71,7 @@ springdoc의 Java 파생 spec을 FE가 기대하는 모양으로 compile-time �
 | `GET /credentials/me`         | `getMyCredentials` | 응답이 목록인데 `me` 는 단수 규칙                 |
 | `PUT /offers/reorder`         | `reorderOffers`    | verb-path 가 명사-접미(updateOfferReorder)로 어색 |
 
-`/auth/*` 는 springdoc/보충 opId 유지 (verb-path 라 일반 규칙 부적합).
+`/auth/*` opId는 OPID_SPECIAL(sendOtp·logout)과 auth-supplement(verifyOtp·refreshToken)가 지정. deriveOperationId의 auth 분기(springdoc opId 유지)는 그 외 /auth 경로 fallback — 현재 해당 경로 없음.
 
 ## 새 BE 엔드포인트 → FE 흐름
 
@@ -87,10 +87,10 @@ pnpm api:generate
 
 ## Codegen 출력 + FE 사용
 
-| 파일                       | 내용                                                                                                              |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `generated/api.ts`         | react-query hook (use*Query, use*Mutation, use*Suspense) + MSW mock handler (get*MockHandler, getBconnectAPIMock) |
-| `generated/schemas/<X>.ts` | 도메인 type interface                                                                                             |
+| 파일                       | 내용                                                                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `generated/api.ts`         | react-query hook (useGetX 쿼리, useCreateX/useUpdateX/useDeleteX 뮤테이션, useGetXSuspense) + MSW mock handler (get\*MockHandler, getBconnectAPIMock) |
+| `generated/schemas/<X>.ts` | 도메인 type interface                                                                                                                                 |
 
 ```typescript
 // Hook 호출 — data 는 envelope unwrap 된 inner type
@@ -116,7 +116,7 @@ const server = setupServer(...getBconnectAPIMock())
 
 ## enum
 
-BE `ModelResolver.enumsAsRef=true` → enum 이 named `$ref` 로 emit → orval 이 TS enum 생성. FE 후처리 불필요. enum-coupled 한글 라벨은 `src/labels.ts` (`TRADE_LABELS` 등).
+BE `ModelResolver.enumsAsRef=true` → enum 이 named `$ref` 로 emit → orval 이 const 객체 + union 타입(`as const`) 생성 (TS `enum` 아님, 사용감은 동일). FE 후처리 불필요. enum-coupled 한글 라벨은 `src/labels.ts` (`TRADE_LABELS` 등).
 
 ## 검증
 
