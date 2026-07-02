@@ -1,5 +1,6 @@
 package to.bconnect.api.core.presentation.v1.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -13,8 +14,8 @@ import java.util.List;
 public record PresignRequest(
         @NotNull AttachmentContext context,
         @NotNull AttachmentType type,
-        @NotNull  Long contextId,
-        @NotEmpty List<FileItem> files
+        @NotNull Long contextId,
+        @NotEmpty @Valid List<FileItem> files
 ) {
     public record FileItem(
             @NotBlank String filename,
