@@ -195,6 +195,22 @@ JwtPayload:
       type: integer
 ```
 
+## 보안 컨벤션
+
+### Sensitive resource 의 단건 조회 — 권한 없을 시 404
+
+본인이 접근 권한 없는 sensitive resource 단건 조회 시 **403 대신 404** 반환:
+
+- ✅ 404 — 정보 누설 방지 ("그 resource 자체가 없는 척"). [Stripe](https://stripe.com/docs/api/errors), [GitHub](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#authentication) 패턴.
+- ❌ 403 — resource 존재 여부 노출. enumerate 공격 표면 생성.
+
+**대상**:
+
+- [`getChat`](src/spec/v1/chats.yaml) — 본인이 `participants` 에 없으면 404
+- 추가될 sensitive endpoint 들 동일 적용
+
+**예외**: public 조회 (`security: []`) 는 무관 — 어차피 인증 없는 endpoint.
+
 ## Custom Extensions (`x-` prefix)
 
 OpenAPI §4.9 Specification Extensions — vendor-specific 의미 명시.
