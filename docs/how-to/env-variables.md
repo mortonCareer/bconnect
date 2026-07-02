@@ -95,7 +95,7 @@ const value = env.MY_NEW_VAR // 타입 안전, 검증됨
 # 비밀
 MY_SECRET_KEY=your_secret_key_here
 # NEXT_PUBLIC 공개값은 실값 기재
-NEXT_PUBLIC_MY_VAR=https://real.value
+NEXT_PUBLIC_MY_VAR=https://api.example.com
 ```
 
 ### 3. 배포 환경에 주입
