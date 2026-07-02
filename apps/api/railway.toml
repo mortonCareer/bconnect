@@ -4,6 +4,7 @@
 watchPatterns = ["apps/api/**"]
 
 [deploy]
+startCommand = "java -jar build/libs/api-0.0.1-SNAPSHOT.jar"
 healthcheckPath = "/actuator/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"

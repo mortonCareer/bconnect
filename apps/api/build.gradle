@@ -82,6 +82,10 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+tasks.named('jar') {
+    enabled = false
+}
+
 sentry {
     includeSourceContext = System.getenv("SENTRY_AUTH_TOKEN") != null
     org = "morton-2l"
