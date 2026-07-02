@@ -6,6 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
 
+/**
+ * 참여자를 member FK 없이 minId·maxId로만 보유한다.
+ * 상대가 탈퇴해도 채팅방은 유지되며, 목록 조회 시 상대 member는 null로 응답한다.
+ */
 @Entity
 @Table(
         name = "direct_chats",

@@ -4,14 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.core.presentation.v1.request.CreateProjectTaskRequest;
 import to.bconnect.api.core.presentation.v1.request.CreateWorkerTaskRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateAssigneeTaskRequest;
@@ -55,6 +48,7 @@ public class TaskController {
     public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal AuthUser user) {
         val workerTasks = taskQueryService.list(user);
         val projectTasks = taskQueryService.listAssigned(user);
+        
         val offers = offerService.listByWorker(user);
         val offerByTaskId = offers.stream().collect(Collectors.toMap(Offer::taskId, Function.identity()));
         val offerTasks = taskQueryService.listByIds(offerByTaskId.keySet());
@@ -74,11 +68,11 @@ public class TaskController {
         return ApiResponse.success(response);
     }
 
-    @GetMapping("/{taskId}/offers")
+    @GetMapping("/{id}/offers")
     public ApiResponse<List<OfferResponse>> listOffers(
             @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long taskId) {
-        val offers = offerService.listByTask(user, taskId);
+            @PathVariable Long id) {
+        val offers = offerService.listByTask(user, id);
         val workerIds = offers.stream().map(Offer::workerId).distinct().toList();
         val memberMap = memberResolver.resolveMap(workerIds);
         val profileMap = profileResolver.resolveMap(workerIds);

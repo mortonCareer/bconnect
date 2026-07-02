@@ -76,6 +76,10 @@ graph TD
   - Java Bean Validation : DTO 필드
   - 비즈니스 로직 : DTO → Command 변환
   - DB 무효성 : Entity 필드
+- 라우팅
+  - Controller 기본 매핑은 리소스 스코프(`/api/v1/<리소스>`)로 작성합니다.
+  - PathVariable은 메인 도메인 단일 식별자는 `{id}`, 참조 도메인은 `{xxxId}`로 작성합니다.
+  - 예외 : Note는 Project·Drive 양쪽에 종속되는 교차 리소스라 `NoteController`가 중첩 경로(`/projects/{projectId}/notes`, `/drives/{driveId}/notes`, `/notes/{id}`)를 사용합니다.
 
 ## 도메인 의존성
 
@@ -129,6 +133,8 @@ graph TD
   subgraph Domain
     PostS[PostService]
     CredS[CredentialService]
+    DriveS[DriveService]
+    Reg[AttachmentContextValidatorRegistry]
   end
   subgraph Attachment
     AttR[AttachmentResolver]
@@ -141,6 +147,7 @@ graph TD
   AttC -->|presign · confirm| AttS
   AttC -->|context validate| Reg
   PostS & CredS -->|link| AttL
+  DriveS -->|unlink| AttL
 ```
 
 ### 도메인 교차

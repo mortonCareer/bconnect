@@ -4,12 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.presentation.v1.request.CreateDirectChatRequest;
 import to.bconnect.api.core.presentation.v1.response.AttachmentResponse;
@@ -61,12 +56,12 @@ public class DirectChatController {
         return ApiResponse.success(id);
     }
 
-    @GetMapping("/{chatId}/messages")
+    @GetMapping("/{id}/messages")
     public ApiResponse<CursorPage<MessageResponse>> listMessages(
             @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long chatId,
+            @PathVariable Long id,
             CursorLimit cursorLimit) {
-        val page = directChatService.listMessages(user, chatId, cursorLimit);
+        val page = directChatService.listMessages(user, id, cursorLimit);
         val messageIds = page.content().stream().map(Message::id).toList();
         val attachmentMap = attachmentResolver.resolveListMap(ReferenceType.MESSAGE, messageIds);
 

@@ -72,18 +72,14 @@ public class CredentialController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/accept")
-    public ApiResponse<Void> accept(
-            @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long id) {
+    public ApiResponse<Void> accept(@PathVariable Long id) {
         credentialService.accept(id);
         return ApiResponse.success(null);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/deny")
-    public ApiResponse<Void> deny(
-            @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long id) {
+    public ApiResponse<Void> deny(@PathVariable Long id) {
         credentialService.deny(id);
         return ApiResponse.success(null);
     }

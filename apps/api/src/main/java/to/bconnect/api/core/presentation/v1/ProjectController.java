@@ -4,14 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.TaskQueryService;
@@ -44,12 +37,12 @@ public class ProjectController {
         return ApiResponse.success(ProjectResponse.of(projectService.get(id)));
     }
 
-    @GetMapping("/{projectId}/tasks")
+    @GetMapping("/{id}/tasks")
     public ApiResponse<List<TaskResponse>> listTasks(
             @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long projectId) {
-        val tasks = taskQueryService.listByProject(user, projectId);
-        val address = projectService.get(projectId).address();
+            @PathVariable Long id) {
+        val tasks = taskQueryService.listByProject(user, id);
+        val address = projectService.get(id).address();
         val response = tasks.stream()
                 .map(it -> TaskResponse.of(it, address))
                 .toList();

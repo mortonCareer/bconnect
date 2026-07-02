@@ -2,10 +2,7 @@ package to.bconnect.api.core.presentation.v1;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.core.presentation.v1.response.FeedResponse;
 import to.bconnect.api.attachment.AttachmentResolver;
 import to.bconnect.api.attachment.ImageSize;
