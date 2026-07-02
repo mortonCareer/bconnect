@@ -40,3 +40,20 @@ output "cloudfront_private_key_base64" {
   value       = base64encode(tls_private_key.cf_signing.private_key_pem_pkcs8)
   sensitive   = true
 }
+
+output "cloudfront_distribution_domain" {
+  description = "static CDN distribution 도메인 (dxxx.cloudfront.net). 가비아에 static.<domain> CNAME 타겟으로 추가"
+  value       = aws_cloudfront_distribution.static.domain_name
+}
+
+output "acm_validation_records" {
+  description = "가비아에 추가할 ACM DNS validation CNAME (domain → {name, type, value})"
+  value = {
+    for dvo in aws_acm_certificate.static.domain_validation_options :
+    dvo.domain_name => {
+      name  = dvo.resource_record_name
+      type  = dvo.resource_record_type
+      value = dvo.resource_record_value
+    }
+  }
+}

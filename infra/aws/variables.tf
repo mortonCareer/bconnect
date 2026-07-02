@@ -13,3 +13,8 @@ variable "aws_region" {
   type        = string
   default     = "ap-northeast-2"
 }
+
+variable "domain" {
+  description = "Root domain (e.g. bconnect.to). CloudFront static CDN 은 static.<domain> 서빙"
+  type        = string
+}

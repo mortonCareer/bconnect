@@ -2,6 +2,12 @@ provider "aws" {
   region = "ap-northeast-2"
 }
 
+# CloudFront viewer 인증서(ACM)는 us-east-1 에서만 발급 가능 → module.aws 에 주입.
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+}
+
 resource "aws_iam_account_alias" "this" {
   # "morton"은 다른 AWS 계정이 선점하여 사용 불가
   # 로그인: https://morton-so.signin.aws.amazon.com/console
@@ -12,6 +18,12 @@ module "aws" {
   source             = "./aws"
   s3_bucket_name     = var.s3_bucket_name
   dev_s3_bucket_name = var.dev_s3_bucket_name
+  domain             = var.domain
+
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
 }
 
 module "railway" {
