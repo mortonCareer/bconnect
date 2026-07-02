@@ -157,12 +157,23 @@ variable "domain" {
 # =============================================================================
 
 variable "cloudfront_private_key" {
-  description = "CloudFront 서명 개인키 base64 (infra/aws output cloudfront_private_key_base64)"
+  description = "prod CloudFront 서명 개인키 base64 (infra/aws output cloudfront_private_key_base64[\"prod\"])"
   type        = string
   sensitive   = true
 }
 
 variable "cloudfront_key_pair_id" {
-  description = "CloudFront에 등록한 공개키의 ID (AWS 자동 발급). 서명 쿠키가 '이 공개키로 검증'을 지목하는 용도. infra/aws output cloudfront_key_pair_id"
+  description = "prod CloudFront 공개키 ID (infra/aws output cloudfront_key_pair_id[\"prod\"])"
+  type        = string
+}
+
+variable "dev_cloudfront_private_key" {
+  description = "dev CloudFront 서명 개인키 base64 (infra/aws output cloudfront_private_key_base64[\"dev\"]). prod 와 격리(#694)"
+  type        = string
+  sensitive   = true
+}
+
+variable "dev_cloudfront_key_pair_id" {
+  description = "dev CloudFront 공개키 ID (infra/aws output cloudfront_key_pair_id[\"dev\"]). prod 와 격리(#694)"
   type        = string
 }

@@ -50,8 +50,10 @@ module "railway" {
   s3_bucket_name        = var.s3_bucket_name
   dev_s3_bucket_name    = var.dev_s3_bucket_name
 
-  cloudfront_private_key = module.aws.cloudfront_private_key_base64
-  cloudfront_key_pair_id = module.aws.cloudfront_key_pair_id
+  cloudfront_private_key     = module.aws.cloudfront_private_key_base64["prod"]
+  cloudfront_key_pair_id     = module.aws.cloudfront_key_pair_id["prod"]
+  dev_cloudfront_private_key = module.aws.cloudfront_private_key_base64["dev"]
+  dev_cloudfront_key_pair_id = module.aws.cloudfront_key_pair_id["dev"]
 
   domain = var.domain
 

@@ -16,8 +16,12 @@ locals {
     JAVA_TOOL_OPTIONS      = "-XX:-UseContainerSupport"
     SENTRY_DSN             = var.sentry_dsn
     SENTRY_ENVIRONMENT     = "dev"
-    CLOUDFRONT_PRIVATE_KEY = var.cloudfront_private_key
-    CLOUDFRONT_KEY_PAIR_ID = var.cloudfront_key_pair_id
+    # dev BE 가 조립하는 절대 URL 도메인. 미주입 시 기본값 static.<domain>(prod)로
+    # 폴백해 dev 키 서명이 prod 도메인을 가리켜 검증 실패. cookie-domain 은
+    # .<domain> 기본값이 static-dev 서브도메인까지 덮으므로 별도 주입 불필요.
+    CLOUDFRONT_DOMAIN      = "static-dev.${var.domain}"
+    CLOUDFRONT_PRIVATE_KEY = var.dev_cloudfront_private_key
+    CLOUDFRONT_KEY_PAIR_ID = var.dev_cloudfront_key_pair_id
   }
 
   dev_postgres_variables = {
