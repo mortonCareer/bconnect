@@ -7,6 +7,6 @@ output "cloudfront_distribution_domain" {
 }
 
 output "acm_validation_records" {
-  description = "ACM DNS validation CNAME (name → value). 가비아 수동 추가 후 cert ISSUED"
+  description = "ACM DNS validation CNAME (domain → {name, type, value} 맵). 가비아 수동 추가 후 cert ISSUED"
   value       = module.aws.acm_validation_records
 }
