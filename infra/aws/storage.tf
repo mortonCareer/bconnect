@@ -8,17 +8,6 @@ resource "aws_s3_bucket" "app_storage_dev" {
   bucket = var.dev_s3_bucket_name
 }
 
-# 저장 시 암호화 (SSE-S3). AWS 계정 기본이 이미 AES256 이나 §9.2 대로 선언적 명시.
-resource "aws_s3_bucket_server_side_encryption_configuration" "app_storage" {
-  bucket = aws_s3_bucket.app_storage.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
-
 # app_storage 는 완전 비공개 — CloudFront OAC 만 GetObject (아래 bucket policy).
 resource "aws_s3_bucket_public_access_block" "app_storage" {
   bucket                  = aws_s3_bucket.app_storage.id
