@@ -20,10 +20,12 @@ import { defineConfig } from 'orval'
 export default defineConfig({
   morton: {
     input: {
-      target: './src/openapi.bundled.yaml',
+      // BE springdoc 산출 spec (SSOT, ADR-0015). apps/api/** 변경 시 ci-api-spec 이
+      // ./gradlew generateOpenApiDocs 로 재생성·커밋. enumsAsRef=true → enum named $ref.
+      target: './src/openapi.yaml',
       override: {
-        // compile-time: spec 의 envelope 을 type 단계에서 strip → generated type
-        // 이 inner data 만 expose. 런타임 unwrap 은 customFetch 가 담당.
+        // BE springdoc → FE 캐논 정렬: schema *Response strip, operationId 규칙,
+        // envelope unwrap(compile-time; 런타임 unwrap 은 customFetch), auth 보충 병합.
         transformer: './orval.transformer.ts',
       },
     },
