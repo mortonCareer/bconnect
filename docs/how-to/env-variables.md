@@ -33,7 +33,7 @@
 | 프로젝트 전역, 서비스 무관, **공개해도 되는** 값     | [`.envrc`](#envrc--프로젝트-전역-공개값)                                   |
 | 프로젝트 전역이지만 **비밀**인 값 (개인 자격증명 등) | `.envrc.local` (gitignored, [ONBOARDING](../tutorials/ONBOARDING.md) 참조) |
 | Career / Plan 앱 런타임에서 읽는 값                  | [`apps/{app}/.env` + `src/env.ts`](#nextjscareer--plan-앱-변수)            |
-| API(Spring) 런타임에서 읽는 값                       | [`application.yaml`](#apispring-boot-변수)                                 |
+| API(Spring) 런타임에서 읽는 값                       | TODO — BE 개발자 설명 필요                                                 |
 | Terraform이 리소스를 만들 때 쓰는 값                 | [`infra/variables.tf` + `terraform.tfvars`](#인프라terraform-변수)         |
 | 로컬 개발에서만 쓰는 값                              | [로컬 전용](#로컬-전용-값)                                                 |
 
@@ -142,7 +142,7 @@ apply 절차는 `morton-terraform` 스킬(MFA 세션 + S3 backend)을 따른다.
 로컬에서만 필요하고 배포 환경엔 넣지 않는 값:
 
 - **FE**: `apps/{app}/.env.local` (gitignored, `.env`보다 우선).
-- **API**: [`application-local.yaml`](../../apps/api/src/main/resources/application-local.yaml)의 더미값.
+- **API**: TODO — BE 개발자 설명 필요.
 - **셸 전역 비밀**: `.envrc.local`.
 
 ---
@@ -155,5 +155,5 @@ apply 절차는 `morton-terraform` 스킬(MFA 세션 + S3 backend)을 따른다.
 | prod·preview·dev 공통 (FE)     | `src/env.ts` 스키마 + Vercel 전 환경                      |
 | 특정 환경에서만                | Terraform env var 리소스에 해당 `target`만 지정           |
 | 특정 환경 + 특정 앱에서만      | 해당 앱 `src/env.ts` + 그 앱 Terraform 리소스의 `target`  |
-| 로컬 개발 전용                 | `.env.local` / `application-local.yaml` / `.envrc.local`  |
+| 로컬 개발 전용                 | `.env.local` / `.envrc.local`                             |
 | 신규 팀원 온보딩               | `.env.example` + [ONBOARDING](../tutorials/ONBOARDING.md) |
