@@ -37,8 +37,6 @@
 | Terraform이 리소스를 만들 때 쓰는 값                 | [`infra/variables.tf` + `terraform.tfvars`](#인프라terraform-변수)         |
 | 로컬 개발에서만 쓰는 값                              | [로컬 전용](#로컬-전용-값)                                                 |
 
-배포 플랫폼(Vercel·Railway)에서 실제 주입하는 절차는 [deployment.md](./deployment.md) 참조. 도메인 literal은 [infra/](../../infra/)가 SSOT이며 현황은 [domains.md](../reference/domains.md)를 본다.
-
 ---
 
 ## `.envrc` — 프로젝트 전역 공개값
@@ -147,8 +145,6 @@ apply 절차는 `morton-terraform` 스킬(MFA 세션 + S3 backend)을 따른다.
 - **API**: [`application-local.yaml`](../../apps/api/src/main/resources/application-local.yaml)의 더미값.
 - **셸 전역 비밀**: `.envrc.local`.
 
-워크트리에서 작업할 때 위 gitignored 파일들은 [`scripts/link-env.sh`](../../scripts/link-env.sh)가 `pnpm prepare` 단계에서 main 워크트리로부터 자동 심링크한다 — 워크트리마다 다시 채울 필요 없다.
-
 ---
 
 ## 시나리오별 요약
@@ -162,9 +158,3 @@ apply 절차는 `morton-terraform` 스킬(MFA 세션 + S3 backend)을 따른다.
 | 특정 환경 + 특정 앱에서만      | 해당 앱 `src/env.ts` + 그 앱 Terraform 리소스의 `target`  |
 | 로컬 개발 전용                 | `.env.local` / `application-local.yaml` / `.envrc.local`  |
 | 신규 팀원 온보딩               | `.env.example` + [ONBOARDING](../tutorials/ONBOARDING.md) |
-
----
-
-## 신규 팀원 온보딩과의 관계
-
-`.env.example`과 이 문서가 "어떤 키가 필요한가"(계약)라면, 실제 비밀값은 Notion [로컬 환경변수](https://www.notion.so/morton-so/384965d2888b8092be18f7bab46d0f8d) 페이지가 SSOT다(핵심 원칙 2). 신규 팀원은 [ONBOARDING](../tutorials/ONBOARDING.md) 절차에 따라 이 Notion 값을 로컬로 복사한다. 새 비밀 변수를 추가했다면 이 Notion 페이지와 `.env.example`에 함께 반영해 신규 팀원이 막히지 않게 한다.
