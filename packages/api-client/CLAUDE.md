@@ -118,10 +118,6 @@ const server = setupServer(...getBconnectAPIMock())
 
 BE `ModelResolver.enumsAsRef=true` → enum 이 named `$ref` 로 emit → orval 이 TS enum 생성. FE 후처리 불필요. enum-coupled 한글 라벨은 `src/labels.ts` (`TRADE_LABELS` 등).
 
-## 보안: sensitive resource 단건 404 (BE enforce)
-
-본인이 접근 권한 없는 sensitive resource 단건 조회는 **403 대신 404** ([Stripe](https://stripe.com/docs/api/errors)/[GitHub](https://docs.github.com/en/rest) 패턴 — 정보 누설 방지). BE 컨트롤러가 강제하며 spec 에 반영됨. public 조회(`security: []`)는 무관.
-
 ## 검증
 
 ```bash
