@@ -8,13 +8,15 @@
 | --- | --- | --- |
 | `C` | 공통 | `common` |
 | `A` | 인증 | `security` |
-| `M` | 회원 | `security/member` |
+| `M` | 회원 | `core/domain/member` |
 | `P` | 프로필 | `core/domain/profile` |
 | `CO` | 업체 | `core/domain/company` |
 | `T` | 작업 | `core/domain/task` |
 | `CW` | 동료 | `core/domain/coworker` |
 | `RC` | 추천서 | `core/domain/recommendation` |
 | `CH` | 채팅 | `core/domain/chat` |
+| `OF` | 제안 | `core/domain/offer` |
+| `AT` | 첨부 | `attachment` |
 
 ---
 
@@ -42,6 +44,8 @@
 | A005 | INVALID_TOKEN | 401 | WARN | 유효하지 않은 토큰입니다. |
 | A006 | SESSION_EXPIRED | 401 | INFO | 세션이 만료되었습니다. |
 | A007 | INVALID_SIGNUP_TOKEN | 400 | INFO | 유효하지 않은 가입 토큰입니다. |
+| A008 | OTP_EXPIRED | 400 | INFO | 만료된 인증번호입니다. |
+| A009 | SIGNUP_TOKEN_EXPIRED | 400 | INFO | 만료된 가입 토큰입니다. |
 
 ## MemberExceptionCode
 
@@ -62,12 +66,23 @@
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
 | CO001 | ALREADY_EXISTS | 409 | INFO | 이미 업체가 존재합니다. |
+| CO002 | DUPLICATE_BRN | 409 | INFO | 이미 등록된 사업자등록번호입니다. |
 
 ## TaskExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
 | T001 | NOT_ASSIGNED | 409 | INFO | 기술자에게 할당되지 않은 작업입니다. |
+
+## OfferExceptionCode
+
+| 코드 | 이름 | HTTP | LogLevel | 메시지 |
+| --- | --- | --- | --- | --- |
+| OF001 | ALREADY_OFFERED | 409 | INFO | 이미 제안한 작업자입니다. |
+| OF002 | WORKER_NOT_FOUND | 404 | INFO | 제안 대상 작업자를 찾을 수 없습니다. |
+| OF003 | NOT_PROJECT_TASK | 400 | INFO | 프로젝트 작업에만 제안할 수 있습니다. |
+| OF004 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 제안 상태입니다. |
+| OF005 | INVALID_REORDER | 400 | INFO | 재정렬 대상이 올바르지 않습니다. |
 
 ## CoworkerExceptionCode
 
@@ -77,8 +92,7 @@
 | CW002 | ALREADY_COWORKER | 409 | INFO | 이미 동료인 사용자입니다. |
 | CW003 | TARGET_NOT_FOUND | 404 | INFO | 요청 대상 프로필을 찾을 수 없습니다. |
 | CW004 | REQUEST_NOT_FOUND | 404 | INFO | 동료 요청을 찾을 수 없습니다. |
-| CW005 | ALREADY_REQUESTED | 409 | INFO | 이미 동료 요청을 보낸 사용자입니다. |
-| CW006 | NOT_FOUND | 404 | INFO | 동료 관계를 찾을 수 없습니다. |
+| CW005 | NOT_FOUND | 404 | INFO | 동료 관계를 찾을 수 없습니다. |
 
 ## RecommendationExceptionCode
 
@@ -93,5 +107,16 @@
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
 | CH001 | CHAT_NOT_FOUND | 404 | INFO | 채팅방을 찾을 수 없습니다. |
-| CH003 | SELF_NOT_INCLUDED | 400 | INFO | 참여자 목록에 본인이 포함되어야 합니다. |
-| CH004 | INVALID_PARTICIPANT | 400 | WARN | 유효하지 않은 참가자 입니다. |
+| CH002 | SELF_NOT_INCLUDED | 400 | INFO | 참여자 목록에 본인이 포함되어야 합니다. |
+| CH003 | INVALID_PARTICIPANT | 400 | WARN | 유효하지 않은 참가자 입니다. |
+| CH004 | INVALID_ATTACHMENT | 400 | INFO | 메시지 타입과 첨부가 일치하지 않습니다. |
+
+## AttachmentExceptionCode
+
+| 코드 | 이름 | HTTP | LogLevel | 메시지 |
+| --- | --- | --- | --- | --- |
+| AT001 | FILE_TOO_LARGE | 413 | INFO | 파일 크기가 허용치를 초과했습니다. |
+| AT002 | TOO_MANY_FILES | 400 | INFO | 한 번에 업로드할 수 있는 파일 수를 초과했습니다. |
+| AT003 | UNSUPPORTED_FILE_TYPE | 415 | WARN | 허용되지 않는 파일 형식입니다. |
+| AT004 | NOT_COMPLETED | 400 | INFO | 업로드가 완료되지 않은 첨부파일입니다. |
+| AT005 | CONTEXT_MISMATCH | 400 | WARN | 첨부파일의 업로드 컨텍스트가 일치하지 않습니다. |

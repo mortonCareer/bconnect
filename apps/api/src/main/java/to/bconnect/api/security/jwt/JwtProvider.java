@@ -11,9 +11,7 @@ import to.bconnect.api.ApiConfigProps;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import to.bconnect.api.security.AuthUserService;
 
 import java.time.Duration;
 import javax.crypto.SecretKey;
@@ -40,14 +38,12 @@ public class JwtProvider {
     private final SecretKey secret;
     private final Duration accessTokenExpiration;
     private final Duration refreshTokenExpiration;
-    private final AuthUserService authUserService;
 
-    public JwtProvider(ApiConfigProps apiConfigProps, AuthUserService authUserService) {
+    public JwtProvider(ApiConfigProps apiConfigProps) {
         val properties = apiConfigProps.jwt();
         this.secret = Keys.hmacShaKeyFor(properties.secret().getBytes());
         this.accessTokenExpiration = properties.accessTokenExpiration();
         this.refreshTokenExpiration = properties.refreshTokenExpiration();
-        this.authUserService = authUserService;
     }
 
     public String generateAccessToken(Authentication authentication) {
@@ -71,26 +67,6 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String generateAccessToken(UserDetails user) {
-        val authorities = user.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .map(it -> it.substring(AUTHORITY_PREFIX.length()))
-                .collect(Collectors.joining(AUTHORITIES_DELIMITER));
-
-        val now = new Date();
-        val expiration = new Date(now.getTime() + accessTokenExpiration.toMillis());
-
-        return Jwts.builder()
-                .subject(user.getUsername())
-                .claim(SCOPE_CLAIM_KEY, authorities)
-                .claim(TOKEN_TYPE_CLAIM_KEY, ACCESS_TOKEN_TYPE)
-                .issuedAt(now)
-                .expiration(expiration)
-                .signWith(secret, HS256)
-                .compact();
-    }
-
     public String generateRefreshToken(String username) {
         val now = new Date();
         val expiration = new Date(now.getTime() + refreshTokenExpiration.toMillis());
@@ -102,18 +78,6 @@ public class JwtProvider {
                 .expiration(expiration)
                 .signWith(secret, HS256)
                 .compact();
-    }
-
-    public String refreshAccessToken(String token) {
-        validateToken(token);
-
-        if (isRefreshToken(token)) {
-            val username = getUsername(token);
-            val user = authUserService.loadUserByUsername(username);
-            return generateAccessToken(user);
-        }
-
-        throw new JwtException("Invalid refresh token");
     }
 
     public void validateToken(String token) {

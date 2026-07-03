@@ -16,7 +16,9 @@ public enum AuthExceptionCode implements ExceptionCode {
     OTP_MAX_ATTEMPTS ("A004", HttpStatus.BAD_REQUEST, "인증 시도 횟수를 초과했습니다.", LogLevel.INFO),
     INVALID_TOKEN ("A005", HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.", LogLevel.WARN),
     SESSION_EXPIRED ("A006", HttpStatus.UNAUTHORIZED, "세션이 만료되었습니다.", LogLevel.INFO),
-    INVALID_SIGNUP_TOKEN ("A007", HttpStatus.BAD_REQUEST, "유효하지 않은 가입 토큰입니다.", LogLevel.INFO);
+    INVALID_SIGNUP_TOKEN ("A007", HttpStatus.BAD_REQUEST, "유효하지 않은 가입 토큰입니다.", LogLevel.INFO),
+    OTP_EXPIRED ("A008", HttpStatus.BAD_REQUEST, "만료된 인증번호입니다.", LogLevel.INFO),
+    SIGNUP_TOKEN_EXPIRED ("A009", HttpStatus.BAD_REQUEST, "만료된 가입 토큰입니다.", LogLevel.INFO);
 
     private final String code;
     private final HttpStatus status;

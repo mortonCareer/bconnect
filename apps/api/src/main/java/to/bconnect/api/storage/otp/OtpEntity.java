@@ -1,9 +1,5 @@
 package to.bconnect.api.storage.otp;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -23,20 +19,11 @@ public class OtpEntity extends BaseEntity {
 
     private String code;
 
-    @Column(name = "code_expired_at")
     private LocalDateTime expiredAt;
 
     private int attempts = 0;
 
-    @Column(name = "code_revoked")
     private boolean revoked = true;
-
-    @AttributeOverrides({
-            @AttributeOverride(name = "expiredAt", column = @Column(name = "token_expired_at")),
-            @AttributeOverride(name = "revoked", column = @Column(name = "token_revoked"))
-    })
-    @Embedded
-    private SignupToken token;
 
     private int dailyCount;
 
@@ -65,14 +52,6 @@ public class OtpEntity extends BaseEntity {
 
     public void invalidateCode() {
         this.revoked = true;
-    }
-
-    public void generateToken(String token, LocalDateTime expiredAt) {
-        this.token = new SignupToken(token, expiredAt);
-    }
-
-    public void invalidateToken() {
-        this.token.invalidate();
     }
 
     public void dailyReset() {
