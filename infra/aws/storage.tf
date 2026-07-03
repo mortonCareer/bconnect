@@ -40,3 +40,19 @@ resource "aws_s3_bucket_policy" "app_storage" {
     }]
   })
 }
+
+# presigned PUT 업로드용 CORS (#702). 브라우저가 S3 origin 으로 직접 PUT 하므로
+# preflight 통과에 필요. 읽기(CloudFront)와 무관. 설계 §9.2.
+# Content-Type 은 BE presign 이 서명하는 헤더라 필수(S3FileStorage.presignPut).
+resource "aws_s3_bucket_cors_configuration" "app_storage" {
+  for_each = local.cdns
+  bucket   = each.value.bucket_id
+
+  cors_rule {
+    allowed_methods = ["PUT"]
+    allowed_origins = each.value.cors_origins
+    allowed_headers = ["Content-Type", "Content-Length"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3600
+  }
+}
