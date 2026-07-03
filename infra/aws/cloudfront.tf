@@ -42,12 +42,6 @@ resource "aws_cloudfront_public_key" "cf_signing" {
   for_each    = local.cdns
   name        = "bconnect-signed-cookie-${each.key}"
   encoded_key = tls_private_key.cf_signing[each.key].public_key_pem
-
-  # key_group 이 이 공개키를 참조하므로, 이름 변경으로 교체될 때 새 것을 먼저
-  # 만든 뒤 옛것을 지운다("public key in use" 삭제 에러 방지).
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 # Signed cookie 검증용 key group.
