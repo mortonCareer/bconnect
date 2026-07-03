@@ -1,13 +1,12 @@
-package to.bconnect.api.core.domain.offer;
+package to.bconnect.api.core.domain.chat;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import to.bconnect.api.core.domain.chat.DirectChatService;
-import to.bconnect.api.core.domain.chat.MessageService;
-import to.bconnect.api.core.domain.chat.SendMessage;
+import to.bconnect.api.core.domain.offer.OfferAcceptedEvent;
+import to.bconnect.api.core.domain.offer.OfferActivatedEvent;
 import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.chat.MessageType;
 
@@ -15,7 +14,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class OfferEventListener {
+public class ChatEventListener {
 
     private final DirectChatService directChatService;
     private final MessageService messageService;
