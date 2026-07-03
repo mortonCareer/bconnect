@@ -20,13 +20,13 @@ public class DomainDependencyTest {
     private static final String SHARED = "profile";
 
     @ArchTest ArchRule boardDomainRule = domainRule("board", "drive");
-    @ArchTest ArchRule chatDomainRule = domainRule("chat");
+    @ArchTest ArchRule chatDomainRule = domainRule("chat", "offer");
     @ArchTest ArchRule companyDomainRule = domainRule("company");
     @ArchTest ArchRule coworkerDomainRule = domainRule("coworker");
     @ArchTest ArchRule credentialDomainRule = domainRule("credential");
     @ArchTest ArchRule driveDomainRule = domainRule("drive");
     @ArchTest ArchRule memberDomainRule = domainRule("member");
-    @ArchTest ArchRule offerDomainRule = domainRule("offer", "chat");
+    @ArchTest ArchRule offerDomainRule = domainRule("offer");
     @ArchTest ArchRule postDomainRule = domainRule("post");
     @ArchTest ArchRule profileDomainRule = domainRule("profile");
     @ArchTest ArchRule projectDomainRule = domainRule("project");
