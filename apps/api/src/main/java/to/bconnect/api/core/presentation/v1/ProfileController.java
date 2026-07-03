@@ -14,7 +14,7 @@ import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.core.domain.profile.ProfileService;
-import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.common.response.ApiResponse;

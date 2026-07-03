@@ -14,7 +14,7 @@ import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.core.domain.recommendation.Recommendation;
 import to.bconnect.api.core.domain.recommendation.RecommendationQueryService;
 import to.bconnect.api.core.domain.recommendation.RecommendationService;
-import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;

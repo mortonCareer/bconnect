@@ -12,7 +12,7 @@ import to.bconnect.api.attachment.AttachmentResolver;
 import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestQueryService;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestService;
-import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;

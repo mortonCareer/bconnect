@@ -1,14 +1,12 @@
-package to.bconnect.api.core.domain;
+package to.bconnect.api.core.domain.member;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import to.bconnect.api.storage.member.MemberRepository;
-import to.bconnect.api.security.member.Member;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.storage.member.MemberRepository;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;

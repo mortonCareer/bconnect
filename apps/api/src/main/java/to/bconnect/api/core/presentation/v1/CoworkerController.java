@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.AttachmentResolver;
 import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.common.response.ApiResponse;
-import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.coworker.Coworker;
 import to.bconnect.api.core.domain.coworker.CoworkerService;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
