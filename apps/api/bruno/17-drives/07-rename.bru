@@ -1,0 +1,32 @@
+meta {
+  name: 드라이브 이름 수정
+  type: http
+  seq: 7
+  tags: [
+    chain
+    idempotent
+  ]
+}
+
+put {
+  url: {{baseUrl}}/api/v1/drives/{{memberDriveId}}
+  auth: inherit
+}
+
+body {
+  {
+    "title": "개인 드라이브 수정"
+  }
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  @chain
+  - 17-drives/01-create-member
+}

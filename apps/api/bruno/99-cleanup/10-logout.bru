@@ -1,14 +1,11 @@
 meta {
-  name: 내 업체 삭제
+  name: 로그아웃
   type: http
-  seq: 7
-  tags: [
-    idempotent
-  ]
+  seq: 10
 }
 
-delete {
-  url: {{baseUrl}}/api/v1/companies/me
+post {
+  url: {{baseUrl}}/api/v1/auth/logout
   auth: inherit
 }
 
