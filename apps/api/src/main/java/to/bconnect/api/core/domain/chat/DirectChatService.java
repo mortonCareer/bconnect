@@ -5,11 +5,12 @@ import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.security.member.Member;
 import to.bconnect.api.storage.chat.*;
+import to.bconnect.api.storage.member.MemberEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,7 +48,7 @@ public class DirectChatService {
     @Transactional(readOnly = true)
     public CursorPage<Message> listMessages(AuthUser user, Long chatId, CursorLimit cursor) {
         if (!directChatRepository.existsByIdAndMember(chatId, user.id()))
-            throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         return messageService.list(chatId, ChatType.DIRECT, cursor);
     }
@@ -59,7 +60,12 @@ public class DirectChatService {
             return optional.get().getId();
 
         val created = directChatRepository.save(DirectChatEntity.of(memberId, otherId));
-        messageService.createSystemMessage(created.getId(), ChatType.DIRECT, MessageTemplate.CHAT_CREATED);
+        messageService.create(
+                created.getId(),
+                ChatType.DIRECT,
+                MemberEntity.SYSTEM_ID,
+                new SendMessage(MessageType.SYSTEM, MessageTemplate.CHAT_CREATED, List.of())
+        );
         return created.getId();
     }
 }

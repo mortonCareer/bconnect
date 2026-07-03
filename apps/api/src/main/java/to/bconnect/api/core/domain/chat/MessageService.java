@@ -9,7 +9,6 @@ import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.chat.*;
-import to.bconnect.api.storage.member.MemberEntity;
 
 @Service
 @RequiredArgsConstructor
@@ -24,17 +23,6 @@ public class MessageService {
                 chatId, type, senderId, command.type(), command.content()));
 
         attachmentLinker.link(senderId, ReferenceType.MESSAGE, created.getId(), command.attachmentIds());
-    }
-
-    @Transactional
-    public void createSystemMessage(Long chatId, ChatType type, String content) {
-        messageRepository.save(new MessageEntity(
-                chatId,
-                type,
-                MemberEntity.SYSTEM_ID,
-                MessageType.SYSTEM,
-                content
-        ));
     }
 
     @Transactional(readOnly = true)
