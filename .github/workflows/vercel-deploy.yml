@@ -12,6 +12,12 @@ on:
   push:
     branches: [dev, main]
   workflow_dispatch:
+    inputs:
+      target:
+        description: '배포 환경 (production은 main 브랜치에서 실행할 때만 허용)'
+        type: choice
+        options: [dev, production]
+        default: dev
 
 jobs:
   deploy:
@@ -37,8 +43,13 @@ jobs:
       - name: Deploy ${{ matrix.app }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          INPUT_TARGET: ${{ inputs.target }}
         run: |
-          TARGET=$([ "${GITHUB_REF_NAME}" = "main" ] && echo production || echo dev)
+          TARGET="${INPUT_TARGET:-$([ "${GITHUB_REF_NAME}" = "main" ] && echo production || echo dev)}"
+          if [ "$TARGET" = "production" ] && [ "${GITHUB_REF_NAME}" != "main" ]; then
+            echo "::error::production 배포는 main 브랜치에서만 가능 (현재: ${GITHUB_REF_NAME})"
+            exit 1
+          fi
           npx -y vercel@latest deploy \
             --target="$TARGET" \
             --build-env HUSKY=0 \
