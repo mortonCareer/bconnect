@@ -18,11 +18,12 @@ public class MessageService {
     private final AttachmentLinker attachmentLinker;
 
     @Transactional
-    public void create(Long chatId, ChatType type, Long senderId, SendMessage command) {
+    public Message create(Long chatId, ChatType type, Long senderId, SendMessage command) {
         val created = messageRepository.save(new MessageEntity(
                 chatId, type, senderId, command.type(), command.content()));
 
         attachmentLinker.link(senderId, ReferenceType.MESSAGE, created.getId(), command.attachmentIds());
+        return Message.of(created);
     }
 
     @Transactional(readOnly = true)
