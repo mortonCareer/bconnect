@@ -5,6 +5,7 @@ import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
+import to.bconnect.api.storage.attachment.AttachmentType;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.support.cloudfront.CloudFrontProperties;
 
@@ -39,6 +40,16 @@ public class AttachmentResolver {
             return List.of();
 
         return attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, List.of(referenceId)).stream()
+                .map(Attachment::of)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Attachment> list(ReferenceType referenceType, Long referenceId, AttachmentType type) {
+        if (referenceId == null)
+            return List.of();
+
+        return attachmentRepository.findAllByReferenceTypeAndReferenceIdAndType(referenceType, referenceId, type).stream()
                 .map(Attachment::of)
                 .toList();
     }

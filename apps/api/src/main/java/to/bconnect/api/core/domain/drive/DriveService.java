@@ -6,21 +6,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.Attachment;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
+import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentType;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.board.BoardEntity;
 import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.BoardType;
 import to.bconnect.api.storage.board.NoteRepository;
-import to.bconnect.api.storage.drive.DriveEntity;
-import to.bconnect.api.storage.drive.DriveMemberEntity;
-import to.bconnect.api.storage.drive.DriveMemberRepository;
-import to.bconnect.api.storage.drive.DriveRepository;
-import to.bconnect.api.storage.drive.DriveType;
+import to.bconnect.api.storage.drive.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,8 +29,8 @@ public class DriveService {
     private final DriveRepository driveRepository;
     private final DriveMemberRepository driveMemberRepository;
     private final DriveValidator driveValidator;
-    private final AttachmentRepository attachmentRepository;
     private final AttachmentLinker attachmentLinker;
+    private final AttachmentResolver attachmentResolver;
     private final BoardRepository boardRepository;
     private final NoteRepository noteRepository;
 
@@ -125,7 +121,6 @@ public class DriveService {
     public List<Attachment> listAttachments(AuthUser user, Long driveId, AttachmentType type) {
         driveValidator.validate(driveId, user.id());
 
-        return Attachment.of(
-                attachmentRepository.findAllByReferenceTypeAndReferenceIdAndType(ReferenceType.DRIVE, driveId, type));
+        return attachmentResolver.list(ReferenceType.DRIVE, driveId, type);
     }
 }

@@ -1,13 +1,8 @@
 package to.bconnect.api.attachment.domain;
 
-import to.bconnect.api.storage.attachment.AttachmentContext;
-import to.bconnect.api.storage.attachment.AttachmentEntity;
-import to.bconnect.api.storage.attachment.AttachmentStatus;
-import to.bconnect.api.storage.attachment.AttachmentType;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public record Attachment(
     Long id,
@@ -44,11 +39,5 @@ public record Attachment(
                 entity.getCreatedAt(),
                 entity.getModifiedAt()
         );
-    }
-
-    public static List<Attachment> of(List<AttachmentEntity> entities) {
-        return entities.stream()
-                .map(Attachment::of)
-                .toList();
     }
 }
