@@ -4,6 +4,8 @@
 watchPatterns = ["apps/api/**"]
 
 [deploy]
+# Railpack 자동 감지 start command 는 멀티모듈 글롭(*/build/libs/*jar)이라 단일모듈 구조와 불일치 — 명시 필수 (#698)
+startCommand = "java $JAVA_OPTS -jar -Dserver.port=$PORT build/libs/*.jar"
 healthcheckPath = "/actuator/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
