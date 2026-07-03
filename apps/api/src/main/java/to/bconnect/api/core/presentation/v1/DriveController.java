@@ -11,7 +11,7 @@ import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.drive.DriveService;
 import to.bconnect.api.core.presentation.v1.request.CreateDriveRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateDriveRequest;
-import to.bconnect.api.core.presentation.v1.response.AttachmentResponse;
+import to.bconnect.api.core.presentation.v1.response.DriveFileResponse;
 import to.bconnect.api.core.presentation.v1.response.DriveResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentType;
@@ -26,20 +26,20 @@ public class DriveController {
     private final DriveService driveService;
     private final AttachmentResolver attachmentResolver;
 
-    @GetMapping
-    public ApiResponse<List<DriveResponse>> list(
-            @AuthenticationPrincipal AuthUser user) {
-        val response = driveService.list(user).stream()
+    @GetMapping(params = "projectId")
+    public ApiResponse<List<DriveResponse>> listByProject(
+            @AuthenticationPrincipal AuthUser user,
+            @RequestParam Long projectId) {
+        val response = driveService.listByProject(user, projectId).stream()
                 .map(DriveResponse::of)
                 .toList();
         return ApiResponse.success(response);
     }
 
-    @GetMapping(params = "projectId")
-    public ApiResponse<List<DriveResponse>> listByProjectId(
-            @AuthenticationPrincipal AuthUser user,
-            @RequestParam Long projectId) {
-        val response = driveService.listByProjectId(user, projectId).stream()
+    @GetMapping
+    public ApiResponse<List<DriveResponse>> listByMember(
+            @AuthenticationPrincipal AuthUser user) {
+        val response = driveService.listByMember(user).stream()
                 .map(DriveResponse::of)
                 .toList();
         return ApiResponse.success(response);
@@ -51,26 +51,6 @@ public class DriveController {
             @RequestBody @Valid CreateDriveRequest request) {
         val id = driveService.create(user, request.toCommand());
         return ApiResponse.success(id);
-    }
-
-    @GetMapping("/{id}/images")
-    public ApiResponse<List<AttachmentResponse>> listImages(
-            @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long id) {
-        val response = driveService.listAttachments(user, id, AttachmentType.IMAGE).stream()
-                .map(it -> AttachmentResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.SMALL)))
-                .toList();
-        return ApiResponse.success(response);
-    }
-
-    @GetMapping("/{id}/files")
-    public ApiResponse<List<AttachmentResponse>> listFiles(
-            @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long id) {
-        val response = driveService.listAttachments(user, id, AttachmentType.FILE).stream()
-                .map(it -> AttachmentResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.ORIGINAL)))
-                .toList();
-        return ApiResponse.success(response);
     }
 
     @PutMapping("/{id}")
@@ -88,5 +68,25 @@ public class DriveController {
             @PathVariable Long id) {
         driveService.delete(user, id);
         return ApiResponse.success(null);
+    }
+
+    @GetMapping("/{id}/images")
+    public ApiResponse<List<DriveFileResponse>> listImages(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id) {
+        val response = driveService.listAttachments(user, id, AttachmentType.IMAGE).stream()
+                .map(it -> DriveFileResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.SMALL)))
+                .toList();
+        return ApiResponse.success(response);
+    }
+
+    @GetMapping("/{id}/files")
+    public ApiResponse<List<DriveFileResponse>> listFiles(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id) {
+        val response = driveService.listAttachments(user, id, AttachmentType.FILE).stream()
+                .map(it -> DriveFileResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.ORIGINAL)))
+                .toList();
+        return ApiResponse.success(response);
     }
 }

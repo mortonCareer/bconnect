@@ -38,6 +38,29 @@ public class DriveService {
     private final BoardRepository boardRepository;
     private final NoteRepository noteRepository;
 
+    @Transactional(readOnly = true)
+    public List<Drive> listByMember(AuthUser user) {
+        val owned = driveRepository.findAllByMemberId(user.id());
+        val titles = driveMemberRepository.findAllByMemberId(user.id()).stream()
+                .collect(Collectors.toMap(DriveMemberEntity::getDriveId, DriveMemberEntity::getTitle));
+        val joined = driveRepository.findAllById(titles.keySet());
+
+        return Stream.concat(
+                owned.stream().map(it -> Drive.of(it, it.getTitle())),
+                joined.stream().map(it -> Drive.of(it, titles.get(it.getId())))
+        ).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Drive> listByProject(AuthUser user, Long projectId) {
+        if (!driveValidator.isProjectDriveOwner(user.id(), projectId))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        return driveRepository.findAllByProjectId(projectId).stream()
+                .map(it -> Drive.of(it, it.getTitle()))
+                .toList();
+    }
+
     @Transactional
     public Long create(AuthUser user, CreateDrive command) {
         Long projectId = null;
@@ -55,37 +78,6 @@ public class DriveService {
         boardRepository.save(new BoardEntity(BoardType.DRIVE, null, created.getId()));
 
         return created.getId();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Drive> list(AuthUser user) {
-        val owned = driveRepository.findAllByMemberId(user.id());
-        val titles = driveMemberRepository.findAllByMemberId(user.id()).stream()
-                .collect(Collectors.toMap(DriveMemberEntity::getDriveId, DriveMemberEntity::getTitle));
-        val joined = driveRepository.findAllById(titles.keySet());
-
-        return Stream.concat(
-                owned.stream().map(it -> Drive.of(it, it.getTitle())),
-                joined.stream().map(it -> Drive.of(it, titles.get(it.getId())))
-        ).toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Drive> listByProjectId(AuthUser user, Long projectId) {
-        if (!driveValidator.isProjectDriveOwner(user.id(), projectId))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        return driveRepository.findAllByProjectId(projectId).stream()
-                .map(it -> Drive.of(it, it.getTitle()))
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Attachment> listAttachments(AuthUser user, Long driveId, AttachmentType type) {
-        driveValidator.validate(driveId, user.id());
-
-        return Attachment.of(
-                attachmentRepository.findAllByReferenceTypeAndReferenceIdAndType(ReferenceType.DRIVE, driveId, type));
     }
 
     @Transactional
@@ -129,4 +121,11 @@ public class DriveService {
         driveRepository.delete(found);
     }
 
+    @Transactional(readOnly = true)
+    public List<Attachment> listAttachments(AuthUser user, Long driveId, AttachmentType type) {
+        driveValidator.validate(driveId, user.id());
+
+        return Attachment.of(
+                attachmentRepository.findAllByReferenceTypeAndReferenceIdAndType(ReferenceType.DRIVE, driveId, type));
+    }
 }
