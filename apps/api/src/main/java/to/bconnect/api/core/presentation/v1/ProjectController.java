@@ -10,8 +10,8 @@ import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.TaskQueryService;
 import to.bconnect.api.core.presentation.v1.request.CreateProjectRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProjectRequest;
-import to.bconnect.api.core.presentation.v1.response.TaskResponse;
 import to.bconnect.api.core.presentation.v1.response.ProjectResponse;
+import to.bconnect.api.core.presentation.v1.response.TaskResponse;
 import to.bconnect.api.security.AuthUser;
 
 import java.util.List;

@@ -1,5 +1,6 @@
-package to.bconnect.api.attachment;
+package to.bconnect.api.attachment.presentation.v1;
 
+import to.bconnect.api.attachment.domain.Attachment;
 import to.bconnect.api.storage.attachment.AttachmentType;
 
 import java.time.LocalDateTime;

@@ -18,6 +18,7 @@ import javax.crypto.SecretKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.jsonwebtoken.Jwts.SIG.HS256;
@@ -51,6 +52,7 @@ public class JwtProvider {
         val authorities = authentication.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
+                .filter(Objects::nonNull)
                 .map(it -> it.substring(AUTHORITY_PREFIX.length()))
                 .collect(Collectors.joining(AUTHORITIES_DELIMITER));
 

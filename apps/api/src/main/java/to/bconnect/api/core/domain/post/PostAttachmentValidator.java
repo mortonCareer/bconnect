@@ -3,7 +3,7 @@ package to.bconnect.api.core.domain.post;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.attachment.AttachmentContextValidator;
+import to.bconnect.api.attachment.domain.cleanup.AttachmentContextValidator;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 
 @Component

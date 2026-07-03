@@ -6,17 +6,17 @@ import lombok.val;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import to.bconnect.api.attachment.AttachmentResolver;
-import to.bconnect.api.attachment.ImageSize;
-import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.ImageSize;
+import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.core.domain.member.MemberService;
 import to.bconnect.api.core.presentation.v1.request.RegisterMemberRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateMemberRequest;
 import to.bconnect.api.core.presentation.v1.response.CheckUsernameResponse;
 import to.bconnect.api.core.presentation.v1.response.MemberResponse;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
 

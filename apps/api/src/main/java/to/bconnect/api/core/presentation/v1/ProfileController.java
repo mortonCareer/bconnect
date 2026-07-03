@@ -5,19 +5,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import to.bconnect.api.core.presentation.v1.request.CreateProfileRequest;
-import to.bconnect.api.core.presentation.v1.request.UpdateProfileRequest;
-import to.bconnect.api.core.presentation.v1.request.UpdateProfileAboutRequest;
-import to.bconnect.api.core.presentation.v1.response.ProfileResponse;
-import to.bconnect.api.attachment.AttachmentResolver;
-import to.bconnect.api.attachment.ImageSize;
+import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.ImageSize;
+import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.core.domain.profile.ProfileService;
-import to.bconnect.api.core.domain.member.MemberResolver;
+import to.bconnect.api.core.presentation.v1.request.CreateProfileRequest;
+import to.bconnect.api.core.presentation.v1.request.UpdateProfileAboutRequest;
+import to.bconnect.api.core.presentation.v1.request.UpdateProfileRequest;
+import to.bconnect.api.core.presentation.v1.response.ProfileResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
 

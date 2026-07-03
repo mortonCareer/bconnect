@@ -1,4 +1,4 @@
-package to.bconnect.api.attachment;
+package to.bconnect.api.attachment.domain;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;

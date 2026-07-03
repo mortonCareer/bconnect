@@ -1,4 +1,4 @@
-package to.bconnect.api.attachment;
+package to.bconnect.api.attachment.domain;
 
 import lombok.val;
 import org.slf4j.Logger;
@@ -7,6 +7,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import to.bconnect.api.attachment.AttachmentProperties;
+import to.bconnect.api.attachment.domain.cleanup.AttachmentContextValidatorRegistry;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.attachment.AttachmentContext;

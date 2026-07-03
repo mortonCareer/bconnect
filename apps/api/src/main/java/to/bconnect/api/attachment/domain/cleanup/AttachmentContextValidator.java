@@ -1,4 +1,4 @@
-package to.bconnect.api.attachment;
+package to.bconnect.api.attachment.domain.cleanup;
 
 import to.bconnect.api.storage.attachment.AttachmentContext;
 

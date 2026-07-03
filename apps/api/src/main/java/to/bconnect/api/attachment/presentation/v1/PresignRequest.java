@@ -1,10 +1,11 @@
-package to.bconnect.api.attachment;
+package to.bconnect.api.attachment.presentation.v1;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import to.bconnect.api.attachment.domain.PresignFile;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.AttachmentType;
 
