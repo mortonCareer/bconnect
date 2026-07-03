@@ -5,7 +5,6 @@ import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
-import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthExceptionCode;
 import to.bconnect.api.security.AuthUtils;
 import to.bconnect.api.storage.signup.SignupTokenEntity;
@@ -41,7 +40,7 @@ public class SignupTokenService {
     @Transactional
     public String verify(String token) {
         val found = signupTokenRepository.findByToken(AuthUtils.sha256(token))
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_SIGNUP_TOKEN));
 
         if (found.isRevoked())
             throw new CodeException(AuthExceptionCode.INVALID_SIGNUP_TOKEN);

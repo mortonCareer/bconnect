@@ -49,7 +49,7 @@ public class OfferService {
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         if (!memberRepository.existsById(command.workerId()))
-            throw new CodeException(OfferExceptionCode.WORKER_NOT_FOUND);
+            throw new CodeException(CommonExceptionCode.NOT_FOUND);
 
         val nextSeq = offerRepository.findFirstByTaskIdOrderBySeqDesc(command.taskId())
                 .map(OfferEntity::getSeq).orElse(0) + 1;

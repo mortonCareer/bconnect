@@ -16,7 +16,7 @@
 | `RC` | 추천서 | `core/domain/recommendation` |
 | `CH` | 채팅 | `core/domain/chat` |
 | `OF` | 제안 | `core/domain/offer` |
-| `AT` | 첨부 | `attachment` |
+| `AT` | 첨부 | `attachment/domain` |
 
 ---
 
@@ -78,11 +78,9 @@
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
-| OF001 | ALREADY_OFFERED | 409 | INFO | 이미 제안한 작업자입니다. |
-| OF002 | WORKER_NOT_FOUND | 404 | INFO | 제안 대상 작업자를 찾을 수 없습니다. |
-| OF003 | NOT_PROJECT_TASK | 400 | INFO | 프로젝트 작업에만 제안할 수 있습니다. |
-| OF004 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 제안 상태입니다. |
-| OF005 | INVALID_REORDER | 400 | INFO | 재정렬 대상이 올바르지 않습니다. |
+| OF001 | NOT_PROJECT_TASK | 400 | INFO | 프로젝트 작업에만 제안할 수 있습니다. |
+| OF002 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 제안 상태입니다. |
+| OF003 | INVALID_REORDER | 400 | INFO | 재정렬 대상이 올바르지 않습니다. |
 
 ## CoworkerExceptionCode
 
@@ -90,9 +88,6 @@
 | --- | --- | --- | --- | --- |
 | CW001 | SELF_REQUEST | 400 | INFO | 자기 자신에게 동료 요청을 보낼 수 없습니다. |
 | CW002 | ALREADY_COWORKER | 409 | INFO | 이미 동료인 사용자입니다. |
-| CW003 | TARGET_NOT_FOUND | 404 | INFO | 요청 대상 프로필을 찾을 수 없습니다. |
-| CW004 | REQUEST_NOT_FOUND | 404 | INFO | 동료 요청을 찾을 수 없습니다. |
-| CW005 | NOT_FOUND | 404 | INFO | 동료 관계를 찾을 수 없습니다. |
 
 ## RecommendationExceptionCode
 
@@ -106,10 +101,8 @@
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
-| CH001 | CHAT_NOT_FOUND | 404 | INFO | 채팅방을 찾을 수 없습니다. |
-| CH002 | SELF_NOT_INCLUDED | 400 | INFO | 참여자 목록에 본인이 포함되어야 합니다. |
-| CH003 | INVALID_PARTICIPANT | 400 | WARN | 유효하지 않은 참가자 입니다. |
-| CH004 | INVALID_ATTACHMENT | 400 | INFO | 메시지 타입과 첨부가 일치하지 않습니다. |
+| CH001 | SELF_NOT_INCLUDED | 400 | INFO | 참여자 목록에 본인이 포함되어야 합니다. |
+| CH002 | INVALID_ATTACHMENT | 400 | INFO | 메시지 타입과 첨부가 일치하지 않습니다. |
 
 ## AttachmentExceptionCode
 
@@ -119,4 +112,3 @@
 | AT002 | TOO_MANY_FILES | 400 | INFO | 한 번에 업로드할 수 있는 파일 수를 초과했습니다. |
 | AT003 | UNSUPPORTED_FILE_TYPE | 415 | WARN | 허용되지 않는 파일 형식입니다. |
 | AT004 | NOT_COMPLETED | 400 | INFO | 업로드가 완료되지 않은 첨부파일입니다. |
-| AT005 | CONTEXT_MISMATCH | 400 | WARN | 첨부파일의 업로드 컨텍스트가 일치하지 않습니다. |
