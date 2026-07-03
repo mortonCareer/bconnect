@@ -1,4 +1,4 @@
-package to.bconnect.api.security.member;
+package to.bconnect.api.core.domain.member;
 
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.Role;

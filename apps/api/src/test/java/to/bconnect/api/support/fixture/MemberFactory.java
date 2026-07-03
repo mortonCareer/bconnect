@@ -1,8 +1,8 @@
 package to.bconnect.api.support.fixture;
 
-import to.bconnect.api.security.member.RegisterMemberRequest;
-import to.bconnect.api.security.member.UpdateMemberRequest;
-import to.bconnect.api.security.member.Member;
+import to.bconnect.api.core.presentation.v1.request.RegisterMemberRequest;
+import to.bconnect.api.core.presentation.v1.request.UpdateMemberRequest;
+import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.Role;
 
@@ -26,7 +26,7 @@ public class MemberFactory {
     }
 
     public static RegisterMemberRequest registerRequest() {
-        return new RegisterMemberRequest("phone", "signupToken", "username", "name", DEFAULT_PICTURE_ID, Role.WORKER);
+        return new RegisterMemberRequest("username", "name", DEFAULT_PICTURE_ID, Role.WORKER);
     }
 
     public static UpdateMemberRequest updateRequest() {

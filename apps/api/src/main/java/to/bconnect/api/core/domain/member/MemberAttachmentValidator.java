@@ -1,4 +1,4 @@
-package to.bconnect.api.security.member;
+package to.bconnect.api.core.domain.member;
 
 import org.springframework.stereotype.Component;
 import to.bconnect.api.common.CodeException;

@@ -1,4 +1,4 @@
-package to.bconnect.api.security.member;
+package to.bconnect.api.core.domain.member;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -9,11 +9,13 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.attachment.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.security.otp.OtpService;
+import to.bconnect.api.security.AuthExceptionCode;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
+import to.bconnect.api.storage.otp.SignupTokenRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -21,7 +23,7 @@ import java.util.List;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final OtpService otpService;
+    private final SignupTokenRepository signupTokenRepository;
     private final AttachmentLinker attachmentLinker;
 
     @Transactional(readOnly = true)
@@ -45,19 +47,26 @@ public class MemberService {
     }
 
     @Transactional
-    public Member register(RegisterMember command) {
-        otpService.verifyToken(command.signupToken());
+    public Member register(String phone, RegisterMember command) {
+        val signupToken = signupTokenRepository.findByPhone(phone)
+                .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_SIGNUP_TOKEN));
+
+        if (signupToken.isRevoked()) throw new CodeException(AuthExceptionCode.INVALID_SIGNUP_TOKEN);
+        if (signupToken.getExpiredAt().isBefore(LocalDateTime.now()))
+            throw new CodeException(AuthExceptionCode.SIGNUP_TOKEN_EXPIRED);
 
         memberRepository.findByUsername(command.username())
                 .ifPresent(it -> { throw new CodeException(MemberExceptionCode.DUPLICATE_USERNAME); });
 
-        memberRepository.findByPhone(command.phone())
+        memberRepository.findByPhone(phone)
                 .ifPresent(it -> { throw new CodeException(MemberExceptionCode.DUPLICATE_PHONE); });
+
+        signupToken.revoke();
 
         val created = new MemberEntity(
                 command.username(),
                 command.name(),
-                command.phone(),
+                phone,
                 command.role()
         );
 

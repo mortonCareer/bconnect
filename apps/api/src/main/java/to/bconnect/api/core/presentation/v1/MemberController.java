@@ -1,4 +1,4 @@
-package to.bconnect.api.security.member;
+package to.bconnect.api.core.presentation.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.AttachmentResolver;
 import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.core.domain.member.Member;
+import to.bconnect.api.core.domain.member.MemberService;
+import to.bconnect.api.core.presentation.v1.request.RegisterMemberRequest;
+import to.bconnect.api.core.presentation.v1.request.UpdateMemberRequest;
+import to.bconnect.api.core.presentation.v1.response.CheckUsernameResponse;
+import to.bconnect.api.core.presentation.v1.response.MemberResponse;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.common.response.ApiResponse;
 
@@ -49,8 +55,10 @@ public class MemberController {
     }
 
     @PostMapping
-    public ApiResponse<Long> register(@RequestBody @Valid RegisterMemberRequest request) {
-        val member = memberService.register(request.toCommand());
+    public ApiResponse<Long> register(
+            @AuthenticationPrincipal String phone,
+            @RequestBody @Valid RegisterMemberRequest request) {
+        val member = memberService.register(phone, request.toCommand());
         return ApiResponse.success(member.id());
     }
 
