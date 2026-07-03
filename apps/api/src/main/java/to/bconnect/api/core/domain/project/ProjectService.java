@@ -9,6 +9,10 @@ import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.task.TaskManager;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.board.BoardEntity;
+import to.bconnect.api.storage.board.BoardRepository;
+import to.bconnect.api.storage.board.BoardType;
+import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.project.ProjectEntity;
@@ -29,6 +33,8 @@ public class ProjectService {
     private final CompanyRepository companyRepository;
     private final TaskRepository taskRepository;
     private final TaskManager taskManager;
+    private final BoardRepository boardRepository;
+    private final NoteRepository noteRepository;
 
     @Transactional(readOnly = true)
     public List<Project> list(AuthUser user) {
@@ -58,15 +64,14 @@ public class ProjectService {
     public Long create(AuthUser user, CreateProject command) {
         val company = findCompany(user);
 
-        val created = new ProjectEntity(
+        val created = projectRepository.save(new ProjectEntity(
                 company.getId(),
                 command.title(),
                 command.address()
-        );
+        ));
+        boardRepository.save(new BoardEntity(BoardType.PROJECT, created.getId(), null));
 
-        val projectId = projectRepository.save(created).getId();
-
-        return projectId;
+        return created.getId();
     }
 
     @Transactional
@@ -96,6 +101,11 @@ public class ProjectService {
                 .map(TaskEntity::getId)
                 .toList();
         taskManager.deleteByIds(taskIds);
+
+        boardRepository.findByProjectId(found.getId()).ifPresent(board -> {
+            noteRepository.deleteByBoardId(board.getId());
+            boardRepository.delete(board);
+        });
 
         projectRepository.delete(found);
     }
