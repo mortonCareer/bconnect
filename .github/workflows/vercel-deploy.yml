@@ -1,0 +1,45 @@
+# Vercel 배포 트리거 — deploy hook 경유 (#707)
+#
+# Pro 팀은 git push 배포 시 커밋 author가 팀 멤버여야 함 (시트 과금).
+# deploy hook은 author 검사가 없어 멤버 승격 없이 배포 가능.
+# git 연동 자동배포는 켜둔 상태 유지 — vercel.json git.deploymentEnabled:false는
+# deploy hook까지 비활성화함 (vercel/community#286). 비멤버 author 푸시의
+# BLOCKED 배포 엔트리는 무해한 노이즈로 현상 유지.
+# 훅 생성/재발급 절차는 infra/vercel/README.md 참조.
+name: Vercel Deploy
+
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deploy hooks
+        env:
+          HOOK_CAREER_DEV: ${{ secrets.VERCEL_DEPLOY_HOOK_CAREER_DEV }}
+          HOOK_CAREER_MAIN: ${{ secrets.VERCEL_DEPLOY_HOOK_CAREER_MAIN }}
+          HOOK_PLAN_DEV: ${{ secrets.VERCEL_DEPLOY_HOOK_PLAN_DEV }}
+          HOOK_PLAN_MAIN: ${{ secrets.VERCEL_DEPLOY_HOOK_PLAN_MAIN }}
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            hooks=("$HOOK_CAREER_MAIN" "$HOOK_PLAN_MAIN")
+          else
+            hooks=("$HOOK_CAREER_DEV" "$HOOK_PLAN_DEV")
+          fi
+          for url in "${hooks[@]}"; do
+            curl -sf -X POST "$url"
+            echo
+          done
+
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          curl -s -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "{\"text\":\"🚨 *Vercel Deploy 트리거 실패* (${GITHUB_REF_NAME})\n<${RUN_URL}|워크플로우 로그 확인>\"}"
