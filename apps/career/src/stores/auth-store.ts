@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { setAccessToken } from '@bconnect/api-client'
+import { setAccessToken, setAuthHint, clearAuthHint } from '@bconnect/api-client'
 
 // member 정보의 진실원은 server (useGetMyMember). store 는 인증/OTP flow 의 client state 만.
 type AuthStep = 'phone' | 'code' | 'authenticated'
@@ -46,6 +46,7 @@ export const useAuthStore = create<AuthState>()(
 
       login: (accessToken) => {
         setAccessToken(accessToken)
+        setAuthHint()
         set({
           isAuthenticated: true,
           authStep: 'authenticated',
@@ -56,6 +57,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         setAccessToken(null)
+        clearAuthHint()
         set({
           isAuthenticated: false,
           authStep: 'phone',
@@ -68,6 +70,7 @@ export const useAuthStore = create<AuthState>()(
 
       reset: () => {
         setAccessToken(null)
+        clearAuthHint()
         set({
           isAuthenticated: false,
           isLoading: false,
