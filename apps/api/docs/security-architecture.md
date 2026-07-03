@@ -1,6 +1,6 @@
 # security-architecture
 - 위치 : `/security`
-- 범위 : 회원(AuthUser), JWT, OTP, 세션(Session)
+- 범위 : 인증 주체(AuthUser), JWT, OTP, 가입 토큰(SignupToken), 세션(Session)
 
 ## 클래스 구조
 
@@ -16,11 +16,16 @@
 - AuthenticationSuccessHandler : 인증 성공 후처리
 
 ### 공통
+- SecurityConfig : SecurityFilterChain · AuthenticationManager 구성, 인증 필터 등록
 - AuthUser (UserDetails) : 인증 주체
 - AuthUserService (UserDetailsService) : AuthUser
+- AuthUtils : sha256 해시 유틸
 
 ### jwt
 - JwtProvider : JWT 생성 · 검증
+- JwtType : 토큰 유형 (`ACCESS`, `REFRESH`)
+- JwtUtils : Bearer 토큰 · 쿠키 추출 유틸
+- CookieProvider : refresh token 쿠키 생성 · 삭제
 - JwtAuthenticationProvider (AuthenticationProvider) : JWT 인증 처리
 - JwtAuthenticationToken (AbstractAuthenticationToken) : JWT 인증 토큰
 - AccessTokenAuthenticationFilter (OncePerRequestFilter) : access token 인증 처리
@@ -33,6 +38,12 @@
 - OtpAuthenticationToken (AbstractAuthenticationToken) : OTP 인증 토큰
 - VerifyOtpAuthenticationFilter (AbstractAuthenticationProcessingFilter) : OTP 검증 처리
 - VerifyOtpAuthenticationSuccessHandler (AuthenticationSuccessHandler) : access/refresh or signup token 발급
+
+### signup
+- SignupTokenService : signup token 발급(SHA-256 해시 저장) · 검증
+- SignupTokenAuthenticationProvider (AuthenticationProvider) : signup token 검증, 전화번호 principal · GUEST 권한 부여
+- SignupTokenAuthenticationToken (AbstractAuthenticationToken) : signup token 인증 토큰
+- SignupTokenAuthenticationFilter (OncePerRequestFilter) : 회원가입(`POST /api/v1/members`)의 `X-Signup-Token` 헤더 인증 처리
 
 ### session
 - SessionService : 세션 처리 (다른 기기에서 로그인 등)
