@@ -7,7 +7,8 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./client": "./src/client.ts"
+    "./client": "./src/client.ts",
+    "./auth-hint": "./src/auth-hint.ts"
   },
   "scripts": {
     "bundle": "redocly bundle src/spec/openapi.yaml -o src/openapi.bundled.yaml",

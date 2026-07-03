@@ -5,6 +5,8 @@
 // hook API 가 명확함.
 import ky, { HTTPError } from 'ky'
 
+import { setAuthHint, clearAuthHint } from './auth-hint'
+
 const getBaseUrl = () => {
   if (typeof window === 'undefined') {
     return process.env.API_URL || 'http://localhost:8080'
@@ -62,10 +64,17 @@ export async function refreshAccessToken(): Promise<boolean> {
 
     if (json.success) {
       setAccessToken(json.data.accessToken)
+      setAuthHint()
       return true
     }
+    clearAuthHint()
     return false
-  } catch {
+  } catch (error) {
+    // HTTPError = BE 가 refresh 를 거절 (세션 만료/무효) → 표시 쿠키 제거.
+    // 그 외 (네트워크 단절 등) 는 세션 판단 불가라 유지.
+    if (error instanceof HTTPError) {
+      clearAuthHint()
+    }
     return false
   }
 }
