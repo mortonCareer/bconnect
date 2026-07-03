@@ -26,14 +26,17 @@ public class AttachmentService {
 
     private final AttachmentRepository attachmentRepository;
     private final AttachmentProperties attachmentProperties;
+    private final AttachmentContextValidatorRegistry attachmentContextValidatorRegistry;
     private final S3FileStorage fileStorage;
     private final List<MediaType> allowedContentTypes;
 
     public AttachmentService(AttachmentRepository attachmentRepository,
                              AttachmentProperties attachmentProperties,
+                             AttachmentContextValidatorRegistry attachmentContextValidatorRegistry,
                              S3FileStorage fileStorage) {
         this.attachmentRepository = attachmentRepository;
         this.attachmentProperties = attachmentProperties;
+        this.attachmentContextValidatorRegistry = attachmentContextValidatorRegistry;
         this.fileStorage = fileStorage;
         this.allowedContentTypes = attachmentProperties.allowedContentTypes().stream()
                 .map(MediaType::parseMediaType)
@@ -42,6 +45,7 @@ public class AttachmentService {
 
     @Transactional
     public List<PresignedFile> presign(Long memberId, AttachmentContext context, AttachmentType type, Long contextId, List<PresignFile> files) {
+        attachmentContextValidatorRegistry.validate(memberId, context, contextId);
         if (files.size() > attachmentProperties.maxBatchSize())
             throw new CodeException(AttachmentExceptionCode.TOO_MANY_FILES);
 

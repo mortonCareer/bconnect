@@ -1,4 +1,4 @@
-package to.bconnect.api.core.presentation.v1.request;
+package to.bconnect.api.attachment;
 
 import jakarta.validation.constraints.NotEmpty;
 
