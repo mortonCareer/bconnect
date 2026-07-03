@@ -4,7 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.attachment.domain.AttachmentLinker;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.company.CompanyRepository;
+import to.bconnect.api.storage.offer.OfferRepository;
+import to.bconnect.api.storage.post.PostEntity;
+import to.bconnect.api.storage.post.PostRepository;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskRepository;
@@ -23,7 +28,9 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final CompanyRepository companyRepository;
     private final ProjectRepository projectRepository;
-    private final TaskManager taskManager;
+    private final OfferRepository offerRepository;
+    private final PostRepository postRepository;
+    private final AttachmentLinker attachmentLinker;
 
     @Transactional
     public Long createByWorker(AuthUser user, CreateWorkerTask command) {
@@ -145,6 +152,15 @@ public class TaskService {
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
         }
 
-        taskManager.deleteByIds(List.of(task.getId()));
+        val taskIds = List.of(task.getId());
+        offerRepository.deleteByTaskIdIn(taskIds);
+
+        val posts = postRepository.findAllByTaskIdIn(taskIds);
+        val postIds = posts.stream().map(PostEntity::getId).toList();
+        if (!postIds.isEmpty())
+            attachmentLinker.unlink(ReferenceType.POST, postIds);
+        postRepository.deleteAll(posts);
+
+        taskRepository.deleteAllById(taskIds);
     }
 }

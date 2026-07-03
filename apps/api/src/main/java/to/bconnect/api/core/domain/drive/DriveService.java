@@ -113,7 +113,7 @@ public class DriveService {
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         boardRepository.findByDriveId(driveId).ifPresent(board -> {
-            noteRepository.deleteByBoardId(board.getId());
+            noteRepository.deleteAllByBoardId(board.getId());
             boardRepository.delete(board);
         });
         attachmentLinker.unlink(ReferenceType.DRIVE, List.of(driveId));

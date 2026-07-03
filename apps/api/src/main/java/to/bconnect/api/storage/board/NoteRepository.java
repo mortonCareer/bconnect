@@ -8,5 +8,5 @@ public interface NoteRepository extends JpaRepository<NoteEntity, Long> {
 
     List<NoteEntity> findAllByBoardId(Long boardId);
 
-    void deleteByBoardId(Long boardId);
+    void deleteAllByBoardId(Long boardId);
 }
