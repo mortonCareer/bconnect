@@ -44,16 +44,16 @@ dev (개발 및 QA)  →  prod (프로덕션)
 
 ### Frontend (Next.js)
 
-Vercel 배포는 git push 자동배포가 아니라 **GitHub Actions → deploy hook** 경유로 트리거된다 ([`vercel-deploy.yml`](../../.github/workflows/vercel-deploy.yml)). Vercel Pro 팀은 git push 배포 시 커밋 author가 팀 멤버여야 하는데(시트 과금), deploy hook은 author 검사가 없어 멤버 승격 없이 배포된다. 훅 생성/재발급 절차는 [infra/vercel/README.md](../../infra/vercel/README.md) 참조.
+Vercel 배포는 git push 자동배포가 아니라 **GitHub Actions의 CLI 소스 업로드**로 트리거된다 ([`vercel-deploy.yml`](../../.github/workflows/vercel-deploy.yml)). Vercel Pro 팀은 배포에 첨부된 git 커밋 author가 팀 멤버여야 하는데(시트 과금), `.git` 제거 후 CLI 업로드하면 git 메타가 없어 멤버 승격 없이 배포된다. git push 자동배포는 `git.deploymentEnabled: false`(각 앱 vercel.json)로 꺼져 있다. 운영 상세는 [infra/vercel/README.md](../../infra/vercel/README.md) 참조.
 
 #### dev 배포
 
 ```
 dev 브랜치 머지 (push)
     ↓
-GitHub Actions: vercel-deploy.yml → deploy hook 호출
+GitHub Actions: vercel-deploy.yml → vercel deploy --target=dev
     ↓
-Vercel 빌드 (custom environment "dev")
+Vercel 리모트 빌드 (custom environment "dev")
     ↓
 dev 도메인 업데이트
     ↓
@@ -65,16 +65,14 @@ dev 도메인 업데이트
 ```
 dev → main 머지 (push)
     ↓
-GitHub Actions: vercel-deploy.yml → deploy hook 호출
+GitHub Actions: vercel-deploy.yml → vercel deploy --target=production
     ↓
-Vercel 프로덕션 빌드
+Vercel 리모트 빌드
     ↓
 bconnect.to / plan.bconnect.to 업데이트
     ↓
 헬스체크 (자동)
 ```
-
-> 비멤버 author 푸시가 남기는 git 연동 BLOCKED 배포 엔트리는 무해한 노이즈 — `git.deploymentEnabled: false`로 끄면 deploy hook까지 비활성화되므로 그대로 둔다 ([infra/vercel/README.md](../../infra/vercel/README.md) 주의사항).
 
 ### Backend (Spring Boot)
 
