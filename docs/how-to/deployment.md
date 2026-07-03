@@ -44,37 +44,37 @@ dev (개발 및 QA)  →  prod (프로덕션)
 
 ### Frontend (Next.js)
 
-#### PR 프리뷰 배포
+Vercel 배포는 git push 자동배포가 아니라 **GitHub Actions → deploy hook** 경유로 트리거된다 ([`vercel-deploy.yml`](../../.github/workflows/vercel-deploy.yml)). Vercel Pro 팀은 git push 배포 시 커밋 author가 팀 멤버여야 하는데(시트 과금), deploy hook은 author 검사가 없어 멤버 승격 없이 배포된다. 훅 생성/재발급 절차는 [infra/vercel/README.md](../../infra/vercel/README.md) 참조.
+
+#### dev 배포
 
 ```
-PR 생성/업데이트
+dev 브랜치 머지 (push)
     ↓
-Vercel 자동 빌드 시작
+GitHub Actions: vercel-deploy.yml → deploy hook 호출
     ↓
-빌드 성공 (1-2분)
+Vercel 빌드 (custom environment "dev")
     ↓
-프리뷰 URL 생성
+dev 도메인 업데이트
     ↓
-GitHub PR 댓글에 링크 추가
-    ↓
-QA 진행
+스프린트 단위 QA
 ```
 
 #### 프로덕션 배포
 
 ```
-PR 승인 + main 머지
+dev → main 머지 (push)
+    ↓
+GitHub Actions: vercel-deploy.yml → deploy hook 호출
     ↓
 Vercel 프로덕션 빌드
-    ↓
-빌드 성공 (1-2분)
     ↓
 bconnect.to / plan.bconnect.to 업데이트
     ↓
 헬스체크 (자동)
-    ↓
-배포 완료 알림 (GitHub, Slack 등)
 ```
+
+> 비멤버 author 푸시가 남기는 git 연동 BLOCKED 배포 엔트리는 무해한 노이즈 — `git.deploymentEnabled: false`로 끄면 deploy hook까지 비활성화되므로 그대로 둔다 ([infra/vercel/README.md](../../infra/vercel/README.md) 주의사항).
 
 ### Backend (Spring Boot)
 
