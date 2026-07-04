@@ -14,6 +14,14 @@ public final class AttachmentKeyUtils {
 
     private static final String DELIMITER = "/";
 
+    public static String scope(AttachmentContext context) {
+        return context.getPath();
+    }
+
+    public static String scope(AttachmentContext context, Long contextId) {
+        return join(context.getPath(), contextId.toString());
+    }
+
     public static List<String> allKeys(AttachmentContext context, Long contextId, AttachmentType type, String uuid, String ext) {
         if (type != AttachmentType.IMAGE)
             return List.of(key(context, contextId, type, ImageSize.ORIGINAL, uuid, ext));

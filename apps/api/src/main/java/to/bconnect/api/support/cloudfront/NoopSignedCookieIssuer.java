@@ -11,7 +11,7 @@ import java.util.List;
 public class NoopSignedCookieIssuer implements SignedCookieIssuer {
 
     @Override
-    public List<ResponseCookie> issue(String path) {
+    public List<ResponseCookie> issue(String scope) {
         return List.of();
     }
 }

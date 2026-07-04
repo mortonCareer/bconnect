@@ -43,12 +43,13 @@ sequenceDiagram
 | cleanup         | Cleanup 규칙에 따라 S3 삭제  (AttachmentCleanupService)                 |  Soft Del | -  | -  |
 
 ## 컴포넌트 구성
-- AttachmentKeyUtils : S3 object key 생성
+- AttachmentKeyUtils : S3 object key · Signed Cookie scope 조립
 - AttachmentResolver : Attachment 읽기 경로 조립
 - AttachmentLinker : 도메인 ↔ Attachment 참조 연결 · 해제
 - AttachmentService : presign · confirm 처리
 - AttachmentCleanupService : PENDING·고아 첨부 정리 (크론)
-- S3FileStorage : presigned 로직 처리
+- S3FileStorage : S3 로직 처리
+- SignedCookieIssuer : signed cookie 발급
 - S3Presigner : AWS SDK presign (외부)
 - S3Client : AWS SDK head·delete (외부)
 
