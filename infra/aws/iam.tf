@@ -13,7 +13,7 @@ resource "aws_iam_access_key" "app_key" {
 resource "aws_iam_policy" "app_access" {
   name        = "MortonAppAccess"
   path        = "/"
-  description = "Allows access to S3 bucket and SNS for SMS OTP + web push endpoints"
+  description = "Allows access to S3 bucket and SNS for SMS OTP"
 
   policy = jsonencode({
     Version = "2012-10-17"
