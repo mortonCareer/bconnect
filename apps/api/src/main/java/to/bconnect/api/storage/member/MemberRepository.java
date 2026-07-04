@@ -14,7 +14,7 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
 
     Optional<MemberEntity> findByPhone(String phone);
 
-    List<MemberEntity> findByIdIn(Collection<Long> ids);
+    List<MemberEntity> findAllByIdIn(Collection<Long> ids);
 
-    List<MemberEntity> findByUsernameIn(Collection<String> usernames);
+    List<MemberEntity> findAllByUsernameIn(Collection<String> usernames);
 }

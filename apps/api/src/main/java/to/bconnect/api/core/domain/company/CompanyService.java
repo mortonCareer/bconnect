@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.attachment.AttachmentLinker;
+import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.company.CompanyEntity;
@@ -43,7 +43,7 @@ public class CompanyService {
             throw new CodeException(CompanyExceptionCode.ALREADY_EXISTS);
 
         if (companyRepository.existsByBrn(command.brn()))
-            throw new CodeException(CompanyExceptionCode.ALREADY_EXISTS);
+            throw new CodeException(CompanyExceptionCode.DUPLICATE_BRN);
 
         val created = new CompanyEntity(
                 user.id(),
@@ -67,10 +67,11 @@ public class CompanyService {
     @Transactional
     public void delete(AuthUser user) {
         val optional = companyRepository.findByMemberId(user.id());
-        if(optional.isPresent()) {
-            val found = optional.get();
-            attachmentLinker.unlink(ReferenceType.COMPANY, List.of(found.getId()));
-            companyRepository.delete(found);
-        }
+        if (optional.isEmpty())
+            return;
+        val found = optional.get();
+
+        attachmentLinker.unlink(ReferenceType.COMPANY, List.of(found.getId()));
+        companyRepository.delete(found);
     }
 }

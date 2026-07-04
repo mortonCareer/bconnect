@@ -19,7 +19,7 @@ import java.util.Set;
 public class TaskEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "dtype", nullable = false)
+    @Column(name = "dtype")
     private TaskType type;
 
     @ElementCollection(targetClass = Trade.class, fetch = FetchType.EAGER)
@@ -28,17 +28,15 @@ public class TaskEntity extends BaseEntity {
     @Column(name = "trade")
     private Set<Trade> trades = new HashSet<>();
 
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date")
     private LocalDate start;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "end_date")
     private LocalDate end;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private TaskStatus status = TaskStatus.DRAFT;
 
-    @Column
     private Long workerId;
 
     @Column(name = "worker_title")
@@ -53,7 +51,6 @@ public class TaskEntity extends BaseEntity {
     @Embedded
     private Address address;
 
-    @Column
     private Long projectId;
 
     @Column(name = "project_title")

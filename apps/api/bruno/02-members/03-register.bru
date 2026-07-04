@@ -9,12 +9,15 @@ meta {
 
 post {
   url: {{baseUrl}}/api/v1/members
+  auth: none
+}
+
+headers {
+  X-Signup-Token: signup-token
 }
 
 body {
   {
-    "phone": "01000000003",
-    "signupToken": "signup-token",
     "username": "new-username",
     "name": "이름",
     "pictureId": null,
@@ -32,5 +35,5 @@ tests {
 
 docs {
   발급된 Signup Token으로 회원가입한다.
-  @seed otps : 4
+  @seed signup_tokens : 1
 }

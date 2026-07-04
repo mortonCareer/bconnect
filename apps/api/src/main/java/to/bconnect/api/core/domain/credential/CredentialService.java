@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.attachment.AttachmentLinker;
+import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.credential.CredentialEntity;
@@ -27,7 +27,7 @@ public class CredentialService {
 
     @Transactional(readOnly = true)
     public List<Credential> list(Long memberId) {
-        return credentialRepository.findByMemberId(memberId)
+        return credentialRepository.findAllByMemberId(memberId)
                 .stream()
                 .map(Credential::of)
                 .toList();
@@ -36,7 +36,7 @@ public class CredentialService {
     @Transactional(readOnly = true)
     public List<Credential> listLatestAccepted(Long memberId) {
         // latest one per type
-        return credentialRepository.findByMemberId(memberId)
+        return credentialRepository.findAllByMemberId(memberId)
                 .stream()
                 .filter(it -> it.getStatus() == CredentialStatus.ACCEPTED)
                 .collect(Collectors.groupingBy(

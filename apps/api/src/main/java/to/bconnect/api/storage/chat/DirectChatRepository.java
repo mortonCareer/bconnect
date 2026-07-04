@@ -14,10 +14,10 @@ public interface DirectChatRepository extends JpaRepository<DirectChatEntity, Lo
     Optional<DirectChatEntity> findByMinIdAndMaxId(Long minId, Long maxId);
 
     default List<DirectChatEntity> findAllByMember(Long memberId) {
-        return findByMinIdOrMaxId(memberId, memberId);
+        return findAllByMinIdOrMaxId(memberId, memberId);
     }
 
-    List<DirectChatEntity> findByMinIdOrMaxId(Long minId, Long maxId);
+    List<DirectChatEntity> findAllByMinIdOrMaxId(Long minId, Long maxId);
 
     default boolean existsByIdAndMember(Long id, Long memberId) {
         return existsByIdAndMinIdOrIdAndMaxId(id, memberId, id, memberId);

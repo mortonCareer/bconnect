@@ -23,6 +23,9 @@ import to.bconnect.api.security.jwt.JwtProvider;
 import to.bconnect.api.security.jwt.RefreshTokenAuthenticationFilter;
 import to.bconnect.api.security.otp.OtpAuthenticationProvider;
 import to.bconnect.api.security.otp.OtpService;
+import to.bconnect.api.security.signup.SignupTokenAuthenticationFilter;
+import to.bconnect.api.security.signup.SignupTokenAuthenticationProvider;
+import to.bconnect.api.security.signup.SignupTokenService;
 import to.bconnect.api.security.otp.VerifyOtpAuthenticationFilter;
 import to.bconnect.api.security.session.SessionService;
 
@@ -44,11 +47,13 @@ public class SecurityConfig {
             AuthUserService authUserService,
             JwtProvider jwtProvider,
             OtpService otpService,
+            SignupTokenService signupTokenService,
             SessionService sessionService) {
 
         val jwtAuthenticationProvider = new JwtAuthenticationProvider(authUserService, sessionService, jwtProvider);
         val otpAuthenticationProvider = new OtpAuthenticationProvider(otpService, authUserService);
-        return new ProviderManager(jwtAuthenticationProvider, otpAuthenticationProvider);
+        val signupTokenAuthenticationProvider = new SignupTokenAuthenticationProvider(signupTokenService);
+        return new ProviderManager(jwtAuthenticationProvider, otpAuthenticationProvider, signupTokenAuthenticationProvider);
     }
 
     @Bean
@@ -58,6 +63,7 @@ public class SecurityConfig {
             ObjectMapper objectMapper,
             AccessTokenAuthenticationFilter accessTokenAuthenticationFilter,
             RefreshTokenAuthenticationFilter refreshTokenAuthenticationFilter,
+            SignupTokenAuthenticationFilter signupTokenAuthenticationFilter,
             @Qualifier("VerifyOtpAuthenticationSuccessHandler") AuthenticationSuccessHandler verifyOtpSuccessHandler
     ) throws Exception {
         val verifyOtpFilter = new VerifyOtpAuthenticationFilter(authenticationManager, objectMapper);
@@ -80,7 +86,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(arc -> arc
                         .requestMatchers("/api/v1/auth/otp/**").permitAll()
-                        .requestMatchers(POST, "/api/v1/members").permitAll()
+                        .requestMatchers(POST, "/api/v1/members").hasRole("GUEST")
                         .requestMatchers(GET, "/api/v1/members/check-username").permitAll()
                         .requestMatchers(GET, "/api/v1/members").hasRole("ADMIN")
                         .requestMatchers(GET, "/api/v1/profiles/**").permitAll()
@@ -95,7 +101,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .addFilterAfter(verifyOtpFilter, LogoutFilter.class)
                 .addFilterAfter(accessTokenAuthenticationFilter, LogoutFilter.class)
-                .addFilterAfter(refreshTokenAuthenticationFilter, LogoutFilter.class);
+                .addFilterAfter(refreshTokenAuthenticationFilter, LogoutFilter.class)
+                .addFilterAfter(signupTokenAuthenticationFilter, LogoutFilter.class);
 
         return http.build();
     }

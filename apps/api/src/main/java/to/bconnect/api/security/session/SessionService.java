@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.storage.member.MemberRepository;
-import to.bconnect.api.security.AuthExceptionCode;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.security.AuthExceptionCode;
 import to.bconnect.api.security.AuthUtils;
+import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.session.SessionEntity;
 import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.support.sms.SmsProvider;
@@ -22,53 +22,52 @@ public class SessionService {
     private final MemberRepository memberRepository;
     private final SmsProvider smsProvider;
 
-    @Transactional(readOnly = true)
+    @Transactional(noRollbackFor = CodeException.class)
     public void verify(String username, String refreshToken) {
-        val found = findSession(username);
-
-        if (!AuthUtils.sha256(refreshToken).equals(found.getRefreshToken())) {
-            throw new CodeException(AuthExceptionCode.INVALID_REFRESH_TOKEN);
-        }
+        val found = sessionRepository.findByMemberId(Long.valueOf(username))
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (found.isRevoked()) {
             throw new CodeException(AuthExceptionCode.SESSION_EXPIRED);
+        }
+
+        if (!AuthUtils.sha256(refreshToken).equals(found.getRefreshToken())) {
+            found.revoke();
+            throw new CodeException(AuthExceptionCode.INVALID_TOKEN);
         }
     }
 
     @Transactional
     public void login(String username, String agent, String ip, String refreshToken) {
-        val member = memberRepository.findById(Long.valueOf(username))
+        val id = Long.valueOf(username);
+        val member = memberRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
         val encrypted = AuthUtils.sha256(refreshToken);
-        val optional = sessionRepository.findByMemberId(member.getId());
+        val optional = sessionRepository.findByMemberId(id);
 
         if (optional.isPresent()) {
             optional.get().update(agent, ip, encrypted);
         } else {
             sessionRepository.save(
-                    new SessionEntity(member.getId(), agent, ip, encrypted)
+                    new SessionEntity(id, agent, ip, encrypted)
             );
-
-            // TODO: 새로운 기기에서 로그인시 세션 덮어쓰기 → RT 무효화
             smsProvider.send(member.getPhone(), SmsTemplate.NEW_DEVICE_LOGIN);
         }
     }
 
     @Transactional
     public void rotate(String username, String refreshToken) {
-        findSession(username).rotate(AuthUtils.sha256(refreshToken));
+        val found = sessionRepository.findByMemberId(Long.valueOf(username))
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        found.rotate(AuthUtils.sha256(refreshToken));
     }
 
     @Transactional
     public void logout(String username) {
-        findSession(username).revoke();
-    }
-
-    private SessionEntity findSession(String username) {
-        val member = memberRepository.findById(Long.valueOf(username))
+        val found = sessionRepository.findByMemberId(Long.valueOf(username))
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        return sessionRepository.findByMemberId(member.getId())
-                .orElseThrow(() -> new CodeException(AuthExceptionCode.SESSION_EXPIRED));
+        found.revoke();
     }
 }

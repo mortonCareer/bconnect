@@ -17,30 +17,24 @@ import java.util.Set;
 public class ProfileEntity extends BaseEntity {
 
 
-    @Column(nullable = false, unique = true)
     private Long memberId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ProfileRole role;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Trade primaryTrade;
 
-    // TODO: MappingTableEntity 분리
     @ElementCollection(targetClass = Trade.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "profile_trades", joinColumns = @JoinColumn(name = "profile_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "trade")
     private Set<Trade> trades = new HashSet<>();
 
-    @Column(nullable = false)
     private int experience;
 
     private String headline;
 
-    @Column(columnDefinition = "TEXT")
     private String about;
 
     @Embedded

@@ -2,7 +2,7 @@ package to.bconnect.api.core.presentation.v1.response;
 
 import to.bconnect.api.core.domain.offer.Offer;
 import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.security.member.Member;
+import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.storage.offer.OfferStatus;
 
 import java.time.LocalDate;

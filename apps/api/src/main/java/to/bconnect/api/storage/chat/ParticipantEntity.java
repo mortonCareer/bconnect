@@ -12,13 +12,10 @@ import to.bconnect.api.storage.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ParticipantEntity extends BaseEntity {
 
-    @Column(nullable = false)
     private Long chatId;
 
-    @Column(nullable = false)
     private Long memberId;
 
-    @Column(nullable = false)
     private Long lastIdx;
 
     public ParticipantEntity(Long chatId, Long memberId) {

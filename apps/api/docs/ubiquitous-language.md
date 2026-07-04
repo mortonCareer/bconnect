@@ -24,11 +24,11 @@ graph TD
     subgraph Task
         Company
         Project
-        CompanyTask
+        ProjectTask
         Offer
         Project -->|N:1| Company
-        CompanyTask -->|N:1| Project
-        Offer -->|N:1| CompanyTask
+        ProjectTask -->|N:1| Project
+        Offer -->|N:1| ProjectTask
     end
     subgraph Post
         WorkerTask
@@ -46,56 +46,77 @@ graph TD
         Otp -.->|인증| Member
         Member -.->|로그인| Session
     end
+    subgraph Drive
+        drive[Drive]
+        DriveMember
+        DriveMember -->|N:1| drive
+    end
+    subgraph Board
+        board[Board]
+        Note
+        Note -.->|N:1| board
+    end
 ```
 
 ## 도메인 개념
 
-| 도메인           | 영문             | 국문      | 의미                 |
-|---------------|----------------|---------|--------------------|
-| Member        | Member         | 회원      | 사용자                |
-| Auth          | Otp            | 인증코드    | 본인확인용 6자리 코드       |
-| Auth          | SignupToken    | 가입 토큰   | 미가입자 회원가입용 임시 토큰   |
-| Auth          | Session        | 세션      | 로그인 정보(IP, Agent 등) |
-| Auth          | Access Token   | 액세스 토큰  |                    |
-| Auth          | Refresh Token  | 리프레시 토큰 | 액세스 토큰 재발급용 토큰     |
-| Profile       | Profile        | 프로필     | 사용자 프로필            |
-| Task          | Task           | 작업      | 프로젝트 공종별 작업 단위     |
-| Post          | Post           | 게시글     |                    |
-| Post          | Feed           | 피드      | 게시글 + 작성자 + 프로필 View |
-| Coworker      | Coworker       | 동료      | 동료 기술자             |
-| Coworker      | CoworkerRequest | 동료 요청   |                    |
-| Recommendation | Recommendation | 추천서     | 동료 기술자가 작성한 추천서    |
-| Chat          | GroupChat      | 그룹 채팅방  | 채팅방 제목 있음          |
-| Chat          | DirectChat     | 1:1 채팅방 | 채팅방 제목 없음          |
-| Chat          | Message        | 메시지     |                    |
-| Chat          | Participant    | 참여자     | 그룹 채팅방 참여자 정보      |
-| Credential    | Credential     | 인증뱃지    | 면허 · 자격 · 보험 등     |
-| Attachment    | Attachment     | 첨부      | 업로드 파일 메타데이터       |
-| Attachment    | Signed cookie  |         | CloudFront 접근 권한   |
-| Company       | Company        | 인테리어 업체 |                    |
-| Project       | Project        | 프로젝트    |                    |
-| Offer         | Offer          | 제안      | 기술자 제안             |
+| 도메인           | 영문             | 국문      | 의미                     |
+|---------------|----------------|---------|------------------------|
+| Member        | Member         | 회원      | 사용자                    |
+| Auth          | Otp            | 인증코드    | 본인확인용 6자리 코드           |
+| Auth          | SignupToken    | 가입 토큰   | 미가입자 회원가입용 임시 토큰       |
+| Auth          | Session        | 세션      | 로그인 정보(IP, Agent 등)    |
+| Auth          | Access Token   | 액세스 토큰  |                        |
+| Auth          | Refresh Token  | 리프레시 토큰 | 액세스 토큰 재발급용 토큰         |
+| Profile       | Profile        | 프로필     | 사용자 프로필                |
+| Task          | Task           | 작업      | 프로젝트 공종별 작업 단위         |
+| Post          | Post           | 게시글     |                        |
+| Post          | Feed           | 피드      | 게시글 + 작성자 + 프로필 View   |
+| Coworker      | Coworker       | 동료      | 동료 기술자                 |
+| Coworker      | CoworkerRequest | 동료 요청   |                        |
+| Recommendation | Recommendation | 추천서     | 동료 기술자가 작성한 추천서        |
+| Chat          | GroupChat      | 그룹 채팅방  | 채팅방 제목 있음              |
+| Chat          | DirectChat     | 1:1 채팅방 | 채팅방 제목 없음              |
+| Chat          | Message        | 메시지     |                        |
+| Chat          | Participant    | 참여자     | 그룹 채팅방 참여자 정보          |
+| Credential    | Credential     | 인증뱃지    | 면허 · 자격 · 보험 등         |
+| Attachment    | Attachment     | 첨부      | 업로드 파일 메타데이터           |
+| Attachment    | Signed cookie  |         | CloudFront 접근 권한       |
+| Company       | Company        | 인테리어 업체 |                        |
+| Project       | Project        | 프로젝트    |                        |
+| Offer         | Offer          | 제안      | 기술자 제안                 |
+| Drive         | Drive          | 공유 저장소  | 원격 파일 · 이미지 저장소        |
+| Drive         | DriveMember    | 저장소 멤버  | 저장소 접근 권한              |
+| Board         | Board          | 게시판     | 프로젝트 · 저장소별 게시판 (자동 생성) |
+| Board         | Note           | 노트      | 게시판에 작성된 글             |
+
 
 ## 열거형 (Enum)
 
-### 회원(Member)
+### 회원 역할(Role)
 
-| 영문 | 국문     |
+| 유형 | 설명     |
 |---|--------|
 | GUEST | 게스트    |
+| WORKER | 기술자    |
+| CONTRACTOR | 인테리어 업체 |
+| ADMIN | 어드민    |
+
+### 프로필 역할(ProfileRole)
+
+| 유형 | 설명     |
+|---|--------|
 | CLIENT | 소비자    |
 | ARCHITECT | 건축가    |
-| CONTRACTOR | 인테리어 업체 |
 | FOREMAN | 반장     |
 | SKILLED | 기공     |
 | SEMI_SKILLED | 준기공    |
 | HELPER | 조공     |
-| ADMIN | 어드민    |
 
 ### 공종(TRADE)
 미확정
 
-| 영문 | 국문   |
+| 유형 | 설명   |
 |---|------|
 | DESIGN | 디자인  |
 | DEMOLITION | 철거   |
@@ -121,11 +142,18 @@ graph TD
 | HOISTING | 양중   |
 | TRANSPORT | 운반   |
 | CLEANING | 청소   |
-| GENERAL_LABOR | 조공   |
+| GENERAL_LABOR | 잡부   |
+
+### 작업 유형(TaskType)
+
+| 유형 | 설명 |
+|---|---|
+| WORKER | 기술자 작업 |
+| PROJECT | 프로젝트 작업 |
 
 ### 작업 상태(TaskStatus)
 
-| 영문 | 프로젝트(업체) | 기술자 |
+| 유형 | 프로젝트(업체) | 기술자 |
 |---|---|---|
 | DRAFT | 시작 전 | 시작 전 |
 | OPEN | 모집 중 | 지원 완료 |
@@ -136,16 +164,23 @@ graph TD
 
 ### 동료(Coworker)
 
-| 영문 | 국문 |
+| 유형 | 설명 |
 |---|---|
 | NONE | 관계없음 |
 | SENT | 보낸 요청 |
 | RECEIVED | 받은 요청 |
 | COWORKER | 동료 |
 
+### 채팅방 유형(ChatType)
+
+| 유형 | 설명 |
+|---|---|
+| GROUP | 그룹 채팅방 |
+| DIRECT | 1:1 채팅방 |
+
 ### 메시지 유형(MessageType)
 
-| 영문     | 국문 |
+| 유형     | 설명 |
 |--------|----|
 | TEXT   | 텍스트 |
 | IMAGE  | 이미지 |
@@ -155,7 +190,7 @@ graph TD
 
 ### 인증뱃지 유형(CredentialType)
 
-| 영문 | 국문 |
+| 유형 | 설명 |
 |---|---|
 | IDENTITY_VERIFICATION | 본인인증 |
 | SOLE_PROPRIETOR | 개인사업자 |
@@ -167,3 +202,17 @@ graph TD
 | NATIONAL_TECHNICAL_QUALIFICATION | 국가기술자격 |
 | SKILLED_TECHNICIAN | 숙련기술인 |
 | OTHER_QUALIFICATION | 기타 자격증 |
+
+### 저장소 유형(DriveType)
+
+| 유형     | 설명          |
+|--------|-------------|
+| PROJECT | 프로젝트 소유 저장소 |
+| MEMBER | 사용자 소유 저장소     |
+
+### 게시판 유형(BoardType)
+
+| 유형     | 설명      |
+|--------|---------|
+| PROJECT | 프로젝트 게시판 |
+| DRIVE  | 저장소 게시판 |

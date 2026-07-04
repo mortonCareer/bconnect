@@ -13,13 +13,13 @@ public interface RecommendationRepository extends JpaRepository<RecommendationEn
 
     boolean existsByFromIdAndToId(Long fromId, Long toId);
 
-    List<RecommendationEntity> findByToIdAndVisibleTrue(Long toId);
+    List<RecommendationEntity> findAllByToIdAndVisibleTrue(Long toId);
 
-    List<RecommendationEntity> findByFromIdAndVisibleTrue(Long fromId);
+    List<RecommendationEntity> findAllByFromIdAndVisibleTrue(Long fromId);
 
-    List<RecommendationEntity> findByToId(Long toId);
+    List<RecommendationEntity> findAllByToId(Long toId);
 
-    List<RecommendationEntity> findByFromId(Long fromId);
+    List<RecommendationEntity> findAllByFromId(Long fromId);
 
     long countByToIdAndVisibleTrue(Long toId);
 

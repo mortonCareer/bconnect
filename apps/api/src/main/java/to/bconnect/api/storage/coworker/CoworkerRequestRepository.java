@@ -9,7 +9,7 @@ public interface CoworkerRequestRepository extends JpaRepository<CoworkerRequest
 
     Optional<CoworkerRequestEntity> findByFromIdAndToId(Long fromId, Long toId);
 
-    List<CoworkerRequestEntity> findByToId(Long toId);
+    List<CoworkerRequestEntity> findAllByToId(Long toId);
 
-    List<CoworkerRequestEntity> findByFromId(Long fromId);
+    List<CoworkerRequestEntity> findAllByFromId(Long fromId);
 }

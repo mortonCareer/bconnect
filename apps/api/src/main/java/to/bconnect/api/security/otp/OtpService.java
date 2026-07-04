@@ -20,7 +20,6 @@ public class OtpService {
     private static final int EXPIRY_SECONDS = 180;
     private static final int MAX_DAILY_COUNT = 10;
     private static final int MAX_ATTEMPTS = 5;
-    private static final int SIGNUP_TOKEN_EXPIRY_MINUTES = 10;
 
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final String CODE_FORMAT = "%06d";
@@ -50,42 +49,20 @@ public class OtpService {
         return Otp.of(otp);
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = CodeException.class)
     public void verifyCode(String phone, String code) {
-        val found = otpRepository.findByCode(code)
+        val found = otpRepository.findByPhone(phone)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_OTP));
 
-        if (!found.getPhone().equals(phone)) throw new CodeException(AuthExceptionCode.INVALID_OTP);
         if (found.getAttempts() >= MAX_ATTEMPTS) throw new CodeException(AuthExceptionCode.OTP_MAX_ATTEMPTS);
 
         found.attempt();
 
-        if (found.isRevoked()) throw new CodeException(AuthExceptionCode.OTP_REVOKED);
+        if (found.isRevoked()) throw new CodeException(AuthExceptionCode.INVALID_OTP);
+        if (found.getExpiredAt().isBefore(LocalDateTime.now())) throw new CodeException(AuthExceptionCode.OTP_EXPIRED);
         if (!found.getCode().equals(code)) throw new CodeException(AuthExceptionCode.INVALID_OTP);
 
         found.invalidateCode();
-    }
-
-    @Transactional
-    public String generateToken(String phone) {
-        val found = otpRepository.findByPhone(phone)
-                .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_OTP));
-
-        val token = java.util.UUID.randomUUID().toString();
-        val expiredAt = LocalDateTime.now().plusMinutes(SIGNUP_TOKEN_EXPIRY_MINUTES);
-        found.generateToken(token, expiredAt);
-
-        return token;
-    }
-
-    @Transactional
-    public void verifyToken(String token) {
-        val found = otpRepository.findByToken_Token(token)
-                .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_SIGNUP_TOKEN));
-
-        if (found.getToken().isRevoked()) throw new CodeException(AuthExceptionCode.SIGNUP_TOKEN_REVOKED);
-
-        found.invalidateToken();
     }
 
     private boolean isRateLimited(OtpEntity found) {

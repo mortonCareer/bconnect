@@ -17,7 +17,7 @@
 - 태그
   - `seed` : 시드 데이터 소모 (`docs` 블록에 메모)
   - `chain` : 선행되어야 하는 테스트 목록 (`docs` 블록에 메모)
-att  - `idempotent` : 멱등성 만족
+  - `idempotent` : 멱등성 만족
   - `ws` : WebSocket 테스트
 - 웹소켓(STOMP)
   - GUI 수동 테스트 필요 (`bru run` 항상 실패)

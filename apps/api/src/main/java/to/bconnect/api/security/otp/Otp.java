@@ -1,7 +1,6 @@
 package to.bconnect.api.security.otp;
 
 import to.bconnect.api.storage.otp.OtpEntity;
-import to.bconnect.api.storage.otp.SignupToken;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +11,6 @@ public record Otp(
     LocalDateTime expiredAt,
     int attempts,
     boolean revoked,
-    SignupToken token,
     int dailyCount,
     LocalDateTime lastSentAt,
     LocalDateTime createdAt,
@@ -26,7 +24,6 @@ public record Otp(
                 entity.getExpiredAt(),
                 entity.getAttempts(),
                 entity.isRevoked(),
-                entity.getToken(),
                 entity.getDailyCount(),
                 entity.getLastSentAt(),
                 entity.getCreatedAt(),

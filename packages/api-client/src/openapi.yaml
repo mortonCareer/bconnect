@@ -282,6 +282,49 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/notes/{id}:
+    put:
+      tags:
+      - note-controller
+      operationId: update_4
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNoteRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+    delete:
+      tags:
+      - note-controller
+      operationId: delete_3
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/members/me:
     get:
       tags:
@@ -297,7 +340,7 @@ paths:
     put:
       tags:
       - member-controller
-      operationId: update_4
+      operationId: update_5
       requestBody:
         content:
           application/json:
@@ -322,11 +365,36 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/drives/{id}/name:
+    put:
+      tags:
+      - drive-controller
+      operationId: rename
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDriveRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/companies/me:
     put:
       tags:
       - company-controller
-      operationId: update_5
+      operationId: update_6
       requestBody:
         content:
           application/json:
@@ -343,7 +411,7 @@ paths:
     delete:
       tags:
       - company-controller
-      operationId: delete_3
+      operationId: delete_4
       responses:
         "200":
           description: OK
@@ -594,6 +662,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/notes:
+    post:
+      tags:
+      - note-controller
+      operationId: create_5
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNoteRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
   /api/v1/members:
     get:
       tags:
@@ -638,7 +724,7 @@ paths:
     post:
       tags:
       - group-chat-controller
-      operationId: create_5
+      operationId: create_6
       requestBody:
         content:
           application/json:
@@ -652,11 +738,47 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/drives:
+    get:
+      tags:
+      - drive-controller
+      operationId: list_3
+      parameters:
+      - name: projectId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListDriveResponse"
+    post:
+      tags:
+      - drive-controller
+      operationId: create_7
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDriveRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
   /api/v1/direct-chats:
     get:
       tags:
       - direct-chat-controller
-      operationId: list_3
+      operationId: list_4
       responses:
         "200":
           description: OK
@@ -667,7 +789,7 @@ paths:
     post:
       tags:
       - direct-chat-controller
-      operationId: create_6
+      operationId: create_8
       requestBody:
         content:
           application/json:
@@ -685,7 +807,7 @@ paths:
     get:
       tags:
       - credential-controller
-      operationId: list_4
+      operationId: list_5
       parameters:
       - name: memberId
         in: query
@@ -703,7 +825,7 @@ paths:
     post:
       tags:
       - credential-controller
-      operationId: create_7
+      operationId: create_9
       requestBody:
         content:
           application/json:
@@ -759,7 +881,7 @@ paths:
     post:
       tags:
       - coworker-request-controller
-      operationId: create_8
+      operationId: create_10
       requestBody:
         content:
           application/json:
@@ -815,7 +937,7 @@ paths:
     get:
       tags:
       - company-controller
-      operationId: list_5
+      operationId: list_6
       responses:
         "200":
           description: OK
@@ -826,7 +948,7 @@ paths:
     post:
       tags:
       - company-controller
-      operationId: create_9
+      operationId: create_11
       requestBody:
         content:
           application/json:
@@ -910,7 +1032,7 @@ paths:
     get:
       tags:
       - task-controller
-      operationId: list_6
+      operationId: list_7
       responses:
         "200":
           description: OK
@@ -918,13 +1040,13 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListTaskResponse"
-  /api/v1/tasks/{taskId}/offers:
+  /api/v1/tasks/{id}/offers:
     get:
       tags:
       - task-controller
       operationId: listOffers
       parameters:
-      - name: taskId
+      - name: id
         in: path
         required: true
         schema:
@@ -999,13 +1121,13 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListRecommendationResponse"
-  /api/v1/projects/{projectId}/tasks:
+  /api/v1/projects/{id}/tasks:
     get:
       tags:
       - project-controller
       operationId: listTasks
       parameters:
-      - name: projectId
+      - name: id
         in: path
         required: true
         schema:
@@ -1018,6 +1140,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListTaskResponse"
+  /api/v1/projects/{id}/notes:
+    get:
+      tags:
+      - project-controller
+      operationId: listNotes
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListNoteResponse"
   /api/v1/profiles/{id}:
     get:
       tags:
@@ -1055,13 +1196,13 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseCheckUsernameResponse"
-  /api/v1/group-chats/{chatId}/messages:
+  /api/v1/group-chats/{id}/messages:
     get:
       tags:
       - group-chat-controller
       operationId: listMessages
       parameters:
-      - name: chatId
+      - name: id
         in: path
         required: true
         schema:
@@ -1083,7 +1224,7 @@ paths:
     get:
       tags:
       - feed-controller
-      operationId: list_7
+      operationId: list_8
       responses:
         "200":
           description: OK
@@ -1110,13 +1251,82 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseFeedResponse"
-  /api/v1/direct-chats/{chatId}/messages:
+  /api/v1/drives/{id}/notes:
+    get:
+      tags:
+      - drive-controller
+      operationId: listNotes_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListNoteResponse"
+  /api/v1/drives/{id}/images:
+    get:
+      tags:
+      - drive-controller
+      operationId: listImages
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListAttachmentResponse"
+  /api/v1/drives/{id}/files:
+    get:
+      tags:
+      - drive-controller
+      operationId: listFiles
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListAttachmentResponse"
+  /api/v1/drives/me:
+    get:
+      tags:
+      - drive-controller
+      operationId: listMine
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListDriveResponse"
+  /api/v1/direct-chats/{id}/messages:
     get:
       tags:
       - direct-chat-controller
       operationId: listMessages_1
       parameters:
-      - name: chatId
+      - name: id
         in: path
         required: true
         schema:
@@ -1138,7 +1348,7 @@ paths:
     get:
       tags:
       - credential-controller
-      operationId: listMine
+      operationId: listMine_1
       responses:
         "200":
           description: OK
@@ -1150,7 +1360,7 @@ paths:
     get:
       tags:
       - coworker-controller
-      operationId: list_8
+      operationId: list_9
       parameters:
       - name: memberId
         in: query
@@ -1231,7 +1441,26 @@ paths:
     delete:
       tags:
       - task-controller
-      operationId: delete_4
+      operationId: delete_5
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/drives/{id}:
+    delete:
+      tags:
+      - drive-controller
+      operationId: delete_6
       parameters:
       - name: id
         in: path
@@ -1250,7 +1479,7 @@ paths:
     delete:
       tags:
       - credential-controller
-      operationId: delete_5
+      operationId: delete_7
       parameters:
       - name: id
         in: path
@@ -1269,7 +1498,7 @@ paths:
     delete:
       tags:
       - coworker-controller
-      operationId: delete_6
+      operationId: delete_8
       parameters:
       - name: memberId
         in: path
@@ -1556,7 +1785,6 @@ components:
           $ref: "#/components/schemas/Address"
       required:
       - address
-      - experience
       - primaryTrade
       - role
       - trades
@@ -1584,6 +1812,14 @@ components:
           minItems: 1
       required:
       - offerIds
+    UpdateNoteRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+      required:
+      - content
     UpdateMemberRequest:
       type: object
       properties:
@@ -1595,6 +1831,14 @@ components:
           format: int64
       required:
       - name
+    UpdateDriveRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+      required:
+      - title
     UpdateCompanyRequest:
       type: object
       properties:
@@ -1724,7 +1968,6 @@ components:
           $ref: "#/components/schemas/Address"
       required:
       - address
-      - experience
       - primaryTrade
       - role
       - trades
@@ -1762,15 +2005,31 @@ components:
       - due
       - taskId
       - workerId
+    BoardType:
+      type: string
+      enum:
+      - PROJECT
+      - DRIVE
+    CreateNoteRequest:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/BoardType"
+        projectId:
+          type: integer
+          format: int64
+        driveId:
+          type: integer
+          format: int64
+        content:
+          type: string
+          minLength: 1
+      required:
+      - content
+      - type
     RegisterMemberRequest:
       type: object
       properties:
-        phone:
-          type: string
-          minLength: 1
-        signupToken:
-          type: string
-          minLength: 1
         username:
           type: string
           minLength: 1
@@ -1784,9 +2043,7 @@ components:
           $ref: "#/components/schemas/Role"
       required:
       - name
-      - phone
       - role
-      - signupToken
       - username
     Role:
       type: string
@@ -1811,6 +2068,25 @@ components:
       required:
       - participantIds
       - title
+    CreateDriveRequest:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/DriveType"
+        title:
+          type: string
+          minLength: 1
+        projectId:
+          type: integer
+          format: int64
+      required:
+      - title
+      - type
+    DriveType:
+      type: string
+      enum:
+      - PROJECT
+      - MEMBER
     CreateDirectChatRequest:
       type: object
       properties:
@@ -1898,6 +2174,7 @@ components:
       - CHAT
       - COMPANY
       - CREDENTIAL
+      - DRIVE
       - MEMBER
       - POST
     AttachmentType:
@@ -2247,6 +2524,34 @@ components:
           $ref: "#/components/schemas/ExceptionCode"
         data:
           $ref: "#/components/schemas/ProjectResponse"
+    ApiResponseListNoteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/NoteResponse"
+    NoteResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
     ApiResponseListProfileResponse:
       type: object
       properties:
@@ -2517,6 +2822,39 @@ components:
           $ref: "#/components/schemas/ExceptionCode"
         data:
           $ref: "#/components/schemas/FeedResponse"
+    ApiResponseListDriveResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DriveResponse"
+    DriveResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        type:
+          $ref: "#/components/schemas/DriveType"
+        projectId:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
     ApiResponseListDirectChatResponse:
       type: object
       properties:

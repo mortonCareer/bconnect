@@ -10,4 +10,6 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
     List<TaskEntity> findAllByWorkerIdAndType(Long workerId, TaskType type);
 
     List<TaskEntity> findAllByProjectId(Long projectId);
+
+    void deleteAllByProjectId(Long projectId);
 }

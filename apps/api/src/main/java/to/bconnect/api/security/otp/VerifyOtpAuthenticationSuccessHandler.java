@@ -18,6 +18,7 @@ import to.bconnect.api.security.AuthenticationTypeMismatchException;
 import to.bconnect.api.security.jwt.JwtProvider;
 import to.bconnect.api.security.jwt.CookieProvider;
 import to.bconnect.api.security.session.SessionService;
+import to.bconnect.api.security.signup.SignupTokenService;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -33,7 +34,7 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
     private final ObjectMapper objectMapper;
     private final JwtProvider jwtProvider;
     private final CookieProvider cookieProvider;
-    private final OtpService otpService;
+    private final SignupTokenService signupTokenService;
     private final SessionService sessionService;
 
     @Override
@@ -45,6 +46,7 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
         }
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
 
         if (authToken.getPrincipal() instanceof AuthUser user) {
             if (log.isDebugEnabled()) {
@@ -57,10 +59,11 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
             val agent = request.getHeader("User-Agent");
             val ip = request.getRemoteAddr();
             sessionService.login(user.getUsername(), agent, ip, refreshToken);
+
             val cookie = cookieProvider.create(refreshToken).toString();
             response.addHeader(HttpHeaders.SET_COOKIE, cookie);
-            val data = new VerifyOtpLoginResponse(accessToken);
 
+            val data = new VerifyOtpLoginResponse(accessToken);
             response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.success(data)));
         } else {
             val phone = (String) authToken.getPrincipal();
@@ -68,9 +71,8 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
                 log.debug("Unregistered phone: {}, signup required", phone);
             }
 
-            val signupToken = otpService.generateToken(phone);
-
-            val data = new VerifyOtpSignupResponse(signupToken);
+            val token = signupTokenService.generate(phone);
+            val data = new VerifyOtpSignupResponse(token);
             response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.success(data)));
         }
     }

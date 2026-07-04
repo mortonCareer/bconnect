@@ -4,26 +4,20 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import to.bconnect.api.core.presentation.v1.request.CreateProfileRequest;
-import to.bconnect.api.core.presentation.v1.request.UpdateProfileRequest;
-import to.bconnect.api.core.presentation.v1.request.UpdateProfileAboutRequest;
-import to.bconnect.api.core.presentation.v1.response.ProfileResponse;
-import to.bconnect.api.attachment.AttachmentResolver;
-import to.bconnect.api.attachment.ImageSize;
+import org.springframework.web.bind.annotation.*;
+import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.ImageSize;
+import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileQueryService;
 import to.bconnect.api.core.domain.profile.ProfileService;
-import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.core.presentation.v1.request.CreateProfileRequest;
+import to.bconnect.api.core.presentation.v1.request.UpdateProfileAboutRequest;
+import to.bconnect.api.core.presentation.v1.request.UpdateProfileRequest;
+import to.bconnect.api.core.presentation.v1.response.ProfileResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
 
@@ -82,7 +76,7 @@ public class ProfileController {
     @PutMapping("/me/about")
     public ApiResponse<Void> updateAbout(
             @AuthenticationPrincipal AuthUser user,
-            @RequestBody UpdateProfileAboutRequest request) {
+            @RequestBody @Valid UpdateProfileAboutRequest request) {
         profileService.updateAbout(user, request.about());
         return ApiResponse.success(null);
     }

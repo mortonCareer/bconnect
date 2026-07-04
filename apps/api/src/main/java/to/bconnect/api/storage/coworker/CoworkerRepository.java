@@ -24,11 +24,11 @@ public interface CoworkerRepository extends JpaRepository<CoworkerEntity, Long> 
 
     Optional<CoworkerEntity> findByMinIdAndMaxId(Long minId, Long maxId);
 
-    default List<CoworkerEntity> findByMemberId(Long memberId) {
-        return findByMinIdOrMaxId(memberId, memberId);
+    default List<CoworkerEntity> findAllByMemberId(Long memberId) {
+        return findAllByMinIdOrMaxId(memberId, memberId);
     }
 
-    List<CoworkerEntity> findByMinIdOrMaxId(Long minId, Long maxId);
+    List<CoworkerEntity> findAllByMinIdOrMaxId(Long minId, Long maxId);
 
     default long countByMemberId(Long memberId) {
         return countByMinIdOrMaxId(memberId, memberId);

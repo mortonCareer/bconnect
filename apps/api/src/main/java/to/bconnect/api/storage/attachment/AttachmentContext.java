@@ -9,6 +9,7 @@ public enum AttachmentContext {
     CHAT("chats"),
     COMPANY("companies"),
     CREDENTIAL("credentials"),
+    DRIVE("drives"),
     MEMBER("members"),
     POST("posts");
 
