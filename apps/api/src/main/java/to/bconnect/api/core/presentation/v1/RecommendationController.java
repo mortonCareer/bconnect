@@ -1,10 +1,13 @@
 package to.bconnect.api.core.presentation.v1;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.common.response.ApiResponse;
@@ -17,7 +20,9 @@ import to.bconnect.api.core.presentation.v1.request.CreateRecommendationRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateRecommendationRequest;
 import to.bconnect.api.core.presentation.v1.response.RecommendationResponse;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.support.cloudfront.SignedCookieIssuer;
 
 import java.util.List;
 
@@ -31,6 +36,7 @@ public class RecommendationController {
     private final MemberResolver memberResolver;
     private final ProfileResolver profileResolver;
     private final AttachmentResolver attachmentResolver;
+    private final SignedCookieIssuer signedCookieIssuer;
 
     @PostMapping
     public ApiResponse<Long> create(
@@ -41,28 +47,54 @@ public class RecommendationController {
     }
 
     @GetMapping("/received")
-    public ApiResponse<List<RecommendationResponse>> listReceived(@RequestParam Long memberId) {
+    public ApiResponse<List<RecommendationResponse>> listReceived(
+            @RequestParam Long memberId,
+            HttpServletResponse response) {
         val recommendations = recommendationQueryService.listReceived(memberId);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
         return ApiResponse.success(assemble(recommendations));
     }
 
     @GetMapping("/sent")
-    public ApiResponse<List<RecommendationResponse>> listSent(@RequestParam Long memberId) {
+    public ApiResponse<List<RecommendationResponse>> listSent(
+            @RequestParam Long memberId,
+            HttpServletResponse response) {
         val recommendations = recommendationQueryService.listSent(memberId);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
         return ApiResponse.success(assemble(recommendations));
     }
 
     @GetMapping("/me/received")
     public ApiResponse<List<RecommendationResponse>> listMyReceived(
-            @AuthenticationPrincipal AuthUser user) {
+            @AuthenticationPrincipal AuthUser user,
+            HttpServletResponse response) {
         val recommendations = recommendationQueryService.listMyReceived(user);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
         return ApiResponse.success(assemble(recommendations));
     }
 
     @GetMapping("/me/sent")
     public ApiResponse<List<RecommendationResponse>> listMySent(
-            @AuthenticationPrincipal AuthUser user) {
+            @AuthenticationPrincipal AuthUser user,
+            HttpServletResponse response) {
         val recommendations = recommendationQueryService.listMySent(user);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
         return ApiResponse.success(assemble(recommendations));
     }
 

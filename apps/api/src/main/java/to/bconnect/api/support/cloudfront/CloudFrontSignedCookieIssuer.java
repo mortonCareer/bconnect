@@ -38,8 +38,8 @@ public class CloudFrontSignedCookieIssuer implements SignedCookieIssuer {
     }
 
     @Override
-    public List<ResponseCookie> issue(String path) {
-        val url = "https://" + properties.domain() + "/" + path;
+    public List<ResponseCookie> issue(String scope) {
+        val url = "https://" + properties.domain() + "/" + scope + "/*";
         val request = CustomSignerRequest.builder()
                 .resourceUrl(url)
                 .privateKey(key)
@@ -53,15 +53,15 @@ public class CloudFrontSignedCookieIssuer implements SignedCookieIssuer {
                         cookies.policyHeaderValue(),
                         cookies.signatureHeaderValue(),
                         cookies.keyPairIdHeaderValue())
-                .map(this::toResponseCookie)
+                .map(it -> toResponseCookie(it, scope))
                 .toList();
     }
 
-    private ResponseCookie toResponseCookie(String header) {
+    private ResponseCookie toResponseCookie(String header, String path) {
         val eq = header.indexOf('=');
         return ResponseCookie.from(header.substring(0, eq), header.substring(eq + 1))
                 .domain(properties.cookieDomain())
-                .path("/")
+                .path("/" + path)
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")

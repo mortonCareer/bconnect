@@ -1,11 +1,14 @@
 package to.bconnect.api.core.presentation.v1;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.Attachment;
+import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.common.request.CursorLimit;
@@ -19,7 +22,9 @@ import to.bconnect.api.core.presentation.v1.request.CreateDirectChatRequest;
 import to.bconnect.api.core.presentation.v1.response.DirectChatResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.support.cloudfront.SignedCookieIssuer;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,21 +37,29 @@ public class DirectChatController {
     private final DirectChatService directChatService;
     private final MemberResolver memberResolver;
     private final AttachmentResolver attachmentResolver;
+    private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
-    public ApiResponse<List<DirectChatResponse>> list(@AuthenticationPrincipal AuthUser user) {
+    public ApiResponse<List<DirectChatResponse>> list(
+            @AuthenticationPrincipal AuthUser user,
+            HttpServletResponse response) {
         val directChats = directChatService.list(user.id());
         val memberIds = directChats.stream().map(DirectChat::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
         val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
-        val response = directChats.stream()
+        val body = directChats.stream()
                 .map(it -> {
                     val member = memberMap.get(it.memberId());
                     return DirectChatResponse.of(it, member, urlMap.get(member == null ? null : member.id()));
                 })
                 .toList();
-        return ApiResponse.success(response);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
+        return ApiResponse.success(body);
     }
 
     @PostMapping
@@ -61,7 +74,8 @@ public class DirectChatController {
     public ApiResponse<CursorPage<MessageResponse>> listMessages(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
-            CursorLimit cursorLimit) {
+            CursorLimit cursorLimit,
+            HttpServletResponse response) {
         val page = directChatService.listMessages(user, id, cursorLimit);
         val messageIds = page.content().stream().map(Message::id).toList();
         val attachmentMap = attachmentResolver.resolveListMap(ReferenceType.MESSAGE, messageIds);
@@ -75,11 +89,16 @@ public class DirectChatController {
                 })
                 .toList();
 
-        val response = new CursorPage<>(
+        val body = new CursorPage<>(
                 content,
                 page.hasNext(),
                 page.nextCursor()
         );
-        return ApiResponse.success(response);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.CHAT, id);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
+        return ApiResponse.success(body);
     }
 }

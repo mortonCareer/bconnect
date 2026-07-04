@@ -1,10 +1,13 @@
 package to.bconnect.api.core.presentation.v1;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.common.response.ApiResponse;
@@ -16,7 +19,9 @@ import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.core.presentation.v1.request.CreateCoworkerRequest;
 import to.bconnect.api.core.presentation.v1.response.CoworkerRequestResponse;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.support.cloudfront.SignedCookieIssuer;
 
 import java.util.List;
 
@@ -30,6 +35,7 @@ public class CoworkerRequestController {
     private final MemberResolver memberResolver;
     private final ProfileResolver profileResolver;
     private final AttachmentResolver attachmentResolver;
+    private final SignedCookieIssuer signedCookieIssuer;
 
     @PostMapping
     public ApiResponse<Long> create(
@@ -41,15 +47,27 @@ public class CoworkerRequestController {
 
     @GetMapping("/received")
     public ApiResponse<List<CoworkerRequestResponse>> listReceived(
-            @AuthenticationPrincipal AuthUser user) {
+            @AuthenticationPrincipal AuthUser user,
+            HttpServletResponse response) {
         val requests = coworkerRequestQueryService.listReceived(user);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
         return ApiResponse.success(assemble(requests));
     }
 
     @GetMapping("/sent")
     public ApiResponse<List<CoworkerRequestResponse>> listSent(
-            @AuthenticationPrincipal AuthUser user) {
+            @AuthenticationPrincipal AuthUser user,
+            HttpServletResponse response) {
         val requests = coworkerRequestQueryService.listSent(user);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
         return ApiResponse.success(assemble(requests));
     }
 
