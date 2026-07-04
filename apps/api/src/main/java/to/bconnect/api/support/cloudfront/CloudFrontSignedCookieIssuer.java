@@ -7,8 +7,13 @@ import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.cloudfront.CloudFrontUtilities;
 import software.amazon.awssdk.services.cloudfront.model.CustomSignerRequest;
 
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -24,18 +29,24 @@ public class CloudFrontSignedCookieIssuer implements SignedCookieIssuer {
 
     private final CloudFrontProperties properties;
     private final CloudFrontUtilities utilities;
-    private final Path privateKeyPath;
+    private final PrivateKey key;
 
     public CloudFrontSignedCookieIssuer(CloudFrontProperties properties) {
         this.properties = properties;
         this.utilities = CloudFrontUtilities.create();
-        this.privateKeyPath = Path.of(properties.privateKeyPath());
+        this.key = parsePrivateKey(properties.privateKey());
     }
 
     @Override
     public List<ResponseCookie> issue(String path) {
         val url = "https://" + properties.domain() + "/" + path;
-        val request = buildRequest(url);
+        val request = CustomSignerRequest.builder()
+                .resourceUrl(url)
+                .privateKey(key)
+                .keyPairId(properties.keyPairId())
+                .expirationDate(Instant.now().plus(properties.cookieTtl()))
+                .build();
+
         val cookies = utilities.getCookiesForCustomPolicy(request);
 
         return Stream.of(
@@ -44,19 +55,6 @@ public class CloudFrontSignedCookieIssuer implements SignedCookieIssuer {
                         cookies.keyPairIdHeaderValue())
                 .map(this::toResponseCookie)
                 .toList();
-    }
-
-    private CustomSignerRequest buildRequest(String url) {
-        try {
-            return CustomSignerRequest.builder()
-                    .resourceUrl(url)
-                    .privateKey(privateKeyPath)
-                    .keyPairId(properties.keyPairId())
-                    .expirationDate(Instant.now().plus(properties.cookieTtl()))
-                    .build();
-        } catch (Exception e) {
-            throw new IllegalStateException("failed at loading CloudFront private key: " + privateKeyPath, e);
-        }
     }
 
     private ResponseCookie toResponseCookie(String header) {
@@ -68,5 +66,19 @@ public class CloudFrontSignedCookieIssuer implements SignedCookieIssuer {
                 .secure(true)
                 .sameSite("Lax")
                 .build();
+    }
+
+    private PrivateKey parsePrivateKey(String base64Pem) {
+        val pem = new String(Base64.getDecoder().decode(base64Pem), StandardCharsets.UTF_8);
+        val content = pem
+                .replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s", "");
+        val decoded = Base64.getDecoder().decode(content);
+        try {
+            return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decoded));
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("failed at parsing CloudFront private key", e);
+        }
     }
 }

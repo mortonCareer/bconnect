@@ -25,4 +25,4 @@ app:
     bucket: test-dummy-bucket
   cloudfront:
     key-pair-id: test-dummy-key-pair-id
-    private-key-path: test-dummy-private-key-path
+    private-key: test-dummy-private-key
