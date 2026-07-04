@@ -163,9 +163,8 @@ resource "railway_variable" "api_sentry_environment" {
 }
 
 resource "railway_variable" "api_cloudfront_private_key" {
-  name = "CLOUDFRONT_PRIVATE_KEY"
-  # BE CloudFrontSignedCookieIssuer 는 PEM 원문을 기대 — base64 그대로 주입하면 부팅 실패 (#698)
-  value          = base64decode(var.cloudfront_private_key)
+  name           = "CLOUDFRONT_PRIVATE_KEY"
+  value          = var.cloudfront_private_key
   service_id     = railway_service.api.id
   environment_id = railway_project.morton.default_environment.id
 

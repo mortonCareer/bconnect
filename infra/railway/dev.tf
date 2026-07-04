@@ -19,9 +19,8 @@ locals {
     # dev BE 가 조립하는 절대 URL 도메인. 미주입 시 기본값 static.<domain>(prod)로
     # 폴백해 dev 키 서명이 prod 도메인을 가리켜 검증 실패. cookie-domain 은
     # .<domain> 기본값이 static-dev 서브도메인까지 덮으므로 별도 주입 불필요.
-    CLOUDFRONT_DOMAIN = "static-dev.${var.domain}"
-    # BE CloudFrontSignedCookieIssuer 는 PEM 원문을 기대 — base64 그대로 주입하면 부팅 실패 (#698)
-    CLOUDFRONT_PRIVATE_KEY = base64decode(var.dev_cloudfront_private_key)
+    CLOUDFRONT_DOMAIN      = "static-dev.${var.domain}"
+    CLOUDFRONT_PRIVATE_KEY = var.dev_cloudfront_private_key
     CLOUDFRONT_KEY_PAIR_ID = var.dev_cloudfront_key_pair_id
   }
 
