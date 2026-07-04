@@ -7,11 +7,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
+import to.bconnect.api.attachment.presentation.v1.AttachmentResponse;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.drive.DriveService;
 import to.bconnect.api.core.presentation.v1.request.CreateDriveRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateDriveRequest;
-import to.bconnect.api.core.presentation.v1.response.DriveFileResponse;
 import to.bconnect.api.core.presentation.v1.response.DriveResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentType;
@@ -71,21 +71,21 @@ public class DriveController {
     }
 
     @GetMapping("/{id}/images")
-    public ApiResponse<List<DriveFileResponse>> listImages(
+    public ApiResponse<List<AttachmentResponse>> listImages(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
         val response = driveService.listAttachments(user, id, AttachmentType.IMAGE).stream()
-                .map(it -> DriveFileResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.SMALL)))
+                .map(it -> AttachmentResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.SMALL)))
                 .toList();
         return ApiResponse.success(response);
     }
 
     @GetMapping("/{id}/files")
-    public ApiResponse<List<DriveFileResponse>> listFiles(
+    public ApiResponse<List<AttachmentResponse>> listFiles(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
         val response = driveService.listAttachments(user, id, AttachmentType.FILE).stream()
-                .map(it -> DriveFileResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.ORIGINAL)))
+                .map(it -> AttachmentResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.ORIGINAL)))
                 .toList();
         return ApiResponse.success(response);
     }
