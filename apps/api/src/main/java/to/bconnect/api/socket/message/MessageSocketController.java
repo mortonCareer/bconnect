@@ -9,13 +9,15 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import to.bconnect.api.attachment.domain.Attachment;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
-import to.bconnect.api.attachment.presentation.v1.AttachmentResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.chat.ChatType;
+
+import java.util.stream.Collectors;
 
 /**
  * @see <a href="https://docs.spring.io/spring-framework/reference/web/websocket/stomp/handle-annotations.html">Annotated Controllers</a>
@@ -35,10 +37,9 @@ public class MessageSocketController {
             @Payload @Valid SendMessageRequest request) {
         val message = messageSocketService.broadcast(user, chatId, ChatType.GROUP, request.toCommand());
         val attachments = attachmentResolver.list(ReferenceType.MESSAGE, message.id());
-        val attachmentResponses = attachments.stream()
-                .map(it -> AttachmentResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.SMALL)))
-                .toList();
-        return MessageResponse.of(message, attachmentResponses);
+        val urlMap = attachments.stream()
+                .collect(Collectors.toMap(Attachment::id, it -> attachmentResolver.parseUrl(it, ImageSize.SMALL)));
+        return MessageResponse.of(message, attachments, urlMap);
     }
 
     @MessageMapping("/direct-chats/{chatId}/messages")
@@ -49,9 +50,8 @@ public class MessageSocketController {
             @Payload @Valid SendMessageRequest request) {
         val message = messageSocketService.broadcast(user, chatId, ChatType.DIRECT, request.toCommand());
         val attachments = attachmentResolver.list(ReferenceType.MESSAGE, message.id());
-        val attachmentResponses = attachments.stream()
-                .map(it -> AttachmentResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.SMALL)))
-                .toList();
-        return MessageResponse.of(message, attachmentResponses);
+        val urlMap = attachments.stream()
+                .collect(Collectors.toMap(Attachment::id, it -> attachmentResolver.parseUrl(it, ImageSize.SMALL)));
+        return MessageResponse.of(message, attachments, urlMap);
     }
 }
