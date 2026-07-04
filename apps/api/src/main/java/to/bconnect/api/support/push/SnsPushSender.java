@@ -22,7 +22,7 @@ import java.util.Map;
 public class SnsPushSender implements PushSender {
 
     private final SnsClient snsClient;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public PushSendResult send(String endpointArn, PushPayload payload) {
