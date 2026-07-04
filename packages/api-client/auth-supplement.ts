@@ -71,7 +71,7 @@ export const authSupplementSchemas: Record<string, SchemaObject> = {
     type: 'object',
     required: ['registered', 'accessToken', 'refreshToken'],
     properties: {
-      registered: { type: 'boolean', enum: [true] },
+      registered: { type: 'boolean', const: true },
       accessToken: { type: 'string' },
       refreshToken: { type: 'string' },
     },
@@ -80,7 +80,7 @@ export const authSupplementSchemas: Record<string, SchemaObject> = {
     type: 'object',
     required: ['registered', 'signupToken'],
     properties: {
-      registered: { type: 'boolean', enum: [false] },
+      registered: { type: 'boolean', const: false },
       signupToken: { type: 'string' },
     },
   },
