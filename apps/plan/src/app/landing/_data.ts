@@ -44,7 +44,7 @@ export const PREVIEW = {
     '간트 차트 기반 공정표로 작업별 일정과 상태를 한눈에 파악',
     '클릭 한 번으로 섭외되는 기술자 자동 추천 서비스',
   ],
-  image: '/landing/preview-schedule.png',
+  image: '/landing/schedule.png',
   imageAlt: '품앗이 공정표 및 기술자 섭외 화면',
 }
 
