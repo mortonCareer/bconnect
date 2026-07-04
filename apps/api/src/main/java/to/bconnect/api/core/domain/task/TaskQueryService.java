@@ -1,5 +1,6 @@
 package to.bconnect.api.core.domain.task;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import to.bconnect.api.common.CommonExceptionCode;
 import java.util.Collection;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TaskQueryService {

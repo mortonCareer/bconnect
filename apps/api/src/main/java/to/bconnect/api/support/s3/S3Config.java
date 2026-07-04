@@ -8,6 +8,10 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
+/**
+ * References
+ * - <a href="https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials-chain.html">Developer Guide for version 2.x</a>
+ */
 @Configuration
 public class S3Config {
 

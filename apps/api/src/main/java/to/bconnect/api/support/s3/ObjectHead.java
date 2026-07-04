@@ -1,6 +1,6 @@
 package to.bconnect.api.support.s3;
 
-public record StoredObject(
+public record ObjectHead(
     String contentType,
     Long size
 ) {}

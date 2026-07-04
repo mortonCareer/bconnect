@@ -1,5 +1,6 @@
 package to.bconnect.api.security;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.member.MemberRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthUserService implements UserDetailsService {

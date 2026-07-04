@@ -1,5 +1,6 @@
 package to.bconnect.api.core.domain.chat;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import to.bconnect.api.storage.member.MemberEntity;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GroupChatService {
