@@ -117,6 +117,12 @@ variable "dev_s3_bucket_name" {
   type        = string
 }
 
+variable "sns_platform_application_arn" {
+  description = "SNS FCM 플랫폼 애플리케이션 ARN (웹 푸시). 비어 있으면 BE 가 푸시 비활성(SnsProperties.enabled()=false)."
+  type        = string
+  default     = ""
+}
+
 # =============================================================================
 # Sentry
 # =============================================================================
