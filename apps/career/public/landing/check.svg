@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" height="100%" overflow="visible" preserveAspectRatio="none" style="display: block;" viewBox="0 0 24 24" width="100%">
+<g id="Container">
+<path d="M0 12C0 5.37258 5.37258 0 12 0V0C18.6274 0 24 5.37258 24 12V12C24 18.6274 18.6274 24 12 24V24C5.37258 24 0 18.6274 0 12V12Z" fill="var(--fill-0, white)" fill-opacity="0.2"/>
+<g id="Icon">
+<path d="M7.33333 12.6667L10 15.3333L16.6667 8.66667" id="Vector" stroke="var(--stroke-0, white)" stroke-linecap="round" stroke-width="1.33333"/>
+</g>
+</g>
+</svg>
