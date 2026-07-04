@@ -17,7 +17,7 @@ export function LandingNav() {
             업체용
           </a>
           <Button asChild size="small">
-            <Link href="/signup">시작하기</Link>
+            <Link href="/signup/auth">시작하기</Link>
           </Button>
         </div>
       </nav>
