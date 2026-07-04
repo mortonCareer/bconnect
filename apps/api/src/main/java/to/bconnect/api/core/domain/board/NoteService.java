@@ -8,7 +8,9 @@ import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.drive.DriveValidator;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.board.BoardEntity;
 import to.bconnect.api.storage.board.BoardRepository;
+import to.bconnect.api.storage.board.BoardType;
 import to.bconnect.api.storage.board.NoteEntity;
 import to.bconnect.api.storage.board.NoteRepository;
 
@@ -46,22 +48,21 @@ public class NoteService {
     }
 
     @Transactional
-    public Long createByProject(AuthUser user, Long projectId, String content) {
-        val board = boardRepository.findByProjectId(projectId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (!driveValidator.isProjectDriveOwner(user.id(), projectId))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+    public Long create(AuthUser user, CreateNote command) {
+        BoardEntity board;
 
-        return noteRepository.save(new NoteEntity(board.getId(), user.id(), content)).getId();
-    }
+        if (command.type() == BoardType.PROJECT) {
+            board = boardRepository.findByProjectId(command.projectId())
+                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+            if (!driveValidator.isProjectDriveOwner(user.id(), command.projectId()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        } else {
+            board = boardRepository.findByDriveId(command.driveId())
+                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+            driveValidator.validate(command.driveId(), user.id());
+        }
 
-    @Transactional
-    public Long createByDrive(AuthUser user, Long driveId, String content) {
-        val board = boardRepository.findByDriveId(driveId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        driveValidator.validate(driveId, user.id());
-
-        return noteRepository.save(new NoteEntity(board.getId(), user.id(), content)).getId();
+        return noteRepository.save(new NoteEntity(board.getId(), user.id(), command.content())).getId();
     }
 
     @Transactional

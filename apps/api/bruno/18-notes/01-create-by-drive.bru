@@ -8,16 +8,14 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/api/v1/notes?driveId={{memberDriveId}}
+  url: {{baseUrl}}/api/v1/notes
   auth: inherit
-}
-
-params:query {
-  driveId: {{memberDriveId}}
 }
 
 body {
   {
+    "type": "DRIVE",
+    "driveId": {{memberDriveId}},
     "content": "드라이브 노트"
   }
 }

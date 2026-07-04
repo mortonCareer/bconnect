@@ -8,12 +8,8 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/v1/notes?driveId={{memberDriveId}}
+  url: {{baseUrl}}/api/v1/drives/{{memberDriveId}}/notes
   auth: inherit
-}
-
-params:query {
-  driveId: {{memberDriveId}}
 }
 
 tests {

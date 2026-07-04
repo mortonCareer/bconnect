@@ -8,12 +8,8 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/v1/notes?projectId={{projectId}}
+  url: {{baseUrl}}/api/v1/projects/{{projectId}}/notes
   auth: inherit
-}
-
-params:query {
-  projectId: {{projectId}}
 }
 
 tests {

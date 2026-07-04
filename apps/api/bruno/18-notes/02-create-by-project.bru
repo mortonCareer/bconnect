@@ -8,16 +8,14 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/api/v1/notes?projectId={{projectId}}
+  url: {{baseUrl}}/api/v1/notes
   auth: inherit
-}
-
-params:query {
-  projectId: {{projectId}}
 }
 
 body {
   {
+    "type": "PROJECT",
+    "projectId": {{projectId}},
     "content": "프로젝트 노트"
   }
 }
