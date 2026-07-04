@@ -2,7 +2,7 @@
 - 위치 : 전체
 - 범위 : 도메인, 레이어, 의존성
 
-## 패키지 구조
+## 디렉터리 구조
 
 ```
 to.bconnect.api
@@ -11,33 +11,19 @@ to.bconnect.api
 ├── core                    # 비즈니스 코어
 │   ├── presentation        # Presentation 레이어
 │   └── domain              # Domain 레이어
-│       ├── chat
-│       └── ...
 ├── storage                 # Storage 레이어
-│   ├── attachment
-│   ├── chat
-│   └── ...
 ├── security                # 인증 · 인가
-│   └── member
 ├── support                 # 제3자 서비스
 └── socket                  # 실시간 통신 (STOMP)
 ```
 - 레이어드 아키텍처(layer-first) 구조를 따릅니다.
 - 패키지 · 레이어 의존성 규칙은 ArchUnit로 강제합니다.
 
-```mermaid
-flowchart TD
-    socket --> core
-    core --> security
-    storage --> common
-    security --> attachment
-    attachment --> storage
-    attachment --> support
-```
+## 패키지 구조
+> socket → core → attachment → security → storage → common, support
 - `PackageDependencyTest.java` 참고
 
 ## 레이어 구조
-
 ```mermaid
 graph TD
   subgraph Presentation
@@ -66,114 +52,47 @@ graph TD
 
 - `LayerDependencyTest.java` 참고
 
-### 컨벤션
-- 비즈니스 로직은 서비스 클래스에서 처리합니다.
-  - 하향식 도메인 교차는 모두 허용되며, 응집도에 따른 의존성을 고려해야 합니다.
-  - 비즈니스 로직이 복잡한 경우 하위 컴포넌트를 생성해 관심사를 분리할 수 있습니다. (e.g. Finder, Validator, etc)
-- 메서드명은 **비즈니스 관점**에서 작성합니다. (e.g. listLatestAccepted x, listPublic o)
-- 저장 구조는 Storage 레이어에 캡슐화합니다. 서비스는 비즈니스 의미 단위로만 호출하고, 컬럼 구조(e.g. min/max)를 알지 못합니다.
-- 유효성 검사 위치
-  - Java Bean Validation : DTO 필드
-  - 비즈니스 로직 : DTO → Command 변환
-  - DB 무효성 : Entity 필드
-- 라우팅
-  - Controller 기본 매핑은 리소스 스코프(`/api/v1/<리소스>`)로 작성합니다.
-  - PathVariable은 메인 도메인 단일 식별자는 `{id}`, 참조 도메인은 `{xxxId}`로 작성합니다.
-  - 예외 : Note는 Project·Drive 양쪽에 종속되는 교차 리소스라 `NoteController`가 중첩 경로(`/projects/{projectId}/notes`, `/drives/{driveId}/notes`, `/notes/{id}`)를 사용합니다.
+### 레이어 컨벤션
+- 컨트롤러는 도메인 객체를 조회하고, 응답 DTO를 조립합니다.
+- 비즈니스 로직은 서비스에서 처리합니다.
+- 비즈니스 로직이 복잡한 경우 하위 컴포넌트를 생성해 로직을 분리할 수 있습니다.
+- 엔티티 저장 구조는 Storage 레이어에 캡슐화합니다. (e.g. minId, maxId)
+- 엔티티 제약 관리를 위해 `schema.sql` 파일을 별도로 관리합니다.
+- 도메인 교차는 하향식만 허용됩니다.
+- 도메인 교차 로직의 위치는 도메인 간 응집도를 고려해서 선정해야 합니다.
 
-## 도메인 의존성
+### 도메인 정책
+- TODO 탈퇴 회원 : DirectChat · GroupChat 조회 응답에서 탈퇴 회원은 member 필드를 `null`로 응답한다.
 
-- 공용 도메인 : Member, Profile, Attachment
-- 도메인 교차 : Domain 계층 내에서 하방식 도메인 교차를 허용
-
-### Member
-
+### 서비스 도메인 교차
 ```mermaid
 graph TD
-  subgraph Presentation
-    DC[Domain Controllers]
+  subgraph chat
+    ChatL[ChatEventListener]
   end
-  subgraph Domain
-    MemR[MemberResolver]
+  subgraph offer
+    OfferAE[OfferAcceptedEvent]
+    OfferVE[OfferActivatedEvent]
   end
-
-  DC --> MemR
+  subgraph board
+    NoteS[NoteService]
+  end
+  subgraph drive
+    DriveV[DriveValidator]
+  end
+  ChatL --> OfferAE
+  ChatL --> OfferVE
+  NoteS --> DriveV
 ```
+- `DomainDependencyTest.java` 참고
+- 부수효과는 EDA 구조로 분리합니다.
 
-### Profile
-
-```mermaid
-graph TD
-  subgraph Presentation
-    ProfC[ProfileController]
-    CowC[CoworkerController]
-    CowRC[CoworkerRequestController]
-    FeedC[FeedController]
-    RecC[RecommendationController]
-  end
-  subgraph Domain
-    ProfQ[ProfileQueryService]
-    ProfR[ProfileResolver]
-  end
-
-  ProfC -->|get · list| ProfQ
-  CowC -->|resolveMap| ProfR
-  CowRC -->|resolveMap| ProfR
-  FeedC -->|resolveMap| ProfR
-  RecC -->|resolveMap| ProfR
-```
-### Attachment
-
-```mermaid
-graph TD
-  subgraph Presentation
-    CS[Other Controllers]
-    AttC[AttachmentController]
-  end
-  subgraph Domain
-    PostS[PostService]
-    CredS[CredentialService]
-    DriveS[DriveService]
-    Reg[AttachmentContextValidatorRegistry]
-  end
-  subgraph Attachment
-    AttR[AttachmentResolver]
-    AttS[AttachmentService]
-    AttL[AttachmentLinker]
-    Reg[AttachmentContextValidatorRegistry]
-  end
-
-  CS -->|resolve| AttR
-  AttC -->|presign · confirm| AttS
-  AttC -->|context validate| Reg
-  PostS & CredS -->|link| AttL
-  DriveS -->|unlink| AttL
-```
-
-### 도메인 교차
-공용 도메인을 제외한 서비스 ↔ 서비스 도메인 간 교차
-
-```mermaid
-graph TD
-  subgraph recommendation
-    RecS[RecommendationService]
-  end
-  subgraph coworker
-    CowS[CoworkerService]
-  end
-  subgraph task
-    TaskS[TaskService]
-  end
-  subgraph member
-    MemS[MemberService]
-  end
-  subgraph otp
-    OtpS[OtpService]
-  end
-  RecS -->|isCoworker| CowS
-  TaskS -->|isCoworker| CowS
-  MemS -->|verifyToken| OtpS
-```
+### 유효성 검사
+- 유효성 검사 위치는 다음과 같습니다
+  - 자바 빈 유효성 : Request DTO 필드 어노테이션
+  - 비즈니스 유효성 : Request DTO의 toCommand 메서드
+  - DB 제약 : `schema.sql`
 
 ## 래퍼런스
-- [Java Bean Validation](https://docs.spring.io/spring-framework/reference/core/validation/beanvalidation.html)
+- [Spring Framework : Java Bean Validation](https://docs.spring.io/spring-framework/reference/core/validation/beanvalidation.html)
+- [Spring Framework : Standard and Custom Events](https://docs.spring.io/spring-framework/reference/core/beans/context-introduction.html#context-functionality-events)
