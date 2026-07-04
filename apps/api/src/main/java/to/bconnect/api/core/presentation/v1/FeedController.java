@@ -19,7 +19,7 @@ import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.core.presentation.v1.response.FeedResponse;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.support.cloudfront.SignedCookieIssuer;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package to.bconnect.api.support.sms;
+package to.bconnect.api.sms;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

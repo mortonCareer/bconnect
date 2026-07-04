@@ -15,8 +15,8 @@ import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.AttachmentEntity;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentType;
-import to.bconnect.api.support.s3.S3FileStorage;
-import to.bconnect.api.support.s3.StoredObject;
+import to.bconnect.api.attachment.infrastructure.s3.S3FileStorage;
+import to.bconnect.api.attachment.infrastructure.s3.StoredObject;
 
 import java.util.List;
 import java.util.UUID;

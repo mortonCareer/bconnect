@@ -1,4 +1,4 @@
-package to.bconnect.api.support.cloudfront;
+package to.bconnect.api.attachment.infrastructure.cloudfront;
 
 import lombok.val;
 import org.springframework.context.annotation.Profile;
@@ -6,6 +6,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.cloudfront.CloudFrontUtilities;
 import software.amazon.awssdk.services.cloudfront.model.CustomSignerRequest;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;

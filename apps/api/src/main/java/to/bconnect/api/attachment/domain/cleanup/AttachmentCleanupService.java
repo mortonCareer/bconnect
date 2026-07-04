@@ -8,7 +8,7 @@ import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.storage.attachment.AttachmentEntity;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentStatus;
-import to.bconnect.api.support.s3.S3FileStorage;
+import to.bconnect.api.attachment.infrastructure.s3.S3FileStorage;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

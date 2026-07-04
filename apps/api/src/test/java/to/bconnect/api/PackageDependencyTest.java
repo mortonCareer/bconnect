@@ -20,7 +20,7 @@ public class PackageDependencyTest {
     private static final String SECURITY = "..security..";
     private static final String STORAGE = "..storage..";
     private static final String COMMON = "..common..";
-    private static final String SUPPORT = "..support..";
+    private static final String SMS = "..sms..";
     private static final String ATTACHMENT = "..attachment..";
 
 	@ArchTest
@@ -33,7 +33,7 @@ public class PackageDependencyTest {
 
     @ArchTest
     ArchRule securityPackageRule = classes().that().resideInAPackage(SECURITY)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, ATTACHMENT);
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, ATTACHMENT, SMS);
 
     @ArchTest
     ArchRule attachmentPackageRule = classes().that().resideInAPackage(ATTACHMENT)
@@ -51,10 +51,10 @@ public class PackageDependencyTest {
             );
 
     @ArchTest
-    ArchRule supportPackageRule = classes().that().resideInAPackage(SUPPORT)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, SUPPORT, ATTACHMENT)
+    ArchRule smsPackageRule = classes().that().resideInAPackage(SMS)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SMS)
             .andShould().onlyDependOnClassesThat(
-                    resideInAnyPackage(SUPPORT).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
+                    resideInAnyPackage(SMS, SECURITY).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
             );
 
 	@ArchTest

@@ -1,4 +1,4 @@
-package to.bconnect.api.support.cloudfront;
+package to.bconnect.api.attachment.domain;
 
 import org.springframework.http.ResponseCookie;
 

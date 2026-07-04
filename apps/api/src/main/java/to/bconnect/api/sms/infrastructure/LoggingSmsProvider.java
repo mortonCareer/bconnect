@@ -1,8 +1,9 @@
-package to.bconnect.api.support.sms;
+package to.bconnect.api.sms.infrastructure;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import to.bconnect.api.sms.SmsProvider;
 
 /**
  * SMS provider that logs messages instead of sending
