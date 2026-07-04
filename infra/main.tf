@@ -15,11 +15,10 @@ resource "aws_iam_account_alias" "this" {
 }
 
 module "aws" {
-  source                   = "./aws"
-  s3_bucket_name           = var.s3_bucket_name
-  dev_s3_bucket_name       = var.dev_s3_bucket_name
-  fcm_service_account_json = var.firebase_service_account_json
-  domain                   = var.domain
+  source             = "./aws"
+  s3_bucket_name     = var.s3_bucket_name
+  dev_s3_bucket_name = var.dev_s3_bucket_name
+  domain             = var.domain
 
   providers = {
     aws           = aws
@@ -45,12 +44,11 @@ module "railway" {
   jwt_secret     = var.jwt_secret
   dev_jwt_secret = var.dev_jwt_secret
 
-  aws_access_key_id            = module.aws.access_key_id
-  aws_secret_access_key        = module.aws.secret_access_key
-  aws_region                   = var.aws_region
-  s3_bucket_name               = var.s3_bucket_name
-  dev_s3_bucket_name           = var.dev_s3_bucket_name
-  sns_platform_application_arn = module.aws.sns_platform_application_arn
+  aws_access_key_id     = module.aws.access_key_id
+  aws_secret_access_key = module.aws.secret_access_key
+  aws_region            = var.aws_region
+  s3_bucket_name        = var.s3_bucket_name
+  dev_s3_bucket_name    = var.dev_s3_bucket_name
 
   cloudfront_private_key     = module.aws.cloudfront_private_key_base64["prod"]
   cloudfront_key_pair_id     = module.aws.cloudfront_key_pair_id["prod"]

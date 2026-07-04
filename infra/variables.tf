@@ -210,13 +210,6 @@ variable "firebase_vapid_key" {
   default     = ""
 }
 
-variable "firebase_service_account_json" {
-  description = "FCM(HTTP v1) 서비스 계정 키 JSON — SNS GCM 플랫폼 애플리케이션 credential 용. 절대 커밋 금지(gitignored tfvars/.secrets). 비어 있으면 SNS 플랫폼 앱 생성 생략."
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
 # =============================================================================
 # Database (Railway Postgres TCP Proxy)
 # =============================================================================

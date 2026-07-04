@@ -162,23 +162,13 @@ resource "railway_variable" "api_sentry_environment" {
   depends_on = [railway_variable.api_sentry_dsn]
 }
 
-# SNS 웹 푸시 — 플랫폼 애플리케이션 ARN (region 은 AWS_REGION 재사용)
-resource "railway_variable" "api_sns_platform_application_arn" {
-  name           = "AWS_SNS_PLATFORM_APPLICATION_ARN"
-  value          = var.sns_platform_application_arn
-  service_id     = railway_service.api.id
-  environment_id = railway_project.morton.default_environment.id
-
-  depends_on = [railway_variable.api_sentry_environment]
-}
-
 resource "railway_variable" "api_cloudfront_private_key" {
   name           = "CLOUDFRONT_PRIVATE_KEY"
   value          = var.cloudfront_private_key
   service_id     = railway_service.api.id
   environment_id = railway_project.morton.default_environment.id
 
-  depends_on = [railway_variable.api_sns_platform_application_arn]
+  depends_on = [railway_variable.api_sentry_environment]
 }
 
 resource "railway_variable" "api_cloudfront_key_pair_id" {
