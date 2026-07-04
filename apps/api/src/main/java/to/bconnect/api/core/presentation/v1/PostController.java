@@ -5,11 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.core.domain.post.PostService;
 import to.bconnect.api.core.presentation.v1.request.CreatePostRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdatePostRequest;
-import to.bconnect.api.core.domain.post.PostService;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.common.response.ApiResponse;
 
 @RestController
 @RequestMapping("/api/v1/posts")

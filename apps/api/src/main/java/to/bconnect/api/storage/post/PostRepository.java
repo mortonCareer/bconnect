@@ -11,11 +11,7 @@ import java.util.stream.Collectors;
 
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
-    List<PostEntity> findByMemberId(Long memberId);
-
-    List<PostEntity> findByTaskId(Long taskId);
-
-    List<PostEntity> findByTaskIdIn(Collection<Long> taskIds);
+    List<PostEntity> findAllByTaskIdIn(Collection<Long> taskIds);
 
     long countByMemberId(Long memberId);
 

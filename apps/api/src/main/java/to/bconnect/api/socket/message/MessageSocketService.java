@@ -7,12 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.attachment.AttachmentLinker;
 import to.bconnect.api.core.domain.chat.Message;
+import to.bconnect.api.core.domain.chat.MessageService;
 import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.socket.WebSocketSecurityConfig;
-import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
@@ -27,26 +26,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MessageSocketService {
 
-    private final MessageRepository messageRepository;
+    private final MessageService messageService;
     private final ParticipantRepository participantRepository;
     private final DirectChatRepository directChatRepository;
     private final MemberRepository memberRepository;
-    private final AttachmentLinker attachmentLinker;
     private final SimpUserRegistry simpUserRegistry;
 
     @Transactional
     public Message broadcast(AuthUser user, Long chatId, ChatType chatType, SendMessage command) {
-        val created = messageRepository.save(new MessageEntity(
-                chatId,
-                chatType,
-                user.id(),
-                command.type(),
-                command.content()
-        ));
-
-        attachmentLinker.link(user.id(), ReferenceType.MESSAGE, created.getId(), command.attachmentIds());
-        markAsRead(chatId, chatType, created.getId());
-        return Message.of(created);
+        val message = messageService.create(chatId, chatType, user.id(), command);
+        markAsRead(chatId, chatType, message.id());
+        return message;
     }
 
     private void markAsRead(Long chatId, ChatType chatType, Long messageId) {
@@ -61,7 +51,7 @@ public class MessageSocketService {
                 .map(it -> it.getSession().getUser().getName())
                 .collect(Collectors.toCollection(HashSet::new));
 
-        val memberIds = memberRepository.findByUsernameIn(usernames).stream()
+        val memberIds = memberRepository.findAllByUsernameIn(usernames).stream()
                 .map(MemberEntity::getId)
                 .toList();
 
@@ -70,7 +60,7 @@ public class MessageSocketService {
                     .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
             memberIds.forEach(it -> chat.markRead(it, messageId));
         } else {
-            participantRepository.findByChatIdAndMemberIdIn(chatId, memberIds)
+            participantRepository.findAllByChatIdAndMemberIdIn(chatId, memberIds)
                     .forEach(it -> it.markRead(messageId));
         }
     }

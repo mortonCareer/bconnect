@@ -12,22 +12,17 @@ import to.bconnect.api.storage.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AttachmentEntity extends BaseEntity {
 
-    @Column(nullable = false)
     private Long memberId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private AttachmentType type;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private AttachmentStatus status = AttachmentStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private AttachmentContext context;
 
-    @Column(nullable = false)
     private Long contextId;
 
     @Enumerated(EnumType.STRING)
@@ -35,19 +30,14 @@ public class AttachmentEntity extends BaseEntity {
 
     private Long referenceId;
 
-    @Column(nullable = false, unique = true)
     private String uuid;
 
-    @Column(nullable = false)
     private String stem;
 
-    @Column(nullable = false)
     private String ext;
 
-    @Column(nullable = false)
     private String contentType;
 
-    @Column(nullable = false)
     private Long size;
 
     public AttachmentEntity(Long memberId, AttachmentType type, AttachmentContext context, Long contextId,

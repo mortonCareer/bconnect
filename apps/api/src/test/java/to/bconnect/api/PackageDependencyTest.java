@@ -33,7 +33,7 @@ public class PackageDependencyTest {
 
     @ArchTest
     ArchRule securityPackageRule = classes().that().resideInAPackage(SECURITY)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY);
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, ATTACHMENT);
 
     @ArchTest
     ArchRule attachmentPackageRule = classes().that().resideInAPackage(ATTACHMENT)

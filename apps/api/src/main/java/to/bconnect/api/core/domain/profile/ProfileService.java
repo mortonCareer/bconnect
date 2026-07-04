@@ -45,9 +45,6 @@ public class ProfileService {
         val found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!found.getMemberId().equals(user.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
         if (!command.trades().contains(command.primaryTrade()))
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
@@ -65,9 +62,6 @@ public class ProfileService {
     public void updateAbout(AuthUser user, String about) {
         val found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-
-        if (!found.getMemberId().equals(user.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         found.updateAbout(about);
     }

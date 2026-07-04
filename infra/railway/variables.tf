@@ -14,6 +14,12 @@ variable "project_name" {
   default     = "morton"
 }
 
+variable "railway_region" {
+  description = "Railway 배포 리전 (싱가폴 = 한국 최근접, #695). 볼륨 리전과 일치해야 함"
+  type        = string
+  default     = "asia-southeast1-eqsg3a"
+}
+
 # =============================================================================
 # GitHub
 # =============================================================================
@@ -149,5 +155,31 @@ variable "solapi_sender_number" {
 
 variable "domain" {
   description = "Root domain for the project (e.g., bconnect.to)"
+  type        = string
+}
+
+# =============================================================================
+# CloudFront (signed cookie)
+# =============================================================================
+
+variable "cloudfront_private_key" {
+  description = "prod CloudFront 서명 개인키 base64 (infra/aws output cloudfront_private_key_base64[\"prod\"])"
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudfront_key_pair_id" {
+  description = "prod CloudFront 공개키 ID (infra/aws output cloudfront_key_pair_id[\"prod\"])"
+  type        = string
+}
+
+variable "dev_cloudfront_private_key" {
+  description = "dev CloudFront 서명 개인키 base64 (infra/aws output cloudfront_private_key_base64[\"dev\"]). prod 와 격리(#694)"
+  type        = string
+  sensitive   = true
+}
+
+variable "dev_cloudfront_key_pair_id" {
+  description = "dev CloudFront 공개키 ID (infra/aws output cloudfront_key_pair_id[\"dev\"]). prod 와 격리(#694)"
   type        = string
 }

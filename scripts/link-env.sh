@@ -4,6 +4,9 @@
 
 set -e
 
+# git 없는 환경(Vercel CLI 소스 업로드 빌드 등)은 워크트리가 없으므로 링크 대상 없음
+git rev-parse --git-dir > /dev/null 2>&1 || exit 0
+
 MAIN_WORKTREE=$(git worktree list --porcelain | head -1 | sed 's/^worktree //')
 CURRENT=$(git rev-parse --show-toplevel)
 

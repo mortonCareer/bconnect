@@ -14,7 +14,7 @@ public record UpdateProfileRequest(
         @NotNull ProfileRole role,
         @NotNull Trade primaryTrade,
         @NotEmpty Set<Trade> trades,
-        @NotNull @PositiveOrZero int experience,
+        @PositiveOrZero int experience,
         String headline,
         @NotNull Address address
 ) {

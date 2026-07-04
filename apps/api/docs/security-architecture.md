@@ -1,10 +1,8 @@
 # security-architecture
 - 위치 : `/security`
-- 범위 : 회원(AuthUser), JWT, OTP, 세션(Session)
+- 범위 : 인증 주체(AuthUser), JWT, OTP, 가입 토큰(SignupToken), 세션(Session)
 
-## 클래스 구조
-
-### Spring Security Architecture
+## Spring Security 아키텍처
 - SecurityFilterChain : 보안 필터 체인
 - AuthenticationFilter : 인증 요청을 Manager에 위임, 인증 후 처리를 SuccessHandler에 위임 (Presentation 계층)
 - AuthenticationProvider : 실제 인증 로직
@@ -15,27 +13,71 @@
 - GrantedAuthority : 권한 표현 (`ROLE_` 접두사)
 - AuthenticationSuccessHandler : 인증 성공 후처리
 
-### 공통
-- AuthUser (UserDetails) : 인증 주체
-- AuthUserService (UserDetailsService) : AuthUser
+## 패키지 구성
 
-### jwt
-- JwtProvider : JWT 생성 · 검증
-- JwtAuthenticationProvider (AuthenticationProvider) : JWT 인증 처리
-- JwtAuthenticationToken (AbstractAuthenticationToken) : JWT 인증 토큰
-- AccessTokenAuthenticationFilter (OncePerRequestFilter) : access token 인증 처리
-- RefreshTokenAuthenticationFilter (OncePerRequestFilter) : refresh token 처리
-- RefreshTokenAuthenticationSuccessHandler (AuthenticationSuccessHandler) : access/refresh token 재발급
+- otp : 본인인증 (인증코드 발송 · 검증)
+- signup : 회원가입 (가입 토큰)
+- jwt : 인증 · 인가 처리 (access · refresh token)
+- session : 세션 관리 (로그인 정보)
 
 ### otp
-- OtpService : 인증코드 발송 · 검증
-- OtpAuthenticationProvider (AuthenticationProvider) : OTP 검증
-- OtpAuthenticationToken (AbstractAuthenticationToken) : OTP 인증 토큰
-- VerifyOtpAuthenticationFilter (AbstractAuthenticationProcessingFilter) : OTP 검증 처리
-- VerifyOtpAuthenticationSuccessHandler (AuthenticationSuccessHandler) : access/refresh or signup token 발급
 
-### session
-- SessionService : 세션 처리 (다른 기기에서 로그인 등)
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Filter as VerifyOtpAuthenticationFilter
+    participant Provider as OtpAuthenticationProvider
+    participant Handler as VerifyOtpAuthenticationSuccessHandler
+
+    Client->>Filter: POST /api/v1/auth/otp/verify
+    Filter->>Provider: authenticate (OtpAuthenticationToken)
+    Provider->>Provider: 인증코드 검증 (OtpService) · 회원 조회 (AuthUserService)
+    Filter->>Handler: onAuthenticationSuccess
+    alt 기존 회원 (AuthUser)
+        Handler->>Handler: 토큰 발급 (JwtProvider) · 세션 등록 (SessionService)
+        Handler-->>Client: access token · refresh 쿠키 (Set-Cookie)
+    else 미가입 (phone · GUEST)
+        Handler->>Handler: signup token 발급 (SignupTokenService)
+        Handler-->>Client: signup token
+    end
+```
+
+### signup
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Filter as SignupTokenAuthenticationFilter
+    participant Provider as SignupTokenAuthenticationProvider
+
+    Client->>Filter: POST /api/v1/members (X-Signup-Token)
+    Filter->>Provider: authenticate (SignupTokenAuthenticationToken)
+    Provider->>Provider: signup token 검증 (SignupTokenService)
+    Filter->>Filter: SecurityContext 저장 · 체인 진행 (회원가입 처리)
+```
+
+### jwt
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant AccessF as AccessTokenAuthenticationFilter
+    participant RefreshF as RefreshTokenAuthenticationFilter
+    participant Provider as JwtAuthenticationProvider
+    participant Handler as RefreshTokenAuthenticationSuccessHandler
+
+    Client->>AccessF: 요청 (Authorization: Bearer)
+    AccessF->>Provider: authenticate (JwtAuthenticationToken)
+    Provider->>Provider: JWT 검증 (JwtProvider) · 회원 조회 (AuthUserService)
+    AccessF->>AccessF: SecurityContext 저장 · 체인 진행
+
+    Client->>RefreshF: POST /api/v1/auth/refresh (refreshToken 쿠키)
+    RefreshF->>Provider: authenticate (JwtAuthenticationToken)
+    Provider->>Provider: JWT 검증 (JwtProvider) · 세션 검증 (SessionService)
+    RefreshF->>Handler: onAuthenticationSuccess
+    Handler->>Handler: access · refresh 재발급 (JwtProvider) · 세션 교체 (SessionService)
+    Handler-->>Client: access token · refresh 쿠키 (Set-Cookie)
+```
 
 ## 래퍼런스
 - [Spring Security : Architecture](https://docs.spring.io/spring-security/reference/servlet/architecture.html)

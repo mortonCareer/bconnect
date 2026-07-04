@@ -79,7 +79,6 @@ public class RefreshTokenAuthenticationFilter extends OncePerRequestFilter {
                 this.logger.debug(LogMessage.format("Set SecurityContextHolder to %s", authResult));
             }
             this.successHandler.onAuthenticationSuccess(request, response, authResult);
-            // to of filter chain
         }
         catch (AuthenticationException failed) {
             this.securityContextHolderStrategy.clearContext();

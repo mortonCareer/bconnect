@@ -6,11 +6,11 @@ servers:
 - url: http://localhost:8080
   description: Generated server url
 paths:
-  /api/v1/tasks/{id}:
+  /api/v1/tasks/{id}/worker:
     put:
       tags:
       - task-controller
-      operationId: update
+      operationId: updateByWorker
       parameters:
       - name: id
         in: path
@@ -22,7 +22,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateTaskRequest"
+              $ref: "#/components/schemas/UpdateWorkerTaskRequest"
         required: true
       responses:
         "200":
@@ -31,10 +31,11 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
-    delete:
+  /api/v1/tasks/{id}/company:
+    put:
       tags:
       - task-controller
-      operationId: delete
+      operationId: updateByCompany
       parameters:
       - name: id
         in: path
@@ -42,6 +43,37 @@ paths:
         schema:
           type: integer
           format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProjectTaskRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/tasks/{id}/assignee:
+    put:
+      tags:
+      - task-controller
+      operationId: updateByAssignee
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAssigneeTaskRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -53,7 +85,7 @@ paths:
     put:
       tags:
       - recommendation-controller
-      operationId: update_1
+      operationId: update
       parameters:
       - name: id
         in: path
@@ -77,6 +109,67 @@ paths:
     delete:
       tags:
       - recommendation-controller
+      operationId: delete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/projects/{id}:
+    get:
+      tags:
+      - project-controller
+      operationId: get
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseProjectResponse"
+    put:
+      tags:
+      - project-controller
+      operationId: update_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProjectRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+    delete:
+      tags:
+      - project-controller
       operationId: delete_1
       parameters:
       - name: id
@@ -110,10 +203,17 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
-    delete:
+  /api/v1/profiles/me/about:
+    put:
       tags:
       - profile-controller
-      operationId: delete_2
+      operationId: updateAbout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileAboutRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -149,6 +249,67 @@ paths:
     delete:
       tags:
       - post-controller
+      operationId: delete_2
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/offers/reorder:
+    put:
+      tags:
+      - offer-controller
+      operationId: reorder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderOfferRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/notes/{id}:
+    put:
+      tags:
+      - note-controller
+      operationId: update_4
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNoteRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+    delete:
+      tags:
+      - note-controller
       operationId: delete_3
       parameters:
       - name: id
@@ -168,7 +329,7 @@ paths:
     get:
       tags:
       - member-controller
-      operationId: get
+      operationId: get_1
       responses:
         "200":
           description: OK
@@ -179,7 +340,7 @@ paths:
     put:
       tags:
       - member-controller
-      operationId: update_4
+      operationId: update_5
       requestBody:
         content:
           application/json:
@@ -204,27 +365,88 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
-  /api/v1/tasks:
-    get:
+  /api/v1/drives/{id}/name:
+    put:
       tags:
-      - task-controller
-      operationId: list
+      - drive-controller
+      operationId: rename
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDriveRequest"
+        required: true
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseListTaskResponse"
-    post:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/companies/me:
+    put:
       tags:
-      - task-controller
-      operationId: create
+      - company-controller
+      operationId: update_6
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateTaskRequest"
+              $ref: "#/components/schemas/UpdateCompanyRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+    delete:
+      tags:
+      - company-controller
+      operationId: delete_4
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/tasks/worker:
+    post:
+      tags:
+      - task-controller
+      operationId: createByWorker
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkerTaskRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/tasks/company:
+    post:
+      tags:
+      - task-controller
+      operationId: createByCompany
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProjectTaskRequest"
         required: true
       responses:
         "200":
@@ -237,7 +459,7 @@ paths:
     post:
       tags:
       - recommendation-controller
-      operationId: create_1
+      operationId: create
       requestBody:
         content:
           application/json:
@@ -289,6 +511,35 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/projects:
+    get:
+      tags:
+      - project-controller
+      operationId: list
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListProjectResponse"
+    post:
+      tags:
+      - project-controller
+      operationId: create_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProjectRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
   /api/v1/profiles:
     get:
       tags:
@@ -336,6 +587,99 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/offers:
+    post:
+      tags:
+      - offer-controller
+      operationId: create_4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOfferRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/offers/{id}/deny:
+    post:
+      tags:
+      - offer-controller
+      operationId: deny
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/offers/{id}/cancel:
+    post:
+      tags:
+      - offer-controller
+      operationId: cancel
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/offers/{id}/accept:
+    post:
+      tags:
+      - offer-controller
+      operationId: accept
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/notes:
+    post:
+      tags:
+      - note-controller
+      operationId: create_5
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNoteRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
   /api/v1/members:
     get:
       tags:
@@ -365,11 +709,105 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/group-chats:
+    get:
+      tags:
+      - group-chat-controller
+      operationId: list_2
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListGroupChatResponse"
+    post:
+      tags:
+      - group-chat-controller
+      operationId: create_6
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGroupChatRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/drives:
+    get:
+      tags:
+      - drive-controller
+      operationId: list_3
+      parameters:
+      - name: projectId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListDriveResponse"
+    post:
+      tags:
+      - drive-controller
+      operationId: create_7
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDriveRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/direct-chats:
+    get:
+      tags:
+      - direct-chat-controller
+      operationId: list_4
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListDirectChatResponse"
+    post:
+      tags:
+      - direct-chat-controller
+      operationId: create_8
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDirectChatRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
   /api/v1/credentials:
     get:
       tags:
       - credential-controller
-      operationId: list_2
+      operationId: list_5
       parameters:
       - name: memberId
         in: query
@@ -383,11 +821,11 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseListCredentialResponse"
+                $ref: "#/components/schemas/ApiResponseListCredentialSummaryResponse"
     post:
       tags:
       - credential-controller
-      operationId: create_4
+      operationId: create_9
       requestBody:
         content:
           application/json:
@@ -405,7 +843,7 @@ paths:
     post:
       tags:
       - credential-controller
-      operationId: deny
+      operationId: deny_1
       parameters:
       - name: id
         in: path
@@ -424,7 +862,7 @@ paths:
     post:
       tags:
       - credential-controller
-      operationId: accept
+      operationId: accept_1
       parameters:
       - name: id
         in: path
@@ -443,7 +881,7 @@ paths:
     post:
       tags:
       - coworker-request-controller
-      operationId: create_5
+      operationId: create_10
       requestBody:
         content:
           application/json:
@@ -461,7 +899,7 @@ paths:
     post:
       tags:
       - coworker-request-controller
-      operationId: deny_1
+      operationId: deny_2
       parameters:
       - name: id
         in: path
@@ -480,7 +918,7 @@ paths:
     post:
       tags:
       - coworker-request-controller
-      operationId: accept_1
+      operationId: accept_2
       parameters:
       - name: id
         in: path
@@ -495,27 +933,27 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
-  /api/v1/chats:
+  /api/v1/companies:
     get:
       tags:
-      - chat-controller
-      operationId: list_3
+      - company-controller
+      operationId: list_6
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseListChatResponse"
+                $ref: "#/components/schemas/ApiResponseListCompanyResponse"
     post:
       tags:
-      - chat-controller
-      operationId: create_6
+      - company-controller
+      operationId: create_11
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateChatRequest"
+              $ref: "#/components/schemas/CreateCompanyRequest"
         required: true
       responses:
         "200":
@@ -554,16 +992,16 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
-  /api/v1/profiles/me/about:
-    patch:
+  /api/v1/attachments/presign:
+    post:
       tags:
-      - profile-controller
-      operationId: updateAbout
+      - attachment-controller
+      operationId: presign
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateProfileAboutRequest"
+              $ref: "#/components/schemas/PresignRequest"
         required: true
       responses:
         "200":
@@ -571,15 +1009,45 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseVoid"
-  /api/v1/tasks/coworker:
+                $ref: "#/components/schemas/ApiResponseListPresignedFileResponse"
+  /api/v1/attachments/confirm:
+    post:
+      tags:
+      - attachment-controller
+      operationId: confirm
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfirmRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListAttachmentResponse"
+  /api/v1/tasks:
     get:
       tags:
       - task-controller
-      operationId: listByCoworker
+      operationId: list_7
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListTaskResponse"
+  /api/v1/tasks/{id}/offers:
+    get:
+      tags:
+      - task-controller
+      operationId: listOffers
       parameters:
-      - name: memberId
-        in: query
+      - name: id
+        in: path
         required: true
         schema:
           type: integer
@@ -590,7 +1058,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseListCoworkerTaskResponse"
+                $ref: "#/components/schemas/ApiResponseListOfferResponse"
   /api/v1/recommendations/sent:
     get:
       tags:
@@ -653,11 +1121,49 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListRecommendationResponse"
+  /api/v1/projects/{id}/tasks:
+    get:
+      tags:
+      - project-controller
+      operationId: listTasks
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListTaskResponse"
+  /api/v1/projects/{id}/notes:
+    get:
+      tags:
+      - project-controller
+      operationId: listNotes
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListNoteResponse"
   /api/v1/profiles/{id}:
     get:
       tags:
       - profile-controller
-      operationId: get_1
+      operationId: get_2
       parameters:
       - name: id
         in: path
@@ -690,11 +1196,35 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseCheckUsernameResponse"
+  /api/v1/group-chats/{id}/messages:
+    get:
+      tags:
+      - group-chat-controller
+      operationId: listMessages
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: cursorLimit
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CursorLimit"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCursorPageMessageResponse"
   /api/v1/feeds:
     get:
       tags:
       - feed-controller
-      operationId: list_4
+      operationId: list_8
       responses:
         "200":
           description: OK
@@ -706,7 +1236,7 @@ paths:
     get:
       tags:
       - feed-controller
-      operationId: get_2
+      operationId: get_3
       parameters:
       - name: id
         in: path
@@ -721,23 +1251,116 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseFeedResponse"
-  /api/v1/credentials/types:
+  /api/v1/drives/{id}/notes:
     get:
       tags:
-      - credential-controller
-      operationId: listTypes
+      - drive-controller
+      operationId: listNotes_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseListCredentialType"
+                $ref: "#/components/schemas/ApiResponseListNoteResponse"
+  /api/v1/drives/{id}/images:
+    get:
+      tags:
+      - drive-controller
+      operationId: listImages
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListAttachmentResponse"
+  /api/v1/drives/{id}/files:
+    get:
+      tags:
+      - drive-controller
+      operationId: listFiles
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListAttachmentResponse"
+  /api/v1/drives/me:
+    get:
+      tags:
+      - drive-controller
+      operationId: listMine
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListDriveResponse"
+  /api/v1/direct-chats/{id}/messages:
+    get:
+      tags:
+      - direct-chat-controller
+      operationId: listMessages_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: cursorLimit
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CursorLimit"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCursorPageMessageResponse"
+  /api/v1/credentials/me:
+    get:
+      tags:
+      - credential-controller
+      operationId: listMine_1
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListCredentialResponse"
   /api/v1/coworkers:
     get:
       tags:
       - coworker-controller
-      operationId: list_5
+      operationId: list_9
       parameters:
       - name: memberId
         in: query
@@ -752,6 +1375,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListCoworkerResponse"
+  /api/v1/coworkers/{memberId}/tasks:
+    get:
+      tags:
+      - coworker-controller
+      operationId: listTasks_1
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListCoworkerTaskResponse"
   /api/v1/coworker-requests/sent:
     get:
       tags:
@@ -776,35 +1418,30 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListCoworkerRequestResponse"
-  /api/v1/chats/{chatId}/messages:
+  /api/v1/companies/{id}:
     get:
       tags:
-      - chat-controller
-      operationId: listMessages
+      - company-controller
+      operationId: get_4
       parameters:
-      - name: chatId
+      - name: id
         in: path
         required: true
         schema:
           type: integer
           format: int64
-      - name: cursorLimit
-        in: query
-        required: true
-        schema:
-          $ref: "#/components/schemas/CursorLimit"
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseCursorPageMessageResponse"
-  /api/v1/credentials/{id}:
+                $ref: "#/components/schemas/ApiResponseCompanyResponse"
+  /api/v1/tasks/{id}:
     delete:
       tags:
-      - credential-controller
-      operationId: delete_4
+      - task-controller
+      operationId: delete_5
       parameters:
       - name: id
         in: path
@@ -819,13 +1456,51 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
-  /api/v1/coworkers/{id}:
+  /api/v1/drives/{id}:
+    delete:
+      tags:
+      - drive-controller
+      operationId: delete_6
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/credentials/{id}:
+    delete:
+      tags:
+      - credential-controller
+      operationId: delete_7
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/coworkers/{memberId}:
     delete:
       tags:
       - coworker-controller
-      operationId: delete_5
+      operationId: delete_8
       parameters:
-      - name: id
+      - name: memberId
         in: path
         required: true
         schema:
@@ -842,7 +1517,7 @@ paths:
     delete:
       tags:
       - coworker-request-controller
-      operationId: cancel
+      operationId: cancel_1
       parameters:
       - name: id
         in: path
@@ -904,24 +1579,14 @@ components:
       - TRANSPORT
       - CLEANING
       - GENERAL_LABOR
-    UpdateTaskRequest:
+    UpdateWorkerTaskRequest:
       type: object
       properties:
-        company:
-          type: string
-          minLength: 1
-        address:
-          $ref: "#/components/schemas/Address"
-        taskTitle:
-          type: string
-          minLength: 1
-        eventTitle:
-          type: string
-          minLength: 1
         trades:
           type: array
           items:
             $ref: "#/components/schemas/Trade"
+          minItems: 1
           uniqueItems: true
         start:
           type: string
@@ -929,13 +1594,21 @@ components:
         end:
           type: string
           format: date
+        title:
+          type: string
+          minLength: 1
+        memo:
+          type: string
+          minLength: 1
+        company:
+          type: string
+        address:
+          $ref: "#/components/schemas/Address"
       required:
-      - address
-      - company
       - end
-      - eventTitle
+      - memo
       - start
-      - taskTitle
+      - title
       - trades
     ApiResponseVoid:
       type: object
@@ -1019,6 +1692,49 @@ components:
       - 509 BANDWIDTH_LIMIT_EXCEEDED
       - 510 NOT_EXTENDED
       - 511 NETWORK_AUTHENTICATION_REQUIRED
+    UpdateProjectTaskRequest:
+      type: object
+      properties:
+        trades:
+          type: array
+          items:
+            $ref: "#/components/schemas/Trade"
+          minItems: 1
+          uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        title:
+          type: string
+          minLength: 1
+        requirement:
+          type: string
+          minLength: 1
+        memo:
+          type: string
+          minLength: 1
+      required:
+      - end
+      - memo
+      - requirement
+      - start
+      - title
+      - trades
+    UpdateAssigneeTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        memo:
+          type: string
+          minLength: 1
+      required:
+      - memo
+      - title
     UpdateRecommendationRequest:
       type: object
       properties:
@@ -1027,16 +1743,37 @@ components:
           minLength: 1
       required:
       - content
+    UpdateProjectRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        address:
+          $ref: "#/components/schemas/Address"
+      required:
+      - address
+      - title
+    ProfileRole:
+      type: string
+      enum:
+      - CLIENT
+      - ARCHITECT
+      - FOREMAN
+      - SKILLED
+      - SEMI_SKILLED
+      - HELPER
     UpdateProfileRequest:
       type: object
       properties:
+        role:
+          $ref: "#/components/schemas/ProfileRole"
         primaryTrade:
           $ref: "#/components/schemas/Trade"
         trades:
           type: array
           items:
             $ref: "#/components/schemas/Trade"
-          maxItems: 2147483647
           minItems: 1
           uniqueItems: true
         experience:
@@ -1048,9 +1785,14 @@ components:
           $ref: "#/components/schemas/Address"
       required:
       - address
-      - experience
       - primaryTrade
+      - role
       - trades
+    UpdateProfileAboutRequest:
+      type: object
+      properties:
+        about:
+          type: string
     UpdatePostRequest:
       type: object
       properties:
@@ -1059,49 +1801,58 @@ components:
           minLength: 1
       required:
       - content
-    Role:
-      type: string
-      enum:
-      - GUEST
-      - CLIENT
-      - ARCHITECT
-      - CONTRACTOR
-      - FOREMAN
-      - SKILLED
-      - SEMI_SKILLED
-      - HELPER
-      - ADMIN
+    ReorderOfferRequest:
+      type: object
+      properties:
+        offerIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          minItems: 1
+      required:
+      - offerIds
+    UpdateNoteRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+      required:
+      - content
     UpdateMemberRequest:
       type: object
       properties:
         name:
           type: string
           minLength: 1
-        picture:
-          type: string
-        role:
-          $ref: "#/components/schemas/Role"
+        pictureId:
+          type: integer
+          format: int64
       required:
       - name
-      - role
-    CreateTaskRequest:
+    UpdateDriveRequest:
       type: object
       properties:
-        company:
+        title:
           type: string
           minLength: 1
-        address:
-          $ref: "#/components/schemas/Address"
-        taskTitle:
-          type: string
-          minLength: 1
-        eventTitle:
-          type: string
-          minLength: 1
+      required:
+      - title
+    UpdateCompanyRequest:
+      type: object
+      properties:
+        pictureId:
+          type: integer
+          format: int64
+    CreateWorkerTaskRequest:
+      type: object
+      properties:
         trades:
           type: array
           items:
             $ref: "#/components/schemas/Trade"
+          minItems: 1
           uniqueItems: true
         start:
           type: string
@@ -1109,13 +1860,21 @@ components:
         end:
           type: string
           format: date
+        title:
+          type: string
+          minLength: 1
+        memo:
+          type: string
+          minLength: 1
+        company:
+          type: string
+        address:
+          $ref: "#/components/schemas/Address"
       required:
-      - address
-      - company
       - end
-      - eventTitle
+      - memo
       - start
-      - taskTitle
+      - title
       - trades
     ApiResponseLong:
       type: object
@@ -1127,6 +1886,41 @@ components:
         data:
           type: integer
           format: int64
+    CreateProjectTaskRequest:
+      type: object
+      properties:
+        trades:
+          type: array
+          items:
+            $ref: "#/components/schemas/Trade"
+          minItems: 1
+          uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        projectId:
+          type: integer
+          format: int64
+        title:
+          type: string
+          minLength: 1
+        requirement:
+          type: string
+          minLength: 1
+        memo:
+          type: string
+          minLength: 1
+      required:
+      - end
+      - memo
+      - projectId
+      - requirement
+      - start
+      - title
+      - trades
     CreateRecommendationRequest:
       type: object
       properties:
@@ -1139,16 +1933,28 @@ components:
       required:
       - content
       - toId
+    CreateProjectRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        address:
+          $ref: "#/components/schemas/Address"
+      required:
+      - address
+      - title
     CreateProfileRequest:
       type: object
       properties:
+        role:
+          $ref: "#/components/schemas/ProfileRole"
         primaryTrade:
           $ref: "#/components/schemas/Trade"
         trades:
           type: array
           items:
             $ref: "#/components/schemas/Trade"
-          maxItems: 2147483647
           minItems: 1
           uniqueItems: true
         experience:
@@ -1162,8 +1968,8 @@ components:
           $ref: "#/components/schemas/Address"
       required:
       - address
-      - experience
       - primaryTrade
+      - role
       - trades
     CreatePostRequest:
       type: object
@@ -1171,43 +1977,124 @@ components:
         taskId:
           type: integer
           format: int64
-        images:
+        attachmentIds:
           type: array
           items:
-            type: string
-          maxItems: 2147483647
+            type: integer
+            format: int64
           minItems: 1
         content:
           type: string
           minLength: 1
       required:
+      - attachmentIds
       - content
-      - images
+    CreateOfferRequest:
+      type: object
+      properties:
+        taskId:
+          type: integer
+          format: int64
+        workerId:
+          type: integer
+          format: int64
+        due:
+          type: string
+          format: date
+      required:
+      - due
+      - taskId
+      - workerId
+    BoardType:
+      type: string
+      enum:
+      - PROJECT
+      - DRIVE
+    CreateNoteRequest:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/BoardType"
+        projectId:
+          type: integer
+          format: int64
+        driveId:
+          type: integer
+          format: int64
+        content:
+          type: string
+          minLength: 1
+      required:
+      - content
+      - type
     RegisterMemberRequest:
       type: object
       properties:
-        phone:
-          type: string
-          minLength: 1
-        signupToken:
-          type: string
-          minLength: 1
         username:
           type: string
           minLength: 1
         name:
           type: string
           minLength: 1
-        picture:
-          type: string
+        pictureId:
+          type: integer
+          format: int64
         role:
           $ref: "#/components/schemas/Role"
       required:
       - name
-      - phone
       - role
-      - signupToken
       - username
+    Role:
+      type: string
+      enum:
+      - GUEST
+      - WORKER
+      - CONTRACTOR
+      - ADMIN
+    CreateGroupChatRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        participantIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          maxItems: 2147483647
+          minItems: 2
+      required:
+      - participantIds
+      - title
+    CreateDriveRequest:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/DriveType"
+        title:
+          type: string
+          minLength: 1
+        projectId:
+          type: integer
+          format: int64
+      required:
+      - title
+      - type
+    DriveType:
+      type: string
+      enum:
+      - PROJECT
+      - MEMBER
+    CreateDirectChatRequest:
+      type: object
+      properties:
+        memberId:
+          type: integer
+          format: int64
+      required:
+      - memberId
     CreateCredentialRequest:
       type: object
       properties:
@@ -1216,6 +2103,9 @@ components:
         expiredAt:
           type: string
           format: date
+        attachmentId:
+          type: integer
+          format: int64
       required:
       - type
     CredentialType:
@@ -1239,22 +2129,21 @@ components:
           format: int64
       required:
       - toId
-    CreateChatRequest:
+    CreateCompanyRequest:
       type: object
       properties:
-        title:
+        name:
           type: string
           minLength: 1
-        participantIds:
-          type: array
-          items:
-            type: integer
-            format: int64
-          maxItems: 2147483647
-          minItems: 2
+        brn:
+          type: string
+          minLength: 1
+        pictureId:
+          type: integer
+          format: int64
       required:
-      - participantIds
-      - title
+      - brn
+      - name
     SendCodeRequest:
       type: object
       properties:
@@ -1279,10 +2168,122 @@ components:
         expiresAt:
           type: string
           format: date-time
-    UpdateProfileAboutRequest:
+    AttachmentContext:
+      type: string
+      enum:
+      - CHAT
+      - COMPANY
+      - CREDENTIAL
+      - DRIVE
+      - MEMBER
+      - POST
+    AttachmentType:
+      type: string
+      enum:
+      - IMAGE
+      - FILE
+    FileItem:
       type: object
       properties:
-        about:
+        filename:
+          type: string
+          minLength: 1
+        contentType:
+          type: string
+          minLength: 1
+        size:
+          type: integer
+          format: int64
+      required:
+      - contentType
+      - filename
+      - size
+    PresignRequest:
+      type: object
+      properties:
+        context:
+          $ref: "#/components/schemas/AttachmentContext"
+        type:
+          $ref: "#/components/schemas/AttachmentType"
+        contextId:
+          type: integer
+          format: int64
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/FileItem"
+          minItems: 1
+      required:
+      - context
+      - contextId
+      - files
+      - type
+    ApiResponseListPresignedFileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PresignedFileResponse"
+    PresignedFileResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        uploadUrl:
+          type: string
+    ConfirmRequest:
+      type: object
+      properties:
+        attachmentIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          minItems: 1
+      required:
+      - attachmentIds
+    ApiResponseListAttachmentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttachmentResponse"
+    AttachmentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        type:
+          $ref: "#/components/schemas/AttachmentType"
+        filename:
+          type: string
+        contentType:
+          type: string
+        size:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+        url:
           type: string
     ApiResponseListTaskResponse:
       type: object
@@ -1295,23 +2296,39 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TaskResponse"
+    OfferStatus:
+      type: string
+      enum:
+      - PENDING
+      - ACTIVE
+      - ACCEPTED
+      - DENIED
+      - CANCELED
+    OfferSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        taskId:
+          type: integer
+          format: int64
+        seq:
+          type: integer
+          format: int32
+        due:
+          type: string
+          format: date
+        status:
+          $ref: "#/components/schemas/OfferStatus"
     TaskResponse:
       type: object
       properties:
         id:
           type: integer
           format: int64
-        memberId:
-          type: integer
-          format: int64
-        company:
-          type: string
-        address:
-          $ref: "#/components/schemas/Address"
-        taskTitle:
-          type: string
-        eventTitle:
-          type: string
+        type:
+          $ref: "#/components/schemas/TaskType"
         trades:
           type: array
           items:
@@ -1323,13 +2340,51 @@ components:
         end:
           type: string
           format: date
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        workerId:
+          type: integer
+          format: int64
+        workerTitle:
+          type: string
+        workerMemo:
+          type: string
+        workerCompany:
+          type: string
+        address:
+          $ref: "#/components/schemas/Address"
+        projectId:
+          type: integer
+          format: int64
+        projectTitle:
+          type: string
+        projectRequirement:
+          type: string
+        projectMemo:
+          type: string
+        offer:
+          $ref: "#/components/schemas/OfferSummaryResponse"
         createdAt:
           type: string
           format: date-time
         modifiedAt:
           type: string
           format: date-time
-    ApiResponseListCoworkerTaskResponse:
+    TaskStatus:
+      type: string
+      enum:
+      - DRAFT
+      - OPEN
+      - OFFERED
+      - SCHEDULED
+      - IN_PROGRESS
+      - COMPLETED
+    TaskType:
+      type: string
+      enum:
+      - WORKER
+      - PROJECT
+    ApiResponseListOfferResponse:
       type: object
       properties:
         success:
@@ -1339,33 +2394,7 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/CoworkerTaskResponse"
-    CoworkerTaskResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        memberId:
-          type: integer
-          format: int64
-        start:
-          type: string
-          format: date
-        end:
-          type: string
-          format: date
-    ApiResponseListRecommendationResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        error:
-          $ref: "#/components/schemas/ExceptionCode"
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/RecommendationResponse"
+            $ref: "#/components/schemas/OfferResponse"
     MemberSummaryResponse:
       type: object
       properties:
@@ -1386,6 +2415,33 @@ components:
         modifiedAt:
           type: string
           format: date-time
+    OfferResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        taskId:
+          type: integer
+          format: int64
+        seq:
+          type: integer
+          format: int32
+        due:
+          type: string
+          format: date
+        status:
+          $ref: "#/components/schemas/OfferStatus"
+        member:
+          $ref: "#/components/schemas/MemberSummaryResponse"
+        profile:
+          $ref: "#/components/schemas/ProfileSummaryResponse"
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
     ProfileSummaryResponse:
       type: object
       properties:
@@ -1398,6 +2454,17 @@ components:
           type: string
         address:
           $ref: "#/components/schemas/Address"
+    ApiResponseListRecommendationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecommendationResponse"
     RecommendationResponse:
       type: object
       properties:
@@ -1412,6 +2479,73 @@ components:
           type: string
         visible:
           type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+    ApiResponseListProjectResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProjectResponse"
+    ProjectResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        companyId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        address:
+          $ref: "#/components/schemas/Address"
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+    ApiResponseProjectResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/ProjectResponse"
+    ApiResponseListNoteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/NoteResponse"
+    NoteResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        content:
+          type: string
         createdAt:
           type: string
           format: date-time
@@ -1437,6 +2571,8 @@ components:
           format: int64
         member:
           $ref: "#/components/schemas/MemberSummaryResponse"
+        role:
+          $ref: "#/components/schemas/ProfileRole"
         primaryTrade:
           $ref: "#/components/schemas/Trade"
         trades:
@@ -1533,6 +2669,106 @@ components:
       properties:
         available:
           type: boolean
+    ApiResponseListGroupChatResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupChatResponse"
+    GroupChatResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        participants:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemberSummaryResponse"
+        lastMessage:
+          $ref: "#/components/schemas/MessageResponse"
+        unreadCount:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+    MessageResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        chatId:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        type:
+          $ref: "#/components/schemas/MessageType"
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+        attachments:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttachmentResponse"
+    MessageType:
+      type: string
+      enum:
+      - TEXT
+      - IMAGE
+      - FILE
+      - SYSTEM
+      - OFFER
+    CursorLimit:
+      type: object
+      properties:
+        cursor:
+          type: integer
+          format: int64
+        limit:
+          type: integer
+          format: int32
+        reverse:
+          type: boolean
+    ApiResponseCursorPageMessageResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/CursorPageMessageResponse"
+    CursorPageMessageResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/MessageResponse"
+        hasNext:
+          type: boolean
+        nextCursor:
+          type: integer
+          format: int64
     ApiResponseListFeedResponse:
       type: object
       properties:
@@ -1586,6 +2822,108 @@ components:
           $ref: "#/components/schemas/ExceptionCode"
         data:
           $ref: "#/components/schemas/FeedResponse"
+    ApiResponseListDriveResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DriveResponse"
+    DriveResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        type:
+          $ref: "#/components/schemas/DriveType"
+        projectId:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+    ApiResponseListDirectChatResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DirectChatResponse"
+    DirectChatResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        member:
+          $ref: "#/components/schemas/MemberSummaryResponse"
+        lastMessage:
+          $ref: "#/components/schemas/MessageResponse"
+        unreadCount:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+    ApiResponseListCredentialSummaryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/CredentialSummaryResponse"
+    CredentialStatus:
+      type: string
+      enum:
+      - PENDING
+      - ACCEPTED
+      - DENIED
+    CredentialSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        type:
+          $ref: "#/components/schemas/CredentialType"
+        status:
+          $ref: "#/components/schemas/CredentialStatus"
+        expiredAt:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
     ApiResponseListCredentialResponse:
       type: object
       properties:
@@ -1619,23 +2957,8 @@ components:
         modifiedAt:
           type: string
           format: date-time
-    CredentialStatus:
-      type: string
-      enum:
-      - PENDING
-      - ACCEPTED
-      - DENIED
-    ApiResponseListCredentialType:
-      type: object
-      properties:
-        success:
-          type: boolean
-        error:
-          $ref: "#/components/schemas/ExceptionCode"
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/CredentialType"
+        attachment:
+          $ref: "#/components/schemas/AttachmentResponse"
     ApiResponseListCoworkerResponse:
       type: object
       properties:
@@ -1666,6 +2989,32 @@ components:
       - SENT
       - RECEIVED
       - COWORKER
+    ApiResponseListCoworkerTaskResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoworkerTaskResponse"
+    CoworkerTaskResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
     ApiResponseListCoworkerRequestResponse:
       type: object
       properties:
@@ -1687,7 +3036,7 @@ components:
           $ref: "#/components/schemas/MemberSummaryResponse"
         profile:
           $ref: "#/components/schemas/ProfileSummaryResponse"
-    ApiResponseListChatResponse:
+    ApiResponseListCompanyResponse:
       type: object
       properties:
         success:
@@ -1697,45 +3046,21 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/ChatResponse"
-    ChatResponse:
+            $ref: "#/components/schemas/CompanyResponse"
+    CompanyResponse:
       type: object
       properties:
         id:
-          type: integer
-          format: int64
-        title:
-          type: string
-        participants:
-          type: array
-          items:
-            $ref: "#/components/schemas/MemberSummaryResponse"
-        lastMessage:
-          $ref: "#/components/schemas/MessageResponse"
-        unreadCount:
-          type: integer
-          format: int64
-        createdAt:
-          type: string
-          format: date-time
-        modifiedAt:
-          type: string
-          format: date-time
-    MessageResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        chatId:
           type: integer
           format: int64
         memberId:
           type: integer
           format: int64
-        type:
-          $ref: "#/components/schemas/MessageType"
-        content:
+        name:
+          type: string
+        brn:
+          type: string
+        picture:
           type: string
         createdAt:
           type: string
@@ -1743,25 +3068,7 @@ components:
         modifiedAt:
           type: string
           format: date-time
-    MessageType:
-      type: string
-      enum:
-      - TEXT
-      - IMAGE
-      - FILE
-      - SYSTEM
-    CursorLimit:
-      type: object
-      properties:
-        cursor:
-          type: integer
-          format: int64
-        limit:
-          type: integer
-          format: int32
-        reverse:
-          type: boolean
-    ApiResponseCursorPageMessageResponse:
+    ApiResponseCompanyResponse:
       type: object
       properties:
         success:
@@ -1769,16 +3076,4 @@ components:
         error:
           $ref: "#/components/schemas/ExceptionCode"
         data:
-          $ref: "#/components/schemas/CursorPageMessageResponse"
-    CursorPageMessageResponse:
-      type: object
-      properties:
-        content:
-          type: array
-          items:
-            $ref: "#/components/schemas/MessageResponse"
-        hasNext:
-          type: boolean
-        nextCursor:
-          type: integer
-          format: int64
+          $ref: "#/components/schemas/CompanyResponse"

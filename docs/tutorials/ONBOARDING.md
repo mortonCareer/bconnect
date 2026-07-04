@@ -51,7 +51,7 @@ cd bconnect
 
 ### Step 2. 환경 시크릿
 
-`.envrc.local`(direnv 시크릿) 받는 절차는 Notion 페이지로 관리: **[로컬 환경변수](https://www.notion.so/morton-so/35a965d2888b80a19c8df76ba51cd2d0?source=copy_link)**.
+`.envrc.local`(direnv 시크릿) 받는 절차는 Notion 페이지로 관리: **[로컬 환경변수](https://www.notion.so/morton-so/384965d2888b8092be18f7bab46d0f8d)**.
 
 ```bash
 direnv allow .  # 환경변수 자동 로드 확인

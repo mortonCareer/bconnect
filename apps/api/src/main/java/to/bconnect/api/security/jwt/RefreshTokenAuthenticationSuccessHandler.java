@@ -52,6 +52,7 @@ public class RefreshTokenAuthenticationSuccessHandler implements AuthenticationS
             sessionService.rotate(username, refreshToken);
 
             val cookie = cookieProvider.create(refreshToken).toString();
+            response.setCharacterEncoding("UTF-8");
             response.addHeader(HttpHeaders.SET_COOKIE, cookie);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getWriter().write(objectMapper.writeValueAsString(

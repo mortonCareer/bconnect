@@ -4,34 +4,23 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import to.bconnect.api.core.presentation.v1.request.CreateProjectTaskRequest;
-import to.bconnect.api.core.presentation.v1.request.CreateWorkerTaskRequest;
-import to.bconnect.api.core.presentation.v1.request.UpdateAssigneeTaskRequest;
-import to.bconnect.api.core.presentation.v1.request.UpdateProjectTaskRequest;
-import to.bconnect.api.core.presentation.v1.request.UpdateWorkerTaskRequest;
-import to.bconnect.api.core.presentation.v1.response.OfferResponse;
-import to.bconnect.api.core.presentation.v1.response.TaskResponse;
-import to.bconnect.api.attachment.AttachmentResolver;
-import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.attachment.ImageSize;
-import to.bconnect.api.core.domain.MemberResolver;
+import org.springframework.web.bind.annotation.*;
+import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.ImageSize;
+import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.offer.Offer;
 import to.bconnect.api.core.domain.offer.OfferService;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.Task;
-import to.bconnect.api.core.domain.task.TaskService;
 import to.bconnect.api.core.domain.task.TaskQueryService;
+import to.bconnect.api.core.domain.task.TaskService;
+import to.bconnect.api.core.presentation.v1.request.*;
+import to.bconnect.api.core.presentation.v1.response.OfferResponse;
+import to.bconnect.api.core.presentation.v1.response.TaskResponse;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.storage.attachment.ReferenceType;
 
 import java.util.List;
 import java.util.function.Function;
@@ -55,6 +44,7 @@ public class TaskController {
     public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal AuthUser user) {
         val workerTasks = taskQueryService.list(user);
         val projectTasks = taskQueryService.listAssigned(user);
+        
         val offers = offerService.listByWorker(user);
         val offerByTaskId = offers.stream().collect(Collectors.toMap(Offer::taskId, Function.identity()));
         val offerTasks = taskQueryService.listByIds(offerByTaskId.keySet());
@@ -74,11 +64,11 @@ public class TaskController {
         return ApiResponse.success(response);
     }
 
-    @GetMapping("/{taskId}/offers")
+    @GetMapping("/{id}/offers")
     public ApiResponse<List<OfferResponse>> listOffers(
             @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long taskId) {
-        val offers = offerService.listByTask(user, taskId);
+            @PathVariable Long id) {
+        val offers = offerService.listByTask(user, id);
         val workerIds = offers.stream().map(Offer::workerId).distinct().toList();
         val memberMap = memberResolver.resolveMap(workerIds);
         val profileMap = profileResolver.resolveMap(workerIds);

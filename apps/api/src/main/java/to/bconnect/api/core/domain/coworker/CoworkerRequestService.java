@@ -28,7 +28,7 @@ public class CoworkerRequestService {
         if (user.id().equals(targetId))
             throw new CodeException(CoworkerExceptionCode.SELF_REQUEST);
         if (!memberRepository.existsById(targetId))
-            throw new CodeException(CoworkerExceptionCode.TARGET_NOT_FOUND);
+            throw new CodeException(CommonExceptionCode.NOT_FOUND);
         if (coworkerRepository.existsByMembers(user.id(), targetId))
             throw new CodeException(CoworkerExceptionCode.ALREADY_COWORKER);
 
@@ -41,7 +41,7 @@ public class CoworkerRequestService {
     @Transactional
     public void accept(AuthUser user, Long id) {
         val found = coworkerRequestRepository.findById(id)
-                .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getToId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
@@ -53,7 +53,7 @@ public class CoworkerRequestService {
     @Transactional
     public void deny(AuthUser user, Long id) {
         val found = coworkerRequestRepository.findById(id)
-                .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getToId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
