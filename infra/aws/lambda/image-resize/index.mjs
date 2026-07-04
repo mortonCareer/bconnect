@@ -42,9 +42,9 @@ export const handler = async (event) => {
               Body: resized,
               ContentType: 'image/webp',
               CacheControl: 'public, max-age=31536000, immutable',
-            }),
+            })
           )
-        }),
+        })
       )
       console.log(`resized: ${key}`)
     } catch (error) {
