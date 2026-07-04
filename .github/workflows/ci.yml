@@ -29,7 +29,7 @@ jobs:
           # spec 만 변경된 PR 은 ci-career/ci-plan skip — BE-first 사이클(ADR-0015)이라
           # 스펙 단독 변경은 BE 구현에 따라가는 갱신 또는 description 수정 등
           # FE 영향 없는 형태가 일반적임.
-          # api-spec 자체는 항상 lint/bundle 검증.
+          # api-spec 은 BE springdoc 재생성·커밋(ci-api-spec) — orval 이 직접 소비.
           filters: |
             career:
               - 'apps/career/**'
@@ -38,6 +38,7 @@ jobs:
               - 'packages/mocks/**'
               - 'packages/api-client/src/*.ts'
               - 'packages/api-client/orval.*.ts'
+              - 'packages/api-client/auth-supplement.ts'
               - 'packages/api-client/package.json'
               - 'packages/api-client/tsconfig.json'
               - 'package.json'
@@ -49,6 +50,7 @@ jobs:
               - 'packages/mocks/**'
               - 'packages/api-client/src/*.ts'
               - 'packages/api-client/orval.*.ts'
+              - 'packages/api-client/auth-supplement.ts'
               - 'packages/api-client/package.json'
               - 'packages/api-client/tsconfig.json'
               - 'package.json'

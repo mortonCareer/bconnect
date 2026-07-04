@@ -81,7 +81,7 @@ export default function LoginPage() {
       const result = await verifyCodeMutation.mutateAsync({
         data: { phone: toNationalNumber(phone), code },
       })
-      if ('accessToken' in result) {
+      if (result.registered) {
         // 기존 회원 — 바로 로그인 (member 정보는 useGetMyMember 로 별도 조회)
         login(result.accessToken)
         const redirect = new URLSearchParams(window.location.search).get('redirect')

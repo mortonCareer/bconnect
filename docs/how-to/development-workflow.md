@@ -23,9 +23,9 @@ BE 코드를 API 기준(SSOT)으로 하는 BE-first 사이클 ([ADR-0015](../exp
    └─ 단위 테스트
    └─ 구현 과정에서 결정된 세부 형태 반영
 
-4. 스펙 갱신 (보통 BE PR과 같이)
-   └─ packages/api-client/src/spec/ 갱신 (BE 코드 형태에 맞춰)
-   └─ pnpm api:generate → TypeScript 타입 + React Query hooks + MSW mock 자동 생성
+4. 스펙 자동 생성 (BE PR과 같이)
+   └─ springdoc이 src/openapi.yaml emit (ci-api-spec이 재생성·커밋)
+   └─ orval + becompat transformer → TypeScript 타입 + React Query hooks + MSW mock 자동 생성
 
 5. FE 작업 (CTO, FE 개발자)
    └─ 퍼블리싱 (Figma → Tailwind 컴포넌트)
@@ -45,27 +45,25 @@ BE 코드를 API 기준(SSOT)으로 하는 BE-first 사이클 ([ADR-0015](../exp
 
 ## API 스펙 관리
 
-API 스펙은 BE 구현을 따라가는 산출물입니다 ([ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md)). `packages/api-client/src/spec/` 하위에 분리 관리되며, `@redocly/cli` 로 lint/bundle, `orval` 로 TypeScript hook + MSW mock 자동 생성합니다.
+API 스펙은 BE springdoc이 자동 emit하는 산출물입니다 ([ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md), [ADR-0024](../explanation/adr/0024-orval-consumes-be-springdoc-spec.md)). 손으로 쓰지 않습니다 — `apps/api`의 `generateOpenApiDocs`가 `packages/api-client/src/openapi.yaml`로 emit하고, `orval`이 becompat transformer로 FE 캐논 정렬 후 TypeScript hook + MSW mock을 생성합니다.
 
 ### 스펙 갱신 워크플로
 
 ```text
-BE 구현 완료
+BE 구현 완료 (controller/DTO)
     ↓
-spec/ 갱신 (BE 코드 형태에 맞춰)
+ci-api-spec: springdoc generateOpenApiDocs → src/openapi.yaml 재생성·커밋
     ↓
-GitHub PR 생성 (보통 BE 변경과 같은 PR)
-    ↓
-ci-api-spec (redocly lint) 자동 실행
+GitHub PR (보통 BE 변경과 같은 PR)
     ↓
 리뷰 → dev 머지
     ↓
-API 클라이언트 자동 생성 (orval)
+orval + becompat transformer로 클라이언트 자동 생성
     ↓
 FE 앱(Career, Plan)에서 generated hook 사용
 ```
 
-> **상세 작성 가이드 (디렉토리 구조, envelope 패턴, 새 endpoint 추가 절차, axis 결정 근거 등) 는 [`packages/api-client/CLAUDE.md`](../../packages/api-client/CLAUDE.md) 참조**. 본 문서는 워크플로 관점만 다룸.
+> **상세 (파이프라인, becompat transformer, operationId 규칙·예외, envelope 패턴 등) 는 [`packages/api-client/CLAUDE.md`](../../packages/api-client/CLAUDE.md) 참조**. 본 문서는 워크플로 관점만 다룸.
 
 ---
 
@@ -85,8 +83,7 @@ pnpm api:generate
 
 ```text
 packages/api-client/src/
-├── spec/                       # 분리된 spec (BE 코드를 따라가는 산출물)
-├── openapi.bundled.yaml        # redocly bundle 산출물 (gitignored)
+├── openapi.yaml                # BE springdoc 산출 spec (SSOT 입력, 커밋됨)
 └── generated/                  # orval 산출물 (gitignored), FE가 참조
     ├── api.ts                  # 모든 hook + handler aggregator
     └── schemas/                # 도메인 타입 정의
@@ -134,10 +131,9 @@ function EditProfile() {
 
 ### 주의사항
 
-- `spec/` 수정 후 반드시 `pnpm api:generate` 실행 (bundle + orval 자동 chain)
-- 생성된 파일 (`generated/`, `openapi.bundled.yaml`) 은 모두 gitignored — 직접 수정하지 않음
-- 타입 불일치 시 spec 수정 후 재생성
-- `pnpm api:lint` 로 spec 품질 사전 검증 가능 (CI 에서 `ci-api-spec` 자동 실행)
+- `src/openapi.yaml`(BE springdoc 산출)은 손으로 수정하지 않음 — BE 변경 시 ci-api-spec이 재생성·커밋
+- 로컬 재생성은 `pnpm api:generate` (orval 단독). 생성물 `generated/`는 gitignored
+- 타입 불일치는 대개 BE-FE 계약 drift — BE 갱신 또는 FE 호출부 정합으로 해소
 
 ---
 
@@ -147,7 +143,7 @@ dev 환경에서 모든 API 요청은 **MSW (Mock Service Worker)** 가 가로�
 
 상세는 패키지 SoT:
 
-- spec + orval codegen + 새 endpoint 추가 절차: [`packages/api-client/CLAUDE.md`](../../packages/api-client/CLAUDE.md)
+- 파이프라인 + becompat transformer + orval codegen: [`packages/api-client/CLAUDE.md`](../../packages/api-client/CLAUDE.md)
 - 핸들러 / stateful override / 브라우저·테스트 entry / race-safe gate / 새 override 추가 절차: [`packages/mocks/CLAUDE.md`](../../packages/mocks/CLAUDE.md)
 
 career / plan 둘 다 자동 적용됨 (둘 다 `@bconnect/mocks` 사용).
@@ -164,9 +160,9 @@ career / plan 둘 다 자동 적용됨 (둘 다 `@bconnect/mocks` 사용).
 2. Repository, Service, Controller 구현
 3. Spring Boot API 엔드포인트 작성
 4. 단위 테스트 작성 (`./gradlew test`)
-5. 구현 마무리 시점에 스펙 갱신
-   - `packages/api-client/src/spec/v1/<도메인>.yaml` 수정
-   - `pnpm api:lint && pnpm api:generate`로 검증
+5. 스펙은 springdoc이 자동 emit — 손 수정 불필요
+   - ci-api-spec이 `generateOpenApiDocs` → `src/openapi.yaml` 재생성·커밋
+   - 로컬 확인: `cd apps/api && ./gradlew generateOpenApiDocs`
    - 보통 BE 코드 변경과 같은 PR에 포함
 
 ### FE 개발 (CTO, FE 개발자)
