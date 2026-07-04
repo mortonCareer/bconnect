@@ -13,15 +13,12 @@ import to.bconnect.api.storage.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CredentialEntity extends BaseEntity {
 
-    @Column(nullable = false)
     private Long memberId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private CredentialType type;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private CredentialStatus status = CredentialStatus.PENDING;
 
     private LocalDate expiredAt;

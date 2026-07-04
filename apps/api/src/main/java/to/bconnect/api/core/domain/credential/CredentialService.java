@@ -1,12 +1,13 @@
 package to.bconnect.api.core.domain.credential;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.attachment.AttachmentLinker;
+import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.credential.CredentialEntity;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CredentialService {
@@ -27,7 +29,7 @@ public class CredentialService {
 
     @Transactional(readOnly = true)
     public List<Credential> list(Long memberId) {
-        return credentialRepository.findByMemberId(memberId)
+        return credentialRepository.findAllByMemberId(memberId)
                 .stream()
                 .map(Credential::of)
                 .toList();
@@ -36,7 +38,7 @@ public class CredentialService {
     @Transactional(readOnly = true)
     public List<Credential> listLatestAccepted(Long memberId) {
         // latest one per type
-        return credentialRepository.findByMemberId(memberId)
+        return credentialRepository.findAllByMemberId(memberId)
                 .stream()
                 .filter(it -> it.getStatus() == CredentialStatus.ACCEPTED)
                 .collect(Collectors.groupingBy(

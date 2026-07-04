@@ -8,14 +8,14 @@ import java.util.List;
 
 public interface AttachmentRepository extends JpaRepository<AttachmentEntity, Long> {
 
-    List<AttachmentEntity> findByReferenceTypeAndReferenceIdIn(
+    List<AttachmentEntity> findAllByReferenceTypeAndReferenceIdIn(
             ReferenceType referenceType, Collection<Long> referenceIds);
 
-    List<AttachmentEntity> findByReferenceTypeAndReferenceIdAndType(
+    List<AttachmentEntity> findAllByReferenceTypeAndReferenceIdAndType(
             ReferenceType referenceType, Long referenceId, AttachmentType type);
 
-    List<AttachmentEntity> findByStatusAndCreatedAtBefore(AttachmentStatus status, LocalDateTime before);
+    List<AttachmentEntity> findAllByStatusAndCreatedAtBefore(AttachmentStatus status, LocalDateTime before);
 
-    List<AttachmentEntity> findByStatusAndCreatedAtBeforeAndReferenceIdIsNull(
+    List<AttachmentEntity> findAllByStatusAndCreatedAtBeforeAndReferenceIdIsNull(
             AttachmentStatus status, LocalDateTime before);
 }

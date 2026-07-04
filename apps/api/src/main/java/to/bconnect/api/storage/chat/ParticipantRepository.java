@@ -9,14 +9,14 @@ import java.util.List;
 
 public interface ParticipantRepository extends JpaRepository<ParticipantEntity, Long> {
 
-    List<ParticipantEntity> findByMemberId(Long memberId);
+    List<ParticipantEntity> findAllByMemberId(Long memberId);
 
-    List<ParticipantEntity> findByChatIdIn(Collection<Long> chatIds);
+    List<ParticipantEntity> findAllByChatIdIn(Collection<Long> chatIds);
 
     @Query("SELECT p.memberId FROM ParticipantEntity p WHERE p.chatId = :chatId")
     List<Long> findMemberIdsByChatId(@Param("chatId") Long chatId);
 
-    List<ParticipantEntity> findByChatIdAndMemberIdIn(Long chatId, Collection<Long> memberIds);
+    List<ParticipantEntity> findAllByChatIdAndMemberIdIn(Long chatId, Collection<Long> memberIds);
 
     boolean existsByChatIdAndMemberId(Long chatId, Long memberId);
 }

@@ -1,5 +1,6 @@
 package to.bconnect.api.core.domain.recommendation;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.recommendation.RecommendationEntity;
 import to.bconnect.api.storage.recommendation.RecommendationRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecommendationService {

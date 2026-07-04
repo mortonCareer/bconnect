@@ -1,5 +1,6 @@
 package to.bconnect.api.core.domain.coworker;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +9,7 @@ import to.bconnect.api.storage.coworker.CoworkerRequestRepository;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CoworkerRequestQueryService {
@@ -16,14 +18,14 @@ public class CoworkerRequestQueryService {
 
     @Transactional(readOnly = true)
     public List<CoworkerRequest> listReceived(AuthUser user) {
-        return coworkerRequestRepository.findByToId(user.id()).stream()
+        return coworkerRequestRepository.findAllByToId(user.id()).stream()
                 .map(it -> CoworkerRequest.of(it, it.getFromId()))
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<CoworkerRequest> listSent(AuthUser user) {
-        return coworkerRequestRepository.findByFromId(user.id()).stream()
+        return coworkerRequestRepository.findAllByFromId(user.id()).stream()
                 .map(it -> CoworkerRequest.of(it, it.getToId()))
                 .toList();
     }

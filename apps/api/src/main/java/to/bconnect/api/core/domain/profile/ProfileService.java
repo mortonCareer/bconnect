@@ -1,5 +1,6 @@
 package to.bconnect.api.core.domain.profile;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import to.bconnect.api.storage.profile.ProfileEntity;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.security.AuthUser;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProfileService {
@@ -43,9 +45,6 @@ public class ProfileService {
         val found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (!found.getMemberId().equals(user.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
         if (!command.trades().contains(command.primaryTrade()))
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
@@ -63,9 +62,6 @@ public class ProfileService {
     public void updateAbout(AuthUser user, String about) {
         val found = profileRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-
-        if (!found.getMemberId().equals(user.id()))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         found.updateAbout(about);
     }

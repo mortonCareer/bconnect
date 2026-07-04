@@ -3,7 +3,7 @@ package to.bconnect.api.core.presentation.v1.response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import to.bconnect.api.core.domain.notification.Notification;
-import to.bconnect.api.security.member.Member;
+import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.storage.notification.NotificationReferenceType;
 
 import static org.assertj.core.api.Assertions.assertThat;

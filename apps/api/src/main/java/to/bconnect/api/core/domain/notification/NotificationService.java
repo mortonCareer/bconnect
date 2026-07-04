@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import to.bconnect.api.common.CodeException;
-import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.storage.device.DeviceTokenRepository;
 import to.bconnect.api.storage.notification.NotificationEntity;
 import to.bconnect.api.storage.notification.NotificationRepository;

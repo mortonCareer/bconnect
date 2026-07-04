@@ -1,12 +1,13 @@
 package to.bconnect.api.core.domain.post;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.attachment.AttachmentLinker;
+import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.post.PostEntity;
@@ -14,6 +15,7 @@ import to.bconnect.api.storage.post.PostRepository;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService {

@@ -1,7 +1,7 @@
 package to.bconnect.api.core.presentation.v1.response;
 
 import to.bconnect.api.core.domain.notification.Notification;
-import to.bconnect.api.security.member.Member;
+import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.storage.notification.NotificationReferenceType;
 
 import java.time.LocalDateTime;

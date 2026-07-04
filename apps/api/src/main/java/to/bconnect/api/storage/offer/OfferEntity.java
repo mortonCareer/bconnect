@@ -18,20 +18,16 @@ import java.time.LocalDate;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OfferEntity extends BaseEntity {
 
-    @Column(nullable = false)
     private Long taskId;
 
-    @Column(nullable = false)
     private Long workerId;
 
-    @Column(name = "seq", nullable = false)
+    @Column(name = "seq")
     private int seq;
 
-    @Column(nullable = false)
     private LocalDate due;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private OfferStatus status = OfferStatus.PENDING;
 
     public OfferEntity(Long taskId, Long workerId, int seq, LocalDate due) {

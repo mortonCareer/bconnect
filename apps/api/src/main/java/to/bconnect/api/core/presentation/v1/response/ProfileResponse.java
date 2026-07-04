@@ -1,7 +1,7 @@
 package to.bconnect.api.core.presentation.v1.response;
 
 import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.security.member.Member;
+import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.profile.ProfileRole;
 import to.bconnect.api.storage.profile.Trade;

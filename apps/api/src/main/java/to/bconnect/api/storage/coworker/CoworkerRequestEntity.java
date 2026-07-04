@@ -2,29 +2,19 @@ package to.bconnect.api.storage.coworker;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import to.bconnect.api.storage.BaseEntity;
 
 @Entity
-@Table(name = "coworker_requests", uniqueConstraints = @UniqueConstraint(columnNames = {"from_id", "to_id"}))
+@Table(name = "coworker_requests")
 @Getter
-@EqualsAndHashCode(of = "id")
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CoworkerRequestEntity {
+public class CoworkerRequestEntity extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false)
     private Long fromId;
 
-    @Column(nullable = false)
     private Long toId;
-
-    public CoworkerRequestEntity(Long fromId, Long toId) {
-        this.fromId = fromId;
-        this.toId = toId;
-    }
 }

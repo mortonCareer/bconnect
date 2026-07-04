@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface CredentialRepository extends JpaRepository<CredentialEntity, Long> {
 
-    List<CredentialEntity> findByMemberId(Long memberId);
+    List<CredentialEntity> findAllByMemberId(Long memberId);
 }

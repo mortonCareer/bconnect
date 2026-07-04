@@ -7,13 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.attachment.AttachmentLinker;
 import to.bconnect.api.core.domain.chat.Message;
+import to.bconnect.api.core.domain.chat.MessageService;
 import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.core.domain.notification.NotificationService;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.socket.WebSocketSecurityConfig;
-import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
@@ -30,31 +29,33 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MessageSocketService {
 
-    private final MessageRepository messageRepository;
+    private final MessageService messageService;
     private final ParticipantRepository participantRepository;
     private final DirectChatRepository directChatRepository;
     private final MemberRepository memberRepository;
-    private final AttachmentLinker attachmentLinker;
     private final SimpUserRegistry simpUserRegistry;
     private final NotificationService notificationService;
 
     @Transactional
     public Message broadcast(AuthUser user, Long chatId, ChatType chatType, SendMessage command) {
-        val created = messageRepository.save(new MessageEntity(
-                chatId,
-                chatType,
-                user.id(),
-                command.type(),
-                command.content()
-        ));
-
-        attachmentLinker.link(user.id(), ReferenceType.MESSAGE, created.getId(), command.attachmentIds());
-        val activeMemberIds = findActiveMemberIds(chatId, chatType);
-        markAsRead(chatId, chatType, created.getId(), activeMemberIds);
+        val message = messageService.create(chatId, chatType, user.id(), command);
+        val activeMemberIds = markAsRead(chatId, chatType, message.id());
         val recipientIds = findRecipientIds(user.id(), chatId, chatType);
         notificationService.notifyChatMessage(
                 user.id(), chatId, recipientIds, activeMemberIds, command.content());
-        return Message.of(created);
+        return message;
+    }
+
+    private Set<Long> markAsRead(Long chatId, ChatType chatType, Long messageId) {
+        val activeMemberIds = findActiveMemberIds(chatId, chatType);
+        if (chatType == ChatType.DIRECT) {
+            val chat = findDirectChat(chatId);
+            activeMemberIds.forEach(it -> chat.markRead(it, messageId));
+        } else {
+            participantRepository.findAllByChatIdAndMemberIdIn(chatId, activeMemberIds)
+                    .forEach(it -> it.markRead(messageId));
+        }
+        return activeMemberIds;
     }
 
     private Set<Long> findActiveMemberIds(Long chatId, ChatType chatType) {
@@ -69,19 +70,9 @@ public class MessageSocketService {
                 .map(it -> it.getSession().getUser().getName())
                 .collect(Collectors.toCollection(HashSet::new));
 
-        return memberRepository.findByUsernameIn(usernames).stream()
+        return memberRepository.findAllByUsernameIn(usernames).stream()
                 .map(MemberEntity::getId)
                 .collect(Collectors.toSet());
-    }
-
-    private void markAsRead(Long chatId, ChatType chatType, Long messageId, Set<Long> memberIds) {
-        if (chatType == ChatType.DIRECT) {
-            val chat = findDirectChat(chatId);
-            memberIds.forEach(it -> chat.markRead(it, messageId));
-        } else {
-            participantRepository.findByChatIdAndMemberIdIn(chatId, memberIds)
-                    .forEach(it -> it.markRead(messageId));
-        }
     }
 
     private List<Long> findRecipientIds(Long senderId, Long chatId, ChatType chatType) {

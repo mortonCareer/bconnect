@@ -1,5 +1,6 @@
 package to.bconnect.api.core.domain.coworker;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import to.bconnect.api.storage.coworker.CoworkerRequestEntity;
 import to.bconnect.api.storage.coworker.CoworkerRequestRepository;
 import to.bconnect.api.storage.member.MemberRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CoworkerRequestService {
@@ -26,7 +28,7 @@ public class CoworkerRequestService {
         if (user.id().equals(targetId))
             throw new CodeException(CoworkerExceptionCode.SELF_REQUEST);
         if (!memberRepository.existsById(targetId))
-            throw new CodeException(CoworkerExceptionCode.TARGET_NOT_FOUND);
+            throw new CodeException(CommonExceptionCode.NOT_FOUND);
         if (coworkerRepository.existsByMembers(user.id(), targetId))
             throw new CodeException(CoworkerExceptionCode.ALREADY_COWORKER);
 
@@ -39,7 +41,7 @@ public class CoworkerRequestService {
     @Transactional
     public void accept(AuthUser user, Long id) {
         val found = coworkerRequestRepository.findById(id)
-                .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getToId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
@@ -51,7 +53,7 @@ public class CoworkerRequestService {
     @Transactional
     public void deny(AuthUser user, Long id) {
         val found = coworkerRequestRepository.findById(id)
-                .orElseThrow(() -> new CodeException(CoworkerExceptionCode.REQUEST_NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getToId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);

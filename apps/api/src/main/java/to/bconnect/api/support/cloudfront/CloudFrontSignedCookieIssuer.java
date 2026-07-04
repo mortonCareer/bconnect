@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.cloudfront.CloudFrontUtilities;
 import software.amazon.awssdk.services.cloudfront.model.CustomSignerRequest;
 
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -17,7 +18,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * issue cookies using custom policy
+ * References <br/>
+ * - <a href="https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-setting-signed-cookie-custom-policy.html">Set signed cookies using a canned policy</a> <br/>
+ * - <a href="https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-trusted-signers.html">Specify signers that can create signed URLs and signed cookies</a>
+ * - <a href="https://docs.aws.amazon.com/java/api/latest/software/amazon/awssdk/services/cloudfront/CloudFrontUtilities.html">Class CloudFrontUtilities</a> <br/>
  */
 @Component
 @Profile({"prod", "dev"})
@@ -64,7 +68,8 @@ public class CloudFrontSignedCookieIssuer implements SignedCookieIssuer {
                 .build();
     }
 
-    private PrivateKey parsePrivateKey(String pem) {
+    private PrivateKey parsePrivateKey(String base64Pem) {
+        val pem = new String(Base64.getDecoder().decode(base64Pem), StandardCharsets.UTF_8);
         val content = pem
                 .replace("-----BEGIN PRIVATE KEY-----", "")
                 .replace("-----END PRIVATE KEY-----", "")

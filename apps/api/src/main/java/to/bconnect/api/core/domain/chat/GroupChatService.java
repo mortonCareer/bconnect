@@ -1,10 +1,12 @@
 package to.bconnect.api.core.domain.chat;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.security.AuthUser;
@@ -14,6 +16,7 @@ import to.bconnect.api.storage.member.MemberEntity;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GroupChatService {
@@ -25,13 +28,13 @@ public class GroupChatService {
 
     @Transactional(readOnly = true)
     public List<GroupChat> list(Long memberId) {
-        val chatIds = participantRepository.findByMemberId(memberId)
+        val chatIds = participantRepository.findAllByMemberId(memberId)
                 .stream().map(ParticipantEntity::getChatId).toList();
         if (chatIds.isEmpty()) return List.of();
 
         val chats = groupChatRepository.findAllById(chatIds);
 
-        val participantMap = participantRepository.findByChatIdIn(chatIds)
+        val participantMap = participantRepository.findAllByChatIdIn(chatIds)
                 .stream()
                 .collect(Collectors.groupingBy(
                         ParticipantEntity::getChatId,
@@ -79,7 +82,7 @@ public class GroupChatService {
     @Transactional(readOnly = true)
     public CursorPage<Message> listMessages(AuthUser user, Long chatId, CursorLimit cursor) {
         if (!participantRepository.existsByChatIdAndMemberId(chatId, user.id()))
-            throw new CodeException(ChatExceptionCode.NOT_PARTICIPANT);
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         return messageService.list(chatId, ChatType.GROUP, cursor);
     }
