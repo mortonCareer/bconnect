@@ -12,7 +12,7 @@ import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.attachment.AttachmentResolver;
 import to.bconnect.api.attachment.AttachmentService;
 import to.bconnect.api.attachment.ImageSize;
-import to.bconnect.api.core.domain.AttachmentContextValidatorRegistry;
+import to.bconnect.api.attachment.AttachmentContextValidatorRegistry;
 import to.bconnect.api.core.presentation.v1.request.ConfirmRequest;
 import to.bconnect.api.core.presentation.v1.request.PresignRequest;
 import to.bconnect.api.core.presentation.v1.response.AttachmentResponse;

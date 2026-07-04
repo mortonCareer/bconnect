@@ -20,3 +20,8 @@ variable "fcm_service_account_json" {
   sensitive   = true
   default     = ""
 }
+
+variable "domain" {
+  description = "Root domain (e.g. bconnect.to). CloudFront static CDN 은 static.<domain> 서빙"
+  type        = string
+}

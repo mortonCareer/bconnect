@@ -47,3 +47,7 @@ career·plan 두 Next.js App Router 앱의 공통 프론트엔드 규칙. 각 �
 career·plan 공통 화면(~90%)은 `packages/features`의 `<도메인>View` 하나로 공유. 앱 로컬 재구현=안티패턴(#541). `*View`는 순수 표현 — 앱이 데이터 fetch해 `data` prop으로 내리고, 셸은 `renderShell`(plan 생략→기본 `PanelShell`), 액션·편집은 `actionSlot`/`editHrefs` 슬롯 주입(부재→읽기전용). mutation·공유는 앱측. 여러 페이지가 쓰면 어댑터를 `_adapters/`로 분리, 단일이면 `page.tsx` 인라인. features 폴더: 루트=공개(`*View`+`index.ts`), `_parts/`=내부.
 
 근거: [ADR-0020](../docs/explanation/adr/0020-dual-shell-view-sharing-rendershell-resolved-data.md).
+
+## 이미지 — private CloudFront는 plain `<img>`
+
+`static.bconnect.to`(S3 유저 업로드) 이미지는 **plain `<img>`**. next/image `<Image>` 금지 + next.config `images.remotePatterns`에 `static.bconnect.to` **추가 금지**. next/image Optimizer는 서버 fetch라 브라우저 signed cookie를 못 실어 private(chats·credentials·storages) 접근 시 403. `<img>`는 브라우저가 쿠키 동봉. `<Image>`는 정적 자산(`/public`, import) 전용. CLS는 width/height 또는 aspect-ratio로 고정. 근거: [파일 인프라 설계 §11](../docs/reference/specs/2026-04-12-file-infrastructure-design.md).

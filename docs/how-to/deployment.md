@@ -44,36 +44,34 @@ dev (개발 및 QA)  →  prod (프로덕션)
 
 ### Frontend (Next.js)
 
-#### PR 프리뷰 배포
+Vercel 배포는 git push 자동배포가 아니라 **GitHub Actions의 CLI 소스 업로드**로 트리거된다 ([`vercel-deploy.yml`](../../.github/workflows/vercel-deploy.yml)). Vercel Pro 팀은 배포에 첨부된 git 커밋 author가 팀 멤버여야 하는데(시트 과금), `.git` 제거 후 CLI 업로드하면 git 메타가 없어 멤버 승격 없이 배포된다. git push 자동배포는 `git.deploymentEnabled: false`(각 앱 vercel.json)로 꺼져 있다. 운영 상세는 [infra/vercel/README.md](../../infra/vercel/README.md) 참조.
+
+#### dev 배포
 
 ```
-PR 생성/업데이트
+dev 브랜치 머지 (push)
     ↓
-Vercel 자동 빌드 시작
+GitHub Actions: vercel-deploy.yml → vercel deploy --target=dev
     ↓
-빌드 성공 (1-2분)
+Vercel 리모트 빌드 (custom environment "dev")
     ↓
-프리뷰 URL 생성
+dev 도메인 업데이트
     ↓
-GitHub PR 댓글에 링크 추가
-    ↓
-QA 진행
+스프린트 단위 QA
 ```
 
 #### 프로덕션 배포
 
 ```
-PR 승인 + main 머지
+dev → main 머지 (push)
     ↓
-Vercel 프로덕션 빌드
+GitHub Actions: vercel-deploy.yml → vercel deploy --target=production
     ↓
-빌드 성공 (1-2분)
+Vercel 리모트 빌드
     ↓
 bconnect.to / plan.bconnect.to 업데이트
     ↓
 헬스체크 (자동)
-    ↓
-배포 완료 알림 (GitHub, Slack 등)
 ```
 
 ### Backend (Spring Boot)
@@ -125,61 +123,13 @@ Docker 이미지 생성
 
 ## 환경 변수 관리
 
-환경 변수는 다음과 같이 관리됩니다:
+새 환경 변수를 어디에 넣고 어떻게 fail-fast로 검증하는지(계층별 저장 위치, `.env.example` 계약, Zod/Spring placeholder)는 [env-variables.md](./env-variables.md)가 SSOT다. 본 문서는 **배포 관점**만 다룬다.
 
-### Frontend 환경 변수
+환경 변수 주입은 **Terraform(IaC)으로 관리**한다 — 대시보드 수동 조작은 IaC 위반이므로 긴급/예외 시에만.
 
-**Zod 스키마로 검증** (`packages/config/env/validate.ts`)
-
-```typescript
-export const envSchema = z.object({
-  NEXT_PUBLIC_API_URL: z.string().url(),
-  NEXT_PUBLIC_VERCEL_ENV: z.enum(['development', 'preview', 'production']),
-  // ...
-})
-```
-
-**사용 방법**:
-
-```typescript
-import { env } from '@bconnect/config/env'
-
-const apiUrl = env.NEXT_PUBLIC_API_URL
-```
-
-**주의사항**:
-
-- `NEXT_PUBLIC_*` 접두사: 클라이언트에 노출됨
-- 접두사 없음: 서버 전용
-
-### Backend 환경 변수
-
-**application.yml**:
-
-```yaml
-spring:
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:development}
-  datasource:
-    url: ${DATABASE_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
-jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION:3600000}
-```
-
-### 환경 변수 추가 시
-
-환경 변수 관리: 각 앱의 `.env.example` + `scripts/link-env.sh` (워크트리 자동 심링크).
-
-**간단 가이드**:
-
-1. Zod 스키마 추가 (`packages/config/env/validate.ts`)
-2. `.env.example` 업데이트
-3. Vercel/Railway 대시보드에 변수 추가
-4. (선택) Terraform 리소스 추가 (`infra/`)
+- **Frontend(Vercel)**: [`infra/vercel/`](../../infra/vercel/)의 `vercel_project_environment_variable` 리소스로 선언. 환경별(prod/preview/dev)은 `target`으로 스코프 지정.
+- **Backend(Railway)**: [`infra/railway/`](../../infra/railway/)의 `railway_variable` 리소스로 선언. 로컬은 [`application-local.yaml`](../../apps/api/src/main/resources/application-local.yaml) 더미값으로 주입 없이 뜬다.
+- **주입 누락 시**: FE는 Zod 검증 실패, API는 `${VAR}` placeholder 미해결로 **부팅 실패**(fail-fast) — silent-fail 방지.
 
 ---
 

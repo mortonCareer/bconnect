@@ -64,7 +64,9 @@ public class ProjectService {
                 command.address()
         );
 
-        return projectRepository.save(created).getId();
+        val projectId = projectRepository.save(created).getId();
+
+        return projectId;
     }
 
     @Transactional

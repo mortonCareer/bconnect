@@ -7,6 +7,8 @@ export {
   ApiError,
 } from './client'
 
+export { AUTH_HINT_COOKIE, setAuthHint, clearAuthHint } from './auth-hint'
+
 export { getQueryClient, queryClientConfig } from './query-client'
 
 // Re-export react-query for app usage

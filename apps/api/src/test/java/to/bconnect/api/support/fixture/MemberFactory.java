@@ -30,6 +30,6 @@ public class MemberFactory {
     }
 
     public static UpdateMemberRequest updateRequest() {
-        return new UpdateMemberRequest("name", DEFAULT_PICTURE_ID, Role.CONTRACTOR);
+        return new UpdateMemberRequest("name", DEFAULT_PICTURE_ID);
     }
 }

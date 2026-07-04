@@ -1,0 +1,68 @@
+# Vercel 배포 — CLI 소스 업로드 + 리모트 빌드 (#707)
+#
+# Pro 팀은 배포에 첨부된 git 커밋 author가 팀 멤버여야 함 (시트 과금).
+# 검사는 트리거가 아니라 git 메타 기준이라 deploy hook도 차단됨 (실측) —
+# .git 제거 후 CLI 업로드하면 git 메타가 없어 검사 대상 자체가 없음.
+# 빌드는 Vercel 리모트에서 수행 (프로젝트 env/설정 서버측 적용).
+# HUSKY=0: gitless 트리에서 husky prepare 실패 방지.
+# 운영 상세는 infra/vercel/README.md 참조.
+name: Vercel Deploy
+
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: '배포 환경 (production은 main 브랜치에서 실행할 때만 허용)'
+        type: choice
+        options: [dev, production]
+        default: dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: career
+            project_id: prj_RlSd4uhoHokj39k3z5P9vfb6LMMf
+          - app: plan
+            project_id: prj_XpYhG7GF6Fq2adC3ol7sGgvVzAUt
+    env:
+      VERCEL_ORG_ID: team_ryk4Nqef5hyc1bMxwCBG4bTo
+      VERCEL_PROJECT_ID: ${{ matrix.project_id }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Strip git metadata
+        run: rm -rf .git
+
+      - name: Deploy ${{ matrix.app }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          INPUT_TARGET: ${{ inputs.target }}
+        run: |
+          TARGET="${INPUT_TARGET:-$([ "${GITHUB_REF_NAME}" = "main" ] && echo production || echo dev)}"
+          if [ "$TARGET" = "production" ] && [ "${GITHUB_REF_NAME}" != "main" ]; then
+            echo "::error::production 배포는 main 브랜치에서만 가능 (현재: ${GITHUB_REF_NAME})"
+            exit 1
+          fi
+          npx -y vercel@latest deploy \
+            --target="$TARGET" \
+            --build-env HUSKY=0 \
+            --meta commitSha="${GITHUB_SHA}" \
+            --meta branch="${GITHUB_REF_NAME}" \
+            --token "$VERCEL_TOKEN" --yes
+
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          curl -s -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "{\"text\":\"🚨 *Vercel Deploy 실패* (${{ matrix.app }} / ${GITHUB_REF_NAME})\n<${RUN_URL}|워크플로우 로그 확인>\"}"
