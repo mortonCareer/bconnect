@@ -4,7 +4,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
     show-sql: false
     defer-datasource-initialization: true
 
@@ -17,12 +17,15 @@ spring:
 app:
   jwt:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
+
   sms:
-    api-key: test-dummy-api-key
-    api-secret: test-dummy-api-secret
+    api-key: test-api-key
+    api-secret: test-api-secret
     sender-number: "01000000000"
+
   s3:
-    bucket: test-dummy-bucket
+    bucket: test-bucket
+
   cloudfront:
-    key-pair-id: test-dummy-key-pair-id
-    private-key: test-dummy-private-key
+    key-pair-id: test-key-pair-id
+    private-key: test-private-key
