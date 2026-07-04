@@ -1,4 +1,4 @@
-package to.bconnect.api.support.sms;
+package to.bconnect.api.sms.infrastructure;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -8,6 +8,7 @@ import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import to.bconnect.api.sms.SmsProvider;
 
 // TODO : https://github.com/solapi/solapi-kotlin 기반 최신화
 @Slf4j

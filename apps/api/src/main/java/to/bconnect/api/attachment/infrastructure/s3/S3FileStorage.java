@@ -1,4 +1,4 @@
-package to.bconnect.api.support.s3;
+package to.bconnect.api.attachment.infrastructure.s3;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;

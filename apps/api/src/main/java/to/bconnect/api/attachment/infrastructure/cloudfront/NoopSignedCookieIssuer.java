@@ -1,8 +1,9 @@
-package to.bconnect.api.support.cloudfront;
+package to.bconnect.api.attachment.infrastructure.cloudfront;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.util.List;
 

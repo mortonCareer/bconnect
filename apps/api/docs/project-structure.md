@@ -13,14 +13,15 @@ to.bconnect.api
 │   └── domain              # Domain 레이어
 ├── storage                 # Storage 레이어
 ├── security                # 인증 · 인가
-├── support                 # 제3자 서비스
+├── sms                     # SMS 모듈
 └── socket                  # 실시간 통신 (STOMP)
 ```
 - 레이어드 아키텍처(layer-first) 구조를 따릅니다.
 - 패키지 · 레이어 의존성 규칙은 ArchUnit로 강제합니다.
 
 ## 패키지 구조
-> socket → core → attachment → security → storage → common, support
+> socket → core → attachment → security → storage → common
+> sms → security
 - `PackageDependencyTest.java` 참고
 
 ## 레이어 구조
@@ -67,6 +68,19 @@ graph TD
 ### 서비스 도메인 교차
 ```mermaid
 graph TD
+  subgraph board
+    NoteS[NoteService]
+  end
+  subgraph drive
+    DriveV[DriveValidator]
+  end
+  NoteS --> DriveV
+```
+- `DomainDependencyTest.java` 참고
+
+### 이벤트 교차 (EDA)
+```mermaid
+graph TD
   subgraph chat
     ChatL[ChatEventListener]
   end
@@ -74,18 +88,22 @@ graph TD
     OfferAE[OfferAcceptedEvent]
     OfferVE[OfferActivatedEvent]
   end
-  subgraph board
-    NoteS[NoteService]
+  subgraph sms
+    SmsL[SmsEventListener]
   end
-  subgraph drive
-    DriveV[DriveValidator]
+  subgraph security.otp
+    OtpE[OtpIssuedEvent]
+  end
+  subgraph security.session
+    LoginE[NewDeviceLoginEvent]
   end
   ChatL --> OfferAE
   ChatL --> OfferVE
-  NoteS --> DriveV
+  SmsL --> OtpE
+  SmsL --> LoginE
 ```
-- `DomainDependencyTest.java` 참고
 - 부수효과는 EDA 구조로 분리합니다.
+- 이벤트는 발행 패키지에, 리스너는 구독 패키지에 위치합니다.
 
 ### 유효성 검사
 - 유효성 검사 위치는 다음과 같습니다

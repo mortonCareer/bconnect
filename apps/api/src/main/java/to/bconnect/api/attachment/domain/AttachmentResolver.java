@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentType;
 import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.support.cloudfront.CloudFrontProperties;
+import to.bconnect.api.attachment.infrastructure.cloudfront.CloudFrontProperties;
 
 import java.util.Collection;
 import java.util.List;

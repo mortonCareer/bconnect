@@ -23,7 +23,7 @@ import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.support.cloudfront.SignedCookieIssuer;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.util.List;
 import java.util.Objects;
