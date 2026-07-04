@@ -93,7 +93,11 @@ export function OfferQueue({
       </p>
 
       {emptyActionHref && (
-        <Button asChild variant="outline" className="mt-4 h-10 w-full">
+        <Button
+          asChild
+          variant="outline"
+          className="text-m-14 mt-4 h-[33.5px] w-full rounded-[6px] border-[#c0d0ff] px-0 font-medium hover:bg-primary-50"
+        >
           <Link href={emptyActionHref}>기술자 탐색</Link>
         </Button>
       )}

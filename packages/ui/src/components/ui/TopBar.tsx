@@ -104,6 +104,10 @@ export interface TopBarProps
   onAction?: () => void
   showAction?: boolean
   actionDisabled?: boolean
+  /** 우측 텍스트 액션 대신 아이콘 버튼 (예: 캘린더 "+"). actionLabel 을 aria-label 로 사용. */
+  actionIcon?: React.ReactNode
+  /** actionIcon 이 라우트 이동이면 지정 — Link(prefetch)로 렌더, 없으면 onAction 버튼. */
+  actionHref?: string
   showBack?: boolean
   chatCount?: number
   notifyCount?: number
@@ -129,6 +133,8 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       onAction,
       showAction = true,
       actionDisabled = false,
+      actionIcon,
+      actionHref,
       showBack = true,
       chatCount,
       notifyCount,
@@ -179,6 +185,25 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
                 chatHref={chatHref}
                 chatCount={chatCount}
               />
+            ) : actionIcon ? (
+              actionHref ? (
+                <Link
+                  href={actionHref}
+                  className={cn(iconButtonClass, '-mr-4 pl-2 pr-4 text-gray-900')}
+                  aria-label={actionLabel}
+                >
+                  {actionIcon}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onAction}
+                  className={cn(iconButtonClass, '-mr-4 pl-2 pr-4 text-gray-900')}
+                  aria-label={actionLabel}
+                >
+                  {actionIcon}
+                </button>
+              )
             ) : showAction ? (
               <button
                 type="button"

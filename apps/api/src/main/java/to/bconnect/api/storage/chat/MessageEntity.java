@@ -17,6 +17,10 @@ public class MessageEntity extends BaseEntity {
     @Column(nullable = false)
     private Long chatId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ChatType chatType;
+
     @Column(nullable = false)
     private Long memberId;
 

@@ -2,6 +2,9 @@ meta {
   name: 프로필 단건 조회
   type: http
   seq: 3
+  tags: [
+    chain
+  ]
 }
 
 get {
@@ -14,4 +17,9 @@ tests {
     expect(res.body.success).to.equal(true);
     expect(res.body.data.id).to.be.a('number');
   });
+}
+
+docs {
+  @chain
+  - 03-profiles/01-create
 }

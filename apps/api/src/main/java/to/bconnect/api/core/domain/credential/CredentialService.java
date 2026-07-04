@@ -7,8 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.core.domain.attachment.AttachmentQueryService;
+import to.bconnect.api.attachment.AttachmentLinker;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.credential.CredentialEntity;
 import to.bconnect.api.storage.credential.CredentialRepository;
 import to.bconnect.api.storage.credential.CredentialStatus;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 public class CredentialService {
 
     private final CredentialRepository credentialRepository;
-    private final AttachmentQueryService attachmentQueryService;
+    private final AttachmentLinker attachmentLinker;
 
     @Transactional(readOnly = true)
     public List<Credential> list(Long memberId) {
@@ -35,7 +36,7 @@ public class CredentialService {
     }
 
     @Transactional(readOnly = true)
-    public List<Credential> listPublic(Long memberId) {
+    public List<Credential> listLatestAccepted(Long memberId) {
         // latest one per type
         return credentialRepository.findByMemberId(memberId)
                 .stream()
@@ -52,27 +53,29 @@ public class CredentialService {
 
     @Transactional
     public Long create(AuthUser user, CreateCredential command) {
-        if (command.attachmentId() != null)
-            attachmentQueryService.get(user, command.attachmentId());
-
         val created = new CredentialEntity(
                 user.id(),
                 command.type(),
-                command.expiredAt(),
-                command.attachmentId()
+                command.expiredAt()
         );
 
-        return credentialRepository.save(created).getId();
+        credentialRepository.save(created);
+        attachmentLinker.relink(user.id(), ReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
+        return created.getId();
     }
 
     @Transactional
     public void delete(AuthUser user, Long id) {
-        credentialRepository.findById(id).ifPresent(it -> {
-            if (!it.getMemberId().equals(user.id()))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        val optional = credentialRepository.findById(id);
+        if (optional.isEmpty())
+            return;
+        val found = optional.get();
 
-            credentialRepository.delete(it);
-        });
+        if (!found.getMemberId().equals(user.id()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        attachmentLinker.unlink(ReferenceType.CREDENTIAL, List.of(found.getId()));
+        credentialRepository.delete(found);
     }
 
     @Transactional

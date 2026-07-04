@@ -12,8 +12,8 @@ post {
 body {
   {
     "name": "업체",
-    "brn": "0000000000",
-    "picture": "https://image.com"
+    "brn": "0000000001",
+    "pictureId": 1
   }
 }
 
@@ -27,4 +27,8 @@ tests {
     expect(res.body.success).to.equal(true);
     expect(res.body.data).to.be.a('number');
   });
+}
+
+docs {
+  @seed attachments : 1
 }

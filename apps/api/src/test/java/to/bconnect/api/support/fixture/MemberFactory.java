@@ -10,26 +10,26 @@ import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
 public class MemberFactory {
 
-    public static final String DEFAULT_PICTURE = "https://image.com";
+    public static final Long DEFAULT_PICTURE_ID = 1L;
 
     public static Member create(Long id) {
-        return new Member(id, "username", "name", "phone", DEFAULT_PICTURE, Role.FOREMAN,
+        return new Member(id, "username", "name", "phone", DEFAULT_PICTURE_ID, Role.WORKER,
                 MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
     public static MemberEntity createEntity() {
-        return new MemberEntity("username", "name", "phone", DEFAULT_PICTURE, Role.FOREMAN);
+        return new MemberEntity("username", "name", "phone", DEFAULT_PICTURE_ID, Role.WORKER);
     }
 
     public static MemberEntity createEntity(String username, String phone, Role role) {
-        return new MemberEntity(username, "name", phone, DEFAULT_PICTURE, role);
+        return new MemberEntity(username, "name", phone, DEFAULT_PICTURE_ID, role);
     }
 
     public static RegisterMemberRequest registerRequest() {
-        return new RegisterMemberRequest("phone", "signupToken", "username", "name", DEFAULT_PICTURE, Role.FOREMAN);
+        return new RegisterMemberRequest("phone", "signupToken", "username", "name", DEFAULT_PICTURE_ID, Role.WORKER);
     }
 
     public static UpdateMemberRequest updateRequest() {
-        return new UpdateMemberRequest("name", DEFAULT_PICTURE, Role.CONTRACTOR);
+        return new UpdateMemberRequest("name", DEFAULT_PICTURE_ID, Role.CONTRACTOR);
     }
 }

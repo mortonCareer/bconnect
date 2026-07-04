@@ -5,7 +5,7 @@ import to.bconnect.api.security.AuthUser;
 
 public class UserFactory {
 
-    public static final AuthUser FOREMAN_USER = new AuthUser(1L, "foreman", "FOREMAN");
+    public static final AuthUser WORKER_USER = new AuthUser(1L, "worker", "WORKER");
     public static final AuthUser CONTRACTOR_USER = new AuthUser(1L, "contractor", "CONTRACTOR");
     public static final AuthUser GUEST_USER = new AuthUser(1L, "guest", "GUEST");
     public static final AuthUser ADMIN_USER = new AuthUser(1L, "admin", "ADMIN");

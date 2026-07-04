@@ -10,18 +10,22 @@ import org.springframework.security.messaging.access.intercept.MessageMatcherDel
 @Configuration
 @RequiredArgsConstructor
 public class WebSocketAuthorizationConfig {
-    public static final String CHAT_TOPIC_PREFIX = "/topic/chats/";
 
-    private final ChatAuthorizationManager chatAuthorizationManager;
+    private final GroupChatAuthorizationManager groupChatAuthorizationManager;
+    private final DirectChatAuthorizationManager directChatAuthorizationManager;
 
     @Bean
     AuthorizationManager<Message<?>> messageAuthorizationManager() {
         return MessageMatcherDelegatingAuthorizationManager.builder()
                 .nullDestMatcher().permitAll()
-                .simpSubscribeDestMatchers(CHAT_TOPIC_PREFIX + "{chatId}")
-                .access(chatAuthorizationManager)
-                .simpMessageDestMatchers("/app/chats/{chatId}/messages")
-                .access(chatAuthorizationManager)
+                .simpSubscribeDestMatchers(WebSocketSecurityConfig.GROUP_CHAT_TOPIC_PREFIX + "{chatId}")
+                .access(groupChatAuthorizationManager)
+                .simpMessageDestMatchers(WebSocketSecurityConfig.GROUP_CHAT_APP_PREFIX + "{chatId}/messages")
+                .access(groupChatAuthorizationManager)
+                .simpSubscribeDestMatchers(WebSocketSecurityConfig.DIRECT_CHAT_TOPIC_PREFIX + "{chatId}")
+                .access(directChatAuthorizationManager)
+                .simpMessageDestMatchers(WebSocketSecurityConfig.DIRECT_CHAT_APP_PREFIX + "{chatId}/messages")
+                .access(directChatAuthorizationManager)
                 .anyMessage().denyAll()
                 .build();
     }

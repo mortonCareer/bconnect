@@ -2,6 +2,9 @@ meta {
   name: 내 프로필 소개 수정
   type: http
   seq: 5
+  tags: [
+    idempotent
+  ]
 }
 
 put {
@@ -20,4 +23,9 @@ tests {
     expect(res.status).to.equal(200);
     expect(res.body.success).to.equal(true);
   });
+}
+
+docs {
+  @chain
+  - 03-profiles/01-create
 }

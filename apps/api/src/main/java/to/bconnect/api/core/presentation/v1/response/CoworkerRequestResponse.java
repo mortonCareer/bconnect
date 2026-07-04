@@ -12,8 +12,8 @@ public record CoworkerRequestResponse(
     public static CoworkerRequestResponse of(CoworkerRequest request, Member member, Profile profile, String picture) {
         return new CoworkerRequestResponse(
                 request.id(),
-                MemberSummaryResponse.of(member),
-                profile == null ? null : ProfileSummaryResponse.of(profile, picture)
+                MemberSummaryResponse.of(member, picture),
+                profile == null ? null : ProfileSummaryResponse.of(profile)
         );
     }
 }

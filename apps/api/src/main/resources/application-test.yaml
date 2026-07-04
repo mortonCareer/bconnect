@@ -6,10 +6,13 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
+    defer-datasource-initialization: true
 
   sql:
     init:
-      mode: never
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: optional:classpath:test-data-none.sql
 
 app:
   jwt:

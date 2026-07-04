@@ -5,14 +5,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.coworker.CoworkerEntity;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.coworker.CoworkerRequestEntity;
 import to.bconnect.api.storage.coworker.CoworkerRequestRepository;
 import to.bconnect.api.storage.member.MemberRepository;
-import to.bconnect.api.common.CodeException;
-import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.security.AuthUser;
 
 @Slf4j
 @Service
@@ -32,18 +32,10 @@ public class CoworkerRequestService {
         if (coworkerRepository.existsByMembers(user.id(), targetId))
             throw new CodeException(CoworkerExceptionCode.ALREADY_COWORKER);
 
-        // idempotent
-        val optional = coworkerRequestRepository.findByFromIdAndToId(user.id(), targetId);
-        if (optional.isPresent())
-            return optional.get().getId();
+        val request = coworkerRequestRepository.findByFromIdAndToId(user.id(), targetId)
+                .orElseGet(() -> coworkerRequestRepository.save(new CoworkerRequestEntity(user.id(), targetId)));
 
-        coworkerRequestRepository.findByFromIdAndToId(targetId, user.id())
-                .ifPresent(it -> accept(user, it.getId()));
-
-        val created = coworkerRequestRepository.save(
-                new CoworkerRequestEntity(user.id(), targetId));
-
-        return created.getId();
+        return request.getId();
     }
 
     @Transactional
@@ -72,13 +64,13 @@ public class CoworkerRequestService {
     @Transactional
     public void cancel(AuthUser user, Long id) {
         val optional = coworkerRequestRepository.findById(id);
-        if (optional.isPresent()) {
-            val found = optional.get();
-            if (!found.getFromId().equals(user.id()))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        if (optional.isEmpty())
+            return;
+        val found = optional.get();
 
-            coworkerRequestRepository.delete(found);
-        }
+        if (!found.getFromId().equals(user.id()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
+        coworkerRequestRepository.delete(found);
     }
 }

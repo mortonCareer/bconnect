@@ -14,6 +14,22 @@ career·plan 두 Next.js App Router 앱의 공통 프론트엔드 규칙. 각 �
 
 색상 hex 직접 X, CSS variables (`❌ bg-[#386dff]` → `✓ bg-primary`). 토큰: `packages/ui/src/styles/globals.css`. 신규 색상은 globals.css 먼저.
 
+## 인터랙션 스타일 — 클릭 가능 요소
+
+**모든 클릭 가능 요소는 상호작용 스타일을 가진다.** 클릭되는데 마우스/포커스/눌림 피드백이 없으면 버그.
+
+- **1순위: 디자인시스템 프리미티브 사용** (`Button`·`Select`·`Tab`·`Fab`·`MenuButton` 등) — 아래 스타일이 이미 내장. raw `<button>`/클릭 `<div>` 직접 작성은 불가피할 때만.
+- 불가피한 raw 클릭 요소엔 **직접** 추가:
+  - `cursor-pointer` — raw `<button>` 은 브라우저 기본이 `default` 라 명시 필요
+  - **hover 피드백** — `hover:bg-gray-100` 등 배경/색 변경
+  - `focus-visible:ring-1 focus-visible:ring-primary` (+`outline-none`) — 키보드 a11y
+  - `active:` 눌림 피드백 (예 `active:scale-[0.98]`)
+  - `transition-colors` — hover/active 부드럽게
+  - **disabled**: `disabled:opacity-40 disabled:cursor-not-allowed` (필요시 `disabled:pointer-events-none`)
+  - 아이콘 전용 버튼은 `aria-label` 필수, `<button type="button">` (폼 submit 오발 방지)
+  - 모바일 탭 타겟 ≥ 44px(`h-11`) 권장
+- 클래스 SSOT 가 있으면 우선 (예 `_field-base.ts`).
+
 ## 도메인 enum/라벨 — `@bconnect/api-client` SSOT
 
 값이 enum인 도메인 어휘(`Trade` 등)는 **mock 포함** api-client SSOT 사용 — 옵션 `TRADE_LIST`, 라벨 `TRADE_LABELS[t]` 파생. 한글 하드코딩·자체 옵션 배열·별도 표시필드(`category`) 금지(`generated/`는 orval 산출, 직접수정 X). enum에 없는 값은 BE spec 이슈로 확장.

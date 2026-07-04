@@ -53,12 +53,15 @@ public class RecommendationService {
 
     @Transactional
     public void delete(AuthUser user, Long id) {
-        recommendationRepository.findById(id).ifPresent(it -> {
-            if (!it.getFromId().equals(user.id()))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        val optional = recommendationRepository.findById(id);
+        if (optional.isEmpty())
+            return;
+        val found = optional.get();
 
-            recommendationRepository.delete(it);
-        });
+        if (!found.getFromId().equals(user.id()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        recommendationRepository.delete(found);
     }
 
     @Transactional

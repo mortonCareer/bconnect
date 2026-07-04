@@ -17,7 +17,15 @@ import to.bconnect.api.core.presentation.v1.request.CreateWorkerTaskRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateAssigneeTaskRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProjectTaskRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateWorkerTaskRequest;
+import to.bconnect.api.core.presentation.v1.response.OfferResponse;
 import to.bconnect.api.core.presentation.v1.response.TaskResponse;
+import to.bconnect.api.attachment.AttachmentResolver;
+import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.attachment.ImageSize;
+import to.bconnect.api.core.domain.MemberResolver;
+import to.bconnect.api.core.domain.offer.Offer;
+import to.bconnect.api.core.domain.offer.OfferService;
+import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.core.domain.task.TaskService;
@@ -26,6 +34,8 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.response.ApiResponse;
 
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
@@ -36,19 +46,54 @@ public class TaskController {
     private final TaskQueryService taskQueryService;
     private final TaskService taskService;
     private final ProjectService projectService;
+    private final OfferService offerService;
+    private final MemberResolver memberResolver;
+    private final ProfileResolver profileResolver;
+    private final AttachmentResolver attachmentResolver;
 
     @GetMapping
     public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal AuthUser user) {
-        val worker = taskQueryService.list(user).stream()
-                .map(it -> TaskResponse.of(it, it.address()));
-
+        val workerTasks = taskQueryService.list(user);
         val projectTasks = taskQueryService.listAssigned(user);
-        val addressMap = projectService.resolveAddressMap(
-                projectTasks.stream().map(Task::projectId).distinct().toList());
-        val assigned = projectTasks.stream()
-                .map(it -> TaskResponse.of(it, addressMap.get(it.projectId())));
+        val offers = offerService.listByWorker(user);
+        val offerByTaskId = offers.stream().collect(Collectors.toMap(Offer::taskId, Function.identity()));
+        val offerTasks = taskQueryService.listByIds(offerByTaskId.keySet());
 
-        val response = Stream.concat(worker, assigned).toList();
+        val projectIds = Stream.concat(projectTasks.stream(), offerTasks.stream())
+                .map(Task::projectId).distinct().toList();
+        val addressMap = projectService.resolveAddressMap(projectIds);
+
+        val worker = workerTasks.stream().map(it -> TaskResponse.of(it, it.address())).toList();
+        val assigned = projectTasks.stream().map(it -> TaskResponse.of(it, addressMap.get(it.projectId()))).toList();
+        val offered = offerTasks.stream()
+                .map(it -> TaskResponse.of(it, addressMap.get(it.projectId()), offerByTaskId.get(it.id()))).toList();
+
+        val response = Stream.of(worker, assigned, offered)
+                .flatMap(List::stream)
+                .toList();
+        return ApiResponse.success(response);
+    }
+
+    @GetMapping("/{taskId}/offers")
+    public ApiResponse<List<OfferResponse>> listOffers(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long taskId) {
+        val offers = offerService.listByTask(user, taskId);
+        val workerIds = offers.stream().map(Offer::workerId).distinct().toList();
+        val memberMap = memberResolver.resolveMap(workerIds);
+        val profileMap = profileResolver.resolveMap(workerIds);
+        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, workerIds, ImageSize.SMALL);
+
+        val response = offers.stream()
+                .map(it -> {
+                    val member = memberMap.get(it.workerId());
+                    return OfferResponse.of(
+                            it,
+                            member,
+                            profileMap.get(it.workerId()),
+                            urlMap.get(member.id()));
+                })
+                .toList();
         return ApiResponse.success(response);
     }
 

@@ -11,6 +11,11 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import to.bconnect.api.ApiConfigProps;
 
+/**
+ * @see <a href="https://docs.spring.io/spring-framework/reference/web/websocket/stomp/enable.html">Enable STOMP</a>
+ * @see <a href="https://docs.spring.io/spring-framework/reference/web/websocket/stomp/authentication-token-based.html">Token Authentication</a>
+ * @see <a href="https://docs.spring.io/spring-framework/reference/web/websocket/server.html#websocket-server-allowed-origins">Allowed Origins</a>
+ */
 @Configuration
 @EnableWebSocketMessageBroker
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)

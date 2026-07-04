@@ -7,19 +7,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.core.presentation.v1.response.FeedResponse;
-import to.bconnect.api.core.domain.attachment.AttachmentResolver;
-import to.bconnect.api.core.domain.attachment.ImageSize;
+import to.bconnect.api.attachment.AttachmentResolver;
+import to.bconnect.api.attachment.ImageSize;
 import to.bconnect.api.core.domain.post.Post;
 import to.bconnect.api.core.domain.post.PostService;
 import to.bconnect.api.core.domain.MemberResolver;
-import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.core.domain.profile.ProfileQueryService;
+import to.bconnect.api.core.domain.profile.ProfileResolver;
+import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.common.response.ApiResponse;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/feeds")
@@ -28,7 +25,7 @@ public class FeedController {
 
     private final PostService postService;
     private final MemberResolver memberResolver;
-    private final ProfileQueryService profileQueryService;
+    private final ProfileResolver profileResolver;
     private final AttachmentResolver attachmentResolver;
 
     @GetMapping
@@ -37,25 +34,22 @@ public class FeedController {
 
         val memberIds = posts.stream().map(Post::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
-        val profileMap = profileQueryService.resolveMap(memberIds);
+        val profileMap = profileResolver.resolveMap(memberIds);
+        val pictureMap = attachmentResolver.resolveUrlMap(
+                ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
-        val attachmentIds = new ArrayList<Long>(posts.stream()
-                .flatMap(it -> it.attachmentIds().stream())
-                .toList());
-        profileMap.values().stream().map(Profile::pictureId).filter(Objects::nonNull).forEach(attachmentIds::add);
-        val attachmentMap = attachmentResolver.resolveMap(attachmentIds);
+        val postIds = posts.stream().map(Post::id).toList();
+        val imageMap = attachmentResolver.resolveUrlListMap(ReferenceType.POST, postIds, ImageSize.MEDIUM);
 
         val response = posts.stream()
                 .map(it -> {
-                    val profile = profileMap.get(it.memberId());
+                    val member = memberMap.get(it.memberId());
                     return FeedResponse.of(
                             it,
-                            memberMap.get(it.memberId()),
-                            profile,
-                            it.attachmentIds().stream()
-                                    .map(attachmentMap::get).filter(Objects::nonNull)
-                                    .map(att -> attachmentResolver.url(att, ImageSize.MEDIUM)).toList(),
-                            profile == null ? null : attachmentResolver.url(attachmentMap.get(profile.pictureId()), ImageSize.SMALL));
+                            member,
+                            profileMap.get(it.memberId()),
+                            imageMap.getOrDefault(it.id(), List.of()),
+                            pictureMap.get(member.id()));
                 })
                 .toList();
         return ApiResponse.success(response);
@@ -65,18 +59,9 @@ public class FeedController {
     public ApiResponse<FeedResponse> get(@PathVariable Long id) {
         val post = postService.get(id);
         val member = memberResolver.find(post.memberId());
-        val profile = profileQueryService.resolveMap(List.of(post.memberId())).get(post.memberId());
-
-        val attachmentIds = new ArrayList<Long>(post.attachmentIds());
-        if (profile != null && profile.pictureId() != null)
-            attachmentIds.add(profile.pictureId());
-        val attachmentMap = attachmentResolver.resolveMap(attachmentIds);
-
-        return ApiResponse.success(FeedResponse.of(
-                post, member, profile,
-                post.attachmentIds().stream()
-                        .map(attachmentMap::get).filter(Objects::nonNull)
-                        .map(att -> attachmentResolver.url(att, ImageSize.MEDIUM)).toList(),
-                profile == null ? null : attachmentResolver.url(attachmentMap.get(profile.pictureId()), ImageSize.SMALL)));
+        val profile = profileResolver.resolveMap(List.of(post.memberId())).get(post.memberId());
+        val images = attachmentResolver.listUrl(ReferenceType.POST, post.id(), ImageSize.MEDIUM);
+        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        return ApiResponse.success(FeedResponse.of(post, member, profile, images, picture));
     }
 }

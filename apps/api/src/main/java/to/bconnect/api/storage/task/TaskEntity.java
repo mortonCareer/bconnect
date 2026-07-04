@@ -25,7 +25,6 @@ public class TaskEntity extends BaseEntity {
     @Column(name = "dtype", nullable = false)
     private TaskType type;
 
-    // TODO: MappingTableEntity 분리
     @ElementCollection(targetClass = Trade.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "task_trades", joinColumns = @JoinColumn(name = "task_id"))
     @Enumerated(EnumType.STRING)
@@ -38,7 +37,6 @@ public class TaskEntity extends BaseEntity {
     @Column(name = "end_date", nullable = false)
     private LocalDate end;
 
-    // TODO: 생성 시 초기 상태 정책 확정
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TaskStatus status = TaskStatus.DRAFT;
@@ -110,5 +108,10 @@ public class TaskEntity extends BaseEntity {
     public void update(UpdateAssigneeTask command) {
         this.workerTitle = command.title();
         this.workerMemo = command.memo();
+    }
+
+    public void assign(Long workerId) {
+        this.workerId = workerId;
+        this.status = TaskStatus.SCHEDULED;
     }
 }

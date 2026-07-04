@@ -19,6 +19,10 @@ locals {
       groups = ["developer"]
       tags   = {}
     }
+    jeonjiwon = {
+      groups = ["admin"]
+      tags   = {}
+    }
   }
 }
 

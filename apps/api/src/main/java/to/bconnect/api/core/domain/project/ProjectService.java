@@ -7,12 +7,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.core.domain.task.TaskManager;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.board.BoardEntity;
+import to.bconnect.api.storage.board.BoardRepository;
+import to.bconnect.api.storage.board.BoardType;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.project.ProjectEntity;
 import to.bconnect.api.storage.project.ProjectRepository;
+import to.bconnect.api.storage.task.TaskEntity;
+import to.bconnect.api.storage.task.TaskRepository;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,6 +32,9 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final CompanyRepository companyRepository;
+    private final TaskRepository taskRepository;
+    private final TaskManager taskManager;
+    private final BoardRepository boardRepository;
 
     @Transactional(readOnly = true)
     public List<Project> list(AuthUser user) {
@@ -61,7 +70,10 @@ public class ProjectService {
                 command.address()
         );
 
-        return projectRepository.save(created).getId();
+        val projectId = projectRepository.save(created).getId();
+        boardRepository.save(new BoardEntity(BoardType.PROJECT, projectId, null));
+
+        return projectId;
     }
 
     @Transactional
@@ -78,13 +90,21 @@ public class ProjectService {
 
     @Transactional
     public void delete(AuthUser user, Long projectId) {
-        projectRepository.findById(projectId).ifPresent(it -> {
-            val company = findCompany(user);
-            if (!it.getCompanyId().equals(company.getId()))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        val optional = projectRepository.findById(projectId);
+        if (optional.isEmpty())
+            return;
+        val found = optional.get();
 
-            projectRepository.delete(it);
-        });
+        val company = findCompany(user);
+        if (!found.getCompanyId().equals(company.getId()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        val taskIds = taskRepository.findAllByProjectId(found.getId()).stream()
+                .map(TaskEntity::getId)
+                .toList();
+        taskManager.deleteByIds(taskIds);
+
+        projectRepository.delete(found);
     }
 
     private CompanyEntity findCompany(AuthUser user) {

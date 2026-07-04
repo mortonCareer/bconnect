@@ -3,12 +3,13 @@ meta {
   type: http
   seq: 5
   tags: [
-    seed
+    chain
+    idempotent
   ]
 }
 
 delete {
-  url: {{baseUrl}}/api/v1/coworkers/6
+  url: {{baseUrl}}/api/v1/coworkers/{{coworkerId}}
   auth: inherit
 }
 
@@ -20,7 +21,7 @@ tests {
 }
 
 docs {
-  로그인 유저(member 1)가 시드 동료 관계(coworker 1 = member 1·6)에서 동료 member 6을 삭제한다.
-  @seed members : 1, 6
-  @seed coworkers : 1
+  로그인 유저(member 1)가 수락으로 생성된 동료 member {{coworkerId}}를 삭제한다.
+  @chain
+  - 12-coworker-requests/05-accept
 }

@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.project.ProjectRepository;
@@ -16,6 +15,7 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 
+import java.util.Collection;
 import java.util.List;
 
 @Slf4j
@@ -27,6 +27,13 @@ public class TaskQueryService {
     private final CoworkerRepository coworkerRepository;
     private final CompanyRepository companyRepository;
     private final ProjectRepository projectRepository;
+
+    @Transactional(readOnly = true)
+    public List<Task> listByIds(Collection<Long> taskIds) {
+        return taskRepository.findAllById(taskIds).stream()
+                .map(Task::of)
+                .toList();
+    }
 
     @Transactional(readOnly = true)
     public List<Task> list(AuthUser user) {
@@ -58,8 +65,8 @@ public class TaskQueryService {
     @Transactional(readOnly = true)
     public List<Task> listByProject(AuthUser user, Long projectId) {
         val companyId = companyRepository.findByMemberId(user.id())
-                .map(CompanyEntity::getId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
+                .getId();
 
         val project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));

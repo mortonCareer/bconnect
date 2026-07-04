@@ -4,6 +4,7 @@ import to.bconnect.api.core.presentation.v1.request.CreateProfileRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProfileRequest;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.storage.profile.ProfileEntity;
+import to.bconnect.api.storage.profile.ProfileRole;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.profile.Trade;
 
@@ -20,33 +21,33 @@ public class ProfileFactory {
     );
 
     public static Profile create(Long id, Long memberId) {
-        return new Profile(id, memberId, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL),
-                5, "headline", "about", DEFAULT_ADDRESS, null,
+        return new Profile(id, memberId, ProfileRole.FOREMAN, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL),
+                5, "headline", "about", DEFAULT_ADDRESS,
                 MIN_DATE_TIME, MIN_DATE_TIME, 0L, 0L, 0L);
     }
 
     public static ProfileEntity createEntity(Long memberId) {
         return new ProfileEntity(
                 memberId,
+                ProfileRole.FOREMAN,
                 Trade.ELECTRICAL,
                 Set.of(Trade.ELECTRICAL),
                 5,
                 "headline",
                 "about",
-                DEFAULT_ADDRESS,
-                null
+                DEFAULT_ADDRESS
         );
     }
 
     public static CreateProfileRequest createRequest() {
         return new CreateProfileRequest(
-                Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL), 5,
-                "headline", "about", DEFAULT_ADDRESS, null);
+                ProfileRole.FOREMAN, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL), 5,
+                "headline", "about", DEFAULT_ADDRESS);
     }
 
     public static UpdateProfileRequest updateRequest() {
         return new UpdateProfileRequest(
-                Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL, Trade.PLUMBING), 10,
+                ProfileRole.FOREMAN, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL, Trade.PLUMBING), 10,
                 "Updated Headline", DEFAULT_ADDRESS);
     }
 }

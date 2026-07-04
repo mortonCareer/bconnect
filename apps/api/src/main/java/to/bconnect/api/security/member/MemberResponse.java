@@ -14,13 +14,13 @@ public record MemberResponse(
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {
-    public static MemberResponse of(Member member) {
+    public static MemberResponse of(Member member, String picture) {
         return new MemberResponse(
                 member.id(),
                 member.username(),
                 member.name(),
                 member.phone(),
-                member.picture(),
+                picture,
                 member.role(),
                 member.createdAt(),
                 member.modifiedAt()

@@ -2,12 +2,7 @@ package to.bconnect.api.storage.member;
 
 public enum Role {
     GUEST,
-    CLIENT,
-    ARCHITECT,
+    WORKER,
     CONTRACTOR,
-    FOREMAN,
-    SKILLED,
-    SEMI_SKILLED,
-    HELPER,
     ADMIN
 }

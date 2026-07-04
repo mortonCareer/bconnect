@@ -5,4 +5,5 @@ public enum MessageType {
     IMAGE,
     FILE,
     SYSTEM,
+    OFFER,
 }

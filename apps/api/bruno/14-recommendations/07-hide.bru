@@ -1,0 +1,31 @@
+meta {
+  name: 받은 추천서 숨김
+  type: http
+  seq: 7
+  tags: [
+    seed
+    idempotent
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/recommendations/:id/hide
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  수신자(1)가 받은 추천서(1)를 숨긴다.
+  @seed members : 6
+  @seed recommendations : 1
+}

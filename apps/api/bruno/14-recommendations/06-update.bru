@@ -1,0 +1,32 @@
+meta {
+  name: 추천서 수정
+  type: http
+  seq: 6
+  tags: [
+    chain
+    idempotent
+  ]
+}
+
+put {
+  url: {{baseUrl}}/api/v1/recommendations/{{recommendationId}}
+  auth: inherit
+}
+
+body {
+  {
+    "content": "내용을 수정한 추천서입니다"
+  }
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  @chain
+  - 14-recommendations/01-create
+}
