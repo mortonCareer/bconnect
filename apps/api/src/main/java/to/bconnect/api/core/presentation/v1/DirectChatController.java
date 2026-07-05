@@ -17,6 +17,7 @@ import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.core.domain.chat.DirectChat;
 import to.bconnect.api.core.domain.chat.DirectChatService;
 import to.bconnect.api.core.domain.chat.Message;
+import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.presentation.v1.request.CreateDirectChatRequest;
 import to.bconnect.api.core.presentation.v1.response.DirectChatResponse;
@@ -50,8 +51,8 @@ public class DirectChatController {
 
         val body = directChats.stream()
                 .map(it -> {
-                    val member = memberMap.get(it.memberId());
-                    return DirectChatResponse.of(it, member, urlMap.get(member == null ? null : member.id()));
+                    val member = memberMap.getOrDefault(it.memberId(), Member.WITHDRAWN);
+                    return DirectChatResponse.of(it, member, urlMap.get(member.id()));
                 })
                 .toList();
 

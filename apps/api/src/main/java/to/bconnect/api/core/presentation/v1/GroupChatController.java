@@ -16,6 +16,7 @@ import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.core.domain.chat.GroupChatService;
 import to.bconnect.api.core.domain.chat.Message;
+import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.presentation.v1.request.CreateGroupChatRequest;
 import to.bconnect.api.core.presentation.v1.response.GroupChatResponse;
@@ -26,7 +27,6 @@ import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -56,8 +56,7 @@ public class GroupChatController {
                 .map(it -> GroupChatResponse.of(
                         it,
                         it.participantIds().stream()
-                                .map(memberMap::get)
-                                .filter(Objects::nonNull)
+                                .map(memberId -> memberMap.getOrDefault(memberId, Member.WITHDRAWN))
                                 .toList(),
                         urlMap
                 ))

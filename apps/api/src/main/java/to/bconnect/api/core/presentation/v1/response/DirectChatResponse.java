@@ -16,7 +16,7 @@ public record DirectChatResponse(
     public static DirectChatResponse of(DirectChat directChat, Member member, String picture) {
         return new DirectChatResponse(
                 directChat.id(),
-                member != null ? MemberSummaryResponse.of(member, picture) : null,
+                MemberSummaryResponse.of(member, picture),
                 directChat.lastMessage() != null ? MessageResponse.of(directChat.lastMessage()) : null,
                 directChat.unreadCount(),
                 directChat.createdAt(),
