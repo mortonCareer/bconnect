@@ -1,4 +1,4 @@
-package to.bconnect.api.crawler.presentation.response;
+package to.bconnect.api.crawler.presentation.v1.response;
 
 import to.bconnect.api.crawler.storage.CrawledMemberEntity;
 import to.bconnect.api.crawler.storage.CrawledPlatform;

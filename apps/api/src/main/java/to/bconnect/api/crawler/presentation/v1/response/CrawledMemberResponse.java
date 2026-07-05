@@ -1,12 +1,6 @@
-package to.bconnect.api.crawler.presentation.response;
+package to.bconnect.api.crawler.presentation.v1.response;
 
-import to.bconnect.api.crawler.storage.CrawledCredentialEntity;
-import to.bconnect.api.crawler.storage.CrawledMemberEntity;
-import to.bconnect.api.crawler.storage.CrawledPlatform;
-import to.bconnect.api.crawler.storage.CrawledPostEntity;
-import to.bconnect.api.crawler.storage.CrawledProfileEntity;
-import to.bconnect.api.crawler.storage.CrawledRegion;
-import to.bconnect.api.crawler.storage.CrawledTaskEntity;
+import to.bconnect.api.crawler.storage.*;
 
 import java.util.List;
 import java.util.Map;

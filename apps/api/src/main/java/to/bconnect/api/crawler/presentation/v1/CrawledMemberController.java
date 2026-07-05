@@ -1,4 +1,4 @@
-package to.bconnect.api.crawler.presentation;
+package to.bconnect.api.crawler.presentation.v1;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.crawler.domain.CrawledMemberService;
-import to.bconnect.api.crawler.presentation.response.CrawledMemberResponse;
-import to.bconnect.api.crawler.presentation.response.CrawledMemberSummaryResponse;
+import to.bconnect.api.crawler.presentation.v1.response.CrawledMemberResponse;
+import to.bconnect.api.crawler.presentation.v1.response.CrawledMemberSummaryResponse;
 import to.bconnect.api.crawler.storage.CrawledCredentialEntity;
 import to.bconnect.api.crawler.storage.CrawledMemberEntity;
 import to.bconnect.api.crawler.storage.CrawledPostEntity;
