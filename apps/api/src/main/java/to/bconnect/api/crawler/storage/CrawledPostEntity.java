@@ -22,7 +22,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CrawledPostEntity extends BaseEntity {
 
-    private Long profileId;
+    private Long memberId;
 
     private Long taskId;
 
@@ -36,8 +36,8 @@ public class CrawledPostEntity extends BaseEntity {
     @Column(name = "url")
     private List<String> images = new ArrayList<>();
 
-    public CrawledPostEntity(Long profileId, Long taskId, String title, String content, List<String> images) {
-        this.profileId = profileId;
+    public CrawledPostEntity(Long memberId, Long taskId, String title, String content, List<String> images) {
+        this.memberId = memberId;
         this.taskId = taskId;
         this.title = title;
         this.content = content;

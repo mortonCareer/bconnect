@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface CrawledCredentialRepository extends JpaRepository<CrawledCredentialEntity, Long> {
 
-    List<CrawledCredentialEntity> findByProfileId(Long profileId);
+    List<CrawledCredentialEntity> findByMemberId(Long memberId);
 }

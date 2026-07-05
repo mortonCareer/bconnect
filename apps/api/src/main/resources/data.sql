@@ -51,13 +51,13 @@ INSERT INTO crawled_profile_trades (profile_id, trade) VALUES
 INSERT INTO crawled_tasks (id, company, address, trade, start_date, end_date, duration, created_at, modified_at) VALUES
 (1, '업체1', '주소1', '방수', DATE '2026-06-01', DATE '2026-06-03', '3일', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
-INSERT INTO crawled_posts (id, profile_id, task_id, title, content, created_at, modified_at) VALUES
+INSERT INTO crawled_posts (id, member_id, task_id, title, content, created_at, modified_at) VALUES
 (1, 1, 1, '제목1', '내용1', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO crawled_post_images (post_id, seq, url) VALUES
 (1, 0, 'https://example.com/image1.jpg');
 
-INSERT INTO crawled_credentials (id, profile_id, type, name, created_at, modified_at) VALUES
+INSERT INTO crawled_credentials (id, member_id, type, name, created_at, modified_at) VALUES
 (1, 1, 'LICENSE', '면허1', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 -- for special entities

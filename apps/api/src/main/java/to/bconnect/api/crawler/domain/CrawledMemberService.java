@@ -50,13 +50,13 @@ public class CrawledMemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<CrawledCredentialEntity> listCredential(Long profileId) {
-        return crawledCredentialRepository.findByProfileId(profileId);
+    public List<CrawledCredentialEntity> listCredential(Long memberId) {
+        return crawledCredentialRepository.findByMemberId(memberId);
     }
 
     @Transactional(readOnly = true)
-    public List<CrawledPostEntity> listPost(Long profileId) {
-        return crawledPostRepository.findByProfileId(profileId);
+    public List<CrawledPostEntity> listPost(Long memberId) {
+        return crawledPostRepository.findByMemberId(memberId);
     }
 
     @Transactional(readOnly = true)

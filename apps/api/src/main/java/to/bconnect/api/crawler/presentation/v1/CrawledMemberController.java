@@ -10,7 +10,6 @@ import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.crawler.domain.CrawledMemberService;
 import to.bconnect.api.crawler.presentation.v1.response.CrawledMemberResponse;
 import to.bconnect.api.crawler.presentation.v1.response.CrawledMemberSummaryResponse;
-import to.bconnect.api.crawler.storage.CrawledCredentialEntity;
 import to.bconnect.api.crawler.storage.CrawledMemberEntity;
 import to.bconnect.api.crawler.storage.CrawledPostEntity;
 
@@ -41,12 +40,8 @@ public class CrawledMemberController {
     public ApiResponse<CrawledMemberResponse> get(@PathVariable Long id) {
         val member = crawledMemberService.get(id);
         val profile = crawledMemberService.getProfileMap(List.of(id)).get(id);
-        val credentials = profile == null
-                ? List.<CrawledCredentialEntity>of()
-                : crawledMemberService.listCredential(profile.getId());
-        val posts = profile == null
-                ? List.<CrawledPostEntity>of()
-                : crawledMemberService.listPost(profile.getId());
+        val credentials = crawledMemberService.listCredential(id);
+        val posts = crawledMemberService.listPost(id);
         val taskIds = posts.stream().map(CrawledPostEntity::getTaskId).filter(Objects::nonNull).toList();
         val taskMap = crawledMemberService.getTaskMap(taskIds);
 

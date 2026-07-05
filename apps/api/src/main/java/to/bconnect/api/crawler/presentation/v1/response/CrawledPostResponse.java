@@ -8,19 +8,25 @@ import java.util.List;
 
 public record CrawledPostResponse(
         Long id,
+        Long memberId,
+        Long taskId,
+        List<String> images,
         String title,
         String content,
-        List<String> images,
         LocalDateTime createdAt,
+        LocalDateTime modifiedAt,
         CrawledTaskResponse task
 ) {
     public static CrawledPostResponse of(CrawledPostEntity post, CrawledTaskEntity task) {
         return new CrawledPostResponse(
                 post.getId(),
+                post.getMemberId(),
+                post.getTaskId(),
+                post.getImages(),
                 post.getTitle(),
                 post.getContent(),
-                post.getImages(),
                 post.getCreatedAt(),
+                post.getModifiedAt(),
                 task == null ? null : CrawledTaskResponse.of(task)
         );
     }

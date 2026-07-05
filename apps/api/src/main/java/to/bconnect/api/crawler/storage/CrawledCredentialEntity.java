@@ -17,7 +17,7 @@ import to.bconnect.api.storage.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CrawledCredentialEntity extends BaseEntity {
 
-    private Long profileId;
+    private Long memberId;
 
     @Enumerated(EnumType.STRING)
     private CrawledCredentialType type;

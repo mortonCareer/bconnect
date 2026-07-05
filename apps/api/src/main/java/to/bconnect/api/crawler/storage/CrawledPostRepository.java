@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface CrawledPostRepository extends JpaRepository<CrawledPostEntity, Long> {
 
-    List<CrawledPostEntity> findByProfileId(Long profileId);
+    List<CrawledPostEntity> findByMemberId(Long memberId);
 }
