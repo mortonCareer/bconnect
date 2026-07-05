@@ -59,6 +59,7 @@ export default function SettingsPage() {
         <section className="flex flex-col gap-2">
           <h2 className="text-sb-14 text-gray-900">이용정책</h2>
           <SettingsRow label="서비스 이용약관" onClick={notReady} />
+          <SettingsRow label="개인정보 처리방침" href="/privacy" />
         </section>
 
         <section className="flex flex-col gap-2">
