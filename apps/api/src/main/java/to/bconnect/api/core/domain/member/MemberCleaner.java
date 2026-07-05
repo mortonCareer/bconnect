@@ -6,14 +6,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
-import to.bconnect.api.core.domain.drive.DriveService;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.board.BoardRepository;
+import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.coworker.CoworkerRequestRepository;
 import to.bconnect.api.storage.credential.CredentialEntity;
 import to.bconnect.api.storage.credential.CredentialRepository;
+import to.bconnect.api.storage.drive.DriveEntity;
 import to.bconnect.api.storage.drive.DriveMemberRepository;
 import to.bconnect.api.storage.drive.DriveRepository;
 import to.bconnect.api.storage.offer.OfferRepository;
@@ -41,9 +43,11 @@ public class MemberCleaner {
     private final TaskRepository taskRepository;
     private final DriveRepository driveRepository;
     private final DriveMemberRepository driveMemberRepository;
-    private final DriveService driveService;
+    private final BoardRepository boardRepository;
+    private final NoteRepository noteRepository;
     private final AttachmentLinker attachmentLinker;
 
+    // TODO: 이벤트 구조로 변경 가능
     @Transactional
     public void clean(AuthUser user) {
         val memberId = user.id();
@@ -72,6 +76,14 @@ public class MemberCleaner {
         taskRepository.deleteAll(taskRepository.findAllByWorkerIdAndType(memberId, TaskType.WORKER));
 
         driveMemberRepository.deleteAll(driveMemberRepository.findAllByMemberId(memberId));
-        driveRepository.findAllByMemberId(memberId).forEach(it -> driveService.delete(user, it.getId()));
+
+        val drives = driveRepository.findAllByMemberId(memberId);
+        drives.forEach(it -> boardRepository.findByDriveId(it.getId()).ifPresent(board -> {
+            noteRepository.deleteAllByBoardId(board.getId());
+            boardRepository.delete(board);
+        }));
+        attachmentLinker.unlink(ReferenceType.DRIVE, drives.stream().map(DriveEntity::getId).toList());
+        drives.forEach(it -> driveMemberRepository.deleteByDriveId(it.getId()));
+        driveRepository.deleteAll(drives);
     }
 }
