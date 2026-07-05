@@ -15,8 +15,7 @@ spring:
         jdbc:
           batch_size: 50
     hibernate:
-      ddl-auto: create
-    defer-datasource-initialization: true
+      ddl-auto: validate
 
   sql:
     init:
