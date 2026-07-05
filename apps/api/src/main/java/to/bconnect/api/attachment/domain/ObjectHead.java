@@ -1,4 +1,4 @@
-package to.bconnect.api.attachment.infrastructure.s3;
+package to.bconnect.api.attachment.domain;
 
 public record ObjectHead(
     String contentType,

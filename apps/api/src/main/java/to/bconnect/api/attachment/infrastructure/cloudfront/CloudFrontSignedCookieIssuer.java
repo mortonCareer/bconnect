@@ -29,18 +29,20 @@ import java.util.stream.Stream;
 public class CloudFrontSignedCookieIssuer implements SignedCookieIssuer {
 
     private final CloudFrontProperties properties;
+    private final CloudFrontUrlResolver urlResolver;
     private final CloudFrontUtilities utilities;
     private final PrivateKey key;
 
-    public CloudFrontSignedCookieIssuer(CloudFrontProperties properties) {
+    public CloudFrontSignedCookieIssuer(CloudFrontProperties properties, CloudFrontUrlResolver urlResolver) {
         this.properties = properties;
+        this.urlResolver = urlResolver;
         this.utilities = CloudFrontUtilities.create();
         this.key = parsePrivateKey(properties.privateKey());
     }
 
     @Override
     public List<ResponseCookie> issue(String scope) {
-        val url = "https://" + properties.domain() + "/" + scope + "/*";
+        val url = urlResolver.resolve(scope + "/*");
         val request = CustomSignerRequest.builder()
                 .resourceUrl(url)
                 .privateKey(key)
