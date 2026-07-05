@@ -10,10 +10,11 @@ meta {
 
 post {
   url: {{baseUrl}}/api/v1/offers
+  body: json
   auth: inherit
 }
 
-body {
+body:json {
   {
     "taskId": {{projectTaskId}},
     "workerId": 2,

@@ -1757,6 +1757,7 @@ components:
     ProfileRole:
       type: string
       enum:
+      - CONTRACTOR
       - CLIENT
       - ARCHITECT
       - FOREMAN
@@ -2049,8 +2050,7 @@ components:
       type: string
       enum:
       - GUEST
-      - WORKER
-      - CONTRACTOR
+      - USER
       - ADMIN
     CreateGroupChatRequest:
       type: object

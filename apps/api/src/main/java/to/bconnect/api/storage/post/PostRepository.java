@@ -13,6 +13,8 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
     List<PostEntity> findAllByTaskIdIn(Collection<Long> taskIds);
 
+    List<PostEntity> findAllByMemberId(Long memberId);
+
     long countByMemberId(Long memberId);
 
     default Map<Long, Long> countByMemberIdIn(Collection<Long> memberIds) {

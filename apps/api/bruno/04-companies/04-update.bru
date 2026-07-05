@@ -10,10 +10,11 @@ meta {
 
 put {
   url: {{baseUrl}}/api/v1/companies/me
+  body: json
   auth: inherit
 }
 
-body {
+body:json {
   {
     "pictureId": 1
   }

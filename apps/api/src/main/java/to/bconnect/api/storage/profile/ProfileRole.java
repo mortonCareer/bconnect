@@ -1,6 +1,7 @@
 package to.bconnect.api.storage.profile;
 
 public enum ProfileRole {
+    CONTRACTOR,
     CLIENT,
     ARCHITECT,
     FOREMAN,

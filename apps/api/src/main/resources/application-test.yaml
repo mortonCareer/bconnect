@@ -4,9 +4,8 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     show-sql: false
-    defer-datasource-initialization: true
 
   sql:
     init:

@@ -9,10 +9,11 @@ meta {
 
 post {
   url: {{baseUrl}}/api/v1/notes
+  body: json
   auth: inherit
 }
 
-body {
+body:json {
   {
     "type": "PROJECT",
     "projectId": {{projectId}},

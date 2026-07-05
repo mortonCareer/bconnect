@@ -6,10 +6,11 @@ meta {
 
 post {
   url: {{baseUrl}}/api/v1/credentials
+  body: json
   auth: inherit
 }
 
-body {
+body:json {
   {
     "type": "IDENTITY_VERIFICATION",
     "expiredAt": "2026-12-31",

@@ -8,8 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import to.bconnect.api.attachment.AttachmentProperties;
 import to.bconnect.api.attachment.domain.cleanup.AttachmentContextValidatorRegistry;
-import to.bconnect.api.attachment.infrastructure.s3.ObjectHead;
-import to.bconnect.api.attachment.infrastructure.s3.S3FileStorage;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.attachment.AttachmentContext;
@@ -28,13 +26,13 @@ public class AttachmentService {
     private final AttachmentRepository attachmentRepository;
     private final AttachmentProperties attachmentProperties;
     private final AttachmentContextValidatorRegistry attachmentContextValidatorRegistry;
-    private final S3FileStorage fileStorage;
+    private final FileStorage fileStorage;
     private final List<MediaType> allowedContentTypes;
 
     public AttachmentService(AttachmentRepository attachmentRepository,
                              AttachmentProperties attachmentProperties,
                              AttachmentContextValidatorRegistry attachmentContextValidatorRegistry,
-                             S3FileStorage fileStorage) {
+                             FileStorage fileStorage) {
         this.attachmentRepository = attachmentRepository;
         this.attachmentProperties = attachmentProperties;
         this.attachmentContextValidatorRegistry = attachmentContextValidatorRegistry;
@@ -85,7 +83,7 @@ public class AttachmentService {
                 file.size()
         ));
 
-        val uploadUrl = fileStorage.presignPut(key, file.contentType(), attachmentProperties.presignTtl());
+        val uploadUrl = fileStorage.presign(key, file.contentType(), attachmentProperties.presignTtl());
         return new PresignedFile(created.getId(), uploadUrl);
     }
 

@@ -4,15 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.Delete;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
-import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import to.bconnect.api.attachment.domain.FileStorage;
+import to.bconnect.api.attachment.domain.ObjectHead;
 
 import java.time.Duration;
 import java.util.List;
@@ -25,13 +21,14 @@ import java.util.Optional;
  */
 @Component
 @RequiredArgsConstructor
-public class S3FileStorage {
+public class S3FileStorage implements FileStorage {
 
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
     private final S3Properties properties;
 
-    public String presignPut(String key, String contentType, Duration ttl) {
+    @Override
+    public String presign(String key, String contentType, Duration ttl) {
         val objectRequest = PutObjectRequest.builder()
                 .bucket(properties.bucket())
                 .key(key)
@@ -47,6 +44,7 @@ public class S3FileStorage {
         return presigned.url().toExternalForm();
     }
 
+    @Override
     public Optional<ObjectHead> head(String key) {
         val request = HeadObjectRequest.builder()
                 .bucket(properties.bucket())
@@ -62,6 +60,7 @@ public class S3FileStorage {
     }
 
     // idempotent
+    @Override
     public void delete(String key) {
         val request = DeleteObjectRequest.builder()
                 .bucket(properties.bucket())
@@ -71,6 +70,7 @@ public class S3FileStorage {
         s3Client.deleteObject(request);
     }
 
+    @Override
     public void deleteAll(List<String> keys) {
         if (keys.isEmpty()) return;
 

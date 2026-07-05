@@ -9,10 +9,11 @@ meta {
 
 put {
   url: {{baseUrl}}/api/v1/members/me
+  body: json
   auth: inherit
 }
 
-body {
+body:json {
   {
     "name": "이름 수정",
     "pictureId": 1

@@ -63,7 +63,7 @@ graph TD
 - 도메인 교차 로직의 위치는 도메인 간 응집도를 고려해서 선정해야 합니다.
 
 ### 도메인 정책
-- TODO 탈퇴 회원 : DirectChat · GroupChat 조회 응답에서 탈퇴 회원은 member 필드를 `null`로 응답한다.
+- 탈퇴 회원 : 탈퇴 시 연관 데이터는 정리하되(`MemberCleaner`) DirectChat · GroupChat(participant) · 메시지는 유지한다. 채팅 조회 응답에서 탈퇴 회원은 제외하지 않고 `Member.WITHDRAWN` 상수로 표현하며, 전 필드가 `null`인 member 객체로 응답한다. 소유한 업체가 있으면 탈퇴할 수 없다(M003).
 
 ### 서비스 도메인 교차
 ```mermaid

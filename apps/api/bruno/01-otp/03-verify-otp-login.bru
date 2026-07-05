@@ -9,9 +9,11 @@ meta {
 
 post {
   url: {{baseUrl}}/api/v1/auth/otp/verify
+  body: json
+  auth: none
 }
 
-body {
+body:json {
   {
     "phone": "01000000002",
     "code": "000002"

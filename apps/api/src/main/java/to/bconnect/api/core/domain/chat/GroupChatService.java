@@ -12,6 +12,7 @@ import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.storage.member.MemberEntity;
+import to.bconnect.api.storage.member.MemberRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ public class GroupChatService {
     private final ParticipantRepository participantRepository;
     private final MessageRepository messageRepository;
     private final MessageService messageService;
+    private final MemberRepository memberRepository;
 
     @Transactional(readOnly = true)
     public List<GroupChat> list(Long memberId) {
@@ -62,6 +64,8 @@ public class GroupChatService {
 
         if (!participantIds.contains(user.id()))
             throw new CodeException(ChatExceptionCode.SELF_NOT_INCLUDED);
+        if (memberRepository.findAllByIdIn(participantIds).size() != participantIds.size())
+            throw new CodeException(CommonExceptionCode.NOT_FOUND);
 
         val created = groupChatRepository.save(new GroupChatEntity(command.title()));
 

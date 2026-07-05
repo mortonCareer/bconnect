@@ -9,10 +9,11 @@ meta {
 
 post {
   url: {{baseUrl}}/api/v1/group-chats
+  body: json
   auth: inherit
 }
 
-body {
+body:json {
   {
     "participantIds": [1, 7],
     "title": "채팅방"

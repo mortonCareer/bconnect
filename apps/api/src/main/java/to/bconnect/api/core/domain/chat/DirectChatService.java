@@ -11,6 +11,7 @@ import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.storage.member.MemberEntity;
+import to.bconnect.api.storage.member.MemberRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class DirectChatService {
     private final DirectChatRepository directChatRepository;
     private final MessageRepository messageRepository;
     private final MessageService messageService;
+    private final MemberRepository memberRepository;
 
     @Transactional(readOnly = true)
     public List<DirectChat> list(Long memberId) {
@@ -55,6 +57,9 @@ public class DirectChatService {
 
     @Transactional
     public Long findOrCreate(Long memberId, Long otherId) {
+        if (!memberRepository.existsById(otherId))
+            throw new CodeException(CommonExceptionCode.NOT_FOUND);
+
         val optional = directChatRepository.findByMembers(memberId, otherId);
         if (optional.isPresent())
             return optional.get().getId();

@@ -9,10 +9,11 @@ meta {
 
 put {
   url: {{baseUrl}}/api/v1/profiles/me/about
+  body: json
   auth: inherit
 }
 
-body {
+body:json {
   {
     "about": "새로운 소개"
   }

@@ -10,10 +10,11 @@ meta {
 
 put {
   url: {{baseUrl}}/api/v1/drives/{{memberDriveId}}/name
+  body: json
   auth: inherit
 }
 
-body {
+body:json {
   {
     "title": "개인 드라이브 수정"
   }

@@ -22,6 +22,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final AttachmentLinker attachmentLinker;
+    private final MemberCleaner memberCleaner;
 
     @Transactional(readOnly = true)
     public Member get(AuthUser user) {
@@ -73,6 +74,7 @@ public class MemberService {
 
     @Transactional
     public void withdraw(AuthUser user) {
+        memberCleaner.clean(user);
         attachmentLinker.unlink(ReferenceType.MEMBER, List.of(user.id()));
         memberRepository.findById(user.id())
                 .ifPresent(memberRepository::delete);
