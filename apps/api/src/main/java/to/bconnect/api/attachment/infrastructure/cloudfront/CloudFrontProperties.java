@@ -1,4 +1,4 @@
-package to.bconnect.api.support.cloudfront;
+package to.bconnect.api.attachment.infrastructure.cloudfront;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

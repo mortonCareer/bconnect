@@ -16,7 +16,7 @@ import to.bconnect.api.attachment.domain.AttachmentService;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.support.cloudfront.SignedCookieIssuer;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.util.List;
 

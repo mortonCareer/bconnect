@@ -1,4 +1,4 @@
-package to.bconnect.api.support.sms;
+package to.bconnect.api.sms.infrastructure;
 
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -3,6 +3,7 @@ package to.bconnect.api.security.otp;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.otp.OtpEntity;
@@ -28,6 +29,7 @@ public class OtpService {
     private static final int CODE_BOUND = 1_000_000;
 
     private final OtpRepository otpRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Otp sendCode(String phone) {
@@ -48,6 +50,7 @@ public class OtpService {
         otp.generateCode(code, expiredAt);
         otpRepository.save(otp);
 
+        eventPublisher.publishEvent(new OtpIssuedEvent(phone, code));
         return Otp.of(otp);
     }
 

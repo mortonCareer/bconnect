@@ -8,14 +8,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import to.bconnect.api.attachment.AttachmentProperties;
 import to.bconnect.api.attachment.domain.cleanup.AttachmentContextValidatorRegistry;
+import to.bconnect.api.attachment.infrastructure.s3.ObjectHead;
+import to.bconnect.api.attachment.infrastructure.s3.S3FileStorage;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.AttachmentEntity;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentType;
-import to.bconnect.api.support.s3.S3FileStorage;
-import to.bconnect.api.support.s3.ObjectHead;
 
 import java.util.List;
 import java.util.UUID;

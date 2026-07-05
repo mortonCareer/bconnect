@@ -1,28 +1,31 @@
-package to.bconnect.api.support.sms;
+package to.bconnect.api.sms.infrastructure;
 
+import com.solapi.sdk.SolapiClient;
+import com.solapi.sdk.message.exception.SolapiApiKeyException;
+import com.solapi.sdk.message.exception.SolapiBadRequestException;
+import com.solapi.sdk.message.exception.SolapiInvalidApiKeyException;
+import com.solapi.sdk.message.model.Message;
+import com.solapi.sdk.message.service.DefaultMessageService;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import net.nurigo.sdk.NurigoApp;
-import net.nurigo.sdk.message.model.Message;
-import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
-import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import to.bconnect.api.sms.SmsProvider;
 
-// TODO : https://github.com/solapi/solapi-kotlin 기반 최신화
+/**
+ * @see <a href="https://github.com/solapi/solapi-kotlin/blob/main/LLM_GUIDE.md">SOLAPI : LLM Guide</a>
+ */
 @Slf4j
 @Component
 @Profile({"prod", "dev"})
 public class SolapiSmsProvider implements SmsProvider {
 
-    private static final String API_URL = "https://api.solapi.com";
-
     private final DefaultMessageService messageService;
     private final String senderNumber;
 
     public SolapiSmsProvider(SmsProperties properties) {
-        this.messageService = NurigoApp.INSTANCE
-                .initialize(properties.apiKey(), properties.apiSecret(), API_URL);
+        this.messageService = SolapiClient.INSTANCE
+                .createInstance(properties.apiKey(), properties.apiSecret());
         this.senderNumber = properties.senderNumber();
     }
 
@@ -34,17 +37,27 @@ public class SolapiSmsProvider implements SmsProvider {
         sms.setText(message);
 
         try {
-            messageService.sendOne(new SingleMessageSendingRequest(sms));
+            messageService.send(sms, null);
             log.info("SMS sent to {}", maskPhone(phone));
         } catch (Exception e) {
+            if (isNonRetryable(e)) {
+                log.error("SMS send rejected to {}: {}", maskPhone(phone), e.getMessage());
+                throw new RuntimeException("SMS 발송 실패: " + maskPhone(phone), e);
+            }
             log.warn("SMS send failed, retrying: {}", e.getMessage());
             retrySend(sms, e);
         }
     }
 
+    private static boolean isNonRetryable(Exception e) {
+        return e instanceof SolapiBadRequestException
+                || e instanceof SolapiInvalidApiKeyException
+                || e instanceof SolapiApiKeyException;
+    }
+
     private void retrySend(Message sms, Exception original) {
         try {
-            messageService.sendOne(new SingleMessageSendingRequest(sms));
+            messageService.send(sms, null);
             log.info("SMS retry succeeded to {}", maskPhone(sms.getTo()));
         } catch (Exception e) {
             log.error("SMS retry also failed to {}: {}", maskPhone(sms.getTo()), e.getMessage());
