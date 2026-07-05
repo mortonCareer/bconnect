@@ -39,6 +39,27 @@ INSERT INTO attachments (id, member_id, type, status, context, context_id, uuid,
 INSERT INTO tasks (id, dtype, start_date, end_date, status, worker_id, project_id, project_title, project_requirement, project_memo, created_at, modified_at) VALUES
 (1, 'PROJECT', DATE '2026-06-01', DATE '2026-06-03', 'SCHEDULED', 2, null, '작업', '요구사항', '메모', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
+INSERT INTO crawled_members (id, company, name, phone, picture, role, brn, email, created_at, modified_at) VALUES
+(1, '업체1', '기술자1', '01000000012', NULL, '반장', '123-45-67890', 'crawled1@test.com', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+
+INSERT INTO crawled_profiles (id, member_id, primary_trade, experience, headline, about, address, state, url, platform, created_at, modified_at) VALUES
+(1, 1, '방수', 10, '한줄소개1', '소개글1', '주소1', 'SEOUL', 'https://blog.naver.com/crawled1', 'NAVER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+
+INSERT INTO crawled_profile_trades (profile_id, trade) VALUES
+(1, '방수');
+
+INSERT INTO crawled_tasks (id, company, address, trade, start_date, end_date, duration, created_at, modified_at) VALUES
+(1, '업체1', '주소1', '방수', DATE '2026-06-01', DATE '2026-06-03', '3일', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+
+INSERT INTO crawled_posts (id, profile_id, task_id, title, content, created_at, modified_at) VALUES
+(1, 1, 1, '제목1', '내용1', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+
+INSERT INTO crawled_post_images (post_id, seq, url) VALUES
+(1, 0, 'https://example.com/image1.jpg');
+
+INSERT INTO crawled_credentials (id, profile_id, type, name, created_at, modified_at) VALUES
+(1, 1, 'LICENSE', '면허1', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+
 -- for special entities
 ALTER TABLE otps ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE signup_tokens ALTER COLUMN id RESTART WITH 100;
@@ -58,3 +79,8 @@ ALTER TABLE attachments ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE coworkers ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE coworker_requests ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE recommendations ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE crawled_members ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE crawled_profiles ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE crawled_tasks ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE crawled_posts ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE crawled_credentials ALTER COLUMN id RESTART WITH 100;
