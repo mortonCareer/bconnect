@@ -10,6 +10,7 @@ meta {
 
 put {
   url: {{baseUrl}}/api/v1/tasks/:id/assignee
+  body: json
   auth: bearer
 }
 
@@ -17,7 +18,7 @@ auth:bearer {
   token: {{accessToken2}}
 }
 
-body {
+body:json {
   {
     "title": "작업 수정",
     "memo": "메모 수정"

@@ -6,9 +6,11 @@ meta {
 
 post {
   url: {{baseUrl}}/api/v1/auth/otp/send
+  body: json
+  auth: none
 }
 
-body {
+body:json {
   {
     "phone": "01000000099"
   }

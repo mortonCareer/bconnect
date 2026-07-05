@@ -9,10 +9,11 @@ meta {
 
 post {
   url: {{baseUrl}}/api/v1/profiles
+  body: json
   auth: inherit
 }
 
-body {
+body:json {
   {
     "role": "FOREMAN",
     "primaryTrade": "TILING",

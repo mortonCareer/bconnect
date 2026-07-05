@@ -9,10 +9,11 @@ meta {
 
 post {
   url: {{baseUrl}}/api/v1/drives
+  body: json
   auth: inherit
 }
 
-body {
+body:json {
   {
     "type": "PROJECT",
     "title": "프로젝트 드라이브",

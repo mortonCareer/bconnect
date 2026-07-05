@@ -9,6 +9,7 @@ meta {
 
 post {
   url: {{baseUrl}}/api/v1/members
+  body: json
   auth: none
 }
 
@@ -16,7 +17,7 @@ headers {
   X-Signup-Token: signup-token
 }
 
-body {
+body:json {
   {
     "username": "new-username",
     "name": "이름",
