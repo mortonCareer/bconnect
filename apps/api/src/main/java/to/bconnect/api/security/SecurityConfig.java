@@ -95,6 +95,7 @@ public class SecurityConfig {
                         .requestMatchers(GET, "/api/v1/credentials/**").permitAll()
                         .requestMatchers(POST, "/api/v1/credentials/*/accept", "/api/v1/credentials/*/deny").hasRole("ADMIN")
                         .requestMatchers(GET, "/api/v1/recommendations/received", "/api/v1/recommendations/sent").permitAll()
+                        .requestMatchers(GET, "/api/v1/crawled-members/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/v3/api-docs.yaml").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
