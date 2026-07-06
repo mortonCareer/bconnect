@@ -77,7 +77,7 @@ export default function SignupAuthPage() {
       const result = await verifyCodeMutation.mutateAsync({
         data: { phone: toNationalNumber(phone), code },
       })
-      if ('accessToken' in result) {
+      if (result.registered) {
         // 이미 가입된 회원 — 로그인 처리 후 홈으로 (member 정보는 useGetMyMember 로 별도 조회)
         login(result.accessToken)
         router.push('/')

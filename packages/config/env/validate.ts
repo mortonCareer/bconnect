@@ -9,6 +9,10 @@ export const commonSchemas = {
   }),
   nodeEnv: z.enum(['development', 'production', 'test']),
   apiMocking: z.enum(['enabled', 'disabled']).optional(),
+  gaId: z
+    .string()
+    .regex(/^G-[A-Z0-9]+$/, { message: 'Must be a GA4 measurement ID (G-XXXXXXXXXX)' })
+    .optional(),
 }
 
 /**

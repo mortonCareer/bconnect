@@ -20,8 +20,9 @@ public class PackageDependencyTest {
     private static final String SECURITY = "..security..";
     private static final String STORAGE = "..storage..";
     private static final String COMMON = "..common..";
-    private static final String SUPPORT = "..support..";
+    private static final String SMS = "..sms..";
     private static final String ATTACHMENT = "..attachment..";
+    private static final String CRAWLER = "..crawler..";
 
 	@ArchTest
 	ArchRule socketPackageRule = classes().that().resideInAPackage(SOCKET)
@@ -33,7 +34,7 @@ public class PackageDependencyTest {
 
     @ArchTest
     ArchRule securityPackageRule = classes().that().resideInAPackage(SECURITY)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, ATTACHMENT);
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, ATTACHMENT, SMS);
 
     @ArchTest
     ArchRule attachmentPackageRule = classes().that().resideInAPackage(ATTACHMENT)
@@ -41,20 +42,27 @@ public class PackageDependencyTest {
 
     @ArchTest
     ArchRule storagePackageRule = classes().that().resideInAPackage(STORAGE)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, STORAGE, ATTACHMENT);
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, STORAGE, ATTACHMENT, CRAWLER);
 
     @ArchTest
     ArchRule commonPackageRule = classes().that().resideInAPackage(COMMON)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, STORAGE, COMMON, ATTACHMENT)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, STORAGE, COMMON, ATTACHMENT, CRAWLER)
             .andShould().onlyDependOnClassesThat(
                     resideInAnyPackage(COMMON).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
             );
 
     @ArchTest
-    ArchRule supportPackageRule = classes().that().resideInAPackage(SUPPORT)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, SUPPORT, ATTACHMENT)
+    ArchRule crawlerPackageRule = classes().that().resideInAPackage(CRAWLER)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(CRAWLER)
             .andShould().onlyDependOnClassesThat(
-                    resideInAnyPackage(SUPPORT).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
+                    resideInAnyPackage(CRAWLER, STORAGE, COMMON).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
+            );
+
+    @ArchTest
+    ArchRule smsPackageRule = classes().that().resideInAPackage(SMS)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SMS)
+            .andShould().onlyDependOnClassesThat(
+                    resideInAnyPackage(SMS, SECURITY).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
             );
 
 	@ArchTest

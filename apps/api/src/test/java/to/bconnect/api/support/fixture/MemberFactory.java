@@ -13,12 +13,12 @@ public class MemberFactory {
     public static final Long DEFAULT_PICTURE_ID = 1L;
 
     public static Member create(Long id) {
-        return new Member(id, "username", "name", "phone", Role.WORKER,
+        return new Member(id, "username", "name", "phone", Role.USER,
                 MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
     public static MemberEntity createEntity() {
-        return new MemberEntity("username", "name", "phone", Role.WORKER);
+        return new MemberEntity("username", "name", "phone", Role.USER);
     }
 
     public static MemberEntity createEntity(String username, String phone, Role role) {
@@ -26,7 +26,7 @@ public class MemberFactory {
     }
 
     public static RegisterMemberRequest registerRequest() {
-        return new RegisterMemberRequest("username", "name", DEFAULT_PICTURE_ID, Role.WORKER);
+        return new RegisterMemberRequest("username", "name", DEFAULT_PICTURE_ID, Role.USER);
     }
 
     public static UpdateMemberRequest updateRequest() {

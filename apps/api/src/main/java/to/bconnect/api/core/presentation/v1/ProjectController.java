@@ -29,10 +29,10 @@ public class ProjectController {
 
     @GetMapping
     public ApiResponse<List<ProjectResponse>> list(@AuthenticationPrincipal AuthUser user) {
-        val response = projectService.list(user).stream()
+        val body = projectService.list(user).stream()
                 .map(ProjectResponse::of)
                 .toList();
-        return ApiResponse.success(response);
+        return ApiResponse.success(body);
     }
 
     @GetMapping("/{id}")
@@ -46,20 +46,20 @@ public class ProjectController {
             @PathVariable Long id) {
         val tasks = taskQueryService.listByProject(user, id);
         val address = projectService.get(id).address();
-        val response = tasks.stream()
+        val body = tasks.stream()
                 .map(it -> TaskResponse.of(it, address))
                 .toList();
-        return ApiResponse.success(response);
+        return ApiResponse.success(body);
     }
 
     @GetMapping("/{id}/notes")
     public ApiResponse<List<NoteResponse>> listNotes(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
-        val response = noteService.listByProject(user, id).stream()
+        val body = noteService.listByProject(user, id).stream()
                 .map(NoteResponse::of)
                 .toList();
-        return ApiResponse.success(response);
+        return ApiResponse.success(body);
     }
 
     @PostMapping

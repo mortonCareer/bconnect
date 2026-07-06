@@ -5,10 +5,10 @@ import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
+import to.bconnect.api.attachment.domain.FileStorage;
 import to.bconnect.api.storage.attachment.AttachmentEntity;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentStatus;
-import to.bconnect.api.support.s3.S3FileStorage;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ public class AttachmentCleanupService {
     private static final Duration ORPHAN_RETENTION = Duration.ofHours(24);
 
     private final AttachmentRepository attachmentRepository;
-    private final S3FileStorage fileStorage;
+    private final FileStorage fileStorage;
 
     @Transactional
     public CleanupResult cleanup() {

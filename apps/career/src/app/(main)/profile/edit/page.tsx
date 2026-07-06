@@ -26,8 +26,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  NumberField,
   SelectField,
-  Slider,
   Tag,
   TextareaField,
   TextField,
@@ -37,15 +37,6 @@ import {
 import { TRADE_LABELS, TRADE_GROUPS } from '@bconnect/api-client'
 import { AddressField } from '@/components/AddressField'
 import { mapKakaoAddress } from '@bconnect/config/address'
-import {
-  DEFAULT_EXPERIENCE_RANGE,
-  EXPERIENCE_MAX,
-  EXPERIENCE_MIN,
-  EXPERIENCE_THUMB_LABELS,
-  apiExperienceToRange,
-  formatExperienceYears,
-  rangeToApiExperience,
-} from '@/lib/experience-range'
 import { MAX_TRADES, profileEditSchema, type ProfileEditFormData } from './schema'
 
 export default function ProfileEditPage() {
@@ -68,7 +59,7 @@ export default function ProfileEditPage() {
       phone: '',
       primaryTrade: undefined,
       trades: [],
-      experience: DEFAULT_EXPERIENCE_RANGE,
+      experience: undefined,
       headline: '',
       about: '',
       address: undefined,
@@ -90,10 +81,7 @@ export default function ProfileEditPage() {
         phone: member?.phone ?? '',
         primaryTrade: profile?.primaryTrade ?? undefined,
         trades: profile?.trades ?? [],
-        experience:
-          profile?.experience != null
-            ? apiExperienceToRange(profile.experience)
-            : DEFAULT_EXPERIENCE_RANGE,
+        experience: profile?.experience ?? undefined,
         headline: profile?.headline ?? '',
         about: profile?.about ?? '',
         address: profile?.address ?? undefined,
@@ -132,7 +120,7 @@ export default function ProfileEditPage() {
           data: {
             primaryTrade: data.primaryTrade as Trade,
             trades: data.trades as Trade[],
-            experience: rangeToApiExperience(data.experience),
+            experience: data.experience,
             headline: data.headline || undefined,
             address: data.address ?? mapKakaoAddress(null),
           },
@@ -275,28 +263,13 @@ export default function ProfileEditPage() {
           />
 
           {/* 경력 */}
-          <FormField
+          <NumberField
             control={control}
             name="experience"
-            render={({ field }) => (
-              <FormItem className="gap-2">
-                <FormLabel required className="text-m-16 text-gray-900">
-                  경력
-                </FormLabel>
-                <FormControl>
-                  <Slider
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    onBlur={field.onBlur}
-                    min={EXPERIENCE_MIN}
-                    max={EXPERIENCE_MAX}
-                    formatLabel={formatExperienceYears}
-                    thumbLabels={EXPERIENCE_THUMB_LABELS}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="경력"
+            required
+            maxLength={2}
+            placeholder="경력을 입력해주세요 (년)"
           />
 
           {/* 한줄소개 */}

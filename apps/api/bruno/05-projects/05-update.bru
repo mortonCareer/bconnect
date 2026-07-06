@@ -10,10 +10,11 @@ meta {
 
 put {
   url: {{baseUrl}}/api/v1/projects/{{projectId}}
+  body: json
   auth: inherit
 }
 
-body {
+body:json {
   {
     "title": "프로젝트 수정",
     "address": {

@@ -98,14 +98,14 @@ graph TD
 | 유형 | 설명     |
 |---|--------|
 | GUEST | 게스트    |
-| WORKER | 기술자    |
-| CONTRACTOR | 인테리어 업체 |
+| USER | 사용자    |
 | ADMIN | 어드민    |
 
 ### 프로필 역할(ProfileRole)
 
 | 유형 | 설명     |
 |---|--------|
+| CONTRACTOR | 인테리어 업체 |
 | CLIENT | 소비자    |
 | ARCHITECT | 건축가    |
 | FOREMAN | 반장     |

@@ -1,10 +1,13 @@
 package to.bconnect.api.core.presentation.v1;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.common.response.ApiResponse;
@@ -20,7 +23,9 @@ import to.bconnect.api.core.presentation.v1.request.*;
 import to.bconnect.api.core.presentation.v1.response.OfferResponse;
 import to.bconnect.api.core.presentation.v1.response.TaskResponse;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.util.List;
 import java.util.function.Function;
@@ -39,6 +44,7 @@ public class TaskController {
     private final MemberResolver memberResolver;
     private final ProfileResolver profileResolver;
     private final AttachmentResolver attachmentResolver;
+    private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
     public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal AuthUser user) {
@@ -58,23 +64,24 @@ public class TaskController {
         val offered = offerTasks.stream()
                 .map(it -> TaskResponse.of(it, addressMap.get(it.projectId()), offerByTaskId.get(it.id()))).toList();
 
-        val response = Stream.of(worker, assigned, offered)
+        val body = Stream.of(worker, assigned, offered)
                 .flatMap(List::stream)
                 .toList();
-        return ApiResponse.success(response);
+        return ApiResponse.success(body);
     }
 
     @GetMapping("/{id}/offers")
     public ApiResponse<List<OfferResponse>> listOffers(
             @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            HttpServletResponse response) {
         val offers = offerService.listByTask(user, id);
         val workerIds = offers.stream().map(Offer::workerId).distinct().toList();
         val memberMap = memberResolver.resolveMap(workerIds);
         val profileMap = profileResolver.resolveMap(workerIds);
         val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, workerIds, ImageSize.SMALL);
 
-        val response = offers.stream()
+        val body = offers.stream()
                 .map(it -> {
                     val member = memberMap.get(it.workerId());
                     return OfferResponse.of(
@@ -84,7 +91,12 @@ public class TaskController {
                             urlMap.get(member.id()));
                 })
                 .toList();
-        return ApiResponse.success(response);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
+        return ApiResponse.success(body);
     }
 
     @PostMapping("/worker")

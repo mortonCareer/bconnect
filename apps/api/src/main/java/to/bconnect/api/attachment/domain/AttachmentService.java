@@ -14,8 +14,6 @@ import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.AttachmentEntity;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentType;
-import to.bconnect.api.support.s3.S3FileStorage;
-import to.bconnect.api.support.s3.ObjectHead;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,13 +26,13 @@ public class AttachmentService {
     private final AttachmentRepository attachmentRepository;
     private final AttachmentProperties attachmentProperties;
     private final AttachmentContextValidatorRegistry attachmentContextValidatorRegistry;
-    private final S3FileStorage fileStorage;
+    private final FileStorage fileStorage;
     private final List<MediaType> allowedContentTypes;
 
     public AttachmentService(AttachmentRepository attachmentRepository,
                              AttachmentProperties attachmentProperties,
                              AttachmentContextValidatorRegistry attachmentContextValidatorRegistry,
-                             S3FileStorage fileStorage) {
+                             FileStorage fileStorage) {
         this.attachmentRepository = attachmentRepository;
         this.attachmentProperties = attachmentProperties;
         this.attachmentContextValidatorRegistry = attachmentContextValidatorRegistry;
@@ -85,7 +83,7 @@ public class AttachmentService {
                 file.size()
         ));
 
-        val uploadUrl = fileStorage.presignPut(key, file.contentType(), attachmentProperties.presignTtl());
+        val uploadUrl = fileStorage.presign(key, file.contentType(), attachmentProperties.presignTtl());
         return new PresignedFile(created.getId(), uploadUrl);
     }
 

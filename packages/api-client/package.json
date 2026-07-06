@@ -11,9 +11,7 @@
     "./auth-hint": "./src/auth-hint.ts"
   },
   "scripts": {
-    "bundle": "redocly bundle src/spec/openapi.yaml -o src/openapi.bundled.yaml",
-    "lint": "redocly lint src/spec/openapi.yaml",
-    "generate": "pnpm bundle && orval",
+    "generate": "orval",
     "generate:watch": "orval --watch"
   },
   "dependencies": {
@@ -24,7 +22,6 @@
     "msw": "catalog:"
   },
   "devDependencies": {
-    "@redocly/cli": "^2.30.0",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "orval": "^8.9.1",

@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentType;
 import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.support.cloudfront.CloudFrontProperties;
+import to.bconnect.api.attachment.infrastructure.cloudfront.CloudFrontUrlResolver;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class AttachmentResolver {
 
     private final AttachmentRepository attachmentRepository;
-    private final CloudFrontProperties properties;
+    private final CloudFrontUrlResolver urlResolver;
 
     @Transactional(readOnly = true)
     public String getUrl(ReferenceType referenceType, Long referenceId, ImageSize size) {
@@ -110,6 +110,6 @@ public class AttachmentResolver {
         val key = AttachmentKeyUtils.key(
                 attachment.context(), attachment.contextId(), attachment.type(),
                 size, attachment.uuid(), attachment.ext());
-        return "https://" + properties.domain() + "/" + key;
+        return urlResolver.resolve(key);
     }
 }

@@ -1,6 +1,6 @@
 # ADR-0003: OpenAPI 3.1 + 도메인 분리 (packing) + envelope wrap
 
-- **Status**: Accepted
+- **Status**: Superseded by [ADR-0024](0024-orval-consumes-be-springdoc-spec.md) — 손-작성 `src/spec/` 폐기, orval 이 BE springdoc spec 직접 소비
 - **Date**: 2026-05-02 ([PR #266](https://github.com/mortonCareer/bconnect/pull/266) 머지)
 - **Deciders**: @manamana32321 @fine-pine
 - **Related**: [#265](https://github.com/mortonCareer/bconnect/issues/265) (메타), [#263](https://github.com/mortonCareer/bconnect/issues/263) (도메인 분리), [#264](https://github.com/mortonCareer/bconnect/issues/264) (3.1 업그레이드), [PR #266](https://github.com/mortonCareer/bconnect/pull/266)

@@ -14,6 +14,8 @@ public record Member(
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
+    public static final Member WITHDRAWN = new Member(null, null, null, null, null, null, null);
+
     public static Member of(MemberEntity entity) {
         return new Member(
                 entity.getId(),

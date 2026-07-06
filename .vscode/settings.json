@@ -25,10 +25,9 @@
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
 
   // OpenAPI 파일 식별자 — 42crunch 확장이 알아보고 specialized UI 적용 (validation/preview).
-  // 진입점 + bundle 결과만 등록 (도메인 분할 _shared.yaml / v1/*.yaml 는 generic yaml 로 충분).
+  // src/openapi.yaml = BE springdoc 산출 spec (SSOT 입력).
   "files.associations": {
-    "openapi.yaml": "openapi-yaml",
-    "openapi.bundled.yaml": "openapi-yaml"
+    "openapi.yaml": "openapi-yaml"
   },
 
   // GHA workflow YAML schema — redhat.vscode-yaml 이 자동완성 + 룰 위반 표시.

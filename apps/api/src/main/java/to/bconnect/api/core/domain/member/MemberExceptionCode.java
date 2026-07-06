@@ -11,7 +11,8 @@ import to.bconnect.api.common.ExceptionCode;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public enum MemberExceptionCode implements ExceptionCode {
     DUPLICATE_USERNAME ("M001", HttpStatus.CONFLICT, "이미 사용 중인 사용자명입니다.", LogLevel.INFO),
-    DUPLICATE_PHONE ("M002", HttpStatus.CONFLICT, "이미 사용 중인 전화번호입니다.", LogLevel.INFO);
+    DUPLICATE_PHONE ("M002", HttpStatus.CONFLICT, "이미 사용 중인 전화번호입니다.", LogLevel.INFO),
+    WITHDRAW_COMPANY_EXISTS ("M003", HttpStatus.CONFLICT, "소유한 업체가 있어 탈퇴할 수 없습니다. 업체를 먼저 삭제해주세요.", LogLevel.INFO);
 
     private final String code;
     private final HttpStatus status;

@@ -1,11 +1,14 @@
 package to.bconnect.api.core.presentation.v1;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.common.response.ApiResponse;
@@ -14,7 +17,9 @@ import to.bconnect.api.core.domain.post.Post;
 import to.bconnect.api.core.domain.post.PostService;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.core.presentation.v1.response.FeedResponse;
+import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.util.List;
 
@@ -27,9 +32,10 @@ public class FeedController {
     private final MemberResolver memberResolver;
     private final ProfileResolver profileResolver;
     private final AttachmentResolver attachmentResolver;
+    private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
-    public ApiResponse<List<FeedResponse>> list() {
+    public ApiResponse<List<FeedResponse>> list(HttpServletResponse response) {
         val posts = postService.list();
 
         val memberIds = posts.stream().map(Post::memberId).distinct().toList();
@@ -41,7 +47,7 @@ public class FeedController {
         val postIds = posts.stream().map(Post::id).toList();
         val imageMap = attachmentResolver.resolveUrlListMap(ReferenceType.POST, postIds, ImageSize.MEDIUM);
 
-        val response = posts.stream()
+        val body = posts.stream()
                 .map(it -> {
                     val member = memberMap.get(it.memberId());
                     return FeedResponse.of(
@@ -52,16 +58,28 @@ public class FeedController {
                             pictureMap.get(member.id()));
                 })
                 .toList();
-        return ApiResponse.success(response);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
+        return ApiResponse.success(body);
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<FeedResponse> get(@PathVariable Long id) {
+    public ApiResponse<FeedResponse> get(
+            @PathVariable Long id,
+            HttpServletResponse response) {
         val post = postService.get(id);
         val member = memberResolver.find(post.memberId());
         val profile = profileResolver.resolveMap(List.of(post.memberId())).get(post.memberId());
         val images = attachmentResolver.listUrl(ReferenceType.POST, post.id(), ImageSize.MEDIUM);
         val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
         return ApiResponse.success(FeedResponse.of(post, member, profile, images, picture));
     }
 }

@@ -204,10 +204,10 @@ Notification                         NotificationType  (타입당 1행 = 레지�
 
 아직 레거시인 openapi SDD 문서에 정의된 엔드포인트입니다. 참고용으로만 봐주시면 되고 추후 삭제 예정입니다. **BE-first이니 BE가 엔드포인트를 구성하면 FE는 이에 맞게 대응**하는 방식으로 갑니다.
 
-| 항목                                                                                                 | 상태   | 위치                                                                                                  |
-| ---------------------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------- |
-| `POST /api/v1/devices` (registerDevice), `DELETE /api/v1/devices` (unregister) 스펙                  | 참고용 | [packages/api-client/src/spec/v1/devices.yaml](../../../packages/api-client/src/spec/v1/devices.yaml) |
-| orval 생성 타입 (`DevicePlatform` enum, `RegisterDeviceRequest/Response`, `UnregisterDeviceRequest`) | 참고용 | `packages/api-client/src/generated/schemas/` (gitignored)                                             |
+| 항목                                                                                                 | 상태   | 위치                                                                      |
+| ---------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------- |
+| `POST /api/v1/devices` (registerDevice), `DELETE /api/v1/devices` (unregister) 스펙                  | 참고용 | 구 손-spec `src/spec/v1/devices.yaml` (ADR-0024 flip 시 제거 — BE 미구현) |
+| orval 생성 타입 (`DevicePlatform` enum, `RegisterDeviceRequest/Response`, `UnregisterDeviceRequest`) | 참고용 | `packages/api-client/src/generated/schemas/` (gitignored)                 |
 
 ### Mock (MSW, dev 전용)
 

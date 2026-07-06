@@ -9,7 +9,7 @@ import { TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
 import { FILTER_ROLES, ROLE_LABELS } from '@/lib/role-labels'
 import { REGIONS, REGION_LABELS } from '@/lib/region'
 import {
-  EXPERIENCE_MAX,
+  EXPERIENCE_FILTER_MAX,
   EXPERIENCE_MIN,
   EXPERIENCE_THUMB_LABELS,
   FULL_EXPERIENCE_RANGE,
@@ -129,7 +129,7 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
               value={experience ?? FULL_EXPERIENCE_RANGE}
               onValueChange={(value) => setExperience([value[0], value[1]])}
               min={EXPERIENCE_MIN}
-              max={EXPERIENCE_MAX}
+              max={EXPERIENCE_FILTER_MAX}
               formatLabel={formatExperienceYears}
               thumbLabels={EXPERIENCE_THUMB_LABELS}
             />

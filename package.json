@@ -23,8 +23,6 @@
     "docs:lint:md": "markdownlint-cli2 \"**/*.md\" \"!apps/api/**\" \"!**/node_modules/**\" \"!**/.next/**\" \"!**/dist/**\" \"!**/build/**\" \"!packages/api-client/src/generated/**\"",
     "docs:lint:links": "command -v lychee >/dev/null || { echo 'lychee not installed — see https://lychee.cli.rs/installation/'; exit 1; } && GITHUB_TOKEN=\"$(gh auth token 2>/dev/null)\" lychee --config lychee.toml --cache=false --no-progress --exclude-path apps/api --exclude-path node_modules './**/*.md' './**/*.mdx'",
     "api:generate": "pnpm --filter @bconnect/api-client generate",
-    "api:bundle": "pnpm --filter @bconnect/api-client bundle",
-    "api:lint": "pnpm --filter @bconnect/api-client lint",
     "package:check": "syncpack lint",
     "package:fix": "syncpack fix",
     "figma:connect": "figma connect publish",

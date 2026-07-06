@@ -9,10 +9,11 @@ meta {
 
 post {
   url: {{baseUrl}}/api/v1/tasks/company
+  body: json
   auth: inherit
 }
 
-body {
+body:json {
   {
     "trades": ["TILING", "FILM_SHEET"],
     "start": "2026-06-01",

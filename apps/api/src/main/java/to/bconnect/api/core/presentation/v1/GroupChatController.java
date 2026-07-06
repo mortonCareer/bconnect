@@ -1,11 +1,14 @@
 package to.bconnect.api.core.presentation.v1;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.Attachment;
+import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.common.request.CursorLimit;
@@ -13,15 +16,17 @@ import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.core.domain.chat.GroupChatService;
 import to.bconnect.api.core.domain.chat.Message;
+import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.presentation.v1.request.CreateGroupChatRequest;
 import to.bconnect.api.core.presentation.v1.response.GroupChatResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -32,9 +37,12 @@ public class GroupChatController {
     private final GroupChatService groupChatService;
     private final MemberResolver memberResolver;
     private final AttachmentResolver attachmentResolver;
+    private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
-    public ApiResponse<List<GroupChatResponse>> list(@AuthenticationPrincipal AuthUser user) {
+    public ApiResponse<List<GroupChatResponse>> list(
+            @AuthenticationPrincipal AuthUser user,
+            HttpServletResponse response) {
         val chats = groupChatService.list(user.id());
         val memberIds = chats.stream()
                 .flatMap(it -> it.participantIds().stream())
@@ -44,17 +52,21 @@ public class GroupChatController {
         val urlMap = attachmentResolver.resolveUrlMap(
                 ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
-        val response = chats.stream()
+        val body = chats.stream()
                 .map(it -> GroupChatResponse.of(
                         it,
                         it.participantIds().stream()
-                                .map(memberMap::get)
-                                .filter(Objects::nonNull)
+                                .map(memberId -> memberMap.getOrDefault(memberId, Member.WITHDRAWN))
                                 .toList(),
                         urlMap
                 ))
                 .toList();
-        return ApiResponse.success(response);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
+        return ApiResponse.success(body);
     }
 
     @PostMapping
@@ -69,7 +81,8 @@ public class GroupChatController {
     public ApiResponse<CursorPage<MessageResponse>> listMessages(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
-            CursorLimit cursorLimit) {
+            CursorLimit cursorLimit,
+            HttpServletResponse response) {
         val page = groupChatService.listMessages(user, id, cursorLimit);
         val messageIds = page.content().stream().map(Message::id).toList();
         val attachmentMap = attachmentResolver.resolveListMap(ReferenceType.MESSAGE, messageIds);
@@ -83,11 +96,16 @@ public class GroupChatController {
                 })
                 .toList();
 
-        val response = new CursorPage<>(
+        val body = new CursorPage<>(
                 content,
                 page.hasNext(),
                 page.nextCursor()
         );
-        return ApiResponse.success(response);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.CHAT, id);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
+        return ApiResponse.success(body);
     }
 }

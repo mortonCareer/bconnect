@@ -803,6 +803,41 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/devices:
+    post:
+      tags:
+      - device-controller
+      operationId: register_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterDeviceRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseRegisterDeviceResponse"
+    delete:
+      tags:
+      - device-controller
+      operationId: unregister
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnregisterDeviceRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/credentials:
     get:
       tags:
@@ -1028,6 +1063,37 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListAttachmentResponse"
+  /api/v1/notifications/{id}/read:
+    patch:
+      tags:
+      - notification-controller
+      operationId: markRead
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/notifications/read:
+    patch:
+      tags:
+      - notification-controller
+      operationId: markAllRead
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/tasks:
     get:
       tags:
@@ -1178,6 +1244,36 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseProfileResponse"
+  /api/v1/notifications:
+    get:
+      tags:
+      - notification-controller
+      operationId: list_8
+      parameters:
+      - name: cursorLimit
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CursorLimit"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCursorPageNotificationResponse"
+  /api/v1/notifications/unread/count:
+    get:
+      tags:
+      - notification-controller
+      operationId: unreadCount
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
   /api/v1/members/check-username:
     get:
       tags:
@@ -1224,7 +1320,7 @@ paths:
     get:
       tags:
       - feed-controller
-      operationId: list_8
+      operationId: list_9
       responses:
         "200":
           description: OK
@@ -1356,11 +1452,42 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListCredentialResponse"
+  /api/v1/crawled-members:
+    get:
+      tags:
+      - crawled-member-controller
+      operationId: list_10
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListCrawledMemberSummaryResponse"
+  /api/v1/crawled-members/{id}:
+    get:
+      tags:
+      - crawled-member-controller
+      operationId: get_4
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCrawledMemberResponse"
   /api/v1/coworkers:
     get:
       tags:
       - coworker-controller
-      operationId: list_9
+      operationId: list_11
       parameters:
       - name: memberId
         in: query
@@ -1422,7 +1549,7 @@ paths:
     get:
       tags:
       - company-controller
-      operationId: get_4
+      operationId: get_5
       parameters:
       - name: id
         in: path
@@ -1621,10 +1748,10 @@ components:
     ExceptionCode:
       type: object
       properties:
-        status:
-          $ref: "#/components/schemas/HttpStatus"
         code:
           type: string
+        status:
+          $ref: "#/components/schemas/HttpStatus"
     HttpStatus:
       type: string
       enum:
@@ -1757,6 +1884,7 @@ components:
     ProfileRole:
       type: string
       enum:
+      - CONTRACTOR
       - CLIENT
       - ARCHITECT
       - FOREMAN
@@ -2049,8 +2177,7 @@ components:
       type: string
       enum:
       - GUEST
-      - WORKER
-      - CONTRACTOR
+      - USER
       - ADMIN
     CreateGroupChatRequest:
       type: object
@@ -2095,6 +2222,37 @@ components:
           format: int64
       required:
       - memberId
+    DevicePlatform:
+      type: string
+      enum:
+      - web
+      - android
+      - ios
+    RegisterDeviceRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+        platform:
+          $ref: "#/components/schemas/DevicePlatform"
+      required:
+      - platform
+      - token
+    ApiResponseRegisterDeviceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/RegisterDeviceResponse"
+    RegisterDeviceResponse:
+      type: object
+      properties:
+        registered:
+          type: boolean
     CreateCredentialRequest:
       type: object
       properties:
@@ -2613,6 +2771,62 @@ components:
           $ref: "#/components/schemas/ExceptionCode"
         data:
           $ref: "#/components/schemas/ProfileResponse"
+    CursorLimit:
+      type: object
+      properties:
+        cursor:
+          type: integer
+          format: int64
+        limit:
+          type: integer
+          format: int32
+        reverse:
+          type: boolean
+    ApiResponseCursorPageNotificationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/CursorPageNotificationResponse"
+    CursorPageNotificationResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/NotificationResponse"
+        hasNext:
+          type: boolean
+        nextCursor:
+          type: integer
+          format: int64
+    NotificationResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        type:
+          type: string
+        message:
+          type: string
+        content:
+          type: string
+        referenceType:
+          type: string
+        referenceId:
+          type: integer
+          format: int64
+        sender:
+          $ref: "#/components/schemas/MemberSummaryResponse"
+        read:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
     ApiResponseListMemberResponse:
       type: object
       properties:
@@ -2737,17 +2951,6 @@ components:
       - FILE
       - SYSTEM
       - OFFER
-    CursorLimit:
-      type: object
-      properties:
-        cursor:
-          type: integer
-          format: int64
-        limit:
-          type: integer
-          format: int32
-        reverse:
-          type: boolean
     ApiResponseCursorPageMessageResponse:
       type: object
       properties:
@@ -2959,6 +3162,220 @@ components:
           format: date-time
         attachment:
           $ref: "#/components/schemas/AttachmentResponse"
+    ApiResponseListCrawledMemberSummaryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/CrawledMemberSummaryResponse"
+    CrawledMemberSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        company:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        picture:
+          type: string
+        role:
+          type: string
+        brn:
+          type: string
+        email:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+        profile:
+          $ref: "#/components/schemas/CrawledProfileResponse"
+    CrawledPlatform:
+      type: string
+      enum:
+      - NAVER
+      - INSTAGRAM
+    CrawledProfileResponse:
+      type: object
+      properties:
+        primaryTrade:
+          type: string
+        trades:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        experience:
+          type: integer
+          format: int32
+        headline:
+          type: string
+        about:
+          type: string
+        address:
+          type: string
+        state:
+          $ref: "#/components/schemas/CrawledRegion"
+        url:
+          type: string
+        platform:
+          $ref: "#/components/schemas/CrawledPlatform"
+    CrawledRegion:
+      type: string
+      enum:
+      - SEOUL
+      - BUSAN
+      - DAEGU
+      - INCHEON
+      - GWANGJU
+      - DAEJEON
+      - ULSAN
+      - SEJONG
+      - GYEONGGI
+      - GANGWON
+      - CHUNGBUK
+      - CHUNGNAM
+      - JEONBUK
+      - JEONNAM
+      - GYEONGBUK
+      - GYEONGNAM
+      - JEJU
+    ApiResponseCrawledMemberResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/CrawledMemberResponse"
+    CrawledCredentialResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        type:
+          $ref: "#/components/schemas/CrawledCredentialType"
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+    CrawledCredentialType:
+      type: string
+      enum:
+      - EDUCATION
+      - CERTIFICATE
+      - AWARD
+      - LICENSE
+    CrawledMemberResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        company:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        picture:
+          type: string
+        role:
+          type: string
+        brn:
+          type: string
+        email:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+        profile:
+          $ref: "#/components/schemas/CrawledProfileResponse"
+        credentials:
+          type: array
+          items:
+            $ref: "#/components/schemas/CrawledCredentialResponse"
+        posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/CrawledPostResponse"
+    CrawledPostResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        taskId:
+          type: integer
+          format: int64
+        images:
+          type: array
+          items:
+            type: string
+        title:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+        task:
+          $ref: "#/components/schemas/CrawledTaskResponse"
+    CrawledTaskResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        company:
+          type: string
+        address:
+          type: string
+        trade:
+          type: string
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        duration:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
     ApiResponseListCoworkerResponse:
       type: object
       properties:
@@ -3077,3 +3494,11 @@ components:
           $ref: "#/components/schemas/ExceptionCode"
         data:
           $ref: "#/components/schemas/CompanyResponse"
+    UnregisterDeviceRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+      required:
+      - token
