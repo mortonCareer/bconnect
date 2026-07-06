@@ -31,6 +31,7 @@ export function NotificationsView(props: NotificationsViewProps) {
   const { data, isLoading, isError } = useNotifications()
 
   const markAllRead = () => {
+    // config 대상 밖: optimistic (setQueryData 직접 갱신, 무효화 아님) — ADR-0025
     queryClient.setQueryData<AppNotification[]>(['notifications'], (prev) =>
       prev?.map((n) => (n.read ? n : { ...n, read: true }))
     )

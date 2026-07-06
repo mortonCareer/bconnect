@@ -32,6 +32,7 @@ export default function EditAboutPage() {
   const { mutate: updateAbout, isPending } = useUpdateMyProfileAbout({
     mutation: {
       onSuccess: () => {
+        // TODO(#728): 수동 무효화 — 추후 config(updateMyProfileAbout→내 프로필) 인계로 대체. getMyProfile 대체 훅 정합 시 맞춰 수정 (orval.config TODO 참조) (ADR-0025)
         queryClient.invalidateQueries({ queryKey: getGetMyProfileQueryKey() })
         router.back()
       },

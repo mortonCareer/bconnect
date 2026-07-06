@@ -139,6 +139,7 @@ export default function ProfileEditPage() {
       await Promise.all(promises)
 
       // 캐시 무효화
+      // TODO(#728): 수동 무효화 — updateMyMember→getMyMember 는 이미 config 중복(추후 제거), 내 프로필은 getMyProfile 대체 훅 정합 시 config 인계로 맞춰 수정 (ADR-0025)
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: getGetMyMemberQueryKey() }),
         queryClient.invalidateQueries({ queryKey: getGetMyProfileQueryKey() }),

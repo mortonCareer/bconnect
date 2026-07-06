@@ -68,6 +68,7 @@ export function TaskCreateForm() {
       },
       {
         onSuccess: () => {
+          // TODO(#728): 수동 무효화 — 추후 config(createTask→getTasks) 인계로 대체. task 훅 정합 시 맞춰 제거 (ADR-0025)
           queryClient.invalidateQueries({ queryKey: getGetMyTasksQueryKey() })
           toast({ description: '작업이 생성되었어요', variant: 'success' })
           // 생성한 작업의 시작일로 포커스 (월·선택일 동기화)

@@ -63,6 +63,7 @@ export default function CertificationApplyPage() {
     refetch: refetchCredentials,
   } = useGetCredentials({ profileId: profileId! }, { query: { enabled: !!profileId } })
 
+  // TODO(#728): 수동 무효화 — 추후 config(create/deleteCredential→getCredentials) 인계로 대체. profileId 부모 유래(config 는 broad 만), credentials 훅 정합 시 맞춰 수정 (ADR-0025)
   const invalidateCredentials = () => {
     if (profileId) {
       queryClient.invalidateQueries({

@@ -32,6 +32,7 @@ export default function CertificationsPage() {
     mutation: {
       onSuccess: () => {
         if (profileId) {
+          // TODO(#728): 수동 무효화 — 추후 config(deleteCredential→getCredentials) 인계로 대체. profileId 부모 유래(config 는 broad 만), credentials 훅 정합 시 맞춰 수정 (ADR-0025)
           queryClient.invalidateQueries({
             queryKey: getGetCredentialsQueryKey({ profileId }),
           })

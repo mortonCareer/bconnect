@@ -10,6 +10,7 @@ export function useWorkActions(profileId: number) {
   const remove = useDeletePost({
     mutation: {
       onSuccess: () => {
+        // TODO(#728): 수동 무효화 — 추후 config 인계 검토. profileId 부모 유래라 config 는 broad 만 가능; getFeeds 정합 시 broad 인계/조건부 예외 중 택해 맞춰 수정 (ADR-0025)
         queryClient.invalidateQueries({ queryKey: getGetFeedsQueryKey({ profileId }) })
         toast({ description: '작업물을 삭제했어요', variant: 'success' })
       },
