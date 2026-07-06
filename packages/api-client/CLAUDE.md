@@ -112,8 +112,7 @@ mutation 성공 시 관련 query 캐시 무효화를 `orval.config.ts` 의 `quer
 
 - 규칙 형태: `{ onMutations: [mutation opId…], invalidates: [query opId…] }`. **opId 는 transformer 산출 이름**(위 operationId 규칙) 기준 — 네이밍 규칙 바뀌면 config 도 동반 갱신.
 - 무파라미터 쿼리 → `getGetXQueryKey()`, query 파라미터(`memberId` 등) → route prefix predicate 로 broad 무효화.
-- 생성 훅 하위호환: `useX(options?, queryClient?)` — `queryClient` optional(내부 `useQueryClient()` 폴백), 호출별 `skipInvalidation: true` 로 건너뛰기. 사용자 `onSuccess` 는 무효화 **이후** 실행.
-- optimistic/커스텀 키(`setQueryData`)·유저 트리거 무효화는 대상 밖 → 수동 유지(하이브리드).
+- config 가 기본. optimistic/커스텀 키(`setQueryData`)·유저 트리거 등 config 로 표현 못 하는 경우만 수동 유지하되, 수동 무효화 호출부엔 `// config 대상 밖: <사유>` 주석을 단다 (사유 목록은 [ADR-0025](../../docs/explanation/adr/0025-cache-invalidation-orval-mutationinvalidates.md) Notes).
 
 ## 런타임: customFetch (`src/client.ts`)
 

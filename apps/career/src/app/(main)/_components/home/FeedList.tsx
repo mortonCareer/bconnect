@@ -75,6 +75,7 @@ export function FeedList() {
         <Button
           variant="outline"
           size="sm"
+          // config 대상 밖: 유저 트리거 (mutation onSuccess 아님) — ADR-0025
           onClick={() => queryClient.invalidateQueries({ queryKey: getGetFeedsQueryKey() })}
         >
           다시 시도
@@ -125,6 +126,7 @@ export function FeedList() {
           if (pendingDeleteId == null) return
           deletePost(
             { postId: pendingDeleteId },
+            // TODO(#728): 수동 무효화 — 추후 config(deletePost→getFeeds) 인계로 대체. getFeeds 파라미터 계약(본인/전체) 정리 시 맞춰 제거 (ADR-0025)
             { onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFeedsQueryKey() }) }
           )
           setPendingDeleteId(null)

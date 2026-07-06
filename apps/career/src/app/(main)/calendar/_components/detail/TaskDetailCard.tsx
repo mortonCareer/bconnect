@@ -79,6 +79,7 @@ export function TaskDetailCard({ task }: { task: CalendarTask }) {
     defaultValues: toEditValues(task.raw),
   })
 
+  // TODO(#728): 수동 무효화 — 추후 config(task→getTasks) 인계로 대체. task 훅(#690 worker/company 분리·getTasks)에 맞춰 정합 시 제거 (ADR-0025)
   const invalidate = () => queryClient.invalidateQueries({ queryKey: getGetMyTasksQueryKey() })
 
   const onError = (error: unknown) =>
