@@ -13,7 +13,10 @@ export function LandingFooter() {
           <a href="mailto:morton.career@gmail.com" className="transition-colors hover:text-white">
             문의사항
           </a>
-          <Link href="/terms" className="transition-colors hover:text-white">
+          <Link
+            href="/terms"
+            className="font-semibold text-gray-200 transition-colors hover:text-white"
+          >
             이용약관
           </Link>
           <Link
