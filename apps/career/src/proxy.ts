@@ -10,6 +10,7 @@ const PUBLIC_PREFIX = [
   '/login',
   '/signup',
   '/privacy',
+  '/terms',
   '/component',
   '/instagram',
   '/showcase',
