@@ -96,7 +96,7 @@ export function RecommendationList({
               key={rec.id}
               recommendation={rec}
               showMenu={canAct}
-              onMenuClick={() => setOpenId(rec.id)}
+              onMenuClick={() => setOpenId(rec.id ?? null)}
               rowClassName={rowPx}
             />
           ))}
@@ -116,7 +116,7 @@ export function RecommendationList({
                   {
                     label: '숨김',
                     icon: <HideIcon size={18} />,
-                    onSelect: () => onHide?.(openRec.id),
+                    onSelect: () => openRec.id != null && onHide?.(openRec.id),
                   },
                 ]
               : [
@@ -130,7 +130,7 @@ export function RecommendationList({
                     label: '삭제',
                     icon: <TrashIcon size={18} />,
                     destructive: true,
-                    onSelect: () => onDelete?.(openRec.id),
+                    onSelect: () => openRec.id != null && onDelete?.(openRec.id),
                   },
                 ]
         }
@@ -180,13 +180,13 @@ function RecommendationItem({
     <ProfileCard
       as="li"
       className={rowClassName}
-      avatarUrl={member.picture || getAvatarUrl(member.name)}
-      name={member.name}
-      profileHref={`/profile/${member.id}`}
+      avatarUrl={member?.picture || getAvatarUrl(member?.name ?? '')}
+      name={member?.name ?? ''}
+      profileHref={`/profile/${member?.id ?? ''}`}
       meta={{
-        region: profile.address.city,
-        trade: getTradeLabel(profile.primaryTrade),
-        // TODO(#473): BE가 MaskedMember.role 미제공 — 추가되면 실제 role 연결
+        region: profile?.address?.city ?? '',
+        trade: profile?.primaryTrade ? getTradeLabel(profile.primaryTrade) : '',
+        // TODO(#473): 등급(ProfileRole)은 요약(ProfileSummary)에 미포함 — 추가되면 실제 등급 연결
         role: '반장(Mocked)',
       }}
       description={content}
