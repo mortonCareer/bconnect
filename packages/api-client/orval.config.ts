@@ -26,7 +26,7 @@ export default defineConfig({
           useSuspenseQuery: true,
           // mutation 성공 시 관련 쿼리 자동 무효화 — 각 FE 호출부의 수동 invalidateQueries 대체 (#728, ADR-0025).
           // operationId 는 becompat transformer(orval.transformer.ts) 산출 이름 기준 — 규칙 변경 시 동반 갱신.
-          // 파라미터 없는 쿼리는 no-arg, memberId 같은 query 파라미터는 no-arg broad(prefix predicate) 로 무효화.
+          // 파라미터 없는 쿼리는 no-arg 무효화.
           mutationInvalidates: [
             // 게시물(작업물) 변경 → 피드 목록 (getFeeds: 파라미터 없음)
             { onMutations: ['createPost', 'updatePost', 'deletePost'], invalidates: ['getFeeds'] },
@@ -51,7 +51,9 @@ export default defineConfig({
               onMutations: ['createRecommendation', 'updateRecommendation', 'deleteRecommendation'],
               invalidates: ['getMySentRecommendations'],
             },
-            // 자격/인증 변경 → 자격 목록 (getCredentials: memberId 쿼리파라미터 → broad)
+            // 자격/인증 변경 → 자격 목록 (getCredentials: memberId 파라미터 → broad, getMyCredentials: 무파라미터)
+            // TODO(#728): getCredentials 는 정밀키(memberId) 필요 — ADR-0025 line 61.
+            //   memberId 는 mutation payload 밖(부모 스코프)이라 config 는 broad 만 가능. 수동 유지 vs broad 추후 결정.
             {
               onMutations: [
                 'createCredential',
