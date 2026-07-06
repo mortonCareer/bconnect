@@ -1,6 +1,6 @@
 import { SERVICE_NAME } from '@bconnect/config/site'
 
-const EFFECTIVE_DATE = '2026년 7월 5일'
+const EFFECTIVE_DATE = '2026년 7월 6일'
 const CONTACT_EMAIL = 'morton.career@gmail.com'
 const OPERATOR = 'Morton'
 const GA_OPT_OUT_URL = 'https://tools.google.com/dlpage/gaoptout'
