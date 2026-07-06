@@ -6,16 +6,14 @@ const OPERATOR = 'Morton'
 const GA_OPT_OUT_URL = 'https://tools.google.com/dlpage/gaoptout'
 
 const OFFICER = {
-  name: '(확정 예정)',
-  position: '(확정 예정)',
-  phone: '(확정 예정)',
+  name: '손장수',
   email: CONTACT_EMAIL,
 }
 
 function Table({ head, rows }: { head: string[]; rows: string[][] }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[36rem] border-collapse text-r-12 text-gray-700">
+      <table className="w-full min-w-xl border-collapse text-r-12 text-gray-700">
         <thead>
           <tr className="bg-gray-50 text-left">
             {head.map((cell) => (
@@ -66,11 +64,15 @@ const SECTIONS: { id: string; title: string; body: React.ReactNode }[] = [
         <Table
           head={['구분', '수집 항목', '수집 방법']}
           rows={[
-            ['회원가입·본인인증 (필수)', '휴대전화번호', '휴대전화 문자(OTP) 인증'],
+            [
+              '회원가입·본인인증 (필수)',
+              '휴대전화번호, 인증번호',
+              '휴대전화 문자(SMS)·알림톡(OTP) 인증',
+            ],
             [
               '프로필 (선택)',
-              '이름·닉네임, 프로필 사진, 경력·보유 시공분야·활동지역(기술자), 상호·사업자등록번호(업체)',
-              '이용자 직접 입력',
+              '이름, 닉네임, 시공분야·대표분야, 경력, 소속, 활동지역, 회원유형, 한줄소개, 프로필 사진, 증빙 서류 (기술자) · 상호·사업자등록번호 (업체)',
+              '이용자 직접 입력·업로드',
             ],
             [
               '자동 수집',
@@ -129,10 +131,21 @@ const SECTIONS: { id: string; title: string; body: React.ReactNode }[] = [
     title: '개인정보 처리의 위탁',
     body: (
       <>
-        <p>운영자는 서비스 향상을 위해 아래와 같이 개인정보 처리 업무를 위탁하고 있습니다.</p>
+        <p>
+          운영자는 원활한 서비스 제공을 위해 아래와 같이 개인정보 처리 업무를 위탁하고 있습니다.
+        </p>
         <Table
           head={['수탁자', '위탁 업무']}
-          rows={[['Google LLC', '서비스 이용 통계 분석(Google Analytics)']]}
+          rows={[
+            ['Railway Corporation', '서버·데이터베이스 운영(호스팅)'],
+            ['Amazon Web Services, Inc.', '업로드 파일(사진·증빙 서류) 저장'],
+            ['Vercel Inc.', '웹 애플리케이션 호스팅'],
+            ['Solapi(솔라피)', '본인인증 문자(SMS)·알림톡 발송'],
+            [
+              'Google LLC',
+              '서비스 이용 통계 분석(Google Analytics), 푸시 알림 발송(Firebase Cloud Messaging)',
+            ],
+          ]}
         />
       </>
     ),
@@ -143,8 +156,8 @@ const SECTIONS: { id: string; title: string; body: React.ReactNode }[] = [
     body: (
       <>
         <p>
-          운영자는 이용 통계 분석을 위해 아래와 같이 개인정보를 국외로 이전합니다. 정보주체는 아래
-          거부 방법을 통해 국외 이전을 거부할 수 있습니다.
+          운영자는 서버·데이터베이스 운영 및 이용 통계 분석을 위해 아래와 같이 개인정보를 국외로
+          이전합니다. 정보주체는 아래 거부 방법을 통해 국외 이전을 거부할 수 있습니다.
         </p>
         <Table
           head={[
@@ -157,12 +170,36 @@ const SECTIONS: { id: string; title: string; body: React.ReactNode }[] = [
           ]}
           rows={[
             [
+              'Railway Corporation',
+              '싱가포르',
+              '서비스 이용 과정에서 처리되는 개인정보 전체(회원정보·프로필 등)',
+              '서버·데이터베이스 운영(호스팅)',
+              '회원 탈퇴 또는 위탁계약 종료 시까지',
+              '회원 탈퇴 또는 서비스 이용 중단',
+            ],
+            [
+              'Vercel Inc.',
+              '미국',
+              '접속 IP, 기기·브라우저 정보, 서비스 이용 기록',
+              '웹 애플리케이션 호스팅',
+              '위탁계약 종료 시까지',
+              '서비스 이용 중단',
+            ],
+            [
               'Google LLC',
               '미국',
               '쿠키, 접속 IP, 기기·브라우저 정보, 서비스 이용 기록',
               '서비스 이용 통계 분석',
               '수집일로부터 최대 14개월',
               '아래 자동 수집 장치(쿠키) 조의 쿠키 거부 및 Google Analytics 차단 부가기능 설치',
+            ],
+            [
+              'Google LLC',
+              '미국',
+              '푸시 알림 토큰, 기기 정보',
+              '푸시 알림 발송(Firebase Cloud Messaging)',
+              '회원 탈퇴 또는 토큰 만료 시까지',
+              '기기 또는 브라우저의 알림 설정에서 알림 차단',
             ],
           ]}
         />
@@ -231,8 +268,6 @@ const SECTIONS: { id: string; title: string; body: React.ReactNode }[] = [
         </p>
         <ul className="list-disc space-y-1 pl-5">
           <li>성명: {OFFICER.name}</li>
-          <li>직위: {OFFICER.position}</li>
-          <li>연락처: {OFFICER.phone}</li>
           <li>
             이메일:{' '}
             <a href={`mailto:${OFFICER.email}`} className="text-primary underline">
