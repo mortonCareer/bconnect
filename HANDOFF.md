@@ -73,3 +73,28 @@ pnpm build:career && pnpm build:plan     # merge 전 최종
 - **Notion「API 대응 Hook」** `https://app.notion.com/p/391965d2888b80d1a0e3e3308814c060` — 83행 엔드포인트↔훅 전체표 + Step2 정합상태별 보드(Phantom 칼럼 = 우선순위). 입력/응답 타입, BE구현상태, 도메인 필터.
 - `packages/api-client/CLAUDE.md` — 파이프라인·transformer 규칙
 - ADR-0024 (flip), ADR-0025 (캐시 무효화)
+
+---
+
+## 진행 상황 (2026-07-07)
+
+### 완료됨
+
+- **임시 호환 레이어 파일 추가** `packages/api-client/src/_temp-compat.ts` — 개발 서버를 오류 없이 띄우기 위한 임시 우회 매핑을 추가한 파일, 자세한 내용은 해당 파일 상단 주석에 설명해둠
+- **연결 완료(실서버 검증)**: `/profile/[memberId]/recommendations`페이지 연결 완료함. (`recommendations` 는 public 이면서 seed 데이터 확보된 상태라 우선 연결 후 QA까지 완료함)
+
+### 계획
+
+- **다음에 연결할 페이지 (데이터 의존성 기준으로 계획)**:
+  1. **public + seed 대기** → 연결은 바로 가능, seed 오면 즉시 QA(로그인 무관).
+     · **`/profile/[memberId]` 프로필 본체** (정체성 원천 — 하위가 member/Profile shape·pid 물려받음) → 최우선
+     · `/` 홈 피드 (posts seed 후 — getFeeds public·author 정보 응답 내장이라 얽힘 적음)
+  2. **인증 필요** → 연결은 바로 가능, **dev 로그인(otp) 확보 후 일괄로** QA.
+     · 동료·캘린더·메시지·본인 화면(`/profile`·`edit`·`settings`) 등
+
+### 참고
+
+- **도메인 의존 현황 (otp·member·profile)**:
+  - `member`(memberId) — 거의 전 도메인이 조회 키로 참조하나 **seed에 이미 있어 조회는 지금도 가능**.
+  - `profile` — flip으로 의존 축소(조회가 memberId로 이동, profileId는 coworker/offer write 정도만).
+  - `otp`(로그인) — **auth 도메인 전체(chat·task·coworker·notification·offer·내 것)를 여는 게이트.** 실서버 QA를 넓게 여는 열쇠.
