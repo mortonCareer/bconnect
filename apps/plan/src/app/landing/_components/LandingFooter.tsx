@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { SITE_URL } from '@bconnect/config/site'
 
 export function LandingFooter() {
@@ -12,6 +13,12 @@ export function LandingFooter() {
           <a href="mailto:morton.career@gmail.com" className="transition-colors hover:text-white">
             문의사항
           </a>
+          <Link
+            href="/privacy"
+            className="font-semibold text-gray-200 transition-colors hover:text-white"
+          >
+            개인정보 처리방침
+          </Link>
           <span>© 2026 Morton. All rights reserved.</span>
         </div>
       </div>
