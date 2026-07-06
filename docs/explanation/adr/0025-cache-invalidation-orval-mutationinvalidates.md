@@ -45,7 +45,7 @@ orval 8.9.1은 `mutationInvalidates` 기능을 제공한다.
 
 - 무효화 로직이 호출부에서 안 보이고 config를 봐야 한다(지역 가시성↓).
 - 기본 무효화 범위가 넓어 리페치 증가 여지 있음.
-- optimistic/커스텀 키 케이스는 여전히 수동 배선 필요.
+- optimistic 갱신(서버 응답을 기다리지 않고 캐시를 미리 바꾸는 방식)·커스텀 키 케이스는 여전히 수동 배선 필요.
 
 ## Decision
 
@@ -58,12 +58,12 @@ orval 8.9.1은 `mutationInvalidates` 기능을 제공한다.
 
 - config로만 커버 불가능한 케이스가 있음 -> **하이브리드 방식** 불가피.
   예) `FeedList` 새로고침 버튼(유저 트리거를 통한 무효화) -> 무효화가 config + 수동 배선 두 곳에 나뉨
-- `params`는 mutation 변수/리터럴만 참조 가능하며, payload에 없는 값(예를 들어 부모 쿼리에서 온 `memberId` 등)으로는 정밀 키를 못 만듦. -> broad 무효화 피하기 위해 수동 배선 필요
+- `params`는 mutation 변수/리터럴만 참조 가능하며, payload에 없는 값(예를 들어 부모 쿼리에서 온 `memberId` 등)으로는 정밀 키를 못 만듦. -> 관련 목록을 통째로 무효화(broad)하는 걸 피하려면 수동 배선 필요
 
 ## Consequences
 
 - **좋은 결과**: 무효화 SSOT화로 누락 감소, 소비 코드 경량화, 배선 통일. 신규 mutation 연동이 config 규칙 한 줄로 축소.
-- **나쁜 결과**: 무효화가 `orval.config.ts`에만 보인다. broad 무효화로 불필요 리페치 여지.
+- **나쁜 결과**: 무효화가 `orval.config.ts`에만 보인다. 관련 목록을 통째로 무효화(broad)해 불필요한 리페치가 생길 여지.
 - **중립적 결과**: optimistic/커스텀 키(예: notifications `setQueryData`)는 대상 밖 → 하이브리드 방식(선언 가능한 것만 config, 나머지 수동).
 
 ## Notes

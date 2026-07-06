@@ -111,8 +111,10 @@ const server = setupServer(...getBconnectAPIMock())
 mutation 성공 시 관련 query 캐시 무효화를 `orval.config.ts` 의 `query.mutationInvalidates` 로 선언 → 생성 훅 `onSuccess` 에 `queryClient.invalidateQueries` 자동 주입 (FE 수동 배선 대체, [ADR-0025](../../docs/explanation/adr/0025-cache-invalidation-orval-mutationinvalidates.md)).
 
 - 규칙 형태: `{ onMutations: [mutation opId…], invalidates: [query opId…] }`. **opId 는 transformer 산출 이름**(위 operationId 규칙) 기준 — 네이밍 규칙 바뀌면 config 도 동반 갱신.
-- 무파라미터 쿼리 → `getGetXQueryKey()`, query 파라미터(`memberId` 등) → no-arg 부분키(route prefix)로 react-query prefix 매칭 → broad 무효화.
-- config 가 기본. optimistic/커스텀 키(`setQueryData`)·유저 트리거 등 config 로 표현 못 하는 경우만 수동 유지하되, 수동 무효화 호출부엔 `// config 대상 밖: <사유>` 주석을 단다 (사유 목록은 [ADR-0025](../../docs/explanation/adr/0025-cache-invalidation-orval-mutationinvalidates.md) Notes).
+- 조회마다 캐시를 구분하는 **키**(배열)가 있고, 무효화는 그 키의 캐시를 "낡음"으로 표시해 다시 불러오게 하는 것이다.
+  - **조건 없는 조회**(예: 피드 목록)는 키가 하나뿐 → 그 목록만 정확히 다시 불러온다.
+  - **조건 있는 조회**(예: 특정 회원의 자격 목록, `memberId` 로 회원별 구분)는 회원마다 키가 다르다. config 는 그 `memberId` 값을 모르므로 키의 앞부분(`/api/v1/credentials`)만 지정하고, React Query 가 앞부분이 같은 키를 전부 무효화한다 → 관련 목록이 한꺼번에 다시 불려온다(= 넓게 무효화).
+- 기본은 config 선언. config 로 표현 못 하는 경우—캐시를 직접 고쳐 쓰거나(예: 알림 `setQueryData`), 버튼 클릭 같은 사용자 동작으로 무효화하는 경우—만 예전처럼 손으로 남기고, 그 자리에 `// config 대상 밖: <이유>` 주석을 단다 (이유 목록은 [ADR-0025](../../docs/explanation/adr/0025-cache-invalidation-orval-mutationinvalidates.md) Notes).
 
 ## 런타임: customFetch (`src/client.ts`)
 
