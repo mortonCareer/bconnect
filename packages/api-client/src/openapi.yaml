@@ -774,6 +774,31 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/drives/{id}/attachments:
+    post:
+      tags:
+      - drive-controller
+      operationId: upload
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadDriveRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/direct-chats:
     get:
       tags:
@@ -1506,6 +1531,31 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/drives/{id}/attachments/{attachmentId}:
+    delete:
+      tags:
+      - drive-controller
+      operationId: detach
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: attachmentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/credentials/{id}:
     delete:
       tags:
@@ -2119,6 +2169,17 @@ components:
       enum:
       - PROJECT
       - MEMBER
+    UploadDriveRequest:
+      type: object
+      properties:
+        attachmentIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          minItems: 1
+      required:
+      - attachmentIds
     CreateDirectChatRequest:
       type: object
       properties:
