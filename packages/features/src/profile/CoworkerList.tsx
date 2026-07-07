@@ -27,22 +27,20 @@ export function CoworkerList({ coworkers, isLoading, isError, coworkerHref }: Co
 
   return (
     <ul className="flex flex-col">
-      {coworkers.map((coworker) => (
-        <CoworkerRow
-          key={coworker.id}
-          profileId={coworker.member.id}
-          href={coworkerHref(coworker.member.id)}
-        />
-      ))}
+      {coworkers.map((coworker) => {
+        const memberId = coworker.member?.id
+        if (memberId == null) return null
+        return <CoworkerRow key={coworker.id} memberId={memberId} href={coworkerHref(memberId)} />
+      })}
     </ul>
   )
 }
 
 /** 동료 한 명 — 마스킹 무관 by-id 보강(useGetProfile)으로 분야/지역/소개 채움. */
-function CoworkerRow({ profileId, href }: { profileId: number; href: string }) {
-  const { data: profileAndMember, isLoading } = useGetProfile(profileId)
-  const member = profileAndMember?.member
-  const profile = profileAndMember?.profile
+function CoworkerRow({ memberId, href }: { memberId: number; href: string }) {
+  // useGetProfile 은 Profile 을 직접 반환(member 내장). 인자는 memberId.
+  const { data: profile, isLoading } = useGetProfile(memberId)
+  const member = profile?.member
 
   if (isLoading) {
     return <ProfileCardSkeleton as="li" className="px-4" />
@@ -59,9 +57,10 @@ function CoworkerRow({ profileId, href }: { profileId: number; href: string }) {
       avatarUrl={member?.picture || getAvatarUrl(name)}
       name={name}
       meta={{
-        region: profile.address.city,
-        trade: getTradeLabel(profile.primaryTrade),
-        // 등급(role)은 MaskedMember 미제공(#473). 시안(1234-2262)은 2번째 줄 = 소개(description).
+        // region/trade 는 필수 string — 빈값은 ProfileCard 내부 filter(Boolean) 에서 제거됨.
+        region: profile.address?.city ?? '',
+        trade: profile.primaryTrade ? getTradeLabel(profile.primaryTrade) : '',
+        // 등급(role)은 MemberSummary 미제공(#473). 시안(1234-2262)은 2번째 줄 = 소개(description).
       }}
       description={profile.headline ?? undefined}
       href={href}

@@ -85,21 +85,20 @@ pnpm build:career && pnpm build:plan     # merge 전 최종
 - **연결 완료(실서버 검증)**: `/profile/[memberId]/recommendations`페이지 연결 완료함. (`recommendations` 는 public 이면서 seed 데이터 확보된 상태라 우선 연결 후 QA까지 완료함)
 - **가입 플로우 정합 (career)** — career 가입은 register(memberId 반환, 세션 토큰 없음) → OTP 재인증으로 accessToken 확보 → 프로필 생성 플로우로 정합 완료. plan signup(`corp/page.tsx`)은 아직 미정합
 - **프로필 (/profile/[memberId]) 정합**
+- **프로필 하위 페이지(/profile/...) 정합 완료**: 남은 런타임 QA는 seed(profiles 행) 확보 후 추가 진행.
 
 ### 계획
 
 - **다음에 연결할 페이지 (데이터 의존성 기준으로 계획)**:
   1. **public + seed 대기** → 연결은 바로 가능, seed 오면 즉시 QA(로그인 무관).
-     · **`/profile/[memberId]` 프로필 본체** (정체성 원천 — 하위가 member/Profile shape·pid 물려받음) → 최우선
      · `/` 홈 피드 (posts seed 후 — getFeeds public·author 정보 응답 내장이라 얽힘 적음)
   2. **인증 필요** → 연결은 바로 가능, **dev 로그인(otp) 확보 후 일괄로** QA.
-     · 동료·캘린더·메시지·본인 화면(`/profile`·`edit`·`settings`) 등
+     · 캘린더·메시지 등
 
 ### 참고
 
 (로그인 세션 유지 이유로 BE 로컬 서버에서 연결 작업 진행중입니다. - 260707)
 
-- **도메인 의존 현황 (otp·member·profile)**:
+- **도메인 의존 현황 (otp·member)**:
   - `member`(memberId) — 거의 전 도메인이 조회 키로 참조하나 **seed에 이미 있어 조회는 지금도 가능**.
-  - `profile` — flip으로 의존 축소(조회가 memberId로 이동, profileId는 coworker/offer write 정도만).
   - `otp`(로그인) — **auth 도메인 전체(chat·task·coworker·notification·offer·내 것)를 여는 게이트.** 실서버 QA를 넓게 여는 열쇠.

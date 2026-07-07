@@ -4,7 +4,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useGetCoworkers, useGetProfile } from '@bconnect/api-client'
+import { useGetCoworkers } from '@bconnect/api-client'
 import { CoworkerList } from '@bconnect/features'
 import { TopBar } from '@bconnect/ui'
 
@@ -13,16 +13,15 @@ export default function MemberCoworkersPage() {
   const memberId = Number(params.memberId)
   const router = useRouter()
 
-  const { data: profileAndMember } = useGetProfile(memberId, {
-    query: { enabled: Number.isFinite(memberId) && memberId > 0 },
-  })
-  const pid = profileAndMember?.profile?.id ?? 0
-
+  // 동료 조회는 memberId 로 직접 (useGetCoworkers 인자 = memberId).
   const {
     data: coworkers,
     isLoading,
     isError,
-  } = useGetCoworkers({ profileId: pid }, { query: { enabled: pid > 0 } })
+  } = useGetCoworkers(
+    { memberId },
+    { query: { enabled: Number.isFinite(memberId) && memberId > 0 } }
+  )
 
   return (
     <div className="flex flex-col">

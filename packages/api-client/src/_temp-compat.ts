@@ -29,14 +29,13 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import type { Profile, Member, Message } from './generated/schemas'
 
-// ── 프로필 / 회원 (프로필 화면을 새 이름으로 고치면 제거) ──────────────────
+// ── 프로필 / 회원 ──────────────────────────────────────────────────────────
+// career 자기화면(edit·about·certifications·coworkers·settings)은 실제 훅으로 정합 완료.
+// 아래는 아직 남은 소비자용 — plan/corp(#753) + 최후 mocks 패스 대상.
 export {
-  useGetMyMember as useGetMyProfile, // TODO: '내 프로필'과 '내 회원정보'는 원래 다른 데이터 → 화면에서 분리 정합
-  getGetProfileQueryKey as getGetMyProfileQueryKey,
-  useCreateMember as useRegisterMember,
-  useDeleteMyMember as useWithdraw,
-  getGetProfileMockHandler as getGetMyProfileMockHandler,
-  getGetProfileResponseMock as getGetMyProfileResponseMock,
+  useCreateMember as useRegisterMember, // plan signup/corp (#753) 정합 시 제거
+  getGetProfileMockHandler as getGetMyProfileMockHandler, // 최후 mocks 패스에서 제거
+  getGetProfileResponseMock as getGetMyProfileResponseMock, // 최후 mocks 패스에서 제거
 } from './generated/api'
 export type { MemberSummary as MaskedMember } from './generated/schemas'
 // '프로필+회원 묶음'이 사라져서 비슷한 모양으로 임시 정의 — TODO: 프로필 화면에서 실제 모양 확정

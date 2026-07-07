@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { getTradeLabel } from '@bconnect/api-client'
-import type { MaskedMember, Profile } from '@bconnect/api-client'
+import type { MemberSummary, Profile } from '@bconnect/api-client'
 import { Skeleton } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 
@@ -15,7 +15,7 @@ export interface ProfileStatHrefs {
 }
 
 interface ProfileSummaryProps {
-  member?: MaskedMember
+  member?: MemberSummary
   profile?: Profile
   postCount?: number
   coworkerCount?: number

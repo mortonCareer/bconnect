@@ -11,14 +11,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  useQueryClient,
-  useGetMyProfile,
-  useGetCredentials,
-  useCreateCredential,
-  useDeleteCredential,
-  getGetCredentialsQueryKey,
-} from '@bconnect/api-client'
+import { useGetMyCredentials, useCreateCredential, useDeleteCredential } from '@bconnect/api-client'
 import type { CredentialType, CreateCredentialRequest } from '@bconnect/api-client'
 import { ConfirmDialog, Tab, TopBar, toast } from '@bconnect/ui'
 import { useQueryState, parseAsStringLiteral } from 'nuqs'
@@ -35,7 +28,6 @@ const TAB_ITEMS = [
 
 export default function CertificationApplyPage() {
   const router = useRouter()
-  const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useQueryState(
     'tab',
     parseAsStringLiteral(APPLY_TAB_KEYS).withDefault('one-click').withOptions({ history: 'push' })
@@ -48,47 +40,27 @@ export default function CertificationApplyPage() {
     setSubTab(null)
   }
 
-  const {
-    data: profile,
-    isLoading: isProfileLoading,
-    isError: isProfileError,
-    refetch: refetchProfile,
-  } = useGetMyProfile()
-  const profileId = profile?.id
-
+  // 내 자격증은 useGetMyCredentials(무인자) — profileId 로 조회하던 useGetCredentials 대체.
   const {
     data: credentials,
     isLoading: isCredentialsLoading,
     isError: isCredentialsError,
     refetch: refetchCredentials,
-  } = useGetCredentials({ profileId: profileId! }, { query: { enabled: !!profileId } })
+  } = useGetMyCredentials()
 
-  // TODO(#728): 수동 무효화 — 추후 config(create/deleteCredential→getCredentials) 인계로 대체. profileId 부모 유래(config 는 broad 만), credentials 훅 정합 시 맞춰 수정 (ADR-0025)
-  const invalidateCredentials = () => {
-    if (profileId) {
-      queryClient.invalidateQueries({
-        queryKey: getGetCredentialsQueryKey({ profileId }),
-      })
-    }
-  }
-
-  const { mutate: createCredential, mutateAsync: createCredentialAsync } = useCreateCredential({
-    mutation: { onSuccess: invalidateCredentials },
-  })
+  // create/deleteCredential→getMyCredentials 무효화는 config(mutationInvalidates)가 자동 처리 (ADR-0025).
+  const { mutate: createCredential, mutateAsync: createCredentialAsync } = useCreateCredential()
 
   const handleOneClickApply = async (requests: CreateCredentialRequest[]) => {
     await Promise.all(requests.map((data) => createCredentialAsync({ data })))
   }
 
-  const { mutate: deleteCredential } = useDeleteCredential({
-    mutation: { onSuccess: invalidateCredentials },
-  })
+  const { mutate: deleteCredential } = useDeleteCredential()
 
-  // 하단 인증 목록 상태 — profile/credentials 한 쿼리 쌍을 공유해 각 탭에 주입.
-  const listIsLoading = isProfileLoading || isCredentialsLoading
-  const listIsError = isProfileError || isCredentialsError
+  // 하단 인증 목록 상태 — 각 탭에 주입.
+  const listIsLoading = isCredentialsLoading
+  const listIsError = isCredentialsError
   const handleRetry = () => {
-    if (isProfileError) refetchProfile()
     refetchCredentials()
   }
 
@@ -159,7 +131,7 @@ export default function CertificationApplyPage() {
         destructive
         onConfirm={() => {
           if (pendingDeleteId == null) return
-          deleteCredential({ credentialId: pendingDeleteId })
+          deleteCredential({ id: pendingDeleteId })
         }}
       />
     </div>
