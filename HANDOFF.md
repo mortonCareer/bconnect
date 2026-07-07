@@ -83,7 +83,7 @@ pnpm build:career && pnpm build:plan     # merge 전 최종
 
 - **임시 호환 레이어 파일 추가** `packages/api-client/src/_temp-compat.ts` — 개발 서버를 오류 없이 띄우기 위한 임시 우회 매핑을 추가한 파일, 자세한 내용은 해당 파일 상단 주석에 설명해둠
 - **연결 완료(실서버 검증)**: `/profile/[memberId]/recommendations`페이지 연결 완료함. (`recommendations` 는 public 이면서 seed 데이터 확보된 상태라 우선 연결 후 QA까지 완료함)
-- **가입/로그인 플로우 정합 (career only, 커밋 `a0c0dc8a`)** — register가 세션 토큰을 발급하지 않는 계약이라 accessToken 확보용 **2번째 OTP 재인증**을 넣은 임시 scaffold(`signup/verify` 상단 주석에 제거 예정 명시). plan signup(`corp/page.tsx`)은 미정합 잔여 — register 응답이 `Long`(회원 ID)인데 `result.accessToken`을 참조해 타입 에러(CI red 기여분). 계약 결정은 #753.
+- **가입 플로우 정합 (career, 커밋 `a0c0dc8a`)** — career 가입은 register(memberId 반환, 세션 토큰 없음) → OTP 재인증으로 accessToken 확보 → 프로필 생성 플로우로 정합 완료. plan signup(`corp/page.tsx`)은 미정합 잔여 — register 응답이 `Long`(회원 ID)인데 `result.accessToken`을 참조해 타입 에러(CI red 기여분).
 
 ### 계획
 
@@ -96,9 +96,7 @@ pnpm build:career && pnpm build:plan     # merge 전 최종
 
 ### 참고
 
-(otp 인증 발송 비용 문제 + 로그인 세션 유지 이유로 BE 로컬 서버에서 연결 작업 진행중입니다. - 260707)
-
-- **[#753](https://github.com/mortonCareer/bconnect/issues/753) (미해결 계약 결정)** — register(POST /members)가 세션 토큰을 발급하도록 계약을 바꿀지 결정 대기. 위 "otp 발송 비용"의 뿌리 = career 가입 OTP 2회 발송. 결정되면 가입 OTP 2회→1회 통일(register 응답에 토큰 포함 시 career 2번째 OTP 제거·plan은 현 코드 그대로 동작). 결정 전까지 career 2-OTP scaffold 유지·plan signup 정합 보류.
+(로그인 세션 유지 이유로 BE 로컬 서버에서 연결 작업 진행중입니다. - 260707)
 
 - **도메인 의존 현황 (otp·member·profile)**:
   - `member`(memberId) — 거의 전 도메인이 조회 키로 참조하나 **seed에 이미 있어 조회는 지금도 가능**.

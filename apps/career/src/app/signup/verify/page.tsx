@@ -1,7 +1,6 @@
 /**
  * @figma-scaffold 가입 완료 재인증 — register(POST /members)가 세션 토큰을 발급하지 않아
- *   OTP 재인증으로 accessToken 확보 후 프로필을 생성하는 임시 단계 (BE가 register 시
- *   세션을 발급하면 이 페이지와 signup-store.pendingProfile 은 제거 예정)
+ *   OTP 재인증으로 accessToken을 확보한 뒤 프로필을 생성하는 단계.
  */
 'use client'
 
