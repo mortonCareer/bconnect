@@ -88,7 +88,8 @@ INSERT INTO attachments (id, member_id, type, status, context, context_id, refer
 (109, 100, 'IMAGE', 'COMPLETED', 'DRIVE', 100, 'DRIVE', 100, 'seed-drive-img-2', 'image2', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (110, 100, 'FILE', 'COMPLETED', 'DRIVE', 100, 'DRIVE', 100, 'seed-drive-file-1', 'file1', 'pdf', 'application/pdf', 2048, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (111, 100, 'FILE', 'COMPLETED', 'DRIVE', 100, 'DRIVE', 100, 'seed-drive-file-2', 'file2', 'pdf', 'application/pdf', 2048, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(112, 100, 'IMAGE', 'COMPLETED', 'DRIVE', 100, NULL, NULL, 'seed-drive-att-attach', 'attach', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(112, 100, 'IMAGE', 'COMPLETED', 'DRIVE', 100, NULL, NULL, 'seed-drive-att-attach', 'attach', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(113, 100, 'FILE', 'COMPLETED', 'DRIVE', 100, NULL, NULL, 'seed-drive-att-upload', 'upload', 'pdf', 'application/pdf', 2048, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO notes (id, board_id, member_id, content, created_at, modified_at) VALUES
 (100, 100, 100, '테스트 드라이브 노트1', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),

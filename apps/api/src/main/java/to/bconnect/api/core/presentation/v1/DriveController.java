@@ -16,6 +16,7 @@ import to.bconnect.api.core.domain.board.NoteService;
 import to.bconnect.api.core.domain.drive.DriveService;
 import to.bconnect.api.core.presentation.v1.request.CreateDriveRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateDriveRequest;
+import to.bconnect.api.core.presentation.v1.request.UploadDriveRequest;
 import to.bconnect.api.core.presentation.v1.response.DriveResponse;
 import to.bconnect.api.core.presentation.v1.response.NoteResponse;
 import to.bconnect.api.security.AuthUser;
@@ -109,6 +110,24 @@ public class DriveController {
                 .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
 
         return ApiResponse.success(body);
+    }
+
+    @PostMapping("/{id}/attachments")
+    public ApiResponse<Void> upload(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id,
+            @RequestBody @Valid UploadDriveRequest request) {
+        driveService.attach(user, id, request.attachmentIds());
+        return ApiResponse.success(null);
+    }
+
+    @DeleteMapping("/{id}/attachments/{attachmentId}")
+    public ApiResponse<Void> detach(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id,
+            @PathVariable Long attachmentId) {
+        driveService.detach(user, id, attachmentId);
+        return ApiResponse.success(null);
     }
 
     @GetMapping("/{id}/notes")
