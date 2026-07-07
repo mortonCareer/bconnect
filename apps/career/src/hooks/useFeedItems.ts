@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
-import type { Trade, Role } from '@bconnect/api-client'
+import type { Trade, ProfileRole } from '@bconnect/api-client'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 import { FILTER_ROLES, ROLE_LABELS } from '@/lib/role-labels'
@@ -33,7 +33,7 @@ export interface FeedItem {
 
 interface UseFeedItemsOptions {
   trades?: Trade[]
-  roles?: Role[]
+  roles?: ProfileRole[]
   regions?: Region[]
   minExperience?: number
   maxExperience?: number
@@ -41,7 +41,7 @@ interface UseFeedItemsOptions {
   limit?: number
 }
 
-const mockRoleFor = (memberId: number): Role => FILTER_ROLES[memberId % FILTER_ROLES.length]
+const mockRoleFor = (memberId: number): ProfileRole => FILTER_ROLES[memberId % FILTER_ROLES.length]
 const mockRegionFor = (memberId: number): Region => REGIONS[memberId % REGIONS.length]
 
 export function useFeedItems({

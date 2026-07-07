@@ -3,12 +3,19 @@
  */
 'use client'
 
+import { useSignupStore } from '@/stores/signup-store'
 import { useGetMyMember } from '@bconnect/api-client'
 import { Button, CheckIcon } from '@bconnect/ui'
 import Link from 'next/link'
+import { useEffect } from 'react'
 
 export default function SignupCompletePage() {
   const { data: member } = useGetMyMember()
+
+  // 가입 흐름의 최종 도착지 — 여기서 임시 보관값(signupToken·pendingProfile 등) 정리.
+  useEffect(() => {
+    useSignupStore.getState().reset()
+  }, [])
 
   const userName = member?.name || '회원'
 
