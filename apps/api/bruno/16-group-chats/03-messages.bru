@@ -1,0 +1,26 @@
+meta {
+  name: 채팅 메시지 목록 조회
+  type: http
+  seq: 3
+  tags: [
+    chain
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/group-chats/{{chatId}}/messages
+  auth: inherit
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.content).to.be.an('array');
+  });
+}
+
+docs {
+  @chain
+  - 16-group-chats/01-create
+}

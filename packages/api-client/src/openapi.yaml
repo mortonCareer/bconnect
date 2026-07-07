@@ -684,7 +684,7 @@ paths:
     get:
       tags:
       - member-controller
-      operationId: listMembers
+      operationId: list_2
       responses:
         "200":
           description: OK
@@ -713,7 +713,7 @@ paths:
     get:
       tags:
       - group-chat-controller
-      operationId: list_2
+      operationId: list_3
       responses:
         "200":
           description: OK
@@ -742,7 +742,7 @@ paths:
     get:
       tags:
       - drive-controller
-      operationId: list_3
+      operationId: list_4
       parameters:
       - name: projectId
         in: query
@@ -778,7 +778,7 @@ paths:
     get:
       tags:
       - direct-chat-controller
-      operationId: list_4
+      operationId: list_5
       responses:
         "200":
           description: OK
@@ -807,7 +807,7 @@ paths:
     get:
       tags:
       - credential-controller
-      operationId: list_5
+      operationId: list_6
       parameters:
       - name: memberId
         in: query
@@ -937,7 +937,7 @@ paths:
     get:
       tags:
       - company-controller
-      operationId: list_6
+      operationId: list_7
       responses:
         "200":
           description: OK
@@ -1032,7 +1032,7 @@ paths:
     get:
       tags:
       - task-controller
-      operationId: list_7
+      operationId: list_8
       responses:
         "200":
           description: OK
@@ -1224,7 +1224,7 @@ paths:
     get:
       tags:
       - feed-controller
-      operationId: list_8
+      operationId: list_9
       responses:
         "200":
           description: OK
@@ -1360,7 +1360,7 @@ paths:
     get:
       tags:
       - crawled-member-controller
-      operationId: list_9
+      operationId: list_10
       responses:
         "200":
           description: OK
@@ -1391,7 +1391,7 @@ paths:
     get:
       tags:
       - coworker-controller
-      operationId: list_10
+      operationId: list_11
       parameters:
       - name: memberId
         in: query
@@ -2042,6 +2042,7 @@ components:
       enum:
       - PROJECT
       - DRIVE
+      - SYSTEM
     CreateNoteRequest:
       type: object
       properties:

@@ -1,0 +1,26 @@
+meta {
+  name: 드라이브 노트 삭제
+  type: http
+  seq: 9
+  tags: [
+    chain
+    idempotent
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/notes/{{noteId}}
+  auth: inherit
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  @chain
+  - 18-member-drives/06-create-note
+}

@@ -5,8 +5,12 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/v1/crawled-members/1
+  url: {{baseUrl}}/api/v1/crawled-members/:id
   auth: none
+}
+
+params:path {
+  id: 100
 }
 
 tests {
@@ -17,4 +21,8 @@ tests {
     expect(res.body.data.credentials).to.be.an('array');
     expect(res.body.data.posts).to.be.an('array');
   });
+}
+
+docs {
+  @seed crawled_members : 100
 }

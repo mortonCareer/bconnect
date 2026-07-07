@@ -4,6 +4,11 @@ spring:
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
 
+  sql:
+    init:
+      mode: never
+      data-locations: classpath:data-prod.sql
+
 sentry:
   dsn: ${SENTRY_DSN:}
   send-default-pii: true
