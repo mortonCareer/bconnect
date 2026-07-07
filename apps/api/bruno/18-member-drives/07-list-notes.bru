@@ -2,14 +2,15 @@ meta {
   name: 드라이브 노트 목록 조회
   type: http
   seq: 7
-  tags: [
-    chain
-  ]
 }
 
 get {
-  url: {{baseUrl}}/api/v1/drives/{{memberDriveId}}/notes
+  url: {{baseUrl}}/api/v1/drives/:id/notes
   auth: inherit
+}
+
+params:path {
+  id: 100
 }
 
 tests {
@@ -21,6 +22,7 @@ tests {
 }
 
 docs {
-  @chain
-  - 18-member-drives/01-create
+  @seed drives : 100
+  @seed notes : 100
+  @seed notes : 101
 }
