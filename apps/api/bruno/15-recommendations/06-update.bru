@@ -1,16 +1,23 @@
 meta {
-  name: 업체 작업 삭제
+  name: 추천서 수정
   type: http
-  seq: 2
+  seq: 6
   tags: [
     chain
     idempotent
   ]
 }
 
-delete {
-  url: {{baseUrl}}/api/v1/tasks/{{projectTaskId}}
+put {
+  url: {{baseUrl}}/api/v1/recommendations/{{recommendationId}}
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "content": "내용을 수정한 추천서입니다"
+  }
 }
 
 tests {
@@ -22,7 +29,5 @@ tests {
 
 docs {
   @chain
-  - 05-companies/01-create
-  - 06-projects/01-create
-  - 06-company-tasks/01-create-company-task
+  - 15-recommendations/01-create
 }

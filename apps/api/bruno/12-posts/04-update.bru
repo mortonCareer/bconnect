@@ -1,16 +1,23 @@
 meta {
-  name: 업체 작업 삭제
+  name: 게시글 수정
   type: http
-  seq: 2
+  seq: 4
   tags: [
     chain
     idempotent
   ]
 }
 
-delete {
-  url: {{baseUrl}}/api/v1/tasks/{{projectTaskId}}
+put {
+  url: {{baseUrl}}/api/v1/posts/{{postId}}
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "content": "게시글 수정"
+  }
 }
 
 tests {
@@ -22,7 +29,6 @@ tests {
 
 docs {
   @chain
-  - 05-companies/01-create
-  - 06-projects/01-create
-  - 06-company-tasks/01-create-company-task
+  - 11-worker-tasks/01-create-worker-task
+  - 12-posts/01-create
 }

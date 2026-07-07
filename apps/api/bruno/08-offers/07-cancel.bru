@@ -1,15 +1,14 @@
 meta {
-  name: 업체 작업 삭제
+  name: 제안 취소
   type: http
-  seq: 2
+  seq: 7
   tags: [
     chain
-    idempotent
   ]
 }
 
-delete {
-  url: {{baseUrl}}/api/v1/tasks/{{projectTaskId}}
+post {
+  url: {{baseUrl}}/api/v1/offers/{{offerId}}/cancel
   auth: inherit
 }
 
@@ -25,4 +24,5 @@ docs {
   - 05-companies/01-create
   - 06-projects/01-create
   - 06-company-tasks/01-create-company-task
+  - 08-offers/01-create
 }

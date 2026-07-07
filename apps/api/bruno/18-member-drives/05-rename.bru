@@ -1,16 +1,23 @@
 meta {
-  name: 업체 작업 삭제
+  name: 드라이브 이름 수정
   type: http
-  seq: 2
+  seq: 5
   tags: [
     chain
     idempotent
   ]
 }
 
-delete {
-  url: {{baseUrl}}/api/v1/tasks/{{projectTaskId}}
+put {
+  url: {{baseUrl}}/api/v1/drives/{{memberDriveId}}/name
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "title": "개인 드라이브 수정"
+  }
 }
 
 tests {
@@ -22,7 +29,5 @@ tests {
 
 docs {
   @chain
-  - 05-companies/01-create
-  - 06-projects/01-create
-  - 06-company-tasks/01-create-company-task
+  - 18-member-drives/01-create
 }

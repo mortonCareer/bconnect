@@ -1,5 +1,5 @@
 meta {
-  name: 업체 작업 삭제
+  name: 업체 작업 수정
   type: http
   seq: 2
   tags: [
@@ -8,9 +8,21 @@ meta {
   ]
 }
 
-delete {
-  url: {{baseUrl}}/api/v1/tasks/{{projectTaskId}}
+put {
+  url: {{baseUrl}}/api/v1/tasks/{{projectTaskId}}/company
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "trades": ["TILING", "FILM_SHEET"],
+    "start": "2026-06-04",
+    "end": "2026-06-06",
+    "title": "작업 수정",
+    "requirement": "요구사항 수정",
+    "memo": "메모 수정"
+  }
 }
 
 tests {

@@ -1,16 +1,23 @@
 meta {
-  name: 업체 작업 삭제
+  name: 내 업체 정보 수정
   type: http
-  seq: 2
+  seq: 4
   tags: [
     chain
     idempotent
   ]
 }
 
-delete {
-  url: {{baseUrl}}/api/v1/tasks/{{projectTaskId}}
+put {
+  url: {{baseUrl}}/api/v1/companies/me
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "pictureId": 6
+  }
 }
 
 tests {
@@ -21,8 +28,7 @@ tests {
 }
 
 docs {
+  @seed attachments : 6
   @chain
   - 05-companies/01-create
-  - 06-projects/01-create
-  - 06-company-tasks/01-create-company-task
 }

@@ -1,3 +1,5 @@
+-- partial unique index 포함
+
 drop table if exists notes cascade;
 drop table if exists boards cascade;
 drop table if exists drive_members cascade;

@@ -1,7 +1,7 @@
 meta {
-  name: 업체 작업 삭제
+  name: 동료 요청 취소
   type: http
-  seq: 2
+  seq: 4
   tags: [
     chain
     idempotent
@@ -9,7 +9,7 @@ meta {
 }
 
 delete {
-  url: {{baseUrl}}/api/v1/tasks/{{projectTaskId}}
+  url: {{baseUrl}}/api/v1/coworker-requests/{{coworkerRequestId}}
   auth: inherit
 }
 
@@ -22,7 +22,5 @@ tests {
 
 docs {
   @chain
-  - 05-companies/01-create
-  - 06-projects/01-create
-  - 06-company-tasks/01-create-company-task
+  - 13-coworker-requests/01-create
 }

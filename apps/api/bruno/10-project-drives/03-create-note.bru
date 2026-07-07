@@ -1,0 +1,41 @@
+meta {
+  name: 프로젝트 노트 생성
+  type: http
+  seq: 3
+  tags: [
+    chain
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/notes
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "type": "PROJECT",
+    "projectId": {{projectId}},
+    "content": "프로젝트 노트"
+  }
+}
+
+script:post-response {
+  bru.setVar("projectNoteId", res.body.data);
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.a('number');
+  });
+}
+
+docs {
+  프로젝트 보드에 노트 생성
+  @chain
+  - 05-companies/01-create
+  - 06-projects/01-create
+}

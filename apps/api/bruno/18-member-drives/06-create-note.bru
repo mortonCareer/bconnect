@@ -1,0 +1,40 @@
+meta {
+  name: 드라이브 노트 생성
+  type: http
+  seq: 6
+  tags: [
+    chain
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/notes
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "type": "DRIVE",
+    "driveId": {{memberDriveId}},
+    "content": "드라이브 노트"
+  }
+}
+
+script:post-response {
+  bru.setVar("noteId", res.body.data);
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.a('number');
+  });
+}
+
+docs {
+  드라이브 보드에 노트 생성
+  @chain
+  - 18-member-drives/01-create
+}

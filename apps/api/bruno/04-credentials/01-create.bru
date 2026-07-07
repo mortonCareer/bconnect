@@ -1,0 +1,35 @@
+meta {
+  name: 인증뱃지 생성
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/credentials
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "type": "IDENTITY_VERIFICATION",
+    "expiredAt": "2026-12-31",
+    "attachmentId": 2
+  }
+}
+
+script:post-response {
+  bru.setVar("credentialId", res.body.data);
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.a('number');
+  });
+}
+
+docs {
+  @seed attachments : 2
+}

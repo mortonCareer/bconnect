@@ -1,16 +1,19 @@
 meta {
-  name: 업체 작업 삭제
+  name: 제안 거절
   type: http
-  seq: 2
+  seq: 8
   tags: [
     chain
-    idempotent
   ]
 }
 
-delete {
-  url: {{baseUrl}}/api/v1/tasks/{{projectTaskId}}
-  auth: inherit
+post {
+  url: {{baseUrl}}/api/v1/offers/{{denyOfferId}}/deny
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken2}}
 }
 
 tests {
@@ -22,7 +25,9 @@ tests {
 
 docs {
   @chain
+  - 01-otp/04-verify-otp-login-2
   - 05-companies/01-create
   - 06-projects/01-create
   - 06-company-tasks/01-create-company-task
+  - 08-offers/06-create-deny
 }

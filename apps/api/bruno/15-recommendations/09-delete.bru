@@ -1,7 +1,7 @@
 meta {
-  name: 업체 작업 삭제
+  name: 추천서 삭제
   type: http
-  seq: 2
+  seq: 9
   tags: [
     chain
     idempotent
@@ -9,7 +9,7 @@ meta {
 }
 
 delete {
-  url: {{baseUrl}}/api/v1/tasks/{{projectTaskId}}
+  url: {{baseUrl}}/api/v1/recommendations/{{recommendationId}}
   auth: inherit
 }
 
@@ -22,7 +22,5 @@ tests {
 
 docs {
   @chain
-  - 05-companies/01-create
-  - 06-projects/01-create
-  - 06-company-tasks/01-create-company-task
+  - 15-recommendations/01-create
 }

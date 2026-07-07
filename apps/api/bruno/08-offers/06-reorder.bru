@@ -1,5 +1,5 @@
 meta {
-  name: 프로젝트 드라이브 삭제
+  name: 제안 순서 변경
   type: http
   seq: 6
   tags: [
@@ -8,9 +8,16 @@ meta {
   ]
 }
 
-delete {
-  url: {{baseUrl}}/api/v1/drives/{{projectDriveId}}
+put {
+  url: {{baseUrl}}/api/v1/offers/reorder
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "offerIds": [{{denyOfferId}}, {{acceptOfferId}}]
+  }
 }
 
 tests {
@@ -22,7 +29,6 @@ tests {
 
 docs {
   @chain
-  - 05-companies/01-create
-  - 06-projects/01-create
-  - 10-project-drives/01-create
+  - 08-offers/02-create-deny
+  - 08-offers/03-create-accept
 }
