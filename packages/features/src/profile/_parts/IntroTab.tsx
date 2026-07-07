@@ -55,7 +55,7 @@ export function IntroTab({
                 key={c.id}
                 className="inline-flex items-center rounded border border-[#E5E5E5] bg-white px-3 py-1.5 text-r-14 text-[#7B7B7B]"
               >
-                {getCredentialLabel(c.type)}
+                {c.type ? getCredentialLabel(c.type) : ''}
               </span>
             ))}
           </div>

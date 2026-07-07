@@ -83,7 +83,8 @@ pnpm build:career && pnpm build:plan     # merge 전 최종
 
 - **임시 호환 레이어 파일 추가** `packages/api-client/src/_temp-compat.ts` — 개발 서버를 오류 없이 띄우기 위한 임시 우회 매핑을 추가한 파일, 자세한 내용은 해당 파일 상단 주석에 설명해둠
 - **연결 완료(실서버 검증)**: `/profile/[memberId]/recommendations`페이지 연결 완료함. (`recommendations` 는 public 이면서 seed 데이터 확보된 상태라 우선 연결 후 QA까지 완료함)
-- **가입 플로우 정합 (career, 커밋 `a0c0dc8a`)** — career 가입은 register(memberId 반환, 세션 토큰 없음) → OTP 재인증으로 accessToken 확보 → 프로필 생성 플로우로 정합 완료. plan signup(`corp/page.tsx`)은 미정합 잔여 — register 응답이 `Long`(회원 ID)인데 `result.accessToken`을 참조해 타입 에러(CI red 기여분).
+- **가입 플로우 정합 (career)** — career 가입은 register(memberId 반환, 세션 토큰 없음) → OTP 재인증으로 accessToken 확보 → 프로필 생성 플로우로 정합 완료. plan signup(`corp/page.tsx`)은 아직 미정합
+- **프로필 (/profile/[memberId]) 정합**
 
 ### 계획
 

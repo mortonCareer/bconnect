@@ -1,11 +1,13 @@
 'use client'
 
 import { useGetFeeds } from '@bconnect/api-client'
+import type { Post } from '@bconnect/api-client'
 import { Skeleton } from '@bconnect/ui'
 import { WorkCard } from './WorkCard'
 import { formatRelativeTime } from '@bconnect/config/format'
 
 interface WorksTabProps {
+  /** 표시 대상 회원의 memberId (GET /feeds 가 전역이라 클라이언트에서 이 값으로 필터) */
   profileId: number
   /** owner 전용 작업물 수정 href 빌더. 없으면 케밥 메뉴 안 그림 (viewer/plan) */
   workEditHref?: (postId: number) => string
@@ -15,7 +17,9 @@ interface WorksTabProps {
 
 export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProps) {
   const enabled = Number.isFinite(profileId) && profileId > 0
-  const { data: feeds, isLoading } = useGetFeeds({ profileId }, { query: { enabled } })
+  // GET /feeds 는 전역(회원별 파라미터 없음) → memberId 로 클라이언트 필터
+  // (BE 회원별 feed 엔드포인트 추가 시 대체)
+  const { data: feeds, isLoading } = useGetFeeds({ query: { enabled } })
 
   if (isLoading) {
     return (
@@ -30,7 +34,9 @@ export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProp
     )
   }
 
-  const posts = feeds ?? []
+  const posts: Post[] = (feeds ?? []).flatMap((feed) =>
+    feed.post && feed.post.memberId === profileId ? [feed.post] : []
+  )
 
   if (posts.length === 0) {
     return (
@@ -42,16 +48,20 @@ export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProp
 
   return (
     <div className="flex flex-col gap-6 py-6">
-      {posts.map(({ post }) => (
-        <WorkCard
-          key={post.id}
-          image={post.images?.[0] ?? ''}
-          timestamp={post.createdAt ? formatRelativeTime(post.createdAt) : ''}
-          description={post.content ?? ''}
-          editHref={workEditHref?.(post.id)}
-          onDelete={onDeleteWork ? () => onDeleteWork(post.id) : undefined}
-        />
-      ))}
+      {posts.map((post) => {
+        const postId = post.id
+        if (postId == null) return null
+        return (
+          <WorkCard
+            key={postId}
+            image={post.images?.[0] ?? ''}
+            timestamp={post.createdAt ? formatRelativeTime(post.createdAt) : ''}
+            description={post.content ?? ''}
+            editHref={workEditHref?.(postId)}
+            onDelete={onDeleteWork ? () => onDeleteWork(postId) : undefined}
+          />
+        )
+      })}
     </div>
   )
 }
