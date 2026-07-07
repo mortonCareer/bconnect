@@ -27,6 +27,8 @@ import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class MemberCleaner {
@@ -57,6 +59,7 @@ public class MemberCleaner {
 
         sessionRepository.findByMemberId(memberId).ifPresent(sessionRepository::delete);
         profileRepository.findByMemberId(memberId).ifPresent(profileRepository::delete);
+        attachmentLinker.unlink(ReferenceType.MEMBER, List.of(memberId));
 
         val credentials = credentialRepository.findAllByMemberId(memberId);
         attachmentLinker.unlink(ReferenceType.CREDENTIAL, credentials.stream().map(CredentialEntity::getId).toList());
