@@ -18,10 +18,10 @@ import {
   FormMessage,
   FormSubmitButton,
   NumberField,
+  passthroughError,
   SelectField,
   Tag,
   TextField,
-  passthroughError,
   useScrollToError,
   useServerError,
 } from '@bconnect/ui'
@@ -49,7 +49,6 @@ export default function SignupProfilePage() {
       fields: formData.fields || [],
       primaryField: formData.primaryField || undefined,
       experience: formData.experience ?? undefined,
-      affiliation: formData.affiliation || '',
       role: undefined,
       address: undefined,
       headline: '',
@@ -173,16 +172,6 @@ export default function SignupProfilePage() {
               required
               maxLength={2}
               placeholder="경력을 입력해주세요 (년)"
-            />
-
-            {/* 소속 */}
-            <TextField
-              control={control}
-              name="affiliation"
-              type="text"
-              label="소속"
-              required
-              placeholder="소속을 입력해주세요"
             />
 
             {/* 유형 */}

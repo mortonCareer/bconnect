@@ -9,7 +9,6 @@ interface SignupFormData {
   fields: string[]
   primaryField: string | null
   experience: number | null
-  affiliation: string
   /**
    * register(회원 생성)는 세션 토큰을 발급하지 않는다 → createProfile(인증 필요)을
    * 바로 호출할 수 없어, 프로필 입력값을 여기 보관했다가 재인증(/signup/verify)으로
@@ -36,7 +35,6 @@ const initialFormData: SignupFormData = {
   fields: [],
   primaryField: null,
   experience: null,
-  affiliation: '',
   pendingProfile: null,
 }
 
