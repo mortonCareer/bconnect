@@ -50,6 +50,7 @@ BE-SSOT flip으로 orval 생성 클라이언트의 훅·타입 이름/형태가 
 
 ## mock 오버라이드 (`packages/mocks/src/overrides/`) — 최후순위
 
+- **진행 순서 고정**: career/plan/features 호출부 정합을 모두 끝낸 뒤, mocks는 마지막에 한 번에 정합한다. 중간 단계에서 mocks typecheck 에러는 남아 있어도 앱 정합을 우선한다.
 - 오버라이드도 생성 클라이언트의 **별도 소비자** → typecheck 그래프에 있어 merge 게이트. 앱 고쳐도 자동 정합 안 됨.
 - **대부분 fix** (큐레이션 데이터 유지). **삭제**는 phantom 엔드포인트(`devices`·`notifications`)만.
 - 런타임은 모킹 끄고(`NEXT_PUBLIC_API_MOCKING=disabled`) dev BE로 개발 가능하나, typecheck/build는 flag 무관하게 오버라이드 컴파일 → 결국 정합 필수.
@@ -97,8 +98,6 @@ pnpm build:career && pnpm build:plan     # merge 전 최종
      · 캘린더·메시지 등
 
 ### 참고
-
-(로그인 세션 유지 이유로 BE 로컬 서버에서 연결 작업 진행중입니다. - 260707)
 
 - **도메인 의존 현황 (otp·member)**:
   - `member`(memberId) — 거의 전 도메인이 조회 키로 참조하나 **seed에 이미 있어 조회는 지금도 가능**.
