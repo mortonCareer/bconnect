@@ -30,11 +30,17 @@ tests {
   test("성공", function() {
     expect(res.status).to.equal(200);
     expect(res.body.success).to.equal(true);
-    expect(res.body.data).to.be.a('number');
+    expect(res.body.data.memberId).to.be.a('number');
+    expect(res.body.data.accessToken).to.be.a('string');
+  });
+
+  test("리프레시 토큰 쿠키 발급", function() {
+    expect(res.headers["set-cookie"][0]).to.match(/refreshToken=/);
   });
 }
 
 docs {
-  발급된 Signup Token으로 회원가입한다.
+  발급된 Signup Token으로 회원가입하고, 동시에 세션을 발급받는다.
+  accessToken 은 응답 body, refreshToken 은 httpOnly 쿠키.
   @seed signup_tokens : 1
 }
