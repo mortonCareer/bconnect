@@ -2,6 +2,7 @@
 -- 테스트 데이터 (100 ~ 199)
 -- 샘플 데이터 (200 ~ 299)
 -- 실제 데이터 (1000 ~)
+-- 모든 테이블 최소 5행 유지 (otps · signup_tokens · sessions 제외 : 런타임 발급 데이터)
 
 -- 운영 (0 ~ 99)
 INSERT INTO members (id, username, name, phone, role, created_at, modified_at) VALUES
@@ -96,47 +97,97 @@ INSERT INTO notes (id, board_id, member_id, content, created_at, modified_at) VA
 (101, 100, 100, '테스트 드라이브 노트2', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO crawled_members (id, company, name, phone, picture, role, brn, email, created_at, modified_at) VALUES
-(100, '업체1', '기술자1', '01000000012', NULL, '반장', '123-45-67890', 'crawled1@test.com', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(100, '업체1', '기술자1', '01000000012', NULL, '반장', '123-45-67890', 'crawled1@test.com', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(101, '업체2', '기술자2', '01000000013', NULL, '반장', '123-45-67891', 'crawled2@test.com', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(102, '업체3', '기술자3', '01000000014', NULL, '팀장', '123-45-67892', 'crawled3@test.com', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(103, '업체4', '기술자4', '01000000015', NULL, '반장', '123-45-67893', 'crawled4@test.com', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(104, '업체5', '기술자5', '01000000016', NULL, '대표', '123-45-67894', 'crawled5@test.com', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO crawled_profiles (id, member_id, primary_trade, experience, headline, about, address, state, url, platform, created_at, modified_at) VALUES
-(100, 100, '방수', 10, '한줄소개1', '소개글1', '주소1', 'SEOUL', 'https://blog.naver.com/crawled1', 'NAVER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(100, 100, '방수', 10, '한줄소개1', '소개글1', '주소1', 'SEOUL', 'https://blog.naver.com/crawled1', 'NAVER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(101, 101, '타일', 8, '한줄소개2', '소개글2', '주소2', 'GYEONGGI', 'https://blog.naver.com/crawled2', 'NAVER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(102, 102, '도장', 12, '한줄소개3', '소개글3', '주소3', 'INCHEON', 'https://www.instagram.com/crawled3', 'INSTAGRAM', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(103, 103, '전기', 15, '한줄소개4', '소개글4', '주소4', 'BUSAN', 'https://blog.naver.com/crawled4', 'NAVER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(104, 104, '목공', 20, '한줄소개5', '소개글5', '주소5', 'DAEGU', 'https://www.instagram.com/crawled5', 'INSTAGRAM', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO crawled_profile_trades (profile_id, trade) VALUES
-(100, '방수');
+(100, '방수'),
+(101, '타일'),
+(102, '도장'),
+(103, '전기'),
+(104, '목공');
 
 INSERT INTO crawled_tasks (id, company, address, trade, start_date, end_date, duration, created_at, modified_at) VALUES
-(100, '업체1', '주소1', '방수', DATE '2026-06-01', DATE '2026-06-03', '3일', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(100, '업체1', '주소1', '방수', DATE '2026-06-01', DATE '2026-06-03', '3일', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(101, '업체2', '주소2', '타일', DATE '2026-06-04', DATE '2026-06-06', '3일', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(102, '업체3', '주소3', '도장', DATE '2026-06-07', DATE '2026-06-11', '5일', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(103, '업체4', '주소4', '전기', DATE '2026-06-12', DATE '2026-06-13', '2일', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(104, '업체5', '주소5', '목공', DATE '2026-06-14', DATE '2026-06-20', '7일', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO crawled_posts (id, member_id, task_id, title, content, created_at, modified_at) VALUES
-(100, 100, 100, '제목1', '내용1', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(100, 100, 100, '제목1', '내용1', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(101, 101, 101, '제목2', '내용2', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(102, 102, 102, '제목3', '내용3', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(103, 103, 103, '제목4', '내용4', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(104, 104, null, '제목5', '내용5', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO crawled_post_images (post_id, seq, url) VALUES
-(100, 0, 'https://example.com/image1.jpg');
+(100, 0, 'https://example.com/image1.jpg'),
+(101, 0, 'https://example.com/image2.jpg'),
+(102, 0, 'https://example.com/image3.jpg'),
+(103, 0, 'https://example.com/image4.jpg'),
+(104, 0, 'https://example.com/image5.jpg');
 
 INSERT INTO crawled_credentials (id, member_id, type, name, created_at, modified_at) VALUES
-(100, 100, 'LICENSE', '면허1', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(100, 100, 'LICENSE', '면허1', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(101, 101, 'CERTIFICATE', '자격증2', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(102, 102, 'AWARD', '수상3', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(103, 103, 'EDUCATION', '교육4', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(104, 104, 'LICENSE', '면허5', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
--- 샘플 (200 ~ 299) : 업체 1 · 반장 3, 프로젝트 1 · 작업 5(상태별)
+-- 샘플 (200 ~ 299) : 업체 5 · 반장 5, 프로젝트 5 · 작업 5(상태별)
 INSERT INTO members (id, username, name, phone, role, created_at, modified_at) VALUES
 (200, 'sample-company', '샘플업체', '01000000200', 'USER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (201, 'sample-foreman1', '샘플반장1', '01000000201', 'USER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (202, 'sample-foreman2', '샘플반장2', '01000000202', 'USER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(203, 'sample-foreman3', '샘플반장3', '01000000203', 'USER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(203, 'sample-foreman3', '샘플반장3', '01000000203', 'USER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(204, 'sample-company2', '샘플업체2', '01000000204', 'USER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(205, 'sample-company3', '샘플업체3', '01000000205', 'USER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(206, 'sample-company4', '샘플업체4', '01000000206', 'USER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(207, 'sample-company5', '샘플업체5', '01000000207', 'USER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(208, 'sample-foreman4', '샘플반장4', '01000000208', 'USER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(209, 'sample-foreman5', '샘플반장5', '01000000209', 'USER', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO profiles (id, member_id, role, primary_trade, experience, headline, about, zipcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
 (200, 200, 'CONTRACTOR', 'TILING', 15, '샘플업체 소개', '샘플업체 상세소개', '06000', '서울특별시', '강남구', '테헤란로', '상세', 37.500, 127.030, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (201, 201, 'FOREMAN', 'TILING', 5, '샘플반장1 소개', '샘플반장1 상세소개', '16000', '경기도', '수원시 장안구', '도로명주소', '상세', 37.294, 126.974, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (202, 202, 'FOREMAN', 'PAINTING', 7, '샘플반장2 소개', '샘플반장2 상세소개', '16000', '경기도', '수원시 장안구', '도로명주소', '상세', 37.294, 126.974, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(203, 203, 'FOREMAN', 'ELECTRICAL', 9, '샘플반장3 소개', '샘플반장3 상세소개', '16000', '경기도', '수원시 장안구', '도로명주소', '상세', 37.294, 126.974, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(203, 203, 'FOREMAN', 'ELECTRICAL', 9, '샘플반장3 소개', '샘플반장3 상세소개', '16000', '경기도', '수원시 장안구', '도로명주소', '상세', 37.294, 126.974, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(204, 204, 'CONTRACTOR', 'PLUMBING', 12, '샘플업체2 소개', '샘플업체2 상세소개', '06000', '서울특별시', '강남구', '테헤란로', '상세', 37.500, 127.030, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(205, 205, 'CONTRACTOR', 'CARPENTRY', 10, '샘플업체3 소개', '샘플업체3 상세소개', '06000', '서울특별시', '서초구', '서초대로', '상세', 37.494, 127.014, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(206, 206, 'CONTRACTOR', 'WATERPROOFING', 20, '샘플업체4 소개', '샘플업체4 상세소개', '04000', '서울특별시', '용산구', '한강대로', '상세', 37.529, 126.964, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(207, 207, 'CONTRACTOR', 'MASONRY', 8, '샘플업체5 소개', '샘플업체5 상세소개', '13000', '경기도', '성남시 분당구', '판교로', '상세', 37.395, 127.111, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(208, 208, 'FOREMAN', 'PLUMBING', 4, '샘플반장4 소개', '샘플반장4 상세소개', '16000', '경기도', '수원시 장안구', '도로명주소', '상세', 37.294, 126.974, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(209, 209, 'FOREMAN', 'CARPENTRY', 11, '샘플반장5 소개', '샘플반장5 상세소개', '16000', '경기도', '수원시 팔달구', '도로명주소', '상세', 37.283, 127.014, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO profile_trades (profile_id, trade) VALUES
 (200, 'TILING'),
 (201, 'TILING'),
 (202, 'PAINTING'),
-(203, 'ELECTRICAL');
+(203, 'ELECTRICAL'),
+(204, 'PLUMBING'),
+(205, 'CARPENTRY'),
+(206, 'WATERPROOFING'),
+(207, 'MASONRY'),
+(208, 'PLUMBING'),
+(209, 'CARPENTRY');
 
 INSERT INTO companies (id, member_id, name, brn, created_at, modified_at) VALUES
-(200, 200, '샘플건설', '2001234567', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(200, 200, '샘플건설', '2001234567', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(201, 204, '샘플건설2', '2011234567', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(202, 205, '샘플건설3', '2021234567', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(203, 206, '샘플건설4', '2031234567', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(204, 207, '샘플건설5', '2041234567', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 -- 회원 picture(reference MEMBER) · 업체 picture(reference COMPANY)
 INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
@@ -144,10 +195,24 @@ INSERT INTO attachments (id, member_id, type, status, context, context_id, refer
 (223, 201, 'IMAGE', 'COMPLETED', 'MEMBER', 201, 'MEMBER', 201, 'sample-att-223', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (224, 202, 'IMAGE', 'COMPLETED', 'MEMBER', 202, 'MEMBER', 202, 'sample-att-224', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (225, 203, 'IMAGE', 'COMPLETED', 'MEMBER', 203, 'MEMBER', 203, 'sample-att-225', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(226, 200, 'IMAGE', 'COMPLETED', 'COMPANY', 200, 'COMPANY', 200, 'sample-att-226', 'company', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(226, 200, 'IMAGE', 'COMPLETED', 'COMPANY', 200, 'COMPANY', 200, 'sample-att-226', 'company', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(233, 204, 'IMAGE', 'COMPLETED', 'MEMBER', 204, 'MEMBER', 204, 'sample-att-233', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(234, 205, 'IMAGE', 'COMPLETED', 'MEMBER', 205, 'MEMBER', 205, 'sample-att-234', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(235, 206, 'IMAGE', 'COMPLETED', 'MEMBER', 206, 'MEMBER', 206, 'sample-att-235', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(236, 207, 'IMAGE', 'COMPLETED', 'MEMBER', 207, 'MEMBER', 207, 'sample-att-236', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(237, 208, 'IMAGE', 'COMPLETED', 'MEMBER', 208, 'MEMBER', 208, 'sample-att-237', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(238, 209, 'IMAGE', 'COMPLETED', 'MEMBER', 209, 'MEMBER', 209, 'sample-att-238', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(239, 204, 'IMAGE', 'COMPLETED', 'COMPANY', 201, 'COMPANY', 201, 'sample-att-239', 'company', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(240, 205, 'IMAGE', 'COMPLETED', 'COMPANY', 202, 'COMPANY', 202, 'sample-att-240', 'company', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(241, 206, 'IMAGE', 'COMPLETED', 'COMPANY', 203, 'COMPANY', 203, 'sample-att-241', 'company', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(242, 207, 'IMAGE', 'COMPLETED', 'COMPANY', 204, 'COMPANY', 204, 'sample-att-242', 'company', 'jpg', 'image/jpeg', 1024, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO projects (id, company_id, title, zipcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
-(200, 200, '샘플 프로젝트', '06000', '서울특별시', '강남구', '테헤란로 100', '상세', 37.500, 127.030, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(200, 200, '샘플 프로젝트', '06000', '서울특별시', '강남구', '테헤란로 100', '상세', 37.500, 127.030, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(201, 201, '샘플 프로젝트2', '06000', '서울특별시', '강남구', '테헤란로 200', '상세', 37.501, 127.031, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(202, 202, '샘플 프로젝트3', '06000', '서울특별시', '서초구', '서초대로 300', '상세', 37.494, 127.014, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(203, 203, '샘플 프로젝트4', '04000', '서울특별시', '용산구', '한강대로 400', '상세', 37.529, 126.964, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(204, 204, '샘플 프로젝트5', '13000', '경기도', '성남시 분당구', '판교로 500', '상세', 37.395, 127.111, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO tasks (id, dtype, status, start_date, end_date, worker_id, project_id, project_title, project_requirement, project_memo, created_at, modified_at) VALUES
 (200, 'PROJECT', 'DRAFT', DATE '2026-08-01', DATE '2026-08-03', null, 200, '초안 작업', '요구사항', '메모', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
@@ -167,7 +232,9 @@ INSERT INTO task_trades (task_id, trade) VALUES
 INSERT INTO offers (id, task_id, worker_id, seq, due, status, created_at, modified_at) VALUES
 (200, 201, 201, 1, DATE '2026-08-31', 'ACTIVE', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (201, 201, 202, 2, DATE '2026-08-31', 'PENDING', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(202, 201, 203, 3, DATE '2026-08-31', 'PENDING', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(202, 201, 203, 3, DATE '2026-08-31', 'PENDING', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(203, 201, 208, 4, DATE '2026-08-31', 'PENDING', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(204, 201, 209, 5, DATE '2026-08-31', 'PENDING', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 -- 기술자 작업 : 반장별 worker task 3개
 INSERT INTO tasks (id, dtype, status, start_date, end_date, worker_id, worker_title, worker_memo, worker_company, zipcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
@@ -239,27 +306,52 @@ INSERT INTO attachments (id, member_id, type, status, context, context_id, refer
 
 -- C. 동료·추천 : member 200 기준 수락 동료 1 · 보낸 요청 1 · 받은 요청 1
 INSERT INTO coworkers (id, min_id, max_id, created_at, modified_at) VALUES
-(200, 200, 201, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(200, 200, 201, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(201, 201, 202, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(202, 201, 203, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(203, 202, 203, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(204, 208, 209, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO coworker_requests (id, from_id, to_id, created_at, modified_at) VALUES
 (200, 200, 202, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(201, 203, 200, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(201, 203, 200, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(202, 204, 200, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(203, 205, 201, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
--- 수락 동료(200-201) 간 보낸/받은 추천서
+-- 수락 동료 간 보낸/받은 추천서
 INSERT INTO recommendations (id, from_id, to_id, content, visible, created_at, modified_at) VALUES
 (200, 200, 201, '함께 일한 반장1을 추천합니다', true, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(201, 201, 200, '믿을 수 있는 업체입니다', true, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(201, 201, 200, '믿을 수 있는 업체입니다', true, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(202, 202, 201, '반장1과 현장을 함께 했습니다', true, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(203, 203, 201, '마감 품질이 뛰어납니다', true, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(204, 208, 209, '배관 작업을 믿고 맡길 수 있습니다', false, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 -- D. 채팅 : 그룹·1:1 각각 메시지 유형별 최소 1
 INSERT INTO group_chats (id, title, created_at, modified_at) VALUES
-(200, '샘플 그룹 채팅', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(200, '샘플 그룹 채팅', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(201, '샘플 프로젝트2 그룹 채팅', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(202, '샘플 프로젝트3 그룹 채팅', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(203, '샘플 프로젝트4 그룹 채팅', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(204, '샘플 프로젝트5 그룹 채팅', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO participants (id, chat_id, member_id, last_idx, created_at, modified_at) VALUES
 (200, 200, 200, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(201, 200, 201, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(201, 200, 201, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(202, 201, 204, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(203, 201, 208, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(204, 202, 205, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(205, 202, 209, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(206, 203, 206, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(207, 203, 201, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(208, 204, 207, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(209, 204, 202, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO direct_chats (id, min_id, max_id, min_last_idx, max_last_idx, created_at, modified_at) VALUES
-(200, 200, 201, 0, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(200, 200, 201, 0, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(201, 200, 202, 0, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(202, 200, 203, 0, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(203, 201, 202, 0, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(204, 202, 203, 0, 0, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO messages (id, chat_id, chat_type, member_id, type, content, created_at, modified_at) VALUES
 (200, 200, 'GROUP', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
@@ -271,7 +363,23 @@ INSERT INTO messages (id, chat_id, chat_type, member_id, type, content, created_
 (211, 200, 'DIRECT', 200, 'TEXT', '반장님 일정 가능하신가요', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (212, 200, 'DIRECT', 201, 'IMAGE', '작업 사진입니다', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (213, 200, 'DIRECT', 200, 'FILE', '계약서 파일입니다', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(214, 200, 'DIRECT', 200, 'OFFER', '제안을 공유했습니다', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(214, 200, 'DIRECT', 200, 'OFFER', '제안을 공유했습니다', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(220, 201, 'GROUP', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(221, 201, 'GROUP', 204, 'TEXT', '프로젝트2 착공 일정 공유드립니다', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(222, 202, 'GROUP', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(223, 202, 'GROUP', 205, 'TEXT', '프로젝트3 자재 반입 확인 부탁드립니다', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(224, 203, 'GROUP', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(225, 203, 'GROUP', 206, 'TEXT', '프로젝트4 방수 공정 문의드립니다', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(226, 204, 'GROUP', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(227, 204, 'GROUP', 207, 'TEXT', '프로젝트5 조적 작업 일정 조율합시다', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(230, 201, 'DIRECT', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(231, 201, 'DIRECT', 202, 'TEXT', '도장 작업 문의드립니다', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(232, 202, 'DIRECT', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(233, 202, 'DIRECT', 203, 'TEXT', '전기 공정 일정 가능하신가요', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(234, 203, 'DIRECT', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(235, 203, 'DIRECT', 201, 'TEXT', '다음 현장 같이 가시죠', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(236, 204, 'DIRECT', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(237, 204, 'DIRECT', 202, 'TEXT', '견적 확인 부탁드립니다', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 -- 채팅 이미지·파일 첨부 (reference MESSAGE)
 INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
@@ -283,11 +391,15 @@ INSERT INTO attachments (id, member_id, type, status, context, context_id, refer
 -- E. 드라이브 : 개인(각 반장 공유) · 프로젝트(할당 기술자 공유), 각 노트 2개(본인·타인)
 INSERT INTO drives (id, dtype, project_id, member_id, title, created_at, modified_at) VALUES
 (200, 'MEMBER', null, 200, '샘플 개인 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(201, 'PROJECT', 200, null, '샘플 프로젝트 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(201, 'PROJECT', 200, null, '샘플 프로젝트 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(202, 'PROJECT', 201, null, '샘플 프로젝트2 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(203, 'PROJECT', 202, null, '샘플 프로젝트3 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO boards (id, dtype, project_id, drive_id, created_at, modified_at) VALUES
 (200, 'DRIVE', null, 200, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(201, 'DRIVE', null, 201, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(201, 'DRIVE', null, 201, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(202, 'DRIVE', null, 202, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(203, 'DRIVE', null, 203, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO drive_members (id, drive_id, member_id, title, created_at, modified_at) VALUES
 (200, 200, 201, '샘플 개인 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
@@ -295,13 +407,18 @@ INSERT INTO drive_members (id, drive_id, member_id, title, created_at, modified_
 (202, 200, 203, '샘플 개인 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (203, 201, 201, '샘플 프로젝트 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (204, 201, 202, '샘플 프로젝트 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(205, 201, 203, '샘플 프로젝트 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(205, 201, 203, '샘플 프로젝트 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(206, 202, 208, '샘플 프로젝트2 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(207, 202, 209, '샘플 프로젝트2 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(208, 203, 208, '샘플 프로젝트3 드라이브', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 INSERT INTO notes (id, board_id, member_id, content, created_at, modified_at) VALUES
 (200, 200, 200, '개인 드라이브 본인 노트', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (201, 200, 201, '개인 드라이브 공유자 노트', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (202, 201, 200, '프로젝트 드라이브 본인 노트', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
-(203, 201, 201, '프로젝트 드라이브 공유자 노트', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+(203, 201, 201, '프로젝트 드라이브 공유자 노트', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(204, 202, 204, '프로젝트2 드라이브 본인 노트', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
+(205, 203, 205, '프로젝트3 드라이브 본인 노트', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
 -- 실데이터 (1000 ~)
 ALTER TABLE otps ALTER COLUMN id RESTART WITH 1000;
