@@ -708,7 +708,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseLong"
+                $ref: "#/components/schemas/ApiResponseRegisterMemberResponse"
   /api/v1/group-chats:
     get:
       tags:
@@ -2134,6 +2134,23 @@ components:
       - GUEST
       - USER
       - ADMIN
+    ApiResponseRegisterMemberResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/RegisterMemberResponse"
+    RegisterMemberResponse:
+      type: object
+      properties:
+        memberId:
+          type: integer
+          format: int64
+        accessToken:
+          type: string
     CreateGroupChatRequest:
       type: object
       properties:
