@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.security.jwt.CookieProvider;
@@ -25,27 +24,10 @@ public class SessionTokenIssuer {
                                HttpServletResponse response) {
         val authUser = new AuthUser(memberId, username, role);
         val authentication = new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities());
-        return login(authentication, request, response);
-    }
-
-    public IssuedSession login(Authentication authentication,
-                               HttpServletRequest request,
-                               HttpServletResponse response) {
         val accessToken = jwtProvider.generateAccessToken(authentication);
         val refreshToken = jwtProvider.generateRefreshToken(authentication.getName());
 
         sessionService.login(authentication.getName(), request.getHeader("User-Agent"), request.getRemoteAddr(), refreshToken);
-        addRefreshTokenCookie(response, refreshToken);
-
-        return new IssuedSession(accessToken);
-    }
-
-    public IssuedSession rotate(Authentication authentication, HttpServletResponse response) {
-        val username = authentication.getName();
-        val accessToken = jwtProvider.generateAccessToken(authentication);
-        val refreshToken = jwtProvider.generateRefreshToken(username);
-
-        sessionService.rotate(username, refreshToken);
         addRefreshTokenCookie(response, refreshToken);
 
         return new IssuedSession(accessToken);

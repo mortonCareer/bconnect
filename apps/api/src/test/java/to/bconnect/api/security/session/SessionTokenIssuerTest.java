@@ -41,22 +41,4 @@ class SessionTokenIssuerTest {
         assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isEqualTo("refreshToken=refresh-token");
         verify(sessionService).login("1", "agent", "127.0.0.1", "refresh-token");
     }
-
-    @Test
-    void 리프레시_토큰을_회전한다() {
-        val authentication = mock(Authentication.class);
-        val response = new MockHttpServletResponse();
-
-        when(authentication.getName()).thenReturn("1");
-        when(jwtProvider.generateAccessToken(authentication)).thenReturn("access-token");
-        when(jwtProvider.generateRefreshToken("1")).thenReturn("refresh-token");
-        when(cookieProvider.create("refresh-token"))
-                .thenReturn(ResponseCookie.from("refreshToken", "refresh-token").build());
-
-        val session = sessionTokenIssuer.rotate(authentication, response);
-
-        assertThat(session.accessToken()).isEqualTo("access-token");
-        assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isEqualTo("refreshToken=refresh-token");
-        verify(sessionService).rotate("1", "refresh-token");
-    }
 }
