@@ -79,26 +79,34 @@ pnpm build:career && pnpm build:plan     # merge 전 최종
 
 ---
 
-## 진행 상황 (2026-07-07)
+## 진행 상황 (2026-07-08)
 
 ### 완료됨
 
 - **임시 호환 레이어 파일 추가** `packages/api-client/src/_temp-compat.ts` — 개발 서버를 오류 없이 띄우기 위한 임시 우회 매핑을 추가한 파일, 자세한 내용은 해당 파일 상단 주석에 설명해둠
 - **연결 완료(실서버 검증)**: `/profile/[memberId]/recommendations`페이지 연결 완료함. (`recommendations` 는 public 이면서 seed 데이터 확보된 상태라 우선 연결 후 QA까지 완료함)
-- **가입 플로우 정합 (career)** — career 가입은 register(memberId 반환, 세션 토큰 없음) → OTP 재인증으로 accessToken 확보 → 프로필 생성 플로우로 정합 완료. plan signup(`corp/page.tsx`)은 아직 미정합
+- **홈 피드(`/`) 정합** — `getFeeds` 실 BE 계약에 맞춰 author/profile/post shape 재매핑 완료. mocks는 최후 패스에서 처리.
+- **가입 플로우 정합 (career/plan)** — #757 이후 register가 `memberId/accessToken`을 반환하고
+  refreshToken 쿠키를 발급함. career는 register 직후 accessToken으로 로그인 → 프로필 생성,
+  plan signup(`corp/page.tsx`)도 동일 세션 계약으로 정합 완료. `signup/verify` 2차 OTP route 제거.
+- **tasks/calendar 정합** — `useGetTasks`/`useCreateTaskWorker`/`useUpdateTaskWorker`/`useDeleteTask` 계약으로 정합 완료. worker task만 수정/삭제 가능, project/offer task는 read-only. 공유 링크 `day/month` 쿼리 보존 보강.
 - **프로필 (/profile/[memberId]) 정합**
 - **프로필 하위 페이지(/profile/...) 정합 완료**: 남은 런타임 QA는 seed(profiles 행) 확보 후 추가 진행.
 
 ### 계획
 
-- **다음에 연결할 페이지 (데이터 의존성 기준으로 계획)**:
-  1. **public + seed 대기** → 연결은 바로 가능, seed 오면 즉시 QA(로그인 무관).
-     · `/` 홈 피드 (posts seed 후 — getFeeds public·author 정보 응답 내장이라 얽힘 적음)
-  2. **인증 필요** → 연결은 바로 가능, **dev 로그인(otp) 확보 후 일괄로** QA.
-     · 캘린더·메시지 등
+- **다음 정합 후보**
+  1. **messages/chat** — `DirectChat`/`GroupChat` 분리 계약에 맞춰 career/plan/features 메시지 화면 정합. 현재 typecheck의 가장 큰 남은 덩어리.
+  2. **plan panel/profile 계열** — `profileId` 파라미터와 `Profile.profile` shape 가정 제거.
+  3. **notifications** — `useGetMyNotifications`는 BE #686 대기/스텁 판단 필요.
+- **런타임 QA**
+  - career/plan 가입: register 응답 accessToken 저장, refreshToken cookie 발급, career 프로필 즉시 생성 확인.
+  - 홈 피드/캘린더: dev BE seed/auth 로그인으로 렌더·생성·수정·삭제 확인.
+- **mocks**
+  - 모든 career/plan/features 호출부 정합 후 `packages/mocks/src/overrides`를 마지막에 일괄 정합.
 
 ### 참고
 
-- **도메인 의존 현황 (otp·member)**:
+- **도메인 의존 현황 (auth·member)**:
   - `member`(memberId) — 거의 전 도메인이 조회 키로 참조하나 **seed에 이미 있어 조회는 지금도 가능**.
-  - `otp`(로그인) — **auth 도메인 전체(chat·task·coworker·notification·offer·내 것)를 여는 게이트.** 실서버 QA를 넓게 여는 열쇠.
+  - `auth`(로그인/refresh cookie) — **chat·task·coworker·notification·offer·내 것**을 여는 게이트. 실서버 QA를 넓게 여는 열쇠.

@@ -31,9 +31,8 @@ import type { Profile, Member, Message } from './generated/schemas'
 
 // ── 프로필 / 회원 ──────────────────────────────────────────────────────────
 // career 자기화면(edit·about·certifications·coworkers·settings)은 실제 훅으로 정합 완료.
-// 아래는 아직 남은 소비자용 — plan/corp(#753) + 최후 mocks 패스 대상.
+// 아래는 아직 남은 소비자용 — 최후 mocks 패스 대상.
 export {
-  useCreateMember as useRegisterMember, // plan signup/corp (#753) 정합 시 제거
   getGetProfileMockHandler as getGetMyProfileMockHandler, // 최후 mocks 패스에서 제거
   getGetProfileResponseMock as getGetMyProfileResponseMock, // 최후 mocks 패스에서 제거
 } from './generated/api'

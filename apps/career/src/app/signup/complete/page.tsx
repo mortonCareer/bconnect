@@ -12,7 +12,7 @@ import { useEffect } from 'react'
 export default function SignupCompletePage() {
   const { data: member } = useGetMyMember()
 
-  // 가입 흐름의 최종 도착지 — 여기서 임시 보관값(signupToken·pendingProfile 등) 정리.
+  // 가입 흐름의 최종 도착지 — 여기서 임시 보관값(signupToken 등) 정리.
   useEffect(() => {
     useSignupStore.getState().reset()
   }, [])

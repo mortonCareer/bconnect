@@ -5,8 +5,10 @@
 
 import { AddressField } from '@/components/AddressField'
 import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
+import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
-import { Role, Trade, TRADE_LABELS, useCreateMember } from '@bconnect/api-client'
+import { Role, Trade, TRADE_LABELS, useCreateMember, useCreateProfile } from '@bconnect/api-client'
+import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { mapKakaoAddress } from '@bconnect/config/address'
 import {
   Form,
@@ -33,13 +35,25 @@ import { SignupHeader } from '../_components/SignupHeader'
 import { TradeSelector } from './_components/TradeSelector'
 import { MAX_TRADES, profileSchema, type ProfileFormData } from './schema'
 
+function requireRegisterAccessToken(result: RegisterMemberResponse) {
+  // TODO: BE required 처리 후 type narrowing 필요.
+  // RegisterMemberResponse.accessToken은 세션 필수값인데 optional emit이다.
+  if (!result.accessToken) {
+    throw new Error('회원가입 세션 토큰이 응답에 없습니다.')
+  }
+
+  return result.accessToken
+}
+
 export default function SignupProfilePage() {
   const router = useRouter()
-  const { formData, setPendingProfile } = useSignupStore()
+  const { login } = useAuthStore()
+  const { formData } = useSignupStore()
   // register(POST /members)는 X-Signup-Token 헤더로 인증한다 (Bearer 아님).
   const registerMemberMutation = useCreateMember({
     request: { headers: { 'X-Signup-Token': formData.signupToken } },
   })
+  const createProfileMutation = useCreateProfile()
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -65,7 +79,7 @@ export default function SignupProfilePage() {
     control,
     passthroughError<ProfileFormData>(undefined, '회원가입에 실패했습니다. 다시 시도해주세요.')
   )
-  const [memberCreated, setMemberCreated] = useState(false)
+  const [issuedAccessToken, setIssuedAccessToken] = useState<string | null>(null)
 
   const watchedFields = useWatch({ control, name: 'fields' })
   const watchedPrimaryField = useWatch({ control, name: 'primaryField' })
@@ -88,32 +102,38 @@ export default function SignupProfilePage() {
   const onSubmit = async (data: ProfileFormData) => {
     try {
       // register 는 signupToken(X-Signup-Token 헤더)을 소비 — 실패 후 재시도 시
-      // 재호출하지 않도록 가드. 회원 가입 유형은 auth 레벨 Role.USER 고정
+      // 재호출하지 않도록 발급된 accessToken을 보관한다.
+      // 회원 가입 유형은 auth 레벨 Role.USER 고정
       // (시공 유형은 ProfileRole 로 프로필에 저장).
-      if (!memberCreated) {
-        await registerMemberMutation.mutateAsync({
-          data: {
-            username: formData.username,
-            name: data.name,
-            role: Role.USER,
-          },
-        })
-        setMemberCreated(true)
+      const accessToken =
+        issuedAccessToken ??
+        requireRegisterAccessToken(
+          await registerMemberMutation.mutateAsync({
+            data: {
+              username: formData.username,
+              name: data.name,
+              role: Role.USER,
+            },
+          })
+        )
+
+      if (!issuedAccessToken) {
+        setIssuedAccessToken(accessToken)
       }
 
-      // register 는 세션 토큰을 발급하지 않는다 → createProfile(인증 필요)을 바로
-      // 호출할 수 없어 프로필 입력값을 보관하고, /signup/verify 재인증으로
-      // accessToken 확보 후 생성한다.
-      setPendingProfile({
-        role: data.role,
-        primaryTrade: data.primaryField as Trade,
-        trades: data.fields as Trade[],
-        experience: data.experience,
-        headline: data.headline || undefined,
-        address: data.address ?? mapKakaoAddress(null),
+      login(accessToken)
+      await createProfileMutation.mutateAsync({
+        data: {
+          role: data.role,
+          primaryTrade: data.primaryField as Trade,
+          trades: data.fields as Trade[],
+          experience: data.experience,
+          headline: data.headline || undefined,
+          address: data.address ?? mapKakaoAddress(null),
+        },
       })
 
-      router.push('/signup/verify')
+      router.push('/signup/complete')
     } catch (err) {
       server.capture(err, data)
     }
@@ -223,7 +243,9 @@ export default function SignupProfilePage() {
               requireAllFilled={false}
               variant="primary"
               size="full"
-              isLoading={isSubmitting || registerMemberMutation.isPending}
+              isLoading={
+                isSubmitting || registerMemberMutation.isPending || createProfileMutation.isPending
+              }
             >
               완료
             </FormSubmitButton>
