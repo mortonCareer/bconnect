@@ -1,11 +1,13 @@
 package to.bconnect.api.core.presentation.v1;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
@@ -18,7 +20,11 @@ import to.bconnect.api.core.presentation.v1.request.RegisterMemberRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateMemberRequest;
 import to.bconnect.api.core.presentation.v1.response.CheckUsernameResponse;
 import to.bconnect.api.core.presentation.v1.response.MemberResponse;
+import to.bconnect.api.core.presentation.v1.response.RegisterMemberResponse;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.security.jwt.CookieProvider;
+import to.bconnect.api.security.jwt.JwtProvider;
+import to.bconnect.api.security.session.SessionService;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
@@ -33,6 +39,9 @@ public class MemberController {
     private final MemberService memberService;
     private final AttachmentResolver attachmentResolver;
     private final SignedCookieIssuer signedCookieIssuer;
+    private final JwtProvider jwtProvider;
+    private final CookieProvider cookieProvider;
+    private final SessionService sessionService;
 
     @GetMapping("/me")
     public ApiResponse<MemberResponse> get(
@@ -73,11 +82,22 @@ public class MemberController {
     }
 
     @PostMapping
-    public ApiResponse<Long> register(
+    public ApiResponse<RegisterMemberResponse> register(
             @AuthenticationPrincipal String phone,
-            @RequestBody @Valid RegisterMemberRequest request) {
-        val member = memberService.register(phone, request.toCommand());
-        return ApiResponse.success(member.id());
+            @RequestBody @Valid RegisterMemberRequest body,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        val member = memberService.register(phone, body.toCommand());
+
+        val authUser = new AuthUser(member.id(), member.username(), member.role().name());
+        val authentication = new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities());
+        val accessToken = jwtProvider.generateAccessToken(authentication);
+        val refreshToken = jwtProvider.generateRefreshToken(authUser.getUsername());
+
+        sessionService.login(authUser.getUsername(), request.getHeader("User-Agent"), request.getRemoteAddr(), refreshToken);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieProvider.create(refreshToken).toString());
+
+        return ApiResponse.success(new RegisterMemberResponse(member.id(), accessToken));
     }
 
     @PutMapping("/me")
