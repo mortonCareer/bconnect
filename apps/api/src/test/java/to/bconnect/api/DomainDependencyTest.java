@@ -19,6 +19,7 @@ public class DomainDependencyTest {
     private static final String DOMAIN = "..core.domain.";
     private static final String SHARED = "profile";
 
+    // dep: chat → allowed
     @ArchTest ArchRule boardDomainRule = domainRule("board", "drive");
     @ArchTest ArchRule chatDomainRule = domainRule("chat", "offer");
     @ArchTest ArchRule companyDomainRule = domainRule("company");

@@ -14,6 +14,12 @@ export function LandingFooter() {
             문의사항
           </a>
           <Link
+            href="/terms"
+            className="font-semibold text-gray-200 transition-colors hover:text-white"
+          >
+            이용약관
+          </Link>
+          <Link
             href="/privacy"
             className="font-semibold text-gray-200 transition-colors hover:text-white"
           >

@@ -54,7 +54,7 @@ public class MemberController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ApiResponse<List<MemberResponse>> listMembers(HttpServletResponse response) {
+    public ApiResponse<List<MemberResponse>> list(HttpServletResponse response) {
         val members = memberService.list();
         val urlMap = attachmentResolver.resolveUrlMap(
                 ReferenceType.MEMBER, members.stream().map(Member::id).toList(), ImageSize.SMALL);

@@ -1,4 +1,4 @@
--- partial unique index 포함
+-- partial unique index 미포함
 
 drop table if exists notes cascade;
 drop table if exists boards cascade;

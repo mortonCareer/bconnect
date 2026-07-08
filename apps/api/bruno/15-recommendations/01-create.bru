@@ -1,0 +1,39 @@
+meta {
+  name: 추천서 생성
+  type: http
+  seq: 1
+  tags: [
+    seed
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/recommendations
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "toId": 105,
+    "content": "함께 일한 동료로서 추천합니다"
+  }
+}
+
+script:post-response {
+  bru.setVar("recommendationId", res.body.data);
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.a('number');
+  });
+}
+
+docs {
+  로그인 유저(member 1)가 member 6에게 추천서를 작성한다.
+  @seed members : 105
+  @seed coworkers : 100
+}

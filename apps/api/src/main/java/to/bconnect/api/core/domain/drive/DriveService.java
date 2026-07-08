@@ -123,4 +123,17 @@ public class DriveService {
 
         return attachmentResolver.list(ReferenceType.DRIVE, driveId, type);
     }
+
+    @Transactional
+    public void attach(AuthUser user, Long driveId, List<Long> attachmentIds) {
+        driveValidator.validate(driveId, user.id());
+        attachmentLinker.link(user.id(), ReferenceType.DRIVE, driveId, attachmentIds);
+    }
+
+    @Transactional
+    public void detach(AuthUser user, Long driveId, Long attachmentId) {
+        driveValidator.validate(driveId, user.id());
+        attachmentLinker.validate(user.id(), ReferenceType.DRIVE, driveId, attachmentId);
+        attachmentLinker.unlink(attachmentId);
+    }
 }
