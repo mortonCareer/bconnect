@@ -2,6 +2,7 @@ package to.bconnect.api.socket.message;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,7 +11,6 @@ import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.chat.MessageService;
 import to.bconnect.api.core.domain.chat.SendMessage;
-import to.bconnect.api.core.domain.notification.NotificationService;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.socket.WebSocketSecurityConfig;
 import to.bconnect.api.storage.chat.*;
@@ -34,15 +34,15 @@ public class MessageSocketService {
     private final DirectChatRepository directChatRepository;
     private final MemberRepository memberRepository;
     private final SimpUserRegistry simpUserRegistry;
-    private final NotificationService notificationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Message broadcast(AuthUser user, Long chatId, ChatType chatType, SendMessage command) {
         val message = messageService.create(chatId, chatType, user.id(), command);
         val activeMemberIds = markAsRead(chatId, chatType, message.id());
         val recipientIds = findRecipientIds(user.id(), chatId, chatType);
-        notificationService.notifyChatMessage(
-                user.id(), chatId, recipientIds, activeMemberIds, command.content());
+        eventPublisher.publishEvent(new ChatMessageSentEvent(
+                user.id(), chatId, recipientIds, activeMemberIds, command.content()));
         return message;
     }
 

@@ -22,20 +22,28 @@ public class NotificationEntity extends BaseEntity {
     @Column(nullable = false)
     private String typeCode;
 
-    @Column(nullable = false)
     private Long referenceId;
 
     @Column(columnDefinition = "text")
     private String content;
 
+    @Column(columnDefinition = "text")
+    private String templateArgs;
+
     private LocalDateTime readAt;
 
     public NotificationEntity(Long senderId, Long receiverId, String typeCode, Long referenceId, String content) {
+        this(senderId, receiverId, typeCode, referenceId, content, null);
+    }
+
+    public NotificationEntity(Long senderId, Long receiverId, String typeCode, Long referenceId,
+                              String content, String templateArgs) {
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.typeCode = typeCode;
         this.referenceId = referenceId;
         this.content = content;
+        this.templateArgs = templateArgs;
     }
 
     public boolean isRead() {

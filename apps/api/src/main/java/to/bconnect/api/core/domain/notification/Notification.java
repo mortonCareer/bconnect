@@ -11,6 +11,7 @@ public record Notification(
         String typeCode,
         Long referenceId,
         String content,
+        NotificationArgs args,
         boolean read,
         LocalDateTime createdAt
 ) {
@@ -22,6 +23,7 @@ public record Notification(
                 entity.getTypeCode(),
                 entity.getReferenceId(),
                 entity.getContent(),
+                NotificationArgs.fromJson(entity.getTemplateArgs()),
                 entity.isRead(),
                 entity.getCreatedAt()
         );

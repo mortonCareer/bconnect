@@ -1,5 +1,10 @@
 package to.bconnect.api.storage.notification;
 
 public enum NotificationReferenceType {
-    CHAT_ROOM
+    NONE,
+    CHAT_ROOM,
+    PROFILE,
+    COWORKER_REQUEST,
+    OFFER,
+    CONTRACT
 }
