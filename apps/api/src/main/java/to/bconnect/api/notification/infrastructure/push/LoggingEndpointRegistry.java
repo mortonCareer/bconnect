@@ -7,7 +7,7 @@ import to.bconnect.api.notification.domain.push.PushEndpointRegistry;
 
 @Slf4j
 @Component
-@Profile({"local", "test"})
+@Profile("(local | test) & !sns")
 public class LoggingEndpointRegistry implements PushEndpointRegistry {
 
     @Override

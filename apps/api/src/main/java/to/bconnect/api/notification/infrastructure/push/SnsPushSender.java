@@ -20,7 +20,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
-@Profile({"dev", "prod"})
+@Profile("dev | prod | sns")
 @RequiredArgsConstructor
 public class SnsPushSender implements PushSender {
 
