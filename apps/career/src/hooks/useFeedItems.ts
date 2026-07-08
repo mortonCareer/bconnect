@@ -72,8 +72,10 @@ export function useFeedItems({
       .map((feed): FeedItem | null => {
         const { member, profile, post } = feed
 
+        // TODO: BE required 처리 후 type narrowing 필요. Feed.member/profile/post가 optional emit이라 없는 행은 임시로 렌더 제외.
         if (!member || !profile || !post) return null
 
+        // TODO: BE required 처리 후 type narrowing 필요. 이름/분야/작성일/본문은 카드 표시 필수값인데 optional emit이라 fallback 중.
         return {
           postId: post.id,
           memberId: member.id,

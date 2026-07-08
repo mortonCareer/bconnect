@@ -28,6 +28,7 @@ export function CoworkerList({ coworkers, isLoading, isError, coworkerHref }: Co
   return (
     <ul className="flex flex-col">
       {coworkers.map((coworker) => {
+        // TODO: BE required 처리 후 type narrowing 필요. Coworker.member.id는 행 링크 필수값인데 optional emit이라 없는 행은 임시로 렌더 제외.
         const memberId = coworker.member?.id
         if (memberId == null) return null
         return <CoworkerRow key={coworker.id} memberId={memberId} href={coworkerHref(memberId)} />
@@ -57,7 +58,7 @@ function CoworkerRow({ memberId, href }: { memberId: number; href: string }) {
       avatarUrl={member?.picture || getAvatarUrl(name)}
       name={name}
       meta={{
-        // region/trade 는 필수 string — 빈값은 ProfileCard 내부 filter(Boolean) 에서 제거됨.
+        // TODO: BE required 처리 후 type narrowing 필요. region/trade는 표시 필수값인데 optional emit이라 빈값으로 silent fallback 중.
         region: profile.address?.city ?? '',
         trade: profile.primaryTrade ? getTradeLabel(profile.primaryTrade) : '',
         // 등급(role)은 MemberSummary 미제공(#473). 시안(1234-2262)은 2번째 줄 = 소개(description).

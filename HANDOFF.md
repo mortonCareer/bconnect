@@ -45,6 +45,7 @@ BE-SSOT flip으로 orval 생성 클라이언트의 훅·타입 이름/형태가 
 - **개명**: `getGetMyProfileMockHandler` → `getGetProfile…` 등 호출부 이름 교체
 - **shape**: `Profile.profile` 없음, `ProfileSummary.id` 없음 → 구조 재매핑
 - **nullability**: `null` not assignable to `string | undefined` → mock값 `undefined` (근본 해소는 BE `required` emit, CEO)
+- **required 미반영**: BE에서 `required` 처리하지 않아 생성 타입이 optional인 경우, 프론트 렌더링 지점에 `TODO: BE required 처리 후 type narrowing 필요`를 명시하고 값 존재를 좁힌 뒤 사용
 - **수동 무효화 제거**: mutationInvalidates 인계된 도메인은 호출부 `invalidateQueries` 삭제 (ADR-0025)
 
 ## mock 오버라이드 (`packages/mocks/src/overrides/`) — 최후순위

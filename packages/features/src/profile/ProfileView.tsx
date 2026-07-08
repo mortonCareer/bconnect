@@ -86,6 +86,7 @@ export function ProfileView(props: ProfileViewProps) {
   )
 
   const { member, profile } = data
+  // TODO: BE required 처리 후 type narrowing 필요. MemberSummary username/name이 optional emit이라 셸 타이틀 fallback에 의존 중.
   const title = member?.username ?? member?.name ?? fallbackTitle ?? '프로필'
 
   const body = (

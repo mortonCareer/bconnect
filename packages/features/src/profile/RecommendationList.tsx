@@ -91,15 +91,18 @@ export function RecommendationList({
         </p>
       ) : (
         <ul className="flex flex-col">
-          {items.map((rec) => (
-            <RecommendationItem
-              key={rec.id}
-              recommendation={rec}
-              showMenu={canAct}
-              onMenuClick={() => setOpenId(rec.id ?? null)}
-              rowClassName={rowPx}
-            />
-          ))}
+          {items.map((rec) => {
+            // TODO: BE required 처리 후 type narrowing 필요. Recommendation.id는 케밥 액션 키인데 optional emit이라 없으면 액션이 조용히 닫힘.
+            return (
+              <RecommendationItem
+                key={rec.id}
+                recommendation={rec}
+                showMenu={canAct}
+                onMenuClick={() => setOpenId(rec.id ?? null)}
+                rowClassName={rowPx}
+              />
+            )
+          })}
         </ul>
       )}
 
@@ -176,6 +179,7 @@ function RecommendationItem({
 }) {
   const { member, content, profile } = recommendation
 
+  // TODO: BE required 처리 후 type narrowing 필요. member/profile/content는 카드 표시값인데 optional emit이라 빈값으로 silent fallback 중.
   return (
     <ProfileCard
       as="li"

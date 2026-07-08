@@ -81,6 +81,7 @@ export default function ProfileEditPage() {
   // 데이터 로드 후 폼 초기값 설정
   useEffect(() => {
     if (member || profile) {
+      // TODO: BE required 처리 후 type narrowing 필요. member/profile 필수 표시값이 optional emit이라 폼 초기값에서 임시 fallback 중.
       reset({
         name: member?.name ?? '',
         phone: member?.phone ?? '',
@@ -123,6 +124,7 @@ export default function ProfileEditPage() {
       promises.push(
         updateProfileMutation.mutateAsync({
           data: {
+            // TODO: BE required 처리 후 type narrowing 필요. Profile.role 필수값이 optional emit이라 임시 cast로 유지.
             role: profile?.role as ProfileRole,
             primaryTrade: data.primaryTrade as Trade,
             trades: data.trades as Trade[],

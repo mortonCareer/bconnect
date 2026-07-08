@@ -24,6 +24,7 @@ import { useWorkActions } from './useWorkActions'
 /** 최상위 프로필 라우트(본인·타인) 상단 알림·채팅 아이콘 — 홈 피드와 동등 */
 function useTopBarUtility() {
   const { data: chats } = useGetMyChats()
+  // TODO: BE required 처리 후 type narrowing 필요. DirectChat.unreadCount가 optional emit이라 누락 시 badge가 0으로 silent fallback 됨.
   const chatCount = chats?.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0) ?? 0
   const notifyCount = useUnreadNotificationCount()
   return {
@@ -42,6 +43,7 @@ export function OwnerProfileView() {
 
   // GET /profiles/me 부재 → 내 memberId 로 by-id 프로필 조회 (Profile 이 member·counts 내장)
   const member = useGetMyMember()
+  // TODO: BE required 처리 후 type narrowing 필요. Member.id는 프로필 조회 키인데 optional emit이라 0 sentinel로 쿼리를 막는 중.
   const myId = member.data?.id ?? 0
   const enabled = myId > 0
   const { onDeleteWork } = useWorkActions()
@@ -51,6 +53,7 @@ export function OwnerProfileView() {
   const received = useGetMyReceivedRecommendations()
   const sent = useGetMySentRecommendations()
 
+  // TODO: BE required 처리 후 type narrowing 필요. Profile.member/counts가 optional emit이라 ProfileView에서 표시 fallback에 의존 중.
   const data: ProfileViewData = {
     member: profile.data?.member,
     profile: profile.data,
@@ -141,6 +144,7 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
     },
   })
 
+  // TODO: BE required 처리 후 type narrowing 필요. Profile.member/counts가 optional emit이라 ProfileView에서 표시 fallback에 의존 중.
   const data: ProfileViewData = {
     member: profile.data?.member,
     profile: profile.data,

@@ -24,6 +24,7 @@ export default function CoworkersPage() {
   } = useGetCoworkers({ memberId: myId! }, { query: { enabled: myId != null } })
 
   const isLoading = isMemberLoading || (!!myId && isCoworkersLoading)
+  // TODO: BE required 처리 후 type narrowing 필요. Coworker.member.name은 검색 필수값인데 optional emit이라 빈값으로 silent fallback 중.
   const filtered = (coworkers ?? []).filter((c) => matchHangul(c.member?.name ?? '', search))
 
   return (

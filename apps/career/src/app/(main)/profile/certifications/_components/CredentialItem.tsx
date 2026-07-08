@@ -19,7 +19,7 @@ export function CredentialItem({
   onRequestDelete,
   showRenew = true,
 }: CredentialItemProps) {
-  // type/id 는 스키마상 optional(nullable emit) — 없으면 렌더 대상 아님.
+  // TODO: BE required 처리 후 type narrowing 필요. Credential.type/id는 렌더·삭제 필수값인데 optional emit이라 없으면 임시로 렌더 제외.
   const { type, id } = credential
   if (type == null || id == null) return null
 

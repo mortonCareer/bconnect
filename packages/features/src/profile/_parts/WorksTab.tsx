@@ -34,6 +34,7 @@ export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProp
     )
   }
 
+  // TODO: BE required 처리 후 type narrowing 필요. Feed.post/Post.memberId가 optional emit이라 없는 항목은 임시로 렌더 제외.
   const posts: Post[] = (feeds ?? []).flatMap((feed) =>
     feed.post && feed.post.memberId === profileId ? [feed.post] : []
   )
@@ -49,6 +50,7 @@ export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProp
   return (
     <div className="flex flex-col gap-6 py-6">
       {posts.map((post) => {
+        // TODO: BE required 처리 후 type narrowing 필요. Post.id/createdAt/content는 카드 표시 필수값인데 optional emit이라 fallback 중.
         const postId = post.id
         if (postId == null) return null
         return (
