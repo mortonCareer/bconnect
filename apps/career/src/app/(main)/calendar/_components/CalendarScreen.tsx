@@ -52,7 +52,7 @@ export function CalendarScreen() {
       {!isError && selectedTasks.length > 0 && (
         <div className="mt-2 divide-y divide-gray-100 border-t border-gray-100">
           {selectedTasks.map((t) => (
-            <TaskDetailCard key={t.id} task={t} />
+            <TaskDetailCard key={t.id} task={t} selectedDay={day} selectedMonth={month} />
           ))}
         </div>
       )}
