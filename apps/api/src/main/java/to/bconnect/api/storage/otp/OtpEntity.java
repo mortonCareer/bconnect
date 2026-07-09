@@ -42,6 +42,7 @@ public class OtpEntity extends BaseEntity {
         this.code = code;
         this.expiredAt = expiredAt;
         this.revoked = false;
+        this.attempts = 0;
         this.dailyCount++;
         this.lastSentAt = LocalDateTime.now();
     }
