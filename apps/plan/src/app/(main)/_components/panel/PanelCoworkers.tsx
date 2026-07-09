@@ -12,7 +12,7 @@ export function PanelCoworkers({ profileId }: { profileId: number }) {
     data: coworkers,
     isLoading,
     isError,
-  } = useGetCoworkers({ profileId }, { query: { enabled } })
+  } = useGetCoworkers({ memberId: profileId }, { query: { enabled } })
 
   const data: CoworkersViewData = { coworkers, isLoading, isError }
 

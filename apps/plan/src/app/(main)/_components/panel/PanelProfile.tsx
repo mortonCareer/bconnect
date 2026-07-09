@@ -53,7 +53,7 @@ export function PanelProfile({ profileId }: { profileId: number }) {
     member && profile
       ? {
           profileId,
-          name: member.name,
+          name: member.name ?? '',
           region: profile.address?.state ?? '',
           level: '',
           specialty: profile.primaryTrade ? (TRADE_LABELS[profile.primaryTrade] ?? '') : '',
