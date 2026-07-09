@@ -10,11 +10,15 @@ import {
   useGetCredentials,
   useGetReceivedRecommendations,
   useGetSentRecommendations,
-  useGetMyChats,
   useCreateCoworkerRequest,
   useCreateDirectChat,
 } from '@bconnect/api-client'
-import { ProfileView, type ProfileViewData, useUnreadNotificationCount } from '@bconnect/features'
+import {
+  ProfileView,
+  type ProfileViewData,
+  useUnreadNotificationCount,
+  useUnreadChatCount,
+} from '@bconnect/features'
 import { Button, SettingsIcon, toast, isApiErrorShape } from '@bconnect/ui'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
 import { useShareCurrentUrl } from '@/hooks/useShareCurrentUrl'
@@ -23,9 +27,7 @@ import { useWorkActions } from './useWorkActions'
 
 /** 최상위 프로필 라우트(본인·타인) 상단 알림·채팅 아이콘 — 홈 피드와 동등 */
 function useTopBarUtility() {
-  const { data: chats } = useGetMyChats()
-  // TODO: BE required 처리 후 type narrowing 필요. DirectChat.unreadCount가 optional emit이라 누락 시 badge가 0으로 silent fallback 됨.
-  const chatCount = chats?.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0) ?? 0
+  const chatCount = useUnreadChatCount()
   const notifyCount = useUnreadNotificationCount()
   return {
     chatHref: '/messages',

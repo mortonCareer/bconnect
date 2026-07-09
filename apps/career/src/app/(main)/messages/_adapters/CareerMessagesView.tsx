@@ -4,9 +4,9 @@ import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   useQueries,
-  useGetMyChats,
+  useGetDirectChats,
+  useGetGroupChats,
   useGetMyMember,
-  useGetChat,
   useGetProfile,
   getGetProfileQueryOptions,
 } from '@bconnect/api-client'
@@ -14,6 +14,7 @@ import type { Profile } from '@bconnect/api-client'
 import {
   MessagesView,
   ChatView,
+  toChatSummaries,
   type MessagesViewData,
   type ChatViewData,
 } from '@bconnect/features'
@@ -24,14 +25,16 @@ export function CareerMessagesList() {
   const router = useRouter()
   const { data: me, isLoading: isMeLoading } = useGetMyMember()
   const currentUserId = me?.id
-  const { data: chats, isLoading: isChatsLoading, isError } = useGetMyChats()
-  const allChats = useMemo(() => chats ?? [], [chats])
+  // 내 채팅 = DM + 그룹 병합 (통합 목록 엔드포인트 부재 → FE 병합, #759)
+  const dm = useGetDirectChats()
+  const group = useGetGroupChats()
+  const allChats = useMemo(() => toChatSummaries(dm.data, group.data), [dm.data, group.data])
 
-  // 상대방 member id 모음 — Chat.participants(MaskedMember[]) 에서 본인 제외
+  // 상대방 member id 모음 — members 에서 본인 제외
   const otherMemberIds = useMemo(() => {
     const ids = new Set<number>()
     for (const chat of allChats) {
-      const other = chat.participants.find((p) => p.id !== currentUserId)
+      const other = chat.members.find((p) => p.id !== currentUserId)
       if (other?.id != null) ids.add(other.id)
     }
     return [...ids]
@@ -48,7 +51,7 @@ export function CareerMessagesList() {
   const profileMap = useMemo(() => {
     const map = new Map<number, Profile>()
     profileQueries.forEach((q, i) => {
-      if (q.data) map.set(otherMemberIds[i], q.data.profile)
+      if (q.data) map.set(otherMemberIds[i], q.data)
     })
     return map
   }, [profileQueries, otherMemberIds])
@@ -57,8 +60,8 @@ export function CareerMessagesList() {
     chats: allChats,
     currentUserId,
     profileMap,
-    isLoading: isMeLoading || isChatsLoading,
-    isError,
+    isLoading: isMeLoading || dm.isLoading || group.isLoading,
+    isError: dm.isError || group.isError,
   }
 
   return (
@@ -73,10 +76,14 @@ export function CareerMessagesList() {
 /** 채팅방 (/messages/[chatId]) — chat·상대 Profile·본인 id 를 resolve 해 ChatView 로 내려준다. */
 export function CareerChatRoom({ chatId }: { chatId: number }) {
   const router = useRouter()
-  const enabled = Number.isFinite(chatId) && chatId > 0
   const currentUserId = useGetMyMember().data?.id
-  const { data: chat, isLoading, isError } = useGetChat(chatId, { query: { enabled } })
-  const otherId = chat?.participants.find((p) => p.id !== currentUserId)?.id
+  // TODO(#760): 단건 조회 엔드포인트 부재 → DM 목록에서 filter. 그룹 단건은 #759.
+  const { data: directChats, isLoading, isError } = useGetDirectChats()
+  const chat = useMemo(
+    () => toChatSummaries(directChats).find((c) => c.id === chatId),
+    [directChats, chatId]
+  )
+  const otherId = chat?.members.find((p) => p.id !== currentUserId)?.id
   const { data: otherProfile } = useGetProfile(otherId ?? 0, {
     query: { enabled: otherId != null },
   })
@@ -84,7 +91,7 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
   const data: ChatViewData = {
     chat,
     currentUserId,
-    otherProfile: otherProfile?.profile,
+    otherProfile,
     isLoading,
     isError,
   }
