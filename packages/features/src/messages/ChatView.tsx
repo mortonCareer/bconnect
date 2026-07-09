@@ -2,15 +2,16 @@
 
 import { useCallback, useState, type ReactNode } from 'react'
 import { MessageType, getTradeLabel } from '@bconnect/api-client'
-import type { Chat, Message, Profile } from '@bconnect/api-client'
+import type { Message, Profile } from '@bconnect/api-client'
 import { ChatInput, ProfileCard, Skeleton } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 import { PanelShell } from '../_shared/PanelShell'
 import { MessageThread } from './_parts/MessageThread'
+import type { ChatSummary } from './_parts/types'
 
 /** 앱이 resolve 해 내려주는 데이터. career/plan 어댑터가 useGetChat·useGetProfile·useGetMyMember 로 채운다. */
 export interface ChatViewData {
-  chat?: Chat
+  chat?: ChatSummary
   /** 본인 member id — "나" 호출(useGetMyMember)은 앱에서 (ADR-0020: features 엔 "나" 호출 없음) */
   currentUserId?: number
   /** 상대 프로필 보강 — chat 응답에 없는 풍부 정보(address.city, primaryTrade). 발산 없는 by-id 보강 */
@@ -47,7 +48,7 @@ export type ChatViewProps = ChatViewBaseProps & ChatViewShellProps
 export function ChatView(props: ChatViewProps) {
   const { chatId, data, profileHref } = props
   const { chat, currentUserId, otherProfile, isLoading, isError } = data
-  const other = chat?.participants.find((p) => p.id !== currentUserId)
+  const other = chat?.members.find((p) => p.id !== currentUserId)
   const otherId = other?.id
   const title = other?.name ?? chat?.title ?? '채팅'
   const profile = otherProfile
@@ -105,7 +106,7 @@ export function ChatView(props: ChatViewProps) {
       <MessageThread
         chatId={chatId}
         currentUserId={currentUserId}
-        participants={chat.participants}
+        participants={chat.members}
         localMessages={localMessages}
       />
       <ChatInput value={message} onChange={setMessage} onSend={handleSend} />
