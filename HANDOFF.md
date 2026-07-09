@@ -96,7 +96,7 @@ pnpm build:career && pnpm build:plan     # merge 전 최종
 ### 계획
 
 - **다음 정합 후보**
-  1. **messages/chat** — `DirectChat`/`GroupChat` 분리 계약에 맞춰 career/plan/features 메시지 화면 정합. 현재 typecheck의 가장 큰 남은 덩어리.
+  1. **messages/chat** — 🔨 **손장수 착수 중(2026-07-09)**. `DirectChat`/`GroupChat` 분리 계약 정합. 스코프=타입체크 해소까지(목록 DM+그룹 병합, MessageThread를 MemberSummary로). 런타임 그룹 완성은 #759, 단건 조회 BE는 #760으로 분리.
   2. **plan panel/profile 계열** — `profileId` 파라미터와 `Profile.profile` shape 가정 제거.
   3. **notifications** — `useGetMyNotifications`는 BE #686 대기/스텁 판단 필요.
 - **런타임 QA**
