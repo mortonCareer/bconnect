@@ -3,26 +3,34 @@
 import { useMemo } from 'react'
 import {
   useQueries,
-  useGetMyChats,
+  useGetDirectChats,
+  useGetGroupChats,
   useGetMyMember,
   getGetProfileQueryOptions,
 } from '@bconnect/api-client'
 import type { Profile } from '@bconnect/api-client'
-import { MessagesView, PanelAside, type MessagesViewData } from '@bconnect/features'
+import {
+  MessagesView,
+  PanelAside,
+  toChatSummaries,
+  type MessagesViewData,
+} from '@bconnect/features'
 import { usePanelNav } from '@/hooks/usePanelNav'
 
 export function PanelMessages() {
   const { panelHref, closeHref, close } = usePanelNav()
   const { data: me, isLoading: isMeLoading } = useGetMyMember()
   const currentUserId = me?.id
-  const { data: chats, isLoading: isChatsLoading, isError } = useGetMyChats()
-  const allChats = useMemo(() => chats ?? [], [chats])
+  // 내 채팅 = DM + 그룹 병합 (통합 목록 엔드포인트 부재 → FE 병합, #759)
+  const dm = useGetDirectChats()
+  const group = useGetGroupChats()
+  const allChats = useMemo(() => toChatSummaries(dm.data, group.data), [dm.data, group.data])
 
-  // 상대방 member id 모음 — Chat.participants(MaskedMember[]) 에서 본인 제외
+  // 상대방 member id 모음 — members 에서 본인 제외
   const otherMemberIds = useMemo(() => {
     const ids = new Set<number>()
     for (const chat of allChats) {
-      const other = chat.participants.find((p) => p.id !== currentUserId)
+      const other = chat.members.find((p) => p.id !== currentUserId)
       if (other?.id != null) ids.add(other.id)
     }
     return [...ids]
@@ -39,7 +47,7 @@ export function PanelMessages() {
   const profileMap = useMemo(() => {
     const map = new Map<number, Profile>()
     profileQueries.forEach((q, i) => {
-      if (q.data) map.set(otherMemberIds[i], q.data.profile)
+      if (q.data) map.set(otherMemberIds[i], q.data)
     })
     return map
   }, [profileQueries, otherMemberIds])
@@ -48,8 +56,8 @@ export function PanelMessages() {
     chats: allChats,
     currentUserId,
     profileMap,
-    isLoading: isMeLoading || isChatsLoading,
-    isError,
+    isLoading: isMeLoading || dm.isLoading || group.isLoading,
+    isError: dm.isError || group.isError,
   }
 
   return (
