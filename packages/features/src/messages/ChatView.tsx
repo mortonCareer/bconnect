@@ -9,7 +9,7 @@ import { PanelShell } from '../_shared/PanelShell'
 import { MessageThread } from './_parts/MessageThread'
 import type { ChatSummary } from './_parts/types'
 
-/** 앱이 resolve 해 내려주는 데이터. career/plan 어댑터가 useGetChat·useGetProfile·useGetMyMember 로 채운다. */
+/** 앱이 resolve 해 내려주는 데이터. career/plan 어댑터가 useGetDirectChats·useGetProfile·useGetMyMember 로 채운다. */
 export interface ChatViewData {
   chat?: ChatSummary
   /** 본인 member id — "나" 호출(useGetMyMember)은 앱에서 (ADR-0020: features 엔 "나" 호출 없음) */

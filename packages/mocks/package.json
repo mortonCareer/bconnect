@@ -11,6 +11,9 @@
     "./server": "./src/server.ts",
     "./handlers": "./src/handlers.ts"
   },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@bconnect/api-client": "workspace:*",
     "msw": "catalog:"

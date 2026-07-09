@@ -11,7 +11,7 @@ import { PanelScroll } from '../_shared/PanelScroll'
 import { PanelMessage } from '../_shared/PanelMessage'
 import type { ChatSummary } from './_parts/types'
 
-/** 앱이 resolve 해 내려주는 데이터. 어댑터가 useGetMyChats·useGetMyMember + 병렬 Profile 보강으로 채운다. */
+/** 앱이 resolve 해 내려주는 데이터. 어댑터가 useGetDirectChats·useGetGroupChats·useGetMyMember + 병렬 Profile 보강으로 채운다. */
 export interface MessagesViewData {
   chats?: ChatSummary[]
   /** 본인 member id — "나" 호출(useGetMyMember)은 앱에서 (ADR-0020: features 엔 "나" 호출 없음) */

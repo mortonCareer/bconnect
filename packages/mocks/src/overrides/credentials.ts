@@ -11,10 +11,10 @@ let nextId = 1
 const cred = (
   type: CredentialType,
   status: CredentialStatus,
-  expiredAt: string | null
+  expiredAt: string | undefined
 ): Credential => ({
   id: nextId++,
-  profileId: 1,
+  memberId: 1,
   type,
   status,
   expiredAt,
@@ -30,14 +30,14 @@ const cred = (
  *   - 자격증: 국가기술=2(리스트) / 숙련기술인=빈 / 그외=빈
  */
 const CREDENTIALS: Credential[] = [
-  cred(CredentialType.IDENTITY_VERIFICATION, CredentialStatus.ACCEPTED, null),
+  cred(CredentialType.IDENTITY_VERIFICATION, CredentialStatus.ACCEPTED, undefined),
   cred(CredentialType.SOLE_PROPRIETOR, CredentialStatus.ACCEPTED, '2026-09-21'),
   cred(CredentialType.CONSTRUCTION_LICENSE, CredentialStatus.ACCEPTED, '2027-09-21'),
 
   cred(CredentialType.CAREER_CERTIFICATE, CredentialStatus.ACCEPTED, '2027-02-18'),
   cred(CredentialType.CAREER_CERTIFICATE, CredentialStatus.ACCEPTED, '2028-05-10'),
-  cred(CredentialType.OTHER_CERTIFICATE, CredentialStatus.ACCEPTED, null),
-  cred(CredentialType.OTHER_CERTIFICATE, CredentialStatus.PENDING, null),
+  cred(CredentialType.OTHER_CERTIFICATE, CredentialStatus.ACCEPTED, undefined),
+  cred(CredentialType.OTHER_CERTIFICATE, CredentialStatus.PENDING, undefined),
 
   cred(CredentialType.NATIONAL_TECHNICAL_QUALIFICATION, CredentialStatus.ACCEPTED, '2027-02-18'),
   cred(CredentialType.NATIONAL_TECHNICAL_QUALIFICATION, CredentialStatus.ACCEPTED, '2029-11-30'),
@@ -47,12 +47,13 @@ export const credentialsOverrides = [
   getGetCredentialsMockHandler(() => CREDENTIALS),
   getCreateCredentialMockHandler(async ({ request }) => {
     const body = (await request.json()) as CreateCredentialRequest
-    const created = cred(body.type, CredentialStatus.ACCEPTED, body.expiredAt ?? null)
+    const created = cred(body.type, CredentialStatus.ACCEPTED, body.expiredAt ?? undefined)
     CREDENTIALS.push(created)
-    return created.id
+    return created.id ?? 0
   }),
   getDeleteCredentialMockHandler(({ params }) => {
     const index = CREDENTIALS.findIndex((c) => c.id === Number(params.credentialId))
     if (index !== -1) CREDENTIALS.splice(index, 1)
+    return { success: true }
   }),
 ]
