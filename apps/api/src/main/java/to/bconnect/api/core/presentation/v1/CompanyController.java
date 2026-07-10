@@ -50,6 +50,20 @@ public class CompanyController {
         return ApiResponse.success(body);
     }
 
+    @GetMapping("/me")
+    public ApiResponse<CompanyResponse> getMine(
+            @AuthenticationPrincipal AuthUser user,
+            HttpServletResponse response) {
+        val company = companyService.get(user);
+        val picture = attachmentResolver.getUrl(ReferenceType.COMPANY, company.id(), ImageSize.SMALL);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.COMPANY);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
+        return ApiResponse.success(CompanyResponse.of(company, picture));
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<CompanyResponse> get(
             @PathVariable Long id,
