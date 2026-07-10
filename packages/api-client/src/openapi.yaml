@@ -1713,10 +1713,10 @@ components:
     ExceptionCode:
       type: object
       properties:
-        code:
-          type: string
         status:
           $ref: "#/components/schemas/HttpStatus"
+        code:
+          type: string
     HttpStatus:
       type: string
       enum:
