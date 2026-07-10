@@ -59,8 +59,8 @@ BE-SSOT flip으로 orval 생성 클라이언트의 훅·타입 이름/형태가 
 
 ```bash
 pnpm api:generate                        # 생성 클라이언트 재확인
-pnpm --filter morton-career typecheck    # 도메인 정합 → 에러 감소 확인
-pnpm --filter morton-plan typecheck
+pnpm --filter @bconnect/career typecheck    # 도메인 정합 → 에러 감소 확인
+pnpm --filter @bconnect/plan typecheck
 pnpm build:career && pnpm build:plan     # merge 전 최종
 ```
 

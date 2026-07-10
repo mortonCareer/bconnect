@@ -106,13 +106,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Type check
-        run: pnpm --filter morton-career typecheck
+        run: pnpm --filter @bconnect/career typecheck
 
       - name: Build
-        run: pnpm --filter morton-career build
+        run: pnpm --filter @bconnect/career build
 
       - name: Lint
-        run: pnpm --filter morton-career lint
+        run: pnpm --filter @bconnect/career lint
 
   ci-plan:
     needs: changes
@@ -133,13 +133,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Type check
-        run: pnpm --filter morton-plan typecheck
+        run: pnpm --filter @bconnect/plan typecheck
 
       - name: Build
-        run: pnpm --filter morton-plan build
+        run: pnpm --filter @bconnect/plan build
 
       - name: Lint
-        run: pnpm --filter morton-plan lint
+        run: pnpm --filter @bconnect/plan lint
 
   ci-api:
     needs: changes
