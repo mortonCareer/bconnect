@@ -27,12 +27,36 @@ function StarRating({ rating, reviewCount }: { rating: number; reviewCount: numb
   )
 }
 
-function Stat({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="flex flex-col items-center gap-1">
+function Stat({
+  value,
+  label,
+  href,
+  onGated,
+}: {
+  value: number
+  label: string
+  href: string
+  onGated?: () => void
+}) {
+  const inner = (
+    <>
       <span className="text-sb-24 text-gray-900">{value}</span>
       <span className="text-r-14 text-gray-500">{label}</span>
-    </div>
+    </>
+  )
+  const className = 'flex flex-col items-center gap-1'
+  // 비로그인은 패널 진입 대신 로그인 게이트 (프로필 보기/메시지 버튼과 동일 규약)
+  if (onGated) {
+    return (
+      <button type="button" onClick={onGated} className={className}>
+        {inner}
+      </button>
+    )
+  }
+  return (
+    <Link href={href} scroll={false} className={className}>
+      {inner}
+    </Link>
   )
 }
 
@@ -58,7 +82,9 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
   const { requireLogin } = useLoginGate()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const { panelHref, openPanel } = usePanelNav()
-  const profileHref = panelHref(`profile/${item.profileId}`)
+  // 프로필 패널 세그먼트는 profile.id 가 아니라 memberId (GET /profiles/{id} 가 memberId 조회)
+  const profileHref = panelHref(`profile/${item.memberId}`)
+  const gated = isAuthenticated ? undefined : requireLogin
   const { mutate: createDirectChat, isPending: isCreatingChat } = useCreateDirectChat()
 
   const metaParts = [
@@ -181,10 +207,26 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
       {/* 우측: 통계 + 작업물 썸네일 */}
       <div className="flex w-[422px] shrink-0 flex-col gap-[22px]">
         {/* 통계 3개 */}
+        {/* 클릭 시 프로필 패널의 해당 탭/하위 패널 진입 (PanelProfile statHrefs 와 동일 규약) */}
         <div className="flex gap-8">
-          <Stat value={item.postCount} label="작업물" />
-          <Stat value={item.coworkerCount} label="동료" />
-          <Stat value={item.recommendCount} label="추천서" />
+          <Stat
+            value={item.postCount}
+            label="작업물"
+            href={panelHref(`profile/${item.memberId}`, { tab: 'works' })}
+            onGated={gated}
+          />
+          <Stat
+            value={item.coworkerCount}
+            label="동료"
+            href={panelHref(`profile/${item.memberId}/coworkers`)}
+            onGated={gated}
+          />
+          <Stat
+            value={item.recommendCount}
+            label="추천서"
+            href={panelHref(`profile/${item.memberId}/recommendations`)}
+            onGated={gated}
+          />
         </div>
 
         {/* 작업물(Post) 썸네일 3개 — 소요일은 Feed 에 task 정보가 없어 미표시 */}
