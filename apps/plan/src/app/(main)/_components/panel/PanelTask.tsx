@@ -4,7 +4,9 @@
 'use client'
 
 import { usePanelNav } from '@/hooks/usePanelNav'
-import { useScheduleTaskStore } from '@/stores/schedule-task-store'
+import { useAllProjectTasks } from '@/hooks/useAllProjectTasks'
+import { useTaskMutations } from '@/hooks/useTaskMutations'
+import { useDraftTaskStore } from '@/stores/draft-task-store'
 import {
   ConfirmDialog,
   DateRangeField,
@@ -22,21 +24,23 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { DRAFT_TASK_ID } from '@/app/(main)/projects/[projectId]/schedule/_components/schedule-grid/task-adapter'
 import type { ScheduleTask } from '@/app/(main)/projects/[projectId]/schedule/_components/schedule-grid/types'
-import { MOCK_PROJECT } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
 import { OfferQueue } from '../offer/OfferQueue'
 
 const taskSchema = z
   .object({
     ganttName: z.string().min(1, '작업명을 입력해주세요.'),
+    // 업체명/주소는 BE 저장 필드 없음 — 읽기전용 표시 (주소는 프로젝트 주소가 BE 에서 주입됨)
     corpName: z.string(),
     startDate: z.string().min(1, '시작일을 선택해주세요.'),
     endDate: z.string().min(1, '종료일을 선택해주세요.'),
     address: z.string(),
     addressDetail: z.string(),
     trades: z.array(z.nativeEnum(Trade)).min(1, '공종을 1개 이상 선택해주세요.'),
-    request: z.string(),
-    memo: z.string(),
+    // BE CreateProjectTaskRequest 가 requirement/memo minLength 1 필수 — 폼도 필수
+    request: z.string().min(1, '요청사항을 입력해주세요.'),
+    memo: z.string().min(1, '메모를 입력해주세요.'),
   })
   .refine((v) => v.startDate <= v.endDate, {
     message: '종료일은 시작일 이후여야 해요.',
@@ -72,27 +76,32 @@ function toFormValues(task: ScheduleTask): TaskFormValues {
 }
 
 /**
- * 공정표 작업 생성/편집 패널 (#582). `?panel=task/new` = 빈 폼(생성, 명시 '작업 생성'),
- * `?panel=task/{id}` = 채워진 폼(편집, 즉시저장). 저장은 schedule-task-store seam 경유.
+ * 공정표 작업 생성/편집 패널 (#582→#767). `?panel=task/new` = 빈 폼(생성),
+ * `?panel=task/draft` = 드래그-생성 로컬 draft, `?panel=task/{id}` = 편집(즉시저장).
  *
- * 편집 모드는 store ↔ 폼 양방향:
- * - store → 폼: `useForm({ values })` 로 외부 변경(간트바 드래그/리사이즈)을 input 에 반영
- * - 폼 → store: useWatch 로 유효한 값만 즉시 updateTask. 외부 반영분과 동일하면 no-op (루프 차단)
+ * 서버 작업은 React Query 캐시가 SSOT — 즉시저장은 useTaskMutations 파이프라인
+ * (낙관적 캐시 patch + 500ms debounce PUT). draft 는 로컬 store 만 갱신하다가
+ * 폼 유효 확정 시 createTaskCompany 로 서버 생성.
  */
 export function PanelTask({ taskId }: { taskId?: string }) {
   const { close, closeHref } = usePanelNav()
   const pathname = usePathname()
-  // 생성 시 소속 프로젝트 — 공정표 라우트(/projects/{id}/schedule)에서 진입. 없으면 기본 프로젝트.
-  const projectId = pathname.match(/^\/projects\/([^/]+)/)?.[1] ?? MOCK_PROJECT.id
-  const task = useScheduleTaskStore((s) =>
-    taskId ? s.tasks.find((t) => t.id === taskId) : undefined
-  )
-  const createTask = useScheduleTaskStore((s) => s.createTask)
-  const updateTask = useScheduleTaskStore((s) => s.updateTask)
-  const deleteTask = useScheduleTaskStore((s) => s.deleteTask)
+  const draft = useDraftTaskStore((s) => s.draft)
+  const patchDraft = useDraftTaskStore((s) => s.patchDraft)
+  const clearDraft = useDraftTaskStore((s) => s.clearDraft)
+  const { tasks: allTasks, projects, isLoading: isTasksLoading } = useAllProjectTasks()
+
+  const isDraft = taskId === DRAFT_TASK_ID
   const isEdit = !!taskId
-  // 드래그-생성 직후 미확정 작업 — 닫기 가드 + 흐린 간트바. 폼 유효 후 확정(draft 해제).
-  const isDraft = !!task?.draft
+  const task = isDraft ? (draft ?? undefined) : allTasks.find((t) => t.id === taskId)
+
+  // 소속 프로젝트 — 편집은 task 유래, 생성은 공정표 라우트(/projects/{id}/schedule) 유래.
+  // 라우트 밖 진입이면 첫 프로젝트 폴백.
+  const projectId =
+    task?.projectId ?? pathname.match(/^\/projects\/([^/]+)/)?.[1] ?? String(projects[0]?.id ?? '')
+  const { updateTask, deleteTask, createTask, isCreating, flushPendingSave } =
+    useTaskMutations(projectId)
+
   const [cancelOpen, setCancelOpen] = useState(false)
 
   const values = useMemo(() => (isEdit && task ? toFormValues(task) : undefined), [isEdit, task])
@@ -104,30 +113,41 @@ export function PanelTask({ taskId }: { taskId?: string }) {
     values,
   })
 
-  // 폼 → store 즉시저장 (편집 모드). 사용자 입력(type==='change')만 반영한다 —
-  // store→폼 역방향 sync(useForm values 가 일으키는 reset)까지 되쓰면 드래그값↔폼값이
-  // 진동해 무한 루프가 난다. 출처를 구분해 단방향만 흘려보낸다.
+  // 폼 → 즉시저장 (편집 모드). 사용자 입력(type==='change')만 반영 —
+  // 캐시→폼 역방향 sync(useForm values 발 reset)까지 되쓰면 드래그값↔폼값이 진동한다.
+  // draft 는 로컬 patch, 서버 작업은 낙관적 patch + debounce PUT.
   useEffect(() => {
     if (!isEdit || !taskId) return
     const sub = form.watch((value, { type }) => {
       if (type !== 'change') return
       const parsed = taskSchema.safeParse(value)
       if (!parsed.success) return
-      updateTask(taskId, parsed.data)
+      if (isDraft) patchDraft(parsed.data)
+      else updateTask(Number(taskId), parsed.data)
     })
     return () => sub.unsubscribe()
-  }, [isEdit, taskId, form, updateTask])
+  }, [isEdit, isDraft, taskId, form, updateTask, patchDraft])
+
+  // draft 확정 = 서버 생성 → 로컬 draft 정리 → 닫기
+  async function confirmDraft(vals: TaskFormValues) {
+    await createTask(vals)
+    clearDraft()
+    close()
+  }
 
   // 닫기 요청 공통 경로(>> 버튼·ESC·backdrop). draft + 미완성이면 가드, 완성이면 확정 후 닫기.
-  // 유효성은 RHF isValid 초기 타이밍 의존 대신 safeParse 로 결정적 판정.
   function requestClose() {
     if (isDraft) {
-      if (!taskSchema.safeParse(form.getValues()).success) {
+      const parsed = taskSchema.safeParse(form.getValues())
+      if (!parsed.success) {
         setCancelOpen(true)
         return
       }
-      if (taskId) updateTask(taskId, { draft: false })
+      if (!isCreating) void confirmDraft(parsed.data)
+      return
     }
+    // 편집 즉시저장 debounce 대기분 유실 방지
+    flushPendingSave()
     close()
   }
 
@@ -143,21 +163,22 @@ export function PanelTask({ taskId }: { taskId?: string }) {
     return (
       <PanelAside label="작업 편집">
         <PanelShell title="작업 편집" closeHref={closeHref} onClose={close}>
-          <p className="px-5 py-10 text-center text-r-14 text-gray-500">작업을 찾을 수 없어요.</p>
+          <p className="px-5 py-10 text-center text-r-14 text-gray-500">
+            {isTasksLoading ? '작업을 불러오는 중이에요.' : '작업을 찾을 수 없어요.'}
+          </p>
         </PanelShell>
       </PanelAside>
     )
   }
 
-  // draft(드래그-생성) 확정 = draft 해제 + 닫기. 일반 편집은 즉시저장이라 submit no-op. 생성은 createTask.
-  const onSubmit = form.handleSubmit((vals) => {
-    if (isDraft && taskId) {
-      updateTask(taskId, { ...vals, draft: false })
-      close()
+  // draft(드래그-생성) 확정·명시 생성 = 서버 생성 후 닫기. 일반 편집은 즉시저장이라 submit no-op.
+  const onSubmit = form.handleSubmit(async (vals) => {
+    if (isDraft) {
+      await confirmDraft(vals)
       return
     }
     if (isEdit) return
-    createTask({ ...vals, projectId, status: 'not_started' })
+    await createTask(vals)
     close()
   })
 
@@ -183,7 +204,13 @@ export function PanelTask({ taskId }: { taskId?: string }) {
             <Form {...form}>
               <form onSubmit={onSubmit} className="flex flex-col px-4 pb-6">
                 <TextField control={form.control} name="ganttName" label="작업명" layout="row" />
-                <TextField control={form.control} name="corpName" label="업체명" layout="row" />
+                <TextField
+                  control={form.control}
+                  name="corpName"
+                  label="업체명"
+                  layout="row"
+                  disabled
+                />
                 <DateRangeField
                   control={form.control}
                   startName="startDate"
@@ -191,12 +218,19 @@ export function PanelTask({ taskId }: { taskId?: string }) {
                   label="작업기간"
                   layout="row"
                 />
-                <TextField control={form.control} name="address" label="현장주소" layout="row" />
+                <TextField
+                  control={form.control}
+                  name="address"
+                  label="현장주소"
+                  layout="row"
+                  disabled
+                />
                 <TextField
                   control={form.control}
                   name="addressDetail"
                   label="상세주소"
                   layout="row"
+                  disabled
                 />
                 <TagSelectField
                   control={form.control}
@@ -221,7 +255,7 @@ export function PanelTask({ taskId }: { taskId?: string }) {
 
             <div className="mt-2 border-t border-solid border-[#e5e5e5] px-5 py-4">
               <h3 className="text-sb-14 text-gray-900">섭외대기열</h3>
-              {isEdit && taskId ? (
+              {isEdit && taskId && !isDraft ? (
                 <OfferQueue
                   taskId={taskId}
                   emptyActionHref={`/?task=${taskId}&trade=${(task?.trades ?? []).join(',')}`}
@@ -247,7 +281,8 @@ export function PanelTask({ taskId }: { taskId?: string }) {
         confirmLabel="취소하기"
         destructive
         onConfirm={() => {
-          if (taskId) deleteTask(taskId)
+          if (isDraft) clearDraft()
+          else if (taskId) deleteTask(Number(taskId))
           setCancelOpen(false)
           close()
         }}
