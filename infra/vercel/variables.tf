@@ -14,11 +14,6 @@ variable "dev_api_url" {
   type        = string
 }
 
-variable "project_name" {
-  description = "Project name (used for Vercel project name prefix)"
-  type        = string
-}
-
 variable "github_repo" {
   description = "GitHub repository (owner/repo)"
   type        = string

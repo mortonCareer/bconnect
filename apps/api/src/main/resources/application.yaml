@@ -40,8 +40,8 @@ app:
     allowed-origins:
       - ${CORS_ALLOWED_ORIGIN:http://localhost:3000}
     allowed-origin-patterns:
-      - https://morton-career*.vercel.app
-      - https://morton-plan*.vercel.app
+      - https://bconnect-career*.vercel.app
+      - https://bconnect-plan*.vercel.app
       - https://*.bconnect.to
       - https://*.dev.bconnect.to
 
