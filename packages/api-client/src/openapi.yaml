@@ -1273,7 +1273,7 @@ paths:
     get:
       tags:
       - notification-controller
-      operationId: list_8
+      operationId: list_9
       parameters:
       - name: cursorLimit
         in: query
@@ -1345,7 +1345,7 @@ paths:
     get:
       tags:
       - feed-controller
-      operationId: list_9
+      operationId: list_10
       responses:
         "200":
           description: OK
@@ -1481,7 +1481,7 @@ paths:
     get:
       tags:
       - crawled-member-controller
-      operationId: list_10
+      operationId: list_11
       responses:
         "200":
           description: OK
@@ -1512,7 +1512,7 @@ paths:
     get:
       tags:
       - coworker-controller
-      operationId: list_11
+      operationId: list_12
       parameters:
       - name: memberId
         in: query
@@ -1798,10 +1798,10 @@ components:
     ExceptionCode:
       type: object
       properties:
-        code:
-          type: string
         status:
           $ref: "#/components/schemas/HttpStatus"
+        code:
+          type: string
     HttpStatus:
       type: string
       enum:
