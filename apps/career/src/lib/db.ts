@@ -15,7 +15,7 @@ export function getDb() {
       idle_timeout: 10,
       max_lifetime: 60 * 5,
       connection: {
-        application_name: 'morton-career',
+        application_name: 'bconnect-career',
       },
     })
   }
