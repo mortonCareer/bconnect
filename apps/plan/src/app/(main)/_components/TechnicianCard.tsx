@@ -27,12 +27,36 @@ function StarRating({ rating, reviewCount }: { rating: number; reviewCount: numb
   )
 }
 
-function Stat({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="flex flex-col items-center gap-1">
+function Stat({
+  value,
+  label,
+  href,
+  onGated,
+}: {
+  value: number
+  label: string
+  href: string
+  onGated?: () => void
+}) {
+  const inner = (
+    <>
       <span className="text-sb-24 text-gray-900">{value}</span>
       <span className="text-r-14 text-gray-500">{label}</span>
-    </div>
+    </>
+  )
+  const className = 'flex flex-col items-center gap-1'
+  // 비로그인은 패널 진입 대신 로그인 게이트 (프로필 보기/메시지 버튼과 동일 규약)
+  if (onGated) {
+    return (
+      <button type="button" onClick={onGated} className={className}>
+        {inner}
+      </button>
+    )
+  }
+  return (
+    <Link href={href} scroll={false} className={className}>
+      {inner}
+    </Link>
   )
 }
 
@@ -58,7 +82,9 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
   const { requireLogin } = useLoginGate()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const { panelHref, openPanel } = usePanelNav()
-  const profileHref = panelHref(`profile/${item.profileId}`)
+  // 프로필 패널 세그먼트는 profile.id 가 아니라 memberId (GET /profiles/{id} 가 memberId 조회)
+  const profileHref = panelHref(`profile/${item.memberId}`)
+  const gated = isAuthenticated ? undefined : requireLogin
   const { mutate: createDirectChat, isPending: isCreatingChat } = useCreateDirectChat()
 
   const metaParts = [
@@ -67,7 +93,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
     item.experienceYears > 0 ? `${item.experienceYears}년` : '신입',
   ].filter(Boolean)
 
-  // TODO: BE #211 — 실 portfolio 데이터 연동 전까진 3개 placeholder
+  // 작업물(Post) 유래 썸네일 — 없으면 3개 회색 placeholder
   const portfolios =
     item.portfolios.length > 0
       ? item.portfolios.slice(0, 3)
@@ -89,7 +115,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
               <p className="text-r-14 text-gray-500">{metaParts.join(' · ')}</p>
             </div>
             <div className="flex items-center gap-[11px]">
-              {/* TODO: BE #211 구현 후 실데이터 교체 */}
+              {/* ⚠️ 모킹값 — 리뷰(별점)·계약수 BE 도메인 미구현 (rating 2.5·count 777 sentinel) */}
               <StarRating rating={item.rating} reviewCount={item.reviewCount} />
               {/* Figma node 1470:6775 — 행 높이(20px) 세로 divider, gray-100 */}
               <span className="h-5 w-px bg-gray-100" />
@@ -119,7 +145,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
               )}
 
               {/* 인증 태그 */}
-              {/* TODO: BE #211 구현 후 실데이터 교체 */}
+              {/* TODO: 타인 프로필 credentials 조회 API 미구현 — 연동 전까진 빈 목록 */}
               {item.certifications.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {item.certifications.map((cert) => (
@@ -181,15 +207,29 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
       {/* 우측: 통계 + 작업물 썸네일 */}
       <div className="flex w-[422px] shrink-0 flex-col gap-[22px]">
         {/* 통계 3개 */}
-        {/* TODO: BE #211 구현 후 실데이터 교체 */}
+        {/* 클릭 시 프로필 패널의 해당 탭/하위 패널 진입 (PanelProfile statHrefs 와 동일 규약) */}
         <div className="flex gap-8">
-          <Stat value={item.postCount} label="작업물" />
-          <Stat value={item.coworkerCount} label="동료" />
-          <Stat value={item.recommendCount} label="추천서" />
+          <Stat
+            value={item.postCount}
+            label="작업물"
+            href={panelHref(`profile/${item.memberId}`, { tab: 'works' })}
+            onGated={gated}
+          />
+          <Stat
+            value={item.coworkerCount}
+            label="동료"
+            href={panelHref(`profile/${item.memberId}/coworkers`)}
+            onGated={gated}
+          />
+          <Stat
+            value={item.recommendCount}
+            label="추천서"
+            href={panelHref(`profile/${item.memberId}/recommendations`)}
+            onGated={gated}
+          />
         </div>
 
-        {/* 작업물 썸네일 3개 */}
-        {/* TODO: BE #211 구현 후 실데이터 교체 */}
+        {/* 작업물(Post) 썸네일 3개 — 소요일은 Feed 에 task 정보가 없어 미표시 */}
         <div className="flex flex-1 gap-[9px]">
           {portfolios.map((p, i) => (
             <PortfolioThumb

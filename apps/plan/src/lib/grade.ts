@@ -1,5 +1,6 @@
-// 기술자 직급(기능 등급). BE #211 구현 전까진 fixture(technicians.ts 의 grade 필드) 기반 필터.
-// TODO: BE #211 구현 후 실제 grade enum/응답으로 교체.
+import { ProfileRole } from '@bconnect/api-client'
+
+// 기술자 직급(기능 등급). BE Profile.role(ProfileRole) 중 기술자 등급 4종의 표시 도메인.
 export const GRADE_VALUES = ['조공', '준기공', '기공', '반장'] as const
 
 export type Grade = (typeof GRADE_VALUES)[number]
@@ -9,3 +10,11 @@ export const GRADE_OPTIONS: { value: Grade; label: string }[] = GRADE_VALUES.map
   value: g,
   label: g,
 }))
+
+// 기술자 외 role(CONTRACTOR/CLIENT/ARCHITECT)은 직급 없음 → undefined.
+export const PROFILE_ROLE_TO_GRADE: Partial<Record<ProfileRole, Grade>> = {
+  [ProfileRole.HELPER]: '조공',
+  [ProfileRole.SEMI_SKILLED]: '준기공',
+  [ProfileRole.SKILLED]: '기공',
+  [ProfileRole.FOREMAN]: '반장',
+}
