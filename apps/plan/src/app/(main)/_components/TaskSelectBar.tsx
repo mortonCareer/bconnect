@@ -4,11 +4,10 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Select, cn } from '@bconnect/ui'
 import { useAuthStore } from '@/stores/auth-store'
-import { useScheduleTaskStore } from '@/stores/schedule-task-store'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useSelectedTask } from '@/hooks/useSelectedTask'
 import { useOfferQueue } from '@/hooks/useOfferQueue'
-import { getMockProject } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
+import { useAllProjectTasks } from '@/hooks/useAllProjectTasks'
 
 /**
  * 탐색 '선택 모드' 바 (#575) — 프로젝트+작업 선택 셀렉트 + 섭외 대기열 칩.
@@ -16,7 +15,7 @@ import { getMockProject } from '@/app/(main)/projects/[projectId]/schedule/_comp
  */
 export function TaskSelectBar() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const tasks = useScheduleTaskStore((s) => s.tasks)
+  const { tasks, projectTitleById } = useAllProjectTasks()
   const { taskId, select } = useSelectedTask()
   const { panelHref, closeHref } = usePanelNav()
   const { count } = useOfferQueue(taskId)
@@ -26,7 +25,7 @@ export function TaskSelectBar() {
 
   const options = tasks.map((t) => ({
     value: t.id,
-    label: `${getMockProject(t.projectId)?.name ?? '프로젝트'} | ${t.ganttName}`,
+    label: `${projectTitleById.get(t.projectId) ?? '프로젝트'} | ${t.ganttName}`,
   }))
 
   return (

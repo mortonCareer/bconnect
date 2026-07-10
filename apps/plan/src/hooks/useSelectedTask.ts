@@ -1,8 +1,7 @@
 'use client'
 
 import { parseAsString, useQueryState } from 'nuqs'
-import { useScheduleTaskStore } from '@/stores/schedule-task-store'
-import { getMockProject } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
+import { useAllProjectTasks } from '@/hooks/useAllProjectTasks'
 
 /**
  * 탐색 '선택 모드' — URL `?task=` 가 진실원 (nuqs). 선택 대상은 작업(task)이고,
@@ -10,17 +9,15 @@ import { getMockProject } from '@/app/(main)/projects/[projectId]/schedule/_comp
  */
 export function useSelectedTask() {
   const [taskId, setTaskId] = useQueryState('task', parseAsString)
-  const task = useScheduleTaskStore((s) =>
-    taskId ? s.tasks.find((t) => t.id === taskId) : undefined
-  )
-  const project = task ? getMockProject(task.projectId) : undefined
-  const label = task ? `${project?.name ?? '프로젝트'} | ${task.ganttName}` : null
+  const { tasks, projectTitleById } = useAllProjectTasks()
+  const task = taskId ? tasks.find((t) => t.id === taskId) : undefined
+  const projectTitle = task ? projectTitleById.get(task.projectId) : undefined
+  const label = task ? `${projectTitle ?? '프로젝트'} | ${task.ganttName}` : null
 
   return {
     taskId,
     task,
     projectId: task?.projectId ?? null,
-    project,
     label,
     select: (nextTaskId: string | null) => setTaskId(nextTaskId),
   }

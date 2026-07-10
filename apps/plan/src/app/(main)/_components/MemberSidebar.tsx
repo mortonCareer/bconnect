@@ -9,7 +9,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { MOCK_PROJECTS } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
+import { useGetProjects } from '@bconnect/api-client'
 import { SidebarFooter } from './SidebarFooter'
 
 // TODO(신규 BE 이슈 필요 — notification 도메인): 엔드포인트 추가 시
@@ -17,8 +17,6 @@ import { SidebarFooter } from './SidebarFooter'
 //   형태로 교체. count=0 이면 CountBadge 자동 숨김.
 const NOTIFICATION_COUNT = 4
 const MAX_BADGE_COUNT = 99
-
-const PROJECT_OPTIONS = MOCK_PROJECTS.map((p) => ({ value: p.id, label: p.name }))
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null
@@ -72,9 +70,14 @@ function ProjectSection({
   activeSlug: string
 }) {
   const router = useRouter()
-  const [selectedProject, setSelectedProject] = useState(
-    pathProjectId ?? PROJECT_OPTIONS[0]?.value ?? ''
-  )
+  const { data: projects } = useGetProjects()
+  const projectOptions = (projects ?? []).map((p) => ({
+    value: String(p.id ?? ''),
+    label: p.title ?? '',
+  }))
+  const [selectedProject, setSelectedProject] = useState(pathProjectId ?? '')
+  // 목록 로드 후에도 선택이 비어 있으면 첫 프로젝트로 (path 미진입 초기 상태)
+  if (!selectedProject && projectOptions[0]) setSelectedProject(projectOptions[0].value)
   // path 로 다른 프로젝트에 진입하면 셀렉트를 따라가게 동기화 (render-time adjustment)
   const [prevPathId, setPrevPathId] = useState(pathProjectId)
   if (pathProjectId !== prevPathId) {
@@ -107,7 +110,7 @@ function ProjectSection({
         <Select
           value={selectedProject}
           onChange={handleProjectChange}
-          options={PROJECT_OPTIONS}
+          options={projectOptions}
           placeholder="프로젝트 선택"
         />
         {items.map((item) => {
