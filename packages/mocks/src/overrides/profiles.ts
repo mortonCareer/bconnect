@@ -1,7 +1,13 @@
-import { getGetProfileMockHandler, Trade } from '@bconnect/api-client'
+import {
+  getGetProfileMockHandler,
+  getGetProfilesMockHandler,
+  ProfileRole,
+  Trade,
+} from '@bconnect/api-client'
 import type { MemberSummary, Profile } from '@bconnect/api-client'
 
-// 프로필 도메인 단일 owner — getProfile(/profiles/:id) 을 id 로 keying.
+// 프로필 도메인 단일 owner — getProfile(/profiles/:id) 을 id 로 keying,
+// getProfiles(목록, plan 기술자 탐색)는 전체 seed 반환.
 // id 1 = 본인(getMyMember 와 동일 식별자, 자기 프로필 화면용 리치 데이터).
 // id 101~103 = chats.ts 채팅 상대 — 상대 프로필 열람 시 일관 표시.
 // BE 확정 시 generated handler 로 교체. dev/preview 전용(prod tree-shake).
@@ -31,6 +37,7 @@ interface ProfileSeed {
   id: number
   username: string
   name: string
+  role: ProfileRole
   trade: Trade
   experience: number
   headline: string
@@ -43,6 +50,7 @@ const SEEDS: ProfileSeed[] = [
     id: 1,
     username: 'leesongmok',
     name: '이송목',
+    role: ProfileRole.SEMI_SKILLED,
     trade: Trade.TILING,
     experience: 3,
     headline: HEADLINE,
@@ -53,6 +61,7 @@ const SEEDS: ProfileSeed[] = [
     id: 101,
     username: 'worker_101',
     name: '이송목',
+    role: ProfileRole.SEMI_SKILLED,
     trade: Trade.WALLPAPER,
     experience: 8,
     headline: '도배 준기공',
@@ -63,6 +72,7 @@ const SEEDS: ProfileSeed[] = [
     id: 102,
     username: 'worker_102',
     name: '박전기',
+    role: ProfileRole.SKILLED,
     trade: Trade.ELECTRICAL,
     experience: 12,
     headline: '전기 기공',
@@ -73,6 +83,7 @@ const SEEDS: ProfileSeed[] = [
     id: 103,
     username: 'worker_103',
     name: '최타일',
+    role: ProfileRole.FOREMAN,
     trade: Trade.TILING,
     experience: 5,
     headline: '타일 시공',
@@ -84,6 +95,7 @@ const SEEDS: ProfileSeed[] = [
 const profileOf = (seed: ProfileSeed): Profile => ({
   id: seed.id,
   member: memberOf(seed.id, seed.username, seed.name),
+  role: seed.role,
   primaryTrade: seed.trade,
   trades: [seed.trade],
   experience: seed.experience,
@@ -112,5 +124,6 @@ const paramId = (value: string | readonly string[] | undefined): number =>
   Number(typeof value === 'string' ? value : (value?.[0] ?? ''))
 
 export const profilesOverrides = [
+  getGetProfilesMockHandler(() => SEEDS.map((seed) => profileOf(seed))),
   getGetProfileMockHandler(({ params }) => PROFILES_BY_ID[paramId(params.id)] ?? PROFILES_BY_ID[1]),
 ]

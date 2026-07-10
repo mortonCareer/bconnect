@@ -67,7 +67,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
     item.experienceYears > 0 ? `${item.experienceYears}년` : '신입',
   ].filter(Boolean)
 
-  // TODO: BE #211 — 실 portfolio 데이터 연동 전까진 3개 placeholder
+  // TODO: 포트폴리오 BE 도메인 미구현 — 연동 전까진 3개 placeholder
   const portfolios =
     item.portfolios.length > 0
       ? item.portfolios.slice(0, 3)
@@ -89,7 +89,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
               <p className="text-r-14 text-gray-500">{metaParts.join(' · ')}</p>
             </div>
             <div className="flex items-center gap-[11px]">
-              {/* TODO: BE #211 구현 후 실데이터 교체 */}
+              {/* TODO: 리뷰(별점)·계약수 BE 도메인 미구현 — 중립값 표시 */}
               <StarRating rating={item.rating} reviewCount={item.reviewCount} />
               {/* Figma node 1470:6775 — 행 높이(20px) 세로 divider, gray-100 */}
               <span className="h-5 w-px bg-gray-100" />
@@ -119,7 +119,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
               )}
 
               {/* 인증 태그 */}
-              {/* TODO: BE #211 구현 후 실데이터 교체 */}
+              {/* TODO: 타인 프로필 credentials 조회 API 미구현 — 연동 전까진 빈 목록 */}
               {item.certifications.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {item.certifications.map((cert) => (
@@ -181,15 +181,13 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
       {/* 우측: 통계 + 작업물 썸네일 */}
       <div className="flex w-[422px] shrink-0 flex-col gap-[22px]">
         {/* 통계 3개 */}
-        {/* TODO: BE #211 구현 후 실데이터 교체 */}
         <div className="flex gap-8">
           <Stat value={item.postCount} label="작업물" />
           <Stat value={item.coworkerCount} label="동료" />
           <Stat value={item.recommendCount} label="추천서" />
         </div>
 
-        {/* 작업물 썸네일 3개 */}
-        {/* TODO: BE #211 구현 후 실데이터 교체 */}
+        {/* 작업물 썸네일 3개 — 포트폴리오 BE 도메인 미구현 */}
         <div className="flex flex-1 gap-[9px]">
           {portfolios.map((p, i) => (
             <PortfolioThumb
