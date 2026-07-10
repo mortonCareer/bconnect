@@ -1,20 +1,24 @@
 #!/bin/bash
 # PreToolUse hook for Bash tool
-# main 브랜치/워크트리에서 git write 작업 무조건 차단.
+# 보호 브랜치(main/dev)/워크트리에서 git write 작업 무조건 차단.
 #
-# 정책: 프로덕션 main 배포는 오직 인간이 통합용 PR을 통해서만.
-# AI는 어떤 상황에서도 main에 직접 쓰지 않는다 (revert/hotfix 포함).
+# 정책:
+# - main: 프로덕션 배포 브랜치. 통합용 PR을 통해서만 인간이 머지.
+# - dev:  default 브랜치. 직접 push 시 CI 체크·PR 리뷰 절차가 생략됨.
+# AI는 어떤 상황에서도 보호 브랜치에 직접 쓰지 않는다 (revert/hotfix 포함).
 #
 # 차단 조건:
 # - tool: Bash
 # - 명령에 git write 동사 포함 (commit, push, add, rm, reset, checkout, merge, cherry-pick, branch -D)
-# - 실행 디렉토리가 main branch
+# - 실행 디렉토리가 main 또는 dev branch
 #
-# 우회 없음. main 작업이 진짜 필요하면 사용자 본인이 직접 쉘에서 실행.
+# 우회 없음. 보호 브랜치 작업이 진짜 필요하면 사용자 본인이 직접 쉘에서 실행.
 
+# 주의: grep -oP(\K, PCRE)는 non-UTF-8/미설정 locale의 Git Bash에서 실패해
+# 빈 값을 반환하고 훅이 무력화된다. portable한 sed로 JSON 필드를 추출한다.
 input=$(cat)
-command=$(echo "$input" | grep -oP '"command"\s*:\s*"\K[^"]+' | head -1)
-cwd=$(echo "$input" | grep -oP '"cwd"\s*:\s*"\K[^"]+' | head -1)
+command=$(echo "$input" | sed -n 's/.*"command"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
+cwd=$(echo "$input" | sed -n 's/.*"cwd"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
 
 if [ -z "$command" ]; then
   exit 0
@@ -27,7 +31,7 @@ fi
 
 # 실행 디렉토리 결정: cd prefix > cwd field > $PWD
 if echo "$command" | grep -qE '^[[:space:]]*cd[[:space:]]+'; then
-  target=$(echo "$command" | grep -oP '^\s*cd\s+\K\S+' | head -1)
+  target=$(echo "$command" | sed -n 's/^[[:space:]]*cd[[:space:]]\{1,\}\([^[:space:]]*\).*/\1/p' | head -1)
 elif [ -n "$cwd" ]; then
   target="$cwd"
 else
@@ -42,19 +46,19 @@ fi
 
 branch=$(cd "$target" && git rev-parse --abbrev-ref HEAD 2>/dev/null)
 
-if [ "$branch" = "main" ]; then
+if [ "$branch" = "main" ] || [ "$branch" = "dev" ]; then
   cat >&2 <<EOF
-🚫 BLOCKED: main 브랜치 git write 작업
+🚫 BLOCKED: 보호 브랜치($branch) git write 작업
 
   명령: $command
   디렉토리: $target
 
-정책: 프로덕션 main 배포는 오직 인간이 통합용 PR을 통해서만.
-AI는 어떤 상황에서도 main에 직접 쓰지 않습니다.
+정책: 보호 브랜치(main/dev)에는 오직 인간이 PR을 통해서만 반영합니다.
+AI는 어떤 상황에서도 보호 브랜치에 직접 쓰지 않습니다.
 
 올바른 흐름:
-  1. 다른 워크트리(feature/fix branch)에서 작업
-     cd /home/json/morton-worktrees/<branch> && <command>
+  1. feature/fix 브랜치에서 작업
+     git switch -c feat/<이슈번호>-<설명> --no-track origin/dev
   2. PR을 통해 dev 브랜치로 머지
   3. 사용자가 직접 dev → main 통합 PR 머지
 EOF
