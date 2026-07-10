@@ -3,6 +3,7 @@
  */
 'use client'
 
+import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { Drawer, DrawerContent, DrawerTitle } from './shadcn/drawer'
 import { cn } from '../../lib/utils'
@@ -11,7 +12,10 @@ export interface ActionDrawerItem {
   label: string
   /** 좌측 아이콘 (필수) — 모든 액션은 아이콘을 가진다. currentColor 면 destructive 색(빨강) 자동 전파. */
   icon: ReactNode
-  onSelect: () => void
+  /** 클릭 액션. href 가 있으면 생략 가능 (라우트 이동은 Link 로 렌더). */
+  onSelect?: () => void
+  /** 라우트 이동 항목 — 지정 시 Link(prefetch)로 렌더. onSelect 대신 사용. */
+  href?: string
   destructive?: boolean
   disabled?: boolean
 }
@@ -36,25 +40,44 @@ export function ActionDrawer({ open, onOpenChange, title, items }: ActionDrawerP
           {title ?? '작업 선택'}
         </DrawerTitle>
         <div className="flex flex-col pb-[env(safe-area-inset-bottom)]">
-          {items.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              disabled={item.disabled}
-              onClick={() => {
-                onOpenChange(false)
-                item.onSelect()
-              }}
-              className={cn(
-                'flex cursor-pointer items-center gap-3 px-4 py-4 text-left text-m-16 transition-colors hover:bg-gray-50',
-                'disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent',
-                item.destructive ? 'text-destructive' : 'text-gray-900'
-              )}
-            >
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center">{item.icon}</span>
-              <span>{item.label}</span>
-            </button>
-          ))}
+          {items.map((item) => {
+            const itemClass = cn(
+              'flex cursor-pointer items-center gap-3 px-4 py-4 text-left text-m-16 transition-colors hover:bg-gray-50',
+              'disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent',
+              item.destructive ? 'text-destructive' : 'text-gray-900'
+            )
+            const inner = (
+              <>
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+                  {item.icon}
+                </span>
+                <span>{item.label}</span>
+              </>
+            )
+            return item.href ? (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={itemClass}
+                onClick={() => onOpenChange(false)}
+              >
+                {inner}
+              </Link>
+            ) : (
+              <button
+                key={item.label}
+                type="button"
+                disabled={item.disabled}
+                onClick={() => {
+                  onOpenChange(false)
+                  item.onSelect?.()
+                }}
+                className={itemClass}
+              >
+                {inner}
+              </button>
+            )
+          })}
         </div>
       </DrawerContent>
     </Drawer>

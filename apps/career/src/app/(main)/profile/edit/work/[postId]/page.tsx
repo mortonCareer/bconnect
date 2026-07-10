@@ -3,194 +3,135 @@
  */
 'use client'
 
-import {
-  AddressSearchDrawer,
-  cn,
-  Form,
-  FormControl,
-  FormError,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  ImageField,
-  Input,
-  Label,
-  TextareaField,
-  TopBar,
-  useScrollToError,
-} from '@bconnect/ui'
+import { useGetFeed, useGetTasks, useUpdatePost } from '@bconnect/api-client'
+import { Form, isApiErrorShape, TextareaField, toast, TopBar } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { WorkPostForm, type WorkPostMeta } from '../_components/WorkPostForm'
 
-const fieldMeta = z.registry<{ label: string; placeholder: string }>()
-
-const workSchema = z.object({
-  company: z
-    .string()
-    .min(1, '업체명을 입력해주세요.')
-    .register(fieldMeta, { label: '업체명', placeholder: '업체명을 입력해주세요' }),
-  period: z
-    .string()
-    .min(1, '시공기간을 입력해주세요.')
-    .register(fieldMeta, { label: '시공기간', placeholder: '예: 12.25 ~ 12.26' }),
-  address: z
-    .string()
-    .min(1, '현장주소를 입력해주세요.')
-    .register(fieldMeta, { label: '현장주소', placeholder: '현장주소를 입력해주세요' }),
-  detail: z.string().optional(),
-  trade: z
-    .string()
-    .min(1, '시공분야를 입력해주세요.')
-    .register(fieldMeta, { label: '시공분야', placeholder: '시공분야를 입력해주세요' }),
-  description: z
-    .string()
-    .min(1, '작업 설명을 입력해주세요.')
-    .register(fieldMeta, { label: '작업 설명', placeholder: '작업 내용을 입력해주세요' }),
-  images: z.custom<File>((value) => value instanceof File).nullable(),
+const editSchema = z.object({
+  content: z.string().min(1, '작업 설명을 입력해주세요.'),
 })
-type WorkFormValues = z.infer<typeof workSchema>
+type EditValues = z.infer<typeof editSchema>
 
-const META_FIELD_NAMES = ['company', 'period', 'trade'] as const
+/** 수정 화면에서 기존 이미지(S3 URL)는 표시전용 — private CloudFront라 plain <img> 사용 (CLAUDE-FE 규칙). */
+function ReadonlyImages({ images }: { images: string[] }) {
+  if (images.length === 0) {
+    return (
+      <div className="flex h-50 items-center justify-center rounded-lg bg-gray-100 text-sm text-gray-400">
+        이미지 없음
+      </div>
+    )
+  }
+  return (
+    <div className="flex gap-2 overflow-x-auto">
+      {images.map((src) => (
+        <img key={src} src={src} alt="" className="h-50 w-50 shrink-0 rounded-lg object-cover" />
+      ))}
+    </div>
+  )
+}
 
 export default function EditWorkPage() {
   const router = useRouter()
   const params = useParams<{ postId: string }>()
-  // TODO: 초기 데이터 받아와서 폼 기본 값 채우기 (#197)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _postId = Number(params.postId)
+  const postId = Number(params.postId)
 
-  const [addressOpen, setAddressOpen] = useState(false)
+  const { data: feed, isLoading, isError } = useGetFeed(postId)
+  const post = feed?.post
 
-  const form = useForm<WorkFormValues>({
-    resolver: zodResolver(workSchema),
+  // 읽기전용 메타는 post.taskId 로 연결된 작업에서 온다. 단건 조회 훅이 없어 worker 작업 목록에서 find.
+  const { data: tasks } = useGetTasks()
+  const task = tasks?.find((t) => t.id === post?.taskId)
+  const meta: WorkPostMeta | null =
+    task && task.start && task.end
+      ? {
+          company: task.workerCompany,
+          start: task.start,
+          end: task.end,
+          address: task.address,
+          trades: task.trades ?? [],
+        }
+      : null
+
+  const form = useForm<EditValues>({
+    resolver: zodResolver(editSchema),
     mode: 'onTouched',
-    defaultValues: {
-      company: '',
-      period: '',
-      address: '',
-      detail: '',
-      trade: '',
-      description: '',
-      images: null,
+    defaultValues: { content: '' },
+    // feed 도착 시 초기값 동기화 (외부 reactive 값).
+    values: { content: post?.content ?? '' },
+  })
+
+  const { mutate: update, isPending } = useUpdatePost({
+    mutation: {
+      onSuccess: () => {
+        toast({ description: '작업물이 수정되었어요', variant: 'success' })
+        router.back()
+      },
+      onError: (error) =>
+        toast({
+          description: isApiErrorShape(error) ? error.message : '다시 시도해주세요',
+          variant: 'error',
+        }),
     },
   })
 
-  const scrollToError = useScrollToError()
-  const onSave = form.handleSubmit(() => {
-    // TODO: Post + Task 수정 API 연동 (#197)
-    router.back()
-  }, scrollToError)
+  const onSubmit = form.handleSubmit((vals) => {
+    update({ id: postId, data: { content: vals.content } })
+  })
 
-  const descriptionMeta = fieldMeta.get(workSchema.shape.description)
-  const address = useWatch({ control: form.control, name: 'address' })
+  if (isLoading) {
+    return (
+      <div className="flex flex-col">
+        <TopBar
+          variant="default"
+          title="작업물 수정"
+          showAction={false}
+          onBack={() => router.back()}
+        />
+        <div className="flex justify-center py-20">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-primary" />
+        </div>
+      </div>
+    )
+  }
+
+  if (isError || !post) {
+    return (
+      <div className="flex flex-col">
+        <TopBar
+          variant="default"
+          title="작업물 수정"
+          showAction={false}
+          onBack={() => router.back()}
+        />
+        <p className="py-20 text-center text-sm text-gray-400">작업물을 불러오지 못했어요</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="flex flex-col">
-      <TopBar
-        variant="default"
+    <Form {...form}>
+      <WorkPostForm
         title="작업물 수정"
         actionLabel="완료"
-        onAction={onSave}
-        showAction
+        onAction={onSubmit}
         onBack={() => router.back()}
-      />
-
-      <Form {...form}>
-        <form onSubmit={onSave}>
-          <div className="px-4 pt-4">
-            <ImageField control={form.control} name="images" />
-          </div>
-
-          {/* 메타 정보 */}
-          <div className="flex flex-col gap-3 px-4 pt-6">
-            {META_FIELD_NAMES.map((name) => {
-              const meta = fieldMeta.get(workSchema.shape[name])
-              return (
-                <FormField
-                  key={name}
-                  control={form.control}
-                  name={name}
-                  render={({ field, fieldState }) => (
-                    <FormItem className="flex items-start gap-2">
-                      <FormLabel className="w-20 shrink-0 text-gray-900">{meta?.label}</FormLabel>
-                      <div className="flex flex-1 flex-col gap-1">
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder={meta?.placeholder}
-                            className={cn(
-                              'h-auto rounded-none border-0 p-0 text-sm text-gray-700',
-                              fieldState.error && 'ring-1 ring-destructive'
-                            )}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-              )
-            })}
-          </div>
-
-          {/* 현장주소 */}
-          <div className="flex items-start gap-2 px-4 pt-3">
-            <Label htmlFor="work-address" className="w-20 shrink-0 text-gray-900">
-              현장주소
-            </Label>
-            <div className="flex flex-1 flex-col gap-1">
-              <button
-                id="work-address"
-                type="button"
-                onClick={() => setAddressOpen(true)}
-                data-invalid={form.formState.errors.address ? true : undefined}
-                className="cursor-pointer text-left text-sm text-gray-700"
-              >
-                {address || <span className="text-gray-400">현장주소를 검색해주세요</span>}
-              </button>
-              <FormError error={form.formState.errors.address?.message} />
-            </div>
-          </div>
-          <AddressSearchDrawer
-            open={addressOpen}
-            onOpenChange={setAddressOpen}
-            onComplete={(result) =>
-              form.setValue('address', result.roadAddress, { shouldValidate: true })
-            }
+        actionDisabled={isPending}
+        meta={meta}
+        imageSlot={<ReadonlyImages images={post.images ?? []} />}
+        contentSlot={
+          <TextareaField
+            control={form.control}
+            name="content"
+            aria-label="작업 설명"
+            placeholder="작업 내용을 입력해주세요"
+            className="min-h-50 rounded-none resize-none p-0 border-0 text-sm"
           />
-
-          {/* 상세주소 */}
-          <div className="flex items-start gap-2 px-4 pt-3">
-            <Label htmlFor="work-detail" className="w-20 shrink-0 text-gray-900">
-              상세주소
-            </Label>
-            <div className="flex flex-1 flex-col gap-1">
-              <Input
-                id="work-detail"
-                {...form.register('detail')}
-                placeholder="상세주소를 입력해주세요 (동/호 등)"
-                className="h-auto rounded-none border-0 p-0 text-sm text-gray-700"
-              />
-              <FormError error={form.formState.errors.detail?.message} />
-            </div>
-          </div>
-
-          {/* 설명 */}
-          <div className="px-4 pt-6">
-            <TextareaField
-              control={form.control}
-              name="description"
-              aria-label={descriptionMeta?.label}
-              placeholder={descriptionMeta?.placeholder}
-              className="min-h-50 rounded-none resize-none p-0 border-0 text-sm"
-            />
-          </div>
-        </form>
-      </Form>
-    </div>
+        }
+      />
+    </Form>
   )
 }
