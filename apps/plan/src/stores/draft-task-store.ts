@@ -10,7 +10,7 @@ import type { ScheduleTask } from '@/app/(main)/projects/[projectId]/schedule/_c
  */
 interface DraftTaskState {
   draft: ScheduleTask | null
-  startDraft: (input: Omit<ScheduleTask, 'id' | 'draft'>) => void
+  startDraft: (input: Omit<ScheduleTask, 'id'>) => void
   patchDraft: (patch: Partial<Omit<ScheduleTask, 'id'>>) => void
   clearDraft: () => void
 }
