@@ -97,7 +97,6 @@ variable "firebase_web_configs" {
     storage_bucket      = string
     messaging_sender_id = string
     app_id              = string
-    measurement_id      = string
   }))
   sensitive = true
 }

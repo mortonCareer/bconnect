@@ -95,11 +95,11 @@ function ProjectNameRow({ initialName }: { initialName: string }) {
 }
 
 function seedAddress(street: string): Address {
-  return { zipcode: '', street, state: '', city: '', detail: null, latitude: 0, longitude: 0 }
+  return { zipcode: '', street, state: '', city: '', detail: undefined, latitude: 0, longitude: 0 }
 }
 
 function formatAddress({ street, detail }: Address): string {
-  return detail ? `${street} ${detail}` : street
+  return detail ? `${street} ${detail}` : (street ?? '')
 }
 
 function AddressRow({ initialAddress }: { initialAddress: string }) {

@@ -3,8 +3,8 @@ import type { Address } from '@bconnect/api-client'
 import { z } from 'zod'
 
 /**
- * 작업 생성 폼. 제목 1개 → taskTitle=eventTitle 양쪽 매핑(갭1).
- * request/memo 는 수집하되 API 필드 부재로 미전송(갭2).
+ * 작업 생성 폼. career 캘린더는 worker task 계약(title/memo/company/address)을 사용한다.
+ * request 는 별도 BE 필드가 없어 memo 가 비었을 때 memo fallback 으로만 사용한다.
  */
 export const createTaskSchema = z
   .object({

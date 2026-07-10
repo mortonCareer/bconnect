@@ -1,6 +1,6 @@
 'use client'
 
-import { useGetMyTasks } from '@bconnect/api-client'
+import { useGetTasks } from '@bconnect/api-client'
 import { gridRangeOf } from '../_components/calendar/date-helpers'
 import { toCalendarTask } from '../_components/calendar/mapper'
 
@@ -10,7 +10,12 @@ import { toCalendarTask } from '../_components/calendar/mapper'
  */
 export function useMonthTasks(month: string) {
   const { start, end } = gridRangeOf(month)
-  const query = useGetMyTasks({ start, end })
-  const tasks = (query.data ?? []).map(toCalendarTask)
+  const query = useGetTasks()
+  const tasks = (query.data ?? []).flatMap((task) => {
+    const calendarTask = toCalendarTask(task)
+    return calendarTask && calendarTask.start <= end && calendarTask.end >= start
+      ? [calendarTask]
+      : []
+  })
   return { tasks, isError: query.isError, refetch: query.refetch }
 }

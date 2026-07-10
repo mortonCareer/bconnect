@@ -1,15 +1,13 @@
 'use client'
 
 import {
-  getGetMyTasksQueryKey,
   Trade,
   TRADE_LABELS,
   TRADE_LIST,
   useDeleteTask,
-  useQueryClient,
-  useUpdateTask,
+  useUpdateTaskWorker,
 } from '@bconnect/api-client'
-import type { Address, Task } from '@bconnect/api-client'
+import type { Address } from '@bconnect/api-client'
 import {
   ConfirmDialog,
   DateRangeField,
@@ -24,7 +22,7 @@ import {
   toast,
 } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { AddressField } from '@/components/AddressField'
@@ -33,27 +31,48 @@ import { formatPeriod } from '../calendar/date-helpers'
 import type { CalendarTask } from '../calendar/types'
 import { TaskActionDrawer } from './TaskActionDrawer'
 
+const REQUIRED_ADDRESS_MESSAGE = '현장주소를 입력해주세요.'
+
 const editSchema = z
   .object({
     company: z.string().min(1, '업체명을 입력해주세요.'),
     start: z.string().min(1, '시작일을 선택해주세요.'),
     end: z.string().min(1, '종료일을 선택해주세요.'),
-    address: z.custom<Address>((v) => !!v && typeof v === 'object', '현장주소를 입력해주세요.'),
+    address: z.custom<Address | undefined>(
+      (v) => v === undefined || (v !== null && typeof v === 'object'),
+      REQUIRED_ADDRESS_MESSAGE
+    ),
     trades: z.array(z.nativeEnum(Trade)).min(1, '공종을 1개 이상 선택해주세요.'),
     memo: z.string(),
   })
-  .refine((v) => v.start <= v.end, { message: '종료일은 시작일 이후여야 해요.', path: ['end'] })
+  .superRefine((v, ctx) => {
+    if (!v.address) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: REQUIRED_ADDRESS_MESSAGE,
+        path: ['address'],
+      })
+    }
+
+    if (v.start > v.end) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '종료일은 시작일 이후여야 해요.',
+        path: ['end'],
+      })
+    }
+  })
 
 type EditValues = z.infer<typeof editSchema>
 
-function toEditValues(task: Task): EditValues {
+function toEditValues(task: CalendarTask): EditValues {
   return {
-    company: task.company,
+    company: task.company ?? '',
     start: task.start,
     end: task.end,
     address: task.address,
     trades: task.trades,
-    memo: '', // API 에 memo 필드 없음 (갭2) — 로컬 전용
+    memo: task.memo,
   }
 }
 
@@ -66,9 +85,20 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   )
 }
 
-export function TaskDetailCard({ task }: { task: CalendarTask }) {
-  const queryClient = useQueryClient()
-  const share = useShareCurrentUrl()
+interface TaskDetailCardProps {
+  task: CalendarTask
+  selectedDay: string
+  selectedMonth: string
+}
+
+export function TaskDetailCard({ task, selectedDay, selectedMonth }: TaskDetailCardProps) {
+  const getShareUrl = useCallback(() => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('day', selectedDay)
+    url.searchParams.set('month', selectedMonth)
+    return url.href
+  }, [selectedDay, selectedMonth])
+  const share = useShareCurrentUrl({ getUrl: getShareUrl })
   const [mode, setMode] = useState<'view' | 'edit'>('view')
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -76,10 +106,8 @@ export function TaskDetailCard({ task }: { task: CalendarTask }) {
   const form = useForm<EditValues>({
     resolver: zodResolver(editSchema),
     mode: 'onTouched',
-    defaultValues: toEditValues(task.raw),
+    defaultValues: toEditValues(task),
   })
-
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: getGetMyTasksQueryKey() })
 
   const onError = (error: unknown) =>
     toast({
@@ -87,10 +115,9 @@ export function TaskDetailCard({ task }: { task: CalendarTask }) {
       variant: 'error',
     })
 
-  const { mutate: update, isPending: saving } = useUpdateTask({
+  const { mutate: update, isPending: saving } = useUpdateTaskWorker({
     mutation: {
       onSuccess: () => {
-        invalidate()
         toast({ description: '수정되었어요', variant: 'success' })
         setMode('view')
       },
@@ -101,7 +128,6 @@ export function TaskDetailCard({ task }: { task: CalendarTask }) {
   const { mutate: remove } = useDeleteTask({
     mutation: {
       onSuccess: () => {
-        invalidate()
         toast({ description: '삭제되었어요', variant: 'success' })
       },
       onError,
@@ -109,17 +135,25 @@ export function TaskDetailCard({ task }: { task: CalendarTask }) {
   })
 
   const onSubmit = form.handleSubmit((vals) => {
+    const address = vals.address
+
+    // BE 계약상 address는 optional이므로 UI required 처리 후 전송 직전에 type narrowing 한다.
+    if (!address) {
+      form.setError('address', { message: REQUIRED_ADDRESS_MESSAGE })
+      return
+    }
+
     update({
-      taskId: task.id,
+      id: task.id,
       data: {
+        title: task.title,
+        // TODO: BE required 처리 후 type narrowing 필요. workerMemo가 optional emit이라 빈 입력 시 기존 메모/제목으로 silent fallback 중.
+        memo: vals.memo.trim() || task.memo || task.title,
         company: vals.company,
-        address: vals.address,
+        address,
         trades: vals.trades,
         start: vals.start,
         end: vals.end,
-        // 인라인 수정 미노출 required 필드는 기존값 재전송 (갭4)
-        taskTitle: task.raw.taskTitle,
-        eventTitle: task.raw.eventTitle,
       },
     })
   })
@@ -163,15 +197,21 @@ export function TaskDetailCard({ task }: { task: CalendarTask }) {
 
       {mode === 'view' ? (
         <div className="mt-3">
-          <Row label="업체명">{task.raw.company}</Row>
+          <Row label="업체명">{task.company || '업체명 없음'}</Row>
           <Row label="작업기간">{formatPeriod(task.start, task.end)}</Row>
           <Row label="현장주소">
-            {task.raw.address.street}
-            {task.raw.address.detail ? ` ${task.raw.address.detail}` : ''}
+            {task.address ? (
+              <>
+                {task.address.street}
+                {task.address.detail ? ` ${task.address.detail}` : ''}
+              </>
+            ) : (
+              '주소 없음'
+            )}
           </Row>
           <Row label="공종">
             <span className="flex flex-wrap gap-1.5">
-              {task.raw.trades.map((t) => (
+              {task.trades.map((t) => (
                 <FilterChip key={t} label={TRADE_LABELS[t]} />
               ))}
             </span>
@@ -207,7 +247,8 @@ export function TaskDetailCard({ task }: { task: CalendarTask }) {
         onShare={share}
         onEdit={() => setMode('edit')}
         onDelete={() => setConfirmOpen(true)}
-        canEdit={!task.isProposed}
+        canEdit={task.canManage}
+        canDelete={task.canManage}
       />
 
       <ConfirmDialog
@@ -218,7 +259,7 @@ export function TaskDetailCard({ task }: { task: CalendarTask }) {
         confirmLabel="삭제"
         destructive
         onConfirm={() => {
-          remove({ taskId: task.id })
+          remove({ id: task.id })
           setConfirmOpen(false)
         }}
       />

@@ -75,6 +75,7 @@ export function FeedList() {
         <Button
           variant="outline"
           size="sm"
+          // config 대상 밖: 유저 트리거 (mutation onSuccess 아님) — ADR-0025
           onClick={() => queryClient.invalidateQueries({ queryKey: getGetFeedsQueryKey() })}
         >
           다시 시도
@@ -123,10 +124,8 @@ export function FeedList() {
         destructive
         onConfirm={() => {
           if (pendingDeleteId == null) return
-          deletePost(
-            { postId: pendingDeleteId },
-            { onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFeedsQueryKey() }) }
-          )
+          // deletePost→getFeeds 무효화는 config(mutationInvalidates)가 자동 처리 (ADR-0025).
+          deletePost({ id: pendingDeleteId })
           setPendingDeleteId(null)
         }}
       />

@@ -6,44 +6,23 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  useQueryClient,
-  useGetMyProfile,
-  useGetCredentials,
-  useDeleteCredential,
-  getGetCredentialsQueryKey,
-} from '@bconnect/api-client'
+import { useGetMyCredentials, useDeleteCredential } from '@bconnect/api-client'
 import { Button, ConfirmDialog, TopBar } from '@bconnect/ui'
 import { CredentialItem } from './_components/CredentialItem'
 
 export default function CertificationsPage() {
   const router = useRouter()
-  const queryClient = useQueryClient()
 
-  const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
-  const profileId = profile?.id
+  // 내 자격증은 useGetMyCredentials(무인자) — profileId 로 조회하던 useGetCredentials 대체.
+  const { data: credentials, isLoading: isCredentialsLoading } = useGetMyCredentials()
 
-  const { data: credentials, isLoading: isCredentialsLoading } = useGetCredentials(
-    { profileId: profileId! },
-    { query: { enabled: !!profileId } }
-  )
-
-  const { mutate: deleteCredential } = useDeleteCredential({
-    mutation: {
-      onSuccess: () => {
-        if (profileId) {
-          queryClient.invalidateQueries({
-            queryKey: getGetCredentialsQueryKey({ profileId }),
-          })
-        }
-      },
-    },
-  })
+  // deleteCredential→getMyCredentials 무효화는 config(mutationInvalidates)가 자동 처리 (ADR-0025).
+  const { mutate: deleteCredential } = useDeleteCredential()
 
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
 
   const credentialsList = credentials ?? []
-  const isLoading = isProfileLoading || isCredentialsLoading
+  const isLoading = isCredentialsLoading
 
   if (isLoading) {
     return (
@@ -100,7 +79,7 @@ export default function CertificationsPage() {
         destructive
         onConfirm={() => {
           if (pendingDeleteId == null) return
-          deleteCredential({ credentialId: pendingDeleteId })
+          deleteCredential({ id: pendingDeleteId })
         }}
       />
     </div>

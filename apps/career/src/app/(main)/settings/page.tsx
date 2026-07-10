@@ -5,7 +5,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useLogout, useWithdraw } from '@bconnect/api-client'
+import { useLogout, useDeleteMyMember } from '@bconnect/api-client'
 import { TopBar, ConfirmDialog, toast, isApiErrorShape } from '@bconnect/ui'
 import { useAuthStore } from '@/stores/auth-store'
 import { SettingsRow } from './_components/SettingsRow'
@@ -25,7 +25,7 @@ export default function SettingsPage() {
     },
   })
 
-  const withdraw = useWithdraw({
+  const withdraw = useDeleteMyMember({
     mutation: {
       onSuccess: () => {
         clearAuth()
@@ -59,6 +59,7 @@ export default function SettingsPage() {
         <section className="flex flex-col gap-2">
           <h2 className="text-sb-14 text-gray-900">이용정책</h2>
           <SettingsRow label="서비스 이용약관" onClick={notReady} />
+          <SettingsRow label="개인정보 처리방침" href="/privacy" />
         </section>
 
         <section className="flex flex-col gap-2">

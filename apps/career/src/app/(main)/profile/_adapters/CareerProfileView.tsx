@@ -4,20 +4,21 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   useGetMyMember,
-  useGetMyProfile,
   useGetMyReceivedRecommendations,
   useGetMySentRecommendations,
   useGetProfile,
-  useGetCoworkers,
   useGetCredentials,
   useGetReceivedRecommendations,
   useGetSentRecommendations,
-  useGetFeeds,
-  useGetMyChats,
   useCreateCoworkerRequest,
   useCreateDirectChat,
 } from '@bconnect/api-client'
-import { ProfileView, type ProfileViewData, useUnreadNotificationCount } from '@bconnect/features'
+import {
+  ProfileView,
+  type ProfileViewData,
+  useUnreadNotificationCount,
+  useUnreadChatCount,
+} from '@bconnect/features'
 import { Button, SettingsIcon, toast, isApiErrorShape } from '@bconnect/ui'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
 import { useShareCurrentUrl } from '@/hooks/useShareCurrentUrl'
@@ -26,8 +27,7 @@ import { useWorkActions } from './useWorkActions'
 
 /** 최상위 프로필 라우트(본인·타인) 상단 알림·채팅 아이콘 — 홈 피드와 동등 */
 function useTopBarUtility() {
-  const { data: chats } = useGetMyChats()
-  const chatCount = chats?.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0) ?? 0
+  const chatCount = useUnreadChatCount()
   const notifyCount = useUnreadNotificationCount()
   return {
     chatHref: '/messages',
@@ -43,24 +43,25 @@ export function OwnerProfileView() {
   const utility = useTopBarUtility()
   const { onHideRecommendation, onDeleteRecommendation } = useRecommendationActions()
 
+  // GET /profiles/me 부재 → 내 memberId 로 by-id 프로필 조회 (Profile 이 member·counts 내장)
   const member = useGetMyMember()
-  const profile = useGetMyProfile()
-  const pid = profile.data?.id ?? 0
-  const enabled = pid > 0
-  const { onDeleteWork } = useWorkActions(pid)
+  // TODO: BE required 처리 후 type narrowing 필요. Member.id는 프로필 조회 키인데 optional emit이라 0 sentinel로 쿼리를 막는 중.
+  const myId = member.data?.id ?? 0
+  const enabled = myId > 0
+  const { onDeleteWork } = useWorkActions()
 
-  const coworkers = useGetCoworkers({ profileId: pid }, { query: { enabled } })
-  const credentials = useGetCredentials({ profileId: pid }, { query: { enabled } })
-  const feeds = useGetFeeds({ profileId: pid }, { query: { enabled } })
+  const profile = useGetProfile(myId, { query: { enabled } })
+  const credentials = useGetCredentials({ memberId: myId }, { query: { enabled } })
   const received = useGetMyReceivedRecommendations()
   const sent = useGetMySentRecommendations()
 
+  // TODO: BE required 처리 후 type narrowing 필요. Profile.member/counts가 optional emit이라 ProfileView에서 표시 fallback에 의존 중.
   const data: ProfileViewData = {
-    member: member.data,
+    member: profile.data?.member,
     profile: profile.data,
-    postCount: feeds.data?.length,
-    coworkerCount: coworkers.data?.length,
-    recommendationCount: received.data?.length,
+    postCount: profile.data?.postCount,
+    coworkerCount: profile.data?.coworkerCount,
+    recommendationCount: profile.data?.recommendationCount,
     credentials: credentials.data,
     receivedRecommendations: received.data,
     sentRecommendations: sent.data,
@@ -70,7 +71,7 @@ export function OwnerProfileView() {
 
   return (
     <ProfileView
-      profileId={pid}
+      profileId={myId}
       data={data}
       renderShell={careerShell(undefined, { utility })}
       fallbackTitle="내 프로필"
@@ -115,18 +116,10 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
   const utility = useTopBarUtility()
   const enabled = Number.isFinite(memberId) && memberId > 0
 
-  const profileAndMember = useGetProfile(memberId, { query: { enabled } })
-  const pid = profileAndMember.data?.profile?.id ?? 0
-  const pidEnabled = pid > 0
-
-  const coworkers = useGetCoworkers({ profileId: pid }, { query: { enabled: pidEnabled } })
-  const credentials = useGetCredentials({ profileId: pid }, { query: { enabled: pidEnabled } })
-  const feeds = useGetFeeds({ profileId: pid }, { query: { enabled: pidEnabled } })
-  const received = useGetReceivedRecommendations(
-    { profileId: pid },
-    { query: { enabled: pidEnabled } }
-  )
-  const sent = useGetSentRecommendations({ profileId: pid }, { query: { enabled: pidEnabled } })
+  const profile = useGetProfile(memberId, { query: { enabled } })
+  const credentials = useGetCredentials({ memberId }, { query: { enabled } })
+  const received = useGetReceivedRecommendations({ memberId }, { query: { enabled } })
+  const sent = useGetSentRecommendations({ memberId }, { query: { enabled } })
 
   const coworker = useCreateCoworkerRequest({
     mutation: {
@@ -142,7 +135,7 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
   })
   const chat = useCreateDirectChat({
     mutation: {
-      onSuccess: (created) => router.push(`/messages/${created.id}`),
+      onSuccess: (createdChatId) => router.push(`/messages/${createdChatId}`),
       onError: (error) =>
         toast({
           description: isApiErrorShape(error)
@@ -153,17 +146,18 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
     },
   })
 
+  // TODO: BE required 처리 후 type narrowing 필요. Profile.member/counts가 optional emit이라 ProfileView에서 표시 fallback에 의존 중.
   const data: ProfileViewData = {
-    member: profileAndMember.data?.member,
-    profile: profileAndMember.data?.profile,
-    postCount: feeds.data?.length,
-    coworkerCount: coworkers.data?.length,
-    recommendationCount: received.data?.length,
+    member: profile.data?.member,
+    profile: profile.data,
+    postCount: profile.data?.postCount,
+    coworkerCount: profile.data?.coworkerCount,
+    recommendationCount: profile.data?.recommendationCount,
     credentials: credentials.data,
     receivedRecommendations: received.data,
     sentRecommendations: sent.data,
-    isLoading: profileAndMember.isLoading,
-    isError: profileAndMember.isError,
+    isLoading: profile.isLoading,
+    isError: profile.isError,
   }
 
   return (
@@ -183,7 +177,7 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
             size="sm"
             className="flex-1"
             disabled={coworker.isPending || coworker.isSuccess}
-            onClick={() => pid > 0 && coworker.mutate({ data: { toId: pid } })}
+            onClick={() => enabled && coworker.mutate({ data: { toId: memberId } })}
           >
             {coworker.isSuccess ? '요청됨' : coworker.isPending ? '요청 중...' : '동료 추가'}
           </Button>
@@ -192,7 +186,7 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
             size="sm"
             className="flex-1"
             disabled={chat.isPending}
-            onClick={() => enabled && chat.mutate({ data: { participantId: memberId } })}
+            onClick={() => enabled && chat.mutate({ data: { memberId } })}
           >
             메시지 보내기
           </Button>

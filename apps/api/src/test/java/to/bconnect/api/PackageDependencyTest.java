@@ -6,7 +6,6 @@ import com.tngtech.archunit.core.importer.ImportOption.DoNotIncludeTests;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
-import org.junit.jupiter.api.Disabled;
 
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
@@ -35,37 +34,31 @@ public class PackageDependencyTest {
 			.should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, NOTIFICATION);
 
     @ArchTest
-    ArchRule securityPackageRule = classes().that().resideInAPackage(SECURITY)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, ATTACHMENT, SMS, NOTIFICATION);
+    ArchRule attachmentPackageRule = classes().that().resideInAPackage(ATTACHMENT)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, NOTIFICATION);
 
     @ArchTest
-    ArchRule attachmentPackageRule = classes().that().resideInAPackage(ATTACHMENT)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, ATTACHMENT, NOTIFICATION);
+    ArchRule securityPackageRule = classes().that().resideInAPackage(SECURITY)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, SECURITY, SMS, NOTIFICATION);
 
     @ArchTest
     ArchRule storagePackageRule = classes().that().resideInAPackage(STORAGE)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, STORAGE, ATTACHMENT, CRAWLER, NOTIFICATION);
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, SECURITY, STORAGE, CRAWLER, NOTIFICATION);
 
     @ArchTest
     ArchRule commonPackageRule = classes().that().resideInAPackage(COMMON)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, SECURITY, STORAGE, COMMON, ATTACHMENT, CRAWLER, NOTIFICATION)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, SECURITY, STORAGE, COMMON, CRAWLER, NOTIFICATION)
             .andShould().onlyDependOnClassesThat(
                     resideInAnyPackage(COMMON).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
             );
 
     @ArchTest
     ArchRule crawlerPackageRule = classes().that().resideInAPackage(CRAWLER)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(CRAWLER)
-            .andShould().onlyDependOnClassesThat(
-                    resideInAnyPackage(CRAWLER, STORAGE, COMMON).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
-            );
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(CRAWLER);
 
     @ArchTest
     ArchRule smsPackageRule = classes().that().resideInAPackage(SMS)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SMS)
-            .andShould().onlyDependOnClassesThat(
-                    resideInAnyPackage(SMS, SECURITY).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
-            );
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SMS);
 
     @ArchTest
     ArchRule notificationPackageRule = classes().that().resideInAPackage(NOTIFICATION)

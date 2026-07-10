@@ -6,16 +6,14 @@
 
 import { useState } from 'react'
 import { TopBar } from '@bconnect/ui'
-import { useGetMyChats } from '@bconnect/api-client'
-import { useUnreadNotificationCount } from '@bconnect/features'
+import { useUnreadNotificationCount, useUnreadChatCount } from '@bconnect/features'
 import { FeedList } from './_components/home/FeedList'
 import { FilterSheet } from './_components/home/FilterSheet'
 import { FilterTags } from './_components/home/FilterTags'
 
 export default function HomePage() {
   const [isFilterOpen, setFilterOpen] = useState(false)
-  const { data: chats } = useGetMyChats()
-  const chatCount = chats?.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0) ?? 0
+  const chatCount = useUnreadChatCount()
   const notifyCount = useUnreadNotificationCount()
 
   return (

@@ -1,16 +1,22 @@
-import type { Task } from '@bconnect/api-client'
+import type { Address, Task, Trade } from '@bconnect/api-client'
 
 /** API Task → 캘린더 뷰모델. */
 export interface CalendarTask {
   id: number
-  /** 바·상세 제목. eventTitle 사용 (행사/현장명). */
+  /** 바·상세 제목. workerTitle/projectTitle 중 현재 계약에서 노출된 제목. */
   title: string
   start: string
   end: string
   /** 색 팔레트 인덱스 (id 기반 안정적). */
   colorIndex: number
-  /** 업체 제안작업(미수락). 현재 profileId === null 로 파생 (mock). */
+  /** 업체 제안작업. offer/status 기반으로 파생. */
   isProposed: boolean
+  /** career worker 화면에서 직접 수정/삭제 가능한 개인 작업 여부. */
+  canManage: boolean
+  company?: string
+  address?: Address
+  trades: Trade[]
+  memo: string
   raw: Task
 }
 

@@ -3,16 +3,17 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { TRADE_LABELS } from '@bconnect/api-client'
-import type { Chat, Profile } from '@bconnect/api-client'
+import type { Profile } from '@bconnect/api-client'
 import { ChatListItem, Skeleton } from '@bconnect/ui'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
 import { PanelMessage } from '../_shared/PanelMessage'
+import type { ChatSummary } from './_parts/types'
 
-/** 앱이 resolve 해 내려주는 데이터. 어댑터가 useGetMyChats·useGetMyMember + 병렬 Profile 보강으로 채운다. */
+/** 앱이 resolve 해 내려주는 데이터. 어댑터가 useGetDirectChats·useGetGroupChats·useGetMyMember + 병렬 Profile 보강으로 채운다. */
 export interface MessagesViewData {
-  chats?: Chat[]
+  chats?: ChatSummary[]
   /** 본인 member id — "나" 호출(useGetMyMember)은 앱에서 (ADR-0020: features 엔 "나" 호출 없음) */
   currentUserId?: number
   /** 상대 member id → Profile 보강 맵 — chat 응답에 없는 address.city/primaryTrade 등 */
@@ -59,7 +60,7 @@ export function MessagesView(props: MessagesViewProps) {
       ) : (
         <div className="flex flex-col">
           {allChats.map((chat) => {
-            const otherMember = chat.participants.find((p) => p.id !== currentUserId)
+            const otherMember = chat.members.find((p) => p.id !== currentUserId)
             const otherId = otherMember?.id
             const otherProfile = otherId != null ? profileMap?.get(otherId) : undefined
             const trade = otherProfile?.primaryTrade
@@ -75,8 +76,8 @@ export function MessagesView(props: MessagesViewProps) {
                   name={otherMember?.name ?? chat.title ?? '채팅'}
                   jobType={trade}
                   specialty={grade}
-                  lastMessage={chat.lastMessage.content}
-                  timestamp={formatRelativeTime(chat.modifiedAt)}
+                  lastMessage={chat.lastMessage?.content}
+                  timestamp={chat.modifiedAt ? formatRelativeTime(chat.modifiedAt) : undefined}
                   unreadCount={chat.unreadCount}
                 />
               </Link>

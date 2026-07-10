@@ -86,7 +86,7 @@ export function AddressField<T extends FieldValues>({
                 open={open}
                 onOpenChange={setOpen}
                 onComplete={(result) =>
-                  field.onChange({ ...mapKakaoAddress(result), detail: value?.detail ?? null })
+                  field.onChange({ ...mapKakaoAddress(result), detail: value?.detail })
                 }
               />
             </>
@@ -124,7 +124,7 @@ export function AddressField<T extends FieldValues>({
               open={open}
               onOpenChange={setOpen}
               onComplete={(result) =>
-                field.onChange({ ...mapKakaoAddress(result), detail: value?.detail ?? null })
+                field.onChange({ ...mapKakaoAddress(result), detail: value?.detail })
               }
             />
           </FormItem>

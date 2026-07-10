@@ -1,11 +1,6 @@
 'use client'
 
-import {
-  getGetMyTasksQueryKey,
-  TRADE_LIST,
-  useCreateTask,
-  useQueryClient,
-} from '@bconnect/api-client'
+import { TRADE_LIST, useCreateTaskWorker } from '@bconnect/api-client'
 import { monthStartOf } from '@bconnect/config/date'
 import {
   DateRangeField,
@@ -28,7 +23,6 @@ import { createTaskSchema, type CreateTaskValues } from './schema'
 
 export function TaskCreateForm() {
   const router = useRouter()
-  const queryClient = useQueryClient()
 
   const form = useForm<CreateTaskValues>({
     resolver: zodResolver(createTaskSchema),
@@ -50,25 +44,24 @@ export function TaskCreateForm() {
     control,
     passthroughError<CreateTaskValues>(undefined, '작업 생성에 실패했어요. 다시 시도해주세요.')
   )
-  const { mutate, isPending } = useCreateTask()
+  const { mutate, isPending } = useCreateTaskWorker()
 
   const onSubmit = (data: CreateTaskValues) => {
     mutate(
       {
         data: {
+          title: data.title,
+          // memo/request는 UI optional이라 BE memo required 전송값을 title로 silent fallback한다.
+          memo: data.memo.trim() || data.request.trim() || data.title,
           company: data.company,
           address: data.address,
           trades: data.trades,
           start: data.start,
           end: data.end,
-          // 제목 1개 → taskTitle/eventTitle 양쪽 (갭1). request/memo 는 미전송 (갭2).
-          taskTitle: data.title,
-          eventTitle: data.title,
         },
       },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getGetMyTasksQueryKey() })
           toast({ description: '작업이 생성되었어요', variant: 'success' })
           // 생성한 작업의 시작일로 포커스 (월·선택일 동기화)
           router.replace(`/calendar?day=${data.start}&month=${monthStartOf(data.start)}`)

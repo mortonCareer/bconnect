@@ -684,7 +684,7 @@ paths:
     get:
       tags:
       - member-controller
-      operationId: listMembers
+      operationId: list_2
       responses:
         "200":
           description: OK
@@ -708,12 +708,12 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseLong"
+                $ref: "#/components/schemas/ApiResponseRegisterMemberResponse"
   /api/v1/group-chats:
     get:
       tags:
       - group-chat-controller
-      operationId: list_2
+      operationId: list_3
       responses:
         "200":
           description: OK
@@ -742,7 +742,7 @@ paths:
     get:
       tags:
       - drive-controller
-      operationId: list_3
+      operationId: list_4
       parameters:
       - name: projectId
         in: query
@@ -774,11 +774,36 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/drives/{id}/attachments:
+    post:
+      tags:
+      - drive-controller
+      operationId: upload
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadDriveRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/direct-chats:
     get:
       tags:
       - direct-chat-controller
-      operationId: list_4
+      operationId: list_5
       responses:
         "200":
           description: OK
@@ -842,7 +867,7 @@ paths:
     get:
       tags:
       - credential-controller
-      operationId: list_5
+      operationId: list_6
       parameters:
       - name: memberId
         in: query
@@ -972,7 +997,7 @@ paths:
     get:
       tags:
       - company-controller
-      operationId: list_6
+      operationId: list_7
       responses:
         "200":
           description: OK
@@ -1098,7 +1123,7 @@ paths:
     get:
       tags:
       - task-controller
-      operationId: list_7
+      operationId: list_8
       responses:
         "200":
           description: OK
@@ -1590,6 +1615,31 @@ paths:
       operationId: delete_6
       parameters:
       - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/drives/{id}/attachments/{attachmentId}:
+    delete:
+      tags:
+      - drive-controller
+      operationId: detach
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: attachmentId
         in: path
         required: true
         schema:
@@ -2138,6 +2188,7 @@ components:
       enum:
       - PROJECT
       - DRIVE
+      - SYSTEM
     CreateNoteRequest:
       type: object
       properties:
@@ -2179,6 +2230,23 @@ components:
       - GUEST
       - USER
       - ADMIN
+    ApiResponseRegisterMemberResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/RegisterMemberResponse"
+    RegisterMemberResponse:
+      type: object
+      properties:
+        memberId:
+          type: integer
+          format: int64
+        accessToken:
+          type: string
     CreateGroupChatRequest:
       type: object
       properties:
@@ -2214,6 +2282,17 @@ components:
       enum:
       - PROJECT
       - MEMBER
+    UploadDriveRequest:
+      type: object
+      properties:
+        attachmentIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          minItems: 1
+      required:
+      - attachmentIds
     CreateDirectChatRequest:
       type: object
       properties:

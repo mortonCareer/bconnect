@@ -1,0 +1,27 @@
+meta {
+  name: 피드 단건 조회
+  type: http
+  seq: 3
+  tags: [
+    chain
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/feeds/{{postId}}
+  auth: none
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.post.id).to.be.a('number');
+  });
+}
+
+docs {
+  @chain
+  - 11-worker-tasks/01-create-worker-task
+  - 12-posts/01-create
+}

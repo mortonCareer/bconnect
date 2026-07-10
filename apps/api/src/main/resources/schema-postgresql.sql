@@ -1,3 +1,5 @@
+-- partial unique index 포함
+
 drop table if exists notifications cascade;
 drop table if exists device_tokens cascade;
 drop table if exists notes cascade;

@@ -27,22 +27,21 @@ export function CoworkerList({ coworkers, isLoading, isError, coworkerHref }: Co
 
   return (
     <ul className="flex flex-col">
-      {coworkers.map((coworker) => (
-        <CoworkerRow
-          key={coworker.id}
-          profileId={coworker.member.id}
-          href={coworkerHref(coworker.member.id)}
-        />
-      ))}
+      {coworkers.map((coworker) => {
+        // TODO: BE required 처리 후 type narrowing 필요. Coworker.member.id는 행 링크 필수값인데 optional emit이라 없는 행은 임시로 렌더 제외.
+        const memberId = coworker.member?.id
+        if (memberId == null) return null
+        return <CoworkerRow key={coworker.id} memberId={memberId} href={coworkerHref(memberId)} />
+      })}
     </ul>
   )
 }
 
 /** 동료 한 명 — 마스킹 무관 by-id 보강(useGetProfile)으로 분야/지역/소개 채움. */
-function CoworkerRow({ profileId, href }: { profileId: number; href: string }) {
-  const { data: profileAndMember, isLoading } = useGetProfile(profileId)
-  const member = profileAndMember?.member
-  const profile = profileAndMember?.profile
+function CoworkerRow({ memberId, href }: { memberId: number; href: string }) {
+  // useGetProfile 은 Profile 을 직접 반환(member 내장). 인자는 memberId.
+  const { data: profile, isLoading } = useGetProfile(memberId)
+  const member = profile?.member
 
   if (isLoading) {
     return <ProfileCardSkeleton as="li" className="px-4" />
@@ -59,9 +58,10 @@ function CoworkerRow({ profileId, href }: { profileId: number; href: string }) {
       avatarUrl={member?.picture || getAvatarUrl(name)}
       name={name}
       meta={{
-        region: profile.address.city,
-        trade: getTradeLabel(profile.primaryTrade),
-        // 등급(role)은 MaskedMember 미제공(#473). 시안(1234-2262)은 2번째 줄 = 소개(description).
+        // TODO: BE required 처리 후 type narrowing 필요. region/trade는 표시 필수값인데 optional emit이라 빈값으로 silent fallback 중.
+        region: profile.address?.city ?? '',
+        trade: profile.primaryTrade ? getTradeLabel(profile.primaryTrade) : '',
+        // 등급(role)은 MemberSummary 미제공(#473). 시안(1234-2262)은 2번째 줄 = 소개(description).
       }}
       description={profile.headline ?? undefined}
       href={href}

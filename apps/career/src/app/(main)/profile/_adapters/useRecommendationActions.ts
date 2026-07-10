@@ -1,21 +1,13 @@
 'use client'
 
-import {
-  getGetMyReceivedRecommendationsQueryKey,
-  getGetMySentRecommendationsQueryKey,
-  useDeleteRecommendation,
-  useHideRecommendation,
-  useQueryClient,
-} from '@bconnect/api-client'
+import { useDeleteRecommendation, useHideRecommendation } from '@bconnect/api-client'
 import { isApiErrorShape, toast } from '@bconnect/ui'
 
+// 무효화(hide→받은목록 / delete→보낸목록)는 orval mutationInvalidates 가 자동 처리 (#728, ADR-0025)
 export function useRecommendationActions() {
-  const queryClient = useQueryClient()
-
   const hide = useHideRecommendation({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetMyReceivedRecommendationsQueryKey() })
         toast({ description: '추천서를 숨겼어요', variant: 'success' })
       },
       onError: (error) =>
@@ -31,7 +23,6 @@ export function useRecommendationActions() {
   const remove = useDeleteRecommendation({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetMySentRecommendationsQueryKey() })
         toast({ description: '추천서를 삭제했어요', variant: 'success' })
       },
       onError: (error) =>

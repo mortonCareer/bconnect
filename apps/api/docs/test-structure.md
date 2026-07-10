@@ -23,5 +23,25 @@
   - GUI 수동 테스트 필요 (`bru run` 항상 실패)
   - 각 프레임은 raw NUL(0x00) 문자로 종료
 
+### 테스트 그룹
+| 그룹        | 폴더                                                                                                |
+|-----------|---------------------------------------------------------------------------------------------------|
+| 인증 · 회원   | 01-otp · 02-members · 03-profiles · 04-credentials                                                |
+| 업체 · 프로젝트 | 05-companies · 06-projects · 07-company-tasks · 08-offers · 09-assignee-tasks · 10-project-drives |
+| 작업        | 11-worker-tasks · 12-posts                                                                        |
+| 동료        | 13-coworker-requests · 14-coworkers · 15-recommendations                                          |
+| 채팅        | 16-group-chats · 17-direct-chats                                                                  |
+| 드라이브     | 18-member-drives                                                                                  |
+| 크롤링       | 90-crawling                                                                                       |
+| 정리        | 99-cleanup                                                                                        |
+- 그룹 간 `@chain` 의존을 금지합니다
+
 ## 통합 테스트
 - `ReflectionTestUtils`을 사용하지 않습니다
+
+## 시드 데이터
+| 유형  | 범위        | 설명                        |
+|-----|-----------|---------------------------|
+| 시스템 | 0 ~ 99    | 비즈니스 필수 데이터 (e.g. SYSTEM) |
+| 테스트 | 100 ~ 199 | 값 변경시 테스트 파손 주의           |
+| 샘플  | 200 ~ 299 | UI · QA 데이터               |

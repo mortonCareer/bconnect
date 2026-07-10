@@ -16,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import jakarta.servlet.DispatcherType;
 import to.bconnect.api.ApiConfigProps;
 import to.bconnect.api.security.jwt.AccessTokenAuthenticationFilter;
 import to.bconnect.api.security.jwt.JwtAuthenticationProvider;
@@ -85,6 +86,7 @@ public class SecurityConfig {
                 }))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(arc -> arc
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/api/v1/auth/otp/**").permitAll()
                         .requestMatchers(POST, "/api/v1/members").hasRole("GUEST")
                         .requestMatchers(GET, "/api/v1/members/check-username").permitAll()

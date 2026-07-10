@@ -1,7 +1,21 @@
+protected="^(main|dev)$"
+
+# pre-push는 stdin으로 "<local ref> <local sha> <remote ref> <remote sha>" 라인을 받는다.
+# 보호 브랜치(main/dev)로의 직접 push를 차단한다 (다른 브랜치에서 `git push origin dev` 해도 잡힘).
+while read -r local_ref local_sha remote_ref remote_sha; do
+  remote_branch=${remote_ref#refs/heads/}
+  if echo "$remote_branch" | grep -qE "$protected"; then
+    echo "❌ 보호 브랜치($remote_branch)에 직접 push할 수 없습니다."
+    echo "feat/* 또는 fix/* 브랜치에서 작업 후 PR로 머지하세요."
+    exit 1
+  fi
+done
+
+# 브랜치명 컨벤션 검사 (현재 브랜치)
 branch=$(git rev-parse --abbrev-ref HEAD)
 
-if ! echo "$branch" | grep -qE "^(main|feat/|fix/|docs/|chore/|refactor/)"; then
+if ! echo "$branch" | grep -qE "^(feat/|fix/|docs/|chore/|refactor/)"; then
   echo "❌ 브랜치명이 컨벤션에 맞지 않습니다: $branch"
-  echo "허용: main, feat/*, fix/*, docs/*, chore/*, refactor/*"
+  echo "허용: feat/*, fix/*, docs/*, chore/*, refactor/*"
   exit 1
 fi

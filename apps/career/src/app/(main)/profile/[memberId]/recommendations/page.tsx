@@ -4,11 +4,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import {
-  useGetProfile,
-  useGetReceivedRecommendations,
-  useGetSentRecommendations,
-} from '@bconnect/api-client'
+import { useGetReceivedRecommendations, useGetSentRecommendations } from '@bconnect/api-client'
 import { TopBar } from '@bconnect/ui'
 import { RecommendationList } from '@bconnect/features'
 
@@ -16,18 +12,10 @@ export default function MemberRecommendationsPage() {
   const params = useParams<{ memberId: string }>()
   const memberId = Number(params.memberId)
   const router = useRouter()
+  const enabled = Number.isFinite(memberId) && memberId > 0
 
-  const { data: profileAndMember } = useGetProfile(memberId, {
-    query: { enabled: Number.isFinite(memberId) && memberId > 0 },
-  })
-  const pid = profileAndMember?.profile?.id ?? 0
-  const enabled = pid > 0
-
-  const { data: received } = useGetReceivedRecommendations(
-    { profileId: pid },
-    { query: { enabled } }
-  )
-  const { data: sent } = useGetSentRecommendations({ profileId: pid }, { query: { enabled } })
+  const { data: received } = useGetReceivedRecommendations({ memberId }, { query: { enabled } })
+  const { data: sent } = useGetSentRecommendations({ memberId }, { query: { enabled } })
 
   return (
     <div className="flex flex-col">

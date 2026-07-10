@@ -108,7 +108,6 @@ Props/Fields:
 - name: string (required)
 - fields: string[] (required)
 - experience: enum (required)
-- affiliation: string (optional)
 
 ### Step 2: API Connect ⏳ (개발자 검토 필요)
 추가 필요 엔드포인트:

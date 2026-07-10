@@ -1,7 +1,8 @@
 'use client'
 
 import { usePanelNav } from '@/hooks/usePanelNav'
-import { useGetMyChats, useGetMyMember } from '@bconnect/api-client'
+import { useGetMyMember } from '@bconnect/api-client'
+import { useUnreadChatCount } from '@bconnect/features'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 import { Select } from '@bconnect/ui'
 import Image from 'next/image'
@@ -175,8 +176,7 @@ function ProfileSection() {
 }
 
 export function MemberSidebar() {
-  const { data: chats } = useGetMyChats()
-  const messageCount = chats?.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0) ?? 0
+  const messageCount = useUnreadChatCount()
   const { panelHref } = usePanelNav()
   const pathname = usePathname()
 

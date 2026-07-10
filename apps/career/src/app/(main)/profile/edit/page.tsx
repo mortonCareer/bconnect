@@ -10,13 +10,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
   useQueryClient,
   useGetMyMember,
-  useGetMyProfile,
+  useGetProfile,
   useUpdateMyMember,
   useUpdateMyProfile,
   useUpdateMyProfileAbout,
   getGetMyMemberQueryKey,
-  getGetMyProfileQueryKey,
+  getGetProfileQueryKey,
   Trade,
+  type ProfileRole,
 } from '@bconnect/api-client'
 import {
   Form,
@@ -44,7 +45,11 @@ export default function ProfileEditPage() {
   const queryClient = useQueryClient()
 
   const { data: member, isLoading: isMemberLoading } = useGetMyMember()
-  const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
+  const myId = member?.id
+  // 내 프로필은 useGetProfile(memberId) 로 조회 (GET /profiles/me 는 flip 으로 사라짐).
+  const { data: profile, isLoading: isProfileLoading } = useGetProfile(myId!, {
+    query: { enabled: myId != null },
+  })
 
   const updateMemberMutation = useUpdateMyMember()
   const updateProfileMutation = useUpdateMyProfile()
@@ -76,6 +81,7 @@ export default function ProfileEditPage() {
   // 데이터 로드 후 폼 초기값 설정
   useEffect(() => {
     if (member || profile) {
+      // TODO: BE required 처리 후 type narrowing 필요. member/profile 필수 표시값이 optional emit이라 폼 초기값에서 임시 fallback 중.
       reset({
         name: member?.name ?? '',
         phone: member?.phone ?? '',
@@ -105,19 +111,21 @@ export default function ProfileEditPage() {
     try {
       const promises: Promise<unknown>[] = []
 
-      // Member 업데이트 (name)
+      // Member 업데이트 (name) — UpdateMemberRequest 는 { name, pictureId? } (role 없음)
       if (member?.id && data.name !== member.name) {
         promises.push(
           updateMemberMutation.mutateAsync({
-            data: { name: data.name, role: member.role! },
+            data: { name: data.name },
           })
         )
       }
 
-      // Profile 업데이트
+      // Profile 업데이트 — role(ProfileRole) 은 편집 대상이 아니라 기존 값 유지 (필수 필드)
       promises.push(
         updateProfileMutation.mutateAsync({
           data: {
+            // TODO: BE required 처리 후 type narrowing 필요. Profile.role 필수값이 optional emit이라 임시 cast로 유지.
+            role: profile?.role as ProfileRole,
             primaryTrade: data.primaryTrade as Trade,
             trades: data.trades as Trade[],
             experience: data.experience,
@@ -139,9 +147,12 @@ export default function ProfileEditPage() {
       await Promise.all(promises)
 
       // 캐시 무효화
+      // TODO(#728): 수동 무효화 — updateMyMember→getMyMember 는 이미 config 중복(추후 제거), 내 프로필은 updateMyProfile→getProfile config 인계로 맞춰 수정 (ADR-0025)
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: getGetMyMemberQueryKey() }),
-        queryClient.invalidateQueries({ queryKey: getGetMyProfileQueryKey() }),
+        ...(myId != null
+          ? [queryClient.invalidateQueries({ queryKey: getGetProfileQueryKey(myId) })]
+          : []),
       ])
 
       router.back()

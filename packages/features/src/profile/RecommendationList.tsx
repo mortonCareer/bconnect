@@ -91,15 +91,18 @@ export function RecommendationList({
         </p>
       ) : (
         <ul className="flex flex-col">
-          {items.map((rec) => (
-            <RecommendationItem
-              key={rec.id}
-              recommendation={rec}
-              showMenu={canAct}
-              onMenuClick={() => setOpenId(rec.id)}
-              rowClassName={rowPx}
-            />
-          ))}
+          {items.map((rec) => {
+            // TODO: BE required 처리 후 type narrowing 필요. Recommendation.id는 케밥 액션 키인데 optional emit이라 없으면 액션이 조용히 닫힘.
+            return (
+              <RecommendationItem
+                key={rec.id}
+                recommendation={rec}
+                showMenu={canAct}
+                onMenuClick={() => setOpenId(rec.id ?? null)}
+                rowClassName={rowPx}
+              />
+            )
+          })}
         </ul>
       )}
 
@@ -116,7 +119,7 @@ export function RecommendationList({
                   {
                     label: '숨김',
                     icon: <HideIcon size={18} />,
-                    onSelect: () => onHide?.(openRec.id),
+                    onSelect: () => openRec.id != null && onHide?.(openRec.id),
                   },
                 ]
               : [
@@ -130,7 +133,7 @@ export function RecommendationList({
                     label: '삭제',
                     icon: <TrashIcon size={18} />,
                     destructive: true,
-                    onSelect: () => onDelete?.(openRec.id),
+                    onSelect: () => openRec.id != null && onDelete?.(openRec.id),
                   },
                 ]
         }
@@ -176,17 +179,18 @@ function RecommendationItem({
 }) {
   const { member, content, profile } = recommendation
 
+  // TODO: BE required 처리 후 type narrowing 필요. member/profile/content는 카드 표시값인데 optional emit이라 빈값으로 silent fallback 중.
   return (
     <ProfileCard
       as="li"
       className={rowClassName}
-      avatarUrl={member.picture || getAvatarUrl(member.name)}
-      name={member.name}
-      profileHref={`/profile/${member.id}`}
+      avatarUrl={member?.picture || getAvatarUrl(member?.name ?? '')}
+      name={member?.name ?? ''}
+      profileHref={`/profile/${member?.id ?? ''}`}
       meta={{
-        region: profile.address.city,
-        trade: getTradeLabel(profile.primaryTrade),
-        // TODO(#473): BE가 MaskedMember.role 미제공 — 추가되면 실제 role 연결
+        region: profile?.address?.city ?? '',
+        trade: profile?.primaryTrade ? getTradeLabel(profile.primaryTrade) : '',
+        // TODO(#473): 등급(ProfileRole)은 요약(ProfileSummary)에 미포함 — 추가되면 실제 등급 연결
         role: '반장(Mocked)',
       }}
       description={content}
