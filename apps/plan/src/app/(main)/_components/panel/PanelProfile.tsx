@@ -2,11 +2,9 @@
 
 import {
   useGetProfile,
-  useGetCoworkers,
   useGetCredentials,
   useGetReceivedRecommendations,
   useGetSentRecommendations,
-  useGetFeeds,
   TRADE_LABELS,
 } from '@bconnect/api-client'
 import { ProfileView, PanelAside, type ProfileViewData } from '@bconnect/features'
@@ -22,29 +20,27 @@ export function PanelProfile({ profileId }: { profileId: number }) {
   const { taskId } = useSelectedTask()
 
   const enabled = Number.isFinite(profileId) && profileId > 0
-  const {
-    data: profileAndMember,
-    isLoading,
-    isError,
-  } = useGetProfile(profileId, { query: { enabled } })
-  const { data: coworkers } = useGetCoworkers({ profileId }, { query: { enabled } })
-  const { data: credentials } = useGetCredentials({ profileId }, { query: { enabled } })
-  const { data: received } = useGetReceivedRecommendations({ profileId }, { query: { enabled } })
-  const { data: sent } = useGetSentRecommendations({ profileId }, { query: { enabled } })
-  const { data: feeds } = useGetFeeds({ profileId }, { query: { enabled } })
+  // profileId 세그먼트는 실제 memberId (flip 후 프로필 조회는 memberId 기준). Profile 이 member·counts 내장.
+  const { data: profile, isLoading, isError } = useGetProfile(profileId, { query: { enabled } })
+  const { data: credentials } = useGetCredentials({ memberId: profileId }, { query: { enabled } })
+  const { data: received } = useGetReceivedRecommendations(
+    { memberId: profileId },
+    { query: { enabled } }
+  )
+  const { data: sent } = useGetSentRecommendations({ memberId: profileId }, { query: { enabled } })
 
   const worksParams = new URLSearchParams(searchParams.toString())
   worksParams.set('tab', 'works')
 
-  const member = profileAndMember?.member
-  const profile = profileAndMember?.profile
+  const member = profile?.member
 
+  // TODO: BE required 처리 후 type narrowing 필요. Profile.member/counts가 optional emit.
   const data: ProfileViewData = {
     member,
     profile,
-    postCount: feeds?.length,
-    coworkerCount: coworkers?.length,
-    recommendationCount: received?.length,
+    postCount: profile?.postCount,
+    coworkerCount: profile?.coworkerCount,
+    recommendationCount: profile?.recommendationCount,
     credentials,
     receivedRecommendations: received,
     sentRecommendations: sent,
@@ -57,10 +53,10 @@ export function PanelProfile({ profileId }: { profileId: number }) {
     member && profile
       ? {
           profileId,
-          name: member.name,
+          name: member.name ?? '',
           region: profile.address?.state ?? '',
           level: '',
-          specialty: TRADE_LABELS[profile.primaryTrade] ?? '',
+          specialty: profile.primaryTrade ? (TRADE_LABELS[profile.primaryTrade] ?? '') : '',
           picture: member.picture ?? undefined,
           status: 'waiting',
         }

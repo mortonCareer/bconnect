@@ -16,17 +16,30 @@ import {
   passthroughError,
   useServerError,
 } from '@bconnect/ui'
-import { useRegisterMember, Role } from '@bconnect/api-client'
+import { Role, useCreateMember } from '@bconnect/api-client'
+import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
 import { useSignupStore } from '@/stores/signup-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { corpSchema, type CorpFormData } from './schema'
 
+function requireRegisterAccessToken(result: RegisterMemberResponse) {
+  // TODO: BE required 처리 후 type narrowing 필요.
+  // RegisterMemberResponse.accessToken은 세션 필수값인데 optional emit이다.
+  if (!result.accessToken) {
+    throw new Error('회원가입 세션 토큰이 응답에 없습니다.')
+  }
+
+  return result.accessToken
+}
+
 export default function SignupCorpPage() {
   const router = useRouter()
   const { formData, setCorp, reset: resetSignup } = useSignupStore()
   const { login, isAuthenticated } = useAuthStore()
-  const registerMemberMutation = useRegisterMember()
+  const registerMemberMutation = useCreateMember({
+    request: { headers: { 'X-Signup-Token': formData.signupToken } },
+  })
 
   // signupToken 없으면 로그인으로 리다이렉트
   useEffect(() => {
@@ -62,13 +75,14 @@ export default function SignupCorpPage() {
     try {
       const result = await registerMemberMutation.mutateAsync({
         data: {
-          signupToken: formData.signupToken,
           username: formData.username,
           name: formData.name,
-          role: Role.CONTRACTOR,
+          // BE auth Role은 GUEST/USER/ADMIN만 가진다.
+          // 업체 유형은 별도 회사/프로필 도메인에서 다룬다.
+          role: Role.USER,
         },
       })
-      login(result.accessToken)
+      login(requireRegisterAccessToken(result))
       resetSignup()
       router.push('/')
     } catch (err) {

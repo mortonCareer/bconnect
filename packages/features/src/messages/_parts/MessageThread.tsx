@@ -1,15 +1,19 @@
 'use client'
 
 import { useCallback, useEffect, useRef } from 'react'
-import { useInfiniteQuery, getChatMessages, getGetChatMessagesQueryKey } from '@bconnect/api-client'
-import type { Message, MessageCursorPage, MaskedMember } from '@bconnect/api-client'
+import {
+  useInfiniteQuery,
+  getDirectChatMessages,
+  getGetDirectChatMessagesQueryKey,
+} from '@bconnect/api-client'
+import type { Message, CursorPageMessage, MemberSummary, InfiniteData } from '@bconnect/api-client'
 import { ChatMessage } from '@bconnect/ui'
 import { formatChatTime } from '@bconnect/config/format'
 
 interface MessageThreadProps {
   chatId: number
   currentUserId: number | undefined
-  participants: MaskedMember[]
+  participants: MemberSummary[]
   localMessages: Message[]
 }
 
@@ -26,7 +30,7 @@ function DateSeparator({ date }: { date: string }) {
   )
 }
 
-/** 발신자 이름/아바타는 Chat.participants(MaskedMember)에서 해석 — admin 전용 getMembers 미사용 */
+/** 발신자 이름/아바타는 참여자(MemberSummary)에서 해석 — admin 전용 getMembers 미사용 */
 function Bubble({
   message,
   currentUserId,
@@ -34,7 +38,7 @@ function Bubble({
 }: {
   message: Message
   currentUserId: number | undefined
-  participants: MaskedMember[]
+  participants: MemberSummary[]
 }) {
   const isMine = message.memberId === currentUserId
   const timestamp = message.createdAt ? formatChatTime(message.createdAt) : undefined
@@ -66,12 +70,19 @@ export function MessageThread({
   const isInitialLoadRef = useRef(true)
   const isNearBottomRef = useRef(true)
 
+  // TODO(#759): 지금은 direct(1:1) 메시지 고정. 그룹 지원 시 chatKind 로 direct/group 분기.
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
-    useInfiniteQuery<MessageCursorPage>({
-      queryKey: getGetChatMessagesQueryKey(chatId),
+    useInfiniteQuery<
+      CursorPageMessage,
+      Error,
+      InfiniteData<CursorPageMessage>,
+      readonly unknown[],
+      number | undefined
+    >({
+      queryKey: getGetDirectChatMessagesQueryKey(chatId),
       queryFn: ({ pageParam }) =>
-        getChatMessages(chatId, pageParam ? { cursor: pageParam as string } : undefined),
-      initialPageParam: undefined as string | undefined,
+        getDirectChatMessages(chatId, { cursorLimit: { cursor: pageParam } }),
+      initialPageParam: undefined,
       getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.nextCursor : undefined),
     })
 
@@ -80,7 +91,7 @@ export function MessageThread({
     data?.pages
       .slice()
       .reverse()
-      .flatMap((page) => page.content.slice().reverse()) ?? []
+      .flatMap((page) => (page.content ?? []).slice().reverse()) ?? []
   const allMessages = [...serverMessages, ...localMessages]
   const lastMessage = allMessages[allMessages.length - 1]
   const lastMessageId = lastMessage?.id

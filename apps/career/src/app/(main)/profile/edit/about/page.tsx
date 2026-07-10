@@ -4,8 +4,9 @@
 'use client'
 
 import {
-  getGetMyProfileQueryKey,
-  useGetMyProfile,
+  getGetProfileQueryKey,
+  useGetMyMember,
+  useGetProfile,
   useQueryClient,
   useUpdateMyProfileAbout,
   type UpdateProfileAboutRequest,
@@ -20,7 +21,9 @@ export default function EditAboutPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const { data: profile } = useGetMyProfile()
+  const { data: member } = useGetMyMember()
+  const myId = member?.id
+  const { data: profile } = useGetProfile(myId!, { query: { enabled: myId != null } })
 
   const form = useForm<AboutFormValues>({
     mode: 'onTouched',
@@ -32,8 +35,10 @@ export default function EditAboutPage() {
   const { mutate: updateAbout, isPending } = useUpdateMyProfileAbout({
     mutation: {
       onSuccess: () => {
-        // TODO(#728): 수동 무효화 — 추후 config(updateMyProfileAbout→내 프로필) 인계로 대체. getMyProfile 대체 훅 정합 시 맞춰 수정 (orval.config TODO 참조) (ADR-0025)
-        queryClient.invalidateQueries({ queryKey: getGetMyProfileQueryKey() })
+        // TODO(#728): 수동 무효화 — 추후 config(updateMyProfileAbout→getProfile) 인계로 대체 (ADR-0025)
+        if (myId != null) {
+          queryClient.invalidateQueries({ queryKey: getGetProfileQueryKey(myId) })
+        }
         router.back()
       },
       onError: (err) => server.capture(err, form.getValues()),

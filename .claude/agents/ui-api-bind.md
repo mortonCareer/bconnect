@@ -77,7 +77,6 @@ const onSubmit = async (data: FormData) => {
         fields: data.fields,
         primaryField: data.primaryField,
         experience: data.experience,
-        affiliation: data.affiliation,
       },
     })
     router.push('/signup/complete')

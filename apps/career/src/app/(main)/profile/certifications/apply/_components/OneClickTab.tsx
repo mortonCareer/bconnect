@@ -109,10 +109,10 @@ export function OneClickTab({
 
       const existingTypes = new Set(oneClickCredentials.map((c) => c.type))
       const requests: CreateCredentialRequest[] = [
-        { type: 'IDENTITY_VERIFICATION', expiredAt: null } satisfies CreateCredentialRequest,
+        { type: 'IDENTITY_VERIFICATION' } satisfies CreateCredentialRequest,
         ...(result.checkItems ?? []).flatMap((item): CreateCredentialRequest[] => {
           const type = mapCheckItemToType(item)
-          return type ? [{ type, expiredAt: extractExpiry(item) }] : []
+          return type ? [{ type, expiredAt: extractExpiry(item) ?? undefined }] : []
         }),
       ].filter((request) => !existingTypes.has(request.type))
 

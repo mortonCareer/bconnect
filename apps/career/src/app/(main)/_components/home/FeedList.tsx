@@ -124,11 +124,8 @@ export function FeedList() {
         destructive
         onConfirm={() => {
           if (pendingDeleteId == null) return
-          deletePost(
-            { postId: pendingDeleteId },
-            // TODO(#728): 수동 무효화 — 추후 config(deletePost→getFeeds) 인계로 대체. getFeeds 파라미터 계약(본인/전체) 정리 시 맞춰 제거 (ADR-0025)
-            { onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFeedsQueryKey() }) }
-          )
+          // deletePost→getFeeds 무효화는 config(mutationInvalidates)가 자동 처리 (ADR-0025).
+          deletePost({ id: pendingDeleteId })
           setPendingDeleteId(null)
         }}
       />

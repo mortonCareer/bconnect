@@ -69,11 +69,10 @@ export const authSupplementSchemas: Record<string, SchemaObject> = {
   },
   VerifyOtpLoginResponse: {
     type: 'object',
-    required: ['registered', 'accessToken', 'refreshToken'],
+    required: ['registered', 'accessToken'],
     properties: {
       registered: { type: 'boolean', const: true },
       accessToken: { type: 'string' },
-      refreshToken: { type: 'string' },
     },
   },
   VerifyOtpSignupResponse: {
@@ -86,10 +85,9 @@ export const authSupplementSchemas: Record<string, SchemaObject> = {
   },
   RefreshTokenResponse: {
     type: 'object',
-    required: ['accessToken', 'refreshToken'],
+    required: ['accessToken'],
     properties: {
       accessToken: { type: 'string' },
-      refreshToken: { type: 'string' },
     },
   },
 }

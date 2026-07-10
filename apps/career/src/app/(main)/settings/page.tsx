@@ -5,7 +5,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useLogout, useWithdraw } from '@bconnect/api-client'
+import { useLogout, useDeleteMyMember } from '@bconnect/api-client'
 import { TopBar, ConfirmDialog, toast, isApiErrorShape } from '@bconnect/ui'
 import { useAuthStore } from '@/stores/auth-store'
 import { SettingsRow } from './_components/SettingsRow'
@@ -25,7 +25,7 @@ export default function SettingsPage() {
     },
   })
 
-  const withdraw = useWithdraw({
+  const withdraw = useDeleteMyMember({
     mutation: {
       onSuccess: () => {
         clearAuth()

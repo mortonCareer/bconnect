@@ -150,9 +150,9 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
                 disabled={isCreatingChat}
                 onClick={() =>
                   createDirectChat(
-                    { data: { participantId: item.memberId } },
+                    { data: { memberId: item.memberId } },
                     {
-                      onSuccess: (chat) => openPanel(`messages/${chat.id}`),
+                      onSuccess: (chatId) => openPanel(`messages/${chatId}`),
                       onError: (error) =>
                         toast({
                           description: isApiErrorShape(error)

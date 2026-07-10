@@ -19,12 +19,16 @@ export function CredentialItem({
   onRequestDelete,
   showRenew = true,
 }: CredentialItemProps) {
-  const label = getCredentialLabel(credential.type)
+  // TODO: BE required 처리 후 type narrowing 필요. Credential.type/id는 렌더·삭제 필수값인데 optional emit이라 없으면 임시로 렌더 제외.
+  const { type, id } = credential
+  if (type == null || id == null) return null
+
+  const label = getCredentialLabel(type)
   const expiryText = credential.expiredAt ? `${formatDate(credential.expiredAt)} 만료` : null
   // 본인인증은 사용자가 직접 갱신/삭제하는 항목이 아니다 — 체크 표시만.
-  const isIdentity = credential.type === 'IDENTITY_VERIFICATION'
+  const isIdentity = type === 'IDENTITY_VERIFICATION'
   const canRenew = showRenew && !isIdentity && credential.status === 'ACCEPTED'
-  const { tab, sub } = getApplyLocation(credential.type)
+  const { tab, sub } = getApplyLocation(type)
   const renewHref = `/profile/certifications/apply?tab=${tab}${sub ? `&sub=${sub}` : ''}`
 
   return (
@@ -41,7 +45,7 @@ export function CredentialItem({
               <Link href={renewHref}>갱신</Link>
             </Button>
           )}
-          <Button variant="destructive" size="small" onClick={() => onRequestDelete(credential.id)}>
+          <Button variant="destructive" size="small" onClick={() => onRequestDelete(id)}>
             삭제
           </Button>
         </div>

@@ -55,7 +55,8 @@ export function IntroTab({
                 key={c.id}
                 className="inline-flex items-center rounded border border-[#E5E5E5] bg-white px-3 py-1.5 text-r-14 text-[#7B7B7B]"
               >
-                {getCredentialLabel(c.type)}
+                {/* TODO: BE required 처리 후 type narrowing 필요. Credential.type은 라벨 필수값인데 optional emit이라 빈값으로 silent fallback 중. */}
+                {c.type ? getCredentialLabel(c.type) : ''}
               </span>
             ))}
           </div>

@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
-import type { Credential, MaskedMember, Profile, Recommendation } from '@bconnect/api-client'
+import type { Credential, MemberSummary, Profile, Recommendation } from '@bconnect/api-client'
 import { Skeleton, Tab } from '@bconnect/ui'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
@@ -20,7 +20,7 @@ const TAB_ITEMS = [
 
 /** 앱이 resolve 해 내려주는 데이터. owner 어댑터는 useGetMy*, viewer/plan 은 by-id 훅으로 채운다. */
 export interface ProfileViewData {
-  member?: MaskedMember
+  member?: MemberSummary
   profile?: Profile
   postCount?: number
   coworkerCount?: number
@@ -86,6 +86,7 @@ export function ProfileView(props: ProfileViewProps) {
   )
 
   const { member, profile } = data
+  // TODO: BE required 처리 후 type narrowing 필요. MemberSummary username/name이 optional emit이라 셸 타이틀 fallback에 의존 중.
   const title = member?.username ?? member?.name ?? fallbackTitle ?? '프로필'
 
   const body = (

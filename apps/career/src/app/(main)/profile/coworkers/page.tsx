@@ -5,7 +5,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useGetCoworkers, useGetMyProfile } from '@bconnect/api-client'
+import { useGetCoworkers, useGetMyMember } from '@bconnect/api-client'
 import { CoworkerList } from '@bconnect/features'
 import { TopBar, SearchIcon } from '@bconnect/ui'
 import { matchHangul } from '@bconnect/config/search'
@@ -14,17 +14,18 @@ export default function CoworkersPage() {
   const router = useRouter()
   const [search, setSearch] = useState('')
 
-  const { data: myProfile, isLoading: isProfileLoading } = useGetMyProfile()
-  const myProfileId = myProfile?.id
+  const { data: member, isLoading: isMemberLoading } = useGetMyMember()
+  const myId = member?.id
 
   const {
     data: coworkers,
     isLoading: isCoworkersLoading,
     isError,
-  } = useGetCoworkers({ profileId: myProfileId! }, { query: { enabled: myProfileId != null } })
+  } = useGetCoworkers({ memberId: myId! }, { query: { enabled: myId != null } })
 
-  const isLoading = isProfileLoading || (!!myProfileId && isCoworkersLoading)
-  const filtered = (coworkers ?? []).filter((c) => matchHangul(c.member.name, search))
+  const isLoading = isMemberLoading || (!!myId && isCoworkersLoading)
+  // TODO: BE required 처리 후 type narrowing 필요. Coworker.member.name은 검색 필수값인데 optional emit이라 빈값으로 silent fallback 중.
+  const filtered = (coworkers ?? []).filter((c) => matchHangul(c.member?.name ?? '', search))
 
   return (
     <div className="flex flex-col">

@@ -9,11 +9,11 @@ export function PanelRecommendations({ profileId }: { profileId: number }) {
 
   const enabled = Number.isFinite(profileId) && profileId > 0
   const { data: received, isError: receivedError } = useGetReceivedRecommendations(
-    { profileId },
+    { memberId: profileId },
     { query: { enabled } }
   )
   const { data: sent, isError: sentError } = useGetSentRecommendations(
-    { profileId },
+    { memberId: profileId },
     { query: { enabled } }
   )
 

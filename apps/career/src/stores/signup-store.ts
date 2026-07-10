@@ -8,7 +8,6 @@ interface SignupFormData {
   fields: string[]
   primaryField: string | null
   experience: number | null
-  affiliation: string
 }
 
 interface SignupState {
@@ -28,7 +27,6 @@ const initialFormData: SignupFormData = {
   fields: [],
   primaryField: null,
   experience: null,
-  affiliation: '',
 }
 
 export const useSignupStore = create<SignupState>()((set) => ({

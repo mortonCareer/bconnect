@@ -1,10 +1,10 @@
 import { useQueryStates, parseAsArrayOf, parseAsInteger, parseAsStringLiteral } from 'nuqs'
-import { Trade, Role } from '@bconnect/api-client'
+import { Trade, ProfileRole } from '@bconnect/api-client'
 import { REGIONS, type Region } from '@/lib/region'
 import { isFullExperienceRange, type ExperienceRange } from '@/lib/experience-range'
 
 const TRADE_VALUES = Object.values(Trade)
-const ROLE_VALUES = Object.values(Role)
+const ROLE_VALUES = Object.values(ProfileRole)
 
 const filterParsers = {
   trades: parseAsArrayOf(parseAsStringLiteral(TRADE_VALUES)).withDefault([]),
@@ -17,7 +17,7 @@ export function useFilterParams() {
   const [params, setParams] = useQueryStates(filterParsers)
 
   const trades = params.trades as Trade[]
-  const roles = params.roles as Role[]
+  const roles = params.roles as ProfileRole[]
   const regions = params.regions as Region[]
   const { exp } = params
 
@@ -28,7 +28,7 @@ export function useFilterParams() {
     setParams({
       trades: trades.includes(target) ? trades.filter((t) => t !== target) : [...trades, target],
     })
-  const toggleRole = (target: Role) =>
+  const toggleRole = (target: ProfileRole) =>
     setParams({
       roles: roles.includes(target) ? roles.filter((r) => r !== target) : [...roles, target],
     })
@@ -44,7 +44,8 @@ export function useFilterParams() {
     setParams({ exp: range && !isFullExperienceRange(range) ? [range[0], range[1]] : null })
 
   const removeTrade = (target: Trade) => setParams({ trades: trades.filter((t) => t !== target) })
-  const removeRole = (target: Role) => setParams({ roles: roles.filter((r) => r !== target) })
+  const removeRole = (target: ProfileRole) =>
+    setParams({ roles: roles.filter((r) => r !== target) })
   const removeRegion = (target: Region) =>
     setParams({ regions: regions.filter((r) => r !== target) })
   const clearExperience = () => setParams({ exp: null })
