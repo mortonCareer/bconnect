@@ -83,7 +83,7 @@ class NotificationFlowIntegrationTest {
     void cleanUp() {
         // FK 순서: notifications → device_tokens → members
         notificationRepository.findAll().stream()
-                .filter(it -> CHAT_ID.equals(it.getReferenceId()))
+                .filter(it -> createdMemberIds.contains(it.getReceiverId()))
                 .forEach(notificationRepository::delete);
         deviceTokenRepository.findAll().stream()
                 .filter(it -> createdMemberIds.contains(it.getMemberId()))
@@ -160,6 +160,10 @@ class NotificationFlowIntegrationTest {
         var device = deviceTokenRepository.findByToken("fcm-reg-token").orElseThrow();
         assertThat(device.getSnsEndpointArn()).startsWith("arn:aws:sns:local");
 
+        // 첫 device 등록으로 발생한 온보딩 push(welcome·프로필)는 이 테스트 관심사가 아니므로 초기화
+        pushSender.sentEndpoints.clear();
+        pushSender.sentPayloads.clear();
+
         transactionTemplate.executeWithoutResult(status ->
                 eventPublisher.publishEvent(new ChatMessageSentEvent(
                         sender, CHAT_ID, List.of(receiver), Set.of(), "안녕하세요")));
@@ -203,5 +207,44 @@ class NotificationFlowIntegrationTest {
                         sender, CHAT_ID, List.of(receiver), Set.of(), "hi")));
 
         assertThat(pushSender.sentEndpoints).containsExactly("arn:on");
+    }
+
+    @Test
+    @DisplayName("첫 device 등록 시 가입축하 + (프로필 미완성이면) 프로필완성 알림을 본인에게 저장·발송한다")
+    void firstDeviceRegister_dispatchesOnboarding() {
+        Long member = saveMember("onb");
+        var user = new AuthUser(member, String.valueOf(member), "USER");
+
+        deviceService.register(user, "onb-token", DevicePlatform.web);
+
+        var saved = notificationRepository.findAll().stream()
+                .filter(n -> member.equals(n.getReceiverId()))
+                .toList();
+        assertThat(saved).extracting(NotificationEntity::getTypeCode)
+                .containsExactlyInAnyOrder("SIGNUP_WELCOME", "PROFILE_COMPLETION");
+
+        var arn = deviceTokenRepository.findByToken("onb-token").orElseThrow().getSnsEndpointArn();
+        assertThat(pushSender.sentEndpoints).containsExactly(arn, arn);
+        assertThat(pushSender.sentPayloads).extracting(PushPayload::title)
+                .containsExactlyInAnyOrder("회원가입을 축하드립니다", "프로필을 완성하고 업체로부터 일감을 받아보세요");
+    }
+
+    @Test
+    @DisplayName("두 번째 device 등록은 온보딩 알림을 다시 보내지 않는다")
+    void secondDeviceRegister_noOnboarding() {
+        Long member = saveMember("onb2");
+        var user = new AuthUser(member, String.valueOf(member), "USER");
+        deviceService.register(user, "onb2-token-1", DevicePlatform.web);
+        pushSender.sentEndpoints.clear();
+        pushSender.sentPayloads.clear();
+        long before = notificationRepository.findAll().stream()
+                .filter(n -> member.equals(n.getReceiverId())).count();
+
+        deviceService.register(user, "onb2-token-2", DevicePlatform.web);
+
+        long after = notificationRepository.findAll().stream()
+                .filter(n -> member.equals(n.getReceiverId())).count();
+        assertThat(after).isEqualTo(before);
+        assertThat(pushSender.sentEndpoints).isEmpty();
     }
 }

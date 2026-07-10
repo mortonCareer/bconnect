@@ -37,7 +37,7 @@ class DeviceServiceTest {
             public void deleteEndpoint(String endpointArn) {
             }
         };
-        deviceService = new DeviceService(repository, fakeRegistry);
+        deviceService = new DeviceService(repository, fakeRegistry, event -> {});
     }
 
     @Test
@@ -127,6 +127,11 @@ class DeviceServiceTest {
             return store.values().stream()
                     .filter(it -> it.getMemberId().equals(memberId) && it.isEnabled())
                     .toList();
+        }
+
+        @Override
+        public boolean existsByMemberId(Long memberId) {
+            return store.values().stream().anyMatch(it -> it.getMemberId().equals(memberId));
         }
 
         @Override

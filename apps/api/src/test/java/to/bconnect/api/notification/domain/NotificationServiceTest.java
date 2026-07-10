@@ -36,7 +36,7 @@ class NotificationServiceTest {
                                         MemberResolver memberResolver,
                                         CapturingPushSender pushSender) {
         var linker = new NotificationLinker(notificationRepository);
-        var deviceService = new DeviceService(deviceRepository, new NoopEndpointRegistry());
+        var deviceService = new DeviceService(deviceRepository, new NoopEndpointRegistry(), event -> {});
         var messageFactory = new NotificationMessageFactory(memberResolver);
         var registry = new NotificationTargetResolverRegistry(List.of(new ChatMessageTargetResolver()));
         return new NotificationService(registry, linker, deviceService, messageFactory, pushSender);
@@ -274,6 +274,11 @@ class NotificationServiceTest {
         @Override
         public List<DeviceTokenEntity> findByMemberIdAndEnabledTrue(Long memberId) {
             return store.stream().filter(it -> it.getMemberId().equals(memberId) && it.isEnabled()).toList();
+        }
+
+        @Override
+        public boolean existsByMemberId(Long memberId) {
+            return store.stream().anyMatch(it -> it.getMemberId().equals(memberId));
         }
 
         @Override

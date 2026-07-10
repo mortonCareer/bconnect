@@ -16,4 +16,10 @@ public class NotificationEventListener {
     public void onChatMessageSent(ChatMessageSentEvent event) {
         notificationService.handle(NotificationType.CHAT_MESSAGE, event);
     }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onMemberFirstDeviceRegistered(MemberFirstDeviceRegisteredEvent event) {
+        notificationService.handle(NotificationType.SIGNUP_WELCOME, event);
+        notificationService.handle(NotificationType.PROFILE_COMPLETION, event);
+    }
 }
