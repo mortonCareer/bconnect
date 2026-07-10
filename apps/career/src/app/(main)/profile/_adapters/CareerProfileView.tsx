@@ -85,6 +85,7 @@ export function OwnerProfileView() {
         about: '/profile/edit/about',
         recommendations: '/profile/recommendations',
       }}
+      workCreateHref="/profile/edit/work/new"
       workEditHref={(postId) => `/profile/edit/work/${postId}`}
       onDeleteWork={onDeleteWork}
       onHideRecommendation={onHideRecommendation}

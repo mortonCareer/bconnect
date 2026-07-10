@@ -1,129 +1,102 @@
 /**
- * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1239-7490
+ * @figma-scaffold 기획 와이어(iGTu8r553...?node-id=1923-2226) 기준 UI 스캐폴드 — 독립 작업물 post.
+ * 위치/업체/소요기간은 BE Post 계약에 필드가 없어 표시(입력)만 두고, 실제 게시 배선은 BE·기획 확정까지 홀드 (#769)
  */
 'use client'
 
-import { useCreatePost, useGetMyMember, useGetTasks } from '@bconnect/api-client'
-import {
-  Button,
-  Form,
-  ImageField,
-  isApiErrorShape,
-  TextareaField,
-  toast,
-  TopBar,
-} from '@bconnect/ui'
+import { Form, FormSubmitButton, ImageField, TextField, TextareaField, TopBar } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { parseAsInteger, useQueryState } from 'nuqs'
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { WorkPostForm, type WorkPostMeta } from '../_components/WorkPostForm'
-import { uploadPostImages } from '../_lib/uploadPostImages'
 
-const publishSchema = z.object({
+// NOTE: 위치/업체/소요기간은 현재 CreatePostRequest({ taskId?, attachmentIds, content })에 대응 필드가 없다.
+// BE Post 확장 또는 기획 확정 전까지 스캐폴드 입력만 두고 제출부에서 사용하지 않는다.
+const scaffoldSchema = z.object({
   images: z
     .array(z.custom<File>((v) => v instanceof File))
     .min(1, '작업 사진을 1장 이상 첨부해주세요.'),
-  content: z.string().min(1, '작업 설명을 입력해주세요.'),
+  content: z.string().min(1, '본문을 입력해주세요.'),
+  location: z.string(),
+  company: z.string(),
+  durationDays: z.string(),
 })
-type PublishValues = z.infer<typeof publishSchema>
-
-/** taskId 부재/무효 시 — 등록 폼 대신 안내. 작업 상세에서 진입해야 taskId 가 붙는다. */
-function NoTaskState({ onBack }: { onBack: () => void }) {
-  return (
-    <div className="flex flex-col">
-      <TopBar variant="default" title="작업물 게시" showAction={false} onBack={onBack} />
-      <div className="flex flex-col items-center gap-4 px-4 py-20 text-center">
-        <p className="text-sm text-gray-500">작업을 선택한 뒤 게시해주세요</p>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/calendar">캘린더로 이동</Link>
-        </Button>
-      </div>
-    </div>
-  )
-}
+type ScaffoldValues = z.infer<typeof scaffoldSchema>
 
 export default function NewWorkPage() {
   const router = useRouter()
-  const [taskId] = useQueryState('taskId', parseAsInteger)
 
-  const { data: myMember } = useGetMyMember()
-  const { data: tasks, isLoading: tasksLoading } = useGetTasks()
-  const task = taskId != null ? tasks?.find((t) => t.id === taskId) : undefined
-  const meta: WorkPostMeta | null =
-    task && task.start && task.end
-      ? {
-          company: task.workerCompany,
-          start: task.start,
-          end: task.end,
-          address: task.address,
-          trades: task.trades ?? [],
-        }
-      : null
-
-  const form = useForm<PublishValues>({
-    resolver: zodResolver(publishSchema),
+  const form = useForm<ScaffoldValues>({
+    resolver: zodResolver(scaffoldSchema),
     mode: 'onTouched',
-    defaultValues: { images: [], content: '' },
+    defaultValues: { images: [], content: '', location: '', company: '', durationDays: '' },
   })
 
-  const { mutateAsync: createPost } = useCreatePost()
-  const [submitting, setSubmitting] = useState(false)
-
-  const onSubmit = form.handleSubmit(async (vals) => {
-    if (taskId == null) return
-    const memberId = myMember?.id
-    if (memberId == null) {
-      toast({ description: '로그인 정보를 확인해주세요', variant: 'error' })
-      return
-    }
-
-    setSubmitting(true)
-    try {
-      const attachmentIds = await uploadPostImages(vals.images, memberId)
-      await createPost({ data: { taskId, attachmentIds, content: vals.content } })
-      toast({ description: '작업물이 게시되었어요', variant: 'success' })
-      router.push('/profile?tab=works')
-    } catch (error) {
-      toast({
-        description: isApiErrorShape(error)
-          ? error.message
-          : '게시에 실패했어요. 다시 시도해주세요',
-        variant: 'error',
-      })
-    } finally {
-      setSubmitting(false)
-    }
+  // TODO(#769): BE Post 계약(위치/업체/소요기간 필드) + 기획 확정 후 게시 배선.
+  // 확정되면 presign 업로드(uploadPostImages) → useCreatePost 로 연결한다. 현재는 스캐폴드 stub.
+  const onSubmit = form.handleSubmit(() => {
+    // 홀드: 실제 게시 미배선.
   })
-
-  // taskId 무효 또는 (로딩 끝났는데) 해당 작업 없음 → 안내 상태.
-  if (taskId == null || (!tasksLoading && !task)) {
-    return <NoTaskState onBack={() => router.back()} />
-  }
 
   return (
-    <Form {...form}>
-      <WorkPostForm
+    <div className="flex flex-col">
+      <TopBar
+        variant="default"
         title="작업물 게시"
-        actionLabel="게시"
-        onAction={onSubmit}
+        showAction={false}
         onBack={() => router.back()}
-        actionDisabled={submitting}
-        meta={meta}
-        imageSlot={<ImageField control={form.control} name="images" multiple maxFiles={10} />}
-        contentSlot={
-          <TextareaField
-            control={form.control}
-            name="content"
-            aria-label="작업 설명"
-            placeholder="작업 내용을 입력해주세요"
-            className="min-h-50 rounded-none resize-none p-0 border-0 text-sm"
-          />
-        }
       />
-    </Form>
+
+      <Form {...form}>
+        <form onSubmit={onSubmit}>
+          <div className="px-4 pt-4">
+            <ImageField control={form.control} name="images" multiple maxFiles={10} />
+          </div>
+
+          {/* 본문 — 라벨 위, 텍스트 아래 (와이어 기준) */}
+          <div className="flex flex-col gap-2 px-4 pt-6">
+            <span className="text-sm font-semibold text-gray-900">본문</span>
+            <TextareaField
+              control={form.control}
+              name="content"
+              aria-label="본문"
+              placeholder="자신이 시공한 내용을 입력해주세요"
+              className="min-h-30 rounded-none resize-none p-0 border-0 text-sm"
+            />
+          </div>
+
+          {/* 위치/업체/소요기간 — 스캐폴드 입력 (BE 필드 미존재, 제출 미배선) */}
+          <div className="flex flex-col gap-3 px-4 pt-4">
+            <TextField
+              control={form.control}
+              name="location"
+              label="위치"
+              layout="row"
+              placeholder="위치를 입력해주세요"
+            />
+            <TextField
+              control={form.control}
+              name="company"
+              label="업체"
+              layout="row"
+              placeholder="업체를 입력해주세요"
+            />
+            <TextField
+              control={form.control}
+              name="durationDays"
+              label="소요 기간"
+              layout="row"
+              placeholder="예: 4일"
+            />
+          </div>
+
+          <div className="px-4 pb-6 pt-8">
+            <FormSubmitButton className="w-full" requireAllFilled={false}>
+              등록하기
+            </FormSubmitButton>
+          </div>
+        </form>
+      </Form>
+    </div>
   )
 }

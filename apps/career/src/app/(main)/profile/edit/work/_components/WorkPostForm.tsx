@@ -6,7 +6,7 @@ import { TopBar } from '@bconnect/ui'
 import type { ReactNode } from 'react'
 import { formatWorkPeriod } from '../_lib/formatWorkPeriod'
 
-/** 등록/수정 화면 상단에 읽기전용으로 표시되는 작업(Task) 메타 — 입력 필드가 아니라 taskId 연결값. */
+/** 수정 화면에서 기존 post.taskId 로 연결된 작업 정보를 읽기전용으로 표시할 때 쓰는 메타. */
 export interface WorkPostMeta {
   company?: string
   start: string
@@ -48,7 +48,7 @@ interface WorkPostFormProps {
   onAction: () => void
   onBack: () => void
   actionDisabled?: boolean
-  /** 읽기전용 작업 메타. null 이면 메타 영역 생략(빈 상태 등). */
+  /** 읽기전용 작업 메타. null 이면 독립 작업물 게시처럼 메타 영역을 생략한다. */
   meta: WorkPostMeta | null
   /** 이미지 영역 — 등록: 편집 가능한 ImageField / 수정: 표시전용 */
   imageSlot: ReactNode
@@ -58,8 +58,8 @@ interface WorkPostFormProps {
 
 /**
  * 작업물 등록·수정 공용 폼 셸. 이슈 #769: 등록 화면은 수정 디자인(node 1239-7490)을 재사용하고
- * 타이틀/액션 문구·내부 호출만 다르다. task 메타(업체명/시공기간/현장주소/시공분야)는 읽기전용,
- * 사용자 입력은 이미지 + 작업 설명뿐.
+ * 타이틀/액션 문구·내부 호출만 다르다. 사용자 입력은 이미지 + 작업 설명뿐이며,
+ * 수정 화면에서 task 메타가 있으면 업체명/시공기간/현장주소/시공분야를 읽기전용으로 표시한다.
  */
 export function WorkPostForm({
   title,

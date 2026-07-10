@@ -40,6 +40,8 @@ interface ProfileViewBaseProps {
   actionSlot?: ReactNode
   editHrefs?: ProfileEditHrefs
   statHrefs?: ProfileStatHrefs
+  /** owner 전용 작업물 등록 페이지 href. 지정 시 작업물 탭에 "작업물 게시" 버튼 노출 (viewer/plan 미지정) */
+  workCreateHref?: string
   /** owner 전용 작업물 수정 href 빌더. 없으면 케밥 메뉴 없음 (viewer/plan) */
   workEditHref?: (postId: number) => string
   /** owner 전용 작업물 삭제. 없으면 케밥 삭제 메뉴 없음 (viewer/plan) */
@@ -74,6 +76,7 @@ export function ProfileView(props: ProfileViewProps) {
     actionSlot,
     editHrefs,
     statHrefs,
+    workCreateHref,
     workEditHref,
     onDeleteWork,
     onHideRecommendation,
@@ -121,6 +124,7 @@ export function ProfileView(props: ProfileViewProps) {
           ) : (
             <WorksTab
               profileId={profileId}
+              workCreateHref={workCreateHref}
               workEditHref={workEditHref}
               onDeleteWork={onDeleteWork}
             />

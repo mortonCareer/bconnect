@@ -247,7 +247,6 @@ export function TaskDetailCard({ task, selectedDay, selectedMonth }: TaskDetailC
         onShare={share}
         onEdit={() => setMode('edit')}
         onDelete={() => setConfirmOpen(true)}
-        publishHref={`/profile/edit/work/new?taskId=${task.id}`}
         canEdit={task.canManage}
         canDelete={task.canManage}
       />
