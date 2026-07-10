@@ -56,6 +56,10 @@ public class SnsPushSender implements PushSender {
         return lower.contains("endpoint") || lower.contains("targetarn") || lower.contains("target arn");
     }
 
+    private static String nullToEmpty(String value) {
+        return value == null ? "" : value;
+    }
+
     private static String mask(String value) {
         if (value == null || value.length() < 12) return "***";
         return value.substring(0, 8) + "...";
@@ -63,11 +67,13 @@ public class SnsPushSender implements PushSender {
 
     private String toSnsMessage(PushPayload payload) {
         try {
+            // FCM v1 message.data 는 값이 모두 string 이어야 한다 — null 은 "" 로 방어
+            // (예: reference_type=NONE 인 SIGNUP_WELCOME 은 link 가 null)
             Map<String, String> data = new HashMap<>();
-            data.put("title", payload.title());
-            data.put("body", payload.body());
-            data.put("link", payload.link());
-            if (payload.data() != null) data.putAll(payload.data());
+            data.put("title", nullToEmpty(payload.title()));
+            data.put("body", nullToEmpty(payload.body()));
+            data.put("link", nullToEmpty(payload.link()));
+            if (payload.data() != null) payload.data().forEach((k, v) -> data.put(k, nullToEmpty(v)));
 
             Map<String, Object> fcmV1 = Map.of(
                     "fcmV1Message", Map.of(
