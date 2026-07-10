@@ -75,6 +75,10 @@ app:
       - image/*
       - application/*
 
+  sns:
+    region: ${AWS_REGION:ap-northeast-2}
+    platform-application-arn: ${AWS_SNS_PLATFORM_APPLICATION_ARN:}
+
 springdoc:
   swagger-ui:
     enabled: false

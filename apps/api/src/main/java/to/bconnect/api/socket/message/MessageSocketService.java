@@ -2,6 +2,7 @@ package to.bconnect.api.socket.message;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,8 @@ import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -31,15 +34,31 @@ public class MessageSocketService {
     private final DirectChatRepository directChatRepository;
     private final MemberRepository memberRepository;
     private final SimpUserRegistry simpUserRegistry;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Message broadcast(AuthUser user, Long chatId, ChatType chatType, SendMessage command) {
         val message = messageService.create(chatId, chatType, user.id(), command);
-        markAsRead(chatId, chatType, message.id());
+        val activeMemberIds = markAsRead(chatId, chatType, message.id());
+        val recipientIds = findRecipientIds(user.id(), chatId, chatType);
+        eventPublisher.publishEvent(new ChatMessageSentEvent(
+                user.id(), chatId, recipientIds, activeMemberIds, command.content()));
         return message;
     }
 
-    private void markAsRead(Long chatId, ChatType chatType, Long messageId) {
+    private Set<Long> markAsRead(Long chatId, ChatType chatType, Long messageId) {
+        val activeMemberIds = findActiveMemberIds(chatId, chatType);
+        if (chatType == ChatType.DIRECT) {
+            val chat = findDirectChat(chatId);
+            activeMemberIds.forEach(it -> chat.markRead(it, messageId));
+        } else {
+            participantRepository.findAllByChatIdAndMemberIdIn(chatId, activeMemberIds)
+                    .forEach(it -> it.markRead(messageId));
+        }
+        return activeMemberIds;
+    }
+
+    private Set<Long> findActiveMemberIds(Long chatId, ChatType chatType) {
         val prefix = chatType == ChatType.DIRECT
                 ? WebSocketSecurityConfig.DIRECT_CHAT_TOPIC_PREFIX
                 : WebSocketSecurityConfig.GROUP_CHAT_TOPIC_PREFIX;
@@ -51,17 +70,23 @@ public class MessageSocketService {
                 .map(it -> it.getSession().getUser().getName())
                 .collect(Collectors.toCollection(HashSet::new));
 
-        val memberIds = memberRepository.findAllByUsernameIn(usernames).stream()
+        return memberRepository.findAllByUsernameIn(usernames).stream()
                 .map(MemberEntity::getId)
-                .toList();
+                .collect(Collectors.toSet());
+    }
 
+    private List<Long> findRecipientIds(Long senderId, Long chatId, ChatType chatType) {
         if (chatType == ChatType.DIRECT) {
-            val chat = directChatRepository.findById(chatId)
-                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-            memberIds.forEach(it -> chat.markRead(it, messageId));
-        } else {
-            participantRepository.findAllByChatIdAndMemberIdIn(chatId, memberIds)
-                    .forEach(it -> it.markRead(messageId));
+            return List.of(findDirectChat(chatId).counterpartIdOf(senderId));
         }
+
+        return participantRepository.findMemberIdsByChatId(chatId).stream()
+                .filter(id -> !id.equals(senderId))
+                .toList();
+    }
+
+    private DirectChatEntity findDirectChat(Long chatId) {
+        return directChatRepository.findById(chatId)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 }

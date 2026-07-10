@@ -11,6 +11,7 @@ to.bconnect.api
 ├── core                    # 비즈니스 코어
 │   ├── presentation        # Presentation 레이어
 │   └── domain              # Domain 레이어
+├── notification            # 알림 모듈
 ├── storage                 # Storage 레이어
 ├── security                # 인증 · 인가
 ├── sms                     # SMS 모듈
@@ -20,7 +21,7 @@ to.bconnect.api
 - 패키지 · 레이어 의존성 규칙은 ArchUnit로 강제합니다.
 
 ## 패키지 구조
-> socket → core → attachment → security → storage → common
+> notification → socket → core → attachment → security → storage → common
 > sms → security
 - `PackageDependencyTest.java` 참고
 
@@ -97,10 +98,17 @@ graph TD
   subgraph security.session
     LoginE[NewDeviceLoginEvent]
   end
+  subgraph socket.message
+    ChatMsgE[ChatMessageSentEvent]
+  end
+  subgraph notification
+    NotiL[NotificationEventListener]
+  end
   ChatL --> OfferAE
   ChatL --> OfferVE
   SmsL --> OtpE
   SmsL --> LoginE
+  NotiL --> ChatMsgE
 ```
 - 부수효과는 EDA 구조로 분리합니다.
 - 이벤트는 발행 패키지에, 리스너는 구독 패키지에 위치합니다.

@@ -828,6 +828,41 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/devices:
+    post:
+      tags:
+      - device-controller
+      operationId: register_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterDeviceRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseRegisterDeviceResponse"
+    delete:
+      tags:
+      - device-controller
+      operationId: unregister
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnregisterDeviceRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/credentials:
     get:
       tags:
@@ -1053,6 +1088,37 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListAttachmentResponse"
+  /api/v1/notifications/{id}/read:
+    patch:
+      tags:
+      - notification-controller
+      operationId: markRead
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/notifications/read:
+    patch:
+      tags:
+      - notification-controller
+      operationId: markAllRead
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/tasks:
     get:
       tags:
@@ -1203,6 +1269,36 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseProfileResponse"
+  /api/v1/notifications:
+    get:
+      tags:
+      - notification-controller
+      operationId: list_9
+      parameters:
+      - name: cursorLimit
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CursorLimit"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCursorPageNotificationResponse"
+  /api/v1/notifications/unread/count:
+    get:
+      tags:
+      - notification-controller
+      operationId: unreadCount
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
   /api/v1/members/check-username:
     get:
       tags:
@@ -1249,7 +1345,7 @@ paths:
     get:
       tags:
       - feed-controller
-      operationId: list_9
+      operationId: list_10
       responses:
         "200":
           description: OK
@@ -1385,7 +1481,7 @@ paths:
     get:
       tags:
       - crawled-member-controller
-      operationId: list_10
+      operationId: list_11
       responses:
         "200":
           description: OK
@@ -1416,7 +1512,7 @@ paths:
     get:
       tags:
       - coworker-controller
-      operationId: list_11
+      operationId: list_12
       parameters:
       - name: memberId
         in: query
@@ -2205,6 +2301,37 @@ components:
           format: int64
       required:
       - memberId
+    DevicePlatform:
+      type: string
+      enum:
+      - web
+      - android
+      - ios
+    RegisterDeviceRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+        platform:
+          $ref: "#/components/schemas/DevicePlatform"
+      required:
+      - platform
+      - token
+    ApiResponseRegisterDeviceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/RegisterDeviceResponse"
+    RegisterDeviceResponse:
+      type: object
+      properties:
+        registered:
+          type: boolean
     CreateCredentialRequest:
       type: object
       properties:
@@ -2723,6 +2850,62 @@ components:
           $ref: "#/components/schemas/ExceptionCode"
         data:
           $ref: "#/components/schemas/ProfileResponse"
+    CursorLimit:
+      type: object
+      properties:
+        cursor:
+          type: integer
+          format: int64
+        limit:
+          type: integer
+          format: int32
+        reverse:
+          type: boolean
+    ApiResponseCursorPageNotificationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/CursorPageNotificationResponse"
+    CursorPageNotificationResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/NotificationResponse"
+        hasNext:
+          type: boolean
+        nextCursor:
+          type: integer
+          format: int64
+    NotificationResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        type:
+          type: string
+        message:
+          type: string
+        content:
+          type: string
+        referenceType:
+          type: string
+        referenceId:
+          type: integer
+          format: int64
+        sender:
+          $ref: "#/components/schemas/MemberSummaryResponse"
+        read:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
     ApiResponseListMemberResponse:
       type: object
       properties:
@@ -2847,17 +3030,6 @@ components:
       - FILE
       - SYSTEM
       - OFFER
-    CursorLimit:
-      type: object
-      properties:
-        cursor:
-          type: integer
-          format: int64
-        limit:
-          type: integer
-          format: int32
-        reverse:
-          type: boolean
     ApiResponseCursorPageMessageResponse:
       type: object
       properties:
@@ -3401,3 +3573,11 @@ components:
           $ref: "#/components/schemas/ExceptionCode"
         data:
           $ref: "#/components/schemas/CompanyResponse"
+    UnregisterDeviceRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+      required:
+      - token
