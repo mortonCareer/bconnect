@@ -93,9 +93,14 @@ export function useOfferQueue(taskId: string | null | undefined) {
       next.splice(to, 0, moved)
       const offerIds = next.flatMap((o) => o.id ?? [])
       if (offerIds.length !== pending.length) return
-      // dnd 스냅백 방지 — offers 캐시를 새 순서로 낙관적 재배열, 실패 시 invalidate 복구
+      // dnd 스냅백 방지 — offers 캐시를 새 순서로 낙관적 재배열, 실패 시 invalidate 복구.
+      // items 가 seq 로 정렬되므로 seq 도 재부여해야 함 (BE reorder 와 동일 규칙: ACTIVE 다음부터)
       const active = activePending.filter((o) => o.status === OfferStatus.ACTIVE)
-      queryClient.setQueryData<Offer[]>(getGetTaskOffersQueryKey(numId), [...active, ...next])
+      const activeMax = Math.max(0, ...active.map((o) => o.seq ?? 0))
+      queryClient.setQueryData<Offer[]>(getGetTaskOffersQueryKey(numId), [
+        ...active,
+        ...next.map((o, i) => ({ ...o, seq: activeMax + 1 + i })),
+      ])
       reorderOffers({ data: { offerIds } })
     },
   }
