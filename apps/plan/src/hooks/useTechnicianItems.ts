@@ -1,8 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useGetProfiles } from '@bconnect/api-client'
-import type { Profile, Trade } from '@bconnect/api-client'
+import { useGetFeeds, useGetProfiles } from '@bconnect/api-client'
+import type { Post, Profile, Trade } from '@bconnect/api-client'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 import type { ExperienceLevel } from '@/lib/experience'
 import { EXPERIENCE_RANGES } from '@/lib/experience'
@@ -24,15 +24,16 @@ export interface TechnicianItem {
   postCount: number
   coworkerCount: number
   recommendCount: number
-  // 리뷰·계약·인증·포트폴리오는 대응 BE 도메인 미구현 — 중립값 (TechnicianCard 가 0/빈배열 방어 렌더)
+  // ⚠️ 모킹값 — 리뷰(별점)·계약·인증 BE 도메인 미구현. 0/빈값은 실제 발생 가능해 sentinel 로 모킹 명시
   rating: number
   reviewCount: number
   contractCount: number
   certifications: string[]
-  portfolios: { imageUrl: string; daysRequired: number }[]
+  // 작업물(Post) 유래 — 소요일은 Feed 에 task 정보가 없어 미표시
+  portfolios: { imageUrl: string; daysRequired?: number }[]
 }
 
-function toTechnicianItem(profile: Profile): TechnicianItem | null {
+function toTechnicianItem(profile: Profile, posts: Post[]): TechnicianItem | null {
   const profileId = profile.id
   const memberId = profile.member?.id
   // 프로필/멤버 식별자 없으면 카드 액션(프로필 보기·메시지)이 불가능 — 목록에서 제외
@@ -54,11 +55,15 @@ function toTechnicianItem(profile: Profile): TechnicianItem | null {
     postCount: profile.postCount ?? 0,
     coworkerCount: profile.coworkerCount ?? 0,
     recommendCount: profile.recommendationCount ?? 0,
-    rating: 0,
-    reviewCount: 0,
-    contractCount: 0,
+    // ⚠️ 모킹값 (BE 도메인 미구현) — 0은 실제 발생 가능한 값이라 sentinel 로 모킹임을 명시.
+    // rating 은 5점 초과 불가 → 2.5 고정.
+    rating: 2.5,
+    reviewCount: 777,
+    contractCount: 777,
     certifications: [],
-    portfolios: [],
+    portfolios: posts
+      .slice(0, 3)
+      .map((post) => ({ imageUrl: post.images?.[0] ?? '', daysRequired: undefined })),
   }
 }
 
@@ -76,10 +81,28 @@ export function useTechnicianItems({
   regions,
 }: UseTechnicianItemsOptions = {}) {
   const { data, isLoading, error } = useGetProfiles()
+  // 포트폴리오(작업물 썸네일)용 — 실패해도 목록은 뜨도록 error 미전파
+  const { data: feeds } = useGetFeeds()
+
+  const postsByMember = useMemo(() => {
+    const map = new Map<number, Post[]>()
+    for (const feed of feeds ?? []) {
+      const memberId = feed.member?.id
+      if (memberId == null || !feed.post) continue
+      const posts = map.get(memberId) ?? []
+      posts.push(feed.post)
+      map.set(memberId, posts)
+    }
+    return map
+  }, [feeds])
 
   const allItems = useMemo(
-    () => (data ?? []).flatMap((profile) => toTechnicianItem(profile) ?? []),
-    [data]
+    () =>
+      (data ?? []).flatMap(
+        (profile) =>
+          toTechnicianItem(profile, postsByMember.get(profile.member?.id ?? -1) ?? []) ?? []
+      ),
+    [data, postsByMember]
   )
 
   const expRange = experience ? EXPERIENCE_RANGES[experience] : undefined

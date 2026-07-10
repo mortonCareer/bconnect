@@ -67,7 +67,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
     item.experienceYears > 0 ? `${item.experienceYears}년` : '신입',
   ].filter(Boolean)
 
-  // TODO: 포트폴리오 BE 도메인 미구현 — 연동 전까진 3개 placeholder
+  // 작업물(Post) 유래 썸네일 — 없으면 3개 회색 placeholder
   const portfolios =
     item.portfolios.length > 0
       ? item.portfolios.slice(0, 3)
@@ -89,7 +89,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
               <p className="text-r-14 text-gray-500">{metaParts.join(' · ')}</p>
             </div>
             <div className="flex items-center gap-[11px]">
-              {/* TODO: 리뷰(별점)·계약수 BE 도메인 미구현 — 중립값 표시 */}
+              {/* ⚠️ 모킹값 — 리뷰(별점)·계약수 BE 도메인 미구현 (rating 2.5·count 777 sentinel) */}
               <StarRating rating={item.rating} reviewCount={item.reviewCount} />
               {/* Figma node 1470:6775 — 행 높이(20px) 세로 divider, gray-100 */}
               <span className="h-5 w-px bg-gray-100" />
@@ -187,7 +187,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
           <Stat value={item.recommendCount} label="추천서" />
         </div>
 
-        {/* 작업물 썸네일 3개 — 포트폴리오 BE 도메인 미구현 */}
+        {/* 작업물(Post) 썸네일 3개 — 소요일은 Feed 에 task 정보가 없어 미표시 */}
         <div className="flex flex-1 gap-[9px]">
           {portfolios.map((p, i) => (
             <PortfolioThumb
