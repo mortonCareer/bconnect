@@ -67,35 +67,78 @@ sequenceDiagram
 - NotificationService : 알림 처리 흐름 조립 (대상 분리 → 저장 → 렌더 → 발송 → 무효 토큰 비활성화)
 - NotificationTargetResolver : 타입별 저장 대상 · push 대상 계산 (전략, `notification.domain.target`) — 구현체 : `ChatMessageTargetResolver` · `SignupWelcomeTargetResolver` · `ProfileCompletionTargetResolver`
 - NotificationTargetResolverRegistry : 타입 → resolver 등록 · 위임 (미등록 시 `UNKNOWN_TYPE`, `notification.domain.target`)
-- NotificationMessageFactory : 렌더 변수(`NotificationArgs`) snapshot 생성 · `PushNotification` 조립
+- NotificationMessageFactory : 렌더 변수(`NotificationArgs`) snapshot 생성 · 본문 100자 절단 · `PushNotification` 조립
 - NotificationLinker : 알림 DB 저장 전담 (`core.domain.notification`)
 - NotificationQueryService : 알림 조회 · unread · 읽음 처리 전담 (`core.domain.notification`)
 - DeviceService : device token 등록 · 해제 · push 가능 device 조회 — 회원의 **첫 기기 등록 시 `MemberFirstDeviceRegisteredEvent` 발행**(온보딩 트리거)
 - PushSender / PushEndpointRegistry : push 발송 · SNS endpoint 관리 port (`notification.domain.push`)
-- SnsPushSender / SnsEndpointRegistry : AWS SNS 구현 (`dev`, `prod`)
-- LoggingPushSender / LoggingEndpointRegistry : 로컬 · 테스트 구현 (`local`, `test`)
+- SnsPushSender / SnsEndpointRegistry : AWS SNS 구현 (`dev | prod | sns`)
+- LoggingPushSender / LoggingEndpointRegistry : 로컬 · 테스트 구현 (`(local | test) & !sns`)
 
 ## 패키지 · 의존성
 ```text
-notification
-├── domain                          # 알림 처리 도메인
-│   ├── NotificationService             # 흐름 조립(orchestration)
-│   ├── NotificationEventListener       # 이벤트 → handle 진입점
-│   ├── NotificationMessageFactory      # args snapshot · push 메시지 생성
-│   ├── NotificationType                # 타입 카탈로그(문구·이동)
-│   ├── DeviceService                   # device token 등록·조회·비활성화
-│   ├── MemberFirstDeviceRegisteredEvent # 첫 기기 등록 사건(온보딩 트리거)
-│   ├── target/                         # "누구에게 저장/발송" 계산(전략)
-│   │   ├── NotificationTargetResolver · NotificationTargetResolverRegistry
-│   │   ├── ChatMessageTargetResolver
-│   │   ├── SignupWelcomeTargetResolver · ProfileCompletionTargetResolver
-│   │   └── ResolvedNotification         # Targets(persist/push) nested record
-│   └── push/                           # push 포트 · 프로토콜(어댑터는 infrastructure/push)
-│       ├── PushSender · PushEndpointRegistry
-│       ├── PushPayload · PushSendResult
-│       └── PushNotification             # PushPayload 로 변환(단일 push 메시지)
-├── infrastructure/push             # Sns/Logging 어댑터 · SnsConfig · SnsProperties
-└── presentation/v1                 # DeviceController · NotificationController · DTO (/api/v1/devices, /api/v1/notifications)
+to.bconnect.api
+├── notification                              # 알림 이벤트 구독 · 대상 계산 · 저장 조립 · push 발송
+│   ├── domain                                # 외부 구현체를 모르는 port · 이벤트 · orchestration
+│   │   ├── DeviceService.java                # token upsert/해제/조회 · 첫 기기 등록 이벤트 발행
+│   │   ├── MemberFirstDeviceRegisteredEvent.java # 첫 push device 등록 사건. 온보딩 알림 트리거
+│   │   ├── NotificationEventListener.java    # 채팅/첫 기기 이벤트를 AFTER_COMMIT 구독해 service 위임
+│   │   ├── NotificationMessageFactory.java   # args snapshot · body 100자 절단 · push 메시지 조립
+│   │   ├── NotificationService.java          # 대상 계산 → 저장 → 발송 → 무효 endpoint 비활성화
+│   │   ├── NotificationType.java             # 6종 타입의 type_code/reference_type/문구/link 규칙
+│   │   ├── push                              # push 발송 port · 공통 payload/result 모델
+│   │   │   ├── PushEndpointRegistry.java     # endpoint 생성/복구/삭제 port
+│   │   │   ├── PushNotification.java         # notification_id와 라우팅 data를 payload로 변환
+│   │   │   ├── PushPayload.java              # title/body/link/data 전송 중립 모델
+│   │   │   ├── PushSendResult.java           # SUCCESS/FAILED/EXPIRED/INVALID 결과
+│   │   │   └── PushSender.java               # endpoint 단위 push 발송 port
+│   │   └── target                            # 타입별 저장/push 대상 계산 전략
+│   │       ├── NotificationTargetResolver.java          # 타입별 resolver 인터페이스
+│   │       ├── NotificationTargetResolverRegistry.java  # NotificationType → resolver 선택
+│   │       ├── ChatMessageTargetResolver.java           # 전원 저장, 활성 채팅 사용자는 push 제외
+│   │       ├── SignupWelcomeTargetResolver.java         # 첫 기기 등록 회원 본인에게 항상 알림
+│   │       ├── ProfileCompletionTargetResolver.java     # 프로필 미완성 회원 본인에게만 알림
+│   │       └── ResolvedNotification.java                # sender/reference/content + persist/push 대상
+│   ├── infrastructure                         # 외부 시스템 adapter
+│   │   └── push
+│   │       ├── SnsConfig.java                 # dev/prod/sns용 AWS SNS client bean
+│   │       ├── SnsProperties.java             # app.sns 설정 바인딩
+│   │       ├── SnsPushSender.java             # SNS FCM v1 발송 · AWS 예외를 공통 결과로 변환
+│   │       ├── SnsEndpointRegistry.java       # SNS endpoint 생성/복구/활성화/삭제
+│   │       ├── LoggingPushSender.java         # local/test용 무발송 sender
+│   │       └── LoggingEndpointRegistry.java   # local/test용 가짜 endpoint registry
+│   └── presentation
+│       └── v1
+│           ├── DeviceController.java          # POST/DELETE /api/v1/devices
+│           ├── NotificationController.java    # 목록/unread/읽음 처리 API
+│           ├── request
+│           │   ├── RegisterDeviceRequest.java
+│           │   └── UnregisterDeviceRequest.java
+│           └── response
+│               ├── NotificationResponse.java  # enum 기반 문구/referenceType + sender/read 상태 조립
+│               └── RegisterDeviceResponse.java
+├── socket
+│   └── message
+│       ├── MessageSocketService.java           # 메시지 저장 후 수신자/활성 사용자 계산 · 이벤트 발행
+│       └── ChatMessageSentEvent.java           # notification이 구독하는 채팅 발생 이벤트
+├── core
+│   └── domain
+│       └── notification                       # 알림 영속화 · 조회 core 로직
+│           ├── Notification.java              # entity를 변환한 조회용 불변 모델
+│           ├── NotificationArgs.java          # 렌더 변수 snapshot · template_args JSON 변환
+│           ├── NotificationLinkCommand.java   # 알림 저장 command
+│           ├── NotificationLinker.java        # 수신자별 저장 · receiverId→notificationId 반환
+│           ├── NotificationQueryService.java  # 목록/unread/개별·전체 읽음 처리
+│           └── NotificationExceptionCode.java # NOT_FOUND/FORBIDDEN/UNKNOWN_TYPE
+└── storage
+    ├── device                                 # device_tokens 영속화
+    │   ├── DevicePlatform.java                # web/android/ios
+    │   ├── DeviceTokenEntity.java             # token/endpoint/enabled/lastActiveAt (해제 시 row 물리 삭제)
+    │   └── DeviceTokenRepository.java         # token/회원/활성 device 조회 · 첫 기기 존재 확인
+    └── notification                           # notifications 영속화
+        ├── NotificationEntity.java            # type_code/reference_id/template_args/read_at 저장
+        ├── NotificationReferenceType.java     # 프론트 이동 화면 enum(DB 컬럼 아님)
+        └── NotificationRepository.java        # 커서 목록/unread/전체 읽음 쿼리
 ```
 - `notification` 은 sink 모듈이다. 다른 패키지는 `notification` 을 의존하지 않는다.
 - 의존 방향 : `notification → socket · core · storage · security · attachment · common`
