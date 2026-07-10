@@ -9,7 +9,7 @@
 
 # 인증 wall — 링크는 살아있으나 익명 접근 시 401/403
 # (Vercel / Railway / AWS / Firebase 콘솔)
-^https://vercel\.com/morton-2262d67a
+^https://vercel\.com/morton-so
 ^https://railway\.com/project
 ^https://console\.firebase\.google\.com
 ^https://morton-so\.signin\.aws\.amazon\.com
