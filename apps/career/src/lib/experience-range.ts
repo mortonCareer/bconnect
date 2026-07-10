@@ -13,9 +13,16 @@ export const EXPERIENCE_THUMB_LABELS = ['최소 경력', '최대 경력']
 export const isFullExperienceRange = ([min, max]: ExperienceRange) =>
   min <= EXPERIENCE_MIN && max >= EXPERIENCE_FILTER_MAX
 
-export const formatExperienceRange = ([min, max]: ExperienceRange) => `${min}~${max}년`
+// 천장(EXPERIENCE_FILTER_MAX)은 슬라이더 전용 상한 — 경력 도메인엔 상한 없음(#684).
+// 따라서 천장 값은 "정확히 10년"이 아니라 "10년 이상"을 의미하므로 그렇게 표기한다.
+export const formatExperienceRange = ([min, max]: ExperienceRange) => {
+  if (max >= EXPERIENCE_FILTER_MAX) return `${min}년 이상`
+  if (min === max) return `${min}년`
+  return `${min}~${max}년`
+}
 
-export const formatExperienceYears = (years: number) => `${years}년`
+export const formatExperienceYears = (years: number) =>
+  years >= EXPERIENCE_FILTER_MAX ? `${EXPERIENCE_FILTER_MAX}년 이상` : `${years}년`
 
 /**
  * 프로필 경력(단일 정수) 입력 스키마 — signup/profile 폼의 SSOT. 필터는 범위라 별도.

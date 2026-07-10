@@ -69,7 +69,7 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
     <div className="fixed inset-0 z-[60]">
       {/* Full-page panel sliding from right */}
       <div
-        className={`absolute inset-0 bg-white transition-transform duration-300 ease-out ${
+        className={`absolute inset-0 flex flex-col bg-white transition-transform duration-300 ease-out ${
           visible ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -84,7 +84,7 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
         />
 
         {/* Scrollable content */}
-        <div className="flex flex-col gap-6 overflow-y-auto px-4 pb-4 pt-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4 pb-4 pt-4">
           {/* 시공분야 */}
           <div className="flex flex-col gap-3">
             <p className="text-sb-16 text-gray-900">시공분야</p>
