@@ -44,7 +44,8 @@ function toTechnicianItem(profile: Profile): TechnicianItem | null {
     memberId,
     name,
     picture: profile.member?.picture ?? getAvatarUrl(name),
-    location: profile.address?.state ?? '',
+    // BE Address 캐논: city = 도/광역시 (data.sql), 지역 필터 옵션(도 단위)과 매칭
+    location: profile.address?.city ?? '',
     primaryTrade: profile.primaryTrade,
     experienceYears: profile.experience ?? 0,
     headline: profile.headline ?? '',
