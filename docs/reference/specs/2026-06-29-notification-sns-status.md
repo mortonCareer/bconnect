@@ -61,7 +61,7 @@
 
 ## 4. 데이터 모델
 
-알림은 두 테이블로 구성된다.
+알림 기록은 `notifications` 테이블 하나로 구성되고, 종류·문구·이동 링크는 `NotificationType` enum이 소유한다(테이블 아님).
 
 ```
 Notification (알림 1건, 테이블)         NotificationType (알림 종류 = enum, 코드가 소유 · 테이블 아님)
