@@ -51,7 +51,7 @@ cat >&2 <<EOF
 모노레포 루트나 잘못된 link 디렉토리에서 무지성 실행 시 자동으로 새 프로젝트가 생성됩니다.
 
 올바른 사용:
-  1. vercel --scope morton-2262d67a <subcommand>   (팀 명시)
+  1. vercel --scope morton-so <subcommand>   (팀 명시)
   2. vercel --cwd apps/career <subcommand>          (디렉토리 명시)
 
 login/whoami 등 cwd-agnostic 명령은 사용자가 직접 쉘에서 실행.

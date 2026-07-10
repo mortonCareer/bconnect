@@ -81,7 +81,6 @@ module "vercel" {
   domain           = var.domain
   dev_api_url      = var.dev_api_url
 
-  project_name  = var.project_name
   github_repo   = var.github_repo
   github_branch = var.github_branch
 

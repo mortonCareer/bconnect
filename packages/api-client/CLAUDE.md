@@ -132,8 +132,8 @@ BE `ModelResolver.enumsAsRef=true` → enum 이 named `$ref` 로 emit → orval 
 
 ```bash
 pnpm api:generate                          # orval 재생성 (76 hook)
-pnpm --filter morton-career typecheck       # FE 계약 정합 (career)
-pnpm --filter morton-plan typecheck         # (plan)
+pnpm --filter @bconnect/career typecheck       # FE 계약 정합 (career)
+pnpm --filter @bconnect/plan typecheck         # (plan)
 ```
 
 ## 관련 문서

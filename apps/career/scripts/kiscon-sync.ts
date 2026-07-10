@@ -8,7 +8,7 @@
  * 매 동기화 시 기존 데이터를 전체 교체 (DELETE → INSERT)
  * - 자연 PK가 없고, 만료 데이터가 자동 제거되어야 하므로
  *
- * 실행: pnpm --filter morton-career exec tsx scripts/kiscon-sync.ts
+ * 실행: pnpm --filter @bconnect/career exec tsx scripts/kiscon-sync.ts
  * 환경변수: DATABASE_URL, SLACK_WEBHOOK_URL (선택)
  */
 

@@ -75,7 +75,7 @@ DNS 레코드는 **Terraform 관리 밖**이다. 가비아는 Terraform/CLI 를 
 | `bconnect.to` / `www`  | Vercel (apex 는 A + Vercel 자동 관리)                 |
 | `plan.bconnect.to`     | Vercel 생성 도메인                                    |
 | `api.bconnect.to`      | Railway 생성 도메인                                   |
-| `dev.bconnect.to`      | Vercel 생성 도메인 (`morton-career-*`)                |
+| `dev.bconnect.to`      | Vercel 생성 도메인 (`bconnect-career-*`)              |
 | `plan.dev.bconnect.to` | Vercel 생성 도메인                                    |
 | `api.dev.bconnect.to`  | Railway 생성 도메인 (`morton-api-dev.up.railway.app`) |
 
