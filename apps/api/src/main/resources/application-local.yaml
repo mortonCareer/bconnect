@@ -17,6 +17,11 @@ spring:
       platform: h2
 
 app:
+  cors:
+    allowed-origin-patterns:
+      - "http://localhost:[*]"
+      - "http://127.0.0.1:[*]"
+
   jwt:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
 
