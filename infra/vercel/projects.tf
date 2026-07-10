@@ -420,13 +420,3 @@ resource "vercel_project_domain" "plan_dev" {
   domain                = "plan.dev.${var.domain}"
   custom_environment_id = vercel_custom_environment.plan_dev.id
 }
-
-moved {
-  from = vercel_project.morton-career
-  to   = vercel_project.career
-}
-
-moved {
-  from = vercel_project.morton-plan
-  to   = vercel_project.plan
-}
