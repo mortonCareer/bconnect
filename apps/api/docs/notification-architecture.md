@@ -7,6 +7,7 @@
 ```mermaid
 flowchart TD
     Socket[MessageSocketService] -- ChatMessageSentEvent --> Listener[NotificationEventListener]
+    DevReg[DeviceService · 첫 기기 등록] -- MemberFirstDeviceRegisteredEvent --> Listener
     Listener -- AFTER_COMMIT --> Svc[NotificationService]
     Svc --> Resolver[TargetResolver · 저장/push 대상]
     Svc --> Linker[NotificationLinker · DB 저장]
@@ -29,6 +30,8 @@ flowchart TD
 | render | 타입 enum 이 `title` 렌더 · `link` 조립 | - | - |
 | send | 대상별 활성 device 로 push 발송 | device_tokens | ○ |
 | disable | `INVALID` / `EXPIRED` endpoint 비활성화 | device_tokens | - |
+
+- 온보딩 알림은 **회원의 첫 기기 등록**(`MemberFirstDeviceRegisteredEvent`, 회원당 1회)이 trigger다. 이후 resolve~disable 단계는 채팅과 동일하며 **본인에게** 저장·발송한다 — 가입 축하(`SIGNUP_WELCOME`)는 항상, 프로필 완성 제안(`PROFILE_COMPLETION`)은 프로필 미완성 시에만.
 
 ## 시퀀스
 
@@ -60,14 +63,14 @@ sequenceDiagram
 ```
 
 ## 컴포넌트 구성
-- NotificationEventListener : 도메인 이벤트(`ChatMessageSentEvent`)를 `AFTER_COMMIT` 구독 후 위임
+- NotificationEventListener : 도메인 이벤트(`ChatMessageSentEvent` · `MemberFirstDeviceRegisteredEvent`)를 `AFTER_COMMIT` 구독 후 위임
 - NotificationService : 알림 처리 흐름 조립 (대상 분리 → 저장 → 렌더 → 발송 → 무효 토큰 비활성화)
-- NotificationTargetResolver : 타입별 저장 대상 · push 대상 계산 (전략, `notification.domain.target`)
+- NotificationTargetResolver : 타입별 저장 대상 · push 대상 계산 (전략, `notification.domain.target`) — 구현체 : `ChatMessageTargetResolver` · `SignupWelcomeTargetResolver` · `ProfileCompletionTargetResolver`
 - NotificationTargetResolverRegistry : 타입 → resolver 등록 · 위임 (미등록 시 `UNKNOWN_TYPE`, `notification.domain.target`)
 - NotificationMessageFactory : 렌더 변수(`NotificationArgs`) snapshot 생성 · `PushNotification` 조립
 - NotificationLinker : 알림 DB 저장 전담 (`core.domain.notification`)
 - NotificationQueryService : 알림 조회 · unread · 읽음 처리 전담 (`core.domain.notification`)
-- DeviceService : device token 등록 · 해제 · push 가능 device 조회
+- DeviceService : device token 등록 · 해제 · push 가능 device 조회 — 회원의 **첫 기기 등록 시 `MemberFirstDeviceRegisteredEvent` 발행**(온보딩 트리거)
 - PushSender / PushEndpointRegistry : push 발송 · SNS endpoint 관리 port (`notification.domain.push`)
 - SnsPushSender / SnsEndpointRegistry : AWS SNS 구현 (`dev`, `prod`)
 - LoggingPushSender / LoggingEndpointRegistry : 로컬 · 테스트 구현 (`local`, `test`)
@@ -81,9 +84,11 @@ notification
 │   ├── NotificationMessageFactory      # args snapshot · push 메시지 생성
 │   ├── NotificationType                # 타입 카탈로그(문구·이동)
 │   ├── DeviceService                   # device token 등록·조회·비활성화
+│   ├── MemberFirstDeviceRegisteredEvent # 첫 기기 등록 사건(온보딩 트리거)
 │   ├── target/                         # "누구에게 저장/발송" 계산(전략)
 │   │   ├── NotificationTargetResolver · NotificationTargetResolverRegistry
 │   │   ├── ChatMessageTargetResolver
+│   │   ├── SignupWelcomeTargetResolver · ProfileCompletionTargetResolver
 │   │   └── ResolvedNotification         # Targets(persist/push) nested record
 │   └── push/                           # push 포트 · 프로토콜(어댑터는 infrastructure/push)
 │       ├── PushSender · PushEndpointRegistry
@@ -158,8 +163,8 @@ graph TD
 | type_code | reference_type | 문구 (template) | 변수 | 트리거 |
 |---|---|---|---|---|
 | CHAT_MESSAGE | CHAT_ROOM | `%s님이 메시지를 보냈습니다` | senderName | ✅ ChatMessageSentEvent |
-| SIGNUP_WELCOME | NONE | `회원가입을 축하드립니다` | — | ⬜ 미배선 |
-| PROFILE_COMPLETION | PROFILE | `프로필을 완성하고 업체로부터 일감을 받아보세요` | — | ⬜ 미배선 |
+| SIGNUP_WELCOME | NONE | `회원가입을 축하드립니다` | — | ✅ MemberFirstDeviceRegisteredEvent (본인, 항상) |
+| PROFILE_COMPLETION | PROFILE | `프로필을 완성하고 업체로부터 일감을 받아보세요` | — | ✅ MemberFirstDeviceRegisteredEvent (본인, 프로필 미완성 시) |
 | COWORKER_REQUESTED | COWORKER_REQUEST | `%s 님으로부터 동료 요청을 제안받았습니다` | senderName | ⬜ 미배선 |
 | OFFER_RECEIVED | OFFER | `%s으로부터 섭외 요청을 제안받았습니다` | companyName | ⬜ 미배선 |
 | CONTRACT_WRITTEN | CONTRACT | `%s 님으로부터 계약서를 작성받았습니다` | senderName | ⬜ 미배선 |
@@ -218,6 +223,8 @@ graph TD
 3. 발행 패키지에 이벤트 정의, 구독 리스너에서 `NotificationService.handle(type, event)` 호출
 4. 대상 규칙이 다르면 `NotificationTargetResolver` 구현체 추가 (registry 자동 등록)
    - `ChatMessageTargetResolver` : active member 를 push 대상에서 제외
+   - `SignupWelcomeTargetResolver` : 첫 기기 등록 회원 **본인**에게 (항상)
+   - `ProfileCompletionTargetResolver` : 첫 기기 등록 회원 본인에게, 단 **프로필 미완성 시에만**(있으면 대상 비움 → 스킵)
    - 이벤트에 수신자가 명시된 타입(동료 요청 · 추천 · 섭외 등)은 직접 대상 지정
    - 시스템 알림(가입 축하 등)은 `reference_type = NONE`, `reference_id = null`
    - 대량 공지는 즉시 전체 push 대신 별도 batch/job 로 분리
