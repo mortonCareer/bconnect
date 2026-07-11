@@ -1,12 +1,13 @@
 'use client'
 
 import { useCallback, useState, type ReactNode } from 'react'
-import { MessageType, getTradeLabel } from '@bconnect/api-client'
+import { getTradeLabel } from '@bconnect/api-client'
 import type { Message, Profile } from '@bconnect/api-client'
 import { ChatInput, ProfileCard, Skeleton } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 import { PanelShell } from '../_shared/PanelShell'
 import { MessageThread } from './_parts/MessageThread'
+import { useDirectChatSocket } from './useDirectChatSocket'
 import type { ChatSummary } from './_parts/types'
 
 /** 앱이 resolve 해 내려주는 데이터. career/plan 어댑터가 useGetDirectChats·useGetProfile·useGetMyMember 로 채운다. */
@@ -56,24 +57,19 @@ export function ChatView(props: ChatViewProps) {
   const [localMessages, setLocalMessages] = useState<Message[]>([])
   const [message, setMessage] = useState('')
 
+  // 수신(본인 발신 브로드캐스트 포함)이 단일 소스 — useDirectChatSocket 주석 참조
+  const appendMessage = useCallback((incoming: Message) => {
+    setLocalMessages((prev) =>
+      prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]
+    )
+  }, [])
+  const sendMessage = useDirectChatSocket(chatId, appendMessage)
+
   const handleSend = useCallback(() => {
-    if (currentUserId == null) return
     const content = message.trim()
     if (!content) return
-    // 전송 엔드포인트 부재(BE 미구현) — optimistic-local echo. PR 본문 명시.
-    const now = new Date().toISOString()
-    const echo: Message = {
-      id: Date.now(),
-      chatId,
-      memberId: currentUserId,
-      type: MessageType.TEXT,
-      content,
-      createdAt: now,
-      modifiedAt: now,
-    }
-    setLocalMessages((prev) => [...prev, echo])
-    setMessage('')
-  }, [chatId, currentUserId, message])
+    if (sendMessage(content)) setMessage('')
+  }, [message, sendMessage])
 
   const profilePanelHref = profileHref && otherId != null ? profileHref(otherId) : undefined
   const headerItem = (
