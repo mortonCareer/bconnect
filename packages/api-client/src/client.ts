@@ -52,8 +52,19 @@ export class ApiError extends Error {
   }
 }
 
-// 토큰 갱신 함수
-export async function refreshAccessToken(): Promise<boolean> {
+// 토큰 갱신 함수 — single-flight (#782). BE 가 refresh 토큰을 회전(rotate)하고
+// mismatch 시 세션을 revoke 하므로, 동시 401 들이 각자 refresh 를 쏘면 뒤의 요청이
+// 폐기된 토큰으로 세션을 죽인다. 진행 중이면 같은 promise 를 공유해 refresh 를 1회로 묶는다.
+let refreshPromise: Promise<boolean> | null = null
+
+export function refreshAccessToken(): Promise<boolean> {
+  refreshPromise ??= doRefresh().finally(() => {
+    refreshPromise = null
+  })
+  return refreshPromise
+}
+
+async function doRefresh(): Promise<boolean> {
   try {
     const response = await ky.post(`${getBaseUrl()}/api/v1/auth/refresh`, {
       credentials: 'include',
@@ -93,10 +104,9 @@ export const apiClient = ky.create({
     ],
     afterResponse: [
       async (request, options, response) => {
-        if (
-          (response.status === 401 || response.status === 403) &&
-          !request.headers.get('X-Retry')
-        ) {
+        // 401 만 refresh 트리거 — 403 은 인가 실패(또는 BE 에러 dispatch 마스킹, #763)라
+        // refresh 로 해소되지 않는다 (#782).
+        if (response.status === 401 && !request.headers.get('X-Retry')) {
           const refreshed = await refreshAccessToken()
           if (refreshed) {
             request.headers.set('Authorization', `Bearer ${accessToken}`)
