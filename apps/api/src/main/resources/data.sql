@@ -51,6 +51,13 @@ INSERT INTO coworkers (id, min_id, max_id, created_at, modified_at) VALUES
 INSERT INTO recommendations (id, from_id, to_id, content, visible, created_at, modified_at) VALUES
 (100, 105, 100, '추천서1', true, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
+-- 테스트(100) 수신 알림 : dev 는 prod 프로파일(실 SMS)이라 고정 OTP 계정으로만 로그인 가능 → QA 는 이 계정으로 확인
+INSERT INTO notifications (id, sender_id, receiver_id, type_code, reference_id, content, template_args, read_at, created_at, modified_at) VALUES
+(100, NULL, 100, 'SIGNUP_WELCOME', NULL, NULL, NULL, TIMESTAMP '2026-01-01 12:00:00', TIMESTAMP '2026-01-01 09:00:00', TIMESTAMP '2026-01-01 12:00:00'),
+(101, NULL, 100, 'PROFILE_COMPLETION', NULL, NULL, NULL, NULL, TIMESTAMP '2026-01-02 09:00:00', TIMESTAMP '2026-01-02 09:00:00'),
+(102, 103, 100, 'COWORKER_REQUESTED', 100, NULL, '{"senderName":"반장3"}', NULL, TIMESTAMP '2026-01-03 09:00:00', TIMESTAMP '2026-01-03 09:00:00'),
+(103, 104, 100, 'COWORKER_REQUESTED', 101, NULL, '{"senderName":"반장4"}', NULL, TIMESTAMP '2026-01-04 09:00:00', TIMESTAMP '2026-01-04 09:00:00');
+
 INSERT INTO credentials (id, member_id, type, status, expired_at, created_at, modified_at) VALUES
 (100, 100, 'IDENTITY_VERIFICATION', 'PENDING', DATE '2026-12-31', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (101, 100, 'SKILL_GRADE_CERTIFICATE', 'PENDING', DATE '2026-12-31', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
