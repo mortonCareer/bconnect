@@ -186,6 +186,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/profiles/me:
+    get:
+      tags:
+      - profile-controller
+      operationId: getMine
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseProfileResponse"
     put:
       tags:
       - profile-controller
@@ -394,7 +405,7 @@ paths:
     get:
       tags:
       - company-controller
-      operationId: getMine
+      operationId: getMine_1
       responses:
         "200":
           description: OK
@@ -1809,10 +1820,10 @@ components:
     ExceptionCode:
       type: object
       properties:
-        status:
-          $ref: "#/components/schemas/HttpStatus"
         code:
           type: string
+        status:
+          $ref: "#/components/schemas/HttpStatus"
     HttpStatus:
       type: string
       enum:
