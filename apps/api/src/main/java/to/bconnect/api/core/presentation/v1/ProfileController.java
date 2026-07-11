@@ -59,6 +59,21 @@ public class ProfileController {
         return ApiResponse.success(body);
     }
 
+    @GetMapping("/me")
+    public ApiResponse<ProfileResponse> getMine(
+            @AuthenticationPrincipal AuthUser user,
+            HttpServletResponse response) {
+        val profile = profileQueryService.get(user.id());
+        val member = memberResolver.find(profile.memberId());
+        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
+        return ApiResponse.success(ProfileResponse.of(profile, member, picture));
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<ProfileResponse> get(
             @PathVariable Long id,
