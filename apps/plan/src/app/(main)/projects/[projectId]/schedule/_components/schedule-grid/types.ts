@@ -39,6 +39,8 @@ export type ScheduleTask = {
   addressDetail?: string
   request?: string
   memo?: string
+  /** 대표 기술자 — 섭외 확정(workerId) 또는 ACTIVE offer 멤버에서 어댑터가 파생 */
+  assignee?: TaskAssignee
 }
 
 export type ScheduleGridProps = {

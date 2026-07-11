@@ -45,9 +45,11 @@ function StatusPill({ status }: { status: TaskStatus }) {
   )
 }
 
-export function ScheduleGrid({ projectId, today }: ScheduleGridProps) {
+export function ScheduleGrid({ projectId, today: todayProp }: ScheduleGridProps) {
   const { panelHref, openPanel } = usePanelNav()
   const { tasks, updateTask, deleteTask, createTask } = useScheduleTasks(projectId)
+  // 오늘 = 클라이언트 시각 (자정 부근 SSR/CSR 불일치는 허용 범위)
+  const [today] = useState(() => todayProp ?? toIsoDate(new Date()))
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   // 바텀 row 드래그-생성(구글캘린더식) — 선택 day index 범위
   const createCellRef = useRef<HTMLTableCellElement>(null)
@@ -282,7 +284,9 @@ export function ScheduleGrid({ projectId, today }: ScheduleGridProps) {
                       <span className="flex min-w-0 flex-col">
                         <span className="text-sb-14 text-gray-900">{assignee.name}</span>
                         <span className="text-r-12 text-gray-500">
-                          {assignee.region} | {assignee.level} | {assignee.specialty}
+                          {[assignee.region, assignee.level, assignee.specialty]
+                            .filter(Boolean)
+                            .join(' | ')}
                         </span>
                       </span>
                     </Link>

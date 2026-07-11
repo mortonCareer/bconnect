@@ -9,6 +9,7 @@ import { membersOverrides } from './overrides/members'
 import { notificationsOverrides } from './overrides/notifications'
 import { profilesOverrides } from './overrides/profiles'
 import { recommendationsOverrides } from './overrides/recommendations'
+import { scheduleOverrides } from './overrides/schedule'
 import { tasksOverrides } from './overrides/tasks'
 
 // API mock(`/api/*`) 응답만 2초 지연 — 실 네트워크 지연 모사로 로딩 UI 검증. mock 응답이
@@ -40,6 +41,9 @@ export const handlers = [
   ...notificationsOverrides,
   ...profilesOverrides,
   ...recommendationsOverrides,
+  // scheduleOverrides 가 tasksOverrides 보다 먼저 — DELETE /tasks/{id} 중복을 schedule 이
+  // fall-through 로 넘기는 순서 전제 (overrides/schedule.ts 주석 참조)
+  ...scheduleOverrides,
   ...tasksOverrides,
   ...getBconnectAPIMock(),
 ]

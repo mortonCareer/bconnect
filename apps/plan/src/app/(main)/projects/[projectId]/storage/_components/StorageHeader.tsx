@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Progress } from '@bconnect/ui'
-import { getMockProject } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
+import { useGetProject } from '@bconnect/api-client'
 import { useFolder, useStorageUsage } from '@/lib/storage-mock/hooks'
 
 const toMB = (bytes: number) => `${Math.round(bytes / 1_000_000)}MB`
@@ -10,11 +10,11 @@ const toGB = (bytes: number) => `${Math.round(bytes / 1_073_741_824)}GB`
 
 /** 동산보드 헤더 — 프로젝트명 + breadcrumb(프로젝트 › 폴더) + TIP + 용량바. */
 export function StorageHeader({ projectId, folderId }: { projectId: string; folderId?: string }) {
-  const project = getMockProject(projectId)
+  const { data: project } = useGetProject(Number(projectId))
   const { data: folder } = useFolder(folderId ?? '')
   const { data: usage } = useStorageUsage(projectId)
 
-  const projectName = project?.name ?? '프로젝트'
+  const projectName = project?.title ?? '프로젝트'
   const pct =
     usage && usage.totalBytes ? Math.min(100, (usage.usedBytes / usage.totalBytes) * 100) : 0
 

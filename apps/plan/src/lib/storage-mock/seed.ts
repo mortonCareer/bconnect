@@ -20,7 +20,7 @@ const MEMO_BODY = `[ 작업시 주의사항 ]
 • 폐자재 관리사무소 지정 장소에만 배출
 • 작업 완료 후 공용부 청소 상태 확인`
 
-// projectId 는 schedule MOCK_PROJECTS id 에 정렬 ('1' = 모튼아파트 리모델링 01).
+// projectId 는 MSW 공정표 시드(packages/mocks overrides/schedule.ts) 프로젝트 id 에 정렬.
 // fileCount/coverImageUrl 는 store 초기화 시 SEED_IMAGES 기준으로 재계산되므로 0/undefined 로 둠.
 export const SEED_FOLDERS: Folder[] = [
   {

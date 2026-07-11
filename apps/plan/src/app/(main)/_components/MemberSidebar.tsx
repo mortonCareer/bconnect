@@ -9,12 +9,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { MOCK_PROJECTS } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
+import { useGetProjects } from '@bconnect/api-client'
 import { SidebarFooter } from './SidebarFooter'
 
 const MAX_BADGE_COUNT = 99
-
-const PROJECT_OPTIONS = MOCK_PROJECTS.map((p) => ({ value: p.id, label: p.name }))
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null
@@ -68,9 +66,14 @@ function ProjectSection({
   activeSlug: string
 }) {
   const router = useRouter()
-  const [selectedProject, setSelectedProject] = useState(
-    pathProjectId ?? PROJECT_OPTIONS[0]?.value ?? ''
-  )
+  const { data: projects } = useGetProjects()
+  const projectOptions = (projects ?? []).map((p) => ({
+    value: String(p.id ?? ''),
+    label: p.title ?? '',
+  }))
+  const [selectedProject, setSelectedProject] = useState(pathProjectId ?? '')
+  // 목록 로드 후에도 선택이 비어 있으면 첫 프로젝트로 (path 미진입 초기 상태)
+  if (!selectedProject && projectOptions[0]) setSelectedProject(projectOptions[0].value)
   // path 로 다른 프로젝트에 진입하면 셀렉트를 따라가게 동기화 (render-time adjustment)
   const [prevPathId, setPrevPathId] = useState(pathProjectId)
   if (pathProjectId !== prevPathId) {
@@ -85,11 +88,20 @@ function ProjectSection({
     if (next) router.push(`/projects/${next}/schedule`)
   }
 
+  // 프로젝트 목록 로드 전(selectedProject 빈값)엔 링크 비활성 — 빈 보간 시 /projects//schedule 오라우팅
   const items: ProjectMenuItem[] = [
-    { slug: 'schedule', label: '공정표', href: `/projects/${selectedProject}/schedule` },
+    {
+      slug: 'schedule',
+      label: '공정표',
+      href: selectedProject ? `/projects/${selectedProject}/schedule` : null,
+    },
     // TODO: 페이지 구현 시 href 연결 (#375 follow-up — 모집 관리)
     { slug: 'recruit', label: '모집 관리', href: null },
-    { slug: 'storage', label: '문서 저장소', href: `/projects/${selectedProject}/storage` },
+    {
+      slug: 'storage',
+      label: '문서 저장소',
+      href: selectedProject ? `/projects/${selectedProject}/storage` : null,
+    },
   ]
   // active 표시는 현재 path 의 프로젝트를 보고 있을 때만
   const onSelectedProject = pathProjectId === selectedProject
@@ -103,7 +115,7 @@ function ProjectSection({
         <Select
           value={selectedProject}
           onChange={handleProjectChange}
-          options={PROJECT_OPTIONS}
+          options={projectOptions}
           placeholder="프로젝트 선택"
         />
         {items.map((item) => {

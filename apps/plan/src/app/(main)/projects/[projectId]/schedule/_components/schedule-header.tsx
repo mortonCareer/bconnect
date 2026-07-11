@@ -13,11 +13,11 @@ import {
   ROW_INPUT_CLASSES,
   TextField,
 } from '@bconnect/ui'
+import { useGetProject } from '@bconnect/api-client'
 import type { Address } from '@bconnect/api-client'
 
 export type ScheduleHeaderProps = {
-  projectName: string
-  address: string
+  projectId: string
 }
 
 const EDIT_BUTTON_CLASSES =
@@ -172,11 +172,18 @@ function AddressRow({ initialAddress }: { initialAddress: string }) {
   )
 }
 
-export function ScheduleHeader({ projectName, address }: ScheduleHeaderProps) {
+export function ScheduleHeader({ projectId }: ScheduleHeaderProps) {
+  const { data: project } = useGetProject(Number(projectId))
+
   return (
-    <header className="flex flex-col gap-[10px] border-b border-solid border-[#f0f0f0] px-10 pt-7 pb-[22px]">
-      <ProjectNameRow initialName={projectName} />
-      <AddressRow initialAddress={address} />
+    <header className="flex min-h-[110px] flex-col gap-[10px] border-b border-solid border-[#f0f0f0] px-10 pt-7 pb-[22px]">
+      {/* 편집 행은 로컬 상태 초기값이라 로드 완료 후 마운트 (useUpdateProject 연동은 후속) */}
+      {project && (
+        <>
+          <ProjectNameRow initialName={project.title ?? ''} />
+          <AddressRow initialAddress={formatAddress(project.address ?? {})} />
+        </>
+      )}
     </header>
   )
 }
