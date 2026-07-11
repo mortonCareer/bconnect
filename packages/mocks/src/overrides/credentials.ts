@@ -2,10 +2,21 @@ import {
   CredentialStatus,
   CredentialType,
   getGetCredentialsMockHandler,
+  getGetMyCredentialsMockHandler,
   getCreateCredentialMockHandler,
   getDeleteCredentialMockHandler,
+  getCreateAttachmentPresignMockHandler,
+  getCreateAttachmentConfirmMockHandler,
 } from '@bconnect/api-client'
-import type { Credential, CreateCredentialRequest } from '@bconnect/api-client'
+import type {
+  Attachment,
+  ConfirmRequest,
+  CreateCredentialRequest,
+  Credential,
+  PresignRequest,
+  PresignedFile,
+} from '@bconnect/api-client'
+import { http, HttpResponse } from 'msw'
 
 let nextId = 1
 const cred = (
@@ -43,13 +54,52 @@ const CREDENTIALS: Credential[] = [
   cred(CredentialType.NATIONAL_TECHNICAL_QUALIFICATION, CredentialStatus.ACCEPTED, '2029-11-30'),
 ]
 
+// presign → PUT → confirm 업로드 체인 (#340 계약)의 CREDENTIAL 소비분. presign 이
+// pending 첨부를 만들고, createCredential 이 attachmentId 로 집어 credential 에 바인딩.
+// ⚠️ presign/confirm 핸들러는 컨텍스트 공용 엔드포인트 — #806(drives)에도 같은 override 가
+// 있어 둘 다 머지되면 하나로 통합 필요.
+let nextAttachmentId = 1
+const pendingAttachments = new Map<number, Attachment>()
+
 export const credentialsOverrides = [
   getGetCredentialsMockHandler(() => CREDENTIALS),
+  getGetMyCredentialsMockHandler(() => CREDENTIALS),
   getCreateCredentialMockHandler(async ({ request }) => {
     const body = (await request.json()) as CreateCredentialRequest
     const created = cred(body.type, CredentialStatus.ACCEPTED, body.expiredAt ?? undefined)
+    if (body.attachmentId != null) {
+      created.attachment = pendingAttachments.get(body.attachmentId)
+      pendingAttachments.delete(body.attachmentId)
+    }
     CREDENTIALS.push(created)
     return created.id ?? 0
+  }),
+  getCreateAttachmentPresignMockHandler(async ({ request }): Promise<PresignedFile[]> => {
+    const body = (await request.json()) as PresignRequest
+    return body.files.map((f) => {
+      const id = nextAttachmentId++
+      const stamp = new Date().toISOString()
+      pendingAttachments.set(id, {
+        id,
+        memberId: 1,
+        type: body.type,
+        filename: f.filename,
+        contentType: f.contentType,
+        size: f.size,
+        createdAt: stamp,
+        modifiedAt: stamp,
+        url: `/mock-s3/${id}`,
+      })
+      return { id, uploadUrl: `/mock-s3/${id}` }
+    })
+  }),
+  // presigned PUT 수신부 — 실 S3 대역. 바이트는 버린다.
+  http.put('*/mock-s3/:id', () => new HttpResponse(null, { status: 200 })),
+  getCreateAttachmentConfirmMockHandler(async ({ request }): Promise<Attachment[]> => {
+    const body = (await request.json()) as ConfirmRequest
+    return body.attachmentIds
+      .map((id) => pendingAttachments.get(id))
+      .filter((a): a is Attachment => a != null)
   }),
   getDeleteCredentialMockHandler(({ params }) => {
     const index = CREDENTIALS.findIndex((c) => c.id === Number(params.credentialId))

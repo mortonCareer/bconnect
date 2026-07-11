@@ -23,7 +23,10 @@ import { CredentialList } from '@/app/(main)/profile/certifications/_components/
 interface QualificationTabProps {
   credentials: Credential[]
   onRequestDelete: (id: number) => void
-  onSubmit: (type: CredentialType, payload: { file: FileValue | null; note?: string }) => void
+  onSubmit: (
+    type: CredentialType,
+    payload: { file: FileValue | null; note?: string }
+  ) => Promise<boolean>
   isLoading: boolean
   isError: boolean
   onRetry: () => void
@@ -62,9 +65,10 @@ export function QualificationTab({
     form.reset({ file: null, note: '' })
   }, [activeSubTab, form])
 
-  const submit = form.handleSubmit((data) => {
-    onSubmit(info.type, { file: data.file, note: isOther ? data.note : undefined })
-    form.reset({ file: null, note: '' })
+  // 실패 시 리셋하지 않아 고른 파일이 유지 — 재시도 가능.
+  const submit = form.handleSubmit(async (data) => {
+    const ok = await onSubmit(info.type, { file: data.file, note: isOther ? data.note : undefined })
+    if (ok) form.reset({ file: null, note: '' })
   })
 
   return (
@@ -126,6 +130,7 @@ export function QualificationTab({
                 size="full"
                 requireAllFilled={false}
                 disabled={!hasFile}
+                isLoading={form.formState.isSubmitting}
               >
                 제출하기
               </FormSubmitButton>
