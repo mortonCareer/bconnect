@@ -39,6 +39,14 @@ public class CompanyService {
         return Company.of(found);
     }
 
+    @Transactional(readOnly = true)
+    public Company get(AuthUser user) {
+        val found = companyRepository.findByMemberId(user.id())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        return Company.of(found);
+    }
+
     @Transactional
     public Long create(AuthUser user, CreateCompany command) {
         if (companyRepository.existsByMemberId(user.id()))

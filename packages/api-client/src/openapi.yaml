@@ -391,6 +391,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/companies/me:
+    get:
+      tags:
+      - company-controller
+      operationId: getMine
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCompanyResponse"
     put:
       tags:
       - company-controller
