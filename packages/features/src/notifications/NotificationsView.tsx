@@ -1,14 +1,13 @@
 'use client'
 
-import type { ReactNode } from 'react'
-import { useQueryClient } from '@bconnect/api-client'
+import { useCallback, useEffect, useRef, type ReactNode } from 'react'
+import { useUpdateNotificationsRead } from '@bconnect/api-client'
 import { NotificationItem, Skeleton } from '@bconnect/ui'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
 import { PanelMessage } from '../_shared/PanelMessage'
 import { useNotifications } from './useNotifications'
-import type { AppNotification } from './types'
 
 type NotificationsViewShellProps =
   | {
@@ -27,17 +26,28 @@ type NotificationsViewShellProps =
 export type NotificationsViewProps = NotificationsViewShellProps
 
 export function NotificationsView(props: NotificationsViewProps) {
-  const queryClient = useQueryClient()
-  const { data, isLoading, isError } = useNotifications()
+  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useNotifications()
+  const { mutate: markAllRead, isPending: isMarkingAllRead } = useUpdateNotificationsRead()
 
-  const markAllRead = () => {
-    // config 대상 밖: optimistic (setQueryData 직접 갱신, 무효화 아님) — ADR-0025
-    queryClient.setQueryData<AppNotification[]>(['notifications'], (prev) =>
-      prev?.map((n) => (n.read ? n : { ...n, read: true }))
-    )
-  }
+  const notifications = data?.pages.flatMap((page) => page.content ?? []) ?? []
+  const hasItems = notifications.length > 0
 
-  const hasItems = !!data && data.length > 0
+  const bottomObserverRef = useRef<HTMLDivElement>(null)
+  const handleBottomObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) fetchNextPage()
+    },
+    [fetchNextPage, hasNextPage, isFetchingNextPage]
+  )
+
+  useEffect(() => {
+    const target = bottomObserverRef.current
+    if (!target) return
+    const observer = new IntersectionObserver(handleBottomObserver)
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [handleBottomObserver])
 
   const body = (
     <>
@@ -45,8 +55,9 @@ export function NotificationsView(props: NotificationsViewProps) {
         <div className="flex justify-end px-4 py-2">
           <button
             type="button"
-            onClick={markAllRead}
-            className="cursor-pointer whitespace-nowrap text-m-12 text-primary-500"
+            onClick={() => markAllRead()}
+            disabled={isMarkingAllRead}
+            className="cursor-pointer whitespace-nowrap text-m-12 text-primary-500 disabled:opacity-50"
           >
             모두 읽음
           </button>
@@ -57,20 +68,25 @@ export function NotificationsView(props: NotificationsViewProps) {
           <NotificationsSkeleton />
         ) : isError ? (
           <PanelMessage>알림을 불러올 수 없습니다</PanelMessage>
-        ) : !data || data.length === 0 ? (
+        ) : !hasItems ? (
           <PanelMessage>새로운 알림이 없습니다</PanelMessage>
         ) : (
-          <ul className="flex flex-col">
-            {data.map((n) => (
-              <li key={n.id} className="contents">
-                <NotificationItem
-                  content={n.body}
-                  timestamp={formatRelativeTime(n.createdAt)}
-                  read={n.read}
-                />
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="flex flex-col">
+              {notifications.map((n) => (
+                <li key={n.id} className="contents">
+                  <NotificationItem
+                    profileImage={n.sender?.picture}
+                    content={n.message ?? ''}
+                    timestamp={formatRelativeTime(n.createdAt ?? '')}
+                    read={n.read}
+                  />
+                </li>
+              ))}
+            </ul>
+            <div ref={bottomObserverRef} className="h-px" aria-hidden />
+            {isFetchingNextPage && <NotificationsSkeleton />}
+          </>
         )}
       </PanelScroll>
     </>

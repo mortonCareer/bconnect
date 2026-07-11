@@ -65,6 +65,11 @@ export default defineConfig({
             },
             // 내 회원정보 변경 → 내 회원정보
             { onMutations: ['updateMyMember'], invalidates: ['getMyMember'] },
+            // 알림 읽음 처리(단건/전체) → 알림 목록 + 안읽음 개수
+            {
+              onMutations: ['updateNotificationRead', 'updateNotificationsRead'],
+              invalidates: ['getNotifications', 'getNotificationsUnreadCount'],
+            },
             // TODO(#728): 프로필 수정(updateMyProfile/updateMyProfileAbout) → '내 프로필' 조회 무효화는 보류.
             // 지금은 '내 프로필' 전용 조회 훅이 없다(getProfile 은 /profiles/{id} 남의 프로필). BE 정합으로 훅 생기면 추가.
           ],

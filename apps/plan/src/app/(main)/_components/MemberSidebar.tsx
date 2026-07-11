@@ -2,7 +2,7 @@
 
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useGetMyMember } from '@bconnect/api-client'
-import { useUnreadChatCount } from '@bconnect/features'
+import { useUnreadChatCount, useUnreadNotificationCount } from '@bconnect/features'
 import { getAvatarUrl } from '@bconnect/config/avatar'
 import { Select } from '@bconnect/ui'
 import Image from 'next/image'
@@ -12,10 +12,6 @@ import { useState } from 'react'
 import { MOCK_PROJECTS } from '@/app/(main)/projects/[projectId]/schedule/_components/mock'
 import { SidebarFooter } from './SidebarFooter'
 
-// TODO(신규 BE 이슈 필요 — notification 도메인): 엔드포인트 추가 시
-//   `const { data } = useGetMyNotifications(); const NOTIFICATION_COUNT = data?.unreadCount ?? 0`
-//   형태로 교체. count=0 이면 CountBadge 자동 숨김.
-const NOTIFICATION_COUNT = 4
 const MAX_BADGE_COUNT = 99
 
 const PROJECT_OPTIONS = MOCK_PROJECTS.map((p) => ({ value: p.id, label: p.name }))
@@ -176,6 +172,7 @@ function ProfileSection() {
 }
 
 export function MemberSidebar() {
+  const notificationCount = useUnreadNotificationCount()
   const messageCount = useUnreadChatCount()
   const { panelHref } = usePanelNav()
   const pathname = usePathname()
@@ -190,7 +187,7 @@ export function MemberSidebar() {
         <ProfileSection />
         <div className="h-px bg-gray-300" />
         <div className="flex flex-col gap-0.5">
-          <NavItem label="알림" count={NOTIFICATION_COUNT} href={panelHref('notifications')} />
+          <NavItem label="알림" count={notificationCount} href={panelHref('notifications')} />
           <NavItem label="메시지" count={messageCount} href={panelHref('messages')} />
           <NavItem label="기술자 탐색" count={0} href="/" active={pathname === '/'} />
         </div>

@@ -1,34 +1,155 @@
-import { http, HttpResponse } from 'msw'
+import {
+  getGetNotificationsMockHandler,
+  getGetNotificationsUnreadCountMockHandler,
+  getUpdateNotificationReadMockHandler,
+  getUpdateNotificationsReadMockHandler,
+} from '@bconnect/api-client'
+import type { Notification } from '@bconnect/api-client'
 
-// 알림 도메인은 BE 미구현 → orval generated 핸들러 없음. 독립 placeholder 핸들러.
-// 응답 shape 은 @bconnect/features 의 AppNotification 과 맞춘다 (BE 확정 시 generated 로 교체).
-const PLACEHOLDER = [
+// 알림 목록·읽음 상태 stateful override — faker 랜덤이면 커서 페이지네이션이
+// (임의 hasNext/nextCursor 로) 무한 반복되고, 읽음 처리 후에도 뱃지가 안 줄어 GUI 검증 불가.
+
+interface NotificationSeed {
+  type: string
+  message: string
+  senderName: string
+  daysAgo: number
+  read: boolean
+}
+
+const SEEDS: NotificationSeed[] = [
   {
-    id: 1,
-    type: 'CHAT',
-    title: '새 메시지',
-    body: '김기술님이 메시지를 보냈습니다.',
+    type: 'CHAT_MESSAGE',
+    message: '김기술님이 메시지를 보냈습니다.',
+    senderName: '김기술',
+    daysAgo: 0,
     read: false,
-    createdAt: '2026-06-03T09:00:00.000Z',
   },
   {
-    id: 2,
-    type: 'RECOMMENDATION',
-    title: '새 추천서',
-    body: '이업체님이 회원님에게 추천서를 작성했습니다.',
+    type: 'OFFER_RECEIVED',
+    message: '서정건축님이 작업을 제안했습니다.',
+    senderName: '서정건축',
+    daysAgo: 1,
     read: false,
-    createdAt: '2026-06-02T15:20:00.000Z',
   },
   {
-    id: 3,
-    type: 'SYSTEM',
-    title: '프로필이 노출되었어요',
-    body: '오늘 12명의 업체가 회원님의 프로필을 확인했습니다.',
+    type: 'COWORKER_REQUESTED',
+    message: '박영희님이 동료 요청을 보냈습니다.',
+    senderName: '박영희',
+    daysAgo: 2,
+    read: false,
+  },
+  {
+    type: 'CONTRACT_WRITTEN',
+    message: '이준호님이 계약서를 작성했습니다.',
+    senderName: '이준호',
+    daysAgo: 3,
     read: true,
-    createdAt: '2026-06-01T08:30:00.000Z',
+  },
+  {
+    type: 'CHAT_MESSAGE',
+    message: '최민수님이 메시지를 보냈습니다.',
+    senderName: '최민수',
+    daysAgo: 4,
+    read: true,
+  },
+  {
+    type: 'PROFILE_COMPLETION',
+    message: '프로필을 완성하고 더 많은 제안을 받아보세요.',
+    senderName: '',
+    daysAgo: 6,
+    read: true,
+  },
+  {
+    type: 'CHAT_MESSAGE',
+    message: '한상우님이 메시지를 보냈습니다.',
+    senderName: '한상우',
+    daysAgo: 8,
+    read: true,
+  },
+  {
+    type: 'OFFER_RECEIVED',
+    message: '대원인테리어님이 작업을 제안했습니다.',
+    senderName: '대원인테리어',
+    daysAgo: 11,
+    read: true,
+  },
+  {
+    type: 'CHAT_MESSAGE',
+    message: '정다혜님이 메시지를 보냈습니다.',
+    senderName: '정다혜',
+    daysAgo: 14,
+    read: true,
+  },
+  {
+    type: 'CONTRACT_WRITTEN',
+    message: '서정건축님이 계약서를 작성했습니다.',
+    senderName: '서정건축',
+    daysAgo: 18,
+    read: true,
+  },
+  {
+    type: 'CHAT_MESSAGE',
+    message: '김기술님이 메시지를 보냈습니다.',
+    senderName: '김기술',
+    daysAgo: 22,
+    read: true,
+  },
+  {
+    type: 'SIGNUP_WELCOME',
+    message: '가입을 축하합니다! 품앗이를 시작해보세요.',
+    senderName: '',
+    daysAgo: 30,
+    read: true,
   },
 ]
 
+const DAY_MS = 24 * 60 * 60 * 1000
+
+// id 내림차순(최신순) — BE 커서(keyset, id 기준)와 동일한 정렬 의미
+const notifications: Notification[] = SEEDS.map((seed, i) => ({
+  id: SEEDS.length - i,
+  type: seed.type,
+  message: seed.message,
+  content: '',
+  referenceType: 'none',
+  sender: seed.senderName
+    ? { id: 100 + i, name: seed.senderName, username: `user${100 + i}` }
+    : undefined,
+  read: seed.read,
+  createdAt: new Date(Date.now() - seed.daysAgo * DAY_MS).toISOString(),
+}))
+
+const DEFAULT_LIMIT = 20
+
 export const notificationsOverrides = [
-  http.get('*/api/v1/notifications', () => HttpResponse.json({ success: true, data: PLACEHOLDER })),
+  getGetNotificationsMockHandler(({ request }) => {
+    const url = new URL(request.url)
+    const cursor = Number(url.searchParams.get('cursor')) || undefined
+    const limit = Number(url.searchParams.get('limit')) || DEFAULT_LIMIT
+    const remaining =
+      cursor === undefined ? notifications : notifications.filter((n) => (n.id ?? 0) < cursor)
+    const content = remaining.slice(0, limit)
+    const hasNext = remaining.length > limit
+    return {
+      content,
+      hasNext,
+      nextCursor: hasNext ? content[content.length - 1]?.id : undefined,
+    }
+  }),
+
+  getGetNotificationsUnreadCountMockHandler(() => notifications.filter((n) => !n.read).length),
+
+  getUpdateNotificationReadMockHandler(({ params }) => {
+    const target = notifications.find((n) => n.id === Number(params.id))
+    if (target) target.read = true
+    return { success: true }
+  }),
+
+  getUpdateNotificationsReadMockHandler(() => {
+    notifications.forEach((n) => {
+      n.read = true
+    })
+    return { success: true }
+  }),
 ]

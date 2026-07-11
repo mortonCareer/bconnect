@@ -1,6 +1,7 @@
 import type {
   OpenAPIObject,
   OperationObject,
+  ParameterObject,
   ReferenceObject,
   ResponseObject,
   ResponsesObject,
@@ -27,6 +28,8 @@ const OPID_SPECIAL: Record<string, string> = {
   'POST /api/v1/auth/logout': 'logout',
   'GET /api/v1/credentials/me': 'getMyCredentials',
   'PUT /api/v1/offers/reorder': 'reorderOffers',
+  // 규칙 파생이 PATCH /notifications/{id}/read(단건) 와 동일한 updateNotificationRead 로 충돌 → 복수형으로 분리
+  'PATCH /api/v1/notifications/read': 'updateNotificationsRead',
 }
 
 const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'patch', 'options', 'head', 'trace'] as const
@@ -48,6 +51,7 @@ export default defineTransformer((spec) => {
   const renameMap = buildRenameMap(schemas)
   applyRename(api, schemas, renameMap)
   rewriteOperationIds(api)
+  flattenObjectQueryParams(api, schemas)
   unwrapEnvelopes(api, schemas)
   pruneOrphans(api, schemas)
 
@@ -167,6 +171,33 @@ function rewriteOperationIds(api: OpenAPIObject): void {
       const op = (item as Record<string, unknown>)[method] as OperationObject | undefined
       if (!op || typeof op !== 'object') continue
       op.operationId = deriveOperationId(method, path, op.operationId)
+    }
+  }
+}
+
+// Spring 바인딩·orval URL 빌더 둘 다 flat 쿼리 전제 — 객체 파라미터(CursorLimit 등)를 프로퍼티 단위로 펼친다
+function flattenObjectQueryParams(api: OpenAPIObject, schemas: Record<string, SchemaObject>): void {
+  for (const item of Object.values(api.paths ?? {})) {
+    if (!item || typeof item !== 'object') continue
+    for (const method of HTTP_METHODS) {
+      const op = (item as Record<string, unknown>)[method] as OperationObject | undefined
+      if (!op?.parameters) continue
+      op.parameters = op.parameters.flatMap((param) => {
+        if ('$ref' in param) return [param]
+        const p = param as ParameterObject
+        const ref = p.schema && '$ref' in p.schema ? p.schema.$ref : undefined
+        if (p.in !== 'query' || !ref) return [param]
+        const target = schemas[ref.replace('#/components/schemas/', '')]
+        if (!target?.properties) return [param] // enum 등 비-객체 $ref 는 유지
+        return Object.entries(target.properties).map(
+          ([name, schema]): ParameterObject => ({
+            name,
+            in: 'query',
+            required: target.required?.includes(name) ?? false,
+            schema,
+          })
+        )
+      })
     }
   }
 }
