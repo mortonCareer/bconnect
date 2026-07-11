@@ -91,6 +91,7 @@ public class SecurityConfig {
                         .requestMatchers(POST, "/api/v1/members").hasRole("GUEST")
                         .requestMatchers(GET, "/api/v1/members/check-username").permitAll()
                         .requestMatchers(GET, "/api/v1/members").hasRole("ADMIN")
+                        .requestMatchers(GET, "/api/v1/profiles/me").authenticated()
                         .requestMatchers(GET, "/api/v1/profiles/**").permitAll()
                         .requestMatchers(GET, "/api/v1/feeds/**").permitAll()
                         .requestMatchers(GET, "/api/v1/credentials/me").authenticated()
