@@ -24,3 +24,10 @@ export function clearAuthHint() {
   if (typeof document === 'undefined') return
   document.cookie = `${AUTH_HINT_COOKIE}=; Max-Age=0; ${cookieAttributes()}`
 }
+
+// 클라이언트에서도 proxy 가드와 같은 낙관 판정 재사용 — 인증 필요한 부수효과(FCM 기기 등록 등)의
+// 게이트 용도. getAccessToken() 은 앱 진입 직후엔 로그인 유저도 null(refresh 전)이라 게이트로 못 씀.
+export function hasAuthHint(): boolean {
+  if (typeof document === 'undefined') return false
+  return document.cookie.split('; ').some((c) => c.startsWith(`${AUTH_HINT_COOKIE}=`))
+}

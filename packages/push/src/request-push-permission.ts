@@ -40,10 +40,20 @@ async function fetchFcmToken(): Promise<string | null> {
 
 /**
  * 토큰 발급 + 서버 등록 + store 반영.
- * 권한이 이미 granted 인 앱 진입 시점과 soft-ask 수락 직후 양쪽에서 공유.
+ * 권한이 이미 granted 인 앱 진입 시점, soft-ask 수락 직후, 로그인 성공 직후(#800)에서 공유.
  * (서버 UPSERT 로 last_active_at 갱신 — Firebase 공식 권장 패턴)
+ *
+ * granted 가드 필수 — getToken 은 권한 미결정(default) 상태에서 호출되면 네이티브 권한
+ * 팝업을 직접 띄워 soft-ask 게이트를 우회한다. granted 가 아니면 조용히 no-op.
  */
 export async function syncDeviceToken(): Promise<void> {
+  if (
+    typeof window === 'undefined' ||
+    !('Notification' in window) ||
+    Notification.permission !== 'granted'
+  ) {
+    return
+  }
   const token = await fetchFcmToken()
   if (!token) return
   usePushStore.setState({ token })

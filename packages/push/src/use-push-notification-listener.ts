@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { onMessage } from 'firebase/messaging'
+import { hasAuthHint } from '@bconnect/api-client'
 import { getFcmMessaging } from './firebase'
 import { useNotificationStore } from './notification-store'
 import { usePushStore } from './push-store'
@@ -42,8 +43,10 @@ export function usePushNotificationListener(): void {
         permissionStatus: mapPermission(Notification.permission),
       })
 
-      // 이미 허용된 상태면 토큰 발급 + 서버 등록 (앱 진입마다 UPSERT 로 last_active_at 갱신)
-      if (Notification.permission === 'granted') await syncDeviceToken()
+      // 이미 허용된 상태면 토큰 발급 + 서버 등록 (앱 진입마다 UPSERT 로 last_active_at 갱신).
+      // 로그인 게이트 필수(#800) — 기기 등록 API 는 인증 필요라 로그아웃 상태면 401.
+      // 세션 중 로그인하는 케이스는 auth-store login() 이 syncDeviceToken 을 직접 호출.
+      if (Notification.permission === 'granted' && hasAuthHint()) await syncDeviceToken()
 
       // 포그라운드 수신 리스너
       // data-only 페이로드(title/body 가 data 안)도 대응, 딥링크는 BE 가 data.url 에 직접 넣음
