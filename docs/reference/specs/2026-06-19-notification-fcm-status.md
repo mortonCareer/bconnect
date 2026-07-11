@@ -211,10 +211,10 @@ Notification                         NotificationType  (타입당 1행 = 레지�
 
 ### Mock (MSW, dev 전용)
 
-| 항목                                                        | 상태     | 위치                                                                                                    |
-| ----------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
-| devices — stateful UPSERT/delete                            | ✅       | [packages/mocks/src/overrides/devices.ts](../../../packages/mocks/src/overrides/devices.ts)             |
-| notifications — placeholder 3건(CHAT/RECOMMENDATION/SYSTEM) | ✅(임시) | [packages/mocks/src/overrides/notifications.ts](../../../packages/mocks/src/overrides/notifications.ts) |
+| 항목                                                                                         | 상태 | 위치                                                                                                    |
+| -------------------------------------------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------- |
+| devices — generated 핸들러로 대체 (#784: 등록 상태를 읽는 API 부재로 stateful override 삭제) | ✅   | orval generated (`getBconnectAPIMock`)                                                                  |
+| notifications — stateful (커서 페이징·읽음 상태, #784 에서 generated 핸들러 래핑으로 교체)   | ✅   | [packages/mocks/src/overrides/notifications.ts](../../../packages/mocks/src/overrides/notifications.ts) |
 
 ### 테스트
 

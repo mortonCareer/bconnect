@@ -8,7 +8,7 @@
 packages/mocks/src/
 ├── overrides/
 │   ├── auth.ts                   # OTP 검증 stateful, signup/login 분기, error 응답
-│   └── devices.ts                # FCM 토큰 UPSERT 의미
+│   └── notifications.ts          # 알림 목록·읽음 상태 stateful (커서 페이징, 뱃지 연동)
 ├── handlers.ts                   # [...overrides, ...getBconnectAPIMock()]
 ├── browser.ts                    # setupWorker (브라우저 dev)
 ├── server.ts                     # setupServer (Node 테스트)
@@ -18,7 +18,7 @@ packages/mocks/src/
 ## 핵심 패턴 — orval generated + thin override
 
 - **자동 생성 (orval)**: `getBconnectAPIMock()` — spec 의 모든 endpoint 에 대해 faker 기반 random 응답 핸들러 생성. spec 변경 → 자동 동기화.
-- **override (손으로)**: stateful flow (예: OTP 발송 ↔ 검증 매칭, signup/login 분기, FCM 토큰 UPSERT) 만. 약 100 LOC.
+- **override (손으로)**: stateful flow (예: OTP 발송 ↔ 검증 매칭, signup/login 분기, 알림 읽음 상태) 만.
 - **합치기 순서**: `[...overrides, ...getBconnectAPIMock()]` — override 가 우선 매칭 (배열 앞쪽).
 
 ## 사용처

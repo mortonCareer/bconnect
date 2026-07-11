@@ -80,8 +80,7 @@ export function MessageThread({
       number | undefined
     >({
       queryKey: getGetDirectChatMessagesQueryKey(chatId),
-      queryFn: ({ pageParam }) =>
-        getDirectChatMessages(chatId, { cursorLimit: { cursor: pageParam } }),
+      queryFn: ({ pageParam }) => getDirectChatMessages(chatId, { cursor: pageParam }),
       initialPageParam: undefined,
       getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.nextCursor : undefined),
     })

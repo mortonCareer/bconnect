@@ -2,7 +2,7 @@
 -- 테스트 데이터 (100 ~ 199)
 -- 샘플 데이터 (200 ~ 299)
 -- 실제 데이터 (1000 ~)
--- 모든 테이블 최소 5행 유지 (otps · signup_tokens · sessions 제외 : 런타임 발급 데이터)
+-- 모든 테이블 최소 5행 유지 (otps · signup_tokens · sessions · device_tokens 제외 : 런타임 발급 데이터)
 
 -- 운영 (0 ~ 99)
 INSERT INTO members (id, username, name, phone, role, created_at, modified_at) VALUES
@@ -50,6 +50,13 @@ INSERT INTO coworkers (id, min_id, max_id, created_at, modified_at) VALUES
 
 INSERT INTO recommendations (id, from_id, to_id, content, visible, created_at, modified_at) VALUES
 (100, 105, 100, '추천서1', true, TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
+
+-- 테스트(100) 수신 알림 : dev 는 prod 프로파일(실 SMS)이라 고정 OTP 계정으로만 로그인 가능 → QA 는 이 계정으로 확인
+INSERT INTO notifications (id, sender_id, receiver_id, type_code, reference_id, content, template_args, read_at, created_at, modified_at) VALUES
+(100, NULL, 100, 'SIGNUP_WELCOME', NULL, NULL, NULL, TIMESTAMP '2026-01-01 12:00:00', TIMESTAMP '2026-01-01 09:00:00', TIMESTAMP '2026-01-01 12:00:00'),
+(101, NULL, 100, 'PROFILE_COMPLETION', NULL, NULL, NULL, NULL, TIMESTAMP '2026-01-02 09:00:00', TIMESTAMP '2026-01-02 09:00:00'),
+(102, 103, 100, 'COWORKER_REQUESTED', 100, NULL, '{"senderName":"반장3"}', NULL, TIMESTAMP '2026-01-03 09:00:00', TIMESTAMP '2026-01-03 09:00:00'),
+(103, 104, 100, 'COWORKER_REQUESTED', 101, NULL, '{"senderName":"반장4"}', NULL, TIMESTAMP '2026-01-04 09:00:00', TIMESTAMP '2026-01-04 09:00:00');
 
 INSERT INTO credentials (id, member_id, type, status, expired_at, created_at, modified_at) VALUES
 (100, 100, 'IDENTITY_VERIFICATION', 'PENDING', DATE '2026-12-31', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
@@ -420,6 +427,17 @@ INSERT INTO notes (id, board_id, member_id, content, created_at, modified_at) VA
 (204, 202, 204, '프로젝트2 드라이브 본인 노트', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00'),
 (205, 203, 205, '프로젝트3 드라이브 본인 노트', TIMESTAMP '2026-01-01 00:00:00', TIMESTAMP '2026-01-01 00:00:00');
 
+-- F. 알림 : 반장1(201)·업체(200) 수신, 기존 채팅(200)·제안(200)·동료요청(201·203) 참조.
+--   읽음/안읽음 혼합. 커서가 id 기준(keyset)이므로 id 순서 = 시간 순서 유지
+INSERT INTO notifications (id, sender_id, receiver_id, type_code, reference_id, content, template_args, read_at, created_at, modified_at) VALUES
+(200, NULL, 201, 'SIGNUP_WELCOME', NULL, NULL, NULL, TIMESTAMP '2026-01-01 12:00:00', TIMESTAMP '2026-01-01 09:00:00', TIMESTAMP '2026-01-01 12:00:00'),
+(201, NULL, 201, 'PROFILE_COMPLETION', 201, NULL, NULL, TIMESTAMP '2026-01-02 12:00:00', TIMESTAMP '2026-01-02 09:00:00', TIMESTAMP '2026-01-02 12:00:00'),
+(202, 205, 201, 'COWORKER_REQUESTED', 203, NULL, '{"senderName":"샘플업체3"}', TIMESTAMP '2026-01-03 12:00:00', TIMESTAMP '2026-01-03 09:00:00', TIMESTAMP '2026-01-03 12:00:00'),
+(203, 200, 201, 'OFFER_RECEIVED', 200, NULL, '{"companyName":"샘플업체"}', NULL, TIMESTAMP '2026-01-04 15:00:00', TIMESTAMP '2026-01-04 15:00:00'),
+(204, 200, 201, 'CHAT_MESSAGE', 200, '안녕하세요 반장님', '{"senderName":"샘플업체"}', NULL, TIMESTAMP '2026-01-05 10:00:00', TIMESTAMP '2026-01-05 10:00:00'),
+(205, 203, 200, 'COWORKER_REQUESTED', 201, NULL, '{"senderName":"샘플반장3"}', NULL, TIMESTAMP '2026-01-04 11:00:00', TIMESTAMP '2026-01-04 11:00:00'),
+(206, 201, 200, 'CHAT_MESSAGE', 200, '네 확인했습니다', '{"senderName":"샘플반장1"}', NULL, TIMESTAMP '2026-01-05 09:00:00', TIMESTAMP '2026-01-05 09:00:00');
+
 -- 실데이터 (1000 ~)
 ALTER TABLE otps ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE signup_tokens ALTER COLUMN id RESTART WITH 1000;
@@ -440,6 +458,8 @@ ALTER TABLE attachments ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE coworkers ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE coworker_requests ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE recommendations ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE notifications ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE device_tokens ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE drives ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE drive_members ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE boards ALTER COLUMN id RESTART WITH 1000;
