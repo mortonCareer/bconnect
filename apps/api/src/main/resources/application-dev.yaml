@@ -17,3 +17,9 @@ sentry:
 app:
   jwt:
     cookie-domain: ${COOKIE_DOMAIN:.bconnect.to}
+
+  otp:
+    test:
+      numbers:
+        - "01000000000"
+      code: "123456"

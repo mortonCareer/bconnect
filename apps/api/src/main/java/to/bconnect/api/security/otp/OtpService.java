@@ -30,9 +30,12 @@ public class OtpService {
 
     private final OtpRepository otpRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final OtpTestProperties testProperties;
 
     @Transactional
     public Otp sendCode(String phone) {
+        if (testProperties.isTestNumber(phone)) return sendTestCode(phone);
+
         val code = String.format(CODE_FORMAT, RANDOM.nextInt(CODE_BOUND));
         val expiredAt = LocalDateTime.now().plusSeconds(EXPIRY_SECONDS);
 
@@ -54,12 +57,25 @@ public class OtpService {
         return Otp.of(otp);
     }
 
+    private Otp sendTestCode(String phone) {
+        val code = testProperties.code();
+        val expiredAt = LocalDateTime.now().plusSeconds(EXPIRY_SECONDS);
+
+        val otp = otpRepository.findByPhone(phone)
+                .orElseGet(() -> new OtpEntity(phone, code, expiredAt));
+        otp.generateCode(code, expiredAt);
+        otpRepository.save(otp);
+
+        return Otp.of(otp);
+    }
+
     @Transactional(noRollbackFor = CodeException.class)
     public void verifyCode(String phone, String code) {
         val found = otpRepository.findByPhone(phone)
                 .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_OTP));
 
-        if (found.getAttempts() >= MAX_ATTEMPTS) throw new CodeException(AuthExceptionCode.OTP_MAX_ATTEMPTS);
+        if (!testProperties.isTestNumber(phone) && found.getAttempts() >= MAX_ATTEMPTS)
+            throw new CodeException(AuthExceptionCode.OTP_MAX_ATTEMPTS);
 
         found.attempt();
 
