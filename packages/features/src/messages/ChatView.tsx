@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useState, type ReactNode } from 'react'
-import { getTradeLabel } from '@bconnect/api-client'
+import { getGetDirectChatsQueryKey, getTradeLabel, useQueryClient } from '@bconnect/api-client'
 import type { Message, Profile } from '@bconnect/api-client'
 import { ChatInput, ProfileCard, Skeleton } from '@bconnect/ui'
 import { getAvatarUrl } from '@bconnect/config/avatar'
@@ -56,13 +56,18 @@ export function ChatView(props: ChatViewProps) {
 
   const [localMessages, setLocalMessages] = useState<Message[]>([])
   const [message, setMessage] = useState('')
+  const queryClient = useQueryClient()
 
   // 수신(본인 발신 브로드캐스트 포함)이 단일 소스 — useDirectChatSocket 주석 참조
-  const appendMessage = useCallback((incoming: Message) => {
-    setLocalMessages((prev) =>
-      prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]
-    )
-  }, [])
+  const appendMessage = useCallback(
+    (incoming: Message) => {
+      setLocalMessages((prev) =>
+        prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]
+      )
+      queryClient.invalidateQueries({ queryKey: getGetDirectChatsQueryKey() })
+    },
+    [queryClient]
+  )
   const sendMessage = useDirectChatSocket(chatId, appendMessage)
 
   const handleSend = useCallback(() => {

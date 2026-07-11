@@ -2,7 +2,14 @@
 
 import { useEffect, useRef } from 'react'
 import { onMessage } from 'firebase/messaging'
-import { hasAuthHint } from '@bconnect/api-client'
+import {
+  getGetDirectChatsQueryKey,
+  getGetGroupChatsQueryKey,
+  getGetNotificationsQueryKey,
+  getGetNotificationsUnreadCountQueryKey,
+  hasAuthHint,
+  useQueryClient,
+} from '@bconnect/api-client'
 import { getFcmMessaging } from './firebase'
 import { useNotificationStore } from './notification-store'
 import { usePushStore } from './push-store'
@@ -23,6 +30,7 @@ import { mapPermission, syncDeviceToken } from './request-push-permission'
 export function usePushNotificationListener(): void {
   const initialized = useRef(false)
   const showNotification = useNotificationStore((s) => s.show)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (typeof window === 'undefined' || initialized.current) return
@@ -55,10 +63,18 @@ export function usePushNotificationListener(): void {
         const title = payload.notification?.title ?? payload.data?.title ?? '새 알림'
         const body = payload.notification?.body ?? payload.data?.body ?? ''
         showNotification({ title, body, href: payload.data?.url })
+        for (const queryKey of [
+          getGetNotificationsUnreadCountQueryKey(),
+          getGetNotificationsQueryKey(),
+          getGetDirectChatsQueryKey(),
+          getGetGroupChatsQueryKey(),
+        ]) {
+          queryClient.invalidateQueries({ queryKey })
+        }
       })
     }
 
     setup()
     return () => unsubscribe?.()
-  }, [showNotification])
+  }, [showNotification, queryClient])
 }
