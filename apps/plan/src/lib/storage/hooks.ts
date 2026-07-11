@@ -17,7 +17,7 @@ import {
   useUpdateNote,
 } from '@bconnect/api-client'
 import type { Attachment, Drive, Note } from '@bconnect/api-client'
-import type { BoardImage, Folder, Memo, QueryResult, StorageUsage } from '@bconnect/features'
+import type { BoardImage, Folder, Memo, QueryResult } from '@bconnect/features'
 
 // Drive/Attachment/Note → features 표현 타입. 동산보드 메타(행표·위치·설명)와 폴더
 // 썸네일/개수는 BE 저장 자리가 없어 빈 값 고정 — 후속 BE 이슈로 추적.
@@ -84,12 +84,11 @@ export function useFolderMemos(folderId: string): QueryResult<Memo[]> {
   })
 }
 
-// 용량바 — BE 엔드포인트 없음(#752 용량 제한 미구현), 시안 유지용 고정 mock.
-const MOCK_USAGE: StorageUsage = { usedBytes: 104_000_000, totalBytes: 1_073_741_824 }
-
-export function useStorageUsage(_projectId: string): QueryResult<StorageUsage> {
-  return { data: MOCK_USAGE, isLoading: false, isError: false }
-}
+// 용량바 — BE 용량 API 미구현(#752)이라 비활성. 복원=#820. BE 지원 시 주석 해제 후 실연동
+// (소비처 StorageHeader 의 주석 블록도 함께 해제):
+// export function useStorageUsage(projectId: string): QueryResult<StorageUsage> {
+//   ...
+// }
 
 export function useFolderMutations(projectId: string) {
   const queryClient = useQueryClient()
