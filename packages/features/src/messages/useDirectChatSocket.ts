@@ -19,6 +19,8 @@ const getWsUrl = () => {
  */
 export function useDirectChatSocket(chatId: number, onMessage: (message: Message) => void) {
   const clientRef = useRef<Client | null>(null)
+  // 구독 콜백은 연결 시점에 한 번 등록됨 — ref 경유로 항상 최신 onMessage 를 부른다
+  // (직접 참조하면 stale closure, deps 에 넣으면 리렌더마다 재연결)
   const onMessageRef = useRef(onMessage)
   onMessageRef.current = onMessage
 
