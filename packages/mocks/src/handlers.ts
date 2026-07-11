@@ -3,6 +3,7 @@ import { delay, http } from 'msw'
 import { authOverrides } from './overrides/auth'
 import { chatsOverrides } from './overrides/chats'
 import { coworkersOverrides } from './overrides/coworkers'
+import { crawledOverrides } from './overrides/crawled'
 import { credentialsOverrides } from './overrides/credentials'
 import { drivesOverrides } from './overrides/drives'
 import { feedsOverrides } from './overrides/feeds'
@@ -36,6 +37,7 @@ export const handlers = [
   ...authOverrides,
   ...chatsOverrides,
   ...coworkersOverrides,
+  ...crawledOverrides,
   ...credentialsOverrides,
   ...drivesOverrides,
   ...feedsOverrides,

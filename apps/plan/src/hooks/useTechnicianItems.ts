@@ -1,17 +1,16 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useGetFeeds, useGetProfiles } from '@bconnect/api-client'
-import type { Post, Profile, Trade } from '@bconnect/api-client'
+import { useGetCrawledMembers, useGetFeeds, useGetProfiles } from '@bconnect/api-client'
+import type { CrawledMemberSummary, Post, Profile, Trade } from '@bconnect/api-client'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
+import { CRAWLED_REGION_LABELS, toTradeEnum } from '@/lib/crawled'
 import type { ExperienceLevel } from '@/lib/experience'
 import { EXPERIENCE_RANGES } from '@/lib/experience'
 import type { Grade } from '@/lib/grade'
-import { PROFILE_ROLE_TO_GRADE } from '@/lib/grade'
+import { GRADE_VALUES, PROFILE_ROLE_TO_GRADE } from '@/lib/grade'
 
-export interface TechnicianItem {
-  profileId: number
-  memberId: number
+interface TechnicianItemBase {
   name: string
   picture: string
   location: string
@@ -33,7 +32,24 @@ export interface TechnicianItem {
   portfolios: { imageUrl: string; daysRequired?: number }[]
 }
 
-function toTechnicianItem(profile: Profile, posts: Post[]): TechnicianItem | null {
+/** 가입 회원 프로필 카드 — 프로필 패널·메시지 등 회원 동작 가능 */
+export interface MemberTechnicianItem extends TechnicianItemBase {
+  source: 'member'
+  profileId: number
+  memberId: number
+}
+
+/** 크롤링 프로필 카드 — 전시 전용 (전화·출처 링크만 가능) */
+export interface CrawledTechnicianItem extends TechnicianItemBase {
+  source: 'crawled'
+  crawledId: number
+  phone: string
+  sourceUrl: string
+}
+
+export type TechnicianItem = MemberTechnicianItem | CrawledTechnicianItem
+
+function toTechnicianItem(profile: Profile, posts: Post[]): MemberTechnicianItem | null {
   const profileId = profile.id
   const memberId = profile.member?.id
   // 프로필/멤버 식별자 없으면 카드 액션(프로필 보기·메시지)이 불가능 — 목록에서 제외
@@ -41,6 +57,7 @@ function toTechnicianItem(profile: Profile, posts: Post[]): TechnicianItem | nul
 
   const name = profile.member?.name ?? ''
   return {
+    source: 'member',
     profileId,
     memberId,
     name,
@@ -67,6 +84,40 @@ function toTechnicianItem(profile: Profile, posts: Post[]): TechnicianItem | nul
   }
 }
 
+function toCrawledItem(crawled: CrawledMemberSummary): CrawledTechnicianItem | null {
+  const crawledId = crawled.id
+  if (crawledId == null) return null
+
+  const profile = crawled.profile
+  // 크롤링 trades 는 한국어 라벨 문자열 — Trade enum 역매핑, 매핑 불가("기타" 등)는 제외
+  const trades = (profile?.trades ?? []).flatMap((label) => toTradeEnum(label) ?? [])
+  const role = crawled.role ?? ''
+
+  return {
+    source: 'crawled',
+    crawledId,
+    name: crawled.company ?? crawled.name ?? '',
+    picture: crawled.picture ?? DEFAULT_PROFILE_IMAGE,
+    location: profile?.state ? CRAWLED_REGION_LABELS[profile.state] : '',
+    primaryTrade: profile?.primaryTrade ? toTradeEnum(profile.primaryTrade) : undefined,
+    experienceYears: profile?.experience ?? 0,
+    headline: profile?.headline ?? '',
+    trades,
+    grade: (GRADE_VALUES as readonly string[]).includes(role) ? (role as Grade) : undefined,
+    postCount: 0,
+    coworkerCount: 0,
+    recommendCount: 0,
+    rating: 0,
+    reviewCount: 0,
+    contractCount: 0,
+    certifications: [],
+    // 목록 API 에는 시공 사진이 없음 — 상세 패널에서 posts 로 표시
+    portfolios: [],
+    phone: crawled.phone ?? '',
+    sourceUrl: profile?.url ?? '',
+  }
+}
+
 interface UseTechnicianItemsOptions {
   trades?: Trade[] | null
   experience?: ExperienceLevel | null
@@ -83,6 +134,8 @@ export function useTechnicianItems({
   const { data, isLoading, error } = useGetProfiles()
   // 포트폴리오(작업물 썸네일)용 — 실패해도 목록은 뜨도록 error 미전파
   const { data: feeds } = useGetFeeds()
+  // 크롤링 프로필 — 회원 목록 뒤에 병합. 실패해도 회원 목록은 뜨도록 error 미전파
+  const { data: crawledMembers } = useGetCrawledMembers()
 
   const postsByMember = useMemo(() => {
     const map = new Map<number, Post[]>()
@@ -96,13 +149,16 @@ export function useTechnicianItems({
     return map
   }, [feeds])
 
-  const allItems = useMemo(
-    () =>
-      (data ?? []).flatMap(
+  // 가입 회원이 항상 앞, 크롤링 프로필이 뒤 — 가입 유인 유지
+  const allItems: TechnicianItem[] = useMemo(
+    () => [
+      ...(data ?? []).flatMap(
         (profile) =>
           toTechnicianItem(profile, postsByMember.get(profile.member?.id ?? -1) ?? []) ?? []
       ),
-    [data, postsByMember]
+      ...(crawledMembers ?? []).flatMap((crawled) => toCrawledItem(crawled) ?? []),
+    ],
+    [data, postsByMember, crawledMembers]
   )
 
   const expRange = experience ? EXPERIENCE_RANGES[experience] : undefined
