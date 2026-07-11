@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,8 +16,8 @@ import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import tools.jackson.databind.ObjectMapper;
+import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.security.AuthExceptionCode;
-import to.bconnect.api.security.SecurityErrorResponseWriter;
 
 import java.io.IOException;
 
@@ -64,7 +65,12 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
             if (this.logger.isTraceEnabled()) {
                 this.logger.trace("Failed to process authentication request", failed);
             }
-            SecurityErrorResponseWriter.write(response, objectMapper, AuthExceptionCode.INVALID_TOKEN);
+            response.setStatus(AuthExceptionCode.INVALID_TOKEN.getStatus().value());
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write(objectMapper.writeValueAsString(
+                    ApiResponse.error(AuthExceptionCode.INVALID_TOKEN)
+            ));
         }
     }
 
