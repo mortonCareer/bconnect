@@ -20,7 +20,7 @@ export interface ProfileCardMeta {
 }
 
 export interface ProfileCardProps {
-  /** 소비처가 picture || getAvatarUrl 로 해소해 전달 */
+  /** 소비처가 picture || DEFAULT_PROFILE_IMAGE 로 해소해 전달 */
   avatarUrl: string
   name: string
   /** 지역 │ 등급 │ 공종 순서로 렌더, 빈 값 생략 */

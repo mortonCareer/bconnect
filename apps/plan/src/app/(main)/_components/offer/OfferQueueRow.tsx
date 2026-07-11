@@ -4,7 +4,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getAvatarUrl } from '@bconnect/config/avatar'
+import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { Button, DragHandleIcon, cn } from '@bconnect/ui'
 import type { OfferQueueItem } from '@/app/(main)/projects/[projectId]/schedule/_components/schedule-grid/types'
 import { OfferStatusBadge } from './OfferStatusBadge'
@@ -55,7 +55,7 @@ export function OfferQueueRow({
       >
         <div className="size-9 shrink-0 overflow-hidden rounded-full bg-[#d9d9d9]">
           <Image
-            src={item.picture || getAvatarUrl(item.name)}
+            src={item.picture || DEFAULT_PROFILE_IMAGE}
             alt={item.name}
             width={36}
             height={36}

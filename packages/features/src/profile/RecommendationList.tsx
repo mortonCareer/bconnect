@@ -15,7 +15,7 @@ import {
   Tab,
   TrashIcon,
 } from '@bconnect/ui'
-import { getAvatarUrl } from '@bconnect/config/avatar'
+import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 
 type Mode = 'received' | 'sent'
 
@@ -184,7 +184,7 @@ function RecommendationItem({
     <ProfileCard
       as="li"
       className={rowClassName}
-      avatarUrl={member?.picture || getAvatarUrl(member?.name ?? '')}
+      avatarUrl={member?.picture || DEFAULT_PROFILE_IMAGE}
       name={member?.name ?? ''}
       profileHref={`/profile/${member?.id ?? ''}`}
       meta={{

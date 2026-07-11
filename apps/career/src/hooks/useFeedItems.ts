@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
 import type { Trade, ProfileRole } from '@bconnect/api-client'
 import { formatRelativeTime } from '@bconnect/config/format'
-import { getAvatarUrl } from '@bconnect/config/avatar'
+import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { FILTER_ROLES, ROLE_LABELS } from '@/lib/role-labels'
 import { REGIONS, REGION_LABELS, type Region } from '@/lib/region'
 import { useAuthStore } from '@/stores/auth-store'
@@ -89,8 +89,8 @@ export function useFeedItems({
           isMine: currentUserId != null && memberId === currentUserId,
           profile: {
             // picture nullable → 빈 string fallback 시 <img src=""> 가 page URL 재 fetch 하는
-            // 브라우저 anti-pattern. DiceBear 아바타 (getAvatarUrl) 로 deterministic fallback.
-            image: member.picture || getAvatarUrl(member.name ?? 'user'),
+            // 브라우저 anti-pattern. 정적 기본 프로필 이미지로 fallback.
+            image: member.picture || DEFAULT_PROFILE_IMAGE,
             name: member.name ?? '',
             location: `${REGION_LABELS[region]}(Mocked)`,
             jobType: `${ROLE_LABELS[role]}(Mocked)`,

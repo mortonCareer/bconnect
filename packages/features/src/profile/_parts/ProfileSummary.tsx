@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { getTradeLabel } from '@bconnect/api-client'
 import type { MemberSummary, Profile } from '@bconnect/api-client'
 import { Skeleton } from '@bconnect/ui'
-import { getAvatarUrl } from '@bconnect/config/avatar'
+import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 
 /** 클릭 가능한 stat 타겟. 없으면 비-링크 (plan 기본). */
 export interface ProfileStatHrefs {
@@ -52,9 +52,9 @@ export function ProfileSummary({
     <div className="flex flex-col">
       <div className="flex items-center gap-4 px-4 pt-4">
         <div className="relative h-[100px] w-[100px] shrink-0 overflow-hidden rounded-full bg-gray-100">
-          {/* TODO: 출시 전 unoptimized 제거 + next/image remotePatterns/loader 구성 (dicebear SVG·외부 업로드 대응) */}
+          {/* TODO: 출시 전 unoptimized 제거 + next/image remotePatterns/loader 구성 (외부 업로드 대응) */}
           <Image
-            src={member?.picture || getAvatarUrl(name)}
+            src={member?.picture || DEFAULT_PROFILE_IMAGE}
             alt={name}
             fill
             sizes="100px"

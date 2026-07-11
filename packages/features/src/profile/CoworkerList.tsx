@@ -3,7 +3,7 @@
 import { getTradeLabel, useGetProfile } from '@bconnect/api-client'
 import type { Coworker } from '@bconnect/api-client'
 import { ProfileCard, ProfileCardSkeleton } from '@bconnect/ui'
-import { getAvatarUrl } from '@bconnect/config/avatar'
+import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { PanelMessage } from '../_shared/PanelMessage'
 
 export interface CoworkerListProps {
@@ -55,7 +55,7 @@ function CoworkerRow({ memberId, href }: { memberId: number; href: string }) {
     <ProfileCard
       as="li"
       className="px-4"
-      avatarUrl={member?.picture || getAvatarUrl(name)}
+      avatarUrl={member?.picture || DEFAULT_PROFILE_IMAGE}
       name={name}
       meta={{
         // TODO: BE required 처리 후 type narrowing 필요. region/trade는 표시 필수값인데 optional emit이라 빈값으로 silent fallback 중.
