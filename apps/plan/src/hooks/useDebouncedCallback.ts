@@ -18,29 +18,30 @@ export function useDebouncedCallback<A extends unknown[]>(
     fnRef.current = fn
   })
 
-  const debounced = useMemo(() => {
-    let timer: ReturnType<typeof setTimeout> | null = null
-    let pendingArgs: A | null = null
+  // 클로저 let 재할당은 react-compiler 가 금지 — 타이머/대기 인자는 ref 로 보관
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingArgsRef = useRef<A | null>(null)
 
+  const debounced = useMemo(() => {
     const invoke = () => {
-      if (pendingArgs) {
-        const args = pendingArgs
-        pendingArgs = null
+      const args = pendingArgsRef.current
+      if (args) {
+        pendingArgsRef.current = null
         fnRef.current(...args)
       }
     }
     const clear = () => {
-      if (timer) {
-        clearTimeout(timer)
-        timer = null
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
       }
     }
 
     const call = (...args: A) => {
-      pendingArgs = args
+      pendingArgsRef.current = args
       clear()
-      timer = setTimeout(() => {
-        timer = null
+      timerRef.current = setTimeout(() => {
+        timerRef.current = null
         invoke()
       }, delayMs)
     }
@@ -50,7 +51,7 @@ export function useDebouncedCallback<A extends unknown[]>(
     }
     call.cancel = () => {
       clear()
-      pendingArgs = null
+      pendingArgsRef.current = null
     }
     return call
   }, [delayMs])
