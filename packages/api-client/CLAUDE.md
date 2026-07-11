@@ -64,14 +64,14 @@ springdoc의 Java 파생 spec을 FE가 기대하는 모양으로 compile-time �
 
 규칙이 구조적으로 못 잡는 **소수 라우트만** 하드코딩 (전 엔드포인트 테이블 아님):
 
-| path                          | opId                      | 이유                                                                                         |
-| ----------------------------- | ------------------------- | -------------------------------------------------------------------------------------------- |
-| `GET /members/check-username` | `checkUsername`           | 규칙은 `getMembersCheckUsername` (끔찍)                                                      |
-| `POST /auth/otp/send`         | `sendOtp`                 | springdoc opId(컨트롤러 메서드명) 불안정                                                     |
-| `POST /auth/logout`           | `logout`                  | 동일                                                                                         |
-| `GET /credentials/me`         | `getMyCredentials`        | 응답이 목록인데 `me` 는 단수 규칙                                                            |
-| `PUT /offers/reorder`         | `reorderOffers`           | verb-path 가 명사-접미(updateOfferReorder)로 어색                                            |
-| `PATCH /notifications/read`   | `updateNotificationsRead` | 규칙 파생이 단건 `PATCH /notifications/{id}/read` 와 동일한 `updateNotificationRead` 로 충돌 |
+| path                          | opId                      | 이유                                                                                                                                           |
+| ----------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /members/check-username` | `checkUsername`           | 규칙은 `getMembersCheckUsername` (끔찍)                                                                                                        |
+| `POST /auth/otp/send`         | `sendOtp`                 | springdoc opId(컨트롤러 메서드명) 불안정                                                                                                       |
+| `POST /auth/logout`           | `logout`                  | 동일                                                                                                                                           |
+| `GET /credentials/me`         | `getMyCredentials`        | 응답이 목록인데 `me` 는 단수 규칙                                                                                                              |
+| `PUT /offers/reorder`         | `reorderOffers`           | verb-path 가 명사-접미(updateOfferReorder)로 어색                                                                                              |
+| `PATCH /notifications/read`   | `updateNotificationsRead` | 단건 읽음(`/{id}/read`)과 전체 읽음이 규칙으로는 둘 다 `updateNotificationRead` 가 되어 뒤엣것이 앞엣것을 덮어씀 → 전체 읽음을 복수형으로 분리 |
 
 `/auth/*` opId는 OPID_SPECIAL(sendOtp·logout)과 auth-supplement(verifyOtp·refreshToken)가 지정. deriveOperationId의 auth 분기(springdoc opId 유지)는 그 외 /auth 경로 fallback — 현재 해당 경로 없음.
 

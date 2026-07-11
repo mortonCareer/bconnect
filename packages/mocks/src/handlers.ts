@@ -4,7 +4,6 @@ import { authOverrides } from './overrides/auth'
 import { chatsOverrides } from './overrides/chats'
 import { coworkersOverrides } from './overrides/coworkers'
 import { credentialsOverrides } from './overrides/credentials'
-import { devicesOverrides } from './overrides/devices'
 import { feedsOverrides } from './overrides/feeds'
 import { membersOverrides } from './overrides/members'
 import { notificationsOverrides } from './overrides/notifications'
@@ -27,7 +26,7 @@ const globalDelay = http.all('*', async ({ request }) => {
 //   faker 기반 임의 데이터로 모든 endpoint 의 happy path 응답.
 //
 // overrides:
-//   stateful flow (auth OTP 검증, device UPSERT) 만 손으로 작성.
+//   stateful flow (auth OTP 검증, 알림 읽음 상태) 만 손으로 작성.
 //   타입은 generated 의 `getXxxMockHandler` 시그니처가 강제 — openapi.yaml 변경 시
 //   override 의 콜백 시그니처도 자동으로 컴파일 에러로 떨어짐 (drift 방지).
 export const handlers = [
@@ -36,7 +35,6 @@ export const handlers = [
   ...chatsOverrides,
   ...coworkersOverrides,
   ...credentialsOverrides,
-  ...devicesOverrides,
   ...feedsOverrides,
   ...membersOverrides,
   ...notificationsOverrides,

@@ -23,7 +23,7 @@ export function useNotifications() {
   })
 }
 
-export function useUnreadNotificationCount(): number {
+export function useUnreadNotificationCount(): number | undefined {
   const { data } = useGetNotificationsUnreadCount()
-  return data ?? 0
+  return data
 }
