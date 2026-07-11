@@ -1820,6 +1820,8 @@ components:
     ExceptionCode:
       type: object
       properties:
+        message:
+          type: string
         status:
           $ref: "#/components/schemas/HttpStatus"
         code:
