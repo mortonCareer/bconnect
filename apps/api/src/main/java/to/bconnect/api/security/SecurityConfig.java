@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import jakarta.servlet.DispatcherType;
 import to.bconnect.api.ApiConfigProps;
+import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.jwt.AccessTokenAuthenticationFilter;
 import to.bconnect.api.security.jwt.JwtAuthenticationProvider;
 import to.bconnect.api.security.jwt.JwtProvider;
@@ -86,8 +87,10 @@ public class SecurityConfig {
                 }))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .exceptionHandling(eh -> eh
-                        .authenticationEntryPoint(new ApiAuthenticationEntryPoint(objectMapper))
-                        .accessDeniedHandler(new ApiAccessDeniedHandler(objectMapper)))
+                        .authenticationEntryPoint((req, res, ex) ->
+                                SecurityErrorResponseWriter.write(res, objectMapper, CommonExceptionCode.UNAUTHORIZED))
+                        .accessDeniedHandler((req, res, ex) ->
+                                SecurityErrorResponseWriter.write(res, objectMapper, CommonExceptionCode.FORBIDDEN)))
                 .authorizeHttpRequests(arc -> arc
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/api/v1/auth/otp/**").permitAll()
