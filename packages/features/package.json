@@ -10,6 +10,7 @@
     "@bconnect/api-client": "workspace:*",
     "@bconnect/config": "workspace:*",
     "@bconnect/ui": "workspace:*",
+    "@stomp/stompjs": "^7.3.0",
     "lucide-react": "catalog:"
   },
   "peerDependencies": {

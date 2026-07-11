@@ -91,7 +91,9 @@ export function MessageThread({
       .slice()
       .reverse()
       .flatMap((page) => (page.content ?? []).slice().reverse()) ?? []
-  const allMessages = [...serverMessages, ...localMessages]
+  // 소켓 수신분(localMessages)이 refetch 된 서버 페이지에 다시 나타나면 서버 쪽을 우선
+  const serverIds = new Set(serverMessages.map((m) => m.id))
+  const allMessages = [...serverMessages, ...localMessages.filter((m) => !serverIds.has(m.id))]
   const lastMessage = allMessages[allMessages.length - 1]
   const lastMessageId = lastMessage?.id
   const lastIsMine = lastMessage?.memberId === currentUserId
