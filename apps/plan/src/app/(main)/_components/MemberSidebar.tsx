@@ -3,7 +3,7 @@
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useGetMyMember } from '@bconnect/api-client'
 import { useUnreadChatCount, useUnreadNotificationCount } from '@bconnect/features'
-import { getAvatarUrl } from '@bconnect/config/avatar'
+import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { Select } from '@bconnect/ui'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -161,11 +161,11 @@ function ProfileSection() {
   const displayName = member?.name ? `${member.name}님` : ''
 
   // BE 가 실제 업로드 URL (S3 등) 을 내려주면 그대로 사용. null 또는 MSW faker 의 placehold URL 이면
-  // dicebear 아바타로 폴백 — Figma 일러스트 톤과 유사. 운영에서도 사진 미업로드 회원은 자연 폴백.
+  // 정적 기본 프로필 이미지로 폴백. 운영에서도 사진 미업로드 회원은 자연 폴백.
   const avatarUrl =
     member?.picture && !/placehold\.co|placeholder\.com/i.test(member.picture)
       ? member.picture
-      : getAvatarUrl(member?.name ?? '회원')
+      : DEFAULT_PROFILE_IMAGE
 
   return (
     <div className="flex items-center gap-3">

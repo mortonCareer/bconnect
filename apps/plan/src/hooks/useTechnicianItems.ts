@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { useGetFeeds, useGetProfiles } from '@bconnect/api-client'
 import type { Post, Profile, Trade } from '@bconnect/api-client'
-import { getAvatarUrl } from '@bconnect/config/avatar'
+import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import type { ExperienceLevel } from '@/lib/experience'
 import { EXPERIENCE_RANGES } from '@/lib/experience'
 import type { Grade } from '@/lib/grade'
@@ -44,7 +44,7 @@ function toTechnicianItem(profile: Profile, posts: Post[]): TechnicianItem | nul
     profileId,
     memberId,
     name,
-    picture: profile.member?.picture ?? getAvatarUrl(name),
+    picture: profile.member?.picture ?? DEFAULT_PROFILE_IMAGE,
     // BE Address 캐논: city = 도/광역시 (data.sql), 지역 필터 옵션(도 단위)과 매칭
     location: profile.address?.city ?? '',
     primaryTrade: profile.primaryTrade,

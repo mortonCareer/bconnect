@@ -4,7 +4,7 @@ import { useCallback, useState, type ReactNode } from 'react'
 import { getGetDirectChatsQueryKey, getTradeLabel, useQueryClient } from '@bconnect/api-client'
 import type { Message, Profile } from '@bconnect/api-client'
 import { ChatInput, ProfileCard, Skeleton } from '@bconnect/ui'
-import { getAvatarUrl } from '@bconnect/config/avatar'
+import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { PanelShell } from '../_shared/PanelShell'
 import { MessageThread } from './_parts/MessageThread'
 import { useDirectChatSocket } from './useDirectChatSocket'
@@ -80,7 +80,7 @@ export function ChatView(props: ChatViewProps) {
   const headerItem = (
     <ProfileCard
       className="px-4"
-      avatarUrl={other?.picture || getAvatarUrl(title)}
+      avatarUrl={other?.picture || DEFAULT_PROFILE_IMAGE}
       name={title}
       meta={{
         region: profile?.address?.city ?? '',
