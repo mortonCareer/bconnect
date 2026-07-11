@@ -16,7 +16,7 @@ import type { ScheduleTask } from './types'
 
 /**
  * 공정표 작업 상태 소비 훅 (#576→#767). 서버 상태 SSOT = React Query 캐시.
- * - 섭외 진행(DRAFT/OPEN/OFFERED) 작업은 offers 를 붙여 '섭외중'·대표 기술자 파생
+ * - 섭외 진행(DRAFT/OPEN/OFFERED) 작업은 offers 를 붙여 대기열·대표 기술자 표시
  * - 섭외 확정(workerId 보유) 작업은 프로필 조회로 대표 기술자 파생
  *   (BE getTaskOffers 가 ACCEPTED 를 반환하지 않아 workerId 경유가 유일한 경로)
  * - 드래그-생성 draft(로컬)를 병합하고 정렬(start asc → end asc)을 렌더 전 강제

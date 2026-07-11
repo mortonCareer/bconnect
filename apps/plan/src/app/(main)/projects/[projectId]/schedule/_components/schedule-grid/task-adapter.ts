@@ -22,12 +22,8 @@ export function toNumericTaskId(id: string | null | undefined): number | null {
   return Number.isFinite(n) ? n : null
 }
 
-/**
- * BE 6-status → FE 5-status.
- * BE createByCompany 는 DRAFT 고정 생성이고 OPEN/OFFERED 전이 코드가 없어,
- * '섭외 중'은 ACTIVE offer 존재로 파생한다 (OFFERED 매핑은 시드 호환용).
- */
-export function toFeTaskStatus(status: Task['status'], hasActiveOffer: boolean): TaskStatus {
+/** BE 6-status → FE 5-status. BE 상태를 그대로 표시 — 화면에서 재해석하지 않는다. */
+export function toFeTaskStatus(status: Task['status']): TaskStatus {
   switch (status) {
     case BeTaskStatus.COMPLETED:
       return 'completed'
@@ -39,7 +35,7 @@ export function toFeTaskStatus(status: Task['status'], hasActiveOffer: boolean):
       return 'recruiting'
     default:
       // DRAFT | OPEN | undefined
-      return hasActiveOffer ? 'recruiting' : 'not_started'
+      return 'not_started'
   }
 }
 
@@ -97,7 +93,7 @@ export function toScheduleTask(
     ganttName: task.projectTitle ?? '',
     startDate: task.start ?? '',
     endDate: task.end ?? '',
-    status: toFeTaskStatus(task.status, active != null),
+    status: toFeTaskStatus(task.status),
     request: task.projectRequirement ?? '',
     memo: task.projectMemo ?? '',
     // 작업 주소 = 소속 프로젝트 주소 (BE 가 주입) — 폼에선 읽기전용

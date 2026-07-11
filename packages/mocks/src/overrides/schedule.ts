@@ -194,7 +194,7 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '바닥 및 마무리',
     startOffset: 6,
     endOffset: 7,
-    status: TaskStatus.DRAFT,
+    status: TaskStatus.OFFERED,
     activeOffer: 7,
   },
   {
@@ -232,7 +232,7 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '타일 시공',
     startOffset: 1,
     endOffset: 4,
-    status: TaskStatus.DRAFT,
+    status: TaskStatus.OFFERED,
     activeOffer: 22,
   },
   {
