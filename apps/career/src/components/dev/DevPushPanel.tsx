@@ -2,6 +2,7 @@
 
 import { Button, Input } from '@bconnect/ui'
 import { useState } from 'react'
+import { useGetMyMember } from '@bconnect/api-client'
 import { usePushStore } from '@bconnect/push'
 
 interface Preset {
@@ -34,6 +35,9 @@ export function DevPushPanel() {
     body: '로컬 발송',
     url: '/messages/123',
   })
+  const [message, setMessage] = useState({ senderPhone: '01000000002', content: '테스트 메시지' })
+  const [messageStatus, setMessageStatus] = useState('')
+  const { data: me } = useGetMyMember({ query: { enabled: open } })
 
   async function send(payload: { title: string; body: string; url: string; icon?: string }) {
     if (!token) {
@@ -53,6 +57,31 @@ export function DevPushPanel() {
       )
     } catch (error) {
       setStatus(`실패: ${error instanceof Error ? error.message : String(error)}`)
+    }
+  }
+
+  async function sendTestMessage() {
+    if (!me?.id) {
+      setMessageStatus('내 멤버 정보 없음 — 로그인 필요')
+      return
+    }
+    setMessageStatus('발사 중…')
+    try {
+      const res = await fetch('/api/dev/test-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetMemberId: me.id,
+          content: message.content,
+          senderPhone: message.senderPhone,
+        }),
+      })
+      const json: { chatId?: number; error?: string } = await res.json()
+      setMessageStatus(
+        res.ok ? `발사 성공 → /messages/${json.chatId}` : `실패: ${json.error ?? res.status}`
+      )
+    } catch (error) {
+      setMessageStatus(`실패: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -121,6 +150,31 @@ export function DevPushPanel() {
       </div>
 
       {status && <p className="mt-2 text-r-12 text-gray-500">{status}</p>}
+
+      <div className="mt-3 border-t border-gray-200 pt-3">
+        <p className="text-sb-14 text-gray-900">테스트 계정 → 나 메시지</p>
+        <p className="mt-1 text-r-12 text-gray-400">
+          {me?.id ? `수신자: ${me.name ?? '나'} (#${me.id})` : '로그인 필요'}
+        </p>
+        <div className="mt-2 flex flex-col gap-1.5">
+          <Input
+            size="small"
+            value={message.senderPhone}
+            onChange={(e) => setMessage({ ...message, senderPhone: e.target.value })}
+            placeholder="발신 테스트 계정 전화번호"
+          />
+          <Input
+            size="small"
+            value={message.content}
+            onChange={(e) => setMessage({ ...message, content: e.target.value })}
+            placeholder="메시지 내용"
+          />
+          <Button variant="primary" size="small" onClick={sendTestMessage} disabled={!me?.id}>
+            메시지 발사
+          </Button>
+        </div>
+        {messageStatus && <p className="mt-2 text-r-12 text-gray-500">{messageStatus}</p>}
+      </div>
     </div>
   )
 }
