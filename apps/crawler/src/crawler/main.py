@@ -12,9 +12,12 @@ from crawler.channels.instagram import (
 )
 from crawler.classifier import classify, format_phone, infer_region_from_address, METRO_REGIONS
 from crawler.config import settings
-from crawler.models import Technician
+from crawler.models import (
+    CrawledMember, CrawledPost, CrawledProfile,
+    PLATFORM_INSTAGRAM, PLATFORM_NAVER, REGION_ENUM_BY_KR,
+)
 from crawler.notion import (
-    save_technician, save_to_review, update_technician,
+    save_member, save_to_review, update_member,
     find_duplicate_by_url, touch_synced_at,
     find_pages_needing_enrichment, find_approved, move_to_production,
     validate_schema, validate_review_schema,
@@ -61,8 +64,8 @@ async def process_blog_result(
     direct: bool = False,
     metro_only: bool = False,
     skip_vision: bool = False,
-) -> Technician | None:
-    """검색 결과 1건 → 블로거 프로필 탐색 → 분류 → Technician 생성."""
+) -> CrawledMember | None:
+    """검색 결과 1건 → 블로거 프로필 탐색 → 분류 → CrawledMember 생성."""
     blog_url = item["link"]
     blogger_name = item.get("bloggername", "")
 
@@ -247,25 +250,31 @@ async def process_blog_result(
             log.info("지역 보정: %s → %s (주소: %s)", region or "(없음)", addr_region, address[:30])
             region = addr_region
 
-    tech = Technician(
-        name=name,
-        rank=classification["rank"],
-        trades=classification["trades"],
-        region=region,
-        address=address,
-        representative=classification.get("representative", ""),
-        business_number=classification.get("business_number", ""),
-        headline=profile_intro[:500],
-        about=profile["about"][:2000],
+    trades = classification["trades"]
+    member = CrawledMember(
+        company=name,
+        name=classification.get("representative", ""),
         phone=phone,
+        picture=cover_image_url,
+        role=classification["rank"],
+        brn=classification.get("business_number", ""),
         email=email,
-        channels=["네이버블로그"],
+        profile=CrawledProfile(
+            primary_trade=trades[0] if trades else "",
+            trades=trades,
+            experience=classification.get("experience"),
+            headline=profile_intro[:500],
+            about=profile["about"][:2000],
+            address=address,
+            state=REGION_ENUM_BY_KR.get(region, ""),
+            url=detail_url,
+            platform=PLATFORM_NAVER,
+        ),
+        posts=[CrawledPost(**post) for post in profile.get("posts", [])],
         source_urls=profile["source_urls"],
-        detail_url=detail_url,
-        cover_image_url=cover_image_url,
     )
 
-    return tech
+    return member
 
 
 async def process_instagram_result(
@@ -275,8 +284,8 @@ async def process_instagram_result(
     dry_run: bool = False,
     force: bool = False,
     on_status: object = None,
-) -> Technician | None:
-    """인스타그램 검색 결과 1건 → 프로필 탐색 → 분류 → Technician 생성."""
+) -> CrawledMember | None:
+    """인스타그램 검색 결과 1건 → 프로필 탐색 → 분류 → CrawledMember 생성."""
     link = item["link"]
     username = item.get("username") or extract_instagram_username(link)
 
@@ -400,25 +409,30 @@ async def process_instagram_result(
                 address = place["road_address"] or place["address"]
                 log.info("지역검색 주소 보충: %s → %s", name, address)
 
-    tech = Technician(
-        name=name,
-        rank=classification["rank"],
-        trades=classification["trades"],
-        region=classification.get("region", ""),
-        address=address,
-        representative=classification.get("representative", ""),
-        business_number=classification.get("business_number", ""),
-        headline=profile["headline"][:500],
-        about=profile["about"][:2000],
+    trades = classification["trades"]
+    member = CrawledMember(
+        company=name,
+        name=classification.get("representative", ""),
         phone=phone,
+        picture=profile.get("profile_pic_url", ""),
+        role=classification["rank"],
+        brn=classification.get("business_number", ""),
         email=email,
-        channels=["인스타그램"],
+        profile=CrawledProfile(
+            primary_trade=trades[0] if trades else "",
+            trades=trades,
+            experience=classification.get("experience"),
+            headline=profile["headline"][:500],
+            about=profile["about"][:2000],
+            address=address,
+            state=REGION_ENUM_BY_KR.get(classification.get("region", ""), ""),
+            url=instagram_url,
+            platform=PLATFORM_INSTAGRAM,
+        ),
         source_urls=profile["source_urls"],
-        detail_url=instagram_url,
-        cover_image_url=profile.get("profile_pic_url", ""),
     )
 
-    return tech
+    return member
 
 
 async def run_pipeline(
@@ -470,44 +484,47 @@ async def run_pipeline(
 
     async def _handle(item: dict) -> None:
         async with sem:
-            tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force, direct=direct, metro_only=metro_only, skip_vision=skip_vision)
-        if tech is None:
+            member = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force, direct=direct, metro_only=metro_only, skip_vision=skip_vision)
+        if member is None:
             return
 
         blog_url = item["link"]
         blogger_name = item.get("bloggername", "")
+        image_count = sum(len(post.images) for post in member.posts)
 
         if dry_run:
-            log.info("dry-run: %s (저장 건너뜀)", tech.name)
+            log.info("dry-run: %s (저장 건너뜀)", member.company)
             if report:
-                report.technicians.append(tech.model_dump())
+                report.members.append(member.dump())
                 report.add_saved(
                     blog_url=blog_url, blogger_name=blogger_name,
-                    tech_name=tech.name, rank=tech.rank, trades=tech.trades,
-                    phone=tech.phone, page_id="",
-                    region=tech.region, address=tech.address, email=tech.email,
+                    company=member.company, role=member.role, trades=member.profile.trades,
+                    phone=member.phone, page_id="",
+                    region=member.region_kr, address=member.profile.address, email=member.email,
+                    posts=len(member.posts), images=image_count,
                 )
             return
 
         try:
             if direct:
-                page_id = await save_technician(tech, force=force)
+                page_id = await save_member(member, force=force)
             else:
-                page_id = await save_to_review(tech)
+                page_id = await save_to_review(member)
         except Exception as exc:
             log.warning("저장 실패: %s", blog_url, exc_info=True)
             if report:
                 report.add_failed(blog_url, blogger_name, "저장", str(exc))
             return
 
-        log.info("저장 완료: %s → %s", tech.name, page_id)
+        log.info("저장 완료: %s → %s", member.company, page_id)
         saved_ids.append(page_id)
         if report:
             report.add_saved(
                 blog_url=blog_url, blogger_name=blogger_name,
-                tech_name=tech.name, rank=tech.rank, trades=tech.trades,
-                phone=tech.phone, page_id=page_id,
-                region=tech.region, address=tech.address, email=tech.email,
+                company=member.company, role=member.role, trades=member.profile.trades,
+                phone=member.phone, page_id=page_id,
+                region=member.region_kr, address=member.profile.address, email=member.email,
+                posts=len(member.posts), images=image_count,
             )
 
     await asyncio.gather(*[_handle(item) for item in items])
@@ -605,52 +622,52 @@ async def run_instagram_pipeline(
             return
         try:
             async with sem:
-                tech = await process_instagram_result(
+                member = await process_instagram_result(
                     item, seen_usernames=seen_usernames, report=report,
                     dry_run=dry_run, force=force, on_status=on_status,
                 )
         except InstagramBlockedError:
             _blocked = True
             raise
-        if tech is None:
+        if member is None:
             return
 
         link = item["link"]
         username = item.get("username", "")
 
         if dry_run:
-            log.info("dry-run: %s (저장 건너뜀)", tech.name)
+            log.info("dry-run: %s (저장 건너뜀)", member.company)
             if report:
-                report.technicians.append(tech.model_dump())
+                report.members.append(member.dump())
                 report.add_saved(
                     blog_url=link, blogger_name=username,
-                    tech_name=tech.name, rank=tech.rank, trades=tech.trades,
-                    phone=tech.phone, page_id="",
-                    region=tech.region, address=tech.address, email=tech.email,
+                    company=member.company, role=member.role, trades=member.profile.trades,
+                    phone=member.phone, page_id="",
+                    region=member.region_kr, address=member.profile.address, email=member.email,
                 )
             return
 
         if on_status:
-            on_status(f"저장: {tech.name[:15]}")
+            on_status(f"저장: {member.company[:15]}")
         try:
             if direct:
-                page_id = await save_technician(tech, force=force)
+                page_id = await save_member(member, force=force)
             else:
-                page_id = await save_to_review(tech)
+                page_id = await save_to_review(member)
         except Exception as exc:
             log.warning("저장 실패: %s", link, exc_info=True)
             if report:
                 report.add_failed(link, username, "저장", str(exc))
             return
 
-        log.info("저장 완료: %s → %s", tech.name, page_id)
+        log.info("저장 완료: %s → %s", member.company, page_id)
         saved_ids.append(page_id)
         if report:
             report.add_saved(
                 blog_url=link, blogger_name=username,
-                tech_name=tech.name, rank=tech.rank, trades=tech.trades,
-                phone=tech.phone, page_id=page_id,
-                region=tech.region, address=tech.address, email=tech.email,
+                company=member.company, role=member.role, trades=member.profile.trades,
+                phone=member.phone, page_id=page_id,
+                region=member.region_kr, address=member.profile.address, email=member.email,
             )
 
     await asyncio.gather(*[_handle(item) for item in items])
@@ -724,39 +741,40 @@ async def run_instagram_full(
 
 
 async def run_from_file(file_path: Path, force: bool = False) -> PipelineReport:
-    """dry-run 보고서 JSON에서 Technician 데이터를 읽어 노션에 저장한다."""
+    """dry-run 보고서 JSON에서 CrawledMember 데이터를 읽어 노션에 저장한다."""
     import json
 
     data = json.loads(file_path.read_text(encoding="utf-8"))
-    technicians_data = data.get("technicians", [])
-    if not technicians_data:
-        raise ValueError(f"파일에 technicians 데이터가 없습니다: {file_path}")
+    members_data = data.get("members", [])
+    if not members_data:
+        raise ValueError(f"파일에 members 데이터가 없습니다: {file_path}")
 
     report = PipelineReport()
     report.mode = "파일 임포트"
     report.llm_model = data.get("params", {}).get("llm_model", "")
 
-    log.info("파일 임포트: %s (%d건)", file_path, len(technicians_data))
+    log.info("파일 임포트: %s (%d건)", file_path, len(members_data))
     saved_ids = []
-    for tech_data in technicians_data:
-        tech = Technician(**tech_data)
+    for member_data in members_data:
+        member = CrawledMember.model_validate(member_data)
         try:
-            page_id = await save_technician(tech, force=force)
+            page_id = await save_member(member, force=force)
         except Exception as exc:
-            log.warning("저장 실패: %s", tech.name, exc_info=True)
-            report.add_failed(tech.detail_url, tech.name, "저장", str(exc))
+            log.warning("저장 실패: %s", member.company, exc_info=True)
+            report.add_failed(member.profile.url, member.company, "저장", str(exc))
             continue
 
-        log.info("저장 완료: %s → %s", tech.name, page_id)
+        log.info("저장 완료: %s → %s", member.company, page_id)
         saved_ids.append(page_id)
         report.add_saved(
-            blog_url=tech.detail_url, blogger_name=tech.name,
-            tech_name=tech.name, rank=tech.rank, trades=tech.trades,
-            phone=tech.phone, page_id=page_id,
-            region=tech.region, address=tech.address, email=tech.email,
+            blog_url=member.profile.url, blogger_name=member.company,
+            company=member.company, role=member.role, trades=member.profile.trades,
+            phone=member.phone, page_id=page_id,
+            region=member.region_kr, address=member.profile.address, email=member.email,
+            posts=len(member.posts), images=sum(len(p.images) for p in member.posts),
         )
 
-    log.info("임포트 완료: %d/%d건 저장", len(saved_ids), len(technicians_data))
+    log.info("임포트 완료: %d/%d건 저장", len(saved_ids), len(members_data))
     return report
 
 
@@ -780,10 +798,13 @@ async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineR
     sem = asyncio.Semaphore(CONCURRENCY * 4)  # enrich는 I/O 위주, 429 미발생 확인
     enriched = 0
 
-    # 빈 필드명 → Technician 속성 매핑
-    _field_to_attr = {
-        "연락처": "phone", "주소": "address", "이메일": "email",
-        "대표자": "representative", "사업자등록번호": "business_number",
+    # 빈 필드명 → CrawledMember 값 접근자 매핑
+    _field_getters = {
+        "연락처": lambda m: m.phone,
+        "주소": lambda m: m.profile.address,
+        "이메일": lambda m: m.email,
+        "대표자": lambda m: m.name,
+        "사업자등록번호": lambda m: m.brn,
     }
 
     async def _handle(page: dict, progress, task_id) -> None:
@@ -915,29 +936,34 @@ async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineR
                 if biz.get("business_number"):
                     classification["business_number"] = biz["business_number"]
 
-            # 5) Technician 구성 + enrichment 저장
-            channels = ["인스타그램"] if is_instagram else ["네이버블로그"]
+            # 5) CrawledMember 구성 + enrichment 저장
             cover = profile.get("profile_pic_url", "") if is_instagram else profile.get("banner_image", "")
-            tech = Technician(
-                name=tech_name,
-                rank=classification["rank"],
-                trades=classification["trades"],
-                region=classification.get("region", ""),
-                address=address,
-                representative=classification.get("representative", ""),
-                business_number=classification.get("business_number", ""),
-                headline=profile_intro[:500],
-                about=profile["about"][:2000],
+            trades = classification["trades"]
+            member = CrawledMember(
+                company=tech_name,
+                name=classification.get("representative", ""),
                 phone=phone,
+                picture=cover,
+                role=classification["rank"],
+                brn=classification.get("business_number", ""),
                 email=email,
-                channels=channels,
+                profile=CrawledProfile(
+                    primary_trade=trades[0] if trades else "",
+                    trades=trades,
+                    experience=classification.get("experience"),
+                    headline=profile_intro[:500],
+                    about=profile["about"][:2000],
+                    address=address,
+                    state=REGION_ENUM_BY_KR.get(classification.get("region", ""), ""),
+                    url=detail_url,
+                    platform=PLATFORM_INSTAGRAM if is_instagram else PLATFORM_NAVER,
+                ),
+                posts=[CrawledPost(**post) for post in profile.get("posts", [])],
                 source_urls=profile["source_urls"],
-                detail_url=detail_url,
-                cover_image_url=cover,
             )
 
             try:
-                await update_technician(page_id, tech, force=False)
+                await update_member(page_id, member, force=False)
             except Exception as exc:
                 log.warning("저장 실패: %s", detail_url, exc_info=True)
                 report.add_failed(detail_url, name, "저장", str(exc))
@@ -948,13 +974,14 @@ async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineR
             log.info("보강 완료: %s → %s", tech_name, page_id)
             report.add_saved(
                 blog_url=detail_url, blogger_name=name,
-                tech_name=tech_name, rank=tech.rank, trades=tech.trades,
+                company=tech_name, role=member.role, trades=member.profile.trades,
                 phone=phone, page_id=page_id,
-                region=tech.region, address=address, email=email,
+                region=member.region_kr, address=address, email=email,
+                posts=len(member.posts), images=sum(len(post.images) for post in member.posts),
             )
 
             # 보강 결과 표시: 빈 필드 중 채워진 것 / 못 채운 것
-            filled = [f for f in empty_fields if getattr(tech, _field_to_attr.get(f, ""), "")]
+            filled = [f for f in empty_fields if _field_getters.get(f, lambda m: "")(member)]
             still_empty = [f for f in empty_fields if f not in filled]
             parts = []
             if filled:
@@ -1082,7 +1109,7 @@ async def run_patch_review(dry_run: bool = False) -> PipelineReport:
                 patched += 1
                 report.add_saved(
                     blog_url="", blogger_name=name,
-                    tech_name=name, rank="", trades=[],
+                    company=name, role="", trades=[],
                     phone="", page_id=page_id,
                 )
 
@@ -1135,7 +1162,7 @@ async def run_approve() -> PipelineReport:
             log.info("이동 완료: %s → %s (%s)", name, page_id, action)
             report.add_saved(
                 blog_url="", blogger_name=name,
-                tech_name=name, rank="", trades=[],
+                company=name, role="", trades=[],
                 phone="", page_id=page_id,
             )
             progress.console.print(f"  [green]v[/green] {name} → {action}")

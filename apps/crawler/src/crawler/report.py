@@ -14,13 +14,15 @@ class ItemResult:
     blogger_name: str
     status: str  # "saved" | "synced" | "skipped" | "failed"
     # saved일 때만 채워짐
-    tech_name: str = ""
-    rank: str = ""
+    company: str = ""
+    role: str = ""
     trades: list[str] = field(default_factory=list)
     phone: str = ""
     region: str = ""
     address: str = ""
     email: str = ""
+    posts: int = 0
+    images: int = 0
     page_id: str = ""
     # failed일 때만 채워짐
     error: str = ""
@@ -43,18 +45,20 @@ class PipelineReport:
     llm_calls: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
-    # dry-run 시 전체 Technician 데이터 보존 (--from-file 임포트용)
-    technicians: list[dict] = field(default_factory=list)
+    # dry-run 시 전체 CrawledMember 데이터 보존 (--from-file 임포트용, BE 계약 동형)
+    members: list[dict] = field(default_factory=list)
 
     def add_saved(
-        self, blog_url: str, blogger_name: str, tech_name: str,
-        rank: str, trades: list[str], phone: str, page_id: str,
+        self, blog_url: str, blogger_name: str, company: str,
+        role: str, trades: list[str], phone: str, page_id: str,
         region: str = "", address: str = "", email: str = "",
+        posts: int = 0, images: int = 0,
     ) -> None:
         self.items.append(ItemResult(
             blog_url=blog_url, blogger_name=blogger_name, status="saved",
-            tech_name=tech_name, rank=rank, trades=trades,
+            company=company, role=role, trades=trades,
             phone=phone, region=region, address=address, email=email,
+            posts=posts, images=images,
             page_id=page_id,
         ))
 
@@ -123,12 +127,13 @@ class PipelineReport:
             return {}
         total = len(saved)
         field_checks = [
-            ("업체명", lambda i: bool(i.tech_name)),
+            ("업체명", lambda i: bool(i.company)),
             ("시공분야", lambda i: bool(i.trades)),
             ("지역", lambda i: bool(i.region)),
             ("연락처", lambda i: bool(i.phone)),
             ("주소", lambda i: bool(i.address)),
             ("이메일", lambda i: bool(i.email)),
+            ("시공사진", lambda i: i.images > 0),
         ]
         return {
             "total": total,
@@ -195,12 +200,13 @@ class PipelineReport:
         saved = [i for i in self.items if i.status == "saved"]
         if saved:
             field_checks = [
-                ("업체명", lambda i: bool(i.tech_name)),
+                ("업체명", lambda i: bool(i.company)),
                 ("시공분야", lambda i: bool(i.trades)),
                 ("지역", lambda i: bool(i.region)),
                 ("연락처", lambda i: bool(i.phone)),
                 ("주소", lambda i: bool(i.address)),
                 ("이메일", lambda i: bool(i.email)),
+                ("시공사진", lambda i: i.images > 0),
             ]
             total = len(saved)
             fill_data = []
@@ -258,7 +264,7 @@ class PipelineReport:
             },
             "field_fill_rates": self._compute_fill_rates(),
             "items": [asdict(i) for i in self.items],
-            **({"technicians": self.technicians} if self.technicians else {}),
+            **({"members": self.members} if self.members else {}),
         }
 
     def save(self, directory: Path) -> Path:
