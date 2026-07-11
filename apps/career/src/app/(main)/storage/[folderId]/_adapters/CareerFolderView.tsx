@@ -3,10 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { parseAsString, parseAsStringEnum, useQueryState } from 'nuqs'
-import { Fab, ImageUploadIcon, Tab, TopBar } from '@bconnect/ui'
+import { Fab, ImageUploadIcon, Tab, TopBar, useToast } from '@bconnect/ui'
 import { FolderImagesView } from '@bconnect/features'
-import { useFolder, useFolderImages } from '@/lib/storage-mock/hooks'
-import { useUploadStore } from '@/app/(main)/storage/upload/_store/upload-store'
+import { useFolder, useFolderImages, useUploadImages } from '@/lib/storage/hooks'
 import { CareerMemoTab } from './CareerMemoTab'
 import { CareerFileDetail } from './CareerFileDetail'
 
@@ -19,7 +18,8 @@ export function CareerFolderView({ folderId }: { folderId: string }) {
   const router = useRouter()
   const { data: folder } = useFolder(folderId)
   const { data: images, isLoading, isError } = useFolderImages(folderId)
-  const { setFiles, setTargetFolder } = useUploadStore()
+  const upload = useUploadImages(folderId)
+  const { toast } = useToast()
   const [tab, setTab] = useQueryState(
     'tab',
     parseAsStringEnum<'images' | 'memo'>(['images', 'memo']).withDefault('images')
@@ -75,14 +75,15 @@ export function CareerFolderView({ folderId }: { folderId: string }) {
     lastPinch.current = 0
   }
 
-  // 업로드 FAB → OS 파일 선택기 직접 호출. 명명 함수로 분리(인라인 router.push 룰 회피).
+  // 업로드 FAB → OS 파일 선택 후 바로 서버 업로드 (보드 작성 단계는 BE 메타 저장 지원 시 복원)
   const handlePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = Array.from(e.target.files ?? [])
     e.target.value = ''
     if (picked.length === 0) return
-    setFiles(picked)
-    setTargetFolder(folderId)
-    router.push('/storage/upload/board')
+    upload.mutate(picked, {
+      onSuccess: () => toast({ title: '업로드되었어요' }),
+      onError: () => toast({ title: '업로드에 실패했어요' }),
+    })
   }
 
   return (
@@ -106,7 +107,6 @@ export function CareerFolderView({ folderId }: { folderId: string }) {
           folderId={folderId}
           selectedId={file}
           onSelectImage={(id) => setFile(id)}
-          onClose={() => setFile(null)}
         />
       ) : tab === 'images' ? (
         <>
@@ -136,7 +136,9 @@ export function CareerFolderView({ folderId }: { folderId: string }) {
           />
           <Fab
             aria-label="이미지 업로드"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => {
+              if (!upload.isPending) fileInputRef.current?.click()
+            }}
             icon={<ImageUploadIcon size={22} />}
           />
         </>

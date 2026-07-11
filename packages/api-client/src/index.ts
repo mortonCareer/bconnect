@@ -15,6 +15,7 @@ export { getQueryClient, queryClientConfig } from './query-client'
 export {
   QueryClientProvider,
   useInfiniteQuery,
+  useMutation,
   useQueries,
   useQuery,
   useQueryClient,

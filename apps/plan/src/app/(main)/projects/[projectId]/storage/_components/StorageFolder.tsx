@@ -5,7 +5,7 @@ import { FolderImagesView } from '@bconnect/features'
 import { StorageHeader } from './StorageHeader'
 import { StorageMemoPanel } from './StorageMemoPanel'
 import { StorageFileDetail } from './StorageFileDetail'
-import { useFolderImages } from '@/lib/storage-mock/hooks'
+import { useFolderImages } from '@/lib/storage/hooks'
 import { useStorageParams } from '../_hooks/useStorageParams'
 
 /** plan 동산보드 폴더 — 갤러리(좌) + 메모|파일상세(우, ?file= 유무), 컬럼 비율 드래그 리사이즈. */
@@ -36,7 +36,6 @@ export function StorageFolder({ projectId, folderId }: { projectId: string; fold
             {file ? (
               <StorageFileDetail
                 key={file}
-                projectId={projectId}
                 folderId={folderId}
                 fileId={file}
                 closeHref={basePath}
