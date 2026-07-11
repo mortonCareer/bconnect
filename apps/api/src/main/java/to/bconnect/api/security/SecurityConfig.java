@@ -12,7 +12,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -65,7 +67,9 @@ public class SecurityConfig {
             AccessTokenAuthenticationFilter accessTokenAuthenticationFilter,
             RefreshTokenAuthenticationFilter refreshTokenAuthenticationFilter,
             SignupTokenAuthenticationFilter signupTokenAuthenticationFilter,
-            @Qualifier("VerifyOtpAuthenticationSuccessHandler") AuthenticationSuccessHandler verifyOtpSuccessHandler
+            @Qualifier("VerifyOtpAuthenticationSuccessHandler") AuthenticationSuccessHandler verifyOtpSuccessHandler,
+            @Qualifier("ApiAuthenticationEntryPoint") AuthenticationEntryPoint apiAuthenticationEntryPoint,
+            @Qualifier("ApiAccessDeniedHandler") AccessDeniedHandler apiAccessDeniedHandler
     ) throws Exception {
         val verifyOtpFilter = new VerifyOtpAuthenticationFilter(authenticationManager, objectMapper);
         verifyOtpFilter.setAuthenticationSuccessHandler(verifyOtpSuccessHandler);
@@ -85,6 +89,9 @@ public class SecurityConfig {
                     return config;
                 }))
                 .formLogin(AbstractHttpConfigurer::disable)
+                .exceptionHandling(eh -> eh
+                        .authenticationEntryPoint(apiAuthenticationEntryPoint)
+                        .accessDeniedHandler(apiAccessDeniedHandler))
                 .authorizeHttpRequests(arc -> arc
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/api/v1/auth/otp/**").permitAll()
