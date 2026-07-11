@@ -16,7 +16,8 @@ public enum CommonExceptionCode implements ExceptionCode {
     NOT_FOUND ("C005", HttpStatus.NOT_FOUND, "요청한 리소스를 찾을 수 없습니다.", LogLevel.INFO),
     UNSUPPORTED_MEDIA_TYPE ("C006", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "지원하지 않는 미디어 형식입니다.", LogLevel.WARN),
     INTERNAL_SERVER_ERROR ("C007", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다.", LogLevel.ERROR),
-    PATH_NOT_FOUND ("C008", HttpStatus.NOT_FOUND, "요청 경로를 찾을 수 없습니다.", LogLevel.INFO);
+    PATH_NOT_FOUND ("C008", HttpStatus.NOT_FOUND, "요청 경로를 찾을 수 없습니다.", LogLevel.INFO),
+    UNAUTHORIZED ("C009", HttpStatus.UNAUTHORIZED, "인증이 필요합니다.", LogLevel.INFO);
 
     private final String code;
     private final HttpStatus status;

@@ -1,5 +1,6 @@
 package to.bconnect.api.security.jwt;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,10 +12,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tools.jackson.databind.ObjectMapper;
+import to.bconnect.api.security.AuthExceptionCode;
+import to.bconnect.api.security.SecurityErrorResponseWriter;
 
 import java.io.IOException;
 
@@ -32,7 +34,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthenticationManager authenticationManager;
 
-    private final AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,@NonNull HttpServletResponse response,@NonNull FilterChain filterChain) throws ServletException, IOException {
@@ -57,12 +59,12 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         }
-        catch (AuthenticationException failed) {
+        catch (AuthenticationException | JwtException failed) {
             this.securityContextHolderStrategy.clearContext();
             if (this.logger.isTraceEnabled()) {
                 this.logger.trace("Failed to process authentication request", failed);
             }
-            this.failureHandler.onAuthenticationFailure(request, response, failed);
+            SecurityErrorResponseWriter.write(response, objectMapper, AuthExceptionCode.INVALID_TOKEN);
         }
     }
 

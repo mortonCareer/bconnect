@@ -85,6 +85,9 @@ public class SecurityConfig {
                     return config;
                 }))
                 .formLogin(AbstractHttpConfigurer::disable)
+                .exceptionHandling(eh -> eh
+                        .authenticationEntryPoint(new ApiAuthenticationEntryPoint(objectMapper))
+                        .accessDeniedHandler(new ApiAccessDeniedHandler(objectMapper)))
                 .authorizeHttpRequests(arc -> arc
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/api/v1/auth/otp/**").permitAll()
