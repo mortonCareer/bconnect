@@ -7,7 +7,7 @@ export {
   ApiError,
 } from './client'
 
-export { AUTH_HINT_COOKIE, setAuthHint, clearAuthHint } from './auth-hint'
+export { AUTH_HINT_COOKIE, setAuthHint, clearAuthHint, hasAuthHint } from './auth-hint'
 
 export { getQueryClient, queryClientConfig } from './query-client'
 
