@@ -6,7 +6,6 @@ import to.bconnect.api.socket.message.ChatMessageSentEvent;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class ChatMessageTargetResolver implements NotificationTargetResolver<ChatMessageSentEvent> {
@@ -18,12 +17,9 @@ public class ChatMessageTargetResolver implements NotificationTargetResolver<Cha
 
     @Override
     public ResolvedNotification resolve(ChatMessageSentEvent event) {
-        Set<Long> persist = new LinkedHashSet<>(event.recipientIds());
-        Set<Long> push = event.recipientIds().stream()
-                .filter(id -> !event.activeMemberIds().contains(id))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+        Set<Long> receivers = new LinkedHashSet<>(event.recipientIds());
         return new ResolvedNotification(
                 event.senderId(), event.chatId(), event.preview(),
-                new ResolvedNotification.Targets(persist, push));
+                new ResolvedNotification.Targets(receivers, new LinkedHashSet<>(receivers)));
     }
 }
