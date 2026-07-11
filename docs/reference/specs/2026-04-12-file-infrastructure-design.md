@@ -63,7 +63,7 @@ Morton 서비스 전반에서 사용될 **파일 저장·조회·권한 제어**
 
 ```
 static/                                            ← 버킷 (단일)
-├── profiles/{memberId}/images/{o,m,s}/{imageId}       ← public (CF Behavior)
+├── members/{memberId}/images/{o,m,s}/{imageId}        ← public (CF Behavior)
 ├── posts/{memberId}/images/{o,m,s}/{imageId}          ← public
 ├── credentials/{memberId}/files/{fileId}              ← private (CF Signed Cookie)
 ├── chats/{chatId}/images/{o,m,s}/{imageId}            ← private
@@ -90,7 +90,7 @@ static/                                            ← 버킷 (단일)
 
 | Path pattern (CloudFront Behavior)          | Signed Cookie | Cache-Control                         | 용도             |
 | ------------------------------------------- | ------------- | ------------------------------------- | ---------------- |
-| `/profiles/*`, `/posts/*`                   | 불필요        | `public, max-age=31536000, immutable` | 공개 엔티티      |
+| `/members/*`, `/posts/*`                    | 불필요        | `public, max-age=31536000, immutable` | 공개 엔티티      |
 | `/chats/*`, `/credentials/*`, `/storages/*` | 필수          | `public, max-age=31536000, immutable` | 권한 제한 엔티티 |
 
 **캐시 정책 통일**: 모든 파일 ID가 UUID(immutable)라 동일 URL이 다른 콘텐츠를 가리키지 않음. private도 1년 캐시 안전. 권한 변경 시에는 쿠키 만료/재발급으로 차단 (콘텐츠 캐시 무효화 불필요).
@@ -476,7 +476,7 @@ function fileUrl(att: AttachmentMeta): string {
 
 | context       | Scope                      | 접근 허용                     |
 | ------------- | -------------------------- | ----------------------------- |
-| `profiles`    | `profiles/{memberId}/*`    | 누구나 (capability URL)       |
+| `members`     | `members/{memberId}/*`     | 누구나 (capability URL)       |
 | `posts`       | `posts/{memberId}/*`       | 누구나 (capability URL)       |
 | `chats`       | `chats/{chatId}/*`         | 채팅방 참여자                 |
 | `credentials` | `credentials/{memberId}/*` | **본인 + 매칭된 업체 + 운영** |

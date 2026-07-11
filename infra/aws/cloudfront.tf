@@ -1,7 +1,7 @@
 # =============================================================================
 # static.<domain> (prod) / static-dev.<domain> (dev) distribution
 # — 유저 업로드 파일 서빙 (환경별 단일 버킷/단일 배포).
-# public(profiles/posts)·signed-cookie private(chats/credentials/storages)를
+# public(members/posts)·signed-cookie private(chats/credentials/storages)를
 # 버킷이 아닌 behavior 로 분기. 설계: docs/reference/specs/2026-04-12-file-infrastructure-design.md §3.1·§3.2
 # prod/dev 는 for_each 파라미터화 — 서명키·cert·distribution 이 환경별로 격리된다.
 # DNS(CNAME) 는 가비아 GUI 수동 — outputs.tf 참조.
@@ -111,7 +111,7 @@ resource "aws_cloudfront_distribution" "static" {
   }
 
   # default = private fail-safe: 유효 signed cookie 없으면 403.
-  # profiles/posts 외 전 경로(chats/credentials/storages/미지정)가 여기로 떨어짐.
+  # members/posts 외 전 경로(chats/credentials/storages/미지정)가 여기로 떨어짐.
   default_cache_behavior {
     target_origin_id       = local.s3_origin_id
     viewer_protocol_policy = "redirect-to-https"
@@ -123,9 +123,10 @@ resource "aws_cloudfront_distribution" "static" {
     trusted_key_groups = [aws_cloudfront_key_group.signing[each.key].id]
   }
 
-  # public override — profiles (capability URL, 쿠키 불필요)
+  # public override — members (아바타, capability URL, 쿠키 불필요).
+  # 설계문서 초안은 profiles/* 였으나 BE AttachmentContext.MEMBER("members") 가 SSOT (#812)
   ordered_cache_behavior {
-    path_pattern           = "profiles/*"
+    path_pattern           = "members/*"
     target_origin_id       = local.s3_origin_id
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["GET", "HEAD"]
