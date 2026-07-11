@@ -14,10 +14,7 @@ import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.socket.WebSocketSecurityConfig;
 import to.bconnect.api.storage.chat.*;
-import to.bconnect.api.storage.member.MemberEntity;
-import to.bconnect.api.storage.member.MemberRepository;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,21 +29,20 @@ public class MessageSocketService {
     private final MessageService messageService;
     private final ParticipantRepository participantRepository;
     private final DirectChatRepository directChatRepository;
-    private final MemberRepository memberRepository;
     private final SimpUserRegistry simpUserRegistry;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Message broadcast(AuthUser user, Long chatId, ChatType chatType, SendMessage command) {
         val message = messageService.create(chatId, chatType, user.id(), command);
-        val activeMemberIds = markAsRead(chatId, chatType, message.id());
+        markAsRead(chatId, chatType, message.id());
         val recipientIds = findRecipientIds(user.id(), chatId, chatType);
         eventPublisher.publishEvent(new ChatMessageSentEvent(
-                user.id(), chatId, recipientIds, activeMemberIds, command.content()));
+                user.id(), chatId, recipientIds, command.content()));
         return message;
     }
 
-    private Set<Long> markAsRead(Long chatId, ChatType chatType, Long messageId) {
+    private void markAsRead(Long chatId, ChatType chatType, Long messageId) {
         val activeMemberIds = findActiveMemberIds(chatId, chatType);
         if (chatType == ChatType.DIRECT) {
             val chat = findDirectChat(chatId);
@@ -55,7 +51,6 @@ public class MessageSocketService {
             participantRepository.findAllByChatIdAndMemberIdIn(chatId, activeMemberIds)
                     .forEach(it -> it.markRead(messageId));
         }
-        return activeMemberIds;
     }
 
     private Set<Long> findActiveMemberIds(Long chatId, ChatType chatType) {
@@ -64,14 +59,11 @@ public class MessageSocketService {
                 : WebSocketSecurityConfig.GROUP_CHAT_TOPIC_PREFIX;
         val dest = prefix + chatId;
 
-        val usernames = simpUserRegistry
+        return simpUserRegistry
                 .findSubscriptions(it -> dest.equals(it.getDestination()))
                 .stream()
                 .map(it -> it.getSession().getUser().getName())
-                .collect(Collectors.toCollection(HashSet::new));
-
-        return memberRepository.findAllByUsernameIn(usernames).stream()
-                .map(MemberEntity::getId)
+                .map(Long::valueOf)
                 .collect(Collectors.toSet());
     }
 

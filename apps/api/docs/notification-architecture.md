@@ -24,14 +24,15 @@ flowchart TD
 |---|---|---|---|
 | trigger | 채팅 메시지 저장 후 `ChatMessageSentEvent` 발행 (socket) | messages | - |
 | listen | `AFTER_COMMIT` 이후 리스너가 `NotificationService.handle` 위임 | - | - |
-| resolve | 저장 대상(`persistReceiverIds`) · push 대상(`pushReceiverIds`) 분리 | - | - |
+| resolve | 채팅은 `MessageSocketService`가 발신자를 제외해 전달한 수신자를 저장·push 대상으로 동일하게 지정 | - | - |
 | args | 이벤트 시점 렌더 변수(`senderName`) snapshot 생성 | - | - |
 | link | 수신자별 알림 저장 (`template_args` = args JSON) | notifications | - |
 | render | 타입 enum 이 `title` 렌더 · `link` 조립 | - | - |
-| send | 대상별 활성 device 로 push 발송 | device_tokens | ○ |
+| send | 대상별 모든 활성 device endpoint 로 동일한 알림 id의 push 발송 | device_tokens | ○ |
 | disable | `INVALID` / `EXPIRED` endpoint 비활성화 | device_tokens | - |
 
 - 온보딩 알림은 **회원의 첫 기기 등록**(`MemberFirstDeviceRegisteredEvent`, 회원당 1회)이 trigger다. 이후 resolve~disable 단계는 채팅과 동일하며 **본인에게** 저장·발송한다 — 가입 축하(`SIGNUP_WELCOME`)는 항상, 프로필 완성 제안(`PROFILE_COMPLETION`)은 프로필 미완성 시에만.
+- 채팅의 WebSocket topic 구독 여부는 push 대상을 제한하지 않는다. 구독 중인 회원 식별은 채팅 읽음 위치 갱신에만 사용한다.
 
 ## 시퀀스
 
@@ -52,9 +53,9 @@ sequenceDiagram
     Svc->>Lnk: notifications 저장
     Lnk-->>Svc: receiverId, id 매핑
     Svc->>Fac: PushNotification 생성
-    loop push 대상 x device
+    loop push 대상 x 모든 활성 device
         Svc->>Dev: pushableDevices
-        Svc->>Snd: send
+        Svc->>Snd: 동일 notificationId로 send
         Snd-->>Svc: 결과
         alt INVALID or EXPIRED
             Svc->>Dev: disable
@@ -95,7 +96,7 @@ to.bconnect.api
 │   │   └── target                            # 타입별 저장/push 대상 계산 전략
 │   │       ├── NotificationTargetResolver.java          # 타입별 resolver 인터페이스
 │   │       ├── NotificationTargetResolverRegistry.java  # NotificationType → resolver 선택
-│   │       ├── ChatMessageTargetResolver.java           # 전원 저장, 활성 채팅 사용자는 push 제외
+│   │       ├── ChatMessageTargetResolver.java           # 전달받은 수신자 전원을 저장 · push 대상으로 지정
 │   │       ├── SignupWelcomeTargetResolver.java         # 첫 기기 등록 회원 본인에게 항상 알림
 │   │       ├── ProfileCompletionTargetResolver.java     # 프로필 미완성 회원 본인에게만 알림
 │   │       └── ResolvedNotification.java                # sender/reference/content + persist/push 대상
@@ -119,7 +120,7 @@ to.bconnect.api
 │               └── RegisterDeviceResponse.java
 ├── socket
 │   └── message
-│       ├── MessageSocketService.java           # 메시지 저장 후 수신자/활성 사용자 계산 · 이벤트 발행
+│       ├── MessageSocketService.java           # 메시지 저장 · topic 구독 회원 읽음 갱신 · 수신자 이벤트 발행
 │       └── ChatMessageSentEvent.java           # notification이 구독하는 채팅 발생 이벤트
 ├── core
 │   └── domain
@@ -248,6 +249,7 @@ graph TD
 
 ## Push Payload
 - push 는 DB 구조(reference_type + reference_id)로 조립한 `link` 를 전송한다.
+- 수신자별 알림은 DB에 1건 저장하며, 그 수신자의 모든 활성 device endpoint에는 같은 `notification_id`를 전송한다.
 
 | 필드 | 값 | 용도 |
 |---|---|---|
@@ -265,7 +267,7 @@ graph TD
 2. 필요 시 `NotificationReferenceType` 에 이동 화면 추가
 3. 발행 패키지에 이벤트 정의, 구독 리스너에서 `NotificationService.handle(type, event)` 호출
 4. 대상 규칙이 다르면 `NotificationTargetResolver` 구현체 추가 (registry 자동 등록)
-   - `ChatMessageTargetResolver` : active member 를 push 대상에서 제외
+   - `ChatMessageTargetResolver` : `MessageSocketService`가 발신자를 제외해 전달한 전체 수신자를 저장 · push 대상으로 지정 (WebSocket 구독 여부와 무관)
    - `SignupWelcomeTargetResolver` : 첫 기기 등록 회원 **본인**에게 (항상)
    - `ProfileCompletionTargetResolver` : 첫 기기 등록 회원 본인에게, 단 **프로필 미완성 시에만**(있으면 대상 비움 → 스킵)
    - 이벤트에 수신자가 명시된 타입(동료 요청 · 추천 · 섭외 등)은 직접 대상 지정

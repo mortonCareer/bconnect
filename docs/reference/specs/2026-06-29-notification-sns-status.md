@@ -3,9 +3,9 @@
 > **For**: 알림 기능을 처음 보거나 이어받는 BE/FE 작업자.
 > **You'll be able to**: 알림이 **AWS SNS 기반**으로 어떻게 동작하는지 이해하고, 무엇이 구현됐고 무엇이 남았는지 파악.
 
-**작성일**: 2026-06-29 (업데이트: 2026-07-10)
-**상태**: **BE 구현 완료** · **`notification` 모듈 이관 · 타입 카탈로그 enum화 · 온보딩(가입 축하·프로필 완성) 알림 배선 완료** · **로컬 `local,sns` 프로파일로 실제 SNS→FCM→브라우저 도달 E2E 검증 완료(2026-07-10)** · **운영 인프라(Terraform) 미적용** · **FE 재배선 남음**
-**이슈**: [#211 feat(be): implement notification apis](https://github.com/mortonCareer/bconnect/issues/211)
+**작성일**: 2026-06-29 (업데이트: 2026-07-11)
+**상태**: **BE 구현 완료** · **`notification` 모듈 이관 · 타입 카탈로그 enum화 · 온보딩(가입 축하·프로필 완성) 알림 배선 완료** · **로컬 `local,sns` 프로파일로 실제 SNS→FCM→브라우저 도달 E2E 검증 완료(2026-07-10)** · **채팅 활성 판별(WebSocket principal=회원 ID) 수정 · 멀티 디바이스 알림 정책 확정 · 서비스 계층 회귀 테스트 추가 완료(#788, 2026-07-11)** · **운영 인프라(Terraform) 미적용** · **FE 재배선 남음**
+**이슈**: [#211 feat(be): implement notification apis](https://github.com/mortonCareer/bconnect/issues/211), [#788 채팅 활성 사용자 판별과 멀티 디바이스 알림 정책 수정](https://github.com/mortonCareer/bconnect/issues/788)
 **관련 문서**: [배경: FCM 시절 현황](./2026-06-19-notification-fcm-status.md) (3.3 딥링크 규칙 포함, 전송 채널을 FCM→SNS로 바꾸기 전 문서. 본 문서가 최신.)
 
 ---
@@ -20,10 +20,10 @@
 
 사용자에게 알림은 **두 가지 방식**으로 닿고, BE는 둘 다 채워야 한다.
 
-| 경로              | 언제                                          | 데이터 출처                             |
-| ----------------- | --------------------------------------------- | --------------------------------------- |
-| **푸시(OS 알림)** | 사용자가 해당 화면에 없을 때 BE가 실시간 발송 | AWS SNS → 브라우저 Service Worker       |
-| **인앱 목록**     | 사용자가 알림함을 열람                        | `GET /api/v1/notifications` (DB 저장분) |
+| 경로              | 언제                                       | 데이터 출처                             |
+| ----------------- | ------------------------------------------ | --------------------------------------- |
+| **푸시(OS 알림)** | 화면 접속 여부와 무관하게 BE가 실시간 발송 | AWS SNS → 브라우저 Service Worker       |
+| **인앱 목록**     | 사용자가 알림함을 열람                     | `GET /api/v1/notifications` (DB 저장분) |
 
 → 한 번의 알림 이벤트(예: 새 채팅 메시지)는 **DB에 영구 저장**(목록용)되고 **동시에 SNS로 발송**(푸시용)된다.
 
@@ -39,7 +39,7 @@
                                                         ▲
 ┌─ BE (apps/api) ─────────────────────────────┐        │
 │ ① device_tokens 저장 (member↔token↔endpoint)│   ┌─ AWS SNS ──────────┐
-│ ② 채팅 이벤트 → 수신자 endpoint 조회          │──→│ Platform App        │
+│ ② 채팅 이벤트 → 수신자의 모든 endpoint 조회   │──→│ Platform App        │
 │ ③ SNS publish                                │   │ + Endpoint(토큰별)   │
 │ ④ Notification DB 저장(목록/안읽음용)         │   └──────────┬──────────┘
 │ ⑤ 발송 실패 토큰 비활성화                      │              ▼ OS 푸시 → 브라우저
@@ -48,14 +48,15 @@
 
 1. **토큰 등록**: FE가 브라우저 푸시 토큰을 발급해 `POST /api/v1/devices`로 보낸다. BE는 이 토큰으로 SNS에 "엔드포인트(endpoint)"를 만들고, `토큰 ↔ endpoint ARN ↔ 회원` 매핑을 `device_tokens`에 저장한다.
 2. **이벤트 발생**: 채팅 메시지가 오면 BE가 수신자를 계산한다.
-3. **저장 + 발송**: 알림을 DB에 저장하고(목록에 남도록), 푸시 대상에게 SNS로 발송한다(브라우저에 OS 알림이 뜨도록).
+3. **저장 + 발송**: 수신자별 알림을 DB에 1건 저장하고(목록에 남도록), 해당 수신자의 모든 활성 SNS endpoint에 같은 `notification_id`로 발송한다. 한 endpoint의 실패는 다른 endpoint 발송을 막지 않는다.
 4. **클릭**: 알림을 누르면 딥링크(`/n/{대상타입}/{대상ID}`, 예 `/n/chat_room/42`)로 이동한다. 상세 규칙은 [배경 문서의 3.3 딥링크 설명](./2026-06-19-notification-fcm-status.md)에 있다.
 
 ### 누구에게 저장하고, 누구에게 푸시하나 (중요)
 
-- **DB 저장 대상** = 채팅 참여자 − 발신자 → **전원**. (지금 채팅방에 들어와 있던 사람도 알림 이력은 남아야 하므로.)
-- **푸시 발송 대상** = 위 대상 중 **그 채팅방에 실시간 접속(WebSocket)하지 않은 사람만**. (접속 중이면 이미 화면에서 메시지를 보고 있으므로 푸시는 생략.)
-- **발송 시점** = 메시지·알림이 DB에 **저장 완료(커밋)된 뒤**. 발송이 실패해도 채팅 저장이 취소되지 않도록 분리했다.
+- **DB 저장 대상** = 채팅 참여자 − 발신자 → **전원**. 수신자별 알림 행은 1건만 저장한다.
+- **푸시 발송 대상** = DB 저장 대상과 동일한 **전원**. 채팅방 WebSocket 구독 여부와 무관하게 각 수신자의 모든 활성 device endpoint로 발송한다.
+- **WebSocket 구독자 판별** = push 제외가 아니라 해당 채팅의 읽음 위치 갱신에만 사용한다.
+- **발송 시점** = 채팅 메시지 커밋 후 별도 알림 트랜잭션에서 알림 행을 저장하고 SNS 발송을 시도한다. 발송이 실패해도 이미 커밋된 채팅 저장은 취소되지 않는다.
 
 ---
 
@@ -94,10 +95,10 @@ Notification (알림 1건, 테이블)         NotificationType (알림 종류 = 
 | 푸시 전송기    | AWS SNS로 발송. 로컬/테스트는 발송 대신 로그만 남기는 대체 구현       | ✅                       |
 | 디바이스 토큰  | `device_tokens` 저장 + `POST/DELETE /api/v1/devices`                  | ✅                       |
 | 알림 저장 모델 | `notifications` + 타입 카탈로그 enum(`NotificationType`, 테이블 없음) | ✅                       |
-| 채팅 트리거    | 채팅 메시지 → DB 저장 + 비접속자에게 발송                             | ✅                       |
+| 채팅 트리거    | 채팅 메시지 → 수신자별 DB 1건 저장 + 모든 활성 device에 발송          | ✅                       |
 | 온보딩 트리거  | 첫 기기 등록 → 가입 축하(항상) + 프로필 완성(미완성 시) 본인 발송     | ✅                       |
 | 알림 조회      | 목록 / 안읽음 개수 / 읽음 처리                                        | ✅                       |
-| 실패 토큰 정리 | 발송 실패한(만료·무효) endpoint 비활성화                              | ✅                       |
+| 실패 토큰 정리 | 만료·무효 endpoint만 비활성화, 다른 endpoint 발송은 계속 진행         | ✅                       |
 | 인프라         | SNS 리소스·IAM 권한·환경변수 (Terraform)                              | 🟡 코드 작성, **미적용** |
 
 ### API
@@ -145,9 +146,14 @@ OpenAPI 스펙은 BE springdoc 산출물(`packages/api-client/src/openapi.yaml`,
 
 **통과(로컬/테스트)**:
 
-- 단위 테스트 — 타입 카탈로그 렌더·링크(`NotificationTypeTest`). (세분화 단위·통합 테스트는 다른 도메인 규모에 맞춰 최소화)
+- 타입 카탈로그 렌더·링크(`NotificationTypeTest`).
+- 채팅 대상 계산 — 전달된 수신자 전원이 저장·push 대상인지 검증(`ChatMessageTargetResolverTest`).
+- 활성 구독자 읽음 갱신 — WebSocket principal의 회원 ID를 직접 해석하는 DIRECT 채팅 경로 검증(`MessageSocketServiceTest`).
+- 서비스 계층 — 수신자별 알림 1건 저장, 모든 활성 endpoint 발송, 개별 실패 격리, EXPIRED endpoint 비활성화 검증(`ChatNotificationIntegrationTest`).
 - 서버 기동 — 스키마·빈(bean) 연결.
 - OpenAPI 생성.
+
+`ChatNotificationIntegrationTest`는 `NotificationService.handle()`을 직접 호출하므로 `MessageSocketService`의 이벤트 발행부터 `AFTER_COMMIT` 리스너까지의 연결은 검증하지 않는다. 멀티 디바이스 payload의 `notification_id` 일치와 GROUP 채팅 읽음 갱신도 채팅 E2E에서 확인해야 한다.
 
 **실제 SNS→FCM→브라우저 E2E 검증 완료 (2026-07-10, `local,sns` 프로파일)**:
 
@@ -166,4 +172,4 @@ OpenAPI 스펙은 BE springdoc 산출물(`packages/api-client/src/openapi.yaml`,
 
 1. **운영 인프라 적용**: FCM 서비스계정 키를 비밀 설정에 넣고 Terraform 적용 → dev에서 실제 발송 확인.
 2. **FE 재배선**(별도 작업): FE 푸시 코드를 현재 BE 계약에 맞추고, 딥링크(`/n/...`) 연결, plan 앱에도 푸시 적용.
-3. **채팅 E2E**: 두 브라우저로 실제 채팅 → 비접속 수신자에게 OS 푸시 + 목록/안읽음 반영 + 만료 토큰 정리까지 확인. (온보딩 경로는 `local,sns`로 검증 완료)
+3. **채팅 E2E**: 한 수신자에게 활성 디바이스를 2개 이상 등록하고 실제 채팅 → 수신자의 WebSocket 구독 여부와 무관하게 모든 활성 endpoint 수신 + 알림 DB 1건 + 동일 `notification_id` + topic 구독자의 채팅 읽음 위치 갱신 + 한 endpoint 만료 시 나머지 발송 지속까지 확인. (온보딩 경로는 `local,sns`로 검증 완료. 단위·서비스 계층 회귀 테스트는 대상 계산, DIRECT 읽음 갱신, 멀티 디바이스 발송·실패 격리·EXPIRED 비활성화까지 검증하며, 이벤트 발행→`AFTER_COMMIT` 리스너 연결과 실제 브라우저/SNS 경로는 이 E2E에서 확인해야 한다.)
