@@ -39,7 +39,8 @@ class AccessTokenAuthenticationFilterTest {
         assertThat(response.getContentType()).contains("application/json");
         assertThat(response.getContentAsString())
                 .contains("\"success\":false")
-                .contains("\"code\":\"A005\"");
+                .contains("\"code\":\"A005\"")
+                .contains("유효하지 않은 토큰입니다.");
         verify(chain, never()).doFilter(any(), any());
     }
 

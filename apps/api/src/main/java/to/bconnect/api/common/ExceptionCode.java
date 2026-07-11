@@ -9,6 +9,6 @@ import org.springframework.boot.logging.LogLevel;
 public interface ExceptionCode {
     String getCode();
     HttpStatus getStatus();
-    @JsonIgnore String getMessage();
+    String getMessage();
     @JsonIgnore LogLevel getLogLevel();
 }

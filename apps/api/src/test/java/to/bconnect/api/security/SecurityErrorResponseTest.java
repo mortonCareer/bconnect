@@ -31,7 +31,8 @@ class SecurityErrorResponseTest {
         assertThat(response.getContentAsString())
                 .contains("\"success\":false")
                 .contains("\"code\":\"C009\"")
-                .contains("UNAUTHORIZED");
+                .contains("UNAUTHORIZED")
+                .contains("인증이 필요합니다.");
     }
 
     @Test
@@ -48,6 +49,7 @@ class SecurityErrorResponseTest {
         assertThat(response.getContentAsString())
                 .contains("\"success\":false")
                 .contains("\"code\":\"C004\"")
-                .contains("FORBIDDEN");
+                .contains("FORBIDDEN")
+                .contains("리소스 접근 권한이 없습니다.");
     }
 }
