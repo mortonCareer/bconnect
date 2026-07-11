@@ -45,7 +45,8 @@ export function usePushNotificationListener(): void {
 
       // 이미 허용된 상태면 토큰 발급 + 서버 등록 (앱 진입마다 UPSERT 로 last_active_at 갱신).
       // 로그인 게이트 필수(#800) — 기기 등록 API 는 인증 필요라 로그아웃 상태면 401.
-      // 세션 중 로그인하는 케이스는 auth-store login() 이 syncDeviceToken 을 직접 호출.
+      // 이 effect 는 마운트 때 1회만 실행된다 — 로그아웃으로 진입했다가 새로고침 없이
+      // 로그인하는 경우는 여기서 못 잡으므로 auth-store login() 이 직접 호출한다.
       if (Notification.permission === 'granted' && hasAuthHint()) await syncDeviceToken()
 
       // 포그라운드 수신 리스너
