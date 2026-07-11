@@ -29,7 +29,8 @@ export interface Folder {
 export interface BoardImage {
   id: string
   folderId: string
-  imageUrl: string // 시드=placeholder data-URI, 업로드=object-URL (never uploaded)
+  imageUrl: string
+  filename?: string
   boardRows: BoardRow[]
   boardPosition: BoardPosition
   description: string

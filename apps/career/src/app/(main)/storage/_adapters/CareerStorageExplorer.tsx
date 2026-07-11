@@ -15,12 +15,12 @@ import {
 import { StorageExplorerView } from '@bconnect/features'
 import type { Folder } from '@bconnect/features'
 import { matchHangul } from '@bconnect/config/search'
-import { useAllFolders, useStorageMutations } from '@/lib/storage-mock/hooks'
+import { useAllFolders, useFolderMutations } from '@/lib/storage/hooks'
 
 /** career 저장소 탐색기 루트 — 검색(초성) + 폴더 목록 + 인라인 생성/이름수정 + FAB(폴더 추가). */
 export function CareerStorageExplorer() {
   const { data: folders, isLoading, isError } = useAllFolders()
-  const { createFolder, updateFolder, deleteFolder } = useStorageMutations()
+  const { createFolder, updateFolder, deleteFolder } = useFolderMutations()
   const [query, setQuery] = useState('')
   const [creating, setCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -57,13 +57,13 @@ export function CareerStorageExplorer() {
           }
           creating={creating}
           onCreateSubmit={(title) => {
-            createFolder({ projectId: '1', title })
+            createFolder(title)
             setCreating(false)
           }}
           onCreateCancel={() => setCreating(false)}
           editingId={editingId}
           onRenameSubmit={(id, title) => {
-            updateFolder(id, { title })
+            updateFolder(id, title)
             setEditingId(null)
           }}
           onRenameCancel={() => setEditingId(null)}

@@ -1,14 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
-import { useToast, XIcon } from '@bconnect/ui'
-import { BoardOverlay, ImageBoardDetail } from '@bconnect/features'
-import type { BoardPosition, BoardRow } from '@bconnect/features'
-import { useFolderImages, useFolders, useStorageMutations } from '@/lib/storage-mock/hooks'
+import { XIcon } from '@bconnect/ui'
+import { formatDate } from '@bconnect/config/format'
+import { useFolderImages } from '@/lib/storage/hooks'
 
 interface StorageFileDetailProps {
-  projectId: string
   folderId: string
   fileId: string
   /** 닫기(=?file 제거) Link */
@@ -16,25 +13,12 @@ interface StorageFileDetailProps {
 }
 
 /**
- * plan 우측 컬럼 — 파일 상세/편집 (포커스 시). 동산보드 메타·폴더·설명 즉시 편집 + 설명 아래 저장.
- * fileId 변경 시 부모가 key 로 리마운트 → 드래프트 초기화.
+ * plan 우측 컬럼 — 파일 상세 (포커스 시). 동산보드 메타·설명·폴더 이동 편집은 BE 저장
+ * 엔드포인트가 없어 비활성 — BE 지원 시 복원 (features ImageBoardDetail 재사용).
  */
-export function StorageFileDetail({
-  projectId,
-  folderId,
-  fileId,
-  closeHref,
-}: StorageFileDetailProps) {
+export function StorageFileDetail({ folderId, fileId, closeHref }: StorageFileDetailProps) {
   const { data: images } = useFolderImages(folderId)
-  const { data: folders } = useFolders(projectId)
-  const { updateImage, moveImage } = useStorageMutations()
-  const { toast } = useToast()
-
   const image = images?.find((i) => i.id === fileId)
-  const [rows, setRows] = useState<BoardRow[]>(image?.boardRows ?? [])
-  const [description, setDescription] = useState(image?.description ?? '')
-  const [position, setPosition] = useState<BoardPosition>(image?.boardPosition ?? 'tl')
-  const [targetFolder, setTargetFolder] = useState(image?.folderId ?? folderId)
 
   if (!image) {
     return (
@@ -47,12 +31,6 @@ export function StorageFileDetail({
     )
   }
 
-  const submit = () => {
-    updateImage(image.id, { boardRows: rows, description, boardPosition: position })
-    if (targetFolder !== image.folderId) moveImage(image.id, targetFolder)
-    toast({ title: '저장되었어요' })
-  }
-
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="flex justify-end">
@@ -60,27 +38,17 @@ export function StorageFileDetail({
           <XIcon size={18} />
         </Link>
       </div>
-      <div className="relative overflow-hidden rounded-md">
+      <div className="overflow-hidden rounded-md">
         <img src={image.imageUrl} alt="" className="aspect-square w-full object-cover" />
-        <BoardOverlay rows={rows} position={position} size="md" />
       </div>
-      <ImageBoardDetail
-        image={{
-          ...image,
-          boardRows: rows,
-          description,
-          boardPosition: position,
-          folderId: targetFolder,
-        }}
-        folders={folders ?? []}
-        onChangeRows={setRows}
-        onChangePosition={setPosition}
-        onChangeDescription={setDescription}
-        onMoveFolder={setTargetFolder}
-        onSubmit={submit}
-        showPositionPicker
-        submitLabel="저장"
-      />
+      <div className="min-w-0">
+        {image.filename && (
+          <p className="truncate text-sm font-medium text-gray-900">{image.filename}</p>
+        )}
+        {image.createdAt && (
+          <p className="mt-0.5 text-xs text-gray-400">{formatDate(image.createdAt)}</p>
+        )}
+      </div>
     </div>
   )
 }

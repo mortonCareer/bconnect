@@ -12,12 +12,12 @@ import {
 } from '@bconnect/ui'
 import { MemoListView } from '@bconnect/features'
 import type { Memo } from '@bconnect/features'
-import { useFolderMemos, useStorageMutations } from '@/lib/storage-mock/hooks'
+import { useFolderMemos, useMemoMutations } from '@/lib/storage/hooks'
 
 /** career 폴더 메모 탭 — 메모 CRUD (작성=FAB, 케밥=ActionDrawer, 삭제=ConfirmDialog 가드). */
 export function CareerMemoTab({ folderId }: { folderId: string }) {
   const { data: memos, isLoading, isError } = useFolderMemos(folderId)
-  const { createMemo, updateMemo, deleteMemo } = useStorageMutations()
+  const { createMemo, updateMemo, deleteMemo } = useMemoMutations(folderId)
   const [composing, setComposing] = useState(false)
   const [kebab, setKebab] = useState<{ memo: Memo; edit: () => void; remove: () => void } | null>(
     null
@@ -33,7 +33,7 @@ export function CareerMemoTab({ folderId }: { folderId: string }) {
         canManage
         composing={composing}
         onComposingChange={setComposing}
-        onCreate={(content) => createMemo(folderId, content)}
+        onCreate={(content) => createMemo(content)}
         onUpdate={(id, content) => updateMemo(id, content)}
         onDelete={(id) => deleteMemo(id)}
         confirmDelete={(onConfirm) => setPendingDelete({ run: onConfirm })}

@@ -3,12 +3,12 @@
 import { useState } from 'react'
 import { Button, ConfirmDialog, EditIcon, MenuButton, TrashIcon } from '@bconnect/ui'
 import { MemoListView } from '@bconnect/features'
-import { useFolderMemos, useStorageMutations } from '@/lib/storage-mock/hooks'
+import { useFolderMemos, useMemoMutations } from '@/lib/storage/hooks'
 
 /** plan 우측 컬럼 — 폴더 메모 CRUD (포커스 없을 때). */
 export function StorageMemoPanel({ folderId }: { folderId: string }) {
   const { data: memos, isLoading, isError } = useFolderMemos(folderId)
-  const { createMemo, updateMemo, deleteMemo } = useStorageMutations()
+  const { createMemo, updateMemo, deleteMemo } = useMemoMutations(folderId)
   const [composing, setComposing] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<{ run: () => void } | null>(null)
 
@@ -29,7 +29,7 @@ export function StorageMemoPanel({ folderId }: { folderId: string }) {
         canManage
         composing={composing}
         onComposingChange={setComposing}
-        onCreate={(content) => createMemo(folderId, content)}
+        onCreate={(content) => createMemo(content)}
         onUpdate={(id, content) => updateMemo(id, content)}
         onDelete={(id) => deleteMemo(id)}
         confirmDelete={(onConfirm) => setPendingDelete({ run: onConfirm })}

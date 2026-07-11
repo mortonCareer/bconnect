@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Progress } from '@bconnect/ui'
 import { useGetProject } from '@bconnect/api-client'
-import { useFolder, useStorageUsage } from '@/lib/storage-mock/hooks'
+import { useFolder, useStorageUsage } from '@/lib/storage/hooks'
 
 const toMB = (bytes: number) => `${Math.round(bytes / 1_000_000)}MB`
 const toGB = (bytes: number) => `${Math.round(bytes / 1_073_741_824)}GB`
@@ -11,7 +11,7 @@ const toGB = (bytes: number) => `${Math.round(bytes / 1_073_741_824)}GB`
 /** 동산보드 헤더 — 프로젝트명 + breadcrumb(프로젝트 › 폴더) + TIP + 용량바. */
 export function StorageHeader({ projectId, folderId }: { projectId: string; folderId?: string }) {
   const { data: project } = useGetProject(Number(projectId))
-  const { data: folder } = useFolder(folderId ?? '')
+  const { data: folder } = useFolder(projectId, folderId)
   const { data: usage } = useStorageUsage(projectId)
 
   const projectName = project?.title ?? '프로젝트'

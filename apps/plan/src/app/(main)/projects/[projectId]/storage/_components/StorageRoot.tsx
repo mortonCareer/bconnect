@@ -14,12 +14,12 @@ import {
 import { StorageExplorerView } from '@bconnect/features'
 import type { Folder } from '@bconnect/features'
 import { StorageHeader } from './StorageHeader'
-import { useFolders, useStorageMutations } from '@/lib/storage-mock/hooks'
+import { useFolderMutations, useFolders } from '@/lib/storage/hooks'
 
 /** plan 동산보드 루트 — 폴더 목록(좌) + 빈 상태 안내(우), 컬럼 비율 드래그 리사이즈. 폴더 미선택 시. */
 export function StorageRoot({ projectId }: { projectId: string }) {
   const { data: folders, isLoading, isError } = useFolders(projectId)
-  const { createFolder, updateFolder, deleteFolder } = useStorageMutations()
+  const { createFolder, updateFolder, deleteFolder } = useFolderMutations(projectId)
   const [creating, setCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [pendingDelete, setPendingDelete] = useState<Folder | null>(null)
@@ -48,13 +48,13 @@ export function StorageRoot({ projectId }: { projectId: string }) {
               folderHref={(id) => `/projects/${projectId}/storage/${id}`}
               creating={creating}
               onCreateSubmit={(title) => {
-                createFolder({ projectId, title })
+                createFolder(title)
                 setCreating(false)
               }}
               onCreateCancel={() => setCreating(false)}
               editingId={editingId}
               onRenameSubmit={(id, title) => {
-                updateFolder(id, { title })
+                updateFolder(id, title)
                 setEditingId(null)
               }}
               onRenameCancel={() => setEditingId(null)}
