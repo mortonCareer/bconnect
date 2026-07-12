@@ -107,9 +107,13 @@ public class AttachmentResolver {
         if (attachment == null)
             return null;
 
+        // 이미지 축소본(m/s)은 리사이즈 Lambda 가 webp 로 생성 — allKeys 와 동일 규칙 (#813)
+        val ext = attachment.type() == AttachmentType.IMAGE && size != ImageSize.ORIGINAL
+                ? size.getExtension()
+                : attachment.ext();
         val key = AttachmentKeyUtils.key(
                 attachment.context(), attachment.contextId(), attachment.type(),
-                size, attachment.uuid(), attachment.ext());
+                size, attachment.uuid(), ext);
         return urlResolver.resolve(key);
     }
 }
