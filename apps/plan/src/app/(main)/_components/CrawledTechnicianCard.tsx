@@ -29,6 +29,8 @@ export function CrawledTechnicianCard({ item }: CrawledTechnicianCardProps) {
   const detailHref = panelHref(`crawled/${item.crawledId}`)
 
   const metaParts = [
+    // 표시명이 대표자명일 때 업체명 병기 (업체명 폴백 표시 중이면 중복이라 생략)
+    item.company !== item.name ? item.company : null,
     item.location,
     item.grade,
     item.experienceYears > 0 ? `${item.experienceYears}년` : null,

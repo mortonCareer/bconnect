@@ -25,9 +25,13 @@ export function PanelCrawled({ crawledId }: { crawledId: number }) {
   const { data, isLoading, isError } = useGetCrawledMember(crawledId, { query: { enabled } })
 
   const profile = data?.profile
+  // 실회원 name(사람 이름) 슬롯과 정합: 대표자명 우선, 없으면 업체명 폴백
+  const displayName = data?.name || data?.company || ''
+  const companySub = data?.company && data.company !== displayName ? data.company : null
   const trades = (profile?.trades ?? []).flatMap((label) => toTradeEnum(label) ?? [])
   const primaryTrade = profile?.primaryTrade ? toTradeEnum(profile.primaryTrade) : undefined
   const metaParts = [
+    companySub,
     profile?.state ? CRAWLED_REGION_LABELS[profile.state] : null,
     data?.role,
     profile?.experience ? `${profile.experience}년` : null,
@@ -61,13 +65,13 @@ export function PanelCrawled({ crawledId }: { crawledId: number }) {
                   {data.picture && (
                     <CrawledImage
                       src={data.picture}
-                      alt={data.company ?? ''}
+                      alt={displayName}
                       className="h-full w-full object-cover"
                     />
                   )}
                 </div>
                 <div className="flex flex-col gap-1">
-                  <p className="text-sb-20 text-gray-900">{data.company}</p>
+                  <p className="text-sb-20 text-gray-900">{displayName}</p>
                   {metaParts.length > 0 && (
                     <p className="text-r-14 text-gray-500">{metaParts.join(' · ')}</p>
                   )}

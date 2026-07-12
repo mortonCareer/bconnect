@@ -45,6 +45,8 @@ export interface CrawledTechnicianItem extends TechnicianItemBase {
   crawledId: number
   phone: string
   sourceUrl: string
+  /** 업체명 — 표시명(name)이 대표자명일 때 메타에 병기 */
+  company: string
 }
 
 export type TechnicianItem = MemberTechnicianItem | CrawledTechnicianItem
@@ -96,7 +98,8 @@ function toCrawledItem(crawled: CrawledMemberSummary): CrawledTechnicianItem | n
   return {
     source: 'crawled',
     crawledId,
-    name: crawled.company ?? crawled.name ?? '',
+    // 실회원 name(사람 이름) 슬롯과 정합: 대표자명 우선, 없으면 업체명 폴백
+    name: crawled.name || crawled.company || '',
     picture: crawled.picture ?? DEFAULT_PROFILE_IMAGE,
     location: profile?.state ? CRAWLED_REGION_LABELS[profile.state] : '',
     primaryTrade: profile?.primaryTrade ? toTradeEnum(profile.primaryTrade) : undefined,
@@ -115,6 +118,7 @@ function toCrawledItem(crawled: CrawledMemberSummary): CrawledTechnicianItem | n
     portfolios: [],
     phone: crawled.phone ?? '',
     sourceUrl: profile?.url ?? '',
+    company: crawled.company ?? '',
   }
 }
 
