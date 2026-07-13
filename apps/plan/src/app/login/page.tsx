@@ -86,7 +86,9 @@ export default function LoginPage() {
         // 기존 회원 — 바로 로그인
         login(result.accessToken)
         const redirect = new URLSearchParams(window.location.search).get('redirect')
-        router.push(
+        // router.push 금지 — 라우터 캐시가 로그아웃 시점의 미들웨어 redirect 를 재생해
+        // 로그인 페이지로 즉시 돌아온다. 하드 내비게이션으로 캐시를 통째로 리셋 (#855).
+        window.location.assign(
           redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/'
         )
       } else {
