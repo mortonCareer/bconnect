@@ -24,10 +24,11 @@ class TestBuildProperties:
         assert props["구분"]["select"]["name"] == "기공"
         assert props["시공분야"]["multi_select"] == [{"name": "타일"}]
 
-    def test_optional_phone(self):
+    def test_optional_phone_formatted_for_notion(self):
+        # 모델은 BE 포맷(숫자만), 노션 표시는 하이픈 포맷
         member = _make_member(phone="01012345678")
         props = _build_properties(member)
-        assert props["연락처"]["phone_number"] == "01012345678"
+        assert props["연락처"]["phone_number"] == "010-1234-5678"
 
     def test_optional_email(self):
         member = _make_member(email="a@b.com")

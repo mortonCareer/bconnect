@@ -9,7 +9,7 @@ import logging
 from crawler.channels.naver_blog import search_blogs, explore_blogger
 from crawler.classifier import classify
 from crawler.models import (
-    CrawledMember, CrawledPost, CrawledProfile, PLATFORM_NAVER, REGION_ENUM_BY_KR,
+    CrawledMember, CrawledPost, CrawledProfile, PLATFORM_NAVER, REGION_ENUM_BY_KR, phone_digits,
 )
 from crawler.notion import save_member
 
@@ -77,7 +77,7 @@ async def run():
     member = CrawledMember(
         company=company,
         name=result.get("representative", ""),
-        phone=profile.get("phone", ""),
+        phone=phone_digits(profile.get("phone", "")),
         picture=picture,
         role=result["rank"],
         brn=result.get("business_number", ""),

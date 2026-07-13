@@ -1,3 +1,5 @@
+import re
+
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
@@ -58,6 +60,11 @@ SEARCH_KEYWORDS = [
     "건설기계운전", "양중", "곰방", "목도",
     "운송", "청소", "보통인부",
 ]
+
+
+def phone_digits(raw: str) -> str:
+    """전화번호를 BE 저장 포맷(숫자만)으로 정규화한다. 예: 010-1234-5678 → 01012345678"""
+    return re.sub(r"\D", "", raw or "")
 
 
 class _CamelModel(BaseModel):

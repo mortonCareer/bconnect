@@ -14,7 +14,7 @@ from crawler.classifier import classify, format_phone, infer_region_from_address
 from crawler.config import settings
 from crawler.models import (
     CrawledMember, CrawledPost, CrawledProfile,
-    PLATFORM_INSTAGRAM, PLATFORM_NAVER, REGION_ENUM_BY_KR,
+    PLATFORM_INSTAGRAM, PLATFORM_NAVER, REGION_ENUM_BY_KR, phone_digits,
 )
 from crawler.notion import (
     save_member, save_to_review, update_member,
@@ -254,7 +254,7 @@ async def process_blog_result(
     member = CrawledMember(
         company=name,
         name=classification.get("representative", ""),
-        phone=phone,
+        phone=phone_digits(phone),
         picture=cover_image_url,
         role=classification["rank"],
         brn=classification.get("business_number", ""),
@@ -413,7 +413,7 @@ async def process_instagram_result(
     member = CrawledMember(
         company=name,
         name=classification.get("representative", ""),
-        phone=phone,
+        phone=phone_digits(phone),
         picture=profile.get("profile_pic_url", ""),
         role=classification["rank"],
         brn=classification.get("business_number", ""),
@@ -942,7 +942,7 @@ async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineR
             member = CrawledMember(
                 company=tech_name,
                 name=classification.get("representative", ""),
-                phone=phone,
+                phone=phone_digits(phone),
                 picture=cover,
                 role=classification["rank"],
                 brn=classification.get("business_number", ""),
@@ -975,7 +975,7 @@ async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineR
             report.add_saved(
                 blog_url=detail_url, blogger_name=name,
                 company=tech_name, role=member.role, trades=member.profile.trades,
-                phone=phone, page_id=page_id,
+                phone=phone_digits(phone), page_id=page_id,
                 region=member.region_kr, address=address, email=email,
                 posts=len(member.posts), images=sum(len(post.images) for post in member.posts),
             )

@@ -8,7 +8,7 @@ import httpx
 from notion_client import AsyncClient
 
 from crawler.config import settings
-from crawler.models import CrawledMember, REGION_ENUM_BY_KR
+from crawler.models import CrawledMember, REGION_ENUM_BY_KR, phone_digits
 
 log = logging.getLogger(__name__)
 
@@ -71,6 +71,13 @@ async def validate_schema() -> list[str]:
     return errors
 
 
+def _display_phone(digits: str) -> str:
+    """노션 저장 포맷(하이픈) 변환 — 저장·중복 조회용."""
+    from crawler.classifier import format_phone
+
+    return format_phone(digits)
+
+
 async def find_duplicate(member: CrawledMember) -> str | None:
     """중복 레코드가 있으면 page_id를 반환한다.
 
@@ -81,7 +88,7 @@ async def find_duplicate(member: CrawledMember) -> str | None:
     filters = [
         ("자세히보기", member.profile.url, {"property": "자세히보기", "url": {"equals": member.profile.url}}),
         ("사업자등록번호", member.brn, {"property": "사업자등록번호", "rich_text": {"equals": member.brn}}),
-        ("연락처", member.phone, {"property": "연락처", "phone_number": {"equals": member.phone}}),
+        ("연락처", member.phone, {"property": "연락처", "phone_number": {"equals": _display_phone(member.phone)}}),
         ("이메일", member.email, {"property": "이메일", "email": {"equals": member.email}}),
     ]
 
@@ -229,7 +236,8 @@ def _build_properties(member: CrawledMember, channels: list[str] | None = None) 
     if profile.address:
         properties["주소"] = {"rich_text": [{"text": {"content": profile.address}}]}
     if member.phone:
-        properties["연락처"] = {"phone_number": member.phone}
+        # 모델은 BE 포맷(숫자만) — 노션 표시는 하이픈 포맷
+        properties["연락처"] = {"phone_number": _display_phone(member.phone)}
     if member.email:
         properties["이메일"] = {"email": member.email}
     if member.brn:
@@ -543,7 +551,7 @@ def _review_page_to_member(props: dict) -> CrawledMember:
         company=_read_prop(props, "업체명") or "이름 없음",
         name=_read_prop(props, "대표자") or "",
         role=_read_prop(props, "구분") or "",
-        phone=_read_prop(props, "연락처") or "",
+        phone=phone_digits(_read_prop(props, "연락처") or ""),
         email=_read_prop(props, "이메일") or "",
         brn=_read_prop(props, "사업자등록번호") or "",
         profile=CrawledProfile(
