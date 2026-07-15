@@ -25,7 +25,7 @@
     "fast-xml-parser": "^5.3.7",
     "next": "catalog:",
     "nuqs": "catalog:",
-    "postgres": "^3.4.8",
+    "postgres": "^3.4.9",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-hook-form": "catalog:",
