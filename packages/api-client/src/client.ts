@@ -49,7 +49,9 @@ type ApiErrorResponse = {
 export class ApiError extends Error {
   constructor(
     public code: string,
-    message: string
+    message: string,
+    /** 원본 HTTP 상태. 호출부가 BE 에러 code(문자열) 대신 상태로 분기할 때 사용. */
+    public status?: number
   ) {
     super(message)
     this.name = 'ApiError'
@@ -152,7 +154,7 @@ export async function customFetch<T>(url: string, options: RequestInit = {}): Pr
     if (json && typeof json === 'object' && 'success' in json) {
       const env = json as ApiSuccessResponse<T> | ApiErrorResponse
       if (!env.success) {
-        throw new ApiError(env.error.code, env.error.message)
+        throw new ApiError(env.error.code, env.error.message, response.status)
       }
       return env.data
     }
@@ -163,7 +165,7 @@ export async function customFetch<T>(url: string, options: RequestInit = {}): Pr
     }
     if (error instanceof HTTPError) {
       const json = (await error.response.json()) as ApiErrorResponse
-      throw new ApiError(json.error.code, json.error.message)
+      throw new ApiError(json.error.code, json.error.message, error.response.status)
     }
     throw error
   }
