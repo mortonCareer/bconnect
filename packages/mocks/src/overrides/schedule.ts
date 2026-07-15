@@ -2,7 +2,6 @@ import {
   getCancelOfferMockHandler,
   getCreateOfferMockHandler,
   getCreateTaskCompanyMockHandler,
-  getGetProjectMockHandler,
   getGetProjectsMockHandler,
   getGetProjectTasksMockHandler,
   getGetTaskOffersMockHandler,
@@ -338,9 +337,20 @@ function promoteNext(taskId: number) {
 export const scheduleOverrides = [
   getGetProjectsMockHandler((): Project[] => projects),
 
-  getGetProjectMockHandler(
-    (info): Project => projects.find((p) => p.id === Number(info.params.id)) ?? projects[0]
-  ),
+  // 없는 프로젝트도 실제 BE처럼 C005/404로 내려 QA 흐름을 가리지 않는다.
+  http.get('*/api/v1/projects/:id', ({ params }) => {
+    const project = projects.find((p) => p.id === Number(params.id))
+    if (!project) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: { code: 'C005', message: '요청한 리소스를 찾을 수 없습니다.' },
+        },
+        { status: 404 }
+      )
+    }
+    return HttpResponse.json(project)
+  }),
 
   getGetProjectTasksMockHandler((info): Task[] =>
     tasks.filter((t) => t.projectId === Number(info.params.id))

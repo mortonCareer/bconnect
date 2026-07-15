@@ -117,6 +117,7 @@ function ProjectSection({
           onChange={handleProjectChange}
           options={projectOptions}
           placeholder="프로젝트 선택"
+          emptyLabel="아직 프로젝트가 없어요"
         />
         {items.map((item) => {
           const active = onSelectedProject && item.slug === activeSlug

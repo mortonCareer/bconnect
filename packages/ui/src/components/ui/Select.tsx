@@ -51,6 +51,8 @@ export interface SelectProps {
   /** 다중 선택 — value 가 string[] 가 된다 */
   multiple?: boolean
   placeholder?: string
+  /** 옵션이 없을 때 패널에 표시할 안내 문구. */
+  emptyLabel?: string
   /** 트리거에 선택값 대신 고정 표시할 카테고리명 (필터 모드). 미지정 시 선택값 표시. */
   triggerLabel?: string
   /** "전체"(해제) 옵션 추가 — 필터용 */
@@ -89,6 +91,7 @@ export function Select({
   options,
   multiple,
   placeholder,
+  emptyLabel,
   triggerLabel,
   clearable,
   disabled,
@@ -132,7 +135,8 @@ export function Select({
 
   const openPanel = () => {
     const selectedIdx = navItems.findIndex(isItemSelected)
-    setActiveIndex(selectedIdx >= 0 ? selectedIdx : 0)
+    // 빈 패널에서는 활성 옵션을 만들지 않는다.
+    setActiveIndex(navItems.length === 0 ? -1 : selectedIdx >= 0 ? selectedIdx : 0)
     setOpen(true)
   }
   const closePanel = (returnFocus = true) => {
@@ -179,6 +183,14 @@ export function Select({
   }
 
   const handleListKeyDown = (e: React.KeyboardEvent) => {
+    // 빈 패널에서는 닫기 키만 처리한다.
+    if (navItems.length === 0) {
+      if (e.key === 'Escape' || e.key === 'Tab') {
+        e.preventDefault()
+        closePanel()
+      }
+      return
+    }
     const last = navItems.length - 1
     switch (e.key) {
       case 'ArrowDown':
@@ -287,6 +299,11 @@ export function Select({
           onKeyDown={handleListKeyDown}
           className={PANEL_CLASSES}
         >
+          {navItems.length === 0 && emptyLabel && (
+            <li aria-disabled="true" className="px-3 py-2 text-m-14 text-gray-400">
+              {emptyLabel}
+            </li>
+          )}
           {navItems.map((item, i) => {
             const sel = isItemSelected(item)
             return (
