@@ -1,7 +1,7 @@
 'use client'
 
 import { usePanelNav } from '@/hooks/usePanelNav'
-import { useGetMyMember } from '@bconnect/api-client'
+import { useGetMyCompany, useGetMyMember } from '@bconnect/api-client'
 import { useUnreadChatCount, useUnreadNotificationCount } from '@bconnect/features'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { Select } from '@bconnect/ui'
@@ -146,6 +146,7 @@ function ProjectSection({
 
 function ProfileSection() {
   const { data: member, isLoading } = useGetMyMember()
+  const { data: company, isLoading: isCompanyLoading } = useGetMyCompany()
 
   if (isLoading) {
     return (
@@ -160,6 +161,7 @@ function ProfileSection() {
   }
 
   const displayName = member?.name ? `${member.name}님` : ''
+  const companyLabel = isCompanyLoading ? '' : (company?.name ?? '회사 미등록')
 
   // BE 가 실제 업로드 URL (S3 등) 을 내려주면 그대로 사용. null 또는 MSW faker 의 placehold URL 이면
   // 정적 기본 프로필 이미지로 폴백. 운영에서도 사진 미업로드 회원은 자연 폴백.
@@ -176,9 +178,7 @@ function ProfileSection() {
       </div>
       <div className="flex min-w-0 flex-col gap-0.5">
         <p className="truncate text-sb-16 text-gray-900">{displayName}</p>
-        {/* TODO(신규 BE 이슈 필요 — Corporation 도메인): Member schema 에 업체명 필드 추가 시
-            `{member?.corporation?.name ?? ''}` 등으로 교체. */}
-        <p className="truncate text-r-12 text-gray-500">OO디자인</p>
+        <p className="truncate text-r-12 text-gray-500">{companyLabel}</p>
       </div>
     </div>
   )
