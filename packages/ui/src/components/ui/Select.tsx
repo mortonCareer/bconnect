@@ -183,6 +183,15 @@ export function Select({
   }
 
   const handleListKeyDown = (e: React.KeyboardEvent) => {
+    // 옵션이 없으면(빈 상태 안내만) 이동/선택 키를 무력화 — 화살표·Home/End 로 activeIndex 가
+    // 0 이 된 뒤 Enter 시 navItems[0] undefined 접근 런타임 에러를 막는다. 닫기만 허용.
+    if (navItems.length === 0) {
+      if (e.key === 'Escape' || e.key === 'Tab') {
+        e.preventDefault()
+        closePanel()
+      }
+      return
+    }
     const last = navItems.length - 1
     switch (e.key) {
       case 'ArrowDown':
