@@ -14,7 +14,7 @@ from crawler.classifier import classify, format_phone, infer_region_from_address
 from crawler.config import settings
 from crawler.models import (
     CrawledMember, CrawledPost, CrawledProfile,
-    PLATFORM_INSTAGRAM, PLATFORM_NAVER, REGION_ENUM_BY_KR, phone_digits,
+    PLATFORM_INSTAGRAM, PLATFORM_NAVER, REGION_ENUM_BY_KR, phone_digits, trade_enum,
 )
 from crawler.notion import (
     save_member, save_to_review, update_member,
@@ -251,6 +251,8 @@ async def process_blog_result(
             region = addr_region
 
     trades = classification["trades"]
+    # 한국어 라벨 → BE Trade enum 코드 (미대응 "기타" 등은 드랍)
+    enum_trades = [c for t in trades if (c := trade_enum(t))]
     member = CrawledMember(
         company=name,
         name=classification.get("representative", ""),
@@ -260,8 +262,8 @@ async def process_blog_result(
         brn=classification.get("business_number", ""),
         email=email,
         profile=CrawledProfile(
-            primary_trade=trades[0] if trades else "",
-            trades=trades,
+            primary_trade=enum_trades[0] if enum_trades else "",
+            trades=enum_trades,
             experience=classification.get("experience"),
             headline=profile_intro[:500],
             about=profile["about"][:2000],
@@ -410,6 +412,8 @@ async def process_instagram_result(
                 log.info("지역검색 주소 보충: %s → %s", name, address)
 
     trades = classification["trades"]
+    # 한국어 라벨 → BE Trade enum 코드 (미대응 "기타" 등은 드랍)
+    enum_trades = [c for t in trades if (c := trade_enum(t))]
     member = CrawledMember(
         company=name,
         name=classification.get("representative", ""),
@@ -419,8 +423,8 @@ async def process_instagram_result(
         brn=classification.get("business_number", ""),
         email=email,
         profile=CrawledProfile(
-            primary_trade=trades[0] if trades else "",
-            trades=trades,
+            primary_trade=enum_trades[0] if enum_trades else "",
+            trades=enum_trades,
             experience=classification.get("experience"),
             headline=profile["headline"][:500],
             about=profile["about"][:2000],
@@ -939,6 +943,8 @@ async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineR
             # 5) CrawledMember 구성 + enrichment 저장
             cover = profile.get("profile_pic_url", "") if is_instagram else profile.get("banner_image", "")
             trades = classification["trades"]
+            # 한국어 라벨 → BE Trade enum 코드 (미대응 "기타" 등은 드랍)
+            enum_trades = [c for t in trades if (c := trade_enum(t))]
             member = CrawledMember(
                 company=tech_name,
                 name=classification.get("representative", ""),
@@ -948,8 +954,8 @@ async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineR
                 brn=classification.get("business_number", ""),
                 email=email,
                 profile=CrawledProfile(
-                    primary_trade=trades[0] if trades else "",
-                    trades=trades,
+                    primary_trade=enum_trades[0] if enum_trades else "",
+                    trades=enum_trades,
                     experience=classification.get("experience"),
                     headline=profile_intro[:500],
                     about=profile["about"][:2000],

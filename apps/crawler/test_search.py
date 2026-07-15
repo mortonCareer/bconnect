@@ -9,7 +9,7 @@ import logging
 from crawler.channels.naver_blog import search_blogs, explore_blogger
 from crawler.classifier import classify
 from crawler.models import (
-    CrawledMember, CrawledPost, CrawledProfile, PLATFORM_NAVER, REGION_ENUM_BY_KR, phone_digits,
+    CrawledMember, CrawledPost, CrawledProfile, PLATFORM_NAVER, REGION_ENUM_BY_KR, phone_digits, trade_enum,
 )
 from crawler.notion import save_member
 
@@ -74,6 +74,7 @@ async def run():
     picture = profile.get("banner_image_url") or profile.get("profile_image_url") or profile.get("cover_image_url", "")
     detail_url = profile.get("blog_home_url") or item["link"]
     trades = result["trades"]
+    enum_trades = [c for t in trades if (c := trade_enum(t))]
     member = CrawledMember(
         company=company,
         name=result.get("representative", ""),
@@ -83,8 +84,8 @@ async def run():
         brn=result.get("business_number", ""),
         email=profile.get("email", ""),
         profile=CrawledProfile(
-            primary_trade=trades[0] if trades else "",
-            trades=trades,
+            primary_trade=enum_trades[0] if enum_trades else "",
+            trades=enum_trades,
             experience=result.get("experience"),
             headline=profile.get("profile_intro", "")[:500],
             about=profile["about"][:2000],

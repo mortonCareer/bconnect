@@ -8,7 +8,7 @@ import httpx
 from notion_client import AsyncClient
 
 from crawler.config import settings
-from crawler.models import CrawledMember, REGION_ENUM_BY_KR, phone_digits
+from crawler.models import CrawledMember, REGION_ENUM_BY_KR, phone_digits, trade_enum, trade_kr
 
 log = logging.getLogger(__name__)
 
@@ -223,7 +223,7 @@ def _build_properties(member: CrawledMember, channels: list[str] | None = None) 
     profile = member.profile
     properties: dict = {
         "업체명": {"title": [{"text": {"content": member.company}}]},
-        "시공분야": {"multi_select": [{"name": t} for t in profile.trades]},
+        "시공분야": {"multi_select": [{"name": trade_kr(t)} for t in profile.trades]},
         "채널": {"multi_select": [{"name": c} for c in (channels or [member.channel_kr])]},
     }
     if member.role:
@@ -526,9 +526,11 @@ def _review_page_to_member(props: dict) -> CrawledMember:
     """검수 DB 페이지 속성을 CrawledMember 모델로 변환한다."""
     from crawler.models import CrawledCredential, CrawledProfile, PLATFORM_INSTAGRAM, PLATFORM_NAVER
 
-    trades = _read_prop(props, "시공분야")
-    if not isinstance(trades, list):
-        trades = [trades] if trades else []
+    trades_kr = _read_prop(props, "시공분야")
+    if not isinstance(trades_kr, list):
+        trades_kr = [trades_kr] if trades_kr else []
+    # 노션 한국어 라벨 → BE Trade enum 코드 (미대응 "기타" 등은 드랍)
+    trades = [c for t in trades_kr if (c := trade_enum(t))]
 
     channels = _read_prop(props, "채널")
     if not isinstance(channels, list):

@@ -9,7 +9,7 @@ from crawler.notion import (
 
 def _make_member(**kwargs) -> CrawledMember:
     profile_kwargs = kwargs.pop("profile_kwargs", {})
-    profile_defaults = {"trades": ["타일"], "primary_trade": "타일"}
+    profile_defaults = {"trades": ["TILING"], "primary_trade": "TILING"}
     profile_defaults.update(profile_kwargs)
     defaults = {"company": "테스트업체", "role": "기공", "profile": CrawledProfile(**profile_defaults)}
     defaults.update(kwargs)
@@ -22,7 +22,7 @@ class TestBuildProperties:
         props = _build_properties(member)
         assert props["업체명"]["title"][0]["text"]["content"] == "테스트업체"
         assert props["구분"]["select"]["name"] == "기공"
-        assert props["시공분야"]["multi_select"] == [{"name": "타일"}]
+        assert props["시공분야"]["multi_select"] == [{"name": "타일"}]  # enum → 한국어 표시
 
     def test_optional_phone_formatted_for_notion(self):
         # 모델은 BE 포맷(숫자만), 노션 표시는 하이픈 포맷
@@ -48,7 +48,8 @@ class TestBuildProperties:
         assert props["자세히보기"]["url"] == "https://blog.naver.com/abc"
 
     def test_multiple_trades(self):
-        member = _make_member(profile_kwargs={"trades": ["타일", "줄눈", "방수"]})
+        # profile.trades 는 enum 코드, 노션 표시는 한국어 역변환
+        member = _make_member(profile_kwargs={"trades": ["TILING", "GROUTING", "WATERPROOFING"]})
         props = _build_properties(member)
         names = [s["name"] for s in props["시공분야"]["multi_select"]]
         assert names == ["타일", "줄눈", "방수"]
@@ -203,7 +204,7 @@ class TestReviewPageToMember:
         member = _review_page_to_member(props)
         assert member.company == "테스트업체"
         assert member.role == "반장"
-        assert member.profile.trades == ["타일", "줄눈"]
+        assert member.profile.trades == ["TILING", "GROUTING"]  # 노션 한국어 → enum
         assert member.profile.state == "SEOUL"
         assert member.profile.experience == 5
         assert member.phone == "01012345678"

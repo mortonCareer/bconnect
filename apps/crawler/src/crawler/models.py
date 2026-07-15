@@ -15,6 +15,29 @@ TRADES = [
 
 RANKS = ["반장", "기공", "준기공", "조공"]
 
+# BE Trade enum ↔ 한국어 라벨 (LLM 분류는 한국어, 저장은 enum 코드)
+# BE Trade enum에 없는 "기타"는 매핑에서 제외 — enum 미대응 공종은 저장 시 드랍
+TRADE_ENUM_BY_KR = {
+    "설계": "DESIGN", "철거/확장": "DEMOLITION", "전기": "ELECTRICAL",
+    "배관": "PLUMBING", "설비": "MECHANICAL", "조적": "MASONRY", "목공": "CARPENTRY",
+    "창호": "GLAZING", "방수": "WATERPROOFING", "미장": "PLASTERING", "단열": "INSULATION",
+    "타일": "TILING", "줄눈": "GROUTING", "도장": "PAINTING", "도배": "WALLPAPER",
+    "필름·시트": "FILM_SHEET", "마루": "HARDWOOD", "장판": "VINYL", "싱크대": "SINK",
+    "가구": "FURNITURE", "에어컨": "AIR_CONDITIONING", "양중/곰방": "HOISTING",
+    "운송": "TRANSPORT", "청소": "CLEANING", "보통인부": "GENERAL_LABOR",
+}
+KR_BY_TRADE_ENUM = {v: k for k, v in TRADE_ENUM_BY_KR.items()}
+
+
+def trade_enum(kr: str) -> str | None:
+    """한국어 시공분야 라벨을 BE Trade enum 코드로 변환. 미대응(예: '기타')은 None."""
+    return TRADE_ENUM_BY_KR.get(kr)
+
+
+def trade_kr(enum_code: str) -> str:
+    """Trade enum 코드를 한국어 라벨로 (노션 표시용). 미상이면 원문 반환."""
+    return KR_BY_TRADE_ENUM.get(enum_code, enum_code)
+
 # BE CrawledRegion enum ↔ 한국어 시/도 (LLM·주소 추론은 한국어, 저장은 enum)
 REGION_ENUM_BY_KR = {
     "서울": "SEOUL", "부산": "BUSAN", "대구": "DAEGU", "인천": "INCHEON",
@@ -93,10 +116,13 @@ class CrawledCredential(_CamelModel):
 
 
 class CrawledProfile(_CamelModel):
-    """프로필 — BE crawled_profiles 행에 대응."""
+    """프로필 — BE crawled_profiles 행에 대응.
 
-    primary_trade: str = ""
-    trades: list[str] = Field(default_factory=list)
+    trades·primary_trade는 BE Trade enum 코드(TILING 등)로 저장 — FE가 역매핑 없이 소비.
+    """
+
+    primary_trade: str = ""  # Trade enum 코드, 미대응이면 빈 문자열
+    trades: list[str] = Field(default_factory=list)  # Trade enum 코드 목록
     experience: int | None = None
     headline: str = ""
     about: str = ""
