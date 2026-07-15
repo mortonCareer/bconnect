@@ -28,12 +28,19 @@ export function toCrawledDisplay(crawled: CrawledMemberSummary | CrawledMember):
   const profile = crawled.profile
   const displayName = crawled.name || crawled.company || ''
   const role = crawled.role ?? ''
+  const trades = (profile?.trades ?? []) as Trade[]
+  const primaryTrade = profile?.primaryTrade ? (profile.primaryTrade as Trade) : undefined
+  // 대표 공종을 태그 정렬 맨 앞으로 (BE trades 는 set 이라 순서 미보장)
+  const sortedTrades =
+    primaryTrade && trades.includes(primaryTrade)
+      ? [primaryTrade, ...trades.filter((t) => t !== primaryTrade)]
+      : trades
   return {
     displayName,
     companySub: crawled.company && crawled.company !== displayName ? crawled.company : null,
     location: profile?.state ? (REGION_LABELS[profile.state] ?? '') : '',
-    trades: (profile?.trades ?? []) as Trade[],
-    primaryTrade: profile?.primaryTrade ? (profile.primaryTrade as Trade) : undefined,
+    trades: sortedTrades,
+    primaryTrade,
     grade: (GRADE_VALUES as readonly string[]).includes(role) ? (role as Grade) : undefined,
     experienceYears: profile?.experience ?? undefined,
     headline: profile?.headline ?? '',
