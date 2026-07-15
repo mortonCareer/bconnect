@@ -1,4 +1,5 @@
 import {
+  getGetMyProfileMockHandler,
   getGetProfileMockHandler,
   getGetProfilesMockHandler,
   ProfileRole,
@@ -7,6 +8,7 @@ import {
 import type { MemberSummary, Profile } from '@bconnect/api-client'
 
 // 프로필 도메인 단일 owner — getProfile(/profiles/:id) 을 id 로 keying,
+// getMyProfile(/profiles/me, 내 프로필 화면)은 id 1 seed 반환,
 // getProfiles(목록, plan 기술자 탐색)는 전체 seed 반환.
 // id 1 = 본인(getMyMember 와 동일 식별자, 자기 프로필 화면용 리치 데이터).
 // id 101~103 = chats.ts 채팅 상대 — 상대 프로필 열람 시 일관 표시.
@@ -125,5 +127,6 @@ const paramId = (value: string | readonly string[] | undefined): number =>
 
 export const profilesOverrides = [
   getGetProfilesMockHandler(() => SEEDS.map((seed) => profileOf(seed))),
+  getGetMyProfileMockHandler(() => PROFILES_BY_ID[1]),
   getGetProfileMockHandler(({ params }) => PROFILES_BY_ID[paramId(params.id)] ?? PROFILES_BY_ID[1]),
 ]

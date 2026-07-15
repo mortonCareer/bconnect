@@ -8,14 +8,10 @@ import { useRouter } from 'next/navigation'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
-  useQueryClient,
-  useGetMyMember,
-  useGetProfile,
+  useGetMyProfile,
   useUpdateMyMember,
   useUpdateMyProfile,
   useUpdateMyProfileAbout,
-  getGetMyMemberQueryKey,
-  getGetProfileQueryKey,
   Trade,
   type ProfileRole,
 } from '@bconnect/api-client'
@@ -42,14 +38,8 @@ import { MAX_TRADES, profileEditSchema, type ProfileEditFormData } from './schem
 
 export default function ProfileEditPage() {
   const router = useRouter()
-  const queryClient = useQueryClient()
 
-  const { data: member, isLoading: isMemberLoading } = useGetMyMember()
-  const myId = member?.id
-  // 내 프로필은 useGetProfile(memberId) 로 조회 (GET /profiles/me 는 flip 으로 사라짐).
-  const { data: profile, isLoading: isProfileLoading } = useGetProfile(myId!, {
-    query: { enabled: myId != null },
-  })
+  const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
 
   const updateMemberMutation = useUpdateMyMember()
   const updateProfileMutation = useUpdateMyProfile()
@@ -80,25 +70,24 @@ export default function ProfileEditPage() {
 
   // 데이터 로드 후 폼 초기값 설정
   useEffect(() => {
-    if (member || profile) {
-      // TODO: BE required 처리 후 type narrowing 필요. member/profile 필수 표시값이 optional emit이라 폼 초기값에서 임시 fallback 중.
+    if (profile) {
+      // TODO: BE required 처리 후 type narrowing 필요. profile 필수 표시값이 optional emit이라 폼 초기값에서 임시 fallback 중.
       reset({
-        name: member?.name ?? '',
-        phone: member?.phone ?? '',
-        primaryTrade: profile?.primaryTrade ?? undefined,
-        trades: profile?.trades ?? [],
-        experience: profile?.experience ?? undefined,
-        headline: profile?.headline ?? '',
-        about: profile?.about ?? '',
-        address: profile?.address ?? undefined,
+        name: profile.member?.name ?? '',
+        primaryTrade: profile.primaryTrade ?? undefined,
+        trades: profile.trades ?? [],
+        experience: profile.experience ?? undefined,
+        headline: profile.headline ?? '',
+        about: profile.about ?? '',
+        address: profile.address ?? undefined,
       })
     }
-  }, [member, profile, reset])
+  }, [profile, reset])
 
   const watchedTrades = useWatch({ control, name: 'trades' })
   const watchedPrimaryTrade = useWatch({ control, name: 'primaryTrade' })
 
-  const isLoading = isMemberLoading || isProfileLoading
+  const isLoading = isProfileLoading
   const isSaving =
     isSubmitting ||
     updateMemberMutation.isPending ||
@@ -112,7 +101,7 @@ export default function ProfileEditPage() {
       const promises: Promise<unknown>[] = []
 
       // Member 업데이트 (name) — UpdateMemberRequest 는 { name, pictureId? } (role 없음)
-      if (member?.id && data.name !== member.name) {
+      if (profile?.member?.id && data.name !== profile.member.name) {
         promises.push(
           updateMemberMutation.mutateAsync({
             data: { name: data.name },
@@ -146,15 +135,8 @@ export default function ProfileEditPage() {
 
       await Promise.all(promises)
 
-      // 캐시 무효화
-      // TODO(#728): 수동 무효화 — updateMyMember→getMyMember 는 이미 config 중복(추후 제거), 내 프로필은 updateMyProfile→getProfile config 인계로 맞춰 수정 (ADR-0025)
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: getGetMyMemberQueryKey() }),
-        ...(myId != null
-          ? [queryClient.invalidateQueries({ queryKey: getGetProfileQueryKey(myId) })]
-          : []),
-      ])
-
+      // 캐시 무효화는 orval config(mutationInvalidates)가 담당 —
+      // updateMyMember→getMyMember, updateMyProfile/About→getMyProfile (ADR-0025)
       router.back()
     } catch (err) {
       console.error('프로필 수정 실패:', err)
