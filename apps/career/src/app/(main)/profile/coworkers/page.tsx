@@ -29,7 +29,14 @@ export default function CoworkersPage() {
 
   return (
     <div className="flex flex-col">
-      <TopBar variant="default" title="동료" showAction={false} onBack={() => router.back()} />
+      <TopBar
+        variant="default"
+        title="동료"
+        onBack={() => router.back()}
+        actionLabel="동료요청"
+        actionHref="/profile/coworker-requests"
+        actionIcon={<span className="text-sb-14 text-primary">요청</span>}
+      />
 
       <div className="px-4 py-2">
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">

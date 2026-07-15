@@ -12,6 +12,7 @@ import {
   useGetSentRecommendations,
   useCreateCoworkerRequest,
   useCreateDirectChat,
+  useGetSentCoworkerRequests,
 } from '@bconnect/api-client'
 import {
   ProfileView,
@@ -133,6 +134,12 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
         }),
     },
   })
+  // 보낸 요청 목록으로 "요청됨" 상태를 새로고침 후에도 유지 (#843).
+  // createCoworkerRequest 성공 시 orval 이 이 조회를 무효화 → 재조회로 자동 반영.
+  const sentRequests = useGetSentCoworkerRequests()
+  const alreadyRequested =
+    sentRequests.data?.some((request) => request.member?.id === memberId) ?? false
+  const requested = coworker.isSuccess || alreadyRequested
   const chat = useCreateDirectChat({
     mutation: {
       onSuccess: (createdChatId) => router.push(`/messages/${createdChatId}`),
@@ -176,10 +183,10 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
             variant="outline"
             size="sm"
             className="flex-1"
-            disabled={coworker.isPending || coworker.isSuccess}
+            disabled={coworker.isPending || requested}
             onClick={() => enabled && coworker.mutate({ data: { toId: memberId } })}
           >
-            {coworker.isSuccess ? '요청됨' : coworker.isPending ? '요청 중...' : '동료 추가'}
+            {requested ? '요청됨' : coworker.isPending ? '요청 중...' : '동료 추가'}
           </Button>
           <Button
             variant="outline"
