@@ -183,7 +183,7 @@ jobs:
 
       - name: Run Bruno demo collection
         working-directory: apps/api/bruno
-        run: bru run --exclude-tags=ws --reporter-html bruno-report.html
+        run: bru run --env local --exclude-tags=ws --reporter-html bruno-report.html
 
       - name: Upload Bruno report
         if: ${{ !cancelled() }}
