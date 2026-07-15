@@ -26,15 +26,15 @@ public class SessionService {
     @Transactional(noRollbackFor = CodeException.class)
     public void verify(String username, String refreshToken) {
         val found = sessionRepository.findByMemberId(Long.valueOf(username))
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CodeException(AuthExceptionCode.INVALID_SESSION));
 
         if (found.isRevoked()) {
-            throw new CodeException(AuthExceptionCode.SESSION_EXPIRED);
+            throw new CodeException(AuthExceptionCode.INVALID_SESSION);
         }
 
         if (!AuthUtils.sha256(refreshToken).equals(found.getRefreshToken())) {
             found.revoke();
-            throw new CodeException(AuthExceptionCode.INVALID_TOKEN);
+            throw new CodeException(AuthExceptionCode.INVALID_SESSION);
         }
     }
 

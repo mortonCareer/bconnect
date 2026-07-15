@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -66,11 +67,13 @@ public class SecurityConfig {
             RefreshTokenAuthenticationFilter refreshTokenAuthenticationFilter,
             SignupTokenAuthenticationFilter signupTokenAuthenticationFilter,
             @Qualifier("VerifyOtpAuthenticationSuccessHandler") AuthenticationSuccessHandler verifyOtpSuccessHandler,
+            AuthenticationFailureHandler apiAuthenticationFailureHandler,
             @Qualifier("ApiAuthenticationEntryPoint") AuthenticationEntryPoint apiAuthenticationEntryPoint,
             @Qualifier("ApiAccessDeniedHandler") AccessDeniedHandler apiAccessDeniedHandler
     ) throws Exception {
         val verifyOtpFilter = new VerifyOtpAuthenticationFilter(authenticationManager, objectMapper);
         verifyOtpFilter.setAuthenticationSuccessHandler(verifyOtpSuccessHandler);
+        verifyOtpFilter.setAuthenticationFailureHandler(apiAuthenticationFailureHandler);
 
         http
                 .sessionManagement(sc -> sc.sessionCreationPolicy(STATELESS))

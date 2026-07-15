@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import tools.jackson.databind.ObjectMapper;
+import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.security.AuthExceptionCode;
 
@@ -65,12 +66,13 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
             if (this.logger.isTraceEnabled()) {
                 this.logger.trace("Failed to process authentication request", failed);
             }
-            response.setStatus(AuthExceptionCode.INVALID_TOKEN.getStatus().value());
+            val code = failed.getCause() instanceof CodeException codeException
+                    ? codeException.getExceptionCode()
+                    : AuthExceptionCode.INVALID_JWT_TOKEN;
+            response.setStatus(code.getStatus().value());
             response.setCharacterEncoding("UTF-8");
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.getWriter().write(objectMapper.writeValueAsString(
-                    ApiResponse.error(AuthExceptionCode.INVALID_TOKEN)
-            ));
+            response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.error(code)));
         }
     }
 

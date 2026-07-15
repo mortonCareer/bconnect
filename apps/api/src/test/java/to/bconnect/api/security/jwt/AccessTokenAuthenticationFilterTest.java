@@ -22,7 +22,7 @@ class AccessTokenAuthenticationFilterTest {
     private final ObjectMapper objectMapper = JsonMapper.builder().build();
 
     @Test
-    @DisplayName("무효 토큰(JwtException)은 401 INVALID_TOKEN(A005) envelope 로 응답하고 체인을 진행하지 않는다")
+    @DisplayName("무효 토큰(JwtException)은 401 INVALID_JWT_TOKEN(A009) envelope 로 응답하고 체인을 진행하지 않는다")
     void invalidToken_returns401Envelope_andStopsChain() throws Exception {
         AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
         when(authenticationManager.authenticate(any())).thenThrow(new JwtException("Invalid token"));
@@ -39,7 +39,7 @@ class AccessTokenAuthenticationFilterTest {
         assertThat(response.getContentType()).contains("application/json");
         assertThat(response.getContentAsString())
                 .contains("\"success\":false")
-                .contains("\"code\":\"A005\"");
+                .contains("\"code\":\"A009\"");
         verify(chain, never()).doFilter(any(), any());
     }
 
