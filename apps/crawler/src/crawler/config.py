@@ -25,5 +25,8 @@ class Settings(BaseSettings):
     # YouTube (optional)
     youtube_api_key: str = ""
 
+    # crawled_* DB 적재 (--export-db). Railway dev Postgres public URL 등
+    crawled_db_url: str = ""
+
 
 settings = Settings()

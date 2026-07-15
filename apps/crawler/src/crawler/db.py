@@ -1,0 +1,127 @@
+"""crawled_* DB 적재 — dry-run JSON(members[])을 서비스 DB 테이블에 넣는다.
+
+⚠️ BE(apps/api)를 우회해 crawled_* 테이블에 직접 INSERT 한다. 크롤러가 BE DB 스키마를
+알아야 하는 이중 관리 — BE 스키마 변경 시 여기도 맞춰야 한다 (#876).
+
+멱등: profile.url 기준으로 기존 레코드를 찾아 관련 행을 지우고 재삽입한다.
+sourceUrls / posts[].sourceUrl 은 BE 스키마에 자리가 없어 드랍한다.
+"""
+
+import logging
+
+import asyncpg
+
+from crawler.models import CrawledMember
+
+log = logging.getLogger(__name__)
+
+# NOT NULL 이라 role 미상 시 BE 엔티티 기본값과 동일하게
+DEFAULT_ROLE = "반장"
+
+_TABLES_IN_FK_ORDER = [
+    "crawled_post_images",
+    "crawled_posts",
+    "crawled_profile_trades",
+    "crawled_credentials",
+    "crawled_profiles",
+    "crawled_members",
+]
+
+
+async def export_members(
+    members: list[CrawledMember], db_url: str, *, truncate: bool = False
+) -> tuple[int, int]:
+    """members 를 crawled_* 에 적재한다. (신규, 갱신) 건수를 반환."""
+    conn = await asyncpg.connect(db_url)
+    created = updated = 0
+    try:
+        if truncate:
+            await conn.execute(
+                f"TRUNCATE {', '.join(_TABLES_IN_FK_ORDER)} RESTART IDENTITY CASCADE"
+            )
+            log.info("기존 crawled_* 데이터 비움 (truncate)")
+
+        for member in members:
+            async with conn.transaction():
+                is_new = await _upsert_member(conn, member)
+                created += is_new
+                updated += not is_new
+    finally:
+        await conn.close()
+    return created, updated
+
+
+async def _upsert_member(conn: asyncpg.Connection, member: CrawledMember) -> bool:
+    """member 1건 upsert. 신규면 True, 갱신이면 False."""
+    profile = member.profile
+    url = profile.url
+    role = member.role or DEFAULT_ROLE
+
+    # profile.url 로 기존 member 찾기 (unique key)
+    existing_member_id = None
+    if url:
+        existing_member_id = await conn.fetchval(
+            "SELECT member_id FROM crawled_profiles WHERE url = $1 AND deleted_at IS NULL",
+            url,
+        )
+
+    if existing_member_id is not None:
+        member_id = existing_member_id
+        await conn.execute(
+            """UPDATE crawled_members
+               SET company=$2, name=$3, phone=$4, picture=$5, role=$6, brn=$7, email=$8,
+                   modified_at=now()
+               WHERE id=$1""",
+            member_id,
+            member.company, member.name or None, member.phone or None,
+            member.picture or None, role, member.brn or None, member.email or None,
+        )
+        # 하위 행은 지우고 재삽입 (멱등)
+        await conn.execute("DELETE FROM crawled_post_images WHERE post_id IN "
+                           "(SELECT id FROM crawled_posts WHERE member_id=$1)", member_id)
+        await conn.execute("DELETE FROM crawled_posts WHERE member_id=$1", member_id)
+        await conn.execute("DELETE FROM crawled_profile_trades WHERE profile_id IN "
+                           "(SELECT id FROM crawled_profiles WHERE member_id=$1)", member_id)
+        await conn.execute("DELETE FROM crawled_profiles WHERE member_id=$1", member_id)
+        is_new = False
+    else:
+        member_id = await conn.fetchval(
+            """INSERT INTO crawled_members
+               (company, name, phone, picture, role, brn, email, created_at, modified_at)
+               VALUES ($1,$2,$3,$4,$5,$6,$7, now(), now()) RETURNING id""",
+            member.company, member.name or None, member.phone or None,
+            member.picture or None, role, member.brn or None, member.email or None,
+        )
+        is_new = True
+
+    profile_id = await conn.fetchval(
+        """INSERT INTO crawled_profiles
+           (member_id, primary_trade, experience, headline, about, address, state, url, platform,
+            created_at, modified_at)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, now(), now()) RETURNING id""",
+        member_id,
+        profile.primary_trade or None, profile.experience,
+        (profile.headline or None) and profile.headline[:255],
+        profile.about or None,
+        (profile.address or None) and profile.address[:255],
+        profile.state or None, url, profile.platform,
+    )
+    for trade in profile.trades:
+        await conn.execute(
+            "INSERT INTO crawled_profile_trades (profile_id, trade) VALUES ($1,$2)",
+            profile_id, trade,
+        )
+
+    for post in member.posts:
+        post_id = await conn.fetchval(
+            """INSERT INTO crawled_posts (member_id, title, content, created_at, modified_at)
+               VALUES ($1,$2,$3, now(), now()) RETURNING id""",
+            member_id, (post.title or None) and post.title[:255], post.content or None,
+        )
+        for seq, image_url in enumerate(post.images):
+            await conn.execute(
+                "INSERT INTO crawled_post_images (post_id, seq, url) VALUES ($1,$2,$3)",
+                post_id, seq, image_url,
+            )
+
+    return is_new
