@@ -158,10 +158,10 @@ class TestInferRegionFromAddress:
         assert infer_region_from_address("서울특별시 서대문구 거북골로 84") == "서울"
 
     def test_gyeonggi(self):
-        assert infer_region_from_address("경기도 수원시 팔달구") == "경기도"
+        assert infer_region_from_address("경기도 수원시 팔달구") == "경기"
 
     def test_gyeongnam(self):
-        assert infer_region_from_address("경상남도 양산시 남부로 13") == "경상도"
+        assert infer_region_from_address("경상남도 양산시 남부로 13") == "경남"
 
     def test_busan(self):
         assert infer_region_from_address("부산광역시 부산진구 중앙대로") == "부산"

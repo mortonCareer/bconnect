@@ -25,20 +25,23 @@
 블로거의 프로필과 게시글을 병렬로 수집한다.
 
 - **입력**: 블로그 게시글 URL
-- **출력**: 프로필 소개, 본문, 배너 이미지, 연락처 등
+- **출력**: 프로필 소개, 본문, 배너 이미지, 연락처, 시공 사례 글(제목·본문·사진) 등
 - **파일**: `channels/naver_blog.py` → `explore_blogger()`
 - **동작**:
   1. 프로필 (모바일 DOM), 배너 (데스크톱 CSS), 게시글 본문을 `asyncio.gather`로 **동시 요청**
-  2. 연락처 추출 — 3단계 폴백:
-     - 프로필 소개글 → 게시글 본문 → RSS 최근 5건
-  3. 각 출처별 `phone_source` 태깅 (`"profile"` | `"post"`)
+  2. 시공 사례 수집: 검색 글 + RSS 최근 글 총 5건 (`POSTS_PER_MEMBER`), 글당 본문 사진 최대 5장 (`IMAGES_PER_POST`, 네이버 CDN 호스트만·스티커 제외·`type=w966` 승격)
+  3. 연락처 추출 — 3단계 폴백:
+     - 프로필 소개글 → 수집한 글 본문 → 남은 RSS 글 (최대 20건)
+  4. 각 출처별 `phone_source` 태깅 (`"profile"` | `"post"`)
+
+  > 사진 URL은 네이버 CDN 원본을 그대로 저장 (핫링크). 외부 사이트 Referer는 403이므로 렌더 시 `referrerpolicy="no-referrer"` 필요.
 
 ### 3. 분류 (Classify)
 
 LLM이 수집된 텍스트를 분석하여 구조화된 데이터를 추출한다.
 
 - **입력**: 블로거명, 프로필 소개 + 게시글 본문, 블로그 제목
-- **출력**: `{name, trades, rank, region, address, phone}`
+- **출력**: `{name, trades, rank, region(시/도), address, phone, experience, ...}`
 - **파일**: `classifier.py` → `classify()`
 - **동작**:
   - LLM 우선순위: Anthropic Claude → OpenAI GPT → 수동 JSON 모드
@@ -60,7 +63,7 @@ LLM이 수집된 텍스트를 분석하여 구조화된 데이터를 추출한�
 
 노션 DB에 페이지를 생성하거나 기존 레코드를 보강한다.
 
-- **입력**: `Technician` 모델
+- **입력**: `CrawledMember` 모델
 - **출력**: 노션 page_id
 - **파일**: `notion.py` → `save_technician()`
 - **동작**:
@@ -105,7 +108,7 @@ uv run crawler --force --full --per-query 3
 # 2단계 워크플로우: 검수 후 저장
 # 1) dry-run으로 크롤링+분류 (보고서 JSON에 전체 데이터 저장)
 uv run crawler --dry-run "타일 시공업체 수도권"
-# 2) reports/xxx.json 검수 → 불필요한 항목 삭제 → 저장
+# 2) reports/xxx.json 검수 → members[] 항목 삭제/수정 → 저장
 uv run crawler --from-file reports/2025-02-10_123456.json
 
 # 특정 키워드만 실행 (Python)
@@ -151,7 +154,7 @@ print_summary(report)
 src/crawler/
 ├── main.py              # 파이프라인 오케스트레이션, CLI 진입점
 ├── config.py            # 환경변수 설정 (pydantic-settings)
-├── models.py            # Technician 모델, TRADES/RANKS/SEARCH_KEYWORDS 정의
+├── models.py            # CrawledMember 모델(BE 계약 동형), TRADES/RANKS/SEARCH_KEYWORDS 정의
 ├── classifier.py        # LLM 분류 (Anthropic/OpenAI/수동)
 ├── notion.py            # 노션 DB CRUD, 중복체크, enrichment
 ├── progress.py          # Rich 프로그레스 바, 요약 테이블
