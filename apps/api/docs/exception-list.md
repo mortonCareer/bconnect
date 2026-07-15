@@ -39,13 +39,14 @@
 | --- | --- | --- | --- | --- |
 | A001 | OTP_DAILY_LIMIT | 429 | INFO | 일일 발송 한도를 초과했습니다. |
 | A002 | OTP_RATE_LIMIT | 429 | INFO | 재전송 대기 시간이 지나지 않았습니다. |
-| A003 | INVALID_OTP | 400 | INFO | 유효하지 않은 인증번호입니다. |
-| A004 | OTP_MAX_ATTEMPTS | 400 | INFO | 인증 시도 횟수를 초과했습니다. |
-| A005 | INVALID_TOKEN | 401 | WARN | 유효하지 않은 토큰입니다. |
-| A006 | SESSION_EXPIRED | 401 | INFO | 세션이 만료되었습니다. |
-| A007 | INVALID_SIGNUP_TOKEN | 400 | INFO | 유효하지 않은 가입 토큰입니다. |
-| A008 | OTP_EXPIRED | 400 | INFO | 만료된 인증번호입니다. |
-| A009 | SIGNUP_TOKEN_EXPIRED | 400 | INFO | 만료된 가입 토큰입니다. |
+| A003 | OTP_MAX_ATTEMPTS | 400 | INFO | 인증 시도 횟수를 초과했습니다. |
+| A004 | INVALID_OTP | 400 | INFO | 유효하지 않은 인증번호입니다. |
+| A005 | OTP_EXPIRED | 400 | INFO | 만료된 인증번호입니다. |
+| A006 | INVALID_SIGNUP_TOKEN | 400 | INFO | 유효하지 않은 가입 토큰입니다. |
+| A007 | SIGNUP_TOKEN_EXPIRED | 400 | INFO | 만료된 가입 토큰입니다. |
+| A008 | INVALID_SESSION | 401 | INFO | 유효하지 않은 세션입니다. |
+| A009 | INVALID_JWT_TOKEN | 401 | WARN | 유효하지 않은 토큰입니다. |
+| A010 | EXPIRED_JWT_TOKEN | 401 | INFO | 만료된 토큰입니다. |
 
 ## MemberExceptionCode
 
