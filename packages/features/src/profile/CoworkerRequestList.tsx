@@ -42,7 +42,8 @@ export function CoworkerRequestList({
     'tab',
     parseAsStringLiteral(['received', 'sent'] as const)
       .withDefault('received')
-      .withOptions({ history: 'push' })
+      // 탭 전환은 히스토리를 쌓지 않음(replace) → TopBar 뒤로가기가 탭을 되돌리지 않고 화면을 정상 이탈
+      .withOptions({ history: 'replace' })
   )
 
   const active = mode === 'received' ? received : sent
