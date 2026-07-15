@@ -6,7 +6,7 @@ const OPERATOR = 'Morton'
 const GA_OPT_OUT_URL = 'https://tools.google.com/dlpage/gaoptout'
 
 const OFFICER = {
-  name: '손장수',
+  name: '이송목',
   email: CONTACT_EMAIL,
 }
 
