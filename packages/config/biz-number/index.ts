@@ -40,14 +40,6 @@ export function isValidRegistrationNumber(value: string): boolean {
   return checkDigit === Number(digits[9])
 }
 
-/** 자릿수(형식) 오류 문구. 10자리 숫자를 채우지 못한 경우. */
-export const REGISTRATION_NUMBER_FORMAT_MESSAGE =
-  '올바른 사업자등록번호 형식이 아닙니다. (10자리 숫자)'
-
-/** 체크섬(유효성) 실패 문구. 10자리는 맞으나 NTS 검증에 실패한 경우. */
-export const REGISTRATION_NUMBER_INVALID_MESSAGE =
-  '유효하지 않은 사업자등록번호입니다. 번호를 다시 확인해 주세요.'
-
 /**
  * 사업자등록번호 zod 스키마. 입력값을 정규화 (digit-only) 후 검증.
  * 자릿수 오류와 체크섬 실패를 각각 다른 메시지로 분리한다.
@@ -60,8 +52,8 @@ export const registrationNumberSchema = z
   .string()
   .transform(extractDigits)
   .refine((digits) => /^\d{10}$/.test(digits), {
-    message: REGISTRATION_NUMBER_FORMAT_MESSAGE,
+    message: '올바른 사업자등록번호 형식이 아닙니다. (10자리 숫자)',
   })
   .refine(isValidRegistrationNumber, {
-    message: REGISTRATION_NUMBER_INVALID_MESSAGE,
+    message: '유효하지 않은 사업자등록번호입니다. 번호를 다시 확인해 주세요.',
   })
