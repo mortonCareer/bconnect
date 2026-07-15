@@ -3,7 +3,7 @@
 import { parseAsStringLiteral, useQueryState } from 'nuqs'
 import { getTradeLabel } from '@bconnect/api-client'
 import type { CoworkerRequest } from '@bconnect/api-client'
-import { Button, ProfileCard, ProfileCardSkeleton, Tab } from '@bconnect/ui'
+import { Button, ProfileCard, ProfileCardSkeleton, cn } from '@bconnect/ui'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 
 type Mode = 'received' | 'sent'
@@ -51,14 +51,25 @@ export function CoworkerRequestList({
 
   return (
     <section className="flex flex-col">
-      <Tab
-        items={[
-          { key: 'received', label: `받은 요청${received ? ` ${received.length}` : ''}` },
-          { key: 'sent', label: `보낸 요청${sent ? ` ${sent.length}` : ''}` },
-        ]}
-        activeKey={mode}
-        onChange={(key) => setMode(key as Mode)}
-      />
+      {/* 받은/보낸 요청 세그먼트 토글 (디자인: 좌측 정렬 pill) */}
+      <div className="flex gap-2 px-4 py-2">
+        {(['received', 'sent'] as const).map((key) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setMode(key)}
+            aria-pressed={mode === key}
+            className={cn(
+              'cursor-pointer rounded-md border px-4 py-1.5 text-r-14 transition-colors',
+              mode === key
+                ? 'border-gray-300 bg-gray-100 font-semibold text-gray-900'
+                : 'border-gray-200 bg-white font-normal text-gray-500 hover:bg-gray-50'
+            )}
+          >
+            {key === 'received' ? '받은 요청' : '보낸 요청'}
+          </button>
+        ))}
+      </div>
 
       {isLoading ? (
         <ul className="flex flex-col">
@@ -129,7 +140,7 @@ function CoworkerRequestRow({
           <div className="flex items-center gap-2">
             <Button
               size="small"
-              variant="outline"
+              variant="primary"
               disabled={pending || id == null}
               onClick={() => id != null && onAccept?.(id)}
             >
