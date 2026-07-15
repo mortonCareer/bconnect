@@ -1,35 +1,59 @@
 'use client'
 
+import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useGetCrawledMember, TRADE_LABELS } from '@bconnect/api-client'
 import { PanelAside, PanelScroll, PanelShell } from '@bconnect/features'
-import { Button, SkillTag } from '@bconnect/ui'
+import { Button, SkillTag, Tab } from '@bconnect/ui'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { toCrawledDisplay } from '@/lib/crawled'
 import { CrawledImage, CrawledSourceBadge } from '../CrawledImage'
 
 /**
  * 크롤링 기술자 상세 패널 — 전시 전용 (회원 아님).
- * 소개·시공 사진·연락처·출처 링크만 제공. 메시지/추천서 등 회원 동작 없음.
+ * 회원 프로필 패널(ProfileView)과 같은 골격: 헤더(아바타+통계+메타) → 소개/작업물 탭.
+ * 동료·추천서는 크롤링에 없는 개념이라 통계는 작업물 수만, 소개탭은 소개+출처만 둔다.
  *
- * @figma-scaffold 크롤링 상세 시안 없음 — PanelProfile 골격 준용
+ * @figma-scaffold 크롤링 상세 시안 없음 — PanelProfile(ProfileView) 골격 준용
  */
+type TabKey = 'intro' | 'works'
+const TAB_ITEMS = [
+  { key: 'intro', label: '소개' },
+  { key: 'works', label: '작업물' },
+]
+
+function renderWithHashtags(text: string) {
+  return text.split(/(#\S+)/g).map((part, i) =>
+    part.startsWith('#') ? (
+      <span key={i} className="text-primary">
+        {part}
+      </span>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  )
+}
+
 export function PanelCrawled({ crawledId }: { crawledId: number }) {
   const { closeHref, close } = usePanelNav()
+  const [tab, setTab] = useQueryState(
+    'tab',
+    parseAsStringEnum<TabKey>(['intro', 'works']).withDefault('intro')
+  )
 
   const enabled = Number.isFinite(crawledId) && crawledId > 0
   const { data, isLoading, isError } = useGetCrawledMember(crawledId, { query: { enabled } })
 
-  const profile = data?.profile
-  // 카드와 동일한 표시 파생(대표자명 우선·업체명 병기·지역 라벨·직급 게이트) 공유 — 두 뷰 불일치 방지
   const d = data ? toCrawledDisplay(data) : null
-  const metaParts = d
+  const meta = d
     ? [
         d.companySub,
-        d.location || null,
         d.grade,
         d.experienceYears != null ? `${d.experienceYears}년` : null,
-      ].filter(Boolean)
-    : []
+        d.location || null,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : ''
   const posts = (data?.posts ?? []).filter((post) => (post.images?.length ?? 0) > 0)
 
   return (
@@ -42,101 +66,143 @@ export function PanelCrawled({ crawledId }: { crawledId: number }) {
       >
         <PanelScroll>
           {isLoading && (
-            <div className="flex flex-col gap-3 p-6">
-              <div className="h-20 w-20 animate-pulse rounded-full bg-gray-100" />
+            <div className="flex flex-col gap-4 p-4">
+              <div className="flex items-center gap-4">
+                <div className="h-[100px] w-[100px] shrink-0 animate-pulse rounded-full bg-gray-100" />
+                <div className="h-12 w-12 animate-pulse rounded bg-gray-100" />
+              </div>
               <div className="h-5 w-32 animate-pulse rounded bg-gray-100" />
-              <div className="h-4 w-48 animate-pulse rounded bg-gray-100" />
+              <div className="h-4 w-2/3 animate-pulse rounded bg-gray-100" />
             </div>
           )}
 
           {isError && <p className="p-6 text-m-14 text-gray-500">프로필을 불러오지 못했습니다.</p>}
 
           {data && d && (
-            <div className="flex flex-col gap-6 p-6">
-              {/* 프로필 요약 */}
-              <div className="flex items-center gap-4">
-                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full bg-gray-100">
-                  {data.picture && (
-                    <CrawledImage
-                      src={data.picture}
-                      alt={d.displayName}
-                      className="h-full w-full object-cover"
-                    />
-                  )}
+            <>
+              {/* 헤더 — 회원 ProfileSummary 레이아웃 (아바타100 + 통계 + 이름/메타/headline) */}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-4 px-4 pt-4">
+                  <div className="relative h-[100px] w-[100px] shrink-0 overflow-hidden rounded-full bg-gray-100">
+                    {data.picture && (
+                      <CrawledImage
+                        src={data.picture}
+                        alt={d.displayName}
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+                  {/* 크롤링은 동료·추천서 개념이 없어 통계는 작업물 수만 */}
+                  <div className="flex flex-1 justify-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-sb-20 text-gray-900">{posts.length}</span>
+                      <span className="text-r-12 text-gray-500">작업물</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <p className="text-sb-20 text-gray-900">{d.displayName}</p>
-                  {metaParts.length > 0 && (
-                    <p className="text-r-14 text-gray-500">{metaParts.join(' · ')}</p>
-                  )}
+
+                <div className="flex flex-col gap-2 px-4 py-4">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sb-20 text-gray-900">{d.displayName}</span>
+                    {meta && <span className="text-r-12 text-gray-500">{meta}</span>}
+                  </div>
+                  {d.headline && <p className="text-r-14 text-gray-900">{d.headline}</p>}
                   <CrawledSourceBadge />
+                  {d.trades.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {d.trades.map((trade) => (
+                        <SkillTag
+                          key={trade}
+                          label={TRADE_LABELS[trade] ?? trade}
+                          selected={trade === d.primaryTrade}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {profile?.headline && <p className="text-r-16 text-gray-900">{profile.headline}</p>}
-
-              {d.trades.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {d.trades.map((trade) => (
-                    <SkillTag
-                      key={trade}
-                      label={TRADE_LABELS[trade] ?? trade}
-                      selected={trade === d.primaryTrade}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* 연락 · 출처 */}
-              <div className="flex gap-2.5">
+              {/* 액션 — 전화 문의 / 블로그 보기 (회원의 actionSlot 위치) */}
+              <div className="flex gap-2.5 px-4 pb-2">
                 {data.phone && (
                   <Button asChild size="full" className="h-10">
                     <a href={`tel:${data.phone}`}>전화 문의</a>
                   </Button>
                 )}
-                {profile?.url && (
+                {d.sourceUrl && (
                   <Button asChild variant="outline" size="full" className="h-10">
-                    <a href={profile.url} target="_blank" rel="noopener noreferrer">
+                    <a href={d.sourceUrl} target="_blank" rel="noopener noreferrer">
                       블로그 보기
                     </a>
                   </Button>
                 )}
               </div>
 
-              {/* 소개 */}
-              {profile?.about && (
-                <div className="flex flex-col gap-2">
-                  <p className="text-sb-16 text-gray-900">소개</p>
-                  <p className="text-r-14 whitespace-pre-line text-gray-700">{profile.about}</p>
-                </div>
-              )}
+              <Tab items={TAB_ITEMS} activeKey={tab} onChange={(key) => setTab(key as TabKey)} />
 
-              {/* 시공 사례 */}
-              {posts.length > 0 && (
-                <div className="flex flex-col gap-4">
-                  <p className="text-sb-16 text-gray-900">시공 사례</p>
-                  {posts.map((post, i) => (
-                    <div key={post.id ?? i} className="flex flex-col gap-2">
-                      {post.title && <p className="text-m-14 text-gray-900">{post.title}</p>}
-                      <div className="grid grid-cols-3 gap-1.5">
-                        {(post.images ?? []).slice(0, 6).map((imageUrl) => (
-                          <div
-                            key={imageUrl}
-                            className="aspect-square overflow-hidden rounded-[9px] bg-gray-100"
-                          >
+              {tab === 'intro' ? (
+                <div className="flex flex-col gap-6 p-4">
+                  {d.headline && (
+                    <div className="flex flex-col gap-2">
+                      <h3 className="text-sb-16 text-gray-900">한 줄 소개</h3>
+                      <p className="text-r-14 text-gray-900">{d.headline}</p>
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-2">
+                    <h3 className="text-sb-16 text-gray-900">소개</h3>
+                    {data.profile?.about ? (
+                      <p className="text-r-14 whitespace-pre-line text-gray-700">
+                        {renderWithHashtags(data.profile.about)}
+                      </p>
+                    ) : (
+                      <p className="text-r-14 text-gray-500">등록된 소개가 없습니다</p>
+                    )}
+                  </div>
+                  {d.sourceUrl && (
+                    <div className="flex flex-col gap-2">
+                      <h3 className="text-sb-16 text-gray-900">출처</h3>
+                      <a
+                        href={d.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-r-14 text-primary underline"
+                      >
+                        {d.sourceUrl}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-6 py-6">
+                  {posts.length === 0 ? (
+                    <div className="flex items-center justify-center py-20">
+                      <p className="text-r-14 text-gray-500">작업물이 없습니다</p>
+                    </div>
+                  ) : (
+                    posts.map((post, i) => (
+                      // 회원 WorkCard 레이아웃 준용 — 대표 이미지 + 제목/본문 (이미지는 no-referrer)
+                      <div key={post.id ?? i} className="flex flex-col">
+                        {post.images?.[0] && (
+                          <div className="h-[220px] w-full overflow-hidden bg-gray-100">
                             <CrawledImage
-                              src={imageUrl}
+                              src={post.images[0]}
                               alt={post.title ?? '시공 사진'}
                               className="h-full w-full object-cover"
                             />
                           </div>
-                        ))}
+                        )}
+                        <div className="flex flex-col gap-1 px-4 pt-3 pb-4">
+                          {post.title && <p className="text-m-16 text-gray-900">{post.title}</p>}
+                          {post.content && (
+                            <p className="line-clamp-2 text-r-14 text-gray-500">{post.content}</p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               )}
-            </div>
+            </>
           )}
         </PanelScroll>
       </PanelShell>
