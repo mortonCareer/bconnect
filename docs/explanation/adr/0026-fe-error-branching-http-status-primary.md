@@ -73,4 +73,3 @@ FE에선 `customFetch`가 envelope를 벗기며 에러를 `ApiError`로 변환�
 ## Notes
 
 - 구현: `packages/api-client/src/client.ts`(`ApiError.status` + 두 throw 지점), `apps/plan/.../schedule/_components/schedule-content.tsx`(첫 적용).
-- BE 에러 코드 카탈로그(각 도메인 `*ExceptionCode`)는 BE 소유. FE는 이를 열거·복제하지 않는다(결합 회피). 특정 code에 의존하는 2차 분기는 최소한으로.
