@@ -1,18 +1,22 @@
 /**
- * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1234-2262
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1759-11906
+ * @figma-state 보낸요청 https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1759-12127
  */
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useGetCoworkers, useGetMyMember } from '@bconnect/api-client'
-import { CoworkerList } from '@bconnect/features'
-import { TopBar, SearchIcon } from '@bconnect/ui'
-import { matchHangul } from '@bconnect/config/search'
+import {
+  useGetCoworkers,
+  useGetMyMember,
+  useGetReceivedCoworkerRequests,
+  useGetSentCoworkerRequests,
+} from '@bconnect/api-client'
+import { CoworkerList, CoworkerRequestList } from '@bconnect/features'
+import { TopBar } from '@bconnect/ui'
+import { useCoworkerRequestActions } from '../_adapters/useCoworkerRequestActions'
 
 export default function CoworkersPage() {
   const router = useRouter()
-  const [search, setSearch] = useState('')
 
   const { data: member, isLoading: isMemberLoading } = useGetMyMember()
   const myId = member?.id
@@ -23,29 +27,30 @@ export default function CoworkersPage() {
     isError,
   } = useGetCoworkers({ memberId: myId! }, { query: { enabled: myId != null } })
 
+  const { data: received } = useGetReceivedCoworkerRequests()
+  const { data: sent } = useGetSentCoworkerRequests()
+  const { onAccept, onDeny, onCancel, pendingId } = useCoworkerRequestActions()
+
   const isLoading = isMemberLoading || (!!myId && isCoworkersLoading)
-  // TODO: BE required 처리 후 type narrowing 필요. Coworker.member.name은 검색 필수값인데 optional emit이라 빈값으로 silent fallback 중.
-  const filtered = (coworkers ?? []).filter((c) => matchHangul(c.member?.name ?? '', search))
 
   return (
     <div className="flex flex-col">
       <TopBar variant="default" title="동료" showAction={false} onBack={() => router.back()} />
 
-      <div className="px-4 py-2">
-        <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
-          <SearchIcon className="text-gray-400" />
-          <input
-            type="search"
-            placeholder="이름·초성 검색 (예: ㄱㅎㄷ)"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 bg-transparent text-r-14 text-gray-900 outline-none placeholder:text-gray-500"
-          />
-        </div>
-      </div>
+      {/* 상단: 받은/보낸 동료요청 (수락·거절·취소) */}
+      <CoworkerRequestList
+        received={received}
+        sent={sent}
+        onAccept={onAccept}
+        onDeny={onDeny}
+        onCancel={onCancel}
+        pendingId={pendingId}
+        profileHref={(memberId) => `/profile/${memberId}`}
+      />
 
+      {/* 하단: 동료 목록 */}
       <CoworkerList
-        coworkers={filtered}
+        coworkers={coworkers ?? []}
         isLoading={isLoading}
         isError={isError}
         coworkerHref={(profileId) => `/profile/${profileId}`}

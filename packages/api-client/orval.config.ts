@@ -63,6 +63,18 @@ export default defineConfig({
               ],
               invalidates: ['getCredentials', 'getMyCredentials'],
             },
+            // 동료요청: 수락 → 받은 목록 + 동료 목록(관계 성립으로 +1), 거절 → 받은 목록,
+            // 생성/취소 → 보낸 목록(보낸 쪽 "요청됨" 상태 새로고침 후에도 유지, #843).
+            // getCoworkers 는 memberId 로 회원별 구분 → config 가 값을 몰라 관련 목록을 한꺼번에 무효화(넓게).
+            {
+              onMutations: ['acceptCoworkerRequest'],
+              invalidates: ['getReceivedCoworkerRequests', 'getCoworkers'],
+            },
+            { onMutations: ['denyCoworkerRequest'], invalidates: ['getReceivedCoworkerRequests'] },
+            {
+              onMutations: ['createCoworkerRequest', 'deleteCoworkerRequest'],
+              invalidates: ['getSentCoworkerRequests'],
+            },
             // 내 회원정보 변경 → 내 회원정보
             { onMutations: ['updateMyMember'], invalidates: ['getMyMember'] },
             // 알림 읽음 처리(단건/전체) → 알림 목록 + 안읽음 개수
