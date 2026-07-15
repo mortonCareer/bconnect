@@ -1,3 +1,4 @@
+export { ScheduleContent } from './schedule-content'
 export { ScheduleGrid } from './schedule-grid'
 export type {
   OfferQueueItem,

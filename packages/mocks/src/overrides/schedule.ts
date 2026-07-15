@@ -2,7 +2,6 @@ import {
   getCancelOfferMockHandler,
   getCreateOfferMockHandler,
   getCreateTaskCompanyMockHandler,
-  getGetProjectMockHandler,
   getGetProjectsMockHandler,
   getGetProjectTasksMockHandler,
   getGetTaskOffersMockHandler,
@@ -338,9 +337,22 @@ function promoteNext(taskId: number) {
 export const scheduleOverrides = [
   getGetProjectsMockHandler((): Project[] => projects),
 
-  getGetProjectMockHandler(
-    (info): Project => projects.find((p) => p.id === Number(info.params.id)) ?? projects[0]
-  ),
+  // 없는(또는 남의) 프로젝트는 BE 처럼 404 (#852). 기존 `?? projects[0]` 폴백이 dev QA 에서
+  // 오류를 가려 빈 공정표를 정상처럼 보이게 했다 — 실제 BE 404 동작을 모사한다.
+  // 성공 응답은 orval mock 관례대로 raw inner data(비-envelope), 에러만 envelope + 404 상태.
+  http.get('*/api/v1/projects/:id', ({ params }) => {
+    const project = projects.find((p) => p.id === Number(params.id))
+    if (!project) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: { code: 'PROJECT_NOT_FOUND', message: '프로젝트를 찾을 수 없어요.' },
+        },
+        { status: 404 }
+      )
+    }
+    return HttpResponse.json(project)
+  }),
 
   getGetProjectTasksMockHandler((info): Task[] =>
     tasks.filter((t) => t.projectId === Number(info.params.id))
