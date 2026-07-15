@@ -23,6 +23,10 @@ export const setAccessToken = (token: string | null) => {
 
 export const getAccessToken = () => accessToken
 
+// 로그인 전(OTP)·refresh 자신의 401 은 재발급 재시도가 성립하지 않는 경로 (#851).
+const AUTH_ENDPOINT = /\/auth\/(otp\/|refresh$)/
+const isAuthEndpoint = (url: string) => AUTH_ENDPOINT.test(url)
+
 // API 응답 envelope. spec 의 ApiSuccessResponseBase + paths 의 allOf 패턴과 정렬됨.
 // orval 이 생성하는 endpoint 응답 타입은 `ApiSuccessResponseBase & { data: T }` 형태 —
 // 여기 generic 의 T 가 그 inner data 를 채움.
@@ -106,7 +110,13 @@ export const apiClient = ky.create({
       async (request, options, response) => {
         // 401 만 refresh 트리거 — 403 은 인가 실패(또는 BE 에러 dispatch 마스킹, #763)라
         // refresh 로 해소되지 않는다 (#782).
-        if (response.status === 401 && !request.headers.get('X-Retry')) {
+        // auth 엔드포인트(로그인 전 OTP·refresh 자신)의 401 은 재발급이 성립하지 않는
+        // 경로라 제외 — 오답마다 무의미한 /auth/refresh 가 따라붙는 낭비를 막는다 (#851).
+        if (
+          response.status === 401 &&
+          !request.headers.get('X-Retry') &&
+          !isAuthEndpoint(request.url)
+        ) {
           const refreshed = await refreshAccessToken()
           if (refreshed) {
             request.headers.set('Authorization', `Bearer ${accessToken}`)
