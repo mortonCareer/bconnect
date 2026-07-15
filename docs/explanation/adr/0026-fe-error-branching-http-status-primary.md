@@ -1,8 +1,8 @@
 # ADR-0026: FE 에러 분기 — HTTP status 1차, BE 에러 code 2차 (hybrid)
 
-- **Status**: Proposed
+- **Status**: Accepted
 - **Date**: 2026-07-15
-- **Deciders**: @twjin03 (리뷰: @manamana32321)
+- **Deciders**: @twjin03, @manamana32321
 - **Related**: #852, PR #873, [ADR-0004](0004-api-response-envelope.md), [ADR-0015](0015-be-code-as-api-ssot.md)
 
 ## Context
@@ -23,8 +23,6 @@ BE 응답은 `{ success, data | error }` envelope 형식이고([ADR-0004](0004-a
 FE에선 `customFetch`가 envelope를 벗기며 에러를 `ApiError`로 변환해 React Query로 던진다. 종전 `ApiError`는 `code`+`message`만 보유했다 — **HTTP status는 버려졌다**.
 
 `#852`(plan 공정표)에서 "없는 프로젝트 진입 시 안내 화면" 요구가 생기며 **"이 에러가 not-found인가"를 FE가 판별**해야 했다. 이때 무엇을 분기 기준으로 삼을지가 반복적으로 재검토됐고(리뷰 3라운드), 앞으로 모든 도메인의 에러 UX 분기에 동일한 질문이 재발하므로 원칙을 못박는다.
-
-주요 force: **BE 결합도**(내부 코드 변경이 FE를 깨뜨리지 않아야 함), **표현력**(같은 상태의 서로 다른 원인을 구분해야 할 때가 있음), **일관성**(도메인마다 제각각 판단하지 않도록).
 
 ## Options
 
@@ -75,5 +73,4 @@ FE에선 `customFetch`가 envelope를 벗기며 에러를 `ApiError`로 변환�
 ## Notes
 
 - 구현: `packages/api-client/src/client.ts`(`ApiError.status` + 두 throw 지점), `apps/plan/.../schedule/_components/schedule-content.tsx`(첫 적용).
-- 2차(code) 분기가 실제로 필요한 지점이 생기면, 그 code가 BE에서 안정 계약인지 확인하고 해당 호출부에 `// code 2차 분기 사유: <...>` 주석을 남긴다.
 - BE 에러 코드 카탈로그(각 도메인 `*ExceptionCode`)는 BE 소유. FE는 이를 열거·복제하지 않는다(결합 회피). 특정 code에 의존하는 2차 분기는 최소한으로.
