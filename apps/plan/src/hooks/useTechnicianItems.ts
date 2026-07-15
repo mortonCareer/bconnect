@@ -24,10 +24,7 @@ export interface TechnicianItem {
   postCount: number
   coworkerCount: number
   recommendCount: number
-  // ⚠️ 모킹값 — 리뷰(별점)·계약·인증 BE 도메인 미구현. 0/빈값은 실제 발생 가능해 sentinel 로 모킹 명시
-  rating: number
-  reviewCount: number
-  contractCount: number
+  // 인증: 타인 프로필 credentials 조회 API 미구현 — 연동 전까진 빈 목록
   certifications: string[]
   // 작업물(Post) 유래 — 소요일은 Feed 에 task 정보가 없어 미표시
   portfolios: { imageUrl: string; daysRequired?: number }[]
@@ -55,11 +52,6 @@ function toTechnicianItem(profile: Profile, posts: Post[]): TechnicianItem | nul
     postCount: profile.postCount ?? 0,
     coworkerCount: profile.coworkerCount ?? 0,
     recommendCount: profile.recommendationCount ?? 0,
-    // ⚠️ 모킹값 (BE 도메인 미구현) — 0은 실제 발생 가능한 값이라 sentinel 로 모킹임을 명시.
-    // rating 은 5점 초과 불가 → 2.5 고정.
-    rating: 2.5,
-    reviewCount: 777,
-    contractCount: 777,
     certifications: [],
     portfolios: posts
       .slice(0, 3)
