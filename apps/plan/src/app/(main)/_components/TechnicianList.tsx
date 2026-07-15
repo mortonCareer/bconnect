@@ -2,6 +2,7 @@
 
 import { useFilterParams } from '@/hooks/useFilterParams'
 import { useTechnicianItems } from '@/hooks/useTechnicianItems'
+import { CrawledTechnicianCard } from './CrawledTechnicianCard'
 import { TechnicianCard } from './TechnicianCard'
 
 function SkeletonCard() {
@@ -57,9 +58,13 @@ export function TechnicianList() {
 
   return (
     <div className="flex flex-col gap-[18px] pb-10">
-      {items.map((item) => (
-        <TechnicianCard key={item.profileId} item={item} />
-      ))}
+      {items.map((item) =>
+        item.source === 'crawled' ? (
+          <CrawledTechnicianCard key={`crawled-${item.crawledId}`} item={item} />
+        ) : (
+          <TechnicianCard key={`member-${item.profileId}`} item={item} />
+        )
+      )}
     </div>
   )
 }

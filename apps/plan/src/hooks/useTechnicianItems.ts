@@ -1,22 +1,22 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useGetFeeds, useGetProfiles } from '@bconnect/api-client'
-import type { Post, Profile, Trade } from '@bconnect/api-client'
+import { useGetCrawledMembers, useGetFeeds, useGetProfiles } from '@bconnect/api-client'
+import type { CrawledMemberSummary, Post, Profile, Trade } from '@bconnect/api-client'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
+import { toCrawledDisplay } from '@/lib/crawled'
 import type { ExperienceLevel } from '@/lib/experience'
 import { EXPERIENCE_RANGES } from '@/lib/experience'
 import type { Grade } from '@/lib/grade'
 import { PROFILE_ROLE_TO_GRADE } from '@/lib/grade'
 
-export interface TechnicianItem {
-  profileId: number
-  memberId: number
+interface TechnicianItemBase {
   name: string
   picture: string
   location: string
   primaryTrade?: Trade
-  experienceYears: number
+  // 미상(크롤링 미추출)이면 undefined — 경력 필터에서 제외
+  experienceYears?: number
   headline: string
   trades: Trade[]
   // 기술자 외 role(업체/건축주/설계)은 직급 없음
@@ -33,7 +33,28 @@ export interface TechnicianItem {
   portfolios: { imageUrl: string; daysRequired?: number }[]
 }
 
-function toTechnicianItem(profile: Profile, posts: Post[]): TechnicianItem | null {
+/** 가입 회원 프로필 카드 — 프로필 패널·메시지 등 회원 동작 가능 */
+export interface MemberTechnicianItem extends TechnicianItemBase {
+  source: 'member'
+  profileId: number
+  memberId: number
+  // 회원 프로필은 BE 가 경력을 항상 채움 (미상 없음)
+  experienceYears: number
+}
+
+/** 크롤링 프로필 카드 — 전시 전용 (전화·출처 링크만 가능) */
+export interface CrawledTechnicianItem extends TechnicianItemBase {
+  source: 'crawled'
+  crawledId: number
+  phone: string
+  sourceUrl: string
+  /** 업체명 — 표시명(name)이 대표자명일 때 메타에 병기 */
+  company: string
+}
+
+export type TechnicianItem = MemberTechnicianItem | CrawledTechnicianItem
+
+function toTechnicianItem(profile: Profile, posts: Post[]): MemberTechnicianItem | null {
   const profileId = profile.id
   const memberId = profile.member?.id
   // 프로필/멤버 식별자 없으면 카드 액션(프로필 보기·메시지)이 불가능 — 목록에서 제외
@@ -41,6 +62,7 @@ function toTechnicianItem(profile: Profile, posts: Post[]): TechnicianItem | nul
 
   const name = profile.member?.name ?? ''
   return {
+    source: 'member',
     profileId,
     memberId,
     name,
@@ -67,6 +89,37 @@ function toTechnicianItem(profile: Profile, posts: Post[]): TechnicianItem | nul
   }
 }
 
+function toCrawledItem(crawled: CrawledMemberSummary): CrawledTechnicianItem | null {
+  const crawledId = crawled.id
+  if (crawledId == null) return null
+
+  const d = toCrawledDisplay(crawled)
+  return {
+    source: 'crawled',
+    crawledId,
+    name: d.displayName,
+    picture: crawled.picture ?? DEFAULT_PROFILE_IMAGE,
+    location: d.location,
+    primaryTrade: d.primaryTrade,
+    experienceYears: d.experienceYears,
+    headline: d.headline,
+    trades: d.trades,
+    grade: d.grade,
+    postCount: 0,
+    coworkerCount: 0,
+    recommendCount: 0,
+    rating: 0,
+    reviewCount: 0,
+    contractCount: 0,
+    certifications: [],
+    // 목록 API 에는 시공 사진이 없음 — 상세 패널에서 posts 로 표시
+    portfolios: [],
+    phone: d.phone,
+    sourceUrl: d.sourceUrl,
+    company: crawled.company ?? '',
+  }
+}
+
 interface UseTechnicianItemsOptions {
   trades?: Trade[] | null
   experience?: ExperienceLevel | null
@@ -80,9 +133,14 @@ export function useTechnicianItems({
   grades,
   regions,
 }: UseTechnicianItemsOptions = {}) {
-  const { data, isLoading, error } = useGetProfiles()
+  const { data, isLoading: isMembersLoading, error } = useGetProfiles()
   // 포트폴리오(작업물 썸네일)용 — 실패해도 목록은 뜨도록 error 미전파
   const { data: feeds } = useGetFeeds()
+  // 크롤링 프로필 — 회원 목록 뒤에 병합. 실패해도 회원 목록은 뜨도록 error 미전파
+  const { data: crawledMembers, isLoading: isCrawledLoading } = useGetCrawledMembers()
+  // 두 소스가 다 도착해야 목록 확정 — 회원만 먼저 끝나 크롤링 카드가 late append 되며
+  // 빈 상태가 번쩍이는 것을 방지 (error 는 회원 쿼리만 전파)
+  const isLoading = isMembersLoading || isCrawledLoading
 
   const postsByMember = useMemo(() => {
     const map = new Map<number, Post[]>()
@@ -96,13 +154,16 @@ export function useTechnicianItems({
     return map
   }, [feeds])
 
-  const allItems = useMemo(
-    () =>
-      (data ?? []).flatMap(
+  // 가입 회원이 항상 앞, 크롤링 프로필이 뒤 — 가입 유인 유지
+  const allItems: TechnicianItem[] = useMemo(
+    () => [
+      ...(data ?? []).flatMap(
         (profile) =>
           toTechnicianItem(profile, postsByMember.get(profile.member?.id ?? -1) ?? []) ?? []
       ),
-    [data, postsByMember]
+      ...(crawledMembers ?? []).flatMap((crawled) => toCrawledItem(crawled) ?? []),
+    ],
+    [data, postsByMember, crawledMembers]
   )
 
   const expRange = experience ? EXPERIENCE_RANGES[experience] : undefined
@@ -114,6 +175,8 @@ export function useTechnicianItems({
       // 직급 다중 선택 — 선택된 직급 중 하나라도 일치하면 통과 (OR). 직급 없는 프로필은 필터 시 제외
       if (grades && grades.length > 0 && (!item.grade || !grades.includes(item.grade))) return false
       if (expRange != null) {
+        // 경력 미상(크롤링 미추출)은 경력 필터 선택 시 제외 — 직급 필터의 미상 제외와 동일 규칙
+        if (item.experienceYears == null) return false
         if (item.experienceYears < expRange.min) return false
         if (expRange.max != null && item.experienceYears > expRange.max) return false
       }
@@ -124,5 +187,11 @@ export function useTechnicianItems({
     })
   }, [allItems, trades, expRange, grades, regions])
 
-  return { items, totalCount: allItems.length, isLoading, error }
+  // 가입 회원 수만 별도 노출 — GuestSidebar '검증된 프로필 N명' 카피는 크롤링 제외
+  const memberCount = useMemo(
+    () => allItems.reduce((n, item) => (item.source === 'member' ? n + 1 : n), 0),
+    [allItems]
+  )
+
+  return { items, totalCount: allItems.length, memberCount, isLoading, error }
 }

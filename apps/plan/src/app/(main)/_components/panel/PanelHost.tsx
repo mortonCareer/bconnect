@@ -1,6 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
+import { PanelCrawled } from './PanelCrawled'
 import { PanelProfile } from './PanelProfile'
 import { PanelCoworkers } from './PanelCoworkers'
 import { PanelRecommendations } from './PanelRecommendations'
@@ -14,7 +15,7 @@ import { PanelTask } from './PanelTask'
  * 어떤 메인 콘텐츠(children) 위에도 떠 있고, 새로고침/뒤로/앞으로/공유가 URL 로 추적된다.
  *
  * `?panel=` 값 형태: `profile/5` · `profile/5/coworkers` · `profile/5/recommendations`
- *                   · `messages` · `messages/3` · `notifications` · `task/new` · `task/4`
+ *                   · `crawled/7` · `messages` · `messages/3` · `notifications` · `task/new` · `task/4`
  */
 export function PanelHost() {
   const panel = useSearchParams().get('panel')
@@ -28,6 +29,12 @@ export function PanelHost() {
     if (seg[2] === 'coworkers') return <PanelCoworkers profileId={profileId} />
     if (seg[2] === 'recommendations') return <PanelRecommendations profileId={profileId} />
     return <PanelProfile profileId={profileId} />
+  }
+
+  if (seg[0] === 'crawled') {
+    const crawledId = Number(seg[1])
+    if (!Number.isFinite(crawledId) || crawledId <= 0) return null
+    return <PanelCrawled crawledId={crawledId} />
   }
 
   if (seg[0] === 'messages') {

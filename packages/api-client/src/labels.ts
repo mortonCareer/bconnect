@@ -1,4 +1,4 @@
-import { Trade, type CredentialType } from './generated/schemas'
+import { CrawledRegion, Trade, type CredentialType } from './generated/schemas'
 
 export const TRADE_LABELS: Record<Trade, string> = {
   [Trade.DESIGN]: '설계',
@@ -91,4 +91,32 @@ export const CREDENTIAL_TYPE_LABELS: Record<CredentialType, string> = {
 
 export function getCredentialLabel(type: CredentialType): string {
   return CREDENTIAL_TYPE_LABELS[type] ?? type
+}
+
+// 지역(시/도) 한글 라벨 SSOT — CrawledRegion enum 기반.
+// career(lib/region.ts)·plan(FilterBar·크롤링 카드)이 공유. 자체 하드코딩 금지.
+export const REGION_LABELS: Record<CrawledRegion, string> = {
+  SEOUL: '서울',
+  BUSAN: '부산',
+  DAEGU: '대구',
+  INCHEON: '인천',
+  GWANGJU: '광주',
+  DAEJEON: '대전',
+  ULSAN: '울산',
+  SEJONG: '세종',
+  GYEONGGI: '경기',
+  GANGWON: '강원',
+  CHUNGBUK: '충북',
+  CHUNGNAM: '충남',
+  JEONBUK: '전북',
+  JEONNAM: '전남',
+  GYEONGBUK: '경북',
+  GYEONGNAM: '경남',
+  JEJU: '제주',
+}
+
+export const REGION_OPTIONS = Object.values(REGION_LABELS)
+
+export function getRegionLabel(region: CrawledRegion): string {
+  return REGION_LABELS[region] ?? region
 }

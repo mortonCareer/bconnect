@@ -6,7 +6,7 @@ import { Button, CertTag, SkillTag, StarIcon, toast, isApiErrorShape } from '@bc
 import { TRADE_LABELS, useCreateDirectChat } from '@bconnect/api-client'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useAuthStore } from '@/stores/auth-store'
-import type { TechnicianItem } from '@/hooks/useTechnicianItems'
+import type { MemberTechnicianItem } from '@/hooks/useTechnicianItems'
 import type { Trade } from '@bconnect/api-client'
 import { useLoginGate } from './LoginGateProvider'
 
@@ -75,7 +75,7 @@ function PortfolioThumb({ imageUrl, daysRequired }: { imageUrl?: string; daysReq
 }
 
 interface TechnicianCardProps {
-  item: TechnicianItem
+  item: MemberTechnicianItem
 }
 
 export function TechnicianCard({ item }: TechnicianCardProps) {

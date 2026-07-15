@@ -11,6 +11,7 @@ type PanelSegment =
   | `profile/${number}`
   | `profile/${number}/coworkers`
   | `profile/${number}/recommendations`
+  | `crawled/${number}`
   | 'messages'
   | `messages/${number}`
   | 'notifications'
