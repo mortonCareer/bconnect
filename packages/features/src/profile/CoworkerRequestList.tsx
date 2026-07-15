@@ -129,6 +129,7 @@ function CoworkerRequestRow({
       avatarUrl={member?.picture || DEFAULT_PROFILE_IMAGE}
       name={member?.name ?? '이름 없음'}
       profileHref={memberId != null ? profileHref(memberId) : undefined}
+      rightSlotAlign="center"
       meta={{
         // TODO: BE required 처리 후 type narrowing 필요. region/trade는 표시 필수값인데 optional emit이라 빈값으로 silent fallback 중.
         region: profile?.address?.city ?? '',

@@ -33,6 +33,11 @@ export interface ProfileCardProps {
   profileHref?: string
   /** 우측 커스텀 (케밥 등). 주면 chevron 대체 */
   rightSlot?: ReactNode
+  /**
+   * rightSlot 세로 정렬. 기본 'start'(위 정렬) — 설명 2줄로 커지는 카드의 케밥용.
+   * 'center' — 설명 없는 컴팩트 행(동료요청 수락/거절 등)에서 버튼을 세로 가운데로.
+   */
+  rightSlotAlign?: 'start' | 'center'
   /** 루트 엘리먼트 — 리스트 항목은 'li' */
   as?: 'div' | 'li'
   className?: string
@@ -46,6 +51,7 @@ export function ProfileCard({
   href,
   profileHref,
   rightSlot,
+  rightSlotAlign = 'start',
   as: Root = 'div',
   className,
 }: ProfileCardProps) {
@@ -133,7 +139,14 @@ export function ProfileCard({
       </div>
 
       {rightSlot ? (
-        <div className="relative z-10 shrink-0 self-start">{rightSlot}</div>
+        <div
+          className={cn(
+            'relative z-10 shrink-0',
+            rightSlotAlign === 'center' ? 'self-center' : 'self-start'
+          )}
+        >
+          {rightSlot}
+        </div>
       ) : href ? (
         <ChevronIcon direction="right" size={16} className="shrink-0 text-gray-400" />
       ) : null}
