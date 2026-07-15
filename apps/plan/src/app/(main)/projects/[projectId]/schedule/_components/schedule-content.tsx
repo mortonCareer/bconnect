@@ -7,14 +7,12 @@ import { ScheduleFooter } from './schedule-footer'
 import { ScheduleGrid } from './schedule-grid'
 import { ScheduleHeader } from './schedule-header'
 
-// BE CommonExceptionCode.NOT_FOUND — 없는 프로젝트 조회 시 반환되는 404 코드.
+// BE 공통 not-found 코드. 프로젝트 조회도 이 코드로 404를 반환한다.
 const PROJECT_NOT_FOUND_CODE = 'C005'
 
 /**
- * 공정표 진입 게이트 — 없는 프로젝트 주소면 404 를 받아 안내 화면을 띄운다 (#852).
- * 프로젝트가 유효한데 작업만 0건인 경우(빈 공정표)는 정상 흐름으로 통과 — 빈 목록이 404 로 오는
- * 서버 문제는 #840 별도 트랙이라 여기서 tasks 404 로 판단하지 않고 프로젝트 조회 404 만 게이트한다.
- * 네트워크 오류·500 등은 not-found 로 오인하지 않도록 C005(프로젝트 없음)만 좁혀 게이트한다.
+ * 프로젝트 조회가 BE 공통 404(C005)일 때만 안내 화면으로 전환한다.
+ * 작업 목록 404는 #840에서 따로 다루므로 여기서 게이트하지 않는다.
  */
 export function ScheduleContent({ projectId }: { projectId: string }) {
   const { error } = useGetProject(Number(projectId))

@@ -51,7 +51,7 @@ export interface SelectProps {
   /** 다중 선택 — value 가 string[] 가 된다 */
   multiple?: boolean
   placeholder?: string
-  /** 옵션이 0개일 때 패널에 표시할 안내 문구 (예: "아직 프로젝트가 없어요"). 미지정 시 빈 패널. */
+  /** 옵션이 없을 때 패널에 표시할 안내 문구. */
   emptyLabel?: string
   /** 트리거에 선택값 대신 고정 표시할 카테고리명 (필터 모드). 미지정 시 선택값 표시. */
   triggerLabel?: string
@@ -135,7 +135,7 @@ export function Select({
 
   const openPanel = () => {
     const selectedIdx = navItems.findIndex(isItemSelected)
-    // 옵션이 없으면(빈 상태 안내만 표시) 활성 항목 없음 — dangling aria-activedescendant 방지
+    // 빈 패널에서는 활성 옵션을 만들지 않는다.
     setActiveIndex(navItems.length === 0 ? -1 : selectedIdx >= 0 ? selectedIdx : 0)
     setOpen(true)
   }
@@ -183,8 +183,7 @@ export function Select({
   }
 
   const handleListKeyDown = (e: React.KeyboardEvent) => {
-    // 옵션이 없으면(빈 상태 안내만) 이동/선택 키를 무력화 — 화살표·Home/End 로 activeIndex 가
-    // 0 이 된 뒤 Enter 시 navItems[0] undefined 접근 런타임 에러를 막는다. 닫기만 허용.
+    // 빈 패널에서는 닫기 키만 처리한다.
     if (navItems.length === 0) {
       if (e.key === 'Escape' || e.key === 'Tab') {
         e.preventDefault()

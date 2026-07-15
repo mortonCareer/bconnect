@@ -337,10 +337,7 @@ function promoteNext(taskId: number) {
 export const scheduleOverrides = [
   getGetProjectsMockHandler((): Project[] => projects),
 
-  // 없는 프로젝트는 BE 처럼 404 (#852). 기존 `?? projects[0]` 폴백이 dev QA 에서
-  // 오류를 가려 빈 공정표를 정상처럼 보이게 했다 — 실제 BE 404 동작을 모사한다.
-  // code 는 BE CommonExceptionCode.NOT_FOUND(C005) 와 정렬 — FE 게이트가 이 코드로 좁힌다.
-  // 성공 응답은 orval mock 관례대로 raw inner data(비-envelope), 에러만 envelope + 404 상태.
+  // 없는 프로젝트도 실제 BE처럼 C005/404로 내려 QA 흐름을 가리지 않는다.
   http.get('*/api/v1/projects/:id', ({ params }) => {
     const project = projects.find((p) => p.id === Number(params.id))
     if (!project) {
