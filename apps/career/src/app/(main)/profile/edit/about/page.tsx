@@ -4,10 +4,7 @@
 'use client'
 
 import {
-  getGetProfileQueryKey,
-  useGetMyMember,
-  useGetProfile,
-  useQueryClient,
+  useGetMyProfile,
   useUpdateMyProfileAbout,
   type UpdateProfileAboutRequest,
 } from '@bconnect/api-client'
@@ -19,11 +16,8 @@ type AboutFormValues = { about: NonNullable<UpdateProfileAboutRequest['about']> 
 
 export default function EditAboutPage() {
   const router = useRouter()
-  const queryClient = useQueryClient()
 
-  const { data: member } = useGetMyMember()
-  const myId = member?.id
-  const { data: profile } = useGetProfile(myId!, { query: { enabled: myId != null } })
+  const { data: profile } = useGetMyProfile()
 
   const form = useForm<AboutFormValues>({
     mode: 'onTouched',
@@ -34,13 +28,8 @@ export default function EditAboutPage() {
 
   const { mutate: updateAbout, isPending } = useUpdateMyProfileAbout({
     mutation: {
-      onSuccess: () => {
-        // TODO(#728): 수동 무효화 — 추후 config(updateMyProfileAbout→getProfile) 인계로 대체 (ADR-0025)
-        if (myId != null) {
-          queryClient.invalidateQueries({ queryKey: getGetProfileQueryKey(myId) })
-        }
-        router.back()
-      },
+      // 캐시 무효화(updateMyProfileAbout→getMyProfile)는 orval config 가 담당 (ADR-0025)
+      onSuccess: () => router.back(),
       onError: (err) => server.capture(err, form.getValues()),
     },
   })

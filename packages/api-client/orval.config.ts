@@ -70,8 +70,11 @@ export default defineConfig({
               onMutations: ['updateNotificationRead', 'updateNotificationsRead'],
               invalidates: ['getNotifications', 'getNotificationsUnreadCount'],
             },
-            // TODO(#728): 프로필 수정(updateMyProfile/updateMyProfileAbout) → '내 프로필' 조회 무효화는 보류.
-            // 지금은 '내 프로필' 전용 조회 훅이 없다(getProfile 은 /profiles/{id} 남의 프로필). BE 정합으로 훅 생기면 추가.
+            // 내 프로필 수정 → 내 프로필 조회. #847 로 getMyProfile GET 훅 신설되어 TODO(#728) 해소 (ADR-0025).
+            {
+              onMutations: ['updateMyProfile', 'updateMyProfileAbout'],
+              invalidates: ['getMyProfile'],
+            },
           ],
         },
         fetch: {

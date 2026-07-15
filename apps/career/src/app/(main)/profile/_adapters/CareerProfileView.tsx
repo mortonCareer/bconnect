@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  useGetMyMember,
+  useGetMyProfile,
   useGetMyReceivedRecommendations,
   useGetMySentRecommendations,
   useGetProfile,
@@ -43,14 +43,14 @@ export function OwnerProfileView() {
   const utility = useTopBarUtility()
   const { onHideRecommendation, onDeleteRecommendation } = useRecommendationActions()
 
-  // GET /profiles/me 부재 → 내 memberId 로 by-id 프로필 조회 (Profile 이 member·counts 내장)
-  const member = useGetMyMember()
-  // TODO: BE required 처리 후 type narrowing 필요. Member.id는 프로필 조회 키인데 optional emit이라 0 sentinel로 쿼리를 막는 중.
-  const myId = member.data?.id ?? 0
+  // GET /profiles/me 로 내 프로필 조회 (Profile 이 member·counts 내장)
+  const profile = useGetMyProfile()
+  // credentials·profileId 용 memberId 는 프로필에 내장된 member 에서 파생
+  // TODO: BE required 처리 후 type narrowing 필요. Profile.member.id가 optional emit이라 0 sentinel로 쿼리를 막는 중.
+  const myId = profile.data?.member?.id ?? 0
   const enabled = myId > 0
   const { onDeleteWork } = useWorkActions()
 
-  const profile = useGetProfile(myId, { query: { enabled } })
   const credentials = useGetCredentials({ memberId: myId }, { query: { enabled } })
   const received = useGetMyReceivedRecommendations()
   const sent = useGetMySentRecommendations()
@@ -65,8 +65,8 @@ export function OwnerProfileView() {
     credentials: credentials.data,
     receivedRecommendations: received.data,
     sentRecommendations: sent.data,
-    isLoading: member.isLoading || profile.isLoading,
-    isError: member.isError || profile.isError,
+    isLoading: profile.isLoading,
+    isError: profile.isError,
   }
 
   return (
