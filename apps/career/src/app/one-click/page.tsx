@@ -4,7 +4,11 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { getCompanyInfo } from '@/lib/business/fetch-business'
-import { formatRegistrationNumber, isValidRegistrationNumber } from '@bconnect/config/biz-number'
+import {
+  formatRegistrationNumber,
+  isValidRegistrationNumber,
+  registrationNumberSchema,
+} from '@bconnect/config/biz-number'
 import { SearchBar } from './_components/SearchBar'
 import { TipBanner } from './_components/TipBanner'
 import { CompanyHeader } from './_components/CompanyHeader'
@@ -49,7 +53,9 @@ async function CompanyHeaderLoader({ registrationNumber }: { registrationNumber:
 
 export default async function OneClickPage({ searchParams }: PageProps) {
   const { q } = await searchParams
-  const isValid = q ? isValidRegistrationNumber(q) : false
+  const parsed = q ? registrationNumberSchema.safeParse(q) : undefined
+  const isValid = parsed?.success ?? false
+  const errorMessage = parsed && !parsed.success ? parsed.error.issues[0]?.message : undefined
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
@@ -59,10 +65,8 @@ export default async function OneClickPage({ searchParams }: PageProps) {
         <SearchBar defaultValue={q} />
         <TipBanner />
 
-        {q && !isValid && (
-          <p className="text-r-14 text-destructive">
-            올바른 사업자등록번호 형식이 아닙니다. (10자리 숫자)
-          </p>
+        {q && !isValid && errorMessage && (
+          <p className="text-r-14 text-destructive">{errorMessage}</p>
         )}
 
         {isValid && (
