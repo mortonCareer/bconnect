@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -39,7 +38,6 @@ import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
-@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -98,6 +96,7 @@ public class SecurityConfig {
                         .requestMatchers(POST, "/api/v1/members").hasRole("GUEST")
                         .requestMatchers(GET, "/api/v1/members/check-username").permitAll()
                         .requestMatchers(GET, "/api/v1/members").hasRole("ADMIN")
+                        .requestMatchers(GET, "/api/v1/companies").hasRole("ADMIN")
                         .requestMatchers(GET, "/api/v1/profiles/me").authenticated()
                         .requestMatchers(GET, "/api/v1/profiles/**").permitAll()
                         .requestMatchers(GET, "/api/v1/feeds/**").permitAll()
@@ -107,7 +106,7 @@ public class SecurityConfig {
                         .requestMatchers(GET, "/api/v1/recommendations/received", "/api/v1/recommendations/sent").permitAll()
                         .requestMatchers(GET, "/api/v1/crawled-members/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
-                        .requestMatchers("/v3/api-docs.yaml").permitAll()
+                        .requestMatchers("/v3/api-docs*").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .anyRequest().authenticated())
                 .addFilterAfter(verifyOtpFilter, LogoutFilter.class)

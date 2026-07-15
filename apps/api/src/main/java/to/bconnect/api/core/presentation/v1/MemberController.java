@@ -6,7 +6,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
@@ -52,7 +51,6 @@ public class MemberController {
         return ApiResponse.success(MemberResponse.of(member, picture));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ApiResponse<List<MemberResponse>> list(HttpServletResponse response) {
         val members = memberService.list();

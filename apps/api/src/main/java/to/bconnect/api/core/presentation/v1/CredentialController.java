@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
@@ -83,14 +82,12 @@ public class CredentialController {
         return ApiResponse.success(null);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/accept")
     public ApiResponse<Void> accept(@PathVariable Long id) {
         credentialService.accept(id);
         return ApiResponse.success(null);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/deny")
     public ApiResponse<Void> deny(@PathVariable Long id) {
         credentialService.deny(id);
