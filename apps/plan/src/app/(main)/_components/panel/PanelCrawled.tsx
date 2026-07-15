@@ -92,11 +92,24 @@ export function PanelCrawled({ crawledId }: { crawledId: number }) {
                       />
                     )}
                   </div>
-                  {/* 크롤링은 동료·추천서 개념이 없어 통계는 작업물 수만 */}
-                  <div className="flex flex-1 justify-center">
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="text-sb-20 text-gray-900">{posts.length}</span>
-                      <span className="text-r-12 text-gray-500">작업물</span>
+                  {/* 회원 ProfileSummary 통계 레이아웃과 동일 (justify-around 3칸) — 아바타와의
+                      간격을 회원 패널과 일치시킴. 크롤링은 동료·추천서가 없어 그 두 칸은 투명 placeholder */}
+                  <div className="flex flex-1 justify-around">
+                    <button
+                      type="button"
+                      onClick={() => setTab('works')}
+                      className="flex cursor-pointer flex-col items-center gap-1 rounded outline-none transition-colors hover:text-gray-600 focus-visible:ring-1 focus-visible:ring-primary"
+                    >
+                      <span className="text-sb-16 text-gray-900">{posts.length}</span>
+                      <span className="text-r-14 text-gray-900">작업물</span>
+                    </button>
+                    <div aria-hidden className="flex flex-col items-center gap-1 opacity-0">
+                      <span className="text-sb-16">0</span>
+                      <span className="text-r-14">동료</span>
+                    </div>
+                    <div aria-hidden className="flex flex-col items-center gap-1 opacity-0">
+                      <span className="text-sb-16">0</span>
+                      <span className="text-r-14">추천서</span>
                     </div>
                   </div>
                 </div>
