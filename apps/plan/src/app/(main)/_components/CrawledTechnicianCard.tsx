@@ -6,6 +6,7 @@ import { TRADE_LABELS } from '@bconnect/api-client'
 import type { Trade } from '@bconnect/api-client'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import type { CrawledTechnicianItem } from '@/hooks/useTechnicianItems'
+import { CrawledImage, CrawledSourceBadge } from './CrawledImage'
 
 /**
  * 크롤링 기술자 카드 — 전시 전용 (회원 아님).
@@ -14,11 +15,6 @@ import type { CrawledTechnicianItem } from '@/hooks/useTechnicianItems'
  *
  * @figma-scaffold 크롤링 카드 시안 없음 — TechnicianCard(1470:6775) 골격 준용
  */
-
-// 네이버 CDN 이미지는 외부 Referer 를 차단(403) — next/image 대신 plain img + no-referrer 로 표시
-function CrawledImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
-  return <img src={src} alt={alt} referrerPolicy="no-referrer" className={className} />
-}
 
 interface CrawledTechnicianCardProps {
   item: CrawledTechnicianItem
@@ -33,7 +29,7 @@ export function CrawledTechnicianCard({ item }: CrawledTechnicianCardProps) {
     item.company !== item.name ? item.company : null,
     item.location,
     item.grade,
-    item.experienceYears > 0 ? `${item.experienceYears}년` : null,
+    item.experienceYears != null && item.experienceYears > 0 ? `${item.experienceYears}년` : null,
   ].filter(Boolean)
 
   return (
@@ -56,9 +52,7 @@ export function CrawledTechnicianCard({ item }: CrawledTechnicianCardProps) {
               <p className="text-sb-20 text-gray-900">{item.name}</p>
               <p className="text-r-14 text-gray-500">{metaParts.join(' · ')}</p>
             </div>
-            <span className="w-fit rounded-full bg-gray-100 px-2.5 py-0.5 text-r-12 text-gray-600">
-              네이버 블로그에서 수집한 프로필
-            </span>
+            <CrawledSourceBadge />
           </div>
 
           {/* 한 줄 소개 */}

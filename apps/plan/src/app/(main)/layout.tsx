@@ -10,8 +10,9 @@ import { useTechnicianItems } from '@/hooks/useTechnicianItems'
 import { useAuthStore } from '@/stores/auth-store'
 
 function GuestSidebarWithCount() {
-  const { totalCount } = useTechnicianItems()
-  return <GuestSidebar memberCount={totalCount} />
+  // '검증된 프로필' 카피라 가입 회원 수만 — 크롤링(미검증) 프로필은 제외
+  const { memberCount } = useTechnicianItems()
+  return <GuestSidebar memberCount={memberCount} />
 }
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {

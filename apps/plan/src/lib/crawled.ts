@@ -1,35 +1,43 @@
-import { TRADE_LABELS } from '@bconnect/api-client'
-import type { CrawledRegion, Trade } from '@bconnect/api-client'
+import { REGION_LABELS } from '@bconnect/api-client'
+import type { CrawledMember, CrawledMemberSummary, Trade } from '@bconnect/api-client'
+import { GRADE_VALUES, type Grade } from './grade'
 
-// 크롤링 프로필의 trades 는 한국어 라벨 문자열 — Trade enum 역매핑.
-// 크롤러 표기("필름·시트")와 라벨 표기("필름/시트")의 구분자 차이를 정규화로 흡수.
-const normalizeTradeLabel = (label: string) => label.replace(/[·ㆍ]/g, '/')
-
-const TRADE_BY_LABEL: Record<string, Trade> = Object.fromEntries(
-  Object.entries(TRADE_LABELS).map(([trade, label]) => [normalizeTradeLabel(label), trade as Trade])
-)
-
-export function toTradeEnum(label: string): Trade | undefined {
-  return TRADE_BY_LABEL[normalizeTradeLabel(label)]
+/**
+ * 크롤링 프로필의 카드·상세 패널 공용 표시 파생.
+ *
+ * 목록/상세 두 뷰가 같은 규칙(대표자명 우선, 업체명 병기, enum→라벨)을 공유하도록 단일 함수로 통합.
+ * trades·primaryTrade 는 크롤러(#826)가 BE Trade enum 코드로 저장하므로 FE 역매핑 없이 그대로 소비.
+ */
+export interface CrawledDisplay {
+  /** 실회원 name(사람 이름) 슬롯과 정합: 대표자명 우선, 없으면 업체명 폴백 */
+  displayName: string
+  /** 표시명이 대표자명일 때 메타에 병기할 업체명 (폴백 표시 중이면 null) */
+  companySub: string | null
+  location: string
+  trades: Trade[]
+  primaryTrade?: Trade
+  grade?: Grade
+  /** 미추출이면 undefined — 경력 필터에서 '미상'으로 취급 */
+  experienceYears?: number
+  headline: string
+  phone: string
+  sourceUrl: string
 }
 
-// CrawledRegion enum → 지역 필터 표기 (FilterBar REGION_OPTIONS 와 동일한 시/도 축약)
-export const CRAWLED_REGION_LABELS: Record<CrawledRegion, string> = {
-  SEOUL: '서울',
-  BUSAN: '부산',
-  DAEGU: '대구',
-  INCHEON: '인천',
-  GWANGJU: '광주',
-  DAEJEON: '대전',
-  ULSAN: '울산',
-  SEJONG: '세종',
-  GYEONGGI: '경기',
-  GANGWON: '강원',
-  CHUNGBUK: '충북',
-  CHUNGNAM: '충남',
-  JEONBUK: '전북',
-  JEONNAM: '전남',
-  GYEONGBUK: '경북',
-  GYEONGNAM: '경남',
-  JEJU: '제주',
+export function toCrawledDisplay(crawled: CrawledMemberSummary | CrawledMember): CrawledDisplay {
+  const profile = crawled.profile
+  const displayName = crawled.name || crawled.company || ''
+  const role = crawled.role ?? ''
+  return {
+    displayName,
+    companySub: crawled.company && crawled.company !== displayName ? crawled.company : null,
+    location: profile?.state ? (REGION_LABELS[profile.state] ?? '') : '',
+    trades: (profile?.trades ?? []) as Trade[],
+    primaryTrade: profile?.primaryTrade ? (profile.primaryTrade as Trade) : undefined,
+    grade: (GRADE_VALUES as readonly string[]).includes(role) ? (role as Grade) : undefined,
+    experienceYears: profile?.experience ?? undefined,
+    headline: profile?.headline ?? '',
+    phone: crawled.phone ?? '',
+    sourceUrl: profile?.url ?? '',
+  }
 }

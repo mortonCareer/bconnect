@@ -1,33 +1,13 @@
 'use client'
 
 import { Select, FilterChip, RefreshIcon } from '@bconnect/ui'
-import { Trade, TRADE_LIST, TRADE_LABELS } from '@bconnect/api-client'
+import { Trade, TRADE_LIST, TRADE_LABELS, REGION_OPTIONS } from '@bconnect/api-client'
 import { EXPERIENCE_OPTIONS, EXPERIENCE_LABELS } from '@/lib/experience'
 import { GRADE_OPTIONS } from '@/lib/grade'
 import type { Grade } from '@/lib/grade'
 import { useFilterParams } from '@/hooks/useFilterParams'
 import type { ExperienceLevel } from '@/lib/experience'
 import { TaskSelectBar } from './TaskSelectBar'
-
-const REGION_OPTIONS = [
-  '서울',
-  '경기',
-  '인천',
-  '부산',
-  '대구',
-  '광주',
-  '대전',
-  '울산',
-  '세종',
-  '강원',
-  '충북',
-  '충남',
-  '전북',
-  '전남',
-  '경북',
-  '경남',
-  '제주',
-]
 
 function RefreshButton({ onClick }: { onClick: () => void }) {
   return (

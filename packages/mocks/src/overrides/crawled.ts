@@ -1,10 +1,10 @@
 import {
-  getGetCrawledMemberMockHandler,
   getGetCrawledMembersMockHandler,
   CrawledPlatform,
   CrawledRegion,
 } from '@bconnect/api-client'
 import type { CrawledMember, CrawledMemberSummary } from '@bconnect/api-client'
+import { http, HttpResponse } from 'msw'
 
 // 크롤링 기술자 — plan 기술자 탐색 병합 노출용 시드.
 // #826 크롤러 dry-run 실측 데이터에서 발췌 (네이버 CDN 실사진 → no-referrer 렌더 경로까지 로컬 검증).
@@ -27,8 +27,8 @@ const SEEDS: CrawledMember[] = [
     createdAt: EPOCH,
     modifiedAt: EPOCH,
     profile: {
-      primaryTrade: '타일',
-      trades: ['타일'],
+      primaryTrade: 'TILING',
+      trades: ['TILING'],
       experience: undefined,
       headline:
         '우리집에 관련된 각종 수리, 보수, 교체, 설치를 도와드리고 있습니다. 앞으로 꾸준히 집수리에 관련된 자료를 업데이트 할 예정입니다.',
@@ -104,8 +104,8 @@ const SEEDS: CrawledMember[] = [
     createdAt: EPOCH,
     modifiedAt: EPOCH,
     profile: {
-      primaryTrade: '타일',
-      trades: ['타일', '미장', '기타'],
+      primaryTrade: 'TILING',
+      trades: ['TILING', 'PLASTERING'],
       experience: undefined,
       headline:
         'TEL 010-0000-0000 타일하자보수/미장단차/각종수전/도기설치  24시간 365일 주말 공휴일 친철히 상담가능. 국가기술자격번호 ***031108*** 사업자등록번호 @30017@@@ 카드결제/현금영수증',
@@ -181,8 +181,8 @@ const SEEDS: CrawledMember[] = [
     createdAt: EPOCH,
     modifiedAt: EPOCH,
     profile: {
-      primaryTrade: '타일',
-      trades: ['타일', '싱크대', '기타'],
+      primaryTrade: 'TILING',
+      trades: ['TILING', 'SINK'],
       experience: 1,
       headline:
         'tel:010-0000-0000\nKBS 동행 프로그램 출연-1인창업-타일-대리석-싱크대-거실 폴리싱 타일-아트월 타일-욕실-부분수리-부분교체집수리 출장지역(서울 인천 경기전지역 빠른출동/충남 충북 강원 출동) 1,500건 이상의 다양한 집수리 경력',
@@ -255,8 +255,11 @@ const toSummary = ({
 
 export const crawledOverrides = [
   getGetCrawledMembersMockHandler(SEEDS.map(toSummary)),
-  getGetCrawledMemberMockHandler((info) => {
-    const id = Number(new URL(info.request.url).pathname.split('/').pop())
-    return SEEDS.find((seed) => seed.id === id) ?? SEEDS[0]
+  // 상세는 직접 작성 — 미존재 id 를 404 로 반환해 에러 UI(isError) 경로가 로컬에서도 재현되게
+  // (generated mock 은 항상 200 이라 not-found 경로를 검증할 수 없음)
+  http.get('*/api/v1/crawled-members/:id', ({ params }) => {
+    const found = SEEDS.find((seed) => seed.id === Number(params.id))
+    if (!found) return HttpResponse.json({ success: false, data: null }, { status: 404 })
+    return HttpResponse.json({ success: true, data: found })
   }),
 ]
