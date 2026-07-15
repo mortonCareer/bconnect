@@ -6,7 +6,7 @@ import to.bconnect.api.core.domain.notification.NotificationArgs;
 import to.bconnect.api.core.presentation.v1.response.MemberSummaryResponse;
 import to.bconnect.api.notification.domain.NotificationType;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record NotificationResponse(
         Long id,
@@ -17,7 +17,7 @@ public record NotificationResponse(
         Long referenceId,
         MemberSummaryResponse sender,
         boolean read,
-        LocalDateTime createdAt
+        OffsetDateTime createdAt
 ) {
     public static NotificationResponse of(Notification notification, NotificationType type,
                                           Member sender, String senderPicture) {

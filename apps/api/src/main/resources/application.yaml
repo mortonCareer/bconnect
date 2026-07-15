@@ -4,6 +4,9 @@ spring:
   profiles:
     default: local
 
+  jackson:
+    time-zone: Asia/Seoul
+
   jpa:
     open-in-view: false
     show-sql: true

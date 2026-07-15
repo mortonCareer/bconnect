@@ -1,13 +1,13 @@
 package to.bconnect.api.core.domain.task;
 
 import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.profile.Trade;
 import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
-import to.bconnect.api.storage.profile.Trade;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Set;
 
 public record Task(
@@ -26,8 +26,8 @@ public record Task(
         String projectTitle,
         String projectRequirement,
         String projectMemo,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt
 ) {
     public static Task of(TaskEntity entity) {
         return new Task(

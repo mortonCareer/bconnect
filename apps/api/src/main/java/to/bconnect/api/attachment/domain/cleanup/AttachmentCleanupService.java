@@ -11,7 +11,7 @@ import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentStatus;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -34,7 +34,7 @@ public class AttachmentCleanupService {
 
     // presigned but not confirmed
     private int cleanupPending() {
-        val before = LocalDateTime.now().minus(PENDING_RETENTION);
+        val before = OffsetDateTime.now().minus(PENDING_RETENTION);
         val attachments =
                 attachmentRepository.findAllByStatusAndCreatedAtBefore(AttachmentStatus.PENDING, before);
 
@@ -44,7 +44,7 @@ public class AttachmentCleanupService {
 
     // completed but not referenced
     private int cleanupOrphans() {
-        val before = LocalDateTime.now().minus(ORPHAN_RETENTION);
+        val before = OffsetDateTime.now().minus(ORPHAN_RETENTION);
         val orphans = attachmentRepository
                 .findAllByStatusAndCreatedAtBeforeAndReferenceIdIsNull(AttachmentStatus.COMPLETED, before);
 

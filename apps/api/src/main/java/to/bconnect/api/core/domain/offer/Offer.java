@@ -4,7 +4,7 @@ import to.bconnect.api.storage.offer.OfferEntity;
 import to.bconnect.api.storage.offer.OfferStatus;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record Offer(
         Long id,
@@ -13,8 +13,8 @@ public record Offer(
         int seq,
         LocalDate due,
         OfferStatus status,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt
 ) {
     public static Offer of(OfferEntity entity) {
         return new Offer(

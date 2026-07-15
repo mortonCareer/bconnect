@@ -2,15 +2,15 @@ package to.bconnect.api.core.domain.chat;
 
 import to.bconnect.api.storage.chat.DirectChatEntity;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record DirectChat(
     Long id,
     Long memberId,
     Message lastMessage,
     Long unreadCount,
-    LocalDateTime createdAt,
-    LocalDateTime modifiedAt
+    OffsetDateTime createdAt,
+    OffsetDateTime modifiedAt
 ) {
     public static DirectChat of(DirectChatEntity entity, Long memberId, Message lastMessage, Long unreadCount) {
         return new DirectChat(

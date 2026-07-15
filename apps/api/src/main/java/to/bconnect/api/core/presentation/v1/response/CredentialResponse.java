@@ -7,7 +7,7 @@ import to.bconnect.api.storage.credential.CredentialStatus;
 import to.bconnect.api.storage.credential.CredentialType;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record CredentialResponse(
         Long id,
@@ -15,8 +15,8 @@ public record CredentialResponse(
         CredentialType type,
         CredentialStatus status,
         LocalDate expiredAt,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt,
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt,
         AttachmentResponse attachment
 ) {
     public static CredentialResponse of(Credential credential, Attachment attachment, String url) {

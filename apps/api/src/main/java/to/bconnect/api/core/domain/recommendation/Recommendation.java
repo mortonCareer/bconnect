@@ -2,15 +2,15 @@ package to.bconnect.api.core.domain.recommendation;
 
 import to.bconnect.api.storage.recommendation.RecommendationEntity;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record Recommendation(
         Long id,
         Long memberId,
         String content,
         boolean visible,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt
 ) {
     public static Recommendation of(RecommendationEntity entity, Long memberId) {
         return new Recommendation(

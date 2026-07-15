@@ -1,12 +1,8 @@
 package to.bconnect.api.crawler.presentation.v1.response;
 
-import to.bconnect.api.crawler.storage.CrawledCredentialEntity;
-import to.bconnect.api.crawler.storage.CrawledMemberEntity;
-import to.bconnect.api.crawler.storage.CrawledPostEntity;
-import to.bconnect.api.crawler.storage.CrawledProfileEntity;
-import to.bconnect.api.crawler.storage.CrawledTaskEntity;
+import to.bconnect.api.crawler.storage.*;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -19,8 +15,8 @@ public record CrawledMemberResponse(
         String role,
         String brn,
         String email,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt,
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt,
         CrawledProfileResponse profile,
         List<CrawledCredentialResponse> credentials,
         List<CrawledPostResponse> posts

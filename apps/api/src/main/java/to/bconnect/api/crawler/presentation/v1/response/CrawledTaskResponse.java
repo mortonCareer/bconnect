@@ -3,7 +3,7 @@ package to.bconnect.api.crawler.presentation.v1.response;
 import to.bconnect.api.crawler.storage.CrawledTaskEntity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record CrawledTaskResponse(
         Long id,
@@ -13,8 +13,8 @@ public record CrawledTaskResponse(
         LocalDate start,
         LocalDate end,
         String duration,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt
 ) {
     public static CrawledTaskResponse of(CrawledTaskEntity task) {
         return new CrawledTaskResponse(

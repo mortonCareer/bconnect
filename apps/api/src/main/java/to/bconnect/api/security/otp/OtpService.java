@@ -1,19 +1,19 @@
 package to.bconnect.api.security.otp;
 
-import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.security.AuthExceptionCode;
 import to.bconnect.api.storage.otp.OtpEntity;
 import to.bconnect.api.storage.otp.OtpRepository;
-import to.bconnect.api.security.AuthExceptionCode;
-import to.bconnect.api.common.CodeException;
 
 import java.security.SecureRandom;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Slf4j
 @Service
@@ -34,7 +34,7 @@ public class OtpService {
     @Transactional
     public Otp sendCode(String phone) {
         val code = String.format(CODE_FORMAT, RANDOM.nextInt(CODE_BOUND));
-        val expiredAt = LocalDateTime.now().plusSeconds(EXPIRY_SECONDS);
+        val expiredAt = OffsetDateTime.now().plusSeconds(EXPIRY_SECONDS);
 
         val optional = otpRepository.findByPhone(phone);
         OtpEntity otp;
@@ -64,17 +64,17 @@ public class OtpService {
         found.attempt();
 
         if (found.isRevoked()) throw new CodeException(AuthExceptionCode.INVALID_OTP);
-        if (found.getExpiredAt().isBefore(LocalDateTime.now())) throw new CodeException(AuthExceptionCode.OTP_EXPIRED);
+        if (found.getExpiredAt().isBefore(OffsetDateTime.now())) throw new CodeException(AuthExceptionCode.OTP_EXPIRED);
         if (!found.getCode().equals(code)) throw new CodeException(AuthExceptionCode.INVALID_OTP);
 
         found.invalidateCode();
     }
 
     private boolean isRateLimited(OtpEntity found) {
-        return found.getLastSentAt().plusSeconds(RATE_LIMIT_SECONDS).isAfter(LocalDateTime.now());
+        return found.getLastSentAt().plusSeconds(RATE_LIMIT_SECONDS).isAfter(OffsetDateTime.now());
     }
 
-    private boolean isToday(LocalDateTime date) {
+    private boolean isToday(OffsetDateTime date) {
         return date.toLocalDate().equals(LocalDate.now());
     }
 }

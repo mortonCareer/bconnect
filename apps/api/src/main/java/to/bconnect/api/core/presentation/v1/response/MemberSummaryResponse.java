@@ -1,9 +1,9 @@
 package to.bconnect.api.core.presentation.v1.response;
 
-import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.core.domain.member.Member;
+import to.bconnect.api.storage.member.Role;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record MemberSummaryResponse(
         Long id,
@@ -11,8 +11,8 @@ public record MemberSummaryResponse(
         String name,
         String picture,
         Role role,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt
 ) {
     public static MemberSummaryResponse of(Member member, String picture) {
         return new MemberSummaryResponse(

@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "otps")
@@ -19,7 +19,7 @@ public class OtpEntity extends BaseEntity {
 
     private String code;
 
-    private LocalDateTime expiredAt;
+    private OffsetDateTime expiredAt;
 
     private int attempts = 0;
 
@@ -27,24 +27,24 @@ public class OtpEntity extends BaseEntity {
 
     private int dailyCount;
 
-    private LocalDateTime lastSentAt;
+    private OffsetDateTime lastSentAt;
 
-    public OtpEntity(String phone, String code, LocalDateTime expiredAt) {
+    public OtpEntity(String phone, String code, OffsetDateTime expiredAt) {
         this.phone = phone;
         this.code = code;
         this.expiredAt = expiredAt;
         this.revoked = false;
         this.dailyCount = 0;
-        this.lastSentAt = LocalDateTime.now();
+        this.lastSentAt = OffsetDateTime.now();
     }
 
-    public void generateCode(String code, LocalDateTime expiredAt) {
+    public void generateCode(String code, OffsetDateTime expiredAt) {
         this.code = code;
         this.expiredAt = expiredAt;
         this.revoked = false;
         this.attempts = 0;
         this.dailyCount++;
-        this.lastSentAt = LocalDateTime.now();
+        this.lastSentAt = OffsetDateTime.now();
     }
 
     public void attempt() {

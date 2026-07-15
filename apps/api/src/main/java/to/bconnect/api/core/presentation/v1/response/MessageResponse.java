@@ -5,7 +5,7 @@ import to.bconnect.api.attachment.presentation.v1.AttachmentResponse;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.storage.chat.MessageType;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -15,8 +15,8 @@ public record MessageResponse(
         Long memberId,
         MessageType type,
         String content,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt,
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt,
         List<AttachmentResponse> attachments
 ) {
     public static MessageResponse of(Message message) {

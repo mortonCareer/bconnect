@@ -1,12 +1,12 @@
 package to.bconnect.api.core.presentation.v1.response;
 
-import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.member.Member;
+import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.profile.ProfileRole;
 import to.bconnect.api.storage.profile.Trade;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Set;
 
 public record ProfileResponse(
@@ -19,8 +19,8 @@ public record ProfileResponse(
         String headline,
         String about,
         Address address,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt,
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt,
         int postCount,
         int recommendationCount,
         int coworkerCount

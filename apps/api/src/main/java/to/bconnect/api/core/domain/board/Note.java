@@ -2,15 +2,15 @@ package to.bconnect.api.core.domain.board;
 
 import to.bconnect.api.storage.board.NoteEntity;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record Note(
         Long id,
         Long boardId,
         Long memberId,
         String content,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt
 ) {
     public static Note of(NoteEntity entity) {
         return new Note(

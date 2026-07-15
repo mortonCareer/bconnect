@@ -9,7 +9,7 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.notification.NotificationEntity;
 import to.bconnect.api.storage.notification.NotificationRepository;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -129,7 +129,7 @@ class NotificationQueryServiceTest {
         }
 
         @Override
-        public int markAllReadByReceiverId(Long receiverId, LocalDateTime now) {
+        public int markAllReadByReceiverId(Long receiverId, OffsetDateTime now) {
             int updated = 0;
             for (var it : store) {
                 if (it.getReceiverId().equals(receiverId) && it.getReadAt() == null) {

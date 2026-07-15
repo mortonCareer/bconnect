@@ -1,12 +1,14 @@
 package to.bconnect.api.storage.notification;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "notifications")
@@ -30,7 +32,7 @@ public class NotificationEntity extends BaseEntity {
     @Column(columnDefinition = "text")
     private String templateArgs;
 
-    private LocalDateTime readAt;
+    private OffsetDateTime readAt;
 
     public NotificationEntity(Long senderId, Long receiverId, String typeCode, Long referenceId, String content) {
         this(senderId, receiverId, typeCode, referenceId, content, null);
@@ -51,6 +53,6 @@ public class NotificationEntity extends BaseEntity {
     }
 
     public void markRead() {
-        if (readAt == null) readAt = LocalDateTime.now();
+        if (readAt == null) readAt = OffsetDateTime.now();
     }
 }

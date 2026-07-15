@@ -3,7 +3,7 @@ package to.bconnect.api.core.domain.drive;
 import to.bconnect.api.storage.drive.DriveEntity;
 import to.bconnect.api.storage.drive.DriveType;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record Drive(
         Long id,
@@ -11,8 +11,8 @@ public record Drive(
         Long projectId,
         Long memberId,
         String title,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt
 ) {
     public static Drive of(DriveEntity entity, String title) {
         return new Drive(

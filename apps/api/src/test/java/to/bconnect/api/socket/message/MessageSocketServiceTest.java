@@ -15,13 +15,9 @@ import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.chat.MessageService;
 import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.chat.ChatType;
-import to.bconnect.api.storage.chat.DirectChatEntity;
-import to.bconnect.api.storage.chat.DirectChatRepository;
-import to.bconnect.api.storage.chat.MessageType;
-import to.bconnect.api.storage.chat.ParticipantRepository;
+import to.bconnect.api.storage.chat.*;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -67,7 +63,7 @@ class MessageSocketServiceTest {
 
     private static Message message(long id) {
         return new Message(id, 10L, 1L, MessageType.TEXT, "hello",
-                LocalDateTime.now(), LocalDateTime.now());
+                OffsetDateTime.now(), OffsetDateTime.now());
     }
 
     private static SimpSubscription subscriptionOf(String principalName) {

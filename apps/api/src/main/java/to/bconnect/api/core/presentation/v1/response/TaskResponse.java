@@ -3,12 +3,12 @@ package to.bconnect.api.core.presentation.v1.response;
 import to.bconnect.api.core.domain.offer.Offer;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.profile.Trade;
 import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
-import to.bconnect.api.storage.profile.Trade;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Set;
 
 public record TaskResponse(
@@ -28,8 +28,8 @@ public record TaskResponse(
         String projectRequirement,
         String projectMemo,
         OfferSummaryResponse offer,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt
 ) {
     public static TaskResponse of(Task task, Address address) {
         return of(task, address, null);

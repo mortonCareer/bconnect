@@ -1,12 +1,12 @@
 package to.bconnect.api.core.presentation.v1.response;
 
+import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.core.domain.offer.Offer;
 import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.storage.offer.OfferStatus;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record OfferResponse(
         Long id,
@@ -16,8 +16,8 @@ public record OfferResponse(
         OfferStatus status,
         MemberSummaryResponse member,
         ProfileSummaryResponse profile,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt
 ) {
     public static OfferResponse of(Offer offer, Member member, Profile profile, String picture) {
         return new OfferResponse(

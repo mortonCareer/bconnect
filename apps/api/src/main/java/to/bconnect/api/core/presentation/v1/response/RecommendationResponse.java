@@ -1,10 +1,10 @@
 package to.bconnect.api.core.presentation.v1.response;
 
+import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.recommendation.Recommendation;
-import to.bconnect.api.core.domain.member.Member;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record RecommendationResponse(
         Long id,
@@ -12,8 +12,8 @@ public record RecommendationResponse(
         ProfileSummaryResponse profile,
         String content,
         boolean visible,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt
 ) {
     public static RecommendationResponse of(Recommendation recommendation, Member member, Profile profile, String picture) {
         return new RecommendationResponse(
