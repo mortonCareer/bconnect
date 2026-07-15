@@ -744,6 +744,44 @@ async def run_instagram_full(
     return report
 
 
+async def run_export_db(file_path: Path, truncate: bool = False) -> PipelineReport:
+    """dry-run 보고서 JSON(members[])을 crawled_* DB 테이블에 적재한다 (#876).
+
+    ⚠️ BE 우회 — crawled_* 직접 INSERT. 대상 DB 는 CRAWLED_DB_URL 환경변수.
+    """
+    import json
+
+    from crawler.db import export_members
+
+    if not settings.crawled_db_url:
+        raise ValueError("CRAWLED_DB_URL 환경변수가 설정되지 않았습니다")
+
+    data = json.loads(file_path.read_text(encoding="utf-8"))
+    members_data = data.get("members", [])
+    if not members_data:
+        raise ValueError(f"파일에 members 데이터가 없습니다: {file_path}")
+
+    members = [CrawledMember.model_validate(m) for m in members_data]
+    log.info("DB 적재: %s (%d건)%s", file_path, len(members), " [truncate]" if truncate else "")
+
+    created, updated = await export_members(members, settings.crawled_db_url, truncate=truncate)
+
+    report = PipelineReport()
+    report.mode = "DB 적재"
+    report.total_searched = len(members)
+    for m in members:
+        report.add_saved(
+            blog_url=m.profile.url, blogger_name=m.company,
+            company=m.company, role=m.role, trades=m.profile.trades,
+            phone=m.phone, page_id="",
+            region=m.region_kr, address=m.profile.address, email=m.email,
+            posts=len(m.posts), images=sum(len(p.images) for p in m.posts),
+        )
+    log.info("DB 적재 완료: 신규 %d · 갱신 %d", created, updated)
+    console.print(f"[green]DB 적재 완료: 신규 {created} · 갱신 {updated}[/green]")
+    return report
+
+
 async def run_from_file(file_path: Path, force: bool = False) -> PipelineReport:
     """dry-run 보고서 JSON에서 CrawledMember 데이터를 읽어 노션에 저장한다."""
     import json
@@ -1194,6 +1232,8 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="노션 저장 없이 분류까지만 수행")
     parser.add_argument("--force", action="store_true", help="기존 업체도 재크롤링하여 덮어쓰기")
     parser.add_argument("--from-file", type=Path, metavar="JSON", help="검수한 JSON에서 노션 저장")
+    parser.add_argument("--export-db", type=Path, metavar="JSON", help="dry-run JSON을 crawled_* DB에 적재 (#876)")
+    parser.add_argument("--truncate", action="store_true", help="--export-db 시 기존 crawled_* 비우고 재적재")
     parser.add_argument("--enrich", action="store_true", help="빈 필드가 있는 기존 레코드를 재크롤링+LLM으로 보강")
     parser.add_argument("--instagram", action="store_true", help="인스타그램 채널 크롤링")
     parser.add_argument("--channel", choices=["blog", "instagram", "all"], default="all", help="enrich 대상 채널 (기본: all)")
@@ -1247,8 +1287,8 @@ def main():
     async def _run() -> PipelineReport:
         nonlocal report
 
-        # 노션 DB 스키마 검증 (dry-run 제외)
-        if not args.dry_run:
+        # 노션 DB 스키마 검증 (dry-run·export-db 제외 — export-db 는 노션 무관, crawled_* DB 직접 적재)
+        if not args.dry_run and not args.export_db:
             # 검수 DB 스키마 검증 (approve, patch-review 모드 또는 기본 모드)
             if args.approve or args.patch_review or not args.direct:
                 review_errors = await validate_review_schema()
@@ -1267,7 +1307,9 @@ def main():
                         console.print(f"  [red]• {err}[/red]")
                     raise SystemExit(1)
 
-        if args.patch_review:
+        if args.export_db:
+            report = await run_export_db(args.export_db, truncate=args.truncate)
+        elif args.patch_review:
             report = await run_patch_review(dry_run=args.dry_run)
         elif args.approve:
             report = await run_approve()
