@@ -1,6 +1,6 @@
 'use client'
 
-import { getTradeLabel, useGetProfile } from '@bconnect/api-client'
+import { getTradeLabel } from '@bconnect/api-client'
 import type { Coworker } from '@bconnect/api-client'
 import { ProfileCard, ProfileCardSkeleton } from '@bconnect/ui'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
@@ -31,24 +31,18 @@ export function CoworkerList({ coworkers, isLoading, isError, coworkerHref }: Co
         // TODO: BE required 처리 후 type narrowing 필요. Coworker.member.id는 행 링크 필수값인데 optional emit이라 없는 행은 임시로 렌더 제외.
         const memberId = coworker.member?.id
         if (memberId == null) return null
-        return <CoworkerRow key={coworker.id} memberId={memberId} href={coworkerHref(memberId)} />
+        return <CoworkerRow key={coworker.id} coworker={coworker} href={coworkerHref(memberId)} />
       })}
     </ul>
   )
 }
 
-/** 동료 한 명 — 마스킹 무관 by-id 보강(useGetProfile)으로 분야/지역/소개 채움. */
-function CoworkerRow({ memberId, href }: { memberId: number; href: string }) {
-  // useGetProfile 은 Profile 을 직접 반환(member 내장). 인자는 memberId.
-  const { data: profile, isLoading } = useGetProfile(memberId)
-  const member = profile?.member
-
-  if (isLoading) {
-    return <ProfileCardSkeleton as="li" className="px-4" />
-  }
-
-  if (!profile) return null
-
+/**
+ * 동료 한 명 — 분야/지역/소개는 목록 응답이 이미 실어 보내는 member·profile 요약에서 읽는다.
+ * (예전엔 행마다 useGetProfile 로 by-id 재조회 → 인원수만큼 N+1 요청. 목록 응답 embed 로 제거, #851)
+ */
+function CoworkerRow({ coworker, href }: { coworker: Coworker; href: string }) {
+  const { member, profile } = coworker
   const name = member?.name ?? '이름 없음'
 
   return (
@@ -59,11 +53,11 @@ function CoworkerRow({ memberId, href }: { memberId: number; href: string }) {
       name={name}
       meta={{
         // TODO: BE required 처리 후 type narrowing 필요. region/trade는 표시 필수값인데 optional emit이라 빈값으로 silent fallback 중.
-        region: profile.address?.city ?? '',
-        trade: profile.primaryTrade ? getTradeLabel(profile.primaryTrade) : '',
+        region: profile?.address?.city ?? '',
+        trade: profile?.primaryTrade ? getTradeLabel(profile.primaryTrade) : '',
         // 등급(role)은 MemberSummary 미제공(#473). 시안(1234-2262)은 2번째 줄 = 소개(description).
       }}
-      description={profile.headline ?? undefined}
+      description={profile?.headline ?? undefined}
       href={href}
     />
   )
