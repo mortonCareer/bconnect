@@ -12,6 +12,7 @@ import {
   useReorderOffers,
 } from '@bconnect/api-client'
 import type { Offer } from '@bconnect/api-client'
+import { addDays, todayIso } from '@bconnect/config/date'
 import {
   toNumericTaskId,
   toOfferQueueItem,
@@ -29,7 +30,7 @@ export function useOfferQueue(taskId: string | null | undefined) {
   const numId = toNumericTaskId(taskId)
   const enabled = numId != null
   const { data: offers, isLoading } = useGetTaskOffers(numId ?? 0, { query: { enabled } })
-  // createOffer.due 임시 규약 = 해당 작업 시작일 (정확한 due 정책은 기획/BE 미결)
+  // createOffer.due = 발송일로부터 3일 (#790 정책 결정)
   const { tasks } = useAllProjectTasks()
   const task = taskId ? tasks.find((t) => t.id === taskId) : undefined
 
@@ -75,7 +76,7 @@ export function useOfferQueue(taskId: string | null | undefined) {
     addToQueue: (item: OfferQueueItem) => {
       if (numId == null || !task) return
       createOffer({
-        data: { taskId: numId, workerId: item.profileId, due: task.startDate },
+        data: { taskId: numId, workerId: item.profileId, due: addDays(todayIso(), 3) },
       })
     },
     removeFromQueue: (profileId: number) => {
