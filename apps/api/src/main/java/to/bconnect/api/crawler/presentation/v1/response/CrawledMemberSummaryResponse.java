@@ -3,7 +3,7 @@ package to.bconnect.api.crawler.presentation.v1.response;
 import to.bconnect.api.crawler.storage.CrawledMemberEntity;
 import to.bconnect.api.crawler.storage.CrawledProfileEntity;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record CrawledMemberSummaryResponse(
         Long id,
@@ -14,8 +14,8 @@ public record CrawledMemberSummaryResponse(
         String role,
         String brn,
         String email,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt,
+        Instant createdAt,
+        Instant modifiedAt,
         CrawledProfileResponse profile
 ) {
     public static CrawledMemberSummaryResponse of(CrawledMemberEntity member, CrawledProfileEntity profile) {

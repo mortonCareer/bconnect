@@ -3,15 +3,15 @@ package to.bconnect.api.core.presentation.v1.response;
 import to.bconnect.api.core.domain.project.Project;
 import to.bconnect.api.storage.Address;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record ProjectResponse(
         Long id,
         Long companyId,
         String title,
         Address address,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static ProjectResponse of(Project project) {
         return new ProjectResponse(

@@ -5,7 +5,7 @@ import to.bconnect.api.storage.profile.ProfileEntity;
 import to.bconnect.api.storage.profile.ProfileRole;
 import to.bconnect.api.storage.profile.Trade;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.Set;
 
 public record Profile(
@@ -18,8 +18,8 @@ public record Profile(
     String headline,
     String about,
     Address address,
-    OffsetDateTime createdAt,
-    OffsetDateTime modifiedAt,
+    Instant createdAt,
+    Instant modifiedAt,
     Long postCount,
     Long recommendationCount,
     Long coworkerCount

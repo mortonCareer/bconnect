@@ -2,14 +2,14 @@ package to.bconnect.api.core.presentation.v1.response;
 
 import to.bconnect.api.core.domain.board.Note;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record NoteResponse(
         Long id,
         Long memberId,
         String content,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static NoteResponse of(Note note) {
         return new NoteResponse(

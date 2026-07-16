@@ -12,8 +12,9 @@ import to.bconnect.api.storage.otp.OtpEntity;
 import to.bconnect.api.storage.otp.OtpRepository;
 
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.ZoneId;
 
 @Slf4j
 @Service
@@ -34,7 +35,7 @@ public class OtpService {
     @Transactional
     public Otp sendCode(String phone) {
         val code = String.format(CODE_FORMAT, RANDOM.nextInt(CODE_BOUND));
-        val expiredAt = OffsetDateTime.now().plusSeconds(EXPIRY_SECONDS);
+        val expiredAt = Instant.now().plusSeconds(EXPIRY_SECONDS);
 
         val optional = otpRepository.findByPhone(phone);
         OtpEntity otp;
@@ -64,17 +65,17 @@ public class OtpService {
         found.attempt();
 
         if (found.isRevoked()) throw new CodeException(AuthExceptionCode.INVALID_OTP);
-        if (found.getExpiredAt().isBefore(OffsetDateTime.now())) throw new CodeException(AuthExceptionCode.OTP_EXPIRED);
+        if (found.getExpiredAt().isBefore(Instant.now())) throw new CodeException(AuthExceptionCode.OTP_EXPIRED);
         if (!found.getCode().equals(code)) throw new CodeException(AuthExceptionCode.INVALID_OTP);
 
         found.invalidateCode();
     }
 
     private boolean isRateLimited(OtpEntity found) {
-        return found.getLastSentAt().plusSeconds(RATE_LIMIT_SECONDS).isAfter(OffsetDateTime.now());
+        return found.getLastSentAt().plusSeconds(RATE_LIMIT_SECONDS).isAfter(Instant.now());
     }
 
-    private boolean isToday(OffsetDateTime date) {
-        return date.toLocalDate().equals(LocalDate.now());
+    private boolean isToday(Instant date) {
+        return date.atZone(ZoneId.systemDefault()).toLocalDate().equals(LocalDate.now());
     }
 }

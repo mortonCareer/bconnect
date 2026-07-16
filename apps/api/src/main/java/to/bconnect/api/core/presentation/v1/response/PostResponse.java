@@ -2,7 +2,7 @@ package to.bconnect.api.core.presentation.v1.response;
 
 import to.bconnect.api.core.domain.post.Post;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 
 public record PostResponse(
@@ -11,8 +11,8 @@ public record PostResponse(
         Long taskId,
         List<String> images,
         String content,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static PostResponse of(Post post, List<String> images) {
         return new PostResponse(

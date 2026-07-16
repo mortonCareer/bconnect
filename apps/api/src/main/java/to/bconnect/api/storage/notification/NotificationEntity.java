@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "notifications")
@@ -32,7 +32,7 @@ public class NotificationEntity extends BaseEntity {
     @Column(columnDefinition = "text")
     private String templateArgs;
 
-    private OffsetDateTime readAt;
+    private Instant readAt;
 
     public NotificationEntity(Long senderId, Long receiverId, String typeCode, Long referenceId, String content) {
         this(senderId, receiverId, typeCode, referenceId, content, null);
@@ -53,6 +53,6 @@ public class NotificationEntity extends BaseEntity {
     }
 
     public void markRead() {
-        if (readAt == null) readAt = OffsetDateTime.now();
+        if (readAt == null) readAt = Instant.now();
     }
 }

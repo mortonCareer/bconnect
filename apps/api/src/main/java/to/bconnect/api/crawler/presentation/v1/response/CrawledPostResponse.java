@@ -3,7 +3,7 @@ package to.bconnect.api.crawler.presentation.v1.response;
 import to.bconnect.api.crawler.storage.CrawledPostEntity;
 import to.bconnect.api.crawler.storage.CrawledTaskEntity;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 
 public record CrawledPostResponse(
@@ -13,8 +13,8 @@ public record CrawledPostResponse(
         List<String> images,
         String title,
         String content,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt,
+        Instant createdAt,
+        Instant modifiedAt,
         CrawledTaskResponse task
 ) {
     public static CrawledPostResponse of(CrawledPostEntity post, CrawledTaskEntity task) {

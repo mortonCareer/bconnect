@@ -11,7 +11,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 @MappedSuperclass
 @Getter
@@ -25,8 +25,8 @@ public class BaseEntity {
     protected Long id;
 
     @CreatedDate
-    private OffsetDateTime createdAt;
+    private Instant createdAt;
 
     @LastModifiedDate
-    private OffsetDateTime modifiedAt;
+    private Instant modifiedAt;
 }

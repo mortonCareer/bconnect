@@ -2,7 +2,7 @@ package to.bconnect.api.core.presentation.v1.response;
 
 import to.bconnect.api.core.domain.company.Company;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record CompanyResponse(
         Long id,
@@ -10,8 +10,8 @@ public record CompanyResponse(
         String name,
         String brn,
         String picture,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static CompanyResponse of(Company company, String picture) {
         return new CompanyResponse(

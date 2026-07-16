@@ -10,7 +10,7 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.notification.NotificationEntity;
 import to.bconnect.api.storage.notification.NotificationRepository;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +41,6 @@ public class NotificationQueryService {
 
     @Transactional
     public void markAllRead(AuthUser user) {
-        notificationRepository.markAllReadByReceiverId(user.id(), OffsetDateTime.now());
+        notificationRepository.markAllReadByReceiverId(user.id(), Instant.now());
     }
 }

@@ -10,7 +10,7 @@ import to.bconnect.api.storage.attachment.AttachmentType;
 import to.bconnect.api.storage.attachment.ReferenceType;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +24,7 @@ class AttachmentResolverTest {
         return new Attachment(1L, 1L, type, AttachmentStatus.COMPLETED,
                 AttachmentContext.POST, 200L, ReferenceType.POST, 200L,
                 "uuid-1", "photo", ext, "image/jpeg", 1024L,
-                OffsetDateTime.now(), OffsetDateTime.now());
+                Instant.now(), Instant.now());
     }
 
     @Test

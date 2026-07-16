@@ -6,7 +6,7 @@ import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.storage.offer.OfferStatus;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record OfferResponse(
         Long id,
@@ -16,8 +16,8 @@ public record OfferResponse(
         OfferStatus status,
         MemberSummaryResponse member,
         ProfileSummaryResponse profile,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static OfferResponse of(Offer offer, Member member, Profile profile, String picture) {
         return new OfferResponse(

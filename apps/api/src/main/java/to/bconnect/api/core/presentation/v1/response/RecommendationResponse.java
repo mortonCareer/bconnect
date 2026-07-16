@@ -4,7 +4,7 @@ import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.recommendation.Recommendation;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record RecommendationResponse(
         Long id,
@@ -12,8 +12,8 @@ public record RecommendationResponse(
         ProfileSummaryResponse profile,
         String content,
         boolean visible,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static RecommendationResponse of(Recommendation recommendation, Member member, Profile profile, String picture) {
         return new RecommendationResponse(

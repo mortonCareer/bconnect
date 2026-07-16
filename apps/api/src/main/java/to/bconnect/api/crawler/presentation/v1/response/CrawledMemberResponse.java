@@ -2,7 +2,7 @@ package to.bconnect.api.crawler.presentation.v1.response;
 
 import to.bconnect.api.crawler.storage.*;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -15,8 +15,8 @@ public record CrawledMemberResponse(
         String role,
         String brn,
         String email,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt,
+        Instant createdAt,
+        Instant modifiedAt,
         CrawledProfileResponse profile,
         List<CrawledCredentialResponse> credentials,
         List<CrawledPostResponse> posts

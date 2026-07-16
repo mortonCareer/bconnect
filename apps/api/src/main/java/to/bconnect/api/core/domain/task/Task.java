@@ -7,7 +7,7 @@ import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.Set;
 
 public record Task(
@@ -26,8 +26,8 @@ public record Task(
         String projectTitle,
         String projectRequirement,
         String projectMemo,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static Task of(TaskEntity entity) {
         return new Task(

@@ -3,15 +3,15 @@ package to.bconnect.api.crawler.presentation.v1.response;
 import to.bconnect.api.crawler.storage.CrawledCredentialEntity;
 import to.bconnect.api.crawler.storage.CrawledCredentialType;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record CrawledCredentialResponse(
         Long id,
         Long memberId,
         CrawledCredentialType type,
         String name,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static CrawledCredentialResponse of(CrawledCredentialEntity credential) {
         return new CrawledCredentialResponse(

@@ -8,7 +8,7 @@ import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.Set;
 
 public record TaskResponse(
@@ -28,8 +28,8 @@ public record TaskResponse(
         String projectRequirement,
         String projectMemo,
         OfferSummaryResponse offer,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static TaskResponse of(Task task, Address address) {
         return of(task, address, null);

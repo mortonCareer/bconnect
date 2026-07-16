@@ -3,7 +3,7 @@ package to.bconnect.api.core.presentation.v1.response;
 import to.bconnect.api.core.domain.drive.Drive;
 import to.bconnect.api.storage.drive.DriveType;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record DriveResponse(
         Long id,
@@ -11,8 +11,8 @@ public record DriveResponse(
         Long projectId,
         Long memberId,
         String title,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static DriveResponse of(Drive drive) {
         return new DriveResponse(

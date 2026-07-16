@@ -17,7 +17,7 @@ import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.chat.*;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -63,7 +63,7 @@ class MessageSocketServiceTest {
 
     private static Message message(long id) {
         return new Message(id, 10L, 1L, MessageType.TEXT, "hello",
-                OffsetDateTime.now(), OffsetDateTime.now());
+                Instant.now(), Instant.now());
     }
 
     private static SimpSubscription subscriptionOf(String principalName) {

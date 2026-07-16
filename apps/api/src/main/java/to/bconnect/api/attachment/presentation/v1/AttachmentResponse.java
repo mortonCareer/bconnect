@@ -3,7 +3,7 @@ package to.bconnect.api.attachment.presentation.v1;
 import to.bconnect.api.attachment.domain.Attachment;
 import to.bconnect.api.storage.attachment.AttachmentType;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record AttachmentResponse(
         Long id,
@@ -12,8 +12,8 @@ public record AttachmentResponse(
         String filename,
         String contentType,
         Long size,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt,
+        Instant createdAt,
+        Instant modifiedAt,
         String url
 ) {
     public static AttachmentResponse of(Attachment attachment, String url) {

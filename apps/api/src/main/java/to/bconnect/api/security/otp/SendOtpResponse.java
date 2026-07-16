@@ -1,5 +1,5 @@
 package to.bconnect.api.security.otp;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
-public record SendOtpResponse(OffsetDateTime expiresAt) {}
+public record SendOtpResponse(Instant expiresAt) {}

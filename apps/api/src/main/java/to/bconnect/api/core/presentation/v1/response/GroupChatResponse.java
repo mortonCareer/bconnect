@@ -3,7 +3,7 @@ package to.bconnect.api.core.presentation.v1.response;
 import to.bconnect.api.core.domain.chat.GroupChat;
 import to.bconnect.api.core.domain.member.Member;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -13,8 +13,8 @@ public record GroupChatResponse(
         List<MemberSummaryResponse> participants,
         MessageResponse lastMessage,
         Long unreadCount,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static GroupChatResponse of(GroupChat chat, List<Member> members, Map<Long, String> pictureMap) {
         return new GroupChatResponse(

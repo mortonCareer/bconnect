@@ -3,7 +3,7 @@ package to.bconnect.api.core.domain.member;
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.Role;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record Member(
     Long id,
@@ -11,8 +11,8 @@ public record Member(
     String name,
     String phone,
     Role role,
-    OffsetDateTime createdAt,
-    OffsetDateTime modifiedAt
+    Instant createdAt,
+    Instant modifiedAt
 ) {
     public static final Member WITHDRAWN = new Member(null, null, null, null, null, null, null);
 

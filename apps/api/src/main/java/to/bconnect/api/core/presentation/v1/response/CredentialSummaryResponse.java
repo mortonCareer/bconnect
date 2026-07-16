@@ -5,7 +5,7 @@ import to.bconnect.api.storage.credential.CredentialStatus;
 import to.bconnect.api.storage.credential.CredentialType;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record CredentialSummaryResponse(
         Long id,
@@ -13,8 +13,8 @@ public record CredentialSummaryResponse(
         CredentialType type,
         CredentialStatus status,
         LocalDate expiredAt,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static CredentialSummaryResponse of(Credential credential) {
         return new CredentialSummaryResponse(

@@ -2,15 +2,15 @@ package to.bconnect.api.core.domain.company;
 
 import to.bconnect.api.storage.company.CompanyEntity;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record Company(
         Long id,
         Long memberId,
         String name,
         String brn,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static Company of(CompanyEntity entity) {
         return new Company(

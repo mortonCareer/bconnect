@@ -6,7 +6,7 @@ import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.profile.ProfileRole;
 import to.bconnect.api.storage.profile.Trade;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.Set;
 
 public record ProfileResponse(
@@ -19,8 +19,8 @@ public record ProfileResponse(
         String headline,
         String about,
         Address address,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt,
+        Instant createdAt,
+        Instant modifiedAt,
         int postCount,
         int recommendationCount,
         int coworkerCount

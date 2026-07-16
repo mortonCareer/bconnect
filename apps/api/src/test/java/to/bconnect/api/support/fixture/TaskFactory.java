@@ -9,7 +9,7 @@ import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.Set;
 
 public class TaskFactory {
@@ -21,7 +21,7 @@ public class TaskFactory {
         return new Task(id, TaskType.WORKER, Set.of(Trade.ELECTRICAL), START_DATE, END_DATE, TaskStatus.DRAFT,
                 memberId, "task", "memo", "company", ProfileFactory.DEFAULT_ADDRESS,
                 null, null, null, null,
-                OffsetDateTime.now(), OffsetDateTime.now());
+                Instant.now(), Instant.now());
     }
 
     public static TaskEntity createEntity(Long memberId) {

@@ -3,7 +3,7 @@ package to.bconnect.api.core.presentation.v1.response;
 import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.storage.member.Role;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record MemberResponse(
         Long id,
@@ -12,8 +12,8 @@ public record MemberResponse(
         String phone,
         String picture,
         Role role,
-        OffsetDateTime createdAt,
-        OffsetDateTime modifiedAt
+        Instant createdAt,
+        Instant modifiedAt
 ) {
     public static MemberResponse of(Member member, String picture) {
         return new MemberResponse(
