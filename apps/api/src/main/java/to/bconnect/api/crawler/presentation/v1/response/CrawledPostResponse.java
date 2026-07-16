@@ -1,5 +1,6 @@
 package to.bconnect.api.crawler.presentation.v1.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import to.bconnect.api.crawler.storage.CrawledPostEntity;
 import to.bconnect.api.crawler.storage.CrawledTaskEntity;
 
@@ -7,15 +8,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record CrawledPostResponse(
-        Long id,
-        Long memberId,
-        Long taskId,
-        List<String> images,
-        String title,
-        String content,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt,
-        CrawledTaskResponse task
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long memberId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Long taskId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> images,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String title,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String content,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime modifiedAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) CrawledTaskResponse task
 ) {
     public static CrawledPostResponse of(CrawledPostEntity post, CrawledTaskEntity task) {
         return new CrawledPostResponse(

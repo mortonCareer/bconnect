@@ -6,18 +6,20 @@ import to.bconnect.api.core.domain.notification.NotificationArgs;
 import to.bconnect.api.core.presentation.v1.response.MemberSummaryResponse;
 import to.bconnect.api.notification.domain.NotificationType;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDateTime;
 
 public record NotificationResponse(
-        Long id,
-        String type,
-        String message,
-        String content,
-        String referenceType,
-        Long referenceId,
-        MemberSummaryResponse sender,
-        boolean read,
-        LocalDateTime createdAt
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String type,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String message,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String content,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String referenceType,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Long referenceId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) MemberSummaryResponse sender,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean read,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime createdAt
 ) {
     public static NotificationResponse of(Notification notification, NotificationType type,
                                           Member sender, String senderPicture) {

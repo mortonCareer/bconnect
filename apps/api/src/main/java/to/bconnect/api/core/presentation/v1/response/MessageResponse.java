@@ -1,5 +1,6 @@
 package to.bconnect.api.core.presentation.v1.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import to.bconnect.api.attachment.domain.Attachment;
 import to.bconnect.api.attachment.presentation.v1.AttachmentResponse;
 import to.bconnect.api.core.domain.chat.Message;
@@ -10,14 +11,14 @@ import java.util.List;
 import java.util.Map;
 
 public record MessageResponse(
-        Long id,
-        Long chatId,
-        Long memberId,
-        MessageType type,
-        String content,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt,
-        List<AttachmentResponse> attachments
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long chatId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long memberId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) MessageType type,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String content,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime modifiedAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<AttachmentResponse> attachments
 ) {
     public static MessageResponse of(Message message) {
         return of(message, List.of(), Map.of());
