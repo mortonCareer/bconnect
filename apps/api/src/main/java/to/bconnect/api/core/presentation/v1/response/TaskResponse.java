@@ -1,35 +1,36 @@
 package to.bconnect.api.core.presentation.v1.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import to.bconnect.api.core.domain.offer.Offer;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.profile.Trade;
 import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
-import to.bconnect.api.storage.profile.Trade;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
 public record TaskResponse(
-        Long id,
-        TaskType type,
-        Set<Trade> trades,
-        LocalDate start,
-        LocalDate end,
-        TaskStatus status,
-        Long workerId,
-        String workerTitle,
-        String workerMemo,
-        String workerCompany,
-        Address address,
-        Long projectId,
-        String projectTitle,
-        String projectRequirement,
-        String projectMemo,
-        OfferSummaryResponse offer,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) TaskType type,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Set<Trade> trades,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate start,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate end,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) TaskStatus status,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Long workerId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String workerTitle,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String workerMemo,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String workerCompany,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Address address,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Long projectId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String projectTitle,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String projectRequirement,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String projectMemo,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) OfferSummaryResponse offer,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime modifiedAt
 ) {
     public static TaskResponse of(Task task, Address address) {
         return of(task, address, null);

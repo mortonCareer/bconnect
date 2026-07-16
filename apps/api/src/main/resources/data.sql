@@ -2,7 +2,6 @@
 -- 테스트 데이터 (100 ~ 199)
 -- 샘플 데이터 (200 ~ 299)
 -- 실제 데이터 (1000 ~)
--- 모든 테이블 최소 5행 유지 (otps · signup_tokens · sessions · device_tokens 제외 : 런타임 발급 데이터)
 
 -- 운영 (0 ~ 99)
 INSERT INTO members (id, username, name, phone, role, created_at, modified_at) VALUES

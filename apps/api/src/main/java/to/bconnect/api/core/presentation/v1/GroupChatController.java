@@ -56,7 +56,7 @@ public class GroupChatController {
                 .map(it -> GroupChatResponse.of(
                         it,
                         it.participantIds().stream()
-                                .map(memberId -> memberMap.getOrDefault(memberId, Member.WITHDRAWN))
+                                .map(memberId -> memberMap.getOrDefault(memberId, Member.withdrawn(memberId)))
                                 .toList(),
                         urlMap
                 ))

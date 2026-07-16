@@ -1,3 +1,5 @@
 package to.bconnect.api.core.presentation.v1.response;
 
-public record CheckUsernameResponse(boolean available) {}
+import io.swagger.v3.oas.annotations.media.Schema;
+
+public record CheckUsernameResponse(@Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean available) {}
