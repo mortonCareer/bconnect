@@ -1,5 +1,7 @@
 package to.bconnect.api.security.jwt;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -10,6 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.Assert;
 import to.bconnect.api.common.CodeException;
+import to.bconnect.api.security.AuthExceptionCode;
 import to.bconnect.api.security.session.SessionService;
 
 import java.util.Objects;
@@ -32,7 +35,13 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
                 "Only JwtTokenAuthenticationToken is supported");
 
         val token = Objects.requireNonNull(authentication.getCredentials()).toString();
-        jwtProvider.validateToken(token);
+        try {
+            jwtProvider.validateToken(token);
+        } catch (ExpiredJwtException ex) {
+            throw new AuthenticationServiceException(ex.getMessage(), new CodeException(AuthExceptionCode.EXPIRED_JWT_TOKEN));
+        } catch (JwtException ex) {
+            throw new AuthenticationServiceException(ex.getMessage(), new CodeException(AuthExceptionCode.INVALID_JWT_TOKEN));
+        }
         val username = jwtProvider.getUsername(token);
         val type = JwtType.valueOf(jwtProvider.getTokenType(token).toUpperCase());
         val user = this.userDetailsService.loadUserByUsername(username);

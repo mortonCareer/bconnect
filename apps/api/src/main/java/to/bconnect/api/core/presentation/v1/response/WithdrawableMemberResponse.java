@@ -6,17 +6,17 @@ import to.bconnect.api.storage.member.Role;
 
 import java.time.Instant;
 
-public record MemberSummaryResponse(
+public record WithdrawableMemberResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String username,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String name,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String username,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String name,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String picture,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Role role,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Role role,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Instant createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Instant modifiedAt
 ) {
-    public static MemberSummaryResponse of(Member member, String picture) {
-        return new MemberSummaryResponse(
+    public static WithdrawableMemberResponse of(Member member, String picture) {
+        return new WithdrawableMemberResponse(
                 member.id(),
                 member.username(),
                 member.name(),

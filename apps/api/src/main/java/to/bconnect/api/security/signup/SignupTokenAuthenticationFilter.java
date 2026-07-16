@@ -13,7 +13,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
@@ -37,10 +36,12 @@ public class SignupTokenAuthenticationFilter extends OncePerRequestFilter {
     private final RequestMatcher requiresAuthenticationRequestMatcher = PathPatternRequestMatcher.withDefaults()
             .matcher(HttpMethod.POST, "/api/v1/members");
 
-    private final AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
+    private final AuthenticationFailureHandler failureHandler;
 
-    public SignupTokenAuthenticationFilter(AuthenticationManager authenticationManager) {
+    public SignupTokenAuthenticationFilter(AuthenticationManager authenticationManager,
+                                           AuthenticationFailureHandler failureHandler) {
         this.authenticationManager = authenticationManager;
+        this.failureHandler = failureHandler;
     }
 
     @Override

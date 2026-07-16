@@ -1,5 +1,6 @@
 package to.bconnect.api.core.presentation.v1.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import to.bconnect.api.attachment.domain.Attachment;
 import to.bconnect.api.attachment.presentation.v1.AttachmentResponse;
 import to.bconnect.api.core.domain.credential.Credential;
@@ -10,14 +11,14 @@ import java.time.LocalDate;
 import java.time.Instant;
 
 public record CredentialResponse(
-        Long id,
-        Long memberId,
-        CredentialType type,
-        CredentialStatus status,
-        LocalDate expiredAt,
-        Instant createdAt,
-        Instant modifiedAt,
-        AttachmentResponse attachment
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long memberId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) CredentialType type,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) CredentialStatus status,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) LocalDate expiredAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) AttachmentResponse attachment
 ) {
     public static CredentialResponse of(Credential credential, Attachment attachment, String url) {
         return new CredentialResponse(

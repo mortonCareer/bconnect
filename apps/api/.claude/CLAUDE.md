@@ -2,11 +2,24 @@
 
 ## 제약
 - `/api` 범위 내에서만 쓰기 작업을 허용합니다.
-- `/api/docs` 문서를 SSOT로 간주합니다.
 - 계획 문서를 작성하지 마세요.
 - 모든 읽기 작업은 READ 도구로, 쓰기 작업은 WRITE 도구로 처리하세요.
 - 사용자가 승인한 사항과 AI가 제안한 사항을 구분하세요.
 - 특정 명령어에 대한 오류가 3회 이상 발생한 경우 해당 작업을 건너뛰고, 보고하세요.
+
+## 문서
+| 문서 | 설명                              |
+| --- |---------------------------------|
+| [project-structure](../docs/project-structure.md) | 도메인 · 레이어 · 의존성 구조              |
+| [ubiquitous-language](../docs/ubiquitous-language.md) | 도메인 용어 · Enum 값                 |
+| [attachment-architecture](../docs/attachment-architecture.md) | 첨부파일(Attachment) 생명주기           |
+| [notification-architecture](../docs/notification-architecture.md) | 알림 저장 · 조회 · 푸시(Push)           |
+| [stomp-architecture](../docs/stomp-architecture.md) | 채팅(Chat) · 메시지(Message) STOMP   |
+| [security-architecture](../docs/security-architecture.md) | 인증 · 인가 처리 구조                   |
+| [exception-list](../docs/exception-list.md) | 예외 코드(ExceptionCode) · Prefix 체계 |
+| [test-structure](../docs/test-structure.md) | 테스트 구조                          |
+- `/api/docs` 문서를 SSOT로 간주합니다.
+- 코드 변경사항에 따른 문서 업데이트 방안을 제안하세요.
 
 ## 탐색
 - 라이브러리 활용시 공식 문서를 근거로 답변하고, 인용에 대한 래퍼런스를 작성하세요.
@@ -24,7 +37,6 @@
 - 코드 변경사항 제안시 2-3가지 방안을 함께 제시하고 비교하세요.
 - 코드 변경사항 제안시 프로젝트 내부 코드 또는 Best Practice를 기반으로 제안하세요.
 - 코드 변경사항에 따른 레거시 코드와 미사용 import를 제거하세요.
-- 코드 변경사항에 따른 문서 업데이트 방안을 제안하세요.
 - 커밋 메시지는 Git 명령어를 사용하지 않고 대화 내역을 바탕으로 제안하세요.
 - 커밋 메시지는 단순한 국문으로 본문 없이 작성합니다.
 - 명시적인 지시가 없다면 주석을 작성하지 마세요.

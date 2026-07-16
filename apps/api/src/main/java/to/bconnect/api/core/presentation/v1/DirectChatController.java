@@ -51,7 +51,7 @@ public class DirectChatController {
 
         val body = directChats.stream()
                 .map(it -> {
-                    val member = memberMap.getOrDefault(it.memberId(), Member.WITHDRAWN);
+                    val member = memberMap.getOrDefault(it.memberId(), Member.withdrawn(it.memberId()));
                     return DirectChatResponse.of(it, member, urlMap.get(member.id()));
                 })
                 .toList();

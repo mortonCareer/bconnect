@@ -1,5 +1,6 @@
 package to.bconnect.api.core.presentation.v1.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.storage.Address;
@@ -10,20 +11,20 @@ import java.time.Instant;
 import java.util.Set;
 
 public record ProfileResponse(
-        Long id,
-        MemberSummaryResponse member,
-        ProfileRole role,
-        Trade primaryTrade,
-        Set<Trade> trades,
-        int experience,
-        String headline,
-        String about,
-        Address address,
-        Instant createdAt,
-        Instant modifiedAt,
-        int postCount,
-        int recommendationCount,
-        int coworkerCount
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) MemberSummaryResponse member,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ProfileRole role,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Trade primaryTrade,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Set<Trade> trades,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int experience,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String headline,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String about,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Address address,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int postCount,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int recommendationCount,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int coworkerCount
 ) {
     public static ProfileResponse of(Profile detail, Member member, String picture) {
         return new ProfileResponse(

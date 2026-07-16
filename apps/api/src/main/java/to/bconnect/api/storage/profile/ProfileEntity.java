@@ -16,7 +16,6 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProfileEntity extends BaseEntity {
 
-
     private Long memberId;
 
     @Enumerated(EnumType.STRING)

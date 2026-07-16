@@ -14,7 +14,9 @@ public record Member(
     Instant createdAt,
     Instant modifiedAt
 ) {
-    public static final Member WITHDRAWN = new Member(null, null, null, null, null, null, null);
+    public static Member withdrawn(Long id) {
+        return new Member(id, null, null, null, null, null, null);
+    }
 
     public static Member of(MemberEntity entity) {
         return new Member(
