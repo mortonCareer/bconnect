@@ -1,6 +1,5 @@
 package to.bconnect.api.security.jwt;
 
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,17 +7,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import tools.jackson.databind.ObjectMapper;
-import to.bconnect.api.common.CodeException;
-import to.bconnect.api.common.response.ApiResponse;
-import to.bconnect.api.security.AuthExceptionCode;
 
 import java.io.IOException;
 
@@ -36,7 +31,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthenticationManager authenticationManager;
 
-    private final ObjectMapper objectMapper;
+    private final AuthenticationFailureHandler failureHandler;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,@NonNull HttpServletResponse response,@NonNull FilterChain filterChain) throws ServletException, IOException {
@@ -61,18 +56,12 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         }
-        catch (AuthenticationException | JwtException failed) {
+        catch (AuthenticationException failed) {
             this.securityContextHolderStrategy.clearContext();
             if (this.logger.isTraceEnabled()) {
                 this.logger.trace("Failed to process authentication request", failed);
             }
-            val code = failed.getCause() instanceof CodeException codeException
-                    ? codeException.getExceptionCode()
-                    : AuthExceptionCode.INVALID_JWT_TOKEN;
-            response.setStatus(code.getStatus().value());
-            response.setCharacterEncoding("UTF-8");
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.error(code)));
+            this.failureHandler.onAuthenticationFailure(request, response, failed);
         }
     }
 
