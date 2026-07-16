@@ -32,6 +32,7 @@
 | C006 | UNSUPPORTED_MEDIA_TYPE | 415 | WARN | 지원하지 않는 미디어 형식입니다. |
 | C007 | INTERNAL_SERVER_ERROR | 500 | ERROR | 서버 내부 오류입니다. |
 | C008 | PATH_NOT_FOUND | 404 | INFO | 요청 경로를 찾을 수 없습니다. |
+| C009 | UNAUTHORIZED | 401 | INFO | 인증이 필요합니다. |
 
 ## AuthExceptionCode
 
