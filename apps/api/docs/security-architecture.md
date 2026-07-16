@@ -12,6 +12,9 @@
 - UserDetailsService / UserDetails : 회원 정보를 담는 데이터 객체
 - GrantedAuthority : 권한 표현 (`ROLE_` 접두사)
 - AuthenticationSuccessHandler : 인증 성공 후처리
+- AuthenticationFailureHandler : 인증 실패 후처리
+- AuthenticationEntryPoint : 인가 단계 미인증 처리
+- AccessDeniedHandler : 권한부족 처리
 
 ## 패키지 구성
 

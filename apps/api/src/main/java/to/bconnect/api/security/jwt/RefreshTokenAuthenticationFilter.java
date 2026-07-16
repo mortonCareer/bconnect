@@ -15,7 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
@@ -42,12 +41,14 @@ public class RefreshTokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthenticationSuccessHandler successHandler;
 
-    private final AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
+    private final AuthenticationFailureHandler failureHandler;
 
     public RefreshTokenAuthenticationFilter(AuthenticationManager authenticationManager,
-                                            @Qualifier("RefreshTokenAuthenticationSuccessHandler") AuthenticationSuccessHandler successHandler) {
+                                            @Qualifier("RefreshTokenAuthenticationSuccessHandler") AuthenticationSuccessHandler successHandler,
+                                            AuthenticationFailureHandler failureHandler) {
         this.authenticationManager = authenticationManager;
         this.successHandler = successHandler;
+        this.failureHandler = failureHandler;
     }
 
     @Override

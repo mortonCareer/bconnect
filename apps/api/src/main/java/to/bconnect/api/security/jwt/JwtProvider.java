@@ -115,7 +115,7 @@ public class JwtProvider {
                     .getPayload();
         } catch (ExpiredJwtException ex) {
             log.info("Expired token: {}", ex.getMessage());
-            throw new JwtException("Expired token", ex);
+            throw ex;
         } catch (JwtException | IllegalArgumentException ex) {
             log.warn("Invalid token: {}", ex.getMessage());
             throw new JwtException("Invalid token", ex);

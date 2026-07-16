@@ -1,5 +1,6 @@
 package to.bconnect.api.socket;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -44,16 +45,18 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
         val authorization = accessor.getFirstNativeHeader(HttpHeaders.AUTHORIZATION);
         val token = JwtUtils.resolveBearerToken(authorization);
         if (token == null)
-            throw new CodeException(AuthExceptionCode.INVALID_TOKEN);
+            throw new CodeException(AuthExceptionCode.INVALID_JWT_TOKEN);
 
         try {
             jwtProvider.validateToken(token);
+        } catch (ExpiredJwtException e) {
+            throw new CodeException(AuthExceptionCode.EXPIRED_JWT_TOKEN);
         } catch (JwtException e) {
-            throw new CodeException(AuthExceptionCode.INVALID_TOKEN);
+            throw new CodeException(AuthExceptionCode.INVALID_JWT_TOKEN);
         }
 
         if (!jwtProvider.isAccessToken(token))
-            throw new CodeException(AuthExceptionCode.INVALID_TOKEN);
+            throw new CodeException(AuthExceptionCode.INVALID_JWT_TOKEN);
 
         val username = jwtProvider.getUsername(token);
         val user = userDetailsService.loadUserByUsername(username);
