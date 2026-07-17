@@ -5,6 +5,7 @@ import to.bconnect.api.crawler.storage.CrawledMemberEntity;
 import to.bconnect.api.crawler.storage.CrawledProfileEntity;
 
 import java.time.Instant;
+import java.util.List;
 
 public record CrawledMemberSummaryResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
@@ -17,9 +18,11 @@ public record CrawledMemberSummaryResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String email,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) CrawledProfileResponse profile
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) CrawledProfileResponse profile,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> thumbnails
 ) {
-    public static CrawledMemberSummaryResponse of(CrawledMemberEntity member, CrawledProfileEntity profile) {
+    public static CrawledMemberSummaryResponse of(CrawledMemberEntity member, CrawledProfileEntity profile,
+                                                  List<String> thumbnails) {
         return new CrawledMemberSummaryResponse(
                 member.getId(),
                 member.getCompany(),
@@ -31,7 +34,8 @@ public record CrawledMemberSummaryResponse(
                 member.getEmail(),
                 member.getCreatedAt(),
                 member.getModifiedAt(),
-                profile == null ? null : CrawledProfileResponse.of(profile)
+                profile == null ? null : CrawledProfileResponse.of(profile),
+                thumbnails
         );
     }
 }
