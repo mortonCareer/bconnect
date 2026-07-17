@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import to.bconnect.api.crawler.storage.CrawledMemberEntity;
 import to.bconnect.api.crawler.storage.CrawledProfileEntity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record CrawledMemberSummaryResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
@@ -15,8 +15,8 @@ public record CrawledMemberSummaryResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String role,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String brn,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String email,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime createdAt,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime modifiedAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) CrawledProfileResponse profile
 ) {
     public static CrawledMemberSummaryResponse of(CrawledMemberEntity member, CrawledProfileEntity profile) {

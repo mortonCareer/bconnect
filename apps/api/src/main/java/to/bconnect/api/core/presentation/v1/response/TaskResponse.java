@@ -9,7 +9,7 @@ import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Set;
 
 public record TaskResponse(
@@ -29,8 +29,8 @@ public record TaskResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String projectRequirement,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String projectMemo,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) OfferSummaryResponse offer,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime createdAt,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime modifiedAt
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt
 ) {
     public static TaskResponse of(Task task, Address address) {
         return of(task, address, null);

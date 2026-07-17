@@ -2,7 +2,7 @@ package to.bconnect.api.attachment.domain;
 
 import to.bconnect.api.storage.attachment.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record Attachment(
     Long id,
@@ -18,8 +18,8 @@ public record Attachment(
     String ext,
     String contentType,
     Long size,
-    LocalDateTime createdAt,
-    LocalDateTime modifiedAt
+    Instant createdAt,
+    Instant modifiedAt
 ) {
     public static Attachment of(AttachmentEntity entity) {
         return new Attachment(

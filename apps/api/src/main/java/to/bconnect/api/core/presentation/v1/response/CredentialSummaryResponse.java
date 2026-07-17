@@ -6,7 +6,7 @@ import to.bconnect.api.storage.credential.CredentialStatus;
 import to.bconnect.api.storage.credential.CredentialType;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record CredentialSummaryResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
@@ -14,8 +14,8 @@ public record CredentialSummaryResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) CredentialType type,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) CredentialStatus status,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) LocalDate expiredAt,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime createdAt,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime modifiedAt
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt
 ) {
     public static CredentialSummaryResponse of(Credential credential) {
         return new CredentialSummaryResponse(

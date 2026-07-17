@@ -2,19 +2,19 @@ package to.bconnect.api.security.otp;
 
 import to.bconnect.api.storage.otp.OtpEntity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record Otp(
     Long id,
     String phone,
     String code,
-    LocalDateTime expiredAt,
+    Instant expiredAt,
     int attempts,
     boolean revoked,
     int dailyCount,
-    LocalDateTime lastSentAt,
-    LocalDateTime createdAt,
-    LocalDateTime modifiedAt
+    Instant lastSentAt,
+    Instant createdAt,
+    Instant modifiedAt
 ) {
     public static Otp of(OtpEntity entity) {
         return new Otp(

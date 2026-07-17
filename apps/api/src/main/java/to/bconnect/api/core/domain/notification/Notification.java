@@ -2,7 +2,7 @@ package to.bconnect.api.core.domain.notification;
 
 import to.bconnect.api.storage.notification.NotificationEntity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record Notification(
         Long id,
@@ -13,7 +13,7 @@ public record Notification(
         String content,
         NotificationArgs args,
         boolean read,
-        LocalDateTime createdAt
+        Instant createdAt
 ) {
     public static Notification of(NotificationEntity entity) {
         return new Notification(

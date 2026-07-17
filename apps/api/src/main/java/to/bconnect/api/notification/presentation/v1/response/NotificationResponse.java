@@ -8,7 +8,7 @@ import to.bconnect.api.notification.domain.NotificationType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record NotificationResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
@@ -19,7 +19,7 @@ public record NotificationResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Long referenceId,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) MemberSummaryResponse sender,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean read,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime createdAt
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt
 ) {
     public static NotificationResponse of(Notification notification, NotificationType type,
                                           Member sender, String senderPicture) {

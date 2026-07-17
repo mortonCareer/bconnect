@@ -7,7 +7,7 @@ import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.storage.offer.OfferStatus;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record OfferResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
@@ -17,8 +17,8 @@ public record OfferResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) OfferStatus status,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) MemberSummaryResponse member,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ProfileSummaryResponse profile,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime createdAt,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime modifiedAt
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt
 ) {
     public static OfferResponse of(Offer offer, Member member, Profile profile, String picture) {
         return new OfferResponse(

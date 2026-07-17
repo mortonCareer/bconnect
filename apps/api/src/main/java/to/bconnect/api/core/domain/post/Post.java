@@ -2,15 +2,15 @@ package to.bconnect.api.core.domain.post;
 
 import to.bconnect.api.storage.post.PostEntity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record Post(
     Long id,
     Long memberId,
     Long taskId,
     String content,
-    LocalDateTime createdAt,
-    LocalDateTime modifiedAt
+    Instant createdAt,
+    Instant modifiedAt
 ) {
     public static Post of(PostEntity entity) {
         return new Post(

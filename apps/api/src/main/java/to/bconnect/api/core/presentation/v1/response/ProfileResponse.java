@@ -7,7 +7,7 @@ import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.profile.ProfileRole;
 import to.bconnect.api.storage.profile.Trade;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Set;
 
 public record ProfileResponse(
@@ -20,8 +20,8 @@ public record ProfileResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String headline,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String about,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Address address,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime createdAt,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime modifiedAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int postCount,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int recommendationCount,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int coworkerCount

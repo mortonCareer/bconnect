@@ -5,7 +5,7 @@ import to.bconnect.api.storage.credential.CredentialStatus;
 import to.bconnect.api.storage.credential.CredentialType;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record Credential(
     Long id,
@@ -13,8 +13,8 @@ public record Credential(
     CredentialType type,
     CredentialStatus status,
     LocalDate expiredAt,
-    LocalDateTime createdAt,
-    LocalDateTime modifiedAt
+    Instant createdAt,
+    Instant modifiedAt
 ) {
     public static Credential of(CredentialEntity entity) {
         return new Credential(

@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "signup_tokens")
@@ -19,18 +19,18 @@ public class SignupTokenEntity extends BaseEntity {
 
     private String token;
 
-    private LocalDateTime expiredAt;
+    private Instant expiredAt;
 
     private boolean revoked;
 
-    public SignupTokenEntity(String phone, String token, LocalDateTime expiredAt) {
+    public SignupTokenEntity(String phone, String token, Instant expiredAt) {
         this.phone = phone;
         this.token = token;
         this.expiredAt = expiredAt;
         this.revoked = false;
     }
 
-    public void update(String token, LocalDateTime expiredAt) {
+    public void update(String token, Instant expiredAt) {
         this.token = token;
         this.expiredAt = expiredAt;
         this.revoked = false;

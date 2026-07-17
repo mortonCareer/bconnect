@@ -2,7 +2,7 @@ package to.bconnect.api.core.domain.chat;
 
 import to.bconnect.api.storage.chat.GroupChatEntity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 public record GroupChat(
@@ -11,8 +11,8 @@ public record GroupChat(
     List<Long> participantIds,
     Message lastMessage,
     Long unreadCount,
-    LocalDateTime createdAt,
-    LocalDateTime modifiedAt
+    Instant createdAt,
+    Instant modifiedAt
 ) {
     public static GroupChat of(GroupChatEntity entity, List<Long> participantIds, Message lastMessage, Long unreadCount) {
         return new GroupChat(

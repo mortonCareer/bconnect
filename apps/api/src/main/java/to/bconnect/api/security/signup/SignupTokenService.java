@@ -10,7 +10,8 @@ import to.bconnect.api.security.AuthUtils;
 import to.bconnect.api.storage.signup.SignupTokenEntity;
 import to.bconnect.api.storage.signup.SignupTokenRepository;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -25,7 +26,7 @@ public class SignupTokenService {
     public String generate(String phone) {
         val token = UUID.randomUUID().toString();
         val encrypted = AuthUtils.sha256(token);
-        val expiredAt = LocalDateTime.now().plusMinutes(EXPIRY_MINUTES);
+        val expiredAt = Instant.now().plus(Duration.ofMinutes(EXPIRY_MINUTES));
         val optional = signupTokenRepository.findByPhone(phone);
 
         if (optional.isPresent()) {
@@ -44,7 +45,7 @@ public class SignupTokenService {
 
         if (found.isRevoked())
             throw new CodeException(AuthExceptionCode.INVALID_SIGNUP_TOKEN);
-        if (found.getExpiredAt().isBefore(LocalDateTime.now()))
+        if (found.getExpiredAt().isBefore(Instant.now()))
             throw new CodeException(AuthExceptionCode.SIGNUP_TOKEN_EXPIRED);
 
         found.revoke();

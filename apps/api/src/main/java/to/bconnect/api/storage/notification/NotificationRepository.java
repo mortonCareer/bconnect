@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Long> {
 
@@ -19,5 +19,5 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
 
     @Modifying
     @Query("UPDATE NotificationEntity n SET n.readAt = :now WHERE n.receiverId = :receiverId AND n.readAt IS NULL")
-    int markAllReadByReceiverId(@Param("receiverId") Long receiverId, @Param("now") LocalDateTime now);
+    int markAllReadByReceiverId(@Param("receiverId") Long receiverId, @Param("now") Instant now);
 }

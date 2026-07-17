@@ -6,7 +6,7 @@ import to.bconnect.api.attachment.presentation.v1.AttachmentResponse;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.storage.chat.MessageType;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -16,8 +16,8 @@ public record MessageResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long memberId,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) MessageType type,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String content,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime createdAt,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime modifiedAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<AttachmentResponse> attachments
 ) {
     public static MessageResponse of(Message message) {

@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import to.bconnect.api.crawler.storage.CrawledPostEntity;
 import to.bconnect.api.crawler.storage.CrawledTaskEntity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 public record CrawledPostResponse(
@@ -14,8 +14,8 @@ public record CrawledPostResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> images,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String title,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String content,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime createdAt,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDateTime modifiedAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) CrawledTaskResponse task
 ) {
     public static CrawledPostResponse of(CrawledPostEntity post, CrawledTaskEntity task) {

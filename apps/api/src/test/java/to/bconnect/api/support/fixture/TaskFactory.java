@@ -1,15 +1,15 @@
 package to.bconnect.api.support.fixture;
 
+import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.core.presentation.v1.request.CreateWorkerTaskRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateWorkerTaskRequest;
-import to.bconnect.api.core.domain.task.Task;
+import to.bconnect.api.storage.profile.Trade;
 import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
-import to.bconnect.api.storage.profile.Trade;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Set;
 
 public class TaskFactory {
@@ -21,7 +21,7 @@ public class TaskFactory {
         return new Task(id, TaskType.WORKER, Set.of(Trade.ELECTRICAL), START_DATE, END_DATE, TaskStatus.DRAFT,
                 memberId, "task", "memo", "company", ProfileFactory.DEFAULT_ADDRESS,
                 null, null, null, null,
-                LocalDateTime.now(), LocalDateTime.now());
+                Instant.now(), Instant.now());
     }
 
     public static TaskEntity createEntity(Long memberId) {
