@@ -7,4 +7,6 @@ import java.util.List;
 public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
 
     List<ProjectEntity> findAllByCompanyId(Long companyId);
+
+    long countByCompanyId(Long companyId);
 }

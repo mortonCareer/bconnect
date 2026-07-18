@@ -70,6 +70,7 @@
 | --- | --- | --- | --- | --- |
 | CO001 | ALREADY_EXISTS | 409 | INFO | 이미 업체가 존재합니다. |
 | CO002 | DUPLICATE_BRN | 409 | INFO | 이미 등록된 사업자등록번호입니다. |
+| CO003 | PROJECT_LIMIT_EXCEEDED | 409 | INFO | 생성 가능한 프로젝트 수를 초과했습니다. |
 
 ## TaskExceptionCode
 

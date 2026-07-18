@@ -30,7 +30,7 @@ public class DomainDependencyTest {
     @ArchTest ArchRule offerDomainRule = domainRule("offer");
     @ArchTest ArchRule postDomainRule = domainRule("post");
     @ArchTest ArchRule profileDomainRule = domainRule("profile");
-    @ArchTest ArchRule projectDomainRule = domainRule("project");
+    @ArchTest ArchRule projectDomainRule = domainRule("project", "company");
     @ArchTest ArchRule recommendationDomainRule = domainRule("recommendation");
     @ArchTest ArchRule taskDomainRule = domainRule("task");
 
