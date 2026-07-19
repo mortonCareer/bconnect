@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [dev]
 
+# 같은 ref 에 새 커밋 push 시 이전 CI 취소 — self-hosted 러너(maxRunners 3) 슬롯을
+# stale 런이 점유하는 것 방지 (#918). docs-lint.yml 과 동일 패턴.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: read
