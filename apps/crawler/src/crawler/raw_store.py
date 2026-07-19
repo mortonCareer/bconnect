@@ -27,9 +27,14 @@ def append_raw(path: Path, record: dict) -> None:
 
 
 def load_raw(path: Path) -> list[dict]:
-    """저장된 원본 전체를 읽어온다."""
+    """저장된 원본 전체를 읽어온다.
+
+    개행은 `\\n` 으로만 나눈다. `about` 본문에 유니코드 줄분리자(U+2028/U+2029)가
+    있을 수 있는데, str.splitlines() 는 그것까지 줄로 쪼개 레코드를 중간에서
+    끊어버린다(append_raw 는 ensure_ascii=False 라 이스케이프되지 않음).
+    """
     return [
         json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
+        for line in path.read_text(encoding="utf-8").split("\n")
         if line.strip()
     ]
