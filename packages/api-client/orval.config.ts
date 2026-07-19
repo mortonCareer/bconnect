@@ -92,6 +92,8 @@ export default defineConfig({
               onMutations: ['updateMyProfile', 'updateMyProfileAbout'],
               invalidates: ['getMyProfile'],
             },
+            // 새 채팅 생성 → 채팅 목록. 생성 직후 이동한 방을 캐시 목록에서 찾도록(#835). getDirectChats 는 파라미터 없음.
+            { onMutations: ['createDirectChat'], invalidates: ['getDirectChats'] },
           ],
         },
         fetch: {
