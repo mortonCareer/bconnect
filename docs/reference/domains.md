@@ -9,18 +9,18 @@
 
 ## 1. 도메인 → 서비스 → 환경
 
-| 도메인                  | 서비스               | 환경          | 프로바이더 | 비고                                                                                                            |
-| ----------------------- | -------------------- | ------------- | ---------- | --------------------------------------------------------------------------------------------------------------- |
-| `career.bconnect.to`    | career (기술자 PWA)  | production    | Vercel     | career apex 이전(#779)                                                                                          |
-| `bconnect.to`           | (비어있음)           | production    | Vercel     | 랜딩 허브(#896) 대기. 앱 레벨에서 의도적 404 — 허브 앱 필요함을 명시. `/.well-known/assetlinks.json`만 200 유지 |
-| `plan.bconnect.to`      | plan (업체/건축주)   | production    | Vercel     |                                                                                                                 |
-| `api.bconnect.to`       | api (Spring Boot BE) | production    | Railway    | `SPRING_PROFILES_ACTIVE=prod`                                                                                   |
-| `dev.bconnect.to`       | career               | dev (staging) | Vercel     | `dev` 브랜치 자동배포 (Vercel custom env)                                                                       |
-| `plan.dev.bconnect.to`  | plan                 | dev (staging) | Vercel     | `dev` 브랜치 자동배포. 2-레벨 서브도메인                                                                        |
-| `api.dev.bconnect.to`   | api                  | dev (staging) | Railway    | Railway `dev` 환경. Sentry env 태그 `dev`                                                                       |
-| `*.vercel.app`          | career / plan        | PR 프리뷰     | Vercel     | `<project>-git-<branch>-<team>.vercel.app`                                                                      |
-| `localhost:3000 / 3001` | career / plan        | 로컬          | —          | `pnpm dev:career` / `pnpm dev:plan`                                                                             |
-| `localhost:8080`        | api                  | 로컬          | —          | `./gradlew bootRun`                                                                                             |
+| 도메인                   | 서비스               | 환경          | 프로바이더 | 비고                                                                                                            |
+| ------------------------ | -------------------- | ------------- | ---------- | --------------------------------------------------------------------------------------------------------------- |
+| `career.bconnect.to`     | career (기술자 PWA)  | production    | Vercel     | career apex 이전(#779)                                                                                          |
+| `bconnect.to`            | (비어있음)           | production    | Vercel     | 랜딩 허브(#896) 대기. 앱 레벨에서 의도적 404 — 허브 앱 필요함을 명시. `/.well-known/assetlinks.json`만 200 유지 |
+| `plan.bconnect.to`       | plan (업체/건축주)   | production    | Vercel     |                                                                                                                 |
+| `api.bconnect.to`        | api (Spring Boot BE) | production    | Railway    | `SPRING_PROFILES_ACTIVE=prod`                                                                                   |
+| `career.dev.bconnect.to` | career               | dev (staging) | Vercel     | `dev` 브랜치 자동배포 (Vercel custom env). apex 이전(#779) 대칭으로 dev도 이전(#902)                            |
+| `plan.dev.bconnect.to`   | plan                 | dev (staging) | Vercel     | `dev` 브랜치 자동배포. 2-레벨 서브도메인                                                                        |
+| `api.dev.bconnect.to`    | api                  | dev (staging) | Railway    | Railway `dev` 환경. Sentry env 태그 `dev`                                                                       |
+| `*.vercel.app`           | career / plan        | PR 프리뷰     | Vercel     | `<project>-git-<branch>-<team>.vercel.app`                                                                      |
+| `localhost:3000 / 3001`  | career / plan        | 로컬          | —          | `pnpm dev:career` / `pnpm dev:plan`                                                                             |
+| `localhost:8080`         | api                  | 로컬          | —          | `./gradlew bootRun`                                                                                             |
 
 규칙: **`{service}.{env}.bconnect.to`** — production 은 `{env}` 생략 ([ADR-0016](../explanation/adr/0016-environment-service-domain-naming.md)). career 는 원래 apex(`{service}` 생략)였으나 #779로 `career.bconnect.to`로 이전, apex(`bconnect.to`)는 랜딩 허브(#896)용으로 예약. 새 환경·서비스는 같은 규칙으로 확장.
 
@@ -30,11 +30,11 @@
 
 ## 2. 서비스별 환경 (한눈에)
 
-| 서비스      | production           | dev (staging)          | 로컬             |
-| ----------- | -------------------- | ---------------------- | ---------------- |
-| career (FE) | `career.bconnect.to` | `dev.bconnect.to`      | `localhost:3000` |
-| plan (FE)   | `plan.bconnect.to`   | `plan.dev.bconnect.to` | `localhost:3001` |
-| api (BE)    | `api.bconnect.to`    | `api.dev.bconnect.to`  | `localhost:8080` |
+| 서비스      | production           | dev (staging)            | 로컬             |
+| ----------- | -------------------- | ------------------------ | ---------------- |
+| career (FE) | `career.bconnect.to` | `career.dev.bconnect.to` | `localhost:3000` |
+| plan (FE)   | `plan.bconnect.to`   | `plan.dev.bconnect.to`   | `localhost:3001` |
+| api (BE)    | `api.bconnect.to`    | `api.dev.bconnect.to`    | `localhost:8080` |
 
 production = `main` 브랜치, dev(staging) = `dev` 브랜치 추적. PR 프리뷰는 브랜치별 `*.vercel.app` (배포 절차: [deployment.md](../how-to/deployment.md)).
 
@@ -42,12 +42,12 @@ production = `main` 브랜치, dev(staging) = `dev` 브랜치 추적. PR 프리�
 
 ## 3. FE → BE 연결 (`NEXT_PUBLIC_API_URL`)
 
-| FE 환경                       | 호출 대상 API                 | 비고                                                                                                        |
-| ----------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| production (`bconnect.to` 등) | `https://api.bconnect.to`     |                                                                                                             |
-| dev (`dev.bconnect.to` 등)    | `https://api.dev.bconnect.to` | Vercel `dev` custom env override, `NEXT_PUBLIC_API_MOCKING=disabled` → 실제 staging BE                      |
-| PR 프리뷰 (`*.vercel.app`)    | MSW mock 기본                 | 상세: [development-workflow.md](../how-to/development-workflow.md), [packages/mocks](../../packages/mocks/) |
-| 로컬                          | `http://localhost:8080`       | [`packages/api-client/src/client.ts`](../../packages/api-client/src/client.ts) fallback                     |
+| FE 환경                           | 호출 대상 API                 | 비고                                                                                                        |
+| --------------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| production (`bconnect.to` 등)     | `https://api.bconnect.to`     |                                                                                                             |
+| dev (`career.dev.bconnect.to` 등) | `https://api.dev.bconnect.to` | Vercel `dev` custom env override, `NEXT_PUBLIC_API_MOCKING=disabled` → 실제 staging BE                      |
+| PR 프리뷰 (`*.vercel.app`)        | MSW mock 기본                 | 상세: [development-workflow.md](../how-to/development-workflow.md), [packages/mocks](../../packages/mocks/) |
+| 로컬                              | `http://localhost:8080`       | [`packages/api-client/src/client.ts`](../../packages/api-client/src/client.ts) fallback                     |
 
 값 선언: [`infra/vercel/projects.tf`](../../infra/vercel/projects.tf) (`career_api_url`/`plan_api_url` + `*_dev_api_url`), 스키마 검증은 [`packages/config/env/validate.ts`](../../packages/config/env/validate.ts).
 
@@ -71,15 +71,15 @@ DNS 레코드는 **Terraform 관리 밖**이다. 가비아는 Terraform/CLI 를 
 
 흐름: `infra/` 에서 Vercel/Railway 커스텀 도메인을 선언하고 `apply` → 나오는 CNAME 타겟을 **가비아 콘솔에서 수동 등록**한다.
 
-| 도메인                 | CNAME 타겟 유형                                       |
-| ---------------------- | ----------------------------------------------------- |
-| `bconnect.to` / `www`  | Vercel (apex 는 A + Vercel 자동 관리)                 |
-| `career.bconnect.to`   | Vercel 생성 도메인 (#779)                             |
-| `plan.bconnect.to`     | Vercel 생성 도메인                                    |
-| `api.bconnect.to`      | Railway 생성 도메인                                   |
-| `dev.bconnect.to`      | Vercel 생성 도메인 (`bconnect-career-*`)              |
-| `plan.dev.bconnect.to` | Vercel 생성 도메인                                    |
-| `api.dev.bconnect.to`  | Railway 생성 도메인 (`morton-api-dev.up.railway.app`) |
+| 도메인                   | CNAME 타겟 유형                                       |
+| ------------------------ | ----------------------------------------------------- |
+| `bconnect.to` / `www`    | Vercel (apex 는 A + Vercel 자동 관리)                 |
+| `career.bconnect.to`     | Vercel 생성 도메인 (#779)                             |
+| `plan.bconnect.to`       | Vercel 생성 도메인                                    |
+| `api.bconnect.to`        | Railway 생성 도메인                                   |
+| `career.dev.bconnect.to` | Vercel 생성 도메인 (`bconnect-career-*`) (#902)       |
+| `plan.dev.bconnect.to`   | Vercel 생성 도메인                                    |
+| `api.dev.bconnect.to`    | Railway 생성 도메인 (`morton-api-dev.up.railway.app`) |
 
 ---
 
