@@ -11,12 +11,13 @@ TWA는 콘텐츠를 라이브 URL에서 로드하므로, **웹 배포만으로 �
 
 ## 커밋되는 것 / 안 되는 것
 
-**커밋**: `twa-manifest.json`(설정 SSOT) · `setup-toolchain.sh` · `build.sh` · 이 README.
+**커밋**: `twa-manifest.template.json`(설정 SSOT) · `setup-toolchain.sh` · `build.sh` · 이 README.
 
 **커밋 안 함** (`.gitignore`):
 
 - `android.keystore` — 서명 키. **레포 밖 안전한 곳에 백업**하고, 빌드 시 이 디렉토리로 복사만 한다. 분실하면 같은 `packageId`로 업데이트 서명이 불가능해진다 (재설치 강제).
 - 서명 패스워드 — 환경변수(`TWA_KEYSTORE_PASSWORD`/`TWA_KEY_PASSWORD`)로 주입. 스크립트·파일에 하드코딩 금지.
+- `twa-manifest.json` — `twa-manifest.template.json` + `build.sh <env>`로 host를 주입해 생성. SSOT는 템플릿.
 - 빌드 산출물(`*.apk`/`*.aab`), gradle·bubblewrap 생성물(`app/`, `build/`, `*.gradle` 등) — `twa-manifest.json`에서 재생성됨.
 
 ## 빌드 절차
@@ -27,11 +28,13 @@ TWA는 콘텐츠를 라이브 URL에서 로드하므로, **웹 배포만으로 �
 
 # 1. android.keystore 를 이 디렉토리에 복사 (레포 밖 보관본에서)
 
-# 2. twa-manifest.json 편집 (host/아이콘/이름 변경 시). 재빌드 시 appVersionCode 를 반드시 +1
+# 2. twa-manifest.template.json 편집 (아이콘/이름/버전 변경 시). 재빌드 시 appVersionCode 를 반드시 +1
+#    host 는 편집하지 않음 — build.sh 인자(dev|prod)로 결정
 
-# 3. 서명 패스워드 주입 후 빌드
+# 3. 서명 패스워드 주입 후 빌드 (인자로 host 선택)
 export TWA_KEYSTORE_PASSWORD=... TWA_KEY_PASSWORD=...
-./build.sh
+./build.sh prod   # career.bconnect.to (Play/실서비스)
+./build.sh dev    # career.dev.bconnect.to (사이드로드 테스트)
 ```
 
 산출물: `app-release-signed.apk`(사이드로드) + `app-release-bundle.aab`(Play 업로드).

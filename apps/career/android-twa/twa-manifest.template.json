@@ -1,10 +1,10 @@
 {
   "packageId": "to.bconnect.career",
-  "host": "career.dev.bconnect.to",
+  "host": "__HOST__",
   "name": "품앗이",
   "launcherName": "품앗이",
   "display": "standalone",
-  "orientation": "default",
+  "orientation": "portrait",
   "themeColor": "#386dff",
   "themeColorDark": "#386dff",
   "navigationColor": "#000000",
@@ -12,10 +12,10 @@
   "navigationDividerColor": "#000000",
   "navigationDividerColorDark": "#000000",
   "backgroundColor": "#ffffff",
-  "enableNotifications": false,
+  "enableNotifications": true,
   "startUrl": "/",
-  "iconUrl": "https://career.dev.bconnect.to/icon-512.png",
-  "webManifestUrl": "https://career.dev.bconnect.to/manifest.webmanifest",
+  "iconUrl": "https://__HOST__/icon-512.png",
+  "webManifestUrl": "https://__HOST__/manifest.webmanifest",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./android.keystore",
@@ -23,7 +23,20 @@
   },
   "appVersion": "1.0.1",
   "appVersionCode": 2,
-  "shortcuts": [],
+  "shortcuts": [
+    {
+      "name": "홈",
+      "shortName": "홈",
+      "url": "/",
+      "chosenIconUrl": "https://__HOST__/icon-192.png"
+    },
+    {
+      "name": "프로필",
+      "shortName": "프로필",
+      "url": "/profile",
+      "chosenIconUrl": "https://__HOST__/icon-192.png"
+    }
+  ],
   "fallbackType": "customtabs",
   "features": {}
 }

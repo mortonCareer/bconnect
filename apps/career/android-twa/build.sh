@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# career TWA 재빌드 — twa-manifest.json 변경(host/아이콘/이름/버전) 후 실행.
+# career TWA 재빌드 — twa-manifest.template.json 변경(아이콘/이름/버전) 후 실행.
 # 산출: app-release-signed.apk(사이드로드) + app-release-bundle.aab(Play).
+#
+# 사용법: ./build.sh [dev|prod]   (기본 prod)
+#   - prod: host=career.bconnect.to (Play/실서비스)
+#   - dev : host=career.dev.bconnect.to (사이드로드 테스트)
+#   host 파생 필드(host·iconUrl·webManifestUrl·shortcut 아이콘)는 템플릿에서 생성됨.
 #
 # 사전조건:
 #   - ./setup-toolchain.sh 로 JDK17 + Android SDK + bubblewrap 설정 완료
@@ -15,8 +20,18 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
+ENV="${1:-prod}"
+case "$ENV" in
+  dev) HOST="career.dev.bconnect.to" ;;
+  prod) HOST="career.bconnect.to" ;;
+  *) echo "ERROR: 인자는 dev|prod (기본 prod). 받은 값: '$ENV'" >&2; exit 1 ;;
+esac
+
 : "${TWA_KEYSTORE_PASSWORD:?export TWA_KEYSTORE_PASSWORD 필요}"
 : "${TWA_KEY_PASSWORD:?export TWA_KEY_PASSWORD 필요}"
+
+echo "=== twa-manifest.json 생성 (env=$ENV, host=$HOST) ==="
+sed "s/__HOST__/${HOST}/g" twa-manifest.template.json > twa-manifest.json
 
 if [[ ! -f android.keystore ]]; then
   echo "ERROR: android.keystore 없음 — 레포 밖 보관본을 이 디렉토리에 복사하세요 (README 참조)" >&2
