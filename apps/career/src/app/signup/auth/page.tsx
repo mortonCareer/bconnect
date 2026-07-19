@@ -17,7 +17,7 @@ import {
 import { Form, FormSubmitButton, TextField, passthroughError, useServerError } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { OtpTimer } from '../_components/OtpTimer'
 import { SignupHeader } from '../_components/SignupHeader'
@@ -91,6 +91,15 @@ export default function SignupAuthPage() {
       codeServer.capture(err, form.getValues())
     }
   }
+
+  const lastAutoVerifiedCode = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (step !== 'otp' || !isCodeValid || verifyCodeMutation.isPending) return
+    if (lastAutoVerifiedCode.current === codeValue) return
+    lastAutoVerifiedCode.current = codeValue
+    void verifyCode()
+  }, [step, isCodeValid, codeValue, verifyCodeMutation.isPending, verifyCode])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

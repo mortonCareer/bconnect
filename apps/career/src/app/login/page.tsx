@@ -22,7 +22,7 @@ import {
 } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { OtpTimer } from '../signup/_components/OtpTimer'
 import { loginSchema, type LoginFormData } from './schema'
@@ -100,6 +100,15 @@ export default function LoginPage() {
       codeServer.capture(err, form.getValues())
     }
   }
+
+  const lastAutoVerifiedCode = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (step !== 'otp' || !isCodeValid || verifyCodeMutation.isPending) return
+    if (lastAutoVerifiedCode.current === codeValue) return
+    lastAutoVerifiedCode.current = codeValue
+    void verifyCode()
+  }, [step, isCodeValid, codeValue, verifyCodeMutation.isPending, verifyCode])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
