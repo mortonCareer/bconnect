@@ -3,7 +3,7 @@
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useGetCrawledMember, TRADE_LABELS } from '@bconnect/api-client'
 import { PanelAside, PanelScroll, PanelShell } from '@bconnect/features'
-import { Button, SkillTag, Tab } from '@bconnect/ui'
+import { Button, ImageCarousel, SkillTag, Tab } from '@bconnect/ui'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { toCrawledDisplay } from '@/lib/crawled'
 import { CrawledImage, CrawledSourceBadge } from '../CrawledImage'
@@ -186,26 +186,29 @@ export function PanelCrawled({ crawledId }: { crawledId: number }) {
                       <p className="text-r-14 text-gray-500">작업물이 없습니다</p>
                     </div>
                   ) : (
-                    posts.map((post, i) => (
-                      // 회원 WorkCard 레이아웃 준용 — 대표 이미지 + 제목/본문 (이미지는 no-referrer)
-                      <div key={post.id ?? i} className="flex flex-col">
-                        {post.images?.[0] && (
-                          <div className="h-[220px] w-full overflow-hidden bg-gray-100">
-                            <CrawledImage
-                              src={post.images[0]}
-                              alt={post.title ?? '시공 사진'}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                        )}
-                        <div className="flex flex-col gap-1 px-4 pt-3 pb-4">
-                          {post.title && <p className="text-m-16 text-gray-900">{post.title}</p>}
-                          {post.content && (
-                            <p className="line-clamp-2 text-r-14 text-gray-500">{post.content}</p>
+                    posts.map((post, i) => {
+                      // 회원 WorkCard 레이아웃 준용 — 시공 사진 캐러셀(no-referrer) + 제목/본문
+                      const images = (post.images ?? []).slice(0, 10)
+                      return (
+                        <div key={post.id ?? i} className="flex flex-col">
+                          {images.length > 0 && (
+                            <div className="px-4">
+                              <ImageCarousel
+                                images={images}
+                                alt={post.title ?? '시공 사진'}
+                                referrerPolicy="no-referrer"
+                              />
+                            </div>
                           )}
+                          <div className="flex flex-col gap-1 px-4 pt-3 pb-4">
+                            {post.title && <p className="text-m-16 text-gray-900">{post.title}</p>}
+                            {post.content && (
+                              <p className="line-clamp-2 text-r-14 text-gray-500">{post.content}</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      )
+                    })
                   )}
                 </div>
               )}
