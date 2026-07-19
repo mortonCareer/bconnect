@@ -13,7 +13,7 @@ public class AttachmentCleanupScheduler {
 
     private final AttachmentCleanupService attachmentCleanupService;
 
-    @Scheduled(cron = "0 0 6 * * WED", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 6 * * WED", zone = "${app.timezone}")
     public void run() {
         val result = attachmentCleanupService.cleanup();
         log.info("attachment cleanup 완료: {}", result);
