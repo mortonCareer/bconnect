@@ -74,7 +74,6 @@ INSERT INTO attachments (id, member_id, type, status, context, context_id, refer
 INSERT INTO tasks (id, dtype, start_date, end_date, status, worker_id, project_id, project_title, project_requirement, project_memo, created_at, modified_at) VALUES
 (100, 'PROJECT', DATE '2026-06-01', DATE '2026-06-03', 'SCHEDULED', 101, null, '작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
--- 동료(103) 작업 조회용 worker task 3개
 INSERT INTO tasks (id, dtype, status, start_date, end_date, worker_id, worker_title, worker_memo, worker_company, zipcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
 (101, 'WORKER', 'SCHEDULED', DATE '2026-06-01', DATE '2026-06-02', 103, '동료 작업1', '메모', '샘플건설', '16000', '경기도', '수원시 장안구', '도로명주소', '상세', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (102, 'WORKER', 'SCHEDULED', DATE '2026-06-03', DATE '2026-06-04', 103, '동료 작업2', '메모', '샘플건설', '16000', '경기도', '수원시 장안구', '도로명주소', '상세', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
@@ -83,13 +82,13 @@ INSERT INTO tasks (id, dtype, status, start_date, end_date, worker_id, worker_ti
 INSERT INTO task_trades (task_id, trade) VALUES
 (101, 'TILING'), (102, 'TILING'), (103, 'TILING');
 
--- 내 드라이브(member 100) 조회용 : 이미지·파일·노트 각 2
 INSERT INTO drives (id, dtype, project_id, member_id, title, created_at, modified_at) VALUES
 (100, 'MEMBER', null, 100, '테스트 드라이브', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO boards (id, dtype, project_id, drive_id, created_at, modified_at) VALUES
 (100, 'DRIVE', null, 100, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
+-- drive attachments
 INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
 (108, 100, 'IMAGE', 'COMPLETED', 'DRIVE', 100, 'DRIVE', 100, 'seed-drive-img-1', 'image1', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (109, 100, 'IMAGE', 'COMPLETED', 'DRIVE', 100, 'DRIVE', 100, 'seed-drive-img-2', 'image2', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
@@ -109,12 +108,12 @@ INSERT INTO crawled_members (id, company, name, phone, picture, role, brn, email
 (103, '업체4', '기술자4', '01000000015', NULL, '반장', '123-45-67893', 'crawled4@test.com', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (104, '업체5', '기술자5', '01000000016', NULL, '대표', '123-45-67894', 'crawled5@test.com', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO crawled_profiles (id, member_id, primary_trade, experience, headline, about, address, state, url, platform, created_at, modified_at) VALUES
-(100, 100, '방수', 10, '한줄소개1', '소개글1', '주소1', 'SEOUL', 'https://blog.naver.com/crawled1', 'NAVER', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(101, 101, '타일', 8, '한줄소개2', '소개글2', '주소2', 'GYEONGGI', 'https://blog.naver.com/crawled2', 'NAVER', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(102, 102, '도장', 12, '한줄소개3', '소개글3', '주소3', 'INCHEON', 'https://www.instagram.com/crawled3', 'INSTAGRAM', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(103, 103, '전기', 15, '한줄소개4', '소개글4', '주소4', 'BUSAN', 'https://blog.naver.com/crawled4', 'NAVER', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(104, 104, '목공', 20, '한줄소개5', '소개글5', '주소5', 'DAEGU', 'https://www.instagram.com/crawled5', 'INSTAGRAM', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO crawled_profiles (id, member_id, primary_trade, experience, headline, address, state, url, platform, created_at, modified_at) VALUES
+(100, 100, '방수', 10, '한줄소개1', '주소1', 'SEOUL', 'https://blog.naver.com/crawled1', 'NAVER', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(101, 101, '타일', 8, '한줄소개2', '주소2', 'GYEONGGI', 'https://blog.naver.com/crawled2', 'NAVER', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(102, 102, '도장', 12, '한줄소개3', '주소3', 'INCHEON', 'https://www.instagram.com/crawled3', 'INSTAGRAM', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(103, 103, '전기', 15, '한줄소개4', '주소4', 'BUSAN', 'https://blog.naver.com/crawled4', 'NAVER', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(104, 104, '목공', 20, '한줄소개5', '주소5', 'DAEGU', 'https://www.instagram.com/crawled5', 'INSTAGRAM', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO crawled_profile_trades (profile_id, trade) VALUES
 (100, '방수'),
@@ -195,7 +194,7 @@ INSERT INTO companies (id, member_id, name, brn, created_at, modified_at) VALUES
 (203, 206, '샘플건설4', '2031234567', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (204, 207, '샘플건설5', '2041234567', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
--- 회원 picture(reference MEMBER) · 업체 picture(reference COMPANY)
+-- picture attachments
 INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
 (222, 200, 'IMAGE', 'COMPLETED', 'MEMBER', 200, 'MEMBER', 200, 'sample-att-222', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (223, 201, 'IMAGE', 'COMPLETED', 'MEMBER', 201, 'MEMBER', 201, 'sample-att-223', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
@@ -234,7 +233,6 @@ INSERT INTO task_trades (task_id, trade) VALUES
 (203, 'ELECTRICAL'),
 (204, 'PAINTING');
 
--- OFFERED 작업(201) : 반장들에게 순서대로 제안(ACTIVE) · 제안 대기(PENDING)
 INSERT INTO offers (id, task_id, worker_id, seq, due, status, created_at, modified_at) VALUES
 (200, 201, 201, 1, DATE '2026-08-31', 'ACTIVE', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (201, 201, 202, 2, DATE '2026-08-31', 'PENDING', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
@@ -242,7 +240,6 @@ INSERT INTO offers (id, task_id, worker_id, seq, due, status, created_at, modifi
 (203, 201, 208, 4, DATE '2026-08-31', 'PENDING', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (204, 201, 209, 5, DATE '2026-08-31', 'PENDING', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
--- 기술자 작업 : 반장별 worker task 3개
 INSERT INTO tasks (id, dtype, status, start_date, end_date, worker_id, worker_title, worker_memo, worker_company, zipcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
 (205, 'WORKER', 'SCHEDULED', DATE '2026-09-01', DATE '2026-09-02', 201, '반장1 작업1', '메모', '샘플건설', '16000', '경기도', '수원시 장안구', '도로명주소', '상세', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (206, 'WORKER', 'SCHEDULED', DATE '2026-09-03', DATE '2026-09-04', 201, '반장1 작업2', '메모', '샘플건설', '16000', '경기도', '수원시 장안구', '도로명주소', '상세', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
@@ -259,7 +256,6 @@ INSERT INTO task_trades (task_id, trade) VALUES
 (208, 'PAINTING'), (209, 'PAINTING'), (210, 'PAINTING'),
 (211, 'ELECTRICAL'), (212, 'ELECTRICAL'), (213, 'ELECTRICAL');
 
--- A. 인증뱃지 : 반장별 2개 (본인인증 + 별도 1)
 INSERT INTO credentials (id, member_id, type, status, expired_at, created_at, modified_at) VALUES
 (200, 201, 'IDENTITY_VERIFICATION', 'ACCEPTED', DATE '2027-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (201, 201, 'SKILL_GRADE_CERTIFICATE', 'ACCEPTED', DATE '2027-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
@@ -268,7 +264,7 @@ INSERT INTO credentials (id, member_id, type, status, expired_at, created_at, mo
 (204, 203, 'IDENTITY_VERIFICATION', 'ACCEPTED', DATE '2027-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (205, 203, 'NATIONAL_TECHNICAL_QUALIFICATION', 'ACCEPTED', DATE '2027-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
--- 인증뱃지 첨부 (reference CREDENTIAL)
+-- credential attachments
 INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
 (227, 201, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 200, 'CREDENTIAL', 200, 'sample-att-227', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (228, 201, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 201, 'CREDENTIAL', 201, 'sample-att-228', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
@@ -277,7 +273,6 @@ INSERT INTO attachments (id, member_id, type, status, context, context_id, refer
 (231, 203, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 204, 'CREDENTIAL', 204, 'sample-att-231', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (232, 203, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 205, 'CREDENTIAL', 205, 'sample-att-232', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
--- B. 게시글 : 반장별 3개 (2개 task 연결 · 1개 미연결)
 INSERT INTO posts (id, member_id, task_id, content, created_at, modified_at) VALUES
 (200, 201, 205, '반장1 게시글1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (201, 201, 206, '반장1 게시글2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
@@ -289,7 +284,7 @@ INSERT INTO posts (id, member_id, task_id, content, created_at, modified_at) VAL
 (207, 203, 212, '반장3 게시글2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (208, 203, null, '반장3 게시글3', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
--- 게시글 이미지 2장씩 (reference POST)
+-- post attachments
 INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
 (200, 201, 'IMAGE', 'COMPLETED', 'POST', 200, 'POST', 200, 'sample-att-200', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (201, 201, 'IMAGE', 'COMPLETED', 'POST', 200, 'POST', 200, 'sample-att-201', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
@@ -310,7 +305,6 @@ INSERT INTO attachments (id, member_id, type, status, context, context_id, refer
 (216, 203, 'IMAGE', 'COMPLETED', 'POST', 208, 'POST', 208, 'sample-att-216', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (217, 203, 'IMAGE', 'COMPLETED', 'POST', 208, 'POST', 208, 'sample-att-217', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
--- C. 동료·추천 : member 200 기준 수락 동료 1 · 보낸 요청 1 · 받은 요청 1
 INSERT INTO coworkers (id, min_id, max_id, created_at, modified_at) VALUES
 (200, 200, 201, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (201, 201, 202, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
@@ -324,7 +318,6 @@ INSERT INTO coworker_requests (id, from_id, to_id, created_at, modified_at) VALU
 (202, 204, 200, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (203, 205, 201, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
--- 수락 동료 간 보낸/받은 추천서
 INSERT INTO recommendations (id, from_id, to_id, content, visible, created_at, modified_at) VALUES
 (200, 200, 201, '함께 일한 반장1을 추천합니다', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (201, 201, 200, '믿을 수 있는 업체입니다', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
@@ -332,7 +325,6 @@ INSERT INTO recommendations (id, from_id, to_id, content, visible, created_at, m
 (203, 203, 201, '마감 품질이 뛰어납니다', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (204, 208, 209, '배관 작업을 믿고 맡길 수 있습니다', false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
--- D. 채팅 : 그룹·1:1 각각 메시지 유형별 최소 1
 INSERT INTO group_chats (id, title, created_at, modified_at) VALUES
 (200, '샘플 그룹 채팅', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (201, '샘플 프로젝트2 그룹 채팅', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
@@ -387,14 +379,13 @@ INSERT INTO messages (id, chat_id, chat_type, member_id, type, content, created_
 (236, 204, 'DIRECT', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (237, 204, 'DIRECT', 202, 'TEXT', '견적 확인 부탁드립니다', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
--- 채팅 이미지·파일 첨부 (reference MESSAGE)
+-- message attachments
 INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
 (218, 201, 'IMAGE', 'COMPLETED', 'CHAT', 200, 'MESSAGE', 202, 'sample-att-218', 'chat', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (219, 200, 'FILE', 'COMPLETED', 'CHAT', 200, 'MESSAGE', 203, 'sample-att-219', 'estimate', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (220, 201, 'IMAGE', 'COMPLETED', 'CHAT', 200, 'MESSAGE', 212, 'sample-att-220', 'chat', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (221, 200, 'FILE', 'COMPLETED', 'CHAT', 200, 'MESSAGE', 213, 'sample-att-221', 'contract', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
--- E. 드라이브 : 개인(각 반장 공유) · 프로젝트(할당 기술자 공유), 각 노트 2개(본인·타인)
 INSERT INTO drives (id, dtype, project_id, member_id, title, created_at, modified_at) VALUES
 (200, 'MEMBER', null, 200, '샘플 개인 드라이브', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (201, 'PROJECT', 200, null, '샘플 프로젝트 드라이브', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
@@ -426,8 +417,6 @@ INSERT INTO notes (id, board_id, member_id, content, created_at, modified_at) VA
 (204, 202, 204, '프로젝트2 드라이브 본인 노트', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (205, 203, 205, '프로젝트3 드라이브 본인 노트', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
--- F. 알림 : 반장1(201)·업체(200) 수신, 기존 채팅(200)·제안(200)·동료요청(201·203) 참조.
---   읽음/안읽음 혼합. 커서가 id 기준(keyset)이므로 id 순서 = 시간 순서 유지
 INSERT INTO notifications (id, sender_id, receiver_id, type_code, reference_id, content, template_args, read_at, created_at, modified_at) VALUES
 (200, NULL, 201, 'SIGNUP_WELCOME', NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 12:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 09:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 12:00:00+00'),
 (201, NULL, 201, 'PROFILE_COMPLETION', 201, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-02 12:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-02 09:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-02 12:00:00+00'),
