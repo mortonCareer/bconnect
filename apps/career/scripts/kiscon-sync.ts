@@ -19,7 +19,7 @@ import {
   parseArrearsHtml,
   parseSubconLimitHtml,
   parseTotalCount,
-} from '../src/lib/business/kiscon-parser'
+} from '@bconnect/business/kiscon-parser'
 
 // ─── 설정 ───────────────────────────────────────
 

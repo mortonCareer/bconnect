@@ -356,6 +356,95 @@ resource "vercel_project_domain" "plan" {
 }
 
 # ===========================================================================
+# Vercel Project for Morton Landing Application (bconnect.to 허브)
+# ===========================================================================
+# 공개 마케팅·조회 사이트: / = 업체(plan) 랜딩, /career = 기술자 랜딩,
+# /one-click = 사업자 원클릭 조회. 로그인·envelope API·FCM·AWS 불필요.
+resource "vercel_project" "landing" {
+  name      = "bconnect-landing"
+  framework = "nextjs"
+
+  automatically_expose_system_environment_variables = true
+
+  git_repository = {
+    type              = "github"
+    repo              = var.github_repo
+    production_branch = var.github_branch
+  }
+
+  oidc_token_config = {
+    enabled     = true
+    issuer_mode = "team"
+  }
+
+  skew_protection = "12 hours"
+
+  root_directory = "apps/landing"
+
+  # 표준 ephemeral 프리뷰 배포 비활성 (ADR-0022 프리뷰 폐기). dev QA는 custom env "dev"가 담당
+  preview_deployments_disabled = true
+
+  git_comments = {
+    on_commit       = false
+    on_pull_request = false
+  }
+
+  vercel_authentication = {
+    deployment_type = "none"
+  }
+}
+
+# 원클릭 조회 — 정부 API + KISCON Postgres (career 와 동일 소스, packages/business 공유)
+resource "vercel_project_environment_variable" "landing_nts_api_service_key" {
+  project_id             = vercel_project.landing.id
+  key                    = "NTS_API_SERVICE_KEY"
+  value                  = var.nts_api_service_key
+  target                 = ["production"]
+  custom_environment_ids = [vercel_custom_environment.landing_dev.id]
+  sensitive              = true
+  comment                = "국세청 사업자등록정보 API (data.go.kr) - 원클릭 조회"
+}
+
+resource "vercel_project_environment_variable" "landing_kcomwel_api_service_key" {
+  project_id             = vercel_project.landing.id
+  key                    = "KCOMWEL_API_SERVICE_KEY"
+  value                  = var.kcomwel_api_service_key
+  target                 = ["production"]
+  custom_environment_ids = [vercel_custom_environment.landing_dev.id]
+  sensitive              = true
+  comment                = "근로복지공단 고용/산재보험 API (data.go.kr) - 원클릭 조회"
+}
+
+resource "vercel_project_environment_variable" "landing_database_url" {
+  project_id             = vercel_project.landing.id
+  key                    = "DATABASE_URL"
+  value                  = var.database_url
+  target                 = ["production"]
+  custom_environment_ids = [vercel_custom_environment.landing_dev.id]
+  sensitive              = true
+  comment                = "Railway Postgres - KISCON 건설업체정보 조회"
+}
+
+resource "vercel_project_environment_variable" "landing_sentry_auth_token" {
+  count                  = var.sentry_auth_token != "" ? 1 : 0
+  project_id             = vercel_project.landing.id
+  key                    = "SENTRY_AUTH_TOKEN"
+  value                  = var.sentry_auth_token
+  target                 = ["production"]
+  custom_environment_ids = [vercel_custom_environment.landing_dev.id]
+  sensitive              = true
+  comment                = "Sentry auth token - 소스맵 업로드"
+}
+
+# 도메인 apex(bconnect.to) 는 릴리스 후 컷오버 시 career_root 에서 이 프로젝트로 이전 (#896)
+# dev 는 apex 미러 — apex=landing 이므로 dev.bconnect.to = landing dev (career 는 career.dev 로 비킴)
+resource "vercel_project_domain" "landing_dev" {
+  project_id            = vercel_project.landing.id
+  domain                = "dev.${var.domain}"
+  custom_environment_id = vercel_custom_environment.landing_dev.id
+}
+
+# ===========================================================================
 # dev 브랜치 자동 preview 환경
 # ===========================================================================
 resource "vercel_custom_environment" "career_dev" {
@@ -370,6 +459,16 @@ resource "vercel_custom_environment" "career_dev" {
 
 resource "vercel_custom_environment" "plan_dev" {
   project_id  = vercel_project.plan.id
+  name        = "dev"
+  description = "dev branch 자동 deploy — staging-like preview"
+  branch_tracking = {
+    pattern = "dev"
+    type    = "equals"
+  }
+}
+
+resource "vercel_custom_environment" "landing_dev" {
+  project_id  = vercel_project.landing.id
   name        = "dev"
   description = "dev branch 자동 deploy — staging-like preview"
   branch_tracking = {

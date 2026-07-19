@@ -31,6 +31,8 @@ jobs:
             project_id: prj_RlSd4uhoHokj39k3z5P9vfb6LMMf
           - app: plan
             project_id: prj_XpYhG7GF6Fq2adC3ol7sGgvVzAUt
+          - app: landing
+            project_id: prj_mEJ2VlsFreZs528OH1a1re0KkkJt
     env:
       VERCEL_ORG_ID: team_ryk4Nqef5hyc1bMxwCBG4bTo
       VERCEL_PROJECT_ID: ${{ matrix.project_id }}
