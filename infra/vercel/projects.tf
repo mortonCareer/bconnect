@@ -220,6 +220,11 @@ resource "vercel_project_domain" "career_root" {
   domain     = var.domain
 }
 
+resource "vercel_project_domain" "career_sub" {
+  project_id = vercel_project.career.id
+  domain     = "career.${var.domain}"
+}
+
 resource "vercel_project_domain" "career_www" {
   project_id = vercel_project.career.id
   domain     = "www.${var.domain}"
