@@ -416,7 +416,7 @@ resource "vercel_project_environment_variable" "plan_dev_api_mocking" {
 # dev custom 도메인 (ADR-0016). DNS CNAME 은 가비아에서 수동 등록.
 resource "vercel_project_domain" "career_dev" {
   project_id            = vercel_project.career.id
-  domain                = "dev.${var.domain}"
+  domain                = "career.dev.${var.domain}"
   custom_environment_id = vercel_custom_environment.career_dev.id
 }
 
