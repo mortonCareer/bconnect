@@ -1,0 +1,24 @@
+# 시크릿 — 절대 커밋 금지
+android.keystore
+local.properties
+
+# 빌드 산출물
+*.apk
+*.aab
+*.idsig
+
+# 생성물 — twa-manifest.template.json + build.sh <env> 로 재생성 (SSOT는 템플릿)
+twa-manifest.json
+
+# bubblewrap / gradle 생성물 (twa-manifest.json 에서 재생성됨)
+app/
+build/
+.gradle/
+gradle/
+gradlew
+gradlew.bat
+*.gradle
+gradle.properties
+manifest-checksum.txt
+store_icon.png
+twa-manifest.json.bak
