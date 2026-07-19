@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useCallback } from 'react'
 import {
   useGetMyProfile,
   useGetMyReceivedRecommendations,
@@ -42,7 +43,6 @@ function useTopBarUtility() {
 
 /** 본인 프로필 (/profile) — My* 훅 + 수정/공유 어포던스 */
 export function OwnerProfileView() {
-  const share = useShareCurrentUrl()
   const utility = useTopBarUtility()
   const { onHideRecommendation, onDeleteRecommendation } = useRecommendationActions()
 
@@ -53,6 +53,12 @@ export function OwnerProfileView() {
   const myId = profile.data?.member?.id ?? 0
   const enabled = myId > 0
   const { onDeleteWork } = useWorkActions()
+
+  const getShareUrl = useCallback(
+    () => (myId > 0 ? `${window.location.origin}/profile/${myId}` : window.location.href),
+    [myId]
+  )
+  const share = useShareCurrentUrl({ getUrl: getShareUrl })
 
   const credentials = useGetCredentials({ memberId: myId }, { query: { enabled } })
   const received = useGetMyReceivedRecommendations()
