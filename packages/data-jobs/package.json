@@ -1,0 +1,19 @@
+{
+  "name": "@bconnect/data-jobs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "kiscon-sync": "tsx src/kiscon-sync.ts",
+    "kiscon-construction-sync": "tsx src/kiscon-construction-sync.ts"
+  },
+  "dependencies": {
+    "@bconnect/business": "workspace:*",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "^4.21.0",
+    "typescript": "catalog:"
+  }
+}
