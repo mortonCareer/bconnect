@@ -14,6 +14,7 @@ interface SignupState {
   formData: SignupFormData
   setPhone: (phone: string) => void
   setUsername: (username: string) => void
+  setName: (name: string) => void
   setSignupToken: (token: string) => void
   setProfile: (profile: Partial<Omit<SignupFormData, 'phone' | 'username' | 'signupToken'>>) => void
   reset: () => void
@@ -40,6 +41,11 @@ export const useSignupStore = create<SignupState>()((set) => ({
   setUsername: (username) =>
     set((state) => ({
       formData: { ...state.formData, username },
+    })),
+
+  setName: (name) =>
+    set((state) => ({
+      formData: { ...state.formData, name },
     })),
 
   setSignupToken: (signupToken) =>
