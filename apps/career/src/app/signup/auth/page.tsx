@@ -71,12 +71,19 @@ export default function SignupAuthPage() {
     }
   }
 
-  const verifyCode = async () => {
+  const lastFailedAttempt = useRef<{ code: string; error: unknown } | null>(null)
+
+  const verifyCode = async ({ silent = false }: { silent?: boolean } = {}) => {
     const { phone, code } = form.getValues()
+    if (lastFailedAttempt.current?.code === code) {
+      if (!silent) codeServer.capture(lastFailedAttempt.current.error, form.getValues())
+      return
+    }
     try {
       const result = await verifyCodeMutation.mutateAsync({
         data: { phone: toNationalNumber(phone), code },
       })
+      lastFailedAttempt.current = null
       if (result.registered) {
         // 이미 가입된 회원 — 로그인 처리 후 홈으로 (member 정보는 useGetMyMember 로 별도 조회)
         login(result.accessToken)
@@ -88,7 +95,8 @@ export default function SignupAuthPage() {
         router.push('/signup/username')
       }
     } catch (err) {
-      codeServer.capture(err, form.getValues())
+      lastFailedAttempt.current = { code, error: err }
+      if (!silent) codeServer.capture(err, form.getValues())
     }
   }
 
@@ -98,7 +106,7 @@ export default function SignupAuthPage() {
     if (step !== 'otp' || !isCodeValid || verifyCodeMutation.isPending) return
     if (lastAutoVerifiedCode.current === codeValue) return
     lastAutoVerifiedCode.current = codeValue
-    void verifyCode()
+    void verifyCode({ silent: true })
   }, [step, isCodeValid, codeValue, verifyCodeMutation.isPending, verifyCode])
 
   const handleSubmit = async (e: React.FormEvent) => {
