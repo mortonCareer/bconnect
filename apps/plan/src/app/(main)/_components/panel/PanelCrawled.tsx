@@ -155,12 +155,6 @@ export function PanelCrawled({ crawledId }: { crawledId: number }) {
 
               {tab === 'intro' ? (
                 <div className="flex flex-col gap-6 p-4">
-                  {d.headline && (
-                    <div className="flex flex-col gap-2">
-                      <h3 className="text-sb-16 text-gray-900">한 줄 소개</h3>
-                      <p className="text-r-14 text-gray-900">{d.headline}</p>
-                    </div>
-                  )}
                   <div className="flex flex-col gap-2">
                     <h3 className="text-sb-16 text-gray-900">소개</h3>
                     {data.profile?.about ? (
