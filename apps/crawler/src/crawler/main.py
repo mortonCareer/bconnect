@@ -11,6 +11,7 @@ from crawler.channels.instagram import (
     InstagramBlockedError, reset_block_counter,
 )
 from crawler.classifier import classify, format_phone, infer_region_from_address, METRO_REGIONS
+from crawler.classifier_rules import rule_reject
 from crawler.config import settings
 from crawler.models import (
     CrawledMember, CrawledPost, CrawledProfile,
@@ -154,6 +155,19 @@ async def _classify_scraped(
     원본만 있으면 재실행 가능 — 분류 방법을 바꿔도 다시 수집할 필요 없음(#920).
     """
     profile_intro = profile.get("profile_intro", "")
+
+    # 값싼 규칙 선필터: 확실한 비-기술자(자동차·인력사무소·협찬글 등)는 LLM 없이 즉시 제외 (#915)
+    rejected = rule_reject({
+        "company": profile.get("blog_title", ""),
+        "headline": profile_intro,
+        "about": profile["about"],
+    })
+    if rejected:
+        _, reason = rejected
+        log.info("규칙 제외(%s): %s (%s)", reason, blogger_name, blog_url)
+        if report:
+            report.add_skipped(blog_url, blogger_name, f"규칙:{reason}")
+        return None
 
     # LLM 분류: 프로필 소개 + 게시글 본문을 종합하여 분류
     combined_about = ""
