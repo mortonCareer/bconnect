@@ -437,10 +437,10 @@ resource "vercel_project_environment_variable" "landing_sentry_auth_token" {
 }
 
 # 도메인 apex(bconnect.to) 는 릴리스 후 컷오버 시 career_root 에서 이 프로젝트로 이전 (#896)
-# dev custom 도메인 (DNS CNAME 은 가비아 수동 등록)
+# dev 는 apex 미러 — apex=landing 이므로 dev.bconnect.to = landing dev (career 는 career.dev 로 비킴)
 resource "vercel_project_domain" "landing_dev" {
   project_id            = vercel_project.landing.id
-  domain                = "landing.dev.${var.domain}"
+  domain                = "dev.${var.domain}"
   custom_environment_id = vercel_custom_environment.landing_dev.id
 }
 

@@ -12,6 +12,7 @@
   "dependencies": {
     "@bconnect/business": "workspace:*",
     "@bconnect/config": "workspace:*",
+    "@bconnect/features": "workspace:*",
     "@bconnect/ui": "workspace:*",
     "@next/third-parties": "catalog:",
     "@sentry/nextjs": "catalog:",

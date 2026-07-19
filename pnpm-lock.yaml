@@ -237,6 +237,9 @@ importers:
       '@bconnect/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@bconnect/features':
+        specifier: workspace:*
+        version: link:../../packages/features
       '@bconnect/ui':
         specifier: workspace:*
         version: link:../../packages/ui
