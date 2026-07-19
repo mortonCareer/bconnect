@@ -1,13 +1,9 @@
 # career 안드로이드 TWA 빌드
 
-career PWA를 [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap)으로 안드로이드 TWA(Trusted Web Activity)로 패키징한다. 결정 배경은 [ADR-0023](../../../docs/explanation/adr/0023-android-twa-packaging-bubblewrap.md).
+career PWA를 [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap)으로 안드로이드 TWA(Trusted Web Activity)로 패키징한다. TWA는 콘텐츠를 라이브 URL에서 로드하므로 **웹 배포만으로 앱 내용이 갱신**되고, 재빌드는 앱 메타(host·아이콘·이름·버전)가 바뀔 때만 한다. 결정 배경은 [ADR-0023](../../../docs/explanation/adr/0023-android-twa-packaging-bubblewrap.md).
 
 > **For**: career 앱을 Play/사이드로드로 배포·재빌드하는 사람.
 > **You'll be able to**: 도메인·아이콘·이름·버전 변경 후 TWA를 재빌드해 새 apk/aab를 얻는다.
-
-## 이게 왜 필요한가
-
-TWA는 콘텐츠를 라이브 URL에서 로드하므로, **웹 배포만으로 앱 내용이 갱신**된다 — 재빌드는 앱 메타(`twa-manifest.json`의 host·아이콘·이름·버전)나 네이티브 동작이 바뀔 때만. 빈도가 낮아 CI 자동화 대신 스크립트로 관리한다 (#911).
 
 ## 커밋되는 것 / 안 되는 것
 
@@ -49,10 +45,3 @@ export TWA_KEYSTORE_PASSWORD=... TWA_KEY_PASSWORD=...
 - **Play 배포**: Play App Signing이 AAB를 재서명하므로 지문은 **Play 콘솔의 App Signing 인증서 SHA-256** (로컬 키 지문 아님). Play 배포 전환 시 assetlinks를 그 지문으로 갱신.
 
 host를 바꾸면(예: #902 `dev.bconnect.to`→`career.dev.bconnect.to`) **새 host에도 같은 assetlinks가 서빙되는지** 확인하고 재빌드한다.
-
-## 알려진 함정
-
-- **build-tools 34.0.0 필수** — bubblewrap이 34.0.0을 핀해 apksigner/zipalign 경로에 쓴다. 35.0.0만 설치하면 빌드 실패. `setup-toolchain.sh`가 둘 다 설치.
-- **비대화식 실행** — 모든 bubblewrap 호출에 `< /dev/null`. `yes |` 파이프는 inquirer가 stdin 플러드를 에코해 로그를 도배하니 금지.
-- **DNS 전파** — 새 host의 CNAME을 막 등록한 직후엔 시스템 resolver가 못 풀어 `bubblewrap update`가 `ENOTFOUND`로 실패할 수 있다. `getent hosts <host>`가 응답할 때까지 기다린 뒤 빌드.
-- **JDK 자동설치 깨짐** — bubblewrap 자동 JDK는 소스트리를 받아 `bin/java`가 없다. `setup-toolchain.sh`가 Temurin JDK17을 직접 받아 `~/.bubblewrap/config.json`에 경로를 지정.

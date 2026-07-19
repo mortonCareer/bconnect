@@ -96,16 +96,9 @@ Docker 이미지 생성
 
 ### Android 앱 (career TWA)
 
-career PWA를 [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap)으로 Android TWA(Trusted Web Activity)로 패키징해 Play/사이드로드 배포한다. TWA는 콘텐츠를 라이브 URL에서 로드하므로 **웹 배포만으로 앱 내용이 갱신**되고, 앱 재빌드는 `twa-manifest.template.json`(이름·아이콘·host 등)이 바뀔 때만 한다.
+career PWA를 [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap)으로 Android TWA(Trusted Web Activity)로 패키징해 Play/사이드로드 배포한다. TWA는 콘텐츠를 라이브 URL에서 로드하므로 **웹 배포만으로 앱 내용이 갱신**되고, 앱 재빌드는 앱 메타(이름·아이콘·host 등)가 바뀔 때만 한다.
 
-```bash
-cd apps/career/android-twa
-export TWA_KEYSTORE_PASSWORD=... TWA_KEY_PASSWORD=...
-./build.sh prod   # career.bconnect.to (Play/실서비스)
-./build.sh dev    # career.dev.bconnect.to (사이드로드 테스트)
-```
-
-빌드 사전조건(툴체인·키스토어)·산출물·Digital Asset Links·함정은 [`apps/career/android-twa/README.md`](../../apps/career/android-twa/README.md)가 SSOT다. 도구 선택 근거는 [ADR-0023](../explanation/adr/0023-android-twa-packaging-bubblewrap.md).
+빌드 방법(`build.sh dev|prod`)·사전조건·Digital Asset Links는 [`apps/career/android-twa/README.md`](../../apps/career/android-twa/README.md)가 SSOT다. 도구 선택 근거는 [ADR-0023](../explanation/adr/0023-android-twa-packaging-bubblewrap.md).
 
 ---
 
