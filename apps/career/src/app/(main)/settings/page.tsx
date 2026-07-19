@@ -48,28 +48,30 @@ export default function SettingsPage() {
     <div className="flex flex-col">
       <TopBar variant="default" title="설정" showAction={false} backHref="/profile" />
 
-      <div className="flex flex-col gap-6 px-4 py-4">
-        <section className="flex flex-col gap-2">
-          <h2 className="text-sb-14 text-gray-900">서비스</h2>
-          <SettingsRow label="공지사항" onClick={notReady} />
-          <SettingsRow label="문의/건의" onClick={notReady} />
-          <SettingsRow label="후기 작성하기" onClick={notReady} />
+      <div className="flex flex-col gap-7 px-4 py-4">
+        <section className="flex flex-col gap-1">
+          <h2 className="text-sb-16 text-gray-900">서비스</h2>
+          <div className="flex flex-col">
+            <SettingsRow label="공지사항" onClick={notReady} />
+            <SettingsRow label="문의/건의" onClick={notReady} />
+            <SettingsRow label="후기 작성하기" onClick={notReady} />
+          </div>
         </section>
 
-        <section className="flex flex-col gap-2">
-          <h2 className="text-sb-14 text-gray-900">이용정책</h2>
-          <SettingsRow label="서비스 이용약관" href="/terms" />
-          <SettingsRow label="개인정보 처리방침" href="/privacy" />
+        <section className="flex flex-col gap-1">
+          <h2 className="text-sb-16 text-gray-900">이용정책</h2>
+          <div className="flex flex-col">
+            <SettingsRow label="서비스 이용약관" href="/terms" />
+            <SettingsRow label="개인정보 처리방침" href="/privacy" />
+          </div>
         </section>
 
-        <section className="flex flex-col gap-2">
-          <h2 className="text-sb-14 text-gray-900">로그아웃/회원탈퇴</h2>
-          <SettingsRow label="로그아웃" variant="destructive" onClick={() => setLogoutOpen(true)} />
-          <SettingsRow
-            label="회원탈퇴"
-            variant="destructive"
-            onClick={() => setWithdrawOpen(true)}
-          />
+        <section className="flex flex-col gap-1">
+          <h2 className="text-sb-16 text-gray-900">로그아웃/회원탈퇴</h2>
+          <div className="flex flex-col">
+            <SettingsRow label="로그아웃" onClick={() => setLogoutOpen(true)} />
+            <SettingsRow label="회원탈퇴" onClick={() => setWithdrawOpen(true)} />
+          </div>
         </section>
       </div>
 
