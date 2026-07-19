@@ -9,9 +9,6 @@ on:
 jobs:
   sync:
     runs-on: morton-runner
-    defaults:
-      run:
-        working-directory: apps/career
     steps:
       - uses: actions/checkout@v6
 
@@ -24,13 +21,12 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        working-directory: .
 
       - name: Sync KISCON data to Postgres
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: pnpm exec tsx scripts/kiscon-sync.ts
+        run: pnpm --filter @bconnect/data-jobs kiscon-sync
 
       - name: Notify Slack on failure or cancellation
         if: failure() || cancelled()
