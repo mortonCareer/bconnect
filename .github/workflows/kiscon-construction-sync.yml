@@ -14,7 +14,7 @@ on:
 
 jobs:
   sync:
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     defaults:
       run:
         working-directory: apps/career
