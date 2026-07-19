@@ -8,6 +8,7 @@ import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
 import { PanelMessage } from '../_shared/PanelMessage'
 import { useNotifications } from './useNotifications'
+import { groupChatNotifications } from './_parts/groupChatNotifications'
 
 type NotificationsViewShellProps =
   | {
@@ -31,7 +32,8 @@ export function NotificationsView(props: NotificationsViewProps) {
   const { mutate: markAllRead, isPending: isMarkingAllRead } = useUpdateNotificationsRead()
 
   const notifications = data?.pages.flatMap((page) => page.content ?? []) ?? []
-  const hasItems = notifications.length > 0
+  const groups = groupChatNotifications(notifications)
+  const hasItems = groups.length > 0
 
   const bottomObserverRef = useRef<HTMLDivElement>(null)
   const handleBottomObserver = useCallback(
@@ -73,13 +75,13 @@ export function NotificationsView(props: NotificationsViewProps) {
         ) : (
           <>
             <ul className="flex flex-col">
-              {notifications.map((n) => (
+              {groups.map(({ representative: n, count, hasUnread }) => (
                 <li key={n.id} className="contents">
                   <NotificationItem
                     profileImage={n.sender?.picture}
-                    content={n.message ?? ''}
+                    content={count > 1 ? `${n.message ?? ''} · ${count}개` : (n.message ?? '')}
                     timestamp={formatRelativeTime(n.createdAt ?? '')}
-                    read={n.read}
+                    read={!hasUnread}
                   />
                 </li>
               ))}
