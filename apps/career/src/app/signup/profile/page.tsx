@@ -59,7 +59,6 @@ export default function SignupProfilePage() {
     resolver: zodResolver(profileSchema),
     mode: 'onTouched',
     defaultValues: {
-      name: formData.name || '',
       fields: formData.fields || [],
       primaryField: formData.primaryField || undefined,
       experience: formData.experience ?? undefined,
@@ -111,7 +110,7 @@ export default function SignupProfilePage() {
           await registerMemberMutation.mutateAsync({
             data: {
               username: formData.username,
-              name: data.name,
+              name: formData.name,
               role: Role.USER,
             },
           })
@@ -155,16 +154,6 @@ export default function SignupProfilePage() {
               <br />
               역할을 선택해주세요
             </h1>
-
-            {/* 이름 */}
-            <TextField
-              control={control}
-              name="name"
-              type="text"
-              label="이름"
-              required
-              placeholder="이름을 입력해주세요"
-            />
 
             {/* 시공분야 */}
             <TradeSelector control={control} name="fields" max={MAX_TRADES} />

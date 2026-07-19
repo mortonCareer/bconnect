@@ -6,7 +6,6 @@ import { z } from 'zod'
 export const MAX_TRADES = 3
 
 export const profileSchema = z.object({
-  name: z.string().min(1, '이름을 입력해주세요.').max(50, '이름은 50자 이내로 입력해주세요.'),
   fields: z
     .array(z.string())
     .min(1, '시공분야를 1개 이상 선택해주세요.')

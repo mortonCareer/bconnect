@@ -16,12 +16,13 @@ import { usernameSchema, type UsernameFormData } from './schema'
 
 export default function SignupUsernamePage() {
   const router = useRouter()
-  const { formData, setUsername } = useSignupStore()
+  const { formData, setUsername, setName } = useSignupStore()
 
   const form = useForm<UsernameFormData>({
     resolver: zodResolver(usernameSchema),
     mode: 'onTouched',
     defaultValues: {
+      name: formData.name,
       username: formData.username,
     },
   })
@@ -40,6 +41,7 @@ export default function SignupUsernamePage() {
         form.setError('username', { message: '이미 존재하는 사용자 이름입니다.' })
         return
       }
+      setName(data.name)
       setUsername(data.username)
       router.push('/signup/profile')
     } catch (err) {
@@ -57,10 +59,21 @@ export default function SignupUsernamePage() {
           {/* Title Section */}
           <div className="flex flex-col gap-4">
             <h1 className="text-2xl font-semibold leading-[1.4] text-black">
-              서비스에서 사용할 ID를
+              이름과 서비스에서 사용할 ID를
               <br />
               입력해 주세요
             </h1>
+
+            {/* Name Input */}
+            <TextField
+              control={control}
+              name="name"
+              type="text"
+              autoComplete="name"
+              label="이름"
+              required
+              placeholder="이름을 입력해주세요"
+            />
 
             {/* Username Input */}
             <TextField
@@ -68,6 +81,7 @@ export default function SignupUsernamePage() {
               name="username"
               type="text"
               autoComplete="username"
+              label="사용자 ID"
               description="ID는 프로필과 검색에 활용되며, 한 번 설정하면 변경이 불가해요."
               placeholder="아이디를 입력해주세요"
               transform={formatUsername}
