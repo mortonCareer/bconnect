@@ -30,8 +30,12 @@ interface RecommendationListProps {
   variant?: 'full' | 'inline'
   /** owner 전용. 받은 추천서 카드 ⋮ → 숨김. 없으면 받은 탭 케밥 안 그림 (viewer/plan) */
   onHide?: (id: number) => void
+  /** owner 전용. 받은 추천서 카드 ⋮ → 숨김 해제 (visible=false 일 때). onHide 와 함께 토글 구성 */
+  onShow?: (id: number) => void
   /** owner 전용. 보낸 추천서 카드 ⋮ → 삭제. 없으면 보낸 탭 케밥 안 그림 (viewer/plan) */
   onDelete?: (id: number) => void
+  /** owner 전용. 보낸 추천서 카드 ⋮ → 수정 화면으로 이동 */
+  onEdit?: (id: number) => void
 }
 
 export function RecommendationList({
@@ -39,7 +43,9 @@ export function RecommendationList({
   sent,
   variant = 'full',
   onHide,
+  onShow,
   onDelete,
+  onEdit,
 }: RecommendationListProps) {
   const [mode, setMode] = useQueryState(
     'rtab',
@@ -118,18 +124,24 @@ export function RecommendationList({
             ? []
             : mode === 'received'
               ? [
-                  {
-                    label: '숨김',
-                    icon: <HideIcon size={18} />,
-                    onSelect: () => openRec.id != null && onHide?.(openRec.id),
-                  },
+                  openRec.visible === false
+                    ? {
+                        label: '숨김 해제',
+                        icon: <HideIcon size={18} />,
+                        onSelect: () => openRec.id != null && onShow?.(openRec.id),
+                      }
+                    : {
+                        label: '숨김',
+                        icon: <HideIcon size={18} />,
+                        onSelect: () => openRec.id != null && onHide?.(openRec.id),
+                      },
                 ]
               : [
                   {
                     label: '수정',
                     icon: <EditIcon size={18} />,
-                    disabled: true,
-                    onSelect: () => {},
+                    disabled: !onEdit,
+                    onSelect: () => openRec.id != null && onEdit?.(openRec.id),
                   },
                   {
                     label: '삭제',
