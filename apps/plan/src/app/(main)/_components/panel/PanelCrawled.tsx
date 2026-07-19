@@ -186,26 +186,39 @@ export function PanelCrawled({ crawledId }: { crawledId: number }) {
                       <p className="text-r-14 text-gray-500">작업물이 없습니다</p>
                     </div>
                   ) : (
-                    posts.map((post, i) => (
-                      // 회원 WorkCard 레이아웃 준용 — 대표 이미지 + 제목/본문 (이미지는 no-referrer)
-                      <div key={post.id ?? i} className="flex flex-col">
-                        {post.images?.[0] && (
-                          <div className="h-[220px] w-full overflow-hidden bg-gray-100">
-                            <CrawledImage
-                              src={post.images[0]}
-                              alt={post.title ?? '시공 사진'}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                        )}
-                        <div className="flex flex-col gap-1 px-4 pt-3 pb-4">
-                          {post.title && <p className="text-m-16 text-gray-900">{post.title}</p>}
-                          {post.content && (
-                            <p className="line-clamp-2 text-r-14 text-gray-500">{post.content}</p>
+                    posts.map((post, i) => {
+                      // 회원 WorkCard 레이아웃 준용 — 시공 사진 가로 스크롤 + 제목/본문
+                      const images = (post.images ?? []).slice(0, 10)
+                      const isMulti = images.length > 1
+                      return (
+                        <div key={post.id ?? i} className="flex flex-col">
+                          {images.length > 0 && (
+                            <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-4 px-4">
+                              {images.map((src, j) => (
+                                <div
+                                  key={`${src}-${j}`}
+                                  className={`h-[220px] shrink-0 snap-start overflow-hidden bg-gray-100 ${
+                                    isMulti ? 'w-[88%]' : 'w-full'
+                                  }`}
+                                >
+                                  <CrawledImage
+                                    src={src}
+                                    alt={post.title ?? '시공 사진'}
+                                    className="h-full w-full object-cover"
+                                  />
+                                </div>
+                              ))}
+                            </div>
                           )}
+                          <div className="flex flex-col gap-1 px-4 pt-3 pb-4">
+                            {post.title && <p className="text-m-16 text-gray-900">{post.title}</p>}
+                            {post.content && (
+                              <p className="line-clamp-2 text-r-14 text-gray-500">{post.content}</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      )
+                    })
                   )}
                 </div>
               )}
