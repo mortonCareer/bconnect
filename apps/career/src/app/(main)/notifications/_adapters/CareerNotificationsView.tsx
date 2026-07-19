@@ -7,14 +7,15 @@ import { careerShell } from '@/app/(main)/_adapters/careerShell'
 
 /**
  * 알림 유형(BE `referenceType`)별 career 이동 목적지.
- * CHAT_ROOM → 채팅방, PROFILE → 본인 프로필 편집(완성 넛지).
- * 나머지(OFFER·COWORKER_REQUEST·CONTRACT·NONE)는 아직 수신 화면 미구현(#842/#843) → 읽음 처리만.
+ * chat_room → 채팅방, profile → 본인 프로필 편집(완성 넛지).
+ * 나머지(offer·coworker_request·contract·none)는 아직 수신 화면 미구현(#842/#843) → 읽음 처리만.
+ * BE 는 referenceType 을 소문자로 내려준다(NotificationResponse.of: `.name().toLowerCase()`) — 방어적으로 정규화.
  */
 function resolveHref(n: Notification): string | undefined {
-  switch (n.referenceType) {
-    case 'CHAT_ROOM':
+  switch (n.referenceType?.toLowerCase()) {
+    case 'chat_room':
       return n.referenceId != null ? `/messages/${n.referenceId}` : undefined
-    case 'PROFILE':
+    case 'profile':
       return '/profile/edit'
     default:
       return undefined

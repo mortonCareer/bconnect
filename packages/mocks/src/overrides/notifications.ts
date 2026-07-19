@@ -106,14 +106,15 @@ const SEEDS: NotificationSeed[] = [
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
-// 알림 type → referenceType (BE NotificationType enum 과 동일 매핑). 클릭 이동 목적지 유도용.
+// 알림 type → referenceType. BE NotificationResponse 는 referenceType 을 소문자로 직렬화하므로
+// (`type.referenceType().name().toLowerCase()`) mock 도 소문자로 맞춘다.
 const REFERENCE_TYPE: Record<string, string> = {
-  CHAT_MESSAGE: 'CHAT_ROOM',
-  SIGNUP_WELCOME: 'NONE',
-  PROFILE_COMPLETION: 'PROFILE',
-  COWORKER_REQUESTED: 'COWORKER_REQUEST',
-  OFFER_RECEIVED: 'OFFER',
-  CONTRACT_WRITTEN: 'CONTRACT',
+  CHAT_MESSAGE: 'chat_room',
+  SIGNUP_WELCOME: 'none',
+  PROFILE_COMPLETION: 'profile',
+  COWORKER_REQUESTED: 'coworker_request',
+  OFFER_RECEIVED: 'offer',
+  CONTRACT_WRITTEN: 'contract',
 }
 
 // 채팅 알림은 실제 mock 채팅방(chats.ts: id 1~3)으로 이동하도록 referenceId 를 연결.
@@ -121,11 +122,11 @@ const CHAT_ROOM_IDS = [1, 2, 3]
 
 // id 내림차순(최신순) — BE 커서(keyset, id 기준)와 동일한 정렬 의미
 const notifications: Notification[] = SEEDS.map((seed, i) => {
-  const referenceType = REFERENCE_TYPE[seed.type] ?? 'NONE'
+  const referenceType = REFERENCE_TYPE[seed.type] ?? 'none'
   const referenceId =
-    referenceType === 'NONE'
+    referenceType === 'none'
       ? undefined
-      : referenceType === 'CHAT_ROOM'
+      : referenceType === 'chat_room'
         ? CHAT_ROOM_IDS[i % CHAT_ROOM_IDS.length]
         : 100 + i
   return {
