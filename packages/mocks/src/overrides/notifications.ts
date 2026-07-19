@@ -106,19 +106,42 @@ const SEEDS: NotificationSeed[] = [
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
+// 알림 type → referenceType (BE NotificationType enum 과 동일 매핑). 클릭 이동 목적지 유도용.
+const REFERENCE_TYPE: Record<string, string> = {
+  CHAT_MESSAGE: 'CHAT_ROOM',
+  SIGNUP_WELCOME: 'NONE',
+  PROFILE_COMPLETION: 'PROFILE',
+  COWORKER_REQUESTED: 'COWORKER_REQUEST',
+  OFFER_RECEIVED: 'OFFER',
+  CONTRACT_WRITTEN: 'CONTRACT',
+}
+
+// 채팅 알림은 실제 mock 채팅방(chats.ts: id 1~3)으로 이동하도록 referenceId 를 연결.
+const CHAT_ROOM_IDS = [1, 2, 3]
+
 // id 내림차순(최신순) — BE 커서(keyset, id 기준)와 동일한 정렬 의미
-const notifications: Notification[] = SEEDS.map((seed, i) => ({
-  id: SEEDS.length - i,
-  type: seed.type,
-  message: seed.message,
-  content: '',
-  referenceType: 'none',
-  sender: seed.senderName
-    ? { id: 100 + i, name: seed.senderName, username: `user${100 + i}` }
-    : undefined,
-  read: seed.read,
-  createdAt: new Date(Date.now() - seed.daysAgo * DAY_MS).toISOString(),
-}))
+const notifications: Notification[] = SEEDS.map((seed, i) => {
+  const referenceType = REFERENCE_TYPE[seed.type] ?? 'NONE'
+  const referenceId =
+    referenceType === 'NONE'
+      ? undefined
+      : referenceType === 'CHAT_ROOM'
+        ? CHAT_ROOM_IDS[i % CHAT_ROOM_IDS.length]
+        : 100 + i
+  return {
+    id: SEEDS.length - i,
+    type: seed.type,
+    message: seed.message,
+    content: '',
+    referenceType,
+    referenceId,
+    sender: seed.senderName
+      ? { id: 100 + i, name: seed.senderName, username: `user${100 + i}` }
+      : undefined,
+    read: seed.read,
+    createdAt: new Date(Date.now() - seed.daysAgo * DAY_MS).toISOString(),
+  }
+})
 
 const DEFAULT_LIMIT = 20
 

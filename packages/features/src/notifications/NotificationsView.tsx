@@ -1,13 +1,22 @@
 'use client'
 
 import { useCallback, useEffect, useRef, type ReactNode } from 'react'
-import { useUpdateNotificationsRead } from '@bconnect/api-client'
+import Link from 'next/link'
+import {
+  updateNotificationRead,
+  useUpdateNotificationsRead,
+  useQueryClient,
+  getGetNotificationsQueryKey,
+  getGetNotificationsUnreadCountQueryKey,
+} from '@bconnect/api-client'
+import type { Notification } from '@bconnect/api-client'
 import { NotificationItem, Skeleton } from '@bconnect/ui'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
 import { PanelMessage } from '../_shared/PanelMessage'
 import { useNotifications } from './useNotifications'
+import { groupChatNotifications } from './_parts/groupChatNotifications'
 
 type NotificationsViewShellProps =
   | {
@@ -23,15 +32,33 @@ type NotificationsViewShellProps =
       onClose: () => void
     }
 
-export type NotificationsViewProps = NotificationsViewShellProps
+export type NotificationsViewProps = NotificationsViewShellProps & {
+  /**
+   * 알림 클릭 시 이동할 목적지 href. `undefined` 를 반환하면 이동 없이 읽음 처리만 한다.
+   * 앱별 라우팅(career 경로 / plan `?panel=`)이 달라 앱에서 주입한다.
+   */
+  resolveHref?: (notification: Notification) => string | undefined
+}
 
 export function NotificationsView(props: NotificationsViewProps) {
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useNotifications()
   const { mutate: markAllRead, isPending: isMarkingAllRead } = useUpdateNotificationsRead()
+  const queryClient = useQueryClient()
+
+  // 그룹 내 안 읽은 id 를 전부 개별 읽음 처리하고(bulk-by-id 엔드포인트 없음) 마지막에 한 번만 무효화.
+  // 개별 hook 을 N 번 부르면 성공마다 재조회가 몰리므로(thundering) raw 함수 + 단일 invalidate.
+  const readOnClick = (unreadIds: number[]) => {
+    if (unreadIds.length === 0) return
+    void Promise.all(unreadIds.map((id) => updateNotificationRead(id))).then(() => {
+      queryClient.invalidateQueries({ queryKey: getGetNotificationsQueryKey() })
+      queryClient.invalidateQueries({ queryKey: getGetNotificationsUnreadCountQueryKey() })
+    })
+  }
 
   const notifications = data?.pages.flatMap((page) => page.content ?? []) ?? []
-  const hasItems = notifications.length > 0
+  const groups = groupChatNotifications(notifications)
+  const hasItems = groups.length > 0
 
   const bottomObserverRef = useRef<HTMLDivElement>(null)
   const handleBottomObserver = useCallback(
@@ -73,16 +100,35 @@ export function NotificationsView(props: NotificationsViewProps) {
         ) : (
           <>
             <ul className="flex flex-col">
-              {notifications.map((n) => (
-                <li key={n.id} className="contents">
+              {groups.map(({ representative: n, unreadIds, count }) => {
+                const href = props.resolveHref?.(n)
+                const content = count > 1 ? `${n.message ?? ''} · ${count}개` : (n.message ?? '')
+                const item = (
                   <NotificationItem
                     profileImage={n.sender?.picture}
-                    content={n.message ?? ''}
+                    content={content}
                     timestamp={formatRelativeTime(n.createdAt ?? '')}
-                    read={n.read}
+                    read={unreadIds.length === 0}
                   />
-                </li>
-              ))}
+                )
+                return (
+                  <li key={n.id} className="contents">
+                    {href ? (
+                      <Link href={href} onClick={() => readOnClick(unreadIds)} className="block">
+                        {item}
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => readOnClick(unreadIds)}
+                        className="block w-full text-left"
+                      >
+                        {item}
+                      </button>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
             <div ref={bottomObserverRef} className="h-px" aria-hidden />
             {isFetchingNextPage && <NotificationsSkeleton />}
