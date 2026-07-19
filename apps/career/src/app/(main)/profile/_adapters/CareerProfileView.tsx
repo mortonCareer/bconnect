@@ -12,6 +12,7 @@ import {
   useGetSentRecommendations,
   useCreateCoworkerRequest,
   useCreateDirectChat,
+  useGetCoworkers,
   useGetSentCoworkerRequests,
 } from '@bconnect/api-client'
 import {
@@ -22,6 +23,7 @@ import {
 } from '@bconnect/features'
 import { Button, SettingsIcon, toast, isApiErrorShape } from '@bconnect/ui'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
+import { CoworkerActionButton } from '@/app/(main)/_components/CoworkerActionButton'
 import { useShareCurrentUrl } from '@/hooks/useShareCurrentUrl'
 import { useRecommendationActions } from './useRecommendationActions'
 import { useWorkActions } from './useWorkActions'
@@ -122,6 +124,12 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
   const received = useGetReceivedRecommendations({ memberId }, { query: { enabled } })
   const sent = useGetSentRecommendations({ memberId }, { query: { enabled } })
 
+  // ProfileResponse 에 관계 필드가 없어, 내 동료 목록에 타겟이 있는지로 성립된 동료 여부 파생
+  const myProfile = useGetMyProfile()
+  const myId = myProfile.data?.member?.id ?? 0
+  const myCoworkers = useGetCoworkers({ memberId: myId }, { query: { enabled: myId > 0 } })
+  const isCoworker = myCoworkers.data?.some((coworker) => coworker.member?.id === memberId) ?? false
+
   const coworker = useCreateCoworkerRequest({
     mutation: {
       onSuccess: () => toast({ description: '동료 요청을 보냈어요', variant: 'success' }),
@@ -179,15 +187,13 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
       }}
       actionSlot={
         <div className="flex gap-2 px-4 py-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            disabled={coworker.isPending || requested}
-            onClick={() => enabled && coworker.mutate({ data: { toId: memberId } })}
-          >
-            {requested ? '요청됨' : coworker.isPending ? '요청 중...' : '동료 추가'}
-          </Button>
+          <CoworkerActionButton
+            memberId={memberId}
+            isCoworker={isCoworker}
+            requested={requested}
+            addPending={coworker.isPending}
+            onAdd={() => enabled && coworker.mutate({ data: { toId: memberId } })}
+          />
           <Button
             variant="outline"
             size="sm"
