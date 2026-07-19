@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     outputs:
       career: ${{ steps.filter.outputs.career }}
       plan: ${{ steps.filter.outputs.plan }}
@@ -70,7 +70,7 @@ jobs:
               - 'packages/config/eslint/**'
 
   format:
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     steps:
       - uses: actions/checkout@v6
 
@@ -90,7 +90,7 @@ jobs:
   ci-career:
     needs: changes
     if: ${{ needs.changes.outputs.career == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     steps:
       - uses: actions/checkout@v6
 
@@ -117,7 +117,7 @@ jobs:
   ci-plan:
     needs: changes
     if: ${{ needs.changes.outputs.plan == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     steps:
       - uses: actions/checkout@v6
 
@@ -144,7 +144,7 @@ jobs:
   ci-api:
     needs: changes
     if: ${{ needs.changes.outputs.api == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
@@ -196,7 +196,7 @@ jobs:
   ci-api-spec:
     needs: changes
     if: ${{ needs.changes.outputs.api-spec == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     permissions: write-all
     steps:
       - name: Checkout sources
@@ -238,7 +238,7 @@ jobs:
   ci-packages:
     needs: changes
     if: ${{ needs.changes.outputs.packages == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     steps:
       - uses: actions/checkout@v6
 
@@ -263,7 +263,7 @@ jobs:
   ci-crawler:
     needs: changes
     if: ${{ needs.changes.outputs.crawler == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     defaults:
       run:
         working-directory: apps/crawler
