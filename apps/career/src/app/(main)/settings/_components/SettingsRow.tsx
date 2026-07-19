@@ -1,25 +1,34 @@
 import Link from 'next/link'
-import { Button } from '@bconnect/ui'
+import { ChevronIcon } from '@bconnect/ui'
 
 interface SettingsRowProps {
   label: string
   href?: string
   onClick?: () => void
-  variant?: 'outline' | 'destructive'
 }
 
-/** 설정 메뉴 행 — full-width 버튼. href 면 Link, 아니면 onClick */
-export function SettingsRow({ label, href, onClick, variant = 'outline' }: SettingsRowProps) {
+const rowClassName =
+  'flex h-10 w-full items-center justify-between border-b border-gray-300 transition-opacity active:opacity-60'
+
+/** 설정 메뉴 행 — 좌 라벨 + 우 chevron, 하단 divider. href 면 Link, 아니면 onClick */
+export function SettingsRow({ label, href, onClick }: SettingsRowProps) {
+  const content = (
+    <>
+      <span className="text-r-14 text-gray-900">{label}</span>
+      <ChevronIcon direction="right" size={16} className="text-gray-400" />
+    </>
+  )
+
   if (href) {
     return (
-      <Button asChild variant={variant} size="sm" className="w-full">
-        <Link href={href}>{label}</Link>
-      </Button>
+      <Link href={href} className={rowClassName}>
+        {content}
+      </Link>
     )
   }
   return (
-    <Button variant={variant} size="sm" className="w-full" onClick={onClick}>
-      {label}
-    </Button>
+    <button type="button" onClick={onClick} className={rowClassName}>
+      {content}
+    </button>
   )
 }
