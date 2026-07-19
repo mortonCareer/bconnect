@@ -646,12 +646,15 @@ async def _search_blogs_paged(query: str, count: int) -> list[dict]:
 
 async def run_collect_raw(
     keywords: list[str] | None = None, per_query: int = 5,
-    force: bool = False, out: Path | None = None,
+    force: bool = False, out: Path | None = None, dedup: bool = True,
 ) -> PipelineReport:
     """#920 1단계 — 검색 → 수집 → 원본을 파일에 저장. 분류·저장은 하지 않는다.
 
     걸러내는 것 없이 수집한 것을 전부 남기므로, 이후 분류 방법이 바뀌어도
     다시 수집하지 않고 `--classify-from-raw`로 분류만 재실행할 수 있다.
+
+    dedup(기본 켜짐): 이미 DB에 적재됐거나 이전 원본 파일에 있는 블로그는 다시
+    수집하지 않는다. 같은 키워드로 다시 돌려도 새 블로그만 쌓인다.
     """
     from crawler import raw_store
 
@@ -663,6 +666,23 @@ async def run_collect_raw(
     report.per_query = per_query
 
     seen_blog_ids: set[str] = set()
+    if dedup:
+        seen_urls: set[str] = set()
+        # 이전에 수집한 원본 파일들
+        for prev in raw_store.RAW_DIR.glob("*.jsonl"):
+            try:
+                seen_urls |= {r["blog_url"] for r in raw_store.load_raw(prev)}
+            except Exception:
+                pass
+        # 이미 DB에 적재된 것
+        if settings.crawled_db_url:
+            try:
+                from crawler.db import load_existing_urls
+                seen_urls |= await load_existing_urls(settings.crawled_db_url)
+            except Exception as exc:
+                log.warning("DB 중복목록 조회 실패(무시하고 진행): %s", exc)
+        seen_blog_ids = {b for u in seen_urls if (b := extract_blog_id(u))}
+        log.info("중복 제외 대상 블로그 %d개 (이미 수집/적재됨)", len(seen_blog_ids))
     query_sem = asyncio.Semaphore(QUERY_CONCURRENCY)
     write_lock = asyncio.Lock()
     collected = 0
@@ -1402,6 +1422,7 @@ def main():
     parser.add_argument("--collect-raw", action="store_true", help="#920 1단계: 검색·수집만 하여 원본을 파일로 저장(분류·저장 안 함)")
     parser.add_argument("--classify-from-raw", type=Path, metavar="RAW", help="#920 2단계: 저장된 원본(jsonl)을 읽어 분류만 실행(다시 수집하지 않음)")
     parser.add_argument("--raw-out", type=Path, metavar="JSONL", help="--collect-raw 저장 경로 (기본: reports/raw/naver-<시각>.jsonl)")
+    parser.add_argument("--no-dedup", action="store_true", help="--collect-raw 중복 제외 끄기 (기본은 이미 수집/적재된 블로그 건너뜀)")
     vision_group = parser.add_mutually_exclusive_group()
     vision_group.add_argument("--vision", action="store_true", default=None, help="배너/Footer 이미지 Vision OCR 강제 활성화")
     vision_group.add_argument("--no-vision", action="store_true", help="Vision OCR 비활성화")
@@ -1470,7 +1491,7 @@ def main():
                     raise SystemExit(1)
 
         if args.collect_raw:
-            report = await run_collect_raw(keywords=args.query or None, per_query=args.per_query, force=args.force, out=args.raw_out)
+            report = await run_collect_raw(keywords=args.query or None, per_query=args.per_query, force=args.force, out=args.raw_out, dedup=not args.no_dedup)
         elif args.classify_from_raw:
             report = await run_classify_from_raw(args.classify_from_raw, skip_vision=not use_vision)
         elif args.export_db:
