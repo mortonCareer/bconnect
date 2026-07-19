@@ -49,7 +49,7 @@ public class TaskEntity extends BaseEntity {
     private String workerCompany;
 
     @Embedded
-    private Address address;
+    private Address workerAddress;
 
     private Long projectId;
 
@@ -63,7 +63,7 @@ public class TaskEntity extends BaseEntity {
     private String projectMemo;
 
     public TaskEntity(TaskType type, Set<Trade> trades, LocalDate start, LocalDate end,
-                      Long workerId, String workerTitle, String workerMemo, String workerCompany, Address address,
+                      Long workerId, String workerTitle, String workerMemo, String workerCompany, Address workerAddress,
                       Long projectId, String projectTitle, String projectRequirement, String projectMemo) {
         this.type = type;
         this.trades = trades != null ? trades : new HashSet<>();
@@ -73,7 +73,7 @@ public class TaskEntity extends BaseEntity {
         this.workerTitle = workerTitle;
         this.workerMemo = workerMemo;
         this.workerCompany = workerCompany;
-        this.address = address;
+        this.workerAddress = workerAddress;
         this.projectId = projectId;
         this.projectTitle = projectTitle;
         this.projectRequirement = projectRequirement;
@@ -88,7 +88,7 @@ public class TaskEntity extends BaseEntity {
         this.workerTitle = title;
         this.workerMemo = memo;
         this.workerCompany = company;
-        this.address = address;
+        this.workerAddress = address;
     }
 
     public void update(Set<Trade> trades, LocalDate start, LocalDate end,
