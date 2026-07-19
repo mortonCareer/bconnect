@@ -21,6 +21,11 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
 
+# 같은 ref 새 커밋 push 시 이전 통합검증 취소 — self-hosted 러너 슬롯 절약 (#918).
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: read
