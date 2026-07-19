@@ -3,13 +3,16 @@ package to.bconnect.api.core.domain.project;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.core.domain.company.CompanyExceptionCode;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.board.BoardEntity;
 import to.bconnect.api.storage.board.BoardRepository;
+import to.bconnect.api.storage.board.BoardType;
 import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
@@ -23,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,6 +70,29 @@ class ProjectServiceTest {
         var id = service.create(USER, createProject());
 
         assertThat(id).isEqualTo(100L);
+    }
+
+    @Test
+    @DisplayName("기본 프로젝트는 기본 제목·주소로 저장하고 보드를 함께 생성한다")
+    void createDefault_savesProjectWithDefaults() {
+        var created = mock(ProjectEntity.class);
+        when(created.getId()).thenReturn(100L);
+        var projectCaptor = ArgumentCaptor.forClass(ProjectEntity.class);
+        when(projectRepository.save(projectCaptor.capture())).thenReturn(created);
+        var boardCaptor = ArgumentCaptor.forClass(BoardEntity.class);
+
+        service.createDefault(10L);
+
+        var savedProject = projectCaptor.getValue();
+        assertThat(savedProject.getCompanyId()).isEqualTo(10L);
+        assertThat(savedProject.getTitle()).isEqualTo("새 프로젝트");
+        assertThat(savedProject.getAddress().getState()).isEqualTo("수원시 장안구");
+        assertThat(savedProject.getAddress().getCity()).isEqualTo("경기도");
+
+        verify(boardRepository).save(boardCaptor.capture());
+        var savedBoard = boardCaptor.getValue();
+        assertThat(savedBoard.getType()).isEqualTo(BoardType.PROJECT);
+        assertThat(savedBoard.getProjectId()).isEqualTo(100L);
     }
 
     private static CreateProject createProject() {

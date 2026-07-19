@@ -3,6 +3,7 @@ package to.bconnect.api.core.domain.company;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
@@ -22,6 +23,7 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final AttachmentLinker attachmentLinker;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<Company> list() {
@@ -63,6 +65,7 @@ public class CompanyService {
 
         val companyId = companyRepository.save(created).getId();
         attachmentLinker.relink(user.id(), ReferenceType.COMPANY, companyId, command.pictureId());
+        eventPublisher.publishEvent(new CompanyCreatedEvent(companyId));
         return companyId;
     }
 
