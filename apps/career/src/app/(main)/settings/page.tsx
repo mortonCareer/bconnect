@@ -42,8 +42,6 @@ export default function SettingsPage() {
     },
   })
 
-  const notReady = () => toast({ description: '준비 중이에요' })
-
   return (
     <div className="flex flex-col">
       <TopBar variant="default" title="설정" showAction={false} backHref="/profile" />
@@ -52,9 +50,9 @@ export default function SettingsPage() {
         <section className="flex flex-col gap-1">
           <h2 className="text-sb-16 text-gray-900">서비스</h2>
           <div className="flex flex-col">
-            <SettingsRow label="공지사항" onClick={notReady} />
-            <SettingsRow label="문의/건의" onClick={notReady} />
-            <SettingsRow label="후기 작성하기" onClick={notReady} />
+            <SettingsRow label="공지사항" disabled />
+            <SettingsRow label="문의/건의" disabled />
+            <SettingsRow label="후기 작성하기" disabled />
           </div>
         </section>
 
