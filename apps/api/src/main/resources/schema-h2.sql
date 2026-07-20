@@ -413,7 +413,6 @@ create table crawled_profiles (
     primary_trade varchar(255),
     experience integer,
     headline varchar(255),
-    about TEXT,
     address varchar(255),
     state varchar(255),
     url varchar(255) not null,

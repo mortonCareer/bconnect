@@ -3577,6 +3577,10 @@ components:
         profile:
           type: "null"
           $ref: "#/components/schemas/CrawledProfileResponse"
+        thumbnails:
+          type: array
+          items:
+            type: string
       required:
       - brn
       - company
@@ -3589,6 +3593,7 @@ components:
       - picture
       - profile
       - role
+      - thumbnails
     CrawledPlatform:
       type: string
       enum:
@@ -3615,10 +3620,6 @@ components:
           type:
           - string
           - "null"
-        about:
-          type:
-          - string
-          - "null"
         address:
           type:
           - string
@@ -3631,7 +3632,6 @@ components:
         platform:
           $ref: "#/components/schemas/CrawledPlatform"
       required:
-      - about
       - address
       - experience
       - headline

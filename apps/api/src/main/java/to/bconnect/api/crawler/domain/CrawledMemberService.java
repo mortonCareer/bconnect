@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CrawledMemberService {
 
+    private static final int THUMBNAIL_LIMIT = 3;
+
     private final CrawledMemberRepository crawledMemberRepository;
     private final CrawledProfileRepository crawledProfileRepository;
     private final CrawledPostRepository crawledPostRepository;
@@ -47,6 +49,15 @@ public class CrawledMemberService {
         return crawledProfileRepository.findByMemberIdIn(memberIds)
                 .stream()
                 .collect(Collectors.toMap(CrawledProfileEntity::getMemberId, Function.identity()));
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, List<String>> getThumbnailMap(List<Long> memberIds) {
+        return crawledPostRepository.findFirstImagesByMemberIdIn(memberIds).entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        it -> it.getValue().stream().limit(THUMBNAIL_LIMIT).toList()
+                ));
     }
 
     @Transactional(readOnly = true)

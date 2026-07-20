@@ -28,8 +28,6 @@ public class CrawledProfileEntity extends BaseEntity {
 
     private String headline;
 
-    private String about;
-
     private String address;
 
     @Enumerated(EnumType.STRING)
@@ -41,14 +39,13 @@ public class CrawledProfileEntity extends BaseEntity {
     private CrawledPlatform platform;
 
     public CrawledProfileEntity(Long memberId, String primaryTrade, Set<String> trades, Integer experience,
-                                String headline, String about, String address, CrawledRegion state,
+                                String headline, String address, CrawledRegion state,
                                 String url, CrawledPlatform platform) {
         this.memberId = memberId;
         this.primaryTrade = primaryTrade;
         this.trades = trades != null ? trades : new HashSet<>();
         this.experience = experience;
         this.headline = headline;
-        this.about = about;
         this.address = address;
         this.state = state;
         this.url = url;
