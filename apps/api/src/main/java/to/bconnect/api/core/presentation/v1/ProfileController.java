@@ -11,6 +11,7 @@ import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.core.domain.coworker.CoworkerService;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.core.domain.profile.ProfileQueryService;
@@ -18,10 +19,12 @@ import to.bconnect.api.core.domain.profile.ProfileService;
 import to.bconnect.api.core.presentation.v1.request.CreateProfileRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProfileAboutRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProfileRequest;
+import to.bconnect.api.core.presentation.v1.response.ProfileDetailResponse;
 import to.bconnect.api.core.presentation.v1.response.ProfileResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.coworker.CoworkerStatus;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.util.List;
@@ -33,6 +36,7 @@ public class ProfileController {
 
     private final ProfileService profileService;
     private final ProfileQueryService profileQueryService;
+    private final CoworkerService coworkerService;
     private final MemberResolver memberResolver;
     private final AttachmentResolver attachmentResolver;
     private final SignedCookieIssuer signedCookieIssuer;
@@ -75,18 +79,22 @@ public class ProfileController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<ProfileResponse> get(
+    public ApiResponse<ProfileDetailResponse> get(
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
             HttpServletResponse response) {
         val profile = profileQueryService.get(id);
         val member = memberResolver.find(profile.memberId());
         val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val status = user == null
+                ? CoworkerStatus.NONE
+                : coworkerService.resolveStatus(user.id(), profile.memberId());
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
                 .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
 
-        return ApiResponse.success(ProfileResponse.of(profile, member, picture));
+        return ApiResponse.success(ProfileDetailResponse.of(profile, member, picture, status));
     }
 
     @PostMapping
