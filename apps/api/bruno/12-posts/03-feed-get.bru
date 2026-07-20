@@ -18,6 +18,7 @@ tests {
     expect(res.body.success).to.equal(true);
     expect(res.body.data.post.id).to.be.a('number');
     expect(res.body.data.profile.role).to.be.a('string');
+    expect(res.body.data.task.type).to.equal("WORKER");
   });
 }
 
