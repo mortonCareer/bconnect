@@ -10,7 +10,7 @@ from crawler.channels.instagram import (
     build_search_queries as build_instagram_queries, extract_username as extract_instagram_username,
     InstagramBlockedError, reset_block_counter,
 )
-from crawler.classifier import classify, format_phone, infer_region_from_address, METRO_REGIONS
+from crawler.classifier import classify, format_phone, infer_region_from_address, METRO_REGIONS, _validate_result
 from crawler.classifier_rules import rule_reject
 from crawler.config import settings
 from crawler.models import (
@@ -149,10 +149,12 @@ async def _classify_scraped(
     report: PipelineReport | None = None,
     metro_only: bool = False,
     skip_vision: bool = False,
+    labels: dict | None = None,
 ) -> CrawledMember | None:
     """수집해둔 블로그 원본(profile) 1건을 분류하여 CrawledMember 생성.
 
     원본만 있으면 재실행 가능 — 분류 방법을 바꿔도 다시 수집할 필요 없음(#920).
+    labels 를 주면 해당 blog_url 은 LLM 대신 그 라벨로 분류한다(#953, 강한 판단자 in-loop).
     """
     profile_intro = profile.get("profile_intro", "")
 
@@ -169,25 +171,32 @@ async def _classify_scraped(
             report.add_skipped(blog_url, blogger_name, f"규칙:{reason}")
         return None
 
-    # LLM 분류: 프로필 소개 + 게시글 본문을 종합하여 분류
-    combined_about = ""
-    if profile_intro:
-        combined_about += f"[블로그 프로필 소개]\n{profile_intro}\n\n"
-    combined_about += f"[게시글 본문]\n{profile['about']}"
-
-    try:
-        classification, usage = await classify(
-            name=blogger_name,
-            about=combined_about,
-            headline=profile.get("blog_title", ""),
+    # 외부 라벨(강한 판단자)이 있으면 LLM 대신 사용 (#953)
+    label = labels.get(blog_url) if labels else None
+    if label is not None:
+        classification = _validate_result(
+            {k: v for k, v in label.items() if k not in ("id", "reason")}
         )
-        if report:
-            report.add_llm_usage(usage["input_tokens"], usage["output_tokens"])
-    except Exception as exc:
-        log.warning("분류 실패: %s", blog_url, exc_info=True)
-        if report:
-            report.add_failed(blog_url, blogger_name, "분류", str(exc))
-        return None
+    else:
+        # LLM 분류: 프로필 소개 + 게시글 본문을 종합하여 분류
+        combined_about = ""
+        if profile_intro:
+            combined_about += f"[블로그 프로필 소개]\n{profile_intro}\n\n"
+        combined_about += f"[게시글 본문]\n{profile['about']}"
+
+        try:
+            classification, usage = await classify(
+                name=blogger_name,
+                about=combined_about,
+                headline=profile.get("blog_title", ""),
+            )
+            if report:
+                report.add_llm_usage(usage["input_tokens"], usage["output_tokens"])
+        except Exception as exc:
+            log.warning("분류 실패: %s", blog_url, exc_info=True)
+            if report:
+                report.add_failed(blog_url, blogger_name, "분류", str(exc))
+            return None
 
     # 전문업자 필터: 일반인/DIY 블로거 스킵
     if not classification.get("is_professional", True):
@@ -725,18 +734,30 @@ async def run_collect_raw(
 
 async def run_classify_from_raw(
     raw_file: Path, metro_only: bool = False, skip_vision: bool = False,
+    labels_file: Path | None = None,
 ) -> PipelineReport:
     """#920 2단계 — 저장된 원본을 읽어 분류만 실행한다. 다시 수집하지 않는다.
 
     dry-run과 같은 형태의 보고서(members 포함)를 만들어, 기존 `--export-db`로
     그대로 DB에 적재할 수 있다. 분류 방법을 바꿔 재실행할 땐 이 명령만 돌리면 된다.
+    labels_file 을 주면 그 라벨에 있는 블로그는 LLM 대신 라벨로 분류한다(#953).
     """
+    import json
+
     from crawler import raw_store
+
+    labels = None
+    if labels_file:
+        rows = json.loads(labels_file.read_text(encoding="utf-8"))
+        labels = {r["id"]: r for r in rows}
+        log.info("외부 라벨 %d건 로드: %s", len(labels), labels_file)
 
     raws = raw_store.load_raw(raw_file)
     report = PipelineReport()
-    report.mode = "원본에서 분류(classify-from-raw)"
-    report.llm_model = settings.openai_model if settings.openai_api_key else settings.anthropic_model
+    report.mode = "원본에서 분류(classify-from-raw)" + (" +외부라벨" if labels else "")
+    report.llm_model = "외부 라벨(--labels)" if labels else (
+        settings.openai_model if settings.openai_api_key else settings.anthropic_model
+    )
     report.total_searched = len(raws)
     log.info("원본 %d건 분류 시작: %s", len(raws), raw_file)
 
@@ -747,6 +768,7 @@ async def run_classify_from_raw(
             member = await _classify_scraped(
                 raw["blog_url"], raw["blogger_name"], raw["profile"],
                 report=report, metro_only=metro_only, skip_vision=skip_vision,
+                labels=labels,
             )
         if member is None:
             return
@@ -1421,6 +1443,7 @@ def main():
     parser.add_argument("--patch-review", action="store_true", help="검수 DB 기존 데이터에 피드백 수정사항 소급 적용")
     parser.add_argument("--collect-raw", action="store_true", help="#920 1단계: 검색·수집만 하여 원본을 파일로 저장(분류·저장 안 함)")
     parser.add_argument("--classify-from-raw", type=Path, metavar="RAW", help="#920 2단계: 저장된 원본(jsonl)을 읽어 분류만 실행(다시 수집하지 않음)")
+    parser.add_argument("--labels", type=Path, metavar="JSON", help="#953: 외부 라벨(강한 판단자) JSON 배열([{id,is_professional,...}]). 있으면 해당 blog_url은 LLM 대신 라벨로 분류")
     parser.add_argument("--raw-out", type=Path, metavar="JSONL", help="--collect-raw 저장 경로 (기본: reports/raw/naver-<시각>.jsonl)")
     parser.add_argument("--no-dedup", action="store_true", help="--collect-raw 중복 제외 끄기 (기본은 이미 수집/적재된 블로그 건너뜀)")
     vision_group = parser.add_mutually_exclusive_group()
@@ -1493,7 +1516,7 @@ def main():
         if args.collect_raw:
             report = await run_collect_raw(keywords=args.query or None, per_query=args.per_query, force=args.force, out=args.raw_out, dedup=not args.no_dedup)
         elif args.classify_from_raw:
-            report = await run_classify_from_raw(args.classify_from_raw, skip_vision=not use_vision)
+            report = await run_classify_from_raw(args.classify_from_raw, skip_vision=not use_vision, labels_file=args.labels)
         elif args.export_db:
             report = await run_export_db(args.export_db, truncate=args.truncate)
         elif args.patch_review:

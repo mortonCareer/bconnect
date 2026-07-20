@@ -9,12 +9,10 @@ export const membersOverrides = [
     const username = new URL(request.url).searchParams.get('username')?.toLowerCase() ?? ''
     return { available: !TAKEN_USERNAMES.has(username) }
   }),
-
-  // 회원가입(register). faker mock 은 accessToken 을 [문자열, undefined] 중 랜덤 반환 →
-  // 절반 확률로 accessToken 없이 응답 → FE 의 requireRegisterAccessToken 이 throw 하여
-  // 가입이 무작위로 실패하던 문제 해소. 세션 토큰을 항상 채워 성공 흐름을 안정화.
+  // 신규 가입 완료 흐름(register → 토큰 발급 → 로그인)이 mock 에서도 성립하도록 accessToken 발급.
+  // auth otp/verify(로그인) mock 이 토큰을 주는 것과 대칭. 실 BE 는 RegisterMemberResponse.accessToken 을 반환.
   getCreateMemberMockHandler(() => ({
-    memberId: Date.now(),
+    memberId: Math.floor(Math.random() * 1_000_000),
     accessToken: `mock_access_${Date.now()}`,
   })),
 ]
