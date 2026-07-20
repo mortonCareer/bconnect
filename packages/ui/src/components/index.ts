@@ -47,6 +47,8 @@ export {
   useFormField,
 } from './ui/shadcn/form'
 export { Label } from './ui/shadcn/label'
+export { AgreementField } from './ui/form/AgreementField'
+export type { AgreementItem } from './ui/form/AgreementField'
 export { TextField } from './ui/form/TextField'
 export { TextareaField } from './ui/form/TextareaField'
 export { NumberField } from './ui/form/NumberField'
