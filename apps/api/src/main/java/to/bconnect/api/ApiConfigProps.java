@@ -9,14 +9,20 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
+import java.time.ZoneId;
 import java.util.List;
 
 @Validated
 @ConfigurationProperties(prefix = "app")
 public record ApiConfigProps(
     @Valid @NotNull Cors cors,
-    @Valid @NotNull Jwt jwt
+    @Valid @NotNull Jwt jwt,
+    @NotBlank(message = "app.timezone must not be blank") String timezone
 ) {
+
+    public ZoneId zoneId() {
+        return ZoneId.of(timezone);
+    }
 
     public record Cors(
         @NotEmpty(message = "app.cors.allowed-origins must not be empty")

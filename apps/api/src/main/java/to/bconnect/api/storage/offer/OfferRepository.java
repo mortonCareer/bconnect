@@ -2,6 +2,7 @@ package to.bconnect.api.storage.offer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -28,4 +29,6 @@ public interface OfferRepository extends JpaRepository<OfferEntity, Long> {
     List<OfferEntity> findAllByWorkerId(Long workerId);
 
     Optional<OfferEntity> findFirstByTaskIdOrderBySeqDesc(Long taskId);
+
+    List<OfferEntity> findAllByStatusAndDueBefore(OfferStatus status, LocalDate due);
 }
