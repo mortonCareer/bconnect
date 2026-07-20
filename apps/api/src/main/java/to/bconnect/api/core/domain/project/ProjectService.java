@@ -1,7 +1,7 @@
 package to.bconnect.api.core.domain.project;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,6 @@ import to.bconnect.api.storage.project.ProjectEntity;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -32,12 +31,6 @@ import java.util.stream.Collectors;
 public class ProjectService {
 
     private static final int MAX_PROJECT_COUNT = 1;
-    // TODO 삭제 예정
-    private static final String DEFAULT_TITLE = "새 프로젝트";
-    private static final Address DEFAULT_ADDRESS = new Address(
-            "16419", "경기도", "수원시 장안구", "서부로 2066", "성균관대학교",
-            new BigDecimal("37.294"), new BigDecimal("126.974")
-    );
 
     private final ProjectRepository projectRepository;
     private final CompanyRepository companyRepository;
@@ -84,16 +77,6 @@ public class ProjectService {
         boardRepository.save(new BoardEntity(BoardType.PROJECT, created.getId(), null));
 
         return created.getId();
-    }
-
-    @Transactional
-    public void createDefault(Long companyId) {
-        val created = projectRepository.save(new ProjectEntity(
-                companyId,
-                DEFAULT_TITLE,
-                DEFAULT_ADDRESS
-        ));
-        boardRepository.save(new BoardEntity(BoardType.PROJECT, created.getId(), null));
     }
 
     @Transactional
