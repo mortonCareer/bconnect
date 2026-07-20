@@ -1820,6 +1820,8 @@ components:
     ExceptionCode:
       type: object
       properties:
+        message:
+          type: string
         status:
           $ref: "#/components/schemas/HttpStatus"
         code:
@@ -2269,6 +2271,9 @@ components:
           format: int64
         accessToken:
           type: string
+      required:
+      - accessToken
+      - memberId
     CreateGroupChatRequest:
       type: object
       properties:
@@ -2354,6 +2359,8 @@ components:
       properties:
         registered:
           type: boolean
+      required:
+      - registered
     CreateCredentialRequest:
       type: object
       properties:
@@ -2427,6 +2434,8 @@ components:
         expiresAt:
           type: string
           format: date-time
+      required:
+      - expiresAt
     AttachmentContext:
       type: string
       enum:
@@ -2496,6 +2505,9 @@ components:
           format: int64
         uploadUrl:
           type: string
+      required:
+      - id
+      - uploadUrl
     ConfirmRequest:
       type: object
       properties:
@@ -2544,6 +2556,16 @@ components:
           format: date-time
         url:
           type: string
+      required:
+      - contentType
+      - createdAt
+      - filename
+      - id
+      - memberId
+      - modifiedAt
+      - size
+      - type
+      - url
     ApiResponseListTaskResponse:
       type: object
       properties:
@@ -2580,6 +2602,12 @@ components:
           format: date
         status:
           $ref: "#/components/schemas/OfferStatus"
+      required:
+      - due
+      - id
+      - seq
+      - status
+      - taskId
     TaskResponse:
       type: object
       properties:
@@ -2602,26 +2630,44 @@ components:
         status:
           $ref: "#/components/schemas/TaskStatus"
         workerId:
-          type: integer
+          type:
+          - integer
+          - "null"
           format: int64
         workerTitle:
-          type: string
+          type:
+          - string
+          - "null"
         workerMemo:
-          type: string
+          type:
+          - string
+          - "null"
         workerCompany:
-          type: string
+          type:
+          - string
+          - "null"
         address:
+          type: "null"
           $ref: "#/components/schemas/Address"
         projectId:
-          type: integer
+          type:
+          - integer
+          - "null"
           format: int64
         projectTitle:
-          type: string
+          type:
+          - string
+          - "null"
         projectRequirement:
-          type: string
+          type:
+          - string
+          - "null"
         projectMemo:
-          type: string
+          type:
+          - string
+          - "null"
         offer:
+          type: "null"
           $ref: "#/components/schemas/OfferSummaryResponse"
         createdAt:
           type: string
@@ -2629,6 +2675,25 @@ components:
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - address
+      - createdAt
+      - end
+      - id
+      - modifiedAt
+      - offer
+      - projectId
+      - projectMemo
+      - projectRequirement
+      - projectTitle
+      - start
+      - status
+      - trades
+      - type
+      - workerCompany
+      - workerId
+      - workerMemo
+      - workerTitle
     TaskStatus:
       type: string
       enum:
@@ -2665,7 +2730,9 @@ components:
         name:
           type: string
         picture:
-          type: string
+          type:
+          - string
+          - "null"
         role:
           $ref: "#/components/schemas/Role"
         createdAt:
@@ -2674,6 +2741,14 @@ components:
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - createdAt
+      - id
+      - modifiedAt
+      - name
+      - picture
+      - role
+      - username
     OfferResponse:
       type: object
       properties:
@@ -2701,6 +2776,16 @@ components:
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - createdAt
+      - due
+      - id
+      - member
+      - modifiedAt
+      - profile
+      - seq
+      - status
+      - taskId
     ProfileSummaryResponse:
       type: object
       properties:
@@ -2710,9 +2795,16 @@ components:
           type: integer
           format: int32
         headline:
-          type: string
+          type:
+          - string
+          - "null"
         address:
           $ref: "#/components/schemas/Address"
+      required:
+      - address
+      - experience
+      - headline
+      - primaryTrade
     ApiResponseListRecommendationResponse:
       type: object
       properties:
@@ -2744,6 +2836,14 @@ components:
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - content
+      - createdAt
+      - id
+      - member
+      - modifiedAt
+      - profile
+      - visible
     ApiResponseListProjectResponse:
       type: object
       properties:
@@ -2774,6 +2874,13 @@ components:
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - address
+      - companyId
+      - createdAt
+      - id
+      - modifiedAt
+      - title
     ApiResponseProjectResponse:
       type: object
       properties:
@@ -2811,6 +2918,12 @@ components:
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - content
+      - createdAt
+      - id
+      - memberId
+      - modifiedAt
     ApiResponseListProfileResponse:
       type: object
       properties:
@@ -2843,9 +2956,13 @@ components:
           type: integer
           format: int32
         headline:
-          type: string
+          type:
+          - string
+          - "null"
         about:
-          type: string
+          type:
+          - string
+          - "null"
         address:
           $ref: "#/components/schemas/Address"
         createdAt:
@@ -2863,6 +2980,21 @@ components:
         coworkerCount:
           type: integer
           format: int32
+      required:
+      - about
+      - address
+      - coworkerCount
+      - createdAt
+      - experience
+      - headline
+      - id
+      - member
+      - modifiedAt
+      - postCount
+      - primaryTrade
+      - recommendationCount
+      - role
+      - trades
     ApiResponseProfileResponse:
       type: object
       properties:
@@ -2915,19 +3047,34 @@ components:
         message:
           type: string
         content:
-          type: string
+          type:
+          - string
+          - "null"
         referenceType:
           type: string
         referenceId:
-          type: integer
+          type:
+          - integer
+          - "null"
           format: int64
         sender:
+          type: "null"
           $ref: "#/components/schemas/MemberSummaryResponse"
         read:
           type: boolean
         createdAt:
           type: string
           format: date-time
+      required:
+      - content
+      - createdAt
+      - id
+      - message
+      - read
+      - referenceId
+      - referenceType
+      - sender
+      - type
     ApiResponseListMemberResponse:
       type: object
       properties:
@@ -2952,7 +3099,9 @@ components:
         phone:
           type: string
         picture:
-          type: string
+          type:
+          - string
+          - "null"
         role:
           $ref: "#/components/schemas/Role"
         createdAt:
@@ -2961,6 +3110,15 @@ components:
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - createdAt
+      - id
+      - modifiedAt
+      - name
+      - phone
+      - picture
+      - role
+      - username
     ApiResponseMemberResponse:
       type: object
       properties:
@@ -2984,6 +3142,8 @@ components:
       properties:
         available:
           type: boolean
+      required:
+      - available
     ApiResponseListGroupChatResponse:
       type: object
       properties:
@@ -3006,8 +3166,9 @@ components:
         participants:
           type: array
           items:
-            $ref: "#/components/schemas/MemberSummaryResponse"
+            $ref: "#/components/schemas/WithdrawableMemberResponse"
         lastMessage:
+          type: "null"
           $ref: "#/components/schemas/MessageResponse"
         unreadCount:
           type: integer
@@ -3018,6 +3179,14 @@ components:
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - createdAt
+      - id
+      - lastMessage
+      - modifiedAt
+      - participants
+      - title
+      - unreadCount
     MessageResponse:
       type: object
       properties:
@@ -3044,6 +3213,15 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/AttachmentResponse"
+      required:
+      - attachments
+      - chatId
+      - content
+      - createdAt
+      - id
+      - memberId
+      - modifiedAt
+      - type
     MessageType:
       type: string
       enum:
@@ -3052,6 +3230,45 @@ components:
       - FILE
       - SYSTEM
       - OFFER
+    WithdrawableMemberResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type:
+          - string
+          - "null"
+        name:
+          type:
+          - string
+          - "null"
+        picture:
+          type:
+          - string
+          - "null"
+        role:
+          type: "null"
+          $ref: "#/components/schemas/Role"
+        createdAt:
+          type:
+          - string
+          - "null"
+          format: date-time
+        modifiedAt:
+          type:
+          - string
+          - "null"
+          format: date-time
+      required:
+      - createdAt
+      - id
+      - modifiedAt
+      - name
+      - picture
+      - role
+      - username
     ApiResponseCursorPageMessageResponse:
       type: object
       properties:
@@ -3093,6 +3310,10 @@ components:
           $ref: "#/components/schemas/ProfileSummaryResponse"
         post:
           $ref: "#/components/schemas/PostResponse"
+      required:
+      - member
+      - post
+      - profile
     PostResponse:
       type: object
       properties:
@@ -3103,7 +3324,9 @@ components:
           type: integer
           format: int64
         taskId:
-          type: integer
+          type:
+          - integer
+          - "null"
           format: int64
         images:
           type: array
@@ -3117,6 +3340,14 @@ components:
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - content
+      - createdAt
+      - id
+      - images
+      - memberId
+      - modifiedAt
+      - taskId
     ApiResponseFeedResponse:
       type: object
       properties:
@@ -3146,10 +3377,14 @@ components:
         type:
           $ref: "#/components/schemas/DriveType"
         projectId:
-          type: integer
+          type:
+          - integer
+          - "null"
           format: int64
         memberId:
-          type: integer
+          type:
+          - integer
+          - "null"
           format: int64
         title:
           type: string
@@ -3159,6 +3394,14 @@ components:
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - createdAt
+      - id
+      - memberId
+      - modifiedAt
+      - projectId
+      - title
+      - type
     ApiResponseListDirectChatResponse:
       type: object
       properties:
@@ -3177,8 +3420,9 @@ components:
           type: integer
           format: int64
         member:
-          $ref: "#/components/schemas/MemberSummaryResponse"
+          $ref: "#/components/schemas/WithdrawableMemberResponse"
         lastMessage:
+          type: "null"
           $ref: "#/components/schemas/MessageResponse"
         unreadCount:
           type: integer
@@ -3189,6 +3433,13 @@ components:
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - createdAt
+      - id
+      - lastMessage
+      - member
+      - modifiedAt
+      - unreadCount
     ApiResponseListCredentialSummaryResponse:
       type: object
       properties:
@@ -3220,7 +3471,9 @@ components:
         status:
           $ref: "#/components/schemas/CredentialStatus"
         expiredAt:
-          type: string
+          type:
+          - string
+          - "null"
           format: date
         createdAt:
           type: string
@@ -3228,6 +3481,14 @@ components:
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - createdAt
+      - expiredAt
+      - id
+      - memberId
+      - modifiedAt
+      - status
+      - type
     ApiResponseListCredentialResponse:
       type: object
       properties:
@@ -3253,7 +3514,9 @@ components:
         status:
           $ref: "#/components/schemas/CredentialStatus"
         expiredAt:
-          type: string
+          type:
+          - string
+          - "null"
           format: date
         createdAt:
           type: string
@@ -3262,7 +3525,17 @@ components:
           type: string
           format: date-time
         attachment:
+          type: "null"
           $ref: "#/components/schemas/AttachmentResponse"
+      required:
+      - attachment
+      - createdAt
+      - expiredAt
+      - id
+      - memberId
+      - modifiedAt
+      - status
+      - type
     ApiResponseListCrawledMemberSummaryResponse:
       type: object
       properties:
@@ -3283,17 +3556,27 @@ components:
         company:
           type: string
         name:
-          type: string
+          type:
+          - string
+          - "null"
         phone:
-          type: string
+          type:
+          - string
+          - "null"
         picture:
-          type: string
+          type:
+          - string
+          - "null"
         role:
           type: string
         brn:
-          type: string
+          type:
+          - string
+          - "null"
         email:
-          type: string
+          type:
+          - string
+          - "null"
         createdAt:
           type: string
           format: date-time
@@ -3301,7 +3584,20 @@ components:
           type: string
           format: date-time
         profile:
+          type: "null"
           $ref: "#/components/schemas/CrawledProfileResponse"
+      required:
+      - brn
+      - company
+      - createdAt
+      - email
+      - id
+      - modifiedAt
+      - name
+      - phone
+      - picture
+      - profile
+      - role
     CrawledPlatform:
       type: string
       enum:
@@ -3311,27 +3607,48 @@ components:
       type: object
       properties:
         primaryTrade:
-          type: string
+          type:
+          - string
+          - "null"
         trades:
           type: array
           items:
             type: string
           uniqueItems: true
         experience:
-          type: integer
+          type:
+          - integer
+          - "null"
           format: int32
         headline:
-          type: string
+          type:
+          - string
+          - "null"
         about:
-          type: string
+          type:
+          - string
+          - "null"
         address:
-          type: string
+          type:
+          - string
+          - "null"
         state:
+          type: "null"
           $ref: "#/components/schemas/CrawledRegion"
         url:
           type: string
         platform:
           $ref: "#/components/schemas/CrawledPlatform"
+      required:
+      - about
+      - address
+      - experience
+      - headline
+      - platform
+      - primaryTrade
+      - state
+      - trades
+      - url
     CrawledRegion:
       type: string
       enum:
@@ -3380,6 +3697,13 @@ components:
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - createdAt
+      - id
+      - memberId
+      - modifiedAt
+      - name
+      - type
     CrawledCredentialType:
       type: string
       enum:
@@ -3396,17 +3720,27 @@ components:
         company:
           type: string
         name:
-          type: string
+          type:
+          - string
+          - "null"
         phone:
-          type: string
+          type:
+          - string
+          - "null"
         picture:
-          type: string
+          type:
+          - string
+          - "null"
         role:
           type: string
         brn:
-          type: string
+          type:
+          - string
+          - "null"
         email:
-          type: string
+          type:
+          - string
+          - "null"
         createdAt:
           type: string
           format: date-time
@@ -3414,6 +3748,7 @@ components:
           type: string
           format: date-time
         profile:
+          type: "null"
           $ref: "#/components/schemas/CrawledProfileResponse"
         credentials:
           type: array
@@ -3423,6 +3758,20 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CrawledPostResponse"
+      required:
+      - brn
+      - company
+      - createdAt
+      - credentials
+      - email
+      - id
+      - modifiedAt
+      - name
+      - phone
+      - picture
+      - posts
+      - profile
+      - role
     CrawledPostResponse:
       type: object
       properties:
@@ -3433,16 +3782,22 @@ components:
           type: integer
           format: int64
         taskId:
-          type: integer
+          type:
+          - integer
+          - "null"
           format: int64
         images:
           type: array
           items:
             type: string
         title:
-          type: string
+          type:
+          - string
+          - "null"
         content:
-          type: string
+          type:
+          - string
+          - "null"
         createdAt:
           type: string
           format: date-time
@@ -3450,7 +3805,18 @@ components:
           type: string
           format: date-time
         task:
+          type: "null"
           $ref: "#/components/schemas/CrawledTaskResponse"
+      required:
+      - content
+      - createdAt
+      - id
+      - images
+      - memberId
+      - modifiedAt
+      - task
+      - taskId
+      - title
     CrawledTaskResponse:
       type: object
       properties:
@@ -3458,25 +3824,47 @@ components:
           type: integer
           format: int64
         company:
-          type: string
+          type:
+          - string
+          - "null"
         address:
-          type: string
+          type:
+          - string
+          - "null"
         trade:
-          type: string
+          type:
+          - string
+          - "null"
         start:
-          type: string
+          type:
+          - string
+          - "null"
           format: date
         end:
-          type: string
+          type:
+          - string
+          - "null"
           format: date
         duration:
-          type: string
+          type:
+          - string
+          - "null"
         createdAt:
           type: string
           format: date-time
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - address
+      - company
+      - createdAt
+      - duration
+      - end
+      - id
+      - modifiedAt
+      - start
+      - trade
     ApiResponseListCoworkerResponse:
       type: object
       properties:
@@ -3500,6 +3888,11 @@ components:
           $ref: "#/components/schemas/ProfileSummaryResponse"
         status:
           $ref: "#/components/schemas/CoworkerStatus"
+      required:
+      - id
+      - member
+      - profile
+      - status
     CoworkerStatus:
       type: string
       enum:
@@ -3533,6 +3926,11 @@ components:
         end:
           type: string
           format: date
+      required:
+      - end
+      - id
+      - memberId
+      - start
     ApiResponseListCoworkerRequestResponse:
       type: object
       properties:
@@ -3554,6 +3952,10 @@ components:
           $ref: "#/components/schemas/MemberSummaryResponse"
         profile:
           $ref: "#/components/schemas/ProfileSummaryResponse"
+      required:
+      - id
+      - member
+      - profile
     ApiResponseListCompanyResponse:
       type: object
       properties:
@@ -3579,13 +3981,23 @@ components:
         brn:
           type: string
         picture:
-          type: string
+          type:
+          - string
+          - "null"
         createdAt:
           type: string
           format: date-time
         modifiedAt:
           type: string
           format: date-time
+      required:
+      - brn
+      - createdAt
+      - id
+      - memberId
+      - modifiedAt
+      - name
+      - picture
     ApiResponseCompanyResponse:
       type: object
       properties:
