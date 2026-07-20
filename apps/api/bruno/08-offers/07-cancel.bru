@@ -12,6 +12,10 @@ post {
   auth: inherit
 }
 
+vars:pre-request {
+  offerId: 200
+}
+
 tests {
   test("성공", function() {
     expect(res.status).to.equal(200);

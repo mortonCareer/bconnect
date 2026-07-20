@@ -16,6 +16,10 @@ auth:bearer {
   token: {{accessToken2}}
 }
 
+vars:pre-request {
+  acceptOfferId: 202
+}
+
 tests {
   test("성공", function() {
     expect(res.status).to.equal(200);

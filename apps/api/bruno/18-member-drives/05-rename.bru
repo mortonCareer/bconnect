@@ -20,6 +20,10 @@ body:json {
   }
 }
 
+vars:pre-request {
+  memberDriveId: 100
+}
+
 tests {
   test("성공", function() {
     expect(res.status).to.equal(200);

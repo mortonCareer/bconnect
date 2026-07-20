@@ -12,6 +12,10 @@ patch {
   auth: inherit
 }
 
+vars:pre-request {
+  notificationId: 102
+}
+
 tests {
   test("성공", function() {
     expect(res.status).to.equal(200);

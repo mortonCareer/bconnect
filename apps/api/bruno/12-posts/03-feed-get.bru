@@ -9,7 +9,12 @@ meta {
 
 get {
   url: {{baseUrl}}/api/v1/feeds/{{postId}}
+  body: none
   auth: none
+}
+
+vars:pre-request {
+  postId: 100
 }
 
 tests {

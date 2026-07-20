@@ -12,6 +12,10 @@ get {
   auth: inherit
 }
 
+vars:pre-request {
+  projectTaskId: 201
+}
+
 tests {
   test("성공", function() {
     expect(res.status).to.equal(200);

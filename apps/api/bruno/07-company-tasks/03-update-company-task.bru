@@ -25,6 +25,10 @@ body:json {
   }
 }
 
+vars:pre-request {
+  projectTaskId: 200
+}
+
 tests {
   test("성공", function() {
     expect(res.status).to.equal(200);

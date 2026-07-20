@@ -9,7 +9,12 @@ meta {
 
 get {
   url: {{baseUrl}}/api/v1/projects/{{projectId}}
+  body: none
   auth: inherit
+}
+
+vars:pre-request {
+  projectId: 200
 }
 
 tests {
