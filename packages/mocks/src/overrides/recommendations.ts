@@ -15,7 +15,10 @@ const LONG_CONTENT =
 function withFixedContent(list: Recommendation[]): Recommendation[] {
   return list.map((rec, i) => ({
     ...rec,
-    member: { ...rec.member, name: NAMES[i % NAMES.length] },
+    // spec 이 required 를 안 붙여 orval mock 이 id 를 랜덤 누락 → 케밥 드로어가 안 열림.
+    // mock 에서 안정적 id 보장 (실 BE 는 항상 채워보냄).
+    id: rec.id ?? 1000 + i,
+    member: { ...rec.member, id: rec.member?.id ?? 100 + i, name: NAMES[i % NAMES.length] },
     profile: { ...rec.profile, primaryTrade: Trade.WALLPAPER },
     content: LONG_CONTENT,
   }))

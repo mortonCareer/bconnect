@@ -6,14 +6,12 @@ import to.bconnect.api.core.domain.offer.Offer;
 import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.storage.offer.OfferStatus;
 
-import java.time.LocalDate;
 import java.time.Instant;
 
 public record OfferResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long taskId,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int seq,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate due,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) OfferStatus status,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) MemberSummaryResponse member,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ProfileSummaryResponse profile,
@@ -25,7 +23,6 @@ public record OfferResponse(
                 offer.id(),
                 offer.taskId(),
                 offer.seq(),
-                offer.due(),
                 offer.status(),
                 MemberSummaryResponse.of(member, picture),
                 ProfileSummaryResponse.of(profile),

@@ -38,6 +38,6 @@ kiscon.net이 cloud IP(AWS/Vercel) 차단 → self-hosted runner(`morton-runner`
 
 핵심 파일:
 
-- `scripts/kiscon-sync.ts` — 크롤링 후 `kiscon_arrears`·`kiscon_subcon_limits` 테이블 적재
+- `packages/data-jobs/src/kiscon-sync.ts` — 크롤링 후 `kiscon_arrears`·`kiscon_subcon_limits` 테이블 적재 (앱 무관 데이터 잡, `@bconnect/data-jobs`)
 - `src/lib/business/kiscon-db-client.ts` — Postgres read (14일 freshness 체크), `kiscon-construction-client.ts`(면허 등록), `kiscon-crawl-client.ts`(live 크롤 폴백)
 - `.github/workflows/kiscon-sync.yml` — 매주 월 09:00 KST, `morton-runner`

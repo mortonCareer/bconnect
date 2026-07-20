@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { extractDigits, isValidRegistrationNumber } from '@bconnect/config/biz-number'
+import { consentField } from '@bconnect/config/consent'
 
 export const corpSchema = z.object({
   companyName: z
@@ -9,6 +10,7 @@ export const corpSchema = z.object({
   bizNumber: z.string().transform(extractDigits).refine(isValidRegistrationNumber, {
     message: '존재하지 않는 사업자등록번호입니다.',
   }),
+  agreements: consentField,
 })
 
 export type CorpFormData = z.infer<typeof corpSchema>

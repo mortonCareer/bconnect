@@ -3,11 +3,12 @@
  */
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  AgreementField,
   Button,
   Form,
   FormError,
@@ -16,9 +17,10 @@ import {
   passthroughError,
   useServerError,
 } from '@bconnect/ui'
-import { Role, useCreateMember } from '@bconnect/api-client'
+import { Role, useCreateMember, useCreateCompany } from '@bconnect/api-client'
 import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
+import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
 import { useSignupStore } from '@/stores/signup-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { corpSchema, type CorpFormData } from './schema'
@@ -40,6 +42,8 @@ export default function SignupCorpPage() {
   const registerMemberMutation = useCreateMember({
     request: { headers: { 'X-Signup-Token': formData.signupToken } },
   })
+  const createCompanyMutation = useCreateCompany()
+  const [issuedAccessToken, setIssuedAccessToken] = useState<string | null>(null)
 
   // signupToken 없으면 로그인으로 리다이렉트
   useEffect(() => {
@@ -57,6 +61,7 @@ export default function SignupCorpPage() {
     defaultValues: {
       companyName: formData.companyName,
       bizNumber: formData.bizNumber,
+      agreements: CONSENT_DEFAULT,
     },
   })
   const {
@@ -73,20 +78,36 @@ export default function SignupCorpPage() {
   const onSubmit = async (data: CorpFormData) => {
     setCorp({ companyName: data.companyName, bizNumber: data.bizNumber })
     try {
-      const result = await registerMemberMutation.mutateAsync({
-        data: {
-          username: formData.username,
-          name: formData.name,
-          // BE auth Role은 GUEST/USER/ADMIN만 가진다.
-          // 업체 유형은 별도 회사/프로필 도메인에서 다룬다.
-          role: Role.USER,
-        },
+      // register 는 signupToken(X-Signup-Token 헤더)을 소비 — 회사 생성 실패 후 재시도 시
+      // 재호출하지 않도록 발급된 accessToken을 보관한다.
+      // 회원 가입 유형은 auth 레벨 Role.USER 고정 (업체 유형은 별도 회사 도메인에서 다룸).
+      const accessToken =
+        issuedAccessToken ??
+        requireRegisterAccessToken(
+          await registerMemberMutation.mutateAsync({
+            data: {
+              username: formData.username,
+              name: formData.name,
+              role: Role.USER,
+            },
+          })
+        )
+
+      if (!issuedAccessToken) {
+        setIssuedAccessToken(accessToken)
+      }
+
+      login(accessToken)
+      await createCompanyMutation.mutateAsync({
+        data: { name: data.companyName, brn: data.bizNumber },
       })
-      login(requireRegisterAccessToken(result))
+
       resetSignup()
       router.push('/')
     } catch (err) {
-      server.capture(err, data)
+      // capture 는 라이브 폼 값(getValues)으로 스냅샷 — data 는 zod transform(bizNumber digit화)을
+      // 거쳐 useWatch 가 보는 표시값과 달라, 넘기면 staleness 판정이 에러를 즉시 숨긴다.
+      server.capture(err, form.getValues())
     }
   }
 
@@ -123,6 +144,9 @@ export default function SignupCorpPage() {
               transform={formatRegistrationNumber}
             />
 
+            {/* 약관·개인정보 동의 (#733) */}
+            <AgreementField control={control} name="agreements" items={CONSENT_ITEMS} />
+
             {/* Server Error (폼 전역) */}
             <FormError error={server.formError} />
 
@@ -132,7 +156,9 @@ export default function SignupCorpPage() {
               variant={isValid ? 'primary' : 'secondary'}
               size="full"
               disabled={!isValid}
-              isLoading={isSubmitting || registerMemberMutation.isPending}
+              isLoading={
+                isSubmitting || registerMemberMutation.isPending || createCompanyMutation.isPending
+              }
             >
               가입 완료
             </Button>

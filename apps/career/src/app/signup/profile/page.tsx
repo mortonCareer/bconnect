@@ -10,7 +10,9 @@ import { useSignupStore } from '@/stores/signup-store'
 import { Role, Trade, TRADE_LABELS, useCreateMember, useCreateProfile } from '@bconnect/api-client'
 import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { mapKakaoAddress } from '@bconnect/config/address'
+import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
 import {
+  AgreementField,
   Form,
   FormControl,
   FormError,
@@ -65,13 +67,14 @@ export default function SignupProfilePage() {
       role: undefined,
       address: undefined,
       headline: '',
+      agreements: CONSENT_DEFAULT,
     },
   })
   const {
     control,
     handleSubmit,
     setValue,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isValid },
   } = form
 
   const server = useServerError(
@@ -225,11 +228,16 @@ export default function SignupProfilePage() {
               maxLength={20}
               placeholder="한줄소개를 입력해주세요 (최대 20글자)"
             />
+
+            {/* 약관·개인정보 동의 (#733) */}
+            <AgreementField control={control} name="agreements" items={CONSENT_ITEMS} />
+
             <FormError error={server.formError} />
           </div>
           <div className="bg-white p-4">
             <FormSubmitButton
               requireAllFilled={false}
+              disabled={!isValid}
               variant="primary"
               size="full"
               isLoading={

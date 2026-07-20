@@ -19,14 +19,14 @@ locals {
       bucket_arn             = aws_s3_bucket.app_storage.arn
       bucket_regional_domain = aws_s3_bucket.app_storage.bucket_regional_domain_name
       # presigned PUT 업로드 origin (브라우저→S3 직결). 프리뷰·로컬은 MSW mock 이라 제외.
-      cors_origins = ["https://${var.domain}", "https://plan.${var.domain}"]
+      cors_origins = ["https://${var.domain}", "https://career.${var.domain}", "https://plan.${var.domain}"]
     }
     dev = {
       domain                 = "static-dev.${var.domain}"
       bucket_id              = aws_s3_bucket.app_storage_dev.id
       bucket_arn             = aws_s3_bucket.app_storage_dev.arn
       bucket_regional_domain = aws_s3_bucket.app_storage_dev.bucket_regional_domain_name
-      cors_origins           = ["https://dev.${var.domain}", "https://plan.dev.${var.domain}"]
+      cors_origins           = ["https://dev.${var.domain}", "https://career.dev.${var.domain}", "https://plan.dev.${var.domain}"]
     }
   }
 }
