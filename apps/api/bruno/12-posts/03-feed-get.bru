@@ -17,6 +17,7 @@ tests {
     expect(res.status).to.equal(200);
     expect(res.body.success).to.equal(true);
     expect(res.body.data.post.id).to.be.a('number');
+    expect(res.body.data.profile.role).to.be.a('string');
   });
 }
 
