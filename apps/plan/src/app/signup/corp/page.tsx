@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  AgreementField,
   Button,
   Form,
   FormError,
@@ -19,6 +20,7 @@ import {
 import { Role, useCreateMember } from '@bconnect/api-client'
 import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
+import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
 import { useSignupStore } from '@/stores/signup-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { corpSchema, type CorpFormData } from './schema'
@@ -57,6 +59,7 @@ export default function SignupCorpPage() {
     defaultValues: {
       companyName: formData.companyName,
       bizNumber: formData.bizNumber,
+      agreements: CONSENT_DEFAULT,
     },
   })
   const {
@@ -122,6 +125,9 @@ export default function SignupCorpPage() {
               placeholder="00000-00-000"
               transform={formatRegistrationNumber}
             />
+
+            {/* 약관·개인정보 동의 (#733) */}
+            <AgreementField control={control} name="agreements" items={CONSENT_ITEMS} />
 
             {/* Server Error (폼 전역) */}
             <FormError error={server.formError} />
