@@ -61,6 +61,7 @@ export default function SettingsPage() {
           <div className="flex flex-col">
             <SettingsRow label="서비스 이용약관" href="/terms" />
             <SettingsRow label="개인정보 처리방침" href="/privacy" />
+            <SettingsRow label="사업자정보" href="/business" />
           </div>
         </section>
 
