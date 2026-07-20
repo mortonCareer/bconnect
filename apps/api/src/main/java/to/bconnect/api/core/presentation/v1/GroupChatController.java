@@ -69,6 +69,26 @@ public class GroupChatController {
         return ApiResponse.success(body);
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse<GroupChatResponse> get(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id,
+            HttpServletResponse response) {
+        val chat = groupChatService.get(user.id(), id);
+        val memberMap = memberResolver.resolveMap(chat.participantIds());
+        val urlMap = attachmentResolver.resolveUrlMap(
+                ReferenceType.MEMBER, chat.participantIds(), ImageSize.SMALL);
+        val members = chat.participantIds().stream()
+                .map(memberId -> memberMap.getOrDefault(memberId, Member.withdrawn(memberId)))
+                .toList();
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
+        return ApiResponse.success(GroupChatResponse.of(chat, members, urlMap));
+    }
+
     @PostMapping
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,

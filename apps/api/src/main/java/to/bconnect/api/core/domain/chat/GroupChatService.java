@@ -1,7 +1,7 @@
 package to.bconnect.api.core.domain.chat;
 
-import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,6 +56,23 @@ public class GroupChatService {
                         lastMessageMap.get(it.getId()),
                         unreadCountMap.getOrDefault(it.getId(), 0L)
                 )).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public GroupChat get(Long memberId, Long chatId) {
+        if (!participantRepository.existsByChatIdAndMemberId(chatId, memberId))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        val chat = groupChatRepository.findById(chatId)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.FORBIDDEN));
+
+        val participantIds = participantRepository.findMemberIdsByChatId(chatId);
+        val lastMessage = messageRepository.findLatestMessagesByChatIdInAndChatType(List.of(chatId), ChatType.GROUP)
+                .stream().findFirst().map(Message::of).orElse(null);
+        val unreadCount = messageRepository.findGroupUnreadCountByChatIdsAndMemberId(List.of(chatId), memberId)
+                .getOrDefault(chatId, 0L);
+
+        return GroupChat.of(chat, participantIds, lastMessage, unreadCount);
     }
 
     @Transactional

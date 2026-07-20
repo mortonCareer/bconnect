@@ -7,10 +7,7 @@ import lombok.val;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import to.bconnect.api.attachment.domain.Attachment;
-import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
-import to.bconnect.api.attachment.domain.ImageSize;
+import to.bconnect.api.attachment.domain.*;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.common.response.CursorPage;
@@ -25,7 +22,6 @@ import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,6 +57,23 @@ public class DirectChatController {
                 .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
 
         return ApiResponse.success(body);
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse<DirectChatResponse> get(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id,
+            HttpServletResponse response) {
+        val chat = directChatService.get(user.id(), id);
+        val member = memberResolver.resolveMap(List.of(chat.memberId()))
+                .getOrDefault(chat.memberId(), Member.withdrawn(chat.memberId()));
+        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
+        return ApiResponse.success(DirectChatResponse.of(chat, member, picture));
     }
 
     @PostMapping
