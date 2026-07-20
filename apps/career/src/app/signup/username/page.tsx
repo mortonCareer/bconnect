@@ -80,7 +80,7 @@ export default function SignupUsernamePage() {
               control={control}
               name="username"
               type="text"
-              autoComplete="username"
+              autoComplete="nickname"
               label="사용자 ID"
               description="ID는 프로필과 검색에 활용되며, 한 번 설정하면 변경이 불가해요."
               placeholder="아이디를 입력해주세요"
