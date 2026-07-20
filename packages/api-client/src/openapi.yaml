@@ -2597,6 +2597,7 @@ components:
         status:
           $ref: "#/components/schemas/OfferStatus"
       required:
+      - due
       - id
       - seq
       - status
@@ -2768,6 +2769,7 @@ components:
           format: date-time
       required:
       - createdAt
+      - due
       - id
       - member
       - modifiedAt
