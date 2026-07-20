@@ -74,6 +74,7 @@ export default function SignupMemberPage() {
               control={control}
               name="username"
               type="text"
+              autoComplete="username"
               label="사용자 ID"
               description="동일한 사용자를 구분하는데 활용되며, 한 번 설정하면 변경이 불가해요."
               placeholder="user_id"
@@ -85,6 +86,7 @@ export default function SignupMemberPage() {
               control={control}
               name="name"
               type="text"
+              autoComplete="name"
               label="이름"
               placeholder="홍길동"
             />

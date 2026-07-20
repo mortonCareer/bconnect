@@ -49,7 +49,7 @@ export default defineConfig({
             },
             {
               onMutations: ['createRecommendation', 'updateRecommendation', 'deleteRecommendation'],
-              invalidates: ['getMySentRecommendations'],
+              invalidates: ['getMySentRecommendations', 'getReceivedRecommendations'],
             },
             // 자격/인증 변경 → 자격 목록. getMyCredentials(내 목록, 조건 없음)는 그 목록만 정확히 무효화.
             // getCredentials 는 memberId 로 회원별 구분 → config 가 그 값을 몰라 관련 목록을 한꺼번에 무효화(넓게).
@@ -75,6 +75,11 @@ export default defineConfig({
               onMutations: ['createCoworkerRequest', 'deleteCoworkerRequest'],
               invalidates: ['getSentCoworkerRequests'],
             },
+            // 성립된 동료 취소 → 동료 목록 + 프로필 동료 카운트(본인·상대)
+            {
+              onMutations: ['deleteCoworker'],
+              invalidates: ['getCoworkers', 'getProfile', 'getMyProfile'],
+            },
             // 내 회원정보 변경 → 내 회원정보
             { onMutations: ['updateMyMember'], invalidates: ['getMyMember'] },
             // 알림 읽음 처리(단건/전체) → 알림 목록 + 안읽음 개수
@@ -87,6 +92,8 @@ export default defineConfig({
               onMutations: ['updateMyProfile', 'updateMyProfileAbout'],
               invalidates: ['getMyProfile'],
             },
+            // 새 채팅 생성 → 채팅 목록. 생성 직후 이동한 방을 캐시 목록에서 찾도록(#835). getDirectChats 는 파라미터 없음.
+            { onMutations: ['createDirectChat'], invalidates: ['getDirectChats'] },
           ],
         },
         fetch: {

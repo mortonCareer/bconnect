@@ -2200,11 +2200,7 @@ components:
         workerId:
           type: integer
           format: int64
-        due:
-          type: string
-          format: date
       required:
-      - due
       - taskId
       - workerId
     BoardType:
@@ -2585,6 +2581,7 @@ components:
       - ACCEPTED
       - DENIED
       - CANCELED
+      - EXPIRED
     OfferSummaryResponse:
       type: object
       properties:
@@ -2597,9 +2594,6 @@ components:
         seq:
           type: integer
           format: int32
-        due:
-          type: string
-          format: date
         status:
           $ref: "#/components/schemas/OfferStatus"
       required:
@@ -2761,9 +2755,6 @@ components:
         seq:
           type: integer
           format: int32
-        due:
-          type: string
-          format: date
         status:
           $ref: "#/components/schemas/OfferStatus"
         member:

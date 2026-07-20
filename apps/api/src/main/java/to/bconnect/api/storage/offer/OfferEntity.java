@@ -1,10 +1,6 @@
 package to.bconnect.api.storage.offer;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,11 +26,13 @@ public class OfferEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private OfferStatus status = OfferStatus.PENDING;
 
-    public OfferEntity(Long taskId, Long workerId, int seq, LocalDate due) {
+    @Version
+    private Long version;
+
+    public OfferEntity(Long taskId, Long workerId, int seq) {
         this.taskId = taskId;
         this.workerId = workerId;
         this.seq = seq;
-        this.due = due;
     }
 
     public void offered() {
@@ -47,6 +45,14 @@ public class OfferEntity extends BaseEntity {
 
     public void deny() {
         this.status = OfferStatus.DENIED;
+    }
+
+    public void expire() {
+        this.status = OfferStatus.EXPIRED;
+    }
+
+    public void updateDue(LocalDate due) {
+        this.due = due;
     }
 
     public void cancel() {
