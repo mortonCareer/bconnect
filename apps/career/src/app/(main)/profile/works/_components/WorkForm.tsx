@@ -48,6 +48,9 @@ const workSchema = z
   })
 type WorkFormValues = z.infer<typeof workSchema>
 
+/** 업로드 단계 실패 — 저장 실패와 토스트 문구를 구분하기 위한 마커. */
+class UploadError extends Error {}
+
 /** presign → S3 PUT → confirm 2-phase 업로드 (#340 계약). POST 컨텍스트의 contextId 는 본인 memberId. */
 async function uploadPostImages(files: File[], memberId: number): Promise<number[]> {
   const presigned = await createAttachmentPresign({
@@ -60,13 +63,14 @@ async function uploadPostImages(files: File[], memberId: number): Promise<number
   await Promise.all(
     presigned.map(async (p, i) => {
       const file = files[i]
-      if (!p.uploadUrl || !file) throw new Error('업로드 URL 누락')
+      if (!p.uploadUrl || !file)
+        throw new UploadError('사진 업로드 준비에 실패했어요. 다시 시도해주세요.')
       const res = await fetch(p.uploadUrl, {
         method: 'PUT',
         body: file,
         headers: { 'Content-Type': file.type },
       })
-      if (!res.ok) throw new Error(`사진 업로드 실패 (${res.status})`)
+      if (!res.ok) throw new UploadError(`사진 업로드에 실패했어요 (${res.status})`)
     })
   )
   const attachmentIds = presigned.map((p) => p.id).filter((id): id is number => id != null)
@@ -145,8 +149,11 @@ export function WorkForm({ postId }: { postId?: number }) {
         variant: 'success',
       })
       router.replace('/profile?tab=works')
-    } catch {
-      toast({ description: '저장에 실패했어요. 다시 시도해주세요.', variant: 'error' })
+    } catch (e) {
+      toast({
+        description: e instanceof UploadError ? e.message : '저장에 실패했어요. 다시 시도해주세요.',
+        variant: 'error',
+      })
       setSaving(false)
     }
   }, scrollToError)
