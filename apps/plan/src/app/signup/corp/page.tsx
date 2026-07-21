@@ -17,7 +17,7 @@ import {
   passthroughError,
   useServerError,
 } from '@bconnect/ui'
-import { Role, useCreateMember, useCreateCompany } from '@bconnect/api-client'
+import { useCreateMember, useCreateCompany } from '@bconnect/api-client'
 import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
@@ -80,7 +80,6 @@ export default function SignupCorpPage() {
     try {
       // register 는 signupToken(X-Signup-Token 헤더)을 소비 — 회사 생성 실패 후 재시도 시
       // 재호출하지 않도록 발급된 accessToken을 보관한다.
-      // 회원 가입 유형은 auth 레벨 Role.USER 고정 (업체 유형은 별도 회사 도메인에서 다룸).
       const accessToken =
         issuedAccessToken ??
         requireRegisterAccessToken(
@@ -88,7 +87,6 @@ export default function SignupCorpPage() {
             data: {
               username: formData.username,
               name: formData.name,
-              role: Role.USER,
             },
           })
         )

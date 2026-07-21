@@ -1,11 +1,13 @@
 import {
+  CoworkerStatus,
   getGetMyProfileMockHandler,
   getGetProfileMockHandler,
   getGetProfilesMockHandler,
   ProfileRole,
+  Role,
   Trade,
 } from '@bconnect/api-client'
-import type { MemberSummary, Profile } from '@bconnect/api-client'
+import type { MemberSummary, Profile, ProfileDetail } from '@bconnect/api-client'
 
 // 프로필 도메인 단일 owner — getProfile(/profiles/:id) 을 id 로 keying,
 // getMyProfile(/profiles/me, 내 프로필 화면)은 id 1 seed 반환,
@@ -31,6 +33,8 @@ const memberOf = (id: number, username: string, name: string): MemberSummary => 
   id,
   username,
   name,
+  picture: null,
+  role: Role.USER,
   createdAt: EPOCH,
   modifiedAt: EPOCH,
 })
@@ -118,8 +122,14 @@ const profileOf = (seed: ProfileSeed): Profile => ({
   modifiedAt: EPOCH,
 })
 
-const PROFILES_BY_ID: Record<number, Profile> = Object.fromEntries(
-  SEEDS.map((seed) => [seed.id, profileOf(seed)])
+// 타인 프로필 단건 조회는 조회자 기준 품앗이꾼 상태가 실린 ProfileDetail 로 응답
+const detailOf = (seed: ProfileSeed): ProfileDetail => ({
+  ...profileOf(seed),
+  status: CoworkerStatus.NONE,
+})
+
+const PROFILES_BY_ID: Record<number, ProfileDetail> = Object.fromEntries(
+  SEEDS.map((seed) => [seed.id, detailOf(seed)])
 )
 
 const paramId = (value: string | readonly string[] | undefined): number =>
@@ -127,6 +137,7 @@ const paramId = (value: string | readonly string[] | undefined): number =>
 
 export const profilesOverrides = [
   getGetProfilesMockHandler(() => SEEDS.map((seed) => profileOf(seed))),
-  getGetMyProfileMockHandler(() => PROFILES_BY_ID[1]),
+  // /profiles/me 는 status 없는 평문 Profile — 타인 조회(ProfileDetail)와 응답형이 다르다
+  getGetMyProfileMockHandler(() => profileOf(SEEDS[0])),
   getGetProfileMockHandler(({ params }) => PROFILES_BY_ID[paramId(params.id)] ?? PROFILES_BY_ID[1]),
 ]

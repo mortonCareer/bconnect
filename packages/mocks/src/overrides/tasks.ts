@@ -102,13 +102,22 @@ function buildSeedTasks(): Task[] {
   const year = now.getFullYear()
   const month1 = now.getMonth() + 1
   const stamp = nowStamp()
-  return SEEDS.map((seed) => {
-    const base: Task = {
+  return SEEDS.map((seed): Task => {
+    const base = {
       id: seed.id,
       trades: seed.trades,
       address: SAMPLE_ADDRESS,
       start: isoOfDay(year, month1, seed.startDay),
       end: isoOfDay(year, month1, seed.endDay),
+      workerId: null,
+      workerTitle: null,
+      workerMemo: null,
+      workerCompany: null,
+      projectId: null,
+      projectTitle: null,
+      projectRequirement: null,
+      projectMemo: null,
+      offer: null,
       createdAt: stamp,
       modifiedAt: stamp,
     }
@@ -150,10 +159,16 @@ export const tasksOverrides = [
       trades: body.trades,
       start: body.start,
       end: body.end,
+      workerId: null,
       workerTitle: body.title,
-      workerMemo: body.memo,
-      workerCompany: body.company,
-      address: body.address,
+      workerMemo: body.memo ?? null,
+      workerCompany: body.company ?? null,
+      address: body.address ?? null,
+      projectId: null,
+      projectTitle: null,
+      projectRequirement: null,
+      projectMemo: null,
+      offer: null,
       createdAt: stamp,
       modifiedAt: stamp,
     })
@@ -172,9 +187,9 @@ export const tasksOverrides = [
             start: body.start,
             end: body.end,
             workerTitle: body.title,
-            workerMemo: body.memo,
-            workerCompany: body.company,
-            address: body.address,
+            workerMemo: body.memo ?? null,
+            workerCompany: body.company ?? null,
+            address: body.address ?? null,
             modifiedAt: stamp,
           }
         : t
