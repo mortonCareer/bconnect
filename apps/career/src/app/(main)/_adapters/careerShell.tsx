@@ -16,6 +16,10 @@ import { TopBar } from '@bconnect/ui'
 interface CareerShellOpts {
   fill?: boolean
   utility?: { chatHref?: string; chatCount?: number; notifyHref?: string; notifyCount?: number }
+  /** 좌측 back 자리 커스텀 아이콘 라우트 (예: 프로필 '+' 작업물 생성, #966) */
+  left?: { icon: ReactNode; href: string; label: string }
+  /** 우측 아이콘 라우트 (예: 프로필 설정) — TopBar action 계열로 전달. utility 와 동시 지정 시 utility 우선 */
+  right?: { icon: ReactNode; href: string; label: string }
 }
 
 export const careerShell = (onBack?: () => void, opts?: CareerShellOpts) =>
@@ -26,8 +30,14 @@ export const careerShell = (onBack?: () => void, opts?: CareerShellOpts) =>
           variant="default"
           title={title}
           showAction={false}
+          actionIcon={opts?.right?.icon}
+          actionHref={opts?.right?.href}
+          actionLabel={opts?.right?.label}
           showBack={onBack != null}
           onBack={onBack}
+          leftIcon={opts?.left?.icon}
+          leftHref={opts?.left?.href}
+          leftLabel={opts?.left?.label}
           chatHref={opts?.utility?.chatHref}
           chatCount={opts?.utility?.chatCount}
           notifyHref={opts?.utility?.notifyHref}

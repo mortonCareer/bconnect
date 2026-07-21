@@ -54,6 +54,10 @@ interface ProfileViewBaseProps {
   onDeleteRecommendation?: (id: number) => void
   /** member 로딩 전/username 부재 시 셸 타이틀 fallback (owner: '내 프로필'). 기본 '프로필' */
   fallbackTitle?: string
+  /** owner 전용 프로필 이미지 수정 트리거. 없으면 edit 배지 없음 (viewer/plan) (#966) */
+  onEditImage?: () => void
+  /** 이미지 업로드 진행 중 — edit 배지 비활성 */
+  imageUploading?: boolean
 }
 
 type ProfileViewShellProps =
@@ -84,6 +88,8 @@ export function ProfileView(props: ProfileViewProps) {
     onHideRecommendation,
     onDeleteRecommendation,
     fallbackTitle,
+    onEditImage,
+    imageUploading,
   } = props
   const [tab, setTab] = useQueryState(
     'tab',
@@ -110,6 +116,8 @@ export function ProfileView(props: ProfileViewProps) {
             recommendationCount={data.recommendationCount}
             statHrefs={statHrefs}
             statScroll={props.renderShell ? undefined : false}
+            onEditImage={onEditImage}
+            imageUploading={imageUploading}
           />
           {actionSlot}
           <Tab items={TAB_ITEMS} activeKey={tab} onChange={(key) => setTab(key as TabKey)} />

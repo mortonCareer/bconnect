@@ -1,11 +1,11 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { getTradeLabel } from '@bconnect/api-client'
 import type { MemberSummary, Profile } from '@bconnect/api-client'
 import { Skeleton } from '@bconnect/ui'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
+import { ProfileImage } from './ProfileImage'
 
 /** 클릭 가능한 stat 타겟. 없으면 비-링크 (plan 기본). */
 export interface ProfileStatHrefs {
@@ -23,6 +23,10 @@ interface ProfileSummaryProps {
   statHrefs?: ProfileStatHrefs
   /** stat 링크 네비 시 scroll 리셋 여부. 패널(plan)=false 로 배경 스크롤 보존, 풀페이지(career)=기본 */
   statScroll?: boolean
+  /** 있으면 프로필 이미지 우하단 edit 배지 렌더 (owner 전용, #966) */
+  onEditImage?: () => void
+  /** 이미지 업로드 진행 중 — edit 배지 비활성 */
+  imageUploading?: boolean
 }
 
 export function ProfileSummary({
@@ -33,6 +37,8 @@ export function ProfileSummary({
   recommendationCount,
   statHrefs,
   statScroll,
+  onEditImage,
+  imageUploading,
 }: ProfileSummaryProps) {
   // TODO: BE required 처리 후 type narrowing 필요. MemberSummary/Profile 표시 필드가 optional emit이라 fallback/filter로 silent 처리 중.
   const name = member?.name ?? '이름 없음'
@@ -51,17 +57,12 @@ export function ProfileSummary({
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-4 px-4 pt-4">
-        <div className="relative h-[100px] w-[100px] shrink-0 overflow-hidden rounded-full bg-gray-100">
-          {/* TODO: 출시 전 unoptimized 제거 + next/image remotePatterns/loader 구성 (외부 업로드 대응) */}
-          <Image
-            src={member?.picture || DEFAULT_PROFILE_IMAGE}
-            alt={name}
-            fill
-            sizes="100px"
-            unoptimized
-            className="object-cover"
-          />
-        </div>
+        <ProfileImage
+          src={member?.picture || DEFAULT_PROFILE_IMAGE}
+          alt={name}
+          onEdit={onEditImage}
+          uploading={imageUploading}
+        />
         <div className="flex flex-1 justify-around">
           <Stat label="작업물" value={postCount} href={statHrefs?.works} scroll={statScroll} />
           <Stat
