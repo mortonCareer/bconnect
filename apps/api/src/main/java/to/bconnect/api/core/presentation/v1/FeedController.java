@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.post.Post;
@@ -20,15 +21,11 @@ import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.core.domain.task.TaskQueryService;
 import to.bconnect.api.core.presentation.v1.response.FeedResponse;
-import to.bconnect.api.core.presentation.v1.response.TaskResponse;
-import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.storage.task.TaskType;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -75,7 +72,8 @@ public class FeedController {
                             it,
                             member,
                             profileMap.get(it.memberId()),
-                            toTaskResponse(task, addressMap),
+                            task,
+                            task == null ? null : addressMap.get(task.projectId()),
                             imageMap.getOrDefault(it.id(), List.of()),
                             pictureMap.get(member.id()));
                 })
@@ -94,31 +92,20 @@ public class FeedController {
             HttpServletResponse response) {
         val post = postService.get(id);
         val member = memberResolver.find(post.memberId());
-        val profile = profileResolver.resolveMap(List.of(post.memberId())).get(post.memberId());
+        val profile = profileResolver.find(post.memberId());
         val images = attachmentResolver.listUrl(ReferenceType.POST, post.id(), ImageSize.MEDIUM);
         val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val task = post.taskId() == null ? null
-                : taskQueryService.listByIds(List.of(post.taskId())).stream().findFirst().orElse(null);
-        val projectIds = task != null && task.type() == TaskType.PROJECT
-                ? List.of(task.projectId())
-                : List.<Long>of();
-        val addressMap = projectService.resolveAddressMap(projectIds);
+                : taskQueryService.find(post.taskId()).orElse(null);
+        val projectAddress = task != null && task.type() == TaskType.PROJECT
+                ? projectService.get(task.projectId()).address()
+                : null;
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
                 .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
 
-        return ApiResponse.success(FeedResponse.of(post, member, profile, toTaskResponse(task, addressMap), images, picture));
-    }
-
-    private TaskResponse toTaskResponse(Task task, Map<Long, Address> projectAddressMap) {
-        if (task == null)
-            return null;
-
-        val address = task.type() == TaskType.WORKER
-                ? task.workerAddress()
-                : projectAddressMap.get(task.projectId());
-        return TaskResponse.of(task, address);
+        return ApiResponse.success(FeedResponse.of(post, member, profile, task, projectAddress, images, picture));
     }
 }

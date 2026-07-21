@@ -41,7 +41,7 @@ public class CrawledMemberController {
     @GetMapping("/{id}")
     public ApiResponse<CrawledMemberResponse> get(@PathVariable Long id) {
         val member = crawledMemberService.get(id);
-        val profile = crawledMemberService.getProfileMap(List.of(id)).get(id);
+        val profile = crawledMemberService.getProfile(id);
         val credentials = crawledMemberService.listCredential(id);
         val posts = crawledMemberService.listPost(id);
         val taskIds = posts.stream().map(CrawledPostEntity::getTaskId).filter(Objects::nonNull).toList();

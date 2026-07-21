@@ -55,10 +55,9 @@ public class DirectChatService {
         val chat = directChatRepository.findById(chatId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.FORBIDDEN));
 
-        val lastMessage = messageRepository.findLatestMessagesByChatIdInAndChatType(List.of(chatId), ChatType.DIRECT)
-                .stream().findFirst().map(Message::of).orElse(null);
-        val unreadCount = messageRepository.findDirectUnreadCountByChatIdsAndMemberId(List.of(chatId), memberId)
-                .getOrDefault(chatId, 0L);
+        val lastMessage = messageRepository.findFirstByChatIdAndChatTypeOrderByIdDesc(chatId, ChatType.DIRECT)
+                .map(Message::of).orElse(null);
+        val unreadCount = messageRepository.findDirectUnreadCountByChatIdAndMemberId(chatId, memberId);
 
         return DirectChat.of(chat, chat.counterpartIdOf(memberId), lastMessage, unreadCount);
     }

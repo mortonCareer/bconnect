@@ -78,7 +78,7 @@ public class MemberService {
     @Transactional
     public void withdraw(AuthUser user) {
         memberCleaner.clean(user);
-        attachmentLinker.unlink(ReferenceType.MEMBER, List.of(user.id()));
+        attachmentLinker.unlink(ReferenceType.MEMBER, user.id());
         memberRepository.findById(user.id())
                 .ifPresent(memberRepository::delete);
     }

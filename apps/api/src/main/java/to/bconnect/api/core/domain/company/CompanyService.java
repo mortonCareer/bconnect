@@ -81,7 +81,7 @@ public class CompanyService {
             return;
         val found = optional.get();
 
-        attachmentLinker.unlink(ReferenceType.COMPANY, List.of(found.getId()));
+        attachmentLinker.unlink(ReferenceType.COMPANY, found.getId());
         companyRepository.delete(found);
     }
 }
