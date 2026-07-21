@@ -64,7 +64,7 @@ public class DirectChatController {
             @PathVariable Long id,
             HttpServletResponse response) {
         val chat = directChatService.get(user.id(), id);
-        val member = memberResolver.findOrWithdrawn(chat.memberId());
+        val member = memberResolver.getOrWithdrawn(chat.memberId());
         val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
@@ -78,7 +78,7 @@ public class DirectChatController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateDirectChatRequest request) {
-        val id = directChatService.findOrCreate(user.id(), request.memberId());
+        val id = directChatService.getOrCreate(user.id(), request.memberId());
         return ApiResponse.success(id);
     }
 

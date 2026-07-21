@@ -19,7 +19,7 @@ public class ProfileResolver {
     private final ProfileRepository profileRepository;
 
     @Transactional(readOnly = true)
-    public Profile find(Long memberId) {
+    public Profile get(Long memberId) {
         return profileRepository.findByMemberId(memberId)
                 .map(Profile::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));

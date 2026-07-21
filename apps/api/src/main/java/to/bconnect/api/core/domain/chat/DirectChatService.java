@@ -71,7 +71,7 @@ public class DirectChatService {
     }
 
     @Transactional
-    public Long findOrCreate(Long memberId, Long otherId) {
+    public Long getOrCreate(Long memberId, Long otherId) {
         if (!memberRepository.existsById(otherId))
             throw new CodeException(CommonExceptionCode.NOT_FOUND);
 

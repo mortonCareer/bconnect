@@ -18,13 +18,13 @@ public class MemberResolver {
 
     private final MemberRepository memberRepository;
 
-    public Member find(Long memberId) {
+    public Member get(Long memberId) {
         return memberRepository.findById(memberId)
                 .map(Member::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
     }
 
-    public Member findOrWithdrawn(Long memberId) {
+    public Member getOrWithdrawn(Long memberId) {
         return memberRepository.findById(memberId)
                 .map(Member::of)
                 .orElse(Member.withdrawn(memberId));
