@@ -132,6 +132,13 @@ const PROFILES_BY_ID: Record<number, ProfileDetail> = Object.fromEntries(
   SEEDS.map((seed) => [seed.id, detailOf(seed)])
 )
 
+// #966 프로필 이미지 업로드 QA — mock-s3 는 바이트를 버리므로 pictureId 시드 이미지로 교체 표시.
+// members.ts 의 updateMyMemberPicture override 가 호출 (프로필 도메인 state 단일 owner 유지).
+export function setMyMockPicture(pictureId: number) {
+  const me = PROFILES_BY_ID[1]?.member
+  if (me) me.picture = `https://picsum.photos/seed/bconnect-${pictureId}/200/200`
+}
+
 const paramId = (value: string | readonly string[] | undefined): number =>
   Number(typeof value === 'string' ? value : (value?.[0] ?? ''))
 

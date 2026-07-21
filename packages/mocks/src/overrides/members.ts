@@ -1,4 +1,10 @@
-import { getCheckUsernameMockHandler, getCreateMemberMockHandler } from '@bconnect/api-client'
+import {
+  getCheckUsernameMockHandler,
+  getCreateMemberMockHandler,
+  getUpdateMyMemberPictureMockHandler,
+} from '@bconnect/api-client'
+import type { UpdatePictureRequest } from '@bconnect/api-client'
+import { setMyMockPicture } from './profiles'
 
 // dev 편의용 — 이 목록의 username 만 중복(taken), 그 외는 사용 가능. faker mock 의
 // 랜덤 available 로 signup 이 무작위로 막히던 문제 해소 + taken 에러 흐름 시연.
@@ -15,4 +21,10 @@ export const membersOverrides = [
     memberId: Math.floor(Math.random() * 1_000_000),
     accessToken: `mock_access_${Date.now()}`,
   })),
+  // #966 프로필 이미지 변경 — pictureId 를 내 프로필 seed 에 반영해 재조회 시 이미지가 바뀐다.
+  getUpdateMyMemberPictureMockHandler(async ({ request }) => {
+    const body = (await request.json()) as UpdatePictureRequest
+    if (body.pictureId != null) setMyMockPicture(body.pictureId)
+    return { success: true }
+  }),
 ]

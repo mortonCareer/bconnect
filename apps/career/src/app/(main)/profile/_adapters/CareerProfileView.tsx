@@ -22,10 +22,11 @@ import {
   useUnreadNotificationCount,
   useUnreadChatCount,
 } from '@bconnect/features'
-import { Button, SettingsIcon, toast, isApiErrorShape } from '@bconnect/ui'
+import { Button, PlusIcon, SettingsIcon, toast, isApiErrorShape } from '@bconnect/ui'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
 import { CoworkerActionButton } from '@/app/(main)/_components/CoworkerActionButton'
 import { useShareCurrentUrl } from '@/hooks/useShareCurrentUrl'
+import { useProfileImageUpload } from './useProfileImageUpload'
 import { useRecommendationActions } from './useRecommendationActions'
 import { useWorkActions } from './useWorkActions'
 
@@ -43,7 +44,6 @@ function useTopBarUtility() {
 
 /** 본인 프로필 (/profile) — My* 훅 + 수정/공유 어포던스 */
 export function OwnerProfileView() {
-  const utility = useTopBarUtility()
   const { onHideRecommendation, onDeleteRecommendation } = useRecommendationActions()
 
   // GET /profiles/me 로 내 프로필 조회 (Profile 이 member·counts 내장)
@@ -63,6 +63,7 @@ export function OwnerProfileView() {
   const credentials = useGetCredentials({ memberId: myId }, { query: { enabled } })
   const received = useGetMyReceivedRecommendations()
   const sent = useGetMySentRecommendations()
+  const imageUpload = useProfileImageUpload(myId)
 
   // TODO: BE required 처리 후 type narrowing 필요. Profile.member/counts가 optional emit이라 ProfileView에서 표시 fallback에 의존 중.
   const data: ProfileViewData = {
@@ -82,8 +83,21 @@ export function OwnerProfileView() {
     <ProfileView
       profileId={myId}
       data={data}
-      renderShell={careerShell(undefined, { utility })}
+      renderShell={careerShell(undefined, {
+        left: {
+          icon: <PlusIcon size={20} className="text-[#a5a5a5]" />,
+          href: '/profile/works/new',
+          label: '작업물 생성',
+        },
+        action: {
+          icon: <SettingsIcon className="text-[#a5a5a5]" />,
+          href: '/settings',
+          label: '설정',
+        },
+      })}
       fallbackTitle="내 프로필"
+      onEditImage={imageUpload.pickAndUpload}
+      imageUploading={imageUpload.isUploading}
       statHrefs={{
         works: '?tab=works',
         coworkers: '/profile/coworkers',
@@ -106,13 +120,6 @@ export function OwnerProfileView() {
           <Button variant="outline" size="sm" className="flex-1" onClick={share}>
             공유하기
           </Button>
-          <Link
-            href="/settings"
-            aria-label="설정"
-            className="flex size-10 shrink-0 items-center justify-center text-gray-600 transition-opacity hover:opacity-60"
-          >
-            <SettingsIcon />
-          </Link>
         </div>
       }
     />
