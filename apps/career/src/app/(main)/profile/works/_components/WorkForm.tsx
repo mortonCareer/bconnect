@@ -21,10 +21,12 @@ import {
   cn,
   Form,
   FormError,
+  passthroughError,
   TextareaField,
   toast,
   TopBar,
   useScrollToError,
+  useServerError,
 } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
@@ -128,6 +130,11 @@ export function WorkForm({ postId }: { postId?: number }) {
   const { mutateAsync: updatePost } = useUpdatePost()
 
   const scrollToError = useScrollToError()
+  const server = useServerError(form.control, (err) =>
+    err instanceof UploadError
+      ? { message: err.message }
+      : passthroughError<WorkFormValues>(undefined, '저장에 실패했어요. 다시 시도해주세요.')(err)
+  )
   const onSave = form.handleSubmit(async (data) => {
     if (me?.id == null || saving) return
     setSaving(true)
@@ -150,10 +157,7 @@ export function WorkForm({ postId }: { postId?: number }) {
       })
       router.replace('/profile?tab=works')
     } catch (e) {
-      toast({
-        description: e instanceof UploadError ? e.message : '저장에 실패했어요. 다시 시도해주세요.',
-        variant: 'error',
-      })
+      server.capture(e, data)
       setSaving(false)
     }
   }, scrollToError)
@@ -262,6 +266,8 @@ export function WorkForm({ postId }: { postId?: number }) {
               className="min-h-55 rounded-lg text-r-16"
             />
           </div>
+
+          <FormError error={server.formError} />
         </form>
       </Form>
     </div>
