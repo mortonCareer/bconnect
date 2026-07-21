@@ -137,6 +137,7 @@ const paramId = (value: string | readonly string[] | undefined): number =>
 
 export const profilesOverrides = [
   getGetProfilesMockHandler(() => SEEDS.map((seed) => profileOf(seed))),
-  getGetMyProfileMockHandler(() => PROFILES_BY_ID[1]),
+  // /profiles/me 는 status 없는 평문 Profile — 타인 조회(ProfileDetail)와 응답형이 다르다
+  getGetMyProfileMockHandler(() => profileOf(SEEDS[0])),
   getGetProfileMockHandler(({ params }) => PROFILES_BY_ID[paramId(params.id)] ?? PROFILES_BY_ID[1]),
 ]
