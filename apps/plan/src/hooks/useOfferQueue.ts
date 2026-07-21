@@ -12,7 +12,6 @@ import {
   useReorderOffers,
 } from '@bconnect/api-client'
 import type { Offer } from '@bconnect/api-client'
-import { addDays, todayIso } from '@bconnect/config/date'
 import {
   toNumericTaskId,
   toOfferQueueItem,
@@ -76,7 +75,7 @@ export function useOfferQueue(taskId: string | null | undefined) {
     addToQueue: (item: OfferQueueItem) => {
       if (numId == null || !task) return
       createOffer({
-        data: { taskId: numId, workerId: item.profileId, due: addDays(todayIso(), 3) },
+        data: { taskId: numId, workerId: item.profileId },
       })
     },
     removeFromQueue: (profileId: number) => {

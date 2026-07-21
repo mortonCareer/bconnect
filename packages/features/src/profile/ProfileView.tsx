@@ -2,7 +2,12 @@
 
 import type { ReactNode } from 'react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
-import type { Credential, MemberSummary, Profile, Recommendation } from '@bconnect/api-client'
+import type {
+  CredentialSummary,
+  MemberSummary,
+  Profile,
+  Recommendation,
+} from '@bconnect/api-client'
 import { Skeleton, Tab } from '@bconnect/ui'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
@@ -25,7 +30,7 @@ export interface ProfileViewData {
   postCount?: number
   coworkerCount?: number
   recommendationCount?: number
-  credentials?: Credential[]
+  credentials?: CredentialSummary[]
   receivedRecommendations?: Recommendation[]
   sentRecommendations?: Recommendation[]
   isLoading: boolean

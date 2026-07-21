@@ -3,7 +3,7 @@
 import { Fragment } from 'react'
 import Link from 'next/link'
 import { getCredentialLabel } from '@bconnect/api-client'
-import type { Credential, Profile, Recommendation } from '@bconnect/api-client'
+import type { CredentialSummary, Profile, Recommendation } from '@bconnect/api-client'
 import { Skeleton } from '@bconnect/ui'
 import { RecommendationList } from '../RecommendationList'
 
@@ -17,7 +17,7 @@ export interface ProfileEditHrefs {
 interface IntroTabProps {
   profile?: Profile
   /** 앱이 resolve 해 내려줌. undefined = 로딩 중 */
-  credentials?: Credential[]
+  credentials?: CredentialSummary[]
   receivedRecommendations?: Recommendation[]
   sentRecommendations?: Recommendation[]
   editHrefs?: ProfileEditHrefs
