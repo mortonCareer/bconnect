@@ -4,9 +4,9 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { WorkFlow } from '@/app/(main)/profile/work/_components/WorkFlow'
+import { WorkForm } from '@/app/(main)/profile/work/_components/WorkForm'
 
 export default function WorkEditPage() {
   const params = useParams<{ postId: string }>()
-  return <WorkFlow postId={Number(params.postId)} />
+  return <WorkForm postId={Number(params.postId)} />
 }

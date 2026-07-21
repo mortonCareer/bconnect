@@ -1,8 +1,8 @@
 /**
  * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=3417-12398
  */
-import { WorkFlow } from '../_components/WorkFlow'
+import { WorkForm } from '../_components/WorkForm'
 
 export default function WorkNewPage() {
-  return <WorkFlow />
+  return <WorkForm />
 }

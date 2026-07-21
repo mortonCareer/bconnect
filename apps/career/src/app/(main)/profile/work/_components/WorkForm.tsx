@@ -78,8 +78,8 @@ async function uploadPostImages(files: File[], memberId: number): Promise<number
 
 type Step = 'main' | 'select' | 'create'
 
-/** 작업물 생성/수정 flow — postId 있으면 수정 모드 (초기값은 GET /feeds/{id}). */
-export function WorkFlow({ postId }: { postId?: number }) {
+/** 작업물 생성/수정 폼 — postId 있으면 수정 모드 (초기값은 GET /feeds/{id}). */
+export function WorkForm({ postId }: { postId?: number }) {
   const isEdit = postId != null
   const router = useRouter()
   const queryClient = useQueryClient()
