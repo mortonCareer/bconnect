@@ -1,0 +1,16 @@
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:4384
+- Network:       http://10.255.255.254:4384
+- Environments: .env.local, .env
+✓ Ready in 618ms
+○ Compiling instrumentation Node.js ...
+- Experiments (use with caution):
+  · clientTraceMetadata
+
+○ Compiling /login ...
+ GET /login 200 in 15.5s (next.js: 9.7s, proxy.ts: 14ms, application-code: 5.8s)
+ GET /login 200 in 437ms (next.js: 29ms, proxy.ts: 60ms, application-code: 348ms)
+✓ Finished writing to filesystem cache in 13.3s
+ GET /login 200 in 593ms (next.js: 32ms, proxy.ts: 43ms, application-code: 517ms)
+○ Compiling / ...
+ GET / 200 in 8.6s (next.js: 7.8s, proxy.ts: 28ms, application-code: 763ms)

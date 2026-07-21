@@ -38,8 +38,10 @@ export interface FeedProps
   content: {
     images: string[]
     imageAlt?: string
-    company: string
-    duration: string
+    /** 건축주(발주 업체)명 — 연결된 작업(task)이 없으면 생략 */
+    company?: string
+    /** 시공기간 (예: '4일 소요') — 연결된 작업(task)이 없으면 생략 */
+    duration?: string
     timestamp: string
     description: string
   }
@@ -97,9 +99,9 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
         {/* 메타행: 회사 · 소요일 / 작성일 · 케밥 */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <p className="text-r-12 text-gray-700">{content.company}</p>
-            <div className="h-[13px] w-px bg-gray-300" />
-            <p className="text-r-12 text-gray-700">{content.duration}</p>
+            {content.company && <p className="text-r-12 text-gray-700">{content.company}</p>}
+            {content.company && content.duration && <div className="h-[13px] w-px bg-gray-300" />}
+            {content.duration && <p className="text-r-12 text-gray-700">{content.duration}</p>}
           </div>
           <div className="flex items-center gap-1">
             <p className="text-r-12 text-gray-700">{content.timestamp}</p>
