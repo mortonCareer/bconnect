@@ -79,7 +79,7 @@ export function TaskSelectView({
                 type="button"
                 onClick={() => setPicked(task.id)}
                 aria-pressed={picked === task.id}
-                className="flex w-full cursor-pointer flex-col items-start gap-2 border-b border-gray-200 py-4 text-left"
+                className="flex w-full cursor-pointer flex-col items-start gap-2 border-b border-gray-200 px-2 py-4 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
               >
                 <span className="flex items-center gap-2">
                   <span aria-hidden className={cn('size-2 rounded-full', dotColor(task.id))} />
@@ -101,7 +101,7 @@ export function TaskSelectView({
             <button
               type="button"
               onClick={onCreateNew}
-              className="flex w-full cursor-pointer items-center gap-2 py-4 text-left text-m-14 text-gray-500"
+              className="flex w-full cursor-pointer items-center gap-2 px-2 py-4 text-left text-m-14 text-gray-500 transition-colors hover:bg-gray-50 active:bg-gray-100"
             >
               <PlusIcon size={16} />새 작업 만들기
             </button>
