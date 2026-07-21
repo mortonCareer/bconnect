@@ -19,6 +19,7 @@ BConnect is a job matching platform (업체-기술자 연결 구인구직 플랫
 - **Authentication**: Phone OTP → tokens (access in memory, refresh in httpOnly cookie)
 - **Data formats**: 공통 데이터 (phone, address 등)는 `@bconnect/config/*` 유틸 통일 사용. 직접 string parsing 금지
 - **Env vars**: `@bconnect/config/env`의 Zod 검증된 `env` 객체 사용. `process.env.X` 직접 접근 금지. **새 env var 추가 시 해당 앱/서비스의 `.env.example`에도 추가 필수** — 비밀은 placeholder(실값 금지), `NEXT_PUBLIC_*` 공개값은 실값 기재
+- **Local dev servers**: dev 서버 포트는 워크트리별 자동 할당 (`scripts/dev-port.sh`, dev·main=3000/3001, 그 외 4000대). 시각적 검증 등으로 서버를 직접 띄우거나 내릴 때는 반드시 [.claude/skills/local-servers/SKILL.md](.claude/skills/local-servers/SKILL.md)의 기동·식별·중지 규칙을 따를 것 — 임의 포트 사용·`pgrep -f` 기반 kill 금지
 
 ## Workflow & Processes
 
