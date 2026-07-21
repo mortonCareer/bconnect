@@ -9,7 +9,6 @@ export const MAX_TRADES = 3
 
 export const profileEditSchema = z.object({
   // Member fields
-  name: z.string().min(1, '이름을 입력해주세요').max(20, '이름은 20자 이내로 입력해주세요'),
   phone: z.string().optional(),
 
   // Profile fields
