@@ -1,8 +1,19 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useGetCrawledMembers, useGetFeeds, useGetProfiles } from '@bconnect/api-client'
-import type { CrawledMemberSummary, Post, Profile, Trade } from '@bconnect/api-client'
+import {
+  regionOfState,
+  useGetCrawledMembers,
+  useGetFeeds,
+  useGetProfiles,
+} from '@bconnect/api-client'
+import type {
+  CrawledMemberSummary,
+  CrawledRegion,
+  Post,
+  Profile,
+  Trade,
+} from '@bconnect/api-client'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { toCrawledDisplay } from '@/lib/crawled'
 import type { ExperienceLevel } from '@/lib/experience'
@@ -14,6 +25,8 @@ interface TechnicianItemBase {
   name: string
   picture: string
   location: string
+  // 표시용 location 과 분리 — 비교는 코드로, 표시는 문자열로. 미상(주소 없음·해석 실패)이면 undefined
+  region?: CrawledRegion
   primaryTrade?: Trade
   // 미상(크롤링 미추출)이면 undefined — 경력 필터에서 제외
   experienceYears?: number
@@ -67,8 +80,9 @@ function toTechnicianItem(profile: Profile, posts: Post[]): MemberTechnicianItem
     memberId,
     name,
     picture: profile.member?.picture ?? DEFAULT_PROFILE_IMAGE,
-    // BE Address 캐논: city = 도/광역시 (data.sql), 지역 필터 옵션(도 단위)과 매칭
+    // 주소 저장 규칙(mapKakaoAddress): city = 시/군/구(표시), state = 시/도(필터 비교)
     location: profile.address?.city ?? '',
+    region: regionOfState(profile.address?.state),
     primaryTrade: profile.primaryTrade,
     experienceYears: profile.experience ?? 0,
     headline: profile.headline ?? '',
@@ -100,6 +114,7 @@ function toCrawledItem(crawled: CrawledMemberSummary): CrawledTechnicianItem | n
     name: d.displayName,
     picture: crawled.picture ?? DEFAULT_PROFILE_IMAGE,
     location: d.location,
+    region: crawled.profile?.state ?? undefined,
     primaryTrade: d.primaryTrade,
     experienceYears: d.experienceYears,
     headline: d.headline,
@@ -124,7 +139,7 @@ interface UseTechnicianItemsOptions {
   trades?: Trade[] | null
   experience?: ExperienceLevel | null
   grades?: Grade[] | null
-  regions?: string[] | null
+  regions?: CrawledRegion[] | null
 }
 
 export function useTechnicianItems({
@@ -180,8 +195,8 @@ export function useTechnicianItems({
         if (item.experienceYears < expRange.min) return false
         if (expRange.max != null && item.experienceYears > expRange.max) return false
       }
-      // 지역 다중 선택 — 선택된 지역 중 하나라도 매칭되면 통과 (OR 조건)
-      if (regions && regions.length > 0 && !regions.some((r) => item.location.includes(r)))
+      // 지역 다중 선택 — 선택된 지역 중 하나라도 일치하면 통과 (OR). 지역 미상은 필터 시 제외
+      if (regions && regions.length > 0 && (!item.region || !regions.includes(item.region)))
         return false
       return true
     })

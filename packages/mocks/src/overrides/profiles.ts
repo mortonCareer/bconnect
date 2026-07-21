@@ -48,6 +48,8 @@ interface ProfileSeed {
   experience: number
   headline: string
   about: string
+  // 카카오 우편번호 결과 그대로 — state = sido(축약형), city = sigungu
+  state: string
   city: string
 }
 
@@ -61,7 +63,8 @@ const SEEDS: ProfileSeed[] = [
     experience: 3,
     headline: HEADLINE,
     about: ABOUT,
-    city: '경기도',
+    state: '경기',
+    city: '수원시 장안구',
   },
   {
     id: 101,
@@ -72,7 +75,8 @@ const SEEDS: ProfileSeed[] = [
     experience: 8,
     headline: '도배 준기공',
     about: '안녕하세요, 도배 준기공 이송목입니다.\n믿고 맡겨주신다면 성실히 임하겠습니다.',
-    city: '경기도',
+    state: '경기',
+    city: '용인시 기흥구',
   },
   {
     id: 102,
@@ -83,7 +87,8 @@ const SEEDS: ProfileSeed[] = [
     experience: 12,
     headline: '전기 기공',
     about: '전기 공사 12년 경력입니다.\n현장 안전 최우선으로 작업합니다.',
-    city: '서울특별시',
+    state: '서울',
+    city: '강남구',
   },
   {
     id: 103,
@@ -94,7 +99,8 @@ const SEEDS: ProfileSeed[] = [
     experience: 5,
     headline: '타일 시공',
     about: '타일·방수 전문입니다.\n견적 문의 편하게 주세요.',
-    city: '인천광역시',
+    state: '인천',
+    city: '남동구',
   },
 ]
 
@@ -110,7 +116,7 @@ const profileOf = (seed: ProfileSeed): Profile => ({
   address: {
     zipcode: '00000',
     city: seed.city,
-    state: seed.city,
+    state: seed.state,
     street: '○○로 12',
     latitude: 37.5,
     longitude: 127.0,

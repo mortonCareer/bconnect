@@ -115,7 +115,10 @@ export const REGION_LABELS: Record<CrawledRegion, string> = {
   JEJU: '제주',
 }
 
-export const REGION_OPTIONS = Object.values(REGION_LABELS)
+export const REGION_LIST = Object.entries(REGION_LABELS).map(([value, label]) => ({
+  value: value as CrawledRegion,
+  label,
+}))
 
 export function getRegionLabel(region: CrawledRegion): string {
   return REGION_LABELS[region] ?? region
