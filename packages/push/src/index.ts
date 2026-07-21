@@ -4,7 +4,7 @@
 export { usePushNotificationListener } from './use-push-notification-listener'
 export { useNotificationSoftAsk } from './use-notification-soft-ask'
 export { requestPushPermission, syncDeviceToken } from './request-push-permission'
-export { registerDeviceToken, unregisterDeviceToken } from './register-device-token'
+export { registerDeviceToken } from './register-device-token'
 
 // 상태
 export { usePushStore, type PushPermissionStatus } from './push-store'

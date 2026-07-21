@@ -16,15 +16,6 @@ export function formatUsername(value: string): string {
   return value.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase()
 }
 
-/** 길이 + charset 유효성 */
-export function isValidUsername(value: string): boolean {
-  return (
-    value.length >= USERNAME_MIN_LENGTH &&
-    value.length <= USERNAME_MAX_LENGTH &&
-    USERNAME_PATTERN.test(value)
-  )
-}
-
 /** username zod 필드 — 규칙 + 에러 메시지 SSOT. `z.object({ username: usernameField })` 로 합성. */
 export const usernameField = z
   .string()

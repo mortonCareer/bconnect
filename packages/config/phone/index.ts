@@ -32,15 +32,6 @@ export function isValidPhoneNumber(phoneNumber: string): boolean {
 }
 
 /**
- * E.164 형식을 한국 형식으로 변환 (+821012345678 → 010-1234-5678)
- */
-export function fromE164(e164Phone: string): string {
-  const parsed = parsePhoneNumber(e164Phone)
-  if (!parsed) throw new Error('Invalid E.164 phone number')
-  return parsed.formatNational()
-}
-
-/**
  * 전화번호를 국내 숫자만 형식으로 변환 (01012345678)
  * API 호출 시 사용 — 백엔드가 \d{10,11} 형식을 기대
  */

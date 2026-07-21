@@ -116,7 +116,3 @@ export const REGION_LABELS: Record<CrawledRegion, string> = {
 }
 
 export const REGION_OPTIONS = Object.values(REGION_LABELS)
-
-export function getRegionLabel(region: CrawledRegion): string {
-  return REGION_LABELS[region] ?? region
-}
