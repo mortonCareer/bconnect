@@ -1357,6 +1357,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseCheckUsernameResponse"
+  /api/v1/group-chats/{id}:
+    get:
+      tags:
+      - group-chat-controller
+      operationId: get_3
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseGroupChatResponse"
   /api/v1/group-chats/{id}/messages:
     get:
       tags:
@@ -1397,7 +1416,7 @@ paths:
     get:
       tags:
       - feed-controller
-      operationId: get_3
+      operationId: get_4
       parameters:
       - name: id
         in: path
@@ -1481,6 +1500,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListDriveResponse"
+  /api/v1/direct-chats/{id}:
+    get:
+      tags:
+      - direct-chat-controller
+      operationId: get_5
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseDirectChatResponse"
   /api/v1/direct-chats/{id}/messages:
     get:
       tags:
@@ -1533,7 +1571,7 @@ paths:
     get:
       tags:
       - crawled-member-controller
-      operationId: get_4
+      operationId: get_6
       parameters:
       - name: id
         in: path
@@ -1614,7 +1652,7 @@ paths:
     get:
       tags:
       - company-controller
-      operationId: get_5
+      operationId: get_7
       parameters:
       - name: id
         in: path
@@ -3357,6 +3395,15 @@ components:
       - picture
       - role
       - username
+    ApiResponseGroupChatResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/GroupChatResponse"
     ApiResponseCursorPageMessageResponse:
       type: object
       properties:
@@ -3532,6 +3579,15 @@ components:
       - member
       - modifiedAt
       - unreadCount
+    ApiResponseDirectChatResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/DirectChatResponse"
     ApiResponseListCredentialSummaryResponse:
       type: object
       properties:

@@ -48,6 +48,22 @@ public class DirectChatService {
     }
 
     @Transactional(readOnly = true)
+    public DirectChat get(Long memberId, Long chatId) {
+        if (!directChatRepository.existsByIdAndMember(chatId, memberId))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        val chat = directChatRepository.findById(chatId)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.FORBIDDEN));
+
+        val lastMessage = messageRepository.findLatestMessagesByChatIdInAndChatType(List.of(chatId), ChatType.DIRECT)
+                .stream().findFirst().map(Message::of).orElse(null);
+        val unreadCount = messageRepository.findDirectUnreadCountByChatIdsAndMemberId(List.of(chatId), memberId)
+                .getOrDefault(chatId, 0L);
+
+        return DirectChat.of(chat, chat.counterpartIdOf(memberId), lastMessage, unreadCount);
+    }
+
+    @Transactional(readOnly = true)
     public CursorPage<Message> listMessages(AuthUser user, Long chatId, CursorLimit cursor) {
         if (!directChatRepository.existsByIdAndMember(chatId, user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
