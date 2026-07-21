@@ -2,7 +2,7 @@
 
 import { getToken } from 'firebase/messaging'
 import { getFcmMessaging } from './firebase'
-import { registerDeviceToken } from './register-device-token'
+import { registerDeviceToken, unregisterDeviceToken } from './register-device-token'
 import { usePushStore, type PushPermissionStatus } from './push-store'
 
 export function mapPermission(p: NotificationPermission): PushPermissionStatus {
@@ -58,6 +58,17 @@ export async function syncDeviceToken(): Promise<void> {
   if (!token) return
   usePushStore.setState({ token })
   await registerDeviceToken(token)
+}
+
+/**
+ * 서버에서 이 기기 등록 해제 + store 반영. 로그아웃·탈퇴에서 호출.
+ * 서버가 인증을 요구하므로 accessToken 을 지우기 전에 await 해야 한다.
+ */
+export async function revokeDeviceToken(): Promise<void> {
+  const token = usePushStore.getState().token
+  if (!token) return
+  await unregisterDeviceToken(token)
+  usePushStore.setState({ token: null })
 }
 
 /**

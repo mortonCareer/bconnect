@@ -3,7 +3,6 @@ import { create } from 'zustand'
 export type SignupStep = 'member' | 'corp' | 'complete'
 
 interface SignupFormData {
-  phone: string
   signupToken: string
   username: string
   name: string
@@ -14,7 +13,6 @@ interface SignupFormData {
 interface SignupState {
   formData: SignupFormData
   step: SignupStep
-  setPhone: (phone: string) => void
   setSignupToken: (token: string) => void
   setMember: (data: { username: string; name: string }) => void
   setCorp: (data: { companyName: string; bizNumber: string }) => void
@@ -23,7 +21,6 @@ interface SignupState {
 }
 
 const initialFormData: SignupFormData = {
-  phone: '',
   signupToken: '',
   username: '',
   name: '',
@@ -34,11 +31,6 @@ const initialFormData: SignupFormData = {
 export const useSignupStore = create<SignupState>()((set) => ({
   formData: initialFormData,
   step: 'member' as SignupStep,
-
-  setPhone: (phone) =>
-    set((state) => ({
-      formData: { ...state.formData, phone },
-    })),
 
   setSignupToken: (signupToken) =>
     set((state) => ({
