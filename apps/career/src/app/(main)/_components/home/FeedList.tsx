@@ -99,7 +99,7 @@ export function FeedList() {
           key={item.postId}
           content={item.content}
           canManage={item.isMine}
-          editHref={`/profile/edit/work/${item.postId}`}
+          editHref={`/profile/work/${item.postId}/edit`}
           onDelete={() => setPendingDeleteId(item.postId)}
         />
       ))}
