@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import { TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
 import type { Trade, ProfileRole } from '@bconnect/api-client'
+import { daysBetween } from '@bconnect/config/date'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { FILTER_ROLES, ROLE_LABELS } from '@/lib/role-labels'
@@ -47,11 +48,9 @@ interface UseFeedItemsOptions {
 const mockRoleFor = (memberId: number): ProfileRole => FILTER_ROLES[memberId % FILTER_ROLES.length]
 const mockRegionFor = (memberId: number): Region => REGIONS[memberId % REGIONS.length]
 
-const DAY_MS = 24 * 60 * 60 * 1000
-
 /** task.start~end(YYYY-MM-DD, 양끝 포함) → '4일 소요'. 파싱 불가/역순이면 생략. */
 function formatDurationDays(start: string, end: string): string | undefined {
-  const days = Math.round((Date.parse(end) - Date.parse(start)) / DAY_MS) + 1
+  const days = daysBetween(start, end) + 1
   if (!Number.isFinite(days) || days < 1) return undefined
   return `${days}일 소요`
 }
