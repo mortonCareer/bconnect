@@ -134,10 +134,19 @@ const PROFILES_BY_ID: Record<number, ProfileDetail> = Object.fromEntries(
 
 // #966 프로필 이미지 업로드 QA — mock-s3 는 바이트를 버리므로 pictureId 시드 이미지로 교체 표시.
 // members.ts 의 updateMyMemberPicture override 가 호출 (프로필 도메인 state 단일 owner 유지).
+// getMyProfile 이 매 호출 seed 에서 새 객체를 만들므로 변이 대신 모듈 변수로 보관해 응답 시 주입.
+let myMockPicture: string | null = null
+
 export function setMyMockPicture(pictureId: number) {
+  myMockPicture = `https://picsum.photos/seed/bconnect-${pictureId}/200/200`
   const me = PROFILES_BY_ID[1]?.member
-  if (me) me.picture = `https://picsum.photos/seed/bconnect-${pictureId}/200/200`
+  if (me) me.picture = myMockPicture
 }
+
+const withMyPicture = (profile: Profile): Profile =>
+  myMockPicture && profile.member
+    ? { ...profile, member: { ...profile.member, picture: myMockPicture } }
+    : profile
 
 const paramId = (value: string | readonly string[] | undefined): number =>
   Number(typeof value === 'string' ? value : (value?.[0] ?? ''))
@@ -145,6 +154,6 @@ const paramId = (value: string | readonly string[] | undefined): number =>
 export const profilesOverrides = [
   getGetProfilesMockHandler(() => SEEDS.map((seed) => profileOf(seed))),
   // /profiles/me 는 status 없는 평문 Profile — 타인 조회(ProfileDetail)와 응답형이 다르다
-  getGetMyProfileMockHandler(() => profileOf(SEEDS[0])),
+  getGetMyProfileMockHandler(() => withMyPicture(profileOf(SEEDS[0]))),
   getGetProfileMockHandler(({ params }) => PROFILES_BY_ID[paramId(params.id)] ?? PROFILES_BY_ID[1]),
 ]
