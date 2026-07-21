@@ -56,7 +56,8 @@ public class CredentialService {
         val created = new CredentialEntity(
                 user.id(),
                 command.type(),
-                command.expiredAt()
+                command.expiredAt(),
+                command.note()
         );
 
         credentialRepository.save(created);

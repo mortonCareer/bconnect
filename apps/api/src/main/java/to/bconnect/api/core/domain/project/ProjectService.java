@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.core.domain.company.CompanyExceptionCode;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.board.BoardEntity;
@@ -28,6 +29,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
+
+    private static final int MAX_PROJECT_COUNT = 1;
 
     private final ProjectRepository projectRepository;
     private final CompanyRepository companyRepository;
@@ -62,6 +65,9 @@ public class ProjectService {
     @Transactional
     public Long create(AuthUser user, CreateProject command) {
         val company = findCompany(user);
+
+        if (projectRepository.countByCompanyId(company.getId()) >= MAX_PROJECT_COUNT)
+            throw new CodeException(CompanyExceptionCode.PROJECT_LIMIT_EXCEEDED);
 
         val created = projectRepository.save(new ProjectEntity(
                 company.getId(),

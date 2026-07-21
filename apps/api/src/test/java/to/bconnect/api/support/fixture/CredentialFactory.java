@@ -13,15 +13,15 @@ public class CredentialFactory {
 
     public static Credential create(Long id, Long memberId) {
         return new Credential(id, memberId, CredentialType.SOLE_PROPRIETOR,
-                CredentialStatus.PENDING, MAX_DATE,
+                CredentialStatus.PENDING, MAX_DATE, null,
                 MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
     public static CredentialEntity createEntity(Long memberId) {
-        return new CredentialEntity(memberId, CredentialType.SOLE_PROPRIETOR, null);
+        return new CredentialEntity(memberId, CredentialType.SOLE_PROPRIETOR, null, null);
     }
 
     public static CreateCredentialRequest createRequest() {
-        return new CreateCredentialRequest(CredentialType.SOLE_PROPRIETOR, MAX_DATE, null);
+        return new CreateCredentialRequest(CredentialType.SOLE_PROPRIETOR, MAX_DATE, null, null);
     }
 }

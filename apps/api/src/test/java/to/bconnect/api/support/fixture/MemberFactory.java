@@ -2,6 +2,7 @@ package to.bconnect.api.support.fixture;
 
 import to.bconnect.api.core.presentation.v1.request.RegisterMemberRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateMemberRequest;
+import to.bconnect.api.core.presentation.v1.request.UpdatePictureRequest;
 import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.Role;
@@ -26,10 +27,14 @@ public class MemberFactory {
     }
 
     public static RegisterMemberRequest registerRequest() {
-        return new RegisterMemberRequest("username", "name", DEFAULT_PICTURE_ID, Role.USER);
+        return new RegisterMemberRequest("username", "name");
     }
 
     public static UpdateMemberRequest updateRequest() {
-        return new UpdateMemberRequest("name", DEFAULT_PICTURE_ID);
+        return new UpdateMemberRequest("name");
+    }
+
+    public static UpdatePictureRequest updatePictureRequest() {
+        return new UpdatePictureRequest(DEFAULT_PICTURE_ID);
     }
 }

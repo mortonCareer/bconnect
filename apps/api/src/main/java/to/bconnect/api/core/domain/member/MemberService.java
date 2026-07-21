@@ -59,7 +59,6 @@ public class MemberService {
         );
 
         memberRepository.save(created);
-        attachmentLinker.relink(created.getId(), ReferenceType.MEMBER, created.getId(), command.pictureId());
         return Member.of(created);
     }
 
@@ -69,7 +68,11 @@ public class MemberService {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         found.update(command.name());
-        attachmentLinker.relink(user.id(), ReferenceType.MEMBER, user.id(), command.pictureId());
+    }
+
+    @Transactional
+    public void updatePicture(AuthUser user, Long pictureId) {
+        attachmentLinker.relink(user.id(), ReferenceType.MEMBER, user.id(), pictureId);
     }
 
     @Transactional

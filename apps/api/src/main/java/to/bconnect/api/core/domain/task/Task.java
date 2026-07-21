@@ -6,8 +6,8 @@ import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
 
-import java.time.LocalDate;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Set;
 
 public record Task(
@@ -21,7 +21,7 @@ public record Task(
         String workerTitle,
         String workerMemo,
         String workerCompany,
-        Address address,
+        Address workerAddress,
         Long projectId,
         String projectTitle,
         String projectRequirement,
@@ -41,7 +41,7 @@ public record Task(
                 entity.getWorkerTitle(),
                 entity.getWorkerMemo(),
                 entity.getWorkerCompany(),
-                entity.getAddress(),
+                entity.getWorkerAddress(),
                 entity.getProjectId(),
                 entity.getProjectTitle(),
                 entity.getProjectRequirement(),

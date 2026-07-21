@@ -5,8 +5,9 @@ spring:
     default: local
 
   jpa:
+    hibernate:
+      ddl-auto: validate
     open-in-view: false
-    show-sql: true
     properties:
       hibernate:
         format_sql: true
@@ -14,8 +15,7 @@ spring:
         order_updates: true
         jdbc:
           batch_size: 50
-    hibernate:
-      ddl-auto: validate
+    show-sql: true
 
   sql:
     init:
@@ -36,6 +36,8 @@ management:
       system: false
 
 app:
+  timezone: Asia/Seoul
+
   cors:
     allowed-origins:
       - ${CORS_ALLOWED_ORIGIN:http://localhost:3000}
