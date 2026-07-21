@@ -9,7 +9,6 @@ import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   useGetMyProfile,
-  useUpdateMyMember,
   useUpdateMyProfile,
   useUpdateMyProfileAbout,
   Trade,
@@ -41,7 +40,6 @@ export default function ProfileEditPage() {
 
   const { data: profile, isLoading: isProfileLoading } = useGetMyProfile()
 
-  const updateMemberMutation = useUpdateMyMember()
   const updateProfileMutation = useUpdateMyProfile()
   const updateAboutMutation = useUpdateMyProfileAbout()
 
@@ -50,7 +48,6 @@ export default function ProfileEditPage() {
     resolver: zodResolver(profileEditSchema as any),
     mode: 'onTouched',
     defaultValues: {
-      name: '',
       phone: '',
       primaryTrade: undefined,
       trades: [],
@@ -73,7 +70,6 @@ export default function ProfileEditPage() {
     if (profile) {
       // TODO: BE required 처리 후 type narrowing 필요. profile 필수 표시값이 optional emit이라 폼 초기값에서 임시 fallback 중.
       reset({
-        name: profile.member?.name ?? '',
         primaryTrade: profile.primaryTrade ?? undefined,
         trades: profile.trades ?? [],
         experience: profile.experience ?? undefined,
@@ -88,26 +84,13 @@ export default function ProfileEditPage() {
   const watchedPrimaryTrade = useWatch({ control, name: 'primaryTrade' })
 
   const isLoading = isProfileLoading
-  const isSaving =
-    isSubmitting ||
-    updateMemberMutation.isPending ||
-    updateProfileMutation.isPending ||
-    updateAboutMutation.isPending
+  const isSaving = isSubmitting || updateProfileMutation.isPending || updateAboutMutation.isPending
 
   const scrollToError = useScrollToError()
 
   const onSubmit = async (data: ProfileEditFormData) => {
     try {
       const promises: Promise<unknown>[] = []
-
-      // Member 업데이트 (name) — UpdateMemberRequest 는 { name, pictureId? } (role 없음)
-      if (profile?.member?.id && data.name !== profile.member.name) {
-        promises.push(
-          updateMemberMutation.mutateAsync({
-            data: { name: data.name },
-          })
-        )
-      }
 
       // Profile 업데이트 — role(ProfileRole) 은 편집 대상이 아니라 기존 값 유지 (필수 필드)
       promises.push(
@@ -136,7 +119,7 @@ export default function ProfileEditPage() {
       await Promise.all(promises)
 
       // 캐시 무효화는 orval config(mutationInvalidates)가 담당 —
-      // updateMyMember→getMyMember, updateMyProfile/About→getMyProfile (ADR-0025)
+      // updateMyProfile/About→getMyProfile (ADR-0025)
       router.back()
     } catch (err) {
       console.error('프로필 수정 실패:', err)
@@ -190,15 +173,6 @@ export default function ProfileEditPage() {
 
       <Form {...form}>
         <form className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-24 pt-3">
-          {/* 이름 */}
-          <TextField
-            control={control}
-            name="name"
-            label="이름"
-            required
-            placeholder="이름을 입력해주세요"
-          />
-
           {/* 시공분야 */}
           <FormField
             control={control}
