@@ -16,6 +16,7 @@ public record CredentialResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) CredentialType type,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) CredentialStatus status,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) LocalDate expiredAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String note,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) AttachmentResponse attachment
@@ -27,6 +28,7 @@ public record CredentialResponse(
                 credential.type(),
                 credential.status(),
                 credential.expiredAt(),
+                credential.note(),
                 credential.createdAt(),
                 credential.modifiedAt(),
                 attachment == null ? null : AttachmentResponse.of(attachment, url)

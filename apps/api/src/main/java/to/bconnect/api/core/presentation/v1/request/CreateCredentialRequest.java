@@ -9,9 +9,10 @@ import java.time.LocalDate;
 public record CreateCredentialRequest(
         @NotNull CredentialType type,
         LocalDate expiredAt,
+        String note,
         Long attachmentId
 ) {
     public CreateCredential toCommand() {
-        return new CreateCredential(type, expiredAt, attachmentId);
+        return new CreateCredential(type, expiredAt, note, attachmentId);
     }
 }

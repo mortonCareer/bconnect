@@ -23,10 +23,13 @@ public class CredentialEntity extends BaseEntity {
 
     private LocalDate expiredAt;
 
-    public CredentialEntity(Long memberId, CredentialType type, LocalDate expiredAt) {
+    private String note;
+
+    public CredentialEntity(Long memberId, CredentialType type, LocalDate expiredAt, String note) {
         this.memberId = memberId;
         this.type = type;
         this.expiredAt = expiredAt;
+        this.note = note;
     }
 
     public void accept() {

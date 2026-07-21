@@ -7,5 +7,6 @@ import java.time.LocalDate;
 public record CreateCredential(
         CredentialType type,
         LocalDate expiredAt,
+        String note,
         Long attachmentId
 ) {}

@@ -114,35 +114,34 @@ graph TD
 | HELPER | 조공     |
 
 ### 공종(TRADE)
-미확정
 
-| 유형 | 설명   |
-|---|------|
-| DESIGN | 디자인  |
-| DEMOLITION | 철거   |
-| ELECTRICAL | 전기 설비 |
-| PLUMBING | 배관   |
-| MECHANICAL | 기계 설비 |
-| MASONRY | 적조   |
-| CARPENTRY | 목공   |
-| GLAZING | 유리   |
-| WATERPROOFING | 방수   |
-| PLASTERING | 미장   |
-| INSULATION | 단열   |
-| TILING | 타일   |
-| GROUTING | 줄눈   |
-| PAINTING | 도장   |
-| WALLPAPER | 도배   |
-| FILM_SHEET | 필름/시트 |
-| HARDWOOD | 마루   |
-| VINYL | 장판   |
-| SINK | 싱크대  |
-| FURNITURE | 가구   |
-| AIR_CONDITIONING | 냉난방  |
-| HOISTING | 양중   |
-| TRANSPORT | 운반   |
-| CLEANING | 청소   |
-| GENERAL_LABOR | 잡부   |
+| 공정 구분 | 유형 | 설명 |
+|---|---|---|
+| 기반 공정 | DESIGN | 설계 |
+| 기반 공정 | DEMOLITION | 철거/확장 |
+| 기반 공정 | ELECTRICAL | 전기 |
+| 기반 공정 | PLUMBING | 배관 |
+| 기반 공정 | MECHANICAL | 설비 |
+| 구조 공정 | MASONRY | 조적 |
+| 구조 공정 | CARPENTRY | 목공 |
+| 구조 공정 | GLAZING | 창호 |
+| 구조 공정 | WATERPROOFING | 방수 |
+| 구조 공정 | PLASTERING | 미장 |
+| 구조 공정 | INSULATION | 단열 |
+| 마감 공정 | TILING | 타일 |
+| 마감 공정 | GROUTING | 줄눈 |
+| 마감 공정 | PAINTING | 도장 |
+| 마감 공정 | WALLPAPER | 도배 |
+| 마감 공정 | FILM_SHEET | 필름/시트 |
+| 마감 공정 | HARDWOOD | 마루 |
+| 마감 공정 | VINYL | 장판 |
+| 설치 | SINK | 싱크대 |
+| 설치 | FURNITURE | 가구 |
+| 설치 | AIR_CONDITIONING | 에어컨 |
+| 현장지원 | HOISTING | 양중/곰방 |
+| 현장지원 | TRANSPORT | 운송 |
+| 현장지원 | CLEANING | 청소 |
+| 현장지원 | GENERAL_LABOR | 보통인부 |
 
 ### 작업 유형(TaskType)
 

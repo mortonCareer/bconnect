@@ -16,6 +16,7 @@ import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.core.domain.member.MemberService;
 import to.bconnect.api.core.presentation.v1.request.RegisterMemberRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateMemberRequest;
+import to.bconnect.api.core.presentation.v1.request.UpdatePictureRequest;
 import to.bconnect.api.core.presentation.v1.response.CheckUsernameResponse;
 import to.bconnect.api.core.presentation.v1.response.MemberResponse;
 import to.bconnect.api.core.presentation.v1.response.RegisterMemberResponse;
@@ -91,6 +92,14 @@ public class MemberController {
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid UpdateMemberRequest request) {
         memberService.update(user, request.toCommand());
+        return ApiResponse.success(null);
+    }
+
+    @PutMapping("/me/picture")
+    public ApiResponse<Void> updatePicture(
+            @AuthenticationPrincipal AuthUser user,
+            @RequestBody UpdatePictureRequest request) {
+        memberService.updatePicture(user, request.pictureId());
         return ApiResponse.success(null);
     }
 

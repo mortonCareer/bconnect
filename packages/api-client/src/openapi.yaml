@@ -376,6 +376,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/members/me/picture:
+    put:
+      tags:
+      - member-controller
+      operationId: updatePicture
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePictureRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/drives/{id}/name:
     put:
       tags:
@@ -2028,11 +2046,14 @@ components:
         name:
           type: string
           minLength: 1
+      required:
+      - name
+    UpdatePictureRequest:
+      type: object
+      properties:
         pictureId:
           type: integer
           format: int64
-      required:
-      - name
     UpdateDriveRequest:
       type: object
       properties:
@@ -2235,21 +2256,9 @@ components:
         name:
           type: string
           minLength: 1
-        pictureId:
-          type: integer
-          format: int64
-        role:
-          $ref: "#/components/schemas/Role"
       required:
       - name
-      - role
       - username
-    Role:
-      type: string
-      enum:
-      - GUEST
-      - USER
-      - ADMIN
     ApiResponseRegisterMemberResponse:
       type: object
       properties:
@@ -2365,6 +2374,8 @@ components:
         expiredAt:
           type: string
           format: date
+        note:
+          type: string
         attachmentId:
           type: integer
           format: int64
@@ -2796,6 +2807,12 @@ components:
       - experience
       - headline
       - primaryTrade
+    Role:
+      type: string
+      enum:
+      - GUEST
+      - USER
+      - ADMIN
     ApiResponseListRecommendationResponse:
       type: object
       properties:
@@ -3509,6 +3526,10 @@ components:
           - string
           - "null"
           format: date
+        note:
+          type:
+          - string
+          - "null"
         createdAt:
           type: string
           format: date-time
@@ -3525,6 +3546,7 @@ components:
       - id
       - memberId
       - modifiedAt
+      - note
       - status
       - type
     ApiResponseListCrawledMemberSummaryResponse:
@@ -3577,10 +3599,6 @@ components:
         profile:
           type: "null"
           $ref: "#/components/schemas/CrawledProfileResponse"
-        thumbnails:
-          type: array
-          items:
-            type: string
       required:
       - brn
       - company
@@ -3593,7 +3611,6 @@ components:
       - picture
       - profile
       - role
-      - thumbnails
     CrawledPlatform:
       type: string
       enum:
@@ -3620,6 +3637,10 @@ components:
           type:
           - string
           - "null"
+        about:
+          type:
+          - string
+          - "null"
         address:
           type:
           - string
@@ -3632,6 +3653,7 @@ components:
         platform:
           $ref: "#/components/schemas/CrawledPlatform"
       required:
+      - about
       - address
       - experience
       - headline

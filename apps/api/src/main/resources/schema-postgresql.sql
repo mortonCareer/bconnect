@@ -278,6 +278,7 @@ create table credentials (
     type varchar(255) not null,
     status varchar(255) not null,
     expired_at date,
+    note TEXT,
     created_at timestamptz not null,
     modified_at timestamptz not null,
     deleted_at timestamptz,

@@ -306,6 +306,7 @@ create table credentials (
     type varchar(255) not null,
     status varchar(255) not null,
     expired_at date,
+    note TEXT,
     created_at timestamp(6) with time zone not null,
     modified_at timestamp(6) with time zone not null,
     deleted_at timestamp with time zone,
