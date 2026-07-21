@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface ParticipantRepository extends JpaRepository<ParticipantEntity, Long> {
 
@@ -17,6 +18,8 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
     List<Long> findMemberIdsByChatId(@Param("chatId") Long chatId);
 
     List<ParticipantEntity> findAllByChatIdAndMemberIdIn(Long chatId, Collection<Long> memberIds);
+
+    Optional<ParticipantEntity> findByChatIdAndMemberId(Long chatId, Long memberId);
 
     boolean existsByChatIdAndMemberId(Long chatId, Long memberId);
 }
