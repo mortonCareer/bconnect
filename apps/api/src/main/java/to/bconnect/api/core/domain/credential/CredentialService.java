@@ -75,7 +75,7 @@ public class CredentialService {
         if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        attachmentLinker.unlink(ReferenceType.CREDENTIAL, List.of(found.getId()));
+        attachmentLinker.unlink(ReferenceType.CREDENTIAL, found.getId());
         credentialRepository.delete(found);
     }
 

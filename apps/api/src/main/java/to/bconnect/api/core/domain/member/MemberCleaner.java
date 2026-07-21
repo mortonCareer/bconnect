@@ -59,7 +59,7 @@ public class MemberCleaner {
 
         sessionRepository.findByMemberId(memberId).ifPresent(sessionRepository::delete);
         profileRepository.findByMemberId(memberId).ifPresent(profileRepository::delete);
-        attachmentLinker.unlink(ReferenceType.MEMBER, List.of(memberId));
+        attachmentLinker.unlink(ReferenceType.MEMBER, memberId);
 
         val credentials = credentialRepository.findAllByMemberId(memberId);
         attachmentLinker.unlink(ReferenceType.CREDENTIAL, credentials.stream().map(CredentialEntity::getId).toList());

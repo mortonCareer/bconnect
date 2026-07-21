@@ -71,7 +71,7 @@ public class PostService {
         if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        attachmentLinker.unlink(ReferenceType.POST, List.of(found.getId()));
+        attachmentLinker.unlink(ReferenceType.POST, found.getId());
         postRepository.delete(found);
     }
 }

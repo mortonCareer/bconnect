@@ -16,7 +16,6 @@ import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.core.domain.chat.GroupChatService;
 import to.bconnect.api.core.domain.chat.Message;
-import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.presentation.v1.request.CreateGroupChatRequest;
 import to.bconnect.api.core.presentation.v1.response.GroupChatResponse;
@@ -48,7 +47,7 @@ public class GroupChatController {
                 .flatMap(it -> it.participantIds().stream())
                 .distinct()
                 .toList();
-        val memberMap = memberResolver.resolveMap(memberIds);
+        val memberMap = memberResolver.resolveMapOrWithdrawn(memberIds);
         val urlMap = attachmentResolver.resolveUrlMap(
                 ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
@@ -56,7 +55,7 @@ public class GroupChatController {
                 .map(it -> GroupChatResponse.of(
                         it,
                         it.participantIds().stream()
-                                .map(memberId -> memberMap.getOrDefault(memberId, Member.withdrawn(memberId)))
+                                .map(memberMap::get)
                                 .toList(),
                         urlMap
                 ))

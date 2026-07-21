@@ -45,6 +45,11 @@ public class CrawledMemberService {
     }
 
     @Transactional(readOnly = true)
+    public CrawledProfileEntity getProfile(Long memberId) {
+        return crawledProfileRepository.findByMemberId(memberId).orElse(null);
+    }
+
+    @Transactional(readOnly = true)
     public Map<Long, CrawledProfileEntity> getProfileMap(List<Long> memberIds) {
         return crawledProfileRepository.findByMemberIdIn(memberIds)
                 .stream()

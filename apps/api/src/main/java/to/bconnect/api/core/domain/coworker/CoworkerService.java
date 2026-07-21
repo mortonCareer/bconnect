@@ -34,7 +34,13 @@ public class CoworkerService {
 
     @Transactional(readOnly = true)
     public CoworkerStatus resolveStatus(Long memberId, Long targetId) {
-        return resolveStatusMap(memberId, List.of(targetId)).get(targetId);
+        if (coworkerRepository.existsByMembers(memberId, targetId))
+            return CoworkerStatus.COWORKER;
+        if (coworkerRequestRepository.existsByFromIdAndToId(memberId, targetId))
+            return CoworkerStatus.SENT;
+        if (coworkerRequestRepository.existsByFromIdAndToId(targetId, memberId))
+            return CoworkerStatus.RECEIVED;
+        return CoworkerStatus.NONE;
     }
 
     @Transactional(readOnly = true)

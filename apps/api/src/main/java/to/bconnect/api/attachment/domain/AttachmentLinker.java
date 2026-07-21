@@ -12,7 +12,6 @@ import to.bconnect.api.storage.attachment.AttachmentStatus;
 import to.bconnect.api.storage.attachment.ReferenceType;
 
 import java.util.Collection;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -37,7 +36,7 @@ public class AttachmentLinker {
 
     @Transactional
     public void relink(Long memberId, ReferenceType referenceType, Long referenceId, Long attachmentId) {
-        unlink(referenceType, List.of(referenceId));
+        unlink(referenceType, referenceId);
         if (attachmentId == null)
             return;
 
@@ -57,6 +56,12 @@ public class AttachmentLinker {
             return;
 
         attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, referenceIds)
+                .forEach(AttachmentEntity::unlink);
+    }
+
+    @Transactional
+    public void unlink(ReferenceType referenceType, Long referenceId) {
+        attachmentRepository.findAllByReferenceTypeAndReferenceId(referenceType, referenceId)
                 .forEach(AttachmentEntity::unlink);
     }
 

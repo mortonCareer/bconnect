@@ -17,6 +17,7 @@ import to.bconnect.api.common.CommonExceptionCode;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -27,6 +28,11 @@ public class TaskQueryService {
     private final CoworkerRepository coworkerRepository;
     private final CompanyRepository companyRepository;
     private final ProjectRepository projectRepository;
+
+    @Transactional(readOnly = true)
+    public Optional<Task> find(Long taskId) {
+        return taskRepository.findById(taskId).map(Task::of);
+    }
 
     @Transactional(readOnly = true)
     public List<Task> listByIds(Collection<Long> taskIds) {

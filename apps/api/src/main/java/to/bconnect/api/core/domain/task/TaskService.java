@@ -152,15 +152,14 @@ public class TaskService {
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
         }
 
-        val taskIds = List.of(task.getId());
-        offerRepository.deleteByTaskIdIn(taskIds);
+        offerRepository.deleteByTaskId(task.getId());
 
-        val posts = postRepository.findAllByTaskIdIn(taskIds);
+        val posts = postRepository.findAllByTaskId(task.getId());
         val postIds = posts.stream().map(PostEntity::getId).toList();
         if (!postIds.isEmpty())
             attachmentLinker.unlink(ReferenceType.POST, postIds);
         postRepository.deleteAll(posts);
 
-        taskRepository.deleteAllById(taskIds);
+        taskRepository.delete(task);
     }
 }
