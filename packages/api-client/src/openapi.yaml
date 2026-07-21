@@ -2608,7 +2608,6 @@ components:
         status:
           $ref: "#/components/schemas/OfferStatus"
       required:
-      - due
       - id
       - seq
       - status
@@ -2780,7 +2779,6 @@ components:
           format: date-time
       required:
       - createdAt
-      - due
       - id
       - member
       - modifiedAt
@@ -3599,6 +3597,10 @@ components:
         profile:
           type: "null"
           $ref: "#/components/schemas/CrawledProfileResponse"
+        thumbnails:
+          type: array
+          items:
+            type: string
       required:
       - brn
       - company
@@ -3611,6 +3613,7 @@ components:
       - picture
       - profile
       - role
+      - thumbnails
     CrawledPlatform:
       type: string
       enum:
@@ -3637,10 +3640,6 @@ components:
           type:
           - string
           - "null"
-        about:
-          type:
-          - string
-          - "null"
         address:
           type:
           - string
@@ -3653,7 +3652,6 @@ components:
         platform:
           $ref: "#/components/schemas/CrawledPlatform"
       required:
-      - about
       - address
       - experience
       - headline
