@@ -7,46 +7,37 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLogout, useDeleteMyMember } from '@bconnect/api-client'
 import { TopBar, ConfirmDialog, toast, isApiErrorShape } from '@bconnect/ui'
-import { revokeDeviceToken } from '@bconnect/push'
-import { useAuthStore } from '@/stores/auth-store'
+import { useSessionExit } from '@/hooks/useSessionExit'
 import { SettingsRow } from './_components/SettingsRow'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const clearAuth = useAuthStore((s) => s.logout)
+  const exitSession = useSessionExit()
   const [logoutOpen, setLogoutOpen] = useState(false)
   const [withdrawOpen, setWithdrawOpen] = useState(false)
 
-  const logout = useLogout({
-    mutation: {
-      onSettled: () => {
-        clearAuth()
-        router.push('/signup/auth')
-      },
-    },
-  })
+  const logout = useLogout()
+  const withdraw = useDeleteMyMember()
 
-  const withdraw = useDeleteMyMember({
-    mutation: {
-      onSuccess: () => {
-        clearAuth()
-        router.push('/')
-        toast({ description: '탈퇴가 완료되었어요', variant: 'success' })
-      },
-      onError: (error) =>
-        toast({
-          description: isApiErrorShape(error)
-            ? error.message
-            : '탈퇴에 실패했어요. 다시 시도해주세요',
-          variant: 'error',
-        }),
-    },
-  })
+  const handleLogout = async () => {
+    // 서버 호출이 실패해도 사용자는 이탈 의사를 밝혔으므로 로컬은 정리하고 이동한다.
+    await exitSession(logout.mutateAsync, { clearAuthOnFailure: true }).catch(() => undefined)
+    router.push('/signup/auth')
+  }
 
-  // 서버가 해제에도 인증을 요구하므로 accessToken 이 살아있는 동안 먼저 해제한다.
-  const revokeThen = (run: () => void) => async () => {
-    await revokeDeviceToken()
-    run()
+  const handleWithdraw = async () => {
+    try {
+      await exitSession(withdraw.mutateAsync)
+      router.push('/')
+      toast({ description: '탈퇴가 완료되었어요', variant: 'success' })
+    } catch (error) {
+      toast({
+        description: isApiErrorShape(error)
+          ? error.message
+          : '탈퇴에 실패했어요. 다시 시도해주세요',
+        variant: 'error',
+      })
+    }
   }
 
   return (
@@ -85,7 +76,7 @@ export default function SettingsPage() {
         onOpenChange={setLogoutOpen}
         title="로그아웃 하시겠어요?"
         confirmLabel="로그아웃"
-        onConfirm={revokeThen(() => logout.mutate())}
+        onConfirm={handleLogout}
       />
       <ConfirmDialog
         open={withdrawOpen}
@@ -94,7 +85,7 @@ export default function SettingsPage() {
         description="탈퇴한 계정은 복구할 수 없어요."
         confirmLabel="탈퇴"
         destructive
-        onConfirm={revokeThen(() => withdraw.mutate())}
+        onConfirm={handleWithdraw}
       />
     </div>
   )
