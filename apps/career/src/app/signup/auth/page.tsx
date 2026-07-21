@@ -78,9 +78,14 @@ export default function SignupAuthPage() {
       })
       lastFailedAttempt.current = null
       if (result.registered) {
-        // 이미 가입된 회원 — 로그인 처리 후 홈으로 (member 정보는 useGetMyMember 로 별도 조회)
+        // 이미 가입된 회원 — 로그인 처리 후 복귀 (member 정보는 useGetMyMember 로 별도 조회)
         login(result.accessToken)
-        router.push('/')
+        const redirect = new URLSearchParams(window.location.search).get('redirect')
+        // router.push 금지 — 라우터 캐시가 로그아웃 시점의 미들웨어 redirect 를 재생해
+        // 인증 페이지로 즉시 돌아온다. 하드 내비게이션으로 캐시를 통째로 리셋 (#855).
+        window.location.assign(
+          redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/'
+        )
       } else {
         // 신규 유저 — signupToken 저장 후 회원가입 진행
         setSignupToken(result.signupToken)

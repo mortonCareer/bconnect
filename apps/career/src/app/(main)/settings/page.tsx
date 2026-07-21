@@ -21,7 +21,7 @@ export default function SettingsPage() {
     mutation: {
       onSettled: () => {
         clearAuth()
-        router.push('/login')
+        router.push('/signup/auth')
       },
     },
   })
