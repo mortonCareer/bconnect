@@ -7,7 +7,8 @@ import type { Task } from '@bconnect/api-client'
 import { matchHangul } from '@bconnect/config/search'
 import { cn, PlusIcon, SearchIcon, TopBar } from '@bconnect/ui'
 import { useMemo, useState } from 'react'
-import { formatWorkPeriod, taskDotColor } from './work-utils'
+import { dotColor } from '@/lib/task-colors'
+import { formatWorkPeriod } from './work-utils'
 
 interface TaskSelectViewProps {
   tasks: Task[]
@@ -81,7 +82,7 @@ export function TaskSelectView({
                 className="flex w-full cursor-pointer flex-col items-start gap-2 border-b border-gray-200 py-4 text-left"
               >
                 <span className="flex items-center gap-2">
-                  <span aria-hidden className={cn('size-2 rounded-full', taskDotColor(task.id))} />
+                  <span aria-hidden className={cn('size-2 rounded-full', dotColor(task.id))} />
                   <span
                     className={cn(
                       'text-m-14',
