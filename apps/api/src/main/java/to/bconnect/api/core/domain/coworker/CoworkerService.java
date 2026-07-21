@@ -33,6 +33,11 @@ public class CoworkerService {
     }
 
     @Transactional(readOnly = true)
+    public CoworkerStatus resolveStatus(Long memberId, Long targetId) {
+        return resolveStatusMap(memberId, List.of(targetId)).get(targetId);
+    }
+
+    @Transactional(readOnly = true)
     public Map<Long, CoworkerStatus> resolveStatusMap(Long memberId, Collection<Long> targetIds) {
         val coworkerIds = coworkerRepository.findAllByMemberId(memberId).stream()
                 .map(it -> it.coworkerIdOf(memberId))
