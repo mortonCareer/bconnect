@@ -93,11 +93,15 @@ export function QualificationTab({
           <h3 className="text-sb-14 text-gray-900">{info.title}</h3>
           <p className="whitespace-pre-line text-r-12 text-gray-500">
             {info.description}
-            {!isOther && (
+            {!isOther && info.detailHref && (
               <>
                 {' '}
-                {/* TODO: 자세히보기 가이드 페이지 href 연결 (서브탭 유형별 경로, 미정) */}
-                <Link href="#" className="text-gray-500 underline">
+                <Link
+                  href={info.detailHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-gray-500 underline"
+                >
                   자세히보기
                 </Link>
               </>

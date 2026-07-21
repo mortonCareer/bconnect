@@ -122,6 +122,29 @@ print_summary(report)
 "
 ```
 
+### 수집 · 분류 분리 + 강한 판단자 in-loop (#920, #953)
+
+수집(느림, 네트워크)과 분류(싸고 재실행 가능)를 나눠, 분류 방법을 바꿔도 다시 수집하지 않는다. 배포된 자동 분류기(GPT)가 놓치는 홍보·범위 밖 오탐을 더 정확한 판단자(사람 또는 강한 모델)로 걸러낼 때 쓴다.
+
+```bash
+# 1) 원본만 수집 (LLM 없이, 이미 수집/적재한 블로그는 건너뜀)
+uv run crawler --collect-raw --full --per-query 20   # → reports/raw/*.jsonl
+
+# 2) (선택) 더 정확한 판단자로 라벨 만들기
+#    reports/raw 를 읽어 블로그별로 is_professional + 필드를 판단한 JSON 배열을 만든다.
+#    형식: [{"id": "<blog_url>", "is_professional": true, "name": "...", "trades": [...], ...}]
+#    사람이든 강한 모델(예: Claude)이든 무엇이 만들어도 된다.
+
+# 3) 원본에서 분류만 실행 (라벨이 있으면 그 블로그는 LLM 대신 라벨 사용)
+uv run crawler --classify-from-raw reports/raw/naver-<시각>.jsonl --labels labels.json
+#    → reports/<시각>.json 에 통과한 기술자(members[]) 저장. 라벨에 없는 블로그는 기본 LLM 이 분류.
+
+# 4) 통과한 기술자를 crawled_* DB 에 적재 (upsert, CRAWLED_DB_URL 필요)
+uv run crawler --export-db reports/<시각>.json
+```
+
+규칙 선필터(#915)가 확실한 비-기술자(자동차·인력사무소·협찬글 등)를 라벨/LLM 전에 먼저 제거하므로, 판단 비용이 드는 대상만 라벨/LLM 으로 넘어간다.
+
 ## 환경변수
 
 `.env.example`을 `.env`로 복사한 후 값을 채운다.

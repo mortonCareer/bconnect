@@ -36,6 +36,8 @@ management:
       system: false
 
 app:
+  timezone: Asia/Seoul
+
   cors:
     allowed-origins:
       - ${CORS_ALLOWED_ORIGIN:http://localhost:3000}

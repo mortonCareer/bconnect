@@ -28,9 +28,11 @@ public class CrawledMemberController {
         val members = crawledMemberService.list();
         val memberIds = members.stream().map(CrawledMemberEntity::getId).toList();
         val profileMap = crawledMemberService.getProfileMap(memberIds);
+        val thumbnailMap = crawledMemberService.getThumbnailMap(memberIds);
 
         val body = members.stream()
-                .map(it -> CrawledMemberSummaryResponse.of(it, profileMap.get(it.getId())))
+                .map(it -> CrawledMemberSummaryResponse.of(
+                        it, profileMap.get(it.getId()), thumbnailMap.getOrDefault(it.getId(), List.of())))
                 .toList();
 
         return ApiResponse.success(body);

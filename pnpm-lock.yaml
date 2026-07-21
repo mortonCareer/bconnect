@@ -486,6 +486,25 @@ importers:
         specifier: ^8.50.1
         version: 8.52.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
 
+  packages/data-jobs:
+    dependencies:
+      '@bconnect/business':
+        specifier: workspace:*
+        version: link:../business
+      postgres:
+        specifier: ^3.4.9
+        version: 3.4.9
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 20.19.35
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   packages/devtools:
     dependencies:
       '@bconnect/config':

@@ -18,6 +18,16 @@ log = logging.getLogger(__name__)
 # NOT NULL 이라 role 미상 시 BE 엔티티 기본값과 동일하게
 DEFAULT_ROLE = "반장"
 
+
+async def load_existing_urls(db_url: str) -> set[str]:
+    """이미 DB에 적재된(살아있는) 크롤 프로필 url 집합. 중복 수집 방지용."""
+    conn = await asyncpg.connect(db_url)
+    try:
+        rows = await conn.fetch("SELECT url FROM crawled_profiles WHERE deleted_at IS NULL AND url <> ''")
+    finally:
+        await conn.close()
+    return {r["url"] for r in rows}
+
 _TABLES_IN_FK_ORDER = [
     "crawled_post_images",
     "crawled_posts",

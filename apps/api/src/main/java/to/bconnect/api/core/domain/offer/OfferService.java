@@ -5,6 +5,7 @@ import lombok.val;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.ApiConfigProps;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthUser;
@@ -17,6 +18,7 @@ import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,12 +26,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OfferService {
 
+    private static final int DUE_EXTENSION_DAYS = 3;
+
     private final OfferRepository offerRepository;
     private final CompanyRepository companyRepository;
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ApiConfigProps apiConfigProps;
 
     @Transactional
     public Long create(AuthUser user, CreateOffer command) {
@@ -52,7 +57,7 @@ public class OfferService {
         val nextSeq = offerRepository.findFirstByTaskIdOrderBySeqDesc(command.taskId())
                 .map(OfferEntity::getSeq).orElse(0) + 1;
         val created = offerRepository.save(
-                new OfferEntity(command.taskId(), command.workerId(), nextSeq, command.due()));
+                new OfferEntity(command.taskId(), command.workerId(), nextSeq));
 
         promoteNext(command.taskId(), 0);
         return created.getId();
@@ -165,6 +170,17 @@ public class OfferService {
                 .toList();
     }
 
+    @Transactional
+    public void expire(Long offerId) {
+        val found = offerRepository.findById(offerId)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        if (found.getStatus() != OfferStatus.ACTIVE)
+            return;
+
+        found.expire();
+        promoteNext(found.getTaskId(), found.getSeq());
+    }
+
     private void promoteNext(Long taskId, int currSeq) {
         if (offerRepository.existsByTaskIdAndStatus(taskId, OfferStatus.ACTIVE))
             return;
@@ -175,6 +191,7 @@ public class OfferService {
 
         val found = optional.get();
         found.offered();
+        found.updateDue(LocalDate.now(apiConfigProps.zoneId()).plusDays(DUE_EXTENSION_DAYS));
         val ownerId = getCompanyOwnerId(taskId);
         eventPublisher.publishEvent(
                 new OfferActivatedEvent(found.getId(), found.getWorkerId(), ownerId));

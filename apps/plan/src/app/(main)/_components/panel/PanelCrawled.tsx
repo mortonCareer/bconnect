@@ -1,44 +1,21 @@
 'use client'
 
-import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useGetCrawledMember, TRADE_LABELS } from '@bconnect/api-client'
 import { PanelAside, PanelScroll, PanelShell } from '@bconnect/features'
-import { Button, ImageCarousel, SkillTag, Tab } from '@bconnect/ui'
+import { Button, ImageCarousel, SkillTag } from '@bconnect/ui'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { toCrawledDisplay } from '@/lib/crawled'
 import { CrawledImage, CrawledSourceBadge } from '../CrawledImage'
 
 /**
  * 크롤링 기술자 상세 패널 — 전시 전용 (회원 아님).
- * 회원 프로필 패널(ProfileView)과 같은 골격: 헤더(아바타+통계+메타) → 소개/작업물 탭.
- * 동료·추천서는 크롤링에 없는 개념이라 통계는 작업물 수만, 소개탭은 소개+출처만 둔다.
+ * 회원 프로필 패널(ProfileView)과 같은 골격: 헤더(아바타+통계+메타) → 작업물.
+ * 동료·추천서는 크롤링에 없는 개념이라 통계는 작업물 수만 둔다.
  *
  * @figma-scaffold 크롤링 상세 시안 없음 — PanelProfile(ProfileView) 골격 준용
  */
-type TabKey = 'intro' | 'works'
-const TAB_ITEMS = [
-  { key: 'intro', label: '소개' },
-  { key: 'works', label: '작업물' },
-]
-
-function renderWithHashtags(text: string) {
-  return text.split(/(#\S+)/g).map((part, i) =>
-    part.startsWith('#') ? (
-      <span key={i} className="text-primary">
-        {part}
-      </span>
-    ) : (
-      <span key={i}>{part}</span>
-    )
-  )
-}
-
 export function PanelCrawled({ crawledId }: { crawledId: number }) {
   const { closeHref, close } = usePanelNav()
-  const [tab, setTab] = useQueryState(
-    'tab',
-    parseAsStringEnum<TabKey>(['intro', 'works']).withDefault('intro')
-  )
 
   const enabled = Number.isFinite(crawledId) && crawledId > 0
   const { data, isLoading, isError } = useGetCrawledMember(crawledId, { query: { enabled } })
@@ -95,14 +72,10 @@ export function PanelCrawled({ crawledId }: { crawledId: number }) {
                   {/* 회원 ProfileSummary 통계 레이아웃과 동일 (justify-around 3칸) — 아바타와의
                       간격을 회원 패널과 일치시킴. 크롤링은 동료·추천서가 없어 그 두 칸은 투명 placeholder */}
                   <div className="flex flex-1 justify-around">
-                    <button
-                      type="button"
-                      onClick={() => setTab('works')}
-                      className="flex cursor-pointer flex-col items-center gap-1 rounded outline-none transition-colors hover:text-gray-600 focus-visible:ring-1 focus-visible:ring-primary"
-                    >
+                    <div className="flex flex-col items-center gap-1">
                       <span className="text-sb-16 text-gray-900">{posts.length}</span>
                       <span className="text-r-14 text-gray-900">작업물</span>
-                    </button>
+                    </div>
                     <div aria-hidden className="flex flex-col items-center gap-1 opacity-0">
                       <span className="text-sb-16">0</span>
                       <span className="text-r-14">동료</span>
@@ -151,67 +124,37 @@ export function PanelCrawled({ crawledId }: { crawledId: number }) {
                 )}
               </div>
 
-              <Tab items={TAB_ITEMS} activeKey={tab} onChange={(key) => setTab(key as TabKey)} />
-
-              {tab === 'intro' ? (
-                <div className="flex flex-col gap-6 p-4">
-                  <div className="flex flex-col gap-2">
-                    <h3 className="text-sb-16 text-gray-900">소개</h3>
-                    {data.profile?.about ? (
-                      <p className="text-r-14 whitespace-pre-line text-gray-700">
-                        {renderWithHashtags(data.profile.about)}
-                      </p>
-                    ) : (
-                      <p className="text-r-14 text-gray-500">등록된 소개가 없습니다</p>
-                    )}
+              <div className="flex flex-col gap-6 py-6">
+                {posts.length === 0 ? (
+                  <div className="flex items-center justify-center py-20">
+                    <p className="text-r-14 text-gray-500">작업물이 없습니다</p>
                   </div>
-                  {d.sourceUrl && (
-                    <div className="flex flex-col gap-2">
-                      <h3 className="text-sb-16 text-gray-900">출처</h3>
-                      <a
-                        href={d.sourceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-r-14 text-primary underline"
-                      >
-                        {d.sourceUrl}
-                      </a>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex flex-col gap-6 py-6">
-                  {posts.length === 0 ? (
-                    <div className="flex items-center justify-center py-20">
-                      <p className="text-r-14 text-gray-500">작업물이 없습니다</p>
-                    </div>
-                  ) : (
-                    posts.map((post, i) => {
-                      // 회원 WorkCard 레이아웃 준용 — 시공 사진 캐러셀(no-referrer) + 제목/본문
-                      const images = (post.images ?? []).slice(0, 10)
-                      return (
-                        <div key={post.id ?? i} className="flex flex-col">
-                          {images.length > 0 && (
-                            <div className="px-4">
-                              <ImageCarousel
-                                images={images}
-                                alt={post.title ?? '시공 사진'}
-                                referrerPolicy="no-referrer"
-                              />
-                            </div>
-                          )}
-                          <div className="flex flex-col gap-1 px-4 pt-3 pb-4">
-                            {post.title && <p className="text-m-16 text-gray-900">{post.title}</p>}
-                            {post.content && (
-                              <p className="line-clamp-2 text-r-14 text-gray-500">{post.content}</p>
-                            )}
+                ) : (
+                  posts.map((post, i) => {
+                    // 회원 WorkCard 레이아웃 준용 — 시공 사진 캐러셀(no-referrer) + 제목/본문
+                    const images = (post.images ?? []).slice(0, 10)
+                    return (
+                      <div key={post.id ?? i} className="flex flex-col">
+                        {images.length > 0 && (
+                          <div className="px-4">
+                            <ImageCarousel
+                              images={images}
+                              alt={post.title ?? '시공 사진'}
+                              referrerPolicy="no-referrer"
+                            />
                           </div>
+                        )}
+                        <div className="flex flex-col gap-1 px-4 pt-3 pb-4">
+                          {post.title && <p className="text-m-16 text-gray-900">{post.title}</p>}
+                          {post.content && (
+                            <p className="line-clamp-2 text-r-14 text-gray-500">{post.content}</p>
+                          )}
                         </div>
-                      )
-                    })
-                  )}
-                </div>
-              )}
+                      </div>
+                    )
+                  })
+                )}
+              </div>
             </>
           )}
         </PanelScroll>

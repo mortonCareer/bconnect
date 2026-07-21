@@ -40,7 +40,9 @@ const nameOf = (it: FileValue): string =>
 
 const sizeOf = (it: FileValue): string | null => {
   if (!(it instanceof File)) return null
-  const kb = it.size / 1024
+  const { size } = it
+  if (size < 1024) return `${size}B`
+  const kb = size / 1024
   return kb < 1024 ? `${Math.round(kb)}KB` : `${(kb / 1024).toFixed(1)}MB`
 }
 
