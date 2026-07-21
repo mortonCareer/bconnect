@@ -9,10 +9,17 @@ import parsePhoneNumber, {
 
 /**
  * 전화번호를 한국 형식으로 포맷팅 (010-1234-5678)
- * 입력 중 실시간 포맷팅 지원
+ * 입력 중 실시간 포맷팅 지원. 완성된 한국 휴대폰 E.164(브라우저 자동완성)는 국내 표기로 접는다.
  */
 export function formatPhoneNumber(value: string): string {
-  return new AsYouType('KR').input(value)
+  const parsed = value.startsWith('+') ? parsePhoneNumber(value) : undefined
+  const isKoreanMobileE164 =
+    parsed !== undefined &&
+    parsed.country === 'KR' &&
+    parsed.isValid() &&
+    parsed.nationalNumber.length === 10 &&
+    parsed.nationalNumber.startsWith('10')
+  return new AsYouType('KR').input(isKoreanMobileE164 ? fromE164(value) : value)
 }
 
 /**

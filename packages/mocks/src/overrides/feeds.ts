@@ -18,6 +18,9 @@ interface FeedSeed {
   imageCount: number
   /** 글에 연결된 시공사례 — 건축주명 + 시공일수. 없으면 카드 메타행에서 생략되는 경로 검증용 */
   task?: { company: string; days: number }
+  role: ProfileRole
+  /** 시/도 명칭 — regionOfState 매핑 검증용. 생략 시 주소 없는 프로필 경로 */
+  state?: string
 }
 
 const FEED_SEEDS: FeedSeed[] = [
@@ -31,6 +34,8 @@ const FEED_SEEDS: FeedSeed[] = [
     daysAgo: 3,
     imageCount: 3,
     task: { company: '한울 종합건설', days: 4 },
+    role: ProfileRole.FOREMAN,
+    state: '경기도',
   },
   {
     name: '김철수',
@@ -42,6 +47,8 @@ const FEED_SEEDS: FeedSeed[] = [
     daysAgo: 6,
     imageCount: 1,
     task: { company: '미소 인테리어', days: 2 },
+    role: ProfileRole.SKILLED,
+    state: '서울특별시',
   },
   {
     name: '박영희',
@@ -51,6 +58,8 @@ const FEED_SEEDS: FeedSeed[] = [
     content: '상가 전기 배선 작업 마무리했습니다.',
     daysAgo: 10,
     imageCount: 2,
+    role: ProfileRole.SKILLED,
+    state: '전북특별자치도',
   },
   {
     name: '이준호',
@@ -62,6 +71,8 @@ const FEED_SEEDS: FeedSeed[] = [
     daysAgo: 14,
     imageCount: 4,
     task: { company: '카페온 F&B', days: 12 },
+    role: ProfileRole.SEMI_SKILLED,
+    state: '인천광역시',
   },
   {
     name: '최민수',
@@ -71,6 +82,7 @@ const FEED_SEEDS: FeedSeed[] = [
     content: '외벽 도장 작업 완료.',
     daysAgo: 21,
     imageCount: 1,
+    role: ProfileRole.HELPER,
   },
   {
     name: '정해성',
@@ -82,6 +94,8 @@ const FEED_SEEDS: FeedSeed[] = [
     daysAgo: 30,
     imageCount: 2,
     task: { company: '두손 건축사사무소', days: 1 },
+    role: ProfileRole.FOREMAN,
+    state: '충청북도',
   },
 ]
 
@@ -142,11 +156,11 @@ export const feedsOverrides = [
           modifiedAt: createdAt,
         },
         profile: {
-          role: ProfileRole.SKILLED,
+          role: seed.role,
           primaryTrade: seed.trade,
           experience: seed.experience,
           headline: seed.headline,
-          address: {},
+          address: seed.state ? { state: seed.state } : {},
         },
         task,
         post: {

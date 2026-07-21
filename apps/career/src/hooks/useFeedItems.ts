@@ -1,13 +1,13 @@
 'use client'
 
 import { useMemo } from 'react'
-import { TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
+import { regionOfState, TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
 import type { Trade, ProfileRole } from '@bconnect/api-client'
 import { daysBetween } from '@bconnect/config/date'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
-import { FILTER_ROLES, ROLE_LABELS } from '@/lib/role-labels'
-import { REGIONS, REGION_LABELS, type Region } from '@/lib/region'
+import { ROLE_LABELS } from '@/lib/role-labels'
+import { REGION_LABELS, type Region } from '@/lib/region'
 import { useAuthStore } from '@/stores/auth-store'
 
 export interface FeedItem {
@@ -45,9 +45,6 @@ interface UseFeedItemsOptions {
   limit?: number
 }
 
-const mockRoleFor = (memberId: number): ProfileRole => FILTER_ROLES[memberId % FILTER_ROLES.length]
-const mockRegionFor = (memberId: number): Region => REGIONS[memberId % REGIONS.length]
-
 /** task.start~end(YYYY-MM-DD, 양끝 포함) → '4일 소요'. 파싱 불가/역순이면 생략. */
 function formatDurationDays(start: string, end: string): string | undefined {
   const days = daysBetween(start, end) + 1
@@ -79,14 +76,14 @@ export function useFeedItems({
       const postId = post?.id
       if (!member || !profile || !post || memberId == null || postId == null) return []
 
-      const role = mockRoleFor(memberId)
-      const region = mockRegionFor(memberId)
+      const role = profile.role
+      const region = regionOfState(profile.address?.state)
       const { primaryTrade } = profile
 
       // ProfileSummary에는 trades 배열이 없어서 현재 계약에서는 대표 분야 기준으로 필터링한다.
       if (trades?.length && (!primaryTrade || !trades.includes(primaryTrade))) return []
-      if (roles?.length && !roles.includes(role)) return []
-      if (regions?.length && !regions.includes(region)) return []
+      if (roles?.length && (role == null || !roles.includes(role))) return []
+      if (regions?.length && (region == null || !regions.includes(region))) return []
       if (minExperience != null && (profile.experience ?? 0) < minExperience) return []
       if (maxExperience != null && (profile.experience ?? 0) > maxExperience) return []
       if (authorId != null && memberId !== authorId) return []
@@ -102,8 +99,8 @@ export function useFeedItems({
             // 브라우저 anti-pattern. 정적 기본 프로필 이미지로 fallback.
             image: member.picture || DEFAULT_PROFILE_IMAGE,
             name: member.name ?? '',
-            location: `${REGION_LABELS[region]}(Mocked)`,
-            jobType: `${ROLE_LABELS[role]}(Mocked)`,
+            location: region ? REGION_LABELS[region] : '',
+            jobType: role ? ROLE_LABELS[role] : '',
             specialty: primaryTrade ? (TRADE_LABELS[primaryTrade] ?? '') : '',
             bio: profile.headline ?? '',
           },

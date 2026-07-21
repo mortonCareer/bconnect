@@ -1,7 +1,14 @@
 'use client'
 
 import { Select, FilterChip, RefreshIcon } from '@bconnect/ui'
-import { Trade, TRADE_LIST, TRADE_LABELS, REGION_OPTIONS } from '@bconnect/api-client'
+import {
+  Trade,
+  TRADE_LIST,
+  TRADE_LABELS,
+  REGION_LIST,
+  REGION_LABELS,
+  type CrawledRegion,
+} from '@bconnect/api-client'
 import { EXPERIENCE_OPTIONS, EXPERIENCE_LABELS } from '@/lib/experience'
 import { GRADE_OPTIONS } from '@/lib/grade'
 import type { Grade } from '@/lib/grade'
@@ -51,8 +58,8 @@ export function FilterBar() {
           clearable
           triggerLabel="지역"
           value={regions}
-          onChange={(v) => setRegion(v as string[])}
-          options={REGION_OPTIONS.map((r) => ({ value: r, label: r }))}
+          onChange={(v) => setRegion(v as CrawledRegion[])}
+          options={REGION_LIST}
         />
         <Select
           multiple
@@ -85,7 +92,7 @@ export function FilterBar() {
       {hasFilter && (
         <div className="flex flex-wrap items-center gap-[7px]">
           {regions.map((r) => (
-            <FilterChip key={r} label={r} onRemove={() => toggleRegion(r)} />
+            <FilterChip key={r} label={REGION_LABELS[r]} onRemove={() => toggleRegion(r)} />
           ))}
           {trades.map((t) => (
             <FilterChip key={t} label={TRADE_LABELS[t]} onRemove={() => toggleTrade(t)} />
