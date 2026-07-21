@@ -7,6 +7,7 @@ import { ChatInput, ProfileCard, Skeleton } from '@bconnect/ui'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { PanelShell } from '../_shared/PanelShell'
 import { MessageThread } from './_parts/MessageThread'
+import { chatMemberName } from './_parts/types'
 import { useDirectChatSocket } from './useDirectChatSocket'
 import type { ChatSummary } from './_parts/types'
 
@@ -51,7 +52,7 @@ export function ChatView(props: ChatViewProps) {
   const { chat, currentUserId, otherProfile, isLoading, isError } = data
   const other = chat?.members.find((p) => p.id !== currentUserId)
   const otherId = other?.id
-  const title = other?.name ?? chat?.title ?? '채팅'
+  const title = chatMemberName(other) ?? chat?.title ?? '채팅'
   const profile = otherProfile
 
   const [localMessages, setLocalMessages] = useState<Message[]>([])

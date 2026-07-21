@@ -53,10 +53,35 @@ export default defineTransformer((spec) => {
   rewriteOperationIds(api)
   flattenObjectQueryParams(api, schemas)
   unwrapEnvelopes(api, schemas)
+  normalizeNullableRefs(api.paths)
+  normalizeNullableRefs(schemas)
   pruneOrphans(api, schemas)
 
   return api
 })
+
+// springdoc(3.1)은 nullable $ref 프로퍼티를 `type: "null"` + `$ref` 형제 키로 emit 하는데,
+// orval 은 이 형태에서 | null 유니온을 만들지 못해 런타임 null 필드가 non-null 타입이 된다
+// (Task.offer, Notification.sender 등). 표준 anyOf 형태로 재작성해 유니온을 살린다.
+function normalizeNullableRefs(node: unknown): void {
+  if (Array.isArray(node)) {
+    node.forEach(normalizeNullableRefs)
+    return
+  }
+  if (!node || typeof node !== 'object') return
+  const obj = node as Record<string, unknown>
+  for (const [key, value] of Object.entries(obj)) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) continue
+    const v = value as Record<string, unknown>
+    const t = v.type
+    const hasNullType = t === 'null' || (Array.isArray(t) && t.includes('null'))
+    if (typeof v.$ref === 'string' && hasNullType) {
+      obj[key] = { anyOf: [{ $ref: v.$ref }, { type: 'null' }] }
+      continue
+    }
+    normalizeNullableRefs(value)
+  }
+}
 
 function buildRenameMap(schemas: Record<string, SchemaObject>): Record<string, string> {
   const map: Record<string, string> = {}

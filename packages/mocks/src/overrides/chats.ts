@@ -24,6 +24,7 @@ const ME: Member = {
   username: 'morton_boss',
   name: '김대표',
   phone: '+821012341234',
+  picture: null,
   role: Role.USER,
   createdAt: EPOCH,
   modifiedAt: EPOCH,
@@ -45,6 +46,8 @@ const maskedOf = (w: Worker): MemberSummary => ({
   id: w.id,
   username: `worker_${w.id}`,
   name: w.name,
+  picture: null,
+  role: Role.USER,
   createdAt: EPOCH,
   modifiedAt: EPOCH,
 })
@@ -63,6 +66,7 @@ const msg = (
   content,
   createdAt: at(hhmm),
   modifiedAt: at(hhmm),
+  attachments: [],
 })
 
 // 시간순(오래된→최신) 작성. 응답은 서버 계약대로 newest-first 로 reverse.
