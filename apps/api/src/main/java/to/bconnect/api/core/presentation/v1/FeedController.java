@@ -91,13 +91,13 @@ public class FeedController {
             @PathVariable Long id,
             HttpServletResponse response) {
         val post = postService.get(id);
-        val member = memberResolver.find(post.memberId());
-        val profile = profileResolver.find(post.memberId());
+        val member = memberResolver.get(post.memberId());
+        val profile = profileResolver.get(post.memberId());
         val images = attachmentResolver.listUrl(ReferenceType.POST, post.id(), ImageSize.MEDIUM);
         val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val task = post.taskId() == null ? null
-                : taskQueryService.find(post.taskId()).orElse(null);
+                : taskQueryService.get(post.taskId()).orElse(null);
         val projectAddress = task != null && task.type() == TaskType.PROJECT
                 ? projectService.get(task.projectId()).address()
                 : null;

@@ -30,7 +30,7 @@ public class TaskQueryService {
     private final ProjectRepository projectRepository;
 
     @Transactional(readOnly = true)
-    public Optional<Task> find(Long taskId) {
+    public Optional<Task> get(Long taskId) {
         return taskRepository.findById(taskId).map(Task::of);
     }
 

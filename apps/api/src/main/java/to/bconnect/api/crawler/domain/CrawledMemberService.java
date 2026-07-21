@@ -18,6 +18,7 @@ import to.bconnect.api.crawler.storage.CrawledTaskRepository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -45,19 +46,19 @@ public class CrawledMemberService {
     }
 
     @Transactional(readOnly = true)
-    public CrawledProfileEntity getProfile(Long memberId) {
-        return crawledProfileRepository.findByMemberId(memberId).orElse(null);
+    public Optional<CrawledProfileEntity> getProfile(Long memberId) {
+        return crawledProfileRepository.findByMemberId(memberId);
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, CrawledProfileEntity> getProfileMap(List<Long> memberIds) {
+    public Map<Long, CrawledProfileEntity> resolveProfileMap(List<Long> memberIds) {
         return crawledProfileRepository.findByMemberIdIn(memberIds)
                 .stream()
                 .collect(Collectors.toMap(CrawledProfileEntity::getMemberId, Function.identity()));
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, List<String>> getThumbnailMap(List<Long> memberIds) {
+    public Map<Long, List<String>> resolveThumbnailMap(List<Long> memberIds) {
         return crawledPostRepository.findFirstImagesByMemberIdIn(memberIds).entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -76,7 +77,7 @@ public class CrawledMemberService {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, CrawledTaskEntity> getTaskMap(List<Long> taskIds) {
+    public Map<Long, CrawledTaskEntity> resolveTaskMap(List<Long> taskIds) {
         return crawledTaskRepository.findAllById(taskIds)
                 .stream()
                 .collect(Collectors.toMap(CrawledTaskEntity::getId, Function.identity()));

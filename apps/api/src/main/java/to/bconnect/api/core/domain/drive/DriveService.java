@@ -134,6 +134,6 @@ public class DriveService {
     public void detach(AuthUser user, Long driveId, Long attachmentId) {
         driveValidator.validate(driveId, user.id());
         attachmentLinker.validate(user.id(), ReferenceType.DRIVE, driveId, attachmentId);
-        attachmentLinker.unlink(attachmentId);
+        attachmentLinker.unlink(ReferenceType.DRIVE, driveId);
     }
 }
