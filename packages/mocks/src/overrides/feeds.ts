@@ -1,5 +1,12 @@
-import { getGetFeedsMockHandler, ProfileRole, Role, Trade } from '@bconnect/api-client'
-import type { Feed } from '@bconnect/api-client'
+import {
+  getGetFeedsMockHandler,
+  ProfileRole,
+  Role,
+  TaskStatus,
+  TaskType,
+  Trade,
+} from '@bconnect/api-client'
+import type { Feed, Task } from '@bconnect/api-client'
 
 interface FeedSeed {
   name: string
@@ -9,6 +16,8 @@ interface FeedSeed {
   content: string
   daysAgo: number
   imageCount: number
+  /** 글에 연결된 시공사례 — 건축주명 + 시공일수. 없으면 카드 메타행에서 생략되는 경로 검증용 */
+  task?: { company: string; days: number }
 }
 
 const FEED_SEEDS: FeedSeed[] = [
@@ -21,6 +30,7 @@ const FEED_SEEDS: FeedSeed[] = [
       '골프장 전원주택 도배 시공을 진행했습니다. 합지와 실크를 혼합해 결 방향까지 맞춰 마감했고, 모서리 들뜸 없이 깔끔하게 마무리했습니다.',
     daysAgo: 3,
     imageCount: 3,
+    task: { company: '한울 종합건설', days: 4 },
   },
   {
     name: '김철수',
@@ -31,6 +41,7 @@ const FEED_SEEDS: FeedSeed[] = [
       '신축 아파트 32평 욕실 2개소 타일 시공을 마쳤습니다. 줄눈 간격을 균일하게 잡아 마감 평탄도를 살렸습니다.',
     daysAgo: 6,
     imageCount: 1,
+    task: { company: '미소 인테리어', days: 2 },
   },
   {
     name: '박영희',
@@ -50,6 +61,7 @@ const FEED_SEEDS: FeedSeed[] = [
       '20평 카페 인테리어를 설계부터 시공 감리까지 한 번에 진행했습니다. 좁은 동선을 풀고 간접 조명 배치에 특히 신경 썼습니다.',
     daysAgo: 14,
     imageCount: 4,
+    task: { company: '카페온 F&B', days: 12 },
   },
   {
     name: '최민수',
@@ -69,12 +81,40 @@ const FEED_SEEDS: FeedSeed[] = [
       '원목 붙박이장을 제작해 설치했습니다. 무늬결을 맞춰 이어 붙여 한 판처럼 보이도록 작업했습니다.',
     daysAgo: 30,
     imageCount: 2,
+    task: { company: '두손 건축사사무소', days: 1 },
   },
 ]
 
 function daysAgoIso(days: number): string {
   const date = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
   return date.toISOString().slice(0, 19) + 'Z'
+}
+
+function taskOf(id: number, seed: FeedSeed): Task | null {
+  if (!seed.task) return null
+  const end = daysAgoIso(seed.daysAgo).slice(0, 10)
+  const start = daysAgoIso(seed.daysAgo + seed.task.days - 1).slice(0, 10)
+  const stamp = daysAgoIso(seed.daysAgo)
+  return {
+    id,
+    type: TaskType.WORKER,
+    status: TaskStatus.COMPLETED,
+    trades: [seed.trade],
+    start,
+    end,
+    workerId: null,
+    workerTitle: null,
+    workerMemo: null,
+    workerCompany: seed.task.company,
+    address: null,
+    projectId: null,
+    projectTitle: null,
+    projectRequirement: null,
+    projectMemo: null,
+    offer: null,
+    createdAt: stamp,
+    modifiedAt: stamp,
+  }
 }
 
 function buildImages(count: number): string[] {
@@ -86,10 +126,11 @@ function buildImages(count: number): string[] {
 
 export const feedsOverrides = [
   getGetFeedsMockHandler((): Feed[] =>
-    // Feed = { member: MemberSummary, profile: ProfileSummary, post: Post }.
+    // Feed = { member: MemberSummary, profile: ProfileSummary, post: Post, task: Task | null }.
     // ProfileSummary 엔 id/memberId/trades 없음(대표분야 primaryTrade 만) — mapper 도 대표분야 기준.
     FEED_SEEDS.map((seed, i): Feed => {
       const createdAt = daysAgoIso(seed.daysAgo)
+      const task = taskOf(600 + i, seed)
       return {
         member: {
           id: 200 + i,
@@ -107,11 +148,11 @@ export const feedsOverrides = [
           headline: seed.headline,
           address: {},
         },
-        task: null,
+        task,
         post: {
           id: 400 + i,
           memberId: 200 + i,
-          taskId: null,
+          taskId: task?.id ?? null,
           images: buildImages(seed.imageCount),
           content: seed.content,
           createdAt,

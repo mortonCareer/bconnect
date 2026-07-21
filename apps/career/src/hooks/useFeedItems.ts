@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import { TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
 import type { Trade, ProfileRole } from '@bconnect/api-client'
+import { daysBetween } from '@bconnect/config/date'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { FILTER_ROLES, ROLE_LABELS } from '@/lib/role-labels'
@@ -25,8 +26,10 @@ export interface FeedItem {
   content: {
     images: string[]
     imageAlt?: string
-    company: string
-    duration: string
+    /** 건축주(발주 업체)명 — 글에 연결된 작업(task)이 없으면 생략 */
+    company?: string
+    /** 시공기간 — task.start~end 일수 (없으면 생략) */
+    duration?: string
     timestamp: string
     description: string
   }
@@ -45,6 +48,13 @@ interface UseFeedItemsOptions {
 const mockRoleFor = (memberId: number): ProfileRole => FILTER_ROLES[memberId % FILTER_ROLES.length]
 const mockRegionFor = (memberId: number): Region => REGIONS[memberId % REGIONS.length]
 
+/** task.start~end(YYYY-MM-DD, 양끝 포함) → '4일 소요'. 파싱 불가/역순이면 생략. */
+function formatDurationDays(start: string, end: string): string | undefined {
+  const days = daysBetween(start, end) + 1
+  if (!Number.isFinite(days) || days < 1) return undefined
+  return `${days}일 소요`
+}
+
 export function useFeedItems({
   trades,
   roles,
@@ -62,7 +72,7 @@ export function useFeedItems({
     if (!feeds) return []
 
     return feeds.flatMap((feed): FeedItem[] => {
-      const { member, profile, post } = feed
+      const { member, profile, post, task } = feed
 
       // TODO: BE required 처리 후 type narrowing 필요. Feed.member/profile/post와 id가 optional emit이라 없는 행은 임시로 렌더 제외.
       const memberId = member?.id
@@ -99,9 +109,8 @@ export function useFeedItems({
           },
           content: {
             images: post.images?.length ? post.images : ['/placeholder-post.svg'],
-            // TODO: Feed API에 Task 정보 포함 필요 (#197)
-            company: '서정 건축(Mocked)',
-            duration: '4일 소요(Mocked)',
+            company: task?.workerCompany ?? undefined,
+            duration: task ? formatDurationDays(task.start, task.end) : undefined,
             timestamp: post.createdAt ? formatRelativeTime(post.createdAt) : '',
             description: post.content ?? '',
           },
