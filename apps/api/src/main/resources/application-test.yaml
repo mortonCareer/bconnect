@@ -2,16 +2,9 @@ spring:
   datasource:
     url: jdbc:tc:postgresql:latest:///test
 
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-
   sql:
     init:
       mode: always
-      schema-locations: classpath:schema-postgresql.sql
-      data-locations: optional:classpath:test-data-none.sql
 
 app:
   jwt:
