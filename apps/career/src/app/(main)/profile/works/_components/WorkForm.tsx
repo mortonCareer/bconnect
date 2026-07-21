@@ -30,6 +30,7 @@ import {
 } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { parseAsStringLiteral, useQueryState } from 'nuqs'
 import { useMemo, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
@@ -76,14 +77,18 @@ async function uploadPostImages(files: File[], memberId: number): Promise<number
   return attachmentIds
 }
 
-type Step = 'main' | 'select' | 'create'
+// 스텝을 ?step= 쿼리로 승격 (plan ?panel= 패턴, ADR-0021) — 브라우저 뒤로가기가 스텝 단위로 팝.
+// null = main. 진입은 push, 완료·뒤로 복귀는 replace(히스토리에 서브스텝 잔존 방지).
+const stepParser = parseAsStringLiteral(['select', 'create'] as const).withOptions({
+  history: 'push',
+})
 
 /** 작업물 생성/수정 폼 — postId 있으면 수정 모드 (초기값은 GET /feeds/{id}). */
 export function WorkForm({ postId }: { postId?: number }) {
   const isEdit = postId != null
   const router = useRouter()
   const queryClient = useQueryClient()
-  const [step, setStep] = useState<Step>('main')
+  const [step, setStep] = useQueryState('step', stepParser)
   const [saving, setSaving] = useState(false)
 
   const { data: me } = useGetMyMember()
@@ -158,10 +163,10 @@ export function WorkForm({ postId }: { postId?: number }) {
         selectedId={taskId}
         onConfirm={(id) => {
           form.setValue('taskId', id, { shouldValidate: true })
-          setStep('main')
+          setStep(null, { history: 'replace' })
         }}
         onCreateNew={() => setStep('create')}
-        onBack={() => setStep('main')}
+        onBack={() => setStep(null, { history: 'replace' })}
       />
     )
   }
@@ -172,9 +177,9 @@ export function WorkForm({ postId }: { postId?: number }) {
         onCreated={(id) => {
           queryClient.invalidateQueries({ queryKey: getGetTasksQueryKey() })
           form.setValue('taskId', id, { shouldValidate: true })
-          setStep('main')
+          setStep(null, { history: 'replace' })
         }}
-        onBack={() => setStep('select')}
+        onBack={() => setStep('select', { history: 'replace' })}
       />
     )
   }
