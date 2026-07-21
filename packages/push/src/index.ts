@@ -3,7 +3,11 @@
 // 부수효과 / 권한
 export { usePushNotificationListener } from './use-push-notification-listener'
 export { useNotificationSoftAsk } from './use-notification-soft-ask'
-export { requestPushPermission, syncDeviceToken } from './request-push-permission'
+export {
+  requestPushPermission,
+  syncDeviceToken,
+  revokeDeviceToken,
+} from './request-push-permission'
 export { registerDeviceToken, unregisterDeviceToken } from './register-device-token'
 
 // 상태

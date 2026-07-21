@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLogout, useDeleteMyMember } from '@bconnect/api-client'
 import { TopBar, ConfirmDialog, toast, isApiErrorShape } from '@bconnect/ui'
+import { revokeDeviceToken } from '@bconnect/push'
 import { useAuthStore } from '@/stores/auth-store'
 import { SettingsRow } from './_components/SettingsRow'
 
@@ -41,6 +42,12 @@ export default function SettingsPage() {
         }),
     },
   })
+
+  // 서버가 해제에도 인증을 요구하므로 accessToken 이 살아있는 동안 먼저 해제한다.
+  const revokeThen = (run: () => void) => async () => {
+    await revokeDeviceToken()
+    run()
+  }
 
   return (
     <div className="flex flex-col">
@@ -78,7 +85,7 @@ export default function SettingsPage() {
         onOpenChange={setLogoutOpen}
         title="로그아웃 하시겠어요?"
         confirmLabel="로그아웃"
-        onConfirm={() => logout.mutate()}
+        onConfirm={revokeThen(() => logout.mutate())}
       />
       <ConfirmDialog
         open={withdrawOpen}
@@ -87,7 +94,7 @@ export default function SettingsPage() {
         description="탈퇴한 계정은 복구할 수 없어요."
         confirmLabel="탈퇴"
         destructive
-        onConfirm={() => withdraw.mutate()}
+        onConfirm={revokeThen(() => withdraw.mutate())}
       />
     </div>
   )

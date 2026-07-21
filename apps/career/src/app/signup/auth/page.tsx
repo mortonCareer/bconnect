@@ -8,12 +8,7 @@
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import { useSendOtp, useVerifyOtp } from '@bconnect/api-client'
-import {
-  formatPhoneNumber,
-  isValidPhoneNumber,
-  toE164,
-  toNationalNumber,
-} from '@bconnect/config/phone'
+import { formatPhoneNumber, isValidPhoneNumber, toNationalNumber } from '@bconnect/config/phone'
 import { Form, FormSubmitButton, TextField, passthroughError, useServerError } from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
@@ -27,8 +22,8 @@ type Step = 'phone' | 'otp'
 
 export default function SignupAuthPage() {
   const router = useRouter()
-  const { setPhoneNumber, setCodeSent, login } = useAuthStore()
-  const { setSignupToken, setPhone: setSignupPhone } = useSignupStore()
+  const { login } = useAuthStore()
+  const { setSignupToken } = useSignupStore()
 
   const [step, setStep] = useState<Step>('phone')
   const [expiresAt, setExpiresAt] = useState<string | null>(null)
@@ -56,13 +51,11 @@ export default function SignupAuthPage() {
 
   const sendCode = async () => {
     const phone = form.getValues('phone')
-    setPhoneNumber(toE164(phone))
     try {
       const result = await sendCodeMutation.mutateAsync({
         data: { phone: toNationalNumber(phone) },
       })
       if (result.expiresAt) {
-        setCodeSent(result.expiresAt)
         setExpiresAt(result.expiresAt)
       }
       setStep('otp')
@@ -90,7 +83,6 @@ export default function SignupAuthPage() {
         router.push('/')
       } else {
         // 신규 유저 — signupToken 저장 후 회원가입 진행
-        setSignupPhone(toE164(phone))
         setSignupToken(result.signupToken)
         router.push('/signup/username')
       }

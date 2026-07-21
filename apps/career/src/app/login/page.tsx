@@ -6,12 +6,7 @@
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import { useSendOtp, useVerifyOtp } from '@bconnect/api-client'
-import {
-  formatPhoneNumber,
-  isValidPhoneNumber,
-  toE164,
-  toNationalNumber,
-} from '@bconnect/config/phone'
+import { formatPhoneNumber, isValidPhoneNumber, toNationalNumber } from '@bconnect/config/phone'
 import {
   Form,
   FormSubmitButton,
@@ -31,8 +26,8 @@ type Step = 'phone' | 'otp'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { setPhoneNumber, setCodeSent, login } = useAuthStore()
-  const { setPhone: setSignupPhone, setSignupToken } = useSignupStore()
+  const { login } = useAuthStore()
+  const { setSignupToken } = useSignupStore()
 
   const [step, setStep] = useState<Step>('phone')
   const [expiresAt, setExpiresAt] = useState<string | null>(null)
@@ -60,13 +55,11 @@ export default function LoginPage() {
 
   const sendCode = async () => {
     const phone = form.getValues('phone')
-    setPhoneNumber(toE164(phone))
     try {
       const result = await sendCodeMutation.mutateAsync({
         data: { phone: toNationalNumber(phone) },
       })
       if (result.expiresAt) {
-        setCodeSent(result.expiresAt)
         setExpiresAt(result.expiresAt)
       }
       setStep('otp')
@@ -99,7 +92,6 @@ export default function LoginPage() {
         )
       } else {
         // 미가입 유저 — signupToken 저장 후 회원가입 진행 (OTP 재인증 불필요)
-        setSignupPhone(toE164(phone))
         setSignupToken(result.signupToken)
         router.push('/signup/username')
       }
