@@ -17,9 +17,9 @@ export interface PanelHeaderProps {
 }
 
 /**
- * `@panel` 슬롯 패널 공통 헤더. 좌측 affordance 는 `backHref` 유무로 갈림 —
+ * 패널 공통 헤더. 좌측 affordance 는 `backHref` 유무로 갈림 —
  * 있으면 뒤로(ChevronLeft)+우측 닫기, 없으면 좌측 닫기(ChevronsRight, 패널을 우측으로 collapse).
- * 닫기는 항상 `closeHref`(= base 경로) 로의 navigation (parallel-route slot reset).
+ * 닫기는 항상 `closeHref` 로의 navigation — 경로는 유지하고 `?panel=` 만 제거한다(필터 등 다른 search param 은 보존).
  */
 export function PanelHeader({
   title,

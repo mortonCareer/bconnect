@@ -38,7 +38,7 @@ type ChatViewShellProps =
       backHref?: never
     }
   | {
-      /** 기본 @panel 쉘 (plan) */
+      /** 기본 패널 쉘 (plan) */
       renderShell?: never
       closeHref: string
       onClose: () => void
