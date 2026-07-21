@@ -1,12 +1,13 @@
 'use client'
 
 import { useMemo } from 'react'
-import { TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
+import { regionOfState, TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
 import type { Trade, ProfileRole } from '@bconnect/api-client'
 import { daysBetween } from '@bconnect/config/date'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { ROLE_LABELS } from '@/lib/role-labels'
+import { REGION_LABELS, type Region } from '@/lib/region'
 import { useAuthStore } from '@/stores/auth-store'
 
 export interface FeedItem {
@@ -17,6 +18,7 @@ export interface FeedItem {
   profile: {
     image: string
     name: string
+    location: string
     jobType: string
     specialty: string
     bio: string
@@ -36,6 +38,7 @@ export interface FeedItem {
 interface UseFeedItemsOptions {
   trades?: Trade[]
   roles?: ProfileRole[]
+  regions?: Region[]
   minExperience?: number
   maxExperience?: number
   authorId?: number
@@ -52,6 +55,7 @@ function formatDurationDays(start: string, end: string): string | undefined {
 export function useFeedItems({
   trades,
   roles,
+  regions,
   minExperience,
   maxExperience,
   authorId,
@@ -73,11 +77,13 @@ export function useFeedItems({
       if (!member || !profile || !post || memberId == null || postId == null) return []
 
       const role = profile.role
+      const region = regionOfState(profile.address?.state)
       const { primaryTrade } = profile
 
       // ProfileSummary에는 trades 배열이 없어서 현재 계약에서는 대표 분야 기준으로 필터링한다.
       if (trades?.length && (!primaryTrade || !trades.includes(primaryTrade))) return []
       if (roles?.length && (role == null || !roles.includes(role))) return []
+      if (regions?.length && (region == null || !regions.includes(region))) return []
       if (minExperience != null && (profile.experience ?? 0) < minExperience) return []
       if (maxExperience != null && (profile.experience ?? 0) > maxExperience) return []
       if (authorId != null && memberId !== authorId) return []
@@ -93,6 +99,7 @@ export function useFeedItems({
             // 브라우저 anti-pattern. 정적 기본 프로필 이미지로 fallback.
             image: member.picture || DEFAULT_PROFILE_IMAGE,
             name: member.name ?? '',
+            location: region ? REGION_LABELS[region] : '',
             jobType: role ? ROLE_LABELS[role] : '',
             specialty: primaryTrade ? (TRADE_LABELS[primaryTrade] ?? '') : '',
             bio: profile.headline ?? '',
@@ -107,7 +114,7 @@ export function useFeedItems({
         },
       ]
     })
-  }, [feeds, trades, roles, minExperience, maxExperience, authorId, currentUserId])
+  }, [feeds, trades, roles, regions, minExperience, maxExperience, authorId, currentUserId])
 
   return {
     feedItems,
