@@ -1,4 +1,4 @@
-import { getGetFeedsMockHandler, Trade } from '@bconnect/api-client'
+import { getGetFeedsMockHandler, ProfileRole, Role, Trade } from '@bconnect/api-client'
 import type { Feed } from '@bconnect/api-client'
 
 interface FeedSeed {
@@ -88,22 +88,36 @@ export const feedsOverrides = [
   getGetFeedsMockHandler((): Feed[] =>
     // Feed = { member: MemberSummary, profile: ProfileSummary, post: Post }.
     // ProfileSummary 엔 id/memberId/trades 없음(대표분야 primaryTrade 만) — mapper 도 대표분야 기준.
-    FEED_SEEDS.map(
-      (seed, i): Feed => ({
-        member: { id: 200 + i, name: seed.name },
+    FEED_SEEDS.map((seed, i): Feed => {
+      const createdAt = daysAgoIso(seed.daysAgo)
+      return {
+        member: {
+          id: 200 + i,
+          username: `feed_user_${200 + i}`,
+          name: seed.name,
+          picture: null,
+          role: Role.USER,
+          createdAt,
+          modifiedAt: createdAt,
+        },
         profile: {
+          role: ProfileRole.SKILLED,
           primaryTrade: seed.trade,
           experience: seed.experience,
           headline: seed.headline,
+          address: {},
         },
+        task: null,
         post: {
           id: 400 + i,
           memberId: 200 + i,
+          taskId: null,
           images: buildImages(seed.imageCount),
           content: seed.content,
-          createdAt: daysAgoIso(seed.daysAgo),
+          createdAt,
+          modifiedAt: createdAt,
         },
-      })
-    )
+      }
+    })
   ),
 ]

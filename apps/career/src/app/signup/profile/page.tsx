@@ -7,7 +7,7 @@ import { AddressField } from '@/components/AddressField'
 import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
-import { Role, Trade, TRADE_LABELS, useCreateMember, useCreateProfile } from '@bconnect/api-client'
+import { Trade, TRADE_LABELS, useCreateMember, useCreateProfile } from '@bconnect/api-client'
 import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { mapKakaoAddress } from '@bconnect/config/address'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
@@ -105,8 +105,6 @@ export default function SignupProfilePage() {
     try {
       // register 는 signupToken(X-Signup-Token 헤더)을 소비 — 실패 후 재시도 시
       // 재호출하지 않도록 발급된 accessToken을 보관한다.
-      // 회원 가입 유형은 auth 레벨 Role.USER 고정
-      // (시공 유형은 ProfileRole 로 프로필에 저장).
       const accessToken =
         issuedAccessToken ??
         requireRegisterAccessToken(
@@ -114,7 +112,6 @@ export default function SignupProfilePage() {
             data: {
               username: formData.username,
               name: formData.name,
-              role: Role.USER,
             },
           })
         )

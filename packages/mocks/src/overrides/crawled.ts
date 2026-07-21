@@ -3,7 +3,7 @@ import {
   CrawledPlatform,
   CrawledRegion,
 } from '@bconnect/api-client'
-import type { CrawledMember, CrawledMemberSummary } from '@bconnect/api-client'
+import type { CrawledMember, CrawledMemberSummary, CrawledPost } from '@bconnect/api-client'
 import { http, HttpResponse } from 'msw'
 
 // 크롤링 기술자 — plan 기술자 탐색 병합 노출용 시드.
@@ -13,7 +13,10 @@ import { http, HttpResponse } from 'msw'
 
 const EPOCH = '2025-01-02T00:00:00.000Z'
 
-const SEEDS: CrawledMember[] = [
+type RawPost = Omit<CrawledPost, 'taskId' | 'task'>
+type RawMember = Omit<CrawledMember, 'posts'> & { posts: RawPost[] }
+
+const RAW: RawMember[] = [
   {
     id: 9001,
     company: '집수리랜드',
@@ -29,11 +32,9 @@ const SEEDS: CrawledMember[] = [
     profile: {
       primaryTrade: 'TILING',
       trades: ['TILING'],
-      experience: undefined,
+      experience: null,
       headline:
         '우리집에 관련된 각종 수리, 보수, 교체, 설치를 도와드리고 있습니다. 앞으로 꾸준히 집수리에 관련된 자료를 업데이트 할 예정입니다.',
-      about:
-        '안녕하세요~\n타일 부분보수\n전문업체\n집수리 랜드입니다.\n재사용 타일 수리\n덧방타일 하자 보수\n타일 파손 부분수리\n타일 재시공 등\n타일 시공과 관련된\n모든 작업을 진행합니다.\n서울, 경기, 인천 등\n수도권 전 지역 출장 가능합니다.\n견적문의는 언제든지 OK입니다.\n통화부재시\n문자로 사진과 작업내용\n부탁드립니다\n관련글 보기\n작업내용 미리보기\n몇일 전 욕실 금가고 들뜬 벽타일 부분보수 비용 문의를 주셔서 송파구 타일 시공을 진행한 고객님댁 현장 사례입니다.\n이 현장은 보수할 타일의 위치가 해바라기샤워 앞이였는데요 금이가기 시작하면서 들뜸 현상도 나타나고 있는 상태였습니다.\n현장에 도착했을 때는 금방이라도 떨어져 나갈것 같은 상황이었는데요 고객님과 상의 후에 타일 시공을 빠르게 진행했습니다.\n샤워수전 앞쪽 벽타일이\n금이 많이 가 있어요\n예전에 해바라기 샤워 달면서\n타공을 했던 자리인데\n그 주변 타일도\n금이 가기 시작했습니다\n얼제 떨어질지 몰라서\n불안한 상태에요\n빨리 와서 봐주실 수 있나요?ㅠ\n고객님 요청사항\n작업 과정보기\n① 현장 점검하기\n금이가 있는 타일과 그 주변 타일까지 점검하는 단계입니다.\n샤워수전 주변 타일을 모두 손으로 두드려 보면서 들떠 있는 타일이 있',
       address: '남양주시 화도읍 녹촌로9 101-601',
       state: CrawledRegion.SEOUL,
       url: 'https://blog.naver.com/jamdoong',
@@ -106,11 +107,9 @@ const SEEDS: CrawledMember[] = [
     profile: {
       primaryTrade: 'TILING',
       trades: ['TILING', 'PLASTERING'],
-      experience: undefined,
+      experience: null,
       headline:
         'TEL 010-0000-0000 타일하자보수/미장단차/각종수전/도기설치  24시간 365일 주말 공휴일 친철히 상담가능. 국가기술자격번호 ***031108*** 사업자등록번호 @30017@@@ 카드결제/현금영수증',
-      about:
-        '화장실은 물을 많이 사용하는 장소입니다.\n구축 아파트의 경우 바닥이 미끄러운\n타일로 이루어져 있어 낙상 사고로\n이어질 수 있는 경우가 많습니다.\n이번 현장은 화려하고 미끄러운 욕실 바닥을\n논슬립으로 교체하여\n사고를 예방하고 깔끔한 디자인으로\n변경해드린 현장입니다.\n공인타일시공자격취득\n사업자등록업체\n장스타일입니다~\n수원타일시공업체 화장실 미끄럼방지\n논슬립 바닥 영통아이파크캐슬\n영통아이파크캐슬1단지\n경기도 수원시 영통구 덕영대로 1410\n수원시 영통구에 위치한\n영통아이파크캐슬1단지 아파트 현장입니다.\n화려하고 미끄러운 금장타일\n수원 화장실 타일시공\n전 집주인이 입주 시 화장실 바닥을\n화려한 금장타일로 교체하셨다고 합니다.\n금장타일은 화려하기도 하지만\n겉면에 코팅이 되어 있어\n물이 묻으면 미끄러운 문제가 발생합니다.\n고객께서 아파트를 매매하시면서 너무 화려한\n바닥타일이 마음에 들지 않으셔서\n논슬립 300각으로 덧방을 요청하셨습니다.\n바닥과 만나는 모서리 쪽에\n실금이 발생한 부분이 있으나\n덧방 시 가려지는 부분이라 고객께\n미리 안내드리고 시공을 시작합니다.\n변기 철거 후 재시공\n욕실 바닥에는 변기가 설치되어있습니다.\n이것을 그대로 두고 타일만 설치하면\n차후 변기를 ',
       address: '경기도 수원시 영통구 덕영대로 1410',
       state: CrawledRegion.GYEONGGI,
       url: 'https://blog.naver.com/hobbyreview',
@@ -186,8 +185,6 @@ const SEEDS: CrawledMember[] = [
       experience: 1,
       headline:
         'tel:010-0000-0000\nKBS 동행 프로그램 출연-1인창업-타일-대리석-싱크대-거실 폴리싱 타일-아트월 타일-욕실-부분수리-부분교체집수리 출장지역(서울 인천 경기전지역 빠른출동/충남 충북 강원 출동) 1,500건 이상의 다양한 집수리 경력',
-      about:
-        '안녕하세요~\n반갑습니다^^\n수지 타일 시공 업체\n프로홈픽서\n입니다.\n5월의 마지막 주가 시작되었어요!\n석가탄신일 휴일 덕분에\n가족과 함께하는 시간이 더 길어졌어요.\n이렇게 함께하는 시간이 많아지니까\n우리 집이 더 소중하게 느껴지네요.\n오늘은 경기도 용인 수지에 있는\n한 아파트 사시는 욕실 타일 시공 현장을\n소개하려고 해요.\n고객님이 급하게\n연락 주셔서 달려간 곳인데요,\n샤워부스 안쪽 벽면 타일이\n심하게 깨지고 터져 있었어요.\n욕실은 집에서 가장\n자주 사용하는 공간 중 하나잖아요?\n특히 샤워부스는\n뜨거운 물과 차가운 물이 오가고,\n항상 습기가 가득한 곳이라\n타일 상태가 조금만 안 좋아도\n위험할 수 있어요.\n그래서 이런 깨짐 현상은\n겉으로 보기보다\n훨씬 심각하게 다가올 수 있답니다.\n우리 프로홈픽서 팀이\n꼼꼼하고 정성스럽게 작업하는 모습\n지금부터 보여드릴게요.\n한 땀 한 땀 진행된 시공 과정을 보시면,\n욕실이 어떻게 안전하고\n깔끔하게 변신했는지\n쉽게 이해하실 수 있을 거예요.\n이번에 방문한 수지 아파트 현장도\n샤워부스 내부의 한쪽 벽면 타일이\n배부름 현상으로 툭 터지고\n금이 가 있는 위험한 상태였습니다.\n이런 타일 크랙이나 들뜸 현상을\n"에이, 설마 떨어지겠어?',
       address: '',
       state: CrawledRegion.GYEONGGI,
       url: 'https://blog.naver.com/eui6212',
@@ -247,11 +244,20 @@ const SEEDS: CrawledMember[] = [
   },
 ]
 
+// 크롤링 시드 글은 연결된 시공사례(task) 없음 — 스펙 nullable 그대로 null.
+const SEEDS: CrawledMember[] = RAW.map((member) => ({
+  ...member,
+  posts: member.posts.map((post) => ({ ...post, taskId: null, task: null })),
+}))
+
 const toSummary = ({
-  posts: _posts,
+  posts,
   credentials: _credentials,
   ...rest
-}: CrawledMember): CrawledMemberSummary => rest
+}: CrawledMember): CrawledMemberSummary => ({
+  ...rest,
+  thumbnails: posts.flatMap((post) => post.images.slice(0, 1)),
+})
 
 export const crawledOverrides = [
   getGetCrawledMembersMockHandler(SEEDS.map(toSummary)),

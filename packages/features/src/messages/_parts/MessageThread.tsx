@@ -6,14 +6,20 @@ import {
   getDirectChatMessages,
   getGetDirectChatMessagesQueryKey,
 } from '@bconnect/api-client'
-import type { Message, CursorPageMessage, MemberSummary, InfiniteData } from '@bconnect/api-client'
+import type {
+  Message,
+  CursorPageMessage,
+  WithdrawableMember,
+  InfiniteData,
+} from '@bconnect/api-client'
+import { chatMemberName } from './types'
 import { ChatMessage } from '@bconnect/ui'
 import { formatChatTime } from '@bconnect/config/format'
 
 interface MessageThreadProps {
   chatId: number
   currentUserId: number | undefined
-  participants: MemberSummary[]
+  participants: WithdrawableMember[]
   localMessages: Message[]
 }
 
@@ -30,7 +36,7 @@ function DateSeparator({ date }: { date: string }) {
   )
 }
 
-/** 발신자 이름/아바타는 참여자(MemberSummary)에서 해석 — admin 전용 getMembers 미사용 */
+/** 발신자 이름/아바타는 참여자(WithdrawableMember)에서 해석 — admin 전용 getMembers 미사용 */
 function Bubble({
   message,
   currentUserId,
@@ -38,7 +44,7 @@ function Bubble({
 }: {
   message: Message
   currentUserId: number | undefined
-  participants: MemberSummary[]
+  participants: WithdrawableMember[]
 }) {
   const isMine = message.memberId === currentUserId
   const timestamp = message.createdAt ? formatChatTime(message.createdAt) : undefined
@@ -51,7 +57,7 @@ function Bubble({
       variant="theirs"
       message={message.content}
       timestamp={timestamp}
-      nickname={sender?.name ?? '상대방'}
+      nickname={chatMemberName(sender) ?? '상대방'}
       profileImage={sender?.picture ?? undefined}
     />
   )

@@ -45,7 +45,7 @@ export function toOfferQueueItem(offer: Offer): OfferQueueItem {
   return {
     profileId: offer.member?.id ?? 0,
     name: offer.member?.name ?? '',
-    picture: offer.member?.picture,
+    picture: offer.member?.picture ?? undefined,
     region: offer.profile?.address?.state ?? '',
     level: '',
     specialty: trade ? (TRADE_LABELS[trade] ?? '') : '',
