@@ -21,13 +21,7 @@ import { useForm } from 'react-hook-form'
 import { AddressField } from '@/components/AddressField'
 import { createTaskSchema, type CreateTaskValues } from './schema'
 
-interface TaskCreateFormProps {
-  /** 생성된 taskId 소비처가 따로 있을 때(작업물 생성 flow) — 지정 시 캘린더 이동 대신 호출 */
-  onCreated?: (taskId: number) => void
-  onBack?: () => void
-}
-
-export function TaskCreateForm({ onCreated, onBack }: TaskCreateFormProps = {}) {
+export function TaskCreateForm() {
   const router = useRouter()
 
   const form = useForm<CreateTaskValues>({
@@ -67,12 +61,8 @@ export function TaskCreateForm({ onCreated, onBack }: TaskCreateFormProps = {}) 
         },
       },
       {
-        onSuccess: (taskId) => {
+        onSuccess: () => {
           toast({ description: '작업이 생성되었어요', variant: 'success' })
-          if (onCreated) {
-            onCreated(taskId)
-            return
-          }
           // 생성한 작업의 시작일로 포커스 (월·선택일 동기화)
           router.replace(`/calendar?day=${data.start}&month=${monthStartOf(data.start)}`)
         },
@@ -89,7 +79,7 @@ export function TaskCreateForm({ onCreated, onBack }: TaskCreateFormProps = {}) 
         actionLabel={isPending ? '저장 중...' : '완료'}
         actionDisabled={isPending}
         onAction={handleSubmit(onSubmit, scrollToError)}
-        onBack={onBack ?? (() => router.back())}
+        onBack={() => router.back()}
       />
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit, scrollToError)} className="flex flex-col px-4 pb-10">

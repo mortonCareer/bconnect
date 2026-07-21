@@ -5,7 +5,7 @@
 
 import type { Task } from '@bconnect/api-client'
 import { matchHangul } from '@bconnect/config/search'
-import { cn, PlusIcon, SearchIcon, TopBar } from '@bconnect/ui'
+import { cn, SearchIcon, TopBar } from '@bconnect/ui'
 import { useMemo, useState } from 'react'
 import { dotColor } from '@/lib/task-colors'
 import { formatWorkPeriod } from './work-utils'
@@ -15,7 +15,6 @@ interface TaskSelectViewProps {
   isLoading?: boolean
   selectedId: number | null
   onConfirm: (taskId: number) => void
-  onCreateNew: () => void
   onBack: () => void
 }
 
@@ -24,7 +23,6 @@ export function TaskSelectView({
   isLoading,
   selectedId,
   onConfirm,
-  onCreateNew,
   onBack,
 }: TaskSelectViewProps) {
   const [query, setQuery] = useState('')
@@ -98,13 +96,6 @@ export function TaskSelectView({
                 </span>
               </button>
             ))}
-            <button
-              type="button"
-              onClick={onCreateNew}
-              className="flex w-full cursor-pointer items-center gap-2 px-2 py-4 text-left text-m-14 text-gray-500 transition-colors hover:bg-gray-50 active:bg-gray-100"
-            >
-              <PlusIcon size={16} />새 작업 만들기
-            </button>
           </>
         )}
       </div>

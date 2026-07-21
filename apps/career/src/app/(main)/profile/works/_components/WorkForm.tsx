@@ -9,13 +9,11 @@ import {
   AttachmentType,
   createAttachmentConfirm,
   createAttachmentPresign,
-  getGetTasksQueryKey,
   TaskType,
   useCreatePost,
   useGetFeed,
   useGetMyMember,
   useGetTasks,
-  useQueryClient,
   useUpdatePost,
 } from '@bconnect/api-client'
 import {
@@ -34,7 +32,6 @@ import { parseAsStringLiteral, useQueryState } from 'nuqs'
 import { useMemo, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
-import { TaskCreateForm } from '@/app/(main)/calendar/new/_components/TaskCreateForm'
 import { PhotoStrip, type WorkPhoto } from './PhotoStrip'
 import { TaskSelectView } from './TaskSelectView'
 import { formatWorkPeriod } from './work-utils'
@@ -79,7 +76,7 @@ async function uploadPostImages(files: File[], memberId: number): Promise<number
 
 // 스텝을 ?step= 쿼리로 승격 (plan ?panel= 패턴, ADR-0021) — 브라우저 뒤로가기가 스텝 단위로 팝.
 // null = main. 진입은 push, 완료·뒤로 복귀는 replace(히스토리에 서브스텝 잔존 방지).
-const stepParser = parseAsStringLiteral(['select', 'create'] as const).withOptions({
+const stepParser = parseAsStringLiteral(['select'] as const).withOptions({
   history: 'push',
 })
 
@@ -87,7 +84,6 @@ const stepParser = parseAsStringLiteral(['select', 'create'] as const).withOptio
 export function WorkForm({ postId }: { postId?: number }) {
   const isEdit = postId != null
   const router = useRouter()
-  const queryClient = useQueryClient()
   const [step, setStep] = useQueryState('step', stepParser)
   const [saving, setSaving] = useState(false)
 
@@ -165,21 +161,7 @@ export function WorkForm({ postId }: { postId?: number }) {
           form.setValue('taskId', id, { shouldValidate: true })
           setStep(null, { history: 'replace' })
         }}
-        onCreateNew={() => setStep('create')}
         onBack={() => setStep(null, { history: 'replace' })}
-      />
-    )
-  }
-
-  if (step === 'create') {
-    return (
-      <TaskCreateForm
-        onCreated={(id) => {
-          queryClient.invalidateQueries({ queryKey: getGetTasksQueryKey() })
-          form.setValue('taskId', id, { shouldValidate: true })
-          setStep(null, { history: 'replace' })
-        }}
-        onBack={() => setStep('select', { history: 'replace' })}
       />
     )
   }
