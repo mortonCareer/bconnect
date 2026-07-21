@@ -13,11 +13,12 @@ public record FeedResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) PostResponse post,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) TaskResponse task
 ) {
-    public static FeedResponse of(Post post, Member member, Profile profile, TaskResponse task, List<String> images, String picture) {
+    public static FeedResponse of(Post post, Member member, Profile profile, TaskResponse task,
+                                  List<String> images, List<PostAttachmentResponse> attachments, String picture) {
         return new FeedResponse(
                 MemberSummaryResponse.of(member, picture),
                 ProfileSummaryResponse.of(profile),
-                PostResponse.of(post, images),
+                PostResponse.of(post, images, attachments),
                 task
         );
     }

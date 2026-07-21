@@ -20,7 +20,8 @@ public class PostEntity extends BaseEntity {
 
     private String content;
 
-    public void update(String content) {
+    public void update(Long taskId, String content) {
+        this.taskId = taskId;
         this.content = content;
     }
 }

@@ -11,16 +11,18 @@ public record PostResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long memberId,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Long taskId,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> images,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<PostAttachmentResponse> attachments,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String content,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt
 ) {
-    public static PostResponse of(Post post, List<String> images) {
+    public static PostResponse of(Post post, List<String> images, List<PostAttachmentResponse> attachments) {
         return new PostResponse(
                 post.id(),
                 post.memberId(),
                 post.taskId(),
                 images,
+                attachments,
                 post.content(),
                 post.createdAt(),
                 post.modifiedAt()
