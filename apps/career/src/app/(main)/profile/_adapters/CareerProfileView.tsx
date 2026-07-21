@@ -89,7 +89,7 @@ export function OwnerProfileView() {
           href: '/profile/works/new',
           label: '작업물 생성',
         },
-        action: {
+        right: {
           icon: <SettingsIcon className="text-[#a5a5a5]" />,
           href: '/settings',
           label: '설정',

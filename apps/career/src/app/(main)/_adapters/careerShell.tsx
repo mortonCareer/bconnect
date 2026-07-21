@@ -18,8 +18,8 @@ interface CareerShellOpts {
   utility?: { chatHref?: string; chatCount?: number; notifyHref?: string; notifyCount?: number }
   /** 좌측 back 자리 커스텀 아이콘 라우트 (예: 프로필 '+' 작업물 생성, #966) */
   left?: { icon: ReactNode; href: string; label: string }
-  /** 우측 아이콘 액션 라우트 (예: 프로필 설정). utility 와 동시 지정 시 utility 우선 */
-  action?: { icon: ReactNode; href: string; label: string }
+  /** 우측 아이콘 라우트 (예: 프로필 설정) — TopBar action 계열로 전달. utility 와 동시 지정 시 utility 우선 */
+  right?: { icon: ReactNode; href: string; label: string }
 }
 
 export const careerShell = (onBack?: () => void, opts?: CareerShellOpts) =>
@@ -30,9 +30,9 @@ export const careerShell = (onBack?: () => void, opts?: CareerShellOpts) =>
           variant="default"
           title={title}
           showAction={false}
-          actionIcon={opts?.action?.icon}
-          actionHref={opts?.action?.href}
-          actionLabel={opts?.action?.label}
+          actionIcon={opts?.right?.icon}
+          actionHref={opts?.right?.href}
+          actionLabel={opts?.right?.label}
           showBack={onBack != null}
           onBack={onBack}
           leftIcon={opts?.left?.icon}
