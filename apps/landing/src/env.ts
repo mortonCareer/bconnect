@@ -5,6 +5,4 @@ const landingEnvSchema = z.object({
   NEXT_PUBLIC_GA_ID: commonSchemas.gaId,
 })
 
-export type LandingEnv = z.infer<typeof landingEnvSchema>
-
 export const env = validateEnv(landingEnvSchema)

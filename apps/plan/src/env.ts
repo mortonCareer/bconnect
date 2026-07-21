@@ -7,8 +7,6 @@ const planEnvSchema = z.object({
   NEXT_PUBLIC_GA_ID: commonSchemas.gaId,
 })
 
-export type PlanEnv = z.infer<typeof planEnvSchema>
-
 /**
  * 검증된 환경 변수
  * 애플리케이션 전체에서 타입 안전하게 사용 가능

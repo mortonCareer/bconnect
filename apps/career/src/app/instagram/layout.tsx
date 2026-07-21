@@ -1,0 +1,7 @@
+import { notFound } from 'next/navigation'
+import type { ReactNode } from 'react'
+
+export default function InstagramLayout({ children }: { children: ReactNode }) {
+  if (process.env.NEXT_PUBLIC_VERCEL_ENV === 'production') notFound()
+  return children
+}
