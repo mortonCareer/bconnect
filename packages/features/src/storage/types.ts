@@ -45,6 +45,11 @@ export interface Memo {
   content: string
 }
 
+/** 동산보드 행 제목 템플릿 — 다음 업로드에도 기억되는 key 목록 (per-user, mock=단일 전역). */
+export interface MetaTemplate {
+  keys: string[]
+}
+
 /** 저장소 사용량 (용량바). mock 파생. */
 export interface StorageUsage {
   usedBytes: number
