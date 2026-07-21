@@ -4,6 +4,7 @@
 'use client'
 
 import type { Task } from '@bconnect/api-client'
+import { matchHangul } from '@bconnect/config/search'
 import { cn, PlusIcon, SearchIcon, TopBar } from '@bconnect/ui'
 import { useMemo, useState } from 'react'
 import { formatWorkPeriod, taskDotColor } from './work-utils'
@@ -32,7 +33,7 @@ export function TaskSelectView({
     const q = query.trim()
     if (!q) return tasks
     return tasks.filter(
-      (t) => (t.workerTitle ?? '').includes(q) || (t.workerCompany ?? '').includes(q)
+      (t) => matchHangul(t.workerTitle ?? '', q) || matchHangul(t.workerCompany ?? '', q)
     )
   }, [tasks, query])
 
