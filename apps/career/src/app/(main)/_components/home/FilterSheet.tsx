@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react'
 import { Slider, Tag, TopBar } from '@bconnect/ui'
 import { TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
 import { FILTER_ROLES, ROLE_LABELS } from '@/lib/role-labels'
-import { REGIONS, REGION_LABELS } from '@/lib/region'
 import {
   EXPERIENCE_FILTER_MAX,
   EXPERIENCE_MIN,
@@ -23,17 +22,8 @@ interface FilterSheetProps {
 }
 
 export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
-  const {
-    trades,
-    roles,
-    regions,
-    experience,
-    toggleTrade,
-    toggleRole,
-    toggleRegion,
-    setExperience,
-    clearFilter,
-  } = useFilterParams()
+  const { trades, roles, experience, toggleTrade, toggleRole, setExperience, clearFilter } =
+    useFilterParams()
 
   // Two-phase rendering: mounted keeps DOM alive for exit animation
   const [mounted, setMounted] = useState(false)
@@ -133,22 +123,6 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
               formatLabel={formatExperienceYears}
               thumbLabels={EXPERIENCE_THUMB_LABELS}
             />
-          </div>
-
-          {/* 지역 */}
-          <div className="flex flex-col gap-3">
-            <p className="text-sb-16 text-gray-900">지역</p>
-            <div className="flex flex-wrap gap-2">
-              {REGIONS.map((region) => (
-                <Tag
-                  key={region}
-                  variant={regions.includes(region) ? 'selected' : 'default'}
-                  onClick={() => toggleRegion(region)}
-                >
-                  {REGION_LABELS[region]}
-                </Tag>
-              ))}
-            </div>
           </div>
         </div>
       </div>

@@ -3,7 +3,6 @@
 import { Tag } from '@bconnect/ui'
 import { TRADE_LABELS } from '@bconnect/api-client'
 import { ROLE_LABELS } from '@/lib/role-labels'
-import { REGION_LABELS } from '@/lib/region'
 import { formatExperienceRange } from '@/lib/experience-range'
 import { useFilterParams } from '@/hooks/useFilterParams'
 
@@ -11,15 +10,13 @@ export function FilterTags() {
   const {
     trades,
     roles,
-    regions,
     experience: selectedExperience,
     removeTrade,
     removeRole,
-    removeRegion,
     clearExperience,
   } = useFilterParams()
 
-  if (trades.length === 0 && roles.length === 0 && regions.length === 0 && !selectedExperience) {
+  if (trades.length === 0 && roles.length === 0 && !selectedExperience) {
     return null
   }
 
@@ -33,11 +30,6 @@ export function FilterTags() {
       {roles.map((role) => (
         <Tag key={role} variant="filter" onRemove={() => removeRole(role)}>
           {ROLE_LABELS[role]}
-        </Tag>
-      ))}
-      {regions.map((region) => (
-        <Tag key={region} variant="filter" onRemove={() => removeRegion(region)}>
-          {REGION_LABELS[region]}
         </Tag>
       ))}
       {selectedExperience && (

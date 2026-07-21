@@ -120,26 +120,3 @@ export const REGION_OPTIONS = Object.values(REGION_LABELS)
 export function getRegionLabel(region: CrawledRegion): string {
   return REGION_LABELS[region] ?? region
 }
-
-// 행정구역 전체 명칭('충청북도'·'전북특별자치도' 등)은 라벨('충북'·'전북')과 접두가 달라
-// 단순 startsWith 로 못 잡는 6개 도만 명시 처리하고, 나머지는 라벨 접두 일치로 해석한다.
-const REGION_FULLNAME_PREFIX: Record<string, CrawledRegion> = {
-  충청북: 'CHUNGBUK',
-  충청남: 'CHUNGNAM',
-  전라북: 'JEONBUK',
-  전라남: 'JEONNAM',
-  경상북: 'GYEONGBUK',
-  경상남: 'GYEONGNAM',
-}
-
-/** Address.state(시/도 명칭, '서울특별시'·'경기도'·'전북특별자치도' 등) → CrawledRegion. 해석 불가면 undefined. */
-export function regionOfState(state: string | null | undefined): CrawledRegion | undefined {
-  if (!state) return undefined
-  const trimmed = state.trim()
-  for (const [prefix, region] of Object.entries(REGION_FULLNAME_PREFIX)) {
-    if (trimmed.startsWith(prefix)) return region
-  }
-  return (Object.keys(REGION_LABELS) as CrawledRegion[]).find((region) =>
-    trimmed.startsWith(REGION_LABELS[region])
-  )
-}
