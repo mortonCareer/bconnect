@@ -7,14 +7,14 @@ description: Use when user asks to run/start local dev servers — "be 로컬 �
 
 ## 포트 규칙 (핵심)
 
-포트는 워크트리 이름으로 **계산**한다 — `.envrc`가 자동 설정하는 `CAREER_PORT`/`PLAN_PORT`와 동일 공식:
-
-- `dev`·`main` 워크트리: career 3000, plan 3001
-- 나머지: `base = 4000 + (cksum(워크트리명) % 490) * 2` → career `base`, plan `base+1`
+포트는 워크트리 이름으로 **계산**한다. 공식의 단일 정의는 `scripts/dev-port.sh`:
 
 ```bash
-wt="$(basename "$PWD")"; base=$(( 4000 + ($(printf '%s' "$wt" | cksum | cut -d' ' -f1) % 490) * 2 ))
+scripts/dev-port.sh career   # dev·main 워크트리=3000, 그 외 4000~4978 짝수
+scripts/dev-port.sh plan     # career 포트 + 1
 ```
+
+`pnpm dev:career`/`dev:plan`은 env 변수(`CAREER_PORT`/`PLAN_PORT`)가 없으면 이 스크립트를 폴백으로 호출한다 — **direnv가 안 잡힌 셸(에이전트 백그라운드 Bash 포함)에서도 그냥 실행하면 올바른 포트로 뜬다.**
 
 포트 명시(-p) 기동이라 점유 시 Next.js가 **fail-fast(EADDRINUSE)** — 조용히 다른 포트로 밀리지 않는다. 같은 워크트리에서 중복 기동하면 Next가 포트와 무관하게 자체 차단한다("Another next dev server is already running" + 기존 PID 안내).
 
@@ -33,8 +33,7 @@ wt="$(basename "$PWD")"; base=$(( 4000 + ($(printf '%s' "$wt" | cksum | cut -d' 
 
 1. 현재 워크트리 포트 계산 (위 공식)
 2. `curl -s localhost:<포트>` 응답 있으면 이미 떠 있음 → 보고, 끝
-3. 기동 (백그라운드, 레포 루트에서): `pnpm dev:career` / `pnpm dev:plan` — direnv가 포트 주입
-   - direnv 미적용 셸(백그라운드 Bash 등)에선 `CAREER_PORT=<포트> pnpm dev:career`로 명시 주입
+3. 기동 (백그라운드, 레포 루트에서): `pnpm dev:career` / `pnpm dev:plan` — 포트는 direnv 또는 스크립트 폴백이 자동 결정, 별도 주입 불필요
 4. 응답 확인 후 URL 보고. 로컬 FE는 MSW mock 자동 적용 — mock 로그인: `01099`로 시작하는 번호 + OTP `123456`
 
 ## 서버 식별·중지

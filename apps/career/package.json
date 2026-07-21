@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p ${CAREER_PORT:-3000}",
+    "dev": "next dev -p ${CAREER_PORT:-$(../../scripts/dev-port.sh career)}",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
