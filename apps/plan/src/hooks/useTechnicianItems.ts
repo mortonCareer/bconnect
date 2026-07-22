@@ -3,18 +3,13 @@
 import { useMemo } from 'react'
 import {
   postImageUrls,
+  regionOfCrawled,
   regionOfState,
   useGetCrawledMembers,
   useGetFeeds,
   useGetProfiles,
 } from '@bconnect/api-client'
-import type {
-  CrawledMemberSummary,
-  CrawledRegion,
-  Post,
-  Profile,
-  Trade,
-} from '@bconnect/api-client'
+import type { CrawledMemberSummary, Post, Profile, Region, Trade } from '@bconnect/api-client'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { toCrawledDisplay } from '@/lib/crawled'
 import type { ExperienceLevel } from '@/lib/experience'
@@ -27,7 +22,7 @@ interface TechnicianItemBase {
   picture: string
   location: string
   // 표시용 location 과 분리 — 비교는 코드로, 표시는 문자열로. 미상(주소 없음·해석 실패)이면 undefined
-  region?: CrawledRegion
+  region?: Region
   primaryTrade?: Trade
   // 미상(크롤링 미추출)이면 undefined — 경력 필터에서 제외
   experienceYears?: number
@@ -115,7 +110,7 @@ function toCrawledItem(crawled: CrawledMemberSummary): CrawledTechnicianItem | n
     name: d.displayName,
     picture: crawled.picture ?? DEFAULT_PROFILE_IMAGE,
     location: d.location,
-    region: crawled.profile?.state ?? undefined,
+    region: crawled.profile?.state ? regionOfCrawled(crawled.profile.state) : undefined,
     primaryTrade: d.primaryTrade,
     experienceYears: d.experienceYears,
     headline: d.headline,
@@ -140,7 +135,7 @@ interface UseTechnicianItemsOptions {
   trades?: Trade[] | null
   experience?: ExperienceLevel | null
   grades?: Grade[] | null
-  regions?: CrawledRegion[] | null
+  regions?: Region[] | null
 }
 
 export function useTechnicianItems({

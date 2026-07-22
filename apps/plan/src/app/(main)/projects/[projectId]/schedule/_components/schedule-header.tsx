@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import { z } from 'zod'
-import { mapKakaoAddress } from '@bconnect/config/address'
+import { mapKakaoAddress, UnknownSidoError } from '@bconnect/config/address'
 import {
   AddressSearchDialog,
   Button,
@@ -107,6 +107,7 @@ function AddressRow({ initialAddress }: { initialAddress: string }) {
   const [draft, setDraft] = useState<Address>(address)
   const [editing, setEditing] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [sidoError, setSidoError] = useState<string | null>(null)
 
   if (editing) {
     return (
@@ -127,6 +128,7 @@ function AddressRow({ initialAddress }: { initialAddress: string }) {
             onChange={(e) => setDraft({ ...draft, detail: e.target.value })}
             placeholder="상세주소를 입력해주세요 (동/호 등)"
           />
+          {sidoError && <p className="text-r-12 text-destructive">{sidoError}</p>}
         </div>
         <Button
           type="button"
@@ -142,7 +144,15 @@ function AddressRow({ initialAddress }: { initialAddress: string }) {
         <AddressSearchDialog
           open={pickerOpen}
           onOpenChange={setPickerOpen}
-          onComplete={(result) => setDraft({ ...mapKakaoAddress(result), detail: draft.detail })}
+          onComplete={(result) => {
+            try {
+              setDraft({ ...mapKakaoAddress(result), detail: draft.detail })
+              setSidoError(null)
+            } catch (e) {
+              if (!(e instanceof UnknownSidoError)) throw e
+              setSidoError('주소의 시/도를 인식할 수 없습니다. 주소를 다시 검색해주세요.')
+            }
+          }}
         />
       </div>
     )
@@ -161,6 +171,7 @@ function AddressRow({ initialAddress }: { initialAddress: string }) {
         type="button"
         onClick={() => {
           setDraft(address)
+          setSidoError(null)
           setEditing(true)
         }}
         aria-label="주소 수정"

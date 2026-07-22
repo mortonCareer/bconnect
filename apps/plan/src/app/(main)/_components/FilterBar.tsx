@@ -7,7 +7,7 @@ import {
   TRADE_LABELS,
   REGION_LIST,
   REGION_LABELS,
-  type CrawledRegion,
+  type Region,
 } from '@bconnect/api-client'
 import { EXPERIENCE_OPTIONS, EXPERIENCE_LABELS } from '@/lib/experience'
 import { GRADE_OPTIONS } from '@/lib/grade'
@@ -58,7 +58,7 @@ export function FilterBar() {
           clearable
           triggerLabel="지역"
           value={regions}
-          onChange={(v) => setRegion(v as CrawledRegion[])}
+          onChange={(v) => setRegion(v as Region[])}
           options={REGION_LIST}
         />
         <Select

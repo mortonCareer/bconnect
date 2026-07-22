@@ -1,4 +1,4 @@
-import { REGION_LABELS } from '@bconnect/api-client'
+import { REGION_LABELS, regionOfCrawled } from '@bconnect/api-client'
 import type { CrawledMember, CrawledMemberSummary, Trade } from '@bconnect/api-client'
 import { GRADE_VALUES, type Grade } from './grade'
 
@@ -38,7 +38,7 @@ export function toCrawledDisplay(crawled: CrawledMemberSummary | CrawledMember):
   return {
     displayName,
     companySub: crawled.company && crawled.company !== displayName ? crawled.company : null,
-    location: profile?.state ? (REGION_LABELS[profile.state] ?? '') : '',
+    location: profile?.state ? (REGION_LABELS[regionOfCrawled(profile.state)] ?? '') : '',
     trades: sortedTrades,
     primaryTrade,
     grade: (GRADE_VALUES as readonly string[]).includes(role) ? (role as Grade) : undefined,

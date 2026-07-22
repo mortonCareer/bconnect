@@ -93,14 +93,19 @@ export function getCredentialLabel(type: CredentialType): string {
   return CREDENTIAL_TYPE_LABELS[type] ?? type
 }
 
-// 지역(시/도) 한글 라벨 SSOT — CrawledRegion enum 기반.
-// career(lib/region.ts)·plan(FilterBar·크롤링 카드)이 공유. 자체 하드코딩 금지.
-export const REGION_LABELS: Record<CrawledRegion, string> = {
+// FE 공용 지역 코드 — 전남광주통합특별시(2026-07-01 출범, 광주·전남 폐지) 반영.
+// #998 BE 공용 Region enum 승격 전까지의 FE 확장 타입. 승격 시 generated enum 으로 교체.
+export const JEONNAM_GWANGJU = 'JEONNAM_GWANGJU' as const
+
+export type Region = Exclude<CrawledRegion, 'GWANGJU' | 'JEONNAM'> | typeof JEONNAM_GWANGJU
+
+// 지역(시/도) 한글 라벨 SSOT — career(lib/region.ts)·plan(FilterBar·크롤링 카드)이 공유. 자체 하드코딩 금지.
+export const REGION_LABELS: Record<Region, string> = {
   SEOUL: '서울',
   BUSAN: '부산',
   DAEGU: '대구',
   INCHEON: '인천',
-  GWANGJU: '광주',
+  JEONNAM_GWANGJU: '전남광주',
   DAEJEON: '대전',
   ULSAN: '울산',
   SEJONG: '세종',
@@ -109,40 +114,60 @@ export const REGION_LABELS: Record<CrawledRegion, string> = {
   CHUNGBUK: '충북',
   CHUNGNAM: '충남',
   JEONBUK: '전북',
-  JEONNAM: '전남',
   GYEONGBUK: '경북',
   GYEONGNAM: '경남',
   JEJU: '제주',
 }
 
 export const REGION_LIST = Object.entries(REGION_LABELS).map(([value, label]) => ({
-  value: value as CrawledRegion,
+  value: value as Region,
   label,
 }))
 
-export function getRegionLabel(region: CrawledRegion): string {
+export function getRegionLabel(region: Region): string {
   return REGION_LABELS[region] ?? region
 }
 
-// 행정구역 전체 명칭('충청북도'·'전북특별자치도' 등)은 라벨('충북'·'전북')과 접두가 달라
-// 단순 startsWith 로 못 잡는 6개 도만 명시 처리하고, 나머지는 라벨 접두 일치로 해석한다.
-const REGION_FULLNAME_PREFIX: Record<string, CrawledRegion> = {
-  충청북: 'CHUNGBUK',
-  충청남: 'CHUNGNAM',
-  전라북: 'JEONBUK',
-  전라남: 'JEONNAM',
-  경상북: 'GYEONGBUK',
-  경상남: 'GYEONGNAM',
+// 카카오 우편번호(shorthand 표기)가 내려주는 sido 리터럴 → Region 정확 일치 맵 (#1000 위젯 실측).
+// 축약형 11종 + 축약 예외 전체형 5종. '광주'·'전남'은 통합 전 저장 행 호환 별칭.
+// 목록에 없는 값은 미상 — 새 행정구역 표기가 나오면 조용한 오분류 대신 명시적으로 드러난다.
+const SIDO_TO_REGION: Record<string, Region> = {
+  서울: 'SEOUL',
+  부산: 'BUSAN',
+  대구: 'DAEGU',
+  인천: 'INCHEON',
+  대전: 'DAEJEON',
+  울산: 'ULSAN',
+  경기: 'GYEONGGI',
+  충북: 'CHUNGBUK',
+  충남: 'CHUNGNAM',
+  경북: 'GYEONGBUK',
+  경남: 'GYEONGNAM',
+  세종특별자치시: 'SEJONG',
+  강원특별자치도: 'GANGWON',
+  전북특별자치도: 'JEONBUK',
+  제주특별자치도: 'JEJU',
+  전남광주통합특별시: JEONNAM_GWANGJU,
+  광주: JEONNAM_GWANGJU,
+  전남: JEONNAM_GWANGJU,
 }
 
-/** Address.state(시/도 명칭, '서울특별시'·'경기도'·'전북특별자치도' 등) → CrawledRegion. 해석 불가면 undefined. */
-export function regionOfState(state: string | null | undefined): CrawledRegion | undefined {
+const reportedUnknownStates = new Set<string>()
+
+/** Address.state(카카오 sido 표기) → Region 정확 일치. 미상이면 undefined + 1회 리포트 (읽기 경로는 크래시 금지). */
+export function regionOfState(state: string | null | undefined): Region | undefined {
   if (!state) return undefined
   const trimmed = state.trim()
-  for (const [prefix, region] of Object.entries(REGION_FULLNAME_PREFIX)) {
-    if (trimmed.startsWith(prefix)) return region
+  if (!trimmed) return undefined
+  const region = SIDO_TO_REGION[trimmed]
+  if (region === undefined && !reportedUnknownStates.has(trimmed)) {
+    reportedUnknownStates.add(trimmed)
+    console.warn(`[regionOfState] 미등록 시/도 표기 "${trimmed}" — 지역 미상 처리 (#1000)`)
   }
-  return (Object.keys(REGION_LABELS) as CrawledRegion[]).find((region) =>
-    trimmed.startsWith(REGION_LABELS[region])
-  )
+  return region
+}
+
+/** 크롤링 도메인 CrawledRegion → Region. 폐지된 광주·전남 값은 통합 지역으로 흡수. */
+export function regionOfCrawled(state: CrawledRegion): Region {
+  return state === 'GWANGJU' || state === 'JEONNAM' ? JEONNAM_GWANGJU : state
 }

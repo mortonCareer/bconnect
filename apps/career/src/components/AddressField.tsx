@@ -3,7 +3,7 @@
  */
 'use client'
 
-import { mapKakaoAddress } from '@bconnect/config/address'
+import { mapKakaoAddress, UnknownSidoError } from '@bconnect/config/address'
 import {
   AddressSearchDrawer,
   cn,
@@ -18,11 +18,15 @@ import {
   FormMessage,
   Input,
   ROW_INPUT_CLASSES,
+  type AddressSearchResult,
   type FieldLayout,
 } from '@bconnect/ui'
 import type { Address } from '@bconnect/api-client'
 import { useState } from 'react'
+import { useFormContext } from 'react-hook-form'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
+
+const UNKNOWN_SIDO_MESSAGE = '주소의 시/도를 인식할 수 없습니다. 주소를 다시 검색해주세요.'
 
 interface AddressFieldProps<T extends FieldValues> {
   control: Control<T>
@@ -42,6 +46,7 @@ export function AddressField<T extends FieldValues>({
   layout = 'stacked',
 }: AddressFieldProps<T>) {
   const [open, setOpen] = useState(false)
+  const { setError, clearErrors } = useFormContext()
 
   return (
     <FormField
@@ -51,6 +56,16 @@ export function AddressField<T extends FieldValues>({
         const value = field.value as Address | null
         const setDetail = (detail: string) =>
           field.onChange({ ...(value ?? mapKakaoAddress(null)), detail })
+        const handleComplete = (result: AddressSearchResult) => {
+          try {
+            const mapped = mapKakaoAddress(result)
+            clearErrors(name)
+            field.onChange({ ...mapped, detail: value?.detail })
+          } catch (e) {
+            if (!(e instanceof UnknownSidoError)) throw e
+            setError(name, { type: 'unknown-sido', message: UNKNOWN_SIDO_MESSAGE })
+          }
+        }
 
         if (layout === 'row') {
           return (
@@ -82,13 +97,7 @@ export function AddressField<T extends FieldValues>({
                 />
               </div>
 
-              <AddressSearchDrawer
-                open={open}
-                onOpenChange={setOpen}
-                onComplete={(result) =>
-                  field.onChange({ ...mapKakaoAddress(result), detail: value?.detail })
-                }
-              />
+              <AddressSearchDrawer open={open} onOpenChange={setOpen} onComplete={handleComplete} />
             </>
           )
         }
@@ -120,13 +129,7 @@ export function AddressField<T extends FieldValues>({
 
             <FormMessage />
 
-            <AddressSearchDrawer
-              open={open}
-              onOpenChange={setOpen}
-              onComplete={(result) =>
-                field.onChange({ ...mapKakaoAddress(result), detail: value?.detail })
-              }
-            />
+            <AddressSearchDrawer open={open} onOpenChange={setOpen} onComplete={handleComplete} />
           </FormItem>
         )
       }}

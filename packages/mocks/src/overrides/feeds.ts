@@ -20,7 +20,7 @@ interface FeedSeed {
   /** 글에 연결된 시공사례 — 건축주명 + 시공일수. 없으면 카드 메타행에서 생략되는 경로 검증용 */
   task?: { company: string; days: number }
   role: ProfileRole
-  /** 시/도 명칭 — regionOfState 매핑 검증용. 생략 시 주소 없는 프로필 경로 */
+  /** 시/도 명칭(카카오 sido 표기) — regionOfState 정확 일치 매핑 검증용. 생략 시 주소 없는 프로필 경로 */
   state?: string
 }
 
@@ -36,7 +36,7 @@ const FEED_SEEDS: FeedSeed[] = [
     imageCount: 3,
     task: { company: '한울 종합건설', days: 4 },
     role: ProfileRole.FOREMAN,
-    state: '경기도',
+    state: '경기',
   },
   {
     name: '김철수',
@@ -49,7 +49,7 @@ const FEED_SEEDS: FeedSeed[] = [
     imageCount: 1,
     task: { company: '미소 인테리어', days: 2 },
     role: ProfileRole.SKILLED,
-    state: '서울특별시',
+    state: '서울',
   },
   {
     name: '박영희',
@@ -73,7 +73,7 @@ const FEED_SEEDS: FeedSeed[] = [
     imageCount: 4,
     task: { company: '카페온 F&B', days: 12 },
     role: ProfileRole.SEMI_SKILLED,
-    state: '인천광역시',
+    state: '전남광주통합특별시',
   },
   {
     name: '최민수',
@@ -96,7 +96,7 @@ const FEED_SEEDS: FeedSeed[] = [
     imageCount: 2,
     task: { company: '두손 건축사사무소', days: 1 },
     role: ProfileRole.FOREMAN,
-    state: '충청북도',
+    state: '광주',
   },
 ]
 
