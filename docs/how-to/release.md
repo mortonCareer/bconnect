@@ -22,8 +22,6 @@ gh pr create --base main --head dev \
   --body-file <개괄 본문>
 ```
 
-본문은 카테고리별 개괄 + 하위에 주요 PR 링크. plain `#N`은 GitHub이 PR 제목 전체로 풀어 렌더링하므로, 번호만 보이게 하려면 명시 링크 `[#N](https://github.com/mortonCareer/bconnect/pull/N)` 형식을 쓴다.
-
 ### 2. 통합 CI 확인
 
 `integration` 체크(api:generate → typecheck → 전 앱 빌드)가 green인지 확인한다. 실패 시 dev에서 수정 후 재시도.
@@ -32,7 +30,7 @@ gh pr create --base main --head dev \
 
 > ⚠️ **"Create a merge commit" 버튼만 사용한다. squash 절대 금지.**
 >
-> #325를 squash로 머지한 결과 main/dev 히스토리가 갈라져, 다음 릴리스 PR(#1024)이 421개 파일 충돌 + 통합 CI 미발동으로 막혔다. merge commit은 dev의 PR 단위 히스토리를 main이 그대로 흡수하므로 이 문제가 없다 ([git-workflow.md](./git-workflow.md) 머지 전략 표 참조).
+> squash는 main/dev 히스토리를 분기시켜 다음 릴리스 PR이 대량 충돌로 막힌다. merge commit은 dev의 PR 단위 히스토리를 main이 그대로 흡수한다 ([git-workflow.md](./git-workflow.md) 머지 전략 표 참조).
 
 ### 4. 태그 + GitHub Release
 
@@ -47,10 +45,12 @@ gh release create vX.Y.Z --title "vX.Y.Z" --generate-notes
 
 ### 5. 릴리스 산출물 — career TWA APK 첨부
 
-career 안드로이드 앱(apk)을 Release 자산으로 첨부한다. 빌드 절차·키스토어·서명은 [android-twa/README.md](../../apps/career/android-twa/README.md)가 SSOT.
+career 안드로이드 앱(apk)은 [release-apk 워크플로](../../.github/workflows/release-apk.yml)가 **자동 첨부**한다: TWA 메타(`twa-manifest.template.json`)가 직전 릴리스와 같으면 직전 apk를 그대로 복사 첨부한다 (TWA는 라이브 URL 로드라 메타 불변이면 동일 apk 유효).
 
-- **재빌드가 필요한 경우**: 앱 메타(이름·아이콘·host·`appVersionCode`) 변경 시에만. TWA는 콘텐츠를 라이브 URL에서 로드하므로 웹 배포만으로 앱 내용이 갱신된다.
-- 메타 변경이 없으면 직전 릴리스의 apk를 그대로 재첨부해도 된다.
+수동 개입이 필요한 경우 — 워크플로가 릴리스 본문에 ⚠️ 안내를 남긴다:
+
+- **메타 변경 시** (이름·아이콘·host·`appVersionCode`): 재빌드 후 첨부. 빌드 절차·키스토어·서명은 [android-twa/README.md](../../apps/career/android-twa/README.md)가 SSOT.
+- **최초 릴리스 / 직전 apk 부재 시**: 아래 명령으로 첨부.
 
 ```bash
 # (메타 변경 시) 재빌드 — appVersionCode +1 필수
@@ -62,30 +62,4 @@ gh release upload vX.Y.Z apps/career/android-twa/app-release-signed.apk
 
 ### 6. 배포 확인
 
-main 푸시로 Vercel(career·plan·landing)과 Railway(api)가 자동 배포된다. 완료 후:
-
-```bash
-curl -s -o /dev/null -w "%{http_code}\n" https://career.bconnect.to   # 200
-curl -s -o /dev/null -w "%{http_code}\n" https://plan.bconnect.to     # 200
-curl -s https://api.bconnect.to/actuator/health                        # {"status":"UP"}
-```
-
-주요 기능 스모크(로그인·조회·생성)와 첫 10분 에러 로그 모니터링은 [deployment.md](./deployment.md) 배포 체크리스트 참조. 문제 시 롤백도 같은 문서.
-
----
-
-## 트러블슈팅 — 히스토리 분기 복구
-
-**증상**: 릴리스 PR이 대량 파일로 `CONFLICTING` + `integration` 체크가 아예 발동 안 함 (conflict 상태에선 pull_request 워크플로가 merge ref를 못 만들어 실행되지 않는다).
-
-**원인**: 직전 릴리스를 squash로 머지해 main에만 있는 커밋이 생김.
-
-**복구** (main의 실질 고유 변경이 없음을 확인한 뒤):
-
-```bash
-git switch dev && git pull
-git merge -s ours origin/main -m "chore: main 히스토리 흡수 (squash 분기 해소)"
-git push --no-verify origin dev   # pre-push 훅이 보호 브랜치를 막으므로 우회 필요
-```
-
-`-s ours`는 파일 내용을 dev 것 그대로 유지하고 족보만 연결한다. **`-X ours`와 혼동 금지** — `-X ours`는 충돌 없는 main 변경을 자동으로 끌어와 dev 최신 코드를 되돌릴 수 있다.
+main 푸시로 Vercel(career·plan·landing)과 Railway(api)가 자동 배포된다. 배포 성공 여부는 Vercel·Railway 대시보드 로그로 확인한다 (실패 시 슬랙 알림). 주요 기능 스모크와 롤백은 [deployment.md](./deployment.md) 참조.

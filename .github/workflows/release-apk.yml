@@ -1,0 +1,71 @@
+# Release 발행 시 career TWA apk 자동 첨부 (carry-forward)
+#
+# TWA는 콘텐츠를 라이브 URL에서 로드하므로 앱 메타(twa-manifest.template.json)가
+# 안 바뀌었으면 직전 릴리스의 apk가 그대로 유효하다. 메타 불변이면 직전 릴리스
+# 자산을 새 릴리스로 복사 첨부하고, 변경됐으면 릴리스 본문에 재빌드 안내를 남긴다.
+# 재빌드 절차는 apps/career/android-twa/README.md 참조.
+name: Release APK
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  attach-apk:
+    runs-on: morton-runner
+    steps:
+      - uses: actions/github-script@v8
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const release = context.payload.release;
+            const APK = 'app-release-signed.apk';
+            const META = 'apps/career/android-twa/twa-manifest.template.json';
+
+            if (release.assets.some(a => a.name === APK)) {
+              core.info('apk 이미 첨부됨 — 종료');
+              return;
+            }
+
+            const { data: releases } = await github.rest.repos.listReleases({ owner, repo, per_page: 20 });
+            const prev = releases.find(r => !r.draft && r.id !== release.id);
+            if (!prev) { core.warning('직전 릴리스 없음 — 최초 릴리스는 수동 첨부'); return; }
+
+            const metaSha = async (ref) => {
+              try {
+                const { data } = await github.rest.repos.getContent({ owner, repo, path: META, ref });
+                return data.sha;
+              } catch { return null; }
+            };
+            const [curSha, prevSha] = [await metaSha(release.tag_name), await metaSha(prev.tag_name)];
+
+            const note = async (msg) => {
+              core.warning(msg);
+              await github.rest.repos.updateRelease({ owner, repo, release_id: release.id,
+                body: `${release.body ?? ''}\n\n> ⚠️ ${msg}` });
+            };
+
+            if (!curSha || curSha !== prevSha) {
+              await note(`TWA 메타(${META}) 변경 — apk 재빌드 후 수동 첨부 필요 (android-twa/README.md)`);
+              return;
+            }
+
+            const asset = prev.assets.find(a => a.name === APK);
+            if (!asset) {
+              await note(`직전 릴리스(${prev.tag_name})에 apk 자산 없음 — 수동 첨부 필요`);
+              return;
+            }
+
+            const { data: bin } = await github.request(
+              'GET /repos/{owner}/{repo}/releases/assets/{asset_id}',
+              { owner, repo, asset_id: asset.id, headers: { accept: 'application/octet-stream' } });
+            await github.rest.repos.uploadReleaseAsset({
+              owner, repo, release_id: release.id, name: APK,
+              headers: { 'content-type': 'application/vnd.android.package-archive',
+                         'content-length': asset.size },
+              data: Buffer.from(bin),
+            });
+            core.info(`${prev.tag_name} → ${release.tag_name} apk carry-forward 완료`);
