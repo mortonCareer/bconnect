@@ -15,8 +15,8 @@ import to.bconnect.api.security.AuthUserService;
 
 import java.util.List;
 
-import static to.bconnect.api.storage.member.Role.GUEST;
 import static to.bconnect.api.security.AuthUser.ROLE_PREFIX;
+import static to.bconnect.api.storage.member.Role.GUEST;
 
 @RequiredArgsConstructor
 public class OtpAuthenticationProvider implements AuthenticationProvider {
@@ -32,15 +32,11 @@ public class OtpAuthenticationProvider implements AuthenticationProvider {
         val token = (OtpAuthenticationToken) authentication;
         val phone = (String) token.getPrincipal();
         val code = (String) token.getCredentials();
-        
-        if (code == null) {
-            throw new IllegalStateException("OTP code is required for authentication");
-        }
-        
+
         try {
             otpService.verifyCode(phone, code);
         } catch (CodeException ex) {
-            throw new AuthenticationServiceException("OTP verification failed", ex);
+            throw new AuthenticationServiceException(ex.getMessage(), ex);
         }
 
         try {

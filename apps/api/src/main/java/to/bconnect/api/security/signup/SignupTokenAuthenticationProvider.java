@@ -37,7 +37,7 @@ public class SignupTokenAuthenticationProvider implements AuthenticationProvider
             return new SignupTokenAuthenticationToken(phone, token,
                     List.of(new SimpleGrantedAuthority(ROLE_PREFIX + GUEST)));
         } catch (CodeException ex) {
-            throw new AuthenticationServiceException("Signup token verification failed", ex);
+            throw new AuthenticationServiceException(ex.getMessage(), ex);
         }
     }
 

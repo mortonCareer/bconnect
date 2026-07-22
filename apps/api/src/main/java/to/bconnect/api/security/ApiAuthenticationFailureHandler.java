@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
@@ -47,9 +46,6 @@ public class ApiAuthenticationFailureHandler implements AuthenticationFailureHan
     private ExceptionCode resolve(AuthenticationException exception) {
         if (exception.getCause() instanceof CodeException codeException) {
             return codeException.getExceptionCode();
-        }
-        if (exception instanceof AuthenticationServiceException) {
-            return CommonExceptionCode.NOT_VALID;
         }
         return CommonExceptionCode.UNAUTHORIZED;
     }

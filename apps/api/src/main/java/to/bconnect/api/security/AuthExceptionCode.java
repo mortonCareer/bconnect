@@ -19,7 +19,8 @@ public enum AuthExceptionCode implements ExceptionCode {
     SIGNUP_TOKEN_EXPIRED ("A007", HttpStatus.BAD_REQUEST, "만료된 가입 토큰입니다.", LogLevel.INFO),
     INVALID_SESSION ("A008", HttpStatus.UNAUTHORIZED, "유효하지 않은 세션입니다.", LogLevel.INFO),
     INVALID_JWT_TOKEN ("A009", HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.", LogLevel.WARN),
-    EXPIRED_JWT_TOKEN ("A010", HttpStatus.UNAUTHORIZED, "만료된 토큰입니다.", LogLevel.INFO);
+    EXPIRED_JWT_TOKEN ("A010", HttpStatus.UNAUTHORIZED, "만료된 토큰입니다.", LogLevel.INFO),
+    INVALID_TOKEN_TYPE ("A011", HttpStatus.UNAUTHORIZED, "토큰 유형이 올바르지 않습니다.", LogLevel.WARN);
 
     private final String code;
     private final HttpStatus status;

@@ -68,8 +68,8 @@ public class SecurityConfig {
             SignupTokenAuthenticationFilter signupTokenAuthenticationFilter,
             @Qualifier("VerifyOtpAuthenticationSuccessHandler") AuthenticationSuccessHandler verifyOtpSuccessHandler,
             AuthenticationFailureHandler apiAuthenticationFailureHandler,
-            @Qualifier("ApiAuthenticationEntryPoint") AuthenticationEntryPoint apiAuthenticationEntryPoint,
-            @Qualifier("ApiAccessDeniedHandler") AccessDeniedHandler apiAccessDeniedHandler
+            AuthenticationEntryPoint apiAuthenticationEntryPoint,
+            AccessDeniedHandler apiAccessDeniedHandler
     ) throws Exception {
         val verifyOtpFilter = new VerifyOtpAuthenticationFilter(authenticationManager, objectMapper);
         verifyOtpFilter.setAuthenticationSuccessHandler(verifyOtpSuccessHandler);

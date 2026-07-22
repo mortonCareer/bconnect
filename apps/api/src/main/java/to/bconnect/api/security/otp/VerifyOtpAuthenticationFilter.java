@@ -16,6 +16,8 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.common.Regex;
 
 /**
@@ -47,14 +49,19 @@ public class VerifyOtpAuthenticationFilter extends AbstractAuthenticationProcess
             val phone = body.phone() != null ? body.phone().trim() : "";
             val code = body.code() != null ? body.code().trim() : "";
 
-            if (!PHONE_PATTERN.matcher(phone).matches()) throw new AuthenticationServiceException("유효하지 않은 전화번호 형식입니다");
-            if (!OTP_CODE_PATTERN.matcher(code).matches()) throw new AuthenticationServiceException("유효하지 않은 인증코드 형식입니다");
+            if (!PHONE_PATTERN.matcher(phone).matches())
+                throw new AuthenticationServiceException("유효하지 않은 전화번호 형식입니다",
+                        new CodeException(CommonExceptionCode.NOT_VALID));
+            if (!OTP_CODE_PATTERN.matcher(code).matches())
+                throw new AuthenticationServiceException("유효하지 않은 인증코드 형식입니다",
+                        new CodeException(CommonExceptionCode.NOT_VALID));
 
             val authRequest = new OtpAuthenticationToken(phone, code);
             setDetails(request, authRequest);
             return this.getAuthenticationManager().authenticate(authRequest);
         } catch (IOException e) {
-            throw new AuthenticationServiceException("인증 요청 본문 파싱에 실패했습니다", e);
+            throw new AuthenticationServiceException("인증 요청 본문 파싱에 실패했습니다",
+                    new CodeException(CommonExceptionCode.NOT_VALID, e));
         }
     }
 
