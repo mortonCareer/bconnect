@@ -96,7 +96,7 @@ const FEED_SEEDS: FeedSeed[] = [
     imageCount: 2,
     task: { company: '두손 건축사사무소', days: 1 },
     role: ProfileRole.FOREMAN,
-    state: '광주',
+    state: '충북',
   },
 ]
 
