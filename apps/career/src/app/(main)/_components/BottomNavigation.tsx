@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { cn, HomeIcon, JobsIcon, UploadIcon, CalendarIcon, ProfileIcon } from '@bconnect/ui'
+import { cn, HomeIcon, JobsIcon, MessageIcon, CalendarIcon, ProfileIcon } from '@bconnect/ui'
 import { isBottomNavHidden } from './nav-visibility'
 
 interface NavItem {
@@ -15,7 +15,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { href: '/', label: '홈', icon: HomeIcon },
   { href: '/jobs', label: '공고', icon: JobsIcon, disabled: true },
-  { href: '/storage', label: '업로드', icon: UploadIcon },
+  { href: '/messages', label: '메시지', icon: MessageIcon },
   { href: '/calendar', label: '캘린더', icon: CalendarIcon },
   { href: '/profile', label: '내 정보', icon: ProfileIcon },
 ]
