@@ -45,12 +45,9 @@ gh release create vX.Y.Z --title "vX.Y.Z" --generate-notes
 
 ### 5. 릴리스 산출물 — career TWA APK 첨부
 
-career 안드로이드 앱(apk)은 [release-apk 워크플로](../../.github/workflows/release-apk.yml)가 **자동 첨부**한다: TWA 메타(`twa-manifest.template.json`)가 직전 릴리스와 같으면 직전 apk를 그대로 복사 첨부한다 (TWA는 라이브 URL 로드라 메타 불변이면 동일 apk 유효).
+career 안드로이드 앱(apk)을 Release 자산으로 첨부한다. 빌드 절차·키스토어·서명은 [android-twa/README.md](../../apps/career/android-twa/README.md)가 SSOT.
 
-수동 개입이 필요한 경우 — 워크플로가 릴리스 본문에 ⚠️ 안내를 남긴다:
-
-- **메타 변경 시** (이름·아이콘·host·`appVersionCode`): 재빌드 후 첨부. 빌드 절차·키스토어·서명은 [android-twa/README.md](../../apps/career/android-twa/README.md)가 SSOT.
-- **최초 릴리스 / 직전 apk 부재 시**: 아래 명령으로 첨부.
+- **재빌드가 필요한 경우**: 앱 메타(이름·아이콘·host·`appVersionCode`) 변경 시에만. TWA는 콘텐츠를 라이브 URL에서 로드하므로 메타 불변이면 직전 릴리스의 apk를 그대로 재첨부해도 된다.
 
 ```bash
 # (메타 변경 시) 재빌드 — appVersionCode +1 필수
