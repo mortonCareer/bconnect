@@ -110,14 +110,13 @@ async def _upsert_member(conn: asyncpg.Connection, member: CrawledMember) -> boo
 
     profile_id = await conn.fetchval(
         """INSERT INTO crawled_profiles
-           (member_id, primary_trade, experience, headline, about, address, state, url, platform,
+           (member_id, primary_trade, experience, headline, address, state, url, platform,
             blog_title, profile_image_url, cover_image_url, external_url,
             created_at, modified_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13, now(), now()) RETURNING id""",
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12, now(), now()) RETURNING id""",
         member_id,
         profile.primary_trade or None, profile.experience,
         (profile.headline or None) and profile.headline[:255],
-        profile.about or None,
         (profile.address or None) and profile.address[:255],
         profile.state or None, url, profile.platform,
         (profile.blog_title or None) and profile.blog_title[:255],

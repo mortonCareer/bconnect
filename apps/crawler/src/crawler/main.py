@@ -56,6 +56,58 @@ def setup_file_logging() -> None:
     logging.getLogger().addHandler(handler)
 
 
+def build_crawled_member(
+    *,
+    company: str,
+    classification: dict,
+    profile: dict,
+    phone: str,
+    email: str,
+    address: str,
+    region_kr: str,
+    headline: str,
+    picture: str,
+    url: str,
+    platform: str,
+    instagram_fallback: str = "",
+) -> CrawledMember:
+    """수집 결과와 분류 결과를 CrawledMember 로 조립한다.
+
+    네이버·인스타그램·보강 세 경로가 공유한다. 채널마다 다른 값(대표 이미지 출처,
+    프로필 주소, 플랫폼 등)만 인자로 받고, 나머지는 profile dict 에서 같은 규칙으로 꺼낸다.
+    """
+    # 한국어 라벨 → BE Trade enum 코드 (미대응 "기타" 등은 드랍)
+    enum_trades = [c for t in classification["trades"] if (c := trade_enum(t))]
+    return CrawledMember(
+        company=company,
+        name=classification.get("representative", ""),
+        phone=phone_digits(phone),
+        picture=picture,
+        role=classification["rank"],
+        brn=classification.get("business_number", ""),
+        email=email,
+        instagram=profile.get("instagram_url", "") or profile.get("instagram", "") or instagram_fallback,
+        youtube=profile.get("youtube_url", "") or profile.get("youtube", ""),
+        profile=CrawledProfile(
+            primary_trade=enum_trades[0] if enum_trades else "",
+            trades=enum_trades,
+            experience=classification.get("experience"),
+            headline=headline[:500],
+            about=profile["about"][:2000],
+            address=address,
+            state=REGION_ENUM_BY_KR.get(region_kr, ""),
+            url=url,
+            platform=platform,
+            blog_title=profile.get("blog_title", ""),
+            profile_image_url=profile.get("profile_image_url", "") or profile.get("profile_pic_url", ""),
+            cover_image_url=profile.get("cover_image_url", ""),
+            external_url=profile.get("external_url", ""),
+        ),
+        posts=[CrawledPost(**post) for post in profile.get("posts", [])],
+        source_urls=profile["source_urls"],
+    )
+
+
 async def process_blog_result(
     item: dict,
     seen_blog_ids: set[str] | None = None,
@@ -312,36 +364,18 @@ async def _classify_scraped(
             log.info("지역 보정: %s → %s (주소: %s)", region or "(없음)", addr_region, address[:30])
             region = addr_region
 
-    trades = classification["trades"]
-    # 한국어 라벨 → BE Trade enum 코드 (미대응 "기타" 등은 드랍)
-    enum_trades = [c for t in trades if (c := trade_enum(t))]
-    member = CrawledMember(
+    member = build_crawled_member(
         company=name,
-        name=classification.get("representative", ""),
-        phone=phone_digits(phone),
-        picture=cover_image_url,
-        role=classification["rank"],
-        brn=classification.get("business_number", ""),
+        classification=classification,
+        profile=profile,
+        phone=phone,
         email=email,
-        instagram=profile.get("instagram_url", ""),
-        youtube=profile.get("youtube_url", ""),
-        profile=CrawledProfile(
-            primary_trade=enum_trades[0] if enum_trades else "",
-            trades=enum_trades,
-            experience=classification.get("experience"),
-            headline=profile_intro[:500],
-            about=profile["about"][:2000],
-            address=address,
-            state=REGION_ENUM_BY_KR.get(region, ""),
-            url=detail_url,
-            platform=PLATFORM_NAVER,
-            blog_title=profile.get("blog_title", ""),
-            profile_image_url=profile.get("profile_image_url", ""),
-            cover_image_url=profile.get("cover_image_url", ""),
-            external_url=profile.get("external_url", ""),
-        ),
-        posts=[CrawledPost(**post) for post in profile.get("posts", [])],
-        source_urls=profile["source_urls"],
+        address=address,
+        region_kr=region,
+        headline=profile_intro,
+        picture=cover_image_url,
+        url=detail_url,
+        platform=PLATFORM_NAVER,
     )
 
     return member
@@ -479,33 +513,19 @@ async def process_instagram_result(
                 address = place["road_address"] or place["address"]
                 log.info("지역검색 주소 보충: %s → %s", name, address)
 
-    trades = classification["trades"]
-    # 한국어 라벨 → BE Trade enum 코드 (미대응 "기타" 등은 드랍)
-    enum_trades = [c for t in trades if (c := trade_enum(t))]
-    member = CrawledMember(
+    member = build_crawled_member(
         company=name,
-        name=classification.get("representative", ""),
-        phone=phone_digits(phone),
-        picture=profile.get("profile_pic_url", ""),
-        role=classification["rank"],
-        brn=classification.get("business_number", ""),
+        classification=classification,
+        profile=profile,
+        phone=phone,
         email=email,
-        instagram=profile.get("instagram", "") or username,
-        youtube=profile.get("youtube", ""),
-        profile=CrawledProfile(
-            primary_trade=enum_trades[0] if enum_trades else "",
-            trades=enum_trades,
-            experience=classification.get("experience"),
-            headline=profile["headline"][:500],
-            about=profile["about"][:2000],
-            address=address,
-            state=REGION_ENUM_BY_KR.get(classification.get("region", ""), ""),
-            url=instagram_url,
-            platform=PLATFORM_INSTAGRAM,
-            profile_image_url=profile.get("profile_pic_url", ""),
-            external_url=profile.get("external_url", ""),
-        ),
-        source_urls=profile["source_urls"],
+        address=address,
+        region_kr=classification.get("region", ""),
+        headline=profile["headline"],
+        picture=profile.get("profile_pic_url", ""),
+        url=instagram_url,
+        platform=PLATFORM_INSTAGRAM,
+        instagram_fallback=username,
     )
 
     return member
@@ -1191,36 +1211,18 @@ async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineR
 
             # 5) CrawledMember 구성 + enrichment 저장
             cover = profile.get("profile_pic_url", "") if is_instagram else profile.get("banner_image", "")
-            trades = classification["trades"]
-            # 한국어 라벨 → BE Trade enum 코드 (미대응 "기타" 등은 드랍)
-            enum_trades = [c for t in trades if (c := trade_enum(t))]
-            member = CrawledMember(
+            member = build_crawled_member(
                 company=tech_name,
-                name=classification.get("representative", ""),
-                phone=phone_digits(phone),
-                picture=cover,
-                role=classification["rank"],
-                brn=classification.get("business_number", ""),
+                classification=classification,
+                profile=profile,
+                phone=phone,
                 email=email,
-                instagram=profile.get("instagram_url", "") or profile.get("instagram", ""),
-                youtube=profile.get("youtube_url", "") or profile.get("youtube", ""),
-                profile=CrawledProfile(
-                    primary_trade=enum_trades[0] if enum_trades else "",
-                    trades=enum_trades,
-                    experience=classification.get("experience"),
-                    headline=profile_intro[:500],
-                    about=profile["about"][:2000],
-                    address=address,
-                    state=REGION_ENUM_BY_KR.get(classification.get("region", ""), ""),
-                    url=detail_url,
-                    platform=PLATFORM_INSTAGRAM if is_instagram else PLATFORM_NAVER,
-                    blog_title=profile.get("blog_title", ""),
-                    profile_image_url=profile.get("profile_image_url", "") or profile.get("profile_pic_url", ""),
-                    cover_image_url=profile.get("cover_image_url", ""),
-                    external_url=profile.get("external_url", ""),
-                ),
-                posts=[CrawledPost(**post) for post in profile.get("posts", [])],
-                source_urls=profile["source_urls"],
+                address=address,
+                region_kr=classification.get("region", ""),
+                headline=profile_intro,
+                picture=cover,
+                url=detail_url,
+                platform=PLATFORM_INSTAGRAM if is_instagram else PLATFORM_NAVER,
             )
 
             try:
