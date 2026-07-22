@@ -50,12 +50,12 @@ export function PanelShell({
       tabIndex={-1}
       className="relative flex h-full flex-col bg-white outline-none"
     >
-      {/* top-2 = 헤더(h-12) 세로 중앙에 32px 원의 중심, -translate-x-1/2 = 패널 좌측 경계 위 */}
+      {/* 시안 실측: 위에서 16, 좌우는 32px 원의 중심이 패널 좌측 경계 위(-translate-x-1/2) */}
       <CloseTab
         aria-label={closeLabel}
         href={closeAsButton ? undefined : closeHref}
         onClick={closeAsButton ? onClose : undefined}
-        className="absolute top-2 left-0 z-10 -translate-x-1/2"
+        className="absolute top-4 left-0 z-10 -translate-x-1/2"
       />
       <PanelHeader {...header} />
       {children}
