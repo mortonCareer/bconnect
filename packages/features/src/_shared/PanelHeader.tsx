@@ -3,7 +3,9 @@
 import { ChevronLeft, ChevronsRight } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { CountBadge } from '@bconnect/ui'
+
+/** 이 값을 넘는 카운트는 `99+` 로 표기 (뱃지 폭 고정) */
+const MAX_TITLE_COUNT = 99
 
 export interface PanelHeaderProps {
   title?: string
@@ -65,7 +67,11 @@ export function PanelHeader({
       {/* 제목은 좌·우 슬롯 폭과 무관하게 패널 정중앙 (TopBar 와 동일한 절대 중앙 정렬, #970) */}
       <div className="pointer-events-none absolute left-1/2 flex max-w-[60%] -translate-x-1/2 items-center gap-2">
         <h2 className="truncate text-sb-16 text-gray-900">{title}</h2>
-        <CountBadge count={titleCount} />
+        {titleCount != null && titleCount > 0 && (
+          <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-destructive px-1 text-[11px] font-bold leading-none text-white">
+            {titleCount > MAX_TITLE_COUNT ? `${MAX_TITLE_COUNT}+` : titleCount}
+          </span>
+        )}
       </div>
       <div className="flex-1" aria-hidden />
       {backHref ? closeLink : (rightSlot ?? <span className="h-5 w-5" aria-hidden />)}
