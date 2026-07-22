@@ -100,7 +100,7 @@ class _CamelModel(BaseModel):
 
 
 class CrawledPost(_CamelModel):
-    """블로그 글 1건 — BE crawled_posts 행에 대응. source_url은 출처 표기용 메타."""
+    """블로그 글 1건 — BE crawled_posts 행에 대응."""
 
     title: str = ""
     content: str = ""
@@ -130,6 +130,10 @@ class CrawledProfile(_CamelModel):
     state: str = ""  # CrawledRegion enum 값, 미상이면 빈 문자열
     url: str = ""  # 프로필 원 URL (블로그 홈 등) — BE unique key
     platform: str = PLATFORM_NAVER
+    blog_title: str = ""
+    profile_image_url: str = ""
+    cover_image_url: str = ""
+    external_url: str = ""  # 프로필에 걸린 외부 링크 (카카오 채널·홈페이지 등)
 
 
 class CrawledMember(_CamelModel):
@@ -142,6 +146,8 @@ class CrawledMember(_CamelModel):
     role: str = ""  # RANKS 중 하나, 빈값이면 적재 시 BE 기본값(반장)
     brn: str = ""  # 사업자등록번호
     email: str = ""
+    instagram: str = ""
+    youtube: str = ""
     profile: CrawledProfile = Field(default_factory=CrawledProfile)
     credentials: list[CrawledCredential] = Field(default_factory=list)
     posts: list[CrawledPost] = Field(default_factory=list)

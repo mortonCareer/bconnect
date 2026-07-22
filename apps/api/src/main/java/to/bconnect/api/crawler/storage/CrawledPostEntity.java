@@ -30,6 +30,8 @@ public class CrawledPostEntity extends BaseEntity {
 
     private String content;
 
+    private String sourceUrl;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "crawled_post_images", joinColumns = @JoinColumn(name = "post_id"))
     @OrderColumn(name = "seq")

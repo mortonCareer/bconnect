@@ -4,7 +4,7 @@
 알아야 하는 이중 관리 — BE 스키마 변경 시 여기도 맞춰야 한다 (#876).
 
 멱등: profile.url 기준으로 기존 레코드를 찾아 관련 행을 지우고 재삽입한다.
-sourceUrls / posts[].sourceUrl 은 BE 스키마에 자리가 없어 드랍한다.
+member.sourceUrls 는 profile.url 과 겹치는 출처 메타라 적재하지 않는다.
 """
 
 import logging
@@ -80,16 +80,18 @@ async def _upsert_member(conn: asyncpg.Connection, member: CrawledMember) -> boo
         await conn.execute(
             """UPDATE crawled_members
                SET company=$2, name=$3, phone=$4, picture=$5, role=$6, brn=$7, email=$8,
-                   modified_at=now()
+                   instagram=$9, youtube=$10, modified_at=now()
                WHERE id=$1""",
             member_id,
             member.company, member.name or None, member.phone or None,
             member.picture or None, role, member.brn or None, member.email or None,
+            member.instagram or None, member.youtube or None,
         )
         # 하위 행은 지우고 재삽입 (멱등)
         await conn.execute("DELETE FROM crawled_post_images WHERE post_id IN "
                            "(SELECT id FROM crawled_posts WHERE member_id=$1)", member_id)
         await conn.execute("DELETE FROM crawled_posts WHERE member_id=$1", member_id)
+        await conn.execute("DELETE FROM crawled_credentials WHERE member_id=$1", member_id)
         await conn.execute("DELETE FROM crawled_profile_trades WHERE profile_id IN "
                            "(SELECT id FROM crawled_profiles WHERE member_id=$1)", member_id)
         await conn.execute("DELETE FROM crawled_profiles WHERE member_id=$1", member_id)
@@ -97,24 +99,31 @@ async def _upsert_member(conn: asyncpg.Connection, member: CrawledMember) -> boo
     else:
         member_id = await conn.fetchval(
             """INSERT INTO crawled_members
-               (company, name, phone, picture, role, brn, email, created_at, modified_at)
-               VALUES ($1,$2,$3,$4,$5,$6,$7, now(), now()) RETURNING id""",
+               (company, name, phone, picture, role, brn, email, instagram, youtube,
+                created_at, modified_at)
+               VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, now(), now()) RETURNING id""",
             member.company, member.name or None, member.phone or None,
             member.picture or None, role, member.brn or None, member.email or None,
+            member.instagram or None, member.youtube or None,
         )
         is_new = True
 
     profile_id = await conn.fetchval(
         """INSERT INTO crawled_profiles
            (member_id, primary_trade, experience, headline, about, address, state, url, platform,
+            blog_title, profile_image_url, cover_image_url, external_url,
             created_at, modified_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, now(), now()) RETURNING id""",
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13, now(), now()) RETURNING id""",
         member_id,
         profile.primary_trade or None, profile.experience,
         (profile.headline or None) and profile.headline[:255],
         profile.about or None,
         (profile.address or None) and profile.address[:255],
         profile.state or None, url, profile.platform,
+        (profile.blog_title or None) and profile.blog_title[:255],
+        profile.profile_image_url or None,
+        profile.cover_image_url or None,
+        profile.external_url or None,
     )
     for trade in profile.trades:
         await conn.execute(
@@ -122,11 +131,22 @@ async def _upsert_member(conn: asyncpg.Connection, member: CrawledMember) -> boo
             profile_id, trade,
         )
 
+    for credential in member.credentials:
+        if not credential.name:
+            continue
+        await conn.execute(
+            """INSERT INTO crawled_credentials (member_id, type, name, created_at, modified_at)
+               VALUES ($1,$2,$3, now(), now())""",
+            member_id, credential.type, credential.name[:255],
+        )
+
     for post in member.posts:
         post_id = await conn.fetchval(
-            """INSERT INTO crawled_posts (member_id, title, content, created_at, modified_at)
-               VALUES ($1,$2,$3, now(), now()) RETURNING id""",
+            """INSERT INTO crawled_posts (member_id, title, content, source_url,
+                                          created_at, modified_at)
+               VALUES ($1,$2,$3,$4, now(), now()) RETURNING id""",
             member_id, (post.title or None) and post.title[:255], post.content or None,
+            post.source_url or None,
         )
         for seq, image_url in enumerate(post.images):
             await conn.execute(
