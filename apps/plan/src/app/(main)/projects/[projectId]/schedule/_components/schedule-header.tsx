@@ -14,6 +14,7 @@ import {
   FormField,
   FormItem,
   FormMessage,
+  FormSubmitButton,
   Input,
   ROW_INPUT_CLASSES,
   TextField,
@@ -69,9 +70,9 @@ function ProjectNameRow({ initialName }: { initialName: string }) {
               autoFocus
             />
           </div>
-          <Button type="submit" variant="ghost" className={EDIT_BUTTON_CLASSES}>
+          <FormSubmitButton variant="ghost" className={EDIT_BUTTON_CLASSES}>
             완료
-          </Button>
+          </FormSubmitButton>
         </form>
       </Form>
     )
@@ -150,9 +151,13 @@ function AddressRow({ initialAddress }: { initialAddress: string }) {
               </FormItem>
             )}
           />
-          <Button type="submit" variant="ghost" className={`${EDIT_BUTTON_CLASSES} mt-[14px]`}>
+          <FormSubmitButton
+            variant="ghost"
+            requireAllFilled={false}
+            className={`${EDIT_BUTTON_CLASSES} mt-[14px]`}
+          >
             완료
-          </Button>
+          </FormSubmitButton>
           <AddressSearchDialog
             open={pickerOpen}
             onOpenChange={setPickerOpen}

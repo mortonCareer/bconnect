@@ -93,48 +93,39 @@ export function getCredentialLabel(type: CredentialType): string {
   return CREDENTIAL_TYPE_LABELS[type] ?? type
 }
 
-// FE 공용 지역 코드 — 전남광주통합특별시(2026-07-01 출범, 광주·전남 폐지) 반영.
-// #998 BE 공용 Region enum 승격 전까지의 FE 독립 정의(generated enum 과 같은 const 객체 스타일). 승격 시 generated 로 교체.
-export const Region = {
-  SEOUL: 'SEOUL',
-  BUSAN: 'BUSAN',
-  DAEGU: 'DAEGU',
-  INCHEON: 'INCHEON',
-  JEONNAM_GWANGJU: 'JEONNAM_GWANGJU',
-  DAEJEON: 'DAEJEON',
-  ULSAN: 'ULSAN',
-  SEJONG: 'SEJONG',
-  GYEONGGI: 'GYEONGGI',
-  GANGWON: 'GANGWON',
-  CHUNGBUK: 'CHUNGBUK',
-  CHUNGNAM: 'CHUNGNAM',
-  JEONBUK: 'JEONBUK',
-  GYEONGBUK: 'GYEONGBUK',
-  GYEONGNAM: 'GYEONGNAM',
-  JEJU: 'JEJU',
+// FE 공용 지역 단일 정의 — 코드 → { label: 한글 라벨, sido: 카카오 우편번호(shorthand) 실측 리터럴 } (#1000).
+// 전남광주통합특별시(2026-07-01 출범, 광주·전남 폐지) 반영. Region·라벨·sido 맵 전부 여기서 파생 — 지역 추가/변경은 이 테이블 한 줄.
+// sido는 축약형 11종 + 축약 예외 전체형 5종. 목록 밖 sido는 미상 — 새 행정구역 표기는 조용한 오분류 대신 명시적으로 드러난다.
+// #998 BE 공용 Region enum 승격 시 generated 로 교체.
+const REGION_DEF = {
+  SEOUL: { label: '서울', sido: '서울' },
+  BUSAN: { label: '부산', sido: '부산' },
+  DAEGU: { label: '대구', sido: '대구' },
+  INCHEON: { label: '인천', sido: '인천' },
+  JEONNAM_GWANGJU: { label: '전남광주', sido: '전남광주통합특별시' },
+  DAEJEON: { label: '대전', sido: '대전' },
+  ULSAN: { label: '울산', sido: '울산' },
+  SEJONG: { label: '세종', sido: '세종특별자치시' },
+  GYEONGGI: { label: '경기', sido: '경기' },
+  GANGWON: { label: '강원', sido: '강원특별자치도' },
+  CHUNGBUK: { label: '충북', sido: '충북' },
+  CHUNGNAM: { label: '충남', sido: '충남' },
+  JEONBUK: { label: '전북', sido: '전북특별자치도' },
+  GYEONGBUK: { label: '경북', sido: '경북' },
+  GYEONGNAM: { label: '경남', sido: '경남' },
+  JEJU: { label: '제주', sido: '제주특별자치도' },
 } as const
 
-export type Region = (typeof Region)[keyof typeof Region]
+export type Region = keyof typeof REGION_DEF
+
+export const Region = Object.fromEntries(Object.keys(REGION_DEF).map((code) => [code, code])) as {
+  [K in Region]: K
+}
 
 // 지역(시/도) 한글 라벨 SSOT — career(lib/region.ts)·plan(FilterBar·크롤링 카드)이 공유. 자체 하드코딩 금지.
-export const REGION_LABELS: Record<Region, string> = {
-  SEOUL: '서울',
-  BUSAN: '부산',
-  DAEGU: '대구',
-  INCHEON: '인천',
-  JEONNAM_GWANGJU: '전남광주',
-  DAEJEON: '대전',
-  ULSAN: '울산',
-  SEJONG: '세종',
-  GYEONGGI: '경기',
-  GANGWON: '강원',
-  CHUNGBUK: '충북',
-  CHUNGNAM: '충남',
-  JEONBUK: '전북',
-  GYEONGBUK: '경북',
-  GYEONGNAM: '경남',
-  JEJU: '제주',
-}
+export const REGION_LABELS = Object.fromEntries(
+  Object.entries(REGION_DEF).map(([code, def]) => [code, def.label])
+) as Record<Region, string>
 
 export const REGION_LIST = Object.entries(REGION_LABELS).map(([value, label]) => ({
   value: value as Region,
@@ -145,30 +136,12 @@ export function getRegionLabel(region: Region): string {
   return REGION_LABELS[region] ?? region
 }
 
-// 카카오 우편번호(shorthand 표기)가 내려주는 sido 리터럴 → Region 정확 일치 맵 (#1000 위젯 실측).
-// 축약형 11종 + 축약 예외 전체형 5종. 통합 전 표기('광주'·'전남')는 전제하지 않는다 — 출시 전이라 저장 행 없음.
-// 목록에 없는 값은 미상 — 새 행정구역 표기가 나오면 조용한 오분류 대신 명시적으로 드러난다.
-const SIDO_TO_REGION = {
-  서울: 'SEOUL',
-  부산: 'BUSAN',
-  대구: 'DAEGU',
-  인천: 'INCHEON',
-  대전: 'DAEJEON',
-  울산: 'ULSAN',
-  경기: 'GYEONGGI',
-  충북: 'CHUNGBUK',
-  충남: 'CHUNGNAM',
-  경북: 'GYEONGBUK',
-  경남: 'GYEONGNAM',
-  세종특별자치시: 'SEJONG',
-  강원특별자치도: 'GANGWON',
-  전북특별자치도: 'JEONBUK',
-  제주특별자치도: 'JEJU',
-  전남광주통합특별시: 'JEONNAM_GWANGJU',
-} as const satisfies Record<string, Region>
-
 /** 카카오 우편번호(shorthand 표기)가 내려주는 sido 리터럴 유니온 — 시드·픽스처는 string 대신 이걸 사용 */
-export type KakaoSido = keyof typeof SIDO_TO_REGION
+export type KakaoSido = (typeof REGION_DEF)[Region]['sido']
+
+const SIDO_TO_REGION = Object.fromEntries(
+  Object.entries(REGION_DEF).map(([code, def]) => [def.sido, code])
+) as Record<KakaoSido, Region>
 
 const reportedUnknownStates = new Set<string>()
 

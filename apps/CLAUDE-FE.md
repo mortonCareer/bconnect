@@ -38,6 +38,10 @@ career·plan 두 Next.js App Router 앱의 공통 프론트엔드 규칙. 각 �
 
 도메인 에러 클래스와 사용자 노출 카피는 [packages/config/errors/index.ts](../packages/config/errors/index.ts)가 SSOT.
 
+## 폼 제출 버튼 — `FormSubmitButton`
+
+RHF `<Form>` 안 제출 버튼은 raw `<Button type="submit">` 대신 `FormSubmitButton` (#400 표준, ESLint 강제).
+
 ## 날짜·공통 데이터 유틸 — `@bconnect/config` 선확인
 
 날짜 계산(일수 차·더하기·월 경계 등)은 `@bconnect/config/date`(`daysBetween`·`addDays`·`todayIso` 등), 포맷·전화·주소·동의 항목도 `@bconnect/config/*`가 SSOT. **앱 로컬에 `Date.parse` 직접 계산 헬퍼를 재작성하기 전에 공용 패키지에 이미 있는지 먼저 확인** — 로컬 중복 헬퍼는 반올림·경계 처리 드리프트를 만든다 (#985 리뷰에서 실측).

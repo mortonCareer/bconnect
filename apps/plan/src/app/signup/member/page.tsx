@@ -9,7 +9,14 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { checkUsername } from '@bconnect/api-client'
-import { Button, Form, Logo, TextField, passthroughError, useServerError } from '@bconnect/ui'
+import {
+  Form,
+  FormSubmitButton,
+  Logo,
+  TextField,
+  passthroughError,
+  useServerError,
+} from '@bconnect/ui'
 import { formatUsername } from '@bconnect/config/username'
 import { useSignupStore } from '@/stores/signup-store'
 import { memberSchema, type MemberFormData } from './schema'
@@ -92,15 +99,15 @@ export default function SignupMemberPage() {
             />
 
             {/* CTA */}
-            <Button
-              type="submit"
+            <FormSubmitButton
               variant={isValid ? 'primary' : 'secondary'}
               size="full"
+              requireAllFilled={false}
               disabled={!isValid}
               isLoading={isSubmitting}
             >
               다음으로
-            </Button>
+            </FormSubmitButton>
           </form>
         </Form>
       </div>
