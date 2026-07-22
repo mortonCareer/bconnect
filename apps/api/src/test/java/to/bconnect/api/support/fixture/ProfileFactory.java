@@ -17,7 +17,7 @@ import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 public class ProfileFactory {
 
     public static final Address DEFAULT_ADDRESS = new Address(
-            "00000", "city", Region.서울, "street", "detail",
+            "00000", Region.서울, "city", "street", "detail",
             BigDecimal.ZERO, BigDecimal.ZERO
     );
 

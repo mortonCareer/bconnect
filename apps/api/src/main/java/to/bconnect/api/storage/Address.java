@@ -17,10 +17,10 @@ import java.math.BigDecimal;
 public class Address {
     private String zipcode;
 
-    private String city;
-
     @Enumerated(EnumType.STRING)
     private Region state;
+
+    private String city;
 
     private String street;
 
