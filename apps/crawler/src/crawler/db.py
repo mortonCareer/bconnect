@@ -141,12 +141,16 @@ async def _upsert_member(conn: asyncpg.Connection, member: CrawledMember) -> boo
         )
 
     for post in member.posts:
+        if not post.source_url:
+            # 글을 수집했으면 그 글 주소도 반드시 있다. 없으면 수집 경로 버그다.
+            log.warning("글 주소 없는 게시글 건너뜀: %s (%s)", post.title[:30], url)
+            continue
         post_id = await conn.fetchval(
             """INSERT INTO crawled_posts (member_id, title, content, source_url,
                                           created_at, modified_at)
                VALUES ($1,$2,$3,$4, now(), now()) RETURNING id""",
             member_id, (post.title or None) and post.title[:255], post.content or None,
-            post.source_url or None,
+            post.source_url,
         )
         for seq, image_url in enumerate(post.images):
             await conn.execute(

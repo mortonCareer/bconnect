@@ -429,7 +429,7 @@ create table crawled_posts (
     task_id bigint references crawled_tasks(id),
     title varchar(255),
     content TEXT,
-    source_url TEXT,
+    source_url TEXT not null,
     created_at timestamptz not null,
     modified_at timestamptz not null,
     deleted_at timestamptz,
