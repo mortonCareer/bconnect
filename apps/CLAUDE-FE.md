@@ -36,7 +36,7 @@ career·plan 두 Next.js App Router 앱의 공통 프론트엔드 규칙. 각 �
 
 ## 에러 클래스 — `@bconnect/config/errors` SSOT
 
-도메인 에러 클래스와 그 사용자 노출 카피는 [packages/config/errors/index.ts](../packages/config/errors/index.ts)가 SSOT (`UnknownSidoError` + `UNKNOWN_SIDO_MESSAGE`가 예). 새 에러 클래스를 앱 로컬이나 다른 패키지에 정의하지 말고 여기에 추가 — 에러 메시지 문자열을 호출부에 인라인 중복하는 것도 금지 (#1001 리뷰에서 실측).
+도메인 에러 클래스와 사용자 노출 카피는 [packages/config/errors/index.ts](../packages/config/errors/index.ts)가 SSOT.
 
 ## 날짜·공통 데이터 유틸 — `@bconnect/config` 선확인
 
