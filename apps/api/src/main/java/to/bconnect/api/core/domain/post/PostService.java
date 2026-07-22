@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.common.request.CursorLimit;
+import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
@@ -24,10 +26,17 @@ public class PostService {
     private final AttachmentLinker attachmentLinker;
 
     @Transactional(readOnly = true)
-    public List<Post> list() {
-        return postRepository.findAll().stream()
-                .map(Post::of)
-                .toList();
+    public CursorPage<Post> list(CursorLimit cursor) {
+        val posts = postRepository.findAllBy(
+                cursor.toScrollPosition(),
+                cursor.toLimit(),
+                cursor.toSort()
+        );
+
+        return CursorPage.from(
+                posts.map(Post::of),
+                Post::id
+        );
     }
 
     @Transactional(readOnly = true)
