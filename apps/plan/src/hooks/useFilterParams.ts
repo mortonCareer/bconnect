@@ -1,12 +1,12 @@
 import { parseAsArrayOf, parseAsStringLiteral, useQueryStates } from 'nuqs'
-import { CrawledRegion, Trade } from '@bconnect/api-client'
+import { REGION_LIST, Trade, type Region } from '@bconnect/api-client'
 import type { ExperienceLevel } from '@/lib/experience'
 import { EXPERIENCE_RANGES } from '@/lib/experience'
 import type { Grade } from '@/lib/grade'
 import { GRADE_VALUES } from '@/lib/grade'
 
 const TRADE_VALUES = Object.values(Trade)
-const REGION_VALUES = Object.values(CrawledRegion)
+const REGION_VALUES = REGION_LIST.map((r) => r.value)
 const EXPERIENCE_VALUES = ['newcomer', '1-3', '3-5', '5-10', '10+'] as const
 
 const filterParsers = {
@@ -27,7 +27,7 @@ export function useFilterParams() {
 
   const trades = (trade ?? []) as Trade[]
   const grades = (grade ?? []) as Grade[]
-  const regions = (region ?? []) as CrawledRegion[]
+  const regions = (region ?? []) as Region[]
 
   const setExperience = (value: ExperienceLevel | null) => setParams({ exp: value })
 
@@ -36,7 +36,7 @@ export function useFilterParams() {
     setParams({ trade: value && value.length > 0 ? value : null })
   const setGrade = (value: Grade[] | null) =>
     setParams({ grade: value && value.length > 0 ? value : null })
-  const setRegion = (value: CrawledRegion[] | null) =>
+  const setRegion = (value: Region[] | null) =>
     setParams({ region: value && value.length > 0 ? value : null })
 
   // 선택돼 있으면 제거, 없으면 추가
@@ -44,7 +44,7 @@ export function useFilterParams() {
     setTrade(trades.includes(value) ? trades.filter((t) => t !== value) : [...trades, value])
   const toggleGrade = (value: Grade) =>
     setGrade(grades.includes(value) ? grades.filter((g) => g !== value) : [...grades, value])
-  const toggleRegion = (value: CrawledRegion) =>
+  const toggleRegion = (value: Region) =>
     setRegion(regions.includes(value) ? regions.filter((r) => r !== value) : [...regions, value])
 
   const clearFilter = () => setParams({ trade: null, exp: null, grade: null, region: null })

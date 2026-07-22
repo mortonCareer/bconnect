@@ -5,10 +5,16 @@ import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import { z } from 'zod'
 import { mapKakaoAddress } from '@bconnect/config/address'
+import { UnknownSidoError, UNKNOWN_SIDO_MESSAGE } from '@bconnect/config/errors'
 import {
   AddressSearchDialog,
   Button,
   Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+  FormSubmitButton,
   Input,
   ROW_INPUT_CLASSES,
   TextField,
@@ -64,9 +70,9 @@ function ProjectNameRow({ initialName }: { initialName: string }) {
               autoFocus
             />
           </div>
-          <Button type="submit" variant="ghost" className={EDIT_BUTTON_CLASSES}>
+          <FormSubmitButton variant="ghost" className={EDIT_BUTTON_CLASSES}>
             완료
-          </Button>
+          </FormSubmitButton>
         </form>
       </Form>
     )
@@ -104,47 +110,70 @@ function formatAddress({ street, detail }: Address): string {
 
 function AddressRow({ initialAddress }: { initialAddress: string }) {
   const [address, setAddress] = useState<Address>(() => seedAddress(initialAddress))
-  const [draft, setDraft] = useState<Address>(address)
   const [editing, setEditing] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
+  const form = useForm<{ address: Address }>({ defaultValues: { address } })
+
+  const onDone = form.handleSubmit(({ address: next }) => {
+    setAddress(next)
+    setEditing(false)
+  })
 
   if (editing) {
     return (
-      <div className="flex items-start gap-[12px]">
-        <span className={`${LABEL_CLASSES} mt-[14px]`} style={LABEL_STYLE}>
-          주소
-        </span>
-        <div className="flex w-[360px] flex-col gap-2">
-          <button
-            type="button"
-            onClick={() => setPickerOpen(true)}
-            className="flex h-12 w-full items-center rounded-lg border border-gray-300 px-3 text-left text-r-14 text-gray-700 transition-colors hover:border-primary"
-          >
-            {draft.street || <span className="text-gray-400">주소를 검색해주세요</span>}
-          </button>
-          <Input
-            value={draft.detail ?? ''}
-            onChange={(e) => setDraft({ ...draft, detail: e.target.value })}
-            placeholder="상세주소를 입력해주세요 (동/호 등)"
+      <Form {...form}>
+        <form onSubmit={onDone} className="flex items-start gap-[12px]">
+          <span className={`${LABEL_CLASSES} mt-[14px]`} style={LABEL_STYLE}>
+            주소
+          </span>
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem className="flex w-[360px] flex-col gap-2">
+                <FormControl>
+                  <button
+                    type="button"
+                    onClick={() => setPickerOpen(true)}
+                    className="flex h-12 w-full items-center rounded-lg border border-gray-300 px-3 text-left text-r-14 text-gray-700 transition-colors hover:border-primary"
+                  >
+                    {field.value.street || (
+                      <span className="text-gray-400">주소를 검색해주세요</span>
+                    )}
+                  </button>
+                </FormControl>
+                <Input
+                  value={field.value.detail ?? ''}
+                  onChange={(e) => field.onChange({ ...field.value, detail: e.target.value })}
+                  placeholder="상세주소를 입력해주세요 (동/호 등)"
+                />
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        <Button
-          type="button"
-          variant="ghost"
-          className={`${EDIT_BUTTON_CLASSES} mt-[14px]`}
-          onClick={() => {
-            setAddress(draft)
-            setEditing(false)
-          }}
-        >
-          완료
-        </Button>
-        <AddressSearchDialog
-          open={pickerOpen}
-          onOpenChange={setPickerOpen}
-          onComplete={(result) => setDraft({ ...mapKakaoAddress(result), detail: draft.detail })}
-        />
-      </div>
+          <FormSubmitButton
+            variant="ghost"
+            requireAllFilled={false}
+            className={`${EDIT_BUTTON_CLASSES} mt-[14px]`}
+          >
+            완료
+          </FormSubmitButton>
+          <AddressSearchDialog
+            open={pickerOpen}
+            onOpenChange={setPickerOpen}
+            onComplete={(result) => {
+              try {
+                const detail = form.getValues('address').detail
+                form.clearErrors('address')
+                form.setValue('address', { ...mapKakaoAddress(result), detail })
+              } catch (e) {
+                if (!(e instanceof UnknownSidoError)) throw e
+                form.setError('address', { type: 'unknown-sido', message: UNKNOWN_SIDO_MESSAGE })
+              }
+            }}
+          />
+        </form>
+      </Form>
     )
   }
 
@@ -160,7 +189,7 @@ function AddressRow({ initialAddress }: { initialAddress: string }) {
         variant="ghost"
         type="button"
         onClick={() => {
-          setDraft(address)
+          form.reset({ address })
           setEditing(true)
         }}
         aria-label="주소 수정"

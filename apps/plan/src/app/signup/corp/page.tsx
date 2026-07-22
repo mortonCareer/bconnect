@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   AgreementField,
-  Button,
+  FormSubmitButton,
   Form,
   FormError,
   Logo,
@@ -149,17 +149,17 @@ export default function SignupCorpPage() {
             <FormError error={server.formError} />
 
             {/* CTA */}
-            <Button
-              type="submit"
+            <FormSubmitButton
               variant={isValid ? 'primary' : 'secondary'}
               size="full"
+              requireAllFilled={false}
               disabled={!isValid}
               isLoading={
                 isSubmitting || registerMemberMutation.isPending || createCompanyMutation.isPending
               }
             >
               가입 완료
-            </Button>
+            </FormSubmitButton>
           </form>
         </Form>
       </div>

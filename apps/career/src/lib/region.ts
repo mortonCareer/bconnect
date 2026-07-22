@@ -1,7 +1,7 @@
 /**
  * 지역(시도) 필터 vocabulary.
  *
- * 한글 라벨 SSOT 는 @bconnect/api-client 의 REGION_LABELS (CrawledRegion enum 기반).
+ * 한글 라벨 SSOT 는 @bconnect/api-client 의 REGION_LABELS (공용 Region 코드 기반).
  * REGIONS 배열은 필터 UI 표시 순서라 앱에서 유지.
  */
 export { REGION_LABELS } from '@bconnect/api-client'
@@ -11,14 +11,13 @@ export const REGIONS = [
   'BUSAN',
   'DAEGU',
   'INCHEON',
-  'GWANGJU',
+  'JEONNAM_GWANGJU',
   'DAEJEON',
   'ULSAN',
   'SEJONG',
   'GYEONGGI',
   'CHUNGBUK',
   'CHUNGNAM',
-  'JEONNAM',
   'JEONBUK',
   'GYEONGBUK',
   'GYEONGNAM',
