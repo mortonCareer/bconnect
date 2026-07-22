@@ -64,11 +64,7 @@ export default function SignupCorpPage() {
       agreements: CONSENT_DEFAULT,
     },
   })
-  const {
-    control,
-    handleSubmit,
-    formState: { isSubmitting, isValid },
-  } = form
+  const { control, handleSubmit } = form
 
   const server = useServerError(
     control,
@@ -149,17 +145,7 @@ export default function SignupCorpPage() {
             <FormError error={server.formError} />
 
             {/* CTA */}
-            <FormSubmitButton
-              variant={isValid ? 'primary' : 'secondary'}
-              size="full"
-              requireAllFilled={false}
-              disabled={!isValid}
-              isLoading={
-                isSubmitting || registerMemberMutation.isPending || createCompanyMutation.isPending
-              }
-            >
-              가입 완료
-            </FormSubmitButton>
+            <FormSubmitButton size="full">가입 완료</FormSubmitButton>
           </form>
         </Form>
       </div>

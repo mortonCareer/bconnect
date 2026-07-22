@@ -70,12 +70,7 @@ export default function SignupProfilePage() {
       agreements: CONSENT_DEFAULT,
     },
   })
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    formState: { isSubmitting, isValid },
-  } = form
+  const { control, handleSubmit, setValue } = form
 
   const server = useServerError(
     control,
@@ -232,17 +227,7 @@ export default function SignupProfilePage() {
             <FormError error={server.formError} />
           </div>
           <div className="bg-white p-4">
-            <FormSubmitButton
-              requireAllFilled={false}
-              disabled={!isValid}
-              variant="primary"
-              size="full"
-              isLoading={
-                isSubmitting || registerMemberMutation.isPending || createProfileMutation.isPending
-              }
-            >
-              완료
-            </FormSubmitButton>
+            <FormSubmitButton size="full">완료</FormSubmitButton>
           </div>
         </form>
       </Form>
