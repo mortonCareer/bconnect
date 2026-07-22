@@ -14,6 +14,8 @@ import {
 } from '@bconnect/ui'
 import { useQueryState, parseAsStringLiteral } from 'nuqs'
 import { useForm, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { credentialSchema, type CredentialFormInput, type CredentialFormValues } from './schema'
 import {
   CERTIFICATE_SUB_KEYS,
   CERTIFICATE_SUB_TABS,
@@ -32,11 +34,6 @@ interface CertificateTabProps {
   onRetry: () => void
 }
 
-interface FormValues {
-  file: FileValue | null
-  note: string
-}
-
 export function CertificateTab({
   credentials,
   onRequestDelete,
@@ -52,7 +49,11 @@ export function CertificateTab({
       .withOptions({ history: 'push' })
   )
 
-  const form = useForm<FormValues>({ mode: 'onTouched', defaultValues: { file: null, note: '' } })
+  const form = useForm<CredentialFormInput, unknown, CredentialFormValues>({
+    resolver: zodResolver(credentialSchema),
+    mode: 'onTouched',
+    defaultValues: { file: null, note: '' },
+  })
   const file = useWatch({ control: form.control, name: 'file' })
   const hasFile = file != null
 
@@ -132,7 +133,6 @@ export function CertificateTab({
               <FormSubmitButton
                 variant="primary"
                 size="full"
-                disabled={!hasFile}
                 isLoading={form.formState.isSubmitting}
               >
                 제출하기
