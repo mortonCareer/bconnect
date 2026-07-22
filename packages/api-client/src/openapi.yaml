@@ -3463,17 +3463,6 @@ components:
       - post
       - profile
       - task
-    PostAttachmentResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        url:
-          type: string
-      required:
-      - id
-      - url
     PostResponse:
       type: object
       properties:
@@ -3488,14 +3477,10 @@ components:
           - integer
           - "null"
           format: int64
-        images:
-          type: array
-          items:
-            type: string
         attachments:
           type: array
           items:
-            $ref: "#/components/schemas/PostAttachmentResponse"
+            $ref: "#/components/schemas/AttachmentResponse"
         content:
           type: string
         createdAt:
@@ -3509,7 +3494,6 @@ components:
       - content
       - createdAt
       - id
-      - images
       - memberId
       - modifiedAt
       - taskId
