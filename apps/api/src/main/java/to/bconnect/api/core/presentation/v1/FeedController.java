@@ -12,7 +12,9 @@ import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
+import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.post.Post;
 import to.bconnect.api.core.domain.post.PostService;
@@ -44,8 +46,11 @@ public class FeedController {
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
-    public ApiResponse<List<FeedResponse>> list(HttpServletResponse response) {
-        val posts = postService.list();
+    public ApiResponse<CursorPage<FeedResponse>> list(
+            CursorLimit cursorLimit,
+            HttpServletResponse response) {
+        val page = postService.list(cursorLimit);
+        val posts = page.content();
 
         val memberIds = posts.stream().map(Post::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
@@ -64,7 +69,7 @@ public class FeedController {
                 .map(Task::projectId).distinct().toList();
         val addressMap = projectService.resolveAddressMap(projectIds);
 
-        val body = posts.stream()
+        val content = posts.stream()
                 .map(it -> {
                     val member = memberMap.get(it.memberId());
                     val task = it.taskId() == null ? null : taskMap.get(it.taskId());
@@ -89,7 +94,7 @@ public class FeedController {
         signedCookieIssuer.issue(scope)
                 .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
 
-        return ApiResponse.success(body);
+        return ApiResponse.success(new CursorPage<>(content, page.hasNext(), page.nextCursor()));
     }
 
     @GetMapping("/{id}")
