@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+
+sentry:
+  dsn: ${SENTRY_DSN:}
+  send-default-pii: true
+  traces-sample-rate: 1.0
+  environment: ${SENTRY_ENVIRONMENT:dev}
+
+app:
+  jwt:
+    cookie-domain: ${COOKIE_DOMAIN:.bconnect.to}

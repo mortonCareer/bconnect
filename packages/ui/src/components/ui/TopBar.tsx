@@ -109,6 +109,12 @@ export interface TopBarProps
   /** actionIcon 이 라우트 이동이면 지정 — Link(prefetch)로 렌더, 없으면 onAction 버튼. */
   actionHref?: string
   showBack?: boolean
+  /** 좌측 back 자리를 대체하는 커스텀 아이콘 (예: 프로필 '+' 작업물 생성). leftLabel 을 aria-label 로 사용. */
+  leftIcon?: React.ReactNode
+  /** leftIcon 이 라우트 이동이면 지정 — Link(prefetch)로 렌더, 없으면 onLeft 버튼. */
+  leftHref?: string
+  onLeft?: () => void
+  leftLabel?: string
   chatCount?: number
   notifyCount?: number
   onFilter?: () => void
@@ -136,6 +142,10 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       actionIcon,
       actionHref,
       showBack = true,
+      leftIcon,
+      leftHref,
+      onLeft,
+      leftLabel,
       chatCount,
       notifyCount,
       onFilter,
@@ -163,6 +173,27 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       </button>
     )
 
+    const LeftSlot = !leftIcon ? (
+      BackButton
+    ) : leftHref ? (
+      <Link
+        href={leftHref}
+        className={cn(iconButtonClass, '-ml-4 pl-4 pr-2')}
+        aria-label={leftLabel}
+      >
+        {leftIcon}
+      </Link>
+    ) : (
+      <button
+        type="button"
+        onClick={onLeft}
+        className={cn(iconButtonClass, '-ml-4 pl-4 pr-2')}
+        aria-label={leftLabel}
+      >
+        {leftIcon}
+      </button>
+    )
+
     return (
       <header ref={ref} className={cn(topBarVariants({ variant, className }))} {...props}>
         {variant === 'progress' && (
@@ -174,7 +205,7 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
         )}
         {variant === 'default' && (
           <>
-            {BackButton}
+            {LeftSlot}
             <p className="pointer-events-none absolute left-1/2 max-w-[60%] -translate-x-1/2 truncate text-center text-sb-16 text-gray-900">
               {title}
             </p>

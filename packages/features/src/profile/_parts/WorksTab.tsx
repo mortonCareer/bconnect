@@ -1,6 +1,6 @@
 'use client'
 
-import { useGetFeeds } from '@bconnect/api-client'
+import { postImageUrls, useGetFeeds } from '@bconnect/api-client'
 import type { Post } from '@bconnect/api-client'
 import { Skeleton } from '@bconnect/ui'
 import { WorkCard } from './WorkCard'
@@ -56,7 +56,7 @@ export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProp
         return (
           <WorkCard
             key={postId}
-            image={post.images?.[0] ?? ''}
+            image={postImageUrls(post)[0] ?? ''}
             timestamp={post.createdAt ? formatRelativeTime(post.createdAt) : ''}
             description={post.content ?? ''}
             editHref={workEditHref?.(postId)}

@@ -1,11 +1,13 @@
 import {
+  CoworkerStatus,
   getGetMyProfileMockHandler,
   getGetProfileMockHandler,
   getGetProfilesMockHandler,
   ProfileRole,
+  Role,
   Trade,
 } from '@bconnect/api-client'
-import type { MemberSummary, Profile } from '@bconnect/api-client'
+import type { MemberSummary, Profile, ProfileDetail } from '@bconnect/api-client'
 
 // 프로필 도메인 단일 owner — getProfile(/profiles/:id) 을 id 로 keying,
 // getMyProfile(/profiles/me, 내 프로필 화면)은 id 1 seed 반환,
@@ -31,6 +33,8 @@ const memberOf = (id: number, username: string, name: string): MemberSummary => 
   id,
   username,
   name,
+  picture: null,
+  role: Role.USER,
   createdAt: EPOCH,
   modifiedAt: EPOCH,
 })
@@ -44,6 +48,8 @@ interface ProfileSeed {
   experience: number
   headline: string
   about: string
+  // 카카오 우편번호 결과 그대로 — state = sido(축약형), city = sigungu
+  state: string
   city: string
 }
 
@@ -57,7 +63,8 @@ const SEEDS: ProfileSeed[] = [
     experience: 3,
     headline: HEADLINE,
     about: ABOUT,
-    city: '경기도',
+    state: '경기',
+    city: '수원시 장안구',
   },
   {
     id: 101,
@@ -68,7 +75,8 @@ const SEEDS: ProfileSeed[] = [
     experience: 8,
     headline: '도배 준기공',
     about: '안녕하세요, 도배 준기공 이송목입니다.\n믿고 맡겨주신다면 성실히 임하겠습니다.',
-    city: '경기도',
+    state: '경기',
+    city: '용인시 기흥구',
   },
   {
     id: 102,
@@ -79,7 +87,8 @@ const SEEDS: ProfileSeed[] = [
     experience: 12,
     headline: '전기 기공',
     about: '전기 공사 12년 경력입니다.\n현장 안전 최우선으로 작업합니다.',
-    city: '서울특별시',
+    state: '서울',
+    city: '강남구',
   },
   {
     id: 103,
@@ -90,7 +99,8 @@ const SEEDS: ProfileSeed[] = [
     experience: 5,
     headline: '타일 시공',
     about: '타일·방수 전문입니다.\n견적 문의 편하게 주세요.',
-    city: '인천광역시',
+    state: '인천',
+    city: '남동구',
   },
 ]
 
@@ -106,7 +116,7 @@ const profileOf = (seed: ProfileSeed): Profile => ({
   address: {
     zipcode: '00000',
     city: seed.city,
-    state: seed.city,
+    state: seed.state,
     street: '○○로 12',
     latitude: 37.5,
     longitude: 127.0,
@@ -118,15 +128,38 @@ const profileOf = (seed: ProfileSeed): Profile => ({
   modifiedAt: EPOCH,
 })
 
-const PROFILES_BY_ID: Record<number, Profile> = Object.fromEntries(
-  SEEDS.map((seed) => [seed.id, profileOf(seed)])
+// 타인 프로필 단건 조회는 조회자 기준 품앗이꾼 상태가 실린 ProfileDetail 로 응답
+const detailOf = (seed: ProfileSeed): ProfileDetail => ({
+  ...profileOf(seed),
+  status: CoworkerStatus.NONE,
+})
+
+const PROFILES_BY_ID: Record<number, ProfileDetail> = Object.fromEntries(
+  SEEDS.map((seed) => [seed.id, detailOf(seed)])
 )
+
+// #966 프로필 이미지 업로드 QA — mock-s3 는 바이트를 버리므로 pictureId 시드 이미지로 교체 표시.
+// members.ts 의 updateMyMemberPicture override 가 호출 (프로필 도메인 state 단일 owner 유지).
+// getMyProfile 이 매 호출 seed 에서 새 객체를 만들므로 변이 대신 모듈 변수로 보관해 응답 시 주입.
+let myMockPicture: string | null = null
+
+export function setMyMockPicture(pictureId: number) {
+  myMockPicture = `https://picsum.photos/seed/bconnect-${pictureId}/200/200`
+  const me = PROFILES_BY_ID[1]?.member
+  if (me) me.picture = myMockPicture
+}
+
+const withMyPicture = (profile: Profile): Profile =>
+  myMockPicture && profile.member
+    ? { ...profile, member: { ...profile.member, picture: myMockPicture } }
+    : profile
 
 const paramId = (value: string | readonly string[] | undefined): number =>
   Number(typeof value === 'string' ? value : (value?.[0] ?? ''))
 
 export const profilesOverrides = [
   getGetProfilesMockHandler(() => SEEDS.map((seed) => profileOf(seed))),
-  getGetMyProfileMockHandler(() => PROFILES_BY_ID[1]),
+  // /profiles/me 는 status 없는 평문 Profile — 타인 조회(ProfileDetail)와 응답형이 다르다
+  getGetMyProfileMockHandler(() => withMyPicture(profileOf(SEEDS[0]))),
   getGetProfileMockHandler(({ params }) => PROFILES_BY_ID[paramId(params.id)] ?? PROFILES_BY_ID[1]),
 ]

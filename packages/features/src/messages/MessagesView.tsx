@@ -10,6 +10,7 @@ import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
 import { PanelMessage } from '../_shared/PanelMessage'
 import type { ChatSummary } from './_parts/types'
+import { chatMemberName } from './_parts/types'
 
 /** 앱이 resolve 해 내려주는 데이터. 어댑터가 useGetDirectChats·useGetGroupChats·useGetMyMember + 병렬 Profile 보강으로 채운다. */
 export interface MessagesViewData {
@@ -36,7 +37,7 @@ type MessagesViewShellProps =
       onClose?: never
     }
   | {
-      /** 기본 @panel 쉘 (plan) */
+      /** 기본 패널 쉘 (plan) */
       renderShell?: never
       closeHref: string
       onClose: () => void
@@ -73,7 +74,7 @@ export function MessagesView(props: MessagesViewProps) {
                 <ChatListItem
                   variant="badge"
                   profileImage={otherMember?.picture ?? undefined}
-                  name={otherMember?.name ?? chat.title ?? '채팅'}
+                  name={chatMemberName(otherMember) ?? chat.title ?? '채팅'}
                   jobType={trade}
                   specialty={grade}
                   lastMessage={chat.lastMessage?.content}

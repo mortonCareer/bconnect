@@ -2,7 +2,12 @@
 
 import type { ReactNode } from 'react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
-import type { Credential, MemberSummary, Profile, Recommendation } from '@bconnect/api-client'
+import type {
+  CredentialSummary,
+  MemberSummary,
+  Profile,
+  Recommendation,
+} from '@bconnect/api-client'
 import { Skeleton, Tab } from '@bconnect/ui'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
@@ -25,7 +30,7 @@ export interface ProfileViewData {
   postCount?: number
   coworkerCount?: number
   recommendationCount?: number
-  credentials?: Credential[]
+  credentials?: CredentialSummary[]
   receivedRecommendations?: Recommendation[]
   sentRecommendations?: Recommendation[]
   isLoading: boolean
@@ -49,6 +54,10 @@ interface ProfileViewBaseProps {
   onDeleteRecommendation?: (id: number) => void
   /** member 로딩 전/username 부재 시 셸 타이틀 fallback (owner: '내 프로필'). 기본 '프로필' */
   fallbackTitle?: string
+  /** owner 전용 프로필 이미지 수정 트리거. 없으면 edit 배지 없음 (viewer/plan) (#966) */
+  onEditImage?: () => void
+  /** 이미지 업로드 진행 중 — edit 배지 비활성 */
+  imageUploading?: boolean
 }
 
 type ProfileViewShellProps =
@@ -59,7 +68,7 @@ type ProfileViewShellProps =
       onClose?: never
     }
   | {
-      /** 기본 @panel 쉘 (plan) */
+      /** 기본 패널 쉘 (plan) */
       renderShell?: never
       closeHref: string
       onClose: () => void
@@ -79,6 +88,8 @@ export function ProfileView(props: ProfileViewProps) {
     onHideRecommendation,
     onDeleteRecommendation,
     fallbackTitle,
+    onEditImage,
+    imageUploading,
   } = props
   const [tab, setTab] = useQueryState(
     'tab',
@@ -105,6 +116,8 @@ export function ProfileView(props: ProfileViewProps) {
             recommendationCount={data.recommendationCount}
             statHrefs={statHrefs}
             statScroll={props.renderShell ? undefined : false}
+            onEditImage={onEditImage}
+            imageUploading={imageUploading}
           />
           {actionSlot}
           <Tab items={TAB_ITEMS} activeKey={tab} onChange={(key) => setTab(key as TabKey)} />

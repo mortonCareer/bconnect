@@ -48,6 +48,7 @@
 | A008 | INVALID_SESSION | 401 | INFO | 유효하지 않은 세션입니다. |
 | A009 | INVALID_JWT_TOKEN | 401 | WARN | 유효하지 않은 토큰입니다. |
 | A010 | EXPIRED_JWT_TOKEN | 401 | INFO | 만료된 토큰입니다. |
+| A011 | INVALID_TOKEN_TYPE | 401 | WARN | 토큰 유형이 올바르지 않습니다. |
 
 ## MemberExceptionCode
 

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.coworker.CoworkerService;
 import to.bconnect.api.core.domain.member.MemberResolver;
@@ -25,7 +26,6 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.coworker.CoworkerStatus;
-import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.util.List;
 

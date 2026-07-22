@@ -54,7 +54,7 @@ public class FeedController {
                 ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         val postIds = posts.stream().map(Post::id).toList();
-        val imageMap = attachmentResolver.resolveUrlListMap(ReferenceType.POST, postIds, ImageSize.MEDIUM);
+        val attachmentMap = attachmentResolver.resolveListMap(ReferenceType.POST, postIds);
 
         val taskIds = posts.stream().map(Post::taskId).filter(Objects::nonNull).distinct().toList();
         val taskMap = taskQueryService.listByIds(taskIds).stream()
@@ -68,13 +68,19 @@ public class FeedController {
                 .map(it -> {
                     val member = memberMap.get(it.memberId());
                     val task = it.taskId() == null ? null : taskMap.get(it.taskId());
+                    val address = task == null ? null : task.type() == TaskType.WORKER
+                            ? task.workerAddress()
+                            : addressMap.get(task.projectId());
+                    val attachments = attachmentMap.getOrDefault(it.id(), List.of());
+                    val urlMap = attachmentResolver.parseUrlMap(attachments, ImageSize.MEDIUM);
                     return FeedResponse.of(
                             it,
                             member,
                             profileMap.get(it.memberId()),
                             task,
-                            task == null ? null : addressMap.get(task.projectId()),
-                            imageMap.getOrDefault(it.id(), List.of()),
+                            address,
+                            attachments,
+                            urlMap,
                             pictureMap.get(member.id()));
                 })
                 .toList();
@@ -92,20 +98,25 @@ public class FeedController {
             HttpServletResponse response) {
         val post = postService.get(id);
         val member = memberResolver.get(post.memberId());
-        val profile = profileResolver.get(post.memberId());
-        val images = attachmentResolver.listUrl(ReferenceType.POST, post.id(), ImageSize.MEDIUM);
+        val profile = profileResolver.resolveMap(List.of(post.memberId())).get(post.memberId());
+        val attachments = attachmentResolver.list(ReferenceType.POST, post.id());
+        val urlMap = attachmentResolver.parseUrlMap(attachments, ImageSize.MEDIUM);
         val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val task = post.taskId() == null ? null
-                : taskQueryService.get(post.taskId()).orElse(null);
-        val projectAddress = task != null && task.type() == TaskType.PROJECT
-                ? projectService.get(task.projectId()).address()
-                : null;
+                : taskQueryService.listByIds(List.of(post.taskId())).stream().findFirst().orElse(null);
+        val projectIds = task != null && task.type() == TaskType.PROJECT
+                ? List.of(task.projectId())
+                : List.<Long>of();
+        val addressMap = projectService.resolveAddressMap(projectIds);
+        val address = task == null ? null : task.type() == TaskType.WORKER
+                ? task.workerAddress()
+                : addressMap.get(task.projectId());
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
                 .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
 
-        return ApiResponse.success(FeedResponse.of(post, member, profile, task, projectAddress, images, picture));
+        return ApiResponse.success(FeedResponse.of(post, member, profile, task, address, attachments, urlMap, picture));
     }
 }

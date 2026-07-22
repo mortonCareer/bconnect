@@ -8,6 +8,8 @@ import {
   getReorderOffersMockHandler,
   getUpdateTaskCompanyMockHandler,
   OfferStatus,
+  ProfileRole,
+  Role,
   TaskStatus,
   TaskType,
   Trade,
@@ -51,6 +53,8 @@ function nowStamp(): string {
   return new Date().toISOString().slice(0, 19) + 'Z'
 }
 
+const seedStamp = nowStamp()
+
 const addressOf = (city: string, state: string, street: string, detail: string): Address => ({
   zipcode: '00000',
   city,
@@ -67,18 +71,24 @@ const PROJECT_SEEDS: Project[] = [
     companyId: 1,
     title: '모튼아파트 리모델링 01 (Mocked)',
     address: addressOf('경기도', '수원시 장안구', '경기도 수원시 율전로 00번길 00-00', '000호'),
+    createdAt: seedStamp,
+    modifiedAt: seedStamp,
   },
   {
     id: 2,
     companyId: 1,
     title: '래미안 리모델링 02 (Mocked)',
     address: addressOf('서울특별시', '강남구', '서울 강남구 테헤란로 00길 00', '0000호'),
+    createdAt: seedStamp,
+    modifiedAt: seedStamp,
   },
   {
     id: 3,
     companyId: 1,
     title: '자담 사옥 인테리어 (Mocked)',
     address: addressOf('인천광역시', '연수구', '인천 연수구 송도과학로 00', '000호'),
+    createdAt: seedStamp,
+    modifiedAt: seedStamp,
   },
 ]
 
@@ -266,12 +276,16 @@ function buildSeedTasks(): Task[] {
       trades: seed.trades,
       start: isoDaysFromToday(seed.startOffset),
       end: isoDaysFromToday(seed.endOffset),
-      workerId: seed.workerId,
+      workerId: seed.workerId ?? null,
+      workerTitle: null,
+      workerMemo: null,
+      workerCompany: null,
       projectId: seed.projectId,
       projectTitle: seed.title,
       projectRequirement: seed.requirement ?? '요청사항 (Mocked)',
       projectMemo: seed.memo ?? '메모 (Mocked)',
-      address: project?.address,
+      address: project?.address ?? null,
+      offer: null,
       createdAt: stamp,
       modifiedAt: stamp,
     }
@@ -283,33 +297,45 @@ function offerOf(
   taskId: number,
   memberId: number,
   seq: number,
-  status: Offer['status'],
-  due: string
+  status: Offer['status']
 ): Offer {
   const person = PEOPLE[memberId]
+  const stamp = nowStamp()
   return {
     id,
     taskId,
     seq,
-    due,
     status,
-    member: { id: memberId, name: person?.name ?? `기술자 ${memberId} (Mocked)` },
-    profile: person ? { primaryTrade: person.trade, address: { state: person.region } } : undefined,
-    createdAt: nowStamp(),
-    modifiedAt: nowStamp(),
+    member: {
+      id: memberId,
+      username: `worker_${memberId}`,
+      name: person?.name ?? `기술자 ${memberId} (Mocked)`,
+      picture: null,
+      role: Role.USER,
+      createdAt: stamp,
+      modifiedAt: stamp,
+    },
+    profile: {
+      role: ProfileRole.SKILLED,
+      primaryTrade: person?.trade ?? Trade.TILING,
+      experience: 3,
+      headline: null,
+      address: { state: person?.region ?? '서울' },
+    },
+    createdAt: stamp,
+    modifiedAt: stamp,
   }
 }
 
-function buildSeedOffers(tasksNow: Task[]): Offer[] {
+function buildSeedOffers(): Offer[] {
   const out: Offer[] = []
   let id = 8500
   for (const seed of TASK_SEEDS) {
-    const start = tasksNow.find((t) => t.id === seed.id)?.start ?? isoDaysFromToday(0)
     let seq = 1
     if (seed.activeOffer != null)
-      out.push(offerOf(id++, seed.id, seed.activeOffer, seq++, OfferStatus.ACTIVE, start))
+      out.push(offerOf(id++, seed.id, seed.activeOffer, seq++, OfferStatus.ACTIVE))
     for (const memberId of seed.pendingOffers ?? []) {
-      out.push(offerOf(id++, seed.id, memberId, seq++, OfferStatus.PENDING, start))
+      out.push(offerOf(id++, seed.id, memberId, seq++, OfferStatus.PENDING))
     }
   }
   return out
@@ -318,7 +344,7 @@ function buildSeedOffers(tasksNow: Task[]): Offer[] {
 // 모듈 메모리 상태 — 핸들러 공유. 하드 리로드 시 시드 리셋.
 const projects: Project[] = PROJECT_SEEDS
 let tasks: Task[] = buildSeedTasks()
-let offers: Offer[] = buildSeedOffers(tasks)
+let offers: Offer[] = buildSeedOffers()
 let nextTaskId = 8100
 let nextOfferId = 8600
 
@@ -368,11 +394,16 @@ export const scheduleOverrides = [
       trades: body.trades,
       start: body.start,
       end: body.end,
+      workerId: null,
+      workerTitle: null,
+      workerMemo: null,
+      workerCompany: null,
       projectId: body.projectId,
       projectTitle: body.title,
       projectRequirement: body.requirement,
       projectMemo: body.memo,
-      address: projects.find((p) => p.id === body.projectId)?.address,
+      address: projects.find((p) => p.id === body.projectId)?.address ?? null,
+      offer: null,
       createdAt: stamp,
       modifiedAt: stamp,
     })
@@ -422,7 +453,7 @@ export const scheduleOverrides = [
     const list = taskOffers(body.taskId)
     const maxSeq = Math.max(0, ...list.map((o) => o.seq ?? 0))
     const id = nextOfferId++
-    offers.push(offerOf(id, body.taskId, body.workerId, maxSeq + 1, OfferStatus.PENDING, body.due))
+    offers.push(offerOf(id, body.taskId, body.workerId, maxSeq + 1, OfferStatus.PENDING))
     promoteNext(body.taskId)
     return id
   }),

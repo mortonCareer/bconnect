@@ -66,9 +66,7 @@ public class SessionService {
 
     @Transactional
     public void logout(String username) {
-        val found = sessionRepository.findByMemberId(Long.valueOf(username))
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-
-        found.revoke();
+        sessionRepository.findByMemberId(Long.valueOf(username))
+                .ifPresent(SessionEntity::revoke);
     }
 }

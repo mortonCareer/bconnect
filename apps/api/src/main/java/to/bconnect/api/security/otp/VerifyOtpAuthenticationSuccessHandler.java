@@ -9,12 +9,14 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.security.AuthenticationTypeMismatchException;
 import to.bconnect.api.security.jwt.JwtProvider;
 import to.bconnect.api.security.jwt.CookieProvider;
 import to.bconnect.api.security.session.SessionService;
@@ -42,7 +44,8 @@ public class VerifyOtpAuthenticationSuccessHandler implements AuthenticationSucc
                                         @NonNull HttpServletResponse response,
                                         @NonNull Authentication authentication) throws IOException {
         if (!(authentication instanceof OtpAuthenticationToken authToken)) {
-            throw new AuthenticationTypeMismatchException("Authentication must be of type " + OtpAuthenticationToken.class.getName());
+            throw new AuthenticationServiceException("Authentication must be of type " + OtpAuthenticationToken.class.getName(),
+                    new CodeException(CommonExceptionCode.INTERNAL_SERVER_ERROR));
         }
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

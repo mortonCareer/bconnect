@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p ${CAREER_PORT:-$(../../scripts/dev-port.sh career)}",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -38,6 +38,7 @@
     "@bconnect/config": "workspace:*",
     "@bconnect/devtools": "workspace:*",
     "@bconnect/mocks": "workspace:*",
+    "@tailwindcss/postcss": "catalog:",
     "@types/cheerio": "^1.0.0",
     "@types/node": "catalog:",
     "@types/react": "catalog:",

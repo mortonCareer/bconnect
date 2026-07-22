@@ -2054,10 +2054,20 @@ components:
     UpdatePostRequest:
       type: object
       properties:
+        taskId:
+          type: integer
+          format: int64
+        attachmentIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          minItems: 1
         content:
           type: string
           minLength: 1
       required:
+      - attachmentIds
       - content
     ReorderOfferRequest:
       type: object
@@ -3467,10 +3477,10 @@ components:
           - integer
           - "null"
           format: int64
-        images:
+        attachments:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/AttachmentResponse"
         content:
           type: string
         createdAt:
@@ -3480,10 +3490,10 @@ components:
           type: string
           format: date-time
       required:
+      - attachments
       - content
       - createdAt
       - id
-      - images
       - memberId
       - modifiedAt
       - taskId

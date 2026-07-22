@@ -1,12 +1,19 @@
 'use client'
 
 import { useMemo } from 'react'
-import { TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
+import {
+  postImageUrls,
+  regionOfState,
+  TRADE_LABELS,
+  useGetFeeds,
+  useGetMyMember,
+} from '@bconnect/api-client'
 import type { Trade, ProfileRole } from '@bconnect/api-client'
+import { daysBetween } from '@bconnect/config/date'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
-import { FILTER_ROLES, ROLE_LABELS } from '@/lib/role-labels'
-import { REGIONS, REGION_LABELS, type Region } from '@/lib/region'
+import { ROLE_LABELS } from '@/lib/role-labels'
+import { REGION_LABELS, type Region } from '@/lib/region'
 import { useAuthStore } from '@/stores/auth-store'
 
 export interface FeedItem {
@@ -25,8 +32,10 @@ export interface FeedItem {
   content: {
     images: string[]
     imageAlt?: string
-    company: string
-    duration: string
+    /** 건축주(발주 업체)명 — 글에 연결된 작업(task)이 없으면 생략 */
+    company?: string
+    /** 시공기간 — task.start~end 일수 (없으면 생략) */
+    duration?: string
     timestamp: string
     description: string
   }
@@ -42,8 +51,12 @@ interface UseFeedItemsOptions {
   limit?: number
 }
 
-const mockRoleFor = (memberId: number): ProfileRole => FILTER_ROLES[memberId % FILTER_ROLES.length]
-const mockRegionFor = (memberId: number): Region => REGIONS[memberId % REGIONS.length]
+/** task.start~end(YYYY-MM-DD, 양끝 포함) → '4일 소요'. 파싱 불가/역순이면 생략. */
+function formatDurationDays(start: string, end: string): string | undefined {
+  const days = daysBetween(start, end) + 1
+  if (!Number.isFinite(days) || days < 1) return undefined
+  return `${days}일 소요`
+}
 
 export function useFeedItems({
   trades,
@@ -62,24 +75,26 @@ export function useFeedItems({
     if (!feeds) return []
 
     return feeds.flatMap((feed): FeedItem[] => {
-      const { member, profile, post } = feed
+      const { member, profile, post, task } = feed
 
       // TODO: BE required 처리 후 type narrowing 필요. Feed.member/profile/post와 id가 optional emit이라 없는 행은 임시로 렌더 제외.
       const memberId = member?.id
       const postId = post?.id
       if (!member || !profile || !post || memberId == null || postId == null) return []
 
-      const role = mockRoleFor(memberId)
-      const region = mockRegionFor(memberId)
+      const role = profile.role
+      const region = regionOfState(profile.address?.state)
       const { primaryTrade } = profile
 
       // ProfileSummary에는 trades 배열이 없어서 현재 계약에서는 대표 분야 기준으로 필터링한다.
       if (trades?.length && (!primaryTrade || !trades.includes(primaryTrade))) return []
-      if (roles?.length && !roles.includes(role)) return []
-      if (regions?.length && !regions.includes(region)) return []
+      if (roles?.length && (role == null || !roles.includes(role))) return []
+      if (regions?.length && (region == null || !regions.includes(region))) return []
       if (minExperience != null && (profile.experience ?? 0) < minExperience) return []
       if (maxExperience != null && (profile.experience ?? 0) > maxExperience) return []
       if (authorId != null && memberId !== authorId) return []
+
+      const postImages = postImageUrls(post)
 
       // TODO: BE required 처리 후 type narrowing 필요. 이름/분야/작성일/본문은 카드 표시 필수값인데 optional emit이라 fallback 중.
       return [
@@ -92,16 +107,15 @@ export function useFeedItems({
             // 브라우저 anti-pattern. 정적 기본 프로필 이미지로 fallback.
             image: member.picture || DEFAULT_PROFILE_IMAGE,
             name: member.name ?? '',
-            location: `${REGION_LABELS[region]}(Mocked)`,
-            jobType: `${ROLE_LABELS[role]}(Mocked)`,
+            location: region ? REGION_LABELS[region] : '',
+            jobType: role ? ROLE_LABELS[role] : '',
             specialty: primaryTrade ? (TRADE_LABELS[primaryTrade] ?? '') : '',
             bio: profile.headline ?? '',
           },
           content: {
-            images: post.images?.length ? post.images : ['/placeholder-post.svg'],
-            // TODO: Feed API에 Task 정보 포함 필요 (#197)
-            company: '서정 건축(Mocked)',
-            duration: '4일 소요(Mocked)',
+            images: postImages.length ? postImages : ['/placeholder-post.svg'],
+            company: task?.workerCompany ?? undefined,
+            duration: task ? formatDurationDays(task.start, task.end) : undefined,
             timestamp: post.createdAt ? formatRelativeTime(post.createdAt) : '',
             description: post.content ?? '',
           },

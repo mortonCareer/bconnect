@@ -31,7 +31,7 @@ public class PostController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
             @RequestBody @Valid UpdatePostRequest request) {
-        postService.update(user, id, request.content());
+        postService.update(user, id, request.toCommand());
         return ApiResponse.success(null);
     }
 

@@ -37,24 +37,22 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         val token = Objects.requireNonNull(authentication.getCredentials()).toString();
         try {
             jwtProvider.validateToken(token);
+            val username = jwtProvider.getUsername(token);
+            val type = JwtType.valueOf(jwtProvider.getTokenType(token).toUpperCase());
+            val user = this.userDetailsService.loadUserByUsername(username);
+
+            if (type == JwtType.REFRESH) {
+                sessionService.verify(username, token);
+            }
+
+            return new JwtAuthenticationToken(user, token, type, user.getAuthorities());
         } catch (ExpiredJwtException ex) {
             throw new AuthenticationServiceException(ex.getMessage(), new CodeException(AuthExceptionCode.EXPIRED_JWT_TOKEN));
         } catch (JwtException ex) {
             throw new AuthenticationServiceException(ex.getMessage(), new CodeException(AuthExceptionCode.INVALID_JWT_TOKEN));
+        } catch (CodeException ex) {
+            throw new AuthenticationServiceException(ex.getMessage(), ex);
         }
-        val username = jwtProvider.getUsername(token);
-        val type = JwtType.valueOf(jwtProvider.getTokenType(token).toUpperCase());
-        val user = this.userDetailsService.loadUserByUsername(username);
-
-        if (type == JwtType.REFRESH) {
-            try {
-                sessionService.verify(username, token);
-            } catch (CodeException ex) {
-                throw new AuthenticationServiceException(ex.getMessage(), ex);
-            }
-        }
-
-        return new JwtAuthenticationToken(user, token, type, user.getAuthorities());
     }
 
     @Override

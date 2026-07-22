@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 
 interface SignupFormData {
-  phone: string
   username: string
   signupToken: string
   name: string
@@ -12,16 +11,14 @@ interface SignupFormData {
 
 interface SignupState {
   formData: SignupFormData
-  setPhone: (phone: string) => void
   setUsername: (username: string) => void
   setName: (name: string) => void
   setSignupToken: (token: string) => void
-  setProfile: (profile: Partial<Omit<SignupFormData, 'phone' | 'username' | 'signupToken'>>) => void
+  setProfile: (profile: Partial<Omit<SignupFormData, 'username' | 'signupToken'>>) => void
   reset: () => void
 }
 
 const initialFormData: SignupFormData = {
-  phone: '',
   username: '',
   signupToken: '',
   name: '',
@@ -32,11 +29,6 @@ const initialFormData: SignupFormData = {
 
 export const useSignupStore = create<SignupState>()((set) => ({
   formData: initialFormData,
-
-  setPhone: (phone) =>
-    set((state) => ({
-      formData: { ...state.formData, phone },
-    })),
 
   setUsername: (username) =>
     set((state) => ({

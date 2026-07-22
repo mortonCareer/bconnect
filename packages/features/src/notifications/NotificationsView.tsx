@@ -26,7 +26,7 @@ type NotificationsViewShellProps =
       onClose?: never
     }
   | {
-      /** 기본 @panel 쉘 (plan) */
+      /** 기본 패널 쉘 (plan) */
       renderShell?: never
       closeHref: string
       onClose: () => void
@@ -105,7 +105,7 @@ export function NotificationsView(props: NotificationsViewProps) {
                 const content = count > 1 ? `${n.message ?? ''} · ${count}개` : (n.message ?? '')
                 const item = (
                   <NotificationItem
-                    profileImage={n.sender?.picture}
+                    profileImage={n.sender?.picture ?? undefined}
                     content={content}
                     timestamp={formatRelativeTime(n.createdAt ?? '')}
                     read={unreadIds.length === 0}

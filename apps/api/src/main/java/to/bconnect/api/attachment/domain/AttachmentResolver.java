@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.attachment.infrastructure.cloudfront.CloudFrontUrlResolver;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentType;
 import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.attachment.infrastructure.cloudfront.CloudFrontUrlResolver;
 
 import java.util.Collection;
 import java.util.List;
@@ -55,13 +55,6 @@ public class AttachmentResolver {
     }
 
     @Transactional(readOnly = true)
-    public List<String> listUrl(ReferenceType referenceType, Long referenceId, ImageSize size) {
-        return list(referenceType, referenceId).stream()
-                .map(it -> parseUrl(it, size))
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
     public Map<Long, Attachment> resolveMap(ReferenceType referenceType, Collection<Long> referenceIds) {
         if (referenceIds == null)
             return Map.of();
@@ -73,12 +66,6 @@ public class AttachmentResolver {
         return attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, ids).stream()
                 .map(Attachment::of)
                 .collect(Collectors.toMap(Attachment::referenceId, Function.identity(), (a, b) -> a));
-    }
-
-    @Transactional(readOnly = true)
-    public Map<Long, String> resolveUrlMap(ReferenceType referenceType, Collection<Long> referenceIds, ImageSize size) {
-        return resolveMap(referenceType, referenceIds).values().stream()
-                .collect(Collectors.toMap(Attachment::referenceId, it -> parseUrl(it, size)));
     }
 
     @Transactional(readOnly = true)
@@ -96,18 +83,15 @@ public class AttachmentResolver {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, List<String>> resolveUrlListMap(ReferenceType referenceType, Collection<Long> referenceIds, ImageSize size) {
-        return resolveListMap(referenceType, referenceIds).entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        it -> it.getValue().stream().map(att -> parseUrl(att, size)).toList()));
+    public Map<Long, String> resolveUrlMap(ReferenceType referenceType, Collection<Long> referenceIds, ImageSize size) {
+        return resolveMap(referenceType, referenceIds).values().stream()
+                .collect(Collectors.toMap(Attachment::referenceId, it -> parseUrl(it, size)));
     }
 
     public String parseUrl(Attachment attachment, ImageSize size) {
         if (attachment == null)
             return null;
 
-        // 이미지 축소본(m/s)은 리사이즈 Lambda 가 webp 로 생성 — allKeys 와 동일 규칙 (#813)
         val ext = attachment.type() == AttachmentType.IMAGE && size != ImageSize.ORIGINAL
                 ? size.getExtension()
                 : attachment.ext();
@@ -115,5 +99,10 @@ public class AttachmentResolver {
                 attachment.context(), attachment.contextId(), attachment.type(),
                 size, attachment.uuid(), ext);
         return urlResolver.resolve(key);
+    }
+
+    public Map<Long, String> parseUrlMap(List<Attachment> attachments, ImageSize size) {
+        return attachments.stream()
+                .collect(Collectors.toMap(Attachment::id, it -> parseUrl(it, size)));
     }
 }

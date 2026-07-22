@@ -10,10 +10,6 @@ export const ROLE_LABELS: Record<ProfileRole, string> = {
   [ProfileRole.HELPER]: '조공',
 }
 
-export function getRoleLabel(role: ProfileRole): string {
-  return ROLE_LABELS[role] ?? role
-}
-
 /** 회원가입 시 선택 가능한 유형 (Figma 기준) */
 export const SIGNUP_ROLES: ProfileRole[] = [
   ProfileRole.CLIENT,

@@ -3,6 +3,7 @@ import {
   getGetNotificationsUnreadCountMockHandler,
   getUpdateNotificationReadMockHandler,
   getUpdateNotificationsReadMockHandler,
+  Role,
 } from '@bconnect/api-client'
 import type { Notification } from '@bconnect/api-client'
 
@@ -125,10 +126,22 @@ const notifications: Notification[] = SEEDS.map((seed, i) => {
   const referenceType = REFERENCE_TYPE[seed.type] ?? 'none'
   const referenceId =
     referenceType === 'none'
-      ? undefined
+      ? null
       : referenceType === 'chat_room'
-        ? CHAT_ROOM_IDS[i % CHAT_ROOM_IDS.length]
+        ? (CHAT_ROOM_IDS[i % CHAT_ROOM_IDS.length] ?? null)
         : 100 + i
+  const createdAt = new Date(Date.now() - seed.daysAgo * DAY_MS).toISOString()
+  const sender = seed.senderName
+    ? {
+        id: 100 + i,
+        name: seed.senderName,
+        username: `user${100 + i}`,
+        picture: null,
+        role: Role.USER,
+        createdAt,
+        modifiedAt: createdAt,
+      }
+    : null
   return {
     id: SEEDS.length - i,
     type: seed.type,
@@ -136,11 +149,9 @@ const notifications: Notification[] = SEEDS.map((seed, i) => {
     content: '',
     referenceType,
     referenceId,
-    sender: seed.senderName
-      ? { id: 100 + i, name: seed.senderName, username: `user${100 + i}` }
-      : undefined,
+    sender,
     read: seed.read,
-    createdAt: new Date(Date.now() - seed.daysAgo * DAY_MS).toISOString(),
+    createdAt,
   }
 })
 

@@ -1,4 +1,4 @@
-import type { MemberSummary, Message, DirectChat, GroupChat } from '@bconnect/api-client'
+import type { WithdrawableMember, Message, DirectChat, GroupChat } from '@bconnect/api-client'
 
 /**
  * DM(DirectChat) + 그룹(GroupChat)을 하나로 정규화한 목록 항목.
@@ -8,7 +8,7 @@ import type { MemberSummary, Message, DirectChat, GroupChat } from '@bconnect/ap
  */
 export interface ChatSummary {
   id: number
-  members: MemberSummary[]
+  members: WithdrawableMember[]
   title?: string
   lastMessage?: Message
   unreadCount?: number
@@ -35,11 +35,17 @@ export function toChatSummaries(
             {
               id: c.id,
               members: c.member ? [c.member] : [],
-              lastMessage: c.lastMessage,
+              lastMessage: c.lastMessage ?? undefined,
               unreadCount: c.unreadCount,
               modifiedAt: c.modifiedAt,
             },
           ]
     )
     .sort((a, b) => (b.modifiedAt ?? '').localeCompare(a.modifiedAt ?? ''))
+}
+
+/** 탈퇴 회원(name null)은 "탈퇴한 사용자"로 표시. member 자체가 없으면 undefined. */
+export function chatMemberName(member: WithdrawableMember | null | undefined): string | undefined {
+  if (!member) return undefined
+  return member.name ?? '탈퇴한 사용자'
 }

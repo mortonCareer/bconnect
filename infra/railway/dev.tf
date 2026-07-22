@@ -3,7 +3,7 @@ locals {
     DATABASE_URL           = "jdbc:postgresql://$${{${railway_service.postgres.name}.RAILWAY_PRIVATE_DOMAIN}}:5432/${var.db_name}"
     DATABASE_USERNAME      = var.db_user
     DATABASE_PASSWORD      = var.dev_db_password
-    SPRING_PROFILES_ACTIVE = var.spring_profile
+    SPRING_PROFILES_ACTIVE = "dev"
     JWT_SECRET             = var.dev_jwt_secret
     AWS_ACCESS_KEY_ID      = var.aws_access_key_id
     AWS_SECRET_ACCESS_KEY  = var.aws_secret_access_key

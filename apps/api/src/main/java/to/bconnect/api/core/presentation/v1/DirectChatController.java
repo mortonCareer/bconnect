@@ -7,7 +7,10 @@ import lombok.val;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import to.bconnect.api.attachment.domain.*;
+import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
+import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.ImageSize;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.common.response.CursorPage;
@@ -23,7 +26,6 @@ import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/direct-chats")
@@ -95,8 +97,7 @@ public class DirectChatController {
         val content = page.content().stream()
                 .map(it -> {
                     val attachments = attachmentMap.getOrDefault(it.id(), List.of());
-                    val urlMap = attachments.stream()
-                            .collect(Collectors.toMap(Attachment::id, att -> attachmentResolver.parseUrl(att, ImageSize.SMALL)));
+                    val urlMap = attachmentResolver.parseUrlMap(attachments, ImageSize.SMALL);
                     return MessageResponse.of(it, attachments, urlMap);
                 })
                 .toList();
