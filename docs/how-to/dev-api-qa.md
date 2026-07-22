@@ -58,17 +58,26 @@ dev 서버도 실제로 문자를 보냅니다. 그런데 테스트 계정 번�
 
 ### 2) 그 외 모든 계정 — 요청 후 데이터베이스에서 조회
 
-#### 준비 (최초 한 번)
+#### 준비
+
+`psql` 이 없으면 먼저 설치합니다.
+
+```bash
+sudo apt install postgresql-client   # Ubuntu·WSL
+brew install libpq                   # macOS
+```
+
+Railway 연결은 **작업할 디렉토리마다** 한 번씩 해야 합니다. 다른 폴더에서 하면 `Environment is deleted.` 라는 엉뚱한 메시지가 나옵니다.
 
 ```bash
 railway login
-railway link          # 프로젝트 morton, 환경 dev 선택
+railway link --project morton --environment dev
 ```
 
 #### 접속 정보 확인
 
 ```bash
-railway variables -s Postgres -e dev --json
+railway variables -s Postgres --json
 ```
 
 출력에서 `DATABASE_PUBLIC_URL` 값을 씁니다.
@@ -84,23 +93,3 @@ railway variables -s Postgres -e dev --json
    ```
 
 3. 나온 `code` 를 화면에 입력합니다
-
-`psql` 이 없으면 `railway connect Postgres` 로 접속해도 같은 조회를 할 수 있습니다.
-
-### 로그인이 안 될 때
-
-| 증상                             | 원인                              | 해결                                  |
-| -------------------------------- | --------------------------------- | ------------------------------------- |
-| 맞는 번호인데 계속 틀렸다고 나옴 | 5회 틀려서 잠김                   | 인증번호를 다시 요청하면 풀립니다     |
-| 인증번호 요청이 막힘             | 60초 안에 다시 요청함             | 1분 기다립니다                        |
-| 하루 종일 요청이 막힘            | 같은 번호로 하루 10번 넘게 요청함 | 다른 계정을 쓰거나 다음 날 시도합니다 |
-| 번호를 넣었는데 만료             | 인증번호 유효시간은 3분           | 다시 요청해서 새 번호를 꺼냅니다      |
-
----
-
-## 참고
-
-- 계정·데이터 원본: [apps/api/src/main/resources/data.sql](../../apps/api/src/main/resources/data.sql)
-- dev 서버 설정: [apps/api/src/main/resources/application-dev.yaml](../../apps/api/src/main/resources/application-dev.yaml)
-- 환경별 주소: [도메인 현황](../reference/domains.md)
-- 배포 절차: [배포](./deployment.md)
