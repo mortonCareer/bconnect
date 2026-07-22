@@ -6,6 +6,7 @@ import to.bconnect.api.core.domain.profile.Profile;
 import to.bconnect.api.storage.profile.ProfileEntity;
 import to.bconnect.api.storage.profile.ProfileRole;
 import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.Region;
 import to.bconnect.api.storage.profile.Trade;
 
 import java.math.BigDecimal;
@@ -16,7 +17,7 @@ import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 public class ProfileFactory {
 
     public static final Address DEFAULT_ADDRESS = new Address(
-            "00000", "city", "state", "street", "detail",
+            "00000", "city", Region.서울, "street", "detail",
             BigDecimal.ZERO, BigDecimal.ZERO
     );
 

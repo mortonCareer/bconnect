@@ -1,6 +1,8 @@
 package to.bconnect.api.storage;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +19,8 @@ public class Address {
 
     private String city;
 
-    private String state;
+    @Enumerated(EnumType.STRING)
+    private Region state;
 
     private String street;
 
