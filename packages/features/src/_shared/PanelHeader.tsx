@@ -1,49 +1,22 @@
 'use client'
 
-import { ChevronLeft, ChevronsRight } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 export interface PanelHeaderProps {
   title?: string
-  closeHref: string
-  closeLabel?: string
   backHref?: string
   backLabel?: string
   rightSlot?: ReactNode
-  /** 닫기를 Link 대신 onClose 버튼으로 — 닫기 가드(미완성 작업 등)가 필요한 패널용. */
-  closeAsButton?: boolean
-  onClose?: () => void
 }
 
 /**
- * 패널 공통 헤더. 좌측 affordance 는 `backHref` 유무로 갈림 —
- * 있으면 뒤로(ChevronLeft)+우측 닫기, 없으면 좌측 닫기(ChevronsRight, 패널을 우측으로 collapse).
- * 닫기는 항상 `closeHref` 로의 navigation — 경로는 유지하고 `?panel=` 만 제거한다(필터 등 다른 search param 은 보존).
+ * 패널 공통 헤더. 좌측은 `backHref` 가 있을 때만 뒤로(ChevronLeft), 우측은 `rightSlot`.
+ * 좌우 폭이 같은 스페이서로 제목을 중앙에 유지한다.
+ * 닫기는 헤더가 아니라 `PanelShell` 이 패널 가장자리에 띄우는 `CloseTab` 이 담당한다 (#969).
  */
-export function PanelHeader({
-  title,
-  closeHref,
-  closeLabel = '패널 닫기',
-  backHref,
-  backLabel = '뒤로',
-  rightSlot,
-  closeAsButton,
-  onClose,
-}: PanelHeaderProps) {
-  const closeIconClass =
-    'flex h-5 w-5 cursor-pointer items-center justify-center text-[#999] hover:text-gray-900'
-  const closeLink =
-    closeAsButton && onClose ? (
-      <button type="button" onClick={onClose} aria-label={closeLabel} className={closeIconClass}>
-        <ChevronsRight className="h-5 w-5" />
-      </button>
-    ) : (
-      <Link href={closeHref} scroll={false} aria-label={closeLabel} className={closeIconClass}>
-        <ChevronsRight className="h-5 w-5" />
-      </Link>
-    )
-
+export function PanelHeader({ title, backHref, backLabel = '뒤로', rightSlot }: PanelHeaderProps) {
   return (
     <div className="flex h-12 shrink-0 items-center px-4">
       {backHref ? (
@@ -56,10 +29,10 @@ export function PanelHeader({
           <ChevronLeft className="h-5 w-5" />
         </Link>
       ) : (
-        closeLink
+        <span className="h-5 w-5" aria-hidden />
       )}
       <h2 className="flex-1 truncate text-center text-sb-16 text-gray-900">{title}</h2>
-      {backHref ? closeLink : (rightSlot ?? <span className="h-5 w-5" aria-hidden />)}
+      {rightSlot ?? <span className="h-5 w-5" aria-hidden />}
     </div>
   )
 }

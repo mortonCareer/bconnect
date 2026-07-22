@@ -87,6 +87,8 @@ export { MenuButton } from './ui/MenuButton'
 export type { MenuButtonItem, MenuButtonProps } from './ui/MenuButton'
 export { Fab } from './ui/Fab'
 export type { FabProps } from './ui/Fab'
+export { CloseTab } from './ui/CloseTab'
+export type { CloseTabProps } from './ui/CloseTab'
 export { Toaster } from './ui/Toaster'
 export {
   Toast,
