@@ -215,20 +215,9 @@ resource "vercel_project_environment_variable" "career_firebase_vapid_key" {
 # ===========================================================================
 # Domain Configuration for Career
 # ===========================================================================
-resource "vercel_project_domain" "career_root" {
-  project_id = vercel_project.career.id
-  domain     = var.domain
-}
-
 resource "vercel_project_domain" "career_sub" {
   project_id = vercel_project.career.id
   domain     = "career.${var.domain}"
-}
-
-resource "vercel_project_domain" "career_www" {
-  project_id = vercel_project.career.id
-  domain     = "www.${var.domain}"
-  redirect   = vercel_project_domain.career_root.domain
 }
 
 # ===========================================================================
@@ -436,7 +425,28 @@ resource "vercel_project_environment_variable" "landing_sentry_auth_token" {
   comment                = "Sentry auth token - 소스맵 업로드"
 }
 
-# 도메인 apex(bconnect.to) 는 릴리스 후 컷오버 시 career_root 에서 이 프로젝트로 이전 (#896)
+# 도메인 apex(bconnect.to) — v0.1.0 릴리스 후 career_root 에서 컷오버 이전 (#896 → #935)
+resource "vercel_project_domain" "landing_root" {
+  project_id = vercel_project.landing.id
+  domain     = var.domain
+}
+
+resource "vercel_project_domain" "landing_www" {
+  project_id = vercel_project.landing.id
+  domain     = "www.${var.domain}"
+  redirect   = vercel_project_domain.landing_root.domain
+}
+
+moved {
+  from = vercel_project_domain.career_root
+  to   = vercel_project_domain.landing_root
+}
+
+moved {
+  from = vercel_project_domain.career_www
+  to   = vercel_project_domain.landing_www
+}
+
 # dev 는 apex 미러 — apex=landing 이므로 dev.bconnect.to = landing dev (career 는 career.dev 로 비킴)
 resource "vercel_project_domain" "landing_dev" {
   project_id            = vercel_project.landing.id
