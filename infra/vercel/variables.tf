@@ -66,9 +66,9 @@ variable "sentry_auth_token" {
   default     = ""
 }
 
-# Slack Incoming Webhook URL (크롤링 스키마 변경 알림)
-variable "slack_webhook_url" {
-  description = "Slack Incoming Webhook URL - 크롤링 스키마 변경 알림용"
+# Slack Incoming Webhook URL (모니터링 전용 채널)
+variable "slack_monitoring_webhook_url" {
+  description = "Slack Incoming Webhook URL - 모니터링 전용 채널 (봇 자동 알림)"
   type        = string
   sensitive   = true
   default     = ""

@@ -32,7 +32,7 @@ jobs:
         env:
           KISCON_API_SERVICE_KEY: ${{ secrets.KISCON_API_SERVICE_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}
         run: |
           if [ "${{ inputs.full }}" = "true" ]; then
             pnpm --filter @bconnect/data-jobs kiscon-construction-sync -- --full
@@ -47,4 +47,4 @@ jobs:
             -H 'Content-Type: application/json' \
             -d '{"text":"🚨 *KISCON Construction Sync 실패*\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|워크플로우 로그 확인>"}'
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}

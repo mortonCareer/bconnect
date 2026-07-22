@@ -123,14 +123,14 @@ resource "vercel_project_environment_variable" "career_sentry_auth_token" {
   comment                = "Sentry auth token - 소스맵 업로드"
 }
 
-resource "vercel_project_environment_variable" "career_slack_webhook_url" {
-  count      = var.slack_webhook_url != "" ? 1 : 0
+resource "vercel_project_environment_variable" "career_slack_monitoring_webhook_url" {
+  count      = var.slack_monitoring_webhook_url != "" ? 1 : 0
   project_id = vercel_project.career.id
   key        = "SLACK_WEBHOOK_URL"
-  value      = var.slack_webhook_url
+  value      = var.slack_monitoring_webhook_url
   target     = ["production"]
   sensitive  = true
-  comment    = "Slack Incoming Webhook - 크롤링 스키마 변경 알림"
+  comment    = "Slack Incoming Webhook - 모니터링 전용 채널 (원클릭 헬스체크 알림)"
 }
 
 resource "vercel_project_environment_variable" "career_database_url" {
