@@ -246,9 +246,7 @@ export function PanelTask({ taskId }: { taskId?: string }) {
                 </p>
                 {/* 일반 편집은 즉시저장(버튼 없음). 생성·draft 확정만 명시 제출. */}
                 {(!isEdit || isDraft) && (
-                  <FormSubmitButton className="mt-5" requireAllFilled={false}>
-                    작업 생성
-                  </FormSubmitButton>
+                  <FormSubmitButton className="mt-5">작업 생성</FormSubmitButton>
                 )}
               </form>
             </Form>

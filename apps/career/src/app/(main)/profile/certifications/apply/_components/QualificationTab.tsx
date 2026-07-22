@@ -132,7 +132,6 @@ export function QualificationTab({
               <FormSubmitButton
                 variant="primary"
                 size="full"
-                requireAllFilled={false}
                 disabled={!hasFile}
                 isLoading={form.formState.isSubmitting}
               >

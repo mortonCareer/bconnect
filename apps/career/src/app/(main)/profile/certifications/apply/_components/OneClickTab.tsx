@@ -85,7 +85,6 @@ export function OneClickTab({
     mode: 'onTouched',
     defaultValues: { businessNumber: '', ownerName: '', openDate: '' },
   })
-  const { isValid } = form.formState
 
   const server = useServerError(form.control, (error) =>
     typeof error === 'string'
@@ -159,13 +158,7 @@ export function OneClickTab({
               transform={formatOpenDate}
             />
 
-            <FormSubmitButton
-              variant="primary"
-              size="full"
-              requireAllFilled={false}
-              disabled={!isValid}
-              isLoading={isSearching}
-            >
+            <FormSubmitButton variant="primary" size="full" isLoading={isSearching}>
               조회하기
             </FormSubmitButton>
           </form>

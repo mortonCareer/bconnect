@@ -74,7 +74,7 @@ export default function SignupProfilePage() {
     control,
     handleSubmit,
     setValue,
-    formState: { isSubmitting, isValid },
+    formState: { isSubmitting },
   } = form
 
   const server = useServerError(
@@ -233,8 +233,6 @@ export default function SignupProfilePage() {
           </div>
           <div className="bg-white p-4">
             <FormSubmitButton
-              requireAllFilled={false}
-              disabled={!isValid}
               variant="primary"
               size="full"
               isLoading={

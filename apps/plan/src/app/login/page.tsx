@@ -182,7 +182,7 @@ export default function LoginPage() {
 
             {/* Submit Button */}
             <FormSubmitButton
-              requireAllFilled={false}
+              requireValid={false}
               variant={isSubmitDisabled ? 'secondary' : 'primary'}
               size="full"
               disabled={isSubmitDisabled}

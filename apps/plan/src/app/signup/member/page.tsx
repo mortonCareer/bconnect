@@ -43,7 +43,7 @@ export default function SignupMemberPage() {
   const {
     control,
     handleSubmit,
-    formState: { isSubmitting, isValid },
+    formState: { isSubmitting },
   } = form
 
   const server = useServerError(control, passthroughError<MemberFormData>('username'))
@@ -99,13 +99,7 @@ export default function SignupMemberPage() {
             />
 
             {/* CTA */}
-            <FormSubmitButton
-              variant={isValid ? 'primary' : 'secondary'}
-              size="full"
-              requireAllFilled={false}
-              disabled={!isValid}
-              isLoading={isSubmitting}
-            >
+            <FormSubmitButton variant="primary" size="full" isLoading={isSubmitting}>
               다음으로
             </FormSubmitButton>
           </form>

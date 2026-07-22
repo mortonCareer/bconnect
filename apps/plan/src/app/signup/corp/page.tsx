@@ -67,7 +67,7 @@ export default function SignupCorpPage() {
   const {
     control,
     handleSubmit,
-    formState: { isSubmitting, isValid },
+    formState: { isSubmitting },
   } = form
 
   const server = useServerError(
@@ -150,10 +150,8 @@ export default function SignupCorpPage() {
 
             {/* CTA */}
             <FormSubmitButton
-              variant={isValid ? 'primary' : 'secondary'}
+              variant="primary"
               size="full"
-              requireAllFilled={false}
-              disabled={!isValid}
               isLoading={
                 isSubmitting || registerMemberMutation.isPending || createCompanyMutation.isPending
               }
