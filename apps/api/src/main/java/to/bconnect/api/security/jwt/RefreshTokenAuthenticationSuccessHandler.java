@@ -10,11 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.common.response.ApiResponse;
-import to.bconnect.api.security.AuthenticationTypeMismatchException;
 import to.bconnect.api.security.session.SessionService;
 import tools.jackson.databind.ObjectMapper;
 
@@ -38,7 +40,8 @@ public class RefreshTokenAuthenticationSuccessHandler implements AuthenticationS
                                         @NonNull HttpServletResponse response,
                                         @NonNull Authentication authentication) throws IOException, ServletException {
         if (!(authentication instanceof JwtAuthenticationToken authToken)) {
-            throw new AuthenticationTypeMismatchException("Authentication must be of type " + JwtAuthenticationToken.class.getName());
+            throw new AuthenticationServiceException("Authentication must be of type " + JwtAuthenticationToken.class.getName(),
+                    new CodeException(CommonExceptionCode.INTERNAL_SERVER_ERROR));
         }
 
         if (authToken.isRefreshToken()) {

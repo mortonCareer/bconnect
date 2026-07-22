@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.log.LogMessage;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
@@ -19,7 +20,8 @@ import org.springframework.security.web.servlet.util.matcher.PathPatternRequestM
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import to.bconnect.api.security.AuthenticationTypeMismatchException;
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.security.AuthExceptionCode;
 
 import java.io.IOException;
 
@@ -70,7 +72,8 @@ public class RefreshTokenAuthenticationFilter extends OncePerRequestFilter {
             val authResult = (JwtAuthenticationToken) this.authenticationManager.authenticate(authRequest);
 
             if (!authResult.isRefreshToken()) {
-                throw new AuthenticationTypeMismatchException("Only refresh token is supported");
+                throw new AuthenticationServiceException("Only refresh token is supported",
+                        new CodeException(AuthExceptionCode.INVALID_TOKEN_TYPE));
             }
 
             val context = this.securityContextHolderStrategy.createEmptyContext();

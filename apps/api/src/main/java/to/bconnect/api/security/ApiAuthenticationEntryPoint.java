@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -20,7 +19,6 @@ import static lombok.AccessLevel.PROTECTED;
 
 @Slf4j
 @Component
-@Qualifier("ApiAuthenticationEntryPoint")
 @RequiredArgsConstructor(access = PROTECTED)
 public class ApiAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
