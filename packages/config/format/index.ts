@@ -1,3 +1,5 @@
+import { daysBetween } from '../date'
+
 const MINUTE = 60 * 1000
 const HOUR = 60 * MINUTE
 const DAY = 24 * HOUR
@@ -20,6 +22,13 @@ export function formatDuration(start: string, end: string): string {
   const endDate = new Date(end)
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / DAY)
   return `${days}일 소요`
+}
+
+/** "12.25 - 12.26 (총 2일 소요)" — 작업기간 표시(시작·종료일 포함). */
+export function formatPeriod(start: string, end: string): string {
+  const md = (iso: string) => `${Number(iso.slice(5, 7))}.${Number(iso.slice(8, 10))}`
+  const days = daysBetween(start, end) + 1
+  return `${md(start)} - ${md(end)} (총 ${days}일 소요)`
 }
 
 export function formatChatTime(dateStr: string): string {

@@ -1,3 +1,4 @@
+import { MessageType } from '@bconnect/api-client'
 import type { WithdrawableMember, Message, DirectChat, GroupChat } from '@bconnect/api-client'
 
 /**
@@ -42,6 +43,35 @@ export function toChatSummaries(
           ]
     )
     .sort((a, b) => (b.modifiedAt ?? '').localeCompare(a.modifiedAt ?? ''))
+}
+
+/**
+ * 목록의 마지막 메시지 미리보기 텍스트.
+ * OFFER 는 content 가 offerId 라 그대로 노출하면 숫자가 보인다 → 타입별 라벨로 대체.
+ */
+export function chatPreviewText(message: Message | undefined): string | undefined {
+  if (!message) return undefined
+  switch (message.type) {
+    case MessageType.OFFER:
+      return '섭외 제안'
+    case MessageType.IMAGE:
+      return '사진'
+    case MessageType.FILE:
+      return '파일'
+    default:
+      return message.content
+  }
+}
+
+/**
+ * 채팅방 섭외 제안(OFFER) 메시지의 수락/거절 슬롯. 앱이 mutation 을 배선해 주입한다
+ * (career 만 주입, plan 은 미주입 → 읽기전용). ADR-0020: features 는 mutation 을 갖지 않는다.
+ */
+export interface OfferActions {
+  onAccept: (offerId: number) => void
+  onDeny: (offerId: number) => void
+  /** 처리 중인 offerId — 해당 카드 버튼 비활성 (중복 클릭 방지) */
+  pendingOfferId?: number | null
 }
 
 /** 탈퇴 회원(name null)은 "탈퇴한 사용자"로 표시. member 자체가 없으면 undefined. */

@@ -9,7 +9,8 @@ import { PanelShell } from '../_shared/PanelShell'
 import { MessageThread } from './_parts/MessageThread'
 import { chatMemberName } from './_parts/types'
 import { useDirectChatSocket } from './useDirectChatSocket'
-import type { ChatSummary } from './_parts/types'
+import type { OfferMessageDetail } from './_parts/OfferMessageCard'
+import type { ChatSummary, OfferActions } from './_parts/types'
 
 /** 앱이 resolve 해 내려주는 데이터. career/plan 어댑터가 useGetDirectChats·useGetProfile·useGetMyMember 로 채운다. */
 export interface ChatViewData {
@@ -18,6 +19,8 @@ export interface ChatViewData {
   currentUserId?: number
   /** 상대 프로필 보강 — chat 응답에 없는 풍부 정보(address.city, primaryTrade). 발산 없는 by-id 보강 */
   otherProfile?: Profile
+  /** 섭외 제안(OFFER) 메시지 상세 — key = offerId. 미주입이면 카드가 상세 없이 렌더 (plan) */
+  offerDetails?: Map<number, OfferMessageDetail>
   isLoading: boolean
   isError: boolean
 }
@@ -27,6 +30,8 @@ type ChatViewBaseProps = {
   data: ChatViewData
   /** 상대 프로필 패널/페이지 href 빌더 — 앱이 주입 (plan: panelHref, career: '/profile/'+id) */
   profileHref?: (memberId: number) => string
+  /** 섭외 제안 수락/거절 — career(기술자)만 주입. 미주입이면 카드가 읽기전용 */
+  offerActions?: OfferActions
 }
 
 type ChatViewShellProps =
@@ -48,8 +53,8 @@ type ChatViewShellProps =
 export type ChatViewProps = ChatViewBaseProps & ChatViewShellProps
 
 export function ChatView(props: ChatViewProps) {
-  const { chatId, data, profileHref } = props
-  const { chat, currentUserId, otherProfile, isLoading, isError } = data
+  const { chatId, data, profileHref, offerActions } = props
+  const { chat, currentUserId, otherProfile, offerDetails, isLoading, isError } = data
   const other = chat?.members.find((p) => p.id !== currentUserId)
   const otherId = other?.id
   const title = chatMemberName(other) ?? chat?.title ?? '채팅'
@@ -110,6 +115,10 @@ export function ChatView(props: ChatViewProps) {
         currentUserId={currentUserId}
         participants={chat.members}
         localMessages={localMessages}
+        offerDetails={offerDetails}
+        offerActions={offerActions}
+        // TODO(BE): offer/task 응답에 업체명(companyId)이 없어 채팅 상대(업체 담당자) 이름으로 대체.
+        companyName={title}
       />
       <ChatInput value={message} onChange={setMessage} onSend={handleSend} />
     </>

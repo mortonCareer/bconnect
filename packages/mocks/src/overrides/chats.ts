@@ -57,17 +57,22 @@ const msg = (
   chatId: number,
   memberId: number,
   content: string,
-  hhmm: string
+  hhmm: string,
+  type: MessageType = MessageType.TEXT
 ): Message => ({
   id,
   chatId,
   memberId,
-  type: MessageType.TEXT,
+  type,
   content,
   createdAt: at(hhmm),
   modifiedAt: at(hhmm),
   attachments: [],
 })
+
+/** 섭외 제안 메시지 — BE 계약대로 content 는 offerId 문자열 (#972). tasks.ts 시드의 offerId 와 맞춘다. */
+const offerMsg = (id: number, chatId: number, memberId: number, offerId: number, hhmm: string) =>
+  msg(id, chatId, memberId, String(offerId), hhmm, MessageType.OFFER)
 
 // 시간순(오래된→최신) 작성. 응답은 서버 계약대로 newest-first 로 reverse.
 const MESSAGES_BY_CHAT: Record<number, Message[]> = {
@@ -76,6 +81,7 @@ const MESSAGES_BY_CHAT: Record<number, Message[]> = {
     msg(1002, 1, MY_ID, '네 안녕하세요.', '05:05'),
     msg(1003, 1, 101, '도배 작업 일정 협의 가능할까요?', '05:09'),
     msg(1004, 1, MY_ID, '다음 주 화요일부터 가능합니다.', '05:13'),
+    offerMsg(1005, 1, 101, 8004, '05:20'),
   ],
   2: [
     msg(2001, 2, 102, '전기 배선 견적 문의드립니다.', '03:00'),
