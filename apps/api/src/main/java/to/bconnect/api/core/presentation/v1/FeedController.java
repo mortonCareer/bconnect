@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import to.bconnect.api.attachment.domain.Attachment;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
@@ -72,9 +71,8 @@ public class FeedController {
                     val address = task == null ? null : task.type() == TaskType.WORKER
                             ? task.workerAddress()
                             : addressMap.get(task.projectId());
-                    val attachments = attachmentMap.getOrDefault(it.id(), List.<Attachment>of());
-                    val urlMap = attachments.stream()
-                            .collect(Collectors.toMap(Attachment::id, att -> attachmentResolver.parseUrl(att, ImageSize.MEDIUM)));
+                    val attachments = attachmentMap.getOrDefault(it.id(), List.of());
+                    val urlMap = attachmentResolver.parseUrlMap(attachments, ImageSize.MEDIUM);
                     return FeedResponse.of(
                             it,
                             member,
@@ -102,8 +100,7 @@ public class FeedController {
         val member = memberResolver.find(post.memberId());
         val profile = profileResolver.resolveMap(List.of(post.memberId())).get(post.memberId());
         val attachments = attachmentResolver.list(ReferenceType.POST, post.id());
-        val urlMap = attachments.stream()
-                .collect(Collectors.toMap(Attachment::id, it -> attachmentResolver.parseUrl(it, ImageSize.MEDIUM)));
+        val urlMap = attachmentResolver.parseUrlMap(attachments, ImageSize.MEDIUM);
         val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val task = post.taskId() == null ? null

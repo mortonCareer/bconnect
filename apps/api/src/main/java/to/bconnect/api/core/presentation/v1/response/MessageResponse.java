@@ -24,7 +24,7 @@ public record MessageResponse(
         return of(message, List.of(), Map.of());
     }
 
-    public static MessageResponse of(Message message, List<Attachment> attachments, Map<Long, String> urlMap) {
+    public static MessageResponse of(Message message, List<Attachment> attachments, Map<Long, String> urls) {
         return new MessageResponse(
                 message.id(),
                 message.chatId(),
@@ -33,9 +33,7 @@ public record MessageResponse(
                 message.content(),
                 message.createdAt(),
                 message.modifiedAt(),
-                attachments.stream()
-                        .map(it -> AttachmentResponse.of(it, urlMap.get(it.id())))
-                        .toList()
+                AttachmentResponse.listOf(attachments, urls)
         );
     }
 }

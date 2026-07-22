@@ -69,12 +69,6 @@ public class AttachmentResolver {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, String> resolveUrlMap(ReferenceType referenceType, Collection<Long> referenceIds, ImageSize size) {
-        return resolveMap(referenceType, referenceIds).values().stream()
-                .collect(Collectors.toMap(Attachment::referenceId, it -> parseUrl(it, size)));
-    }
-
-    @Transactional(readOnly = true)
     public Map<Long, List<Attachment>> resolveListMap(ReferenceType referenceType, Collection<Long> referenceIds) {
         if (referenceIds == null)
             return Map.of();
@@ -88,6 +82,12 @@ public class AttachmentResolver {
                 .collect(Collectors.groupingBy(Attachment::referenceId));
     }
 
+    @Transactional(readOnly = true)
+    public Map<Long, String> resolveUrlMap(ReferenceType referenceType, Collection<Long> referenceIds, ImageSize size) {
+        return resolveMap(referenceType, referenceIds).values().stream()
+                .collect(Collectors.toMap(Attachment::referenceId, it -> parseUrl(it, size)));
+    }
+
     public String parseUrl(Attachment attachment, ImageSize size) {
         if (attachment == null)
             return null;
@@ -99,5 +99,10 @@ public class AttachmentResolver {
                 attachment.context(), attachment.contextId(), attachment.type(),
                 size, attachment.uuid(), ext);
         return urlResolver.resolve(key);
+    }
+
+    public Map<Long, String> parseUrlMap(List<Attachment> attachments, ImageSize size) {
+        return attachments.stream()
+                .collect(Collectors.toMap(Attachment::id, it -> parseUrl(it, size)));
     }
 }

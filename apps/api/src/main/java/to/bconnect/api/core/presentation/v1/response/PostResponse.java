@@ -18,14 +18,12 @@ public record PostResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt
 ) {
-    public static PostResponse of(Post post, List<Attachment> attachments, Map<Long, String> urlMap) {
+    public static PostResponse of(Post post, List<Attachment> attachments, Map<Long, String> urls) {
         return new PostResponse(
                 post.id(),
                 post.memberId(),
                 post.taskId(),
-                attachments.stream()
-                        .map(it -> AttachmentResponse.of(it, urlMap.get(it.id())))
-                        .toList(),
+                AttachmentResponse.listOf(attachments, urls),
                 post.content(),
                 post.createdAt(),
                 post.modifiedAt()
