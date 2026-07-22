@@ -168,6 +168,10 @@ export const feedsOverrides = [
           memberId: 200 + i,
           taskId: task?.id ?? null,
           images: buildImages(seed.imageCount),
+          attachments: buildImages(seed.imageCount).map((url, j) => ({
+            id: (400 + i) * 10 + j + 1,
+            url,
+          })),
           content: seed.content,
           createdAt,
           modifiedAt: createdAt,

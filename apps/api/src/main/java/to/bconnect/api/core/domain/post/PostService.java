@@ -51,14 +51,17 @@ public class PostService {
     }
 
     @Transactional
-    public void update(AuthUser user, Long postId, String content) {
+    public void update(AuthUser user, Long postId, UpdatePost command) {
         val found = postRepository.findById(postId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        found.update(content);
+        found.update(command.taskId(), command.content());
+
+        attachmentLinker.unlink(ReferenceType.POST, List.of(found.getId()));
+        attachmentLinker.link(user.id(), ReferenceType.POST, found.getId(), command.attachmentIds());
     }
 
     @Transactional

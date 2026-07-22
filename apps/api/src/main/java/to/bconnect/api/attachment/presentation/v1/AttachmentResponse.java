@@ -5,6 +5,8 @@ import to.bconnect.api.attachment.domain.Attachment;
 import to.bconnect.api.storage.attachment.AttachmentType;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 
 public record AttachmentResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
@@ -29,5 +31,11 @@ public record AttachmentResponse(
                 attachment.modifiedAt(),
                 url
         );
+    }
+
+    public static List<AttachmentResponse> listOf(List<Attachment> attachments, Map<Long, String> urls) {
+        return attachments.stream()
+                .map(it -> of(it, urls.get(it.id())))
+                .toList();
     }
 }

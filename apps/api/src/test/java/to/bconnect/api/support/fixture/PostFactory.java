@@ -26,6 +26,6 @@ public class PostFactory {
     }
 
     public static UpdatePostRequest updateRequest() {
-        return new UpdatePostRequest("updated content");
+        return new UpdatePostRequest(1L, List.of(DEFAULT_ATTACHMENT_ID), "updated content");
     }
 }
