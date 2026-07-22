@@ -437,16 +437,6 @@ resource "vercel_project_domain" "landing_www" {
   redirect   = vercel_project_domain.landing_root.domain
 }
 
-moved {
-  from = vercel_project_domain.career_root
-  to   = vercel_project_domain.landing_root
-}
-
-moved {
-  from = vercel_project_domain.career_www
-  to   = vercel_project_domain.landing_www
-}
-
 # dev 는 apex 미러 — apex=landing 이므로 dev.bconnect.to = landing dev (career 는 career.dev 로 비킴)
 resource "vercel_project_domain" "landing_dev" {
   project_id            = vercel_project.landing.id
