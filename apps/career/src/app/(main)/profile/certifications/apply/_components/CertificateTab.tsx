@@ -129,15 +129,7 @@ export function CertificateTab({
                 placeholder="검토시 참고할 내용을 작성해주세요..."
               />
             )}
-            {(isOther || hasFile) && (
-              <FormSubmitButton
-                variant="primary"
-                size="full"
-                isLoading={form.formState.isSubmitting}
-              >
-                제출하기
-              </FormSubmitButton>
-            )}
+            {(isOther || hasFile) && <FormSubmitButton size="full">제출하기</FormSubmitButton>}
           </form>
         </Form>
       </div>

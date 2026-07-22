@@ -189,7 +189,6 @@ export default function SignupAuthPage() {
           ) : (
             <FormSubmitButton
               requireValid={false}
-              variant="primary"
               size="full"
               disabled={!isCodeValid}
               isLoading={verifyCodeMutation.isPending}

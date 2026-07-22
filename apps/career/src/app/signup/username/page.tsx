@@ -26,11 +26,7 @@ export default function SignupUsernamePage() {
       username: formData.username,
     },
   })
-  const {
-    control,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = form
+  const { control, handleSubmit } = form
 
   const server = useServerError(control, passthroughError<UsernameFormData>('username'))
 
@@ -90,9 +86,7 @@ export default function SignupUsernamePage() {
           </div>
 
           {/* Submit Button */}
-          <FormSubmitButton size="full" isLoading={isSubmitting}>
-            다음으로
-          </FormSubmitButton>
+          <FormSubmitButton size="full">다음으로</FormSubmitButton>
         </form>
       </Form>
     </div>

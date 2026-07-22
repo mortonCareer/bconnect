@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -78,8 +77,6 @@ export function OneClickTab({
   isError,
   onRetry,
 }: OneClickTabProps) {
-  const [isSearching, setIsSearching] = useState(false)
-
   const form = useForm<OneClickInput, unknown, OneClickOutput>({
     resolver: zodResolver(oneClickSchema),
     mode: 'onTouched',
@@ -97,7 +94,6 @@ export function OneClickTab({
   )
 
   const onSearch = form.handleSubmit(async ({ businessNumber, ownerName, openDate }) => {
-    setIsSearching(true)
     server.reset()
     try {
       const result = await lookupBusinessForApply(businessNumber, ownerName, openDate)
@@ -119,8 +115,6 @@ export function OneClickTab({
       toast({ description: '인증 정보가 갱신되었어요', variant: 'success' })
     } catch (error) {
       server.capture(error, form.getValues())
-    } finally {
-      setIsSearching(false)
     }
   })
 
@@ -158,9 +152,7 @@ export function OneClickTab({
               transform={formatOpenDate}
             />
 
-            <FormSubmitButton variant="primary" size="full" isLoading={isSearching}>
-              조회하기
-            </FormSubmitButton>
+            <FormSubmitButton size="full">조회하기</FormSubmitButton>
           </form>
         </Form>
       </div>
