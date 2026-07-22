@@ -1,0 +1,16 @@
+changelog:
+  categories:
+    - title: 백엔드
+      labels: ['⚙️ api']
+    - title: 프론트엔드
+      labels: ['💻 fe', '🎨 publishing']
+    - title: 크롤러
+      labels: ['🤖 crawler']
+    - title: 인프라
+      labels: ['☁️ infra']
+    - title: 버그 수정
+      labels: ['🐛 bug']
+    - title: 기타
+      labels: ['*']
+  exclude:
+    labels: ['🔧 chore']
