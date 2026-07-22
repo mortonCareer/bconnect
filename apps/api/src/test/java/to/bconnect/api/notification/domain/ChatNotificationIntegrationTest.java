@@ -10,7 +10,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import to.bconnect.api.notification.domain.push.PushPayload;
 import to.bconnect.api.notification.domain.push.PushSendResult;
 import to.bconnect.api.notification.domain.push.PushSender;
-import to.bconnect.api.socket.message.ChatMessageSentEvent;
+import to.bconnect.api.socket.message.SocketMessageSentEvent;
 import to.bconnect.api.storage.device.DevicePlatform;
 import to.bconnect.api.storage.device.DeviceTokenEntity;
 import to.bconnect.api.storage.device.DeviceTokenRepository;
@@ -19,17 +19,15 @@ import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.notification.NotificationRepository;
 
-import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
- * 이슈 #788 회귀 방지: 채팅 알림은 접속 여부와 관계없이 수신자의 모든 활성 디바이스로 발송되어야 한다.
+ * 이슈 #788 회귀 방지: 채팅 알림은 수신자의 모든 활성 디바이스로 발송되어야 한다.
  * 실제 Postgres(Testcontainers) 위에서 알림 저장·발송·실패 격리·endpoint 비활성화를 검증한다.
  * REQUIRES_NEW 로 커밋되는 handle() 이 사전 저장 데이터를 보도록 비트랜잭션으로 구동한다.
  */
@@ -104,7 +102,7 @@ class ChatNotificationIntegrationTest {
                 new DeviceTokenEntity(receiverId, token, DevicePlatform.web, endpointArn)).getId();
     }
 
-    private ChatMessageSentEvent chatEvent(String preview) {
-        return new ChatMessageSentEvent(senderId, 999L, List.of(receiverId), preview);
+    private SocketMessageSentEvent chatEvent(String preview) {
+        return new SocketMessageSentEvent(999L, senderId, Set.of(), Set.of(receiverId), preview);
     }
 }

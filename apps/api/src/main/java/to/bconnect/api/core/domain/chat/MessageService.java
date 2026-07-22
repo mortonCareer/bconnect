@@ -13,7 +13,8 @@ import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.chat.*;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -49,15 +50,15 @@ public class MessageService {
         );
     }
 
-    @Transactional
-    public void markRead(Long chatId, ChatType type, Collection<Long> memberIds, Long messageId) {
+    @Transactional(readOnly = true)
+    public Set<Long> findParticipantIds(Long chatId, ChatType type) {
         if (type == ChatType.DIRECT) {
-            directChatRepository.findById(chatId)
-                    .ifPresent(chat -> memberIds.forEach(it -> chat.markRead(it, messageId)));
-        } else {
-            participantRepository.findAllByChatIdAndMemberIdIn(chatId, memberIds)
-                    .forEach(it -> it.markRead(messageId));
+            val chat = directChatRepository.findById(chatId)
+                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+            return Set.of(chat.getMaxId(), chat.getMinId());
         }
+
+        return new HashSet<>(participantRepository.findMemberIdsByChatId(chatId));
     }
 
     @Transactional
@@ -71,19 +72,17 @@ public class MessageService {
             directChatRepository.findById(chatId).ifPresent(it -> it.markRead(memberId, messageId));
         else
             participantRepository.findByChatIdAndMemberId(chatId, memberId)
-                    .ifPresent(it -> it.markRead(messageId));
+                    .ifPresent(it -> it.read(messageId));
     }
 
-    @Transactional(readOnly = true)
-    public List<Long> listRecipientIds(Long chatId, ChatType type, Long senderId) {
+    @Transactional
+    public void markRead(Long chatId, ChatType type, Collection<Long> memberIds, Long messageId) {
         if (type == ChatType.DIRECT) {
-            val chat = directChatRepository.findById(chatId)
-                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-            return List.of(chat.counterpartIdOf(senderId));
+            directChatRepository.findById(chatId)
+                    .ifPresent(chat -> memberIds.forEach(it -> chat.markRead(it, messageId)));
+        } else {
+            participantRepository.findAllByChatIdAndMemberIdIn(chatId, memberIds)
+                    .forEach(it -> it.read(messageId));
         }
-
-        return participantRepository.findMemberIdsByChatId(chatId).stream()
-                .filter(id -> !id.equals(senderId))
-                .toList();
     }
 }

@@ -13,6 +13,7 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.socket.WebSocketSecurityConfig;
 import to.bconnect.api.storage.chat.ChatType;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,10 +31,14 @@ public class MessageSocketService {
     @Transactional
     public Message broadcast(AuthUser user, Long chatId, ChatType chatType, SendMessage command) {
         val message = messageService.create(chatId, chatType, user.id(), command);
-        messageService.markRead(chatId, chatType, findActiveMemberIds(chatId, chatType), message.id());
-        val recipientIds = messageService.listRecipientIds(chatId, chatType, user.id());
-        eventPublisher.publishEvent(new ChatMessageSentEvent(
-                user.id(), chatId, recipientIds, command.content()));
+        val activeIds = findActiveMemberIds(chatId, chatType);
+        val participantIds = messageService.findParticipantIds(chatId, chatType);
+        val inactiveIds = new HashSet<>(participantIds);
+        inactiveIds.removeAll(activeIds);
+
+        messageService.markRead(chatId, chatType, activeIds, message.id());
+        eventPublisher.publishEvent(new SocketMessageSentEvent(
+                chatId, user.id(), activeIds, inactiveIds, command.content()));
         return message;
     }
 
