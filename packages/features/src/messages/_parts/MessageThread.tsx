@@ -79,17 +79,20 @@ function Bubble({
     const detail = Number.isFinite(offerId) ? offerDetails?.get(offerId) : undefined
     const isThisOfferPending = offerActions?.pendingOfferId === offerId
     const isAnyOfferPending = offerActions?.pendingOfferId != null
+    // 아바타(size-10) + gap-2 만큼 들여써 다른 수신 버블과 좌측을 맞춘다.
     return (
-      <OfferMessageCard
-        detail={detail}
-        companyName={companyName}
-        isDetailLoading={isOfferDetailsLoading}
-        isDetailError={isOfferDetailsError}
-        isActionDisabled={isAnyOfferPending}
-        pendingAction={isThisOfferPending ? offerActions?.pendingAction : null}
-        onAccept={offerActions && detail ? () => offerActions.onAccept(offerId) : undefined}
-        onDeny={offerActions && detail ? () => offerActions.onDeny(offerId) : undefined}
-      />
+      <div className="pl-12">
+        <OfferMessageCard
+          detail={detail}
+          companyName={companyName}
+          isDetailLoading={isOfferDetailsLoading}
+          isDetailError={isOfferDetailsError}
+          isActionDisabled={isAnyOfferPending}
+          pendingAction={isThisOfferPending ? offerActions?.pendingAction : null}
+          onAccept={offerActions && detail ? () => offerActions.onAccept(offerId) : undefined}
+          onDeny={offerActions && detail ? () => offerActions.onDeny(offerId) : undefined}
+        />
+      </div>
     )
   }
 

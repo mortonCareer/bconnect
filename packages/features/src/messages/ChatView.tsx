@@ -132,8 +132,9 @@ export function ChatView(props: ChatViewProps) {
         isOfferDetailsLoading={isOfferDetailsLoading}
         isOfferDetailsError={isOfferDetailsError}
         offerActions={offerActions}
-        // TODO(BE): offer/task 응답에 업체명(companyId)이 없어 채팅 상대(업체 담당자) 이름으로 대체.
-        companyName={title}
+        // TODO(BE): 섭외/작업 응답에 업체명 필드가 없어 companyName 을 주입하지 못한다.
+        // 채팅 상대 이름은 업체가 아니라 담당자 개인명이라 대체 불가 — 카드가 placeholder 로 렌더된다.
+        // BE 에 필드가 추가되면 여기서 companyName 을 넘길 것.
       />
       <ChatInput value={message} onChange={setMessage} onSend={handleSend} />
     </>
