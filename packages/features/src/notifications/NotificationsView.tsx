@@ -15,7 +15,7 @@ import { formatRelativeTime } from '@bconnect/config/format'
 import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
 import { PanelMessage } from '../_shared/PanelMessage'
-import { useNotifications } from './useNotifications'
+import { useNotifications, useUnreadNotificationCount } from './useNotifications'
 import { groupChatNotifications } from './_parts/groupChatNotifications'
 
 type NotificationsViewShellProps =
@@ -44,6 +44,7 @@ export function NotificationsView(props: NotificationsViewProps) {
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useNotifications()
   const { mutate: markAllRead, isPending: isMarkingAllRead } = useUpdateNotificationsRead()
+  const unreadCount = useUnreadNotificationCount()
   const queryClient = useQueryClient()
 
   // 그룹 내 안 읽은 id 를 전부 개별 읽음 처리하고(bulk-by-id 엔드포인트 없음) 마지막에 한 번만 무효화.
@@ -76,19 +77,22 @@ export function NotificationsView(props: NotificationsViewProps) {
     return () => observer.disconnect()
   }, [handleBottomObserver])
 
+  const markAllReadButton = hasItems ? (
+    <button
+      type="button"
+      onClick={() => markAllRead()}
+      disabled={isMarkingAllRead}
+      className="cursor-pointer whitespace-nowrap text-m-12 text-primary-500 disabled:opacity-50"
+    >
+      모두 읽음
+    </button>
+  ) : null
+
   const body = (
     <>
-      {hasItems && (
-        <div className="flex justify-end px-4 py-2">
-          <button
-            type="button"
-            onClick={() => markAllRead()}
-            disabled={isMarkingAllRead}
-            className="cursor-pointer whitespace-nowrap text-m-12 text-primary-500 disabled:opacity-50"
-          >
-            모두 읽음
-          </button>
-        </div>
+      {/* 패널(plan)은 '모두 읽음' 을 헤더 우측 슬롯에 두므로(#970) 본문 행은 풀페이지 쉘(career)에서만 */}
+      {props.renderShell && markAllReadButton && (
+        <div className="flex justify-end px-4 py-2">{markAllReadButton}</div>
       )}
       <PanelScroll>
         {isLoading ? (
@@ -145,6 +149,8 @@ export function NotificationsView(props: NotificationsViewProps) {
   return (
     <PanelShell
       title="알림"
+      titleCount={unreadCount}
+      rightSlot={markAllReadButton}
       closeLabel="알림 패널 닫기"
       closeHref={props.closeHref}
       onClose={props.onClose}
