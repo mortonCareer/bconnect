@@ -1,4 +1,5 @@
 import {
+  AttachmentType,
   getGetFeedsMockHandler,
   ProfileRole,
   Role,
@@ -6,7 +7,7 @@ import {
   TaskType,
   Trade,
 } from '@bconnect/api-client'
-import type { Feed, Task } from '@bconnect/api-client'
+import type { Attachment, Feed, Task } from '@bconnect/api-client'
 
 interface FeedSeed {
   name: string
@@ -131,11 +132,23 @@ function taskOf(id: number, seed: FeedSeed): Task | null {
   }
 }
 
-function buildImages(count: number): string[] {
-  return Array.from(
-    { length: count },
-    (_, i) => `https://placehold.co/600x400/e5e5e5/767676?text=${i + 1}`
-  )
+function buildAttachments(
+  count: number,
+  postId: number,
+  memberId: number,
+  stamp: string
+): Attachment[] {
+  return Array.from({ length: count }, (_, i) => ({
+    id: postId * 10 + i + 1,
+    memberId,
+    type: AttachmentType.IMAGE,
+    filename: `work-${i + 1}.png`,
+    contentType: 'image/png',
+    size: 120_000,
+    createdAt: stamp,
+    modifiedAt: stamp,
+    url: `https://placehold.co/600x400/e5e5e5/767676?text=${i + 1}`,
+  }))
 }
 
 export const feedsOverrides = [
@@ -167,11 +180,7 @@ export const feedsOverrides = [
           id: 400 + i,
           memberId: 200 + i,
           taskId: task?.id ?? null,
-          images: buildImages(seed.imageCount),
-          attachments: buildImages(seed.imageCount).map((url, j) => ({
-            id: (400 + i) * 10 + j + 1,
-            url,
-          })),
+          attachments: buildAttachments(seed.imageCount, 400 + i, 200 + i, createdAt),
           content: seed.content,
           createdAt,
           modifiedAt: createdAt,

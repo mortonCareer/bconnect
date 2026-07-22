@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import {
+  postImageUrls,
   regionOfState,
   useGetCrawledMembers,
   useGetFeeds,
@@ -99,7 +100,7 @@ function toTechnicianItem(profile: Profile, posts: Post[]): MemberTechnicianItem
     certifications: [],
     portfolios: posts
       .slice(0, 3)
-      .map((post) => ({ imageUrl: post.images?.[0] ?? '', daysRequired: undefined })),
+      .map((post) => ({ imageUrl: postImageUrls(post)[0] ?? '', daysRequired: undefined })),
   }
 }
 

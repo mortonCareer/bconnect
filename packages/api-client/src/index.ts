@@ -29,3 +29,5 @@ export * from './generated/schemas'
 
 // Hand-written domain labels (enum-coupled: Trade / CredentialType)
 export * from './labels'
+
+export { postImageUrls } from './post'
