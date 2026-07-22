@@ -14,9 +14,11 @@ import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.company.Company;
 import to.bconnect.api.core.domain.company.CompanyService;
+import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.presentation.v1.request.CreateCompanyRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateCompanyRequest;
 import to.bconnect.api.core.presentation.v1.response.CompanyResponse;
+import to.bconnect.api.core.presentation.v1.response.MemberSummaryResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
@@ -29,6 +31,7 @@ import java.util.List;
 public class CompanyController {
 
     private final CompanyService companyService;
+    private final MemberResolver memberResolver;
     private final AttachmentResolver attachmentResolver;
     private final SignedCookieIssuer signedCookieIssuer;
 
@@ -74,6 +77,21 @@ public class CompanyController {
                 .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
 
         return ApiResponse.success(CompanyResponse.of(company, picture));
+    }
+
+    @GetMapping("/{id}/members")
+    public ApiResponse<List<MemberSummaryResponse>> listMembers(
+            @PathVariable Long id,
+            HttpServletResponse response) {
+        val company = companyService.get(id);
+        val member = memberResolver.get(company.memberId());
+        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
+        return ApiResponse.success(List.of(MemberSummaryResponse.of(member, picture)));
     }
 
     @PostMapping
