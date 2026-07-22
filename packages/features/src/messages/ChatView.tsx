@@ -21,6 +21,10 @@ export interface ChatViewData {
   otherProfile?: Profile
   /** 섭외 제안(OFFER) 메시지 상세 — key = offerId. 미주입이면 카드가 상세 없이 렌더 (plan) */
   offerDetails?: Map<number, OfferMessageDetail>
+  /** 섭외 상세 조회 중 — 채팅 자체는 유지하고 OFFER 카드 안에서 상태 표시 */
+  isOfferDetailsLoading?: boolean
+  /** 섭외 상세 조회 실패 — 채팅 자체는 유지하고 OFFER 카드 안에서 상태 표시 */
+  isOfferDetailsError?: boolean
   isLoading: boolean
   isError: boolean
 }
@@ -54,7 +58,16 @@ export type ChatViewProps = ChatViewBaseProps & ChatViewShellProps
 
 export function ChatView(props: ChatViewProps) {
   const { chatId, data, profileHref, offerActions } = props
-  const { chat, currentUserId, otherProfile, offerDetails, isLoading, isError } = data
+  const {
+    chat,
+    currentUserId,
+    otherProfile,
+    offerDetails,
+    isOfferDetailsLoading,
+    isOfferDetailsError,
+    isLoading,
+    isError,
+  } = data
   const other = chat?.members.find((p) => p.id !== currentUserId)
   const otherId = other?.id
   const title = chatMemberName(other) ?? chat?.title ?? '채팅'
@@ -116,6 +129,8 @@ export function ChatView(props: ChatViewProps) {
         participants={chat.members}
         localMessages={localMessages}
         offerDetails={offerDetails}
+        isOfferDetailsLoading={isOfferDetailsLoading}
+        isOfferDetailsError={isOfferDetailsError}
         offerActions={offerActions}
         // TODO(BE): offer/task 응답에 업체명(companyId)이 없어 채팅 상대(업체 담당자) 이름으로 대체.
         companyName={title}

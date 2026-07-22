@@ -4,6 +4,7 @@ import { OfferStatus, TRADE_LABELS } from '@bconnect/api-client'
 import type { Address, Trade } from '@bconnect/api-client'
 import { Button, FilterChip } from '@bconnect/ui'
 import { formatPeriod } from '@bconnect/config/format'
+import type { OfferActionKind } from './types'
 
 /**
  * OFFER 메시지 카드에 필요한 섭외 상세. 앱이 offerId 로 resolve 해 내려준다
@@ -27,8 +28,14 @@ export interface OfferMessageCardProps {
   /** 수락 핸들러. 미주입이면 버튼 없음 (plan = 읽기전용). */
   onAccept?: () => void
   onDeny?: () => void
-  /** 처리 중 — 중복 클릭 방지 */
-  isPending?: boolean
+  /** 상세 조회 중 — 숫자 offerId 대신 loading 안내를 보여준다. */
+  isDetailLoading?: boolean
+  /** 상세 조회 실패 — 액션을 숨기고 실패 안내를 보여준다. */
+  isDetailError?: boolean
+  /** 다른 카드까지 포함해 처리 중인 액션이 있으면 중복 요청 방지 */
+  isActionDisabled?: boolean
+  /** 현재 카드에서 처리 중인 액션 — 해당 버튼에 spinner 표시 */
+  pendingAction?: OfferActionKind | null
 }
 
 /** ACTIVE(응답 대기) 외 상태는 버튼 대신 결과 텍스트로 표시. */
@@ -57,12 +64,18 @@ export function OfferMessageCard({
   companyName,
   onAccept,
   onDeny,
-  isPending,
+  isDetailLoading,
+  isDetailError,
+  isActionDisabled,
+  pendingAction,
 }: OfferMessageCardProps) {
   const address = detail?.address
   const trades = detail?.trades ?? []
   const canAct = detail?.status === OfferStatus.ACTIVE && (onAccept != null || onDeny != null)
   const statusLabel = detail ? STATUS_LABELS[detail.status] : undefined
+  const isAcceptPending = pendingAction === 'accept'
+  const isDenyPending = pendingAction === 'deny'
+  const actionsDisabled = isActionDisabled || isAcceptPending || isDenyPending
 
   return (
     <div className="max-w-md rounded-xl bg-gray-100 p-4">
@@ -93,17 +106,35 @@ export function OfferMessageCard({
           )}
           {detail.requirement && <Row label="요청사항">{detail.requirement}</Row>}
         </div>
+      ) : isDetailLoading ? (
+        <p className="mt-2 text-r-14 text-gray-500">제안 상세를 불러오는 중입니다</p>
+      ) : isDetailError ? (
+        <p className="mt-2 text-r-14 text-destructive">
+          제안 상세를 불러오지 못했습니다. 잠시 후 다시 시도해주세요
+        </p>
       ) : (
-        <p className="mt-2 text-r-14 text-gray-500">제안 상세를 불러올 수 없습니다</p>
+        <p className="mt-2 text-r-14 text-gray-500">제안 상세를 찾을 수 없습니다</p>
       )}
 
       {canAct ? (
         <div className="mt-3 flex justify-end gap-2">
-          <Button variant="outline" size="small" disabled={isPending} onClick={onAccept}>
-            수락
+          <Button
+            variant="outline"
+            size="small"
+            disabled={actionsDisabled}
+            isLoading={isAcceptPending}
+            onClick={onAccept}
+          >
+            {isAcceptPending ? '수락 중' : '수락'}
           </Button>
-          <Button variant="ghost" size="small" disabled={isPending} onClick={onDeny}>
-            거절
+          <Button
+            variant="ghost"
+            size="small"
+            disabled={actionsDisabled}
+            isLoading={isDenyPending}
+            onClick={onDeny}
+          >
+            {isDenyPending ? '거절 중' : '거절'}
           </Button>
         </div>
       ) : (

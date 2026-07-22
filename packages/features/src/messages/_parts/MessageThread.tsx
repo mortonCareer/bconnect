@@ -27,6 +27,10 @@ interface MessageThreadProps {
   localMessages: Message[]
   /** 섭외 제안(OFFER) 메시지 상세 — key = offerId. 앱이 resolve (ADR-0020). */
   offerDetails?: Map<number, OfferMessageDetail>
+  /** 섭외 상세 조회 중 — OFFER 숫자 노출 없이 카드 내부 loading 안내 */
+  isOfferDetailsLoading?: boolean
+  /** 섭외 상세 조회 실패 — 카드 내부 error 안내 */
+  isOfferDetailsError?: boolean
   /** 수락/거절 액션 슬롯. 미주입이면 읽기전용 카드. */
   offerActions?: OfferActions
   /** 카드에 표시할 업체명 — 채팅 상대 이름 */
@@ -52,6 +56,8 @@ function Bubble({
   currentUserId,
   participants,
   offerDetails,
+  isOfferDetailsLoading,
+  isOfferDetailsError,
   offerActions,
   companyName,
 }: {
@@ -59,6 +65,8 @@ function Bubble({
   currentUserId: number | undefined
   participants: WithdrawableMember[]
   offerDetails?: Map<number, OfferMessageDetail>
+  isOfferDetailsLoading?: boolean
+  isOfferDetailsError?: boolean
   offerActions?: OfferActions
   companyName?: string
 }) {
@@ -69,11 +77,16 @@ function Bubble({
   if (message.type === MessageType.OFFER) {
     const offerId = Number(message.content)
     const detail = Number.isFinite(offerId) ? offerDetails?.get(offerId) : undefined
+    const isThisOfferPending = offerActions?.pendingOfferId === offerId
+    const isAnyOfferPending = offerActions?.pendingOfferId != null
     return (
       <OfferMessageCard
         detail={detail}
         companyName={companyName}
-        isPending={offerActions?.pendingOfferId === offerId}
+        isDetailLoading={isOfferDetailsLoading}
+        isDetailError={isOfferDetailsError}
+        isActionDisabled={isAnyOfferPending}
+        pendingAction={isThisOfferPending ? offerActions?.pendingAction : null}
         onAccept={offerActions && detail ? () => offerActions.onAccept(offerId) : undefined}
         onDeny={offerActions && detail ? () => offerActions.onDeny(offerId) : undefined}
       />
@@ -102,6 +115,8 @@ export function MessageThread({
   participants,
   localMessages,
   offerDetails,
+  isOfferDetailsLoading,
+  isOfferDetailsError,
   offerActions,
   companyName,
 }: MessageThreadProps) {
@@ -229,6 +244,8 @@ export function MessageThread({
                 currentUserId={currentUserId}
                 participants={participants}
                 offerDetails={offerDetails}
+                isOfferDetailsLoading={isOfferDetailsLoading}
+                isOfferDetailsError={isOfferDetailsError}
                 offerActions={offerActions}
                 companyName={companyName}
               />

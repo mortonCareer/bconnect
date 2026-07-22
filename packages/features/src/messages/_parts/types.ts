@@ -63,6 +63,8 @@ export function chatPreviewText(message: Message | undefined): string | undefine
   }
 }
 
+export type OfferActionKind = 'accept' | 'deny'
+
 /**
  * 채팅방 섭외 제안(OFFER) 메시지의 수락/거절 슬롯. 앱이 mutation 을 배선해 주입한다
  * (career 만 주입, plan 은 미주입 → 읽기전용). ADR-0020: features 는 mutation 을 갖지 않는다.
@@ -72,6 +74,8 @@ export interface OfferActions {
   onDeny: (offerId: number) => void
   /** 처리 중인 offerId — 해당 카드 버튼 비활성 (중복 클릭 방지) */
   pendingOfferId?: number | null
+  /** 처리 중인 액션 — 버튼별 loading 표시용 */
+  pendingAction?: OfferActionKind | null
 }
 
 /** 탈퇴 회원(name null)은 "탈퇴한 사용자"로 표시. member 자체가 없으면 undefined. */

@@ -1,8 +1,9 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  OfferStatus,
   useAcceptOffer,
   useDenyOffer,
   useQueries,
@@ -24,6 +25,10 @@ import {
 } from '@bconnect/features'
 import { isApiErrorShape, toast } from '@bconnect/ui'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
+
+function offerActionErrorMessage(error: unknown, fallback: string): string {
+  return isApiErrorShape(error) ? error.message : fallback
+}
 
 /** 메시지 목록 (/messages) — My 훅 + 병렬 Profile 보강을 resolve 해 MessagesView 로 내려준다. */
 export function CareerMessagesList() {
@@ -93,9 +98,25 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
     query: { enabled: otherId != null },
   })
 
+  const [offerStatusOverrides, setOfferStatusOverrides] = useState<Map<number, OfferStatus>>(
+    () => new Map()
+  )
+  const setOfferStatusOverride = useCallback((offerId: number, status: OfferStatus) => {
+    setOfferStatusOverrides((prev) => {
+      if (prev.get(offerId) === status) return prev
+      const next = new Map(prev)
+      next.set(offerId, status)
+      return next
+    })
+  }, [])
+
   // 섭외 제안(OFFER) 메시지는 content 에 offerId 만 담겨 온다 → 기술자 작업 목록에서 상세를 붙인다.
   // getTasks 는 본인에게 온 offer 작업(task.offer)까지 함께 내려준다 (TaskController.list).
-  const { data: tasks } = useGetTasks()
+  const {
+    data: tasks,
+    isLoading: isOfferDetailsLoading,
+    isError: isOfferDetailsError,
+  } = useGetTasks()
   const offerDetails = useMemo(() => {
     const map = new Map<number, OfferMessageDetail>()
     for (const task of tasks ?? []) {
@@ -103,7 +124,7 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
       if (offer?.id == null) continue
       map.set(offer.id, {
         offerId: offer.id,
-        status: offer.status,
+        status: offerStatusOverrides.get(offer.id) ?? offer.status,
         start: task.start,
         end: task.end,
         address: task.address ?? undefined,
@@ -112,39 +133,55 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
       })
     }
     return map
-  }, [tasks])
+  }, [tasks, offerStatusOverrides])
 
   // 무효화(수락/거절 → getTasks·getTaskOffers)는 orval mutationInvalidates 가 자동 처리 (ADR-0025)
   const accept = useAcceptOffer({
     mutation: {
-      onSuccess: () => toast({ description: '섭외를 수락했어요', variant: 'success' }),
+      onSuccess: (_data, variables) => {
+        setOfferStatusOverride(variables.id, OfferStatus.ACCEPTED)
+        toast({ description: '섭외를 수락했어요', variant: 'success' })
+      },
       onError: (error) =>
         toast({
-          description: isApiErrorShape(error)
-            ? error.message
-            : '수락하지 못했어요. 다시 시도해주세요',
+          description: offerActionErrorMessage(
+            error,
+            '섭외를 수락하지 못했어요. 다시 시도해주세요'
+          ),
           variant: 'error',
         }),
     },
   })
   const deny = useDenyOffer({
     mutation: {
-      onSuccess: () => toast({ description: '섭외를 거절했어요', variant: 'success' }),
+      onSuccess: (_data, variables) => {
+        setOfferStatusOverride(variables.id, OfferStatus.DENIED)
+        toast({ description: '섭외를 거절했어요', variant: 'success' })
+      },
       onError: (error) =>
         toast({
-          description: isApiErrorShape(error)
-            ? error.message
-            : '거절하지 못했어요. 다시 시도해주세요',
+          description: offerActionErrorMessage(
+            error,
+            '섭외를 거절하지 못했어요. 다시 시도해주세요'
+          ),
           variant: 'error',
         }),
     },
   })
+  const pendingOfferId =
+    (accept.isPending ? accept.variables?.id : undefined) ??
+    (deny.isPending ? deny.variables?.id : undefined) ??
+    null
+  const pendingAction = accept.isPending ? 'accept' : deny.isPending ? 'deny' : null
+  const isOfferActionPending = pendingAction != null
 
   const data: ChatViewData = {
     chat,
     currentUserId,
     otherProfile,
     offerDetails,
+    isOfferDetailsLoading,
+    isOfferDetailsError,
     isLoading,
     isError,
   }
@@ -155,13 +192,17 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
       data={data}
       profileHref={(id) => `/profile/${id}`}
       offerActions={{
-        onAccept: (offerId) => accept.mutate({ id: offerId }),
-        onDeny: (offerId) => deny.mutate({ id: offerId }),
-        // 처리 중인 제안만 비활성 (중복 클릭 방지)
-        pendingOfferId:
-          (accept.isPending ? accept.variables?.id : undefined) ??
-          (deny.isPending ? deny.variables?.id : undefined) ??
-          null,
+        onAccept: (offerId) => {
+          if (isOfferActionPending) return
+          accept.mutate({ id: offerId })
+        },
+        onDeny: (offerId) => {
+          if (isOfferActionPending) return
+          deny.mutate({ id: offerId })
+        },
+        // 처리 중엔 모든 섭외 버튼을 잠그고, 해당 카드의 해당 버튼만 loading 표시한다.
+        pendingOfferId,
+        pendingAction,
       }}
       renderShell={careerShell(() => router.back(), { fill: true })}
     />
