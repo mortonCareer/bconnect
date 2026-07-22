@@ -21,7 +21,7 @@ export const FEATURES: { icon: string; title: string; desc: string }[] = [
     desc: '현장명, 위치, 시간을 한 번에 확인하고 팀원과 일감을 간편하게 공유해요',
   },
   {
-    icon: '/landing/feature-settlement.svg',
+    icon: '/landing/feature-settlement-career.svg',
     title: '투명한 정산 시스템',
     desc: '안심하고 일만 할 수 있도록, 대금 지급 현황을 한눈에 확인할 수 있어요',
   },
