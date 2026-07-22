@@ -7,7 +7,7 @@ import {
   TaskType,
   Trade,
 } from '@bconnect/api-client'
-import type { Attachment, Feed, Task } from '@bconnect/api-client'
+import type { Attachment, Feed, KakaoSido, Task } from '@bconnect/api-client'
 
 interface FeedSeed {
   name: string
@@ -21,7 +21,7 @@ interface FeedSeed {
   task?: { company: string; days: number }
   role: ProfileRole
   /** 시/도 명칭(카카오 sido 표기) — regionOfState 정확 일치 매핑 검증용. 생략 시 주소 없는 프로필 경로 */
-  state?: string
+  state?: KakaoSido
 }
 
 const FEED_SEEDS: FeedSeed[] = [

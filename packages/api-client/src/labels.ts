@@ -148,7 +148,7 @@ export function getRegionLabel(region: Region): string {
 // 카카오 우편번호(shorthand 표기)가 내려주는 sido 리터럴 → Region 정확 일치 맵 (#1000 위젯 실측).
 // 축약형 11종 + 축약 예외 전체형 5종. 통합 전 표기('광주'·'전남')는 전제하지 않는다 — 출시 전이라 저장 행 없음.
 // 목록에 없는 값은 미상 — 새 행정구역 표기가 나오면 조용한 오분류 대신 명시적으로 드러난다.
-const SIDO_TO_REGION: Record<string, Region> = {
+const SIDO_TO_REGION = {
   서울: 'SEOUL',
   부산: 'BUSAN',
   대구: 'DAEGU',
@@ -164,8 +164,11 @@ const SIDO_TO_REGION: Record<string, Region> = {
   강원특별자치도: 'GANGWON',
   전북특별자치도: 'JEONBUK',
   제주특별자치도: 'JEJU',
-  전남광주통합특별시: Region.JEONNAM_GWANGJU,
-}
+  전남광주통합특별시: 'JEONNAM_GWANGJU',
+} as const satisfies Record<string, Region>
+
+/** 카카오 우편번호(shorthand 표기)가 내려주는 sido 리터럴 유니온 — 시드·픽스처는 string 대신 이걸 사용 */
+export type KakaoSido = keyof typeof SIDO_TO_REGION
 
 const reportedUnknownStates = new Set<string>()
 
@@ -174,7 +177,7 @@ export function regionOfState(state: string | null | undefined): Region | undefi
   if (!state) return undefined
   const trimmed = state.trim()
   if (!trimmed) return undefined
-  const region = SIDO_TO_REGION[trimmed]
+  const region = (SIDO_TO_REGION as Record<string, Region | undefined>)[trimmed]
   if (region === undefined && !reportedUnknownStates.has(trimmed)) {
     reportedUnknownStates.add(trimmed)
     console.warn(`[regionOfState] 미등록 시/도 표기 "${trimmed}" — 지역 미상 처리 (#1000)`)
