@@ -1,5 +1,6 @@
 import { regionOfState } from '@bconnect/api-client'
 import type { Address } from '@bconnect/api-client'
+import { UnknownSidoError } from '../errors/index'
 
 /** 카카오 우편번호 oncomplete 결과 중 우리가 읽는 부분집합 (react-daum-postcode 결과와 구조 호환) */
 export interface KakaoAddressResult {
@@ -9,14 +10,6 @@ export interface KakaoAddressResult {
   userSelectedType: 'R' | 'J'
   sido: string
   sigungu: string
-}
-
-/** 시/도 정확 일치 실패 — 주소 입력(쓰기)은 저장 차단, 호출부가 잡아 에러 표시 (#1000) */
-export class UnknownSidoError extends Error {
-  constructor(public readonly sido: string) {
-    super(`인식할 수 없는 시/도 표기: ${sido}`)
-    this.name = 'UnknownSidoError'
-  }
 }
 
 /**

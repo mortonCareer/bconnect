@@ -94,10 +94,27 @@ export function getCredentialLabel(type: CredentialType): string {
 }
 
 // FE 공용 지역 코드 — 전남광주통합특별시(2026-07-01 출범, 광주·전남 폐지) 반영.
-// #998 BE 공용 Region enum 승격 전까지의 FE 확장 타입. 승격 시 generated enum 으로 교체.
-export const JEONNAM_GWANGJU = 'JEONNAM_GWANGJU' as const
+// #998 BE 공용 Region enum 승격 전까지의 FE 독립 정의(generated enum 과 같은 const 객체 스타일). 승격 시 generated 로 교체.
+export const Region = {
+  SEOUL: 'SEOUL',
+  BUSAN: 'BUSAN',
+  DAEGU: 'DAEGU',
+  INCHEON: 'INCHEON',
+  JEONNAM_GWANGJU: 'JEONNAM_GWANGJU',
+  DAEJEON: 'DAEJEON',
+  ULSAN: 'ULSAN',
+  SEJONG: 'SEJONG',
+  GYEONGGI: 'GYEONGGI',
+  GANGWON: 'GANGWON',
+  CHUNGBUK: 'CHUNGBUK',
+  CHUNGNAM: 'CHUNGNAM',
+  JEONBUK: 'JEONBUK',
+  GYEONGBUK: 'GYEONGBUK',
+  GYEONGNAM: 'GYEONGNAM',
+  JEJU: 'JEJU',
+} as const
 
-export type Region = Exclude<CrawledRegion, 'GWANGJU' | 'JEONNAM'> | typeof JEONNAM_GWANGJU
+export type Region = (typeof Region)[keyof typeof Region]
 
 // 지역(시/도) 한글 라벨 SSOT — career(lib/region.ts)·plan(FilterBar·크롤링 카드)이 공유. 자체 하드코딩 금지.
 export const REGION_LABELS: Record<Region, string> = {
@@ -147,9 +164,9 @@ const SIDO_TO_REGION: Record<string, Region> = {
   강원특별자치도: 'GANGWON',
   전북특별자치도: 'JEONBUK',
   제주특별자치도: 'JEJU',
-  전남광주통합특별시: JEONNAM_GWANGJU,
-  광주: JEONNAM_GWANGJU,
-  전남: JEONNAM_GWANGJU,
+  전남광주통합특별시: Region.JEONNAM_GWANGJU,
+  광주: Region.JEONNAM_GWANGJU,
+  전남: Region.JEONNAM_GWANGJU,
 }
 
 const reportedUnknownStates = new Set<string>()
@@ -169,5 +186,5 @@ export function regionOfState(state: string | null | undefined): Region | undefi
 
 /** 크롤링 도메인 CrawledRegion → Region. 폐지된 광주·전남 값은 통합 지역으로 흡수. */
 export function regionOfCrawled(state: CrawledRegion): Region {
-  return state === 'GWANGJU' || state === 'JEONNAM' ? JEONNAM_GWANGJU : state
+  return state === 'GWANGJU' || state === 'JEONNAM' ? Region.JEONNAM_GWANGJU : state
 }

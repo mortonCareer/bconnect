@@ -4,7 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import { z } from 'zod'
-import { mapKakaoAddress, UnknownSidoError } from '@bconnect/config/address'
+import { mapKakaoAddress } from '@bconnect/config/address'
+import { UnknownSidoError, UNKNOWN_SIDO_MESSAGE } from '@bconnect/config/errors'
 import {
   AddressSearchDialog,
   Button,
@@ -150,7 +151,7 @@ function AddressRow({ initialAddress }: { initialAddress: string }) {
               setSidoError(null)
             } catch (e) {
               if (!(e instanceof UnknownSidoError)) throw e
-              setSidoError('주소의 시/도를 인식할 수 없습니다. 주소를 다시 검색해주세요.')
+              setSidoError(UNKNOWN_SIDO_MESSAGE)
             }
           }}
         />

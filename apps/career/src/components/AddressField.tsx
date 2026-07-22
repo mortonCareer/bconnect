@@ -3,7 +3,8 @@
  */
 'use client'
 
-import { mapKakaoAddress, UnknownSidoError } from '@bconnect/config/address'
+import { mapKakaoAddress } from '@bconnect/config/address'
+import { UnknownSidoError, UNKNOWN_SIDO_MESSAGE } from '@bconnect/config/errors'
 import {
   AddressSearchDrawer,
   cn,
@@ -25,8 +26,6 @@ import type { Address } from '@bconnect/api-client'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
-
-const UNKNOWN_SIDO_MESSAGE = '주소의 시/도를 인식할 수 없습니다. 주소를 다시 검색해주세요.'
 
 interface AddressFieldProps<T extends FieldValues> {
   control: Control<T>
