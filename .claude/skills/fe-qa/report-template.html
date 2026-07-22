@@ -1,0 +1,72 @@
+<!--
+  fe-qa Artifact 보고서 골격.
+  사용법: {{...}} 치환 + 시나리오 카드(.card) 반복. Artifact 도구가 doctype/head/body를 감싸므로
+  이 파일 내용을 그대로 본문으로 쓴다. 스크린샷은 반드시 data URI(JPEG, 긴 변 ~900px 다운스케일).
+  발행: <title> 유지한 채 같은 파일 경로로 재배포하면 동일 URL 갱신.
+-->
+<title>{{프로젝트}} QA — {{대상}}</title>
+<style>
+  :root { --ok:#1a7f37; --fail:#cf222e; --blocked:#9a6700; --known:#57606a;
+          --bg:#ffffff; --fg:#1f2328; --muted:#57606a; --card:#f6f8fa; --border:#d0d7de; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --fg:#e6edf3; --muted:#8b949e; --card:#161b22; --border:#30363d;
+            --ok:#3fb950; --fail:#f85149; --blocked:#d29922; --known:#8b949e; }
+  }
+  :root[data-theme="dark"] { --bg:#0d1117; --fg:#e6edf3; --muted:#8b949e; --card:#161b22; --border:#30363d;
+            --ok:#3fb950; --fail:#f85149; --blocked:#d29922; --known:#8b949e; }
+  :root[data-theme="light"] { --bg:#ffffff; --fg:#1f2328; --muted:#57606a; --card:#f6f8fa; --border:#d0d7de;
+            --ok:#1a7f37; --fail:#cf222e; --blocked:#9a6700; --known:#57606a; }
+  body { background:var(--bg); color:var(--fg); font-family:system-ui,sans-serif;
+         max-width:960px; margin:0 auto; padding:24px 16px; line-height:1.6; }
+  h1 { font-size:1.5rem; } h2 { font-size:1.2rem; margin-top:2.5rem; border-bottom:1px solid var(--border); padding-bottom:6px; }
+  .meta { color:var(--muted); font-size:.9rem; }
+  .scroll { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font-size:.9rem; }
+  th,td { border:1px solid var(--border); padding:6px 10px; text-align:left; vertical-align:top; }
+  th { background:var(--card); }
+  .badge { display:inline-block; padding:1px 8px; border-radius:10px; font-size:.78rem; font-weight:600; color:#fff; }
+  .PASS{background:var(--ok);} .FAIL{background:var(--fail);} .BLOCKED{background:var(--blocked);} .KNOWN{background:var(--known);}
+  .card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px; margin:16px 0; }
+  .card h3 { margin:0 0 8px; font-size:1rem; }
+  .card img { max-width:100%; border:1px solid var(--border); border-radius:4px; }
+  details > summary { cursor:pointer; color:var(--muted); font-size:.85rem; }
+  pre { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:10px;
+        font-size:.8rem; overflow-x:auto; }
+  .issue-draft { border-left:3px solid var(--fail); padding-left:12px; }
+</style>
+
+<h1>{{프로젝트}} QA 보고서 — {{대상}}</h1>
+<p class="meta">{{날짜}} · FE={{fe환경}} / BE={{be환경}} · 브랜치 {{브랜치}} {{환경주석: 예 "BE=MSW mock — 4xx는 mock 재현, 실계약 미검증"}}</p>
+
+<h2>요약</h2>
+<div class="scroll"><table>
+  <tr><th>#</th><th>시나리오</th><th>판정</th><th>비고</th></tr>
+  <tr><td>1</td><td>{{시나리오명}}</td><td><span class="badge PASS">PASS</span></td><td></td></tr>
+  <tr><td>2</td><td>{{...}}</td><td><span class="badge FAIL">FAIL</span></td><td><a href="#s2">상세</a> · 이슈초안 A</td></tr>
+  <tr><td>3</td><td>{{...}}</td><td><span class="badge BLOCKED">BLOCKED</span></td><td>{{유발 불가 사유 — 커버리지 공백}}</td></tr>
+</table></div>
+<p>번외 버그 {{N}}건 (신규 {{n}} / 기존 {{k}}) — <a href="#incidental">섹션</a></p>
+
+<h2>시나리오 상세</h2>
+<!-- 시나리오마다 반복 -->
+<div class="card" id="s2">
+  <h3>#2 {{시나리오명}} <span class="badge FAIL">FAIL</span></h3>
+  <p><strong>절차</strong>: {{재현 절차}}<br><strong>기대</strong>: {{기대}}<br><strong>실제</strong>: {{실제}}</p>
+  <img src="data:image/jpeg;base64,{{...}}" alt="{{스크린샷 설명}}">
+  <details><summary>네트워크 증거</summary>
+    <pre>{{METHOD}} {{URL}} → {{status}}
+요청: {{payload 발췌}}
+응답: {{body 발췌}}</pre>
+  </details>
+  <details><summary>콘솔 발췌</summary><pre>{{콘솔 로그}}</pre></details>
+</div>
+
+<h2 id="incidental">번외 버그 (스위프)</h2>
+<!-- 동일 .card 형식. 기존 이슈는 <span class="badge KNOWN">KNOWN #802</span> -->
+
+<h2>이슈 초안</h2>
+<div class="card issue-draft">
+  <h3>초안 A — {{이슈 제목}}</h3>
+  <p class="meta">레이블: {{레이블}} · 근거 시나리오: #2</p>
+  <pre>{{이슈 본문 전문 — 재현/예상/실제/증거. 생성 후 링크로 치환: → 이슈 #NNN}}</pre>
+</div>
