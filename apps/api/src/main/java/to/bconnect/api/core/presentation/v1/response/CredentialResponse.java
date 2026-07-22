@@ -1,0 +1,37 @@
+package to.bconnect.api.core.presentation.v1.response;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import to.bconnect.api.attachment.domain.Attachment;
+import to.bconnect.api.attachment.presentation.v1.AttachmentResponse;
+import to.bconnect.api.core.domain.credential.Credential;
+import to.bconnect.api.storage.credential.CredentialStatus;
+import to.bconnect.api.storage.credential.CredentialType;
+
+import java.time.LocalDate;
+import java.time.Instant;
+
+public record CredentialResponse(
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long memberId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) CredentialType type,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) CredentialStatus status,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) LocalDate expiredAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String note,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) AttachmentResponse attachment
+) {
+    public static CredentialResponse of(Credential credential, Attachment attachment, String url) {
+        return new CredentialResponse(
+                credential.id(),
+                credential.memberId(),
+                credential.type(),
+                credential.status(),
+                credential.expiredAt(),
+                credential.note(),
+                credential.createdAt(),
+                credential.modifiedAt(),
+                attachment == null ? null : AttachmentResponse.of(attachment, url)
+        );
+    }
+}

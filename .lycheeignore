@@ -9,7 +9,7 @@
 
 # 인증 wall — 링크는 살아있으나 익명 접근 시 401/403
 # (Vercel / Railway / AWS / Firebase 콘솔)
-^https://vercel\.com/morton-2262d67a
+^https://vercel\.com/morton-so
 ^https://railway\.com/project
 ^https://console\.firebase\.google\.com
 ^https://morton-so\.signin\.aws\.amazon\.com
@@ -26,7 +26,7 @@
 ^https?://0\.0\.0\.0
 
 # docs 본문 안의 예시/placeholder URL (실제 도메인 아님)
-# - Vercel 프리뷰 URL 패턴 예시 (git-workflow / qa-and-testing 안)
+# - Vercel 프리뷰 URL 패턴 예시
 ^https://morton-(career|plan)-git-
 # - 미배포 CDN 도메인 (file-infrastructure-design 안 — production 활성 시 ignore 제거 검토)
 ^https://static\.bconnect\.to
@@ -37,3 +37,7 @@
 ^https://github\.com/(owner|org)/repo
 # - notion-task-sync 의 JS template literal (lychee 가 plain URL 로 잘못 파싱)
 ^https://github\.com/org/repo/(issues|pull)/\$\{
+
+# 외부 도구 — SPA 라 lychee 가 timeout (링크 자체는 살아있음)
+# - uicolors.app: Tailwind 색 스케일 생성기 (ADR-0012 에서 참조)
+^https://uicolors\.app

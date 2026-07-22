@@ -25,20 +25,23 @@
 블로거의 프로필과 게시글을 병렬로 수집한다.
 
 - **입력**: 블로그 게시글 URL
-- **출력**: 프로필 소개, 본문, 배너 이미지, 연락처 등
+- **출력**: 프로필 소개, 본문, 배너 이미지, 연락처, 시공 사례 글(제목·본문·사진) 등
 - **파일**: `channels/naver_blog.py` → `explore_blogger()`
 - **동작**:
   1. 프로필 (모바일 DOM), 배너 (데스크톱 CSS), 게시글 본문을 `asyncio.gather`로 **동시 요청**
-  2. 연락처 추출 — 3단계 폴백:
-     - 프로필 소개글 → 게시글 본문 → RSS 최근 5건
-  3. 각 출처별 `phone_source` 태깅 (`"profile"` | `"post"`)
+  2. 시공 사례 수집: 검색 글 + RSS 최근 글 총 5건 (`POSTS_PER_MEMBER`), 글당 본문 사진 최대 5장 (`IMAGES_PER_POST`, 네이버 CDN 호스트만·스티커 제외·`type=w966` 승격)
+  3. 연락처 추출 — 3단계 폴백:
+     - 프로필 소개글 → 수집한 글 본문 → 남은 RSS 글 (최대 20건)
+  4. 각 출처별 `phone_source` 태깅 (`"profile"` | `"post"`)
+
+  > 사진 URL은 네이버 CDN 원본을 그대로 저장 (핫링크). 외부 사이트 Referer는 403이므로 렌더 시 `referrerpolicy="no-referrer"` 필요.
 
 ### 3. 분류 (Classify)
 
 LLM이 수집된 텍스트를 분석하여 구조화된 데이터를 추출한다.
 
 - **입력**: 블로거명, 프로필 소개 + 게시글 본문, 블로그 제목
-- **출력**: `{name, trades, rank, region, address, phone}`
+- **출력**: `{name, trades, rank, region(시/도), address, phone, experience, ...}`
 - **파일**: `classifier.py` → `classify()`
 - **동작**:
   - LLM 우선순위: Anthropic Claude → OpenAI GPT → 수동 JSON 모드
@@ -60,7 +63,7 @@ LLM이 수집된 텍스트를 분석하여 구조화된 데이터를 추출한�
 
 노션 DB에 페이지를 생성하거나 기존 레코드를 보강한다.
 
-- **입력**: `Technician` 모델
+- **입력**: `CrawledMember` 모델
 - **출력**: 노션 page_id
 - **파일**: `notion.py` → `save_technician()`
 - **동작**:
@@ -105,7 +108,7 @@ uv run crawler --force --full --per-query 3
 # 2단계 워크플로우: 검수 후 저장
 # 1) dry-run으로 크롤링+분류 (보고서 JSON에 전체 데이터 저장)
 uv run crawler --dry-run "타일 시공업체 수도권"
-# 2) reports/xxx.json 검수 → 불필요한 항목 삭제 → 저장
+# 2) reports/xxx.json 검수 → members[] 항목 삭제/수정 → 저장
 uv run crawler --from-file reports/2025-02-10_123456.json
 
 # 특정 키워드만 실행 (Python)
@@ -118,6 +121,29 @@ md = report.save(REPORTS_DIR)
 print_summary(report)
 "
 ```
+
+### 수집 · 분류 분리 + 강한 판단자 in-loop (#920, #953)
+
+수집(느림, 네트워크)과 분류(싸고 재실행 가능)를 나눠, 분류 방법을 바꿔도 다시 수집하지 않는다. 배포된 자동 분류기(GPT)가 놓치는 홍보·범위 밖 오탐을 더 정확한 판단자(사람 또는 강한 모델)로 걸러낼 때 쓴다.
+
+```bash
+# 1) 원본만 수집 (LLM 없이, 이미 수집/적재한 블로그는 건너뜀)
+uv run crawler --collect-raw --full --per-query 20   # → reports/raw/*.jsonl
+
+# 2) (선택) 더 정확한 판단자로 라벨 만들기
+#    reports/raw 를 읽어 블로그별로 is_professional + 필드를 판단한 JSON 배열을 만든다.
+#    형식: [{"id": "<blog_url>", "is_professional": true, "name": "...", "trades": [...], ...}]
+#    사람이든 강한 모델(예: Claude)이든 무엇이 만들어도 된다.
+
+# 3) 원본에서 분류만 실행 (라벨이 있으면 그 블로그는 LLM 대신 라벨 사용)
+uv run crawler --classify-from-raw reports/raw/naver-<시각>.jsonl --labels labels.json
+#    → reports/<시각>.json 에 통과한 기술자(members[]) 저장. 라벨에 없는 블로그는 기본 LLM 이 분류.
+
+# 4) 통과한 기술자를 crawled_* DB 에 적재 (upsert, CRAWLED_DB_URL 필요)
+uv run crawler --export-db reports/<시각>.json
+```
+
+규칙 선필터(#915)가 확실한 비-기술자(자동차·인력사무소·협찬글 등)를 라벨/LLM 전에 먼저 제거하므로, 판단 비용이 드는 대상만 라벨/LLM 으로 넘어간다.
 
 ## 환경변수
 
@@ -151,7 +177,7 @@ print_summary(report)
 src/crawler/
 ├── main.py              # 파이프라인 오케스트레이션, CLI 진입점
 ├── config.py            # 환경변수 설정 (pydantic-settings)
-├── models.py            # Technician 모델, TRADES/RANKS/SEARCH_KEYWORDS 정의
+├── models.py            # CrawledMember 모델(BE 계약 동형), TRADES/RANKS/SEARCH_KEYWORDS 정의
 ├── classifier.py        # LLM 분류 (Anthropic/OpenAI/수동)
 ├── notion.py            # 노션 DB CRUD, 중복체크, enrichment
 ├── progress.py          # Rich 프로그레스 바, 요약 테이블

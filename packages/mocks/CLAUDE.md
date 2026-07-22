@@ -1,6 +1,6 @@
 # `@bconnect/mocks` — MSW handler 패키지
 
-브라우저 Service Worker 와 Node 테스트 환경 모두에서 사용 가능한 MSW handler 모음. orval 이 자동 생성한 handlers 와 손으로 쓴 stateful override 를 합쳐 export.
+브라우저 Service Worker 에서 쓰는 MSW handler 모음. orval 이 자동 생성한 handlers 와 손으로 쓴 stateful override 를 합쳐 export.
 
 ## 디렉토리
 
@@ -8,17 +8,15 @@
 packages/mocks/src/
 ├── overrides/
 │   ├── auth.ts                   # OTP 검증 stateful, signup/login 분기, error 응답
-│   └── devices.ts                # FCM 토큰 UPSERT 의미
+│   └── notifications.ts          # 알림 목록·읽음 상태 stateful (커서 페이징, 뱃지 연동)
 ├── handlers.ts                   # [...overrides, ...getBconnectAPIMock()]
-├── browser.ts                    # setupWorker (브라우저 dev)
-├── server.ts                     # setupServer (Node 테스트)
-└── index.ts                      # public exports
+└── browser.ts                    # setupWorker (브라우저 dev, 유일한 진입점)
 ```
 
 ## 핵심 패턴 — orval generated + thin override
 
 - **자동 생성 (orval)**: `getBconnectAPIMock()` — spec 의 모든 endpoint 에 대해 faker 기반 random 응답 핸들러 생성. spec 변경 → 자동 동기화.
-- **override (손으로)**: stateful flow (예: OTP 발송 ↔ 검증 매칭, signup/login 분기, FCM 토큰 UPSERT) 만. 약 100 LOC.
+- **override (손으로)**: stateful flow (예: OTP 발송 ↔ 검증 매칭, signup/login 분기, 알림 읽음 상태) 만.
 - **합치기 순서**: `[...overrides, ...getBconnectAPIMock()]` — override 가 우선 매칭 (배열 앞쪽).
 
 ## 사용처
@@ -44,17 +42,9 @@ await worker.start()
 
 `pnpm install` 시 msw 패키지의 postinstall 이 `apps/{career,plan}/public/mockServiceWorker.js` 자동 재생성 (gitignored — 진짜 SoT 는 node_modules/msw).
 
-### Node 테스트 (Vitest 등)
+### Node 테스트
 
-```typescript
-import { server } from '@bconnect/mocks/server'
-
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
-```
-
-브라우저와 동일한 핸들러 그대로 재사용.
+현재 레포에 테스트 러너가 없어 Node 용 `setupServer` 진입점을 두지 않는다. 테스트를 도입할 때 `browser.ts` 와 같은 방식으로 `handlers` 를 재사용하는 `server.ts` 를 추가한다.
 
 ## 새 stateful override 추가 절차
 

@@ -29,14 +29,21 @@ resource "aws_iam_policy" "app_access" {
         ]
         Resource = [
           aws_s3_bucket.app_storage.arn,
-          "${aws_s3_bucket.app_storage.arn}/*"
+          "${aws_s3_bucket.app_storage.arn}/*",
+          aws_s3_bucket.app_storage_dev.arn,
+          "${aws_s3_bucket.app_storage_dev.arn}/*"
         ]
       },
       {
         Sid    = "SNSAccess"
         Effect = "Allow"
+        # Publish: SMS OTP + 웹 푸시 발송 / 나머지: 푸시 디바이스 endpoint 생명주기 관리
         Action = [
-          "sns:Publish"
+          "sns:Publish",
+          "sns:CreatePlatformEndpoint",
+          "sns:GetEndpointAttributes",
+          "sns:SetEndpointAttributes",
+          "sns:DeleteEndpoint"
         ]
         Resource = ["*"]
       }

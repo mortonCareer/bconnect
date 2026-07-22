@@ -1,111 +1,93 @@
 @import 'tailwindcss';
 
-@source "../../apps/career/src/**/*.tsx";
-@source "../components/**/*.tsx";
+@source "../../apps/career/src/**/*.{ts,tsx}";
+@source "../../apps/plan/src/**/*.{ts,tsx}";
+@source "../components/**/*.{ts,tsx}";
+@source "../../../features/src/**/*.{ts,tsx}";
 
 /**
- * Morton Design System — Color Tokens, Typography, Font
+ * Morton Design System — Design Tokens (Color), Typography, Font
  *
  * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=603-4661
  *
- * 토큰 변경 시 Figma의 디자인 시스템 페이지(위 URL)와 동기화.
- * SSoT는 이 CSS 파일이며, Figma는 시각 명세 참조용.
+ * SSOT는 Figma Variables다 (ADR-0012). 이 파일은 Figma Variables를 코드로
+ * sync한 결과물 — 토큰은 Figma에서 먼저 바꾸고 그 뒤 이 파일에 반영한다.
+ * 구조: Primitive(원시 팔레트) + Semantic(역할) 2-layer.
+ * 네이밍 컨벤션 / 새 토큰 추가 절차는 packages/ui/CLAUDE.md 참조.
  */
 
-/* Morton Design System - Color Tokens */
+/* ==============================================================
+   Design Tokens (ADR-0012) — Primitive / Semantic 2-layer
+   ============================================================== */
+@theme {
+  /* --- Layer 1 · Primitive — brand 색 스케일 ---------------------
+     비-brand 색(gray·red·orange·green …)은 Tailwind v4 기본 팔레트를
+     그대로 쓴다. 여기서 재정의하지 않는다 (ADR-0012 §3). */
+
+  /* primary — brand 앵커 #386dff @ 500 (https://uicolors.app/generate/386dff) */
+  --color-primary-50: #eef4ff;
+  --color-primary-100: #d9e5ff;
+  --color-primary-200: #bcd2ff;
+  --color-primary-300: #8eb6ff;
+  --color-primary-400: #5991ff;
+  --color-primary-500: #386dff;
+  --color-primary-600: #1b47f5;
+  --color-primary-700: #1432e1;
+  --color-primary-800: #172ab6;
+  --color-primary-900: #192a8f;
+  --color-primary-950: #141c57;
+
+  /* secondary — brand 앵커 #eaefff @ 50 (https://uicolors.app/generate/eaefff) */
+  --color-secondary-50: #eaefff;
+  --color-secondary-100: #e0e7ff;
+  --color-secondary-200: #c7d2fe;
+  --color-secondary-300: #a5b4fc;
+  --color-secondary-400: #818cf8;
+  --color-secondary-500: #6366f1;
+  --color-secondary-600: #4f46e5;
+  --color-secondary-700: #4338ca;
+  --color-secondary-800: #3730a3;
+  --color-secondary-900: #312e81;
+  --color-secondary-950: #1e1b4b;
+
+  /* --- Layer 2 · Semantic — 역할 토큰 ---------------------------
+     "이 색을 어디에 쓰는가". shadcn 토큰 어휘를 semantic 계층으로
+     쓰고, 값은 Layer 1(brand 스케일 · Tailwind 팔레트)을 alias 한다
+     (ADR-0012 §4·§7). */
+
+  /* surface — 배경 · 표면 */
+  --color-background: #ffffff;
+  --color-foreground: var(--color-gray-900);
+  --color-card: #ffffff;
+  --color-card-foreground: var(--color-gray-900);
+  --color-popover: #ffffff;
+  --color-popover-foreground: var(--color-gray-900);
+  --color-muted: var(--color-gray-100);
+  --color-muted-foreground: var(--color-gray-500);
+  --color-accent: var(--color-gray-100);
+  --color-accent-foreground: var(--color-gray-900);
+
+  /* action — 상호작용(버튼 · 링크 · 포커스) */
+  --color-primary: var(--color-primary-500);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-secondary-50);
+  --color-secondary-foreground: var(--color-primary-700);
+  --color-ring: var(--color-primary-500);
+
+  /* feedback — 상태 알림. 현재 error 만 도입 (warning·success·info 보류, ADR-0012 §5) */
+  --color-destructive: var(--color-red-500);
+
+  /* border — 외곽선 · 구분선 · 입력 필드 */
+  --color-border: var(--color-gray-200);
+  --color-input: var(--color-gray-300);
+}
+
 :root {
-  /* Primary Colors */
-  --bconnect-primary: #386dff;
-  --bconnect-primary-sub: #eaefff;
-  --bconnect-primary-hover: #2858e0;
-
-  /* Grayscale */
-  --bconnect-gray-900: #1b1b1b;
-  --bconnect-gray-700: #7b7b7b;
-  --bconnect-gray-500: #a5a5a5;
-  --bconnect-gray-300: #e5e5e5;
-  --bconnect-gray-100: #f4f4f4;
-
-  /* Semantic Colors */
-  --bconnect-error: #ff4242;
-
-  /* shadcn/ui compatibility */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.965 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.965 0 0);
-  --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0.965 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
   --radius: 0.625rem;
 }
 
-/* shadcn/ui CSS Variables - Dark Mode */
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-}
-
-/* Tailwind v4 Theme */
+/* Tailwind v4 Theme — radius · animation · typography */
 @theme inline {
-  /* Morton Design System Colors */
-  --color-bconnect-primary: var(--bconnect-primary);
-  --color-bconnect-primary-sub: var(--bconnect-primary-sub);
-  --color-bconnect-primary-hover: var(--bconnect-primary-hover);
-  --color-bconnect-gray-900: var(--bconnect-gray-900);
-  --color-bconnect-gray-700: var(--bconnect-gray-700);
-  --color-bconnect-gray-500: var(--bconnect-gray-500);
-  --color-bconnect-gray-300: var(--bconnect-gray-300);
-  --color-bconnect-gray-100: var(--bconnect-gray-100);
-  --color-bconnect-error: var(--bconnect-error);
-
-  /* shadcn/ui compatibility */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-
   /* Radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -118,7 +100,7 @@
 
   /* Typography - Pretendard */
   --font-sans:
-    'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    var(--font-pretendard), -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 
   /* Font sizes matching Figma */
   --font-size-xs: 0.75rem; /* 12px */
@@ -161,6 +143,38 @@
   --text-r-12--line-height: 1.6;
 }
 
+/* Dark mode 스캐폴드 — 1차 범위 외 (ADR-0012 §6).
+   theme provider / 토글이 아직 없어 현재 비활성. 다크 도입 시 이 블록의
+   semantic 값만 검수하면 된다 — Layer 2 토큰을 다크용 primitive step 으로
+   재매핑하는 구조. brand 색은 다크 배경에서 한 단계 밝은 step 을 쓴다. */
+.dark {
+  /* surface */
+  --color-background: var(--color-gray-950);
+  --color-foreground: var(--color-gray-50);
+  --color-card: var(--color-gray-900);
+  --color-card-foreground: var(--color-gray-50);
+  --color-popover: var(--color-gray-900);
+  --color-popover-foreground: var(--color-gray-50);
+  --color-muted: var(--color-gray-800);
+  --color-muted-foreground: var(--color-gray-400);
+  --color-accent: var(--color-gray-800);
+  --color-accent-foreground: var(--color-gray-50);
+
+  /* action */
+  --color-primary: var(--color-primary-400);
+  --color-primary-foreground: var(--color-gray-950);
+  --color-secondary: var(--color-secondary-800);
+  --color-secondary-foreground: var(--color-gray-50);
+  --color-ring: var(--color-primary-400);
+
+  /* feedback */
+  --color-destructive: var(--color-red-400);
+
+  /* border */
+  --color-border: var(--color-gray-800);
+  --color-input: var(--color-gray-800);
+}
+
 @keyframes accordion-down {
   from {
     height: 0;
@@ -189,8 +203,8 @@ body {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-background);
+  color: var(--color-foreground);
   font-family: var(--font-sans);
 }
 

@@ -47,6 +47,12 @@ variable "db_name" {
   default     = "morton"
 }
 
+variable "dev_db_password" {
+  description = "PostgreSQL password for dev(staging) environment (prod 와 분리된 시크릿)"
+  type        = string
+  sensitive   = true
+}
+
 # =============================================================================
 # Spring App Config
 # =============================================================================
@@ -59,6 +65,12 @@ variable "spring_profile" {
 
 variable "jwt_secret" {
   description = "JWT signing secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "dev_jwt_secret" {
+  description = "JWT signing secret for dev(staging) environment (prod 와 분리된 시크릿)"
   type        = string
   sensitive   = true
 }
@@ -78,6 +90,12 @@ variable "s3_bucket_name" {
   type        = string
 }
 
+variable "dev_s3_bucket_name" {
+  description = "S3 bucket name for dev(staging) environment file storage"
+  type        = string
+  default     = "morton-storage-dev"
+}
+
 # =============================================================================
 # Domain Config
 # =============================================================================
@@ -85,6 +103,12 @@ variable "s3_bucket_name" {
 variable "domain" {
   description = "Root domain for the project (e.g., bconnect.to)"
   type        = string
+}
+
+variable "dev_api_url" {
+  description = "Railway staging BE base URL — dev 브랜치 Vercel 환경에서 호출 (#352, ADR-0010)"
+  type        = string
+  default     = "https://api.dev.bconnect.to"
 }
 
 # =============================================================================
@@ -181,6 +205,13 @@ variable "firebase_billing_account_id" {
 
 variable "firebase_vapid_key" {
   description = "Firebase Web Push VAPID public key (Firebase Console → Cloud Messaging에서 수동 생성)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "firebase_service_account_json" {
+  description = "FCM(HTTP v1) 서비스 계정 키 JSON — SNS GCM 플랫폼 애플리케이션 credential 용. 절대 커밋 금지(gitignored tfvars/.secrets). 비어 있으면 SNS 플랫폼 앱 생성 생략."
   type        = string
   sensitive   = true
   default     = ""

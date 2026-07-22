@@ -1,0 +1,22 @@
+meta {
+  name: 사용자명 중복 확인 - 사용 가능
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/members/check-username?username=new-username
+  auth: none
+}
+
+params:query {
+  username: new-username
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.available).to.equal(true);
+  });
+}

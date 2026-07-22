@@ -2,6 +2,12 @@ provider "aws" {
   region = "ap-northeast-2"
 }
 
+# CloudFront viewer 인증서(ACM)는 us-east-1 에서만 발급 가능 → module.aws 에 주입.
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+}
+
 resource "aws_iam_account_alias" "this" {
   # "morton"은 다른 AWS 계정이 선점하여 사용 불가
   # 로그인: https://morton-so.signin.aws.amazon.com/console
@@ -9,8 +15,16 @@ resource "aws_iam_account_alias" "this" {
 }
 
 module "aws" {
-  source         = "./aws"
-  s3_bucket_name = var.s3_bucket_name
+  source                   = "./aws"
+  s3_bucket_name           = var.s3_bucket_name
+  dev_s3_bucket_name       = var.dev_s3_bucket_name
+  fcm_service_account_json = var.firebase_service_account_json
+  domain                   = var.domain
+
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
 }
 
 module "railway" {
@@ -25,13 +39,23 @@ module "railway" {
   db_password = var.db_password
   db_name     = var.db_name
 
+  dev_db_password = var.dev_db_password
+
   spring_profile = var.spring_profile
   jwt_secret     = var.jwt_secret
+  dev_jwt_secret = var.dev_jwt_secret
 
-  aws_access_key_id     = module.aws.access_key_id
-  aws_secret_access_key = module.aws.secret_access_key
-  aws_region            = var.aws_region
-  s3_bucket_name        = var.s3_bucket_name
+  aws_access_key_id            = module.aws.access_key_id
+  aws_secret_access_key        = module.aws.secret_access_key
+  aws_region                   = var.aws_region
+  s3_bucket_name               = var.s3_bucket_name
+  dev_s3_bucket_name           = var.dev_s3_bucket_name
+  sns_platform_application_arn = module.aws.sns_platform_application_arn
+
+  cloudfront_private_key     = module.aws.cloudfront_private_key_base64["prod"]
+  cloudfront_key_pair_id     = module.aws.cloudfront_key_pair_id["prod"]
+  dev_cloudfront_private_key = module.aws.cloudfront_private_key_base64["dev"]
+  dev_cloudfront_key_pair_id = module.aws.cloudfront_key_pair_id["dev"]
 
   domain = var.domain
 
@@ -55,8 +79,8 @@ module "vercel" {
 
   vercel_api_token = var.vercel_api_token
   domain           = var.domain
+  dev_api_url      = var.dev_api_url
 
-  project_name  = var.project_name
   github_repo   = var.github_repo
   github_branch = var.github_branch
 

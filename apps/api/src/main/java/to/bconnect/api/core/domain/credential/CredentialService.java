@@ -1,0 +1,97 @@
+package to.bconnect.api.core.domain.credential;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.attachment.domain.AttachmentLinker;
+import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.credential.CredentialEntity;
+import to.bconnect.api.storage.credential.CredentialRepository;
+import to.bconnect.api.storage.credential.CredentialStatus;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class CredentialService {
+
+    private final CredentialRepository credentialRepository;
+    private final AttachmentLinker attachmentLinker;
+
+    @Transactional(readOnly = true)
+    public List<Credential> list(Long memberId) {
+        return credentialRepository.findAllByMemberId(memberId)
+                .stream()
+                .map(Credential::of)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Credential> listLatestAccepted(Long memberId) {
+        // latest one per type
+        return credentialRepository.findAllByMemberId(memberId)
+                .stream()
+                .filter(it -> it.getStatus() == CredentialStatus.ACCEPTED)
+                .collect(Collectors.groupingBy(
+                        CredentialEntity::getType,
+                        Collectors.maxBy(Comparator.comparing(CredentialEntity::getCreatedAt))
+                ))
+                .values().stream()
+                .flatMap(Optional::stream)
+                .map(Credential::of)
+                .toList();
+    }
+
+    @Transactional
+    public Long create(AuthUser user, CreateCredential command) {
+        val created = new CredentialEntity(
+                user.id(),
+                command.type(),
+                command.expiredAt(),
+                command.note()
+        );
+
+        credentialRepository.save(created);
+        attachmentLinker.relink(user.id(), ReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
+        return created.getId();
+    }
+
+    @Transactional
+    public void delete(AuthUser user, Long id) {
+        val optional = credentialRepository.findById(id);
+        if (optional.isEmpty())
+            return;
+        val found = optional.get();
+
+        if (!found.getMemberId().equals(user.id()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        attachmentLinker.unlink(ReferenceType.CREDENTIAL, List.of(found.getId()));
+        credentialRepository.delete(found);
+    }
+
+    @Transactional
+    public void accept(Long id) {
+        val found = credentialRepository.findById(id)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        found.accept();
+    }
+
+    @Transactional
+    public void deny(Long id) {
+        val found = credentialRepository.findById(id)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        found.deny();
+    }
+}

@@ -15,10 +15,12 @@ bconnect은 **2단계 배포 모델**을 사용합니다:
 dev (개발 및 QA)  →  prod (프로덕션)
 ```
 
-| 환경 | 목적          | 배포 방식         | URL                               |
-| ---- | ------------- | ----------------- | --------------------------------- |
-| dev  | PR 프리뷰, QA | PR 생성 시 자동   | `*.vercel.app` (프리뷰 도메인)    |
-| prod | 실제 서비스   | main 머지 시 자동 | `bconnect.to`, `plan.bconnect.to` |
+| 환경 | 목적          | 배포 방식         |
+| ---- | ------------- | ----------------- |
+| dev  | PR 프리뷰, QA | PR 생성 시 자동   |
+| prod | 실제 서비스   | main 머지 시 자동 |
+
+각 환경의 도메인 매핑(career/plan/api × prod/dev/프리뷰/로컬)은 [도메인 현황](../reference/domains.md) 참조.
 
 ### dev 환경 (PR 프리뷰)
 
@@ -26,7 +28,7 @@ dev (개발 및 QA)  →  prod (프로덕션)
 - **배포 트리거**: PR 생성 또는 업데이트
 - **배포 플랫폼**: Vercel (Frontend), Railway (Backend)
 - **데이터**: 테스트 데이터 또는 Mock API
-- **URL 예시**: `https://<vercel-project>-git-<branch>-<team>.vercel.app` (각 PR Vercel comment에 자동 노출)
+- **URL**: 브랜치별 Vercel 프리뷰 도메인 (각 PR Vercel comment에 자동 노출) — [도메인 현황](../reference/domains.md) 참조
 
 ### prod 환경 (프로덕션)
 
@@ -34,10 +36,7 @@ dev (개발 및 QA)  →  prod (프로덕션)
 - **배포 트리거**: main 브랜치 머지
 - **배포 플랫폼**: Vercel (Frontend), Railway (Backend)
 - **데이터**: 실제 프로덕션 데이터
-- **URL**:
-  - Career App: `https://bconnect.to`
-  - Plan App: `https://plan.bconnect.to`
-  - API: `https://api.bconnect.to`
+- **URL**: career/plan/api production 도메인 — [도메인 현황](../reference/domains.md) 참조
 
 ---
 
@@ -45,36 +44,34 @@ dev (개발 및 QA)  →  prod (프로덕션)
 
 ### Frontend (Next.js)
 
-#### PR 프리뷰 배포
+Vercel 배포는 git push 자동배포가 아니라 **GitHub Actions의 CLI 소스 업로드**로 트리거된다 ([`vercel-deploy.yml`](../../.github/workflows/vercel-deploy.yml)). Vercel Pro 팀은 배포에 첨부된 git 커밋 author가 팀 멤버여야 하는데(시트 과금), `.git` 제거 후 CLI 업로드하면 git 메타가 없어 멤버 승격 없이 배포된다. git push 자동배포는 `git.deploymentEnabled: false`(각 앱 vercel.json)로 꺼져 있다. 운영 상세는 [infra/vercel/README.md](../../infra/vercel/README.md) 참조.
+
+#### dev 배포
 
 ```
-PR 생성/업데이트
+dev 브랜치 머지 (push)
     ↓
-Vercel 자동 빌드 시작
+GitHub Actions: vercel-deploy.yml → vercel deploy --target=dev
     ↓
-빌드 성공 (1-2분)
+Vercel 리모트 빌드 (custom environment "dev")
     ↓
-프리뷰 URL 생성
+dev 도메인 업데이트
     ↓
-GitHub PR 댓글에 링크 추가
-    ↓
-QA 진행
+스프린트 단위 QA
 ```
 
 #### 프로덕션 배포
 
 ```
-PR 승인 + main 머지
+dev → main 머지 (push)
     ↓
-Vercel 프로덕션 빌드
+GitHub Actions: vercel-deploy.yml → vercel deploy --target=production
     ↓
-빌드 성공 (1-2분)
+Vercel 리모트 빌드
     ↓
 bconnect.to / plan.bconnect.to 업데이트
     ↓
 헬스체크 (자동)
-    ↓
-배포 완료 알림 (GitHub, Slack 등)
 ```
 
 ### Backend (Spring Boot)
@@ -96,6 +93,12 @@ Docker 이미지 생성
     ↓
 트래픽 전환
 ```
+
+### Android 앱 (career TWA)
+
+career PWA를 [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap)으로 Android TWA(Trusted Web Activity)로 패키징해 Play/사이드로드 배포한다. TWA는 콘텐츠를 라이브 URL에서 로드하므로 **웹 배포만으로 앱 내용이 갱신**되고, 앱 재빌드는 앱 메타(이름·아이콘·host 등)가 바뀔 때만 한다.
+
+빌드 방법(`build.sh dev|prod`)·사전조건·Digital Asset Links는 [`apps/career/android-twa/README.md`](../../apps/career/android-twa/README.md)가 SSOT다. 도구 선택 근거는 [ADR-0023](../explanation/adr/0023-android-twa-packaging-bubblewrap.md).
 
 ---
 
@@ -126,61 +129,13 @@ Docker 이미지 생성
 
 ## 환경 변수 관리
 
-환경 변수는 다음과 같이 관리됩니다:
+새 환경 변수를 어디에 넣고 어떻게 fail-fast로 검증하는지(계층별 저장 위치, `.env.example` 계약, Zod/Spring placeholder)는 [env-variables.md](./env-variables.md)가 SSOT다. 본 문서는 **배포 관점**만 다룬다.
 
-### Frontend 환경 변수
+환경 변수 주입은 **Terraform(IaC)으로 관리**한다 — 대시보드 수동 조작은 IaC 위반이므로 긴급/예외 시에만.
 
-**Zod 스키마로 검증** (`packages/config/env/validate.ts`)
-
-```typescript
-export const envSchema = z.object({
-  NEXT_PUBLIC_API_URL: z.string().url(),
-  NEXT_PUBLIC_VERCEL_ENV: z.enum(['development', 'preview', 'production']),
-  // ...
-})
-```
-
-**사용 방법**:
-
-```typescript
-import { env } from '@bconnect/config/env'
-
-const apiUrl = env.NEXT_PUBLIC_API_URL
-```
-
-**주의사항**:
-
-- `NEXT_PUBLIC_*` 접두사: 클라이언트에 노출됨
-- 접두사 없음: 서버 전용
-
-### Backend 환경 변수
-
-**application.yml**:
-
-```yaml
-spring:
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:development}
-  datasource:
-    url: ${DATABASE_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
-jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION:3600000}
-```
-
-### 환경 변수 추가 시
-
-환경 변수 관리: 각 앱의 `.env.example` + `scripts/link-env.sh` (워크트리 자동 심링크).
-
-**간단 가이드**:
-
-1. Zod 스키마 추가 (`packages/config/env/validate.ts`)
-2. `.env.example` 업데이트
-3. Vercel/Railway 대시보드에 변수 추가
-4. (선택) Terraform 리소스 추가 (`infra/`)
+- **Frontend(Vercel)**: [`infra/vercel/`](../../infra/vercel/)의 `vercel_project_environment_variable` 리소스로 선언. 환경별(prod/preview/dev)은 `target`으로 스코프 지정.
+- **Backend(Railway)**: [`infra/railway/`](../../infra/railway/)의 `railway_variable` 리소스로 선언. 로컬은 [`application-local.yaml`](../../apps/api/src/main/resources/application-local.yaml) 더미값으로 주입 없이 뜬다.
+- **주입 누락 시**: FE는 Zod 검증 실패, API는 `${VAR}` placeholder 미해결로 **부팅 실패**(fail-fast) — silent-fail 방지.
 
 ---
 

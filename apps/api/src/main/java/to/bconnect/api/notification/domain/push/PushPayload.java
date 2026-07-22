@@ -1,0 +1,10 @@
+package to.bconnect.api.notification.domain.push;
+
+import java.util.Map;
+
+public record PushPayload(
+        String title,
+        String body,
+        String link,
+        Map<String, String> data
+) {}

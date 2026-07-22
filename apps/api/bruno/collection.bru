@@ -1,0 +1,12 @@
+auth {
+  mode: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+vars:pre-request {
+  memberId: 100
+  coworkerId: 103
+}

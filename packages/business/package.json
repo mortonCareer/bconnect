@@ -1,0 +1,39 @@
+{
+  "name": "@bconnect/business",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./db": "./src/db.ts",
+    "./types": "./src/types.ts",
+    "./fetch-business": "./src/fetch-business.ts",
+    "./nts-client": "./src/nts-client.ts",
+    "./kcomwel-client": "./src/kcomwel-client.ts",
+    "./feia-client": "./src/feia-client.ts",
+    "./moel-client": "./src/moel-client.ts",
+    "./ecic-client": "./src/ecic-client.ts",
+    "./kiscon-db-client": "./src/kiscon-db-client.ts",
+    "./kiscon-construction-client": "./src/kiscon-construction-client.ts",
+    "./kiscon-crawl-client": "./src/kiscon-crawl-client.ts",
+    "./kiscon-parser": "./src/kiscon-parser.ts",
+    "./cwma-retirement-client": "./src/cwma-retirement-client.ts"
+  },
+  "dependencies": {
+    "@sentry/nextjs": "catalog:",
+    "cheerio": "^1.2.0",
+    "fast-xml-parser": "^5.3.7",
+    "postgres": "^3.4.9",
+    "server-only": "^0.0.1"
+  },
+  "peerDependencies": {
+    "next": "catalog:",
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "@types/cheerio": "^1.0.0",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "typescript": "catalog:"
+  }
+}

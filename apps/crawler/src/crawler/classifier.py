@@ -46,20 +46,19 @@ def _is_rate_limit_error(exc: Exception) -> bool:
     # 문자열 폴백
     return "429" in str(exc) and "rate limit" in str(exc).lower()
 
-# 지역 옵션 (검수 DB 기준)
+# 지역 옵션 — BE CrawledRegion 17개 시/도의 한국어 표기 (models.REGION_ENUM_BY_KR 키와 일치)
 REGIONS = [
-    "서울", "경기도", "인천",
-    "충청도", "전라도", "경상도", "강원도", "제주도",
-    "전국", "광주", "울산", "부산", "세종", "대구", "대전",
+    "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+    "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주",
 ]
 
 # 수도권 필터링용
-METRO_REGIONS = {"서울", "경기도", "인천"}
+METRO_REGIONS = {"서울", "경기", "인천"}
 
 # 주소 → 지역 매핑 (지역 분류 보정용)
 _ADDRESS_REGION_MAP: dict[str, str] = {
     "서울": "서울", "서울시": "서울", "서울특별시": "서울",
-    "경기": "경기도", "경기도": "경기도",
+    "경기": "경기", "경기도": "경기",
     "인천": "인천", "인천시": "인천", "인천광역시": "인천",
     "부산": "부산", "부산시": "부산", "부산광역시": "부산",
     "대구": "대구", "대구시": "대구", "대구광역시": "대구",
@@ -67,12 +66,14 @@ _ADDRESS_REGION_MAP: dict[str, str] = {
     "광주": "광주", "광주시": "광주", "광주광역시": "광주",
     "울산": "울산", "울산시": "울산", "울산광역시": "울산",
     "세종": "세종", "세종시": "세종", "세종특별자치시": "세종",
-    "충북": "충청도", "충남": "충청도", "충청북도": "충청도", "충청남도": "충청도",
-    "전북": "전라도", "전남": "전라도", "전라북도": "전라도", "전라남도": "전라도",
-    "전북특별자치도": "전라도",
-    "경북": "경상도", "경남": "경상도", "경상북도": "경상도", "경상남도": "경상도",
-    "강원": "강원도", "강원도": "강원도", "강원특별자치도": "강원도",
-    "제주": "제주도", "제주도": "제주도", "제주특별자치도": "제주도",
+    "충북": "충북", "충청북도": "충북",
+    "충남": "충남", "충청남도": "충남",
+    "전북": "전북", "전라북도": "전북", "전북특별자치도": "전북",
+    "전남": "전남", "전라남도": "전남",
+    "경북": "경북", "경상북도": "경북",
+    "경남": "경남", "경상남도": "경남",
+    "강원": "강원", "강원도": "강원", "강원특별자치도": "강원",
+    "제주": "제주", "제주도": "제주", "제주특별자치도": "제주",
 }
 
 
@@ -150,8 +151,9 @@ SYSTEM_PROMPT = """\
 
 ### 4. region (지역)
 아래 목록에서 선택: {regions}
-- 시공 가능 지역이나 소재지 기준
-- 여러 지역이면 주요 지역 1개
+- 시공 가능 지역이나 소재지 기준 (시/도 단위)
+- 여러 지역이면 주요 지역 1개, "전국"이면 업체 소재지 기준
+- 판단 불가 시 빈 문자열
 
 ### 5. address (주소)
 - 사업장/사무실 소재지 주소를 추출
@@ -178,13 +180,18 @@ SYSTEM_PROMPT = """\
 - "000-00-00000" 형식의 사업자등록번호
 - 찾을 수 없으면 빈 문자열
 
-### 10. is_professional (전문업자 여부)
+### 10. experience (경력 연차)
+- 본문에 "경력 N년", "N년차" 등으로 **명시된 경우만** 정수로 추출
+- "2005년부터" 같은 시작 연도는 현재 연도 기준으로 환산
+- 명시가 없으면 null (추측 금지)
+
+### 11. is_professional (전문업자 여부)
 - true: 건설/인테리어 시공을 직접 수행하는 전문 기술자 또는 업체
 - false: DIY 블로거, 제품 리뷰어, 인테리어 정보 블로거, 일반인, 자재 판매만 하는 업체
 - 판단 기준: 직접 시공을 수행하는지, 팀/인력을 보유하는지, 시공 사례가 있는지
 
 ## 응답 형식 (JSON만, 설명 없이)
-{{"name": "", "trades": [], "rank": "", "region": "", "address": "", "phone": "", "email": "", "representative": "", "business_number": "", "is_professional": true}}
+{{"name": "", "trades": [], "rank": "", "region": "", "address": "", "phone": "", "email": "", "representative": "", "business_number": "", "experience": null, "is_professional": true}}
 """.format(trades=", ".join(TRADES), regions=", ".join(REGIONS))
 
 # 수동 모드 파일 경로
@@ -197,6 +204,7 @@ def _empty_result() -> dict:
     return {
         "name": "", "trades": ["기타"], "rank": "", "region": "",
         "address": "", "phone": "", "email": "", "representative": "", "business_number": "",
+        "experience": None,
         "is_professional": True,
     }
 
@@ -208,8 +216,16 @@ def _validate_result(result: dict) -> dict:
         result["trades"] = ["기타"]
     rank = result.get("rank", "")
     result["rank"] = rank if rank in RANKS else ""
+    region = result.get("region", "")
+    result["region"] = region if region in REGIONS else ""
+    # 경력: 양의 정수만 인정
+    exp = result.get("experience")
+    try:
+        exp = int(exp) if exp is not None else None
+    except (TypeError, ValueError):
+        exp = None
+    result["experience"] = exp if exp and 0 < exp <= 60 else None
     result.setdefault("name", "")
-    result.setdefault("region", "")
     result.setdefault("address", "")
     result.setdefault("email", "")
     result.setdefault("representative", "")

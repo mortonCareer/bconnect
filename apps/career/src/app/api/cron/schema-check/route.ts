@@ -1,10 +1,10 @@
 import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
-import { fetchNtsBusinessStatus } from '@/app/one-click/_clients/nts-client'
-import { fetchKcomwelInsurance } from '@/app/one-click/_clients/kcomwel-client'
-import { fetchFeiaCompanies } from '@/app/one-click/_clients/feia-client'
-import { fetchMoelDefaulters } from '@/app/one-click/_clients/moel-client'
-import { checkKisconFreshness } from '@/app/one-click/_clients/kiscon-db-client'
+import { fetchNtsBusinessStatus } from '@bconnect/business/nts-client'
+import { fetchKcomwelInsurance } from '@bconnect/business/kcomwel-client'
+import { fetchFeiaCompanies } from '@bconnect/business/feia-client'
+import { fetchMoelDefaulters } from '@bconnect/business/moel-client'
+import { checkKisconFreshness } from '@bconnect/business/kiscon-db-client'
 
 // 더미 사업자번호 — 존재 여부와 무관하게 API 응답 자체를 검증
 const DUMMY_BIZ_NO = '0000000000'

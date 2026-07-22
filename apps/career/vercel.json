@@ -1,13 +1,11 @@
 {
-  "git": {
-    "deploymentEnabled": {
-      "dev": false
-    }
-  },
   "crons": [
     {
       "path": "/api/cron/schema-check",
       "schedule": "0 0 * * *"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
 }

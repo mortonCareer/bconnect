@@ -1,15 +1,26 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useGetFeeds } from '@bconnect/api-client'
-import type { Trade } from '@bconnect/api-client'
-import { TRADE_LABELS } from '../lib/trade-labels'
-import { formatRelativeTime } from '../lib/format-time'
-import { getAvatarUrl } from '../lib/avatar'
+import {
+  postImageUrls,
+  regionOfState,
+  TRADE_LABELS,
+  useGetFeeds,
+  useGetMyMember,
+} from '@bconnect/api-client'
+import type { Trade, ProfileRole } from '@bconnect/api-client'
+import { daysBetween } from '@bconnect/config/date'
+import { formatRelativeTime } from '@bconnect/config/format'
+import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
+import { ROLE_LABELS } from '@/lib/role-labels'
+import { REGION_LABELS, type Region } from '@/lib/region'
+import { useAuthStore } from '@/stores/auth-store'
 
 export interface FeedItem {
   postId: number
   memberId?: number
+  /** 현재 로그인 사용자의 게시물 여부 — 케밥(수정/삭제) 노출 게이트 */
+  isMine: boolean
   profile: {
     image: string
     name: string
@@ -19,74 +30,99 @@ export interface FeedItem {
     bio: string
   }
   content: {
-    image: string
+    images: string[]
     imageAlt?: string
-    company: string
-    duration: string
+    /** 건축주(발주 업체)명 — 글에 연결된 작업(task)이 없으면 생략 */
+    company?: string
+    /** 시공기간 — task.start~end 일수 (없으면 생략) */
+    duration?: string
     timestamp: string
     description: string
   }
 }
 
 interface UseFeedItemsOptions {
-  trade?: Trade | null
+  trades?: Trade[]
+  roles?: ProfileRole[]
+  regions?: Region[]
   minExperience?: number
   maxExperience?: number
   authorId?: number
   limit?: number
 }
 
+/** task.start~end(YYYY-MM-DD, 양끝 포함) → '4일 소요'. 파싱 불가/역순이면 생략. */
+function formatDurationDays(start: string, end: string): string | undefined {
+  const days = daysBetween(start, end) + 1
+  if (!Number.isFinite(days) || days < 1) return undefined
+  return `${days}일 소요`
+}
+
 export function useFeedItems({
-  trade,
+  trades,
+  roles,
+  regions,
   minExperience,
   maxExperience,
   authorId,
 }: UseFeedItemsOptions = {}) {
   const { data: feeds, isLoading, error } = useGetFeeds()
+  // 홈 피드는 public — members/me 는 인증 필요라 로그아웃 상태면 정지, isMine 전부 false (#802)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const currentUserId = useGetMyMember({ query: { enabled: isAuthenticated } }).data?.id
 
   const feedItems: FeedItem[] = useMemo(() => {
     if (!feeds) return []
 
-    // useGetFeeds 응답 = FeedOffsetPage = { content: Feed[], hasNext } — content 풀어냄
-    return feeds.content
-      .filter((feed) => {
-        if (trade && feed.profile.primaryTrade !== trade) return false
-        if (minExperience != null && (feed.profile.experience ?? 0) < minExperience) return false
-        if (maxExperience != null && (feed.profile.experience ?? 0) > maxExperience) return false
-        if (authorId != null && feed.member.id !== authorId) return false
-        return true
-      })
-      .map((feed): FeedItem | null => {
-        const { member, profile, post } = feed
+    return feeds.flatMap((feed): FeedItem[] => {
+      const { member, profile, post, task } = feed
 
-        if (!member || !profile || !post) return null
+      // TODO: BE required 처리 후 type narrowing 필요. Feed.member/profile/post와 id가 optional emit이라 없는 행은 임시로 렌더 제외.
+      const memberId = member?.id
+      const postId = post?.id
+      if (!member || !profile || !post || memberId == null || postId == null) return []
 
-        return {
-          postId: post.id,
-          memberId: member.id,
+      const role = profile.role
+      const region = regionOfState(profile.address?.state)
+      const { primaryTrade } = profile
+
+      // ProfileSummary에는 trades 배열이 없어서 현재 계약에서는 대표 분야 기준으로 필터링한다.
+      if (trades?.length && (!primaryTrade || !trades.includes(primaryTrade))) return []
+      if (roles?.length && (role == null || !roles.includes(role))) return []
+      if (regions?.length && (region == null || !regions.includes(region))) return []
+      if (minExperience != null && (profile.experience ?? 0) < minExperience) return []
+      if (maxExperience != null && (profile.experience ?? 0) > maxExperience) return []
+      if (authorId != null && memberId !== authorId) return []
+
+      const postImages = postImageUrls(post)
+
+      // TODO: BE required 처리 후 type narrowing 필요. 이름/분야/작성일/본문은 카드 표시 필수값인데 optional emit이라 fallback 중.
+      return [
+        {
+          postId,
+          memberId,
+          isMine: currentUserId != null && memberId === currentUserId,
           profile: {
             // picture nullable → 빈 string fallback 시 <img src=""> 가 page URL 재 fetch 하는
-            // 브라우저 anti-pattern. DiceBear 아바타 (getAvatarUrl) 로 deterministic fallback.
-            image: member.picture || getAvatarUrl(member.name ?? 'user'),
+            // 브라우저 anti-pattern. 정적 기본 프로필 이미지로 fallback.
+            image: member.picture || DEFAULT_PROFILE_IMAGE,
             name: member.name ?? '',
-            location: '',
-            // TODO: role 은 MaskedMember 에 없음 (BE public masking) — 필요시 BE 협의 후 부활
-            jobType: '',
-            specialty: profile.primaryTrade ? (TRADE_LABELS[profile.primaryTrade] ?? '') : '',
+            location: region ? REGION_LABELS[region] : '',
+            jobType: role ? ROLE_LABELS[role] : '',
+            specialty: primaryTrade ? (TRADE_LABELS[primaryTrade] ?? '') : '',
             bio: profile.headline ?? '',
           },
           content: {
-            image: post.images?.[0] || '/placeholder-post.svg',
-            // TODO: Feed API에 Task 정보 포함 필요 (#197)
-            company: '서정 건축',
-            duration: '4일 소요',
+            images: postImages.length ? postImages : ['/placeholder-post.svg'],
+            company: task?.workerCompany ?? undefined,
+            duration: task ? formatDurationDays(task.start, task.end) : undefined,
             timestamp: post.createdAt ? formatRelativeTime(post.createdAt) : '',
             description: post.content ?? '',
           },
-        }
-      })
-      .filter((item): item is FeedItem => item !== null)
-  }, [feeds, trade, minExperience, maxExperience, authorId])
+        },
+      ]
+    })
+  }, [feeds, trades, roles, regions, minExperience, maxExperience, authorId, currentUserId])
 
   return {
     feedItems,

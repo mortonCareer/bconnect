@@ -1,11 +1,20 @@
+/**
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=617-5501
+ */
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Tag, TopBar } from '@bconnect/ui'
-import type { Trade } from '@bconnect/api-client'
-import { TRADE_GROUPS, TRADE_LABELS } from '@/lib/trade-labels'
-import { EXPERIENCE_OPTIONS } from '@/lib/experience'
-import type { ExperienceLevel } from '@/lib/experience'
+import { Slider, Tag, TopBar } from '@bconnect/ui'
+import { TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
+import { FILTER_ROLES, ROLE_LABELS } from '@/lib/role-labels'
+import { REGIONS, REGION_LABELS } from '@/lib/region'
+import {
+  EXPERIENCE_FILTER_MAX,
+  EXPERIENCE_MIN,
+  EXPERIENCE_THUMB_LABELS,
+  FULL_EXPERIENCE_RANGE,
+  formatExperienceYears,
+} from '@/lib/experience-range'
 import { useFilterParams } from '@/hooks/useFilterParams'
 
 interface FilterSheetProps {
@@ -15,30 +24,25 @@ interface FilterSheetProps {
 
 export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
   const {
-    trades: storeTrades,
-    primaryTrade: storePrimary,
-    experience: storeExperience,
-    applyFilters,
+    trades,
+    roles,
+    regions,
+    experience,
+    toggleTrade,
+    toggleRole,
+    toggleRegion,
+    setExperience,
+    clearFilter,
   } = useFilterParams()
-
-  const [pendingTrades, setPendingTrades] = useState<Trade[]>(storeTrades)
-  const [pendingPrimary, setPendingPrimary] = useState<Trade | null>(storePrimary)
-  const [pendingExperience, setPendingExperience] = useState<ExperienceLevel | null>(
-    storeExperience
-  )
 
   // Two-phase rendering: mounted keeps DOM alive for exit animation
   const [mounted, setMounted] = useState(false)
   const [visible, setVisible] = useState(false)
-
-  // Sync store → pending on open transition (render-time setState, avoids effect)
   const [prevIsOpen, setPrevIsOpen] = useState(false)
+
   if (isOpen && !prevIsOpen) {
     setPrevIsOpen(true)
     setMounted(true)
-    setPendingTrades(storeTrades)
-    setPendingPrimary(storePrimary)
-    setPendingExperience(storeExperience)
   }
   if (!isOpen && prevIsOpen) {
     setPrevIsOpen(false)
@@ -59,45 +63,13 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
     }
   }, [isOpen, mounted])
 
-  const handleClose = () => {
-    applyFilters(pendingTrades, pendingPrimary, pendingExperience)
-    onClose()
-  }
-
-  const handleReset = () => {
-    setPendingTrades([])
-    setPendingPrimary(null)
-    setPendingExperience(null)
-  }
-
-  const handleTradeToggle = (trade: Trade) => {
-    const next = pendingTrades.includes(trade)
-      ? pendingTrades.filter((t) => t !== trade)
-      : pendingTrades.length < 3
-        ? [...pendingTrades, trade]
-        : pendingTrades
-
-    setPendingTrades(next)
-
-    // Auto-set primary trade
-    if (next.length > 0 && (!pendingPrimary || !next.includes(pendingPrimary))) {
-      setPendingPrimary(next[0])
-    } else if (next.length === 0) {
-      setPendingPrimary(null)
-    }
-  }
-
-  const handleExperienceClick = (level: ExperienceLevel) => {
-    setPendingExperience((prev) => (prev === level ? null : level))
-  }
-
   if (!mounted) return null
 
   return (
     <div className="fixed inset-0 z-[60]">
       {/* Full-page panel sliding from right */}
       <div
-        className={`absolute inset-0 bg-white transition-transform duration-300 ease-out ${
+        className={`absolute inset-0 flex flex-col bg-white transition-transform duration-300 ease-out ${
           visible ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -107,26 +79,24 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
           title="필터"
           showAction
           actionLabel="초기화"
-          onAction={handleReset}
-          onBack={handleClose}
+          onAction={clearFilter}
+          onBack={onClose}
         />
 
         {/* Scrollable content */}
-        <div className="flex flex-col gap-6 overflow-y-auto px-4 pb-4 pt-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4 pb-4 pt-4">
           {/* 시공분야 */}
           <div className="flex flex-col gap-3">
-            <p className="text-sb-16 text-bconnect-gray-900">
-              시공분야 <span className="text-bconnect-error">*</span>
-            </p>
+            <p className="text-sb-16 text-gray-900">시공분야</p>
             {TRADE_GROUPS.map((group) => (
               <div key={group.label} className="flex flex-col gap-3">
-                <p className="text-m-14 text-bconnect-gray-700">{group.label}</p>
+                <p className="text-m-14 text-gray-700">{group.label}</p>
                 <div className="flex flex-wrap gap-2">
                   {group.trades.map((trade) => (
                     <Tag
                       key={trade}
-                      variant={pendingTrades.includes(trade) ? 'selected' : 'default'}
-                      onClick={() => handleTradeToggle(trade)}
+                      variant={trades.includes(trade) ? 'selected' : 'default'}
+                      onClick={() => toggleTrade(trade)}
                     >
                       {TRADE_LABELS[trade]}
                     </Tag>
@@ -136,54 +106,46 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
             ))}
           </div>
 
-          {/* 대표분야 */}
-          {pendingTrades.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <p className="text-sb-16 text-bconnect-gray-900">
-                대표분야 <span className="text-bconnect-error">*</span>
-              </p>
-              <div className="relative w-fit">
-                <select
-                  value={pendingPrimary || ''}
-                  onChange={(e) => setPendingPrimary(e.target.value as Trade)}
-                  className="flex h-[40px] appearance-none items-center rounded-[8px] border border-bconnect-gray-300 bg-white py-[3px] pl-[10px] pr-8 text-m-14 text-bconnect-gray-900"
+          {/* 역할 */}
+          <div className="flex flex-col gap-3">
+            <p className="text-sb-16 text-gray-900">역할</p>
+            <div className="flex flex-wrap gap-2">
+              {FILTER_ROLES.map((role) => (
+                <Tag
+                  key={role}
+                  variant={roles.includes(role) ? 'selected' : 'default'}
+                  onClick={() => toggleRole(role)}
                 >
-                  {pendingTrades.map((trade) => (
-                    <option key={trade} value={trade}>
-                      {TRADE_LABELS[trade]}
-                    </option>
-                  ))}
-                </select>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  className="pointer-events-none absolute right-[10px] top-1/2 -translate-y-1/2"
-                >
-                  <path
-                    d="M4 6L8 10L12 6"
-                    stroke="#1B1B1B"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+                  {ROLE_LABELS[role]}
+                </Tag>
+              ))}
             </div>
-          )}
+          </div>
 
           {/* 경력 */}
           <div className="flex flex-col gap-3">
-            <p className="text-sb-16 text-bconnect-gray-900">경력</p>
+            <p className="text-sb-16 text-gray-900">경력</p>
+            <Slider
+              value={experience ?? FULL_EXPERIENCE_RANGE}
+              onValueChange={(value) => setExperience([value[0], value[1]])}
+              min={EXPERIENCE_MIN}
+              max={EXPERIENCE_FILTER_MAX}
+              formatLabel={formatExperienceYears}
+              thumbLabels={EXPERIENCE_THUMB_LABELS}
+            />
+          </div>
+
+          {/* 지역 */}
+          <div className="flex flex-col gap-3">
+            <p className="text-sb-16 text-gray-900">지역</p>
             <div className="flex flex-wrap gap-2">
-              {EXPERIENCE_OPTIONS.map((option) => (
+              {REGIONS.map((region) => (
                 <Tag
-                  key={option.id}
-                  variant={pendingExperience === option.id ? 'selected' : 'default'}
-                  onClick={() => handleExperienceClick(option.id)}
+                  key={region}
+                  variant={regions.includes(region) ? 'selected' : 'default'}
+                  onClick={() => toggleRegion(region)}
                 >
-                  {option.label}
+                  {REGION_LABELS[region]}
                 </Tag>
               ))}
             </div>

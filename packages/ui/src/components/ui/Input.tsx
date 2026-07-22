@@ -4,35 +4,44 @@
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
+import {
+  FIELD_BASE_CLASSES,
+  FIELD_DEFAULT_VARIANT_CLASSES,
+  FIELD_ERROR_VARIANT_CLASSES,
+} from './_field-base'
 
 /**
  * Input variants:
- * - default: 기본 상태 (회색 테두리)
- * - error: 에러 상태 (빨간 테두리)
+ * - variant: default(회색 테두리) / error(빨간 테두리)
+ * - size: default(h-50, text-base) / small(h-33, text-14) — 패널 row 필드(작업기간 등)용
  *
  * Figma: https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=189-626
+ *        size=small https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1879-13366
  */
-const inputVariants = cva(
-  'flex items-center w-full h-[50px] px-3 py-[7px] rounded-lg border bg-transparent text-base outline-none transition-colors placeholder:text-bconnect-gray-500 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-  {
-    variants: {
-      variant: {
-        // 기본 상태
-        default:
-          'border-bconnect-gray-300 text-bconnect-gray-900 focus:border-bconnect-primary focus:ring-1 focus:ring-bconnect-primary',
-        // 에러 상태
-        error:
-          'border-destructive text-bconnect-gray-900 focus:border-destructive focus:ring-1 focus:ring-destructive/50',
-      },
+const inputVariants = cva(`${FIELD_BASE_CLASSES} flex items-center`, {
+  variants: {
+    variant: {
+      // 기본 상태 — 회색 보더 + primary 포커스
+      default: FIELD_DEFAULT_VARIANT_CLASSES,
+      // 에러 상태 — destructive 보더·포커스
+      error: FIELD_ERROR_VARIANT_CLASSES,
     },
-    defaultVariants: {
-      variant: 'default',
+    size: {
+      default: 'h-[50px]',
+      // 컴팩트 — FIELD_BASE 의 py-[7px]/text-base 를 덮어 Figma 33px 박스에 맞춘다
+      small: 'h-[33px] py-0 text-r-14',
     },
-  }
-)
+  },
+  defaultVariants: {
+    variant: 'default',
+    size: 'default',
+  },
+})
 
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement>, VariantProps<typeof inputVariants> {
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
+    VariantProps<typeof inputVariants> {
   /** 에러 메시지 (variant="error"일 때 하단에 표시) */
   errorMessage?: string
 }
@@ -56,13 +65,13 @@ export interface InputProps
  * ```
  */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, variant, type, errorMessage, ...props }, ref) => {
+  ({ className, variant, size, type, errorMessage, ...props }, ref) => {
     const inputElement = (
       <input
         type={type}
         ref={ref}
         data-slot="input"
-        className={cn(inputVariants({ variant, className }))}
+        className={cn(inputVariants({ variant, size, className }))}
         {...props}
       />
     )
@@ -72,7 +81,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       return (
         <div className="flex w-full flex-col items-start gap-2">
           {inputElement}
-          <p className="text-sm text-bconnect-error">{errorMessage}</p>
+          <p className="text-sm text-destructive">{errorMessage}</p>
         </div>
       )
     }

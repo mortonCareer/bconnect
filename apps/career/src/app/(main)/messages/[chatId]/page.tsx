@@ -4,55 +4,10 @@
  */
 'use client'
 
-import { useCallback, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { useGetChat, useGetMyMember, MessageType } from '@bconnect/api-client'
-import type { Message } from '@bconnect/api-client'
-import { TopBar } from '@bconnect/ui'
-import MessageList from './_components/MessageList'
-import ChatInput from './_components/ChatInput'
+import { useParams } from 'next/navigation'
+import { CareerChatRoom } from '../_adapters/CareerMessagesView'
 
 export default function ChatRoomPage() {
-  const params = useParams()
-  const router = useRouter()
-  const chatId = Number(params.chatId)
-  const currentUserId = useGetMyMember().data?.id
-
-  const { data: chat } = useGetChat(chatId, {
-    query: { enabled: !!chatId },
-  })
-
-  const [localMessages, setLocalMessages] = useState<Message[]>([])
-
-  const handleSend = useCallback(
-    (content: string) => {
-      if (currentUserId == null) return // 인증 없이 전송 불가
-      const newMessage: Message = {
-        id: Date.now(),
-        chatId,
-        memberId: currentUserId,
-        type: MessageType.TEXT,
-        content,
-        createdAt: new Date().toISOString(),
-        modifiedAt: new Date().toISOString(),
-      }
-      setLocalMessages((prev) => [...prev, newMessage])
-    },
-    [chatId, currentUserId]
-  )
-
-  return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <TopBar
-        variant="default"
-        title={chat?.title ?? '채팅'}
-        showAction={false}
-        onBack={() => router.back()}
-      />
-
-      <MessageList chatId={chatId} localMessages={localMessages} />
-
-      <ChatInput onSend={handleSend} />
-    </div>
-  )
+  const params = useParams<{ chatId: string }>()
+  return <CareerChatRoom chatId={Number(params.chatId)} />
 }

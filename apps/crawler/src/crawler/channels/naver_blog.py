@@ -10,7 +10,6 @@ import httpx
 from bs4 import BeautifulSoup
 
 from crawler.config import settings
-from crawler.models import Technician
 
 log = logging.getLogger(__name__)
 
@@ -161,11 +160,44 @@ def _extract_post_content_url(blog_url: str) -> str | None:
     return None
 
 
+# 글당 본문 이미지 수집 상한
+IMAGES_PER_POST = 5
+# 블로거당 시공 사례 글 수집 상한 (검색 글 1 + RSS 최근 글)
+POSTS_PER_MEMBER = 5
+
+# 본문 이미지로 인정하는 네이버 CDN 호스트 (스티커·이모티콘 CDN 제외)
+_POST_IMAGE_HOSTS = ("postfiles.pstatic.net", "blogfiles.pstatic.net", "mblogthumb-phinf.pstatic.net")
+
+
+def _normalize_post_image_url(src: str) -> str:
+    """네이버 이미지 URL의 썸네일 type 파라미터를 원본급(w966)으로 승격한다."""
+    return re.sub(r"([?&])type=[a-z]?\d+[^&]*", r"\1type=w966", src)
+
+
+def _extract_post_images(content_area) -> list[str]:
+    """본문 영역에서 시공 사진 URL을 추출한다 (스티커·중복 제외, 상한 적용)."""
+    images: list[str] = []
+    for img in content_area.select("img"):
+        src = img.get("data-lazy-src") or img.get("src") or ""
+        if not src.startswith("http"):
+            continue
+        if not any(host in src for host in _POST_IMAGE_HOSTS):
+            continue
+        src = _normalize_post_image_url(src)
+        if src in images:
+            continue
+        images.append(src)
+        if len(images) >= IMAGES_PER_POST:
+            break
+    return images
+
+
 async def fetch_blog_post(blog_url: str) -> dict:
-    """블로그 본문을 파싱하여 소개 텍스트와 메타정보를 추출한다.
+    """블로그 본문을 파싱하여 제목·소개 텍스트·시공 사진을 추출한다.
 
     Returns:
-        {"about": str, "source_url": str, "blogger_name": str, "cover_image_url": str}
+        {"title": str, "about": str, "images": list[str],
+         "source_url": str, "blogger_name": str, "cover_image_url": str}
     """
     content_url = _extract_post_content_url(blog_url) or blog_url
 
@@ -177,6 +209,14 @@ async def fetch_blog_post(blog_url: str) -> dict:
     og_img = soup.select_one('meta[property="og:image"]')
     cover_image_url = og_img["content"] if og_img and og_img.get("content") else ""
 
+    # 글 제목: 본문 타이틀 → og:title 폴백
+    title_el = soup.select_one("div.se-title-text") or soup.select_one("span.se-fs-")
+    if title_el:
+        title = title_el.get_text(strip=True)
+    else:
+        og_title = soup.select_one('meta[property="og:title"]')
+        title = og_title["content"].strip() if og_title and og_title.get("content") else ""
+
     # 본문 영역 추출 (네이버 블로그 구조)
     content_area = (
         soup.select_one("div.se-main-container")       # 스마트에디터3
@@ -185,7 +225,10 @@ async def fetch_blog_post(blog_url: str) -> dict:
     )
 
     about = ""
+    images: list[str] = []
     if content_area:
+        # 시공 사진: 노이즈 제거 전에 추출 (스티커 CDN은 호스트 필터로 배제)
+        images = _extract_post_images(content_area)
         # 노이즈 요소 제거 (외부 링크 카드, 스크립트, 위젯 등)
         for tag in content_area.select("script, style, iframe, div.se-oglink"):
             tag.decompose()
@@ -203,7 +246,9 @@ async def fetch_blog_post(blog_url: str) -> dict:
         about = "\n".join(lines)
 
     return {
+        "title": title,
         "about": about,
+        "images": images,
         "source_url": blog_url,
         "blogger_name": _extract_blogger_name(soup),
         "cover_image_url": cover_image_url,
@@ -489,6 +534,12 @@ async def explore_blogger(blog_url: str) -> dict:
             "banner_image_url": "",
             "footer_image_url": "",
             "profile_image_url": "",
+            "posts": [{
+                "title": post["title"],
+                "content": post["about"][:1000],
+                "images": post["images"],
+                "source_url": blog_url,
+            }] if (post["about"] or post["images"]) else [],
             "source_urls": [blog_url],
         }
 
@@ -509,30 +560,48 @@ async def explore_blogger(blog_url: str) -> dict:
     )
     source_urls = [blog_home_url]
 
-    # 연락처 추출: 소개글 → 게시글 본문 → RSS 최근 글 순 폴백
+    async def _safe_fetch(u: str) -> tuple[str, dict | None]:
+        try:
+            return u, await fetch_blog_post(u)
+        except Exception:
+            return u, None
+
+    # 4. 최근 글 수집 — 시공 사례(posts) + 연락처 폴백 겸용
+    recent_urls = await fetch_blogger_posts(blog_id, count=20)
+    recent_urls = [u for u in recent_urls if u != blog_url]
+    fetched = await asyncio.gather(*(_safe_fetch(u) for u in recent_urls[: POSTS_PER_MEMBER - 1]))
+    collected = [(blog_url, main_post)] + [(u, p) for u, p in fetched if p is not None]
+
+    posts = [
+        {
+            "title": post["title"],
+            "content": post["about"][:1000],
+            "images": post["images"],
+            "source_url": url,
+        }
+        for url, post in collected
+        if post["about"] or post["images"]
+    ]
+
+    # 연락처 추출: 소개글 → 수집한 글 본문 순 폴백
     contact = extract_contact_info(profile["profile_intro"])
     phone_source = "profile" if contact["phone"] else ""
 
-    # 소개글에서 못 찾은 필드를 게시글 본문에서 보충
-    post_contact = extract_contact_info(main_post["about"])
-    for key in ("phone", "email", "instagram", "youtube"):
-        if not contact[key] and post_contact[key]:
-            contact[key] = post_contact[key]
-            if key == "phone":
-                phone_source = "post"
+    for url, post in collected:
+        if contact["phone"] and contact["email"]:
+            break
+        post_contact = extract_contact_info(post["about"])
+        for key in ("phone", "email", "instagram", "youtube"):
+            if not contact[key] and post_contact[key]:
+                contact[key] = post_contact[key]
+                if key == "phone":
+                    phone_source = "post"
 
-    # 아직 연락처 부족하면 RSS 최근 글에서 보충 (병렬 fetch)
+    # 아직 연락처 부족하면 남은 RSS 글에서 보충 (병렬 fetch)
     if not contact["phone"] and not contact["email"]:
-        other_urls = await fetch_blogger_posts(blog_id, count=20)
-        other_urls = [u for u in other_urls if u != blog_url]
-
-        async def _safe_fetch(u: str) -> tuple[str, dict | None]:
-            try:
-                return u, await fetch_blog_post(u)
-            except Exception:
-                return u, None
-
-        rss_results = await asyncio.gather(*(_safe_fetch(u) for u in other_urls))
+        rss_results = await asyncio.gather(
+            *(_safe_fetch(u) for u in recent_urls[POSTS_PER_MEMBER - 1 :])
+        )
         for url, post in rss_results:
             if post is None:
                 continue
@@ -559,6 +628,7 @@ async def explore_blogger(blog_url: str) -> dict:
         "footer_image_url": footer_image_url,
         "profile_image_url": profile["profile_image_url"],
         "cover_image_url": main_post["cover_image_url"],
+        "posts": posts,  # 시공 사례 글 (제목·본문·사진·출처)
         "source_urls": source_urls,
         "phone_source": phone_source,  # "profile" | "post" | ""
         "business_info": biz_info,  # 네이버 인증 사업자정보 (빈 dict이면 미등록)

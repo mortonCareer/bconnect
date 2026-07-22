@@ -4,8 +4,14 @@
 'use client'
 
 import * as React from 'react'
+import * as Dialog from '@radix-ui/react-dialog'
+import Link from 'next/link'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { SquarePen, Trash2 } from 'lucide-react'
+import { MoreVerticalIcon } from '../../icons'
+import { useExpandableText } from '../../hooks'
 import { cn } from '../../lib/utils'
+import { ImageCarousel } from './ImageCarousel'
 
 /**
  * Feed variants:
@@ -25,47 +31,32 @@ const feedVariants = cva('flex flex-col gap-3 items-stretch', {
 })
 
 export interface FeedProps
-  extends
-    Omit<React.HTMLAttributes<HTMLDivElement>, 'content' | 'onToggle'>,
-    VariantProps<typeof feedVariants> {
-  /**
-   * 프로필 정보
-   */
-  profile: {
-    image: string
-    name: string
-    location: string
-    jobType: string
-    specialty: string
-    bio: string
-  }
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'content'>, VariantProps<typeof feedVariants> {
   /**
    * 피드 컨텐츠
    */
   content: {
-    image: string
+    images: string[]
     imageAlt?: string
-    company: string
-    duration: string
+    /** 건축주(발주 업체)명 — 연결된 작업(task)이 없으면 생략 */
+    company?: string
+    /** 시공기간 (예: '4일 소요') — 연결된 작업(task)이 없으면 생략 */
+    duration?: string
     timestamp: string
     description: string
   }
   /**
-   * 초기 펼침 상태 (기본값: false)
+   * 본인 게시물 여부 — true 일 때만 케밥(수정/삭제) 노출
    */
-  defaultExpanded?: boolean
+  canManage?: boolean
   /**
-   * 더보기/접기 버튼 클릭 핸들러
+   * 수정 페이지 href — 케밥 → 수정 은 선언적 링크로 이동
    */
-  onToggle?: (expanded: boolean) => void
+  editHref?: string
   /**
-   * 프로필 영역 링크 URL (프로필 페이지 이동용)
+   * 삭제 액션 (케밥 → 삭제)
    */
-  profileHref?: string
-  /**
-   * 링크 컴포넌트 (Next.js Link 등). 미지정 시 <a> 태그 사용
-   */
-  LinkComponent?: React.ElementType
+  onDelete?: () => void
 }
 
 /**
@@ -74,55 +65,28 @@ export interface FeedProps
  * @example
  * ```tsx
  * <Feed
- *   profile={{
- *     image: '/profile.jpg',
- *     name: '이송목',
- *     location: '경기도',
- *     jobType: '준기공',
- *     specialty: '도배',
- *     bio: '안녕하세요, 도배 준기공 이송목입니다.',
- *   }}
  *   content={{
- *     image: '/work.jpg',
+ *     images: ['/work.jpg'],
  *     company: '서정 건축',
  *     duration: '4일 소요',
  *     timestamp: '3일 전',
- *     description: '골프장 전원주택 도배 시공을 진행하였습니다. 골프장 전원주택 도배 시공을 진행하였습니다.원주택 도배 시공을 ',
+ *     description: '골프장 전원주택 도배 시공을 진행하였습니다.',
  *   }}
+ *   canManage
+ *   editHref="/profile/edit/work/1"
+ *   onDelete={() => deletePost(1)}
  * />
  * ```
  */
 export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
-  (
-    {
-      className,
-      profile,
-      content,
-      defaultExpanded = false,
-      onToggle,
-      variant,
-      profileHref,
-      LinkComponent,
-      ...props
-    },
-    ref
-  ) => {
-    const [isExpanded, setIsExpanded] = React.useState(defaultExpanded)
-    const [isTruncated, setIsTruncated] = React.useState(false)
-    const textRef = React.useRef<HTMLParagraphElement>(null)
-
-    React.useEffect(() => {
-      if (isExpanded) return
-      const el = textRef.current
-      if (!el) return
-      setIsTruncated(el.scrollWidth > el.clientWidth)
-    }, [isExpanded, content.description])
-
-    const handleToggle = () => {
-      const newState = !isExpanded
-      setIsExpanded(newState)
-      onToggle?.(newState)
-    }
+  ({ className, content, canManage = false, editHref, onDelete, variant, ...props }, ref) => {
+    const {
+      ref: textRef,
+      expanded: isExpanded,
+      showToggle,
+      toggle: handleToggle,
+    } = useExpandableText([content.description], 'width')
+    const [menuOpen, setMenuOpen] = React.useState(false)
 
     const effectiveVariant = isExpanded ? 'expanded' : 'collapsed'
 
@@ -132,142 +96,102 @@ export const Feed = React.forwardRef<HTMLDivElement, FeedProps>(
         className={cn(feedVariants({ variant: effectiveVariant }), 'w-full', className)}
         {...props}
       >
-        {/* 프로필 헤더 */}
-        {React.createElement(
-          profileHref ? LinkComponent || 'a' : 'div',
-          {
-            ...(profileHref ? { href: profileHref } : {}),
-            className: 'flex items-center justify-between no-underline',
-          },
-          <>
-            <div className="flex items-end gap-2">
-              {/* 프로필 이미지 */}
-              <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                <img
-                  src={profile.image}
-                  alt={profile.name}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-
-              {/* 프로필 정보 */}
-              <div className="flex flex-col justify-center">
-                {/* 이름 + 지역/직종/전문분야 */}
-                <div className="flex items-center gap-2.5">
-                  <p className="text-sb-16 text-bconnect-gray-900">{profile.name}</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-m-12 text-bconnect-gray-500">{profile.location}</span>
-                    <div className="h-2 w-0 rotate-90 border-t border-bconnect-gray-300" />
-                    <span className="text-m-12 text-bconnect-gray-500">{profile.jobType}</span>
-                    <div className="h-2 w-0 rotate-90 border-t border-bconnect-gray-300" />
-                    <span className="text-m-12 text-bconnect-gray-500">{profile.specialty}</span>
-                  </div>
-                </div>
-                {/* 자기소개 */}
-                <div className="flex items-center">
-                  <p className="text-m-12 text-bconnect-gray-500">{profile.bio}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* chevron */}
-            <svg
-              width="5.067"
-              height="9.6"
-              viewBox="0 0 5.067 9.6"
-              fill="none"
-              className="h-4 w-4 shrink-0"
-              aria-hidden="true"
-            >
-              <path
-                d="M0.5 0.5 L4.567 4.8 L0.5 9.1"
-                stroke="#1B1B1B"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </>
-        )}
-
-        {/* 이미지 */}
-        <div className="relative h-[220px] w-full overflow-hidden rounded-lg">
-          <img
-            src={content.image}
-            alt={content.imageAlt || content.description}
-            className="h-full w-full object-cover"
-          />
-        </div>
-
-        {/* 컨텐츠 푸터 */}
-        <div className="flex flex-col">
-          {/* 회사명 / 소요일 / 작성일 */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center justify-center gap-2.5">
-              <p
-                className={cn(
-                  'text-r-12 text-bconnect-gray-700',
-                  isExpanded ? 'leading-[1.6]' : 'leading-[21.6px]'
-                )}
-              >
-                {content.company}
-              </p>
-              <div className="flex h-[13px] w-0 rotate-90 items-center justify-center">
-                <div className="h-0 w-[13px] border-t border-bconnect-gray-300" />
-              </div>
-              <p
-                className={cn(
-                  'text-r-12 text-bconnect-gray-700',
-                  isExpanded ? 'leading-[1.6]' : 'leading-[21.6px]'
-                )}
-              >
-                {content.duration}
-              </p>
-            </div>
-            <div className="flex items-center justify-center">
-              <p
-                className={cn(
-                  'text-r-12 text-bconnect-gray-700',
-                  isExpanded ? 'leading-[1.6]' : 'leading-[21.6px]'
-                )}
-              >
-                {content.timestamp}
-              </p>
-            </div>
+        {/* 메타행: 회사 · 소요일 / 작성일 · 케밥 */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            {content.company && <p className="text-r-12 text-gray-700">{content.company}</p>}
+            {content.company && content.duration && <div className="h-[13px] w-px bg-gray-300" />}
+            {content.duration && <p className="text-r-12 text-gray-700">{content.duration}</p>}
           </div>
-
-          {/* 본문 + 더보기/접기 버튼 */}
-          <div
-            className={cn(
-              'flex w-full',
-              isExpanded ? 'flex-col items-end justify-center' : 'items-center gap-2'
-            )}
-          >
-            <p
-              ref={textRef}
-              className={cn(
-                'text-m-16 text-bconnect-gray-900',
-                isExpanded
-                  ? 'min-w-full w-[min-content] whitespace-pre-wrap leading-[1.6]'
-                  : 'min-w-0 flex-1 truncate leading-[25.2px]'
-              )}
-            >
-              {content.description}
-            </p>
-            {(isExpanded || isTruncated) && (
+          <div className="flex items-center gap-1">
+            <p className="text-r-12 text-gray-700">{content.timestamp}</p>
+            {canManage && (
               <button
                 type="button"
-                onClick={handleToggle}
-                className={cn(
-                  'shrink-0 cursor-pointer text-r-12 text-bconnect-gray-700 underline decoration-solid hover:text-bconnect-gray-900',
-                  isExpanded ? 'leading-[25.2px]' : ''
-                )}
+                onClick={() => setMenuOpen(true)}
+                className="shrink-0 cursor-pointer p-1 text-[#434343]"
+                aria-label="게시물 관리"
               >
-                {isExpanded ? '접기' : '더보기'}
+                <MoreVerticalIcon size={16} />
               </button>
             )}
           </div>
         </div>
+
+        {/* 이미지 (다중 이미지 시 캐러셀 + 인덱스 점) */}
+        <ImageCarousel images={content.images} alt={content.imageAlt || content.description} />
+
+        {/* 본문 캡션 + 더보기/접기 버튼 */}
+        <div
+          className={cn(
+            'flex w-full',
+            isExpanded ? 'flex-col items-end justify-center' : 'items-center gap-2'
+          )}
+        >
+          <p
+            ref={textRef}
+            className={cn(
+              'text-m-16 text-gray-900',
+              isExpanded
+                ? 'min-w-full w-[min-content] whitespace-pre-wrap leading-[1.6]'
+                : 'min-w-0 flex-1 truncate leading-[25.2px]'
+            )}
+          >
+            {content.description}
+          </p>
+          {showToggle && (
+            <button
+              type="button"
+              onClick={handleToggle}
+              className={cn(
+                'shrink-0 cursor-pointer text-r-12 text-gray-700 underline decoration-solid hover:text-gray-900',
+                isExpanded ? 'leading-[25.2px]' : ''
+              )}
+            >
+              {isExpanded ? '접기' : '더보기'}
+            </button>
+          )}
+        </div>
+
+        {canManage && (
+          <Dialog.Root open={menuOpen} onOpenChange={setMenuOpen}>
+            <Dialog.Portal>
+              <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40" />
+              <Dialog.Content
+                aria-describedby={undefined}
+                className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-white pb-[env(safe-area-inset-bottom)] focus:outline-none"
+              >
+                <Dialog.Title className="sr-only">게시물 관리</Dialog.Title>
+                <div className="flex justify-center pt-3 pb-1">
+                  <div className="h-1 w-9 rounded-full bg-gray-300" />
+                </div>
+                <div className="flex flex-col py-2">
+                  {editHref && (
+                    <Link
+                      href={editHref}
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-3 px-5 py-3.5 text-m-16 text-gray-900 hover:bg-gray-50"
+                    >
+                      <SquarePen size={20} />
+                      수정
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onDelete?.()
+                    }}
+                    className="flex items-center gap-3 px-5 py-3.5 text-m-16 text-gray-900 hover:bg-gray-50"
+                  >
+                    <Trash2 size={20} />
+                    삭제
+                  </button>
+                </div>
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
+        )}
       </div>
     )
   }

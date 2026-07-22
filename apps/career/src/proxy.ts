@@ -1,15 +1,31 @@
+import { AUTH_HINT_COOKIE } from '@bconnect/api-client/auth-hint'
+import { isApiMockingEnabled } from '@bconnect/config/env'
+import { SITE_URL } from '@bconnect/config/site'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+const CAREER_HOST = new URL(SITE_URL.career).host
+const LEGACY_APEX_HOST = CAREER_HOST.replace(/^career\./, '')
+
 // PUBLIC route — middleware 는 실행되지만 인증 가드만 우회. matcher 의 제외 대상과 위계가 다름.
 const PUBLIC_EXACT = ['/']
-const PUBLIC_PREFIX = ['/login', '/signup', '/component', '/instagram', '/showcase', '/one-click']
+const PUBLIC_PREFIX = ['/signup', '/privacy', '/terms', '/monitoring', '/instagram']
 
-/** /profile/123 같은 타인 프로필은 public, /profile (내 프로필)과 /profile/edit는 보호 */
-const PUBLIC_PROFILE_PATTERN = /^\/profile\/\d+$/
+/** /profile/123 및 그 하위(/coworkers·/recommendations 등) 타인 프로필은 public, /profile (내 프로필)과 /profile/edit는 보호 */
+const PUBLIC_PROFILE_PATTERN = /^\/profile\/\d+(\/.*)?$/
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  if (request.headers.get('host') === LEGACY_APEX_HOST) {
+    return new NextResponse(
+      `${LEGACY_APEX_HOST} 는 준비 중입니다. career 앱은 ${SITE_URL.career} 입니다.`,
+      {
+        status: 404,
+        headers: { 'content-type': 'text/plain; charset=utf-8' },
+      }
+    )
+  }
 
   if (
     PUBLIC_EXACT.includes(pathname) ||
@@ -19,13 +35,14 @@ export function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // TODO: 인증 보호 임시 해제 — 로그인 플로우 완성 후 복구
-  // const refreshToken = request.cookies.get('refreshToken')
-  // if (!refreshToken) {
-  //   const loginUrl = new URL('/login', request.url)
-  //   loginUrl.searchParams.set('redirect', pathname)
-  //   return NextResponse.redirect(loginUrl)
-  // }
+  if (!isApiMockingEnabled()) {
+    const authHint = request.cookies.get(AUTH_HINT_COOKIE)
+    if (!authHint) {
+      const loginUrl = new URL('/signup/auth', request.url)
+      loginUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+  }
 
   return NextResponse.next()
 }

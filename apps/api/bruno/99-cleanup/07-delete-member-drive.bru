@@ -1,0 +1,26 @@
+meta {
+  name: 개인 드라이브 삭제
+  type: http
+  seq: 7
+  tags: [
+    chain
+    idempotent
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/drives/{{memberDriveId}}
+  auth: inherit
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  @chain
+  - 18-member-drives/01-create
+}

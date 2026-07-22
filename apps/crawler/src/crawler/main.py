@@ -10,11 +10,15 @@ from crawler.channels.instagram import (
     build_search_queries as build_instagram_queries, extract_username as extract_instagram_username,
     InstagramBlockedError, reset_block_counter,
 )
-from crawler.classifier import classify, format_phone, infer_region_from_address, METRO_REGIONS
+from crawler.classifier import classify, format_phone, infer_region_from_address, METRO_REGIONS, _validate_result
+from crawler.classifier_rules import rule_reject
 from crawler.config import settings
-from crawler.models import Technician
+from crawler.models import (
+    CrawledMember, CrawledPost, CrawledProfile,
+    PLATFORM_INSTAGRAM, PLATFORM_NAVER, REGION_ENUM_BY_KR, phone_digits, trade_enum,
+)
 from crawler.notion import (
-    save_technician, save_to_review, update_technician,
+    save_member, save_to_review, update_member,
     find_duplicate_by_url, touch_synced_at,
     find_pages_needing_enrichment, find_approved, move_to_production,
     validate_schema, validate_review_schema,
@@ -61,8 +65,30 @@ async def process_blog_result(
     direct: bool = False,
     metro_only: bool = False,
     skip_vision: bool = False,
-) -> Technician | None:
-    """검색 결과 1건 → 블로거 프로필 탐색 → 분류 → Technician 생성."""
+) -> CrawledMember | None:
+    """검색 결과 1건 → 수집 → 분류 → CrawledMember 생성."""
+    raw = await _scrape_blog_result(item, seen_blog_ids, report, dry_run, force, direct)
+    if raw is None:
+        return None
+    return await _classify_scraped(
+        raw["blog_url"], raw["blogger_name"], raw["profile"],
+        report=report, metro_only=metro_only, skip_vision=skip_vision,
+    )
+
+
+async def _scrape_blog_result(
+    item: dict,
+    seen_blog_ids: set[str] | None = None,
+    report: PipelineReport | None = None,
+    dry_run: bool = False,
+    force: bool = False,
+    direct: bool = False,
+) -> dict | None:
+    """검색 결과 1건 → 중복 체크 → 블로그 수집. 분류는 하지 않는다.
+
+    수집한 원본 {blog_url, blogger_name, profile}을 반환한다. 걸러내는 것 없이
+    수집만 하므로 이 결과를 저장해두면 분류만 따로 재실행할 수 있다(#920).
+    """
     blog_url = item["link"]
     blogger_name = item.get("bloggername", "")
 
@@ -113,25 +139,64 @@ async def process_blog_result(
             report.add_skipped(blog_url, blogger_name, "본문 없음")
         return None
 
-    # LLM 분류: 프로필 소개 + 게시글 본문을 종합하여 판단
-    combined_about = ""
-    if profile_intro:
-        combined_about += f"[블로그 프로필 소개]\n{profile_intro}\n\n"
-    combined_about += f"[게시글 본문]\n{profile['about']}"
+    return {"blog_url": blog_url, "blogger_name": blogger_name, "profile": profile}
 
-    try:
-        classification, usage = await classify(
-            name=blogger_name,
-            about=combined_about,
-            headline=profile.get("blog_title", ""),
-        )
+
+async def _classify_scraped(
+    blog_url: str,
+    blogger_name: str,
+    profile: dict,
+    report: PipelineReport | None = None,
+    metro_only: bool = False,
+    skip_vision: bool = False,
+    labels: dict | None = None,
+) -> CrawledMember | None:
+    """수집해둔 블로그 원본(profile) 1건을 분류하여 CrawledMember 생성.
+
+    원본만 있으면 재실행 가능 — 분류 방법을 바꿔도 다시 수집할 필요 없음(#920).
+    labels 를 주면 해당 blog_url 은 LLM 대신 그 라벨로 분류한다(#953, 강한 판단자 in-loop).
+    """
+    profile_intro = profile.get("profile_intro", "")
+
+    # 값싼 규칙 선필터: 확실한 비-기술자(자동차·인력사무소·협찬글 등)는 LLM 없이 즉시 제외 (#915)
+    rejected = rule_reject({
+        "company": profile.get("blog_title", ""),
+        "headline": profile_intro,
+        "about": profile["about"],
+    })
+    if rejected:
+        _, reason = rejected
+        log.info("규칙 제외(%s): %s (%s)", reason, blogger_name, blog_url)
         if report:
-            report.add_llm_usage(usage["input_tokens"], usage["output_tokens"])
-    except Exception as exc:
-        log.warning("분류 실패: %s", blog_url, exc_info=True)
-        if report:
-            report.add_failed(blog_url, blogger_name, "분류", str(exc))
+            report.add_skipped(blog_url, blogger_name, f"규칙:{reason}")
         return None
+
+    # 외부 라벨(강한 판단자)이 있으면 LLM 대신 사용 (#953)
+    label = labels.get(blog_url) if labels else None
+    if label is not None:
+        classification = _validate_result(
+            {k: v for k, v in label.items() if k not in ("id", "reason")}
+        )
+    else:
+        # LLM 분류: 프로필 소개 + 게시글 본문을 종합하여 분류
+        combined_about = ""
+        if profile_intro:
+            combined_about += f"[블로그 프로필 소개]\n{profile_intro}\n\n"
+        combined_about += f"[게시글 본문]\n{profile['about']}"
+
+        try:
+            classification, usage = await classify(
+                name=blogger_name,
+                about=combined_about,
+                headline=profile.get("blog_title", ""),
+            )
+            if report:
+                report.add_llm_usage(usage["input_tokens"], usage["output_tokens"])
+        except Exception as exc:
+            log.warning("분류 실패: %s", blog_url, exc_info=True)
+            if report:
+                report.add_failed(blog_url, blogger_name, "분류", str(exc))
+            return None
 
     # 전문업자 필터: 일반인/DIY 블로거 스킵
     if not classification.get("is_professional", True):
@@ -247,25 +312,33 @@ async def process_blog_result(
             log.info("지역 보정: %s → %s (주소: %s)", region or "(없음)", addr_region, address[:30])
             region = addr_region
 
-    tech = Technician(
-        name=name,
-        rank=classification["rank"],
-        trades=classification["trades"],
-        region=region,
-        address=address,
-        representative=classification.get("representative", ""),
-        business_number=classification.get("business_number", ""),
-        headline=profile_intro[:500],
-        about=profile["about"][:2000],
-        phone=phone,
+    trades = classification["trades"]
+    # 한국어 라벨 → BE Trade enum 코드 (미대응 "기타" 등은 드랍)
+    enum_trades = [c for t in trades if (c := trade_enum(t))]
+    member = CrawledMember(
+        company=name,
+        name=classification.get("representative", ""),
+        phone=phone_digits(phone),
+        picture=cover_image_url,
+        role=classification["rank"],
+        brn=classification.get("business_number", ""),
         email=email,
-        channels=["네이버블로그"],
+        profile=CrawledProfile(
+            primary_trade=enum_trades[0] if enum_trades else "",
+            trades=enum_trades,
+            experience=classification.get("experience"),
+            headline=profile_intro[:500],
+            about=profile["about"][:2000],
+            address=address,
+            state=REGION_ENUM_BY_KR.get(region, ""),
+            url=detail_url,
+            platform=PLATFORM_NAVER,
+        ),
+        posts=[CrawledPost(**post) for post in profile.get("posts", [])],
         source_urls=profile["source_urls"],
-        detail_url=detail_url,
-        cover_image_url=cover_image_url,
     )
 
-    return tech
+    return member
 
 
 async def process_instagram_result(
@@ -275,8 +348,8 @@ async def process_instagram_result(
     dry_run: bool = False,
     force: bool = False,
     on_status: object = None,
-) -> Technician | None:
-    """인스타그램 검색 결과 1건 → 프로필 탐색 → 분류 → Technician 생성."""
+) -> CrawledMember | None:
+    """인스타그램 검색 결과 1건 → 프로필 탐색 → 분류 → CrawledMember 생성."""
     link = item["link"]
     username = item.get("username") or extract_instagram_username(link)
 
@@ -400,25 +473,32 @@ async def process_instagram_result(
                 address = place["road_address"] or place["address"]
                 log.info("지역검색 주소 보충: %s → %s", name, address)
 
-    tech = Technician(
-        name=name,
-        rank=classification["rank"],
-        trades=classification["trades"],
-        region=classification.get("region", ""),
-        address=address,
-        representative=classification.get("representative", ""),
-        business_number=classification.get("business_number", ""),
-        headline=profile["headline"][:500],
-        about=profile["about"][:2000],
-        phone=phone,
+    trades = classification["trades"]
+    # 한국어 라벨 → BE Trade enum 코드 (미대응 "기타" 등은 드랍)
+    enum_trades = [c for t in trades if (c := trade_enum(t))]
+    member = CrawledMember(
+        company=name,
+        name=classification.get("representative", ""),
+        phone=phone_digits(phone),
+        picture=profile.get("profile_pic_url", ""),
+        role=classification["rank"],
+        brn=classification.get("business_number", ""),
         email=email,
-        channels=["인스타그램"],
+        profile=CrawledProfile(
+            primary_trade=enum_trades[0] if enum_trades else "",
+            trades=enum_trades,
+            experience=classification.get("experience"),
+            headline=profile["headline"][:500],
+            about=profile["about"][:2000],
+            address=address,
+            state=REGION_ENUM_BY_KR.get(classification.get("region", ""), ""),
+            url=instagram_url,
+            platform=PLATFORM_INSTAGRAM,
+        ),
         source_urls=profile["source_urls"],
-        detail_url=instagram_url,
-        cover_image_url=profile.get("profile_pic_url", ""),
     )
 
-    return tech
+    return member
 
 
 async def run_pipeline(
@@ -446,21 +526,7 @@ async def run_pipeline(
     if report:
         report.queries.append(query)
 
-    log.info("검색 시작: '%s' (최대 %d건)", query, count)
-    # 네이버 API display 최대 100 → 페이지네이션
-    items: list[dict] = []
-    page_size = min(count, 100)
-    start = 1
-    while len(items) < count:
-        page = await search_blogs(query, display=page_size, start=start)
-        if not page:
-            break
-        items.extend(page)
-        start += len(page)
-        if len(page) < page_size:
-            break
-    items = items[:count]
-    log.info("검색 결과: %d건", len(items))
+    items = await _search_blogs_paged(query, count)
 
     if report:
         report.total_searched += len(items)
@@ -470,44 +536,47 @@ async def run_pipeline(
 
     async def _handle(item: dict) -> None:
         async with sem:
-            tech = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force, direct=direct, metro_only=metro_only, skip_vision=skip_vision)
-        if tech is None:
+            member = await process_blog_result(item, seen_blog_ids=seen_blog_ids, report=report, dry_run=dry_run, force=force, direct=direct, metro_only=metro_only, skip_vision=skip_vision)
+        if member is None:
             return
 
         blog_url = item["link"]
         blogger_name = item.get("bloggername", "")
+        image_count = sum(len(post.images) for post in member.posts)
 
         if dry_run:
-            log.info("dry-run: %s (저장 건너뜀)", tech.name)
+            log.info("dry-run: %s (저장 건너뜀)", member.company)
             if report:
-                report.technicians.append(tech.model_dump())
+                report.members.append(member.dump())
                 report.add_saved(
                     blog_url=blog_url, blogger_name=blogger_name,
-                    tech_name=tech.name, rank=tech.rank, trades=tech.trades,
-                    phone=tech.phone, page_id="",
-                    region=tech.region, address=tech.address, email=tech.email,
+                    company=member.company, role=member.role, trades=member.profile.trades,
+                    phone=member.phone, page_id="",
+                    region=member.region_kr, address=member.profile.address, email=member.email,
+                    posts=len(member.posts), images=image_count,
                 )
             return
 
         try:
             if direct:
-                page_id = await save_technician(tech, force=force)
+                page_id = await save_member(member, force=force)
             else:
-                page_id = await save_to_review(tech)
+                page_id = await save_to_review(member)
         except Exception as exc:
             log.warning("저장 실패: %s", blog_url, exc_info=True)
             if report:
                 report.add_failed(blog_url, blogger_name, "저장", str(exc))
             return
 
-        log.info("저장 완료: %s → %s", tech.name, page_id)
+        log.info("저장 완료: %s → %s", member.company, page_id)
         saved_ids.append(page_id)
         if report:
             report.add_saved(
                 blog_url=blog_url, blogger_name=blogger_name,
-                tech_name=tech.name, rank=tech.rank, trades=tech.trades,
-                phone=tech.phone, page_id=page_id,
-                region=tech.region, address=tech.address, email=tech.email,
+                company=member.company, role=member.role, trades=member.profile.trades,
+                phone=member.phone, page_id=page_id,
+                region=member.region_kr, address=member.profile.address, email=member.email,
+                posts=len(member.posts), images=image_count,
             )
 
     await asyncio.gather(*[_handle(item) for item in items])
@@ -565,6 +634,159 @@ async def run_full(keywords: list[str] | None = None, per_query: int = 5, dry_ru
     return report
 
 
+async def _search_blogs_paged(query: str, count: int) -> list[dict]:
+    """네이버 블로그 검색(display 최대 100)을 페이지네이션해 count건까지 모은다."""
+    log.info("검색 시작: '%s' (최대 %d건)", query, count)
+    items: list[dict] = []
+    page_size = min(count, 100)
+    start = 1
+    while len(items) < count:
+        page = await search_blogs(query, display=page_size, start=start)
+        if not page:
+            break
+        items.extend(page)
+        start += len(page)
+        if len(page) < page_size:
+            break
+    items = items[:count]
+    log.info("검색 결과: %d건", len(items))
+    return items
+
+
+async def run_collect_raw(
+    keywords: list[str] | None = None, per_query: int = 5,
+    force: bool = False, out: Path | None = None, dedup: bool = True,
+) -> PipelineReport:
+    """#920 1단계 — 검색 → 수집 → 원본을 파일에 저장. 분류·저장은 하지 않는다.
+
+    걸러내는 것 없이 수집한 것을 전부 남기므로, 이후 분류 방법이 바뀌어도
+    다시 수집하지 않고 `--classify-from-raw`로 분류만 재실행할 수 있다.
+
+    dedup(기본 켜짐): 이미 DB에 적재됐거나 이전 원본 파일에 있는 블로그는 다시
+    수집하지 않는다. 같은 키워드로 다시 돌려도 새 블로그만 쌓인다.
+    """
+    from crawler import raw_store
+
+    queries = build_search_queries(keywords)
+    path = out or raw_store.raw_path("naver")
+
+    report = PipelineReport()
+    report.mode = "원본 수집(raw)"
+    report.per_query = per_query
+
+    seen_blog_ids: set[str] = set()
+    if dedup:
+        seen_urls: set[str] = set()
+        # 이전에 수집한 원본 파일들
+        for prev in raw_store.RAW_DIR.glob("*.jsonl"):
+            try:
+                seen_urls |= {r["blog_url"] for r in raw_store.load_raw(prev)}
+            except Exception:
+                pass
+        # 이미 DB에 적재된 것
+        if settings.crawled_db_url:
+            try:
+                from crawler.db import load_existing_urls
+                seen_urls |= await load_existing_urls(settings.crawled_db_url)
+            except Exception as exc:
+                log.warning("DB 중복목록 조회 실패(무시하고 진행): %s", exc)
+        seen_blog_ids = {b for u in seen_urls if (b := extract_blog_id(u))}
+        log.info("중복 제외 대상 블로그 %d개 (이미 수집/적재됨)", len(seen_blog_ids))
+    query_sem = asyncio.Semaphore(QUERY_CONCURRENCY)
+    write_lock = asyncio.Lock()
+    collected = 0
+
+    async def _collect_query(q: str) -> None:
+        nonlocal collected
+        report.queries.append(q)
+        items = await _search_blogs_paged(q, per_query)
+        report.total_searched += len(items)
+        sem = asyncio.Semaphore(CONCURRENCY)
+
+        async def _one(item: dict) -> None:
+            nonlocal collected
+            async with sem:
+                # dry_run=True: 노션 중복조회 건너뜀(수집만 수행). direct=False.
+                raw = await _scrape_blog_result(
+                    item, seen_blog_ids=seen_blog_ids, report=report,
+                    dry_run=True, force=force, direct=False,
+                )
+            if raw is None:
+                return
+            async with write_lock:
+                raw_store.append_raw(path, raw)
+            collected += 1
+
+        await asyncio.gather(*[_one(it) for it in items])
+
+    async def _guarded(q: str) -> None:
+        async with query_sem:
+            try:
+                await _collect_query(q)
+            except Exception as exc:
+                log.error("쿼리 수집 실패 '%s': %s", q, exc)
+                report.add_failed("", "", "쿼리", f"{q}: {exc}")
+
+    await asyncio.gather(*[_guarded(q) for q in queries])
+    console.print(f"[green]원본 {collected}건 저장 → {path}[/green]")
+    return report
+
+
+async def run_classify_from_raw(
+    raw_file: Path, metro_only: bool = False, skip_vision: bool = False,
+    labels_file: Path | None = None,
+) -> PipelineReport:
+    """#920 2단계 — 저장된 원본을 읽어 분류만 실행한다. 다시 수집하지 않는다.
+
+    dry-run과 같은 형태의 보고서(members 포함)를 만들어, 기존 `--export-db`로
+    그대로 DB에 적재할 수 있다. 분류 방법을 바꿔 재실행할 땐 이 명령만 돌리면 된다.
+    labels_file 을 주면 그 라벨에 있는 블로그는 LLM 대신 라벨로 분류한다(#953).
+    """
+    import json
+
+    from crawler import raw_store
+
+    labels = None
+    if labels_file:
+        rows = json.loads(labels_file.read_text(encoding="utf-8"))
+        labels = {r["id"]: r for r in rows}
+        log.info("외부 라벨 %d건 로드: %s", len(labels), labels_file)
+
+    raws = raw_store.load_raw(raw_file)
+    report = PipelineReport()
+    report.mode = "원본에서 분류(classify-from-raw)" + (" +외부라벨" if labels else "")
+    report.llm_model = "외부 라벨(--labels)" if labels else (
+        settings.openai_model if settings.openai_api_key else settings.anthropic_model
+    )
+    report.total_searched = len(raws)
+    log.info("원본 %d건 분류 시작: %s", len(raws), raw_file)
+
+    sem = asyncio.Semaphore(CONCURRENCY)
+
+    async def _one(raw: dict) -> None:
+        async with sem:
+            member = await _classify_scraped(
+                raw["blog_url"], raw["blogger_name"], raw["profile"],
+                report=report, metro_only=metro_only, skip_vision=skip_vision,
+                labels=labels,
+            )
+        if member is None:
+            return
+        image_count = sum(len(post.images) for post in member.posts)
+        report.members.append(member.dump())
+        report.add_saved(
+            blog_url=raw["blog_url"], blogger_name=raw.get("blogger_name", ""),
+            company=member.company, role=member.role, trades=member.profile.trades,
+            phone=member.phone, page_id="",
+            region=member.region_kr, address=member.profile.address, email=member.email,
+            posts=len(member.posts), images=image_count,
+        )
+
+    await asyncio.gather(*[_one(r) for r in raws])
+    log.info("분류 완료: %d/%d건 기술자로 통과", len(report.members), len(raws))
+    return report
+
+
 async def run_instagram_pipeline(
     query: str, count: int = 10, seen_usernames: set[str] | None = None,
     report: PipelineReport | None = None, dry_run: bool = False,
@@ -605,52 +827,52 @@ async def run_instagram_pipeline(
             return
         try:
             async with sem:
-                tech = await process_instagram_result(
+                member = await process_instagram_result(
                     item, seen_usernames=seen_usernames, report=report,
                     dry_run=dry_run, force=force, on_status=on_status,
                 )
         except InstagramBlockedError:
             _blocked = True
             raise
-        if tech is None:
+        if member is None:
             return
 
         link = item["link"]
         username = item.get("username", "")
 
         if dry_run:
-            log.info("dry-run: %s (저장 건너뜀)", tech.name)
+            log.info("dry-run: %s (저장 건너뜀)", member.company)
             if report:
-                report.technicians.append(tech.model_dump())
+                report.members.append(member.dump())
                 report.add_saved(
                     blog_url=link, blogger_name=username,
-                    tech_name=tech.name, rank=tech.rank, trades=tech.trades,
-                    phone=tech.phone, page_id="",
-                    region=tech.region, address=tech.address, email=tech.email,
+                    company=member.company, role=member.role, trades=member.profile.trades,
+                    phone=member.phone, page_id="",
+                    region=member.region_kr, address=member.profile.address, email=member.email,
                 )
             return
 
         if on_status:
-            on_status(f"저장: {tech.name[:15]}")
+            on_status(f"저장: {member.company[:15]}")
         try:
             if direct:
-                page_id = await save_technician(tech, force=force)
+                page_id = await save_member(member, force=force)
             else:
-                page_id = await save_to_review(tech)
+                page_id = await save_to_review(member)
         except Exception as exc:
             log.warning("저장 실패: %s", link, exc_info=True)
             if report:
                 report.add_failed(link, username, "저장", str(exc))
             return
 
-        log.info("저장 완료: %s → %s", tech.name, page_id)
+        log.info("저장 완료: %s → %s", member.company, page_id)
         saved_ids.append(page_id)
         if report:
             report.add_saved(
                 blog_url=link, blogger_name=username,
-                tech_name=tech.name, rank=tech.rank, trades=tech.trades,
-                phone=tech.phone, page_id=page_id,
-                region=tech.region, address=tech.address, email=tech.email,
+                company=member.company, role=member.role, trades=member.profile.trades,
+                phone=member.phone, page_id=page_id,
+                region=member.region_kr, address=member.profile.address, email=member.email,
             )
 
     await asyncio.gather(*[_handle(item) for item in items])
@@ -723,40 +945,79 @@ async def run_instagram_full(
     return report
 
 
+async def run_export_db(file_path: Path, truncate: bool = False) -> PipelineReport:
+    """dry-run 보고서 JSON(members[])을 crawled_* DB 테이블에 적재한다 (#876).
+
+    ⚠️ BE 우회 — crawled_* 직접 INSERT. 대상 DB 는 CRAWLED_DB_URL 환경변수.
+    """
+    import json
+
+    from crawler.db import export_members
+
+    if not settings.crawled_db_url:
+        raise ValueError("CRAWLED_DB_URL 환경변수가 설정되지 않았습니다")
+
+    data = json.loads(file_path.read_text(encoding="utf-8"))
+    members_data = data.get("members", [])
+    if not members_data:
+        raise ValueError(f"파일에 members 데이터가 없습니다: {file_path}")
+
+    members = [CrawledMember.model_validate(m) for m in members_data]
+    log.info("DB 적재: %s (%d건)%s", file_path, len(members), " [truncate]" if truncate else "")
+
+    created, updated = await export_members(members, settings.crawled_db_url, truncate=truncate)
+
+    report = PipelineReport()
+    report.mode = "DB 적재"
+    report.total_searched = len(members)
+    for m in members:
+        report.add_saved(
+            blog_url=m.profile.url, blogger_name=m.company,
+            company=m.company, role=m.role, trades=m.profile.trades,
+            phone=m.phone, page_id="",
+            region=m.region_kr, address=m.profile.address, email=m.email,
+            posts=len(m.posts), images=sum(len(p.images) for p in m.posts),
+        )
+    log.info("DB 적재 완료: 신규 %d · 갱신 %d", created, updated)
+    console.print(f"[green]DB 적재 완료: 신규 {created} · 갱신 {updated}[/green]")
+    return report
+
+
 async def run_from_file(file_path: Path, force: bool = False) -> PipelineReport:
-    """dry-run 보고서 JSON에서 Technician 데이터를 읽어 노션에 저장한다."""
+    """dry-run 보고서 JSON에서 CrawledMember 데이터를 읽어 노션에 저장한다."""
     import json
 
     data = json.loads(file_path.read_text(encoding="utf-8"))
-    technicians_data = data.get("technicians", [])
-    if not technicians_data:
-        raise ValueError(f"파일에 technicians 데이터가 없습니다: {file_path}")
+    members_data = data.get("members", [])
+    if not members_data:
+        raise ValueError(f"파일에 members 데이터가 없습니다: {file_path}")
 
     report = PipelineReport()
     report.mode = "파일 임포트"
     report.llm_model = data.get("params", {}).get("llm_model", "")
 
-    log.info("파일 임포트: %s (%d건)", file_path, len(technicians_data))
+    log.info("파일 임포트: %s (%d건)", file_path, len(members_data))
     saved_ids = []
-    for tech_data in technicians_data:
-        tech = Technician(**tech_data)
+    for member_data in members_data:
+        member = CrawledMember.model_validate(member_data)
         try:
-            page_id = await save_technician(tech, force=force)
+            page_id = await save_member(member, force=force)
         except Exception as exc:
-            log.warning("저장 실패: %s", tech.name, exc_info=True)
-            report.add_failed(tech.detail_url, tech.name, "저장", str(exc))
+            log.warning("저장 실패: %s", member.company, exc_info=True)
+            report.add_failed(member.profile.url, member.company, "저장", str(exc))
             continue
 
-        log.info("저장 완료: %s → %s", tech.name, page_id)
+        log.info("저장 완료: %s → %s", member.company, page_id)
         saved_ids.append(page_id)
         report.add_saved(
-            blog_url=tech.detail_url, blogger_name=tech.name,
-            tech_name=tech.name, rank=tech.rank, trades=tech.trades,
-            phone=tech.phone, page_id=page_id,
-            region=tech.region, address=tech.address, email=tech.email,
+            blog_url=member.profile.url, blogger_name=member.company,
+            company=member.company, role=member.role, trades=member.profile.trades,
+            phone=member.phone, page_id=page_id,
+            region=member.region_kr, address=member.profile.address, email=member.email,
+            posts=len(member.posts), images=sum(len(p.images) for p in member.posts),
         )
 
-    log.info("임포트 완료: %d/%d건 저장", len(saved_ids), len(technicians_data))
+    log.info("임포트 완료: %d/%d건 저장", len(saved_ids), len(members_data))
     return report
 
 
@@ -780,10 +1041,13 @@ async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineR
     sem = asyncio.Semaphore(CONCURRENCY * 4)  # enrich는 I/O 위주, 429 미발생 확인
     enriched = 0
 
-    # 빈 필드명 → Technician 속성 매핑
-    _field_to_attr = {
-        "연락처": "phone", "주소": "address", "이메일": "email",
-        "대표자": "representative", "사업자등록번호": "business_number",
+    # 빈 필드명 → CrawledMember 값 접근자 매핑
+    _field_getters = {
+        "연락처": lambda m: m.phone,
+        "주소": lambda m: m.profile.address,
+        "이메일": lambda m: m.email,
+        "대표자": lambda m: m.name,
+        "사업자등록번호": lambda m: m.brn,
     }
 
     async def _handle(page: dict, progress, task_id) -> None:
@@ -915,29 +1179,36 @@ async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineR
                 if biz.get("business_number"):
                     classification["business_number"] = biz["business_number"]
 
-            # 5) Technician 구성 + enrichment 저장
-            channels = ["인스타그램"] if is_instagram else ["네이버블로그"]
+            # 5) CrawledMember 구성 + enrichment 저장
             cover = profile.get("profile_pic_url", "") if is_instagram else profile.get("banner_image", "")
-            tech = Technician(
-                name=tech_name,
-                rank=classification["rank"],
-                trades=classification["trades"],
-                region=classification.get("region", ""),
-                address=address,
-                representative=classification.get("representative", ""),
-                business_number=classification.get("business_number", ""),
-                headline=profile_intro[:500],
-                about=profile["about"][:2000],
-                phone=phone,
+            trades = classification["trades"]
+            # 한국어 라벨 → BE Trade enum 코드 (미대응 "기타" 등은 드랍)
+            enum_trades = [c for t in trades if (c := trade_enum(t))]
+            member = CrawledMember(
+                company=tech_name,
+                name=classification.get("representative", ""),
+                phone=phone_digits(phone),
+                picture=cover,
+                role=classification["rank"],
+                brn=classification.get("business_number", ""),
                 email=email,
-                channels=channels,
+                profile=CrawledProfile(
+                    primary_trade=enum_trades[0] if enum_trades else "",
+                    trades=enum_trades,
+                    experience=classification.get("experience"),
+                    headline=profile_intro[:500],
+                    about=profile["about"][:2000],
+                    address=address,
+                    state=REGION_ENUM_BY_KR.get(classification.get("region", ""), ""),
+                    url=detail_url,
+                    platform=PLATFORM_INSTAGRAM if is_instagram else PLATFORM_NAVER,
+                ),
+                posts=[CrawledPost(**post) for post in profile.get("posts", [])],
                 source_urls=profile["source_urls"],
-                detail_url=detail_url,
-                cover_image_url=cover,
             )
 
             try:
-                await update_technician(page_id, tech, force=False)
+                await update_member(page_id, member, force=False)
             except Exception as exc:
                 log.warning("저장 실패: %s", detail_url, exc_info=True)
                 report.add_failed(detail_url, name, "저장", str(exc))
@@ -948,13 +1219,14 @@ async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineR
             log.info("보강 완료: %s → %s", tech_name, page_id)
             report.add_saved(
                 blog_url=detail_url, blogger_name=name,
-                tech_name=tech_name, rank=tech.rank, trades=tech.trades,
-                phone=phone, page_id=page_id,
-                region=tech.region, address=address, email=email,
+                company=tech_name, role=member.role, trades=member.profile.trades,
+                phone=phone_digits(phone), page_id=page_id,
+                region=member.region_kr, address=address, email=email,
+                posts=len(member.posts), images=sum(len(post.images) for post in member.posts),
             )
 
             # 보강 결과 표시: 빈 필드 중 채워진 것 / 못 채운 것
-            filled = [f for f in empty_fields if getattr(tech, _field_to_attr.get(f, ""), "")]
+            filled = [f for f in empty_fields if _field_getters.get(f, lambda m: "")(member)]
             still_empty = [f for f in empty_fields if f not in filled]
             parts = []
             if filled:
@@ -1082,7 +1354,7 @@ async def run_patch_review(dry_run: bool = False) -> PipelineReport:
                 patched += 1
                 report.add_saved(
                     blog_url="", blogger_name=name,
-                    tech_name=name, rank="", trades=[],
+                    company=name, role="", trades=[],
                     phone="", page_id=page_id,
                 )
 
@@ -1135,7 +1407,7 @@ async def run_approve() -> PipelineReport:
             log.info("이동 완료: %s → %s (%s)", name, page_id, action)
             report.add_saved(
                 blog_url="", blogger_name=name,
-                tech_name=name, rank="", trades=[],
+                company=name, role="", trades=[],
                 phone="", page_id=page_id,
             )
             progress.console.print(f"  [green]v[/green] {name} → {action}")
@@ -1161,12 +1433,19 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="노션 저장 없이 분류까지만 수행")
     parser.add_argument("--force", action="store_true", help="기존 업체도 재크롤링하여 덮어쓰기")
     parser.add_argument("--from-file", type=Path, metavar="JSON", help="검수한 JSON에서 노션 저장")
+    parser.add_argument("--export-db", type=Path, metavar="JSON", help="dry-run JSON을 crawled_* DB에 적재 (#876)")
+    parser.add_argument("--truncate", action="store_true", help="--export-db 시 기존 crawled_* 비우고 재적재")
     parser.add_argument("--enrich", action="store_true", help="빈 필드가 있는 기존 레코드를 재크롤링+LLM으로 보강")
     parser.add_argument("--instagram", action="store_true", help="인스타그램 채널 크롤링")
     parser.add_argument("--channel", choices=["blog", "instagram", "all"], default="all", help="enrich 대상 채널 (기본: all)")
     parser.add_argument("--approve", action="store_true", help="검수 DB 승인 건을 프로덕션 DB로 이동")
     parser.add_argument("--direct", action="store_true", help="검수 DB 거치지 않고 프로덕션 DB 직접 저장")
     parser.add_argument("--patch-review", action="store_true", help="검수 DB 기존 데이터에 피드백 수정사항 소급 적용")
+    parser.add_argument("--collect-raw", action="store_true", help="#920 1단계: 검색·수집만 하여 원본을 파일로 저장(분류·저장 안 함)")
+    parser.add_argument("--classify-from-raw", type=Path, metavar="RAW", help="#920 2단계: 저장된 원본(jsonl)을 읽어 분류만 실행(다시 수집하지 않음)")
+    parser.add_argument("--labels", type=Path, metavar="JSON", help="#953: 외부 라벨(강한 판단자) JSON 배열([{id,is_professional,...}]). 있으면 해당 blog_url은 LLM 대신 라벨로 분류")
+    parser.add_argument("--raw-out", type=Path, metavar="JSONL", help="--collect-raw 저장 경로 (기본: reports/raw/naver-<시각>.jsonl)")
+    parser.add_argument("--no-dedup", action="store_true", help="--collect-raw 중복 제외 끄기 (기본은 이미 수집/적재된 블로그 건너뜀)")
     vision_group = parser.add_mutually_exclusive_group()
     vision_group.add_argument("--vision", action="store_true", default=None, help="배너/Footer 이미지 Vision OCR 강제 활성화")
     vision_group.add_argument("--no-vision", action="store_true", help="Vision OCR 비활성화")
@@ -1214,8 +1493,8 @@ def main():
     async def _run() -> PipelineReport:
         nonlocal report
 
-        # 노션 DB 스키마 검증 (dry-run 제외)
-        if not args.dry_run:
+        # 노션 DB 스키마 검증 (dry-run·export-db·raw 단계 제외 — 노션 무관)
+        if not args.dry_run and not args.export_db and not args.collect_raw and not args.classify_from_raw:
             # 검수 DB 스키마 검증 (approve, patch-review 모드 또는 기본 모드)
             if args.approve or args.patch_review or not args.direct:
                 review_errors = await validate_review_schema()
@@ -1234,7 +1513,13 @@ def main():
                         console.print(f"  [red]• {err}[/red]")
                     raise SystemExit(1)
 
-        if args.patch_review:
+        if args.collect_raw:
+            report = await run_collect_raw(keywords=args.query or None, per_query=args.per_query, force=args.force, out=args.raw_out, dedup=not args.no_dedup)
+        elif args.classify_from_raw:
+            report = await run_classify_from_raw(args.classify_from_raw, skip_vision=not use_vision, labels_file=args.labels)
+        elif args.export_db:
+            report = await run_export_db(args.export_db, truncate=args.truncate)
+        elif args.patch_review:
             report = await run_patch_review(dry_run=args.dry_run)
         elif args.approve:
             report = await run_approve()

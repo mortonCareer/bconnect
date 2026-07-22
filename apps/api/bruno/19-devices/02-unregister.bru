@@ -1,0 +1,34 @@
+meta {
+  name: 디바이스 해제
+  type: http
+  seq: 2
+  tags: [
+    idempotent
+    chain
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/devices
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "token": "sample-fcm-token"
+  }
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  등록한 device token 을 해제한다. 존재하지 않는 token 도 200(idempotent).
+  @chain
+  - 19-devices/01-register
+}

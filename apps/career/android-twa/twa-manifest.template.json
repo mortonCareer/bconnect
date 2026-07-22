@@ -1,0 +1,48 @@
+{
+  "packageId": "to.bconnect.career",
+  "host": "__HOST__",
+  "name": "품앗이",
+  "launcherName": "품앗이",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#386dff",
+  "themeColorDark": "#386dff",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#ffffff",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://__HOST__/icon-512.png",
+  "webManifestUrl": "https://__HOST__/manifest.webmanifest",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "appVersion": "1.0.1",
+  "appVersionCode": 2,
+  "shortcuts": [
+    {
+      "name": "홈",
+      "shortName": "홈",
+      "url": "/",
+      "chosenIconUrl": "https://__HOST__/icon-192.png"
+    },
+    {
+      "name": "프로필",
+      "shortName": "프로필",
+      "url": "/profile",
+      "chosenIconUrl": "https://__HOST__/icon-192.png"
+    },
+    {
+      "name": "메시지",
+      "shortName": "메시지",
+      "url": "/messages",
+      "chosenIconUrl": "https://__HOST__/icon-192.png"
+    }
+  ],
+  "fallbackType": "customtabs",
+  "features": {}
+}

@@ -1,6 +1,7 @@
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import globals from 'globals'
+import tailwind from './tailwind.js'
 
 export default tseslint.config(
   js.configs.recommended,
@@ -8,6 +9,7 @@ export default tseslint.config(
   {
     ignores: ['**/node_modules/', '**/.next/', '**/dist/', '**/generated/'],
   },
+  tailwind,
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {

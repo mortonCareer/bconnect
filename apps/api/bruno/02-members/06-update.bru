@@ -1,0 +1,27 @@
+meta {
+  name: 내 정보 수정
+  type: http
+  seq: 6
+  tags: [
+    idempotent
+  ]
+}
+
+put {
+  url: {{baseUrl}}/api/v1/members/me
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "이름 수정"
+  }
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}

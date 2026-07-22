@@ -51,7 +51,7 @@ cd bconnect
 
 ### Step 2. 환경 시크릿
 
-`.envrc.local`(direnv 시크릿) 받는 절차는 Notion 페이지로 관리: **[로컬 환경변수](https://www.notion.so/morton-so/35a965d2888b80a19c8df76ba51cd2d0?source=copy_link)**.
+`.envrc.local`(direnv 시크릿) 받는 절차는 Notion 페이지로 관리: **[로컬 환경변수](https://www.notion.so/morton-so/384965d2888b8092be18f7bab46d0f8d)**.
 
 ```bash
 direnv allow .  # 환경변수 자동 로드 확인
@@ -106,7 +106,7 @@ gh pr create --base dev --fill
 - 리뷰어 approve 후 본인이 **Squash and Merge**
 - main 직접 머지 X — PR 타겟은 항상 `dev`
 
-자세한 CI / QA / 배포: [`how-to/qa-and-testing.md`](../how-to/qa-and-testing.md), [`how-to/deployment.md`](../how-to/deployment.md).
+자세한 CI / 배포: [`how-to/deployment.md`](../how-to/deployment.md).
 
 ---
 
@@ -126,7 +126,7 @@ gh pr create --base dev --fill
 
 ## 다 끝났다면
 
-- 개발 사이클: [`how-to/git-workflow.md`](../how-to/git-workflow.md) → [`how-to/development-workflow.md`](../how-to/development-workflow.md) → [`how-to/qa-and-testing.md`](../how-to/qa-and-testing.md) → [`how-to/deployment.md`](../how-to/deployment.md)
+- 개발 사이클: [`how-to/git-workflow.md`](../how-to/git-workflow.md) → [`how-to/development-workflow.md`](../how-to/development-workflow.md) → [`how-to/deployment.md`](../how-to/deployment.md)
 - 사실 lookup: [`reference/`](../reference/)
 - 결정 이유: [`explanation/adr/`](../explanation/adr/)
 - 새 docs 작성 룰: [`how-to/write-docs.md`](../how-to/write-docs.md)

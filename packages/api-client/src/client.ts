@@ -5,6 +5,8 @@
 // hook API 가 명확함.
 import ky, { HTTPError } from 'ky'
 
+import { setAuthHint, clearAuthHint } from './auth-hint'
+
 const getBaseUrl = () => {
   if (typeof window === 'undefined') {
     return process.env.API_URL || 'http://localhost:8080'
@@ -20,6 +22,10 @@ export const setAccessToken = (token: string | null) => {
 }
 
 export const getAccessToken = () => accessToken
+
+// 로그인 전(OTP)·refresh 자신의 401 은 재발급 재시도가 성립하지 않는 경로 (#851).
+const AUTH_ENDPOINT = /\/auth\/(otp\/|refresh$)/
+const isAuthEndpoint = (url: string) => AUTH_ENDPOINT.test(url)
 
 // API 응답 envelope. spec 의 ApiSuccessResponseBase + paths 의 allOf 패턴과 정렬됨.
 // orval 이 생성하는 endpoint 응답 타입은 `ApiSuccessResponseBase & { data: T }` 형태 —
@@ -43,15 +49,28 @@ type ApiErrorResponse = {
 export class ApiError extends Error {
   constructor(
     public code: string,
-    message: string
+    message: string,
+    /** 원본 HTTP 상태. 호출부가 BE 에러 code(문자열) 대신 상태로 분기할 때 사용. */
+    public status?: number
   ) {
     super(message)
     this.name = 'ApiError'
   }
 }
 
-// 토큰 갱신 함수
-export async function refreshAccessToken(): Promise<boolean> {
+// 토큰 갱신 함수 — single-flight (#782). BE 가 refresh 토큰을 회전(rotate)하고
+// mismatch 시 세션을 revoke 하므로, 동시 401 들이 각자 refresh 를 쏘면 뒤의 요청이
+// 폐기된 토큰으로 세션을 죽인다. 진행 중이면 같은 promise 를 공유해 refresh 를 1회로 묶는다.
+let refreshPromise: Promise<boolean> | null = null
+
+export function refreshAccessToken(): Promise<boolean> {
+  refreshPromise ??= doRefresh().finally(() => {
+    refreshPromise = null
+  })
+  return refreshPromise
+}
+
+async function doRefresh(): Promise<boolean> {
   try {
     const response = await ky.post(`${getBaseUrl()}/api/v1/auth/refresh`, {
       credentials: 'include',
@@ -62,10 +81,17 @@ export async function refreshAccessToken(): Promise<boolean> {
 
     if (json.success) {
       setAccessToken(json.data.accessToken)
+      setAuthHint()
       return true
     }
+    clearAuthHint()
     return false
-  } catch {
+  } catch (error) {
+    // HTTPError = BE 가 refresh 를 거절 (세션 만료/무효) → 표시 쿠키 제거.
+    // 그 외 (네트워크 단절 등) 는 세션 판단 불가라 유지.
+    if (error instanceof HTTPError) {
+      clearAuthHint()
+    }
     return false
   }
 }
@@ -84,9 +110,14 @@ export const apiClient = ky.create({
     ],
     afterResponse: [
       async (request, options, response) => {
+        // 401 만 refresh 트리거 — 403 은 인가 실패(또는 BE 에러 dispatch 마스킹, #763)라
+        // refresh 로 해소되지 않는다 (#782).
+        // auth 엔드포인트(로그인 전 OTP·refresh 자신)의 401 은 재발급이 성립하지 않는
+        // 경로라 제외 — 오답마다 무의미한 /auth/refresh 가 따라붙는 낭비를 막는다 (#851).
         if (
-          (response.status === 401 || response.status === 403) &&
-          !request.headers.get('X-Retry')
+          response.status === 401 &&
+          !request.headers.get('X-Retry') &&
+          !isAuthEndpoint(request.url)
         ) {
           const refreshed = await refreshAccessToken()
           if (refreshed) {
@@ -123,7 +154,7 @@ export async function customFetch<T>(url: string, options: RequestInit = {}): Pr
     if (json && typeof json === 'object' && 'success' in json) {
       const env = json as ApiSuccessResponse<T> | ApiErrorResponse
       if (!env.success) {
-        throw new ApiError(env.error.code, env.error.message)
+        throw new ApiError(env.error.code, env.error.message, response.status)
       }
       return env.data
     }
@@ -134,7 +165,7 @@ export async function customFetch<T>(url: string, options: RequestInit = {}): Pr
     }
     if (error instanceof HTTPError) {
       const json = (await error.response.json()) as ApiErrorResponse
-      throw new ApiError(json.error.code, json.error.message)
+      throw new ApiError(json.error.code, json.error.message, error.response.status)
     }
     throw error
   }

@@ -1,0 +1,18 @@
+meta {
+  name: 안읽음 개수
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/notifications/unread/count
+  auth: inherit
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.a('number');
+  });
+}

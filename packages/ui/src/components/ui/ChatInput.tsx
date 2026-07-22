@@ -71,7 +71,7 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && !disabled && inputValue.trim()) {
+      if (e.key === 'Enter' && !e.nativeEvent.isComposing && !disabled && inputValue.trim()) {
         e.preventDefault()
         onSend?.()
       }
@@ -82,19 +82,16 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
     return (
       <div
         ref={ref}
-        className={cn(
-          'flex h-[80px] items-center gap-[8px] bg-white px-[24px] py-[16px]',
-          className
-        )}
+        className={cn('flex h-20 items-center gap-2 bg-white px-6 py-4', className)}
         {...props}
       >
         {/* 갤러리 아이콘 */}
         <button type="button" className="shrink-0" aria-label="갤러리">
-          <ImageIcon size={24} className="text-bconnect-gray-500" />
+          <ImageIcon size={24} className="text-gray-500" />
         </button>
 
         {/* 입력 영역 */}
-        <div className="flex flex-1 items-center rounded-[12px] bg-bconnect-gray-100 px-[16px] py-[9px]">
+        <div className="flex flex-1 items-center rounded-xl bg-gray-100 px-4 py-[9px]">
           <input
             type="text"
             value={inputValue}
@@ -103,9 +100,9 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
             onKeyDown={handleKeyDown}
             disabled={disabled}
             className={cn(
-              'flex-1 bg-transparent text-[0.875rem] leading-[1.6] font-normal outline-none',
-              disabled ? 'text-bconnect-gray-500' : 'text-bconnect-gray-900',
-              'placeholder:text-bconnect-gray-500'
+              'flex-1 bg-transparent text-r-14 outline-none',
+              disabled ? 'text-gray-500' : 'text-gray-900',
+              'placeholder:text-gray-500'
             )}
           />
         </div>
@@ -116,8 +113,8 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           onClick={handleSendClick}
           disabled={!isActive}
           className={cn(
-            'flex size-[40px] shrink-0 items-center justify-center rounded-full p-[8px]',
-            isActive ? 'bg-bconnect-primary' : 'bg-bconnect-gray-500'
+            'flex size-10 shrink-0 items-center justify-center rounded-full p-2',
+            isActive ? 'bg-primary' : 'bg-[#A5A5A5]'
           )}
           aria-label="전송"
         >

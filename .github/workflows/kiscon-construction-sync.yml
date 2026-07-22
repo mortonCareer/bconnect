@@ -14,10 +14,7 @@ on:
 
 jobs:
   sync:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/career
+    runs-on: morton-runner
     steps:
       - uses: actions/checkout@v6
 
@@ -30,7 +27,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        working-directory: .
 
       - name: Sync KISCON construction data to Postgres
         env:
@@ -39,9 +35,9 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           if [ "${{ inputs.full }}" = "true" ]; then
-            pnpm exec tsx scripts/kiscon-construction-sync.ts --full
+            pnpm --filter @bconnect/data-jobs kiscon-construction-sync -- --full
           else
-            pnpm exec tsx scripts/kiscon-construction-sync.ts
+            pnpm --filter @bconnect/data-jobs kiscon-construction-sync
           fi
 
       - name: Notify Slack on failure

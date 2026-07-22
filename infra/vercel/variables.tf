@@ -9,8 +9,8 @@ variable "domain" {
   type        = string
 }
 
-variable "project_name" {
-  description = "Project name (used for Vercel project name prefix)"
+variable "dev_api_url" {
+  description = "Railway staging BE base URL — dev custom environment 에서 호출 (#352, ADR-0010)"
   type        = string
 }
 
@@ -92,7 +92,6 @@ variable "firebase_web_configs" {
     storage_bucket      = string
     messaging_sender_id = string
     app_id              = string
-    measurement_id      = string
   }))
   sensitive = true
 }

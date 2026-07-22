@@ -1,0 +1,44 @@
+meta {
+  name: 업체 작업 생성
+  type: http
+  seq: 1
+  tags: [
+    chain
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/tasks/company
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "trades": ["TILING", "FILM_SHEET"],
+    "start": "2026-06-01",
+    "end": "2026-06-03",
+    "projectId": {{projectId}},
+    "title": "작업",
+    "requirement": "요구사항",
+    "memo": "메모"
+  }
+}
+
+script:post-response {
+  bru.setVar("projectTaskId", res.body.data);
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.a('number');
+  });
+}
+
+docs {
+  @chain
+  - 05-companies/01-create
+  - 06-projects/01-create
+}

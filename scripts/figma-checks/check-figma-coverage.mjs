@@ -77,7 +77,10 @@ export async function checkFigmaCoverage(ctx) {
       })
       continue
     }
-    if (!node.devReady) {
+    // "Ready for Dev" 는 화면/플로우 단위 신호 — 디자이너가 화면을 Ready 마킹한다.
+    // packages/ 의 디자인 시스템 컴포넌트는 빌딩 블록이라 ready/not-ready 개념이 안 맞고
+    // 디자이너가 Ready 마킹하지 않는 게 정상. 따라서 이 체크는 apps/ 매핑에만 적용 (#355).
+    if (!node.devReady && tag.file.startsWith('apps/')) {
       findings.push({
         checkName: 'figma-coverage',
         severity: 'info',

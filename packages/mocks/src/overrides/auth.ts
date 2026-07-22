@@ -5,9 +5,10 @@ import {
   getLogoutMockHandler,
 } from '@bconnect/api-client'
 
-// dev 편의용 고정값 — docs/how-to/qa-and-testing.md "테스트 데이터 생성" 섹션과 일치.
+// dev 편의용 고정값.
 const MOCK_OTP_CODE = '123456'
-const NEW_USER_PHONE_PREFIX = '01099'
+// 01099 로 시작하는 번호만 기존 회원(로그인) 으로 취급. 그 외는 모두 신규(signup).
+const REGISTERED_PHONE_PREFIX = '01099'
 
 // 동일 phone 으로 send → verify 가 즉시 작동하도록 in-memory 저장.
 const verificationCodes = new Map<string, string>()
@@ -33,8 +34,8 @@ export const authOverrides = [
   }),
 
   // OTP 검증: orval mock 은 200 만 생성하므로 error 응답이 필요한 이 endpoint 는 raw 핸들러.
-  // - 신규 (01099 prefix): VerifyOtpSignupResponse
-  // - 기존: VerifyOtpLoginResponse + Set-Cookie (refreshToken)
+  // - 기존 (01099 prefix): VerifyOtpLoginResponse + Set-Cookie (refreshToken)
+  // - 신규 (그 외 전부): VerifyOtpSignupResponse
   // - 잘못된 코드: 401 Morton API 공통 에러 포맷
   http.post('*/api/v1/auth/otp/verify', async ({ request }) => {
     const body = (await request.json()) as { phone?: string; code?: string }
@@ -70,25 +71,25 @@ export const authOverrides = [
     }
     verificationCodes.delete(body.phone)
 
-    if (body.phone.startsWith(NEW_USER_PHONE_PREFIX)) {
-      return HttpResponse.json({
-        success: true,
-        data: { registered: false, signupToken: generateToken('signup') },
-      })
-    }
-    const accessToken = generateToken('access')
-    const refreshToken = generateToken('refresh')
-    return HttpResponse.json(
-      {
-        success: true,
-        data: { registered: true, accessToken, refreshToken },
-      },
-      {
-        headers: {
-          'Set-Cookie': `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=604800; SameSite=Lax`,
+    if (body.phone.startsWith(REGISTERED_PHONE_PREFIX)) {
+      const accessToken = generateToken('access')
+      const refreshToken = generateToken('refresh')
+      return HttpResponse.json(
+        {
+          success: true,
+          data: { registered: true, accessToken, refreshToken },
         },
-      }
-    )
+        {
+          headers: {
+            'Set-Cookie': `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=604800; SameSite=Lax`,
+          },
+        }
+      )
+    }
+    return HttpResponse.json({
+      success: true,
+      data: { registered: false, signupToken: generateToken('signup') },
+    })
   }),
 
   // refresh: 매번 새 access token 발급. mock 에선 쿠키 검증을 생략 (실제 BE 는 검증).

@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:db;mode=postgresql;DB_CLOSE_ON_EXIT=FALSE
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  sql:
+    init:
+      platform: h2
+
+app:
+  cors:
+    allowed-origin-patterns:
+      - "http://localhost:[*]"
+      - "http://127.0.0.1:[*]"
+
+  jwt:
+    secret: test-secret-key-for-jwt-authentication-minimum-256-bits
+
+  sms:
+    api-key: local-api-key
+    api-secret: local-api-secret
+    sender-number: "01000000000"
+
+  s3:
+    bucket: local-bucket
+
+  cloudfront:
+    key-pair-id: local-key-pair-id
+    private-key: local-private-key
+
+logging:
+  level:
+    org.springframework.web.socket: TRACE
+    org.springframework.messaging.simp.stomp: TRACE

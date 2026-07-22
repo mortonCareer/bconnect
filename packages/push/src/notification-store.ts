@@ -1,0 +1,30 @@
+import { create } from 'zustand'
+
+export interface InAppNotificationItem {
+  id: string
+  title: string
+  body: string
+  /** 딥링크 경로 (예: /messages/123) */
+  href?: string
+  timestamp: number
+}
+
+interface NotificationStore {
+  /** 현재 표시 중인 인앱 알림 (포그라운드 수신 시) */
+  current: InAppNotificationItem | null
+  show: (notification: Omit<InAppNotificationItem, 'id' | 'timestamp'>) => void
+  dismiss: () => void
+}
+
+export const useNotificationStore = create<NotificationStore>((set) => ({
+  current: null,
+  show: (notification) =>
+    set({
+      current: {
+        ...notification,
+        id: crypto.randomUUID(),
+        timestamp: Date.now(),
+      },
+    }),
+  dismiss: () => set({ current: null }),
+}))

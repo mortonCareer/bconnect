@@ -1,0 +1,40 @@
+package to.bconnect.api.support.fixture;
+
+import to.bconnect.api.core.presentation.v1.request.RegisterMemberRequest;
+import to.bconnect.api.core.presentation.v1.request.UpdateMemberRequest;
+import to.bconnect.api.core.presentation.v1.request.UpdatePictureRequest;
+import to.bconnect.api.core.domain.member.Member;
+import to.bconnect.api.storage.member.MemberEntity;
+import to.bconnect.api.storage.member.Role;
+
+import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
+
+public class MemberFactory {
+
+    public static final Long DEFAULT_PICTURE_ID = 1L;
+
+    public static Member create(Long id) {
+        return new Member(id, "username", "name", "phone", Role.USER,
+                MIN_DATE_TIME, MIN_DATE_TIME);
+    }
+
+    public static MemberEntity createEntity() {
+        return new MemberEntity("username", "name", "phone", Role.USER);
+    }
+
+    public static MemberEntity createEntity(String username, String phone, Role role) {
+        return new MemberEntity(username, "name", phone, role);
+    }
+
+    public static RegisterMemberRequest registerRequest() {
+        return new RegisterMemberRequest("username", "name");
+    }
+
+    public static UpdateMemberRequest updateRequest() {
+        return new UpdateMemberRequest("name");
+    }
+
+    public static UpdatePictureRequest updatePictureRequest() {
+        return new UpdatePictureRequest(DEFAULT_PICTURE_ID);
+    }
+}

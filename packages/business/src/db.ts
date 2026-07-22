@@ -1,0 +1,23 @@
+import 'server-only'
+
+import postgres from 'postgres'
+
+let _sql: ReturnType<typeof postgres> | null = null
+
+export function getDb() {
+  if (!_sql) {
+    const url = process.env.DATABASE_URL
+    if (!url) {
+      throw new Error('DATABASE_URL is not configured')
+    }
+    _sql = postgres(url, {
+      max: 3,
+      idle_timeout: 10,
+      max_lifetime: 60 * 5,
+      connection: {
+        application_name: 'bconnect-career',
+      },
+    })
+  }
+  return _sql
+}

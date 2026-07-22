@@ -1,0 +1,29 @@
+meta {
+  name: 인증뱃지 반려 (ADMIN)
+  type: http
+  seq: 4
+  tags: [
+    admin
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/credentials/:id/deny
+  auth: inherit
+}
+
+params:path {
+  id: 101
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  어드민이 사용자가 업로드한 자격을 직접 검토한 다음 거절한다.
+  @seed credentials : 101
+}

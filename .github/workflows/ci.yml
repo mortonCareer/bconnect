@@ -6,13 +6,19 @@ on:
   pull_request:
     branches: [dev]
 
+# 같은 ref 에 새 커밋 push 시 이전 CI 취소 — self-hosted 러너(maxRunners 3) 슬롯을
+# stale 런이 점유하는 것 방지 (#918). docs-lint.yml 과 동일 패턴.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: read
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     outputs:
       career: ${{ steps.filter.outputs.career }}
       plan: ${{ steps.filter.outputs.plan }}
@@ -26,29 +32,39 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
-          # spec 만 변경된 PR 은 ci-career/ci-plan skip — spec ↔ FE drift 는
-          # FE follow-up PR 에서 해소 (dev → main 의 ci-integration 가 최종 gate).
-          # api-spec 자체는 항상 lint/bundle 검증.
+          # spec 만 변경된 PR 은 ci-career/ci-plan skip — BE-first 사이클(ADR-0015)이라
+          # 스펙 단독 변경은 BE 구현에 따라가는 갱신 또는 description 수정 등
+          # FE 영향 없는 형태가 일반적임.
+          # api-spec 은 BE springdoc 재생성·커밋(ci-api-spec) — orval 이 직접 소비.
           filters: |
             career:
               - 'apps/career/**'
-              - 'packages/**'
-              - '!packages/api-client/src/spec/**'
-              - '!packages/api-client/.redocly.yaml'
+              - 'packages/ui/**'
+              - 'packages/config/**'
+              - 'packages/mocks/**'
+              - 'packages/api-client/src/*.ts'
+              - 'packages/api-client/orval.*.ts'
+              - 'packages/api-client/auth-supplement.ts'
+              - 'packages/api-client/package.json'
+              - 'packages/api-client/tsconfig.json'
               - 'package.json'
               - 'pnpm-lock.yaml'
             plan:
               - 'apps/plan/**'
-              - 'packages/**'
-              - '!packages/api-client/src/spec/**'
-              - '!packages/api-client/.redocly.yaml'
+              - 'packages/ui/**'
+              - 'packages/config/**'
+              - 'packages/mocks/**'
+              - 'packages/api-client/src/*.ts'
+              - 'packages/api-client/orval.*.ts'
+              - 'packages/api-client/auth-supplement.ts'
+              - 'packages/api-client/package.json'
+              - 'packages/api-client/tsconfig.json'
               - 'package.json'
               - 'pnpm-lock.yaml'
             api:
               - 'apps/api/**'
             api-spec:
-              - 'packages/api-client/src/spec/**'
-              - 'packages/api-client/.redocly.yaml'
+              - 'apps/api/**'
             crawler:
               - 'apps/crawler/**'
             packages:
@@ -56,11 +72,31 @@ jobs:
               - 'pnpm-workspace.yaml'
               - 'pnpm-lock.yaml'
               - '.syncpackrc.json'
+              - 'packages/ui/**'
+              - 'packages/config/eslint/**'
+
+  format:
+    runs-on: morton-runner
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Format check
+        run: pnpm format:check
 
   ci-career:
     needs: changes
     if: ${{ needs.changes.outputs.career == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     steps:
       - uses: actions/checkout@v6
 
@@ -76,18 +112,18 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Type check
-        run: pnpm --filter morton-career typecheck
+        run: pnpm --filter @bconnect/career typecheck
+
+      - name: Build
+        run: pnpm --filter @bconnect/career build
 
       - name: Lint
-        run: pnpm --filter morton-career lint
-
-      - name: Format check
-        run: pnpm format:check
+        run: pnpm --filter @bconnect/career lint
 
   ci-plan:
     needs: changes
     if: ${{ needs.changes.outputs.plan == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     steps:
       - uses: actions/checkout@v6
 
@@ -103,69 +139,112 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Type check
-        run: pnpm --filter morton-plan typecheck
+        run: pnpm --filter @bconnect/plan typecheck
+
+      - name: Build
+        run: pnpm --filter @bconnect/plan build
 
       - name: Lint
-        run: pnpm --filter morton-plan lint
-
-      - name: Format check
-        run: pnpm format:check
+        run: pnpm --filter @bconnect/plan lint
 
   ci-api:
     needs: changes
     if: ${{ needs.changes.outputs.api == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout sources
+        uses: actions/checkout@v6
 
-      - uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '21'
-          cache: 'gradle'
+          java-version: 21
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x apps/api/gradlew
-
-      - name: Build with Gradle
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: |
-          cd apps/api
-          ./gradlew build --no-daemon
-
-      - name: Run tests
-        run: |
-          cd apps/api
-          ./gradlew test --no-daemon
-
-  ci-api-spec:
-    needs: changes
-    if: ${{ needs.changes.outputs.api-spec == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: pnpm/action-setup@v4
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
 
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Install Bruno CLI
+        run: npm install -g @usebruno/cli
 
-      - name: Lint OpenAPI spec
-        run: pnpm api:lint
+      - name: Build with Gradle
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        working-directory: apps/api
+        run: ./gradlew build
 
-      - name: Bundle check (sanity)
-        run: pnpm api:bundle
+      - name: Start API server
+        working-directory: apps/api
+        run: ./gradlew bootRun > /dev/null 2>&1 &
+
+      - name: Wait for health
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8080/actuator/health && break || sleep 1
+          done
+
+      - name: Run Bruno demo collection
+        working-directory: apps/api/bruno
+        run: bru run --env local --exclude-tags=ws --reporter-html bruno-report.html
+
+      - name: Upload Bruno report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: bruno-report
+          path: apps/api/bruno/bruno-report.html
+          if-no-files-found: error
+
+  ci-api-spec:
+    needs: changes
+    if: ${{ needs.changes.outputs.api-spec == 'true' }}
+    runs-on: morton-runner
+    permissions: write-all
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Generate Open API Docs
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        working-directory: apps/api
+        run: |
+          ./gradlew build
+          ./gradlew generateOpenApiDocs
+
+      - name: Commit and Push changes
+        run: |
+          mv apps/api/build/openapi.yaml packages/api-client/src
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+          if git diff --staged --quiet; then
+            echo "스펙 변경 없음 — 커밋 스킵"
+          else
+            git commit -m "docs(api): generate open api document"
+            git push origin HEAD:${{ github.head_ref || github.ref_name }}
+          fi
 
   ci-packages:
     needs: changes
     if: ${{ needs.changes.outputs.packages == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     steps:
       - uses: actions/checkout@v6
 
@@ -184,10 +263,13 @@ jobs:
       - name: Check package versions
         run: pnpm package:check
 
+      - name: Lint @bconnect/ui
+        run: pnpm --filter @bconnect/ui lint
+
   ci-crawler:
     needs: changes
     if: ${{ needs.changes.outputs.crawler == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: morton-runner
     defaults:
       run:
         working-directory: apps/crawler

@@ -1,0 +1,28 @@
+meta {
+  name: 드라이브 노트 목록 조회
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/drives/:id/notes
+  auth: inherit
+}
+
+params:path {
+  id: 100
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.an('array');
+  });
+}
+
+docs {
+  @seed drives : 100
+  @seed notes : 100
+  @seed notes : 101
+}

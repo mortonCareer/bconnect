@@ -6,13 +6,15 @@ import {
   ReactQueryDevtools,
   getQueryClient,
   refreshAccessToken,
+  hasAuthHint,
 } from '@bconnect/api-client'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
+import { Toaster } from '@bconnect/ui'
 import type { ReactNode } from 'react'
 import '../env'
-import { usePushNotifications } from '@/hooks/use-push-notifications'
-import { InAppNotification } from '@/components/in-app-notification'
-import { MSWProvider } from '@/components/msw-provider'
+import { MSWProvider, DevToolbar } from '@bconnect/devtools'
+import { usePushNotificationListener, InAppNotification } from '@bconnect/push'
+import { DevPushPanel } from '@/components/dev/DevPushPanel'
 
 // MSW 가 fetch 를 가로채야 하는 모든 부수효과(refresh token, FCM device 등록)는
 // MSWProvider 가 ready 가 된 후 실행되어야 함. 그렇지 않으면 dev 첫 페이지 로드 시
@@ -23,12 +25,19 @@ function PostMSWBootstrap({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (initialized.current) return
     initialized.current = true
-    refreshAccessToken()
+    // 로그아웃 상태면 스킵(#802) — 선제 refresh 가 게스트 방문마다 401 을 만든다.
+    // 힌트가 있는데 세션이 무효면 refresh 실패가 힌트 쿠키를 스스로 지운다 (client.ts).
+    if (hasAuthHint()) refreshAccessToken()
   }, [])
 
-  usePushNotifications()
+  usePushNotificationListener()
 
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      {process.env.NODE_ENV !== 'production' && <DevPushPanel />}
+    </>
+  )
 }
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -41,7 +50,9 @@ export function Providers({ children }: { children: ReactNode }) {
           <PostMSWBootstrap>
             <InAppNotification />
             {children}
+            <Toaster />
             <ReactQueryDevtools initialIsOpen={false} />
+            <DevToolbar />
           </PostMSWBootstrap>
         </QueryClientProvider>
       </NuqsAdapter>

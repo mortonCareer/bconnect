@@ -74,6 +74,28 @@ GitHub Issue 정보를 기반으로 Pull Request를 자동 생성합니다.
 
 템플릿 구조: Summary → Changes → Test → Screenshots → `Closes #이슈번호`
 
+## 본문 quality 룰
+
+PR 본문은 위 4-section 구조 + `Closes #N` 을 유지한다. 다음은 본문에 박지 말 것 — 결정 history, supersede 사유, 코드리뷰 반영 내역, ADR 번호 재할당, 정정 이력. ADR/이슈/git history 가 SoT.
+
+### Section 별 룰
+
+- **Summary** (1-3문장) — 첫 줄은 stand-alone 으로 의도 전달, 나머지는 Why
+- **Changes** — 무엇 + 왜 그렇게 했나. 컴포넌트 구조표 X (코드가 SoT)
+- **Test** — 검증 절차 + 결과
+- **Screenshots** — UI 변경 시
+- **Closes #N** — 이슈에 모든 깊이를 link out
+
+### 권장 길이
+
+| 종류              | 본문 길이         |
+| ----------------- | ----------------- |
+| 단순 fix/refactor | 200-500 bytes     |
+| 일반 feature      | 600-1,200 bytes   |
+| 복잡한 change     | 1,200-2,000 bytes |
+
+상한 초과 시 self-check: "이 단락은 무엇/왜? Detail? ADR/이슈로 보낼 수 있는가?"
+
 ---
 
 ## 리뷰어 자동 할당
@@ -95,143 +117,6 @@ fi
 if git diff main...HEAD --name-only | grep -q "openapi.yaml"; then
   REVIEWER="<CEO_GITHUB>,<CTO_GITHUB>"  # 둘 다
 fi
-```
-
----
-
-## 사용 예시
-
-### 예시 1: 기능 개발 PR
-
-**현재 브랜치**: `feat/123-add-profile-upload`
-
-**이슈 정보** (#123):
-
-- 제목: "Add user profile image upload"
-- 레이블: `💻 FE`
-
-**변경 파일**:
-
-- `apps/career/src/app/profile/upload/page.tsx`
-- `apps/api/src/main/java/com/morton/api/controller/ProfileController.java` (포함됨)
-
-**생성되는 PR**:
-
-```markdown
-Title: feat(career): Add user profile image upload
-Reviewer: CEO (백엔드 변경 포함)
-
-Body:
-
-## Summary
-
-사용자가 프로필 이미지를 업로드할 수 있는 기능 추가
-
-## Changes
-
-- 파일 업로드 폼 UI 구현
-- S3 업로드 로직 추가 (백엔드)
-- 이미지 미리보기 기능
-- 업로드 에러 처리
-
-## Test
-
-- [x] 로컬에서 이미지 업로드 테스트 완료
-- [x] 에러 케이스 (파일 크기, 형식) 확인
-- [x] 반응형 동작 확인 (모바일/데스크톱)
-
-Closes #123
-```
-
-### 예시 2: 버그 수정 PR
-
-**현재 브랜치**: `fix/456-login-redirect-loop`
-
-**이슈 정보** (#456):
-
-- 제목: "Fix login redirect loop"
-- 레이블: `🐛 bug:FE`
-
-**생성되는 PR**:
-
-```markdown
-Title: fix(plan): Fix login redirect loop
-
-Body:
-
-## Summary
-
-로그인 후 무한 리다이렉트 발생 문제 수정
-
-## Changes
-
-- 인증 토큰 검증 로직 수정
-- 리다이렉트 조건 개선
-- 토큰 만료 시 처리 추가
-
-## Test
-
-- [x] 로그인 플로우 테스트
-- [x] 토큰 만료 시나리오 확인
-- [x] 여러 브라우저에서 테스트
-
-Closes #456
-```
-
----
-
-## gh CLI로 PR 생성
-
-### 기본 PR 생성
-
-```bash
-gh pr create \
-  --title "feat(career): Add user profile upload" \
-  --body "Summary and changes here"
-```
-
-### 본문을 heredoc으로 작성
-
-```bash
-gh pr create \
-  --title "feat(career): Add user profile upload" \
-  --body "$(cat <<'EOF'
-## Summary
-
-사용자 프로필 이미지 업로드 기능
-
-## Changes
-
-- 파일 업로드 폼 UI
-- S3 업로드 로직
-- 이미지 미리보기
-
-## Test
-
-- [x] 로컬 테스트 완료
-
-Closes #123
-EOF
-)"
-```
-
-### 리뷰어 및 레이블 추가
-
-```bash
-gh pr create \
-  --title "feat(career): Add user profile upload" \
-  --body "..." \
-  --reviewer <CEO_GITHUB> \
-  --label "💻 FE"
-```
-
-### base 브랜치 지정
-
-```bash
-gh pr create \
-  --base main \
-  --title "feat(career): Add user profile upload" \
-  --body "..."
 ```
 
 ---
@@ -262,11 +147,11 @@ ISSUE_BODY=$(gh issue view $ISSUE --json body -q .body)
 
 # scope 추론 (레이블에서)
 LABELS=$(gh issue view $ISSUE --json labels -q '.labels[].name')
-if echo "$LABELS" | grep -q "career\|💻 FE"; then
+if echo "$LABELS" | grep -q "career\|💻 fe"; then
   SCOPE="career"
 elif echo "$LABELS" | grep -q "plan"; then
   SCOPE="plan"
-elif echo "$LABELS" | grep -q "⚙️ BE\|api"; then
+elif echo "$LABELS" | grep -q "⚙️ be\|api"; then
   SCOPE="api"
 else
   SCOPE=""
@@ -381,71 +266,6 @@ PR 생성 전 확인 사항:
 
 ---
 
-## gh CLI 명령어
-
-### PR 생성
-
-```bash
-# 기본
-gh pr create
-
-# 제목과 본문 지정
-gh pr create --title "feat: add feat" --body "description"
-
-# draft PR
-gh pr create --draft
-
-# 리뷰어 지정
-gh pr create --reviewer CEO,CTO
-
-# 레이블 추가
-gh pr create --label "💻 FE"
-```
-
-### PR 조회
-
-```bash
-# PR 목록
-gh pr list
-
-# 내 PR만 보기
-gh pr list --author @me
-
-# PR 상세 보기
-gh pr view 123
-
-# PR 상태 확인
-gh pr status
-```
-
-### PR 수정
-
-```bash
-# PR 제목 수정
-gh pr edit 123 --title "new title"
-
-# PR 본문 수정
-gh pr edit 123 --body "new body"
-
-# PR에 리뷰어 추가
-gh pr edit 123 --add-reviewer CEO
-```
-
-### PR 머지
-
-```bash
-# Squash and merge
-gh pr merge 123 --squash
-
-# Merge commit
-gh pr merge 123 --merge
-
-# Rebase and merge
-gh pr merge 123 --rebase
-```
-
----
-
 ## 문제 해결
 
 ### Vercel 프리뷰가 안 뜰 때
@@ -526,5 +346,4 @@ PR 생성 후:
 ## 참고 문서
 
 - [Git Workflow](../../../docs/how-to/git-workflow.md) - PR 프로세스
-- [QA & Testing](../../../docs/how-to/qa-and-testing.md) - QA 체크리스트
-- [Deployment](../../../docs/how-to/deployment.md) - Vercel 프리뷰 배포
+- [Deployment](../../../docs/how-to/deployment.md) - 배포

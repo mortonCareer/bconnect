@@ -23,7 +23,7 @@ apps/crawler/src/crawler/
 │   └── instagram.py
 ├── classifier.py        # LLM 분류 (Anthropic/OpenAI)
 ├── notion.py            # Notion DB sync
-├── models.py            # Technician model + TRADES, RANKS
+├── models.py            # CrawledMember 모델(BE CrawledMemberResponse 동형) + TRADES, RANKS
 └── config.py            # pydantic-settings
 ```
 

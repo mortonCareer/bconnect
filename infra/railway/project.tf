@@ -1,5 +1,15 @@
 resource "railway_project" "morton" {
-  name = var.project_name
+  name           = var.project_name
+  has_pr_deploys = false
+
+  default_environment = {
+    name = "prod"
+  }
+}
+
+resource "railway_environment" "dev" {
+  name       = "dev"
+  project_id = railway_project.morton.id
 }
 
 # resource "railway_custom_domain" "api" {

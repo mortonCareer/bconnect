@@ -3,48 +3,85 @@
  */
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm, useWatch, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Tag } from '@bconnect/ui'
-import { ApiError, useRegisterMember, useCreateProfile, Role, Trade } from '@bconnect/api-client'
+import { AddressField } from '@/components/AddressField'
+import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
-import { TRADE_LABELS, TRADE_GROUPS } from '@/lib/trade-labels'
-import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
-import { EXPERIENCE_OPTIONS, EXPERIENCE_TO_YEARS } from '@/lib/experience'
-import type { ExperienceLevel } from '@/lib/experience'
-import { SignupHeader, FormInput, FormLabel, FormError } from '../_components'
-import { profileSchema, type ProfileFormData } from './schema'
+import { Trade, TRADE_LABELS, useCreateMember, useCreateProfile } from '@bconnect/api-client'
+import type { RegisterMemberResponse } from '@bconnect/api-client'
+import { mapKakaoAddress } from '@bconnect/config/address'
+import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
+import {
+  AgreementField,
+  Form,
+  FormControl,
+  FormError,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormSubmitButton,
+  NumberField,
+  passthroughError,
+  SelectField,
+  Tag,
+  TextField,
+  useScrollToError,
+  useServerError,
+} from '@bconnect/ui'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
+import { SignupHeader } from '../_components/SignupHeader'
+import { TradeSelector } from './_components/TradeSelector'
+import { MAX_TRADES, profileSchema, type ProfileFormData } from './schema'
+
+function requireRegisterAccessToken(result: RegisterMemberResponse) {
+  // TODO: BE required 처리 후 type narrowing 필요.
+  // RegisterMemberResponse.accessToken은 세션 필수값인데 optional emit이다.
+  if (!result.accessToken) {
+    throw new Error('회원가입 세션 토큰이 응답에 없습니다.')
+  }
+
+  return result.accessToken
+}
 
 export default function SignupProfilePage() {
   const router = useRouter()
   const { login } = useAuthStore()
-  const registerMemberMutation = useRegisterMember()
-  const createProfileMutation = useCreateProfile()
   const { formData } = useSignupStore()
+  // register(POST /members)는 X-Signup-Token 헤더로 인증한다 (Bearer 아님).
+  const registerMemberMutation = useCreateMember({
+    request: { headers: { 'X-Signup-Token': formData.signupToken } },
+  })
+  const createProfileMutation = useCreateProfile()
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    setValue,
-    formState: { errors, isSubmitting, isValid },
-  } = useForm<ProfileFormData>({
+  const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    mode: 'onChange',
+    mode: 'onTouched',
     defaultValues: {
-      name: formData.name || '',
       fields: formData.fields || [],
       primaryField: formData.primaryField || undefined,
-      experience: formData.experience || undefined,
-      affiliation: formData.affiliation || '',
+      experience: formData.experience ?? undefined,
       role: undefined,
-      address: '',
+      address: undefined,
       headline: '',
+      agreements: CONSENT_DEFAULT,
     },
   })
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { isSubmitting, isValid },
+  } = form
+
+  const server = useServerError(
+    control,
+    passthroughError<ProfileFormData>(undefined, '회원가입에 실패했습니다. 다시 시도해주세요.')
+  )
+  const [issuedAccessToken, setIssuedAccessToken] = useState<string | null>(null)
 
   const watchedFields = useWatch({ control, name: 'fields' })
   const watchedPrimaryField = useWatch({ control, name: 'primaryField' })
@@ -62,240 +99,153 @@ export default function SignupProfilePage() {
     }
   }, [watchedFields, watchedPrimaryField, setValue])
 
-  const toggleField = (trade: Trade) => {
-    const currentFields = selectedFields || []
-    if (currentFields.includes(trade)) {
-      setValue(
-        'fields',
-        currentFields.filter((f) => f !== trade),
-        { shouldValidate: true }
-      )
-    } else if (currentFields.length < 3) {
-      setValue('fields', [...currentFields, trade], { shouldValidate: true })
-    }
-  }
+  const scrollToError = useScrollToError()
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
-      const selectedRole = (data.role as Role) || Role.SKILLED
-      const result = await registerMemberMutation.mutateAsync({
+      // register 는 signupToken(X-Signup-Token 헤더)을 소비 — 실패 후 재시도 시
+      // 재호출하지 않도록 발급된 accessToken을 보관한다.
+      const accessToken =
+        issuedAccessToken ??
+        requireRegisterAccessToken(
+          await registerMemberMutation.mutateAsync({
+            data: {
+              username: formData.username,
+              name: formData.name,
+            },
+          })
+        )
+
+      if (!issuedAccessToken) {
+        setIssuedAccessToken(accessToken)
+      }
+
+      login(accessToken)
+      await createProfileMutation.mutateAsync({
         data: {
-          signupToken: formData.signupToken,
-          username: formData.username,
-          name: data.name,
-          picture: '',
-          role: selectedRole,
+          role: data.role,
+          primaryTrade: data.primaryField as Trade,
+          trades: data.fields as Trade[],
+          experience: data.experience,
+          headline: data.headline || undefined,
+          address: data.address ?? mapKakaoAddress(null),
         },
       })
 
-      // 회원가입 성공 — accessToken 저장 (member 정보는 useGetMyMember 로 별도 조회)
-      login(result.accessToken)
-
-      // 프로필 데이터 생성 (시공분야/경력/주소/한줄소개)
-      try {
-        await createProfileMutation.mutateAsync({
-          data: {
-            primaryTrade: data.primaryField as Trade,
-            trades: data.fields as Trade[],
-            experience: EXPERIENCE_TO_YEARS[data.experience],
-            headline: data.headline || undefined,
-            // TODO #280 — 카카오 우편번호 도입 전 임시 mock 값. zipcode/state/lat/lng 0 으로
-            // address 는 BE-required 라 undefined 불가 — 비어있으면 empty city 로 (BE validation 위임)
-            address: {
-              zipcode: '',
-              city: data.address || '',
-              state: '',
-              street: data.address || '',
-              latitude: 0,
-              longitude: 0,
-            },
-          },
-        })
-      } catch (profileErr) {
-        console.error('Profile creation failed (non-blocking):', profileErr)
-      }
-
-      useSignupStore.getState().reset()
       router.push('/signup/complete')
     } catch (err) {
-      if (err instanceof ApiError) {
-        console.error('Registration failed:', err.code, err.message)
-      }
+      server.capture(err, data)
     }
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex h-dvh flex-col">
       <SignupHeader step={3} onBack={() => router.back()} />
 
       {/* Content */}
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-28 pt-3"
-      >
-        <h1 className="text-sb-24 text-black">
-          기술자님의 시공분야와
-          <br />
-          역할을 선택해주세요
-        </h1>
+      <Form {...form}>
+        <form
+          onSubmit={handleSubmit(onSubmit, scrollToError)}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-6 pt-3">
+            <h1 className="text-sb-24 text-black">
+              기술자님의 시공분야와
+              <br />
+              역할을 선택해주세요
+            </h1>
 
-        {/* 이름 */}
-        <div className="flex flex-col gap-2">
-          <FormLabel required>이름</FormLabel>
-          <FormInput type="text" placeholder="내용을 입력해주세요" {...register('name')} />
-          <FormError message={errors.name?.message} />
-        </div>
+            {/* 시공분야 */}
+            <TradeSelector control={control} name="fields" max={MAX_TRADES} />
 
-        {/* 시공분야 */}
-        <div className="flex flex-col gap-3">
-          <FormLabel required>시공분야</FormLabel>
-          {TRADE_GROUPS.map((group) => (
-            <div key={group.label} className="flex flex-col gap-3">
-              <p className="text-m-14 text-bconnect-gray-700">{group.label}</p>
-              <div className="flex flex-wrap gap-2">
-                {group.trades.map((trade) => (
-                  <Tag
-                    key={trade}
-                    variant={selectedFields.includes(trade) ? 'selected' : 'default'}
-                    onClick={() => toggleField(trade)}
-                  >
-                    {TRADE_LABELS[trade]}
-                  </Tag>
-                ))}
-              </div>
-            </div>
-          ))}
-          <FormError message={errors.fields?.message} />
-        </div>
-
-        {/* 대표분야 */}
-        {selectedFields.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <FormLabel required>대표분야</FormLabel>
-            <Controller
-              name="primaryField"
+            {/* 대표분야 */}
+            <SelectField
               control={control}
+              name="primaryField"
+              label="대표분야"
+              required
+              fitContent
+              disabled={selectedFields.length === 0}
+              placeholder="선택해주세요"
+              options={selectedFields.map((trade) => ({
+                value: trade,
+                label: TRADE_LABELS[trade as Trade],
+              }))}
+            />
+
+            {/* 경력 */}
+            <NumberField
+              control={control}
+              name="experience"
+              label="경력"
+              required
+              maxLength={2}
+              placeholder="경력을 입력해주세요 (년)"
+            />
+
+            {/* 유형 */}
+            <FormField
+              control={control}
+              name="role"
               render={({ field }) => (
-                <div className="relative w-fit">
-                  <select
-                    value={field.value || ''}
-                    onChange={field.onChange}
-                    className="flex h-[40px] appearance-none items-center rounded-[8px] border border-bconnect-gray-300 bg-white py-[3px] pl-[10px] pr-8 text-m-14 text-bconnect-gray-900"
-                  >
-                    {selectedFields.map((tradeValue) => (
-                      <option key={tradeValue} value={tradeValue}>
-                        {TRADE_LABELS[tradeValue as Trade]}
-                      </option>
-                    ))}
-                  </select>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    className="pointer-events-none absolute right-[10px] top-1/2 -translate-y-1/2"
-                  >
-                    <path
-                      d="M4 6L8 10L12 6"
-                      stroke="#1B1B1B"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
+                <FormItem className="gap-2">
+                  <FormLabel required>유형</FormLabel>
+                  <FormControl>
+                    <div tabIndex={-1} className="flex flex-wrap gap-2 outline-none">
+                      {SIGNUP_ROLES.map((role) => (
+                        <Tag
+                          key={role}
+                          variant={field.value === role ? 'selected' : 'default'}
+                          onClick={() => field.onChange(role)}
+                        >
+                          {ROLE_LABELS[role]}
+                        </Tag>
+                      ))}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
+
+            {/* 주소 */}
+            <AddressField
+              control={control}
+              name="address"
+              label="주소"
+              description="정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요"
+            />
+
+            {/* 한줄소개 */}
+            <TextField
+              control={control}
+              name="headline"
+              type="text"
+              label="한줄소개"
+              maxLength={20}
+              placeholder="한줄소개를 입력해주세요 (최대 20글자)"
+            />
+
+            {/* 약관·개인정보 동의 (#733) */}
+            <AgreementField control={control} name="agreements" items={CONSENT_ITEMS} />
+
+            <FormError error={server.formError} />
           </div>
-        )}
-
-        {/* 경력 */}
-        <div className="flex flex-col gap-3">
-          <FormLabel required>경력</FormLabel>
-          <Controller
-            name="experience"
-            control={control}
-            render={({ field }) => (
-              <div className="flex flex-wrap gap-2">
-                {EXPERIENCE_OPTIONS.map((option) => (
-                  <Tag
-                    key={option.id}
-                    variant={field.value === option.id ? 'selected' : 'default'}
-                    onClick={() => field.onChange(option.id as ExperienceLevel)}
-                  >
-                    {option.label}
-                  </Tag>
-                ))}
-              </div>
-            )}
-          />
-          <FormError message={errors.experience?.message} />
-        </div>
-
-        {/* 소속 */}
-        <div className="flex flex-col gap-2">
-          <FormLabel required>소속</FormLabel>
-          <FormInput type="text" placeholder="소속을 입력해주세요" {...register('affiliation')} />
-        </div>
-
-        {/* 유형 */}
-        <div className="flex flex-col gap-2">
-          <FormLabel>유형</FormLabel>
-          <Controller
-            name="role"
-            control={control}
-            render={({ field }) => (
-              <div className="flex flex-wrap gap-2">
-                {SIGNUP_ROLES.map((role) => (
-                  <Tag
-                    key={role}
-                    variant={field.value === role ? 'selected' : 'default'}
-                    onClick={() => field.onChange(field.value === role ? undefined : role)}
-                  >
-                    {ROLE_LABELS[role]}
-                  </Tag>
-                ))}
-              </div>
-            )}
-          />
-        </div>
-
-        {/* 주소 */}
-        <div className="flex flex-col gap-2">
-          <FormLabel>주소</FormLabel>
-          <p className="text-r-12 text-bconnect-gray-700">
-            정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요
-          </p>
-          <FormInput type="text" placeholder="주소를 입력해주세요" {...register('address')} />
-        </div>
-
-        {/* 한줄소개 */}
-        <div className="flex flex-col gap-2">
-          <FormLabel>한줄소개</FormLabel>
-          <FormInput
-            type="text"
-            placeholder="한줄소개를 입력해주세요 (최대 20글자)"
-            maxLength={20}
-            {...register('headline')}
-          />
-          <FormError message={errors.headline?.message} />
-        </div>
-      </form>
-
-      {/* Fixed Submit Button */}
-      <div className="fixed inset-x-0 bottom-0 bg-white px-4 pb-[env(safe-area-inset-bottom,32px)] pt-4">
-        <Button
-          type="submit"
-          variant="primary"
-          size="full"
-          disabled={!isValid}
-          isLoading={isSubmitting || registerMemberMutation.isPending}
-          loadingText="저장 중..."
-          onClick={handleSubmit(onSubmit)}
-        >
-          완료
-        </Button>
-      </div>
+          <div className="bg-white p-4">
+            <FormSubmitButton
+              requireAllFilled={false}
+              disabled={!isValid}
+              variant="primary"
+              size="full"
+              isLoading={
+                isSubmitting || registerMemberMutation.isPending || createProfileMutation.isPending
+              }
+            >
+              완료
+            </FormSubmitButton>
+          </div>
+        </form>
+      </Form>
     </div>
   )
 }

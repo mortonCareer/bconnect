@@ -1,29 +1,11 @@
 import { defineConfig } from 'orval'
 
-// orval — OpenAPI spec 으로부터 다음을 자동 생성:
-// 1. TypeScript types (schemas)
-// 2. React Query hooks (useGetUser, useUpdateProfileMutation 등)
-// 3. MSW mock handlers (`mock` 옵션 활성 시)
-//
-// MSW mock generation 흐름:
-//   spec 의 각 operation → `getXxxMockHandler()` 함수
-//   spec 의 각 schema → `getXxxResponseMock()` 함수 (faker 로 random 데이터)
-//     - `example: ...` 명시된 필드 → 그 값 사용
-//     - `const: <v>` → 그 리터럴 강제
-//     - `format: date-time/email/uri` 등 → 적절한 faker 호출
-//     - 그 외 → 타입 기반 random (string/number/boolean/array)
-//   모든 handler 를 `getBconnectAPIMock()` aggregator 에 모아 export
-//
-// 결과: MSW provider 가 `getBconnectAPIMock()` 을 setupWorker 에 넘기면
-// 모든 endpoint 가 spec 기반 mock 응답으로 대체됨. stateful flow 가 필요한
-// endpoint (auth OTP 검증 등) 는 별도 패키지 (@bconnect/mocks/overrides) 에서 override.
+// codegen 설정. 파이프라인·transformer 규칙: packages/api-client/CLAUDE.md
 export default defineConfig({
   morton: {
     input: {
-      target: './src/openapi.bundled.yaml',
+      target: './src/openapi.yaml',
       override: {
-        // compile-time: spec 의 envelope 을 type 단계에서 strip → generated type
-        // 이 inner data 만 expose. 런타임 unwrap 은 customFetch 가 담당.
         transformer: './orval.transformer.ts',
       },
     },
@@ -32,13 +14,8 @@ export default defineConfig({
       target: './src/generated/api.ts',
       schemas: './src/generated/schemas',
       client: 'react-query',
-      // MSW handlers + faker 기반 mock 데이터 생성. baseUrl '*' 는 모든 origin 매칭
-      // (FE 가 절대 URL 을 사용해도 가로챌 수 있게). locale 'ko' 는 faker 의 한국어 로케일.
-      // packages/mocks/ 에서 stateful override 와 합쳐 사용.
       mock: { type: 'msw', useExamples: true, baseUrl: '*', locale: 'ko' },
       override: {
-        // 모든 hook 의 fetch 호출을 src/client.ts 의 customFetch 로 위임.
-        // customFetch 가 envelope unwrap + 401 자동 retry + ApiError 변환 처리.
         mutator: {
           path: './src/client.ts',
           name: 'customFetch',
@@ -47,23 +24,81 @@ export default defineConfig({
           useQuery: true,
           useMutation: true,
           useSuspenseQuery: true,
+          // mutation 성공 시 관련 쿼리 자동 무효화 — 각 FE 호출부의 수동 invalidateQueries 대체 (#728, ADR-0025).
+          // operationId 는 becompat transformer(orval.transformer.ts) 산출 이름 기준 — 규칙 변경 시 동반 갱신.
+          // 조건(파라미터) 없는 조회는 그 목록만 정확히 다시 불러오도록 무효화된다.
+          mutationInvalidates: [
+            // 게시물(작업물) 변경 → 피드 목록 (getFeeds: 파라미터 없음)
+            { onMutations: ['createPost', 'updatePost', 'deletePost'], invalidates: ['getFeeds'] },
+            // 작업(Task) 변경 → 작업 목록 (worker/company/assignee 전 변형 + 삭제)
+            {
+              onMutations: [
+                'createTaskWorker',
+                'createTaskCompany',
+                'updateTaskWorker',
+                'updateTaskCompany',
+                'updateTaskAssignee',
+                'deleteTask',
+              ],
+              invalidates: ['getTasks'],
+            },
+            // 추천서: 받은 목록(hide/show), 보낸 목록(create/update/delete)
+            {
+              onMutations: ['hideRecommendation', 'showRecommendation'],
+              invalidates: ['getMyReceivedRecommendations'],
+            },
+            {
+              onMutations: ['createRecommendation', 'updateRecommendation', 'deleteRecommendation'],
+              invalidates: ['getMySentRecommendations', 'getReceivedRecommendations'],
+            },
+            // 자격/인증 변경 → 자격 목록. getMyCredentials(내 목록, 조건 없음)는 그 목록만 정확히 무효화.
+            // getCredentials 는 memberId 로 회원별 구분 → config 가 그 값을 몰라 관련 목록을 한꺼번에 무효화(넓게).
+            // TODO(#728): getCredentials 를 특정 회원만 무효화하려면 화면 쪽 수동 배선 필요(ADR-0025 line 61). 넓게 둘지 좁힐지 추후 결정.
+            {
+              onMutations: [
+                'createCredential',
+                'acceptCredential',
+                'denyCredential',
+                'deleteCredential',
+              ],
+              invalidates: ['getCredentials', 'getMyCredentials'],
+            },
+            // 동료요청: 수락 → 받은 목록 + 동료 목록(관계 성립으로 +1), 거절 → 받은 목록,
+            // 생성/취소 → 보낸 목록(보낸 쪽 "요청됨" 상태 새로고침 후에도 유지, #843).
+            // getCoworkers 는 memberId 로 회원별 구분 → config 가 값을 몰라 관련 목록을 한꺼번에 무효화(넓게).
+            {
+              onMutations: ['acceptCoworkerRequest'],
+              invalidates: ['getReceivedCoworkerRequests', 'getCoworkers'],
+            },
+            { onMutations: ['denyCoworkerRequest'], invalidates: ['getReceivedCoworkerRequests'] },
+            {
+              onMutations: ['createCoworkerRequest', 'deleteCoworkerRequest'],
+              invalidates: ['getSentCoworkerRequests'],
+            },
+            // 성립된 동료 취소 → 동료 목록 + 프로필 동료 카운트(본인·상대)
+            {
+              onMutations: ['deleteCoworker'],
+              invalidates: ['getCoworkers', 'getProfile', 'getMyProfile'],
+            },
+            // 내 회원정보 변경 → 내 회원정보
+            { onMutations: ['updateMyMember'], invalidates: ['getMyMember'] },
+            // 알림 읽음 처리(단건/전체) → 알림 목록 + 안읽음 개수
+            {
+              onMutations: ['updateNotificationRead', 'updateNotificationsRead'],
+              invalidates: ['getNotifications', 'getNotificationsUnreadCount'],
+            },
+            // 내 프로필 수정 → 내 프로필 조회. #847 로 getMyProfile GET 훅 신설되어 TODO(#728) 해소 (ADR-0025).
+            {
+              onMutations: ['updateMyProfile', 'updateMyProfileAbout'],
+              invalidates: ['getMyProfile'],
+            },
+            // 새 채팅 생성 → 채팅 목록. 생성 직후 이동한 방을 캐시 목록에서 찾도록(#835). getDirectChats 는 파라미터 없음.
+            { onMutations: ['createDirectChat'], invalidates: ['getDirectChats'] },
+          ],
         },
-        // orval 8 의 generated 함수 return type 을 `Promise<{ data, status }>` →
-        // `Promise<T>` 로 simplified. wrapper 가 hook 까지 노출되는 것 방지.
-        // mutator 가 inner data 를 return 하면 hook 의 `data` 도 raw payload.
         fetch: {
           includeHttpResponseReturnType: false,
         },
-        // mock format override:
-        //   spec 의 `format: image-url` 필드 (Member.picture, Post.images 등) 가
-        //   `useExamples: true` 만으로는 nullable union/array items 의 `example` 을
-        //   못 받아오는 orval 한계 우회 → placeholder URL 강제로 콘솔 noise 제거
-        //   + 실제 이미지 렌더링.
-        //
-        //   `image-url` 은 [JSON Schema 의 custom format](https://json-schema.org/draft/2020-12/json-schema-validation#name-custom-format-attributes)
-        //   허용 규정에 따른 vendor format. 표준 `format: uri` (webhook URL,
-        //   redirect URI 등 모든 URI) 와 의미 분리 — 비-이미지 URI 가 추가돼도
-        //   default faker 로 fallback (이 override 미적용).
         mock: {
           format: {
             'image-url': () => 'https://placehold.co/600x400',

@@ -8,21 +8,33 @@
     "./eslint/base": "./eslint/base.js",
     "./tsconfig/next": "./tsconfig/next.json",
     "./tsconfig/base": "./tsconfig/base.json",
+    "./avatar": "./avatar/index.ts",
     "./biz-number": "./biz-number/index.ts",
+    "./consent": "./consent/index.ts",
+    "./date": "./date/index.ts",
     "./env": "./env/validate.ts",
+    "./format": "./format/index.ts",
+    "./address": "./address/index.ts",
     "./phone": "./phone/index.ts",
-    "./sentry": "./sentry/index.ts"
+    "./search": "./search/index.ts",
+    "./sentry": "./sentry/index.ts",
+    "./site": "./site/index.ts",
+    "./username": "./username/index.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@types/node": "catalog:",
     "eslint": "catalog:",
-    "eslint-config-next": "16.1.1",
+    "eslint-config-next": "16.2.10",
+    "eslint-plugin-tailwindcss": "3.18.3",
     "globals": "^16.5.0",
+    "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "^8.50.1"
   },
   "dependencies": {
+    "@bconnect/api-client": "workspace:*",
+    "es-hangul": "^2.3.8",
     "libphonenumber-js": "^1.12.33",
     "zod": "catalog:"
   }

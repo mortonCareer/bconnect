@@ -9,12 +9,13 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 
 ## 팀원
 
-| 역할       | 이름   | GitHub            | 주요 작업                                           |
-| ---------- | ------ | ----------------- | --------------------------------------------------- |
-| CEO        | 이송목 | `fine-pine`       | ERD 설계, BE 구현, API 리뷰, 최종 QA                |
-| CTO        | 손장수 | `manamana32321`   | API 스펙 설계, 퍼블리싱, FE 구현, 인프라, 코드 리뷰 |
-| 프론트엔드 | 김예진 | TBD               | 퍼블리싱, FE 구현                                   |
-| 디자이너   | 박정윤 | `julyatpark-star` | UI/UX 시안, UI 검수                                 |
+| 역할            | 이름   | GitHub            | 주요 작업                                           |
+| --------------- | ------ | ----------------- | --------------------------------------------------- |
+| CEO             | 이송목 | `fine-pine`       | ERD 설계, BE 구현, API 리뷰, 최종 QA                |
+| CTO             | 손장수 | `manamana32321`   | API 스펙 설계, 퍼블리싱, FE 구현, 인프라, 코드 리뷰 |
+| 프론트엔드      | 김예진 | `twjin03`         | 퍼블리싱, FE 구현                                   |
+| 백엔드 + 인프라 | 전지원 | `jiwonly`         | 알림 BE 구현, AWS 인프라                            |
+| 디자이너        | 박정윤 | `julyatpark-star` | UI/UX 시안, UI 검수                                 |
 
 ---
 
@@ -89,20 +90,21 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 
 ## GitHub 작업 매핑
 
-담당자/리뷰어의 실제 GitHub 핸들은 위 [팀원](#팀원) 표 참조.
+레이블 정의 + 자동 적용 규칙은 [labels.md](./labels.md) 참조. 본 섹션은 레이블 → 담당자/리뷰어 매핑.
 
 ### Issue 담당자 자동 할당
 
-| 작업 유형         | 담당자         | 비고               |
-| ----------------- | -------------- | ------------------ |
-| `⚙️ BE`           | CEO            |                    |
-| `📋 api-spec`     | CTO + CEO      | CTO 작성, CEO 리뷰 |
-| `💻 FE`           | CTO + Frontend |                    |
-| `🎨 publishing`   | CTO + Frontend |                    |
-| `☁️ infra`        | CTO            |                    |
-| `🐛 bug:BE`       | CEO            |                    |
-| `🐛 bug:FE`       | CTO + Frontend |                    |
-| `🐛 bug:api-spec` | CTO + CEO      | 함께 결정          |
+| 작업 범위        | 담당자         | 비고                                 |
+| ---------------- | -------------- | ------------------------------------ |
+| `⚙️ be` (+ 하위) | CEO            | `⚙️be:api`, `⚙️be:service` 포함      |
+| `📋 api-spec`    | CTO + CEO      | CTO 작성, CEO 리뷰                   |
+| `💻 fe`          | CTO + Frontend |                                      |
+| `🎨 publishing`  | CTO + Frontend |                                      |
+| `☁️ infra`       | CTO            |                                      |
+| `🤖 crawler`     | CTO            |                                      |
+| `🔧 chore`       | (해당자)       | DX universal — 모든 개발자 리뷰 가능 |
+
+버그는 `🐛 bug` + 범위 레이블 조합. 담당자는 범위 레이블에 따름.
 
 ### PR 리뷰어 자동 할당
 
@@ -115,7 +117,7 @@ Morton 프로젝트의 팀 구성 및 역할을 정의합니다.
 | API 스펙: `packages/api-client/src/spec/`                                                   | 모든 개발자 |
 | DX universal: `.claude/`, `docs/`, root 컨벤션 (`commitlint*`, `.husky/`, ESLint config 등) | 모든 개발자 |
 
-여러 영역에 걸친 PR은 해당 룰들의 union 적용. 인프라/DX 변경은 보수적으로 운영 영향 고려.
+여러 영역에 걸친 PR은 해당 룰들의 union 적용.
 
 ---
 
@@ -174,21 +176,7 @@ PR 생성 + 리뷰어 할당
 
 ---
 
-## 커뮤니케이션
-
-각 도구의 계정/식별자/링크는 [tools.md](./tools.md) 참조. 본 섹션은 **언제 어디서 무엇을 논의하는가** 만 다룸.
-
-| 채널           | 사용 맥락                               |
-| -------------- | --------------------------------------- |
-| Notion         | 기획, 스프린트 계획, 작업 보드, 지식 KB |
-| Figma          | 디자인 시안 검토, 디자인 피드백         |
-| GitHub PR/이슈 | 코드 리뷰, 이슈 트래킹, 기술 논의       |
-| Slack          | 일상 커뮤니케이션 (선택)                |
-
----
-
 ## 참고 문서
 
 - [Git Workflow](../how-to/git-workflow.md) - 이슈/PR 프로세스
 - [Development Workflow](../how-to/development-workflow.md) - 개발 프로세스
-- [QA & Testing](../how-to/qa-and-testing.md) - 버그 판단 기준

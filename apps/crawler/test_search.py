@@ -1,16 +1,22 @@
-"""전체 파이프라인 E2E 테스트 — 검색→프로필 탐색→분류→노션 저장."""
+"""전체 파이프라인 E2E 수동 스크립트 — 검색→프로필 탐색→분류→노션 저장.
+
+pytest 대상이 아니다. 직접 실행: `uv run python test_search.py`
+"""
 
 import asyncio
 import logging
+
 from crawler.channels.naver_blog import search_blogs, explore_blogger
 from crawler.classifier import classify
-from crawler.models import Technician
-from crawler.notion import save_technician
+from crawler.models import (
+    CrawledMember, CrawledPost, CrawledProfile, PLATFORM_NAVER, REGION_ENUM_BY_KR, phone_digits, trade_enum,
+)
+from crawler.notion import save_member
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
-async def test():
+async def run():
     # Step 1: 검색
     print("=== Step 1: 네이버 검색 ===")
     items = await search_blogs("타일 시공업체 수도권", display=3)
@@ -33,7 +39,9 @@ async def test():
     print(f"  연락처: {profile.get('phone', '-')}")
     print(f"  이메일: {profile.get('email', '-')}")
     print(f"  인스타: {profile.get('instagram', '-')}")
-    print(f"  게시글 이미지: {profile.get('cover_image_url', '-')[:80]}")
+    print(f"  수집 글: {len(profile.get('posts', []))}건")
+    for post in profile.get("posts", []):
+        print(f"    - {post['title'][:40]} (사진 {len(post['images'])}장)")
     print(f"  출처: {profile['source_urls']}")
 
     # Step 3: 분류 (프로필 소개 + 게시글 본문 종합)
@@ -43,7 +51,7 @@ async def test():
     if profile_intro:
         combined_about += f"[블로그 프로필 소개]\n{profile_intro}\n\n"
     combined_about += f"[게시글 본문]\n{profile['about']}"
-    result = await classify(
+    result, _usage = await classify(
         name=item["bloggername"],
         about=combined_about,
         headline=profile.get("blog_title", ""),
@@ -53,35 +61,46 @@ async def test():
     print(f"  직급: {result['rank']}")
     print(f"  지역: {result.get('region', '-')}")
     print(f"  주소: {result.get('address', '-')}")
+    print(f"  경력: {result.get('experience', '-')}")
 
     # Step 4: 노션 저장 (중복 시 업데이트)
     print("\n=== Step 4: 노션 저장 ===")
-    name = (
+    company = (
         result.get("name")
         or profile.get("blog_title")
         or profile.get("blogger_name")
         or item["bloggername"]
     )
-    cover_image_url = profile.get("banner_image_url") or profile.get("profile_image_url") or profile.get("cover_image_url", "")
+    picture = profile.get("banner_image_url") or profile.get("profile_image_url") or profile.get("cover_image_url", "")
     detail_url = profile.get("blog_home_url") or item["link"]
-    tech = Technician(
-        name=name,
-        rank=result["rank"],
-        trades=result["trades"],
-        region=result.get("region", ""),
-        address=result.get("address", ""),
-        headline=profile.get("profile_intro", "")[:500],
-        about=profile["about"][:2000],
-        phone=profile.get("phone", ""),
+    trades = result["trades"]
+    enum_trades = [c for t in trades if (c := trade_enum(t))]
+    member = CrawledMember(
+        company=company,
+        name=result.get("representative", ""),
+        phone=phone_digits(profile.get("phone", "")),
+        picture=picture,
+        role=result["rank"],
+        brn=result.get("business_number", ""),
         email=profile.get("email", ""),
-        channels=["네이버블로그"],
+        profile=CrawledProfile(
+            primary_trade=enum_trades[0] if enum_trades else "",
+            trades=enum_trades,
+            experience=result.get("experience"),
+            headline=profile.get("profile_intro", "")[:500],
+            about=profile["about"][:2000],
+            address=result.get("address", ""),
+            state=REGION_ENUM_BY_KR.get(result.get("region", ""), ""),
+            url=detail_url,
+            platform=PLATFORM_NAVER,
+        ),
+        posts=[CrawledPost(**post) for post in profile.get("posts", [])],
         source_urls=profile["source_urls"],
-        detail_url=detail_url,
-        cover_image_url=cover_image_url,
     )
-    page_id = await save_technician(tech)
+    page_id = await save_member(member)
     print(f"  저장 완료: {page_id}")
     print(f"  https://www.notion.so/{page_id.replace('-', '')}")
 
 
-asyncio.run(test())
+if __name__ == "__main__":
+    asyncio.run(run())

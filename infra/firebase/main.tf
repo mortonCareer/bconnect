@@ -23,7 +23,7 @@ resource "google_project" "bconnect" {
   billing_account = var.billing_account_id
 
   labels = {
-    environment = "production"
+    environment = "prod"
     managed_by  = "terraform"
   }
 }
@@ -48,6 +48,17 @@ resource "google_firebase_project" "bconnect" {
   project  = google_project.bconnect.project_id
 
   depends_on = [google_project_service.required]
+}
+
+# adminsdk 서비스계정에 FCM 발송 권한 부여.
+# 발송은 AWS SNS(GCM 플랫폼 앱)가 이 SA 키(JSON)를 platform_credential 로 삼아
+# FCM HTTP v1 messages:send 를 호출하는 방식 — messages:send 는 cloudmessaging.messages.create 가
+# 필요한데 adminsdk 서비스계정에 기본 부여되지 않음 → 명시적으로 바인딩 (없으면 403 mismatched-credential).
+resource "google_project_iam_member" "adminsdk_fcm_sender" {
+  provider = google-beta
+  project  = google_firebase_project.bconnect.project
+  role     = "roles/firebasecloudmessaging.admin"
+  member   = "serviceAccount:firebase-adminsdk-fbsvc@${google_project.bconnect.project_id}.iam.gserviceaccount.com"
 }
 
 # Firebase 웹 앱 등록 (프론트엔드 앱별로 분리)

@@ -17,7 +17,6 @@ output "web_configs" {
       storage_bucket      = data.google_firebase_web_app_config.apps[key].storage_bucket
       messaging_sender_id = data.google_firebase_web_app_config.apps[key].messaging_sender_id
       app_id              = google_firebase_web_app.apps[key].app_id
-      measurement_id      = data.google_firebase_web_app_config.apps[key].measurement_id
     }
   }
   sensitive = true

@@ -44,11 +44,12 @@ main 머지 → 프로덕션 배포
   - 통합검증 CI: `api:generate` → typecheck → 빌드
 
 - **`dev`**: 개발 브랜치 (GitHub 기본 브랜치)
-  - BE/FE 독립 — spec 변경 후 FE 가 새 endpoint 호출하는 PR 도 typecheck 통과 (orval 자동 생성). 단 runtime 검증은 BE 구현 후. 진정한 디커플 (BE 미구현 endpoint 호출하는 페이지의 preview 동작까지 보장) 은 [#171](https://github.com/mortonCareer/bconnect/issues/171) (MSW 도입) 후.
+  - BE 코드를 API 기준(SSOT)으로 하는 BE-first 개발 사이클 ([ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md)). 일반적으로 **BE 구현 → 스펙 갱신 → FE 작업** 순서로 진행
+  - FE는 로컬에서 MSW mock으로 BE 미구현 상태에서도 작업 가능 (dev 배포는 dev BE(Railway)에 연동)
   - 모든 feature/fix PR의 타겟
   - CI: lint, format, BE 빌드/테스트, **FE typecheck 포함** (강제 green 정책)
-  - **spec 변경 PR 은 ci-career/ci-plan skip** (paths filter 에서 negate). spec ↔ FE drift 는 즉시 follow-up PR 로 해소. spec PR 머지 ~ FE follow-up PR 머지 사이의 dev 는 broken state — 다른 FE PR 의 ci-career 가 fail 로 압력 발생 (drift 빨리 해소 유도). 누적된 drift 가 main 으로 흘러가지 않도록 `ci-integration` 가 dev → main 최종 gate.
-  - Vercel preview build 항상 green — 디자이너 검수 / 시각 QA 사이클 보장. spec 변경 후 BE 미구현 endpoint 의 runtime 은 [#171](https://github.com/mortonCareer/bconnect/issues/171) 도입 전까진 BE 구현 후 동작.
+  - 스펙만 갱신하는 PR(BE 구현 후 따라가는 갱신)은 paths-filter로 ci-career/ci-plan skip — BE-first에선 일반적으로 BE 변경과 스펙 갱신이 같은 PR에 묶이거나, 스펙 갱신이 FE 호출부 영향 없는 형태로 들어옴
+  - dev 환경 always-green — 스프린트 단위 QA 사이클 보장
 
 ### 작업 브랜치
 
@@ -94,7 +95,7 @@ gh pr create --base main --head dev --title "release: v1.x.x"
 
 통합검증 CI(`ci-integration.yml`)가 통과해야 머지 가능합니다. 실패 시 dev에서 수정 후 재시도합니다.
 
-dev 브랜치는 BE/FE 독립 개발을 허용하므로 OpenAPI 스펙 ↔ FE 타입 drift가 누적될 수 있습니다. 통합은 일반적으로 스프린트 단위로 진행하되, 필요 시 CTO가 임의로 트리거할 수 있습니다. drift는 dev 브랜치에서 직접 수정하며, typecheck 에러가 많을 경우 AI agent에 초안 작성 위임 후 CTO 리뷰.
+dev 브랜치는 BE-first 개발 사이클이라 BE 구현 → 스펙 → FE 순서로 자연스럽게 정합됩니다 ([ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md)). 통합은 일반적으로 스프린트 단위로 진행하되, 필요 시 CTO가 임의로 트리거할 수 있습니다. BE 변경 후 스펙 또는 FE 갱신 누락으로 드물게 drift가 발생할 수 있으며, 발견 시 dev에서 직접 수정합니다.
 
 ---
 
@@ -106,36 +107,19 @@ dev 브랜치는 BE/FE 독립 개발을 허용하므로 OpenAPI 스펙 ↔ FE �
 
 **이슈 템플릿:**
 
-- **Bug Report**: 버그 리포트
-- **Feature Request**: 새 기능 제안
-- **Task**: 일반 작업
+- **Bug Report**: 버그 리포트 (재현/예상/실제 구조)
+- **Task**: 그 외 모든 작업 (기능/리팩토링/설정/문서)
 
 ### 이슈 레이블
 
-#### 작업 유형
-
-| 레이블          | 용도          |
-| --------------- | ------------- |
-| `📋 api-spec`   | API 스펙 설계 |
-| `🎨 publishing` | 퍼블리싱      |
-| `⚙️ BE`         | 백엔드 개발   |
-| `💻 FE`         | 프론트엔드    |
-| `☁️ infra`      | 인프라        |
-
-#### 버그 유형
-
-| 레이블            | 담당      | 설명                              |
-| ----------------- | --------- | --------------------------------- |
-| `🐛 bug:api-spec` | 둘이 논의 | API 스펙 자체가 부족하거나 잘못됨 |
-| `🐛 bug:BE`       | CEO       | 응답이 스펙과 다름                |
-| `🐛 bug:FE`       | CTO       | 스펙대로 왔는데 화면 처리가 안 됨 |
+레이블 목록 + 자동 적용 규칙은 [labels.md](../reference/labels.md) 참조.
 
 ### 이슈 처리 흐름
 
 ```
 문제 발견
     ↓
-GitHub Issue 생성 + 레이블 적용
+GitHub Issue 생성
     ↓
 담당자 할당
     ↓
@@ -299,9 +283,7 @@ PR 본문 템플릿: [.github/pull_request_template.md](../../.github/pull_reque
 ```
 PR 생성
     ↓
-Vercel 프리뷰 자동 배포 (1-2분 소요)
-    ↓
-디자이너: UI 검수 (프리뷰 URL)
+CI 체크 통과 (lint/format/BE·FE typecheck)
     ↓
 CTO: 코드 리뷰 + 기능 테스트
     ↓
@@ -311,8 +293,10 @@ CEO: 최종 QA (실사용자 관점)
     ↓
 Approve
     ↓
-main 브랜치로 머지
+dev 브랜치로 머지
 ```
+
+> 디자이너 UI 검수·실사용자 QA 는 스프린트 단위 dev 환경에서 수행합니다.
 
 ### PR 머지 방법
 
@@ -327,49 +311,11 @@ main 브랜치로 머지
 공통:
 
 - 머지 커밋 메시지는 PR 제목 사용
-- 머지 즉시 이슈 자동 닫힘 — [close-linked-issues workflow](../../.github/workflows/close-linked-issues.yml) (`ldez/gha-mjolnir`) 가 dev 머지에서도 closing keyword 인식 ([#303](https://github.com/mortonCareer/bconnect/issues/303))
 - 프로덕션 자동 배포 (`main` 머지 시)
 
-#### Sync PR (head=main)의 Vercel checks 예외
+## QA
 
-`main → dev` sync PR은 head가 `main`이라 Vercel preview가 main 코드를 빌드합니다. main에 typecheck drift 등 broken 상태가 있으면 preview가 실패하지만, 이는 sync PR이 만든 문제가 아니라 기존 main 상태를 비추는 것이므로 머지 금지 사유에 해당하지 않습니다. main의 drift는 다음 `dev → main` 통합 사이클에서 별도로 해소합니다.
-
----
-
-## Vercel 프리뷰 배포
-
-### 자동 배포
-
-PR 생성 시 자동으로 프리뷰 환경이 배포됩니다:
-
-```
-PR 생성/업데이트
-    ↓
-Vercel 빌드 시작 (1-2분)
-    ↓
-프리뷰 URL 생성
-    ↓
-GitHub PR 댓글에 링크 추가
-```
-
-### 프리뷰 URL 예시
-
-URL 패턴은 [tools.md](../reference/tools.md#terraform-선언적-관리) Vercel 섹션 참조.
-
-```
-https://morton-career-git-feat-123-add-profile-upload-<team>.vercel.app
-https://morton-plan-git-feat-123-add-profile-upload-<team>.vercel.app
-```
-
-### QA on Preview
-
-프리뷰 환경에서 다음을 확인합니다:
-
-- UI/UX 시안 대비 확인 (디자이너)
-- 기능 동작 테스트 (CTO)
-- 실사용자 관점 검증 (CEO)
-
-상세 QA 프로세스: **[qa-and-testing.md](./qa-and-testing.md)** 참조
+QA 는 dev 환경에서 **스프린트 단위**로 수행합니다 — 디자이너 UI 검수, CTO 기능 테스트, CEO 실사용자 관점 검증. production 배포는 main 머지 시 career(`bconnect.to`)·plan(`plan.bconnect.to`)으로 자동 진행됩니다.
 
 ---
 
@@ -381,7 +327,7 @@ https://morton-plan-git-feat-123-add-profile-upload-<team>.vercel.app
 - 이슈 번호 기반 브랜치 생성
 - 의미 있는 커밋 메시지 작성
 - PR에 테스트 결과 명시
-- 프리뷰 환경에서 충분히 테스트
+- 스프린트 단위로 dev 환경에서 충분히 테스트
 - 리뷰어 피드백 적극 반영
 
 ### DON'T ❌

@@ -1,19 +1,25 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
-import Link from 'next/link'
-import { Feed } from '@bconnect/ui'
+import { useEffect, useRef, useCallback, useState } from 'react'
+import { useDeletePost, useQueryClient, getGetFeedsQueryKey } from '@bconnect/api-client'
+import { Feed, ConfirmDialog, Button } from '@bconnect/ui'
 import { useFeedItems } from '@/hooks/useFeedItems'
 import { useFilterParams } from '@/hooks/useFilterParams'
 
 export function FeedList() {
-  const { primaryTrade, expRange } = useFilterParams()
+  const queryClient = useQueryClient()
+  const { mutate: deletePost } = useDeletePost()
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
+  const { trades, roles, regions, expRange } = useFilterParams()
 
-  const { feedItems, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useFeedItems({
-    trade: primaryTrade,
-    minExperience: expRange?.min,
-    maxExperience: expRange?.max,
-  })
+  const { feedItems, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, error } =
+    useFeedItems({
+      trades,
+      roles,
+      regions,
+      minExperience: expRange?.min,
+      maxExperience: expRange?.max,
+    })
 
   const observerRef = useRef<HTMLDivElement | null>(null)
 
@@ -41,7 +47,7 @@ export function FeedList() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-4 px-4 py-6">
+      <div className="flex flex-col gap-6 px-4 py-6">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="animate-pulse">
             <div className="mb-3 flex items-center gap-3">
@@ -62,6 +68,22 @@ export function FeedList() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20">
+        <p className="text-m-14 text-gray-400">피드를 불러오지 못했어요</p>
+        <Button
+          variant="outline"
+          size="sm"
+          // config 대상 밖: 유저 트리거 (mutation onSuccess 아님) — ADR-0025
+          onClick={() => queryClient.invalidateQueries({ queryKey: getGetFeedsQueryKey() })}
+        >
+          다시 시도
+        </Button>
+      </div>
+    )
+  }
+
   if (feedItems.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -71,14 +93,14 @@ export function FeedList() {
   }
 
   return (
-    <div className="flex flex-col gap-4 px-4 py-2">
+    <div className="flex flex-col gap-6 px-4 py-2">
       {feedItems.map((item) => (
         <Feed
           key={item.postId}
-          profile={item.profile}
           content={item.content}
-          profileHref={item.memberId != null ? `/profile/${item.memberId}` : undefined}
-          LinkComponent={Link}
+          canManage={item.isMine}
+          editHref={`/profile/works/${item.postId}/edit`}
+          onDelete={() => setPendingDeleteId(item.postId)}
         />
       ))}
 
@@ -87,9 +109,26 @@ export function FeedList() {
 
       {isFetchingNextPage && (
         <div className="flex justify-center py-4">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-bconnect-primary" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-primary" />
         </div>
       )}
+
+      <ConfirmDialog
+        open={pendingDeleteId != null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteId(null)
+        }}
+        title="게시물을 삭제할까요?"
+        description="삭제한 게시물은 복구할 수 없어요."
+        confirmLabel="삭제"
+        destructive
+        onConfirm={() => {
+          if (pendingDeleteId == null) return
+          // deletePost→getFeeds 무효화는 config(mutationInvalidates)가 자동 처리 (ADR-0025).
+          deletePost({ id: pendingDeleteId })
+          setPendingDeleteId(null)
+        }}
+      />
     </div>
   )
 }

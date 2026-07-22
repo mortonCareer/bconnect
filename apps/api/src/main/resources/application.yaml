@@ -1,0 +1,86 @@
+spring:
+  application:
+    name: api
+  profiles:
+    default: local
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+        order_updates: true
+        jdbc:
+          batch_size: 50
+    show-sql: true
+
+  sql:
+    init:
+      mode: always
+      platform: postgresql
+
+  flyway:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  metrics:
+    enable:
+      process: false
+      system: false
+
+app:
+  timezone: Asia/Seoul
+
+  cors:
+    allowed-origins:
+      - ${CORS_ALLOWED_ORIGIN:http://localhost:3000}
+    allowed-origin-patterns:
+      - https://bconnect-career*.vercel.app
+      - https://bconnect-plan*.vercel.app
+      - https://*.bconnect.to
+      - https://*.dev.bconnect.to
+
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-expiration: 1h
+    refresh-token-expiration: 7d
+    cookie-domain: ${COOKIE_DOMAIN:}
+
+  sms:
+    api-key: ${SOLAPI_API_KEY}
+    api-secret: ${SOLAPI_API_SECRET}
+    sender-number: ${SOLAPI_SENDER_NUMBER}
+
+  s3:
+    region: ${AWS_REGION:ap-northeast-2}
+    bucket: ${AWS_S3_BUCKET}
+
+  cloudfront:
+    domain: ${CLOUDFRONT_DOMAIN:static.bconnect.to}
+    key-pair-id: ${CLOUDFRONT_KEY_PAIR_ID}
+    private-key: ${CLOUDFRONT_PRIVATE_KEY}
+    cookie-domain: ${CLOUDFRONT_COOKIE_DOMAIN:.bconnect.to}
+    cookie-ttl: 1h
+
+  attachment:
+    max-file-size: 20MB
+    max-batch-size: 50
+    presign-ttl: 10m
+    allowed-content-types:
+      - image/*
+      - application/*
+
+  sns:
+    region: ${AWS_REGION:ap-northeast-2}
+    platform-application-arn: ${AWS_SNS_PLATFORM_APPLICATION_ARN:}
+
+springdoc:
+  swagger-ui:
+    enabled: false

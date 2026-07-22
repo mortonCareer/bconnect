@@ -1,9 +1,11 @@
 # ADR-0007: 정식 출시 후 BE + DB 호스팅 — Railway → AWS ECS Fargate + RDS 트리거 기반 이전
 
-- **Status**: Proposed
+- **Status**: Superseded by ADR-0009
 - **Date**: 2026-05-10
 - **Deciders**: @manamana32321, @fine-pine (리뷰)
-- **Related**: [ADR-0006](./0006-dev-as-staging.md), [#322](https://github.com/mortonCareer/bconnect/issues/322)
+- **Related**: [ADR-0006](./0006-dev-as-staging.md), [ADR-0009](./0009-be-db-hosting-railway-staging.md) (supersedes this), [#322](https://github.com/mortonCareer/bconnect/issues/322)
+
+> **2026-05-14**: [ADR-0009](./0009-be-db-hosting-railway-staging.md) 이 본 ADR 을 supersede 한다 — Railway 유지로 결정, 트리거를 "스프린트 5" 에서 스케일·비용 기반으로 교체. **단 본 ADR 의 옵션 분석(목적지 호스팅 10개 옵션 비교, Spring Boot cold start 대응, maturity audit)은 트리거 발동 시점의 출발 참조로 유효하다** — supersede 가 바꾼 것은 _언제 이전하나_ 지 _어디로 가나_ 가 아니다.
 
 ## Context
 
@@ -106,7 +108,7 @@ Cross-cloud (AWS-first 원칙 위배), GCP IAM/billing 신규 학습. 비추.
 - **BE 1순위**: 표준 ECS Fargate (Graviton + Spot 활용, ap-northeast-2 Seoul)
 - **BE 차선**: ECS on EC2 — Steady high traffic 시점 또는 Fargate cost break-even 초과 시 검토
 - **BE 거부**: ECS Express Mode — Production maturity 부족 + 4종 기능 봉쇄 (Graviton/Spot/Exec/blue-green)
-- **DB**: AWS RDS — 엔진/구체 옵션은 별도 ADR-0008 (트리거 시점)
+- **DB**: AWS RDS — 엔진/구체 옵션은 별도 ADR (트리거 시점)
 
 BE 와 DB 분리 이전 (small batch) 검토했으나 폐기:
 
@@ -144,7 +146,7 @@ BE 와 DB 분리 이전 (small batch) 검토했으나 폐기:
 
 ### 중립적 결과
 
-- RDS 옵션 결정 (Postgres / Aurora / Aurora Serverless v2) 은 **별도 ADR-0008** — 본 ADR 은 "BE + DB 동시 이전" 결정만
+- RDS 옵션 결정 (Postgres / Aurora / Aurora Serverless v2) 은 **별도 ADR** — 본 ADR 은 "BE + DB 동시 이전" 결정만
 
 ## Notes
 

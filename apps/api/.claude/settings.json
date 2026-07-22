@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(dir:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(xargs:*)",
+      "Bash(jdeps:*)",
+      "WebSearch",
+      "WebFetch",
+      "Bash(./gradlew compileJava)",
+      "Bash(./gradlew build:*)",
+      "Bash(./gradlew test:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm format:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "disabledMcpjsonServers": [
+    "playwright",
+    "figma",
+    "aws"
+  ],
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/available-checker.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

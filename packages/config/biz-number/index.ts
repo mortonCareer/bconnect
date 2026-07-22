@@ -42,6 +42,7 @@ export function isValidRegistrationNumber(value: string): boolean {
 
 /**
  * 사업자등록번호 zod 스키마. 입력값을 정규화 (digit-only) 후 검증.
+ * 자릿수 오류와 체크섬 실패를 각각 다른 메시지로 분리한다.
  * react-hook-form 등 폼 라이브러리에서 직접 사용 가능.
  *
  * @example
@@ -50,6 +51,9 @@ export function isValidRegistrationNumber(value: string): boolean {
 export const registrationNumberSchema = z
   .string()
   .transform(extractDigits)
+  .refine((digits) => /^\d{10}$/.test(digits), {
+    message: '올바른 사업자등록번호 형식이 아닙니다. (10자리 숫자)',
+  })
   .refine(isValidRegistrationNumber, {
-    message: '올바르지 않은 사업자등록번호입니다',
+    message: '유효하지 않은 사업자등록번호입니다. 번호를 다시 확인해 주세요.',
   })

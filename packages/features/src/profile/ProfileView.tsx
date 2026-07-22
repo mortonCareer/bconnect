@@ -1,0 +1,178 @@
+'use client'
+
+import type { ReactNode } from 'react'
+import { parseAsStringEnum, useQueryState } from 'nuqs'
+import type {
+  CredentialSummary,
+  MemberSummary,
+  Profile,
+  Recommendation,
+} from '@bconnect/api-client'
+import { Skeleton, Tab } from '@bconnect/ui'
+import { PanelShell } from '../_shared/PanelShell'
+import { PanelScroll } from '../_shared/PanelScroll'
+import { PanelMessage } from '../_shared/PanelMessage'
+import { ProfileSummary, type ProfileStatHrefs } from './_parts/ProfileSummary'
+import { IntroTab, type ProfileEditHrefs } from './_parts/IntroTab'
+import { WorksTab } from './_parts/WorksTab'
+
+type TabKey = 'intro' | 'works'
+
+const TAB_ITEMS = [
+  { key: 'intro', label: '소개' },
+  { key: 'works', label: '작업물' },
+]
+
+/** 앱이 resolve 해 내려주는 데이터. owner 어댑터는 useGetMy*, viewer/plan 은 by-id 훅으로 채운다. */
+export interface ProfileViewData {
+  member?: MemberSummary
+  profile?: Profile
+  postCount?: number
+  coworkerCount?: number
+  recommendationCount?: number
+  credentials?: CredentialSummary[]
+  receivedRecommendations?: Recommendation[]
+  sentRecommendations?: Recommendation[]
+  isLoading: boolean
+  isError: boolean
+}
+
+interface ProfileViewBaseProps {
+  /** WorksTab 의 by-id feed self-fetch 용 (마스킹 무관 — 발산 없음) */
+  profileId: number
+  data: ProfileViewData
+  /** summary 와 Tab 사이에 꽂히는 액션 버튼 행 (owner: 수정/공유, viewer: 동료/메시지). 없으면 액션 행 없음 (plan) */
+  actionSlot?: ReactNode
+  editHrefs?: ProfileEditHrefs
+  statHrefs?: ProfileStatHrefs
+  /** owner 전용 작업물 수정 href 빌더. 없으면 케밥 메뉴 없음 (viewer/plan) */
+  workEditHref?: (postId: number) => string
+  /** owner 전용 작업물 삭제. 없으면 케밥 삭제 메뉴 없음 (viewer/plan) */
+  onDeleteWork?: (postId: number) => void
+  /** owner 전용 추천서 액션. 없으면 추천서 카드 케밥 없음 (viewer/plan) */
+  onHideRecommendation?: (id: number) => void
+  onDeleteRecommendation?: (id: number) => void
+  /** member 로딩 전/username 부재 시 셸 타이틀 fallback (owner: '내 프로필'). 기본 '프로필' */
+  fallbackTitle?: string
+  /** owner 전용 프로필 이미지 수정 트리거. 없으면 edit 배지 없음 (viewer/plan) (#966) */
+  onEditImage?: () => void
+  /** 이미지 업로드 진행 중 — edit 배지 비활성 */
+  imageUploading?: boolean
+}
+
+type ProfileViewShellProps =
+  | {
+      /** 풀페이지 등 비-패널 쉘 주입 (career 풀페이지 라우트). title 은 비동기 도출분을 전달받음 */
+      renderShell: (props: { title: string; children: ReactNode }) => ReactNode
+      closeHref?: never
+      onClose?: never
+    }
+  | {
+      /** 기본 패널 쉘 (plan) */
+      renderShell?: never
+      closeHref: string
+      onClose: () => void
+    }
+
+export type ProfileViewProps = ProfileViewBaseProps & ProfileViewShellProps
+
+export function ProfileView(props: ProfileViewProps) {
+  const {
+    profileId,
+    data,
+    actionSlot,
+    editHrefs,
+    statHrefs,
+    workEditHref,
+    onDeleteWork,
+    onHideRecommendation,
+    onDeleteRecommendation,
+    fallbackTitle,
+    onEditImage,
+    imageUploading,
+  } = props
+  const [tab, setTab] = useQueryState(
+    'tab',
+    parseAsStringEnum<TabKey>(['intro', 'works']).withDefault('intro')
+  )
+
+  const { member, profile } = data
+  // TODO: BE required 처리 후 type narrowing 필요. MemberSummary username/name이 optional emit이라 셸 타이틀 fallback에 의존 중.
+  const title = member?.username ?? member?.name ?? fallbackTitle ?? '프로필'
+
+  const body = (
+    <PanelScroll>
+      {data.isLoading ? (
+        <ProfileSkeleton />
+      ) : data.isError || !profile ? (
+        <PanelMessage>프로필을 불러올 수 없습니다</PanelMessage>
+      ) : (
+        <>
+          <ProfileSummary
+            member={member}
+            profile={profile}
+            postCount={data.postCount}
+            coworkerCount={data.coworkerCount}
+            recommendationCount={data.recommendationCount}
+            statHrefs={statHrefs}
+            statScroll={props.renderShell ? undefined : false}
+            onEditImage={onEditImage}
+            imageUploading={imageUploading}
+          />
+          {actionSlot}
+          <Tab items={TAB_ITEMS} activeKey={tab} onChange={(key) => setTab(key as TabKey)} />
+          {tab === 'intro' ? (
+            <IntroTab
+              profile={profile}
+              credentials={data.credentials}
+              receivedRecommendations={data.receivedRecommendations}
+              sentRecommendations={data.sentRecommendations}
+              editHrefs={editHrefs}
+              onHideRecommendation={onHideRecommendation}
+              onDeleteRecommendation={onDeleteRecommendation}
+            />
+          ) : (
+            <WorksTab
+              profileId={profileId}
+              workEditHref={workEditHref}
+              onDeleteWork={onDeleteWork}
+            />
+          )}
+        </>
+      )}
+    </PanelScroll>
+  )
+
+  if (props.renderShell) {
+    return <>{props.renderShell({ title, children: body })}</>
+  }
+
+  return (
+    <PanelShell
+      title={member?.username}
+      closeLabel="프로필 패널 닫기"
+      closeHref={props.closeHref}
+      onClose={props.onClose}
+    >
+      {body}
+    </PanelShell>
+  )
+}
+
+function ProfileSkeleton() {
+  return (
+    <div className="flex flex-col gap-4 p-4">
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-[100px] w-[100px] shrink-0 rounded-full" />
+        <div className="flex flex-1 justify-around gap-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-12" />
+          ))}
+        </div>
+      </div>
+      <Skeleton className="h-5 w-32" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-2/3" />
+    </div>
+  )
+}
