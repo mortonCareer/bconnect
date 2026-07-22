@@ -4,24 +4,13 @@ import { usePanelNav } from '@/hooks/usePanelNav'
 import { useGetMyCompany, useGetMyMember } from '@bconnect/api-client'
 import { useUnreadChatCount, useUnreadNotificationCount } from '@bconnect/features'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
-import { Select } from '@bconnect/ui'
+import { CountBadge, Select } from '@bconnect/ui'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useGetProjects } from '@bconnect/api-client'
 import { SidebarFooter } from './SidebarFooter'
-
-const MAX_BADGE_COUNT = 99
-
-function CountBadge({ count }: { count: number }) {
-  if (count <= 0) return null
-  return (
-    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs text-white">
-      {count > MAX_BADGE_COUNT ? `${MAX_BADGE_COUNT}+` : count}
-    </span>
-  )
-}
 
 interface NavItemProps {
   label: string
