@@ -1,7 +1,13 @@
 'use client'
 
 import { useMemo } from 'react'
-import { regionOfState, TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
+import {
+  postImageUrls,
+  regionOfState,
+  TRADE_LABELS,
+  useGetFeeds,
+  useGetMyMember,
+} from '@bconnect/api-client'
 import type { Trade, ProfileRole } from '@bconnect/api-client'
 import { daysBetween } from '@bconnect/config/date'
 import { formatRelativeTime } from '@bconnect/config/format'
@@ -88,6 +94,8 @@ export function useFeedItems({
       if (maxExperience != null && (profile.experience ?? 0) > maxExperience) return []
       if (authorId != null && memberId !== authorId) return []
 
+      const postImages = postImageUrls(post)
+
       // TODO: BE required 처리 후 type narrowing 필요. 이름/분야/작성일/본문은 카드 표시 필수값인데 optional emit이라 fallback 중.
       return [
         {
@@ -105,7 +113,7 @@ export function useFeedItems({
             bio: profile.headline ?? '',
           },
           content: {
-            images: post.images?.length ? post.images : ['/placeholder-post.svg'],
+            images: postImages.length ? postImages : ['/placeholder-post.svg'],
             company: task?.workerCompany ?? undefined,
             duration: task ? formatDurationDays(task.start, task.end) : undefined,
             timestamp: post.createdAt ? formatRelativeTime(post.createdAt) : '',
