@@ -129,12 +129,12 @@ INSERT INTO crawled_tasks (id, company, address, trade, start_date, end_date, du
 (103, '업체4', '주소4', '전기', DATE '2026-06-12', DATE '2026-06-13', '2일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (104, '업체5', '주소5', '목공', DATE '2026-06-14', DATE '2026-06-20', '7일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO crawled_posts (id, member_id, task_id, title, content, created_at, modified_at) VALUES
-(100, 100, 100, '제목1', '내용1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(101, 101, 101, '제목2', '내용2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(102, 102, 102, '제목3', '내용3', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(103, 103, 103, '제목4', '내용4', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(104, 104, null, '제목5', '내용5', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO crawled_posts (id, member_id, task_id, title, content, source_url, created_at, modified_at) VALUES
+(100, 100, 100, '제목1', '내용1', 'https://blog.naver.com/sample1/100', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(101, 101, 101, '제목2', '내용2', 'https://blog.naver.com/sample2/101', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(102, 102, 102, '제목3', '내용3', 'https://blog.naver.com/sample3/102', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(103, 103, 103, '제목4', '내용4', 'https://blog.naver.com/sample4/103', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(104, 104, null, '제목5', '내용5', 'https://blog.naver.com/sample5/104', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO crawled_post_images (post_id, seq, url) VALUES
 (100, 0, 'https://example.com/image1.jpg'),
