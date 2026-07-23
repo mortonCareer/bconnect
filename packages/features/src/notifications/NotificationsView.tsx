@@ -20,8 +20,16 @@ import { groupChatNotifications } from './_parts/groupChatNotifications'
 
 type NotificationsViewShellProps =
   | {
-      /** 풀페이지 등 비-패널 쉘 주입 (career 풀페이지 라우트) */
-      renderShell: (props: { title: string; children: ReactNode }) => ReactNode
+      /**
+       * 풀페이지 등 비-패널 쉘 주입 (career 풀페이지 라우트).
+       * 헤더 슬롯(`titleCount`·`rightSlot`)은 패널 쉘(`PanelShell`)과 같은 이름으로 관통시킨다 (#1016).
+       */
+      renderShell: (props: {
+        title: string
+        titleCount?: number
+        rightSlot?: ReactNode
+        children: ReactNode
+      }) => ReactNode
       closeHref?: never
       onClose?: never
     }
@@ -89,61 +97,64 @@ export function NotificationsView(props: NotificationsViewProps) {
   ) : null
 
   const body = (
-    <>
-      {/* 패널(plan)은 '모두 읽음' 을 헤더 우측 슬롯에 두므로(#970) 본문 행은 풀페이지 쉘(career)에서만 */}
-      {props.renderShell && markAllReadButton && (
-        <div className="flex justify-end px-4 py-2">{markAllReadButton}</div>
+    <PanelScroll>
+      {isLoading ? (
+        <NotificationsSkeleton />
+      ) : isError ? (
+        <PanelMessage>알림을 불러올 수 없습니다</PanelMessage>
+      ) : !hasItems ? (
+        <PanelMessage>새로운 알림이 없습니다</PanelMessage>
+      ) : (
+        <>
+          <ul className="flex flex-col">
+            {groups.map(({ representative: n, unreadIds, count }) => {
+              const href = props.resolveHref?.(n)
+              const content = count > 1 ? `${n.message ?? ''} · ${count}개` : (n.message ?? '')
+              const item = (
+                <NotificationItem
+                  profileImage={n.sender?.picture ?? undefined}
+                  content={content}
+                  timestamp={formatRelativeTime(n.createdAt ?? '')}
+                  read={unreadIds.length === 0}
+                />
+              )
+              return (
+                <li key={n.id} className="contents">
+                  {href ? (
+                    <Link href={href} onClick={() => readOnClick(unreadIds)} className="block">
+                      {item}
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => readOnClick(unreadIds)}
+                      className="block w-full text-left"
+                    >
+                      {item}
+                    </button>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+          <div ref={bottomObserverRef} className="h-px" aria-hidden />
+          {isFetchingNextPage && <NotificationsSkeleton />}
+        </>
       )}
-      <PanelScroll>
-        {isLoading ? (
-          <NotificationsSkeleton />
-        ) : isError ? (
-          <PanelMessage>알림을 불러올 수 없습니다</PanelMessage>
-        ) : !hasItems ? (
-          <PanelMessage>새로운 알림이 없습니다</PanelMessage>
-        ) : (
-          <>
-            <ul className="flex flex-col">
-              {groups.map(({ representative: n, unreadIds, count }) => {
-                const href = props.resolveHref?.(n)
-                const content = count > 1 ? `${n.message ?? ''} · ${count}개` : (n.message ?? '')
-                const item = (
-                  <NotificationItem
-                    profileImage={n.sender?.picture ?? undefined}
-                    content={content}
-                    timestamp={formatRelativeTime(n.createdAt ?? '')}
-                    read={unreadIds.length === 0}
-                  />
-                )
-                return (
-                  <li key={n.id} className="contents">
-                    {href ? (
-                      <Link href={href} onClick={() => readOnClick(unreadIds)} className="block">
-                        {item}
-                      </Link>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => readOnClick(unreadIds)}
-                        className="block w-full text-left"
-                      >
-                        {item}
-                      </button>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-            <div ref={bottomObserverRef} className="h-px" aria-hidden />
-            {isFetchingNextPage && <NotificationsSkeleton />}
-          </>
-        )}
-      </PanelScroll>
-    </>
+    </PanelScroll>
   )
 
   if (props.renderShell) {
-    return <>{props.renderShell({ title: '알림', children: body })}</>
+    return (
+      <>
+        {props.renderShell({
+          title: '알림',
+          titleCount: unreadCount,
+          rightSlot: markAllReadButton,
+          children: body,
+        })}
+      </>
+    )
   }
 
   return (
