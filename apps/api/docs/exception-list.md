@@ -16,6 +16,7 @@
 | `RC` | 추천서 | `core/domain/recommendation` |
 | `CH` | 채팅 | `core/domain/chat` |
 | `OF` | 제안 | `core/domain/offer` |
+| `DR` | 드라이브 | `core/domain/drive` |
 | `AT` | 첨부 | `attachment/domain` |
 
 ---
@@ -109,6 +110,12 @@
 | CH001 | SELF_NOT_INCLUDED | 400 | INFO | 참여자 목록에 본인이 포함되어야 합니다. |
 | CH002 | INVALID_ATTACHMENT | 400 | INFO | 메시지 타입과 첨부가 일치하지 않습니다. |
 
+## DriveExceptionCode
+
+| 코드 | 이름 | HTTP | LogLevel | 메시지 |
+| --- | --- | --- | --- | --- |
+| DR001 | LIMIT_EXCEEDED | 409 | INFO | 드라이브 용량 한도를 초과했습니다. |
+
 ## AttachmentExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
@@ -118,3 +125,4 @@
 | AT003 | UNSUPPORTED_FILE_TYPE | 415 | WARN | 허용되지 않는 파일 형식입니다. |
 | AT004 | NOT_COMPLETED | 400 | INFO | 업로드가 완료되지 않은 첨부파일입니다. |
 | AT005 | INVALID_LINKED | 404 | INFO | 연결되지 않은 첨부파일입니다. |
+| AT006 | NOT_FOUND | 404 | INFO | 존재하지 않는 첨부파일입니다. |
