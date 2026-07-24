@@ -9,7 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.request.CursorLimit;
@@ -28,15 +28,13 @@ import to.bconnect.api.security.session.SessionTokenIssuer;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberService memberService;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
     private final SessionTokenIssuer sessionTokenIssuer;
 
@@ -45,7 +43,7 @@ public class MemberController {
             @AuthenticationPrincipal AuthUser user,
             HttpServletResponse response) {
         val member = memberService.get(user);
-        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
@@ -60,7 +58,7 @@ public class MemberController {
             HttpServletResponse response) {
         val page = memberService.list(cursorLimit);
         val members = page.content();
-        val urlMap = attachmentResolver.resolveUrlMap(
+        val urlMap = attachmentUrlService.map(
                 ReferenceType.MEMBER, members.stream().map(Member::id).toList(), ImageSize.SMALL);
 
         val content = members.stream()

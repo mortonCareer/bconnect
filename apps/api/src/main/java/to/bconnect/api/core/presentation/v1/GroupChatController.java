@@ -7,10 +7,7 @@ import lombok.val;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
-import to.bconnect.api.attachment.domain.ImageSize;
-import to.bconnect.api.attachment.domain.SignedCookieIssuer;
+import to.bconnect.api.attachment.domain.*;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.common.response.CursorPage;
@@ -33,7 +30,8 @@ public class GroupChatController {
 
     private final GroupChatService groupChatService;
     private final MemberResolver memberResolver;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentFinder attachmentFinder;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
@@ -46,7 +44,7 @@ public class GroupChatController {
                 .distinct()
                 .toList();
         val memberMap = memberResolver.resolveMapOrWithdrawn(memberIds);
-        val urlMap = attachmentResolver.resolveUrlMap(
+        val urlMap = attachmentUrlService.map(
                 ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         val body = chats.stream()
@@ -73,7 +71,7 @@ public class GroupChatController {
             HttpServletResponse response) {
         val chat = groupChatService.get(user.id(), id);
         val memberMap = memberResolver.resolveMapOrWithdrawn(chat.participantIds());
-        val urlMap = attachmentResolver.resolveUrlMap(
+        val urlMap = attachmentUrlService.map(
                 ReferenceType.MEMBER, chat.participantIds(), ImageSize.SMALL);
         val members = chat.participantIds().stream()
                 .map(memberMap::get)
@@ -102,12 +100,12 @@ public class GroupChatController {
             HttpServletResponse response) {
         val page = groupChatService.listMessages(user, id, cursorLimit);
         val messageIds = page.content().stream().map(Message::id).toList();
-        val attachmentMap = attachmentResolver.resolveListMap(ReferenceType.MESSAGE, messageIds);
+        val attachmentMap = attachmentFinder.listMap(ReferenceType.MESSAGE, messageIds);
 
         val content = page.content().stream()
                 .map(it -> {
                     val attachments = attachmentMap.getOrDefault(it.id(), List.of());
-                    val urlMap = attachmentResolver.parseUrlMap(attachments, ImageSize.SMALL);
+                    val urlMap = attachmentUrlService.parseUrlMap(attachments, ImageSize.SMALL);
                     return MessageResponse.of(it, attachments, urlMap);
                 })
                 .toList();

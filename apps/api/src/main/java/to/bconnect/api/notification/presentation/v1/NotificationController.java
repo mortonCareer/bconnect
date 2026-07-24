@@ -3,12 +3,8 @@ package to.bconnect.api.notification.presentation.v1;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
+import org.springframework.web.bind.annotation.*;
+import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
@@ -30,7 +26,7 @@ public class NotificationController {
 
     private final NotificationQueryService notificationQueryService;
     private final MemberResolver memberResolver;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentUrlService attachmentUrlService;
 
     @GetMapping
     public ApiResponse<CursorPage<NotificationResponse>> list(
@@ -44,7 +40,7 @@ public class NotificationController {
                 .distinct()
                 .toList();
         val memberMap = memberResolver.resolveMap(senderIds);
-        val pictureMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, senderIds, ImageSize.SMALL);
+        val pictureMap = attachmentUrlService.map(ReferenceType.MEMBER, senderIds, ImageSize.SMALL);
 
         val content = page.content().stream()
                 .map(it -> {

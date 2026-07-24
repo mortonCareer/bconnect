@@ -9,7 +9,8 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.AttachmentFinder;
+import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.security.AuthUser;
@@ -25,7 +26,8 @@ import to.bconnect.api.storage.chat.ChatType;
 public class MessageSocketController {
 
     private final MessageSocketService messageSocketService;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentFinder attachmentFinder;
+    private final AttachmentUrlService attachmentUrlService;
 
     @MessageMapping("/group-chats/{chatId}/messages")
     @SendTo("/topic/group-chats/{chatId}")
@@ -34,8 +36,8 @@ public class MessageSocketController {
             @AuthenticationPrincipal AuthUser user,
             @Payload @Valid SendMessageRequest request) {
         val message = messageSocketService.broadcast(user, chatId, ChatType.GROUP, request.toCommand());
-        val attachments = attachmentResolver.list(ReferenceType.MESSAGE, message.id());
-        val urlMap = attachmentResolver.parseUrlMap(attachments, ImageSize.SMALL);
+        val attachments = attachmentFinder.list(ReferenceType.MESSAGE, message.id());
+        val urlMap = attachmentUrlService.parseUrlMap(attachments, ImageSize.SMALL);
         return MessageResponse.of(message, attachments, urlMap);
     }
 
@@ -46,8 +48,8 @@ public class MessageSocketController {
             @AuthenticationPrincipal AuthUser user,
             @Payload @Valid SendMessageRequest request) {
         val message = messageSocketService.broadcast(user, chatId, ChatType.DIRECT, request.toCommand());
-        val attachments = attachmentResolver.list(ReferenceType.MESSAGE, message.id());
-        val urlMap = attachmentResolver.parseUrlMap(attachments, ImageSize.SMALL);
+        val attachments = attachmentFinder.list(ReferenceType.MESSAGE, message.id());
+        val urlMap = attachmentUrlService.parseUrlMap(attachments, ImageSize.SMALL);
         return MessageResponse.of(message, attachments, urlMap);
     }
 }

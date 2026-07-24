@@ -14,11 +14,11 @@ import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class AttachmentResolverTest {
+class AttachmentUrlServiceTest {
 
     private final CloudFrontUrlResolver urlResolver = new CloudFrontUrlResolver(
             new CloudFrontProperties("cdn.test", "kp", "pk", ".test", Duration.ofMinutes(5)));
-    private final AttachmentResolver resolver = new AttachmentResolver(null, urlResolver);
+    private final AttachmentUrlService resolver = new AttachmentUrlService(null, urlResolver);
 
     private Attachment attachment(AttachmentType type, String ext) {
         return new Attachment(1L, 1L, type, AttachmentStatus.COMPLETED,
