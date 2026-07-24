@@ -1,13 +1,13 @@
 package to.bconnect.api.core.domain.company;
 
-import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.company.CompanyEntity;
@@ -62,7 +62,7 @@ public class CompanyService {
         );
 
         val companyId = companyRepository.save(created).getId();
-        attachmentLinker.relink(user.id(), ReferenceType.COMPANY, companyId, command.pictureId());
+        attachmentLinker.link(user.id(), ReferenceType.COMPANY, companyId, command.pictureId());
         return companyId;
     }
 
@@ -71,7 +71,7 @@ public class CompanyService {
         val found = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        attachmentLinker.relink(user.id(), ReferenceType.COMPANY, found.getId(), pictureId);
+        attachmentLinker.link(user.id(), ReferenceType.COMPANY, found.getId(), pictureId);
     }
 
     @Transactional
@@ -81,7 +81,7 @@ public class CompanyService {
             return;
         val found = optional.get();
 
-        attachmentLinker.unlink(ReferenceType.COMPANY, List.of(found.getId()));
+        attachmentLinker.unlink(ReferenceType.COMPANY, found.getId());
         companyRepository.delete(found);
     }
 }

@@ -112,7 +112,7 @@ public class DriveService {
             noteRepository.deleteAllByBoardId(board.getId());
             boardRepository.delete(board);
         });
-        attachmentLinker.unlink(ReferenceType.DRIVE, List.of(driveId));
+        attachmentLinker.unlink(ReferenceType.DRIVE, driveId);
         driveMemberRepository.deleteByDriveId(driveId);
         driveRepository.delete(found);
     }
@@ -134,6 +134,6 @@ public class DriveService {
     public void detach(AuthUser user, Long driveId, Long attachmentId) {
         driveValidator.validate(driveId, user.id());
         attachmentLinker.validate(user.id(), ReferenceType.DRIVE, driveId, attachmentId);
-        attachmentLinker.unlink(attachmentId);
+        attachmentLinker.unlink(ReferenceType.DRIVE, driveId);
     }
 }

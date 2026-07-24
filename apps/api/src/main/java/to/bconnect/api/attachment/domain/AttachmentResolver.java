@@ -28,7 +28,7 @@ public class AttachmentResolver {
         if (referenceId == null)
             return null;
 
-        return attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, List.of(referenceId)).stream()
+        return attachmentRepository.findAllByReferenceTypeAndReferenceId(referenceType, referenceId).stream()
                 .findFirst()
                 .map(it -> parseUrl(Attachment.of(it), size))
                 .orElse(null);
@@ -39,7 +39,7 @@ public class AttachmentResolver {
         if (referenceId == null)
             return List.of();
 
-        return attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, List.of(referenceId)).stream()
+        return attachmentRepository.findAllByReferenceTypeAndReferenceId(referenceType, referenceId).stream()
                 .map(Attachment::of)
                 .toList();
     }

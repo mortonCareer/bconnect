@@ -68,7 +68,7 @@ public class ProfileController {
             @AuthenticationPrincipal AuthUser user,
             HttpServletResponse response) {
         val profile = profileQueryService.get(user.id());
-        val member = memberResolver.find(profile.memberId());
+        val member = memberResolver.get(profile.memberId());
         val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
@@ -84,7 +84,7 @@ public class ProfileController {
             @PathVariable Long id,
             HttpServletResponse response) {
         val profile = profileQueryService.get(id);
-        val member = memberResolver.find(profile.memberId());
+        val member = memberResolver.get(profile.memberId());
         val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
         val status = user == null
                 ? CoworkerStatus.NONE

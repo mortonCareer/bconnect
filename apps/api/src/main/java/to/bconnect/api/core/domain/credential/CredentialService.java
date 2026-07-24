@@ -1,13 +1,13 @@
 package to.bconnect.api.core.domain.credential;
 
-import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.credential.CredentialEntity;
@@ -61,7 +61,7 @@ public class CredentialService {
         );
 
         credentialRepository.save(created);
-        attachmentLinker.relink(user.id(), ReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
+        attachmentLinker.link(user.id(), ReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
         return created.getId();
     }
 
@@ -75,7 +75,7 @@ public class CredentialService {
         if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        attachmentLinker.unlink(ReferenceType.CREDENTIAL, List.of(found.getId()));
+        attachmentLinker.unlink(ReferenceType.CREDENTIAL, found.getId());
         credentialRepository.delete(found);
     }
 

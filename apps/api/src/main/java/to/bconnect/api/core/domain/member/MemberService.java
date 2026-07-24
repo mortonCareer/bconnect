@@ -1,7 +1,7 @@
 package to.bconnect.api.core.domain.member;
 
-import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,13 +72,13 @@ public class MemberService {
 
     @Transactional
     public void updatePicture(AuthUser user, Long pictureId) {
-        attachmentLinker.relink(user.id(), ReferenceType.MEMBER, user.id(), pictureId);
+        attachmentLinker.link(user.id(), ReferenceType.MEMBER, user.id(), pictureId);
     }
 
     @Transactional
     public void withdraw(AuthUser user) {
         memberCleaner.clean(user);
-        attachmentLinker.unlink(ReferenceType.MEMBER, List.of(user.id()));
+        attachmentLinker.unlink(ReferenceType.MEMBER, user.id());
         memberRepository.findById(user.id())
                 .ifPresent(memberRepository::delete);
     }

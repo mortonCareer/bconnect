@@ -67,10 +67,9 @@ public class GroupChatService {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.FORBIDDEN));
 
         val participantIds = participantRepository.findMemberIdsByChatId(chatId);
-        val lastMessage = messageRepository.findLatestMessagesByChatIdInAndChatType(List.of(chatId), ChatType.GROUP)
-                .stream().findFirst().map(Message::of).orElse(null);
-        val unreadCount = messageRepository.findGroupUnreadCountByChatIdsAndMemberId(List.of(chatId), memberId)
-                .getOrDefault(chatId, 0L);
+        val lastMessage = messageRepository.findFirstByChatIdAndChatTypeOrderByIdDesc(chatId, ChatType.GROUP)
+                .map(Message::of).orElse(null);
+        val unreadCount = messageRepository.findGroupUnreadCountByChatIdAndMemberId(chatId, memberId);
 
         return GroupChat.of(chat, participantIds, lastMessage, unreadCount);
     }

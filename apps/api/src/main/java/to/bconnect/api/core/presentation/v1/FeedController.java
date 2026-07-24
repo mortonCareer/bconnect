@@ -97,7 +97,7 @@ public class FeedController {
             @PathVariable Long id,
             HttpServletResponse response) {
         val post = postService.get(id);
-        val member = memberResolver.find(post.memberId());
+        val member = memberResolver.get(post.memberId());
         val profile = profileResolver.resolveMap(List.of(post.memberId())).get(post.memberId());
         val attachments = attachmentResolver.list(ReferenceType.POST, post.id());
         val urlMap = attachmentResolver.parseUrlMap(attachments, ImageSize.MEDIUM);

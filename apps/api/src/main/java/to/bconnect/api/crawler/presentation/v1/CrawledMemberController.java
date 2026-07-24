@@ -27,8 +27,8 @@ public class CrawledMemberController {
     public ApiResponse<List<CrawledMemberSummaryResponse>> list() {
         val members = crawledMemberService.list();
         val memberIds = members.stream().map(CrawledMemberEntity::getId).toList();
-        val profileMap = crawledMemberService.getProfileMap(memberIds);
-        val thumbnailMap = crawledMemberService.getThumbnailMap(memberIds);
+        val profileMap = crawledMemberService.resolveProfileMap(memberIds);
+        val thumbnailMap = crawledMemberService.resolveThumbnailMap(memberIds);
 
         val body = members.stream()
                 .map(it -> CrawledMemberSummaryResponse.of(
@@ -41,11 +41,11 @@ public class CrawledMemberController {
     @GetMapping("/{id}")
     public ApiResponse<CrawledMemberResponse> get(@PathVariable Long id) {
         val member = crawledMemberService.get(id);
-        val profile = crawledMemberService.getProfileMap(List.of(id)).get(id);
+        val profile = crawledMemberService.getProfile(id).orElse(null);
         val credentials = crawledMemberService.listCredential(id);
         val posts = crawledMemberService.listPost(id);
         val taskIds = posts.stream().map(CrawledPostEntity::getTaskId).filter(Objects::nonNull).toList();
-        val taskMap = crawledMemberService.getTaskMap(taskIds);
+        val taskMap = crawledMemberService.resolveTaskMap(taskIds);
 
         return ApiResponse.success(CrawledMemberResponse.of(member, profile, credentials, posts, taskMap));
     }

@@ -12,7 +12,6 @@ import to.bconnect.api.storage.attachment.AttachmentStatus;
 import to.bconnect.api.storage.attachment.ReferenceType;
 
 import java.util.Collection;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -22,6 +21,9 @@ public class AttachmentLinker {
 
     @Transactional
     public void link(Long memberId, ReferenceType referenceType, Long referenceId, Collection<Long> attachmentIds) {
+        if(attachmentIds.isEmpty())
+            return;
+
         val attachments = attachmentRepository.findAllById(attachmentIds);
         if (attachments.size() != attachmentIds.size())
             throw new CodeException(CommonExceptionCode.NOT_FOUND);
@@ -36,18 +38,14 @@ public class AttachmentLinker {
     }
 
     @Transactional
-    public void relink(Long memberId, ReferenceType referenceType, Long referenceId, Long attachmentId) {
-        unlink(referenceType, List.of(referenceId));
-        if (attachmentId == null)
-            return;
-
+    public void link(Long memberId, ReferenceType referenceType, Long referenceId, Long attachmentId) {
         val attachment = attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
         if (!attachment.getMemberId().equals(memberId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
         if (attachment.getStatus() != AttachmentStatus.COMPLETED)
             throw new CodeException(AttachmentExceptionCode.NOT_COMPLETED);
-
         attachment.link(referenceType, referenceId);
     }
 
@@ -61,8 +59,9 @@ public class AttachmentLinker {
     }
 
     @Transactional
-    public void unlink(Long attachmentId) {
-        attachmentRepository.findById(attachmentId).ifPresent(AttachmentEntity::unlink);
+    public void unlink(ReferenceType referenceType, Long referenceId) {
+        attachmentRepository.findAllByReferenceTypeAndReferenceId(referenceType, referenceId)
+                .forEach(AttachmentEntity::unlink);
     }
 
     public void validate(Long memberId, ReferenceType referenceType, Long referenceId, Long attachmentId) {

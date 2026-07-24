@@ -1,6 +1,7 @@
 package to.bconnect.api.storage.chat;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +25,7 @@ public class ParticipantEntity extends BaseEntity {
         this.lastIdx = 0L;
     }
 
-    public void markRead(Long messageId) {
+    public void read(Long messageId) {
         this.lastIdx = messageId;
     }
 }
