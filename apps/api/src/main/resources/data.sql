@@ -111,9 +111,9 @@ INSERT INTO crawled_members (id, company, name, phone, picture, role, brn, email
 INSERT INTO crawled_profiles (id, member_id, primary_trade, experience, headline, address, state, url, platform, created_at, modified_at) VALUES
 (100, 100, '방수', 10, '한줄소개1', '주소1', '서울', 'https://blog.naver.com/crawled1', 'NAVER', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (101, 101, '타일', 8, '한줄소개2', '주소2', '경기', 'https://blog.naver.com/crawled2', 'NAVER', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(102, 102, '도장', 12, '한줄소개3', '주소3', 'INCHEON', 'https://www.instagram.com/crawled3', 'INSTAGRAM', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(103, 103, '전기', 15, '한줄소개4', '주소4', 'BUSAN', 'https://blog.naver.com/crawled4', 'NAVER', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(104, 104, '목공', 20, '한줄소개5', '주소5', 'DAEGU', 'https://www.instagram.com/crawled5', 'INSTAGRAM', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+(102, 102, '도장', 12, '한줄소개3', '주소3', '인천', 'https://www.instagram.com/crawled3', 'INSTAGRAM', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(103, 103, '전기', 15, '한줄소개4', '주소4', '부산', 'https://blog.naver.com/crawled4', 'NAVER', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(104, 104, '목공', 20, '한줄소개5', '주소5', '대구', 'https://www.instagram.com/crawled5', 'INSTAGRAM', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO crawled_profile_trades (profile_id, trade) VALUES
 (100, '방수'),
