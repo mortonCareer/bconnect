@@ -20,12 +20,12 @@ public class DomainDependencyTest {
     private static final String SHARED = "profile";
 
     // dep: chat → allowed
-    @ArchTest ArchRule boardDomainRule = domainRule("board", "drive");
+    @ArchTest ArchRule boardDomainRule = domainRule("board", "drive", "project");
     @ArchTest ArchRule chatDomainRule = domainRule("chat", "offer");
     @ArchTest ArchRule companyDomainRule = domainRule("company");
     @ArchTest ArchRule coworkerDomainRule = domainRule("coworker");
     @ArchTest ArchRule credentialDomainRule = domainRule("credential");
-    @ArchTest ArchRule driveDomainRule = domainRule("drive");
+    @ArchTest ArchRule driveDomainRule = domainRule("drive", "project");
     @ArchTest ArchRule memberDomainRule = domainRule("member");
     @ArchTest ArchRule offerDomainRule = domainRule("offer");
     @ArchTest ArchRule postDomainRule = domainRule("post");
