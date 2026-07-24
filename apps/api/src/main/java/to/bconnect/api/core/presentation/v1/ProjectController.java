@@ -8,7 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.response.ApiResponse;
@@ -38,7 +38,7 @@ public class ProjectController {
     private final TaskQueryService taskQueryService;
     private final NoteService noteService;
     private final MemberResolver memberResolver;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
@@ -50,8 +50,8 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<ProjectResponse> get(@PathVariable Long id) {
-        return ApiResponse.success(ProjectResponse.of(projectService.get(id)));
+    public ApiResponse<ProjectResponse> get(@AuthenticationPrincipal AuthUser user, @PathVariable Long id) {
+        return ApiResponse.success(ProjectResponse.of(projectService.get(user, id)));
     }
 
     @GetMapping("/{id}/tasks")
@@ -59,7 +59,7 @@ public class ProjectController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
         val tasks = taskQueryService.listByProject(user, id);
-        val address = projectService.get(id).address();
+        val address = projectService.get(user, id).address();
         val body = tasks.stream()
                 .map(it -> TaskResponse.of(it, address))
                 .toList();
@@ -73,7 +73,7 @@ public class ProjectController {
             HttpServletResponse response) {
         val assigneeIds = taskQueryService.listAssigneeIdsByProject(user, id);
         val memberMap = memberResolver.resolveMap(assigneeIds);
-        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, assigneeIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, assigneeIds, ImageSize.SMALL);
 
         val body = assigneeIds.stream()
                 .map(memberMap::get)
