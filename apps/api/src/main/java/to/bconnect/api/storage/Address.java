@@ -1,6 +1,8 @@
 package to.bconnect.api.storage;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,9 +17,10 @@ import java.math.BigDecimal;
 public class Address {
     private String zipcode;
 
-    private String city;
+    @Enumerated(EnumType.STRING)
+    private Region state;
 
-    private String state;
+    private String city;
 
     private String street;
 

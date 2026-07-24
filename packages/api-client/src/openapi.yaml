@@ -1794,9 +1794,9 @@ components:
       properties:
         zipcode:
           type: string
-        city:
-          type: string
         state:
+          $ref: "#/components/schemas/Region"
+        city:
           type: string
         street:
           type: string
@@ -1806,6 +1806,25 @@ components:
           type: number
         longitude:
           type: number
+    Region:
+      type: string
+      enum:
+      - 서울
+      - 부산
+      - 대구
+      - 인천
+      - 대전
+      - 울산
+      - 세종특별자치시
+      - 경기
+      - 강원특별자치도
+      - 충북
+      - 충남
+      - 전북특별자치도
+      - 전남광주통합특별시
+      - 경북
+      - 경남
+      - 제주특별자치도
     Trade:
       type: string
       enum:
@@ -3798,7 +3817,7 @@ components:
           - "null"
         state:
           type: "null"
-          $ref: "#/components/schemas/CrawledRegion"
+          $ref: "#/components/schemas/Region"
         url:
           type: string
         platform:
@@ -3812,26 +3831,6 @@ components:
       - state
       - trades
       - url
-    CrawledRegion:
-      type: string
-      enum:
-      - SEOUL
-      - BUSAN
-      - DAEGU
-      - INCHEON
-      - GWANGJU
-      - DAEJEON
-      - ULSAN
-      - SEJONG
-      - GYEONGGI
-      - GANGWON
-      - CHUNGBUK
-      - CHUNGNAM
-      - JEONBUK
-      - JEONNAM
-      - GYEONGBUK
-      - GYEONGNAM
-      - JEJU
     ApiResponseCrawledMemberResponse:
       type: object
       properties:
