@@ -1474,6 +1474,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseFeedResponse"
+  /api/v1/drives/{id}/usage:
+    get:
+      tags:
+      - drive-controller
+      operationId: usage
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseDriveUsageResponse"
   /api/v1/drives/{id}/notes:
     get:
       tags:
@@ -2448,7 +2467,7 @@ components:
       type: string
       enum:
       - PROJECT
-      - MEMBER
+      - PERSONAL
     UploadDriveRequest:
       type: object
       properties:
@@ -3679,6 +3698,27 @@ components:
       - projectId
       - title
       - type
+    ApiResponseDriveUsageResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/DriveUsageResponse"
+    DriveUsageResponse:
+      type: object
+      properties:
+        usedBytes:
+          type: integer
+          format: int64
+        limitBytes:
+          type: integer
+          format: int64
+      required:
+      - limitBytes
+      - usedBytes
     ApiResponseListDirectChatResponse:
       type: object
       properties:
