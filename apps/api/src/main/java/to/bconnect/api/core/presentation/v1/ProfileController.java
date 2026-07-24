@@ -11,7 +11,9 @@ import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
+import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.core.domain.coworker.CoworkerService;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.profile.Profile;
@@ -42,14 +44,17 @@ public class ProfileController {
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
-    public ApiResponse<List<ProfileResponse>> list(HttpServletResponse response) {
-        val profiles = profileQueryService.list();
+    public ApiResponse<CursorPage<ProfileResponse>> list(
+            CursorLimit cursorLimit,
+            HttpServletResponse response) {
+        val page = profileQueryService.list(cursorLimit);
+        val profiles = page.content();
 
         val memberIds = profiles.stream().map(Profile::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
         val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
-        val body = profiles.stream()
+        val content = profiles.stream()
                 .map(it -> {
                     val member = memberMap.get(it.memberId());
                     return ProfileResponse.of(it, member, urlMap.get(member.id()));
@@ -60,7 +65,7 @@ public class ProfileController {
         signedCookieIssuer.issue(scope)
                 .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
 
-        return ApiResponse.success(body);
+        return ApiResponse.success(new CursorPage<>(content, page.hasNext(), page.nextCursor()));
     }
 
     @GetMapping("/me")

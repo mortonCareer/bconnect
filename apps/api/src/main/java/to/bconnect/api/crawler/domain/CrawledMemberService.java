@@ -1,10 +1,13 @@
 package to.bconnect.api.crawler.domain;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.common.request.CursorLimit;
+import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.crawler.storage.CrawledCredentialEntity;
 import to.bconnect.api.crawler.storage.CrawledCredentialRepository;
 import to.bconnect.api.crawler.storage.CrawledMemberEntity;
@@ -35,8 +38,17 @@ public class CrawledMemberService {
     private final CrawledCredentialRepository crawledCredentialRepository;
 
     @Transactional(readOnly = true)
-    public List<CrawledMemberEntity> list() {
-        return crawledMemberRepository.findAll();
+    public CursorPage<CrawledMemberEntity> list(CursorLimit cursor) {
+        val members = crawledMemberRepository.findAllBy(
+                cursor.toScrollPosition(),
+                cursor.toLimit(),
+                cursor.toSort()
+        );
+
+        return CursorPage.from(
+                members,
+                CrawledMemberEntity::getId
+        );
     }
 
     @Transactional(readOnly = true)

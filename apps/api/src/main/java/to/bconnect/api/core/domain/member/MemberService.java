@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.common.request.CursorLimit;
+import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.member.MemberEntity;
@@ -32,11 +34,17 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<Member> list() {
-        return memberRepository.findAll()
-                .stream()
-                .map(Member::of)
-                .toList();
+    public CursorPage<Member> list(CursorLimit cursor) {
+        val members = memberRepository.findAllBy(
+                cursor.toScrollPosition(),
+                cursor.toLimit(),
+                cursor.toSort()
+        );
+
+        return CursorPage.from(
+                members.map(Member::of),
+                Member::id
+        );
     }
 
     @Transactional(readOnly = true)

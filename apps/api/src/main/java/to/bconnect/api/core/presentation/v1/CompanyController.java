@@ -11,7 +11,9 @@ import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
+import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.core.domain.company.Company;
 import to.bconnect.api.core.domain.company.CompanyService;
 import to.bconnect.api.core.domain.member.MemberResolver;
@@ -36,11 +38,14 @@ public class CompanyController {
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
-    public ApiResponse<List<CompanyResponse>> list(HttpServletResponse response) {
-        val companies = companyService.list();
+    public ApiResponse<CursorPage<CompanyResponse>> list(
+            CursorLimit cursorLimit,
+            HttpServletResponse response) {
+        val page = companyService.list(cursorLimit);
+        val companies = page.content();
         val companyIds = companies.stream().map(Company::id).toList();
         val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.COMPANY, companyIds, ImageSize.SMALL);
-        val body = companies.stream()
+        val content = companies.stream()
                 .map(it -> CompanyResponse.of(it, urlMap.get(it.id())))
                 .toList();
 
@@ -48,7 +53,7 @@ public class CompanyController {
         signedCookieIssuer.issue(scope)
                 .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
 
-        return ApiResponse.success(body);
+        return ApiResponse.success(new CursorPage<>(content, page.hasNext(), page.nextCursor()));
     }
 
     @GetMapping("/me")
@@ -84,7 +89,7 @@ public class CompanyController {
             @PathVariable Long id,
             HttpServletResponse response) {
         val company = companyService.get(id);
-        val member = memberResolver.find(company.memberId());
+        val member = memberResolver.get(company.memberId());
         val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
