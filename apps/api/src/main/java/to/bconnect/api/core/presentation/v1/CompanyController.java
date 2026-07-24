@@ -89,7 +89,7 @@ public class CompanyController {
             @PathVariable Long id,
             HttpServletResponse response) {
         val company = companyService.get(id);
-        val member = memberResolver.find(company.memberId());
+        val member = memberResolver.get(company.memberId());
         val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
