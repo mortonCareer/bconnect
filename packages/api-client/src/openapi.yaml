@@ -1290,6 +1290,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListNoteResponse"
+  /api/v1/projects/{id}/assignees:
+    get:
+      tags:
+      - project-controller
+      operationId: listAssignees
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListMemberSummaryResponse"
   /api/v1/profiles/{id}:
     get:
       tags:
@@ -1667,6 +1686,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseCompanyResponse"
+  /api/v1/companies/{id}/members:
+    get:
+      tags:
+      - company-controller
+      operationId: listMembers
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListMemberSummaryResponse"
   /api/v1/tasks/{id}:
     delete:
       tags:
@@ -2981,6 +3019,17 @@ components:
       - id
       - memberId
       - modifiedAt
+    ApiResponseListMemberSummaryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemberSummaryResponse"
     ApiResponseListProfileResponse:
       type: object
       properties:
