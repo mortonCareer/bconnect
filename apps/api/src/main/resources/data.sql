@@ -83,7 +83,7 @@ INSERT INTO task_trades (task_id, trade) VALUES
 (101, 'TILING'), (102, 'TILING'), (103, 'TILING');
 
 INSERT INTO drives (id, dtype, project_id, member_id, title, created_at, modified_at) VALUES
-(100, 'MEMBER', null, 100, '테스트 드라이브', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+(100, 'PERSONAL', null, 100, '테스트 드라이브', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO boards (id, dtype, project_id, drive_id, created_at, modified_at) VALUES
 (100, 'DRIVE', null, 100, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
@@ -387,7 +387,7 @@ INSERT INTO attachments (id, member_id, type, status, context, context_id, refer
 (221, 200, 'FILE', 'COMPLETED', 'CHAT', 200, 'MESSAGE', 213, 'sample-att-221', 'contract', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO drives (id, dtype, project_id, member_id, title, created_at, modified_at) VALUES
-(200, 'MEMBER', null, 200, '샘플 개인 드라이브', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(200, 'PERSONAL', null, 200, '샘플 개인 드라이브', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (201, 'PROJECT', 200, null, '샘플 프로젝트 드라이브', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (202, 'PROJECT', 201, null, '샘플 프로젝트2 드라이브', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (203, 'PROJECT', 202, null, '샘플 프로젝트3 드라이브', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
