@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart TD
-    Socket[MessageSocketService] -- ChatMessageSentEvent --> Listener[NotificationEventListener]
+    Socket[MessageSocketService] -- SocketMessageSentEvent --> Listener[NotificationEventListener]
     DevReg[DeviceService · 첫 기기 등록] -- MemberFirstDeviceRegisteredEvent --> Listener
     Listener -- AFTER_COMMIT --> Svc[NotificationService]
     Svc --> Resolver[TargetResolver · 저장/push 대상 · args]
@@ -22,16 +22,16 @@ flowchart TD
 
 | 단계 | 처리 | DB | Push |
 |---|---|---|---|
-| trigger | 채팅 메시지 저장 후 `ChatMessageSentEvent` 발행 (socket) | messages | - |
+| trigger | 채팅 메시지 저장 후 `SocketMessageSentEvent` 발행 (socket — 참여자를 topic 구독 중(`activeIds`) / 미구독(`inactiveIds`) 으로 분리해 담음) | messages | - |
 | listen | `AFTER_COMMIT` 이후 리스너가 `NotificationService.handle` 위임 | - | - |
-| resolve | 채팅은 `MessageSocketService`가 발신자를 제외해 전달한 수신자를 저장·push 대상으로 동일하게 지정, 이벤트 시점 렌더 변수(`senderName`) snapshot 도 resolver 가 생성 | - | - |
+| resolve | 채팅은 topic 미구독(`inactiveIds`) 참여자만 저장·push 대상으로 지정, 이벤트 시점 렌더 변수(`senderName`) snapshot 도 resolver 가 생성 (발신자 탈퇴 시 `getOrWithdrawn` placeholder) | - | - |
 | link | 수신자별 알림 저장 (`sender_name` · `company_name` = args snapshot) | notifications | - |
 | render | 타입 enum 이 `title` 렌더 · `link` 조립 | - | - |
 | send | 대상별 모든 활성 device endpoint 로 동일한 알림 id의 push 발송 | device_tokens | ○ |
 | disable | `INVALID` / `EXPIRED` endpoint 비활성화 | device_tokens | - |
 
 - 온보딩 알림은 **회원의 첫 기기 등록**(`MemberFirstDeviceRegisteredEvent`, 회원당 1회)이 trigger다. 이후 resolve~disable 단계는 채팅과 동일하며 **본인에게** 저장·발송한다 — 가입 축하(`SIGNUP_WELCOME`)는 항상, 프로필 완성 제안(`PROFILE_COMPLETION`)은 프로필 미완성 시에만.
-- 채팅의 WebSocket topic 구독 여부는 push 대상을 제한하지 않는다. 구독 중인 회원 식별은 채팅 읽음 위치 갱신에만 사용한다.
+- 채팅의 WebSocket topic 구독 여부가 알림 대상을 가른다 — 구독 중(`activeIds`) 회원은 메시지를 실시간 수신하고 읽음 위치가 즉시 갱신되므로 알림 저장·push 대상에서 제외되고, 미구독(`inactiveIds`) 참여자만 대상이 된다. 발신자는 자신의 topic 을 구독 중이므로 자연히 제외된다.
 
 ## 시퀀스
 
@@ -44,7 +44,7 @@ sequenceDiagram
     participant Dev as DeviceService
     participant Snd as PushSender
 
-    Socket->>Svc: ChatMessageSentEvent (AFTER_COMMIT)
+    Socket->>Svc: SocketMessageSentEvent (AFTER_COMMIT)
     Svc->>Res: resolve(event)
     Res-->>Svc: persist, push 대상 + args snapshot
     Svc->>Lnk: notifications 저장
@@ -61,7 +61,7 @@ sequenceDiagram
 ```
 
 ## 컴포넌트 구성
-- NotificationEventListener : 도메인 이벤트(`ChatMessageSentEvent` · `MemberFirstDeviceRegisteredEvent`)를 `AFTER_COMMIT` 구독 후 위임
+- NotificationEventListener : 도메인 이벤트(`SocketMessageSentEvent` · `MemberFirstDeviceRegisteredEvent`)를 `AFTER_COMMIT` 구독 후 위임 — 첫 기기 등록 이벤트 하나가 `SIGNUP_WELCOME` · `PROFILE_COMPLETION` 두 타입을 트리거
 - NotificationService : 알림 처리 흐름 조립 (대상 분리 → 저장 → 렌더 → 발송 → 무효 토큰 비활성화) — 생성자에서 타입 → resolver map 구성 (미등록 시 `UNKNOWN_TYPE`)
 - NotificationTargetResolver : 타입별 저장 대상 · push 대상 · 렌더 변수(`NotificationArgs`) snapshot 계산 (전략, `notification.domain.target`) — 구현체 : `ChatMessageTargetResolver` · `SignupWelcomeTargetResolver` · `ProfileCompletionTargetResolver`
 - PushNotification : push 메시지 조립 (`of` — title 렌더 · 본문 100자 절단 · link) · payload 변환
@@ -80,7 +80,7 @@ to.bconnect.api
 │   │   ├── DeviceService.java                # token upsert/해제/조회 · 첫 기기 등록 이벤트 발행
 │   │   ├── MemberFirstDeviceRegisteredEvent.java # 첫 push device 등록 사건. 온보딩 알림 트리거
 │   │   ├── NotificationEventListener.java    # 채팅/첫 기기 이벤트를 AFTER_COMMIT 구독해 service 위임
-│   │   ├── NotificationService.java          # 대상 계산 → 저장 → 발송 → 무효 endpoint 비활성화
+│   │   ├── NotificationService.java          # 타입 → resolver 선택 · 대상 계산 → 저장 → 발송 → 무효 endpoint 비활성화
 │   │   ├── push                              # push 발송 port · 공통 payload/result 모델
 │   │   │   ├── PushEndpointRegistry.java     # endpoint 생성/복구/삭제 port
 │   │   │   ├── PushNotification.java         # title 렌더 · body 100자 절단 · link 조립, payload 변환
@@ -89,7 +89,7 @@ to.bconnect.api
 │   │   │   └── PushSender.java               # endpoint 단위 push 발송 port
 │   │   └── target                            # 타입별 저장/push 대상 계산 전략
 │   │       ├── NotificationTargetResolver.java          # 타입별 resolver 인터페이스
-│   │       ├── ChatMessageTargetResolver.java           # 전달받은 수신자 전원을 저장 · push 대상으로 지정 · senderName args 생성
+│   │       ├── ChatMessageTargetResolver.java           # topic 미구독(inactive) 참여자를 저장 · push 대상으로 지정 · senderName args 생성
 │   │       ├── SignupWelcomeTargetResolver.java         # 첫 기기 등록 회원 본인에게 항상 알림
 │   │       ├── ProfileCompletionTargetResolver.java     # 프로필 미완성 회원 본인에게만 알림
 │   │       └── ResolvedNotification.java                # sender/reference/content/args + persist/push 대상
@@ -104,7 +104,7 @@ to.bconnect.api
 │   └── presentation
 │       └── v1
 │           ├── DeviceController.java          # POST/DELETE /api/v1/devices
-│           ├── NotificationController.java    # 목록/unread/읽음 처리 API
+│           ├── NotificationController.java    # 목록 · unread 조회(GET) / 단건 · 전체 읽음 처리(POST) API
 │           ├── request
 │           │   ├── RegisterDeviceRequest.java
 │           │   └── UnregisterDeviceRequest.java
@@ -113,8 +113,10 @@ to.bconnect.api
 │               └── RegisterDeviceResponse.java
 ├── socket
 │   └── message
-│       ├── MessageSocketService.java           # 메시지 저장 · topic 구독 회원 읽음 갱신 · 수신자 이벤트 발행
-│       └── ChatMessageSentEvent.java           # notification이 구독하는 채팅 발생 이벤트
+│       ├── MessageSocketController.java        # STOMP 메시지 수신 endpoint (group/direct)
+│       ├── MessageSocketService.java           # 메시지 저장 · 구독(active) 회원 읽음 갱신 · active/inactive 분리 이벤트 발행
+│       ├── SendMessageRequest.java             # STOMP 발신 요청 payload
+│       └── SocketMessageSentEvent.java         # notification이 구독하는 채팅 발생 이벤트 (active/inactive/preview)
 ├── core
 │   └── domain
 │       └── notification                       # 알림 영속화 · 조회 core 로직
@@ -140,7 +142,7 @@ to.bconnect.api
 - 의존 방향 : `notification → socket · core · storage · security · attachment · common`
 - port/adapter : `notification.infrastructure.push → notification.domain.push` (역방향 금지 — domain 하위(push·target)는 infrastructure 를 모른다)
 - 저장 · 조회는 `core.domain.notification` 소유 : `notification.domain → core.domain.notification`
-- socket 은 `ChatMessageSentEvent` 만 발행하고 알림을 모른다 (이벤트 역전).
+- socket 은 `SocketMessageSentEvent` 만 발행하고 알림을 모른다 (이벤트 역전).
 - 규칙은 `PackageDependencyTest`(sink·`notificationDomainIsPortSide`) · `LayerDependencyTest` 로 강제한다.
 
 ### 저장 · 조회 (Linker / QueryService)
@@ -196,13 +198,13 @@ graph TD
 | NotificationReferenceType | storage.notification | `NONE` · `CHAT_ROOM` · `PROFILE` · `COWORKER_REQUEST` · `OFFER` · `CONTRACT` | — | 프론트 이동 화면 의미 (라우팅). `NONE` = 이동 없음(link null) |
 | NotificationArgs | storage.notification | `senderName` · `companyName` (`@Embeddable` record) | `render` 변수 snapshot | 이벤트 시점 렌더 변수. 개별 컬럼으로 저장 |
 | NotificationEvent | core.domain.notification | — (마커 인터페이스) | 트리거 이벤트 공통 타입 | `SocketMessageSentEvent` · `MemberFirstDeviceRegisteredEvent` 가 구현 |
-| NotificationTargetResolver | notification.domain.target | `supports()` · `resolve(event)` → `ResolvedNotification.Targets` | 타입별 대상 계산 (`E extends NotificationEvent`) | 저장 · push 대상 분리 |
+| NotificationTargetResolver | notification.domain.target | `supports()` · `resolve(event)` → `ResolvedNotification` (sender/reference/content/args + `Targets`) | 타입별 대상 · args 계산 (`E extends NotificationEvent`) | 저장 · push 대상 분리 + 렌더 변수 snapshot |
 
 알림 타입 카탈로그
 
 | type_code | reference_type | 문구 (template) | 변수 | 트리거 |
 |---|---|---|---|---|
-| CHAT_MESSAGE | CHAT_ROOM | `%s님이 메시지를 보냈습니다` | senderName | ✅ ChatMessageSentEvent |
+| CHAT_MESSAGE | CHAT_ROOM | `%s님이 메시지를 보냈습니다` | senderName | ✅ SocketMessageSentEvent |
 | SIGNUP_WELCOME | NONE | `회원가입을 축하드립니다` | — | ✅ MemberFirstDeviceRegisteredEvent (본인, 항상) |
 | PROFILE_COMPLETION | PROFILE | `프로필을 완성하고 업체로부터 일감을 받아보세요` | — | ✅ MemberFirstDeviceRegisteredEvent (본인, 프로필 미완성 시) |
 | COWORKER_REQUESTED | COWORKER_REQUEST | `%s 님으로부터 동료 요청을 제안받았습니다` | senderName | ⬜ 미배선 |
@@ -263,7 +265,7 @@ graph TD
 2. 필요 시 `NotificationReferenceType` 에 이동 화면 추가
 3. 발행 패키지에 이벤트 정의(`NotificationEvent` 구현), 구독 리스너에서 `NotificationService.handle(type, event)` 호출
 4. 대상 규칙이 다르면 `NotificationTargetResolver` 구현체 추가 (`NotificationService` 생성자 주입으로 자동 등록) — 렌더 변수(`NotificationArgs`) snapshot 도 resolver 가 생성
-   - `ChatMessageTargetResolver` : `MessageSocketService`가 발신자를 제외해 전달한 전체 수신자를 저장 · push 대상으로 지정 (WebSocket 구독 여부와 무관)
+   - `ChatMessageTargetResolver` : topic 미구독(`inactiveIds`) 참여자만 저장 · push 대상으로 지정 (구독 중 회원은 실시간 수신 · 즉시 읽음 처리되므로 제외)
    - `SignupWelcomeTargetResolver` : 첫 기기 등록 회원 **본인**에게 (항상)
    - `ProfileCompletionTargetResolver` : 첫 기기 등록 회원 본인에게, 단 **프로필 미완성 시에만**(있으면 대상 비움 → 스킵)
    - 이벤트에 수신자가 명시된 타입(동료 요청 · 추천 · 섭외 등)은 직접 대상 지정
