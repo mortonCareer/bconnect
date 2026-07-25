@@ -22,13 +22,26 @@ interface CareerShellOpts {
   right?: { icon: ReactNode; href: string; label: string }
 }
 
+/**
+ * 뷰가 주입하는 헤더 내용 — `title` 외 `titleCount`·`rightSlot` 은 뷰가 필요할 때만 넘긴다 (#1016).
+ * 패널 셸(`PanelHeader`, plan)과 같은 슬롯 이름을 써서 듀얼셸 양쪽 헤더가 같은 한 줄 구성이 된다.
+ */
+interface CareerShellSlots {
+  title: string
+  titleCount?: number
+  rightSlot?: ReactNode
+  children: ReactNode
+}
+
 export const careerShell = (onBack?: () => void, opts?: CareerShellOpts) =>
-  function CareerShell({ title, children }: { title: string; children: ReactNode }) {
+  function CareerShell({ title, titleCount, rightSlot, children }: CareerShellSlots) {
     return (
       <div className={opts?.fill ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-col'}>
         <TopBar
           variant="default"
           title={title}
+          titleCount={titleCount}
+          rightSlot={rightSlot}
           showAction={false}
           actionIcon={opts?.right?.icon}
           actionHref={opts?.right?.href}
