@@ -63,7 +63,7 @@ public class MemberService {
                 command.username(),
                 command.name(),
                 phone,
-                command.role()
+                command.roles()
         );
 
         memberRepository.save(created);

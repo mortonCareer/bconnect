@@ -20,14 +20,14 @@ public class AuthUserService implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
         return memberRepository.findById(Long.valueOf(username))
-            .map(it -> new AuthUser(it.getId(), it.getUsername(), it.getRole().name()))
+            .map(it -> new AuthUser(it.getId(), it.getUsername(), it.getRoles()))
             .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
     @Transactional(readOnly = true)
     public UserDetails loadUserByPhone(@NonNull String phone) throws UsernameNotFoundException {
         return memberRepository.findByPhone(phone)
-            .map(it -> new AuthUser(it.getId(), it.getUsername(), it.getRole().name()))
+            .map(it -> new AuthUser(it.getId(), it.getUsername(), it.getRoles()))
             .orElseThrow(() -> new UsernameNotFoundException(phone));
     }
 }

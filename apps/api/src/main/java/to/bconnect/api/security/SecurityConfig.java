@@ -1,6 +1,6 @@
 package to.bconnect.api.security;
 
-import tools.jackson.databind.ObjectMapper;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,7 +18,6 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import jakarta.servlet.DispatcherType;
 import to.bconnect.api.ApiConfigProps;
 import to.bconnect.api.security.jwt.AccessTokenAuthenticationFilter;
 import to.bconnect.api.security.jwt.JwtAuthenticationProvider;
@@ -26,16 +25,16 @@ import to.bconnect.api.security.jwt.JwtProvider;
 import to.bconnect.api.security.jwt.RefreshTokenAuthenticationFilter;
 import to.bconnect.api.security.otp.OtpAuthenticationProvider;
 import to.bconnect.api.security.otp.OtpService;
+import to.bconnect.api.security.otp.VerifyOtpAuthenticationFilter;
+import to.bconnect.api.security.session.SessionService;
 import to.bconnect.api.security.signup.SignupTokenAuthenticationFilter;
 import to.bconnect.api.security.signup.SignupTokenAuthenticationProvider;
 import to.bconnect.api.security.signup.SignupTokenService;
-import to.bconnect.api.security.otp.VerifyOtpAuthenticationFilter;
-import to.bconnect.api.security.session.SessionService;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Collections;
 
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.*;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
@@ -96,10 +95,32 @@ public class SecurityConfig {
                 .authorizeHttpRequests(arc -> arc
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/api/v1/auth/otp/**").permitAll()
-                        .requestMatchers(POST, "/api/v1/members").hasRole("GUEST")
+                        .requestMatchers(POST, "/api/v1/members").hasRole("SIGNUP")
                         .requestMatchers(GET, "/api/v1/members/check-username").permitAll()
                         .requestMatchers(GET, "/api/v1/members").hasRole("ADMIN")
                         .requestMatchers(GET, "/api/v1/companies").hasRole("ADMIN")
+                        .requestMatchers(GET, "/api/v1/companies/me").hasRole("PLAN")
+                        .requestMatchers(PUT, "/api/v1/companies/me").hasRole("PLAN")
+                        .requestMatchers(DELETE, "/api/v1/companies/me").hasRole("PLAN")
+                        .requestMatchers(POST, "/api/v1/projects").hasRole("PLAN")
+                        .requestMatchers(PUT, "/api/v1/projects/*").hasRole("PLAN")
+                        .requestMatchers(DELETE, "/api/v1/projects/*").hasRole("PLAN")
+                        .requestMatchers(POST, "/api/v1/tasks/company").hasRole("PLAN")
+                        .requestMatchers(PUT, "/api/v1/tasks/*/company").hasRole("PLAN")
+                        .requestMatchers(GET, "/api/v1/tasks/*/offers").hasRole("PLAN")
+                        .requestMatchers(POST, "/api/v1/tasks/worker").hasRole("CAREER")
+                        .requestMatchers(PUT, "/api/v1/tasks/*/worker").hasRole("CAREER")
+                        .requestMatchers(PUT, "/api/v1/tasks/*/assignee").hasRole("CAREER")
+                        .requestMatchers(POST, "/api/v1/offers").hasRole("PLAN")
+                        .requestMatchers(PUT, "/api/v1/offers/reorder").hasRole("PLAN")
+                        .requestMatchers(POST, "/api/v1/offers/*/cancel").hasRole("PLAN")
+                        .requestMatchers(POST, "/api/v1/offers/*/accept").hasRole("CAREER")
+                        .requestMatchers(POST, "/api/v1/offers/*/deny").hasRole("CAREER")
+                        .requestMatchers(GET, "/api/v1/coworkers/*/tasks").hasRole("CAREER")
+                        .requestMatchers(DELETE, "/api/v1/coworkers/*").hasRole("CAREER")
+                        .requestMatchers(POST, "/api/v1/posts").hasRole("CAREER")
+                        .requestMatchers(PUT, "/api/v1/posts/*").hasRole("CAREER")
+                        .requestMatchers(DELETE, "/api/v1/posts/*").hasRole("CAREER")
                         .requestMatchers(GET, "/api/v1/profiles/me").authenticated()
                         .requestMatchers(GET, "/api/v1/profiles/**").permitAll()
                         .requestMatchers(GET, "/api/v1/feeds/**").permitAll()
@@ -108,6 +129,7 @@ public class SecurityConfig {
                         .requestMatchers(POST, "/api/v1/credentials/*/accept", "/api/v1/credentials/*/deny").hasRole("ADMIN")
                         .requestMatchers(GET, "/api/v1/recommendations/received", "/api/v1/recommendations/sent").permitAll()
                         .requestMatchers(GET, "/api/v1/crawled-members/**").permitAll()
+                        .requestMatchers(POST, "/api/v1/one-click").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/v3/api-docs*").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
