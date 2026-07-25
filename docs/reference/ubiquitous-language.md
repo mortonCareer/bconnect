@@ -84,7 +84,7 @@ graph TD
 | Attachment    | Signed cookie  |         | CloudFront 접근 권한       |
 | Company       | Company        | 인테리어 업체 |                        |
 | Project       | Project        | 프로젝트    |                        |
-| Offer         | Offer          | 제안      | 기술자 제안                 |
+| Offer         | Offer          | 섭외      | 기술자 섭외                 |
 | Drive         | Drive          | 공유 저장소  | 원격 파일 · 이미지 저장소        |
 | Drive         | DriveMember    | 저장소 멤버  | 저장소 접근 권한              |
 | Board         | Board          | 게시판     | 프로젝트 · 저장소별 게시판 (자동 생성) |
@@ -160,7 +160,7 @@ graph TD
 |---|---|---|
 | DRAFT | 시작 전 | 시작 전 |
 | OPEN | 모집 중 | 지원 완료 |
-| OFFERED | 섭외 중 | 제안 받음 |
+| OFFERED | 섭외 중 | 섭외 받음 |
 | SCHEDULED | 섭외 됨 | 시공 전 |
 | IN_PROGRESS | 진행 중 | 진행 중 |
 | COMPLETED | 시공 완료 | 시공 완료 |
@@ -189,7 +189,7 @@ graph TD
 | IMAGE  | 이미지 |
 | FILE   | 파일 |
 | SYSTEM | 시스템 |
-| OFFER  | 제안 |
+| OFFER  | 섭외 |
 
 ### 인증뱃지 유형(CredentialType)
 
