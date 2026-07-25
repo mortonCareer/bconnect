@@ -10,7 +10,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import to.bconnect.api.core.domain.offer.OfferEvent;
 import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.chat.MessageType;
-import to.bconnect.api.storage.offer.OfferStatus;
+import to.bconnect.api.storage.member.MemberEntity;
 
 import java.util.List;
 
@@ -24,15 +24,28 @@ public class ChatEventListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleOfferEvent(OfferEvent event) {
-        if (event.status() != OfferStatus.ACTIVE && event.status() != OfferStatus.ACCEPTED)
+        val command = resolveCommand(event);
+        if (command == null)
             return;
 
-        val activated = event.status() == OfferStatus.ACTIVE;
-        val senderId = activated ? event.companyOwnerId() : event.workerId();
-        val receiverId = activated ? event.workerId() : event.companyOwnerId();
+        val senderId = switch (event.status()) {
+            case ACTIVE -> event.companyOwnerId();
+            default -> MemberEntity.SYSTEM_ID;
+        };
 
-        val chatId = directChatService.getOrCreate(senderId, receiverId);
-        messageService.create(chatId, ChatType.DIRECT, senderId,
-                new SendMessage(MessageType.OFFER, String.valueOf(event.offerId()), List.of()));
+        val chatId = directChatService.getOrCreate(event.companyOwnerId(), event.workerId());
+        messageService.create(chatId, ChatType.DIRECT, senderId, command);
+    }
+
+    private static SendMessage resolveCommand(OfferEvent event) {
+        return switch (event.status()) {
+            case ACTIVE -> new SendMessage(
+                    MessageType.OFFER, String.valueOf(event.offerId()), List.of());
+            case ACCEPTED -> new SendMessage(
+                    MessageType.SYSTEM, MessageTemplate.OFFER_ACCEPTED, List.of());
+            case EXPIRED -> new SendMessage(
+                    MessageType.SYSTEM, MessageTemplate.OFFER_EXPIRED, List.of());
+            default -> null;
+        };
     }
 }
