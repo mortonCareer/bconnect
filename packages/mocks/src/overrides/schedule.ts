@@ -20,6 +20,7 @@ import type {
   CreateProjectTaskRequest,
   Offer,
   Project,
+  Region,
   ReorderOfferRequest,
   Task,
   UpdateProjectTaskRequest,
@@ -55,7 +56,7 @@ function nowStamp(): string {
 
 const seedStamp = nowStamp()
 
-const addressOf = (city: string, state: string, street: string, detail: string): Address => ({
+const addressOf = (city: string, state: Region, street: string, detail: string): Address => ({
   zipcode: '00000',
   city,
   state,
@@ -70,7 +71,7 @@ const PROJECT_SEEDS: Project[] = [
     id: 1,
     companyId: 1,
     title: '모튼아파트 리모델링 01 (Mocked)',
-    address: addressOf('경기도', '수원시 장안구', '경기도 수원시 율전로 00번길 00-00', '000호'),
+    address: addressOf('수원시 장안구', '경기', '경기도 수원시 율전로 00번길 00-00', '000호'),
     createdAt: seedStamp,
     modifiedAt: seedStamp,
   },
@@ -78,7 +79,7 @@ const PROJECT_SEEDS: Project[] = [
     id: 2,
     companyId: 1,
     title: '래미안 리모델링 02 (Mocked)',
-    address: addressOf('서울특별시', '강남구', '서울 강남구 테헤란로 00길 00', '0000호'),
+    address: addressOf('강남구', '서울', '서울 강남구 테헤란로 00길 00', '0000호'),
     createdAt: seedStamp,
     modifiedAt: seedStamp,
   },
@@ -86,7 +87,7 @@ const PROJECT_SEEDS: Project[] = [
     id: 3,
     companyId: 1,
     title: '자담 사옥 인테리어 (Mocked)',
-    address: addressOf('인천광역시', '연수구', '인천 연수구 송도과학로 00', '000호'),
+    address: addressOf('연수구', '인천', '인천 연수구 송도과학로 00', '000호'),
     createdAt: seedStamp,
     modifiedAt: seedStamp,
   },
@@ -95,24 +96,24 @@ const PROJECT_SEEDS: Project[] = [
 /** 섭외 대기열/대표 기술자 표시용 인물 시드 — member.id 축 (FE 'profileId' = memberId). */
 interface PersonSeed {
   name: string
-  region: string
+  region: Region
   trade: Trade
 }
 
 const PEOPLE: Record<number, PersonSeed> = {
-  1: { name: '이송목 (Mocked)', region: '경기도', trade: Trade.WALLPAPER },
+  1: { name: '이송목 (Mocked)', region: '경기', trade: Trade.WALLPAPER },
   2: { name: '손장수 (Mocked)', region: '서울', trade: Trade.ELECTRICAL },
   3: { name: '홍길동 (Mocked)', region: '인천', trade: Trade.CARPENTRY },
-  4: { name: '탁재훈 (Mocked)', region: '경기도', trade: Trade.TILING },
+  4: { name: '탁재훈 (Mocked)', region: '경기', trade: Trade.TILING },
   5: { name: '송중기 (Mocked)', region: '서울', trade: Trade.FILM_SHEET },
   6: { name: '박세리 (Mocked)', region: '인천', trade: Trade.PAINTING },
-  7: { name: '최수종 (Mocked)', region: '경기도', trade: Trade.WATERPROOFING },
+  7: { name: '최수종 (Mocked)', region: '경기', trade: Trade.WATERPROOFING },
   21: { name: '김철수 (Mocked)', region: '서울', trade: Trade.DEMOLITION },
-  22: { name: '이영희 (Mocked)', region: '경기도', trade: Trade.TILING },
+  22: { name: '이영희 (Mocked)', region: '경기', trade: Trade.TILING },
   23: { name: '박민수 (Mocked)', region: '인천', trade: Trade.WALLPAPER },
   902: { name: '이민호 (Mocked)', region: '서울', trade: Trade.TILING },
   903: { name: '김태현 (Mocked)', region: '인천', trade: Trade.WALLPAPER },
-  904: { name: '박지성 (Mocked)', region: '경기도', trade: Trade.TILING },
+  904: { name: '박지성 (Mocked)', region: '경기', trade: Trade.TILING },
 }
 
 interface TaskSeed {

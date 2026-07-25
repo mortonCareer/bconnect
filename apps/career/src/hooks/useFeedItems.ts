@@ -72,9 +72,9 @@ export function useFeedItems({
   const currentUserId = useGetMyMember({ query: { enabled: isAuthenticated } }).data?.id
 
   const feedItems: FeedItem[] = useMemo(() => {
-    if (!feeds) return []
+    if (!feeds?.content) return []
 
-    return feeds.flatMap((feed): FeedItem[] => {
+    return feeds.content.flatMap((feed): FeedItem[] => {
       const { member, profile, post, task } = feed
 
       // TODO: BE required 처리 후 type narrowing 필요. Feed.member/profile/post와 id가 optional emit이라 없는 행은 임시로 렌더 제외.

@@ -3,7 +3,6 @@
 import { useMemo } from 'react'
 import {
   postImageUrls,
-  regionOfCrawled,
   regionOfState,
   useGetCrawledMembers,
   useGetFeeds,
@@ -110,7 +109,7 @@ function toCrawledItem(crawled: CrawledMemberSummary): CrawledTechnicianItem | n
     name: d.displayName,
     picture: crawled.picture ?? DEFAULT_PROFILE_IMAGE,
     location: d.location,
-    region: crawled.profile?.state ? regionOfCrawled(crawled.profile.state) : undefined,
+    region: crawled.profile?.state ?? undefined,
     primaryTrade: d.primaryTrade,
     experienceYears: d.experienceYears,
     headline: d.headline,
@@ -155,7 +154,7 @@ export function useTechnicianItems({
 
   const postsByMember = useMemo(() => {
     const map = new Map<number, Post[]>()
-    for (const feed of feeds ?? []) {
+    for (const feed of feeds?.content ?? []) {
       const memberId = feed.member?.id
       if (memberId == null || !feed.post) continue
       const posts = map.get(memberId) ?? []
@@ -168,11 +167,11 @@ export function useTechnicianItems({
   // 가입 회원이 항상 앞, 크롤링 프로필이 뒤 — 가입 유인 유지
   const allItems: TechnicianItem[] = useMemo(
     () => [
-      ...(data ?? []).flatMap(
+      ...(data?.content ?? []).flatMap(
         (profile) =>
           toTechnicianItem(profile, postsByMember.get(profile.member?.id ?? -1) ?? []) ?? []
       ),
-      ...(crawledMembers ?? []).flatMap((crawled) => toCrawledItem(crawled) ?? []),
+      ...(crawledMembers?.content ?? []).flatMap((crawled) => toCrawledItem(crawled) ?? []),
     ],
     [data, postsByMember, crawledMembers]
   )
