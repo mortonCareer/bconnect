@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-@Profile("dev | prod | sns")
+@Profile("dev | prod")
 @RequiredArgsConstructor
 public class SnsEndpointRegistry implements PushEndpointRegistry {
 

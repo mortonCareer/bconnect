@@ -9,7 +9,7 @@ import to.bconnect.api.notification.domain.push.PushSender;
 
 @Slf4j
 @Component
-@Profile("(local | test) & !sns")
+@Profile("local | test")
 public class LoggingPushSender implements PushSender {
 
     @Override

@@ -73,8 +73,8 @@ sequenceDiagram
 - NotificationQueryService : 알림 조회 · unread · 읽음 처리 전담 (`core.domain.notification`)
 - DeviceService : device token 등록 · 해제 · push 가능 device 조회 — 회원의 **첫 기기 등록 시 `MemberFirstDeviceRegisteredEvent` 발행**(온보딩 트리거)
 - PushSender / PushEndpointRegistry : push 발송 · SNS endpoint 관리 port (`notification.domain.push`)
-- SnsPushSender / SnsEndpointRegistry : AWS SNS 구현 (`dev | prod | sns`)
-- LoggingPushSender / LoggingEndpointRegistry : 로컬 · 테스트 구현 (`(local | test) & !sns`)
+- SnsPushSender / SnsEndpointRegistry : AWS SNS 구현 (`dev | prod`)
+- LoggingPushSender / LoggingEndpointRegistry : 로컬 · 테스트 구현 (`local | test`)
 
 ## 패키지 · 의존성
 ```text
@@ -102,7 +102,7 @@ to.bconnect.api
 │   │       └── ResolvedNotification.java                # sender/reference/content + persist/push 대상
 │   ├── infrastructure                         # 외부 시스템 adapter
 │   │   └── push
-│   │       ├── SnsConfig.java                 # dev/prod/sns용 AWS SNS client bean
+│   │       ├── SnsConfig.java                 # dev/prod용 AWS SNS client bean
 │   │       ├── SnsProperties.java             # app.sns 설정 바인딩
 │   │       ├── SnsPushSender.java             # SNS FCM v1 발송 · AWS 예외를 공통 결과로 변환
 │   │       ├── SnsEndpointRegistry.java       # SNS endpoint 생성/복구/활성화/삭제

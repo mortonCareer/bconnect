@@ -8,7 +8,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sns.SnsClient;
 
 @Configuration
-@Profile("dev | prod | sns")
+@Profile("dev | prod")
 public class SnsConfig {
 
     @Bean
