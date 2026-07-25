@@ -62,9 +62,8 @@ sequenceDiagram
 
 ## 컴포넌트 구성
 - NotificationEventListener : 도메인 이벤트(`ChatMessageSentEvent` · `MemberFirstDeviceRegisteredEvent`)를 `AFTER_COMMIT` 구독 후 위임
-- NotificationService : 알림 처리 흐름 조립 (대상 분리 → 저장 → 렌더 → 발송 → 무효 토큰 비활성화)
+- NotificationService : 알림 처리 흐름 조립 (대상 분리 → 저장 → 렌더 → 발송 → 무효 토큰 비활성화) — 생성자에서 타입 → resolver map 구성 (미등록 시 `UNKNOWN_TYPE`)
 - NotificationTargetResolver : 타입별 저장 대상 · push 대상 · 렌더 변수(`NotificationArgs`) snapshot 계산 (전략, `notification.domain.target`) — 구현체 : `ChatMessageTargetResolver` · `SignupWelcomeTargetResolver` · `ProfileCompletionTargetResolver`
-- NotificationTargetResolverRegistry : 타입 → resolver 등록 · 위임 (미등록 시 `UNKNOWN_TYPE`, `notification.domain.target`)
 - PushNotification : push 메시지 조립 (`of` — title 렌더 · 본문 100자 절단 · link) · payload 변환
 - NotificationLinker : 알림 DB 저장 전담 (`core.domain.notification`)
 - NotificationQueryService : 알림 조회 · unread · 읽음 처리 전담 (`core.domain.notification`)
@@ -90,7 +89,6 @@ to.bconnect.api
 │   │   │   └── PushSender.java               # endpoint 단위 push 발송 port
 │   │   └── target                            # 타입별 저장/push 대상 계산 전략
 │   │       ├── NotificationTargetResolver.java          # 타입별 resolver 인터페이스
-│   │       ├── NotificationTargetResolverRegistry.java  # NotificationType → resolver 선택
 │   │       ├── ChatMessageTargetResolver.java           # 전달받은 수신자 전원을 저장 · push 대상으로 지정 · senderName args 생성
 │   │       ├── SignupWelcomeTargetResolver.java         # 첫 기기 등록 회원 본인에게 항상 알림
 │   │       ├── ProfileCompletionTargetResolver.java     # 프로필 미완성 회원 본인에게만 알림
@@ -180,12 +178,14 @@ graph TD
         Type{{NotificationType}}
         Args[NotificationArgs]
     end
+    subgraph notification.domain
+        Svc[NotificationService]
+    end
     subgraph notification.domain.target
-        Reg[NotificationTargetResolverRegistry]
         R{{NotificationTargetResolver}}
         Chat[ChatMessageTargetResolver]
     end
-    Reg --> R
+    Svc -- 타입 → resolver map --> R
     Chat -.implements.-> R
     Type --> Args
 ```
@@ -262,7 +262,7 @@ graph TD
 1. `NotificationType` 에 상수 추가 (reference_type + `render` 개별화)
 2. 필요 시 `NotificationReferenceType` 에 이동 화면 추가
 3. 발행 패키지에 이벤트 정의(`NotificationEvent` 구현), 구독 리스너에서 `NotificationService.handle(type, event)` 호출
-4. 대상 규칙이 다르면 `NotificationTargetResolver` 구현체 추가 (registry 자동 등록) — 렌더 변수(`NotificationArgs`) snapshot 도 resolver 가 생성
+4. 대상 규칙이 다르면 `NotificationTargetResolver` 구현체 추가 (`NotificationService` 생성자 주입으로 자동 등록) — 렌더 변수(`NotificationArgs`) snapshot 도 resolver 가 생성
    - `ChatMessageTargetResolver` : `MessageSocketService`가 발신자를 제외해 전달한 전체 수신자를 저장 · push 대상으로 지정 (WebSocket 구독 여부와 무관)
    - `SignupWelcomeTargetResolver` : 첫 기기 등록 회원 **본인**에게 (항상)
    - `ProfileCompletionTargetResolver` : 첫 기기 등록 회원 본인에게, 단 **프로필 미완성 시에만**(있으면 대상 비움 → 스킵)
