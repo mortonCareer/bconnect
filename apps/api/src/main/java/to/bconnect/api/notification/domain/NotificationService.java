@@ -27,7 +27,6 @@ public class NotificationService {
     private final NotificationTargetResolverRegistry resolverRegistry;
     private final NotificationLinker notificationLinker;
     private final DeviceService deviceService;
-    private final NotificationMessageFactory messageFactory;
     private final PushSender pushSender;
 
     // 이벤트 커밋 후 새 트랜잭션에서 저장·발송. disable() 은 이 트랜잭션에서 영속화됨.
@@ -38,7 +37,7 @@ public class NotificationService {
         Set<Long> persistReceiverIds = resolved.targets().persistReceiverIds();
         if (persistReceiverIds.isEmpty()) return;
 
-        var args = messageFactory.createArgs(type, resolved.senderId());
+        var args = resolved.args();
         Map<Long, Long> linked = notificationLinker.link(new NotificationLinkCommand(
                 resolved.senderId(), persistReceiverIds, type,
                 resolved.referenceId(), resolved.content(), args));
@@ -46,7 +45,7 @@ public class NotificationService {
         Set<Long> pushReceiverIds = resolved.targets().pushReceiverIds();
         if (pushReceiverIds.isEmpty()) return;
 
-        PushNotification message = messageFactory.create(
+        PushNotification message = PushNotification.of(
                 type, resolved.referenceId(), resolved.content(), args);
 
         pushReceiverIds.forEach(memberId -> {

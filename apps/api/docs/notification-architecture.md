@@ -9,9 +9,9 @@ flowchart TD
     Socket[MessageSocketService] -- ChatMessageSentEvent --> Listener[NotificationEventListener]
     DevReg[DeviceService · 첫 기기 등록] -- MemberFirstDeviceRegisteredEvent --> Listener
     Listener -- AFTER_COMMIT --> Svc[NotificationService]
-    Svc --> Resolver[TargetResolver · 저장/push 대상]
+    Svc --> Resolver[TargetResolver · 저장/push 대상 · args]
     Svc --> Linker[NotificationLinker · DB 저장]
-    Svc --> Factory[MessageFactory · PushNotification]
+    Svc --> Msg[PushNotification 조립]
     Svc --> Device[DeviceService · 활성 device]
     Svc --> Sender[PushSender]
     Sender --> Infra[Sns / Logging PushSender]
@@ -24,8 +24,7 @@ flowchart TD
 |---|---|---|---|
 | trigger | 채팅 메시지 저장 후 `ChatMessageSentEvent` 발행 (socket) | messages | - |
 | listen | `AFTER_COMMIT` 이후 리스너가 `NotificationService.handle` 위임 | - | - |
-| resolve | 채팅은 `MessageSocketService`가 발신자를 제외해 전달한 수신자를 저장·push 대상으로 동일하게 지정 | - | - |
-| args | 이벤트 시점 렌더 변수(`senderName`) snapshot 생성 | - | - |
+| resolve | 채팅은 `MessageSocketService`가 발신자를 제외해 전달한 수신자를 저장·push 대상으로 동일하게 지정, 이벤트 시점 렌더 변수(`senderName`) snapshot 도 resolver 가 생성 | - | - |
 | link | 수신자별 알림 저장 (`sender_name` · `company_name` = args snapshot) | notifications | - |
 | render | 타입 enum 이 `title` 렌더 · `link` 조립 | - | - |
 | send | 대상별 모든 활성 device endpoint 로 동일한 알림 id의 push 발송 | device_tokens | ○ |
@@ -41,18 +40,16 @@ sequenceDiagram
     participant Socket as MessageSocketService
     participant Svc as NotificationService
     participant Res as TargetResolver
-    participant Fac as MessageFactory
     participant Lnk as NotificationLinker
     participant Dev as DeviceService
     participant Snd as PushSender
 
     Socket->>Svc: ChatMessageSentEvent (AFTER_COMMIT)
     Svc->>Res: resolve(event)
-    Res-->>Svc: persist, push 대상
-    Svc->>Fac: createArgs (snapshot)
+    Res-->>Svc: persist, push 대상 + args snapshot
     Svc->>Lnk: notifications 저장
     Lnk-->>Svc: receiverId, id 매핑
-    Svc->>Fac: PushNotification 생성
+    Svc->>Svc: PushNotification.of (render · 절단 · link)
     loop push 대상 x 모든 활성 device
         Svc->>Dev: pushableDevices
         Svc->>Snd: 동일 notificationId로 send
@@ -66,9 +63,9 @@ sequenceDiagram
 ## 컴포넌트 구성
 - NotificationEventListener : 도메인 이벤트(`ChatMessageSentEvent` · `MemberFirstDeviceRegisteredEvent`)를 `AFTER_COMMIT` 구독 후 위임
 - NotificationService : 알림 처리 흐름 조립 (대상 분리 → 저장 → 렌더 → 발송 → 무효 토큰 비활성화)
-- NotificationTargetResolver : 타입별 저장 대상 · push 대상 계산 (전략, `notification.domain.target`) — 구현체 : `ChatMessageTargetResolver` · `SignupWelcomeTargetResolver` · `ProfileCompletionTargetResolver`
+- NotificationTargetResolver : 타입별 저장 대상 · push 대상 · 렌더 변수(`NotificationArgs`) snapshot 계산 (전략, `notification.domain.target`) — 구현체 : `ChatMessageTargetResolver` · `SignupWelcomeTargetResolver` · `ProfileCompletionTargetResolver`
 - NotificationTargetResolverRegistry : 타입 → resolver 등록 · 위임 (미등록 시 `UNKNOWN_TYPE`, `notification.domain.target`)
-- NotificationMessageFactory : 렌더 변수(`NotificationArgs`) snapshot 생성 · 본문 100자 절단 · `PushNotification` 조립
+- PushNotification : push 메시지 조립 (`of` — title 렌더 · 본문 100자 절단 · link) · payload 변환
 - NotificationLinker : 알림 DB 저장 전담 (`core.domain.notification`)
 - NotificationQueryService : 알림 조회 · unread · 읽음 처리 전담 (`core.domain.notification`)
 - DeviceService : device token 등록 · 해제 · push 가능 device 조회 — 회원의 **첫 기기 등록 시 `MemberFirstDeviceRegisteredEvent` 발행**(온보딩 트리거)
@@ -84,21 +81,20 @@ to.bconnect.api
 │   │   ├── DeviceService.java                # token upsert/해제/조회 · 첫 기기 등록 이벤트 발행
 │   │   ├── MemberFirstDeviceRegisteredEvent.java # 첫 push device 등록 사건. 온보딩 알림 트리거
 │   │   ├── NotificationEventListener.java    # 채팅/첫 기기 이벤트를 AFTER_COMMIT 구독해 service 위임
-│   │   ├── NotificationMessageFactory.java   # args snapshot · body 100자 절단 · push 메시지 조립
 │   │   ├── NotificationService.java          # 대상 계산 → 저장 → 발송 → 무효 endpoint 비활성화
 │   │   ├── push                              # push 발송 port · 공통 payload/result 모델
 │   │   │   ├── PushEndpointRegistry.java     # endpoint 생성/복구/삭제 port
-│   │   │   ├── PushNotification.java         # notification_id와 라우팅 data를 payload로 변환
+│   │   │   ├── PushNotification.java         # title 렌더 · body 100자 절단 · link 조립, payload 변환
 │   │   │   ├── PushPayload.java              # title/body/link/data 전송 중립 모델
 │   │   │   ├── PushSendResult.java           # SUCCESS/FAILED/EXPIRED/INVALID 결과
 │   │   │   └── PushSender.java               # endpoint 단위 push 발송 port
 │   │   └── target                            # 타입별 저장/push 대상 계산 전략
 │   │       ├── NotificationTargetResolver.java          # 타입별 resolver 인터페이스
 │   │       ├── NotificationTargetResolverRegistry.java  # NotificationType → resolver 선택
-│   │       ├── ChatMessageTargetResolver.java           # 전달받은 수신자 전원을 저장 · push 대상으로 지정
+│   │       ├── ChatMessageTargetResolver.java           # 전달받은 수신자 전원을 저장 · push 대상으로 지정 · senderName args 생성
 │   │       ├── SignupWelcomeTargetResolver.java         # 첫 기기 등록 회원 본인에게 항상 알림
 │   │       ├── ProfileCompletionTargetResolver.java     # 프로필 미완성 회원 본인에게만 알림
-│   │       └── ResolvedNotification.java                # sender/reference/content + persist/push 대상
+│   │       └── ResolvedNotification.java                # sender/reference/content/args + persist/push 대상
 │   ├── infrastructure                         # 외부 시스템 adapter
 │   │   └── push
 │   │       ├── SnsConfig.java                 # dev/prod용 AWS SNS client bean
@@ -265,8 +261,8 @@ graph TD
 새 알림 타입 추가 시:
 1. `NotificationType` 에 상수 추가 (reference_type + `render` 개별화)
 2. 필요 시 `NotificationReferenceType` 에 이동 화면 추가
-3. 발행 패키지에 이벤트 정의, 구독 리스너에서 `NotificationService.handle(type, event)` 호출
-4. 대상 규칙이 다르면 `NotificationTargetResolver` 구현체 추가 (registry 자동 등록)
+3. 발행 패키지에 이벤트 정의(`NotificationEvent` 구현), 구독 리스너에서 `NotificationService.handle(type, event)` 호출
+4. 대상 규칙이 다르면 `NotificationTargetResolver` 구현체 추가 (registry 자동 등록) — 렌더 변수(`NotificationArgs`) snapshot 도 resolver 가 생성
    - `ChatMessageTargetResolver` : `MessageSocketService`가 발신자를 제외해 전달한 전체 수신자를 저장 · push 대상으로 지정 (WebSocket 구독 여부와 무관)
    - `SignupWelcomeTargetResolver` : 첫 기기 등록 회원 **본인**에게 (항상)
    - `ProfileCompletionTargetResolver` : 첫 기기 등록 회원 본인에게, 단 **프로필 미완성 시에만**(있으면 대상 비움 → 스킵)

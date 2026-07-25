@@ -2,6 +2,7 @@ package to.bconnect.api.notification.domain.target;
 
 import org.springframework.stereotype.Component;
 import to.bconnect.api.notification.domain.MemberFirstDeviceRegisteredEvent;
+import to.bconnect.api.storage.notification.NotificationArgs;
 import to.bconnect.api.storage.notification.NotificationType;
 
 import java.util.Set;
@@ -17,6 +18,7 @@ public class SignupWelcomeTargetResolver implements NotificationTargetResolver<M
     @Override
     public ResolvedNotification resolve(MemberFirstDeviceRegisteredEvent event) {
         Set<Long> self = Set.of(event.memberId());
-        return new ResolvedNotification(null, null, null, new ResolvedNotification.Targets(self, self));
+        return new ResolvedNotification(null, null, null, NotificationArgs.empty(),
+                new ResolvedNotification.Targets(self, self));
     }
 }
