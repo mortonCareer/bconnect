@@ -1,6 +1,8 @@
 package to.bconnect.api.core.domain.notification;
 
+import to.bconnect.api.storage.notification.NotificationArgs;
 import to.bconnect.api.storage.notification.NotificationEntity;
+import to.bconnect.api.storage.notification.NotificationType;
 
 import java.time.Instant;
 
@@ -8,7 +10,7 @@ public record Notification(
         Long id,
         Long senderId,
         Long receiverId,
-        String typeCode,
+        NotificationType type,
         Long referenceId,
         String content,
         NotificationArgs args,
@@ -23,7 +25,7 @@ public record Notification(
                 entity.getTypeCode(),
                 entity.getReferenceId(),
                 entity.getContent(),
-                NotificationArgs.fromJson(entity.getTemplateArgs()),
+                entity.getArgs(),
                 entity.isRead(),
                 entity.getCreatedAt()
         );

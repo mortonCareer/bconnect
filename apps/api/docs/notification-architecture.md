@@ -26,7 +26,7 @@ flowchart TD
 | listen | `AFTER_COMMIT` 이후 리스너가 `NotificationService.handle` 위임 | - | - |
 | resolve | 채팅은 `MessageSocketService`가 발신자를 제외해 전달한 수신자를 저장·push 대상으로 동일하게 지정 | - | - |
 | args | 이벤트 시점 렌더 변수(`senderName`) snapshot 생성 | - | - |
-| link | 수신자별 알림 저장 (`template_args` = args JSON) | notifications | - |
+| link | 수신자별 알림 저장 (`sender_name` · `company_name` = args snapshot) | notifications | - |
 | render | 타입 enum 이 `title` 렌더 · `link` 조립 | - | - |
 | send | 대상별 모든 활성 device endpoint 로 동일한 알림 id의 push 발송 | device_tokens | ○ |
 | disable | `INVALID` / `EXPIRED` endpoint 비활성화 | device_tokens | - |
@@ -86,7 +86,6 @@ to.bconnect.api
 │   │   ├── NotificationEventListener.java    # 채팅/첫 기기 이벤트를 AFTER_COMMIT 구독해 service 위임
 │   │   ├── NotificationMessageFactory.java   # args snapshot · body 100자 절단 · push 메시지 조립
 │   │   ├── NotificationService.java          # 대상 계산 → 저장 → 발송 → 무효 endpoint 비활성화
-│   │   ├── NotificationType.java             # 6종 타입의 type_code/reference_type/문구/link 규칙
 │   │   ├── push                              # push 발송 port · 공통 payload/result 모델
 │   │   │   ├── PushEndpointRegistry.java     # endpoint 생성/복구/삭제 port
 │   │   │   ├── PushNotification.java         # notification_id와 라우팅 data를 payload로 변환
@@ -126,7 +125,7 @@ to.bconnect.api
 │   └── domain
 │       └── notification                       # 알림 영속화 · 조회 core 로직
 │           ├── Notification.java              # entity를 변환한 조회용 불변 모델
-│           ├── NotificationArgs.java          # 렌더 변수 snapshot · template_args JSON 변환
+│           ├── NotificationEvent.java         # 알림 트리거 이벤트 마커 인터페이스
 │           ├── NotificationLinkCommand.java   # 알림 저장 command
 │           ├── NotificationLinker.java        # 수신자별 저장 · receiverId→notificationId 반환
 │           ├── NotificationQueryService.java  # 목록/unread/개별·전체 읽음 처리
@@ -137,8 +136,10 @@ to.bconnect.api
     │   ├── DeviceTokenEntity.java             # token/endpoint/enabled (해제 시 row 물리 삭제)
     │   └── DeviceTokenRepository.java         # token/회원/활성 device 조회 · 첫 기기 존재 확인
     └── notification                           # notifications 영속화
-        ├── NotificationEntity.java            # type_code/reference_id/template_args/read_at 저장
+        ├── NotificationArgs.java              # 렌더 변수 snapshot (@Embeddable record)
+        ├── NotificationEntity.java            # type_code/reference_id/args(@Embedded)/read_at 저장
         ├── NotificationReferenceType.java     # 프론트 이동 화면 enum(DB 컬럼 아님)
+        ├── NotificationType.java              # 6종 타입의 type_code/reference_type/문구/link 규칙
         └── NotificationRepository.java        # 커서 목록/unread/전체 읽음 쿼리
 ```
 - `notification` 은 sink 모듈이다. 다른 패키지는 `notification` 을 의존하지 않는다.
@@ -179,16 +180,14 @@ graph TD
 
 ```mermaid
 graph TD
-    subgraph notification.domain
+    subgraph storage.notification
         Type{{NotificationType}}
+        Args[NotificationArgs]
     end
     subgraph notification.domain.target
         Reg[NotificationTargetResolverRegistry]
         R{{NotificationTargetResolver}}
         Chat[ChatMessageTargetResolver]
-    end
-    subgraph core.domain.notification
-        Args[NotificationArgs]
     end
     Reg --> R
     Chat -.implements.-> R
@@ -197,10 +196,11 @@ graph TD
 
 | 요소 | 레이어 | 값 · 키 | 개별화 | 의미 |
 |---|---|---|---|---|
-| NotificationType | notification.domain | 아래 카탈로그 | `template` + `formatArgs(args)` → `render` · `referenceType()` · `link()` | 타입별 문구(format string) · 링크 정의 |
+| NotificationType | storage.notification | 아래 카탈로그 | `template` + `formatArgs(args)` → `render` · `referenceType()` · `link()` | 타입별 문구(format string) · 링크 정의. entity 가 `@Enumerated(STRING)` 으로 저장 |
 | NotificationReferenceType | storage.notification | `NONE` · `CHAT_ROOM` · `PROFILE` · `COWORKER_REQUEST` · `OFFER` · `CONTRACT` | — | 프론트 이동 화면 의미 (라우팅). `NONE` = 이동 없음(link null) |
-| NotificationArgs | core.domain.notification | `senderName` · `companyName` | `render` 변수 snapshot | 이벤트 시점 렌더 변수 (JSON) |
-| NotificationTargetResolver | notification.domain.target | `supports()` · `resolve(event)` → `ResolvedNotification.Targets` | 타입별 대상 계산 | 저장 · push 대상 분리 |
+| NotificationArgs | storage.notification | `senderName` · `companyName` (`@Embeddable` record) | `render` 변수 snapshot | 이벤트 시점 렌더 변수. 개별 컬럼으로 저장 |
+| NotificationEvent | core.domain.notification | — (마커 인터페이스) | 트리거 이벤트 공통 타입 | `SocketMessageSentEvent` · `MemberFirstDeviceRegisteredEvent` 가 구현 |
+| NotificationTargetResolver | notification.domain.target | `supports()` · `resolve(event)` → `ResolvedNotification.Targets` | 타입별 대상 계산 (`E extends NotificationEvent`) | 저장 · push 대상 분리 |
 
 알림 타입 카탈로그
 
@@ -215,7 +215,7 @@ graph TD
 
 - 문구는 format string(`%s`)이며 `template.formatted(formatArgs(args))` 로 렌더한다 — placeholder 는 필요한 만큼 확장 가능하다.
 - 트리거 ⬜ 는 문구 · 이동만 정의된 상태이며, 발행 이벤트 · 수신자(resolver) 배선은 후속 작업이다.
-- render 변수는 이벤트 시점에 snapshot(`NotificationArgs`) 으로 만들어 `template_args` 에 저장한다.
+- render 변수는 이벤트 시점에 snapshot(`NotificationArgs`) 으로 만들어 `sender_name` · `company_name` 컬럼에 저장한다 (`@Embedded`).
 - 목록 조회 렌더는 저장된 snapshot 을 사용하고, snapshot 이 비어있을 때만 현재 sender 이름으로 대체한다.
 - push 렌더도 같은 snapshot 을 사용하므로, DB 히스토리와 push 문구가 일치한다.
 
@@ -229,7 +229,8 @@ graph TD
 | type_code | varchar | `NotificationType.name()` |
 | reference_id | bigint (nullable) | 이동 대상 식별자 (없으면 null) |
 | content | text (nullable) | 본문 (예: 메시지 미리보기) |
-| template_args | text (nullable) | 렌더 변수 snapshot (JSON) |
+| sender_name | varchar (nullable) | 렌더 변수 snapshot (발신자명) |
+| company_name | varchar (nullable) | 렌더 변수 snapshot (업체명) |
 | read_at | timestamp (nullable) | 읽은 시각. `null` 이면 안읽음 |
 
 - 이동 정보는 `reference_type`(enum) + `reference_id` 로만 표현한다. `link` 컬럼은 두지 않는다.

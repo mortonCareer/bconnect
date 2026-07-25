@@ -2,8 +2,8 @@ package to.bconnect.api.notification.domain.target;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import to.bconnect.api.notification.domain.NotificationType;
 import to.bconnect.api.socket.message.SocketMessageSentEvent;
+import to.bconnect.api.storage.notification.NotificationType;
 
 import java.util.Set;
 

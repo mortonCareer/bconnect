@@ -8,6 +8,7 @@ import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.notification.NotificationEntity;
 import to.bconnect.api.storage.notification.NotificationRepository;
+import to.bconnect.api.storage.notification.NotificationType;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ class NotificationQueryServiceTest {
     }
 
     private NotificationEntity chat(Long receiverId) {
-        return new NotificationEntity(9L, receiverId, "CHAT_MESSAGE", 42L, "안녕");
+        return new NotificationEntity(9L, receiverId, NotificationType.CHAT_MESSAGE, 42L, "안녕");
     }
 
     @Test

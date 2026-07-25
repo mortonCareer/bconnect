@@ -1,12 +1,9 @@
-package to.bconnect.api.notification.domain;
+package to.bconnect.api.storage.notification;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import to.bconnect.api.common.CodeException;
-import to.bconnect.api.core.domain.notification.NotificationArgs;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class NotificationTypeTest {
 
@@ -41,10 +38,4 @@ class NotificationTypeTest {
         assertThat(NotificationType.SIGNUP_WELCOME.link(null)).isNull();
     }
 
-    @Test
-    @DisplayName("from 은 코드로 타입을 찾고, 알 수 없는 코드엔 예외를 던진다")
-    void from_lookup() {
-        assertThat(NotificationType.from("CHAT_MESSAGE")).isEqualTo(NotificationType.CHAT_MESSAGE);
-        assertThatThrownBy(() -> NotificationType.from("NOPE")).isInstanceOf(CodeException.class);
-    }
 }

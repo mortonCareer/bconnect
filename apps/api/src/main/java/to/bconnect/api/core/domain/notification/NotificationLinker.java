@@ -20,11 +20,10 @@ public class NotificationLinker {
         Map<Long, Long> linked = new LinkedHashMap<>();
         for (Long receiverId : command.receiverIds()) {
             Long id = notificationRepository.save(new NotificationEntity(
-                    command.senderId(), receiverId, command.typeCode(),
-                    command.referenceId(), command.content(),
-                    command.args() == null ? null : command.args().toJson())).getId();
+                    command.senderId(), receiverId, command.type(),
+                    command.referenceId(), command.content(), command.args())).getId();
             linked.put(receiverId, id);
         }
-        return linked;
+        return Map.copyOf(linked);
     }
 }

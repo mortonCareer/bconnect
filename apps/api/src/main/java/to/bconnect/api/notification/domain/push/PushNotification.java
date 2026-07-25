@@ -1,6 +1,6 @@
 package to.bconnect.api.notification.domain.push;
 
-import to.bconnect.api.notification.domain.NotificationType;
+import to.bconnect.api.storage.notification.NotificationType;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

@@ -2,7 +2,7 @@ package to.bconnect.api.notification.domain.target;
 
 import org.springframework.stereotype.Component;
 import to.bconnect.api.notification.domain.MemberFirstDeviceRegisteredEvent;
-import to.bconnect.api.notification.domain.NotificationType;
+import to.bconnect.api.storage.notification.NotificationType;
 
 import java.util.Set;
 

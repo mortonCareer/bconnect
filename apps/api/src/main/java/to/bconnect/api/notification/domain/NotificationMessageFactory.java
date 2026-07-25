@@ -3,8 +3,9 @@ package to.bconnect.api.notification.domain;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.core.domain.member.MemberResolver;
-import to.bconnect.api.core.domain.notification.NotificationArgs;
 import to.bconnect.api.notification.domain.push.PushNotification;
+import to.bconnect.api.storage.notification.NotificationArgs;
+import to.bconnect.api.storage.notification.NotificationType;
 
 @Component
 @RequiredArgsConstructor

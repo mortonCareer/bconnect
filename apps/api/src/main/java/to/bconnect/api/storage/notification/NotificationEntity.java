@@ -1,7 +1,10 @@
 package to.bconnect.api.storage.notification;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,31 +24,36 @@ public class NotificationEntity extends BaseEntity {
     @Column(nullable = false)
     private Long receiverId;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String typeCode;
+    private NotificationType typeCode;
 
     private Long referenceId;
 
     @Column(columnDefinition = "text")
     private String content;
 
-    @Column(columnDefinition = "text")
-    private String templateArgs;
+    @Embedded
+    private NotificationArgs args;
 
     private Instant readAt;
 
-    public NotificationEntity(Long senderId, Long receiverId, String typeCode, Long referenceId, String content) {
+    public NotificationEntity(Long senderId, Long receiverId, NotificationType typeCode, Long referenceId, String content) {
         this(senderId, receiverId, typeCode, referenceId, content, null);
     }
 
-    public NotificationEntity(Long senderId, Long receiverId, String typeCode, Long referenceId,
-                              String content, String templateArgs) {
+    public NotificationEntity(Long senderId, Long receiverId, NotificationType typeCode, Long referenceId,
+                              String content, NotificationArgs args) {
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.typeCode = typeCode;
         this.referenceId = referenceId;
         this.content = content;
-        this.templateArgs = templateArgs;
+        this.args = args;
+    }
+
+    public NotificationArgs getArgs() {
+        return args == null ? NotificationArgs.empty() : args;
     }
 
     public boolean isRead() {

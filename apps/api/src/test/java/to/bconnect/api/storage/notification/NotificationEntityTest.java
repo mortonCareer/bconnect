@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class NotificationEntityTest {
 
     private NotificationEntity chatNotification() {
-        return new NotificationEntity(1L, 2L, "CHAT_MESSAGE", 42L, "안녕하세요");
+        return new NotificationEntity(1L, 2L, NotificationType.CHAT_MESSAGE, 42L, "안녕하세요");
     }
 
     @Test

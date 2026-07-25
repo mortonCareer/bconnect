@@ -2,9 +2,9 @@ package to.bconnect.api.notification.presentation.v1.response;
 
 import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.core.domain.notification.Notification;
-import to.bconnect.api.core.domain.notification.NotificationArgs;
 import to.bconnect.api.core.presentation.v1.response.MemberSummaryResponse;
-import to.bconnect.api.notification.domain.NotificationType;
+import to.bconnect.api.storage.notification.NotificationArgs;
+import to.bconnect.api.storage.notification.NotificationType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -21,15 +21,15 @@ public record NotificationResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean read,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt
 ) {
-    public static NotificationResponse of(Notification notification, NotificationType type,
-                                          Member sender, String senderPicture) {
+    public static NotificationResponse of(Notification notification, Member sender, String senderPicture) {
+        NotificationType type = notification.type();
         NotificationArgs args = notification.args();
         if (args.isEmpty() && sender != null) {
             args = NotificationArgs.senderName(sender.name());
         }
         return new NotificationResponse(
                 notification.id(),
-                notification.typeCode(),
+                type.code(),
                 type.render(args),
                 notification.content(),
                 type.referenceType().name().toLowerCase(),

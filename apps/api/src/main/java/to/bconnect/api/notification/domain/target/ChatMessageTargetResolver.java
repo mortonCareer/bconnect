@@ -1,10 +1,9 @@
 package to.bconnect.api.notification.domain.target;
 
 import org.springframework.stereotype.Component;
-import to.bconnect.api.notification.domain.NotificationType;
 import to.bconnect.api.socket.message.SocketMessageSentEvent;
+import to.bconnect.api.storage.notification.NotificationType;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Component
@@ -20,6 +19,6 @@ public class ChatMessageTargetResolver implements NotificationTargetResolver<Soc
         Set<Long> receivers = event.inactiveIds();
         return new ResolvedNotification(
                 event.senderId(), event.chatId(), event.preview(),
-                new ResolvedNotification.Targets(receivers, new LinkedHashSet<>(receivers)));
+                new ResolvedNotification.Targets(receivers, receivers));
     }
 }

@@ -73,7 +73,7 @@ public class SnsPushSender implements PushSender {
             data.put("title", nullToEmpty(payload.title()));
             data.put("body", nullToEmpty(payload.body()));
             data.put("link", nullToEmpty(payload.link()));
-            if (payload.data() != null) payload.data().forEach((k, v) -> data.put(k, nullToEmpty(v)));
+            payload.data().forEach((k, v) -> data.put(k, nullToEmpty(v)));
 
             Map<String, Object> fcmV1 = Map.of(
                     "fcmV1Message", Map.of(

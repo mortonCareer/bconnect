@@ -1,9 +1,4 @@
-package to.bconnect.api.notification.domain;
-
-import to.bconnect.api.common.CodeException;
-import to.bconnect.api.core.domain.notification.NotificationArgs;
-import to.bconnect.api.core.domain.notification.NotificationExceptionCode;
-import to.bconnect.api.storage.notification.NotificationReferenceType;
+package to.bconnect.api.storage.notification;
 
 /**
  * 알림 타입 정의. 타입별 메시지 템플릿(format string)·이동 링크·reference_type 을 enum 안에서 개별화한다.
@@ -16,7 +11,7 @@ public enum NotificationType {
     CHAT_MESSAGE(NotificationReferenceType.CHAT_ROOM, "%s님이 메시지를 보냈습니다") {
         @Override
         protected Object[] formatArgs(NotificationArgs args) {
-            return new Object[]{args.get(NotificationArgs.SENDER_NAME)};
+            return new Object[]{args.senderName()};
         }
     },
 
@@ -37,21 +32,21 @@ public enum NotificationType {
     COWORKER_REQUESTED(NotificationReferenceType.COWORKER_REQUEST, "%s 님으로부터 동료 요청을 제안받았습니다") {
         @Override
         protected Object[] formatArgs(NotificationArgs args) {
-            return new Object[]{args.get(NotificationArgs.SENDER_NAME)};
+            return new Object[]{args.senderName()};
         }
     },
 
     OFFER_RECEIVED(NotificationReferenceType.OFFER, "%s으로부터 섭외 요청을 제안받았습니다") {
         @Override
         protected Object[] formatArgs(NotificationArgs args) {
-            return new Object[]{args.get(NotificationArgs.COMPANY_NAME)};
+            return new Object[]{args.companyName()};
         }
     },
 
     CONTRACT_WRITTEN(NotificationReferenceType.CONTRACT, "%s 님으로부터 계약서를 작성받았습니다") {
         @Override
         protected Object[] formatArgs(NotificationArgs args) {
-            return new Object[]{args.get(NotificationArgs.SENDER_NAME)};
+            return new Object[]{args.senderName()};
         }
     };
 
@@ -85,13 +80,5 @@ public enum NotificationType {
         if (referenceType == NotificationReferenceType.NONE) return null;
         String segment = referenceType.name().toLowerCase();
         return referenceId == null ? "/n/" + segment : "/n/" + segment + "/" + referenceId;
-    }
-
-    public static NotificationType from(String code) {
-        try {
-            return NotificationType.valueOf(code);
-        } catch (IllegalArgumentException e) {
-            throw new CodeException(NotificationExceptionCode.UNKNOWN_TYPE);
-        }
     }
 }

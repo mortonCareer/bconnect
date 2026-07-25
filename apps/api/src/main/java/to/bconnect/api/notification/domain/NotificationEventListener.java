@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import to.bconnect.api.socket.message.SocketMessageSentEvent;
+import to.bconnect.api.storage.notification.NotificationType;
 
 @Component
 @RequiredArgsConstructor

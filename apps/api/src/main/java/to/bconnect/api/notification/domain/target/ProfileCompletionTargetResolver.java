@@ -3,7 +3,7 @@ package to.bconnect.api.notification.domain.target;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.notification.domain.MemberFirstDeviceRegisteredEvent;
-import to.bconnect.api.notification.domain.NotificationType;
+import to.bconnect.api.storage.notification.NotificationType;
 import to.bconnect.api.storage.profile.ProfileRepository;
 
 import java.util.Set;

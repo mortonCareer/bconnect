@@ -12,7 +12,6 @@ import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.notification.Notification;
 import to.bconnect.api.core.domain.notification.NotificationQueryService;
-import to.bconnect.api.notification.domain.NotificationType;
 import to.bconnect.api.notification.presentation.v1.response.NotificationResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
@@ -44,10 +43,9 @@ public class NotificationController {
 
         val content = page.content().stream()
                 .map(it -> {
-                    val type = NotificationType.from(it.typeCode());
                     val sender = it.senderId() == null ? null : memberMap.get(it.senderId());
                     return NotificationResponse.of(
-                            it, type, sender, sender == null ? null : pictureMap.get(sender.id()));
+                            it, sender, sender == null ? null : pictureMap.get(sender.id()));
                 })
                 .toList();
 

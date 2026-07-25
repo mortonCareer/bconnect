@@ -18,6 +18,7 @@ import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.notification.NotificationRepository;
+import to.bconnect.api.storage.notification.NotificationType;
 
 import java.util.Set;
 

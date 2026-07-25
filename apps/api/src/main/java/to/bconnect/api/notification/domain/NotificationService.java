@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.core.domain.notification.NotificationEvent;
 import to.bconnect.api.core.domain.notification.NotificationLinkCommand;
 import to.bconnect.api.core.domain.notification.NotificationLinker;
 import to.bconnect.api.notification.domain.push.PushNotification;
@@ -13,6 +14,7 @@ import to.bconnect.api.notification.domain.push.PushSendResult;
 import to.bconnect.api.notification.domain.push.PushSender;
 import to.bconnect.api.notification.domain.target.NotificationTargetResolverRegistry;
 import to.bconnect.api.notification.domain.target.ResolvedNotification;
+import to.bconnect.api.storage.notification.NotificationType;
 
 import java.util.Map;
 import java.util.Set;
@@ -30,22 +32,22 @@ public class NotificationService {
 
     // 이벤트 커밋 후 새 트랜잭션에서 저장·발송. disable() 은 이 트랜잭션에서 영속화됨.
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void handle(NotificationType typeCode, Object event) {
-        ResolvedNotification resolved = resolverRegistry.get(typeCode).resolve(event);
+    public void handle(NotificationType type, NotificationEvent event) {
+        ResolvedNotification resolved = resolverRegistry.get(type).resolve(event);
 
         Set<Long> persistReceiverIds = resolved.targets().persistReceiverIds();
         if (persistReceiverIds.isEmpty()) return;
 
-        var args = messageFactory.createArgs(typeCode, resolved.senderId());
+        var args = messageFactory.createArgs(type, resolved.senderId());
         Map<Long, Long> linked = notificationLinker.link(new NotificationLinkCommand(
-                resolved.senderId(), persistReceiverIds, typeCode.code(),
+                resolved.senderId(), persistReceiverIds, type,
                 resolved.referenceId(), resolved.content(), args));
 
         Set<Long> pushReceiverIds = resolved.targets().pushReceiverIds();
         if (pushReceiverIds.isEmpty()) return;
 
         PushNotification message = messageFactory.create(
-                typeCode, resolved.referenceId(), resolved.content(), args);
+                type, resolved.referenceId(), resolved.content(), args);
 
         pushReceiverIds.forEach(memberId -> {
             PushPayload payload = message.toPayload(linked.get(memberId));

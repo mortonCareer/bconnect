@@ -7,4 +7,8 @@ public record PushPayload(
         String body,
         String link,
         Map<String, String> data
-) {}
+) {
+    public PushPayload {
+        data = data == null ? Map.of() : Map.copyOf(data);
+    }
+}
