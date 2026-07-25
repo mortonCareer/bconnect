@@ -1,15 +1,16 @@
 package to.bconnect.api.core.domain.post;
 
-import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.attachment.domain.AttachmentFinder;
+import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
-import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.post.PostEntity;
@@ -23,6 +24,7 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final AttachmentFinder attachmentFinder;
     private final AttachmentLinker attachmentLinker;
 
     @Transactional(readOnly = true)
@@ -54,7 +56,8 @@ public class PostService {
                 command.content()
         ));
 
-        attachmentLinker.link(user.id(), ReferenceType.POST, created.getId(), command.attachmentIds());
+        attachmentFinder.validateOwnership(user.id(), command.attachmentIds());
+        attachmentLinker.link(ReferenceType.POST, created.getId(), command.attachmentIds());
 
         return created.getId();
     }
@@ -69,8 +72,9 @@ public class PostService {
 
         found.update(command.taskId(), command.content());
 
+        attachmentFinder.validateOwnership(user.id(), command.attachmentIds());
         attachmentLinker.unlink(ReferenceType.POST, List.of(found.getId()));
-        attachmentLinker.link(user.id(), ReferenceType.POST, found.getId(), command.attachmentIds());
+        attachmentLinker.link(ReferenceType.POST, found.getId(), command.attachmentIds());
     }
 
     @Transactional

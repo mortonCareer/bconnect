@@ -8,7 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.request.CursorLimit;
@@ -34,7 +34,7 @@ public class CompanyController {
 
     private final CompanyService companyService;
     private final MemberResolver memberResolver;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
@@ -44,7 +44,7 @@ public class CompanyController {
         val page = companyService.list(cursorLimit);
         val companies = page.content();
         val companyIds = companies.stream().map(Company::id).toList();
-        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.COMPANY, companyIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(ReferenceType.COMPANY, companyIds, ImageSize.SMALL);
         val content = companies.stream()
                 .map(it -> CompanyResponse.of(it, urlMap.get(it.id())))
                 .toList();
@@ -61,7 +61,7 @@ public class CompanyController {
             @AuthenticationPrincipal AuthUser user,
             HttpServletResponse response) {
         val company = companyService.get(user);
-        val picture = attachmentResolver.getUrl(ReferenceType.COMPANY, company.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(ReferenceType.COMPANY, company.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.COMPANY);
         signedCookieIssuer.issue(scope)
@@ -75,7 +75,7 @@ public class CompanyController {
             @PathVariable Long id,
             HttpServletResponse response) {
         val company = companyService.get(id);
-        val picture = attachmentResolver.getUrl(ReferenceType.COMPANY, company.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(ReferenceType.COMPANY, company.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.COMPANY);
         signedCookieIssuer.issue(scope)
@@ -90,7 +90,7 @@ public class CompanyController {
             HttpServletResponse response) {
         val company = companyService.get(id);
         val member = memberResolver.get(company.memberId());
-        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)

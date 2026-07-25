@@ -8,7 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.request.CursorLimit;
@@ -29,8 +29,6 @@ import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.coworker.CoworkerStatus;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/profiles")
 @RequiredArgsConstructor
@@ -40,7 +38,7 @@ public class ProfileController {
     private final ProfileQueryService profileQueryService;
     private final CoworkerService coworkerService;
     private final MemberResolver memberResolver;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
@@ -52,7 +50,7 @@ public class ProfileController {
 
         val memberIds = profiles.stream().map(Profile::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
-        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         val content = profiles.stream()
                 .map(it -> {
@@ -74,7 +72,7 @@ public class ProfileController {
             HttpServletResponse response) {
         val profile = profileQueryService.get(user.id());
         val member = memberResolver.get(profile.memberId());
-        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
@@ -90,7 +88,7 @@ public class ProfileController {
             HttpServletResponse response) {
         val profile = profileQueryService.get(id);
         val member = memberResolver.get(profile.memberId());
-        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
         val status = user == null
                 ? CoworkerStatus.NONE
                 : coworkerService.resolveStatus(user.id(), profile.memberId());

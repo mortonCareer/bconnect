@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
-import to.bconnect.api.attachment.domain.ImageSize;
-import to.bconnect.api.attachment.domain.SignedCookieIssuer;
+import to.bconnect.api.attachment.domain.*;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.common.response.CursorPage;
@@ -19,11 +16,13 @@ import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.post.Post;
 import to.bconnect.api.core.domain.post.PostService;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
+import to.bconnect.api.core.domain.project.ProjectFinder;
 import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.core.domain.task.TaskQueryService;
 import to.bconnect.api.core.presentation.v1.response.FeedResponse;
 import to.bconnect.api.storage.attachment.AttachmentContext;
+import to.bconnect.api.storage.attachment.AttachmentType;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.task.TaskType;
 
@@ -39,10 +38,12 @@ public class FeedController {
 
     private final PostService postService;
     private final TaskQueryService taskQueryService;
+    private final ProjectFinder projectFinder;
     private final ProjectService projectService;
     private final MemberResolver memberResolver;
     private final ProfileResolver profileResolver;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentFinder attachmentFinder;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
@@ -55,11 +56,11 @@ public class FeedController {
         val memberIds = posts.stream().map(Post::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
         val profileMap = profileResolver.resolveMap(memberIds);
-        val pictureMap = attachmentResolver.resolveUrlMap(
+        val pictureMap = attachmentUrlService.map(
                 ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         val postIds = posts.stream().map(Post::id).toList();
-        val attachmentMap = attachmentResolver.resolveListMap(ReferenceType.POST, postIds);
+        val attachmentMap = attachmentFinder.listMap(ReferenceType.POST, postIds, AttachmentType.IMAGE);
 
         val taskIds = posts.stream().map(Post::taskId).filter(Objects::nonNull).distinct().toList();
         val taskMap = taskQueryService.listByIds(taskIds).stream()
@@ -67,7 +68,7 @@ public class FeedController {
         val projectIds = taskMap.values().stream()
                 .filter(it -> it.type() == TaskType.PROJECT)
                 .map(Task::projectId).distinct().toList();
-        val addressMap = projectService.resolveAddressMap(projectIds);
+        val addressMap = projectFinder.addressMap(projectIds);
 
         val content = posts.stream()
                 .map(it -> {
@@ -77,7 +78,7 @@ public class FeedController {
                             ? task.workerAddress()
                             : addressMap.get(task.projectId());
                     val attachments = attachmentMap.getOrDefault(it.id(), List.of());
-                    val urlMap = attachmentResolver.parseUrlMap(attachments, ImageSize.MEDIUM);
+                    val urlMap = attachmentUrlService.parseUrlMap(attachments, ImageSize.MEDIUM);
                     return FeedResponse.of(
                             it,
                             member,
@@ -104,16 +105,16 @@ public class FeedController {
         val post = postService.get(id);
         val member = memberResolver.get(post.memberId());
         val profile = profileResolver.resolveMap(List.of(post.memberId())).get(post.memberId());
-        val attachments = attachmentResolver.list(ReferenceType.POST, post.id());
-        val urlMap = attachmentResolver.parseUrlMap(attachments, ImageSize.MEDIUM);
-        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val attachments = attachmentFinder.list(ReferenceType.POST, post.id(), AttachmentType.IMAGE);
+        val urlMap = attachmentUrlService.parseUrlMap(attachments, ImageSize.MEDIUM);
+        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val task = post.taskId() == null ? null
                 : taskQueryService.listByIds(List.of(post.taskId())).stream().findFirst().orElse(null);
         val projectIds = task != null && task.type() == TaskType.PROJECT
                 ? List.of(task.projectId())
                 : List.<Long>of();
-        val addressMap = projectService.resolveAddressMap(projectIds);
+        val addressMap = projectFinder.addressMap(projectIds);
         val address = task == null ? null : task.type() == TaskType.WORKER
                 ? task.workerAddress()
                 : addressMap.get(task.projectId());

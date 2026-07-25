@@ -44,7 +44,8 @@ sequenceDiagram
 
 ## 컴포넌트 구성
 - AttachmentKeyUtils : S3 object key · Signed Cookie scope 조립
-- AttachmentResolver : Attachment 읽기 경로 조립
+- AttachmentFinder : Attachment 조회
+- AttachmentResolver : CloudFront URL 조립 (조회는 Finder 위임)
 - AttachmentLinker : 도메인 ↔ Attachment 참조 연결 · 해제
 - AttachmentService : presign · confirm 처리
 - AttachmentCleanupService : PENDING·고아 첨부 정리 (크론)
@@ -95,7 +96,7 @@ graph TD
 ```
 - Domain Services : 엔티티 생명주기에 따라 Attachment 참조 관리
 
-### 조회 (Resolver)
+### 조회 (Finder · Resolver)
 
 ```mermaid
 graph TD
@@ -107,17 +108,22 @@ graph TD
     end
     subgraph attachment
         AttC[AttachmentController]
+        Fin[AttachmentFinder]
         Res[AttachmentResolver]
     end
     subgraph storage
         AttR[("AttachmentRepository")]
     end
+    DC --> Fin
     DC --> Res
+    MsgC --> Fin
     MsgC --> Res
     AttC --> Res
-    Res --> AttR
+    Res --> Fin
+    Fin --> AttR
 ```
-- AttachmentResolver : Attachment 조회 · CloudFront Url 조립
+- AttachmentFinder : Attachment 조회 (id · reference 기준)
+- AttachmentResolver : CloudFront Url 조립 (getUrl · resolveUrlMap 은 Finder 위임)
 
 ### 삭제 (Cleanup)
 

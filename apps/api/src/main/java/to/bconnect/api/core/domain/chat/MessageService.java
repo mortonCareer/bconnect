@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.attachment.domain.AttachmentFinder;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
@@ -23,6 +24,7 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final ParticipantRepository participantRepository;
     private final DirectChatRepository directChatRepository;
+    private final AttachmentFinder attachmentFinder;
     private final AttachmentLinker attachmentLinker;
 
     @Transactional
@@ -30,7 +32,8 @@ public class MessageService {
         val created = messageRepository.save(new MessageEntity(
                 chatId, type, senderId, command.type(), command.content()));
 
-        attachmentLinker.link(senderId, ReferenceType.MESSAGE, created.getId(), command.attachmentIds());
+        attachmentFinder.validateOwnership(senderId, command.attachmentIds());
+        attachmentLinker.link(ReferenceType.MESSAGE, created.getId(), command.attachmentIds());
         return Message.of(created);
     }
 
