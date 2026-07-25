@@ -459,7 +459,6 @@ create table device_tokens (
     platform varchar(255) not null,
     sns_endpoint_arn varchar(512) not null,
     enabled boolean not null,
-    last_active_at timestamptz not null,
     created_at timestamptz not null,
     modified_at timestamptz not null,
     primary key (id)

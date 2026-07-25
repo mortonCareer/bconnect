@@ -38,9 +38,6 @@ public class DeviceTokenEntity {
     @Column(nullable = false)
     private boolean enabled = true;
 
-    @Column(nullable = false)
-    private Instant lastActiveAt = Instant.now();
-
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
@@ -55,14 +52,12 @@ public class DeviceTokenEntity {
         this.platform = platform;
         this.snsEndpointArn = snsEndpointArn;
         this.enabled = true;
-        this.lastActiveAt = Instant.now();
     }
 
     public void refresh(Long memberId, String snsEndpointArn) {
         this.memberId = memberId;
         this.snsEndpointArn = snsEndpointArn;
         this.enabled = true;
-        this.lastActiveAt = Instant.now();
     }
 
     public void disable() {

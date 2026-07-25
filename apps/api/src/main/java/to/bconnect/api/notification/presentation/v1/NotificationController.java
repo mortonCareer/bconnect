@@ -59,13 +59,13 @@ public class NotificationController {
         return ApiResponse.success(notificationQueryService.unreadCount(user));
     }
 
-    @PatchMapping("/{id}/read")
+    @PostMapping("/{id}/read")
     public ApiResponse<Void> markRead(@AuthenticationPrincipal AuthUser user, @PathVariable Long id) {
         notificationQueryService.markRead(user, id);
         return ApiResponse.success(null);
     }
 
-    @PatchMapping("/read")
+    @PostMapping("/read")
     public ApiResponse<Void> markAllRead(@AuthenticationPrincipal AuthUser user) {
         notificationQueryService.markAllRead(user);
         return ApiResponse.success(null);

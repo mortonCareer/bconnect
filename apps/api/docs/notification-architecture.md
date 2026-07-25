@@ -134,7 +134,7 @@ to.bconnect.api
 └── storage
     ├── device                                 # device_tokens 영속화
     │   ├── DevicePlatform.java                # web/android/ios
-    │   ├── DeviceTokenEntity.java             # token/endpoint/enabled/lastActiveAt (해제 시 row 물리 삭제)
+    │   ├── DeviceTokenEntity.java             # token/endpoint/enabled (해제 시 row 물리 삭제)
     │   └── DeviceTokenRepository.java         # token/회원/활성 device 조회 · 첫 기기 존재 확인
     └── notification                           # notifications 영속화
         ├── NotificationEntity.java            # type_code/reference_id/template_args/read_at 저장
@@ -245,7 +245,6 @@ graph TD
 | platform | varchar | `web` · `android` · `ios` |
 | sns_endpoint_arn | varchar | SNS platform endpoint |
 | enabled | boolean | 유효 여부 (`INVALID`/`EXPIRED` 시 false) |
-| last_active_at | timestamp | 마지막 등록 시각 |
 
 ## Push Payload
 - push 는 DB 구조(reference_type + reference_id)로 조립한 `link` 를 전송한다.
