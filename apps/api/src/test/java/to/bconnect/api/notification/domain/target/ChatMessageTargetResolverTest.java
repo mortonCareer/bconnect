@@ -27,7 +27,7 @@ class ChatMessageTargetResolverTest {
     @Test
     @DisplayName("비활성 수신자만 저장·push 대상이다")
     void resolve_pushesToInactiveRecipients() {
-        when(memberResolver.get(1L)).thenReturn(new Member(1L, "sender", "발신자", "p", null, null, null));
+        when(memberResolver.getOrWithdrawn(1L)).thenReturn(new Member(1L, "sender", "발신자", "p", null, null, null));
         var event = new SocketMessageSentEvent(10L, 1L, Set.of(4L), Set.of(2L, 3L), "안녕하세요");
 
         var resolved = resolver.resolve(event);

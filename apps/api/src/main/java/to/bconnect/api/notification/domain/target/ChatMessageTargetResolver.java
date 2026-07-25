@@ -23,9 +23,9 @@ public class ChatMessageTargetResolver implements NotificationTargetResolver<Soc
     @Override
     public ResolvedNotification resolve(SocketMessageSentEvent event) {
         Set<Long> receivers = event.inactiveIds();
-        NotificationArgs args = receivers.isEmpty()
+        NotificationArgs args = receivers.isEmpty() || event.senderId() == null
                 ? NotificationArgs.empty()
-                : NotificationArgs.senderName(memberResolver.get(event.senderId()).name());
+                : NotificationArgs.senderName(memberResolver.getOrWithdrawn(event.senderId()).name());
         return new ResolvedNotification(
                 event.senderId(), event.chatId(), event.preview(), args,
                 new ResolvedNotification.Targets(receivers, receivers));
