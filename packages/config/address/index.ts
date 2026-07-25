@@ -23,15 +23,24 @@ export function mapKakaoAddress(r: KakaoAddressResult | null): Address {
   const latitude = 0
   const longitude = 0
   if (!r) {
-    return { zipcode: '', street: '', state: '', city: '', detail: undefined, latitude, longitude }
+    return {
+      zipcode: '',
+      street: '',
+      state: undefined,
+      city: '',
+      detail: undefined,
+      latitude,
+      longitude,
+    }
   }
-  if (regionOfState(r.sido) === undefined) {
+  const state = regionOfState(r.sido)
+  if (state === undefined) {
     throw new UnknownSidoError(r.sido)
   }
   return {
     zipcode: r.zonecode,
     street: r.userSelectedType === 'R' ? r.roadAddress : r.jibunAddress,
-    state: r.sido,
+    state,
     city: r.sigungu,
     detail: undefined,
     latitude,

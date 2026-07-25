@@ -7,7 +7,7 @@ import {
   TaskType,
   Trade,
 } from '@bconnect/api-client'
-import type { Attachment, Feed, KakaoSido, Task } from '@bconnect/api-client'
+import type { Attachment, CursorPageFeed, Feed, Region, Task } from '@bconnect/api-client'
 
 interface FeedSeed {
   name: string
@@ -20,8 +20,8 @@ interface FeedSeed {
   /** 글에 연결된 시공사례 — 건축주명 + 시공일수. 없으면 카드 메타행에서 생략되는 경로 검증용 */
   task?: { company: string; days: number }
   role: ProfileRole
-  /** 시/도 명칭(카카오 sido 표기) — regionOfState 정확 일치 매핑 검증용. 생략 시 주소 없는 프로필 경로 */
-  state?: KakaoSido
+  /** 시/도 명칭(공용 Region 값) — regionOfState 정확 일치 매핑 검증용. 생략 시 주소 없는 프로필 경로 */
+  state?: Region
 }
 
 const FEED_SEEDS: FeedSeed[] = [
@@ -152,40 +152,44 @@ function buildAttachments(
 }
 
 export const feedsOverrides = [
-  getGetFeedsMockHandler((): Feed[] =>
-    // Feed = { member: MemberSummary, profile: ProfileSummary, post: Post, task: Task | null }.
-    // ProfileSummary 엔 id/memberId/trades 없음(대표분야 primaryTrade 만) — mapper 도 대표분야 기준.
-    FEED_SEEDS.map((seed, i): Feed => {
-      const createdAt = daysAgoIso(seed.daysAgo)
-      const task = taskOf(600 + i, seed)
-      return {
-        member: {
-          id: 200 + i,
-          username: `feed_user_${200 + i}`,
-          name: seed.name,
-          picture: null,
-          role: Role.USER,
-          createdAt,
-          modifiedAt: createdAt,
-        },
-        profile: {
-          role: seed.role,
-          primaryTrade: seed.trade,
-          experience: seed.experience,
-          headline: seed.headline,
-          address: seed.state ? { state: seed.state } : {},
-        },
-        task,
-        post: {
-          id: 400 + i,
-          memberId: 200 + i,
-          taskId: task?.id ?? null,
-          attachments: buildAttachments(seed.imageCount, 400 + i, 200 + i, createdAt),
-          content: seed.content,
-          createdAt,
-          modifiedAt: createdAt,
-        },
-      }
+  getGetFeedsMockHandler(
+    (): CursorPageFeed => ({
+      // Feed = { member: MemberSummary, profile: ProfileSummary, post: Post, task: Task | null }.
+      // ProfileSummary 엔 id/memberId/trades 없음(대표분야 primaryTrade 만) — mapper 도 대표분야 기준.
+      content: FEED_SEEDS.map((seed, i): Feed => {
+        const createdAt = daysAgoIso(seed.daysAgo)
+        const task = taskOf(600 + i, seed)
+        return {
+          member: {
+            id: 200 + i,
+            username: `feed_user_${200 + i}`,
+            name: seed.name,
+            picture: null,
+            role: Role.USER,
+            createdAt,
+            modifiedAt: createdAt,
+          },
+          profile: {
+            role: seed.role,
+            primaryTrade: seed.trade,
+            experience: seed.experience,
+            headline: seed.headline,
+            address: seed.state ? { state: seed.state } : {},
+          },
+          task,
+          post: {
+            id: 400 + i,
+            memberId: 200 + i,
+            taskId: task?.id ?? null,
+            attachments: buildAttachments(seed.imageCount, 400 + i, 200 + i, createdAt),
+            content: seed.content,
+            createdAt,
+            modifiedAt: createdAt,
+          },
+        }
+      }),
+      hasNext: false,
+      nextCursor: undefined,
     })
   ),
 ]

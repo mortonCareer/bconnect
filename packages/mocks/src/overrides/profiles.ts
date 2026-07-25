@@ -7,7 +7,13 @@ import {
   Role,
   Trade,
 } from '@bconnect/api-client'
-import type { MemberSummary, Profile, ProfileDetail } from '@bconnect/api-client'
+import type {
+  CursorPageProfile,
+  MemberSummary,
+  Profile,
+  ProfileDetail,
+  Region,
+} from '@bconnect/api-client'
 
 // 프로필 도메인 단일 owner — getProfile(/profiles/:id) 을 id 로 keying,
 // getMyProfile(/profiles/me, 내 프로필 화면)은 id 1 seed 반환,
@@ -48,8 +54,8 @@ interface ProfileSeed {
   experience: number
   headline: string
   about: string
-  // 카카오 우편번호 결과 그대로 — state = sido(축약형), city = sigungu
-  state: string
+  // 카카오 우편번호 결과 그대로 — state = 공용 Region 값, city = sigungu
+  state: Region
   city: string
 }
 
@@ -158,7 +164,13 @@ const paramId = (value: string | readonly string[] | undefined): number =>
   Number(typeof value === 'string' ? value : (value?.[0] ?? ''))
 
 export const profilesOverrides = [
-  getGetProfilesMockHandler(() => SEEDS.map((seed) => profileOf(seed))),
+  getGetProfilesMockHandler(
+    (): CursorPageProfile => ({
+      content: SEEDS.map((seed) => profileOf(seed)),
+      hasNext: false,
+      nextCursor: undefined,
+    })
+  ),
   // /profiles/me 는 status 없는 평문 Profile — 타인 조회(ProfileDetail)와 응답형이 다르다
   getGetMyProfileMockHandler(() => withMyPicture(profileOf(SEEDS[0]))),
   getGetProfileMockHandler(({ params }) => PROFILES_BY_ID[paramId(params.id)] ?? PROFILES_BY_ID[1]),

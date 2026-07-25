@@ -31,7 +31,7 @@ function isoOfDay(year: number, month1: number, day: number): string {
 
 const SAMPLE_ADDRESS: Address = {
   zipcode: '16677',
-  state: '경기도',
+  state: '경기',
   city: '수원시 장안구',
   street: '경기도 수원시 율전로 00번길 00-00',
   detail: '000호',
