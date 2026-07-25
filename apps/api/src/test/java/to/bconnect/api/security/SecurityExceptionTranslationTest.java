@@ -64,7 +64,7 @@ class SecurityExceptionTranslationTest {
     void authenticatedRequest_denied_returns403() throws Exception {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("user", "n/a",
-                        AuthorityUtils.createAuthorityList("ROLE_USER")));
+                        AuthorityUtils.createAuthorityList("ROLE_CAREER")));
         var request = new MockHttpServletRequest("POST", "/api/v1/devices");
         var response = new MockHttpServletResponse();
 

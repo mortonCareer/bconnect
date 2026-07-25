@@ -15,6 +15,8 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
+import to.bconnect.api.storage.member.MemberRepository;
+import to.bconnect.api.storage.member.Role;
 
 @Slf4j
 @Service
@@ -22,6 +24,7 @@ import to.bconnect.api.storage.company.CompanyRepository;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
+    private final MemberRepository memberRepository;
     private final AttachmentFinder attachmentFinder;
     private final AttachmentLinker attachmentLinker;
 
@@ -72,6 +75,11 @@ public class CompanyService {
         val companyId = companyRepository.save(created).getId();
         attachmentFinder.validateOwnership(user.id(), command.pictureId());
         attachmentLinker.link(ReferenceType.COMPANY, companyId, command.pictureId());
+
+        memberRepository.findById(user.id())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
+                .grantRole(Role.PLAN);
+
         return companyId;
     }
 
@@ -93,5 +101,9 @@ public class CompanyService {
 
         attachmentLinker.unlink(ReferenceType.COMPANY, found.getId());
         companyRepository.delete(found);
+
+        memberRepository.findById(user.id())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
+                .revokeRole(Role.PLAN);
     }
 }
