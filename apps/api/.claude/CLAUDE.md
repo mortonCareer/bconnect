@@ -11,7 +11,7 @@
 | 문서 | 설명                              |
 | --- |---------------------------------|
 | [project-structure](../docs/project-structure.md) | 도메인 · 레이어 · 의존성 구조              |
-| [ubiquitous-language](../docs/ubiquitous-language.md) | 도메인 용어 · Enum 값                 |
+| [ubiquitous-language](../../../docs/reference/ubiquitous-language.md) | 도메인 용어 · Enum 값 (루트 docs)     |
 | [attachment-architecture](../docs/attachment-architecture.md) | 첨부파일(Attachment) 생명주기           |
 | [notification-architecture](../docs/notification-architecture.md) | 알림 저장 · 조회 · 푸시(Push)           |
 | [stomp-architecture](../docs/stomp-architecture.md) | 채팅(Chat) · 메시지(Message) STOMP   |
