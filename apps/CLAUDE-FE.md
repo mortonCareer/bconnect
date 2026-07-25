@@ -10,6 +10,11 @@ career·plan 두 Next.js App Router 앱의 공통 프론트엔드 규칙. 각 �
 
 탭/필터/검색 state는 `useQueryState`(nuqs), `useState` 금지. URL 공유·새로고침 유지·뒤로가기 자연.
 
+**`history` 옵션은 "뒤로가기가 무엇을 되돌려야 하나" 기준으로 고른다** (기본값 `'replace'`):
+
+- `'replace'` — 화면 내부에서만 의미 있는 일시적 state (탭·서브탭·필터·검색어). `'push'`로 두면 전환마다 히스토리가 쌓여 TopBar 뒤로가기(`router.back()`)가 화면을 이탈하지 못하고 탭만 되돌린다 (#843, #869).
+- `'push'` — 뒤로가기로 되돌리는 것이 사용자 기대인 화면 전환급 state. 예: 갤러리 → 파일 뷰어 열기(`?file`), 폼 서브스텝 진입(`?step`). 이 경우 **왜 push 인지 주석으로 남긴다**.
+
 ## Tailwind v4 design tokens
 
 색상 hex 직접 X, CSS variables (`❌ bg-[#386dff]` → `✓ bg-primary`). 토큰: `packages/ui/src/styles/globals.css`. 신규 색상은 globals.css 먼저.

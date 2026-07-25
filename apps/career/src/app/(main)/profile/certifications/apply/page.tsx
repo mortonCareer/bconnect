@@ -56,11 +56,14 @@ async function uploadCredentialFile(file: File, memberId: number): Promise<numbe
 
 export default function CertificationApplyPage() {
   const router = useRouter()
+  // 탭/서브탭 전환은 히스토리를 쌓지 않음(replace) → TopBar 뒤로가기가 탭을 되돌리지 않고 화면을 정상 이탈
   const [activeTab, setActiveTab] = useQueryState(
     'tab',
-    parseAsStringLiteral(APPLY_TAB_KEYS).withDefault('one-click').withOptions({ history: 'push' })
+    parseAsStringLiteral(APPLY_TAB_KEYS)
+      .withDefault('one-click')
+      .withOptions({ history: 'replace' })
   )
-  const [, setSubTab] = useQueryState('sub', { history: 'push' })
+  const [, setSubTab] = useQueryState('sub', { history: 'replace' })
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
 
   const handleTabChange = (key: string) => {
