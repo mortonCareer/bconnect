@@ -73,8 +73,10 @@ public class CompanyService {
         );
 
         val companyId = companyRepository.save(created).getId();
-        attachmentFinder.validateOwnership(user.id(), command.pictureId());
-        attachmentLinker.link(ReferenceType.COMPANY, companyId, command.pictureId());
+        if (command.pictureId() != null) {
+            attachmentFinder.validateOwnership(user.id(), command.pictureId());
+            attachmentLinker.link(ReferenceType.COMPANY, companyId, command.pictureId());
+        }
 
         memberRepository.findById(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
@@ -87,6 +89,9 @@ public class CompanyService {
     public void update(AuthUser user, Long pictureId) {
         val found = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        if (pictureId == null)
+            return;
 
         attachmentFinder.validateOwnership(user.id(), pictureId);
         attachmentLinker.link(ReferenceType.COMPANY, found.getId(), pictureId);
