@@ -7,10 +7,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import to.bconnect.api.core.domain.offer.OfferAcceptedEvent;
-import to.bconnect.api.core.domain.offer.OfferActivatedEvent;
+import to.bconnect.api.core.domain.offer.OfferEvent;
 import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.chat.MessageType;
+import to.bconnect.api.storage.offer.OfferStatus;
 
 import java.util.List;
 
@@ -23,17 +23,16 @@ public class ChatEventListener {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleOfferActivatedEvent(OfferActivatedEvent event) {
-        val chatId = directChatService.getOrCreate(event.companyOwnerId(), event.workerId());
-        messageService.create(chatId, ChatType.DIRECT, event.companyOwnerId(),
-                new SendMessage(MessageType.OFFER, String.valueOf(event.offerId()), List.of()));
-    }
+    public void handleOfferEvent(OfferEvent event) {
+        if (event.status() != OfferStatus.ACTIVE && event.status() != OfferStatus.ACCEPTED)
+            return;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleOfferAcceptedEvent(OfferAcceptedEvent event) {
-        val chatId = directChatService.getOrCreate(event.workerId(), event.companyOwnerId());
-        messageService.create(chatId, ChatType.DIRECT, event.workerId(),
+        val activated = event.status() == OfferStatus.ACTIVE;
+        val senderId = activated ? event.companyOwnerId() : event.workerId();
+        val receiverId = activated ? event.workerId() : event.companyOwnerId();
+
+        val chatId = directChatService.getOrCreate(senderId, receiverId);
+        messageService.create(chatId, ChatType.DIRECT, senderId,
                 new SendMessage(MessageType.OFFER, String.valueOf(event.offerId()), List.of()));
     }
 }
