@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.attachment.domain.AttachmentLinker;
-import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.post.PostEntity;
@@ -30,7 +28,6 @@ public class TaskService {
     private final ProjectRepository projectRepository;
     private final OfferRepository offerRepository;
     private final PostRepository postRepository;
-    private final AttachmentLinker attachmentLinker;
 
     @Transactional
     public Long createByWorker(AuthUser user, CreateWorkerTask command) {
@@ -154,11 +151,8 @@ public class TaskService {
 
         offerRepository.deleteByTaskId(task.getId());
 
-        val posts = postRepository.findAllByTaskId(task.getId());
-        val postIds = posts.stream().map(PostEntity::getId).toList();
-        if (!postIds.isEmpty())
-            attachmentLinker.unlink(ReferenceType.POST, postIds);
-        postRepository.deleteAll(posts);
+        postRepository.findAllByTaskId(task.getId())
+                .forEach(PostEntity::detachTask);
 
         taskRepository.delete(task);
     }
