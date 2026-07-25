@@ -85,7 +85,7 @@ public class OfferService {
 
         val ownerId = getCompanyOwnerId(found.getTaskId());
         eventPublisher.publishEvent(
-                new OfferAcceptedEvent(found.getId(), found.getWorkerId(), ownerId));
+                new OfferEvent(found.getId(), found.getWorkerId(), ownerId, OfferStatus.ACCEPTED));
     }
 
     @Transactional
@@ -99,6 +99,11 @@ public class OfferService {
             throw new CodeException(OfferExceptionCode.INVALID_STATUS);
 
         found.deny();
+
+        val ownerId = getCompanyOwnerId(found.getTaskId());
+        eventPublisher.publishEvent(
+                new OfferEvent(found.getId(), found.getWorkerId(), ownerId, OfferStatus.DENIED));
+
         promoteNext(found.getTaskId(), found.getSeq());
     }
 
@@ -178,6 +183,11 @@ public class OfferService {
             return;
 
         found.expire();
+
+        val ownerId = getCompanyOwnerId(found.getTaskId());
+        eventPublisher.publishEvent(
+                new OfferEvent(found.getId(), found.getWorkerId(), ownerId, OfferStatus.EXPIRED));
+
         promoteNext(found.getTaskId(), found.getSeq());
     }
 
@@ -194,7 +204,7 @@ public class OfferService {
         found.updateDue(LocalDate.now(apiConfigProps.zoneId()).plusDays(DUE_EXTENSION_DAYS));
         val ownerId = getCompanyOwnerId(taskId);
         eventPublisher.publishEvent(
-                new OfferActivatedEvent(found.getId(), found.getWorkerId(), ownerId));
+                new OfferEvent(found.getId(), found.getWorkerId(), ownerId, OfferStatus.ACTIVE));
     }
 
     private Long getCompanyOwnerId(Long taskId) {
