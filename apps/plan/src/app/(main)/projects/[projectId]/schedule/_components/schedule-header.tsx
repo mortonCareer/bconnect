@@ -151,11 +151,7 @@ function AddressRow({ initialAddress }: { initialAddress: string }) {
               </FormItem>
             )}
           />
-          <FormSubmitButton
-            variant="ghost"
-            requireAllFilled={false}
-            className={`${EDIT_BUTTON_CLASSES} mt-[14px]`}
-          >
+          <FormSubmitButton variant="ghost" className={`${EDIT_BUTTON_CLASSES} mt-[14px]`}>
             완료
           </FormSubmitButton>
           <AddressSearchDialog

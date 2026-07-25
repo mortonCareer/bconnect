@@ -12,8 +12,10 @@ import to.bconnect.api.storage.attachment.AttachmentStatus;
 import to.bconnect.api.storage.attachment.ReferenceType;
 
 import java.util.Collection;
-import java.util.List;
 
+/**
+ * Attachment 참조 연결 · 제거 (권한검증 미포함)
+ */
 @Component
 @RequiredArgsConstructor
 public class AttachmentLinker {
@@ -21,33 +23,34 @@ public class AttachmentLinker {
     private final AttachmentRepository attachmentRepository;
 
     @Transactional
-    public void link(Long memberId, ReferenceType referenceType, Long referenceId, Collection<Long> attachmentIds) {
+    public void link(ReferenceType referenceType, Long referenceId, Collection<Long> attachmentIds) {
+        if(attachmentIds.isEmpty())
+            return;
+
         val attachments = attachmentRepository.findAllById(attachmentIds);
         if (attachments.size() != attachmentIds.size())
             throw new CodeException(CommonExceptionCode.NOT_FOUND);
 
         attachments.forEach(it -> {
-            if (!it.getMemberId().equals(memberId))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
             if (it.getStatus() != AttachmentStatus.COMPLETED)
                 throw new CodeException(AttachmentExceptionCode.NOT_COMPLETED);
+            if (it.getReferenceType() != null
+                    && (it.getReferenceType() != referenceType || !referenceId.equals(it.getReferenceId())))
+                throw new CodeException(AttachmentExceptionCode.INVALID_LINKED);
             it.link(referenceType, referenceId);
         });
     }
 
     @Transactional
-    public void relink(Long memberId, ReferenceType referenceType, Long referenceId, Long attachmentId) {
-        unlink(referenceType, List.of(referenceId));
-        if (attachmentId == null)
-            return;
-
+    public void link(ReferenceType referenceType, Long referenceId, Long attachmentId) {
         val attachment = attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (!attachment.getMemberId().equals(memberId))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
         if (attachment.getStatus() != AttachmentStatus.COMPLETED)
             throw new CodeException(AttachmentExceptionCode.NOT_COMPLETED);
-
+        if (attachment.getReferenceType() != null
+                && (attachment.getReferenceType() != referenceType || !referenceId.equals(attachment.getReferenceId())))
+            throw new CodeException(AttachmentExceptionCode.INVALID_LINKED);
         attachment.link(referenceType, referenceId);
     }
 
@@ -61,16 +64,17 @@ public class AttachmentLinker {
     }
 
     @Transactional
-    public void unlink(Long attachmentId) {
-        attachmentRepository.findById(attachmentId).ifPresent(AttachmentEntity::unlink);
+    public void unlink(ReferenceType referenceType, Long referenceId) {
+        val attachments = attachmentRepository.findAllByReferenceTypeAndReferenceId(referenceType, referenceId);
+        attachments.forEach(AttachmentEntity::unlink);
     }
 
-    public void validate(Long memberId, ReferenceType referenceType, Long referenceId, Long attachmentId) {
+    @Transactional
+    public void unlink(ReferenceType referenceType, Long referenceId, Long attachmentId) {
         val attachment = attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (!attachment.getMemberId().equals(memberId))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
         if (attachment.getReferenceType() != referenceType || !referenceId.equals(attachment.getReferenceId()))
             throw new CodeException(AttachmentExceptionCode.INVALID_LINKED);
+        attachment.unlink();
     }
 }

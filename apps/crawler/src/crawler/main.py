@@ -15,7 +15,7 @@ from crawler.classifier_rules import rule_reject
 from crawler.config import settings
 from crawler.models import (
     CrawledMember, CrawledPost, CrawledProfile,
-    PLATFORM_INSTAGRAM, PLATFORM_NAVER, REGION_ENUM_BY_KR, phone_digits, trade_enum,
+    PLATFORM_INSTAGRAM, PLATFORM_NAVER, phone_digits, trade_enum,
 )
 from crawler.notion import (
     save_member, save_to_review, update_member,
@@ -64,7 +64,7 @@ def build_crawled_member(
     phone: str,
     email: str,
     address: str,
-    region_kr: str,
+    state: str,
     headline: str,
     picture: str,
     url: str,
@@ -95,7 +95,7 @@ def build_crawled_member(
             headline=headline[:500],
             about=profile["about"][:2000],
             address=address,
-            state=REGION_ENUM_BY_KR.get(region_kr, ""),
+            state=state,
             url=url,
             platform=platform,
             blog_title=profile.get("blog_title", ""),
@@ -371,7 +371,7 @@ async def _classify_scraped(
         phone=phone,
         email=email,
         address=address,
-        region_kr=region,
+        state=region,
         headline=profile_intro,
         picture=cover_image_url,
         url=detail_url,
@@ -520,7 +520,7 @@ async def process_instagram_result(
         phone=phone,
         email=email,
         address=address,
-        region_kr=classification.get("region", ""),
+        state=classification.get("region", ""),
         headline=profile["headline"],
         picture=profile.get("profile_pic_url", ""),
         url=instagram_url,
@@ -1218,7 +1218,7 @@ async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineR
                 phone=phone,
                 email=email,
                 address=address,
-                region_kr=classification.get("region", ""),
+                state=classification.get("region", ""),
                 headline=profile_intro,
                 picture=cover,
                 url=detail_url,

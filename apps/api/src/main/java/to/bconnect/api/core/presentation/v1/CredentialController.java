@@ -7,10 +7,7 @@ import lombok.val;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
-import to.bconnect.api.attachment.domain.ImageSize;
-import to.bconnect.api.attachment.domain.SignedCookieIssuer;
+import to.bconnect.api.attachment.domain.*;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.credential.Credential;
 import to.bconnect.api.core.domain.credential.CredentialService;
@@ -19,6 +16,7 @@ import to.bconnect.api.core.presentation.v1.response.CredentialResponse;
 import to.bconnect.api.core.presentation.v1.response.CredentialSummaryResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
+import to.bconnect.api.storage.attachment.AttachmentType;
 import to.bconnect.api.storage.attachment.ReferenceType;
 
 import java.util.List;
@@ -29,7 +27,8 @@ import java.util.List;
 public class CredentialController {
 
     private final CredentialService credentialService;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentFinder attachmentFinder;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
@@ -49,12 +48,12 @@ public class CredentialController {
         val credentialIds = credentials.stream()
                 .map(Credential::id)
                 .toList();
-        val attachmentMap = attachmentResolver.resolveMap(ReferenceType.CREDENTIAL, credentialIds);
+        val attachmentMap = attachmentFinder.map(ReferenceType.CREDENTIAL, credentialIds, AttachmentType.FILE);
 
         val body = credentials.stream()
                 .map(it -> {
                     val attachment = attachmentMap.get(it.id());
-                    val url = attachmentResolver.parseUrl(attachment, ImageSize.SMALL);
+                    val url = attachmentUrlService.parseUrl(attachment, ImageSize.SMALL);
                     return CredentialResponse.of(it, attachment, url);
                 })
                 .toList();

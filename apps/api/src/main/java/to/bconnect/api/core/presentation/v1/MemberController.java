@@ -9,10 +9,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
+import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.core.domain.member.MemberService;
 import to.bconnect.api.core.presentation.v1.request.RegisterMemberRequest;
@@ -26,15 +28,13 @@ import to.bconnect.api.security.session.SessionTokenIssuer;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberService memberService;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
     private final SessionTokenIssuer sessionTokenIssuer;
 
@@ -43,7 +43,7 @@ public class MemberController {
             @AuthenticationPrincipal AuthUser user,
             HttpServletResponse response) {
         val member = memberService.get(user);
-        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
@@ -53,12 +53,15 @@ public class MemberController {
     }
 
     @GetMapping
-    public ApiResponse<List<MemberResponse>> list(HttpServletResponse response) {
-        val members = memberService.list();
-        val urlMap = attachmentResolver.resolveUrlMap(
+    public ApiResponse<CursorPage<MemberResponse>> list(
+            CursorLimit cursorLimit,
+            HttpServletResponse response) {
+        val page = memberService.list(cursorLimit);
+        val members = page.content();
+        val urlMap = attachmentUrlService.map(
                 ReferenceType.MEMBER, members.stream().map(Member::id).toList(), ImageSize.SMALL);
 
-        val body = members.stream()
+        val content = members.stream()
                 .map(it -> MemberResponse.of(it, urlMap.get(it.id())))
                 .toList();
 
@@ -66,7 +69,7 @@ public class MemberController {
         signedCookieIssuer.issue(scope)
                 .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
 
-        return ApiResponse.success(body);
+        return ApiResponse.success(new CursorPage<>(content, page.hasNext(), page.nextCursor()));
     }
 
     @GetMapping("/check-username")

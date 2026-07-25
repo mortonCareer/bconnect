@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
+import to.bconnect.api.storage.Region;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,7 +32,7 @@ public class CrawledProfileEntity extends BaseEntity {
     private String address;
 
     @Enumerated(EnumType.STRING)
-    private CrawledRegion state;
+    private Region state;
 
     private String url;
 
@@ -47,7 +48,7 @@ public class CrawledProfileEntity extends BaseEntity {
     private String externalUrl;
 
     public CrawledProfileEntity(Long memberId, String primaryTrade, Set<String> trades, Integer experience,
-                                String headline, String address, CrawledRegion state,
+                                String headline, String address, Region state,
                                 String url, CrawledPlatform platform) {
         this.memberId = memberId;
         this.primaryTrade = primaryTrade;

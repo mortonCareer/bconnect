@@ -8,10 +8,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
+import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.core.domain.coworker.CoworkerService;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.profile.Profile;
@@ -27,8 +29,6 @@ import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.coworker.CoworkerStatus;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/profiles")
 @RequiredArgsConstructor
@@ -38,18 +38,21 @@ public class ProfileController {
     private final ProfileQueryService profileQueryService;
     private final CoworkerService coworkerService;
     private final MemberResolver memberResolver;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
-    public ApiResponse<List<ProfileResponse>> list(HttpServletResponse response) {
-        val profiles = profileQueryService.list();
+    public ApiResponse<CursorPage<ProfileResponse>> list(
+            CursorLimit cursorLimit,
+            HttpServletResponse response) {
+        val page = profileQueryService.list(cursorLimit);
+        val profiles = page.content();
 
         val memberIds = profiles.stream().map(Profile::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
-        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
-        val body = profiles.stream()
+        val content = profiles.stream()
                 .map(it -> {
                     val member = memberMap.get(it.memberId());
                     return ProfileResponse.of(it, member, urlMap.get(member.id()));
@@ -60,7 +63,7 @@ public class ProfileController {
         signedCookieIssuer.issue(scope)
                 .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
 
-        return ApiResponse.success(body);
+        return ApiResponse.success(new CursorPage<>(content, page.hasNext(), page.nextCursor()));
     }
 
     @GetMapping("/me")
@@ -68,8 +71,8 @@ public class ProfileController {
             @AuthenticationPrincipal AuthUser user,
             HttpServletResponse response) {
         val profile = profileQueryService.get(user.id());
-        val member = memberResolver.find(profile.memberId());
-        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val member = memberResolver.get(profile.memberId());
+        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
@@ -84,8 +87,8 @@ public class ProfileController {
             @PathVariable Long id,
             HttpServletResponse response) {
         val profile = profileQueryService.get(id);
-        val member = memberResolver.find(profile.memberId());
-        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val member = memberResolver.get(profile.memberId());
+        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
         val status = user == null
                 ? CoworkerStatus.NONE
                 : coworkerService.resolveStatus(user.id(), profile.memberId());

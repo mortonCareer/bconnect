@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import to.bconnect.api.socket.message.ChatMessageSentEvent;
+import to.bconnect.api.socket.message.SocketMessageSentEvent;
 
 @Component
 @RequiredArgsConstructor
@@ -13,7 +13,7 @@ public class NotificationEventListener {
     private final NotificationService notificationService;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void onChatMessageSent(ChatMessageSentEvent event) {
+    public void onChatMessageSent(SocketMessageSentEvent event) {
         notificationService.handle(NotificationType.CHAT_MESSAGE, event);
     }
 

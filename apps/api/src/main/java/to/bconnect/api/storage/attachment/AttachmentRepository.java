@@ -11,11 +11,16 @@ public interface AttachmentRepository extends JpaRepository<AttachmentEntity, Lo
     List<AttachmentEntity> findAllByReferenceTypeAndReferenceIdIn(
             ReferenceType referenceType, Collection<Long> referenceIds);
 
+    List<AttachmentEntity> findAllByReferenceTypeAndReferenceId(
+            ReferenceType referenceType, Long referenceId);
+
     List<AttachmentEntity> findAllByReferenceTypeAndReferenceIdAndType(
             ReferenceType referenceType, Long referenceId, AttachmentType type);
 
+    Collection<AttachmentEntity> findAllByReferenceTypeAndReferenceIdInAndType(
+            ReferenceType referenceType, Collection<Long> referenceIds, AttachmentType type);
+
     List<AttachmentEntity> findAllByStatusAndCreatedAtBefore(AttachmentStatus status, Instant before);
 
-    List<AttachmentEntity> findAllByStatusAndCreatedAtBeforeAndReferenceIdIsNull(
-            AttachmentStatus status, Instant before);
+    List<AttachmentEntity> findAllByStatusAndCreatedAtBeforeAndReferenceIdIsNull(AttachmentStatus status, Instant before);
 }

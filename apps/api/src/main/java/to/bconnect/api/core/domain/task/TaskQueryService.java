@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.project.ProjectRepository;
+import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
 import to.bconnect.api.security.AuthUser;
@@ -17,6 +18,7 @@ import to.bconnect.api.common.CommonExceptionCode;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -27,6 +29,11 @@ public class TaskQueryService {
     private final CoworkerRepository coworkerRepository;
     private final CompanyRepository companyRepository;
     private final ProjectRepository projectRepository;
+
+    @Transactional(readOnly = true)
+    public Optional<Task> get(Long taskId) {
+        return taskRepository.findById(taskId).map(Task::of);
+    }
 
     @Transactional(readOnly = true)
     public List<Task> listByIds(Collection<Long> taskIds) {
@@ -64,6 +71,26 @@ public class TaskQueryService {
 
     @Transactional(readOnly = true)
     public List<Task> listByProject(AuthUser user, Long projectId) {
+        validateProjectOwner(user, projectId);
+
+        return taskRepository.findAllByProjectId(projectId)
+                .stream()
+                .map(Task::of)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> listAssigneeIdsByProject(AuthUser user, Long projectId) {
+        validateProjectOwner(user, projectId);
+
+        return taskRepository.findAllByProjectIdAndWorkerIdNotNull(projectId)
+                .stream()
+                .map(TaskEntity::getWorkerId)
+                .distinct()
+                .toList();
+    }
+
+    private void validateProjectOwner(AuthUser user, Long projectId) {
         val companyId = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
                 .getId();
@@ -72,10 +99,5 @@ public class TaskQueryService {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
         if (!project.getCompanyId().equals(companyId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        return taskRepository.findAllByProjectId(projectId)
-                .stream()
-                .map(Task::of)
-                .toList();
     }
 }

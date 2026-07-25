@@ -1,19 +1,20 @@
 package to.bconnect.api.core.domain.company;
 
-import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.attachment.domain.AttachmentFinder;
+import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.attachment.domain.AttachmentLinker;
+import to.bconnect.api.common.request.CursorLimit;
+import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -21,14 +22,21 @@ import java.util.List;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
+    private final AttachmentFinder attachmentFinder;
     private final AttachmentLinker attachmentLinker;
 
     @Transactional(readOnly = true)
-    public List<Company> list() {
-        return companyRepository.findAll()
-                .stream()
-                .map(Company::of)
-                .toList();
+    public CursorPage<Company> list(CursorLimit cursor) {
+        val companies = companyRepository.findAllBy(
+                cursor.toScrollPosition(),
+                cursor.toLimit(),
+                cursor.toSort()
+        );
+
+        return CursorPage.from(
+                companies.map(Company::of),
+                Company::id
+        );
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +70,8 @@ public class CompanyService {
         );
 
         val companyId = companyRepository.save(created).getId();
-        attachmentLinker.relink(user.id(), ReferenceType.COMPANY, companyId, command.pictureId());
+        attachmentFinder.validateOwnership(user.id(), command.pictureId());
+        attachmentLinker.link(ReferenceType.COMPANY, companyId, command.pictureId());
         return companyId;
     }
 
@@ -71,7 +80,8 @@ public class CompanyService {
         val found = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        attachmentLinker.relink(user.id(), ReferenceType.COMPANY, found.getId(), pictureId);
+        attachmentFinder.validateOwnership(user.id(), pictureId);
+        attachmentLinker.link(ReferenceType.COMPANY, found.getId(), pictureId);
     }
 
     @Transactional
@@ -81,7 +91,7 @@ public class CompanyService {
             return;
         val found = optional.get();
 
-        attachmentLinker.unlink(ReferenceType.COMPANY, List.of(found.getId()));
+        attachmentLinker.unlink(ReferenceType.COMPANY, found.getId());
         companyRepository.delete(found);
     }
 }

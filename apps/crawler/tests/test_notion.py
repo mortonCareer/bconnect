@@ -67,7 +67,7 @@ class TestBuildProperties:
         assert names == ["네이버블로그", "인스타그램"]
 
     def test_region_kr_from_state_enum(self):
-        member = _make_member(profile_kwargs={"state": "GYEONGGI"})
+        member = _make_member(profile_kwargs={"state": "경기"})
         props = _build_properties(member)
         assert props["지역"]["select"]["name"] == "경기"
 
@@ -205,7 +205,7 @@ class TestReviewPageToMember:
         assert member.company == "테스트업체"
         assert member.role == "반장"
         assert member.profile.trades == ["TILING", "GROUTING"]  # 노션 한국어 → enum
-        assert member.profile.state == "SEOUL"
+        assert member.profile.state == "서울"
         assert member.profile.experience == 5
         assert member.phone == "01012345678"
         assert member.email == "test@test.com"
@@ -233,7 +233,7 @@ class TestReviewPageToMember:
             "인증": {"type": "multi_select", "multi_select": []},
         }
         member = _review_page_to_member(props)
-        assert member.profile.state == "GYEONGGI"
+        assert member.profile.state == "경기"
 
     def test_instagram_platform_from_url(self):
         props = {

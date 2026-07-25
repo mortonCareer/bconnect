@@ -1,19 +1,20 @@
 package to.bconnect.api.core.domain.member;
 
-import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.attachment.domain.AttachmentFinder;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.common.request.CursorLimit;
+import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -21,6 +22,7 @@ import java.util.List;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final AttachmentFinder attachmentFinder;
     private final AttachmentLinker attachmentLinker;
     private final MemberCleaner memberCleaner;
 
@@ -32,11 +34,17 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<Member> list() {
-        return memberRepository.findAll()
-                .stream()
-                .map(Member::of)
-                .toList();
+    public CursorPage<Member> list(CursorLimit cursor) {
+        val members = memberRepository.findAllBy(
+                cursor.toScrollPosition(),
+                cursor.toLimit(),
+                cursor.toSort()
+        );
+
+        return CursorPage.from(
+                members.map(Member::of),
+                Member::id
+        );
     }
 
     @Transactional(readOnly = true)
@@ -72,13 +80,14 @@ public class MemberService {
 
     @Transactional
     public void updatePicture(AuthUser user, Long pictureId) {
-        attachmentLinker.relink(user.id(), ReferenceType.MEMBER, user.id(), pictureId);
+        attachmentFinder.validateOwnership(user.id(), pictureId);
+        attachmentLinker.link(ReferenceType.MEMBER, user.id(), pictureId);
     }
 
     @Transactional
     public void withdraw(AuthUser user) {
         memberCleaner.clean(user);
-        attachmentLinker.unlink(ReferenceType.MEMBER, List.of(user.id()));
+        attachmentLinker.unlink(ReferenceType.MEMBER, user.id());
         memberRepository.findById(user.id())
                 .ifPresent(memberRepository::delete);
     }

@@ -7,8 +7,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.coworker.Coworker;
 import to.bconnect.api.core.domain.coworker.CoworkerService;
@@ -20,7 +21,6 @@ import to.bconnect.api.core.presentation.v1.response.CoworkerTaskResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class CoworkerController {
     private final TaskQueryService taskQueryService;
     private final MemberResolver memberResolver;
     private final ProfileResolver profileResolver;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
@@ -46,7 +46,7 @@ public class CoworkerController {
         val memberMap = memberResolver.resolveMap(memberIds);
         val profileMap = profileResolver.resolveMap(memberIds);
         val statusMap = coworkerService.resolveStatusMap(user.id(), memberIds);
-        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         val body = coworkers.stream()
                 .map(it -> {

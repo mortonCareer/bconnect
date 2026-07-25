@@ -1,10 +1,13 @@
 package to.bconnect.api.crawler.domain;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.common.request.CursorLimit;
+import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.crawler.storage.CrawledCredentialEntity;
 import to.bconnect.api.crawler.storage.CrawledCredentialRepository;
 import to.bconnect.api.crawler.storage.CrawledMemberEntity;
@@ -18,6 +21,7 @@ import to.bconnect.api.crawler.storage.CrawledTaskRepository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,8 +38,17 @@ public class CrawledMemberService {
     private final CrawledCredentialRepository crawledCredentialRepository;
 
     @Transactional(readOnly = true)
-    public List<CrawledMemberEntity> list() {
-        return crawledMemberRepository.findAll();
+    public CursorPage<CrawledMemberEntity> list(CursorLimit cursor) {
+        val members = crawledMemberRepository.findAllBy(
+                cursor.toScrollPosition(),
+                cursor.toLimit(),
+                cursor.toSort()
+        );
+
+        return CursorPage.from(
+                members,
+                CrawledMemberEntity::getId
+        );
     }
 
     @Transactional(readOnly = true)
@@ -45,14 +58,19 @@ public class CrawledMemberService {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, CrawledProfileEntity> getProfileMap(List<Long> memberIds) {
+    public Optional<CrawledProfileEntity> getProfile(Long memberId) {
+        return crawledProfileRepository.findByMemberId(memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, CrawledProfileEntity> resolveProfileMap(List<Long> memberIds) {
         return crawledProfileRepository.findByMemberIdIn(memberIds)
                 .stream()
                 .collect(Collectors.toMap(CrawledProfileEntity::getMemberId, Function.identity()));
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, List<String>> getThumbnailMap(List<Long> memberIds) {
+    public Map<Long, List<String>> resolveThumbnailMap(List<Long> memberIds) {
         return crawledPostRepository.findFirstImagesByMemberIdIn(memberIds).entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -71,7 +89,7 @@ public class CrawledMemberService {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, CrawledTaskEntity> getTaskMap(List<Long> taskIds) {
+    public Map<Long, CrawledTaskEntity> resolveTaskMap(List<Long> taskIds) {
         return crawledTaskRepository.findAllById(taskIds)
                 .stream()
                 .collect(Collectors.toMap(CrawledTaskEntity::getId, Function.identity()));

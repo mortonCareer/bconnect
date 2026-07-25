@@ -8,8 +8,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
@@ -22,7 +23,6 @@ import to.bconnect.api.core.presentation.v1.response.RecommendationResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class RecommendationController {
     private final RecommendationQueryService recommendationQueryService;
     private final MemberResolver memberResolver;
     private final ProfileResolver profileResolver;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @PostMapping
@@ -135,7 +135,7 @@ public class RecommendationController {
         val memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
         val profileMap = profileResolver.resolveMap(memberIds);
-        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         return recommendations.stream()
                 .map(it -> {

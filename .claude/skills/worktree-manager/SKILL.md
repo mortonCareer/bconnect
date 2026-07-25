@@ -24,10 +24,12 @@ Git worktree를 활용하여 여러 이슈를 병렬로 작업할 수 있도록 
 
 ## 디렉토리 구조
 
+메인 레포와 **형제 디렉토리**로 `<repo>-worktrees/` 를 둔다.
+
 ```
-/home/json/
-├── morton/                          # 메인 레포 (main 브랜치)
-└── morton-worktrees/                # 워크트리 루트
+<메인 레포의 부모>/
+├── bconnect/                        # 메인 레포 (dev 브랜치)
+└── bconnect-worktrees/              # 워크트리 루트
     ├── feat-57-input-component/
     └── fix-58-button-variant/
 ```
@@ -53,23 +55,30 @@ gh issue view <issue-number> --json title,labels
 # 3. 브랜치명 생성 (git-workflow.md 규칙)
 # <type>/<issue-number>-<short-description>
 
-# 4. dev 최신화
-git -C /home/json/morton fetch origin dev
+# 4. 경로 확인 + dev 최신화
+MAIN=$(git rev-parse --show-toplevel)          # 메인 레포
+WT_ROOT="$(dirname "$MAIN")/$(basename "$MAIN")-worktrees"
+git -C "$MAIN" fetch origin dev
 
 # 5. 워크트리 + 브랜치 동시 생성
-mkdir -p /home/json/morton-worktrees
+#    --no-track 필수: 생략하면 새 브랜치의 upstream 이 origin/dev 로 상속되어
+#    IDE Sync 버튼이 dev 직접 push 로 동작한다
+mkdir -p "$WT_ROOT"
 git worktree add \
-  /home/json/morton-worktrees/<branch-name-with-hyphens> \
+  "$WT_ROOT"/<branch-name-with-hyphens> \
   -b <type>/<issue-number>-<description> \
-  origin/dev
+  --no-track origin/dev
 
-# 6. 설정 파일 복사
-cp /home/json/morton/.env* <worktree-path>/ 2>/dev/null || true
-cp -r /home/json/morton/.claude <worktree-path>/
-
-# 7. 의존성 설치
+# 6. 의존성 설치
+#    .claude/ 는 git 추적 대상이라 자동 포함 (settings.local.json 만 워크트리별로 별도)
+#    .env 류는 prepare 훅의 scripts/link-env.sh 가 메인 워크트리에서 자동 링크
 cd <worktree-path> && pnpm install
+
+# 7. 첫 푸시에서 upstream 지정 (이때 처음 origin 에 브랜치가 생긴다)
+git push -u origin <type>/<issue-number>-<description>
 ```
+
+> dev 서버 포트는 [scripts/dev-port.sh](../../../scripts/dev-port.sh) 가 워크트리명 해시로 자동 배정한다 (dev·main = 3000/3001, 그 외 4000번대). 임의 포트 지정 금지.
 
 **출력 예시**:
 
@@ -78,7 +87,7 @@ cd <worktree-path> && pnpm install
 
 **이슈**: #57 - Add Input component
 **브랜치**: feat/57-input-component
-**경로**: /home/json/morton-worktrees/feat-57-input-component
+**경로**: <repo-parent>/bconnect-worktrees/feat-57-input-component
 
 다음 단계:
 1. 해당 디렉토리에서 작업 진행
@@ -110,8 +119,8 @@ gh pr list --head <branch-name> --json number,state
 
 | 이슈 | 브랜치 | 경로 | PR |
 |------|--------|------|----|
-| #57 | feat/57-input-component | morton-worktrees/feat-57 | - |
-| #58 | fix/58-button-variant | morton-worktrees/fix-58 | #59 |
+| #57 | feat/57-input-component | bconnect-worktrees/feat-57 | - |
+| #58 | fix/58-button-variant | bconnect-worktrees/fix-58 | #59 |
 
 총 2개 작업 중
 ```
@@ -148,15 +157,16 @@ git branch -d <branch-name>
 
 ### DO
 
-- 항상 dev에서 분기 (origin/dev 기준)
+- 항상 dev에서 분기 (`--no-track origin/dev`)
 - 워크트리 생성 전 이슈 확인
-- 설정 파일 복사 (.env, .claude/)
+- 워크트리에서 `pnpm install` (env·설정은 자동 — 수동 복사 불필요)
 
 ### DON'T
 
 - 동일 이슈로 중복 워크트리 생성
 - 머지 전 워크트리 삭제
 - 메인 레포에서 `git checkout -b`로 직접 브랜치 생성
+- `--no-track` 없이 `origin/dev` 에서 분기 (upstream 상속 → dev 직접 push 위험)
 
 ---
 

@@ -8,7 +8,7 @@ import httpx
 from notion_client import AsyncClient
 
 from crawler.config import settings
-from crawler.models import CrawledMember, REGION_ENUM_BY_KR, phone_digits, trade_enum, trade_kr
+from crawler.models import CrawledMember, REGIONS, phone_digits, trade_enum, trade_kr
 
 log = logging.getLogger(__name__)
 
@@ -506,19 +506,22 @@ async def validate_review_schema() -> list[str]:
     return errors
 
 
-# 구 검수 DB의 광역 지역 표기 → CrawledRegion enum (모호한 광역은 미상 처리)
+# 구 검수 DB의 지역 표기 → Region 값 (모호한 광역은 미상 처리)
 _LEGACY_REGION_TO_ENUM = {
-    "경기도": "GYEONGGI", "강원도": "GANGWON", "제주도": "JEJU",
+    "경기도": "경기", "강원도": "강원특별자치도", "제주도": "제주특별자치도",
+    "세종": "세종특별자치시", "강원": "강원특별자치도",
+    "전북": "전북특별자치도", "제주": "제주특별자치도",
+    "광주": "전남광주통합특별시", "전남": "전남광주통합특별시",
     "충청도": "", "전라도": "", "경상도": "", "전국": "",
 }
 
 
 def _notion_region_to_enum(region_kr: str) -> str:
-    """노션 지역 표기(시/도 또는 구 광역)를 CrawledRegion enum으로 변환한다."""
+    """노션 지역 표기(시/도 또는 구 광역)를 Region 값으로 변환한다."""
     if not region_kr:
         return ""
-    if region_kr in REGION_ENUM_BY_KR:
-        return REGION_ENUM_BY_KR[region_kr]
+    if region_kr in REGIONS:
+        return region_kr
     return _LEGACY_REGION_TO_ENUM.get(region_kr, "")
 
 

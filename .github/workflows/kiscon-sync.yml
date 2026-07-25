@@ -25,7 +25,7 @@ jobs:
       - name: Sync KISCON data to Postgres
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}
         run: pnpm --filter @bconnect/data-jobs kiscon-sync
 
       - name: Notify Slack on failure or cancellation
@@ -35,4 +35,4 @@ jobs:
             -H 'Content-Type: application/json' \
             -d '{"text":"🚨 *KISCON Sync 실패/취소*\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|워크플로우 로그 확인>"}'
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}

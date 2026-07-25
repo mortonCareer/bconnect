@@ -178,7 +178,7 @@ export default function SignupAuthPage() {
           {/* Submit Button */}
           {step === 'phone' ? (
             <FormSubmitButton
-              requireAllFilled={false}
+              requireValid={false}
               variant="outline"
               size="full"
               disabled={!isPhoneValid}
@@ -188,8 +188,7 @@ export default function SignupAuthPage() {
             </FormSubmitButton>
           ) : (
             <FormSubmitButton
-              requireAllFilled={false}
-              variant="primary"
+              requireValid={false}
               size="full"
               disabled={!isCodeValid}
               isLoading={verifyCodeMutation.isPending}

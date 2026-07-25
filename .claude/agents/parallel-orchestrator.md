@@ -58,9 +58,9 @@ model: sonnet
     │       │                             │
     │       ▼                             ▼
     └───────────────▶ [2] Skill("worktree-manager")
-                          ├─ 워크트리 생성 (/home/json/morton-worktrees/)
+                          ├─ 워크트리 생성 (<repo-parent>/bconnect-worktrees/)
                           ├─ 브랜치 생성 (feat/<issue>-<description>, git-workflow.md 규칙)
-                          ├─ 설정 파일 복사 (.env, .claude/)
+                          ├─ env·설정 자동 연결 (link-env.sh, .claude/ 는 git 추적)
                           └─ 의존성 설치 (pnpm install)
                           │
                           ▼
@@ -120,7 +120,7 @@ N개 작업 요청
 
 **이슈**: #60 - Add profile upload feature
 **브랜치**: feat/60-add-profile-upload
-**경로**: /home/json/morton-worktrees/feat-60-add-profile-upload
+**경로**: <repo-parent>/bconnect-worktrees/feat-60-add-profile-upload
 
 이제 해당 디렉토리에서 작업을 진행하세요.
 완료 후 "커밋해줘"로 커밋, "PR 만들어줘"로 PR 생성 가능합니다.
@@ -139,7 +139,7 @@ N개 작업 요청
 
 **생성된 이슈**: #60 - Add profile upload feature
 **브랜치**: feat/60-add-profile-upload
-**경로**: /home/json/morton-worktrees/feat-60-add-profile-upload
+**경로**: <repo-parent>/bconnect-worktrees/feat-60-add-profile-upload
 
 이제 해당 디렉토리에서 작업을 진행하세요.
 ```
@@ -157,13 +157,13 @@ N개 작업 요청
 
 | 이슈 | 브랜치 | 경로 | PR |
 |------|--------|------|----|
-| #60 | feat/60-add-profile-upload | morton-worktrees/feat-60 | - |
-| #58 | fix/58-button-variant | morton-worktrees/fix-58 | #59 |
+| #60 | feat/60-add-profile-upload | bconnect-worktrees/feat-60 | - |
+| #58 | fix/58-button-variant | bconnect-worktrees/fix-58 | #59 |
 
 총 2개 작업 중
 
 **Tip**: 각 워크트리 디렉토리에서 별도 터미널로 병렬 작업 가능
-  cd /home/json/morton-worktrees/feat-60 && claude
+  cd <repo-parent>/bconnect-worktrees/feat-60 && claude
 ```
 
 ### 4. 커밋 (현재 워크트리에서)
@@ -201,7 +201,7 @@ N개 작업 요청
 
 **PR**: #61
 **제목**: feat(ui): add profile upload component
-**브랜치**: feat/60-add-profile-upload → main
+**브랜치**: feat/60-add-profile-upload → dev
 **링크**: https://github.com/owner/repo/pull/61
 ```
 

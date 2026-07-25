@@ -75,8 +75,14 @@ graph TD
   end
   subgraph drive
     DriveV[DriveValidator]
+    DriveS[DriveService]
+  end
+  subgraph project
+    ProjectF[ProjectFinder]
   end
   NoteS --> DriveV
+  NoteS --> ProjectF
+  DriveS --> ProjectF
 ```
 - `DomainDependencyTest.java` 참고
 
