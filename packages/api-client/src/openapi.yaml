@@ -708,6 +708,37 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/notifications/{id}/read:
+    post:
+      tags:
+      - notification-controller
+      operationId: markRead
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/notifications/read:
+    post:
+      tags:
+      - notification-controller
+      operationId: markAllRead
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/notes:
     post:
       tags:
@@ -1146,37 +1177,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListAttachmentResponse"
-  /api/v1/notifications/{id}/read:
-    patch:
-      tags:
-      - notification-controller
-      operationId: markRead
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ApiResponseVoid"
-  /api/v1/notifications/read:
-    patch:
-      tags:
-      - notification-controller
-      operationId: markAllRead
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/tasks:
     get:
       tags:
@@ -1982,11 +1982,11 @@ components:
     ExceptionCode:
       type: object
       properties:
-        message:
+        code:
           type: string
         status:
           $ref: "#/components/schemas/HttpStatus"
-        code:
+        message:
           type: string
     HttpStatus:
       type: string
