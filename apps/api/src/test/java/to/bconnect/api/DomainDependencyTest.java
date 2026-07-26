@@ -21,7 +21,7 @@ public class DomainDependencyTest {
 
     // dep: chat → allowed
     @ArchTest ArchRule boardDomainRule = domainRule("board", "drive", "project");
-    @ArchTest ArchRule chatDomainRule = domainRule("chat", "offer");
+    @ArchTest ArchRule chatDomainRule = domainRule("chat");
     @ArchTest ArchRule companyDomainRule = domainRule("company");
     @ArchTest ArchRule coworkerDomainRule = domainRule("coworker");
     @ArchTest ArchRule credentialDomainRule = domainRule("credential");
