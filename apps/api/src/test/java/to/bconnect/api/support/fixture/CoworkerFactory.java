@@ -7,11 +7,11 @@ import to.bconnect.api.storage.coworker.CoworkerEntity;
 @Component
 public class CoworkerFactory {
 
-    public static Coworker create(Long id, Long memberId) {
+    public static Coworker domain(Long id, Long memberId) {
         return new Coworker(id, memberId);
     }
 
-    public static CoworkerEntity createEntity(Long memberId, Long otherId) {
+    public static CoworkerEntity entity(Long memberId, Long otherId) {
         return CoworkerEntity.of(memberId, otherId);
     }
 }
