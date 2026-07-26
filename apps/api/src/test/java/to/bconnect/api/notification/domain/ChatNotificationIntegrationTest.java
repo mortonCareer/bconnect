@@ -49,8 +49,8 @@ class ChatNotificationIntegrationTest {
     void setUp() {
         // 비트랜잭션 구동이라 커밋이 남는다. username·phone 은 부분 unique 인덱스가 있어 테스트마다 고유값으로 격리한다.
         String uniq = java.util.UUID.randomUUID().toString();
-        senderId = memberRepository.save(new MemberEntity("sender-" + uniq, "발신자", "p-" + uniq, Role.USER)).getId();
-        receiverId = memberRepository.save(new MemberEntity("receiver-" + uniq, "수신자", "r-" + uniq, Role.USER)).getId();
+        senderId = memberRepository.save(new MemberEntity("sender-" + uniq, "발신자", "p-" + uniq, Set.of(Role.CAREER))).getId();
+        receiverId = memberRepository.save(new MemberEntity("receiver-" + uniq, "수신자", "r-" + uniq, Set.of(Role.CAREER))).getId();
     }
 
     @Test

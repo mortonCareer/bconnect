@@ -18,6 +18,7 @@ import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.chat.MessageType;
+import to.bconnect.api.storage.member.Role;
 
 import java.time.Instant;
 import java.util.List;
@@ -42,7 +43,7 @@ class MessageSocketServiceTest {
     @DisplayName("WebSocket principal name(=회원 ID)을 회원 ID로 직접 해석해 활성·비활성 수신자를 분리한다")
     void broadcast_splitsRecipientsByPrincipalId() {
         // DIRECT 방 참여자 1(발신자)·2(상대). 상대(2)만 구독 중.
-        var sender = new AuthUser(1L, "1", "WORKER");
+        var sender = new AuthUser(1L, "1", Set.of(Role.CAREER));
 
         // principal.getName() == "2" (username 아님, 회원 ID 문자열) — 중첩 스터빙 방지 위해 미리 생성
         var activeSubscription = subscriptionOf("2");

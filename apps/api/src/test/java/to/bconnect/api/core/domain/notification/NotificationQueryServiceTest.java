@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.notification.NotificationEntity;
 import to.bconnect.api.storage.notification.NotificationRepository;
 
@@ -13,6 +14,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.IntFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,8 +22,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class NotificationQueryServiceTest {
 
-    private static final AuthUser USER_A = new AuthUser(1L, "1", "WORKER");
-    private static final AuthUser USER_B = new AuthUser(2L, "2", "WORKER");
+    private static final AuthUser USER_A = new AuthUser(1L, "1", Set.of(Role.CAREER));
+    private static final AuthUser USER_B = new AuthUser(2L, "2", Set.of(Role.CAREER));
 
     private FakeNotificationRepository repository;
     private NotificationQueryService service;

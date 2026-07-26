@@ -128,7 +128,7 @@ class MessageServiceTest {
     private Long saveMember() {
         var uniq = UUID.randomUUID().toString();
         return memberRepository.save(
-                new MemberEntity("u-" + uniq, "회원", "p-" + uniq, Role.USER)).getId();
+                new MemberEntity("u-" + uniq, "회원", "p-" + uniq, Set.of(Role.CAREER))).getId();
     }
 
     private Long saveGroupChat() {
