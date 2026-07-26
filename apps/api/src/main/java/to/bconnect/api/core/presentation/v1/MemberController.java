@@ -85,7 +85,7 @@ public class MemberController {
             HttpServletRequest request,
             HttpServletResponse response) {
         val member = memberService.register(phone, body.toCommand());
-        val session = sessionTokenIssuer.login(member.id(), member.username(), member.role().name(), request, response);
+        val session = sessionTokenIssuer.login(member.id(), member.username(), member.roles(), request, response);
 
         return ApiResponse.success(new RegisterMemberResponse(member.id(), session.accessToken()));
     }

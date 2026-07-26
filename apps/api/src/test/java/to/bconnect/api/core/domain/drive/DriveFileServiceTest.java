@@ -30,6 +30,7 @@ import to.bconnect.api.storage.project.ProjectRepository;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -39,7 +40,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DriveFileServiceTest {
 
-    private static final AuthUser USER = new AuthUser(1L, "1", "USER");
+    private static final AuthUser USER = new AuthUser(1L, "1", Set.of(Role.CAREER));
 
     @Mock private DriveRepository driveRepository;
     @Mock private DriveFinder driveFinder;
@@ -191,7 +192,7 @@ class DriveFileServiceTest {
     }
 
     private static MemberEntity member() {
-        return new MemberEntity("username", "이름", "01000000000", Role.USER);
+        return new MemberEntity("username", "이름", "01000000000", Set.of(Role.CAREER));
     }
 
     private static CompanyEntity company() {

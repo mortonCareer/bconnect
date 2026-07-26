@@ -39,7 +39,7 @@ sequenceDiagram
     alt 기존 회원 (AuthUser)
         Handler->>Handler: 토큰 발급 (JwtProvider) · 세션 등록 (SessionService)
         Handler-->>Client: access token · refresh 쿠키 (Set-Cookie)
-    else 미가입 (phone · GUEST)
+    else 미가입 (phone · SIGNUP)
         Handler->>Handler: signup token 발급 (SignupTokenService)
         Handler-->>Client: signup token
     end

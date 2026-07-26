@@ -13,11 +13,13 @@ import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
+import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.project.ProjectEntity;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -28,7 +30,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
 
-    private static final AuthUser USER = new AuthUser(1L, "1", "USER");
+    private static final AuthUser USER = new AuthUser(1L, "1", Set.of(Role.CAREER));
 
     @Mock private ProjectRepository projectRepository;
     @Mock private CompanyRepository companyRepository;

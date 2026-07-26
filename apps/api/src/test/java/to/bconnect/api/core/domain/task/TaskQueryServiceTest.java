@@ -12,6 +12,7 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
+import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.project.ProjectEntity;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskEntity;
@@ -19,6 +20,7 @@ import to.bconnect.api.storage.task.TaskRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -28,7 +30,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TaskQueryServiceTest {
 
-    private static final AuthUser USER = new AuthUser(1L, "1", "USER");
+    private static final AuthUser USER = new AuthUser(1L, "1", Set.of(Role.CAREER));
     private static final Long PROJECT_ID = 100L;
 
     @Mock private TaskRepository taskRepository;
