@@ -2891,21 +2891,10 @@ components:
           type:
           - string
           - "null"
-        role:
-          $ref: "#/components/schemas/Role"
-        createdAt:
-          type: string
-          format: date-time
-        modifiedAt:
-          type: string
-          format: date-time
       required:
-      - createdAt
       - id
-      - modifiedAt
       - name
       - picture
-      - role
       - username
     OfferResponse:
       type: object
@@ -2962,12 +2951,6 @@ components:
       - headline
       - primaryTrade
       - role
-    Role:
-      type: string
-      enum:
-      - GUEST
-      - USER
-      - ADMIN
     ApiResponseListRecommendationResponse:
       type: object
       properties:
@@ -3375,8 +3358,11 @@ components:
           type:
           - string
           - "null"
-        role:
-          $ref: "#/components/schemas/Role"
+        roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Role"
+          uniqueItems: true
         createdAt:
           type: string
           format: date-time
@@ -3390,8 +3376,16 @@ components:
       - name
       - phone
       - picture
-      - role
+      - roles
       - username
+    Role:
+      type: string
+      enum:
+      - SIGNUP
+      - GUEST
+      - CAREER
+      - PLAN
+      - ADMIN
     ApiResponseMemberResponse:
       type: object
       properties:
@@ -3521,26 +3515,10 @@ components:
           type:
           - string
           - "null"
-        role:
-          type: "null"
-          $ref: "#/components/schemas/Role"
-        createdAt:
-          type:
-          - string
-          - "null"
-          format: date-time
-        modifiedAt:
-          type:
-          - string
-          - "null"
-          format: date-time
       required:
-      - createdAt
       - id
-      - modifiedAt
       - name
       - picture
-      - role
       - username
     ApiResponseGroupChatResponse:
       type: object
