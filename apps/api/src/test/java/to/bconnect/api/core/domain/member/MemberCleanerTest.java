@@ -1,0 +1,154 @@
+package to.bconnect.api.core.domain.member;
+
+import lombok.val;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import to.bconnect.api.storage.attachment.AttachmentRepository;
+import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.board.BoardRepository;
+import to.bconnect.api.storage.board.NoteRepository;
+import to.bconnect.api.storage.company.CompanyRepository;
+import to.bconnect.api.storage.coworker.CoworkerRepository;
+import to.bconnect.api.storage.coworker.CoworkerRequestRepository;
+import to.bconnect.api.storage.credential.CredentialRepository;
+import to.bconnect.api.storage.drive.DriveMemberRepository;
+import to.bconnect.api.storage.drive.DriveRepository;
+import to.bconnect.api.storage.member.MemberRepository;
+import to.bconnect.api.storage.member.Role;
+import to.bconnect.api.storage.offer.OfferRepository;
+import to.bconnect.api.storage.post.PostRepository;
+import to.bconnect.api.storage.profile.ProfileRepository;
+import to.bconnect.api.storage.profile.Trade;
+import to.bconnect.api.storage.recommendation.RecommendationRepository;
+import to.bconnect.api.storage.session.SessionRepository;
+import to.bconnect.api.storage.task.TaskEntity;
+import to.bconnect.api.storage.task.TaskRepository;
+import to.bconnect.api.storage.task.TaskType;
+import to.bconnect.api.support.IntegrationTest;
+import to.bconnect.api.support.fixture.*;
+
+import java.time.LocalDate;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
+
+@IntegrationTest
+class MemberCleanerTest {
+
+    @Autowired private MemberCleaner memberCleaner;
+    @Autowired private MemberRepository memberRepository;
+    @Autowired private CompanyRepository companyRepository;
+    @Autowired private SessionRepository sessionRepository;
+    @Autowired private ProfileRepository profileRepository;
+    @Autowired private CredentialRepository credentialRepository;
+    @Autowired private CoworkerRepository coworkerRepository;
+    @Autowired private CoworkerRequestRepository coworkerRequestRepository;
+    @Autowired private RecommendationRepository recommendationRepository;
+    @Autowired private PostRepository postRepository;
+    @Autowired private OfferRepository offerRepository;
+    @Autowired private TaskRepository taskRepository;
+    @Autowired private DriveRepository driveRepository;
+    @Autowired private DriveMemberRepository driveMemberRepository;
+    @Autowired private BoardRepository boardRepository;
+    @Autowired private NoteRepository noteRepository;
+    @Autowired private AttachmentRepository attachmentRepository;
+
+    @Test
+    @DisplayName("clean - 탈퇴 회원을 정리하면 연관 데이터가 삭제된다")
+    void clean_success() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+
+        sessionRepository.save(SessionFactory.entity(member.getId()));
+        profileRepository.save(ProfileFactory.entity(member.getId()));
+        val credential = credentialRepository.save(CredentialFactory.entity(member.getId()));
+        coworkerRepository.save(CoworkerFactory.entity(member.getId(), other.getId()));
+        coworkerRequestRepository.save(CoworkerRequestFactory.entity(member.getId(), other.getId()));
+        coworkerRequestRepository.save(CoworkerRequestFactory.entity(other.getId(), member.getId()));
+        recommendationRepository.save(RecommendationFactory.entity(member.getId(), other.getId()));
+        recommendationRepository.save(RecommendationFactory.entity(other.getId(), member.getId()));
+        val task = taskRepository.save(TaskFactory.entity(member.getId()));
+        val post = postRepository.save(PostFactory.entity(member.getId(), task.getId()));
+        offerRepository.save(OfferFactory.entity(task.getId(), member.getId()));
+        val projectTask = taskRepository.save(new TaskEntity(
+                TaskType.PROJECT,
+                Set.of(Trade.ELECTRICAL),
+                LocalDate.of(2026, 6, 1),
+                LocalDate.of(2026, 6, 30),
+                member.getId(),
+                "task",
+                "memo",
+                "company",
+                ProfileFactory.DEFAULT_ADDRESS,
+                null,
+                "project",
+                "requirement",
+                "memo"
+        ));
+        val drive = driveRepository.save(DriveFactory.entity(null, member.getId()));
+        val board = boardRepository.save(BoardFactory.entity(null, drive.getId()));
+        val note = noteRepository.save(BoardFactory.noteEntity(board.getId(), member.getId()));
+        driveMemberRepository.save(DriveFactory.memberEntity(drive.getId(), member.getId()));
+
+        val memberAttachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        memberAttachment.complete();
+        memberAttachment.link(ReferenceType.MEMBER, member.getId());
+        val credentialAttachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        credentialAttachment.complete();
+        credentialAttachment.link(ReferenceType.CREDENTIAL, credential.getId());
+        val postAttachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        postAttachment.complete();
+        postAttachment.link(ReferenceType.POST, post.getId());
+        val driveAttachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        driveAttachment.complete();
+        driveAttachment.link(ReferenceType.DRIVE, drive.getId());
+
+        // when
+        memberCleaner.clean(UserFactory.domain(member.getId(), Role.CAREER));
+
+        // then
+        assertThat(sessionRepository.findByMemberId(member.getId())).isEmpty();
+        assertThat(profileRepository.findByMemberId(member.getId())).isEmpty();
+        assertThat(credentialRepository.findAllByMemberId(member.getId())).isEmpty();
+        assertThat(coworkerRepository.findAllByMemberId(member.getId())).isEmpty();
+        assertThat(coworkerRequestRepository.findAllByFromId(member.getId())).isEmpty();
+        assertThat(coworkerRequestRepository.findAllByToId(member.getId())).isEmpty();
+        assertThat(recommendationRepository.findAllByFromId(member.getId())).isEmpty();
+        assertThat(recommendationRepository.findAllByToId(member.getId())).isEmpty();
+        assertThat(postRepository.findAllByMemberId(member.getId())).isEmpty();
+        assertThat(offerRepository.findAllByWorkerId(member.getId())).isEmpty();
+        assertThat(taskRepository.findAllByWorkerIdAndType(member.getId(), TaskType.WORKER)).isEmpty();
+        assertThat(taskRepository.findById(projectTask.getId())).isPresent();
+        assertThat(driveRepository.findAllByMemberId(member.getId())).isEmpty();
+        assertThat(boardRepository.findByDriveId(drive.getId())).isEmpty();
+        assertThat(noteRepository.findById(note.getId())).isEmpty();
+        assertThat(driveMemberRepository.findAllByMemberId(member.getId())).isEmpty();
+
+        assertThat(attachmentRepository.findById(memberAttachment.getId()).orElseThrow().getReferenceId()).isNull();
+        assertThat(attachmentRepository.findById(credentialAttachment.getId()).orElseThrow().getReferenceId()).isNull();
+        assertThat(attachmentRepository.findById(postAttachment.getId()).orElseThrow().getReferenceId()).isNull();
+        assertThat(attachmentRepository.findById(driveAttachment.getId()).orElseThrow().getReferenceId()).isNull();
+
+        val empty = memberRepository.save(MemberFactory.entity("member3", "01000001003", Role.CAREER));
+        assertThatCode(() -> memberCleaner.clean(UserFactory.domain(empty.getId(), Role.CAREER)))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("clean - 소유한 업체가 있을 때 정리하면 WITHDRAW_COMPANY_EXISTS로 실패한다")
+    void clean_fail_M003() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        companyRepository.save(CompanyFactory.entity(member.getId()));
+        profileRepository.save(ProfileFactory.entity(member.getId()));
+
+        // when & then
+        assertCodeException(() -> memberCleaner.clean(UserFactory.domain(member.getId(), Role.CAREER)))
+                .hasExceptionCode(MemberExceptionCode.WITHDRAW_COMPANY_EXISTS);
+        assertThat(profileRepository.findByMemberId(member.getId())).isPresent();
+    }
+}
