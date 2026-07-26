@@ -10,7 +10,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
-import to.bconnect.api.core.domain.chat.MessageService;
+import to.bconnect.api.socket.message.MessageService;
 import to.bconnect.api.storage.chat.ChatType;
 
 @Component
