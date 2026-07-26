@@ -82,7 +82,7 @@ graph TD
         DS[Domain Services]
     end
     subgraph socket.message
-        MsgS[MessageSocketService]
+        MsgS[MessageService]
     end
     subgraph attachment
         Linker[AttachmentLinker]
