@@ -12,8 +12,8 @@ import org.springframework.messaging.simp.user.SimpSession;
 import org.springframework.messaging.simp.user.SimpSubscription;
 import org.springframework.messaging.simp.user.SimpUser;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
+import to.bconnect.api.core.domain.chat.GroupChatService;
 import to.bconnect.api.core.domain.chat.Message;
-import to.bconnect.api.core.domain.chat.MessageService;
 import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.chat.ChatType;
@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 class MessageSocketServiceTest {
 
     @Mock private MessageService messageService;
+    @Mock private GroupChatService groupChatService;
     @Mock private SimpUserRegistry simpUserRegistry;
     @Mock private ApplicationEventPublisher eventPublisher;
 
@@ -48,7 +49,7 @@ class MessageSocketServiceTest {
         // principal.getName() == "2" (username 아님, 회원 ID 문자열) — 중첩 스터빙 방지 위해 미리 생성
         var activeSubscription = subscriptionOf("2");
         when(messageService.create(any(), any(), any(), any())).thenReturn(message(100L));
-        when(messageService.findParticipantIds(10L, ChatType.DIRECT)).thenReturn(Set.of(1L, 2L));
+        when(groupChatService.findParticipantIds(10L, ChatType.DIRECT)).thenReturn(Set.of(1L, 2L));
         when(simpUserRegistry.findSubscriptions(any())).thenReturn(Set.of(activeSubscription));
 
         service.broadcast(sender, 10L, ChatType.DIRECT,
@@ -61,13 +62,13 @@ class MessageSocketServiceTest {
         // name "2" 가 회원 ID 2 로 해석돼 활성으로 분류됨
         assertThat(event.activeIds()).containsExactly(2L);
         assertThat(event.inactiveIds()).containsExactly(1L);
-        assertThat(event.chatId()).isEqualTo(10L);
-        assertThat(event.senderId()).isEqualTo(1L);
-        assertThat(event.preview()).isEqualTo("hello");
+        assertThat(event.message().chatId()).isEqualTo(10L);
+        assertThat(event.message().memberId()).isEqualTo(1L);
+        assertThat(event.message().content()).isEqualTo("hello");
     }
 
     private static Message message(long id) {
-        return new Message(id, 10L, 1L, MessageType.TEXT, "hello",
+        return new Message(id, 10L, ChatType.DIRECT, 1L, MessageType.TEXT, "hello",
                 Instant.now(), Instant.now());
     }
 
