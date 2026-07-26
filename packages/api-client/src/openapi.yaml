@@ -1881,18 +1881,29 @@ components:
       properties:
         zipcode:
           type: string
+          maxLength: 5
+          minLength: 0
         state:
           $ref: "#/components/schemas/Region"
         city:
           type: string
+          minLength: 1
         street:
           type: string
+          minLength: 1
         detail:
           type: string
         latitude:
           type: number
         longitude:
           type: number
+      required:
+      - city
+      - latitude
+      - longitude
+      - state
+      - street
+      - zipcode
     Region:
       type: string
       enum:
