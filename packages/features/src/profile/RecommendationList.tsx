@@ -51,9 +51,8 @@ export function RecommendationList({
     'rtab',
     parseAsStringLiteral(['received', 'sent'] as const)
       .withDefault('received')
-      // TODO(#843): 탭 history 'push'가 TopBar 뒤로가기를 오염시킴 — 뒤로가기가 화면을 이탈하지 않고 탭을 되돌림.
-      // CoworkerRequestList 처럼 'replace'로 전환 필요. 추천서 화면(full/inline) 회귀 확인 후 별도 반영.
-      .withOptions({ history: 'push' })
+      // 탭 전환은 히스토리를 쌓지 않음(replace) → TopBar 뒤로가기가 탭을 되돌리지 않고 화면을 정상 이탈
+      .withOptions({ history: 'replace' })
   )
   const [openId, setOpenId] = useState<number | null>(null)
 

@@ -19,7 +19,7 @@ export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProp
   const enabled = Number.isFinite(profileId) && profileId > 0
   // GET /feeds 는 전역(회원별 파라미터 없음) → memberId 로 클라이언트 필터
   // (BE 회원별 feed 엔드포인트 추가 시 대체)
-  const { data: feeds, isLoading } = useGetFeeds({ query: { enabled } })
+  const { data: feeds, isLoading } = useGetFeeds(undefined, { query: { enabled } })
 
   if (isLoading) {
     return (
@@ -35,7 +35,7 @@ export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProp
   }
 
   // TODO: BE required 처리 후 type narrowing 필요. Feed.post/Post.memberId가 optional emit이라 없는 항목은 임시로 렌더 제외.
-  const posts: Post[] = (feeds ?? []).flatMap((feed) =>
+  const posts: Post[] = (feeds?.content ?? []).flatMap((feed) =>
     feed.post && feed.post.memberId === profileId ? [feed.post] : []
   )
 

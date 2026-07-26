@@ -46,7 +46,8 @@ export function CertificateTab({
     'sub',
     parseAsStringLiteral(CERTIFICATE_SUB_KEYS)
       .withDefault('career')
-      .withOptions({ history: 'push' })
+      // 서브탭 전환은 히스토리를 쌓지 않음(replace) → TopBar 뒤로가기가 탭을 되돌리지 않고 화면을 정상 이탈
+      .withOptions({ history: 'replace' })
   )
 
   const form = useForm<CredentialFormInput, unknown, CredentialFormValues>({

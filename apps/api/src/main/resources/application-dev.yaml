@@ -13,3 +13,11 @@ sentry:
 app:
   jwt:
     cookie-domain: ${COOKIE_DOMAIN:.bconnect.to}
+
+  cors:
+    allowed-origin-patterns:
+      - https://bconnect-career*.vercel.app
+      - https://bconnect-plan*.vercel.app
+      - https://*.bconnect.to
+      - https://*.dev.bconnect.to
+      - "http://localhost:[*]"
