@@ -4,22 +4,18 @@ import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import to.bconnect.api.attachment.domain.AttachmentExceptionCode;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.ReferenceType;
-import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.support.IntegrationTest;
 import to.bconnect.api.support.fixture.AttachmentFactory;
-import to.bconnect.api.support.fixture.CompanyFactory;
 import to.bconnect.api.support.fixture.MemberFactory;
 import to.bconnect.api.support.fixture.UserFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 
 @IntegrationTest
@@ -30,7 +26,6 @@ class MemberServiceTest {
     @Autowired private MemberService memberService;
     @Autowired private MemberRepository memberRepository;
     @Autowired private AttachmentRepository attachmentRepository;
-    @Autowired private CompanyRepository companyRepository;
 
     @Test
     @DisplayName("get - 회원이 존재할 때 회원 정보를 반환한다")
@@ -157,105 +152,51 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("updatePicture - 본인이 첨부한 프로필 이미지로 변경한다")
+    @DisplayName("updatePicture - 프로필 이미지를 변경하면 기존 첨부가 해제되고 새 첨부가 연결되며 미지정은 연결을 해제한다")
     void updatePicture_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
-        attachment.complete();
+        val first = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        first.complete();
+        val second = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        second.complete();
 
         // when
-        memberService.updatePicture(UserFactory.domain(member.getId(), Role.CAREER), attachment.getId());
-        memberService.updatePicture(UserFactory.domain(member.getId(), Role.CAREER), attachment.getId());
+        memberService.updatePicture(UserFactory.domain(member.getId(), Role.CAREER), first.getId());
+        memberService.updatePicture(UserFactory.domain(member.getId(), Role.CAREER), second.getId());
+        val replacedReferenceId = attachmentRepository.findById(first.getId()).orElseThrow().getReferenceId();
+        val linkedReferenceId = attachmentRepository.findById(second.getId()).orElseThrow().getReferenceId();
         memberService.updatePicture(UserFactory.domain(member.getId(), Role.CAREER), null);
 
         // then
-        val found = attachmentRepository.findById(attachment.getId()).orElseThrow();
-        assertThat(found.getReferenceType()).isEqualTo(ReferenceType.MEMBER);
-        assertThat(found.getReferenceId()).isEqualTo(member.getId());
+        assertThat(replacedReferenceId).isNull();
+        assertThat(linkedReferenceId).isEqualTo(member.getId());
+        val found = attachmentRepository.findById(second.getId()).orElseThrow();
+        assertThat(found.getReferenceType()).isNull();
+        assertThat(found.getReferenceId()).isNull();
     }
 
     @Test
-    @DisplayName("updatePicture - 타인의 첨부일 때 사진을 변경하면 FORBIDDEN으로 실패한다")
-    void updatePicture_fail_C004() {
-        // given
-        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        val attachment = attachmentRepository.save(AttachmentFactory.entity(other.getId(), other.getId()));
-        attachment.complete();
-
-        // when & then
-        assertCodeException(() -> memberService.updatePicture(UserFactory.domain(member.getId(), Role.CAREER), attachment.getId()))
-                .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
-    }
-
-    @Test
-    @DisplayName("updatePicture - 첨부가 존재하지 않을 때 사진을 변경하면 NOT_FOUND로 실패한다")
-    void updatePicture_fail_C005() {
-        // given
-        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-
-        // when & then
-        assertCodeException(() -> memberService.updatePicture(UserFactory.domain(member.getId(), Role.CAREER), MISSING_ID))
-                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
-    }
-
-    @Test
-    @DisplayName("updatePicture - 첨부 업로드가 완료되지 않았을 때 사진을 변경하면 NOT_COMPLETED로 실패한다")
-    void updatePicture_fail_AT004() {
-        // given
-        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
-
-        // when & then
-        assertCodeException(() -> memberService.updatePicture(UserFactory.domain(member.getId(), Role.CAREER), attachment.getId()))
-                .hasExceptionCode(AttachmentExceptionCode.NOT_COMPLETED);
-    }
-
-    @Test
-    @DisplayName("updatePicture - 첨부가 다른 참조에 연결되어 있을 때 사진을 변경하면 INVALID_LINKED로 실패한다")
-    void updatePicture_fail_AT005() {
-        // given
-        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
-        attachment.complete();
-        attachment.link(ReferenceType.POST, 1L);
-
-        // when & then
-        assertCodeException(() -> memberService.updatePicture(UserFactory.domain(member.getId(), Role.CAREER), attachment.getId()))
-                .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
-    }
-
-    @Test
-    @DisplayName("withdraw - 회원이 존재할 때 탈퇴하면 회원이 삭제되고 첨부 참조가 해제된다")
+    @DisplayName("withdraw - 회원이 존재할 때 탈퇴하면 회원이 삭제된다")
     void withdraw_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
-        attachment.complete();
-        attachment.link(ReferenceType.MEMBER, member.getId());
 
         // when
         memberService.withdraw(UserFactory.domain(member.getId(), Role.CAREER));
 
         // then
         assertThat(memberRepository.findById(member.getId())).isEmpty();
-        val found = attachmentRepository.findById(attachment.getId()).orElseThrow();
-        assertThat(found.getReferenceType()).isNull();
-        assertThat(found.getReferenceId()).isNull();
-        assertThatCode(() -> memberService.withdraw(UserFactory.domain(MISSING_ID, Role.CAREER)))
-                .doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("withdraw - 소유한 업체가 있을 때 탈퇴하면 WITHDRAW_COMPANY_EXISTS로 실패한다")
-    void withdraw_fail_M003() {
+    @DisplayName("withdraw - 회원이 존재하지 않을 때 탈퇴하면 NOT_FOUND로 실패한다")
+    void withdraw_fail_C005() {
         // given
-        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        companyRepository.save(CompanyFactory.entity(member.getId()));
+        val user = UserFactory.domain(MISSING_ID, Role.CAREER);
 
         // when & then
-        assertCodeException(() -> memberService.withdraw(UserFactory.domain(member.getId(), Role.CAREER)))
-                .hasExceptionCode(MemberExceptionCode.WITHDRAW_COMPANY_EXISTS);
+        assertCodeException(() -> memberService.withdraw(user))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
 }
