@@ -17,7 +17,6 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -85,7 +84,10 @@ public class TaskService {
         val found = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (found.getType() != TaskType.WORKER || !found.getWorkerId().equals(user.id()))
+        if (found.getType() != TaskType.WORKER)
+            throw new CodeException(TaskExceptionCode.INVALID_TYPE);
+
+        if (!found.getWorkerId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         found.update(command.trades(), command.start(), command.end(),
@@ -98,7 +100,7 @@ public class TaskService {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (task.getType() != TaskType.PROJECT)
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+            throw new CodeException(TaskExceptionCode.INVALID_TYPE);
 
         val companyId = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
@@ -119,7 +121,10 @@ public class TaskService {
         val found = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (found.getType() != TaskType.PROJECT || found.getWorkerId() == null)
+        if (found.getType() != TaskType.PROJECT)
+            throw new CodeException(TaskExceptionCode.INVALID_TYPE);
+
+        if (found.getWorkerId() == null)
             throw new CodeException(TaskExceptionCode.NOT_ASSIGNED);
 
         if (!user.id().equals(found.getWorkerId()))

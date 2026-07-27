@@ -89,6 +89,9 @@ public class CredentialService {
         val found = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
+        if (found.getStatus() != CredentialStatus.PENDING)
+            throw new CodeException(CredentialExceptionCode.INVALID_STATUS);
+
         found.accept();
     }
 
@@ -96,6 +99,9 @@ public class CredentialService {
     public void deny(Long id) {
         val found = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        if (found.getStatus() != CredentialStatus.PENDING)
+            throw new CodeException(CredentialExceptionCode.INVALID_STATUS);
 
         found.deny();
     }

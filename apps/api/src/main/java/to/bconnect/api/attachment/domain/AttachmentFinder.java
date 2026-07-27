@@ -41,6 +41,9 @@ public class AttachmentFinder {
      */
     @Transactional(readOnly = true)
     public List<Attachment> list(Collection<Long> attachmentIds) {
+        if (attachmentIds == null)
+            return List.of();
+
         val ids = attachmentIds.stream().filter(Objects::nonNull).distinct().toList();
         if (ids.isEmpty())
             return List.of();
@@ -128,6 +131,9 @@ public class AttachmentFinder {
 
     @Transactional(readOnly = true)
     public void validateOwnership(Long memberId, List<Long> attachmentIds) {
+        if (attachmentIds == null)
+            return;
+
         val ids = attachmentIds.stream().filter(Objects::nonNull).distinct().toList();
         if (ids.isEmpty())
             return;
