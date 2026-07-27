@@ -79,8 +79,8 @@ class AttachmentLinkerTest {
     }
 
     @Test
-    @DisplayName("link - 다른 참조에 연결된 첨부가 목록에 포함되면 INVALID_LINKED로 실패한다")
-    void link_list_fail_AT005() {
+    @DisplayName("link - 참조 타입이 다른 첨부가 목록에 포함되면 INVALID_LINKED로 실패한다")
+    void link_list_fail_AT005_type() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
@@ -88,7 +88,22 @@ class AttachmentLinkerTest {
         attachment.link(ReferenceType.POST, 1L);
 
         // when & then
-        assertCodeException(() -> attachmentLinker.link(ReferenceType.MEMBER, member.getId(),
+        assertCodeException(() -> attachmentLinker.link(ReferenceType.MEMBER, 1L,
+                List.of(attachment.getId())))
+                .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
+    }
+
+    @Test
+    @DisplayName("link - 참조 식별자가 다른 첨부가 목록에 포함되면 INVALID_LINKED로 실패한다")
+    void link_list_fail_AT005_id() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        attachment.complete();
+        attachment.link(ReferenceType.POST, 1L);
+
+        // when & then
+        assertCodeException(() -> attachmentLinker.link(ReferenceType.POST, 2L,
                 List.of(attachment.getId())))
                 .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
     }
@@ -135,8 +150,8 @@ class AttachmentLinkerTest {
     }
 
     @Test
-    @DisplayName("link - 첨부가 다른 참조에 연결되어 있을 때 연결하면 INVALID_LINKED로 실패한다")
-    void link_fail_AT005() {
+    @DisplayName("link - 참조 타입이 다른 첨부를 연결하면 INVALID_LINKED로 실패한다")
+    void link_fail_AT005_type() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
@@ -144,7 +159,21 @@ class AttachmentLinkerTest {
         attachment.link(ReferenceType.POST, 1L);
 
         // when & then
-        assertCodeException(() -> attachmentLinker.link(ReferenceType.MEMBER, member.getId(), attachment.getId()))
+        assertCodeException(() -> attachmentLinker.link(ReferenceType.MEMBER, 1L, attachment.getId()))
+                .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
+    }
+
+    @Test
+    @DisplayName("link - 참조 식별자가 다른 첨부를 연결하면 INVALID_LINKED로 실패한다")
+    void link_fail_AT005_id() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        attachment.complete();
+        attachment.link(ReferenceType.POST, 1L);
+
+        // when & then
+        assertCodeException(() -> attachmentLinker.link(ReferenceType.POST, 2L, attachment.getId()))
                 .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
     }
 
@@ -219,8 +248,8 @@ class AttachmentLinkerTest {
     }
 
     @Test
-    @DisplayName("unlink - 다른 참조에 연결된 첨부를 지정 해제하면 INVALID_LINKED로 실패한다")
-    void unlink_attachment_fail_AT005() {
+    @DisplayName("unlink - 참조 타입이 다른 첨부를 지정 해제하면 INVALID_LINKED로 실패한다")
+    void unlink_attachment_fail_AT005_type() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
@@ -228,7 +257,21 @@ class AttachmentLinkerTest {
         attachment.link(ReferenceType.POST, 1L);
 
         // when & then
-        assertCodeException(() -> attachmentLinker.unlink(ReferenceType.MEMBER, member.getId(), attachment.getId()))
+        assertCodeException(() -> attachmentLinker.unlink(ReferenceType.MEMBER, 1L, attachment.getId()))
+                .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
+    }
+
+    @Test
+    @DisplayName("unlink - 참조 식별자가 다른 첨부를 지정 해제하면 INVALID_LINKED로 실패한다")
+    void unlink_attachment_fail_AT005_id() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        attachment.complete();
+        attachment.link(ReferenceType.POST, 1L);
+
+        // when & then
+        assertCodeException(() -> attachmentLinker.unlink(ReferenceType.POST, 2L, attachment.getId()))
                 .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
     }
 }
