@@ -80,10 +80,13 @@ public class MemberService {
 
     @Transactional
     public void updatePicture(AuthUser user, Long pictureId) {
-        if (pictureId == null)
+        if (pictureId == null) {
+            attachmentLinker.unlink(ReferenceType.MEMBER, user.id());
             return;
+        }
 
         attachmentFinder.validateOwnership(user.id(), pictureId);
+        attachmentLinker.unlink(ReferenceType.MEMBER, user.id());
         attachmentLinker.link(ReferenceType.MEMBER, user.id(), pictureId);
     }
 

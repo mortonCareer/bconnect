@@ -90,10 +90,13 @@ public class CompanyService {
         val found = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (pictureId == null)
+        if (pictureId == null) {
+            attachmentLinker.unlink(ReferenceType.COMPANY, found.getId());
             return;
+        }
 
         attachmentFinder.validateOwnership(user.id(), pictureId);
+        attachmentLinker.unlink(ReferenceType.COMPANY, found.getId());
         attachmentLinker.link(ReferenceType.COMPANY, found.getId(), pictureId);
     }
 
