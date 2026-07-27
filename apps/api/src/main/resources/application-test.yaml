@@ -11,11 +11,7 @@ spring:
 app:
   jwt:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
-
-  sms:
-    api-key: test-api-key
-    api-secret: test-api-secret
-    sender-number: "01000000000"
+    cookie-domain: localhost
 
   s3:
     bucket: test-bucket
@@ -23,3 +19,6 @@ app:
   cloudfront:
     key-pair-id: test-key-pair-id
     private-key: test-private-key
+
+  sns:
+    platform-application-arn: test-sns-arn

@@ -14,18 +14,9 @@ spring:
         - classpath:schema-crawler-h2.sql
 
 app:
-  cors:
-    allowed-origin-patterns:
-      - "http://localhost:[*]"
-      - "http://127.0.0.1:[*]"
-
   jwt:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
-
-  sms:
-    api-key: local-api-key
-    api-secret: local-api-secret
-    sender-number: "01000000000"
+    cookie-domain: localhost
 
   s3:
     bucket: local-bucket
@@ -34,7 +25,5 @@ app:
     key-pair-id: local-key-pair-id
     private-key: local-private-key
 
-logging:
-  level:
-    org.springframework.web.socket: TRACE
-    org.springframework.messaging.simp.stomp: TRACE
+  sns:
+    platform-application-arn: local-sns-arn

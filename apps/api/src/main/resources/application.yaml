@@ -39,7 +39,7 @@ app:
 
   cors:
     allowed-origins:
-      - ${CORS_ALLOWED_ORIGIN:http://localhost:3000}
+      - ${CORS_ALLOWED_ORIGIN}
     allowed-origin-patterns:
       - https://bconnect-career*.vercel.app
       - https://bconnect-plan*.vercel.app
@@ -50,12 +50,7 @@ app:
     secret: ${JWT_SECRET}
     access-token-expiration: 1h
     refresh-token-expiration: 7d
-    cookie-domain: ${COOKIE_DOMAIN:}
-
-  sms:
-    api-key: ${SOLAPI_API_KEY}
-    api-secret: ${SOLAPI_API_SECRET}
-    sender-number: ${SOLAPI_SENDER_NUMBER}
+    cookie-domain: ${COOKIE_DOMAIN}
 
   s3:
     region: ${AWS_REGION:ap-northeast-2}
@@ -78,7 +73,7 @@ app:
 
   sns:
     region: ${AWS_REGION:ap-northeast-2}
-    platform-application-arn: ${AWS_SNS_PLATFORM_APPLICATION_ARN:}
+    platform-application-arn: ${AWS_SNS_PLATFORM_APPLICATION_ARN}
 
 springdoc:
   swagger-ui:
