@@ -2835,6 +2835,15 @@ components:
           type:
           - string
           - "null"
+        projectCompanyId:
+          type:
+          - integer
+          - "null"
+          format: int64
+        projectCompanyName:
+          type:
+          - string
+          - "null"
         offer:
           type: "null"
           $ref: "#/components/schemas/OfferSummaryResponse"
@@ -2851,6 +2860,8 @@ components:
       - id
       - modifiedAt
       - offer
+      - projectCompanyId
+      - projectCompanyName
       - projectId
       - projectMemo
       - projectRequirement
@@ -3433,6 +3444,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/GroupChatResponse"
+    ChatType:
+      type: string
+      enum:
+      - GROUP
+      - DIRECT
     GroupChatResponse:
       type: object
       properties:
@@ -3474,6 +3490,8 @@ components:
         chatId:
           type: integer
           format: int64
+        chatType:
+          $ref: "#/components/schemas/ChatType"
         memberId:
           type: integer
           format: int64
@@ -3494,6 +3512,7 @@ components:
       required:
       - attachments
       - chatId
+      - chatType
       - content
       - createdAt
       - id
