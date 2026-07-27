@@ -96,7 +96,6 @@ public class MemberService {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         memberCleaner.clean(user);
-        attachmentLinker.unlink(ReferenceType.MEMBER, user.id());
         memberRepository.delete(found);
     }
 }
