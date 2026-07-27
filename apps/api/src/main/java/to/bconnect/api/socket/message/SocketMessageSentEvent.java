@@ -1,11 +1,11 @@
 package to.bconnect.api.socket.message;
 
+import to.bconnect.api.core.domain.chat.Message;
+
 import java.util.Set;
 
 public record SocketMessageSentEvent(
-        Long chatId,
-        Long senderId,
         Set<Long> activeIds,
         Set<Long> inactiveIds,
-        String preview
+        Message message
 ) {}

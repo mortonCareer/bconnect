@@ -7,10 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.notification.domain.push.PushPayload;
 import to.bconnect.api.notification.domain.push.PushSendResult;
 import to.bconnect.api.notification.domain.push.PushSender;
 import to.bconnect.api.socket.message.SocketMessageSentEvent;
+import to.bconnect.api.storage.chat.ChatType;
+import to.bconnect.api.storage.chat.MessageType;
 import to.bconnect.api.storage.device.DevicePlatform;
 import to.bconnect.api.storage.device.DeviceTokenEntity;
 import to.bconnect.api.storage.device.DeviceTokenRepository;
@@ -19,6 +22,7 @@ import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.notification.NotificationRepository;
 
+import java.time.Instant;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -103,6 +107,8 @@ class ChatNotificationIntegrationTest {
     }
 
     private SocketMessageSentEvent chatEvent(String preview) {
-        return new SocketMessageSentEvent(999L, senderId, Set.of(), Set.of(receiverId), preview);
+        return new SocketMessageSentEvent(Set.of(), Set.of(receiverId),
+                new Message(1L, 999L, ChatType.DIRECT, senderId, MessageType.TEXT, preview,
+                        Instant.now(), Instant.now()));
     }
 }

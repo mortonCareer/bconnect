@@ -210,7 +210,7 @@ graph TD
 | SIGNUP_WELCOME | NONE | `회원가입을 축하드립니다` | — | ✅ MemberFirstDeviceRegisteredEvent (본인, 항상) |
 | PROFILE_COMPLETION | PROFILE | `프로필을 완성하고 업체로부터 일감을 받아보세요` | — | ✅ MemberFirstDeviceRegisteredEvent (본인, 프로필 미완성 시) |
 | COWORKER_REQUESTED | COWORKER_REQUEST | `%s 님으로부터 동료 요청을 제안받았습니다` | senderName | ⬜ 미배선 |
-| OFFER_RECEIVED | OFFER | `%s으로부터 섭외 요청을 제안받았습니다` | companyName | ⬜ 미배선 |
+| OFFER_RECEIVED | OFFER | `%s으로부터 섭외 요청을 받았습니다` | companyName | ⬜ 미배선 |
 | CONTRACT_WRITTEN | CONTRACT | `%s 님으로부터 계약서를 작성받았습니다` | senderName | ⬜ 미배선 |
 
 - 문구는 format string(`%s`)이며 `template.formatted(formatArgs(args))` 로 렌더한다 — placeholder 는 필요한 만큼 확장 가능하다.

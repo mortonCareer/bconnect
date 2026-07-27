@@ -29,6 +29,9 @@ public class ProfileService {
         if (!command.trades().contains(command.primaryTrade()))
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
 
+        val member = memberRepository.findById(user.id())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
         val created = new ProfileEntity(
                 user.id(),
                 command.role(),
@@ -41,10 +44,7 @@ public class ProfileService {
         );
 
         val profileId = profileRepository.save(created).getId();
-
-        memberRepository.findById(user.id())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
-                .grantRole(Role.CAREER);
+        member.grantRole(Role.CAREER);
 
         return profileId;
     }
