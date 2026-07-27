@@ -72,16 +72,16 @@ public class CompanyService {
                 command.brn()
         );
 
+        val member = memberRepository.findById(user.id())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
         val companyId = companyRepository.save(created).getId();
         if (command.pictureId() != null) {
             attachmentFinder.validateOwnership(user.id(), command.pictureId());
             attachmentLinker.link(ReferenceType.COMPANY, companyId, command.pictureId());
         }
 
-        memberRepository.findById(user.id())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
-                .grantRole(Role.PLAN);
-
+        member.grantRole(Role.PLAN);
         return companyId;
     }
 
