@@ -80,11 +80,13 @@ class AttachmentFinderTest {
 
         // when
         val response = attachmentFinder.list(List.of(first.getId(), second.getId()));
+        val duplicated = attachmentFinder.list(List.of(first.getId(), first.getId()));
         val empty = attachmentFinder.list(List.of());
 
         // then
         assertThat(response).extracting(Attachment::id)
                 .containsExactlyInAnyOrder(first.getId(), second.getId());
+        assertThat(duplicated).extracting(Attachment::id).containsExactly(first.getId());
         assertThat(empty).isEmpty();
     }
 
@@ -264,6 +266,8 @@ class AttachmentFinderTest {
 
         // when & then
         assertThatCode(() -> attachmentFinder.validateOwnership(member.getId(), List.of(first.getId(), second.getId())))
+                .doesNotThrowAnyException();
+        assertThatCode(() -> attachmentFinder.validateOwnership(member.getId(), List.of(first.getId(), first.getId())))
                 .doesNotThrowAnyException();
         assertThatCode(() -> attachmentFinder.validateOwnership(member.getId(), List.of()))
                 .doesNotThrowAnyException();

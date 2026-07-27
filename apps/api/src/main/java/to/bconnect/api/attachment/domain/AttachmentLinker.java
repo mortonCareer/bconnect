@@ -12,6 +12,7 @@ import to.bconnect.api.storage.attachment.AttachmentStatus;
 import to.bconnect.api.storage.attachment.ReferenceType;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Attachment 참조 연결 · 제거 (권한검증 미포함)
@@ -24,11 +25,12 @@ public class AttachmentLinker {
 
     @Transactional
     public void link(ReferenceType referenceType, Long referenceId, Collection<Long> attachmentIds) {
-        if(attachmentIds.isEmpty())
+        val ids = attachmentIds.stream().filter(Objects::nonNull).distinct().toList();
+        if (ids.isEmpty())
             return;
 
-        val attachments = attachmentRepository.findAllById(attachmentIds);
-        if (attachments.size() != attachmentIds.size())
+        val attachments = attachmentRepository.findAllById(ids);
+        if (attachments.size() != ids.size())
             throw new CodeException(CommonExceptionCode.NOT_FOUND);
 
         attachments.forEach(it -> {

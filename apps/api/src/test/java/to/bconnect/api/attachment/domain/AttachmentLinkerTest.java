@@ -41,6 +41,7 @@ class AttachmentLinkerTest {
         // when
         attachmentLinker.link(ReferenceType.MEMBER, member.getId(), List.of(first.getId(), second.getId()));
         attachmentLinker.link(ReferenceType.MEMBER, member.getId(), List.of(first.getId(), second.getId()));
+        attachmentLinker.link(ReferenceType.MEMBER, member.getId(), List.of(first.getId(), first.getId()));
         attachmentLinker.link(ReferenceType.MEMBER, member.getId(), List.of());
 
         // then
