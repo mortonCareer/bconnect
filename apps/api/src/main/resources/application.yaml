@@ -20,7 +20,6 @@ spring:
   sql:
     init:
       mode: always
-      platform: postgresql
 
   flyway:
     enabled: false

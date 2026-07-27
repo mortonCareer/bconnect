@@ -4,7 +4,9 @@ spring:
 
   sql:
     init:
-      mode: always
+      schema-locations:
+        - classpath:schema-postgresql.sql
+        - classpath:schema-crawler-postgresql.sql
 
 app:
   jwt:
