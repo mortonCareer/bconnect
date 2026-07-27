@@ -63,8 +63,10 @@ public class CredentialService {
         );
 
         credentialRepository.save(created);
-        attachmentFinder.validateOwnership(user.id(), command.attachmentId());
-        attachmentLinker.link(ReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
+        if (command.attachmentId() != null) {
+            attachmentFinder.validateOwnership(user.id(), command.attachmentId());
+            attachmentLinker.link(ReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
+        }
         return created.getId();
     }
 

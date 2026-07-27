@@ -5,6 +5,7 @@ import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.storage.member.Role;
 
 import java.time.Instant;
+import java.util.Set;
 
 public record MemberResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
@@ -12,7 +13,7 @@ public record MemberResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String name,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String phone,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String picture,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Role role,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Set<Role> roles,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt
 ) {
@@ -23,7 +24,7 @@ public record MemberResponse(
                 member.name(),
                 member.phone(),
                 picture,
-                member.role(),
+                member.roles(),
                 member.createdAt(),
                 member.modifiedAt()
         );

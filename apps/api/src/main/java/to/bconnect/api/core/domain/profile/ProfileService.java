@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.storage.member.MemberRepository;
+import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.profile.ProfileEntity;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.security.AuthUser;
@@ -17,6 +19,7 @@ import to.bconnect.api.security.AuthUser;
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
     public Long create(AuthUser user, CreateProfile command) {
@@ -25,6 +28,9 @@ public class ProfileService {
 
         if (!command.trades().contains(command.primaryTrade()))
             throw new CodeException(ProfileExceptionCode.INVALID_PRIMARY_TRADE);
+
+        val member = memberRepository.findById(user.id())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         val created = new ProfileEntity(
                 user.id(),
@@ -37,7 +43,10 @@ public class ProfileService {
                 command.address()
         );
 
-        return profileRepository.save(created).getId();
+        val profileId = profileRepository.save(created).getId();
+        member.grantRole(Role.CAREER);
+
+        return profileId;
     }
 
     @Transactional

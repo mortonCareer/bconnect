@@ -2,9 +2,13 @@
 -- 실제 데이터 (1000 ~)
 
 -- 운영 데이터 (0 ~ 99)
-INSERT INTO members (id, username, name, phone, role, created_at, modified_at) VALUES
-(0, 'system', '시스템', '01000000000', 'ADMIN', now(), now()),
-(1, 'admin', '관리자', '01083358632', 'ADMIN', now(), now());
+INSERT INTO members (id, username, name, phone, created_at, modified_at) VALUES
+(0, 'system', '시스템', '01000000000', now(), now()),
+(1, 'admin', '관리자', '01083358632', now(), now());
+
+INSERT INTO member_roles (member_id, role) VALUES
+(0, 'ADMIN'),
+(1, 'ADMIN');
 
 -- 실제 데이터 (1000 ~)
 ALTER TABLE otps ALTER COLUMN id RESTART WITH 1000;

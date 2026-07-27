@@ -47,10 +47,11 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public List<Project> list(AuthUser user) {
-        val company = companyRepository.findByMemberId(user.id())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        val optional = companyRepository.findByMemberId(user.id());
+        if (optional.isEmpty())
+            return List.of();
 
-        return projectRepository.findAllByCompanyId(company.getId())
+        return projectRepository.findAllByCompanyId(optional.get().getId())
                 .stream()
                 .map(Project::of)
                 .toList();

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import to.bconnect.api.socket.message.MessageService;
 import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
@@ -20,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MessageServiceTest {
 
     @Autowired private MessageService messageService;
+    @Autowired private GroupChatService groupChatService;
     @Autowired private MessageRepository messageRepository;
     @Autowired private DirectChatRepository directChatRepository;
     @Autowired private GroupChatRepository groupChatRepository;
@@ -109,7 +111,7 @@ class MessageServiceTest {
     void findParticipantIds_direct_returnsBothMembers() {
         var chat = directChatRepository.save(DirectChatEntity.of(memberB, memberA));
 
-        assertThat(messageService.findParticipantIds(chat.getId(), ChatType.DIRECT))
+        assertThat(groupChatService.findParticipantIds(chat.getId(), ChatType.DIRECT))
                 .containsExactlyInAnyOrder(memberA, memberB);
     }
 
@@ -121,14 +123,14 @@ class MessageServiceTest {
                 new ParticipantEntity(chatId, memberA),
                 new ParticipantEntity(chatId, memberB)));
 
-        assertThat(messageService.findParticipantIds(chatId, ChatType.GROUP))
+        assertThat(groupChatService.findParticipantIds(chatId, ChatType.GROUP))
                 .containsExactlyInAnyOrder(memberA, memberB);
     }
 
     private Long saveMember() {
         var uniq = UUID.randomUUID().toString();
         return memberRepository.save(
-                new MemberEntity("u-" + uniq, "회원", "p-" + uniq, Role.USER)).getId();
+                new MemberEntity("u-" + uniq, "회원", "p-" + uniq, Set.of(Role.CAREER))).getId();
     }
 
     private Long saveGroupChat() {

@@ -63,7 +63,7 @@ public class MemberService {
                 command.username(),
                 command.name(),
                 phone,
-                command.role()
+                command.roles()
         );
 
         memberRepository.save(created);
@@ -80,6 +80,9 @@ public class MemberService {
 
     @Transactional
     public void updatePicture(AuthUser user, Long pictureId) {
+        if (pictureId == null)
+            return;
+
         attachmentFinder.validateOwnership(user.id(), pictureId);
         attachmentLinker.link(ReferenceType.MEMBER, user.id(), pictureId);
     }

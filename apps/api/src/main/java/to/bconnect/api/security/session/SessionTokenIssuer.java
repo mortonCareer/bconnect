@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.security.jwt.CookieProvider;
 import to.bconnect.api.security.jwt.JwtProvider;
+import to.bconnect.api.storage.member.Role;
+
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -19,10 +22,10 @@ public class SessionTokenIssuer {
     private final CookieProvider cookieProvider;
     private final SessionService sessionService;
 
-    public IssuedSession login(Long memberId, String username, String role,
+    public IssuedSession login(Long memberId, String username, Set<Role> roles,
                                HttpServletRequest request,
                                HttpServletResponse response) {
-        val authUser = new AuthUser(memberId, username, role);
+        val authUser = new AuthUser(memberId, username, roles);
         val authentication = new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities());
         val accessToken = jwtProvider.generateAccessToken(authentication);
         val refreshToken = jwtProvider.generateRefreshToken(authentication.getName());

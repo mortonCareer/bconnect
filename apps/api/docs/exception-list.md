@@ -15,7 +15,7 @@
 | `CW` | 동료 | `core/domain/coworker` |
 | `RC` | 추천서 | `core/domain/recommendation` |
 | `CH` | 채팅 | `core/domain/chat` |
-| `OF` | 제안 | `core/domain/offer` |
+| `OF` | 섭외 | `core/domain/offer` |
 | `DR` | 드라이브 | `core/domain/drive` |
 | `AT` | 첨부 | `attachment/domain` |
 
@@ -84,8 +84,8 @@
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
-| OF001 | NOT_PROJECT_TASK | 400 | INFO | 프로젝트 작업에만 제안할 수 있습니다. |
-| OF002 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 제안 상태입니다. |
+| OF001 | NOT_PROJECT_TASK | 400 | INFO | 프로젝트 작업에만 섭외할 수 있습니다. |
+| OF002 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 섭외 상태입니다. |
 | OF003 | INVALID_REORDER | 400 | INFO | 재정렬 대상이 올바르지 않습니다. |
 
 ## CoworkerExceptionCode

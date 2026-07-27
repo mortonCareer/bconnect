@@ -7,10 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.notification.domain.push.PushPayload;
 import to.bconnect.api.notification.domain.push.PushSendResult;
 import to.bconnect.api.notification.domain.push.PushSender;
 import to.bconnect.api.socket.message.SocketMessageSentEvent;
+import to.bconnect.api.storage.chat.ChatType;
+import to.bconnect.api.storage.chat.MessageType;
 import to.bconnect.api.storage.device.DevicePlatform;
 import to.bconnect.api.storage.device.DeviceTokenEntity;
 import to.bconnect.api.storage.device.DeviceTokenRepository;
@@ -19,6 +22,7 @@ import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.notification.NotificationRepository;
 
+import java.time.Instant;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,8 +53,8 @@ class ChatNotificationIntegrationTest {
     void setUp() {
         // 비트랜잭션 구동이라 커밋이 남는다. username·phone 은 부분 unique 인덱스가 있어 테스트마다 고유값으로 격리한다.
         String uniq = java.util.UUID.randomUUID().toString();
-        senderId = memberRepository.save(new MemberEntity("sender-" + uniq, "발신자", "p-" + uniq, Role.USER)).getId();
-        receiverId = memberRepository.save(new MemberEntity("receiver-" + uniq, "수신자", "r-" + uniq, Role.USER)).getId();
+        senderId = memberRepository.save(new MemberEntity("sender-" + uniq, "발신자", "p-" + uniq, Set.of(Role.CAREER))).getId();
+        receiverId = memberRepository.save(new MemberEntity("receiver-" + uniq, "수신자", "r-" + uniq, Set.of(Role.CAREER))).getId();
     }
 
     @Test
@@ -103,6 +107,8 @@ class ChatNotificationIntegrationTest {
     }
 
     private SocketMessageSentEvent chatEvent(String preview) {
-        return new SocketMessageSentEvent(999L, senderId, Set.of(), Set.of(receiverId), preview);
+        return new SocketMessageSentEvent(Set.of(), Set.of(receiverId),
+                new Message(1L, 999L, ChatType.DIRECT, senderId, MessageType.TEXT, preview,
+                        Instant.now(), Instant.now()));
     }
 }

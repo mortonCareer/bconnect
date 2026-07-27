@@ -1,6 +1,7 @@
 package to.bconnect.api.core.presentation.v1.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import to.bconnect.api.core.domain.company.Company;
 import to.bconnect.api.core.domain.offer.Offer;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.storage.Address;
@@ -28,15 +29,21 @@ public record TaskResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String projectTitle,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String projectRequirement,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String projectMemo,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Long projectCompanyId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String projectCompanyName,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) OfferSummaryResponse offer,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt
 ) {
     public static TaskResponse of(Task task, Address address) {
-        return of(task, address, null);
+        return of(task, address, null, null);
     }
 
-    public static TaskResponse of(Task task, Address address, Offer offer) {
+    public static TaskResponse of(Task task, Address address, Company company) {
+        return of(task, address, company, null);
+    }
+
+    public static TaskResponse of(Task task, Address address, Company company, Offer offer) {
         return new TaskResponse(
                 task.id(),
                 task.type(),
@@ -53,6 +60,8 @@ public record TaskResponse(
                 task.projectTitle(),
                 task.projectRequirement(),
                 task.projectMemo(),
+                company == null ? null : company.id(),
+                company == null ? null : company.name(),
                 offer == null ? null : OfferSummaryResponse.of(offer),
                 task.createdAt(),
                 task.modifiedAt()

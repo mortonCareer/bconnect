@@ -40,6 +40,7 @@ docs는 [Diátaxis](https://diataxis.fr) 4분할로 정리됨. "지금 무슨 �
 
 - 외부 도구: [`reference/tools.md`](./reference/tools.md) (Vercel/Railway/AWS/Firebase/GitHub/Figma/Notion/Slack/Sentry)
 - 팀 구성: [`reference/team.md`](./reference/team.md)
+- 도메인 용어 · Enum: [`reference/ubiquitous-language.md`](./reference/ubiquitous-language.md)
 - API spec: [`reference/specs/`](./reference/specs/)
 
 ### 결정 이유 (왜 이렇게?)

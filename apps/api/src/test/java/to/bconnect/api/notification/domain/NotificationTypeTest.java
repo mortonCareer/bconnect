@@ -18,7 +18,7 @@ class NotificationTypeTest {
         assertThat(NotificationType.COWORKER_REQUESTED.render(NotificationArgs.senderName("가현")))
                 .isEqualTo("가현 님으로부터 동료 요청을 제안받았습니다");
         assertThat(NotificationType.OFFER_RECEIVED.render(NotificationArgs.companyName("비커넥트")))
-                .isEqualTo("비커넥트으로부터 섭외 요청을 제안받았습니다");
+                .isEqualTo("비커넥트으로부터 섭외 요청을 받았습니다");
         assertThat(NotificationType.CONTRACT_WRITTEN.render(NotificationArgs.senderName("가현")))
                 .isEqualTo("가현 님으로부터 계약서를 작성받았습니다");
     }
