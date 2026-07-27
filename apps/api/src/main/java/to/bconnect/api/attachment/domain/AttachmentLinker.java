@@ -25,6 +25,9 @@ public class AttachmentLinker {
 
     @Transactional
     public void link(ReferenceType referenceType, Long referenceId, Collection<Long> attachmentIds) {
+        if (attachmentIds == null)
+            return;
+
         val ids = attachmentIds.stream().filter(Objects::nonNull).distinct().toList();
         if (ids.isEmpty())
             return;
@@ -58,7 +61,7 @@ public class AttachmentLinker {
 
     @Transactional
     public void unlink(ReferenceType referenceType, Collection<Long> referenceIds) {
-        if (referenceIds.isEmpty())
+        if (referenceIds == null || referenceIds.isEmpty())
             return;
 
         attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, referenceIds)
