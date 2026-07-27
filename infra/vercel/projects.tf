@@ -368,7 +368,7 @@ resource "vercel_project" "landing" {
 
   skew_protection = "12 hours"
 
-  root_directory = "apps/landing"
+  root_directory = "apps/company"
 
   # 표준 ephemeral 프리뷰 배포 비활성 (ADR-0022 프리뷰 폐기). dev QA는 custom env "dev"가 담당
   preview_deployments_disabled = true
