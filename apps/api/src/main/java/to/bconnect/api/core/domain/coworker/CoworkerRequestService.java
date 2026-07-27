@@ -63,10 +63,8 @@ public class CoworkerRequestService {
 
     @Transactional
     public void cancel(AuthUser user, Long id) {
-        val optional = coworkerRequestRepository.findById(id);
-        if (optional.isEmpty())
-            return;
-        val found = optional.get();
+        val found = coworkerRequestRepository.findById(id)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getFromId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);

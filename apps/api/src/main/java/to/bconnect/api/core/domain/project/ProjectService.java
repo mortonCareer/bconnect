@@ -90,10 +90,8 @@ public class ProjectService {
 
     @Transactional
     public void delete(AuthUser user, Long projectId) {
-        val optional = projectRepository.findById(projectId);
-        if (optional.isEmpty())
-            return;
-        val found = optional.get();
+        val found = projectRepository.findById(projectId)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         val company = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));

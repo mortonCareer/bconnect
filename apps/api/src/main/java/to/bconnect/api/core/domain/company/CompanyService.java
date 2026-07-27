@@ -99,10 +99,8 @@ public class CompanyService {
 
     @Transactional
     public void delete(AuthUser user) {
-        val optional = companyRepository.findByMemberId(user.id());
-        if (optional.isEmpty())
-            return;
-        val found = optional.get();
+        val found = companyRepository.findByMemberId(user.id())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         attachmentLinker.unlink(ReferenceType.COMPANY, found.getId());
         companyRepository.delete(found);

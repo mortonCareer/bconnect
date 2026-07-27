@@ -89,9 +89,11 @@ public class MemberService {
 
     @Transactional
     public void withdraw(AuthUser user) {
+        val found = memberRepository.findById(user.id())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
         memberCleaner.clean(user);
         attachmentLinker.unlink(ReferenceType.MEMBER, user.id());
-        memberRepository.findById(user.id())
-                .ifPresent(memberRepository::delete);
+        memberRepository.delete(found);
     }
 }
