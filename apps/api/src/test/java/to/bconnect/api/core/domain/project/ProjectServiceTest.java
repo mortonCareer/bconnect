@@ -78,13 +78,27 @@ class ProjectServiceTest {
 
     @Test
     @DisplayName("get - 프로젝트가 존재하지 않을 때 조회하면 NOT_FOUND로 실패한다")
-    void get_fail_C005() {
+    void get_fail_C005_project() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         companyRepository.save(CompanyFactory.entity(member.getId()));
 
         // when & then
         assertCodeException(() -> projectService.get(UserFactory.domain(member.getId(), Role.CAREER), MISSING_ID))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("get - 소유한 업체가 없을 때 조회하면 NOT_FOUND로 실패한다")
+    void get_fail_C005_company() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+
+        // when & then
+        assertCodeException(() -> projectService.get(UserFactory.domain(other.getId(), Role.CAREER), project.getId()))
                 .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
 
@@ -185,13 +199,27 @@ class ProjectServiceTest {
 
     @Test
     @DisplayName("update - 프로젝트가 존재하지 않을 때 수정하면 NOT_FOUND로 실패한다")
-    void update_fail_C005() {
+    void update_fail_C005_project() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         companyRepository.save(CompanyFactory.entity(member.getId()));
 
         // when & then
         assertCodeException(() -> projectService.update(UserFactory.domain(member.getId(), Role.CAREER), MISSING_ID, ProjectFactory.updateCommand()))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("update - 소유한 업체가 없을 때 수정하면 NOT_FOUND로 실패한다")
+    void update_fail_C005_company() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+
+        // when & then
+        assertCodeException(() -> projectService.update(UserFactory.domain(other.getId(), Role.CAREER), project.getId(), ProjectFactory.updateCommand()))
                 .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
 
@@ -236,13 +264,27 @@ class ProjectServiceTest {
 
     @Test
     @DisplayName("delete - 프로젝트가 존재하지 않을 때 삭제하면 NOT_FOUND로 실패한다")
-    void delete_fail_C005() {
+    void delete_fail_C005_project() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         companyRepository.save(CompanyFactory.entity(member.getId()));
 
         // when & then
         assertCodeException(() -> projectService.delete(UserFactory.domain(member.getId(), Role.CAREER), MISSING_ID))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("delete - 소유한 업체가 없을 때 삭제하면 NOT_FOUND로 실패한다")
+    void delete_fail_C005_company() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+
+        // when & then
+        assertCodeException(() -> projectService.delete(UserFactory.domain(other.getId(), Role.CAREER), project.getId()))
                 .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
 }

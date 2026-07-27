@@ -49,8 +49,8 @@ class AttachmentFinderTest {
     }
 
     @Test
-    @DisplayName("get - 다른 참조에 연결된 첨부일 때 조회하면 INVALID_LINKED로 실패한다")
-    void get_fail_AT005() {
+    @DisplayName("get - 참조 타입이 다른 첨부일 때 조회하면 INVALID_LINKED로 실패한다")
+    void get_fail_AT005_type() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
@@ -58,7 +58,21 @@ class AttachmentFinderTest {
         attachment.link(ReferenceType.POST, 1L);
 
         // when & then
-        assertCodeException(() -> attachmentFinder.get(ReferenceType.MEMBER, member.getId(), attachment.getId()))
+        assertCodeException(() -> attachmentFinder.get(ReferenceType.MEMBER, 1L, attachment.getId()))
+                .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
+    }
+
+    @Test
+    @DisplayName("get - 참조 식별자가 다른 첨부일 때 조회하면 INVALID_LINKED로 실패한다")
+    void get_fail_AT005_id() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        attachment.complete();
+        attachment.link(ReferenceType.POST, 1L);
+
+        // when & then
+        assertCodeException(() -> attachmentFinder.get(ReferenceType.POST, 2L, attachment.getId()))
                 .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
     }
 
