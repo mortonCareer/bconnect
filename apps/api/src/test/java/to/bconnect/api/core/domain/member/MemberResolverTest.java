@@ -46,12 +46,17 @@ class MemberResolverTest {
     }
 
     @Test
-    @DisplayName("getOrWithdrawn - 회원이 존재하지 않을 때 조회하면 탈퇴 회원을 반환한다")
+    @DisplayName("getOrWithdrawn - 회원을 조회하면 존재하면 회원 정보를 미존재면 탈퇴 회원을 반환한다")
     void getOrWithdrawn_success() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+
         // when
+        val found = memberResolver.getOrWithdrawn(member.getId());
         val withdrawn = memberResolver.getOrWithdrawn(MISSING_ID);
 
         // then
+        assertThat(found.username()).isEqualTo("member1");
         assertThat(withdrawn.id()).isEqualTo(MISSING_ID);
         assertThat(withdrawn.username()).isNull();
     }
