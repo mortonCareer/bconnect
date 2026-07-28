@@ -23,6 +23,7 @@ public class PackageDependencyTest {
     private static final String SMS = "..sms..";
     private static final String ATTACHMENT = "..attachment..";
     private static final String CRAWLER = "..crawler..";
+    private static final String ONECLICK = "to.bconnect.api.oneclick..";
     private static final String NOTIFICATION = "to.bconnect.api.notification..";
 
 	@ArchTest
@@ -39,15 +40,15 @@ public class PackageDependencyTest {
 
     @ArchTest
     ArchRule securityPackageRule = classes().that().resideInAPackage(SECURITY)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, SECURITY, SMS, NOTIFICATION);
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, SECURITY, SMS, NOTIFICATION, ONECLICK);
 
     @ArchTest
     ArchRule storagePackageRule = classes().that().resideInAPackage(STORAGE)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, SECURITY, STORAGE, CRAWLER, NOTIFICATION);
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, SECURITY, STORAGE, CRAWLER, NOTIFICATION, ONECLICK);
 
     @ArchTest
     ArchRule commonPackageRule = classes().that().resideInAPackage(COMMON)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, SECURITY, STORAGE, COMMON, CRAWLER, NOTIFICATION)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, SECURITY, STORAGE, COMMON, CRAWLER, NOTIFICATION, ONECLICK)
             .andShould().onlyDependOnClassesThat(
                     resideInAnyPackage(COMMON).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
             );
@@ -55,6 +56,10 @@ public class PackageDependencyTest {
     @ArchTest
     ArchRule crawlerPackageRule = classes().that().resideInAPackage(CRAWLER)
             .should().onlyHaveDependentClassesThat().resideInAnyPackage(CRAWLER);
+
+    @ArchTest
+    ArchRule oneclickPackageRule = classes().that().resideInAPackage(ONECLICK)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(ONECLICK);
 
     @ArchTest
     ArchRule smsPackageRule = classes().that().resideInAPackage(SMS)

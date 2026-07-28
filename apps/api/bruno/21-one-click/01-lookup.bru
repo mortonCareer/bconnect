@@ -1,0 +1,32 @@
+meta {
+  name: 원클릭 조회
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/one-click
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "brn": "6138127726",
+    "ownerName": "홍길동",
+    "openedAt": "2019-03-11"
+  }
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.businessStatus.verdict).to.be.a('string');
+    expect(res.body.data.electricalLicense.verdict).to.be.a('string');
+  });
+}
+
+docs {
+  사업자 진위확인 후 10종 공공데이터를 조회한다. NTS·KCOMWEL 키 주입 환경에서만 성공(불일치시 OC001).
+}

@@ -18,6 +18,12 @@ app:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
     cookie-domain: localhost
 
+  nts:
+    service-key: ${NTS_API_SERVICE_KEY:local-service-key}
+
+  kcomwel:
+    service-key: ${KCOMWEL_API_SERVICE_KEY:local-service-key}
+
   s3:
     bucket: local-bucket
 
