@@ -57,4 +57,18 @@ public class AttachmentFactory {
                 SIZE
         );
     }
+
+    public static AttachmentEntity fileEntity(Long memberId, Long contextId) {
+        return new AttachmentEntity(
+                memberId,
+                AttachmentType.FILE,
+                AttachmentContext.POST,
+                contextId,
+                UUID.randomUUID().toString(),
+                "stem",
+                "pdf",
+                "application/pdf",
+                SIZE
+        );
+    }
 }

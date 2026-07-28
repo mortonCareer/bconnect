@@ -21,6 +21,14 @@ public class CompanyFactory {
         );
     }
 
+    public static CompanyEntity entity(Long memberId, String brn) {
+        return new CompanyEntity(
+                memberId,
+                "company",
+                brn
+        );
+    }
+
     public static CreateCompany command() {
         return new CreateCompany("company", "0000001000", DEFAULT_ATTACHMENT_ID);
     }

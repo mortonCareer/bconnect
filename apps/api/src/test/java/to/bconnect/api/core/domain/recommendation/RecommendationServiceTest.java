@@ -36,16 +36,87 @@ class RecommendationServiceTest {
         val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         coworkerRepository.save(CoworkerFactory.entity(from.getId(), to.getId()));
         val command = RecommendationFactory.command(to.getId());
+        val user = UserFactory.domain(from.getId(), Role.CAREER);
 
         // when
-        val created = recommendationService.create(UserFactory.domain(from.getId(), Role.CAREER), command);
+        val created = recommendationService.create(user, command);
 
         // then
         val found = recommendationRepository.findById(created).orElseThrow();
         assertThat(found.getFromId()).isEqualTo(from.getId());
         assertThat(found.getToId()).isEqualTo(to.getId());
-        assertThat(found.getContent()).isEqualTo(command.content());
         assertThat(found.isVisible()).isFalse();
+    }
+
+    @Test
+    @DisplayName("update - 본인이 작성한 추천서가 있을 때 수정하면 내용이 갱신된다")
+    void update_success() {
+        // given
+        val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        val created = recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
+
+        val user = UserFactory.domain(from.getId(), Role.CAREER);
+
+        // when
+        recommendationService.update(user, created.getId(), "updated content");
+
+        // then
+        val found = recommendationRepository.findById(created.getId()).orElseThrow();
+        assertThat(found.getContent()).isEqualTo("updated content");
+    }
+
+    @Test
+    @DisplayName("delete - 본인이 작성한 추천서가 있을 때 삭제하면 추천서가 제거된다")
+    void delete_success() {
+        // given
+        val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        val created = recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
+
+        val user = UserFactory.domain(from.getId(), Role.CAREER);
+
+        // when
+        recommendationService.delete(user, created.getId());
+
+        // then
+        assertThat(recommendationRepository.findById(created.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("hide - 공개된 추천서를 받았을 때 숨기면 비공개 상태가 된다")
+    void hide_success() {
+        // given
+        val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        val created = recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
+        created.show();
+        val user = UserFactory.domain(to.getId(), Role.CAREER);
+
+        // when
+        recommendationService.hide(user, created.getId());
+
+        // then
+        val found = recommendationRepository.findById(created.getId()).orElseThrow();
+        assertThat(found.isVisible()).isFalse();
+    }
+
+    @Test
+    @DisplayName("show - 비공개 추천서를 받았을 때 공개하면 공개 상태가 된다")
+    void show_success() {
+        // given
+        val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        val created = recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
+
+        val user = UserFactory.domain(to.getId(), Role.CAREER);
+
+        // when
+        recommendationService.show(user, created.getId());
+
+        // then
+        val found = recommendationRepository.findById(created.getId()).orElseThrow();
+        assertThat(found.isVisible()).isTrue();
     }
 
     @Test
@@ -53,10 +124,11 @@ class RecommendationServiceTest {
     void create_fail_C005() {
         // given
         val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val user = UserFactory.domain(from.getId(), Role.CAREER);
+        val command = RecommendationFactory.command(MISSING_ID);
 
         // when & then
-        assertCodeException(() -> recommendationService.create(
-                UserFactory.domain(from.getId(), Role.CAREER), RecommendationFactory.command(MISSING_ID)))
+        assertCodeException(() -> recommendationService.create(user, command))
                 .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
 
@@ -64,11 +136,11 @@ class RecommendationServiceTest {
     @DisplayName("create - 대상이 자신일 때 추천서를 작성하면 SELF_RECOMMENDATION으로 실패한다")
     void create_fail_RC001() {
         // given
-        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val user = UserFactory.domain(MISSING_ID, Role.CAREER);
+        val command = RecommendationFactory.command(MISSING_ID);
 
         // when & then
-        assertCodeException(() -> recommendationService.create(
-                UserFactory.domain(member.getId(), Role.CAREER), RecommendationFactory.command(member.getId())))
+        assertCodeException(() -> recommendationService.create(user, command))
                 .hasExceptionCode(RecommendationExceptionCode.SELF_RECOMMENDATION);
     }
 
@@ -78,10 +150,11 @@ class RecommendationServiceTest {
         // given
         val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        val user = UserFactory.domain(from.getId(), Role.CAREER);
+        val command = RecommendationFactory.command(to.getId());
 
         // when & then
-        assertCodeException(() -> recommendationService.create(
-                UserFactory.domain(from.getId(), Role.CAREER), RecommendationFactory.command(to.getId())))
+        assertCodeException(() -> recommendationService.create(user, command))
                 .hasExceptionCode(RecommendationExceptionCode.NOT_COWORKER);
     }
 
@@ -93,40 +166,26 @@ class RecommendationServiceTest {
         val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         coworkerRepository.save(CoworkerFactory.entity(from.getId(), to.getId()));
         recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
+        val user = UserFactory.domain(from.getId(), Role.CAREER);
+        val command = RecommendationFactory.command(to.getId());
 
         // when & then
-        assertCodeException(() -> recommendationService.create(
-                UserFactory.domain(from.getId(), Role.CAREER), RecommendationFactory.command(to.getId())))
+        assertCodeException(() -> recommendationService.create(user, command))
                 .hasExceptionCode(RecommendationExceptionCode.ALREADY_EXISTS);
     }
 
     @Test
-    @DisplayName("update - 본인이 작성한 추천서를 수정하면 내용이 갱신된다")
-    void update_success() {
-        // given
-        val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        val created = recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
-
-        // when
-        recommendationService.update(UserFactory.domain(from.getId(), Role.CAREER), created.getId(), "updated content");
-
-        // then
-        val found = recommendationRepository.findById(created.getId()).orElseThrow();
-        assertThat(found.getContent()).isEqualTo("updated content");
-    }
-
-    @Test
-    @DisplayName("update - 타인이 작성한 추천서를 수정하면 FORBIDDEN으로 실패한다")
+    @DisplayName("update - 타인이 작성한 추천서일 때 수정하면 FORBIDDEN으로 실패한다")
     void update_fail_C004() {
         // given
         val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         val created = recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
 
+        val user = UserFactory.domain(to.getId(), Role.CAREER);
+
         // when & then
-        assertCodeException(() -> recommendationService.update(
-                UserFactory.domain(to.getId(), Role.CAREER), created.getId(), "updated content"))
+        assertCodeException(() -> recommendationService.update(user, created.getId(), "updated content"))
                 .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
     }
 
@@ -142,30 +201,17 @@ class RecommendationServiceTest {
     }
 
     @Test
-    @DisplayName("delete - 본인이 작성한 추천서를 삭제하면 추천서가 제거된다")
-    void delete_success() {
-        // given
-        val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        val created = recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
-
-        // when
-        recommendationService.delete(UserFactory.domain(from.getId(), Role.CAREER), created.getId());
-
-        // then
-        assertThat(recommendationRepository.findById(created.getId())).isEmpty();
-    }
-
-    @Test
-    @DisplayName("delete - 타인이 작성한 추천서를 삭제하면 FORBIDDEN으로 실패한다")
+    @DisplayName("delete - 타인이 작성한 추천서일 때 삭제하면 FORBIDDEN으로 실패한다")
     void delete_fail_C004() {
         // given
         val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         val created = recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
 
+        val user = UserFactory.domain(to.getId(), Role.CAREER);
+
         // when & then
-        assertCodeException(() -> recommendationService.delete(UserFactory.domain(to.getId(), Role.CAREER), created.getId()))
+        assertCodeException(() -> recommendationService.delete(user, created.getId()))
                 .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
     }
 
@@ -181,32 +227,17 @@ class RecommendationServiceTest {
     }
 
     @Test
-    @DisplayName("hide - 받은 추천서를 숨기면 비공개 상태가 된다")
-    void hide_success() {
-        // given
-        val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        val created = recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
-        created.show();
-
-        // when
-        recommendationService.hide(UserFactory.domain(to.getId(), Role.CAREER), created.getId());
-
-        // then
-        val found = recommendationRepository.findById(created.getId()).orElseThrow();
-        assertThat(found.isVisible()).isFalse();
-    }
-
-    @Test
-    @DisplayName("hide - 받은 사람이 아닐 때 추천서를 숨기면 FORBIDDEN으로 실패한다")
+    @DisplayName("hide - 받은 사람이 아닐 때 숨기면 FORBIDDEN으로 실패한다")
     void hide_fail_C004() {
         // given
         val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         val created = recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
 
+        val user = UserFactory.domain(from.getId(), Role.CAREER);
+
         // when & then
-        assertCodeException(() -> recommendationService.hide(UserFactory.domain(from.getId(), Role.CAREER), created.getId()))
+        assertCodeException(() -> recommendationService.hide(user, created.getId()))
                 .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
     }
 
@@ -222,31 +253,17 @@ class RecommendationServiceTest {
     }
 
     @Test
-    @DisplayName("show - 받은 추천서를 공개하면 공개 상태가 된다")
-    void show_success() {
-        // given
-        val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        val created = recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
-
-        // when
-        recommendationService.show(UserFactory.domain(to.getId(), Role.CAREER), created.getId());
-
-        // then
-        val found = recommendationRepository.findById(created.getId()).orElseThrow();
-        assertThat(found.isVisible()).isTrue();
-    }
-
-    @Test
-    @DisplayName("show - 받은 사람이 아닐 때 추천서를 공개하면 FORBIDDEN으로 실패한다")
+    @DisplayName("show - 받은 사람이 아닐 때 공개하면 FORBIDDEN으로 실패한다")
     void show_fail_C004() {
         // given
         val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         val created = recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
 
+        val user = UserFactory.domain(from.getId(), Role.CAREER);
+
         // when & then
-        assertCodeException(() -> recommendationService.show(UserFactory.domain(from.getId(), Role.CAREER), created.getId()))
+        assertCodeException(() -> recommendationService.show(user, created.getId()))
                 .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
     }
 

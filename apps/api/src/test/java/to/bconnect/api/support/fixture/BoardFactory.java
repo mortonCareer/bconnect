@@ -15,14 +15,26 @@ public class BoardFactory {
                 MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
-    public static CreateNote command(Long projectId, Long driveId) {
-        return new CreateNote(BoardType.PROJECT, projectId, driveId, "content");
+    public static CreateNote projectCommand(Long projectId) {
+        return new CreateNote(BoardType.PROJECT, projectId, null, "content");
     }
 
-    public static BoardEntity entity(Long projectId, Long driveId) {
+    public static CreateNote driveCommand(Long driveId) {
+        return new CreateNote(BoardType.DRIVE, null, driveId, "content");
+    }
+
+    public static BoardEntity projectEntity(Long projectId) {
         return new BoardEntity(
                 BoardType.PROJECT,
                 projectId,
+                null
+        );
+    }
+
+    public static BoardEntity driveEntity(Long driveId) {
+        return new BoardEntity(
+                BoardType.DRIVE,
+                null,
                 driveId
         );
     }

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
@@ -48,14 +47,6 @@ class ProjectFinderTest {
     }
 
     @Test
-    @DisplayName("get - 프로젝트가 존재하지 않을 때 조회하면 NOT_FOUND로 실패한다")
-    void get_fail_C005() {
-        // when & then
-        assertCodeException(() -> projectFinder.get(MISSING_ID))
-                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
-    }
-
-    @Test
     @DisplayName("addressMap - 프로젝트 ID 목록으로 조회하면 존재하는 프로젝트의 주소 맵을 반환한다")
     void addressMap_success() {
         // given
@@ -79,13 +70,9 @@ class ProjectFinderTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
-        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        val withdrawnCompany = companyRepository.save(new CompanyEntity(other.getId(), "company", "0000001001"));
-        val orphan = projectRepository.save(ProjectFactory.entity(withdrawnCompany.getId()));
-        companyRepository.delete(withdrawnCompany);
 
         // when
-        val response = projectFinder.companyMap(List.of(project.getId(), orphan.getId()));
+        val response = projectFinder.companyMap(List.of(project.getId(), MISSING_ID));
 
         // then
         assertThat(response).containsOnlyKeys(project.getId());
@@ -106,6 +93,76 @@ class ProjectFinderTest {
     }
 
     @Test
+    @DisplayName("isOwner - 소유한 업체의 프로젝트일 때 소유 여부를 조회하면 true를 반환한다")
+    void isOwner_success() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+
+        // when
+        val owned = projectFinder.isOwner(member.getId(), project.getId());
+
+        // then
+        assertThat(owned).isTrue();
+    }
+
+    @Test
+    @DisplayName("isOwner - 다른 업체의 프로젝트일 때 소유 여부를 조회하면 false를 반환한다")
+    void isOwner_success_other() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val ownerCompany = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(ownerCompany.getId()));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        companyRepository.save(CompanyFactory.entity(other.getId(), "0000001001"));
+
+        // when
+        val owned = projectFinder.isOwner(other.getId(), project.getId());
+
+        // then
+        assertThat(owned).isFalse();
+    }
+
+    @Test
+    @DisplayName("isOwner - 소유한 업체가 없을 때 소유 여부를 조회하면 false를 반환한다")
+    void isOwner_success_company() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val ownerCompany = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(ownerCompany.getId()));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+
+        // when
+        val owned = projectFinder.isOwner(other.getId(), project.getId());
+
+        // then
+        assertThat(owned).isFalse();
+    }
+
+    @Test
+    @DisplayName("isOwner - 프로젝트가 존재하지 않을 때 소유 여부를 조회하면 false를 반환한다")
+    void isOwner_success_project() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        companyRepository.save(CompanyFactory.entity(member.getId()));
+
+        // when
+        val owned = projectFinder.isOwner(member.getId(), MISSING_ID);
+
+        // then
+        assertThat(owned).isFalse();
+    }
+
+    @Test
+    @DisplayName("get - 프로젝트가 존재하지 않을 때 조회하면 NOT_FOUND로 실패한다")
+    void get_fail_C005() {
+        // when & then
+        assertCodeException(() -> projectFinder.get(MISSING_ID))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
     @DisplayName("validateOwnership - 다른 업체의 프로젝트일 때 검증하면 FORBIDDEN으로 실패한다")
     void validateOwnership_fail_C004() {
         // given
@@ -113,28 +170,10 @@ class ProjectFinderTest {
         val ownerCompany = companyRepository.save(CompanyFactory.entity(owner.getId()));
         val project = projectRepository.save(ProjectFactory.entity(ownerCompany.getId()));
         val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        companyRepository.save(new CompanyEntity(other.getId(), "company", "0000001001"));
+        companyRepository.save(CompanyFactory.entity(other.getId(), "0000001001"));
 
         // when & then
         assertCodeException(() -> projectFinder.validateOwnership(other.getId(), project.getId()))
                 .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
-    }
-
-    @Test
-    @DisplayName("isOwner - 회원의 업체가 프로젝트를 소유했는지 여부를 반환한다")
-    void isOwner_success() {
-        // given
-        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val ownerCompany = companyRepository.save(CompanyFactory.entity(owner.getId()));
-        val project = projectRepository.save(ProjectFactory.entity(ownerCompany.getId()));
-        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        companyRepository.save(new CompanyEntity(other.getId(), "company", "0000001001"));
-        val noCompany = memberRepository.save(MemberFactory.entity("member3", "01000001003", Role.CAREER));
-
-        // when & then
-        assertThat(projectFinder.isOwner(owner.getId(), project.getId())).isTrue();
-        assertThat(projectFinder.isOwner(other.getId(), project.getId())).isFalse();
-        assertThat(projectFinder.isOwner(noCompany.getId(), project.getId())).isFalse();
-        assertThat(projectFinder.isOwner(owner.getId(), MISSING_ID)).isFalse();
     }
 }

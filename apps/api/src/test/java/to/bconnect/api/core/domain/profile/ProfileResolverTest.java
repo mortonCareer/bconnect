@@ -41,15 +41,7 @@ class ProfileResolverTest {
     }
 
     @Test
-    @DisplayName("get - 프로필이 없을 때 조회하면 NOT_FOUND로 실패한다")
-    void get_fail_C005() {
-        // when & then
-        assertCodeException(() -> profileResolver.get(MISSING_ID))
-                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
-    }
-
-    @Test
-    @DisplayName("resolveMap - 회원 목록을 조회하면 프로필이 있는 회원만 매핑한다")
+    @DisplayName("resolveMap - 프로필이 일부만 있을 때 목록을 조회하면 프로필이 있는 회원만 매핑한다")
     void resolveMap_success() {
         // given
         val first = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -61,5 +53,13 @@ class ProfileResolverTest {
 
         // then
         assertThat(resolved).containsOnlyKeys(first.getId());
+    }
+
+    @Test
+    @DisplayName("get - 프로필이 없을 때 조회하면 NOT_FOUND로 실패한다")
+    void get_fail_C005() {
+        // when & then
+        assertCodeException(() -> profileResolver.get(MISSING_ID))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
 }

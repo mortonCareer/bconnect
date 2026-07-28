@@ -30,6 +30,6 @@ public class MemberFactory {
     }
 
     public static UpdateMember updateCommand() {
-        return new UpdateMember("name");
+        return new UpdateMember("updated name");
     }
 }

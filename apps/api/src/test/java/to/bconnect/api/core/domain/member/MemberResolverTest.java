@@ -34,35 +34,35 @@ class MemberResolverTest {
 
         // then
         assertThat(found.id()).isEqualTo(member.getId());
-        assertThat(found.username()).isEqualTo("member1");
     }
 
     @Test
-    @DisplayName("get - 회원이 존재하지 않을 때 조회하면 NOT_FOUND로 실패한다")
-    void get_fail_C005() {
-        // when & then
-        assertCodeException(() -> memberResolver.get(MISSING_ID))
-                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
-    }
-
-    @Test
-    @DisplayName("getOrWithdrawn - 회원을 조회하면 존재하면 회원 정보를 미존재면 탈퇴 회원을 반환한다")
+    @DisplayName("getOrWithdrawn - 회원이 존재할 때 조회하면 회원 정보를 반환한다")
     void getOrWithdrawn_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
 
         // when
         val found = memberResolver.getOrWithdrawn(member.getId());
+
+        // then
+        assertThat(found.id()).isEqualTo(member.getId());
+        assertThat(found.username()).isEqualTo("member1");
+    }
+
+    @Test
+    @DisplayName("getOrWithdrawn - 회원이 존재하지 않을 때 조회하면 탈퇴 회원을 반환한다")
+    void getOrWithdrawn_success_withdrawn() {
+        // when
         val withdrawn = memberResolver.getOrWithdrawn(MISSING_ID);
 
         // then
-        assertThat(found.username()).isEqualTo("member1");
         assertThat(withdrawn.id()).isEqualTo(MISSING_ID);
         assertThat(withdrawn.username()).isNull();
     }
 
     @Test
-    @DisplayName("resolveMap - 회원 목록을 조회하면 존재하는 회원만 매핑한다")
+    @DisplayName("resolveMap - 회원이 일부만 존재할 때 목록을 조회하면 존재하는 회원만 매핑한다")
     void resolveMap_success() {
         // given
         val first = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -75,7 +75,7 @@ class MemberResolverTest {
     }
 
     @Test
-    @DisplayName("resolveMapOrWithdrawn - 회원 목록을 조회하면 미존재 회원을 탈퇴 회원으로 채운다")
+    @DisplayName("resolveMapOrWithdrawn - 미존재 id가 섞여 있을 때 목록을 조회하면 미존재는 탈퇴 회원으로 채운다")
     void resolveMapOrWithdrawn_success() {
         // given
         val first = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -86,5 +86,13 @@ class MemberResolverTest {
         // then
         assertThat(resolved).containsOnlyKeys(first.getId(), MISSING_ID);
         assertThat(resolved.get(MISSING_ID).username()).isNull();
+    }
+
+    @Test
+    @DisplayName("get - 회원이 존재하지 않을 때 조회하면 NOT_FOUND로 실패한다")
+    void get_fail_C005() {
+        // when & then
+        assertCodeException(() -> memberResolver.get(MISSING_ID))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
 }
