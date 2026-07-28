@@ -41,7 +41,7 @@ export function IntroTab({
   return (
     <div className="flex flex-col gap-6 px-4 py-4">
       <section className="flex flex-col gap-3">
-        <SectionHeader title="인증" editHref={editHrefs?.certifications} />
+        <SectionHeader title="자격 증빙" editHref={editHrefs?.certifications} />
         {credentialsLoading ? (
           <div className="flex flex-wrap gap-2">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -61,7 +61,7 @@ export function IntroTab({
             ))}
           </div>
         ) : (
-          <p className="text-r-14 text-gray-500">등록된 인증이 없습니다</p>
+          <p className="text-r-14 text-gray-500">등록된 자격 증빙이 없습니다</p>
         )}
       </section>
 
