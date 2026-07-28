@@ -38,7 +38,7 @@ public class TaskQueryService {
 
     @Transactional(readOnly = true)
     public List<Task> listByWorker(AuthUser user) {
-        return taskRepository.findAllByWorkerIdAndType(user.id(), TaskType.WORKER)
+        return taskRepository.findAllByWorkerIdAndTypeOrderByIdDesc(user.id(), TaskType.WORKER)
                 .stream()
                 .map(Task::of)
                 .toList();
@@ -46,7 +46,7 @@ public class TaskQueryService {
 
     @Transactional(readOnly = true)
     public List<Task> listAssigned(AuthUser user) {
-        return taskRepository.findAllByWorkerIdAndType(user.id(), TaskType.PROJECT)
+        return taskRepository.findAllByWorkerIdAndTypeOrderByIdDesc(user.id(), TaskType.PROJECT)
                 .stream()
                 .map(Task::of)
                 .toList();
@@ -57,7 +57,7 @@ public class TaskQueryService {
         if (!coworkerRepository.existsByMembers(user.id(), targetId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        return taskRepository.findAllByWorkerId(targetId)
+        return taskRepository.findAllByWorkerIdOrderByIdDesc(targetId)
                 .stream()
                 .map(Task::of)
                 .toList();
@@ -67,7 +67,7 @@ public class TaskQueryService {
     public List<Task> listByProject(AuthUser user, Long projectId) {
         projectFinder.validateOwnership(user.id(), projectId);
 
-        return taskRepository.findAllByProjectId(projectId)
+        return taskRepository.findAllByProjectIdOrderByIdAsc(projectId)
                 .stream()
                 .map(Task::of)
                 .toList();
@@ -77,7 +77,7 @@ public class TaskQueryService {
     public List<Long> listAssigneeIdsByProject(AuthUser user, Long projectId) {
         projectFinder.validateOwnership(user.id(), projectId);
 
-        return taskRepository.findAllByProjectIdAndWorkerIdNotNull(projectId)
+        return taskRepository.findAllByProjectIdAndWorkerIdNotNullOrderByIdAsc(projectId)
                 .stream()
                 .map(TaskEntity::getWorkerId)
                 .distinct()

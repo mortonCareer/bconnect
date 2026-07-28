@@ -13,6 +13,7 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.storage.member.MemberRepository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,7 +46,12 @@ public class DirectChatService {
                         it.counterpartIdOf(memberId),
                         lastMessageMap.get(it.getId()),
                         unreadCountMap.getOrDefault(it.getId(), 0L)
-                )).toList();
+                ))
+                .sorted(Comparator.comparing(
+                        (DirectChat it) -> it.lastMessage() == null
+                                ? it.createdAt()
+                                : it.lastMessage().createdAt()).reversed())
+                .toList();
     }
 
     @Transactional(readOnly = true)

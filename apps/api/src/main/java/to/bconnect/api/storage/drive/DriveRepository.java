@@ -7,5 +7,5 @@ import java.util.List;
 public interface DriveRepository extends JpaRepository<DriveEntity, Long> {
     List<DriveEntity> findAllByMemberId(Long memberId);
 
-    List<DriveEntity> findAllByProjectId(Long projectId);
+    List<DriveEntity> findAllByProjectIdOrderByIdAsc(Long projectId);
 }

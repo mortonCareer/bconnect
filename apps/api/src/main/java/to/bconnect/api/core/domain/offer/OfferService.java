@@ -172,7 +172,7 @@ public class OfferService {
 
     @Transactional(readOnly = true)
     public List<Offer> listByWorker(AuthUser user) {
-        return offerRepository.findAllByWorkerIdAndStatus(user.id(), OfferStatus.ACTIVE).stream()
+        return offerRepository.findAllByWorkerIdAndStatusOrderByIdDesc(user.id(), OfferStatus.ACTIVE).stream()
                 .map(Offer::of)
                 .toList();
     }
