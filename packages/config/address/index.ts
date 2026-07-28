@@ -1,5 +1,6 @@
 import { regionOfState } from '@bconnect/api-client'
 import type { Address, Region } from '@bconnect/api-client'
+import { z } from 'zod'
 import { UnknownSidoError } from '../errors/index'
 
 /** 카카오 우편번호 oncomplete 결과 중 우리가 읽는 부분집합 (react-daum-postcode 결과와 구조 호환) */
@@ -35,6 +36,19 @@ export function emptyAddressDraft(): AddressDraft {
 export function isCompleteAddress(a: AddressDraft | null | undefined): a is Address {
   return a != null && a.state != null && a.city.length > 0 && a.street.length > 0
 }
+
+/**
+ * 주소 zod 필드 — 주소 검색을 마쳐 state/city/street 가 채워져야 통과. `z.object({ address: addressField() })` 로 합성.
+ * label 은 화면에서 부르는 이름(주소 / 현장주소)만 갈아끼우는 용도다.
+ *
+ * 검증만 하고 타입은 좁히지 않는다 — 좁히면 z.input 과 z.output 이 갈라져 useForm 단일 제네릭이 깨진다.
+ * 전송 직전 좁히기는 호출부가 isCompleteAddress 로 한다.
+ */
+export const addressField = (label = '주소') =>
+  z
+    .custom<AddressDraft>()
+    .nullish()
+    .refine((a): boolean => isCompleteAddress(a), `${label}를 입력해주세요.`)
 
 /**
  * 카카오 선택 결과 → BE Address.
