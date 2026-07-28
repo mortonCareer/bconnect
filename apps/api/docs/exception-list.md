@@ -35,6 +35,7 @@
 | C007 | INTERNAL_SERVER_ERROR | 500 | ERROR | 서버 내부 오류입니다. |
 | C008 | PATH_NOT_FOUND | 404 | INFO | 요청 경로를 찾을 수 없습니다. |
 | C009 | UNAUTHORIZED | 401 | INFO | 인증이 필요합니다. |
+| C010 | INVALID_REQUEST | 400 | WARN | 요청 형식이 올바르지 않습니다. |
 
 ## AuthExceptionCode
 
