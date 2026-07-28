@@ -1,5 +1,5 @@
 import { experienceSchema } from '@/lib/experience-range'
-import type { Address } from '@bconnect/api-client'
+import { addressField } from '@bconnect/config/address'
 import { ProfileRole } from '@bconnect/api-client'
 import { consentField } from '@bconnect/config/consent'
 import { z } from 'zod'
@@ -14,7 +14,7 @@ export const profileSchema = z.object({
   primaryField: z.string({ error: '대표분야를 선택해주세요.' }),
   experience: experienceSchema,
   role: z.enum(ProfileRole, { error: '유형을 선택해주세요.' }),
-  address: z.custom<Address>().nullish(),
+  address: addressField(),
   headline: z.string().max(20, '한줄소개는 최대 20글자까지 입력 가능합니다.').optional(),
   agreements: consentField,
 })

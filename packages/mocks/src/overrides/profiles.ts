@@ -4,7 +4,6 @@ import {
   getGetProfileMockHandler,
   getGetProfilesMockHandler,
   ProfileRole,
-  Role,
   Trade,
 } from '@bconnect/api-client'
 import type {
@@ -40,9 +39,6 @@ const memberOf = (id: number, username: string, name: string): MemberSummary => 
   username,
   name,
   picture: null,
-  role: Role.USER,
-  createdAt: EPOCH,
-  modifiedAt: EPOCH,
 })
 
 interface ProfileSeed {

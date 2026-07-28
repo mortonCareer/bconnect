@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import { z } from 'zod'
 import { mapKakaoAddress } from '@bconnect/config/address'
+import type { AddressDraft } from '@bconnect/config/address'
 import { UnknownSidoError, UNKNOWN_SIDO_MESSAGE } from '@bconnect/config/errors'
 import {
   AddressSearchDialog,
@@ -100,7 +101,7 @@ function ProjectNameRow({ initialName }: { initialName: string }) {
   )
 }
 
-function seedAddress(street: string): Address {
+function seedAddress(street: string): AddressDraft {
   return {
     zipcode: '',
     street,
@@ -112,15 +113,15 @@ function seedAddress(street: string): Address {
   }
 }
 
-function formatAddress({ street, detail }: Address): string {
+function formatAddress({ street, detail }: AddressDraft): string {
   return detail ? `${street} ${detail}` : (street ?? '')
 }
 
 function AddressRow({ initialAddress }: { initialAddress: string }) {
-  const [address, setAddress] = useState<Address>(() => seedAddress(initialAddress))
+  const [address, setAddress] = useState<AddressDraft>(() => seedAddress(initialAddress))
   const [editing, setEditing] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
-  const form = useForm<{ address: Address }>({ defaultValues: { address } })
+  const form = useForm<{ address: AddressDraft }>({ defaultValues: { address } })
 
   const onDone = form.handleSubmit(({ address: next }) => {
     setAddress(next)
