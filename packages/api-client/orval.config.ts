@@ -57,7 +57,7 @@ export default defineConfig({
               onMutations: ['createRecommendation', 'updateRecommendation', 'deleteRecommendation'],
               invalidates: ['getMySentRecommendations', 'getReceivedRecommendations'],
             },
-            // 자격/인증 변경 → 자격 목록. getMyCredentials(내 목록, 조건 없음)는 그 목록만 정확히 무효화.
+            // 자격 증빙 변경 → 자격 증빙 목록. getMyCredentials(내 목록, 조건 없음)는 그 목록만 정확히 무효화.
             // getCredentials 는 memberId 로 회원별 구분 → config 가 그 값을 몰라 관련 목록을 한꺼번에 무효화(넓게).
             // TODO(#728): getCredentials 를 특정 회원만 무효화하려면 화면 쪽 수동 배선 필요(ADR-0025 line 61). 넓게 둘지 좁힐지 추후 결정.
             {

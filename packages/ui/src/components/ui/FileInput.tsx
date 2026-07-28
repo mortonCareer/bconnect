@@ -1,5 +1,5 @@
 /**
- * @figma-scaffold 파일 업로드 primitive — ImageInput 의 문서 버전(썸네일 대신 파일명 칩). 인증 신청 파일 첨부 (#586)
+ * @figma-scaffold 파일 업로드 primitive — ImageInput 의 문서 버전(썸네일 대신 파일명 칩). 자격 증빙 신청 파일 첨부 (#586)
  */
 'use client'
 
