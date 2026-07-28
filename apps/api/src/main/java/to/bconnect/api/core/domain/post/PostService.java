@@ -59,13 +59,14 @@ public class PostService {
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
         }
 
+        attachmentFinder.validateOwnership(user.id(), command.attachmentIds());
+
         val created = postRepository.save(new PostEntity(
                 user.id(),
                 command.taskId(),
                 command.content()
         ));
 
-        attachmentFinder.validateOwnership(user.id(), command.attachmentIds());
         attachmentLinker.link(ReferenceType.POST, created.getId(), command.attachmentIds());
 
         return created.getId();
