@@ -35,43 +35,77 @@ class CoworkerServiceTest {
     @DisplayName("list - 동료가 있을 때 목록을 조회하면 상대방 회원 id로 정규화된 목록을 반환한다")
     void list_success() {
         // given
-        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        val another = memberRepository.save(MemberFactory.entity("member3", "01000001003", Role.CAREER));
-        coworkerRepository.save(CoworkerFactory.entity(member.getId(), other.getId()));
-        coworkerRepository.save(CoworkerFactory.entity(another.getId(), member.getId()));
+        val earlier = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val member = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        val later = memberRepository.save(MemberFactory.entity("member3", "01000001003", Role.CAREER));
+        coworkerRepository.save(CoworkerFactory.entity(member.getId(), later.getId()));
+        coworkerRepository.save(CoworkerFactory.entity(earlier.getId(), member.getId()));
 
         // when
         val response = coworkerService.list(member.getId());
 
         // then
         assertThat(response).extracting(Coworker::memberId)
-                .containsExactlyInAnyOrder(other.getId(), another.getId());
+                .containsExactlyInAnyOrder(later.getId(), earlier.getId());
     }
 
     @Test
-    @DisplayName("resolveStatus - 동료와 요청이 있을 때 상태를 조회하면 관계별 상태를 반환한다")
+    @DisplayName("resolveStatus - 동료 관계일 때 상태를 조회하면 COWORKER를 반환한다")
     void resolveStatus_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        val another = memberRepository.save(MemberFactory.entity("member3", "01000001003", Role.CAREER));
-        val requester = memberRepository.save(MemberFactory.entity("member4", "01000001004", Role.CAREER));
         coworkerRepository.save(CoworkerFactory.entity(member.getId(), other.getId()));
-        coworkerRequestRepository.save(CoworkerRequestFactory.entity(member.getId(), another.getId()));
-        coworkerRequestRepository.save(CoworkerRequestFactory.entity(requester.getId(), member.getId()));
 
         // when
-        val coworker = coworkerService.resolveStatus(member.getId(), other.getId());
-        val sent = coworkerService.resolveStatus(member.getId(), another.getId());
-        val received = coworkerService.resolveStatus(member.getId(), requester.getId());
-        val none = coworkerService.resolveStatus(member.getId(), MISSING_ID);
+        val status = coworkerService.resolveStatus(member.getId(), other.getId());
 
         // then
-        assertThat(coworker).isEqualTo(CoworkerStatus.COWORKER);
-        assertThat(sent).isEqualTo(CoworkerStatus.SENT);
-        assertThat(received).isEqualTo(CoworkerStatus.RECEIVED);
-        assertThat(none).isEqualTo(CoworkerStatus.NONE);
+        assertThat(status).isEqualTo(CoworkerStatus.COWORKER);
+    }
+
+    @Test
+    @DisplayName("resolveStatus - 보낸 요청이 있을 때 상태를 조회하면 SENT를 반환한다")
+    void resolveStatus_success_sent() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        coworkerRequestRepository.save(CoworkerRequestFactory.entity(member.getId(), other.getId()));
+
+        // when
+        val status = coworkerService.resolveStatus(member.getId(), other.getId());
+
+        // then
+        assertThat(status).isEqualTo(CoworkerStatus.SENT);
+    }
+
+    @Test
+    @DisplayName("resolveStatus - 받은 요청이 있을 때 상태를 조회하면 RECEIVED를 반환한다")
+    void resolveStatus_success_received() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        coworkerRequestRepository.save(CoworkerRequestFactory.entity(other.getId(), member.getId()));
+
+        // when
+        val status = coworkerService.resolveStatus(member.getId(), other.getId());
+
+        // then
+        assertThat(status).isEqualTo(CoworkerStatus.RECEIVED);
+    }
+
+    @Test
+    @DisplayName("resolveStatus - 동료도 요청도 없을 때 상태를 조회하면 NONE을 반환한다")
+    void resolveStatus_success_none() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+
+        // when
+        val status = coworkerService.resolveStatus(member.getId(), other.getId());
+
+        // then
+        assertThat(status).isEqualTo(CoworkerStatus.NONE);
     }
 
     @Test
@@ -88,7 +122,7 @@ class CoworkerServiceTest {
 
         // when
         val statuses = coworkerService.resolveStatusMap(member.getId(),
-                List.of(other.getId(), another.getId(), requester.getId(), MISSING_ID));
+                List.of(other.getId(), other.getId(), another.getId(), requester.getId(), MISSING_ID));
 
         // then
         assertThat(statuses)
@@ -105,9 +139,10 @@ class CoworkerServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         val created = coworkerRepository.save(CoworkerFactory.entity(other.getId(), member.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when
-        coworkerService.delete(UserFactory.domain(member.getId(), Role.CAREER), other.getId());
+        coworkerService.delete(user, other.getId());
 
         // then
         assertThat(coworkerRepository.findById(created.getId())).isEmpty();
@@ -118,9 +153,10 @@ class CoworkerServiceTest {
     void delete_fail_C005() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when & then
-        assertCodeException(() -> coworkerService.delete(UserFactory.domain(member.getId(), Role.CAREER), MISSING_ID))
+        assertCodeException(() -> coworkerService.delete(user, MISSING_ID))
                 .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
 }

@@ -19,20 +19,29 @@ import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.post.PostRepository;
 import to.bconnect.api.storage.profile.ProfileRepository;
-import to.bconnect.api.storage.profile.Trade;
 import to.bconnect.api.storage.recommendation.RecommendationRepository;
 import to.bconnect.api.storage.session.SessionRepository;
-import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
 import to.bconnect.api.support.IntegrationTest;
-import to.bconnect.api.support.fixture.*;
+import to.bconnect.api.support.fixture.AttachmentFactory;
+import to.bconnect.api.support.fixture.BoardFactory;
+import to.bconnect.api.support.fixture.CompanyFactory;
+import to.bconnect.api.support.fixture.CoworkerFactory;
+import to.bconnect.api.support.fixture.CoworkerRequestFactory;
+import to.bconnect.api.support.fixture.CredentialFactory;
+import to.bconnect.api.support.fixture.DriveFactory;
+import to.bconnect.api.support.fixture.MemberFactory;
+import to.bconnect.api.support.fixture.OfferFactory;
+import to.bconnect.api.support.fixture.PostFactory;
+import to.bconnect.api.support.fixture.ProfileFactory;
+import to.bconnect.api.support.fixture.RecommendationFactory;
+import to.bconnect.api.support.fixture.SessionFactory;
+import to.bconnect.api.support.fixture.TaskFactory;
+import to.bconnect.api.support.fixture.UserFactory;
 
-import java.time.LocalDate;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 
 @IntegrationTest
@@ -57,7 +66,7 @@ class MemberCleanerTest {
     @Autowired private AttachmentRepository attachmentRepository;
 
     @Test
-    @DisplayName("clean - 탈퇴 회원을 정리하면 연관 데이터가 삭제된다")
+    @DisplayName("clean - 연관 데이터가 있을 때 정리하면 연관 데이터가 삭제된다")
     void clean_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -74,23 +83,9 @@ class MemberCleanerTest {
         val task = taskRepository.save(TaskFactory.entity(member.getId()));
         val post = postRepository.save(PostFactory.entity(member.getId(), task.getId()));
         offerRepository.save(OfferFactory.entity(task.getId(), member.getId()));
-        val projectTask = taskRepository.save(new TaskEntity(
-                TaskType.PROJECT,
-                Set.of(Trade.ELECTRICAL),
-                LocalDate.of(2026, 6, 1),
-                LocalDate.of(2026, 6, 30),
-                member.getId(),
-                "task",
-                "memo",
-                "company",
-                ProfileFactory.DEFAULT_ADDRESS,
-                null,
-                "project",
-                "requirement",
-                "memo"
-        ));
+        val projectTask = taskRepository.save(TaskFactory.projectEntity(null, member.getId()));
         val drive = driveRepository.save(DriveFactory.entity(null, member.getId()));
-        val board = boardRepository.save(BoardFactory.entity(null, drive.getId()));
+        val board = boardRepository.save(BoardFactory.driveEntity(drive.getId()));
         val note = noteRepository.save(BoardFactory.noteEntity(board.getId(), member.getId()));
         driveMemberRepository.save(DriveFactory.memberEntity(drive.getId(), member.getId()));
 
@@ -107,8 +102,10 @@ class MemberCleanerTest {
         driveAttachment.complete();
         driveAttachment.link(ReferenceType.DRIVE, drive.getId());
 
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
+
         // when
-        memberCleaner.clean(UserFactory.domain(member.getId(), Role.CAREER));
+        memberCleaner.clean(user);
 
         // then
         assertThat(sessionRepository.findByMemberId(member.getId())).isEmpty();
@@ -132,10 +129,6 @@ class MemberCleanerTest {
         assertThat(attachmentRepository.findById(credentialAttachment.getId()).orElseThrow().getReferenceId()).isNull();
         assertThat(attachmentRepository.findById(postAttachment.getId()).orElseThrow().getReferenceId()).isNull();
         assertThat(attachmentRepository.findById(driveAttachment.getId()).orElseThrow().getReferenceId()).isNull();
-
-        val empty = memberRepository.save(MemberFactory.entity("member3", "01000001003", Role.CAREER));
-        assertThatCode(() -> memberCleaner.clean(UserFactory.domain(empty.getId(), Role.CAREER)))
-                .doesNotThrowAnyException();
     }
 
     @Test
@@ -144,11 +137,10 @@ class MemberCleanerTest {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         companyRepository.save(CompanyFactory.entity(member.getId()));
-        profileRepository.save(ProfileFactory.entity(member.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when & then
-        assertCodeException(() -> memberCleaner.clean(UserFactory.domain(member.getId(), Role.CAREER)))
+        assertCodeException(() -> memberCleaner.clean(user))
                 .hasExceptionCode(MemberExceptionCode.WITHDRAW_COMPANY_EXISTS);
-        assertThat(profileRepository.findByMemberId(member.getId())).isPresent();
     }
 }

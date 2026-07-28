@@ -21,6 +21,10 @@ public class CredentialFactory {
         return new CredentialEntity(memberId, CredentialType.SOLE_PROPRIETOR, null, null);
     }
 
+    public static CredentialEntity entity(Long memberId, CredentialType type) {
+        return new CredentialEntity(memberId, type, MAX_DATE, null);
+    }
+
     public static CreateCredential command() {
         return new CreateCredential(CredentialType.SOLE_PROPRIETOR, MAX_DATE, null, null);
     }

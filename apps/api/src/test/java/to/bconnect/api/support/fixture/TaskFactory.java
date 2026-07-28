@@ -45,6 +45,24 @@ public class TaskFactory {
         );
     }
 
+    public static TaskEntity projectEntity(Long projectId, Long workerId) {
+        return new TaskEntity(
+                TaskType.PROJECT,
+                Set.of(Trade.ELECTRICAL),
+                START_DATE,
+                END_DATE,
+                workerId,
+                null,
+                null,
+                null,
+                null,
+                projectId,
+                "task",
+                "requirement",
+                "memo"
+        );
+    }
+
     public static CreateWorkerTask createCommand() {
         return new CreateWorkerTask(
                 Set.of(Trade.ELECTRICAL), START_DATE, END_DATE,

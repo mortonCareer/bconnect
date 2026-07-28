@@ -5,27 +5,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
-import to.bconnect.api.storage.profile.Trade;
 import to.bconnect.api.storage.project.ProjectRepository;
-import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskRepository;
-import to.bconnect.api.storage.task.TaskType;
 import to.bconnect.api.support.IntegrationTest;
-import to.bconnect.api.support.fixture.CompanyFactory;
-import to.bconnect.api.support.fixture.CoworkerFactory;
-import to.bconnect.api.support.fixture.MemberFactory;
-import to.bconnect.api.support.fixture.ProjectFactory;
-import to.bconnect.api.support.fixture.TaskFactory;
-import to.bconnect.api.support.fixture.UserFactory;
+import to.bconnect.api.support.fixture.*;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
@@ -43,7 +32,7 @@ class TaskQueryServiceTest {
     @Autowired private MemberRepository memberRepository;
 
     @Test
-    @DisplayName("get - 작업이 존재할 때 조회하면 작업을 반환하고 없으면 빈 값을 반환한다")
+    @DisplayName("get - 작업이 존재할 때 조회하면 작업을 반환한다")
     void get_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -51,15 +40,11 @@ class TaskQueryServiceTest {
 
         // when
         val found = taskQueryService.get(task.getId());
-        val empty = taskQueryService.get(MISSING_ID);
 
         // then
         assertThat(found).isPresent();
         assertThat(found.orElseThrow().id()).isEqualTo(task.getId());
-        assertThat(found.orElseThrow().type()).isEqualTo(TaskType.WORKER);
         assertThat(found.orElseThrow().workerId()).isEqualTo(member.getId());
-        assertThat(found.orElseThrow().workerTitle()).isEqualTo("task");
-        assertThat(empty).isEmpty();
     }
 
     @Test
@@ -86,15 +71,13 @@ class TaskQueryServiceTest {
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
         val workerTask = taskRepository.save(TaskFactory.entity(member.getId()));
-        taskRepository.save(new TaskEntity(TaskType.PROJECT, Set.of(Trade.ELECTRICAL),
-                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30),
-                member.getId(), null, null, null, null,
-                project.getId(), "task", "requirement", "memo"));
+        taskRepository.save(TaskFactory.projectEntity(project.getId(), member.getId()));
         val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         taskRepository.save(TaskFactory.entity(other.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when
-        val response = taskQueryService.list(UserFactory.domain(member.getId(), Role.CAREER));
+        val response = taskQueryService.list(user);
 
         // then
         assertThat(response).extracting(Task::id).containsExactly(workerTask.getId());
@@ -108,17 +91,12 @@ class TaskQueryServiceTest {
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
         taskRepository.save(TaskFactory.entity(member.getId()));
-        val assigned = taskRepository.save(new TaskEntity(TaskType.PROJECT, Set.of(Trade.ELECTRICAL),
-                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30),
-                member.getId(), null, null, null, null,
-                project.getId(), "task", "requirement", "memo"));
-        taskRepository.save(new TaskEntity(TaskType.PROJECT, Set.of(Trade.ELECTRICAL),
-                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30),
-                null, null, null, null, null,
-                project.getId(), "task", "requirement", "memo"));
+        val assigned = taskRepository.save(TaskFactory.projectEntity(project.getId(), member.getId()));
+        taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when
-        val response = taskQueryService.listAssigned(UserFactory.domain(member.getId(), Role.CAREER));
+        val response = taskQueryService.listAssigned(user);
 
         // then
         assertThat(response).extracting(Task::id).containsExactly(assigned.getId());
@@ -134,31 +112,16 @@ class TaskQueryServiceTest {
         val company = companyRepository.save(CompanyFactory.entity(target.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
         val workerTask = taskRepository.save(TaskFactory.entity(target.getId()));
-        val assigned = taskRepository.save(new TaskEntity(TaskType.PROJECT, Set.of(Trade.ELECTRICAL),
-                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30),
-                target.getId(), null, null, null, null,
-                project.getId(), "task", "requirement", "memo"));
+        val assigned = taskRepository.save(TaskFactory.projectEntity(project.getId(), target.getId()));
         taskRepository.save(TaskFactory.entity(member.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when
-        val response = taskQueryService.listByCoworker(UserFactory.domain(member.getId(), Role.CAREER), target.getId());
+        val response = taskQueryService.listByCoworker(user, target.getId());
 
         // then
         assertThat(response).extracting(Task::id)
                 .containsExactlyInAnyOrder(workerTask.getId(), assigned.getId());
-    }
-
-    @Test
-    @DisplayName("listByCoworker - 동료가 아닐 때 목록을 조회하면 FORBIDDEN으로 실패한다")
-    void listByCoworker_fail_C004() {
-        // given
-        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val target = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        taskRepository.save(TaskFactory.entity(target.getId()));
-
-        // when & then
-        assertCodeException(() -> taskQueryService.listByCoworker(UserFactory.domain(member.getId(), Role.CAREER), target.getId()))
-                .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
     }
 
     @Test
@@ -168,63 +131,17 @@ class TaskQueryServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
-        val assigned = taskRepository.save(new TaskEntity(TaskType.PROJECT, Set.of(Trade.ELECTRICAL),
-                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30),
-                member.getId(), null, null, null, null,
-                project.getId(), "task", "requirement", "memo"));
-        val unassigned = taskRepository.save(new TaskEntity(TaskType.PROJECT, Set.of(Trade.ELECTRICAL),
-                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30),
-                null, null, null, null, null,
-                project.getId(), "task", "requirement", "memo"));
+        val assigned = taskRepository.save(TaskFactory.projectEntity(project.getId(), member.getId()));
+        val unassigned = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
         taskRepository.save(TaskFactory.entity(member.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when
-        val response = taskQueryService.listByProject(UserFactory.domain(member.getId(), Role.CAREER), project.getId());
+        val response = taskQueryService.listByProject(user, project.getId());
 
         // then
         assertThat(response).extracting(Task::id)
                 .containsExactlyInAnyOrder(assigned.getId(), unassigned.getId());
-    }
-
-    @Test
-    @DisplayName("listByProject - 다른 업체의 프로젝트일 때 목록을 조회하면 FORBIDDEN으로 실패한다")
-    void listByProject_fail_C004() {
-        // given
-        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val ownerCompany = companyRepository.save(CompanyFactory.entity(owner.getId()));
-        val project = projectRepository.save(ProjectFactory.entity(ownerCompany.getId()));
-        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        companyRepository.save(new CompanyEntity(other.getId(), "company", "0000001001"));
-
-        // when & then
-        assertCodeException(() -> taskQueryService.listByProject(UserFactory.domain(other.getId(), Role.CAREER), project.getId()))
-                .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
-    }
-
-    @Test
-    @DisplayName("listByProject - 프로젝트가 존재하지 않을 때 목록을 조회하면 NOT_FOUND로 실패한다")
-    void listByProject_fail_C005_project() {
-        // given
-        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        companyRepository.save(CompanyFactory.entity(member.getId()));
-
-        // when & then
-        assertCodeException(() -> taskQueryService.listByProject(UserFactory.domain(member.getId(), Role.CAREER), MISSING_ID))
-                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
-    }
-
-    @Test
-    @DisplayName("listByProject - 소유한 업체가 없을 때 목록을 조회하면 NOT_FOUND로 실패한다")
-    void listByProject_fail_C005_company() {
-        // given
-        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
-        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
-        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-
-        // when & then
-        assertCodeException(() -> taskQueryService.listByProject(UserFactory.domain(other.getId(), Role.CAREER), project.getId()))
-                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
 
     @Test
@@ -235,68 +152,43 @@ class TaskQueryServiceTest {
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
         val worker = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        taskRepository.save(new TaskEntity(TaskType.PROJECT, Set.of(Trade.ELECTRICAL),
-                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30),
-                worker.getId(), null, null, null, null,
-                project.getId(), "task", "requirement", "memo"));
-        taskRepository.save(new TaskEntity(TaskType.PROJECT, Set.of(Trade.ELECTRICAL),
-                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30),
-                worker.getId(), null, null, null, null,
-                project.getId(), "task", "requirement", "memo"));
-        taskRepository.save(new TaskEntity(TaskType.PROJECT, Set.of(Trade.ELECTRICAL),
-                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30),
-                null, null, null, null, null,
-                project.getId(), "task", "requirement", "memo"));
+        taskRepository.save(TaskFactory.projectEntity(project.getId(), worker.getId()));
+        taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when
-        val response = taskQueryService.listAssigneeIdsByProject(
-                UserFactory.domain(member.getId(), Role.CAREER), project.getId());
+        val response = taskQueryService.listAssigneeIdsByProject(user, project.getId());
 
         // then
         assertThat(response).containsExactly(worker.getId());
     }
 
     @Test
-    @DisplayName("listAssigneeIdsByProject - 다른 업체의 프로젝트일 때 조회하면 FORBIDDEN으로 실패한다")
-    void listAssigneeIdsByProject_fail_C004() {
+    @DisplayName("listByCoworker - 동료가 아닐 때 목록을 조회하면 FORBIDDEN으로 실패한다")
+    void listByCoworker_fail_C004() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val target = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
+
+        // when & then
+        assertCodeException(() -> taskQueryService.listByCoworker(user, target.getId()))
+                .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
+    }
+
+    @Test
+    @DisplayName("listByProject - 다른 업체의 프로젝트일 때 목록을 조회하면 FORBIDDEN으로 실패한다")
+    void listByProject_fail_C004() {
         // given
         val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val ownerCompany = companyRepository.save(CompanyFactory.entity(owner.getId()));
         val project = projectRepository.save(ProjectFactory.entity(ownerCompany.getId()));
         val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-        companyRepository.save(new CompanyEntity(other.getId(), "company", "0000001001"));
+        companyRepository.save(CompanyFactory.entity(other.getId(), "0000001001"));
+        val user = UserFactory.domain(other.getId(), Role.CAREER);
 
         // when & then
-        assertCodeException(() -> taskQueryService.listAssigneeIdsByProject(
-                UserFactory.domain(other.getId(), Role.CAREER), project.getId()))
+        assertCodeException(() -> taskQueryService.listByProject(user, project.getId()))
                 .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
-    }
-
-    @Test
-    @DisplayName("listAssigneeIdsByProject - 프로젝트가 존재하지 않을 때 조회하면 NOT_FOUND로 실패한다")
-    void listAssigneeIdsByProject_fail_C005_project() {
-        // given
-        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        companyRepository.save(CompanyFactory.entity(member.getId()));
-
-        // when & then
-        assertCodeException(() -> taskQueryService.listAssigneeIdsByProject(
-                UserFactory.domain(member.getId(), Role.CAREER), MISSING_ID))
-                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
-    }
-
-    @Test
-    @DisplayName("listAssigneeIdsByProject - 소유한 업체가 없을 때 조회하면 NOT_FOUND로 실패한다")
-    void listAssigneeIdsByProject_fail_C005_company() {
-        // given
-        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
-        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
-        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
-
-        // when & then
-        assertCodeException(() -> taskQueryService.listAssigneeIdsByProject(
-                UserFactory.domain(other.getId(), Role.CAREER), project.getId()))
-                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
 }

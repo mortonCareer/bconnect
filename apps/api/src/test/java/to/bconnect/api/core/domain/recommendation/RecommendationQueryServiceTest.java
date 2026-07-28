@@ -22,7 +22,7 @@ class RecommendationQueryServiceTest {
     @Autowired private MemberRepository memberRepository;
 
     @Test
-    @DisplayName("listReceived - 회원이 받은 추천서를 조회하면 공개된 추천서만 작성자 정보와 반환한다")
+    @DisplayName("listReceived - 공개·비공개 추천서를 받았을 때 조회하면 공개된 추천서만 작성자 정보와 반환한다")
     void listReceived_success() {
         // given
         val other = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -39,12 +39,12 @@ class RecommendationQueryServiceTest {
 
         // then
         assertThat(response).extracting(Recommendation::id).containsExactly(shown.getId());
-        assertThat(response.get(0).memberId()).isEqualTo(other.getId());
-        assertThat(response.get(0).visible()).isTrue();
+        assertThat(response.getFirst().memberId()).isEqualTo(other.getId());
+        assertThat(response.getFirst().visible()).isTrue();
     }
 
     @Test
-    @DisplayName("listSent - 회원이 보낸 추천서를 조회하면 공개된 추천서만 대상자 정보와 반환한다")
+    @DisplayName("listSent - 공개·비공개 추천서를 보냈을 때 조회하면 공개된 추천서만 대상자 정보와 반환한다")
     void listSent_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -61,12 +61,12 @@ class RecommendationQueryServiceTest {
 
         // then
         assertThat(response).extracting(Recommendation::id).containsExactly(shown.getId());
-        assertThat(response.get(0).memberId()).isEqualTo(other.getId());
-        assertThat(response.get(0).visible()).isTrue();
+        assertThat(response.getFirst().memberId()).isEqualTo(other.getId());
+        assertThat(response.getFirst().visible()).isTrue();
     }
 
     @Test
-    @DisplayName("listMyReceived - 내가 받은 추천서를 조회하면 비공개 추천서를 포함해 반환한다")
+    @DisplayName("listMyReceived - 공개·비공개 추천서를 받았을 때 조회하면 비공개 추천서를 포함해 반환한다")
     void listMyReceived_success() {
         // given
         val other = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -87,7 +87,7 @@ class RecommendationQueryServiceTest {
     }
 
     @Test
-    @DisplayName("listMySent - 내가 보낸 추천서를 조회하면 비공개 추천서를 포함해 반환한다")
+    @DisplayName("listMySent - 공개·비공개 추천서를 보냈을 때 조회하면 비공개 추천서를 포함해 반환한다")
     void listMySent_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
