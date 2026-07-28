@@ -110,4 +110,12 @@ public class TaskEntity extends BaseEntity {
         this.workerId = workerId;
         this.status = TaskStatus.SCHEDULED;
     }
+
+    public void offered() {
+        this.status = TaskStatus.OFFERED;
+    }
+
+    public void draft() {
+        this.status = TaskStatus.DRAFT;
+    }
 }

@@ -90,6 +90,7 @@
 | OF001 | NOT_PROJECT_TASK | 400 | INFO | 프로젝트 작업에만 섭외할 수 있습니다. |
 | OF002 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 섭외 상태입니다. |
 | OF003 | INVALID_REORDER | 400 | INFO | 재정렬 대상이 올바르지 않습니다. |
+| OF004 | INVALID_TASK_STATUS | 409 | INFO | 섭외할 수 없는 작업 상태입니다. |
 
 ## CredentialExceptionCode
 
