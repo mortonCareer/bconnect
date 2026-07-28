@@ -15,9 +15,11 @@ import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.coworker.CoworkerRequestRepository;
 import to.bconnect.api.storage.credential.CredentialEntity;
 import to.bconnect.api.storage.credential.CredentialRepository;
+import to.bconnect.api.storage.device.DeviceTokenRepository;
 import to.bconnect.api.storage.drive.DriveEntity;
 import to.bconnect.api.storage.drive.DriveMemberRepository;
 import to.bconnect.api.storage.drive.DriveRepository;
+import to.bconnect.api.storage.notification.NotificationRepository;
 import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.post.PostEntity;
 import to.bconnect.api.storage.post.PostRepository;
@@ -26,8 +28,6 @@ import to.bconnect.api.storage.recommendation.RecommendationRepository;
 import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -47,6 +47,8 @@ public class MemberCleaner {
     private final DriveMemberRepository driveMemberRepository;
     private final BoardRepository boardRepository;
     private final NoteRepository noteRepository;
+    private final DeviceTokenRepository deviceTokenRepository;
+    private final NotificationRepository notificationRepository;
     private final AttachmentLinker attachmentLinker;
 
     // TODO: 이벤트 구조로 변경 가능
@@ -77,6 +79,10 @@ public class MemberCleaner {
 
         offerRepository.deleteAll(offerRepository.findAllByWorkerId(memberId));
         taskRepository.deleteAll(taskRepository.findAllByWorkerIdAndType(memberId, TaskType.WORKER));
+
+        deviceTokenRepository.deleteAll(deviceTokenRepository.findAllByMemberId(memberId));
+        notificationRepository.deleteAll(notificationRepository.findAllByReceiverId(memberId));
+        notificationRepository.deleteAll(notificationRepository.findAllBySenderId(memberId));
 
         driveMemberRepository.deleteAll(driveMemberRepository.findAllByMemberId(memberId));
 

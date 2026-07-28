@@ -13,10 +13,14 @@ import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.board.BoardRepository;
+import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
+import to.bconnect.api.storage.project.ProjectRepository;
+import to.bconnect.api.storage.task.TaskRepository;
 
 @Slf4j
 @Service
@@ -25,6 +29,10 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final MemberRepository memberRepository;
+    private final ProjectRepository projectRepository;
+    private final TaskRepository taskRepository;
+    private final BoardRepository boardRepository;
+    private final NoteRepository noteRepository;
     private final AttachmentFinder attachmentFinder;
     private final AttachmentLinker attachmentLinker;
 
@@ -104,6 +112,16 @@ public class CompanyService {
     public void delete(AuthUser user) {
         val found = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        val projects = projectRepository.findAllByCompanyId(found.getId());
+        projects.forEach(it -> {
+            taskRepository.deleteAllByProjectId(it.getId());
+            boardRepository.findByProjectId(it.getId()).ifPresent(board -> {
+                noteRepository.deleteAllByBoardId(board.getId());
+                boardRepository.delete(board);
+            });
+        });
+        projectRepository.deleteAll(projects);
 
         attachmentLinker.unlink(ReferenceType.COMPANY, found.getId());
         companyRepository.delete(found);
