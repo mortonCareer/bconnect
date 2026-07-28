@@ -98,7 +98,6 @@ export default function CertificationApplyPage() {
   }
 
   // 파일 제출 — presign 업로드 후 attachmentId로 credential 생성. 성공 여부를 돌려줘 탭이 폼 리셋을 결정.
-  // note는 CreateCredentialRequest에 자리 없어 미전송 (#609 BE 갭).
   const handleSubmit = async (
     type: CredentialType,
     payload: { file: FileValue | null; note?: string }
@@ -110,7 +109,8 @@ export default function CertificationApplyPage() {
         if (me?.id == null) throw new Error('회원 정보 로드 전')
         attachmentId = await uploadCredentialFile(payload.file, me.id)
       }
-      await createCredentialAsync({ data: { type, attachmentId } })
+      const note = payload.note?.trim() || undefined
+      await createCredentialAsync({ data: { type, attachmentId, note } })
       toast({
         description: isOther ? '제출했어요. 검토 후 반영돼요' : '인증 정보가 갱신되었어요',
         variant: 'success',
