@@ -1,31 +1,16 @@
-/**
- * KISCON 건설업체정보 동기화 스크립트
- *
- * data.go.kr API → Railway Postgres
- * - GongsiReg (건설업체등록) → kiscon_registration
- * - GongsiAdmi (행정처분) → kiscon_admin_penalty
- *
- * 실행: pnpm exec tsx scripts/kiscon-construction-sync.ts [--full]
- * 환경변수: KISCON_API_SERVICE_KEY, DATABASE_URL, SLACK_WEBHOOK_URL (선택)
- */
+// KISCON 건설업체등록·행정처분 (data.go.kr API) → kiscon_registration / kiscon_admin_penalty
+// 실행: pnpm --filter @bconnect/data-jobs kiscon-construction-sync [--full]
 
-import postgres from 'postgres'
+import { createDb, notifySlack, runSync, sleep } from './lib'
 
-// ─── 설정 ───────────────────────────────────────
-
-const DATABASE_URL = process.env.DATABASE_URL
 const API_KEY = process.env.KISCON_API_SERVICE_KEY
-const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL
 const BASE_URL = 'https://apis.data.go.kr/1613000/ConAdminInfoSvc1'
 const PAGE_SIZE = 1000
 const REQUEST_DELAY_MS = 100
 
-if (!DATABASE_URL) throw new Error('DATABASE_URL is required')
 if (!API_KEY) throw new Error('KISCON_API_SERVICE_KEY is required')
 
-const sql = postgres(DATABASE_URL, { max: 5 })
-
-// ─── DDL ────────────────────────────────────────
+const sql = createDb()
 
 async function ensureTables(): Promise<void> {
   await sql`
@@ -85,8 +70,6 @@ async function ensureTables(): Promise<void> {
     ON kiscon_admin_penalty (biz_reg_no)
   `
 }
-
-// ─── API 호출 ───────────────────────────────────
 
 interface ApiResponse<T> {
   response: {
@@ -149,17 +132,9 @@ async function fetchPage<T>(
   throw lastError!
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms))
-}
-
-// ─── biz_reg_no 정규화 ─────────────────────────
-
 function normalizeBizRegNo(value: number | string): string {
   return String(value).padStart(10, '0')
 }
-
-// ─── GongsiReg 동기화 ──────────────────────────
 
 interface RawRegItem {
   ncrGsSeq: number
@@ -190,10 +165,10 @@ async function syncRegistration(sDate: string, eDate: string): Promise<number> {
   console.log(`[GongsiReg] totalCount=${totalCount}, pages=${totalPages}`)
 
   async function upsertBatch(items: RawRegItem[]): Promise<void> {
-    // 사업자번호 없는 레코드는 조회 불가하므로 스킵
+    // 사업자번호 없는 레코드는 조회 생략
     const valid = items.filter((r) => r.ncrMasterNum)
     if (valid.length === 0) return
-    // API 응답에 동일 PK 중복 존재 가능 → 마지막 레코드만 유지
+    // 동일 PK 중복 응답 가능 → 마지막 레코드만 유지
     const deduped = [...new Map(valid.map((r) => [r.ncrGsSeq, r])).values()]
     const rows = deduped.map((r) => ({
       ncr_gs_seq: r.ncrGsSeq,
@@ -245,8 +220,6 @@ async function syncRegistration(sDate: string, eDate: string): Promise<number> {
   return upserted
 }
 
-// ─── GongsiAdmi 동기화 ─────────────────────────
-
 interface RawAdmiItem {
   ncrGsSeq: number
   ncrMasterNum: number | string
@@ -289,7 +262,7 @@ async function syncAdminPenalty(sDate: string, eDate: string): Promise<number> {
   async function upsertBatch(items: RawAdmiItem[]): Promise<void> {
     const valid = items.filter((r) => r.ncrMasterNum)
     if (valid.length === 0) return
-    // API 응답에 동일 PK 중복 존재 가능 → 마지막 레코드만 유지
+    // 동일 PK 중복 응답 가능 → 마지막 레코드만 유지
     const deduped = [...new Map(valid.map((r) => [r.ncrGsSeq, r])).values()]
     const rows = deduped.map((r) => ({
       ncr_gs_seq: r.ncrGsSeq,
@@ -363,23 +336,6 @@ async function syncAdminPenalty(sDate: string, eDate: string): Promise<number> {
   return upserted
 }
 
-// ─── Slack 알림 ─────────────────────────────────
-
-async function notifySlack(message: string): Promise<void> {
-  if (!SLACK_WEBHOOK_URL) return
-  try {
-    await fetch(SLACK_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: message }),
-    })
-  } catch (e) {
-    console.error('[slack] notification failed:', e)
-  }
-}
-
-// ─── 메인 ───────────────────────────────────────
-
 function formatDateParam(date: Date): string {
   return date.toISOString().slice(0, 10).replace(/-/g, '')
 }
@@ -416,14 +372,6 @@ async function main(): Promise<void> {
 
   console.log(summary)
   await notifySlack(summary)
-  await sql.end({ timeout: 5 })
 }
 
-main().catch(async (err) => {
-  console.error('[sync] 실패:', err)
-  await notifySlack(
-    `🚨 *KISCON 건설업체정보 동기화 실패*\n${err instanceof Error ? err.message : String(err)}`
-  )
-  await sql.end()
-  process.exit(1)
-})
+runSync('kiscon-construction-sync', sql, main)
