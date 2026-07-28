@@ -3,6 +3,7 @@ import {
   getGetDirectChatsMockHandler,
   getGetGroupChatsMockHandler,
   getGetMyMemberMockHandler,
+  ChatType,
   MessageType,
   Role,
   Trade,
@@ -25,7 +26,7 @@ const ME: Member = {
   name: '김대표',
   phone: '+821012341234',
   picture: null,
-  role: Role.USER,
+  roles: [Role.CAREER],
   createdAt: EPOCH,
   modifiedAt: EPOCH,
 }
@@ -47,9 +48,6 @@ const maskedOf = (w: Worker): MemberSummary => ({
   username: `worker_${w.id}`,
   name: w.name,
   picture: null,
-  role: Role.USER,
-  createdAt: EPOCH,
-  modifiedAt: EPOCH,
 })
 
 const msg = (
@@ -61,6 +59,7 @@ const msg = (
 ): Message => ({
   id,
   chatId,
+  chatType: ChatType.DIRECT,
   memberId,
   type: MessageType.TEXT,
   content,

@@ -3,7 +3,6 @@ import {
   getGetNotificationsUnreadCountMockHandler,
   getUpdateNotificationReadMockHandler,
   getUpdateNotificationsReadMockHandler,
-  Role,
 } from '@bconnect/api-client'
 import type { Notification } from '@bconnect/api-client'
 
@@ -137,9 +136,6 @@ const notifications: Notification[] = SEEDS.map((seed, i) => {
         name: seed.senderName,
         username: `user${100 + i}`,
         picture: null,
-        role: Role.USER,
-        createdAt,
-        modifiedAt: createdAt,
       }
     : null
   return {
