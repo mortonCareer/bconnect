@@ -14,8 +14,8 @@ public record UpdateProjectTaskRequest(
         @NotNull LocalDate start,
         @NotNull LocalDate end,
         @NotBlank String title,
-        @NotBlank String requirement,
-        @NotBlank String memo
+        String requirement,
+        String memo
 ) {
     public UpdateProjectTask toCommand() {
         return new UpdateProjectTask(trades, start, end, title, requirement, memo);
