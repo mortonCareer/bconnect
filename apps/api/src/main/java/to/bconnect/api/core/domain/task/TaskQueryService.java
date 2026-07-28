@@ -37,7 +37,7 @@ public class TaskQueryService {
     }
 
     @Transactional(readOnly = true)
-    public List<Task> list(AuthUser user) {
+    public List<Task> listByWorker(AuthUser user) {
         return taskRepository.findAllByWorkerIdAndType(user.id(), TaskType.WORKER)
                 .stream()
                 .map(Task::of)
