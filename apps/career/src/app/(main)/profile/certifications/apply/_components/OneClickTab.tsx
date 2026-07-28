@@ -112,7 +112,7 @@ export function OneClickTab({
       ].filter((request) => !existingTypes.has(request.type))
 
       await onApply(requests)
-      toast({ description: '자격 증빙이 갱신되었어요', variant: 'success' })
+      toast({ description: '자격 증명이 갱신되었어요', variant: 'success' })
     } catch (error) {
       server.capture(error, form.getValues())
     }
@@ -157,14 +157,14 @@ export function OneClickTab({
         </Form>
       </div>
 
-      {/* 하단 자격 증빙 목록 */}
+      {/* 하단 자격 증명 목록 */}
       <CredentialList
         credentials={oneClickCredentials}
         isLoading={isLoading}
         isError={isError}
         onRetry={onRetry}
         onRequestDelete={onRequestDelete}
-        emptyText="아직 등록된 자격 증빙이 없어요"
+        emptyText="아직 등록된 자격 증명이 없어요"
       />
     </div>
   )

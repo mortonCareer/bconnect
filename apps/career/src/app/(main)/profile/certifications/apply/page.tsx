@@ -71,7 +71,7 @@ export default function CertificationApplyPage() {
     setSubTab(null)
   }
 
-  // 내 자격 증빙은 useGetMyCredentials(무인자) — profileId 로 조회하던 useGetCredentials 대체.
+  // 내 자격 증명은 useGetMyCredentials(무인자) — profileId 로 조회하던 useGetCredentials 대체.
   const {
     data: credentials,
     isLoading: isCredentialsLoading,
@@ -90,7 +90,7 @@ export default function CertificationApplyPage() {
 
   const { mutate: deleteCredential } = useDeleteCredential()
 
-  // 하단 자격 증빙 목록 상태 — 각 탭에 주입.
+  // 하단 자격 증명 목록 상태 — 각 탭에 주입.
   const listIsLoading = isCredentialsLoading
   const listIsError = isCredentialsError
   const handleRetry = () => {
@@ -112,7 +112,7 @@ export default function CertificationApplyPage() {
       const note = payload.note?.trim() || undefined
       await createCredentialAsync({ data: { type, attachmentId, note } })
       toast({
-        description: isOther ? '제출했어요. 검토 후 반영돼요' : '자격 증빙이 갱신되었어요',
+        description: isOther ? '제출했어요. 검토 후 반영돼요' : '자격 증명이 갱신되었어요',
         variant: 'success',
       })
       return true
@@ -128,7 +128,7 @@ export default function CertificationApplyPage() {
     <div className="flex flex-col">
       <TopBar
         variant="default"
-        title="자격 증빙 신청"
+        title="자격 증명 신청"
         showAction={false}
         onBack={() => router.back()}
       />
@@ -173,8 +173,8 @@ export default function CertificationApplyPage() {
         onOpenChange={(open) => {
           if (!open) setPendingDeleteId(null)
         }}
-        title="자격 증빙을 삭제할까요?"
-        description="삭제한 자격 증빙은 복구할 수 없어요."
+        title="자격 증명을 삭제할까요?"
+        description="삭제한 자격 증명은 복구할 수 없어요."
         confirmLabel="삭제"
         destructive
         onConfirm={() => {
