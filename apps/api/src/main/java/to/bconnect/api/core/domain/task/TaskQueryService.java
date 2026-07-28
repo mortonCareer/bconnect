@@ -1,19 +1,16 @@
 package to.bconnect.api.core.domain.task;
 
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.storage.company.CompanyRepository;
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.core.domain.project.ProjectFinder;
+import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
-import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
-import to.bconnect.api.security.AuthUser;
-
-import to.bconnect.api.common.CodeException;
-import to.bconnect.api.common.CommonExceptionCode;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,8 +22,7 @@ public class TaskQueryService {
 
     private final TaskRepository taskRepository;
     private final CoworkerRepository coworkerRepository;
-    private final CompanyRepository companyRepository;
-    private final ProjectRepository projectRepository;
+    private final ProjectFinder projectFinder;
 
     @Transactional(readOnly = true)
     public Optional<Task> get(Long taskId) {
@@ -69,7 +65,7 @@ public class TaskQueryService {
 
     @Transactional(readOnly = true)
     public List<Task> listByProject(AuthUser user, Long projectId) {
-        validateProjectOwner(user, projectId);
+        projectFinder.validateOwnership(user.id(), projectId);
 
         return taskRepository.findAllByProjectId(projectId)
                 .stream()
@@ -79,23 +75,12 @@ public class TaskQueryService {
 
     @Transactional(readOnly = true)
     public List<Long> listAssigneeIdsByProject(AuthUser user, Long projectId) {
-        validateProjectOwner(user, projectId);
+        projectFinder.validateOwnership(user.id(), projectId);
 
         return taskRepository.findAllByProjectIdAndWorkerIdNotNull(projectId)
                 .stream()
                 .map(TaskEntity::getWorkerId)
                 .distinct()
                 .toList();
-    }
-
-    private void validateProjectOwner(AuthUser user, Long projectId) {
-        val companyId = companyRepository.findByMemberId(user.id())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
-                .getId();
-
-        val project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (!project.getCompanyId().equals(companyId))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
     }
 }
