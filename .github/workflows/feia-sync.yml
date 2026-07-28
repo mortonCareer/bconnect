@@ -1,4 +1,4 @@
-name: KISCON Sync
+name: FEIA Sync
 
 on:
   schedule:
@@ -21,17 +21,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Sync KISCON data to Postgres
+      - name: Sync FEIA fire-license data to Postgres
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          FEIA_API_SERVICE_KEY: ${{ secrets.FEIA_API_SERVICE_KEY }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: pnpm --filter @bconnect/data-jobs kiscon-sync
+        run: pnpm --filter @bconnect/data-jobs feia-sync
 
       - name: Notify Slack on failure or cancellation
         if: failure() || cancelled()
         run: |
           curl -s -X POST "$SLACK_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
-            -d '{"text":"🚨 *KISCON Sync 실패/취소*\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|워크플로우 로그 확인>"}'
+            -d '{"text":"🚨 *FEIA Sync 실패/취소*\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|워크플로우 로그 확인>"}'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

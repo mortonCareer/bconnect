@@ -2,8 +2,7 @@ name: KISCON Construction Sync
 
 on:
   schedule:
-    # 매주 월요일 01:00 UTC (10:00 KST) — 기존 kiscon-sync와 1시간 차이
-    - cron: '0 1 * * 1'
+    - cron: '0 21 * * 2'
   workflow_dispatch:
     inputs:
       full:
