@@ -285,7 +285,7 @@ CREATE TABLE storage_attachments (
 
 업로드 자체는 §5.1의 2-step으로 통일. 첨부의 영속화는 **항상 엔티티 생성 또는 수정 API 호출**로 매핑 row가 만들어짐. "엔티티 미생성"(파일만 떠다니는) 시나리오는 **존재하지 않음** — 매핑 row가 없으면 고아 첨부가 됨.
 
-**(A) 엔티티 생성 — 게시글, 인증서, 메시지, 저장소 추가**
+**(A) 엔티티 생성 — 게시글, 자격 증빙, 메시지, 저장소 추가**
 
 ```
 1. POST /attachments/presign
@@ -482,7 +482,7 @@ function fileUrl(att: AttachmentMeta): string {
 | `credentials` | `credentials/{memberId}/*` | **본인 + 매칭된 업체 + 운영** |
 | `storages`    | `storages/{storageId}/*`   | 권한 보유 멤버                |
 
-**핵심 차이:** `credentials`는 메타데이터(어떤 자격증을 보유 중인지)는 공개되지만, 실제 인증서 파일(신분증/자격증 사본 등 민감 정보)은 본인 외에 매칭된 업체와 운영만 접근. 메타가 공개돼도 파일 자체는 보호됨 — [피그마 디자인](https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS/?node-id=1238-5348)이 메타 공개 의도 확정.
+**핵심 차이:** `credentials`는 메타데이터(어떤 자격증을 보유 중인지)는 공개되지만, 실제 자격 증빙 파일(신분증/자격증 사본 등 민감 정보)은 본인 외에 매칭된 업체와 운영만 접근. 메타가 공개돼도 파일 자체는 보호됨 — [피그마 디자인](https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS/?node-id=1238-5348)이 메타 공개 의도 확정.
 
 ### 7.2 구현 원칙
 
@@ -582,7 +582,7 @@ confirm 실패 첨부는 confirm 시점에 즉시 S3 객체 삭제 + soft delete
 
 ---
 
-## 10. 인증서 파일 정책
+## 10. 자격 증빙 파일 정책
 
 Credential은 제출/승인/거절/만료 흐름을 가지며, 파일 자체는 다음 정책을 따른다:
 
