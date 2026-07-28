@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.storage.company.CompanyRepository;
+import to.bconnect.api.core.domain.project.ProjectFinder;
 import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.post.PostEntity;
 import to.bconnect.api.storage.post.PostRepository;
-import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
@@ -23,8 +22,7 @@ import to.bconnect.api.common.CommonExceptionCode;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final CompanyRepository companyRepository;
-    private final ProjectRepository projectRepository;
+    private final ProjectFinder projectFinder;
     private final OfferRepository offerRepository;
     private final PostRepository postRepository;
 
@@ -51,14 +49,7 @@ public class TaskService {
 
     @Transactional
     public Long createByCompany(AuthUser user, CreateProjectTask command) {
-        val companyId = companyRepository.findByMemberId(user.id())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
-                .getId();
-
-        val project = projectRepository.findById(command.projectId())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (!project.getCompanyId().equals(companyId))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        projectFinder.validateOwnership(user.id(), command.projectId());
 
         val created = new TaskEntity(
                 TaskType.PROJECT,
@@ -87,7 +78,7 @@ public class TaskService {
         if (found.getType() != TaskType.WORKER)
             throw new CodeException(TaskExceptionCode.INVALID_TYPE);
 
-        if (!found.getWorkerId().equals(user.id()))
+        if (!user.id().equals(found.getWorkerId()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         found.update(command.trades(), command.start(), command.end(),
@@ -102,15 +93,7 @@ public class TaskService {
         if (task.getType() != TaskType.PROJECT)
             throw new CodeException(TaskExceptionCode.INVALID_TYPE);
 
-        val companyId = companyRepository.findByMemberId(user.id())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
-                .getId();
-
-        val project = projectRepository.findById(task.getProjectId())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-
-        if (!project.getCompanyId().equals(companyId))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        projectFinder.validateOwnership(user.id(), task.getProjectId());
 
         task.update(command.trades(), command.start(), command.end(),
                 command.title(), command.requirement(), command.memo());
@@ -141,17 +124,10 @@ public class TaskService {
         val task = optional.get();
 
         if (task.getType() == TaskType.WORKER) {
-            if (!task.getWorkerId().equals(user.id()))
+            if (!user.id().equals(task.getWorkerId()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
         } else {
-            val companyId = companyRepository.findByMemberId(user.id())
-                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
-                    .getId();
-
-            val project = projectRepository.findById(task.getProjectId())
-                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-            if (!project.getCompanyId().equals(companyId))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+            projectFinder.validateOwnership(user.id(), task.getProjectId());
         }
 
         offerRepository.deleteByTaskId(task.getId());
