@@ -64,8 +64,8 @@ class TaskQueryServiceTest {
     }
 
     @Test
-    @DisplayName("list - 본인의 작업이 있을 때 목록을 조회하면 기술자 작업만 반환한다")
-    void list_success() {
+    @DisplayName("listByWorker - 본인의 작업이 있을 때 목록을 조회하면 기술자 작업만 반환한다")
+    void listByWorker_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
@@ -77,7 +77,7 @@ class TaskQueryServiceTest {
         val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when
-        val response = taskQueryService.list(user);
+        val response = taskQueryService.listByWorker(user);
 
         // then
         assertThat(response).extracting(Task::id).containsExactly(workerTask.getId());

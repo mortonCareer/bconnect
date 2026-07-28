@@ -50,7 +50,7 @@ public class TaskController {
 
     @GetMapping
     public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal AuthUser user) {
-        val workerTasks = taskQueryService.list(user);
+        val workerTasks = taskQueryService.listByWorker(user);
         val projectTasks = taskQueryService.listAssigned(user);
         
         val offers = offerService.listByWorker(user);
