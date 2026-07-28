@@ -30,7 +30,7 @@ public class AttachmentFinder {
     public Attachment get(ReferenceType referenceType, Long referenceId, Long attachmentId) {
         val attachment = attachmentRepository.findById(attachmentId).
                 orElseThrow(() -> new CodeException(AttachmentExceptionCode.NOT_FOUND));
-        if (attachment.getReferenceType() != referenceType || !referenceId.equals(attachment.getReferenceId()))
+        if (attachment.getReferenceType() != referenceType || !Objects.equals(referenceId, attachment.getReferenceId()))
             throw new CodeException(AttachmentExceptionCode.INVALID_LINKED);
 
         return Attachment.of(attachment);
@@ -41,11 +41,15 @@ public class AttachmentFinder {
      */
     @Transactional(readOnly = true)
     public List<Attachment> list(Collection<Long> attachmentIds) {
-        if (attachmentIds.isEmpty())
+        if (attachmentIds == null)
+            throw new CodeException(CommonExceptionCode.INVALID_REQUEST);
+
+        val ids = attachmentIds.stream().filter(Objects::nonNull).distinct().toList();
+        if (ids.isEmpty())
             return List.of();
 
-        val attachments = attachmentRepository.findAllById(attachmentIds);
-        if (attachments.size() != attachmentIds.size())
+        val attachments = attachmentRepository.findAllById(ids);
+        if (attachments.size() != ids.size())
             throw new CodeException(CommonExceptionCode.NOT_FOUND);
 
         return attachments.stream()
@@ -55,9 +59,6 @@ public class AttachmentFinder {
 
     @Transactional(readOnly = true)
     public List<Attachment> list(ReferenceType referenceType, Long referenceId) {
-        if (referenceId == null)
-            return List.of();
-
         return attachmentRepository.findAllByReferenceTypeAndReferenceId(referenceType, referenceId).stream()
                 .map(Attachment::of)
                 .toList();
@@ -65,9 +66,6 @@ public class AttachmentFinder {
 
     @Transactional(readOnly = true)
     public List<Attachment> list(ReferenceType referenceType, Long referenceId, AttachmentType type) {
-        if (referenceId == null)
-            return List.of();
-
         return attachmentRepository.findAllByReferenceTypeAndReferenceIdAndType(referenceType, referenceId, type).stream()
                 .map(Attachment::of)
                 .toList();
@@ -76,7 +74,7 @@ public class AttachmentFinder {
     @Transactional(readOnly = true)
     public Map<Long, Attachment> map(ReferenceType referenceType, Collection<Long> referenceIds, AttachmentType type) {
         if (referenceIds == null)
-            return Map.of();
+            throw new CodeException(CommonExceptionCode.INVALID_REQUEST);
 
         val ids = referenceIds.stream().filter(Objects::nonNull).distinct().toList();
         if (ids.isEmpty())
@@ -90,7 +88,7 @@ public class AttachmentFinder {
     @Transactional(readOnly = true)
     public Map<Long, List<Attachment>> listMap(ReferenceType referenceType, Collection<Long> referenceIds) {
         if (referenceIds == null)
-            return Map.of();
+            throw new CodeException(CommonExceptionCode.INVALID_REQUEST);
 
         val ids = referenceIds.stream().filter(Objects::nonNull).distinct().toList();
         if (ids.isEmpty())
@@ -104,7 +102,7 @@ public class AttachmentFinder {
     @Transactional(readOnly = true)
     public Map<Long, List<Attachment>> listMap(ReferenceType referenceType, Collection<Long> referenceIds, AttachmentType type) {
         if (referenceIds == null)
-            return Map.of();
+            throw new CodeException(CommonExceptionCode.INVALID_REQUEST);
 
         val ids = referenceIds.stream().filter(Objects::nonNull).distinct().toList();
         if (ids.isEmpty())
@@ -127,11 +125,15 @@ public class AttachmentFinder {
 
     @Transactional(readOnly = true)
     public void validateOwnership(Long memberId, List<Long> attachmentIds) {
-        if (attachmentIds.isEmpty())
+        if (attachmentIds == null)
+            throw new CodeException(CommonExceptionCode.INVALID_REQUEST);
+
+        val ids = attachmentIds.stream().filter(Objects::nonNull).distinct().toList();
+        if (ids.isEmpty())
             return;
 
-        val attachments = attachmentRepository.findAllById(attachmentIds);
-        if (attachments.size() != attachmentIds.size())
+        val attachments = attachmentRepository.findAllById(ids);
+        if (attachments.size() != ids.size())
             throw new CodeException(CommonExceptionCode.NOT_FOUND);
 
         attachments.forEach(it -> {

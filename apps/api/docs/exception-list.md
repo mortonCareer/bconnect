@@ -13,6 +13,7 @@
 | `CO` | 업체 | `core/domain/company` |
 | `T` | 작업 | `core/domain/task` |
 | `CW` | 동료 | `core/domain/coworker` |
+| `CD` | 인증뱃지 | `core/domain/credential` |
 | `RC` | 추천서 | `core/domain/recommendation` |
 | `CH` | 채팅 | `core/domain/chat` |
 | `OF` | 섭외 | `core/domain/offer` |
@@ -34,6 +35,7 @@
 | C007 | INTERNAL_SERVER_ERROR | 500 | ERROR | 서버 내부 오류입니다. |
 | C008 | PATH_NOT_FOUND | 404 | INFO | 요청 경로를 찾을 수 없습니다. |
 | C009 | UNAUTHORIZED | 401 | INFO | 인증이 필요합니다. |
+| C010 | INVALID_REQUEST | 400 | WARN | 요청 형식이 올바르지 않습니다. |
 
 ## AuthExceptionCode
 
@@ -79,6 +81,7 @@
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
 | T001 | NOT_ASSIGNED | 409 | INFO | 기술자에게 할당되지 않은 작업입니다. |
+| T002 | INVALID_TYPE | 409 | INFO | 처리할 수 없는 작업 유형입니다. |
 
 ## OfferExceptionCode
 
@@ -87,6 +90,12 @@
 | OF001 | NOT_PROJECT_TASK | 400 | INFO | 프로젝트 작업에만 섭외할 수 있습니다. |
 | OF002 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 섭외 상태입니다. |
 | OF003 | INVALID_REORDER | 400 | INFO | 재정렬 대상이 올바르지 않습니다. |
+
+## CredentialExceptionCode
+
+| 코드 | 이름 | HTTP | LogLevel | 메시지 |
+| --- | --- | --- | --- | --- |
+| CD001 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 인증뱃지 상태입니다. |
 
 ## CoworkerExceptionCode
 
