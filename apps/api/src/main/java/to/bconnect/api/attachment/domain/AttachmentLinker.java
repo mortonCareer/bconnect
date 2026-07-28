@@ -26,7 +26,7 @@ public class AttachmentLinker {
     @Transactional
     public void link(ReferenceType referenceType, Long referenceId, Collection<Long> attachmentIds) {
         if (attachmentIds == null)
-            return;
+            throw new CodeException(CommonExceptionCode.INVALID_REQUEST);
 
         val ids = attachmentIds.stream().filter(Objects::nonNull).distinct().toList();
         if (ids.isEmpty())
@@ -40,7 +40,7 @@ public class AttachmentLinker {
             if (it.getStatus() != AttachmentStatus.COMPLETED)
                 throw new CodeException(AttachmentExceptionCode.NOT_COMPLETED);
             if (it.getReferenceType() != null
-                    && (it.getReferenceType() != referenceType || !referenceId.equals(it.getReferenceId())))
+                    && (it.getReferenceType() != referenceType || !Objects.equals(referenceId, it.getReferenceId())))
                 throw new CodeException(AttachmentExceptionCode.INVALID_LINKED);
             it.link(referenceType, referenceId);
         });
@@ -54,17 +54,21 @@ public class AttachmentLinker {
         if (attachment.getStatus() != AttachmentStatus.COMPLETED)
             throw new CodeException(AttachmentExceptionCode.NOT_COMPLETED);
         if (attachment.getReferenceType() != null
-                && (attachment.getReferenceType() != referenceType || !referenceId.equals(attachment.getReferenceId())))
+                && (attachment.getReferenceType() != referenceType || !Objects.equals(referenceId, attachment.getReferenceId())))
             throw new CodeException(AttachmentExceptionCode.INVALID_LINKED);
         attachment.link(referenceType, referenceId);
     }
 
     @Transactional
     public void unlink(ReferenceType referenceType, Collection<Long> referenceIds) {
-        if (referenceIds == null || referenceIds.isEmpty())
+        if (referenceIds == null)
+            throw new CodeException(CommonExceptionCode.INVALID_REQUEST);
+
+        val ids = referenceIds.stream().filter(Objects::nonNull).distinct().toList();
+        if (ids.isEmpty())
             return;
 
-        attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, referenceIds)
+        attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, ids)
                 .forEach(AttachmentEntity::unlink);
     }
 
@@ -78,7 +82,7 @@ public class AttachmentLinker {
     public void unlink(ReferenceType referenceType, Long referenceId, Long attachmentId) {
         val attachment = attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (attachment.getReferenceType() != referenceType || !referenceId.equals(attachment.getReferenceId()))
+        if (attachment.getReferenceType() != referenceType || !Objects.equals(referenceId, attachment.getReferenceId()))
             throw new CodeException(AttachmentExceptionCode.INVALID_LINKED);
         attachment.unlink();
     }

@@ -56,12 +56,14 @@ public class NoteService {
                     .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
             projectFinder.validateOwnership(user.id(), command.projectId());
-        } else {
+        } else if (command.type() == BoardType.DRIVE) {
             board = boardRepository.findByDriveId(command.driveId())
                     .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
             if (!driveFinder.isMember(user.id(), command.driveId()) && !driveFinder.isOwner(user.id(), command.driveId()))
                 throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        } else {
+            throw new CodeException(CommonExceptionCode.NOT_VALID);
         }
 
         return noteRepository.save(new NoteEntity(board.getId(), user.id(), command.content())).getId();
