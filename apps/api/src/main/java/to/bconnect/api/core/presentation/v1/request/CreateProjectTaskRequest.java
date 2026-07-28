@@ -15,8 +15,8 @@ public record CreateProjectTaskRequest(
         @NotNull LocalDate end,
         @NotNull Long projectId,
         @NotBlank String title,
-        @NotBlank String requirement,
-        @NotBlank String memo
+        String requirement,
+        String memo
 ) {
     public CreateProjectTask toCommand() {
         return new CreateProjectTask(trades, start, end, projectId, title, requirement, memo);

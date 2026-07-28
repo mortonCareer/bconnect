@@ -16,7 +16,7 @@ public record UpdateWorkerTaskRequest(
         @NotNull LocalDate start,
         @NotNull LocalDate end,
         @NotBlank String title,
-        @NotBlank String memo,
+        String memo,
         String company,
         @Valid Address address
 ) {
