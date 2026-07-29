@@ -8,6 +8,7 @@ import { PanelHost } from './_components/panel/PanelHost'
 import { NotificationPromptToast } from '@bconnect/push'
 import { useTechnicianItems } from '@/hooks/useTechnicianItems'
 import { useAuthStore } from '@/stores/auth-store'
+import { RoleGate } from './_components/RoleGate'
 
 function GuestSidebarWithCount() {
   // '검증된 프로필' 카피라 가입 회원 수만 — 크롤링(미검증) 프로필은 제외
@@ -29,14 +30,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </Suspense>
         )}
       </aside>
-      <LoginGateProvider>
-        <main className="flex h-full min-w-0 flex-1 justify-start overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex min-h-full w-full flex-col">{children}</div>
-        </main>
-        <Suspense>
-          <PanelHost />
-        </Suspense>
-      </LoginGateProvider>
+      <RoleGate>
+        <LoginGateProvider>
+          <main className="flex h-full min-w-0 flex-1 justify-start overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex min-h-full w-full flex-col">{children}</div>
+          </main>
+          <Suspense>
+            <PanelHost />
+          </Suspense>
+        </LoginGateProvider>
+      </RoleGate>
       <NotificationPromptToast />
     </div>
   )
