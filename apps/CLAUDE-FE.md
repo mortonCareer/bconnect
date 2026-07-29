@@ -10,6 +10,11 @@ career·plan 두 Next.js App Router 앱의 공통 프론트엔드 규칙. 각 �
 
 탭/필터/검색 state는 `useQueryState`(nuqs), `useState` 금지. URL 공유·새로고침 유지·뒤로가기 자연.
 
+**`history` 옵션은 "뒤로가기가 무엇을 되돌려야 하나" 기준으로 고른다** (기본값 `'replace'`):
+
+- `'replace'` — 화면 내부에서만 의미 있는 일시적 state (탭·서브탭·필터·검색어). `'push'`로 두면 전환마다 히스토리가 쌓여 TopBar 뒤로가기(`router.back()`)가 화면을 이탈하지 못하고 탭만 되돌린다 (#843, #869).
+- `'push'` — 뒤로가기로 되돌리는 것이 사용자 기대인 화면 전환급 state. 예: 갤러리 → 파일 뷰어 열기(`?file`), 폼 서브스텝 진입(`?step`). 이 경우 **왜 push 인지 주석으로 남긴다**.
+
 ## Tailwind v4 design tokens
 
 색상 hex 직접 X, CSS variables (`❌ bg-[#386dff]` → `✓ bg-primary`). 토큰: `packages/ui/src/styles/globals.css`. 신규 색상은 globals.css 먼저.
@@ -33,6 +38,14 @@ career·plan 두 Next.js App Router 앱의 공통 프론트엔드 규칙. 각 �
 ## 도메인 enum/라벨 — `@bconnect/api-client` SSOT
 
 값이 enum인 도메인 어휘(`Trade` 등)는 **mock 포함** api-client SSOT 사용 — 옵션 `TRADE_LIST`, 라벨 `TRADE_LABELS[t]` 파생. 한글 하드코딩·자체 옵션 배열·별도 표시필드(`category`) 금지(`generated/`는 orval 산출, 직접수정 X). enum에 없는 값은 BE spec 이슈로 확장.
+
+## 에러 클래스 — `@bconnect/config/errors` SSOT
+
+도메인 에러 클래스와 사용자 노출 카피는 [packages/config/errors/index.ts](../packages/config/errors/index.ts)가 SSOT.
+
+## 폼 제출 버튼 — `FormSubmitButton`
+
+RHF `<Form>` 안 제출 버튼은 raw `<Button type="submit">` 대신 `FormSubmitButton` (#400 표준, ESLint 강제).
 
 ## 날짜·공통 데이터 유틸 — `@bconnect/config` 선확인
 

@@ -2,6 +2,7 @@ package to.bconnect.api.core.domain.chat;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
@@ -10,7 +11,6 @@ import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.chat.*;
-import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
 
 import java.util.List;
@@ -22,8 +22,9 @@ public class DirectChatService {
 
     private final DirectChatRepository directChatRepository;
     private final MessageRepository messageRepository;
-    private final MessageService messageService;
+    private final MessageFinder messageFinder;
     private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<DirectChat> list(Long memberId) {
@@ -55,10 +56,9 @@ public class DirectChatService {
         val chat = directChatRepository.findById(chatId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.FORBIDDEN));
 
-        val lastMessage = messageRepository.findLatestMessagesByChatIdInAndChatType(List.of(chatId), ChatType.DIRECT)
-                .stream().findFirst().map(Message::of).orElse(null);
-        val unreadCount = messageRepository.findDirectUnreadCountByChatIdsAndMemberId(List.of(chatId), memberId)
-                .getOrDefault(chatId, 0L);
+        val lastMessage = messageRepository.findFirstByChatIdAndChatTypeOrderByIdDesc(chatId, ChatType.DIRECT)
+                .map(Message::of).orElse(null);
+        val unreadCount = messageRepository.findDirectUnreadCountByChatIdAndMemberId(chatId, memberId);
 
         return DirectChat.of(chat, chat.counterpartIdOf(memberId), lastMessage, unreadCount);
     }
@@ -68,11 +68,11 @@ public class DirectChatService {
         if (!directChatRepository.existsByIdAndMember(chatId, user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        return messageService.list(chatId, ChatType.DIRECT, cursor);
+        return messageFinder.list(chatId, ChatType.DIRECT, cursor);
     }
 
     @Transactional
-    public Long findOrCreate(Long memberId, Long otherId) {
+    public Long getOrCreate(Long memberId, Long otherId) {
         if (!memberRepository.existsById(otherId))
             throw new CodeException(CommonExceptionCode.NOT_FOUND);
 
@@ -81,12 +81,7 @@ public class DirectChatService {
             return optional.get().getId();
 
         val created = directChatRepository.save(DirectChatEntity.of(memberId, otherId));
-        messageService.create(
-                created.getId(),
-                ChatType.DIRECT,
-                MemberEntity.SYSTEM_ID,
-                new SendMessage(MessageType.SYSTEM, MessageTemplate.CHAT_CREATED, List.of())
-        );
+        eventPublisher.publishEvent(new ChatCreatedEvent(created.getId(), ChatType.DIRECT));
         return created.getId();
     }
 }

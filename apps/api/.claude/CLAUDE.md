@@ -2,16 +2,16 @@
 
 ## 제약
 - `/api` 범위 내에서만 쓰기 작업을 허용합니다.
-- 계획 문서를 작성하지 마세요.
 - 모든 읽기 작업은 READ 도구로, 쓰기 작업은 WRITE 도구로 처리하세요.
 - 사용자가 승인한 사항과 AI가 제안한 사항을 구분하세요.
-- 특정 명령어에 대한 오류가 3회 이상 발생한 경우 해당 작업을 건너뛰고, 보고하세요.
+- 계획 문서는 사용자가 승인한 내용만 포함하세요.
+- 특정 명령어에 대한 오류가 3회 이상 발생한 경우 해당 작업을 생략하고 보고하세요.
 
 ## 문서
 | 문서 | 설명                              |
 | --- |---------------------------------|
 | [project-structure](../docs/project-structure.md) | 도메인 · 레이어 · 의존성 구조              |
-| [ubiquitous-language](../docs/ubiquitous-language.md) | 도메인 용어 · Enum 값                 |
+| [ubiquitous-language](../../../docs/reference/ubiquitous-language.md) | 도메인 용어 · Enum 값 (루트 docs)     |
 | [attachment-architecture](../docs/attachment-architecture.md) | 첨부파일(Attachment) 생명주기           |
 | [notification-architecture](../docs/notification-architecture.md) | 알림 저장 · 조회 · 푸시(Push)           |
 | [stomp-architecture](../docs/stomp-architecture.md) | 채팅(Chat) · 메시지(Message) STOMP   |

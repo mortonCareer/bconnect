@@ -1,0 +1,27 @@
+meta {
+  name: 업체 소속 멤버 목록 조회
+  type: http
+  seq: 6
+  tags: [
+    chain
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/companies/{{companyId}}/members
+  auth: inherit
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.an('array');
+  });
+}
+
+docs {
+  업체에 소속된 멤버 목록 조회 (현재 소유자 1인)
+  @chain
+  - 05-companies/01-create
+}

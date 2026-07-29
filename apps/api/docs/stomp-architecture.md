@@ -40,6 +40,8 @@ sequenceDiagram
   - DirectChatAuthorizationManager : 1:1 채팅방 인가 처리
 - MessageSocketController : 메시지 송신 STOMP 엔드포인트 (group · direct)
 - MessageSocketService : 메시지 브로드캐스트 · 첨부 연결
+- MessageService : 메시지 영속화 — 조회는 core 의 MessageFinder
+- MessageEventListener : 이벤트 처리 (구독 · 메시지 생성 · 전송)
 
 ## 래퍼런스
 - [Spring WebSocket : STOMP](https://docs.spring.io/spring-framework/reference/web/websocket/stomp.html)

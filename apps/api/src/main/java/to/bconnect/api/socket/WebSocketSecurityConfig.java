@@ -17,6 +17,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import java.util.List;
 
 /**
+ * 인바운드 인터셉터 순서 : WebSocketAuthInterceptor → SecurityContextChannelInterceptor → AuthorizationChannelInterceptor → ChatReadInterceptor
  * CSRF 비활성화를 위해 {@code @EnableWebSocketSecurity} 미사용
  * @see <a href="https://docs.spring.io/spring-security/reference/servlet/integrations/websocket.html">WebSocket Security</a>
  */
@@ -31,6 +32,7 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
 
     private final ApplicationContext applicationContext;
     private final AuthorizationManager<Message<?>> authorizationManager;
+    private final ChatReadInterceptor chatReadInterceptor;
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
@@ -42,6 +44,6 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
         val authz = new AuthorizationChannelInterceptor(authorizationManager);
         val publisher = new SpringAuthorizationEventPublisher(applicationContext);
         authz.setAuthorizationEventPublisher(publisher);
-        registration.interceptors(new SecurityContextChannelInterceptor(), authz);
+        registration.interceptors(new SecurityContextChannelInterceptor(), authz, chatReadInterceptor);
     }
 }

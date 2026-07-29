@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.common.request.CursorLimit;
+import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.post.PostRepository;
 import to.bconnect.api.storage.profile.ProfileEntity;
@@ -38,23 +40,28 @@ public class ProfileQueryService {
     }
 
     @Transactional(readOnly = true)
-    public List<Profile> list() {
-        val profiles = profileRepository.findAll();
-        if (profiles.isEmpty()) return List.of();
+    public CursorPage<Profile> list(CursorLimit cursor) {
+        val profiles = profileRepository.findAllBy(
+                cursor.toScrollPosition(),
+                cursor.toLimit(),
+                cursor.toSort()
+        );
 
-        val memberIds = profiles.stream().map(ProfileEntity::getMemberId).toList();
+        val memberIds = profiles.getContent().stream().map(ProfileEntity::getMemberId).toList();
+        if (memberIds.isEmpty()) return new CursorPage<>(List.of(), false, null);
 
         val postCounts = postRepository.countByMemberIdIn(memberIds);
         val recommendationCounts = recommendationRepository.countByToIdInAndVisibleTrue(memberIds);
         val coworkerCounts = coworkerRepository.countByMemberIdIn(memberIds);
 
-        return profiles.stream()
-                .map(it -> Profile.of(
+        return CursorPage.from(
+                profiles.map(it -> Profile.of(
                         it,
                         postCounts.getOrDefault(it.getMemberId(), 0L),
                         recommendationCounts.getOrDefault(it.getMemberId(), 0L),
                         coworkerCounts.getOrDefault(it.getMemberId(), 0L)
-                ))
-                .toList();
+                )),
+                Profile::id
+        );
     }
 }

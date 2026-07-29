@@ -3,6 +3,8 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { useForm, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { credentialSchema, type CredentialFormInput, type CredentialFormValues } from './schema'
 import { useQueryState, parseAsStringLiteral } from 'nuqs'
 import type { Credential, CredentialType } from '@bconnect/api-client'
 import {
@@ -32,11 +34,6 @@ interface QualificationTabProps {
   onRetry: () => void
 }
 
-interface FormValues {
-  file: FileValue | null
-  note: string
-}
-
 export function QualificationTab({
   credentials,
   onRequestDelete,
@@ -49,10 +46,15 @@ export function QualificationTab({
     'sub',
     parseAsStringLiteral(QUALIFICATION_SUB_KEYS)
       .withDefault('national')
-      .withOptions({ history: 'push' })
+      // 서브탭 전환은 히스토리를 쌓지 않음(replace) → TopBar 뒤로가기가 탭을 되돌리지 않고 화면을 정상 이탈
+      .withOptions({ history: 'replace' })
   )
 
-  const form = useForm<FormValues>({ mode: 'onTouched', defaultValues: { file: null, note: '' } })
+  const form = useForm<CredentialFormInput, unknown, CredentialFormValues>({
+    resolver: zodResolver(credentialSchema),
+    mode: 'onTouched',
+    defaultValues: { file: null, note: '' },
+  })
   const file = useWatch({ control: form.control, name: 'file' })
   const hasFile = file != null
 
@@ -128,17 +130,7 @@ export function QualificationTab({
                 placeholder="검토시 참고할 내용을 작성해주세요..."
               />
             )}
-            {(isOther || hasFile) && (
-              <FormSubmitButton
-                variant="primary"
-                size="full"
-                requireAllFilled={false}
-                disabled={!hasFile}
-                isLoading={form.formState.isSubmitting}
-              >
-                제출하기
-              </FormSubmitButton>
-            )}
+            {(isOther || hasFile) && <FormSubmitButton size="full">제출하기</FormSubmitButton>}
           </form>
         </Form>
       </div>

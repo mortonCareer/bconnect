@@ -1,6 +1,7 @@
 package to.bconnect.api.core.domain.member;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
@@ -17,10 +18,16 @@ public class MemberResolver {
 
     private final MemberRepository memberRepository;
 
-    public Member find(Long memberId) {
+    public Member get(Long memberId) {
         return memberRepository.findById(memberId)
                 .map(Member::of)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+    }
+
+    public Member getOrWithdrawn(Long memberId) {
+        return memberRepository.findById(memberId)
+                .map(Member::of)
+                .orElse(Member.withdrawn(memberId));
     }
 
     public Map<Long, Member> resolveMap(Collection<Long> memberIds) {
@@ -28,5 +35,13 @@ public class MemberResolver {
                 .stream()
                 .map(Member::of)
                 .collect(Collectors.toMap(Member::id, Function.identity()));
+    }
+
+    public Map<Long, Member> resolveMapOrWithdrawn(Collection<Long> memberIds) {
+        val memberMap = resolveMap(memberIds);
+        return memberIds.stream()
+                .distinct()
+                .collect(Collectors.toMap(Function.identity(),
+                        it -> memberMap.getOrDefault(it, Member.withdrawn(it))));
     }
 }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" height="100%" overflow="visible" preserveAspectRatio="none" style="display: block;" viewBox="0 0 56 56" width="100%">
+<g id="Container">
+<path d="M0 16C0 7.16344 7.16344 0 16 0H40C48.8366 0 56 7.16344 56 16V40C56 48.8366 48.8366 56 40 56H16C7.16344 56 0 48.8366 0 40V16Z" fill="var(--fill-0, #F3F4F6)"/>
+<g id="Icon">
+<path d="M28 36H28.0133M22.6667 40H33.3333C34.0406 40 34.7189 39.719 35.219 39.219C35.719 38.7189 36 38.0406 36 37.3333V18.6667C36 17.9594 35.719 17.2811 35.219 16.781C34.7189 16.281 34.0406 16 33.3333 16H22.6667C21.9594 16 21.2811 16.281 20.781 16.781C20.281 17.2811 20 17.9594 20 18.6667V37.3333C20 38.0406 20.281 38.7189 20.781 39.219C21.2811 39.719 21.9594 40 22.6667 40Z" id="Vector" stroke="var(--stroke-0, #0F0F0F)" stroke-linecap="round" stroke-width="2"/>
+</g>
+</g>
+</svg>

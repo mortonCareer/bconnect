@@ -22,7 +22,7 @@ import java.util.List;
 public class AttachmentController {
 
     private final AttachmentService attachmentService;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @PostMapping("/presign")
@@ -43,7 +43,7 @@ public class AttachmentController {
             HttpServletResponse response) {
         val attachments = attachmentService.confirm(user.id(), request.attachmentIds());
         val body = attachments.stream()
-                .map(it -> AttachmentResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.SMALL)))
+                .map(it -> AttachmentResponse.of(it, attachmentUrlService.parseUrl(it, ImageSize.SMALL)))
                 .toList();
         val attachment = attachments.getFirst();
 

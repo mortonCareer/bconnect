@@ -7,9 +7,15 @@ import { AddressField } from '@/components/AddressField'
 import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
-import { Trade, TRADE_LABELS, useCreateMember, useCreateProfile } from '@bconnect/api-client'
+import {
+  Trade,
+  TRADE_LABELS,
+  refreshAccessToken,
+  useCreateMember,
+  useCreateProfile,
+} from '@bconnect/api-client'
 import type { RegisterMemberResponse } from '@bconnect/api-client'
-import { mapKakaoAddress } from '@bconnect/config/address'
+import { isCompleteAddress } from '@bconnect/config/address'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
 import {
   AgreementField,
@@ -70,12 +76,7 @@ export default function SignupProfilePage() {
       agreements: CONSENT_DEFAULT,
     },
   })
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    formState: { isSubmitting, isValid },
-  } = form
+  const { control, handleSubmit, setValue } = form
 
   const server = useServerError(
     control,
@@ -102,6 +103,7 @@ export default function SignupProfilePage() {
   const scrollToError = useScrollToError()
 
   const onSubmit = async (data: ProfileFormData) => {
+    if (!isCompleteAddress(data.address)) return
     try {
       // register 는 signupToken(X-Signup-Token 헤더)을 소비 — 실패 후 재시도 시
       // 재호출하지 않도록 발급된 accessToken을 보관한다.
@@ -128,9 +130,10 @@ export default function SignupProfilePage() {
           trades: data.fields as Trade[],
           experience: data.experience,
           headline: data.headline || undefined,
-          address: data.address ?? mapKakaoAddress(null),
+          address: data.address,
         },
       })
+      await refreshAccessToken()
 
       router.push('/signup/complete')
     } catch (err) {
@@ -232,17 +235,7 @@ export default function SignupProfilePage() {
             <FormError error={server.formError} />
           </div>
           <div className="bg-white p-4">
-            <FormSubmitButton
-              requireAllFilled={false}
-              disabled={!isValid}
-              variant="primary"
-              size="full"
-              isLoading={
-                isSubmitting || registerMemberMutation.isPending || createProfileMutation.isPending
-              }
-            >
-              완료
-            </FormSubmitButton>
+            <FormSubmitButton size="full">완료</FormSubmitButton>
           </div>
         </form>
       </Form>

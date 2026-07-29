@@ -585,13 +585,19 @@ paths:
       tags:
       - profile-controller
       operationId: list_1
+      parameters:
+      - name: cursorLimit
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CursorLimit"
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseListProfileResponse"
+                $ref: "#/components/schemas/ApiResponseCursorPageProfileResponse"
     post:
       tags:
       - profile-controller
@@ -725,13 +731,19 @@ paths:
       tags:
       - member-controller
       operationId: list_2
+      parameters:
+      - name: cursorLimit
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CursorLimit"
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseListMemberResponse"
+                $ref: "#/components/schemas/ApiResponseCursorPageMemberResponse"
     post:
       tags:
       - member-controller
@@ -1038,13 +1050,19 @@ paths:
       tags:
       - company-controller
       operationId: list_7
+      parameters:
+      - name: cursorLimit
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CursorLimit"
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseListCompanyResponse"
+                $ref: "#/components/schemas/ApiResponseCursorPageCompanyResponse"
     post:
       tags:
       - company-controller
@@ -1290,6 +1308,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListNoteResponse"
+  /api/v1/projects/{id}/assignees:
+    get:
+      tags:
+      - project-controller
+      operationId: listAssignees
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListMemberSummaryResponse"
   /api/v1/profiles/{id}:
     get:
       tags:
@@ -1405,13 +1442,19 @@ paths:
       tags:
       - feed-controller
       operationId: list_10
+      parameters:
+      - name: cursorLimit
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CursorLimit"
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseListFeedResponse"
+                $ref: "#/components/schemas/ApiResponseCursorPageFeedResponse"
   /api/v1/feeds/{id}:
     get:
       tags:
@@ -1431,6 +1474,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseFeedResponse"
+  /api/v1/drives/{id}/usage:
+    get:
+      tags:
+      - drive-controller
+      operationId: usage
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseDriveUsageResponse"
   /api/v1/drives/{id}/notes:
     get:
       tags:
@@ -1560,13 +1622,19 @@ paths:
       tags:
       - crawled-member-controller
       operationId: list_11
+      parameters:
+      - name: cursorLimit
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CursorLimit"
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseListCrawledMemberSummaryResponse"
+                $ref: "#/components/schemas/ApiResponseCursorPageCrawledMemberSummaryResponse"
   /api/v1/crawled-members/{id}:
     get:
       tags:
@@ -1667,6 +1735,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseCompanyResponse"
+  /api/v1/companies/{id}/members:
+    get:
+      tags:
+      - company-controller
+      operationId: listMembers
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListMemberSummaryResponse"
   /api/v1/tasks/{id}:
     delete:
       tags:
@@ -1794,18 +1881,48 @@ components:
       properties:
         zipcode:
           type: string
+          maxLength: 5
+          minLength: 0
+        state:
+          $ref: "#/components/schemas/Region"
         city:
           type: string
-        state:
-          type: string
+          minLength: 1
         street:
           type: string
+          minLength: 1
         detail:
           type: string
         latitude:
           type: number
         longitude:
           type: number
+      required:
+      - city
+      - latitude
+      - longitude
+      - state
+      - street
+      - zipcode
+    Region:
+      type: string
+      enum:
+      - 서울
+      - 부산
+      - 대구
+      - 인천
+      - 대전
+      - 울산
+      - 세종특별자치시
+      - 경기
+      - 강원특별자치도
+      - 충북
+      - 충남
+      - 전북특별자치도
+      - 전남광주통합특별시
+      - 경북
+      - 경남
+      - 제주특별자치도
     Trade:
       type: string
       enum:
@@ -2361,7 +2478,7 @@ components:
       type: string
       enum:
       - PROJECT
-      - MEMBER
+      - PERSONAL
     UploadDriveRequest:
       type: object
       properties:
@@ -2718,6 +2835,15 @@ components:
           type:
           - string
           - "null"
+        projectCompanyId:
+          type:
+          - integer
+          - "null"
+          format: int64
+        projectCompanyName:
+          type:
+          - string
+          - "null"
         offer:
           type: "null"
           $ref: "#/components/schemas/OfferSummaryResponse"
@@ -2734,6 +2860,8 @@ components:
       - id
       - modifiedAt
       - offer
+      - projectCompanyId
+      - projectCompanyName
       - projectId
       - projectMemo
       - projectRequirement
@@ -2785,21 +2913,10 @@ components:
           type:
           - string
           - "null"
-        role:
-          $ref: "#/components/schemas/Role"
-        createdAt:
-          type: string
-          format: date-time
-        modifiedAt:
-          type: string
-          format: date-time
       required:
-      - createdAt
       - id
-      - modifiedAt
       - name
       - picture
-      - role
       - username
     OfferResponse:
       type: object
@@ -2856,12 +2973,6 @@ components:
       - headline
       - primaryTrade
       - role
-    Role:
-      type: string
-      enum:
-      - GUEST
-      - USER
-      - ADMIN
     ApiResponseListRecommendationResponse:
       type: object
       properties:
@@ -2981,7 +3092,7 @@ components:
       - id
       - memberId
       - modifiedAt
-    ApiResponseListProfileResponse:
+    ApiResponseListMemberSummaryResponse:
       type: object
       properties:
         success:
@@ -2991,7 +3102,39 @@ components:
         data:
           type: array
           items:
+            $ref: "#/components/schemas/MemberSummaryResponse"
+    CursorLimit:
+      type: object
+      properties:
+        cursor:
+          type: integer
+          format: int64
+        limit:
+          type: integer
+          format: int32
+        reverse:
+          type: boolean
+    ApiResponseCursorPageProfileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/CursorPageProfileResponse"
+    CursorPageProfileResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
             $ref: "#/components/schemas/ProfileResponse"
+        hasNext:
+          type: boolean
+        nextCursor:
+          type: integer
+          format: int64
     ProfileResponse:
       type: object
       properties:
@@ -3140,17 +3283,6 @@ components:
           $ref: "#/components/schemas/ExceptionCode"
         data:
           $ref: "#/components/schemas/ProfileResponse"
-    CursorLimit:
-      type: object
-      properties:
-        cursor:
-          type: integer
-          format: int64
-        limit:
-          type: integer
-          format: int32
-        reverse:
-          type: boolean
     ApiResponseCursorPageNotificationResponse:
       type: object
       properties:
@@ -3211,7 +3343,7 @@ components:
       - referenceType
       - sender
       - type
-    ApiResponseListMemberResponse:
+    ApiResponseCursorPageMemberResponse:
       type: object
       properties:
         success:
@@ -3219,9 +3351,19 @@ components:
         error:
           $ref: "#/components/schemas/ExceptionCode"
         data:
+          $ref: "#/components/schemas/CursorPageMemberResponse"
+    CursorPageMemberResponse:
+      type: object
+      properties:
+        content:
           type: array
           items:
             $ref: "#/components/schemas/MemberResponse"
+        hasNext:
+          type: boolean
+        nextCursor:
+          type: integer
+          format: int64
     MemberResponse:
       type: object
       properties:
@@ -3238,8 +3380,11 @@ components:
           type:
           - string
           - "null"
-        role:
-          $ref: "#/components/schemas/Role"
+        roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Role"
+          uniqueItems: true
         createdAt:
           type: string
           format: date-time
@@ -3253,8 +3398,16 @@ components:
       - name
       - phone
       - picture
-      - role
+      - roles
       - username
+    Role:
+      type: string
+      enum:
+      - SIGNUP
+      - GUEST
+      - CAREER
+      - PLAN
+      - ADMIN
     ApiResponseMemberResponse:
       type: object
       properties:
@@ -3291,6 +3444,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/GroupChatResponse"
+    ChatType:
+      type: string
+      enum:
+      - GROUP
+      - DIRECT
     GroupChatResponse:
       type: object
       properties:
@@ -3332,6 +3490,8 @@ components:
         chatId:
           type: integer
           format: int64
+        chatType:
+          $ref: "#/components/schemas/ChatType"
         memberId:
           type: integer
           format: int64
@@ -3352,6 +3512,7 @@ components:
       required:
       - attachments
       - chatId
+      - chatType
       - content
       - createdAt
       - id
@@ -3384,26 +3545,10 @@ components:
           type:
           - string
           - "null"
-        role:
-          type: "null"
-          $ref: "#/components/schemas/Role"
-        createdAt:
-          type:
-          - string
-          - "null"
-          format: date-time
-        modifiedAt:
-          type:
-          - string
-          - "null"
-          format: date-time
       required:
-      - createdAt
       - id
-      - modifiedAt
       - name
       - picture
-      - role
       - username
     ApiResponseGroupChatResponse:
       type: object
@@ -3435,7 +3580,7 @@ components:
         nextCursor:
           type: integer
           format: int64
-    ApiResponseListFeedResponse:
+    ApiResponseCursorPageFeedResponse:
       type: object
       properties:
         success:
@@ -3443,9 +3588,19 @@ components:
         error:
           $ref: "#/components/schemas/ExceptionCode"
         data:
+          $ref: "#/components/schemas/CursorPageFeedResponse"
+    CursorPageFeedResponse:
+      type: object
+      properties:
+        content:
           type: array
           items:
             $ref: "#/components/schemas/FeedResponse"
+        hasNext:
+          type: boolean
+        nextCursor:
+          type: integer
+          format: int64
     FeedResponse:
       type: object
       properties:
@@ -3551,6 +3706,27 @@ components:
       - projectId
       - title
       - type
+    ApiResponseDriveUsageResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/DriveUsageResponse"
+    DriveUsageResponse:
+      type: object
+      properties:
+        usedBytes:
+          type: integer
+          format: int64
+        limitBytes:
+          type: integer
+          format: int64
+      required:
+      - limitBytes
+      - usedBytes
     ApiResponseListDirectChatResponse:
       type: object
       properties:
@@ -3699,7 +3875,7 @@ components:
       - note
       - status
       - type
-    ApiResponseListCrawledMemberSummaryResponse:
+    ApiResponseCursorPageCrawledMemberSummaryResponse:
       type: object
       properties:
         success:
@@ -3707,9 +3883,7 @@ components:
         error:
           $ref: "#/components/schemas/ExceptionCode"
         data:
-          type: array
-          items:
-            $ref: "#/components/schemas/CrawledMemberSummaryResponse"
+          $ref: "#/components/schemas/CursorPageCrawledMemberSummaryResponse"
     CrawledMemberSummaryResponse:
       type: object
       properties:
@@ -3798,7 +3972,7 @@ components:
           - "null"
         state:
           type: "null"
-          $ref: "#/components/schemas/CrawledRegion"
+          $ref: "#/components/schemas/Region"
         url:
           type: string
         platform:
@@ -3812,26 +3986,18 @@ components:
       - state
       - trades
       - url
-    CrawledRegion:
-      type: string
-      enum:
-      - SEOUL
-      - BUSAN
-      - DAEGU
-      - INCHEON
-      - GWANGJU
-      - DAEJEON
-      - ULSAN
-      - SEJONG
-      - GYEONGGI
-      - GANGWON
-      - CHUNGBUK
-      - CHUNGNAM
-      - JEONBUK
-      - JEONNAM
-      - GYEONGBUK
-      - GYEONGNAM
-      - JEJU
+    CursorPageCrawledMemberSummaryResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/CrawledMemberSummaryResponse"
+        hasNext:
+          type: boolean
+        nextCursor:
+          type: integer
+          format: int64
     ApiResponseCrawledMemberResponse:
       type: object
       properties:
@@ -4112,7 +4278,7 @@ components:
       - id
       - member
       - profile
-    ApiResponseListCompanyResponse:
+    ApiResponseCursorPageCompanyResponse:
       type: object
       properties:
         success:
@@ -4120,9 +4286,7 @@ components:
         error:
           $ref: "#/components/schemas/ExceptionCode"
         data:
-          type: array
-          items:
-            $ref: "#/components/schemas/CompanyResponse"
+          $ref: "#/components/schemas/CursorPageCompanyResponse"
     CompanyResponse:
       type: object
       properties:
@@ -4154,6 +4318,18 @@ components:
       - modifiedAt
       - name
       - picture
+    CursorPageCompanyResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/CompanyResponse"
+        hasNext:
+          type: boolean
+        nextCursor:
+          type: integer
+          format: int64
     ApiResponseCompanyResponse:
       type: object
       properties:

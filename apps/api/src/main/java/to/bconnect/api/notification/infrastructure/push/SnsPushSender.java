@@ -78,7 +78,9 @@ public class SnsPushSender implements PushSender {
             Map<String, Object> fcmV1 = Map.of(
                     "fcmV1Message", Map.of(
                             "message", Map.of(
-                                    "data", data
+                                    "data", data,
+                                    "android", Map.of("priority", "HIGH"),
+                                    "webpush", Map.of("headers", Map.of("Urgency", "high"))
                             )
                     )
             );
