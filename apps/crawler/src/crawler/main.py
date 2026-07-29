@@ -15,7 +15,7 @@ from crawler.classifier_rules import rule_reject
 from crawler.config import settings
 from crawler.models import (
     CrawledMember, CrawledPost, CrawledProfile,
-    PLATFORM_INSTAGRAM, PLATFORM_NAVER, REGION_ENUM_BY_KR, phone_digits, trade_enum,
+    PLATFORM_INSTAGRAM, PLATFORM_NAVER, phone_digits, trade_enum,
 )
 from crawler.notion import (
     save_member, save_to_review, update_member,
@@ -330,7 +330,7 @@ async def _classify_scraped(
             headline=profile_intro[:500],
             about=profile["about"][:2000],
             address=address,
-            state=REGION_ENUM_BY_KR.get(region, ""),
+            state=region,
             url=detail_url,
             platform=PLATFORM_NAVER,
         ),
@@ -491,7 +491,7 @@ async def process_instagram_result(
             headline=profile["headline"][:500],
             about=profile["about"][:2000],
             address=address,
-            state=REGION_ENUM_BY_KR.get(classification.get("region", ""), ""),
+            state=classification.get("region", ""),
             url=instagram_url,
             platform=PLATFORM_INSTAGRAM,
         ),
@@ -1199,7 +1199,7 @@ async def run_enrich(use_vision: bool = True, channel: str = "all") -> PipelineR
                     headline=profile_intro[:500],
                     about=profile["about"][:2000],
                     address=address,
-                    state=REGION_ENUM_BY_KR.get(classification.get("region", ""), ""),
+                    state=classification.get("region", ""),
                     url=detail_url,
                     platform=PLATFORM_INSTAGRAM if is_instagram else PLATFORM_NAVER,
                 ),

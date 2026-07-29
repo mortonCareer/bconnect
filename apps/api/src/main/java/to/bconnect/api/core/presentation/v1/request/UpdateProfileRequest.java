@@ -1,5 +1,6 @@
 package to.bconnect.api.core.presentation.v1.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -16,7 +17,7 @@ public record UpdateProfileRequest(
         @NotEmpty Set<Trade> trades,
         @PositiveOrZero int experience,
         String headline,
-        @NotNull Address address
+        @Valid @NotNull Address address
 ) {
     public UpdateProfile toCommand() {
         return new UpdateProfile(role, primaryTrade, trades, experience, headline, address);

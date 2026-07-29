@@ -91,9 +91,9 @@ module "vercel" {
   nts_api_service_key     = var.nts_api_service_key
   kcomwel_api_service_key = var.kcomwel_api_service_key
 
-  slack_webhook_url = var.slack_webhook_url
-  sentry_auth_token = var.sentry_auth_token
-  database_url      = var.database_url
+  slack_monitoring_webhook_url = var.slack_monitoring_webhook_url
+  sentry_auth_token            = var.sentry_auth_token
+  database_url                 = var.database_url
 
   # Firebase config → Vercel 환경변수로 주입 (앱별 map)
   firebase_web_configs = module.firebase.web_configs

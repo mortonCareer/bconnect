@@ -8,6 +8,7 @@ import Link from 'next/link'
 import * as React from 'react'
 import { ChevronIcon, FilterIcon, ChatIcon, NotificationIcon } from '../../icons'
 import { cn } from '../../lib/utils'
+import { TitleCountBadge } from './TitleCountBadge'
 
 const topBarVariants = cva('sticky top-0 z-40 flex h-15 w-full items-center bg-white px-4', {
   variants: {
@@ -100,6 +101,10 @@ export interface TopBarProps
   step?: number
   totalSteps?: number
   title?: string
+  /** 제목 옆 카운트 뱃지 (0·undefined 면 렌더 안 함) — 예: 알림 안 읽음 수 (#1016) */
+  titleCount?: number
+  /** 우측 영역 커스텀 노드 (예: 알림 '모두 읽음'). utility/actionIcon/showAction 보다 우선. */
+  rightSlot?: React.ReactNode
   actionLabel?: string
   onAction?: () => void
   showAction?: boolean
@@ -135,6 +140,8 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       step = 1,
       totalSteps = 3,
       title,
+      titleCount,
+      rightSlot,
       actionLabel = '완료',
       onAction,
       showAction = true,
@@ -206,10 +213,13 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
         {variant === 'default' && (
           <>
             {LeftSlot}
-            <p className="pointer-events-none absolute left-1/2 max-w-[60%] -translate-x-1/2 truncate text-center text-sb-16 text-gray-900">
-              {title}
-            </p>
-            {hasUtility ? (
+            <div className="pointer-events-none absolute left-1/2 flex max-w-[60%] -translate-x-1/2 items-center gap-2">
+              <p className="truncate text-center text-sb-16 text-gray-900">{title}</p>
+              <TitleCountBadge count={titleCount} />
+            </div>
+            {rightSlot ? (
+              rightSlot
+            ) : hasUtility ? (
               <UtilityIcons
                 notifyHref={notifyHref}
                 notifyCount={notifyCount}

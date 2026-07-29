@@ -10,12 +10,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Long> {
 
     Window<NotificationEntity> findByReceiverId(Long receiverId, ScrollPosition position, Limit limit, Sort sort);
 
     long countByReceiverIdAndReadAtIsNull(Long receiverId);
+
+    List<NotificationEntity> findAllByReceiverId(Long receiverId);
+
+    List<NotificationEntity> findAllBySenderId(Long senderId);
 
     @Modifying
     @Query("UPDATE NotificationEntity n SET n.readAt = :now WHERE n.receiverId = :receiverId AND n.readAt IS NULL")

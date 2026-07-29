@@ -1,7 +1,6 @@
 package to.bconnect.api.support.fixture;
 
-import to.bconnect.api.core.presentation.v1.request.CreateRecommendationRequest;
-import to.bconnect.api.core.presentation.v1.request.UpdateRecommendationRequest;
+import to.bconnect.api.core.domain.recommendation.CreateRecommendation;
 import to.bconnect.api.core.domain.recommendation.Recommendation;
 import to.bconnect.api.storage.recommendation.RecommendationEntity;
 
@@ -9,20 +8,16 @@ import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
 public class RecommendationFactory {
 
-    public static Recommendation create(Long id, Long memberId) {
+    public static Recommendation domain(Long id, Long memberId) {
         return new Recommendation(id, memberId, "content", false,
                 MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
-    public static RecommendationEntity createEntity(Long fromId, Long toId) {
+    public static RecommendationEntity entity(Long fromId, Long toId) {
         return new RecommendationEntity(fromId, toId, "content");
     }
 
-    public static CreateRecommendationRequest createRequest(Long toId) {
-        return new CreateRecommendationRequest(toId, "content");
-    }
-
-    public static UpdateRecommendationRequest updateRequest() {
-        return new UpdateRecommendationRequest("Updated content");
+    public static CreateRecommendation command(Long toId) {
+        return new CreateRecommendation(toId, "content");
     }
 }

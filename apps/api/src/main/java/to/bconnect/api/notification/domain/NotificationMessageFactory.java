@@ -18,7 +18,7 @@ public class NotificationMessageFactory {
         return switch (type) {
             case CHAT_MESSAGE, COWORKER_REQUESTED, CONTRACT_WRITTEN -> senderId == null
                     ? NotificationArgs.empty()
-                    : NotificationArgs.senderName(memberResolver.find(senderId).name());
+                    : NotificationArgs.senderName(memberResolver.get(senderId).name());
             // OFFER(companyName)·시스템 알림은 트리거 배선 시 각 이벤트에서 args 를 채운다.
             case OFFER_RECEIVED, SIGNUP_WELCOME, PROFILE_COMPLETION -> NotificationArgs.empty();
         };

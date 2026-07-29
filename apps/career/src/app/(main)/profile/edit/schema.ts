@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { Trade } from '@bconnect/api-client'
-import type { Address } from '@bconnect/api-client'
+import { addressField } from '@bconnect/config/address'
 import { experienceSchema } from '@/lib/experience-range'
 
 const tradeValues = Object.values(Trade) as [string, ...string[]]
@@ -20,7 +20,7 @@ export const profileEditSchema = z.object({
   experience: experienceSchema,
   headline: z.string().max(50, '한 줄 소개는 50자 이내로 입력해주세요').optional().nullable(),
   about: z.string().max(500, '소개는 500자 이내로 입력해주세요').optional().nullable(),
-  address: z.custom<Address>().nullish(),
+  address: addressField(),
 })
 
 export type ProfileEditFormData = z.infer<typeof profileEditSchema>

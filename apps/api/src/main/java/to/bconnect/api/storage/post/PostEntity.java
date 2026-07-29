@@ -24,4 +24,8 @@ public class PostEntity extends BaseEntity {
         this.taskId = taskId;
         this.content = content;
     }
+
+    public void detachTask() {
+        this.taskId = null;
+    }
 }

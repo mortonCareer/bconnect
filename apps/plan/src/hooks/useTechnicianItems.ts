@@ -8,13 +8,7 @@ import {
   useGetFeeds,
   useGetProfiles,
 } from '@bconnect/api-client'
-import type {
-  CrawledMemberSummary,
-  CrawledRegion,
-  Post,
-  Profile,
-  Trade,
-} from '@bconnect/api-client'
+import type { CrawledMemberSummary, Post, Profile, Region, Trade } from '@bconnect/api-client'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { toCrawledDisplay } from '@/lib/crawled'
 import type { ExperienceLevel } from '@/lib/experience'
@@ -27,7 +21,7 @@ interface TechnicianItemBase {
   picture: string
   location: string
   // 표시용 location 과 분리 — 비교는 코드로, 표시는 문자열로. 미상(주소 없음·해석 실패)이면 undefined
-  region?: CrawledRegion
+  region?: Region
   primaryTrade?: Trade
   // 미상(크롤링 미추출)이면 undefined — 경력 필터에서 제외
   experienceYears?: number
@@ -140,7 +134,7 @@ interface UseTechnicianItemsOptions {
   trades?: Trade[] | null
   experience?: ExperienceLevel | null
   grades?: Grade[] | null
-  regions?: CrawledRegion[] | null
+  regions?: Region[] | null
 }
 
 export function useTechnicianItems({
@@ -160,7 +154,7 @@ export function useTechnicianItems({
 
   const postsByMember = useMemo(() => {
     const map = new Map<number, Post[]>()
-    for (const feed of feeds ?? []) {
+    for (const feed of feeds?.content ?? []) {
       const memberId = feed.member?.id
       if (memberId == null || !feed.post) continue
       const posts = map.get(memberId) ?? []
@@ -173,11 +167,11 @@ export function useTechnicianItems({
   // 가입 회원이 항상 앞, 크롤링 프로필이 뒤 — 가입 유인 유지
   const allItems: TechnicianItem[] = useMemo(
     () => [
-      ...(data ?? []).flatMap(
+      ...(data?.content ?? []).flatMap(
         (profile) =>
           toTechnicianItem(profile, postsByMember.get(profile.member?.id ?? -1) ?? []) ?? []
       ),
-      ...(crawledMembers ?? []).flatMap((crawled) => toCrawledItem(crawled) ?? []),
+      ...(crawledMembers?.content ?? []).flatMap((crawled) => toCrawledItem(crawled) ?? []),
     ],
     [data, postsByMember, crawledMembers]
   )

@@ -7,17 +7,13 @@ import lombok.val;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
-import to.bconnect.api.attachment.domain.ImageSize;
-import to.bconnect.api.attachment.domain.SignedCookieIssuer;
+import to.bconnect.api.attachment.domain.*;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.core.domain.chat.DirectChat;
 import to.bconnect.api.core.domain.chat.DirectChatService;
 import to.bconnect.api.core.domain.chat.Message;
-import to.bconnect.api.core.domain.member.Member;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.presentation.v1.request.CreateDirectChatRequest;
 import to.bconnect.api.core.presentation.v1.response.DirectChatResponse;
@@ -35,7 +31,8 @@ public class DirectChatController {
 
     private final DirectChatService directChatService;
     private final MemberResolver memberResolver;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentFinder attachmentFinder;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
@@ -44,12 +41,12 @@ public class DirectChatController {
             HttpServletResponse response) {
         val directChats = directChatService.list(user.id());
         val memberIds = directChats.stream().map(DirectChat::memberId).distinct().toList();
-        val memberMap = memberResolver.resolveMap(memberIds);
-        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
+        val memberMap = memberResolver.resolveMapOrWithdrawn(memberIds);
+        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         val body = directChats.stream()
                 .map(it -> {
-                    val member = memberMap.getOrDefault(it.memberId(), Member.withdrawn(it.memberId()));
+                    val member = memberMap.get(it.memberId());
                     return DirectChatResponse.of(it, member, urlMap.get(member.id()));
                 })
                 .toList();
@@ -67,9 +64,8 @@ public class DirectChatController {
             @PathVariable Long id,
             HttpServletResponse response) {
         val chat = directChatService.get(user.id(), id);
-        val member = memberResolver.resolveMap(List.of(chat.memberId()))
-                .getOrDefault(chat.memberId(), Member.withdrawn(chat.memberId()));
-        val picture = attachmentResolver.getUrl(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val member = memberResolver.getOrWithdrawn(chat.memberId());
+        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
@@ -82,7 +78,7 @@ public class DirectChatController {
     public ApiResponse<Long> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid CreateDirectChatRequest request) {
-        val id = directChatService.findOrCreate(user.id(), request.memberId());
+        val id = directChatService.getOrCreate(user.id(), request.memberId());
         return ApiResponse.success(id);
     }
 
@@ -94,12 +90,12 @@ public class DirectChatController {
             HttpServletResponse response) {
         val page = directChatService.listMessages(user, id, cursorLimit);
         val messageIds = page.content().stream().map(Message::id).toList();
-        val attachmentMap = attachmentResolver.resolveListMap(ReferenceType.MESSAGE, messageIds);
+        val attachmentMap = attachmentFinder.listMap(ReferenceType.MESSAGE, messageIds);
 
         val content = page.content().stream()
                 .map(it -> {
                     val attachments = attachmentMap.getOrDefault(it.id(), List.of());
-                    val urlMap = attachmentResolver.parseUrlMap(attachments, ImageSize.SMALL);
+                    val urlMap = attachmentUrlService.parseUrlMap(attachments, ImageSize.SMALL);
                     return MessageResponse.of(it, attachments, urlMap);
                 })
                 .toList();

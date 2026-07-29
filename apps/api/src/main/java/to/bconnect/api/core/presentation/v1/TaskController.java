@@ -8,7 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.response.ApiResponse;
@@ -16,6 +16,7 @@ import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.offer.Offer;
 import to.bconnect.api.core.domain.offer.OfferService;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
+import to.bconnect.api.core.domain.project.ProjectFinder;
 import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.core.domain.task.TaskQueryService;
@@ -39,16 +40,17 @@ public class TaskController {
 
     private final TaskQueryService taskQueryService;
     private final TaskService taskService;
+    private final ProjectFinder projectFinder;
     private final ProjectService projectService;
     private final OfferService offerService;
     private final MemberResolver memberResolver;
     private final ProfileResolver profileResolver;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
     public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal AuthUser user) {
-        val workerTasks = taskQueryService.list(user);
+        val workerTasks = taskQueryService.listByWorker(user);
         val projectTasks = taskQueryService.listAssigned(user);
         
         val offers = offerService.listByWorker(user);
@@ -57,12 +59,15 @@ public class TaskController {
 
         val projectIds = Stream.concat(projectTasks.stream(), offerTasks.stream())
                 .map(Task::projectId).distinct().toList();
-        val addressMap = projectService.resolveAddressMap(projectIds);
+        val addressMap = projectFinder.addressMap(projectIds);
+        val companyMap = projectFinder.companyMap(projectIds);
 
         val worker = workerTasks.stream().map(it -> TaskResponse.of(it, it.workerAddress())).toList();
-        val assigned = projectTasks.stream().map(it -> TaskResponse.of(it, addressMap.get(it.projectId()))).toList();
+        val assigned = projectTasks.stream()
+                .map(it -> TaskResponse.of(it, addressMap.get(it.projectId()), companyMap.get(it.projectId()))).toList();
         val offered = offerTasks.stream()
-                .map(it -> TaskResponse.of(it, addressMap.get(it.projectId()), offerByTaskId.get(it.id()))).toList();
+                .map(it -> TaskResponse.of(it, addressMap.get(it.projectId()), companyMap.get(it.projectId()),
+                        offerByTaskId.get(it.id()))).toList();
 
         val body = Stream.of(worker, assigned, offered)
                 .flatMap(List::stream)
@@ -79,7 +84,7 @@ public class TaskController {
         val workerIds = offers.stream().map(Offer::workerId).distinct().toList();
         val memberMap = memberResolver.resolveMap(workerIds);
         val profileMap = profileResolver.resolveMap(workerIds);
-        val urlMap = attachmentResolver.resolveUrlMap(ReferenceType.MEMBER, workerIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, workerIds, ImageSize.SMALL);
 
         val body = offers.stream()
                 .map(it -> {

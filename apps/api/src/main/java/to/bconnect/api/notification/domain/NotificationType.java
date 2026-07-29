@@ -41,7 +41,7 @@ public enum NotificationType {
         }
     },
 
-    OFFER_RECEIVED(NotificationReferenceType.OFFER, "%s으로부터 섭외 요청을 제안받았습니다") {
+    OFFER_RECEIVED(NotificationReferenceType.OFFER, "%s으로부터 섭외 요청을 받았습니다") {
         @Override
         protected Object[] formatArgs(NotificationArgs args) {
             return new Object[]{args.get(NotificationArgs.COMPANY_NAME)};
