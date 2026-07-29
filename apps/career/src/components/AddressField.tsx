@@ -3,7 +3,9 @@
  */
 'use client'
 
-import { mapKakaoAddress } from '@bconnect/config/address'
+import { emptyAddressDraft, mapKakaoAddress } from '@bconnect/config/address'
+import type { AddressDraft } from '@bconnect/config/address'
+import { UnknownSidoError, UNKNOWN_SIDO_MESSAGE } from '@bconnect/config/errors'
 import {
   AddressSearchDrawer,
   cn,
@@ -18,10 +20,11 @@ import {
   FormMessage,
   Input,
   ROW_INPUT_CLASSES,
+  type AddressSearchResult,
   type FieldLayout,
 } from '@bconnect/ui'
-import type { Address } from '@bconnect/api-client'
 import { useState } from 'react'
+import { useFormContext } from 'react-hook-form'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
 
 interface AddressFieldProps<T extends FieldValues> {
@@ -33,7 +36,7 @@ interface AddressFieldProps<T extends FieldValues> {
   layout?: FieldLayout
 }
 
-/** 주소 검색 트리거 + 선택 도로명 표시 + 상세주소 입력. 폼 값은 Address(위경도 0). */
+/** 주소 검색 트리거 + 선택 도로명 표시 + 상세주소 입력. 폼 값은 AddressDraft(위경도 0). */
 export function AddressField<T extends FieldValues>({
   control,
   name,
@@ -42,15 +45,26 @@ export function AddressField<T extends FieldValues>({
   layout = 'stacked',
 }: AddressFieldProps<T>) {
   const [open, setOpen] = useState(false)
+  const { setError, clearErrors } = useFormContext()
 
   return (
     <FormField
       control={control}
       name={name}
       render={({ field }) => {
-        const value = field.value as Address | null
+        const value = field.value as AddressDraft | null
         const setDetail = (detail: string) =>
-          field.onChange({ ...(value ?? mapKakaoAddress(null)), detail })
+          field.onChange({ ...(value ?? emptyAddressDraft()), detail })
+        const handleComplete = (result: AddressSearchResult) => {
+          try {
+            const mapped = mapKakaoAddress(result)
+            clearErrors(name)
+            field.onChange({ ...mapped, detail: value?.detail })
+          } catch (e) {
+            if (!(e instanceof UnknownSidoError)) throw e
+            setError(name, { type: 'unknown-sido', message: UNKNOWN_SIDO_MESSAGE })
+          }
+        }
 
         if (layout === 'row') {
           return (
@@ -82,13 +96,7 @@ export function AddressField<T extends FieldValues>({
                 />
               </div>
 
-              <AddressSearchDrawer
-                open={open}
-                onOpenChange={setOpen}
-                onComplete={(result) =>
-                  field.onChange({ ...mapKakaoAddress(result), detail: value?.detail })
-                }
-              />
+              <AddressSearchDrawer open={open} onOpenChange={setOpen} onComplete={handleComplete} />
             </>
           )
         }
@@ -120,13 +128,7 @@ export function AddressField<T extends FieldValues>({
 
             <FormMessage />
 
-            <AddressSearchDrawer
-              open={open}
-              onOpenChange={setOpen}
-              onComplete={(result) =>
-                field.onChange({ ...mapKakaoAddress(result), detail: value?.detail })
-              }
-            />
+            <AddressSearchDrawer open={open} onOpenChange={setOpen} onComplete={handleComplete} />
           </FormItem>
         )
       }}

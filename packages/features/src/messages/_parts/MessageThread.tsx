@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react'
 import {
+  MessageType,
   useInfiniteQuery,
   getDirectChatMessages,
   getGetDirectChatMessagesQueryKey,
@@ -15,12 +16,25 @@ import type {
 import { chatMemberName } from './types'
 import { ChatMessage } from '@bconnect/ui'
 import { formatChatTime } from '@bconnect/config/format'
+import { OfferMessageCard } from './OfferMessageCard'
+import type { OfferMessageDetail } from './OfferMessageCard'
+import type { OfferActions } from './types'
 
 interface MessageThreadProps {
   chatId: number
   currentUserId: number | undefined
   participants: WithdrawableMember[]
   localMessages: Message[]
+  /** 섭외 제안(OFFER) 메시지 상세 — key = offerId. 앱이 resolve (ADR-0020). */
+  offerDetails?: Map<number, OfferMessageDetail>
+  /** 섭외 상세 조회 중 — OFFER 숫자 노출 없이 카드 내부 loading 안내 */
+  isOfferDetailsLoading?: boolean
+  /** 섭외 상세 조회 실패 — 카드 내부 error 안내 */
+  isOfferDetailsError?: boolean
+  /** 수락/거절 액션 슬롯. 미주입이면 읽기전용 카드. */
+  offerActions?: OfferActions
+  /** 카드에 표시할 업체명 — 채팅 상대 이름 */
+  companyName?: string
 }
 
 function formatDateLabel(dateStr: string): string {
@@ -41,12 +55,47 @@ function Bubble({
   message,
   currentUserId,
   participants,
+  offerDetails,
+  isOfferDetailsLoading,
+  isOfferDetailsError,
+  offerActions,
+  companyName,
 }: {
   message: Message
   currentUserId: number | undefined
   participants: WithdrawableMember[]
+  offerDetails?: Map<number, OfferMessageDetail>
+  isOfferDetailsLoading?: boolean
+  isOfferDetailsError?: boolean
+  offerActions?: OfferActions
+  companyName?: string
 }) {
   const isMine = message.memberId === currentUserId
+
+  // BE 는 섭외 제안·수락 시 content 에 offerId 만 담아 OFFER 메시지를 남긴다(ChatEventListener).
+  // 숫자를 그대로 버블에 찍지 않도록 카드로 렌더한다 — 발신자와 무관하게 좌측 정렬(시스템성 카드).
+  if (message.type === MessageType.OFFER) {
+    const offerId = Number(message.content)
+    const detail = Number.isFinite(offerId) ? offerDetails?.get(offerId) : undefined
+    const isThisOfferPending = offerActions?.pendingOfferId === offerId
+    const isAnyOfferPending = offerActions?.pendingOfferId != null
+    // 아바타(size-10) + gap-2 만큼 들여써 다른 수신 버블과 좌측을 맞춘다.
+    return (
+      <div className="pl-12">
+        <OfferMessageCard
+          detail={detail}
+          companyName={companyName}
+          isDetailLoading={isOfferDetailsLoading}
+          isDetailError={isOfferDetailsError}
+          isActionDisabled={isAnyOfferPending}
+          pendingAction={isThisOfferPending ? offerActions?.pendingAction : null}
+          onAccept={offerActions && detail ? () => offerActions.onAccept(offerId) : undefined}
+          onDeny={offerActions && detail ? () => offerActions.onDeny(offerId) : undefined}
+        />
+      </div>
+    )
+  }
+
   const timestamp = message.createdAt ? formatChatTime(message.createdAt) : undefined
   if (isMine) {
     return <ChatMessage variant="mine" message={message.content} timestamp={timestamp} />
@@ -68,6 +117,11 @@ export function MessageThread({
   currentUserId,
   participants,
   localMessages,
+  offerDetails,
+  isOfferDetailsLoading,
+  isOfferDetailsError,
+  offerActions,
+  companyName,
 }: MessageThreadProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const topObserverRef = useRef<HTMLDivElement>(null)
@@ -188,7 +242,16 @@ export function MessageThread({
           return (
             <div key={message.id ?? `local-${message.createdAt}`}>
               {showSep && <DateSeparator date={currentDate} />}
-              <Bubble message={message} currentUserId={currentUserId} participants={participants} />
+              <Bubble
+                message={message}
+                currentUserId={currentUserId}
+                participants={participants}
+                offerDetails={offerDetails}
+                isOfferDetailsLoading={isOfferDetailsLoading}
+                isOfferDetailsError={isOfferDetailsError}
+                offerActions={offerActions}
+                companyName={companyName}
+              />
             </div>
           )
         })}

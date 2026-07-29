@@ -1,9 +1,10 @@
-import {
-  getGetCrawledMembersMockHandler,
-  CrawledPlatform,
-  CrawledRegion,
+import { getGetCrawledMembersMockHandler, CrawledPlatform, Region } from '@bconnect/api-client'
+import type {
+  CrawledMember,
+  CrawledMemberSummary,
+  CrawledPost,
+  CursorPageCrawledMemberSummary,
 } from '@bconnect/api-client'
-import type { CrawledMember, CrawledMemberSummary, CrawledPost } from '@bconnect/api-client'
 import { http, HttpResponse } from 'msw'
 
 // 크롤링 기술자 — plan 기술자 탐색 병합 노출용 시드.
@@ -36,7 +37,7 @@ const RAW: RawMember[] = [
       headline:
         '우리집에 관련된 각종 수리, 보수, 교체, 설치를 도와드리고 있습니다. 앞으로 꾸준히 집수리에 관련된 자료를 업데이트 할 예정입니다.',
       address: '남양주시 화도읍 녹촌로9 101-601',
-      state: CrawledRegion.SEOUL,
+      state: Region.서울,
       url: 'https://blog.naver.com/jamdoong',
       platform: CrawledPlatform.NAVER,
     },
@@ -111,7 +112,7 @@ const RAW: RawMember[] = [
       headline:
         'TEL 010-0000-0000 타일하자보수/미장단차/각종수전/도기설치  24시간 365일 주말 공휴일 친철히 상담가능. 국가기술자격번호 ***031108*** 사업자등록번호 @30017@@@ 카드결제/현금영수증',
       address: '경기도 수원시 영통구 덕영대로 1410',
-      state: CrawledRegion.GYEONGGI,
+      state: Region.경기,
       url: 'https://blog.naver.com/hobbyreview',
       platform: CrawledPlatform.NAVER,
     },
@@ -186,7 +187,7 @@ const RAW: RawMember[] = [
       headline:
         'tel:010-0000-0000\nKBS 동행 프로그램 출연-1인창업-타일-대리석-싱크대-거실 폴리싱 타일-아트월 타일-욕실-부분수리-부분교체집수리 출장지역(서울 인천 경기전지역 빠른출동/충남 충북 강원 출동) 1,500건 이상의 다양한 집수리 경력',
       address: '',
-      state: CrawledRegion.GYEONGGI,
+      state: Region.경기,
       url: 'https://blog.naver.com/eui6212',
       platform: CrawledPlatform.NAVER,
     },
@@ -260,7 +261,13 @@ const toSummary = ({
 })
 
 export const crawledOverrides = [
-  getGetCrawledMembersMockHandler(SEEDS.map(toSummary)),
+  getGetCrawledMembersMockHandler(
+    (): CursorPageCrawledMemberSummary => ({
+      content: SEEDS.map(toSummary),
+      hasNext: false,
+      nextCursor: undefined,
+    })
+  ),
   // 상세는 직접 작성 — 미존재 id 를 404 로 반환해 에러 UI(isError) 경로가 로컬에서도 재현되게
   // (generated mock 은 항상 200 이라 not-found 경로를 검증할 수 없음)
   http.get('*/api/v1/crawled-members/:id', ({ params }) => {

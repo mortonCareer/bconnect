@@ -55,6 +55,12 @@ export default defineConfig([
           message:
             '클릭 핸들러에서 router.push/replace 금지 — 내비게이션은 next/link <Link>(Button 은 asChild)를 쓰세요. 불가피한 imperative 는 핸들러를 별도 함수로 분리하거나 eslint-disable 에 사유를 남기세요.',
         },
+        {
+          selector:
+            'JSXElement[openingElement.name.name="Form"] JSXOpeningElement[name.name="Button"]:has(JSXAttribute[name.name="type"] Literal[value="submit"])',
+          message:
+            'RHF <Form> 안 제출 버튼은 raw <Button type="submit"> 대신 FormSubmitButton 을 쓰세요 (#400 표준: submit 자동 + isLoading + 채움 게이트).',
+        },
       ],
     },
   },

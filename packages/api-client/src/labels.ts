@@ -1,4 +1,4 @@
-import { CrawledRegion, Trade, type CredentialType } from './generated/schemas'
+import { Region, Trade, type CredentialType } from './generated/schemas'
 
 export const TRADE_LABELS: Record<Trade, string> = {
   [Trade.DESIGN]: '설계',
@@ -93,56 +93,49 @@ export function getCredentialLabel(type: CredentialType): string {
   return CREDENTIAL_TYPE_LABELS[type] ?? type
 }
 
-// 지역(시/도) 한글 라벨 SSOT — CrawledRegion enum 기반.
+// 지역(시/도) 한글 라벨 SSOT — 공용 Region enum(#998, BE canonical 한글값) 기반.
 // career(lib/region.ts)·plan(FilterBar·크롤링 카드)이 공유. 자체 하드코딩 금지.
-export const REGION_LABELS: Record<CrawledRegion, string> = {
-  SEOUL: '서울',
-  BUSAN: '부산',
-  DAEGU: '대구',
-  INCHEON: '인천',
-  GWANGJU: '광주',
-  DAEJEON: '대전',
-  ULSAN: '울산',
-  SEJONG: '세종',
-  GYEONGGI: '경기',
-  GANGWON: '강원',
-  CHUNGBUK: '충북',
-  CHUNGNAM: '충남',
-  JEONBUK: '전북',
-  JEONNAM: '전남',
-  GYEONGBUK: '경북',
-  GYEONGNAM: '경남',
-  JEJU: '제주',
+// Region 값 대부분은 표시 라벨과 동일하고, 통합·특별자치 명칭만 짧은 라벨로 축약.
+export const REGION_LABELS: Record<Region, string> = {
+  [Region.서울]: '서울',
+  [Region.부산]: '부산',
+  [Region.대구]: '대구',
+  [Region.인천]: '인천',
+  [Region.대전]: '대전',
+  [Region.울산]: '울산',
+  [Region.세종특별자치시]: '세종',
+  [Region.경기]: '경기',
+  [Region.강원특별자치도]: '강원',
+  [Region.충북]: '충북',
+  [Region.충남]: '충남',
+  [Region.전북특별자치도]: '전북',
+  [Region.전남광주통합특별시]: '전남광주',
+  [Region.경북]: '경북',
+  [Region.경남]: '경남',
+  [Region.제주특별자치도]: '제주',
 }
 
 export const REGION_LIST = Object.entries(REGION_LABELS).map(([value, label]) => ({
-  value: value as CrawledRegion,
+  value: value as Region,
   label,
 }))
 
-export function getRegionLabel(region: CrawledRegion): string {
+export function getRegionLabel(region: Region): string {
   return REGION_LABELS[region] ?? region
 }
 
-// 행정구역 전체 명칭('충청북도'·'전북특별자치도' 등)은 라벨('충북'·'전북')과 접두가 달라
-// 단순 startsWith 로 못 잡는 6개 도만 명시 처리하고, 나머지는 라벨 접두 일치로 해석한다.
-const REGION_FULLNAME_PREFIX: Record<string, CrawledRegion> = {
-  충청북: 'CHUNGBUK',
-  충청남: 'CHUNGNAM',
-  전라북: 'JEONBUK',
-  전라남: 'JEONNAM',
-  경상북: 'GYEONGBUK',
-  경상남: 'GYEONGNAM',
-}
+const REGION_VALUES = new Set<string>(Object.values(Region))
+const reportedUnknownStates = new Set<string>()
 
-/** Address.state(시/도 명칭, '서울특별시'·'경기도'·'전북특별자치도' 등) → CrawledRegion. 해석 불가면 undefined. */
-export function regionOfState(state: string | null | undefined): CrawledRegion | undefined {
+/** 카카오 우편번호 sido 문자열 → Region 정확 일치 검증. 미상이면 undefined + 1회 리포트 (읽기 경로는 크래시 금지). */
+export function regionOfState(state: string | null | undefined): Region | undefined {
   if (!state) return undefined
   const trimmed = state.trim()
-  for (const [prefix, region] of Object.entries(REGION_FULLNAME_PREFIX)) {
-    if (trimmed.startsWith(prefix)) return region
+  if (!trimmed) return undefined
+  if (REGION_VALUES.has(trimmed)) return trimmed as Region
+  if (!reportedUnknownStates.has(trimmed)) {
+    reportedUnknownStates.add(trimmed)
+    console.warn(`[regionOfState] 미등록 시/도 표기 "${trimmed}" — 지역 미상 처리 (#1000)`)
   }
-  return (Object.keys(REGION_LABELS) as CrawledRegion[]).find((region) =>
-    trimmed.startsWith(REGION_LABELS[region])
-  )
+  return undefined
 }

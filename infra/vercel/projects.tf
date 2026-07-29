@@ -123,14 +123,14 @@ resource "vercel_project_environment_variable" "career_sentry_auth_token" {
   comment                = "Sentry auth token - 소스맵 업로드"
 }
 
-resource "vercel_project_environment_variable" "career_slack_webhook_url" {
-  count      = var.slack_webhook_url != "" ? 1 : 0
+resource "vercel_project_environment_variable" "career_slack_monitoring_webhook_url" {
+  count      = var.slack_monitoring_webhook_url != "" ? 1 : 0
   project_id = vercel_project.career.id
   key        = "SLACK_WEBHOOK_URL"
-  value      = var.slack_webhook_url
+  value      = var.slack_monitoring_webhook_url
   target     = ["production"]
   sensitive  = true
-  comment    = "Slack Incoming Webhook - 크롤링 스키마 변경 알림"
+  comment    = "Slack Incoming Webhook - 모니터링 전용 채널 (원클릭 헬스체크 알림)"
 }
 
 resource "vercel_project_environment_variable" "career_database_url" {
@@ -215,20 +215,9 @@ resource "vercel_project_environment_variable" "career_firebase_vapid_key" {
 # ===========================================================================
 # Domain Configuration for Career
 # ===========================================================================
-resource "vercel_project_domain" "career_root" {
-  project_id = vercel_project.career.id
-  domain     = var.domain
-}
-
 resource "vercel_project_domain" "career_sub" {
   project_id = vercel_project.career.id
   domain     = "career.${var.domain}"
-}
-
-resource "vercel_project_domain" "career_www" {
-  project_id = vercel_project.career.id
-  domain     = "www.${var.domain}"
-  redirect   = vercel_project_domain.career_root.domain
 }
 
 # ===========================================================================
@@ -379,7 +368,7 @@ resource "vercel_project" "landing" {
 
   skew_protection = "12 hours"
 
-  root_directory = "apps/landing"
+  root_directory = "apps/company"
 
   # 표준 ephemeral 프리뷰 배포 비활성 (ADR-0022 프리뷰 폐기). dev QA는 custom env "dev"가 담당
   preview_deployments_disabled = true
@@ -436,7 +425,18 @@ resource "vercel_project_environment_variable" "landing_sentry_auth_token" {
   comment                = "Sentry auth token - 소스맵 업로드"
 }
 
-# 도메인 apex(bconnect.to) 는 릴리스 후 컷오버 시 career_root 에서 이 프로젝트로 이전 (#896)
+# 도메인 apex(bconnect.to) — v0.1.0 릴리스 후 career_root 에서 컷오버 이전 (#896 → #935)
+resource "vercel_project_domain" "landing_root" {
+  project_id = vercel_project.landing.id
+  domain     = var.domain
+}
+
+resource "vercel_project_domain" "landing_www" {
+  project_id = vercel_project.landing.id
+  domain     = "www.${var.domain}"
+  redirect   = vercel_project_domain.landing_root.domain
+}
+
 # dev 는 apex 미러 — apex=landing 이므로 dev.bconnect.to = landing dev (career 는 career.dev 로 비킴)
 resource "vercel_project_domain" "landing_dev" {
   project_id            = vercel_project.landing.id

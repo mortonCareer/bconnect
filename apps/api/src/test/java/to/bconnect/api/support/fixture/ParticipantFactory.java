@@ -10,7 +10,7 @@ public class ParticipantFactory {
 
     @Autowired private ParticipantRepository participantRepository;
 
-    public ParticipantEntity create(Long chatId, Long memberId) {
+    public ParticipantEntity entity(Long chatId, Long memberId) {
         return participantRepository.save(new ParticipantEntity(chatId, memberId));
     }
 }

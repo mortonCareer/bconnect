@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static to.bconnect.api.security.AuthUser.ROLE_PREFIX;
-import static to.bconnect.api.storage.member.Role.GUEST;
+import static to.bconnect.api.storage.member.Role.SIGNUP;
 
 /**
  * Validate SignupTokenAuthenticationToken and generate authenticated token with phone principal
@@ -35,7 +35,7 @@ public class SignupTokenAuthenticationProvider implements AuthenticationProvider
         try {
             val phone = signupTokenService.verify(token);
             return new SignupTokenAuthenticationToken(phone, token,
-                    List.of(new SimpleGrantedAuthority(ROLE_PREFIX + GUEST)));
+                    List.of(new SimpleGrantedAuthority(ROLE_PREFIX + SIGNUP)));
         } catch (CodeException ex) {
             throw new AuthenticationServiceException(ex.getMessage(), ex);
         }

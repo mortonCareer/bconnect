@@ -1,13 +1,14 @@
 package to.bconnect.api.core.domain.credential;
 
-import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.attachment.domain.AttachmentFinder;
+import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.credential.CredentialEntity;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class CredentialService {
 
     private final CredentialRepository credentialRepository;
+    private final AttachmentFinder attachmentFinder;
     private final AttachmentLinker attachmentLinker;
 
     @Transactional(readOnly = true)
@@ -43,7 +45,8 @@ public class CredentialService {
                 .filter(it -> it.getStatus() == CredentialStatus.ACCEPTED)
                 .collect(Collectors.groupingBy(
                         CredentialEntity::getType,
-                        Collectors.maxBy(Comparator.comparing(CredentialEntity::getCreatedAt))
+                        Collectors.maxBy(Comparator.comparing(CredentialEntity::getCreatedAt)
+                                .thenComparing(CredentialEntity::getId))
                 ))
                 .values().stream()
                 .flatMap(Optional::stream)
@@ -53,6 +56,9 @@ public class CredentialService {
 
     @Transactional
     public Long create(AuthUser user, CreateCredential command) {
+        if (command.attachmentId() != null)
+            attachmentFinder.validateOwnership(user.id(), command.attachmentId());
+
         val created = new CredentialEntity(
                 user.id(),
                 command.type(),
@@ -61,7 +67,9 @@ public class CredentialService {
         );
 
         credentialRepository.save(created);
-        attachmentLinker.relink(user.id(), ReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
+        if (command.attachmentId() != null)
+            attachmentLinker.link(ReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
+
         return created.getId();
     }
 
@@ -75,7 +83,7 @@ public class CredentialService {
         if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        attachmentLinker.unlink(ReferenceType.CREDENTIAL, List.of(found.getId()));
+        attachmentLinker.unlink(ReferenceType.CREDENTIAL, found.getId());
         credentialRepository.delete(found);
     }
 
@@ -84,6 +92,9 @@ public class CredentialService {
         val found = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
+        if (found.getStatus() != CredentialStatus.PENDING)
+            throw new CodeException(CredentialExceptionCode.INVALID_STATUS);
+
         found.accept();
     }
 
@@ -91,6 +102,9 @@ public class CredentialService {
     public void deny(Long id) {
         val found = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        if (found.getStatus() != CredentialStatus.PENDING)
+            throw new CodeException(CredentialExceptionCode.INVALID_STATUS);
 
         found.deny();
     }

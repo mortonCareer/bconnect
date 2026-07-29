@@ -31,7 +31,7 @@ jobs:
             project_id: prj_RlSd4uhoHokj39k3z5P9vfb6LMMf
           - app: plan
             project_id: prj_XpYhG7GF6Fq2adC3ol7sGgvVzAUt
-          - app: landing
+          - app: company
             project_id: prj_mEJ2VlsFreZs528OH1a1re0KkkJt
     env:
       VERCEL_ORG_ID: team_ryk4Nqef5hyc1bMxwCBG4bTo
@@ -66,7 +66,7 @@ jobs:
       - name: Notify Slack on failure
         if: failure()
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           curl -s -X POST "$SLACK_WEBHOOK_URL" \

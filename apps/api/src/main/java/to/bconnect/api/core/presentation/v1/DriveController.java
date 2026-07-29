@@ -8,17 +8,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
+import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.attachment.presentation.v1.AttachmentResponse;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.board.NoteService;
+import to.bconnect.api.core.domain.drive.DriveFileService;
 import to.bconnect.api.core.domain.drive.DriveService;
 import to.bconnect.api.core.presentation.v1.request.CreateDriveRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateDriveRequest;
 import to.bconnect.api.core.presentation.v1.request.UploadDriveRequest;
 import to.bconnect.api.core.presentation.v1.response.DriveResponse;
+import to.bconnect.api.core.presentation.v1.response.DriveUsageResponse;
 import to.bconnect.api.core.presentation.v1.response.NoteResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
@@ -32,8 +34,9 @@ import java.util.List;
 public class DriveController {
 
     private final DriveService driveService;
+    private final DriveFileService driveFileService;
     private final NoteService noteService;
-    private final AttachmentResolver attachmentResolver;
+    private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
@@ -85,8 +88,8 @@ public class DriveController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
             HttpServletResponse response) {
-        val body = driveService.listAttachments(user, id, AttachmentType.IMAGE).stream()
-                .map(it -> AttachmentResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.SMALL)))
+        val body = driveFileService.list(user, id, AttachmentType.IMAGE).stream()
+                .map(it -> AttachmentResponse.of(it, attachmentUrlService.parseUrl(it, ImageSize.SMALL)))
                 .toList();
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.DRIVE, id);
@@ -101,8 +104,8 @@ public class DriveController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
             HttpServletResponse response) {
-        val body = driveService.listAttachments(user, id, AttachmentType.FILE).stream()
-                .map(it -> AttachmentResponse.of(it, attachmentResolver.parseUrl(it, ImageSize.ORIGINAL)))
+        val body = driveFileService.list(user, id, AttachmentType.FILE).stream()
+                .map(it -> AttachmentResponse.of(it, attachmentUrlService.parseUrl(it, ImageSize.ORIGINAL)))
                 .toList();
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.DRIVE, id);
@@ -117,7 +120,7 @@ public class DriveController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
             @RequestBody @Valid UploadDriveRequest request) {
-        driveService.attach(user, id, request.attachmentIds());
+        driveFileService.attach(user, id, request.attachmentIds());
         return ApiResponse.success(null);
     }
 
@@ -126,8 +129,16 @@ public class DriveController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
             @PathVariable Long attachmentId) {
-        driveService.detach(user, id, attachmentId);
+        driveFileService.detach(user, id, attachmentId);
         return ApiResponse.success(null);
+    }
+
+    @GetMapping("/{id}/usage")
+    public ApiResponse<DriveUsageResponse> usage(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id) {
+        val body = DriveUsageResponse.of(driveFileService.usage(user, id));
+        return ApiResponse.success(body);
     }
 
     @GetMapping("/{id}/notes")

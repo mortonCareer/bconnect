@@ -32,6 +32,16 @@ public class CoworkerRequestService {
         if (coworkerRepository.existsByMembers(user.id(), targetId))
             throw new CodeException(CoworkerExceptionCode.ALREADY_COWORKER);
 
+        val reverse = coworkerRequestRepository.findByFromIdAndToId(targetId, user.id());
+        if (reverse.isPresent()) {
+            val accepted = reverse.get();
+            coworkerRequestRepository.delete(accepted);
+            coworkerRequestRepository.findByFromIdAndToId(user.id(), targetId)
+                    .ifPresent(coworkerRequestRepository::delete);
+            coworkerRepository.save(CoworkerEntity.of(accepted.getFromId(), accepted.getToId()));
+            return accepted.getId();
+        }
+
         val request = coworkerRequestRepository.findByFromIdAndToId(user.id(), targetId)
                 .orElseGet(() -> coworkerRequestRepository.save(new CoworkerRequestEntity(user.id(), targetId)));
 
@@ -63,10 +73,8 @@ public class CoworkerRequestService {
 
     @Transactional
     public void cancel(AuthUser user, Long id) {
-        val optional = coworkerRequestRepository.findById(id);
-        if (optional.isEmpty())
-            return;
-        val found = optional.get();
+        val found = coworkerRequestRepository.findById(id)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getFromId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);

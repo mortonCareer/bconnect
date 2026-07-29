@@ -11,7 +11,7 @@ GitHub Issue 정보를 기반으로 Pull Request를 자동 생성합니다.
 ## 사용 시점
 
 - 작업 완료 후 PR을 생성할 때
-- 브랜치의 변경사항을 main에 머지하고 싶을 때
+- 브랜치의 변경사항을 dev에 머지하고 싶을 때 (모든 feature/fix PR 의 타겟은 `dev`. `main` 은 dev → main 통합 PR 로만 들어간다)
 
 ## PR 생성 프로세스
 
@@ -23,7 +23,7 @@ GitHub Issue 정보를 기반으로 Pull Request를 자동 생성합니다.
    └─ gh issue view 123
 
 3. 변경 파일 분석
-   └─ git diff main...HEAD
+   └─ git diff origin/dev...HEAD
 
 4. 리뷰어 자동 결정
    └─ apps/api/ 변경 포함 → CEO 추가
@@ -106,15 +106,15 @@ PR 본문은 위 4-section 구조 + `Closes #N` 을 유지한다. 다음은 본�
 
 ```bash
 # 변경 파일 확인
-git diff main...HEAD --name-only
+git diff origin/dev...HEAD --name-only
 
 # apps/api/ 포함 여부 체크
-if git diff main...HEAD --name-only | grep -q "^apps/api/"; then
+if git diff origin/dev...HEAD --name-only | grep -q "^apps/api/"; then
   REVIEWER="<CEO_GITHUB>"
 fi
 
 # openapi.yaml 변경 시
-if git diff main...HEAD --name-only | grep -q "openapi.yaml"; then
+if git diff origin/dev...HEAD --name-only | grep -q "openapi.yaml"; then
   REVIEWER="<CEO_GITHUB>,<CTO_GITHUB>"  # 둘 다
 fi
 ```
@@ -189,7 +189,7 @@ echo "Creating PR: $PR_TITLE"
 gh pr create \
   --title "$PR_TITLE" \
   --body "$PR_BODY" \
-  --base main
+  --base dev
 
 echo "✓ PR created successfully"
 echo "Vercel preview will be available in 1-2 minutes"
@@ -298,17 +298,13 @@ Resolves #123
 ### Conflict 발생 시
 
 ```bash
-# main 최신화
-git checkout main
-git pull origin main
+# dev 최신화 (워크트리 작업 중이면 checkout 없이 fetch 만)
+git fetch origin dev
 
-# 작업 브랜치로 돌아가기
-git checkout feat/123-add-profile-upload
-
-# main 변경사항 가져오기
-git rebase main
+# dev 변경사항 가져오기
+git rebase origin/dev
 # 또는
-git merge main
+git merge origin/dev
 
 # 충돌 해결 후
 git add .

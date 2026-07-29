@@ -14,4 +14,6 @@ public interface DeviceTokenRepository extends JpaRepository<DeviceTokenEntity, 
     List<DeviceTokenEntity> findByMemberIdAndEnabledTrue(Long memberId);
 
     boolean existsByMemberId(Long memberId);
+
+    List<DeviceTokenEntity> findAllByMemberId(Long memberId);
 }

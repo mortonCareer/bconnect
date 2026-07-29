@@ -4,14 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.attachment.domain.Attachment;
-import to.bconnect.api.attachment.domain.AttachmentLinker;
-import to.bconnect.api.attachment.domain.AttachmentResolver;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.core.domain.project.ProjectFinder;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.attachment.AttachmentType;
-import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.board.BoardEntity;
 import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.BoardType;
@@ -28,11 +24,11 @@ public class DriveService {
 
     private final DriveRepository driveRepository;
     private final DriveMemberRepository driveMemberRepository;
-    private final DriveValidator driveValidator;
-    private final AttachmentLinker attachmentLinker;
-    private final AttachmentResolver attachmentResolver;
+    private final DriveFinder driveFinder;
+    private final DriveFileService driveFileService;
     private final BoardRepository boardRepository;
     private final NoteRepository noteRepository;
+    private final ProjectFinder projectFinder;
 
     @Transactional(readOnly = true)
     public List<Drive> listByMember(AuthUser user) {
@@ -49,9 +45,7 @@ public class DriveService {
 
     @Transactional(readOnly = true)
     public List<Drive> listByProject(AuthUser user, Long projectId) {
-        if (!driveValidator.isProjectDriveOwner(user.id(), projectId))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
+        projectFinder.validateOwnership(user.id(), projectId);
         return driveRepository.findAllByProjectId(projectId).stream()
                 .map(it -> Drive.of(it, it.getTitle()))
                 .toList();
@@ -63,8 +57,7 @@ public class DriveService {
         Long memberId = null;
 
         if (command.type() == DriveType.PROJECT) {
-            if (!driveValidator.isProjectDriveOwner(user.id(), command.projectId()))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+            projectFinder.validateOwnership(user.id(), command.projectId());
             projectId = command.projectId();
         } else {
             memberId = user.id();
@@ -72,7 +65,6 @@ public class DriveService {
 
         val created = driveRepository.save(new DriveEntity(command.type(), projectId, memberId, command.title()));
         boardRepository.save(new BoardEntity(BoardType.DRIVE, null, created.getId()));
-
         return created.getId();
     }
 
@@ -81,19 +73,15 @@ public class DriveService {
         val found = driveRepository.findById(driveId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        if (found.getType() == DriveType.MEMBER && driveValidator.isMemberDriveOwner(user.id(), found)) {
-            found.update(title);
+        val optional = driveMemberRepository.findByDriveIdAndMemberId(driveId, user.id());
+        if (optional.isPresent()) {
+            optional.get().update(title);
             return;
         }
 
-        if (found.getType() == DriveType.PROJECT && driveValidator.isProjectDriveOwner(user.id(), found.getProjectId())) {
-            found.update(title);
-            return;
-        }
-
-        val driveMember = driveMemberRepository.findByDriveIdAndMemberId(driveId, user.id())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.FORBIDDEN));
-        driveMember.update(title);
+        if (!driveFinder.isOwner(user.id(), found.getId()))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        found.update(title);
     }
 
     @Transactional
@@ -101,39 +89,17 @@ public class DriveService {
         val optional = driveRepository.findById(driveId);
         if (optional.isEmpty())
             return;
-        val found = optional.get();
 
-        if (found.getType() == DriveType.MEMBER && !driveValidator.isMemberDriveOwner(user.id(), found))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-        if (found.getType() == DriveType.PROJECT && !driveValidator.isProjectDriveOwner(user.id(), found.getProjectId()))
+        val found = optional.get();
+        if (!driveFinder.isOwner(user.id(), found.getId()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         boardRepository.findByDriveId(driveId).ifPresent(board -> {
             noteRepository.deleteAllByBoardId(board.getId());
             boardRepository.delete(board);
         });
-        attachmentLinker.unlink(ReferenceType.DRIVE, List.of(driveId));
+        driveFileService.detachAll(found);
         driveMemberRepository.deleteByDriveId(driveId);
         driveRepository.delete(found);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Attachment> listAttachments(AuthUser user, Long driveId, AttachmentType type) {
-        driveValidator.validate(driveId, user.id());
-
-        return attachmentResolver.list(ReferenceType.DRIVE, driveId, type);
-    }
-
-    @Transactional
-    public void attach(AuthUser user, Long driveId, List<Long> attachmentIds) {
-        driveValidator.validate(driveId, user.id());
-        attachmentLinker.link(user.id(), ReferenceType.DRIVE, driveId, attachmentIds);
-    }
-
-    @Transactional
-    public void detach(AuthUser user, Long driveId, Long attachmentId) {
-        driveValidator.validate(driveId, user.id());
-        attachmentLinker.validate(user.id(), ReferenceType.DRIVE, driveId, attachmentId);
-        attachmentLinker.unlink(attachmentId);
     }
 }

@@ -1,11 +1,7 @@
 import { AUTH_HINT_COOKIE } from '@bconnect/api-client/auth-hint'
 import { isApiMockingEnabled } from '@bconnect/config/env'
-import { SITE_URL } from '@bconnect/config/site'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-
-const CAREER_HOST = new URL(SITE_URL.career).host
-const LEGACY_APEX_HOST = CAREER_HOST.replace(/^career\./, '')
 
 // PUBLIC route — middleware 는 실행되지만 인증 가드만 우회. matcher 의 제외 대상과 위계가 다름.
 const PUBLIC_EXACT = ['/']
@@ -16,16 +12,6 @@ const PUBLIC_PROFILE_PATTERN = /^\/profile\/\d+(\/.*)?$/
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-
-  if (request.headers.get('host') === LEGACY_APEX_HOST) {
-    return new NextResponse(
-      `${LEGACY_APEX_HOST} 는 준비 중입니다. career 앱은 ${SITE_URL.career} 입니다.`,
-      {
-        status: 404,
-        headers: { 'content-type': 'text/plain; charset=utf-8' },
-      }
-    )
-  }
 
   if (
     PUBLIC_EXACT.includes(pathname) ||

@@ -13,6 +13,7 @@
     "./consent": "./consent/index.ts",
     "./date": "./date/index.ts",
     "./env": "./env/validate.ts",
+    "./errors": "./errors/index.ts",
     "./format": "./format/index.ts",
     "./address": "./address/index.ts",
     "./phone": "./phone/index.ts",

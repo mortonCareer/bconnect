@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   AgreementField,
-  Button,
+  FormSubmitButton,
   Form,
   FormError,
   Logo,
@@ -17,7 +17,7 @@ import {
   passthroughError,
   useServerError,
 } from '@bconnect/ui'
-import { useCreateMember, useCreateCompany } from '@bconnect/api-client'
+import { refreshAccessToken, useCreateMember, useCreateCompany } from '@bconnect/api-client'
 import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
@@ -64,11 +64,7 @@ export default function SignupCorpPage() {
       agreements: CONSENT_DEFAULT,
     },
   })
-  const {
-    control,
-    handleSubmit,
-    formState: { isSubmitting, isValid },
-  } = form
+  const { control, handleSubmit } = form
 
   const server = useServerError(
     control,
@@ -99,6 +95,7 @@ export default function SignupCorpPage() {
       await createCompanyMutation.mutateAsync({
         data: { name: data.companyName, brn: data.bizNumber },
       })
+      await refreshAccessToken()
 
       resetSignup()
       router.push('/')
@@ -149,17 +146,7 @@ export default function SignupCorpPage() {
             <FormError error={server.formError} />
 
             {/* CTA */}
-            <Button
-              type="submit"
-              variant={isValid ? 'primary' : 'secondary'}
-              size="full"
-              disabled={!isValid}
-              isLoading={
-                isSubmitting || registerMemberMutation.isPending || createCompanyMutation.isPending
-              }
-            >
-              가입 완료
-            </Button>
+            <FormSubmitButton size="full">가입 완료</FormSubmitButton>
           </form>
         </Form>
       </div>

@@ -6,13 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.core.domain.drive.DriveValidator;
+import to.bconnect.api.core.domain.drive.DriveFinder;
+import to.bconnect.api.core.domain.project.ProjectFinder;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.board.BoardEntity;
-import to.bconnect.api.storage.board.BoardRepository;
-import to.bconnect.api.storage.board.BoardType;
-import to.bconnect.api.storage.board.NoteEntity;
-import to.bconnect.api.storage.board.NoteRepository;
+import to.bconnect.api.storage.board.*;
 
 import java.util.List;
 
@@ -22,14 +19,15 @@ public class NoteService {
 
     private final NoteRepository noteRepository;
     private final BoardRepository boardRepository;
-    private final DriveValidator driveValidator;
+    private final DriveFinder driveFinder;
+    private final ProjectFinder projectFinder;
 
     @Transactional(readOnly = true)
     public List<Note> listByProject(AuthUser user, Long projectId) {
         val board = boardRepository.findByProjectId(projectId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (!driveValidator.isProjectDriveOwner(user.id(), projectId))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        projectFinder.validateOwnership(user.id(), projectId);
 
         return noteRepository.findAllByBoardId(board.getId()).stream()
                 .map(Note::of)
@@ -40,7 +38,9 @@ public class NoteService {
     public List<Note> listByDrive(AuthUser user, Long driveId) {
         val board = boardRepository.findByDriveId(driveId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        driveValidator.validate(driveId, user.id());
+
+        if (!driveFinder.isMember(user.id(), driveId) && !driveFinder.isOwner(user.id(), driveId))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         return noteRepository.findAllByBoardId(board.getId()).stream()
                 .map(Note::of)
@@ -54,12 +54,16 @@ public class NoteService {
         if (command.type() == BoardType.PROJECT) {
             board = boardRepository.findByProjectId(command.projectId())
                     .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-            if (!driveValidator.isProjectDriveOwner(user.id(), command.projectId()))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
-        } else {
+
+            projectFinder.validateOwnership(user.id(), command.projectId());
+        } else if (command.type() == BoardType.DRIVE) {
             board = boardRepository.findByDriveId(command.driveId())
                     .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-            driveValidator.validate(command.driveId(), user.id());
+
+            if (!driveFinder.isMember(user.id(), command.driveId()) && !driveFinder.isOwner(user.id(), command.driveId()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        } else {
+            throw new CodeException(CommonExceptionCode.NOT_VALID);
         }
 
         return noteRepository.save(new NoteEntity(board.getId(), user.id(), command.content())).getId();

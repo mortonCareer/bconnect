@@ -13,9 +13,11 @@
 | `CO` | 업체 | `core/domain/company` |
 | `T` | 작업 | `core/domain/task` |
 | `CW` | 동료 | `core/domain/coworker` |
+| `CD` | 인증뱃지 | `core/domain/credential` |
 | `RC` | 추천서 | `core/domain/recommendation` |
 | `CH` | 채팅 | `core/domain/chat` |
-| `OF` | 제안 | `core/domain/offer` |
+| `OF` | 섭외 | `core/domain/offer` |
+| `DR` | 드라이브 | `core/domain/drive` |
 | `AT` | 첨부 | `attachment/domain` |
 
 ---
@@ -33,6 +35,7 @@
 | C007 | INTERNAL_SERVER_ERROR | 500 | ERROR | 서버 내부 오류입니다. |
 | C008 | PATH_NOT_FOUND | 404 | INFO | 요청 경로를 찾을 수 없습니다. |
 | C009 | UNAUTHORIZED | 401 | INFO | 인증이 필요합니다. |
+| C010 | INVALID_REQUEST | 400 | WARN | 요청 형식이 올바르지 않습니다. |
 
 ## AuthExceptionCode
 
@@ -78,14 +81,21 @@
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
 | T001 | NOT_ASSIGNED | 409 | INFO | 기술자에게 할당되지 않은 작업입니다. |
+| T002 | INVALID_TYPE | 409 | INFO | 처리할 수 없는 작업 유형입니다. |
 
 ## OfferExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
-| OF001 | NOT_PROJECT_TASK | 400 | INFO | 프로젝트 작업에만 제안할 수 있습니다. |
-| OF002 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 제안 상태입니다. |
+| OF001 | NOT_PROJECT_TASK | 400 | INFO | 프로젝트 작업에만 섭외할 수 있습니다. |
+| OF002 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 섭외 상태입니다. |
 | OF003 | INVALID_REORDER | 400 | INFO | 재정렬 대상이 올바르지 않습니다. |
+
+## CredentialExceptionCode
+
+| 코드 | 이름 | HTTP | LogLevel | 메시지 |
+| --- | --- | --- | --- | --- |
+| CD001 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 인증뱃지 상태입니다. |
 
 ## CoworkerExceptionCode
 
@@ -109,6 +119,12 @@
 | CH001 | SELF_NOT_INCLUDED | 400 | INFO | 참여자 목록에 본인이 포함되어야 합니다. |
 | CH002 | INVALID_ATTACHMENT | 400 | INFO | 메시지 타입과 첨부가 일치하지 않습니다. |
 
+## DriveExceptionCode
+
+| 코드 | 이름 | HTTP | LogLevel | 메시지 |
+| --- | --- | --- | --- | --- |
+| DR001 | LIMIT_EXCEEDED | 409 | INFO | 드라이브 용량 한도를 초과했습니다. |
+
 ## AttachmentExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
@@ -118,3 +134,4 @@
 | AT003 | UNSUPPORTED_FILE_TYPE | 415 | WARN | 허용되지 않는 파일 형식입니다. |
 | AT004 | NOT_COMPLETED | 400 | INFO | 업로드가 완료되지 않은 첨부파일입니다. |
 | AT005 | INVALID_LINKED | 404 | INFO | 연결되지 않은 첨부파일입니다. |
+| AT006 | NOT_FOUND | 404 | INFO | 존재하지 않는 첨부파일입니다. |

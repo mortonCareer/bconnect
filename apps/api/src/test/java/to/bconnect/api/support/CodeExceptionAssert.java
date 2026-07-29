@@ -19,17 +19,17 @@ public class CodeExceptionAssert
     public static CodeExceptionAssert assertCodeException(ThrowingCallable callable) {
         val throwable = catchThrowable(callable);
         assertThat(throwable).isInstanceOf(CodeException.class);
+
         return new CodeExceptionAssert((CodeException) throwable);
     }
 
     public CodeExceptionAssert hasExceptionCode(ExceptionCode expected) {
         isNotNull();
         val actualCode = actual.getExceptionCode();
-        if (!actualCode.equals(expected)) {
-            failWithMessage(
-                    "Expected exception code <%s> but was <%s>",
-                    expected, actualCode);
-        }
+        if (!actualCode.equals(expected))
+            failWithMessage("Expected exception code <%s(%s)> but was <%s(%s)>",
+                    expected, expected.getCode(), actualCode, actualCode.getCode());
+
         return this;
     }
 }

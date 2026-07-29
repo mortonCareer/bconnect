@@ -82,7 +82,14 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
     return (
       <div
         ref={ref}
-        className={cn('flex h-20 items-center gap-2 bg-white px-6 py-4', className)}
+        className={cn(
+          // 하단 고정 입력바 — viewport-fit=cover 라 홈 인디케이터/제스처바 높이를 직접 확보한다.
+          // 채팅 상세는 하단 네비(safe-area 패딩 보유)가 숨겨져 이 컴포넌트가 화면 최하단이다 (#1017).
+          // 고정 h-20 이면 그 패딩이 안쪽을 먹으므로 min-h-20.
+          'flex min-h-20 items-center gap-2 bg-white px-6 py-4',
+          'pb-[calc(env(safe-area-inset-bottom)+1rem)]',
+          className
+        )}
         {...props}
       >
         {/* 갤러리 아이콘 */}

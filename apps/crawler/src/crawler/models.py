@@ -38,15 +38,12 @@ def trade_kr(enum_code: str) -> str:
     """Trade enum 코드를 한국어 라벨로 (노션 표시용). 미상이면 원문 반환."""
     return KR_BY_TRADE_ENUM.get(enum_code, enum_code)
 
-# BE CrawledRegion enum ↔ 한국어 시/도 (LLM·주소 추론은 한국어, 저장은 enum)
-REGION_ENUM_BY_KR = {
-    "서울": "SEOUL", "부산": "BUSAN", "대구": "DAEGU", "인천": "INCHEON",
-    "광주": "GWANGJU", "대전": "DAEJEON", "울산": "ULSAN", "세종": "SEJONG",
-    "경기": "GYEONGGI", "강원": "GANGWON", "충북": "CHUNGBUK", "충남": "CHUNGNAM",
-    "전북": "JEONBUK", "전남": "JEONNAM", "경북": "GYEONGBUK", "경남": "GYEONGNAM",
-    "제주": "JEJU",
-}
-KR_BY_REGION_ENUM = {v: k for k, v in REGION_ENUM_BY_KR.items()}
+# BE Region enum (국문 상수 = 카카오 우편번호 sido 원문). 저장·표시·LLM 옵션이 모두 같은 값을 쓴다.
+REGIONS = (
+    "서울", "부산", "대구", "인천", "대전", "울산",
+    "세종특별자치시", "경기", "강원특별자치도", "충북", "충남",
+    "전북특별자치도", "전남광주통합특별시", "경북", "경남", "제주특별자치도",
+)
 
 # BE CrawledPlatform enum ↔ 노션 채널 이름
 PLATFORM_NAVER = "NAVER"
@@ -127,7 +124,7 @@ class CrawledProfile(_CamelModel):
     headline: str = ""
     about: str = ""
     address: str = ""
-    state: str = ""  # CrawledRegion enum 값, 미상이면 빈 문자열
+    state: str = ""  # Region enum 값, 미상이면 빈 문자열
     url: str = ""  # 프로필 원 URL (블로그 홈 등) — BE unique key
     platform: str = PLATFORM_NAVER
 
@@ -153,4 +150,4 @@ class CrawledMember(_CamelModel):
 
     @property
     def region_kr(self) -> str:
-        return KR_BY_REGION_ENUM.get(self.profile.state, "")
+        return self.profile.state
