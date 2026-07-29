@@ -15,9 +15,15 @@ import {
   Logo,
   TextField,
   passthroughError,
+  toast,
   useServerError,
 } from '@bconnect/ui'
-import { refreshAccessToken, useCreateMember, useCreateCompany } from '@bconnect/api-client'
+import {
+  isRegisterMemberSignupSessionError,
+  refreshAccessToken,
+  useCreateMember,
+  useCreateCompany,
+} from '@bconnect/api-client'
 import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
@@ -76,22 +82,35 @@ export default function SignupCorpPage() {
     try {
       // register 는 signupToken(X-Signup-Token 헤더)을 소비 — 회사 생성 실패 후 재시도 시
       // 재호출하지 않도록 발급된 accessToken을 보관한다.
-      const accessToken =
-        issuedAccessToken ??
-        requireRegisterAccessToken(
-          await registerMemberMutation.mutateAsync({
-            data: {
-              username: formData.username,
-              name: formData.name,
-            },
-          })
-        )
+      if (!isAuthenticated) {
+        let accessToken: string
+        try {
+          accessToken =
+            issuedAccessToken ??
+            requireRegisterAccessToken(
+              await registerMemberMutation.mutateAsync({
+                data: {
+                  username: formData.username,
+                  name: formData.name,
+                },
+              })
+            )
+        } catch (err) {
+          if (isRegisterMemberSignupSessionError(err)) {
+            toast({ description: err.message, variant: 'error' })
+            resetSignup()
+            router.replace('/login')
+            return
+          }
+          throw err
+        }
 
-      if (!issuedAccessToken) {
-        setIssuedAccessToken(accessToken)
+        if (!issuedAccessToken) {
+          setIssuedAccessToken(accessToken)
+        }
+
+        login(accessToken)
       }
-
-      login(accessToken)
       await createCompanyMutation.mutateAsync({
         data: { name: data.companyName, brn: data.bizNumber },
       })
@@ -106,7 +125,8 @@ export default function SignupCorpPage() {
     }
   }
 
-  if (!formData.signupToken || !formData.username || !formData.name) return null
+  if (!isAuthenticated && (!formData.signupToken || !formData.username || !formData.name))
+    return null
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
