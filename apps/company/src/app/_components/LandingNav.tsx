@@ -1,6 +1,6 @@
-import Link from 'next/link'
-import { Button, Logo } from '@bconnect/ui'
 import { SITE_URL } from '@bconnect/config/site'
+import { Button, Logo } from '@bconnect/ui'
+import Link from 'next/link'
 
 export function LandingNav() {
   return (
@@ -9,15 +9,17 @@ export function LandingNav() {
         <Link href="/" aria-label="품앗이 홈">
           <Logo className="h-6 w-auto" />
         </Link>
-        <div className="flex items-center gap-3 sm:gap-5">
-          <Link
-            href="/career"
-            className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
-          >
-            기술자용
-          </Link>
-          <Button asChild size="small">
-            <a href={`${SITE_URL.plan}/login`}>시작하기</a>
+        <div className="flex items-center gap-2">
+          <Button asChild size="small" className="rounded-lg h-[38px]">
+            <a href={`${SITE_URL.plan}`}>베타 테스트</a>
+          </Button>
+          <Button asChild size="small" variant="outline" className="rounded-lg h-[38px]">
+            <Link
+              href="/career"
+              className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
+            >
+              기술자용
+            </Link>
           </Button>
         </div>
       </nav>

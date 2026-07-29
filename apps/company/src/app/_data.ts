@@ -1,9 +1,9 @@
 export const HERO = {
-  badge: '8월 출시 예정',
+  badge: '• 8월 출시 예정',
   titleLead: '인테리어 사업자를 위한',
   titleMain: '공정표 기반 하도급 플랫폼, 품앗이',
   subtitle: '일정 관리부터 대금 수취까지, 품앗이가 함께합니다',
-  ctaLabel: '출시 알림 신청',
+  ctaLabel: '베타 테스트',
 }
 
 export const PROBLEM = {
@@ -114,5 +114,5 @@ export const CTA = {
   titleLead: '인테리어 사업자를 위한',
   titleMain: '공정표 기반 하도급 플랫폼, 품앗이',
   subtitle: '가입하고 첫 프로젝트를 시작해보세요.',
-  ctaLabel: '지금 시작하기',
+  ctaLabel: '베타 테스트',
 }
