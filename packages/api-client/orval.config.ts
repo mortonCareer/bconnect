@@ -42,6 +42,12 @@ export default defineConfig({
               ],
               invalidates: ['getTasks'],
             },
+            // 섭외 수락/거절(#972) → 기술자 작업 목록(제안 반영) + 그 작업의 섭외 대기열.
+            // getTaskOffers 는 taskId 로 작업별 구분 → config 가 그 값을 몰라 관련 목록을 한꺼번에 무효화(넓게).
+            {
+              onMutations: ['acceptOffer', 'denyOffer'],
+              invalidates: ['getTasks', 'getTaskOffers'],
+            },
             // 추천서: 받은 목록(hide/show), 보낸 목록(create/update/delete)
             {
               onMutations: ['hideRecommendation', 'showRecommendation'],

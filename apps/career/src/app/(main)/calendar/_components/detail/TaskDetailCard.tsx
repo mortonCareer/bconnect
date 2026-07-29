@@ -21,13 +21,13 @@ import {
   isApiErrorShape,
   toast,
 } from '@bconnect/ui'
+import { formatPeriod } from '@bconnect/config/format'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { AddressField } from '@/components/AddressField'
 import { useShareCurrentUrl } from '@/hooks/useShareCurrentUrl'
-import { formatPeriod } from '../calendar/date-helpers'
 import type { CalendarTask } from '../calendar/types'
 import { TaskActionDrawer } from './TaskActionDrawer'
 
