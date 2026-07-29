@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { createJSONStorage, persist } from 'zustand/middleware'
 
 export type SignupStep = 'member' | 'corp' | 'complete'
 
@@ -28,26 +29,35 @@ const initialFormData: SignupFormData = {
   bizNumber: '',
 }
 
-export const useSignupStore = create<SignupState>()((set) => ({
-  formData: initialFormData,
-  step: 'member' as SignupStep,
+export const useSignupStore = create<SignupState>()(
+  persist(
+    (set) => ({
+      formData: initialFormData,
+      step: 'member' as SignupStep,
 
-  setSignupToken: (signupToken) =>
-    set((state) => ({
-      formData: { ...state.formData, signupToken },
-    })),
+      setSignupToken: (signupToken) =>
+        set((state) => ({
+          formData: { ...state.formData, signupToken },
+        })),
 
-  setMember: ({ username, name }) =>
-    set((state) => ({
-      formData: { ...state.formData, username, name },
-    })),
+      setMember: ({ username, name }) =>
+        set((state) => ({
+          formData: { ...state.formData, username, name },
+        })),
 
-  setCorp: ({ companyName, bizNumber }) =>
-    set((state) => ({
-      formData: { ...state.formData, companyName, bizNumber },
-    })),
+      setCorp: ({ companyName, bizNumber }) =>
+        set((state) => ({
+          formData: { ...state.formData, companyName, bizNumber },
+        })),
 
-  setStep: (step) => set({ step }),
+      setStep: (step) => set({ step }),
 
-  reset: () => set({ formData: initialFormData, step: 'member' }),
-}))
+      reset: () => set({ formData: initialFormData, step: 'member' }),
+    }),
+    {
+      name: 'plan-signup-storage',
+      storage: createJSONStorage(() => sessionStorage),
+      partialize: (state) => ({ formData: state.formData, step: state.step }),
+    }
+  )
+)
