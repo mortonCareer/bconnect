@@ -12,7 +12,7 @@ export function InsightsSection() {
             return (
               <div
                 key={insight.title}
-                className={`rounded-3xl p-8 sm:p-10 ${isDark ? 'bg-gray-900' : 'bg-primary-50'}`}
+                className={`rounded-3xl p-8 sm:p-10 ${isDark ? 'bg-primary' : 'bg-[#C9E2FF]'}`}
               >
                 <span className="text-4xl">{insight.emoji}</span>
                 <h3
