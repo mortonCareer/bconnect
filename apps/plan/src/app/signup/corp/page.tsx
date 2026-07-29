@@ -17,7 +17,7 @@ import {
   passthroughError,
   useServerError,
 } from '@bconnect/ui'
-import { useCreateMember, useCreateCompany } from '@bconnect/api-client'
+import { refreshAccessToken, useCreateMember, useCreateCompany } from '@bconnect/api-client'
 import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
@@ -95,6 +95,7 @@ export default function SignupCorpPage() {
       await createCompanyMutation.mutateAsync({
         data: { name: data.companyName, brn: data.bizNumber },
       })
+      await refreshAccessToken()
 
       resetSignup()
       router.push('/')
