@@ -2,16 +2,16 @@
  * @figma-scaffold 업체용 랜딩 — Figma Sites(디자인 노드 아님)를 브랜드 UI로 재구축. 원본: https://www.figma.com/site/MNz7F2h1c5CaCHG4OeGB4g
  */
 import type { Metadata } from 'next'
-import { LandingNav } from './_components/LandingNav'
-import { HeroSection } from './_components/HeroSection'
-import { ProblemSection } from './_components/ProblemSection'
-import { FeaturesSection } from './_components/FeaturesSection'
 import { AppScheduleSection } from './_components/AppScheduleSection'
-import { ReviewsSection } from './_components/ReviewsSection'
-import { InsightsSection } from './_components/InsightsSection'
-import { FaqSection } from './_components/FaqSection'
 import { CtaSection } from './_components/CtaSection'
+import { FaqSection } from './_components/FaqSection'
+import { FeaturesSection } from './_components/FeaturesSection'
+import { HeroSection } from './_components/HeroSection'
+import { InsightsSection } from './_components/InsightsSection'
 import { LandingFooter } from './_components/LandingFooter'
+import { LandingNav } from './_components/LandingNav'
+import { ProblemSection } from './_components/ProblemSection'
+import { ReviewsSection } from './_components/ReviewsSection'
 
 export const metadata: Metadata = {
   title: '인테리어 사업자를 위한 공정표 기반 하도급 플랫폼',

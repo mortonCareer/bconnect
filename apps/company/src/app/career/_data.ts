@@ -1,9 +1,9 @@
 export const HERO = {
-  badge: '인테리어 기술자 필수 앱',
+  badge: '• 8월 출시 예정',
   titleLead: '인테리어 기술자를 위한',
   titleMain: '캘린더 기반 하도급 플랫폼, 품앗이',
   subtitle: '일정 관리부터 대금 수취까지, 품앗이가 함께합니다',
-  ctaLabel: '지금 시작하기',
+  ctaLabel: '베타 테스트',
 }
 
 export const PROBLEM = {
@@ -135,5 +135,5 @@ export const CTA = {
   titleLead: '인테리어 기술자를 위한',
   titleMain: '캘린더 기반 하도급 플랫폼, 품앗이',
   subtitle: '가입하고 첫 일감을 받아보세요.',
-  ctaLabel: '지금 시작하기',
+  ctaLabel: '베타 테스트',
 }

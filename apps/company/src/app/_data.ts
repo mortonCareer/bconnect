@@ -1,9 +1,9 @@
 export const HERO = {
-  badge: '인테리어 사업자 필수 툴',
+  badge: '8월 출시 예정',
   titleLead: '인테리어 사업자를 위한',
   titleMain: '공정표 기반 하도급 플랫폼, 품앗이',
   subtitle: '일정 관리부터 대금 수취까지, 품앗이가 함께합니다',
-  ctaLabel: '지금 시작하기',
+  ctaLabel: '출시 알림 신청',
 }
 
 export const PROBLEM = {

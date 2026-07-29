@@ -5,12 +5,10 @@ export function AppPreviewSection() {
   return (
     <section className="bg-gradient-to-br from-primary-500 to-primary-700 py-20 sm:py-28">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-24 px-5 sm:px-6">
-        {PREVIEWS.map((preview, index) => (
+        {PREVIEWS.map((preview) => (
           <div
             key={preview.title}
-            className={`flex flex-col items-center gap-10 lg:gap-16 ${
-              index % 2 === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'
-            }`}
+            className="flex flex-col items-center gap-10 lg:gap-16 lg:flex-row"
           >
             <div className="relative w-64 shrink-0">
               <div className="relative overflow-hidden rounded-3xl border-8 border-gray-900 bg-gray-900 shadow-2xl">
