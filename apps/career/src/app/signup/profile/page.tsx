@@ -10,6 +10,7 @@ import { useSignupStore } from '@/stores/signup-store'
 import {
   Trade,
   TRADE_LABELS,
+  isRegisterMemberSignupSessionError,
   refreshAccessToken,
   useCreateMember,
   useCreateProfile,
@@ -32,6 +33,7 @@ import {
   SelectField,
   Tag,
   TextField,
+  toast,
   useScrollToError,
   useServerError,
 } from '@bconnect/ui'
@@ -55,8 +57,8 @@ function requireRegisterAccessToken(result: RegisterMemberResponse) {
 
 export default function SignupProfilePage() {
   const router = useRouter()
-  const { login } = useAuthStore()
-  const { formData } = useSignupStore()
+  const { login, isAuthenticated } = useAuthStore()
+  const { formData, reset: resetSignup } = useSignupStore()
   // register(POST /members)는 X-Signup-Token 헤더로 인증한다 (Bearer 아님).
   const registerMemberMutation = useCreateMember({
     request: { headers: { 'X-Signup-Token': formData.signupToken } },
@@ -107,22 +109,35 @@ export default function SignupProfilePage() {
     try {
       // register 는 signupToken(X-Signup-Token 헤더)을 소비 — 실패 후 재시도 시
       // 재호출하지 않도록 발급된 accessToken을 보관한다.
-      const accessToken =
-        issuedAccessToken ??
-        requireRegisterAccessToken(
-          await registerMemberMutation.mutateAsync({
-            data: {
-              username: formData.username,
-              name: formData.name,
-            },
-          })
-        )
+      if (!isAuthenticated) {
+        let accessToken: string
+        try {
+          accessToken =
+            issuedAccessToken ??
+            requireRegisterAccessToken(
+              await registerMemberMutation.mutateAsync({
+                data: {
+                  username: formData.username,
+                  name: formData.name,
+                },
+              })
+            )
+        } catch (err) {
+          if (isRegisterMemberSignupSessionError(err)) {
+            toast({ description: err.message, variant: 'error' })
+            resetSignup()
+            router.replace('/signup/auth')
+            return
+          }
+          throw err
+        }
 
-      if (!issuedAccessToken) {
-        setIssuedAccessToken(accessToken)
+        if (!issuedAccessToken) {
+          setIssuedAccessToken(accessToken)
+        }
+
+        login(accessToken)
       }
-
-      login(accessToken)
       await createProfileMutation.mutateAsync({
         data: {
           role: data.role,
