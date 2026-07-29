@@ -14,10 +14,9 @@ BE 가 회원 역할(`Role`)에 `CAREER`, `PLAN` 을 추가하고 `Member.role` 
 
 BE 는 이 역할로 엔드포인트를 막습니다. [SecurityConfig](../../../apps/api/src/main/java/to/bconnect/api/security/SecurityConfig.java) 기준으로 작업 등록·섭외 수락은 `CAREER`, 프로젝트 CRUD·섭외 발신은 `PLAN` 이 필요합니다.
 
-FE 는 아직 역할을 보지 않습니다. 그래서 두 가지 문제가 있습니다.
+FE 는 아직 역할을 보지 않습니다. 그래서 프로필 없이 career 에, 업체 없이 plan 에 그대로 들어가집니다. 화면은 열리는데 주요 동작만 403 이라, 사용자 입장에서는 무엇이 잘못됐는지 알 수 없습니다.
 
-1. 프로필 없이 career 에, 업체 없이 plan 에 그대로 들어가집니다. 화면은 열리는데 주요 동작이 전부 403 입니다.
-2. 가입을 마친 직후에도 같은 상태가 됩니다. 역할은 DB 에만 부여되고 이미 발급된 토큰은 바뀌지 않기 때문입니다. 이 상태는 브라우저를 새로고침하면 풀리지만, 새로고침 전까지는 방금 만든 프로필 · 업체가 없는 것처럼 동작합니다.
+같은 조사에서 나온 토큰 갱신 문제는 [#1100](https://github.com/mortonCareer/bconnect/issues/1100) 으로 분리했습니다. 서로 의존하지 않습니다 — 이 문서의 게이트는 `/members/me` 응답을 보고 판정하므로 토큰에 담긴 역할과 무관하고, 반대로 #1100 도 게이트 없이 단독으로 유효합니다.
 
 ---
 
@@ -50,15 +49,12 @@ FE 는 아직 역할을 보지 않습니다. 그래서 두 가지 문제가 있�
 
 ### 고치는 것
 
-| 파일                                                                                                | 변경                                                                       |
-| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [apps/career/src/proxy.ts](../../../apps/career/src/proxy.ts)                                       | 경로 상수를 `lib/routes.ts` 로 옮기고 `isPublicPath()` 를 씁니다           |
-| [apps/plan/src/proxy.ts](../../../apps/plan/src/proxy.ts)                                           | 위와 동일                                                                  |
-| [apps/career/src/app/(main)/layout.tsx](<../../../apps/career/src/app/(main)/layout.tsx>)           | `{children}` 만 게이트로 감쌉니다. 하단 네비는 바깥에 그대로 둡니다        |
-| [apps/plan/src/app/(main)/layout.tsx](<../../../apps/plan/src/app/(main)/layout.tsx>)               | 위와 동일. 사이드바는 바깥에 그대로 둡니다                                 |
-| [apps/career/src/app/signup/profile/page.tsx](../../../apps/career/src/app/signup/profile/page.tsx) | 프로필 생성 성공 후 `refreshAccessToken()` 을 부릅니다                     |
-| [apps/plan/src/app/signup/corp/page.tsx](../../../apps/plan/src/app/signup/corp/page.tsx)           | 업체 생성 성공 후 동일                                                     |
-| [packages/api-client/orval.config.ts](../../../packages/api-client/orval.config.ts)                 | `createProfile`·`createCompany` 성공 시 `getMyMember` 캐시를 비우도록 선언 |
+| 파일                                                                                      | 변경                                                                |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| [apps/career/src/proxy.ts](../../../apps/career/src/proxy.ts)                             | 경로 상수를 `lib/routes.ts` 로 옮기고 `isPublicPath()` 를 씁니다    |
+| [apps/plan/src/proxy.ts](../../../apps/plan/src/proxy.ts)                                 | 위와 동일                                                           |
+| [apps/career/src/app/(main)/layout.tsx](<../../../apps/career/src/app/(main)/layout.tsx>) | `{children}` 만 게이트로 감쌉니다. 하단 네비는 바깥에 그대로 둡니다 |
+| [apps/plan/src/app/(main)/layout.tsx](<../../../apps/plan/src/app/(main)/layout.tsx>)     | 위와 동일. 사이드바는 바깥에 그대로 둡니다                          |
 
 ### 선행 작업
 
@@ -116,13 +112,12 @@ plan 래퍼는 `useSearchParams()` 를 쓰므로 반드시 `<Suspense>` 안에 �
 
 FE 에 테스트 러너가 없으므로 실제 브라우저로 확인합니다.
 
-1. 신규 가입 후 프로필 미생성 상태에서 `/profile` 로 직접 들어가면 `/signup/profile` 로 이동합니다
-2. 프로필 생성 직후 **새로고침하지 않고** 작업 등록이 403 없이 됩니다 (토큰 갱신 확인). plan 은 업체 등록 직후 사이드바에 '회사 미등록' 대신 회사명이 뜹니다
-3. 프로필 생성 직후 재로그인 없이 `/profile` 에 들어갑니다 (캐시 갱신 확인)
-4. plan 에서 업체 미등록 상태로 보호 경로에 들어가면 `/signup/corp` 로 이동합니다
-5. career 홈과 타인 프로필은 비로그인·프로필 미생성 모두 통과합니다
-6. 로그인 상태에서 보호 페이지를 새로고침하면 본문만 잠깐 스켈레톤이고 하단 네비는 유지됩니다
-7. `pnpm build:plan` 이 통과합니다 (`useSearchParams` 사전 렌더)
+1. 프로필 미생성 상태에서 `/profile` 로 직접 들어가면 `/signup/profile` 로 이동합니다
+2. 프로필 생성 직후 재로그인 없이 `/profile` 에 들어갑니다 (캐시 갱신 확인)
+3. plan 에서 업체 미등록 상태로 보호 경로에 들어가면 `/signup/corp` 로 이동합니다
+4. career 홈과 타인 프로필은 비로그인·프로필 미생성 모두 통과합니다
+5. 로그인 상태에서 보호 페이지를 새로고침하면 본문만 잠깐 스켈레톤이고 하단 네비는 유지됩니다
+6. `pnpm build:plan` 이 통과합니다 (`useSearchParams` 사전 렌더)
 
 ---
 
@@ -137,6 +132,6 @@ FE 에 테스트 러너가 없으므로 실제 브라우저로 확인합니다.
 
 ## 발견 사항 (별도 이슈)
 
-작업 중 인증 상태를 판정하는 소스가 둘로 갈라져 있는 것을 확인했습니다. 표시 쿠키는 토큰 갱신 실패 시 스스로 지워지지만 `auth-store` 의 값은 앱이 직접 꺼야 하는데, 갱신 실패를 처리하는 코드가 공용 패키지에 있어 앱 저장소를 건드릴 수 없습니다. plan 은 로그아웃 기능 자체가 없어 한 번 켜진 값이 꺼지지 않습니다.
+**[#1100](https://github.com/mortonCareer/bconnect/issues/1100) — 생성 후 토큰 갱신 누락**: 프로필 · 업체를 만들어도 이미 발급된 토큰에는 역할이 반영되지 않습니다. 새로고침하면 풀리지만 그 전까지는 방금 만든 것이 없는 것처럼 동작합니다. 이 문서의 게이트와 판정 재료가 달라(`/members/me` 응답 대 토큰 클레임) 서로 의존하지 않으므로 분리했습니다.
 
-축이 다른 문제라 이 작업에 포함하지 않고 [#1098](https://github.com/mortonCareer/bconnect/issues/1098) 로 분리했습니다.
+**[#1098](https://github.com/mortonCareer/bconnect/issues/1098) — 인증 상태 소스 이원화**: 로그인 여부를 판정하는 소스가 표시 쿠키와 `auth-store` 둘로 갈라져 있습니다. 쿠키는 토큰 갱신 실패 시 스스로 지워지지만 `auth-store` 의 값은 앱이 직접 꺼야 하는데, 갱신 실패를 처리하는 코드가 공용 패키지에 있어 앱 저장소를 건드릴 수 없습니다. plan 은 로그아웃 기능 자체가 없어 한 번 켜진 값이 꺼지지 않습니다. 인가가 아니라 인증 축이라 분리했습니다.
