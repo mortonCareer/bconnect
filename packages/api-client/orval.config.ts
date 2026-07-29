@@ -82,6 +82,8 @@ export default defineConfig({
             },
             // 내 회원정보 변경 → 내 회원정보
             { onMutations: ['updateMyMember'], invalidates: ['getMyMember'] },
+            // 프로필·업체 생성 → 내 회원정보. BE 가 생성 시 역할(CAREER/PLAN)을 부여하므로 roles 가 바뀐다 (#1100).
+            { onMutations: ['createProfile', 'createCompany'], invalidates: ['getMyMember'] },
             // 알림 읽음 처리(단건/전체) → 알림 목록 + 안읽음 개수
             {
               onMutations: ['updateNotificationRead', 'updateNotificationsRead'],

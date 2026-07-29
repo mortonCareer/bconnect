@@ -7,7 +7,13 @@ import { AddressField } from '@/components/AddressField'
 import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
-import { Trade, TRADE_LABELS, useCreateMember, useCreateProfile } from '@bconnect/api-client'
+import {
+  Trade,
+  TRADE_LABELS,
+  refreshAccessToken,
+  useCreateMember,
+  useCreateProfile,
+} from '@bconnect/api-client'
 import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { isCompleteAddress } from '@bconnect/config/address'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
@@ -127,6 +133,7 @@ export default function SignupProfilePage() {
           address: data.address,
         },
       })
+      await refreshAccessToken()
 
       router.push('/signup/complete')
     } catch (err) {
