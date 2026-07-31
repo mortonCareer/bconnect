@@ -2,7 +2,7 @@ package to.bconnect.api.notification.domain.push;
 
 public interface PushEndpointRegistry {
 
-    String ensureEndpoint(String token);
+    String ensure(String token);
 
-    void deleteEndpoint(String endpointArn);
+    void delete(String endpoint);
 }

@@ -37,8 +37,7 @@ public class MessageSocketService {
         inactiveIds.removeAll(activeIds);
 
         messageService.markRead(chatId, chatType, activeIds, message.id());
-        eventPublisher.publishEvent(new SocketMessageSentEvent(
-                chatId, user.id(), activeIds, inactiveIds, command.content()));
+        eventPublisher.publishEvent(new SocketMessageSentEvent(activeIds, inactiveIds, message));
         return message;
     }
 

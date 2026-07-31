@@ -33,7 +33,7 @@ public class DeviceTokenEntity {
     private DevicePlatform platform;
 
     @Column(nullable = false)
-    private String snsEndpointArn;
+    private String endpoint;
 
     @Column(nullable = false)
     private boolean enabled = true;
@@ -46,17 +46,17 @@ public class DeviceTokenEntity {
     @Column(nullable = false)
     private Instant modifiedAt = Instant.now();
 
-    public DeviceTokenEntity(Long memberId, String token, DevicePlatform platform, String snsEndpointArn) {
+    public DeviceTokenEntity(Long memberId, String token, DevicePlatform platform, String endpoint) {
         this.memberId = memberId;
         this.token = token;
         this.platform = platform;
-        this.snsEndpointArn = snsEndpointArn;
+        this.endpoint = endpoint;
         this.enabled = true;
     }
 
-    public void refresh(Long memberId, String snsEndpointArn) {
+    public void refresh(Long memberId, String endpoint) {
         this.memberId = memberId;
-        this.snsEndpointArn = snsEndpointArn;
+        this.endpoint = endpoint;
         this.enabled = true;
     }
 
