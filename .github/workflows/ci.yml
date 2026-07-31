@@ -114,11 +114,11 @@ jobs:
       - name: Type check
         run: pnpm --filter @bconnect/career typecheck
 
-      - name: Build
-        run: pnpm --filter @bconnect/career build
-
       - name: Lint
         run: pnpm --filter @bconnect/career lint
+
+      - name: Build
+        run: pnpm --filter @bconnect/career build
 
   ci-plan:
     needs: changes
@@ -141,11 +141,11 @@ jobs:
       - name: Type check
         run: pnpm --filter @bconnect/plan typecheck
 
-      - name: Build
-        run: pnpm --filter @bconnect/plan build
-
       - name: Lint
         run: pnpm --filter @bconnect/plan lint
+
+      - name: Build
+        run: pnpm --filter @bconnect/plan build
 
   ci-api:
     needs: changes
