@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
@@ -26,8 +26,6 @@ import to.bconnect.api.storage.recommendation.RecommendationRepository;
 import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -59,10 +57,10 @@ public class MemberCleaner {
 
         sessionRepository.findByMemberId(memberId).ifPresent(sessionRepository::delete);
         profileRepository.findByMemberId(memberId).ifPresent(profileRepository::delete);
-        attachmentLinker.unlink(ReferenceType.MEMBER, memberId);
+        attachmentLinker.unlink(AttachmentReferenceType.MEMBER, memberId);
 
         val credentials = credentialRepository.findAllByMemberId(memberId);
-        attachmentLinker.unlink(ReferenceType.CREDENTIAL, credentials.stream().map(CredentialEntity::getId).toList());
+        attachmentLinker.unlink(AttachmentReferenceType.CREDENTIAL, credentials.stream().map(CredentialEntity::getId).toList());
         credentialRepository.deleteAll(credentials);
 
         coworkerRepository.deleteAll(coworkerRepository.findAllByMemberId(memberId));
@@ -72,7 +70,7 @@ public class MemberCleaner {
         recommendationRepository.deleteAll(recommendationRepository.findAllByToId(memberId));
 
         val posts = postRepository.findAllByMemberId(memberId);
-        attachmentLinker.unlink(ReferenceType.POST, posts.stream().map(PostEntity::getId).toList());
+        attachmentLinker.unlink(AttachmentReferenceType.POST, posts.stream().map(PostEntity::getId).toList());
         postRepository.deleteAll(posts);
 
         offerRepository.deleteAll(offerRepository.findAllByWorkerId(memberId));
@@ -85,7 +83,7 @@ public class MemberCleaner {
             noteRepository.deleteAllByBoardId(board.getId());
             boardRepository.delete(board);
         }));
-        attachmentLinker.unlink(ReferenceType.DRIVE, drives.stream().map(DriveEntity::getId).toList());
+        attachmentLinker.unlink(AttachmentReferenceType.DRIVE, drives.stream().map(DriveEntity::getId).toList());
         drives.forEach(it -> driveMemberRepository.deleteByDriveId(it.getId()));
         driveRepository.deleteAll(drives);
     }

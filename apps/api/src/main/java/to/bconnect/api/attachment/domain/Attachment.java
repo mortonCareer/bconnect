@@ -11,7 +11,7 @@ public record Attachment(
     AttachmentStatus status,
     AttachmentContext context,
     Long contextId,
-    ReferenceType referenceType,
+    AttachmentReferenceType referenceType,
     Long referenceId,
     String uuid,
     String stem,

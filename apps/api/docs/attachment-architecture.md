@@ -164,7 +164,7 @@ Enum 구성
 | Enum | 레이어    | 값 (path/ext)                                                                 | 의미                   |
 |---|--------|------------------------------------------------------------------------------|----------------------|
 | AttachmentContext | Storage | `CHAT`(chats), `COMPANY`(companies), `CREDENTIAL`(credentials), `DRIVE`(drives), `MEMBER`(members), `POST`(posts) | 권한 scope 종류 + path   |
-| ReferenceType | Storage | `POST`, `MESSAGE`, `COMPANY`, `MEMBER`, `CREDENTIAL`, `DRIVE`                  | 엔티티 소유(참조)           |
+| AttachmentReferenceType | Storage | `POST`, `MESSAGE`, `COMPANY`, `MEMBER`, `CREDENTIAL`, `DRIVE`                  | 엔티티 소유(참조)           |
 | AttachmentType | Storage | `IMAGE`(images), `FILE`(files)                                               | 파일 종류 + path         |
 | AttachmentStatus | Storage | `PENDING`, `COMPLETED`                                                       | 파일 업로드 상태            |
 | ImageSize | Attachment | `ORIGINAL`(o), `MEDIUM`(m/webp), `SMALL`(s/webp)                             | 이미지 사이즈 + path + ext |

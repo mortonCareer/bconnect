@@ -26,7 +26,7 @@ import to.bconnect.api.core.presentation.v1.response.RegisterMemberResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.security.session.SessionTokenIssuer;
 import to.bconnect.api.storage.attachment.AttachmentContext;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 
 @RestController
 @RequestMapping("/api/v1/members")
@@ -43,7 +43,7 @@ public class MemberController {
             @AuthenticationPrincipal AuthUser user,
             HttpServletResponse response) {
         val member = memberService.get(user);
-        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(AttachmentReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
@@ -59,7 +59,7 @@ public class MemberController {
         val page = memberService.list(cursorLimit);
         val members = page.content();
         val urlMap = attachmentUrlService.map(
-                ReferenceType.MEMBER, members.stream().map(Member::id).toList(), ImageSize.SMALL);
+                AttachmentReferenceType.MEMBER, members.stream().map(Member::id).toList(), ImageSize.SMALL);
 
         val content = members.stream()
                 .map(it -> MemberResponse.of(it, urlMap.get(it.id())))

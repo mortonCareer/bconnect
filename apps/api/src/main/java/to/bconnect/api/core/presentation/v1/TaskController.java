@@ -26,7 +26,7 @@ import to.bconnect.api.core.presentation.v1.response.OfferResponse;
 import to.bconnect.api.core.presentation.v1.response.TaskResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 
 import java.util.List;
 import java.util.function.Function;
@@ -81,7 +81,7 @@ public class TaskController {
         val workerIds = offers.stream().map(Offer::workerId).distinct().toList();
         val memberMap = memberResolver.resolveMap(workerIds);
         val profileMap = profileResolver.resolveMap(workerIds);
-        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, workerIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(AttachmentReferenceType.MEMBER, workerIds, ImageSize.SMALL);
 
         val body = offers.stream()
                 .map(it -> {

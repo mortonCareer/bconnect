@@ -5,7 +5,10 @@ import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.post.PostEntity;
@@ -14,12 +17,6 @@ import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
-import to.bconnect.api.security.AuthUser;
-
-import to.bconnect.api.common.CodeException;
-import to.bconnect.api.common.CommonExceptionCode;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -157,7 +154,7 @@ public class TaskService {
         val posts = postRepository.findAllByTaskId(task.getId());
         val postIds = posts.stream().map(PostEntity::getId).toList();
         if (!postIds.isEmpty())
-            attachmentLinker.unlink(ReferenceType.POST, postIds);
+            attachmentLinker.unlink(AttachmentReferenceType.POST, postIds);
         postRepository.deleteAll(posts);
 
         taskRepository.delete(task);

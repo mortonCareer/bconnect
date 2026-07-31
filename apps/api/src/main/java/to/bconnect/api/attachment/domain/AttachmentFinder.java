@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentType;
-import to.bconnect.api.storage.attachment.ReferenceType;
 
 import java.util.Collection;
 import java.util.List;
@@ -27,7 +27,7 @@ public class AttachmentFinder {
     private final AttachmentRepository attachmentRepository;
 
     @Transactional(readOnly = true)
-    public Attachment get(ReferenceType referenceType, Long referenceId, Long attachmentId) {
+    public Attachment get(AttachmentReferenceType referenceType, Long referenceId, Long attachmentId) {
         val attachment = attachmentRepository.findById(attachmentId).
                 orElseThrow(() -> new CodeException(AttachmentExceptionCode.NOT_FOUND));
         if (attachment.getReferenceType() != referenceType || !referenceId.equals(attachment.getReferenceId()))
@@ -54,7 +54,7 @@ public class AttachmentFinder {
     }
 
     @Transactional(readOnly = true)
-    public List<Attachment> list(ReferenceType referenceType, Long referenceId) {
+    public List<Attachment> list(AttachmentReferenceType referenceType, Long referenceId) {
         if (referenceId == null)
             return List.of();
 
@@ -64,7 +64,7 @@ public class AttachmentFinder {
     }
 
     @Transactional(readOnly = true)
-    public List<Attachment> list(ReferenceType referenceType, Long referenceId, AttachmentType type) {
+    public List<Attachment> list(AttachmentReferenceType referenceType, Long referenceId, AttachmentType type) {
         if (referenceId == null)
             return List.of();
 
@@ -74,7 +74,7 @@ public class AttachmentFinder {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, Attachment> map(ReferenceType referenceType, Collection<Long> referenceIds, AttachmentType type) {
+    public Map<Long, Attachment> map(AttachmentReferenceType referenceType, Collection<Long> referenceIds, AttachmentType type) {
         if (referenceIds == null)
             return Map.of();
 
@@ -88,7 +88,7 @@ public class AttachmentFinder {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, List<Attachment>> listMap(ReferenceType referenceType, Collection<Long> referenceIds) {
+    public Map<Long, List<Attachment>> listMap(AttachmentReferenceType referenceType, Collection<Long> referenceIds) {
         if (referenceIds == null)
             return Map.of();
 
@@ -102,7 +102,7 @@ public class AttachmentFinder {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, List<Attachment>> listMap(ReferenceType referenceType, Collection<Long> referenceIds, AttachmentType type) {
+    public Map<Long, List<Attachment>> listMap(AttachmentReferenceType referenceType, Collection<Long> referenceIds, AttachmentType type) {
         if (referenceIds == null)
             return Map.of();
 

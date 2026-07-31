@@ -10,7 +10,7 @@ import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.chat.*;
 
 import java.util.Collection;
@@ -33,7 +33,7 @@ public class MessageService {
                 chatId, type, senderId, command.type(), command.content()));
 
         attachmentFinder.validateOwnership(senderId, command.attachmentIds());
-        attachmentLinker.link(ReferenceType.MESSAGE, created.getId(), command.attachmentIds());
+        attachmentLinker.link(AttachmentReferenceType.MESSAGE, created.getId(), command.attachmentIds());
         return Message.of(created);
     }
 
