@@ -45,7 +45,8 @@ public class CredentialService {
                 .filter(it -> it.getStatus() == CredentialStatus.ACCEPTED)
                 .collect(Collectors.groupingBy(
                         CredentialEntity::getType,
-                        Collectors.maxBy(Comparator.comparing(CredentialEntity::getCreatedAt))
+                        Collectors.maxBy(Comparator.comparing(CredentialEntity::getCreatedAt)
+                                .thenComparing(CredentialEntity::getId))
                 ))
                 .values().stream()
                 .flatMap(Optional::stream)
@@ -55,6 +56,9 @@ public class CredentialService {
 
     @Transactional
     public Long create(AuthUser user, CreateCredential command) {
+        if (command.attachmentId() != null)
+            attachmentFinder.validateOwnership(user.id(), command.attachmentId());
+
         val created = new CredentialEntity(
                 user.id(),
                 command.type(),
@@ -63,8 +67,9 @@ public class CredentialService {
         );
 
         credentialRepository.save(created);
-        attachmentFinder.validateOwnership(user.id(), command.attachmentId());
-        attachmentLinker.link(AttachmentReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
+        if (command.attachmentId() != null)
+            attachmentLinker.link(AttachmentReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
+
         return created.getId();
     }
 
@@ -87,6 +92,9 @@ public class CredentialService {
         val found = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
+        if (found.getStatus() != CredentialStatus.PENDING)
+            throw new CodeException(CredentialExceptionCode.INVALID_STATUS);
+
         found.accept();
     }
 
@@ -94,6 +102,9 @@ public class CredentialService {
     public void deny(Long id) {
         val found = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        if (found.getStatus() != CredentialStatus.PENDING)
+            throw new CodeException(CredentialExceptionCode.INVALID_STATUS);
 
         found.deny();
     }

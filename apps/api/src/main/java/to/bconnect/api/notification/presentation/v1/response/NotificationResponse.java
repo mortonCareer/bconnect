@@ -16,7 +16,7 @@ public record NotificationResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long memberId,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String type,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) NotificationSenderType senderType,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) NotificationSenderType senderType,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) WithdrawableMemberResponse senderMember,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) WithdrawableCompanyResponse senderCompany,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String message,

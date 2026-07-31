@@ -19,6 +19,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { AddressField } from '@/components/AddressField'
+import { isCompleteAddress } from '@bconnect/config/address'
 import { createTaskSchema, type CreateTaskValues } from './schema'
 
 export function TaskCreateForm() {
@@ -47,6 +48,7 @@ export function TaskCreateForm() {
   const { mutate, isPending } = useCreateTaskWorker()
 
   const onSubmit = (data: CreateTaskValues) => {
+    if (!isCompleteAddress(data.address)) return
     mutate(
       {
         data: {

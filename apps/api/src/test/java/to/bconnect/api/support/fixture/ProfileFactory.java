@@ -1,12 +1,12 @@
 package to.bconnect.api.support.fixture;
 
-import to.bconnect.api.core.presentation.v1.request.CreateProfileRequest;
-import to.bconnect.api.core.presentation.v1.request.UpdateProfileRequest;
+import to.bconnect.api.core.domain.profile.CreateProfile;
 import to.bconnect.api.core.domain.profile.Profile;
-import to.bconnect.api.storage.profile.ProfileEntity;
-import to.bconnect.api.storage.profile.ProfileRole;
+import to.bconnect.api.core.domain.profile.UpdateProfile;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.Region;
+import to.bconnect.api.storage.profile.ProfileEntity;
+import to.bconnect.api.storage.profile.ProfileRole;
 import to.bconnect.api.storage.profile.Trade;
 
 import java.math.BigDecimal;
@@ -21,13 +21,13 @@ public class ProfileFactory {
             BigDecimal.ZERO, BigDecimal.ZERO
     );
 
-    public static Profile create(Long id, Long memberId) {
+    public static Profile domain(Long id, Long memberId) {
         return new Profile(id, memberId, ProfileRole.FOREMAN, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL),
                 5, "headline", "about", DEFAULT_ADDRESS,
                 MIN_DATE_TIME, MIN_DATE_TIME, 0L, 0L, 0L);
     }
 
-    public static ProfileEntity createEntity(Long memberId) {
+    public static ProfileEntity entity(Long memberId) {
         return new ProfileEntity(
                 memberId,
                 ProfileRole.FOREMAN,
@@ -40,14 +40,14 @@ public class ProfileFactory {
         );
     }
 
-    public static CreateProfileRequest createRequest() {
-        return new CreateProfileRequest(
+    public static CreateProfile createCommand() {
+        return new CreateProfile(
                 ProfileRole.FOREMAN, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL), 5,
                 "headline", "about", DEFAULT_ADDRESS);
     }
 
-    public static UpdateProfileRequest updateRequest() {
-        return new UpdateProfileRequest(
+    public static UpdateProfile updateCommand() {
+        return new UpdateProfile(
                 ProfileRole.FOREMAN, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL, Trade.PLUMBING), 10,
                 "Updated Headline", DEFAULT_ADDRESS);
     }

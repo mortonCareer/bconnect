@@ -4,13 +4,14 @@ import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.Role;
 
 import java.time.Instant;
+import java.util.Set;
 
 public record Member(
     Long id,
     String username,
     String name,
     String phone,
-    Role role,
+    Set<Role> roles,
     Instant createdAt,
     Instant modifiedAt
 ) {
@@ -26,7 +27,7 @@ public record Member(
                 entity.getUsername(),
                 entity.getName(),
                 entity.getPhone(),
-                entity.getRole(),
+                entity.getRoles(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt()
         );

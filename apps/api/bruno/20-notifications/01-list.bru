@@ -25,6 +25,8 @@ tests {
 
 docs {
   로그인 멤버의 알림을 커서 페이지로 조회한다. 첫 항목 id 를 notificationId 변수에 저장(읽음 체인용).
-  각 항목: id, type, message(렌더된 문구), content, referenceType, referenceId, sender, read, createdAt
+  각 항목: id, memberId, type, senderType, senderMember, senderCompany, message, referenceType, referenceId, read, createdAt
+  senderType 은 MEMBER · COMPANY · null(시스템 알림)이고, 그에 따라 senderMember 또는 senderCompany 중 하나만 채워진다.
+  message 는 NotificationType 템플릿에 발신자명을 렌더한 문구다.
   커서/limit 은 query 파라미터(옵션).
 }

@@ -8,9 +8,4 @@ public record SocketMessageSentEvent(
         Set<Long> activeIds,
         Set<Long> inactiveIds,
         Message message
-) {
-    public SocketMessageSentEvent {
-        activeIds = Set.copyOf(activeIds);
-        inactiveIds = Set.copyOf(inactiveIds);
-    }
-}
+) {}

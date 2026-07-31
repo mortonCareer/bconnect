@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import to.bconnect.api.attachment.domain.Attachment;
 import to.bconnect.api.attachment.presentation.v1.AttachmentResponse;
 import to.bconnect.api.core.domain.chat.Message;
+import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.chat.MessageType;
 
 import java.time.Instant;
@@ -13,6 +14,7 @@ import java.util.Map;
 public record MessageResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long id,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long chatId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ChatType chatType,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long memberId,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) MessageType type,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String content,
@@ -28,6 +30,7 @@ public record MessageResponse(
         return new MessageResponse(
                 message.id(),
                 message.chatId(),
+                message.chatType(),
                 message.memberId(),
                 message.type(),
                 message.content(),

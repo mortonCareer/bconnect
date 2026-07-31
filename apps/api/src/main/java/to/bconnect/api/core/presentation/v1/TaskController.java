@@ -50,7 +50,7 @@ public class TaskController {
 
     @GetMapping
     public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal AuthUser user) {
-        val workerTasks = taskQueryService.list(user);
+        val workerTasks = taskQueryService.listByWorker(user);
         val projectTasks = taskQueryService.listAssigned(user);
         
         val offers = offerService.listByWorker(user);
@@ -60,11 +60,14 @@ public class TaskController {
         val projectIds = Stream.concat(projectTasks.stream(), offerTasks.stream())
                 .map(Task::projectId).distinct().toList();
         val addressMap = projectFinder.addressMap(projectIds);
+        val companyMap = projectFinder.companyMap(projectIds);
 
         val worker = workerTasks.stream().map(it -> TaskResponse.of(it, it.workerAddress())).toList();
-        val assigned = projectTasks.stream().map(it -> TaskResponse.of(it, addressMap.get(it.projectId()))).toList();
+        val assigned = projectTasks.stream()
+                .map(it -> TaskResponse.of(it, addressMap.get(it.projectId()), companyMap.get(it.projectId()))).toList();
         val offered = offerTasks.stream()
-                .map(it -> TaskResponse.of(it, addressMap.get(it.projectId()), offerByTaskId.get(it.id()))).toList();
+                .map(it -> TaskResponse.of(it, addressMap.get(it.projectId()), companyMap.get(it.projectId()),
+                        offerByTaskId.get(it.id()))).toList();
 
         val body = Stream.of(worker, assigned, offered)
                 .flatMap(List::stream)

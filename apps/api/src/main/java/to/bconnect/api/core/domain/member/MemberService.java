@@ -65,7 +65,7 @@ public class MemberService {
                 command.username(),
                 command.name(),
                 phone,
-                command.role()
+                command.roles()
         );
 
         memberRepository.save(created);
@@ -83,15 +83,19 @@ public class MemberService {
 
     @Transactional
     public void updatePicture(AuthUser user, Long pictureId) {
+        if (pictureId == null) {
+            attachmentLinker.unlink(AttachmentReferenceType.MEMBER, user.id());
+            return;
+        }
+
         attachmentFinder.validateOwnership(user.id(), pictureId);
+        attachmentLinker.unlink(AttachmentReferenceType.MEMBER, user.id());
         attachmentLinker.link(AttachmentReferenceType.MEMBER, user.id(), pictureId);
     }
 
     @Transactional
     public void withdraw(AuthUser user) {
         memberCleaner.clean(user);
-        attachmentLinker.unlink(AttachmentReferenceType.MEMBER, user.id());
-        memberRepository.findById(user.id())
-                .ifPresent(memberRepository::delete);
+        memberRepository.deleteById(user.id());
     }
 }

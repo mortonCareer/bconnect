@@ -16,7 +16,7 @@ import to.bconnect.api.security.AuthUserService;
 import java.util.List;
 
 import static to.bconnect.api.security.AuthUser.ROLE_PREFIX;
-import static to.bconnect.api.storage.member.Role.GUEST;
+import static to.bconnect.api.storage.member.Role.SIGNUP;
 
 @RequiredArgsConstructor
 public class OtpAuthenticationProvider implements AuthenticationProvider {
@@ -43,7 +43,7 @@ public class OtpAuthenticationProvider implements AuthenticationProvider {
             val user = authUserService.loadUserByPhone(phone);
             return new OtpAuthenticationToken(user, null, user.getAuthorities());
         } catch (UsernameNotFoundException ex) {
-            return new OtpAuthenticationToken(phone, null, List.of(new SimpleGrantedAuthority(ROLE_PREFIX + GUEST)));
+            return new OtpAuthenticationToken(phone, null, List.of(new SimpleGrantedAuthority(ROLE_PREFIX + SIGNUP)));
         }
     }
 

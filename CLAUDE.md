@@ -14,7 +14,7 @@ BConnect is a job matching platform (업체-기술자 연결 구인구직 플랫
 
 ### Key Patterns
 
-- **Domain vocabulary**: 도메인 용어·Enum 값의 SSOT는 [apps/api/docs/ubiquitous-language.md](apps/api/docs/ubiquitous-language.md). Project·ProjectTask·WorkerTask·Offer 등 혼동하기 쉬운 이름은 FE 네이밍·카피 작성 전 여기서 확인 (BE `apps/api/docs/` 전체 인덱스는 [apps/api/.claude/CLAUDE.md](apps/api/.claude/CLAUDE.md))
+- **Domain vocabulary**: 도메인 용어·Enum 값의 SSOT는 [docs/reference/ubiquitous-language.md](docs/reference/ubiquitous-language.md). Project·ProjectTask·WorkerTask·Offer 등 혼동하기 쉬운 이름은 FE 네이밍·카피 작성 전 여기서 확인 (BE `apps/api/docs/` 전체 인덱스는 [apps/api/.claude/CLAUDE.md](apps/api/.claude/CLAUDE.md))
 - **API contract envelope**: 모든 API 응답 `{ success, data/error }` 형식 (BE 측 enforce, FE 측 customFetch 자동 unwrap)
 - **Generated API client**: `packages/api-client/src/generated/`는 orval 자동 생성, 직접 수정 금지. spec은 BE springdoc 산출(`src/openapi.yaml`, ci-api-spec이 재생성) → `pnpm api:generate`로 클라이언트 재생성 ([ADR-0024](docs/explanation/adr/0024-orval-consumes-be-springdoc-spec.md))
 - **Authentication**: Phone OTP → tokens (access in memory, refresh in httpOnly cookie)

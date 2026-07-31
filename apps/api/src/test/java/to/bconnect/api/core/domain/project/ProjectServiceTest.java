@@ -1,74 +1,291 @@
 package to.bconnect.api.core.domain.project;
 
+import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import to.bconnect.api.common.CodeException;
+import org.springframework.beans.factory.annotation.Autowired;
+import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.company.CompanyExceptionCode;
-import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.board.BoardRepository;
+import to.bconnect.api.storage.board.BoardType;
 import to.bconnect.api.storage.board.NoteRepository;
-import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
-import to.bconnect.api.storage.project.ProjectEntity;
+import to.bconnect.api.storage.member.MemberRepository;
+import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskRepository;
-
-import java.util.Optional;
+import to.bconnect.api.support.IntegrationTest;
+import to.bconnect.api.support.fixture.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 
-@ExtendWith(MockitoExtension.class)
+@IntegrationTest
 class ProjectServiceTest {
 
-    private static final AuthUser USER = new AuthUser(1L, "1", "USER");
+    private static final Long MISSING_ID = 999_999L;
 
-    @Mock private ProjectRepository projectRepository;
-    @Mock private CompanyRepository companyRepository;
-    @Mock private TaskRepository taskRepository;
-    @Mock private BoardRepository boardRepository;
-    @Mock private NoteRepository noteRepository;
-
-    @InjectMocks private ProjectService service;
+    @Autowired private ProjectService projectService;
+    @Autowired private ProjectRepository projectRepository;
+    @Autowired private CompanyRepository companyRepository;
+    @Autowired private MemberRepository memberRepository;
+    @Autowired private TaskRepository taskRepository;
+    @Autowired private BoardRepository boardRepository;
+    @Autowired private NoteRepository noteRepository;
 
     @Test
-    @DisplayName("업체 프로젝트 수가 한도에 도달하면 생성은 PROJECT_LIMIT_EXCEEDED")
-    void create_atLimit_throwsLimitExceeded() {
-        var company = mock(CompanyEntity.class);
-        when(company.getId()).thenReturn(10L);
-        when(companyRepository.findByMemberId(USER.id())).thenReturn(Optional.of(company));
-        when(projectRepository.countByCompanyId(10L)).thenReturn(1L);
+    @DisplayName("get - 소유한 업체의 프로젝트일 때 조회하면 프로젝트를 반환한다")
+    void get_success() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
 
-        assertThatThrownBy(() -> service.create(USER, createProject()))
-                .isInstanceOf(CodeException.class)
-                .extracting("exceptionCode")
-                .isEqualTo(CompanyExceptionCode.PROJECT_LIMIT_EXCEEDED);
+        // when
+        val found = projectService.get(user, project.getId());
+
+        // then
+        assertThat(found.id()).isEqualTo(project.getId());
+        assertThat(found.companyId()).isEqualTo(company.getId());
     }
 
     @Test
-    @DisplayName("한도 미만이면 프로젝트를 저장하고 id 를 반환한다")
-    void create_underLimit_savesProject() {
-        var company = mock(CompanyEntity.class);
-        when(company.getId()).thenReturn(10L);
-        when(companyRepository.findByMemberId(USER.id())).thenReturn(Optional.of(company));
-        when(projectRepository.countByCompanyId(10L)).thenReturn(0L);
-        var created = mock(ProjectEntity.class);
-        when(created.getId()).thenReturn(100L);
-        when(projectRepository.save(any())).thenReturn(created);
+    @DisplayName("list - 소유한 업체가 있을 때 목록을 조회하면 업체의 프로젝트 목록을 반환한다")
+    void list_success() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
 
-        var id = service.create(USER, createProject());
+        // when
+        val response = projectService.list(user);
 
-        assertThat(id).isEqualTo(100L);
+        // then
+        assertThat(response).extracting(Project::id).containsExactly(project.getId());
     }
 
-    private static CreateProject createProject() {
-        return new CreateProject("제목", null);
+    @Test
+    @DisplayName("create - 소유한 업체가 있을 때 생성하면 프로젝트와 보드가 저장된다")
+    void create_success() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
+        val command = ProjectFactory.createCommand();
+
+        // when
+        val created = projectService.create(user, command);
+
+        // then
+        val found = projectRepository.findById(created).orElseThrow();
+        assertThat(found.getCompanyId()).isEqualTo(company.getId());
+        val board = boardRepository.findByProjectId(created).orElseThrow();
+        assertThat(board.getType()).isEqualTo(BoardType.PROJECT);
+    }
+
+    @Test
+    @DisplayName("update - 소유한 업체의 프로젝트일 때 수정하면 제목과 주소가 갱신된다")
+    void update_success() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
+        val command = ProjectFactory.updateCommand();
+
+        // when
+        projectService.update(user, project.getId(), command);
+
+        // then
+        val found = projectRepository.findById(project.getId()).orElseThrow();
+        assertThat(found.getTitle()).isEqualTo(command.title());
+        assertThat(found.getAddress().getZipcode()).isEqualTo(command.address().getZipcode());
+    }
+
+    @Test
+    @DisplayName("delete - 소유한 업체의 프로젝트일 때 삭제하면 태스크·보드·노트가 함께 삭제된다")
+    void delete_success() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        val board = boardRepository.save(BoardFactory.projectEntity(project.getId()));
+        noteRepository.save(BoardFactory.noteEntity(board.getId(), member.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
+
+        // when
+        projectService.delete(user, project.getId());
+
+        // then
+        assertThat(projectRepository.findById(project.getId())).isEmpty();
+        assertThat(taskRepository.findAllByProjectId(project.getId())).isEmpty();
+        assertThat(boardRepository.findByProjectId(project.getId())).isEmpty();
+        assertThat(noteRepository.findAllByBoardId(board.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("get - 다른 업체의 프로젝트일 때 조회하면 FORBIDDEN으로 실패한다")
+    void get_fail_C004() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val ownerCompany = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(ownerCompany.getId()));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        companyRepository.save(CompanyFactory.entity(other.getId(), "0000001001"));
+        val user = UserFactory.domain(other.getId(), Role.CAREER);
+
+        // when & then
+        assertCodeException(() -> projectService.get(user, project.getId()))
+                .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
+    }
+
+    @Test
+    @DisplayName("get - 프로젝트가 존재하지 않을 때 조회하면 NOT_FOUND로 실패한다")
+    void get_fail_C005_project() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        companyRepository.save(CompanyFactory.entity(member.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
+
+        // when & then
+        assertCodeException(() -> projectService.get(user, MISSING_ID))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("get - 소유한 업체가 없을 때 조회하면 NOT_FOUND로 실패한다")
+    void get_fail_C005_company() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        val user = UserFactory.domain(other.getId(), Role.CAREER);
+
+        // when & then
+        assertCodeException(() -> projectService.get(user, project.getId()))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("create - 소유한 업체가 없을 때 생성하면 NOT_FOUND로 실패한다")
+    void create_fail_C005() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
+        val command = ProjectFactory.createCommand();
+
+        // when & then
+        assertCodeException(() -> projectService.create(user, command))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("create - 업체가 프로젝트 한도일 때 생성하면 PROJECT_LIMIT_EXCEEDED로 실패한다")
+    void create_fail_CO003() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        projectRepository.save(ProjectFactory.entity(company.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
+        val command = ProjectFactory.createCommand();
+
+        // when & then
+        assertCodeException(() -> projectService.create(user, command))
+                .hasExceptionCode(CompanyExceptionCode.PROJECT_LIMIT_EXCEEDED);
+    }
+
+    @Test
+    @DisplayName("update - 다른 업체의 프로젝트일 때 수정하면 FORBIDDEN으로 실패한다")
+    void update_fail_C004() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val ownerCompany = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(ownerCompany.getId()));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        companyRepository.save(CompanyFactory.entity(other.getId(), "0000001001"));
+        val user = UserFactory.domain(other.getId(), Role.CAREER);
+        val command = ProjectFactory.updateCommand();
+
+        // when & then
+        assertCodeException(() -> projectService.update(user, project.getId(), command))
+                .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
+    }
+
+    @Test
+    @DisplayName("update - 프로젝트가 존재하지 않을 때 수정하면 NOT_FOUND로 실패한다")
+    void update_fail_C005_project() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        companyRepository.save(CompanyFactory.entity(member.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
+        val command = ProjectFactory.updateCommand();
+
+        // when & then
+        assertCodeException(() -> projectService.update(user, MISSING_ID, command))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("update - 소유한 업체가 없을 때 수정하면 NOT_FOUND로 실패한다")
+    void update_fail_C005_company() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        val user = UserFactory.domain(other.getId(), Role.CAREER);
+        val command = ProjectFactory.updateCommand();
+
+        // when & then
+        assertCodeException(() -> projectService.update(user, project.getId(), command))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("delete - 다른 업체의 프로젝트일 때 삭제하면 FORBIDDEN으로 실패한다")
+    void delete_fail_C004() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val ownerCompany = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(ownerCompany.getId()));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        companyRepository.save(CompanyFactory.entity(other.getId(), "0000001001"));
+        val user = UserFactory.domain(other.getId(), Role.CAREER);
+
+        // when & then
+        assertCodeException(() -> projectService.delete(user, project.getId()))
+                .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
+    }
+
+    @Test
+    @DisplayName("delete - 프로젝트가 존재하지 않을 때 삭제하면 NOT_FOUND로 실패한다")
+    void delete_fail_C005_project() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        companyRepository.save(CompanyFactory.entity(member.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
+
+        // when & then
+        assertCodeException(() -> projectService.delete(user, MISSING_ID))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("delete - 소유한 업체가 없을 때 삭제하면 NOT_FOUND로 실패한다")
+    void delete_fail_C005_company() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        val user = UserFactory.domain(other.getId(), Role.CAREER);
+
+        // when & then
+        assertCodeException(() -> projectService.delete(user, project.getId()))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
 }

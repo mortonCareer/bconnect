@@ -6,8 +6,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.core.domain.chat.GroupChatService;
 import to.bconnect.api.core.domain.chat.Message;
-import to.bconnect.api.core.domain.chat.MessageService;
 import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.socket.WebSocketSecurityConfig;
@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 public class MessageSocketService {
 
     private final MessageService messageService;
+    private final GroupChatService groupChatService;
     private final SimpUserRegistry simpUserRegistry;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -32,12 +33,13 @@ public class MessageSocketService {
     public Message broadcast(AuthUser user, Long chatId, ChatType chatType, SendMessage command) {
         val message = messageService.create(chatId, chatType, user.id(), command);
         val activeIds = findActiveMemberIds(chatId, chatType);
-        val participantIds = messageService.findParticipantIds(chatId, chatType);
+        val participantIds = groupChatService.findParticipantIds(chatId, chatType);
         val inactiveIds = new HashSet<>(participantIds);
         inactiveIds.removeAll(activeIds);
 
         messageService.markRead(chatId, chatType, activeIds, message.id());
-        eventPublisher.publishEvent(new SocketMessageSentEvent(activeIds, inactiveIds, message));
+        eventPublisher.publishEvent(new SocketMessageSentEvent(
+                activeIds, inactiveIds, message));
         return message;
     }
 

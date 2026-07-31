@@ -1,7 +1,6 @@
 package to.bconnect.api.core.domain.coworker;
 
 import to.bconnect.api.storage.coworker.CoworkerEntity;
-import to.bconnect.api.storage.coworker.CoworkerRequestEntity;
 
 public record Coworker(
     Long id,

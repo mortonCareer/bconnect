@@ -32,7 +32,7 @@ import {
 } from '@bconnect/ui'
 import { TRADE_LABELS, TRADE_GROUPS } from '@bconnect/api-client'
 import { AddressField } from '@/components/AddressField'
-import { mapKakaoAddress } from '@bconnect/config/address'
+import { isCompleteAddress } from '@bconnect/config/address'
 import { MAX_TRADES, profileEditSchema, type ProfileEditFormData } from './schema'
 
 export default function ProfileEditPage() {
@@ -89,6 +89,7 @@ export default function ProfileEditPage() {
   const scrollToError = useScrollToError()
 
   const onSubmit = async (data: ProfileEditFormData) => {
+    if (!isCompleteAddress(data.address)) return
     try {
       const promises: Promise<unknown>[] = []
 
@@ -102,7 +103,7 @@ export default function ProfileEditPage() {
             trades: data.trades as Trade[],
             experience: data.experience,
             headline: data.headline || undefined,
-            address: data.address ?? mapKakaoAddress(null),
+            address: data.address,
           },
         })
       )

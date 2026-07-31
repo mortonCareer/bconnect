@@ -1,5 +1,6 @@
 package to.bconnect.api.core.presentation.v1.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +18,7 @@ public record CreateWorkerTaskRequest(
         @NotBlank String title,
         @NotBlank String memo,
         String company,
-        Address address
+        @Valid Address address
 ) {
     public CreateWorkerTask toCommand() {
         return new CreateWorkerTask(trades, start, end, title, memo, company, address);
