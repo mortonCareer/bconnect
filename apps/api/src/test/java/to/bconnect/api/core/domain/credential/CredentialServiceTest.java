@@ -4,6 +4,8 @@ import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
@@ -23,6 +25,7 @@ import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 import static to.bconnect.api.support.fixture.FixtureConstant.MAX_DATE;
 
 @IntegrationTest
+@RecordApplicationEvents
 class CredentialServiceTest {
 
     private static final Long MISSING_ID = 999_999L;
@@ -31,6 +34,7 @@ class CredentialServiceTest {
     @Autowired private CredentialRepository credentialRepository;
     @Autowired private MemberRepository memberRepository;
     @Autowired private AttachmentRepository attachmentRepository;
+    @Autowired private ApplicationEvents applicationEvents;
 
     @Test
     @DisplayName("list - 회원의 자격 증빙이 존재할 때 목록을 조회하면 본인 증빙만 반환한다")
@@ -129,6 +133,8 @@ class CredentialServiceTest {
         // then
         val found = credentialRepository.findById(credential.getId()).orElseThrow();
         assertThat(found.getStatus()).isEqualTo(CredentialStatus.ACCEPTED);
+        assertThat(applicationEvents.stream(CredentialReviewedEvent.class))
+                .containsExactly(new CredentialReviewedEvent(credential.getId(), member.getId(), CredentialStatus.ACCEPTED));
     }
 
     @Test
@@ -144,6 +150,8 @@ class CredentialServiceTest {
         // then
         val found = credentialRepository.findById(credential.getId()).orElseThrow();
         assertThat(found.getStatus()).isEqualTo(CredentialStatus.DENIED);
+        assertThat(applicationEvents.stream(CredentialReviewedEvent.class))
+                .containsExactly(new CredentialReviewedEvent(credential.getId(), member.getId(), CredentialStatus.DENIED));
     }
 
     @Test
