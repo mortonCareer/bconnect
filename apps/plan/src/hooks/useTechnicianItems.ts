@@ -2,15 +2,14 @@
 
 import { useMemo } from 'react'
 import {
-  postImageUrls,
   regionOfState,
   useGetCrawledMembers,
   useGetFeeds,
   useGetProfiles,
 } from '@bconnect/api-client'
-import type { CrawledMemberSummary, Post, Profile, Region, Task, Trade } from '@bconnect/api-client'
+import type { CrawledMemberSummary, Feed, Profile, Region, Trade } from '@bconnect/api-client'
+import { feedWork } from '@bconnect/features'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
-import { durationDays } from '@bconnect/config/date'
 import { toCrawledDisplay } from '@/lib/crawled'
 import type { ExperienceLevel } from '@/lib/experience'
 import { EXPERIENCE_RANGES } from '@/lib/experience'
@@ -63,12 +62,7 @@ export interface CrawledTechnicianItem extends TechnicianItemBase {
 
 export type TechnicianItem = MemberTechnicianItem | CrawledTechnicianItem
 
-interface MemberWork {
-  post: Post
-  task?: Task | null
-}
-
-function toTechnicianItem(profile: Profile, works: MemberWork[]): MemberTechnicianItem | null {
+function toTechnicianItem(profile: Profile, feeds: Feed[]): MemberTechnicianItem | null {
   const profileId = profile.id
   const memberId = profile.member?.id
   // 프로필/멤버 식별자 없으면 카드 액션(프로필 보기·메시지)이 불가능 — 목록에서 제외
@@ -98,10 +92,10 @@ function toTechnicianItem(profile: Profile, works: MemberWork[]): MemberTechnici
     reviewCount: 777,
     contractCount: 777,
     certifications: [],
-    portfolios: works.slice(0, 3).map(({ post, task }) => ({
-      imageUrl: postImageUrls(post)[0] ?? '',
-      daysRequired: task ? durationDays(task.start, task.end) : undefined,
-    })),
+    portfolios: feeds.slice(0, 3).map((feed) => {
+      const { images, days } = feedWork(feed)
+      return { imageUrl: images[0] ?? '', daysRequired: days }
+    }),
   }
 }
 
@@ -159,14 +153,14 @@ export function useTechnicianItems({
   // 빈 상태가 번쩍이는 것을 방지 (error 는 회원 쿼리만 전파)
   const isLoading = isMembersLoading || isCrawledLoading
 
-  const worksByMember = useMemo(() => {
-    const map = new Map<number, MemberWork[]>()
+  const feedsByMember = useMemo(() => {
+    const map = new Map<number, Feed[]>()
     for (const feed of feeds?.content ?? []) {
       const memberId = feed.member?.id
       if (memberId == null || !feed.post) continue
-      const works = map.get(memberId) ?? []
-      works.push({ post: feed.post, task: feed.task })
-      map.set(memberId, works)
+      const authored = map.get(memberId) ?? []
+      authored.push(feed)
+      map.set(memberId, authored)
     }
     return map
   }, [feeds])
@@ -176,11 +170,11 @@ export function useTechnicianItems({
     () => [
       ...(data?.content ?? []).flatMap(
         (profile) =>
-          toTechnicianItem(profile, worksByMember.get(profile.member?.id ?? -1) ?? []) ?? []
+          toTechnicianItem(profile, feedsByMember.get(profile.member?.id ?? -1) ?? []) ?? []
       ),
       ...(crawledMembers?.content ?? []).flatMap((crawled) => toCrawledItem(crawled) ?? []),
     ],
-    [data, worksByMember, crawledMembers]
+    [data, feedsByMember, crawledMembers]
   )
 
   const expRange = experience ? EXPERIENCE_RANGES[experience] : undefined

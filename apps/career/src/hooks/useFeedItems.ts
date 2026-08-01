@@ -1,15 +1,10 @@
 'use client'
 
 import { useMemo } from 'react'
-import {
-  postImageUrls,
-  regionOfState,
-  TRADE_LABELS,
-  useGetFeeds,
-  useGetMyMember,
-} from '@bconnect/api-client'
+import { regionOfState, TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
 import type { Trade, ProfileRole } from '@bconnect/api-client'
-import { formatDurationDays, formatRelativeTime } from '@bconnect/config/format'
+import { feedWork } from '@bconnect/features'
+import { formatRelativeTime } from '@bconnect/config/format'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { ROLE_LABELS } from '@/lib/role-labels'
 import { REGION_LABELS, type Region } from '@/lib/region'
@@ -67,7 +62,7 @@ export function useFeedItems({
     if (!feeds?.content) return []
 
     return feeds.content.flatMap((feed): FeedItem[] => {
-      const { member, profile, post, task } = feed
+      const { member, profile, post } = feed
 
       // TODO: BE required 처리 후 type narrowing 필요. Feed.member/profile/post와 id가 optional emit이라 없는 행은 임시로 렌더 제외.
       const memberId = member?.id
@@ -86,7 +81,7 @@ export function useFeedItems({
       if (maxExperience != null && (profile.experience ?? 0) > maxExperience) return []
       if (authorId != null && memberId !== authorId) return []
 
-      const postImages = postImageUrls(post)
+      const work = feedWork(feed)
 
       // TODO: BE required 처리 후 type narrowing 필요. 이름/분야/작성일/본문은 카드 표시 필수값인데 optional emit이라 fallback 중.
       return [
@@ -105,9 +100,9 @@ export function useFeedItems({
             bio: profile.headline ?? '',
           },
           content: {
-            images: postImages.length ? postImages : ['/placeholder-post.svg'],
-            company: task?.workerCompany ?? undefined,
-            duration: task ? formatDurationDays(task.start, task.end) : undefined,
+            images: work.images.length ? work.images : ['/placeholder-post.svg'],
+            company: work.company,
+            duration: work.duration,
             timestamp: post.createdAt ? formatRelativeTime(post.createdAt) : '',
             description: post.content ?? '',
           },
