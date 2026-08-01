@@ -3296,6 +3296,8 @@ components:
       - COWORKER_REQUEST
       - OFFER
       - CONTRACT
+      - CREDENTIAL
+      - RECOMMENDATION
     NotificationResponse:
       type: object
       properties:
