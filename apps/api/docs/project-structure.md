@@ -98,6 +98,19 @@ graph TD
   subgraph member
     MemberE[MemberRegisteredEvent]
   end
+  subgraph profile
+    ProfileE[ProfileCreatedEvent]
+  end
+  subgraph credential
+    CredentialE[CredentialReviewedEvent]
+  end
+  subgraph coworker
+    CoworkerReqE[CoworkerRequestedEvent]
+    CoworkerAccE[CoworkerAcceptedEvent]
+  end
+  subgraph recommendation
+    RecommendE[RecommendationWrittenEvent]
+  end
   subgraph sms
     SmsL[SmsEventListener]
   end
@@ -113,6 +126,7 @@ graph TD
   end
   subgraph notification
     NotiL[NotificationEventListener]
+    DeviceE[DeviceRegisteredEvent]
   end
   MsgL --> OfferE
   MsgL --> ChatCreatedE
@@ -120,6 +134,14 @@ graph TD
   SmsL --> LoginE
   NotiL --> ChatMsgE
   NotiL --> MemberE
+  NotiL --> LoginE
+  NotiL --> OfferE
+  NotiL --> ProfileE
+  NotiL --> CredentialE
+  NotiL --> CoworkerReqE
+  NotiL --> CoworkerAccE
+  NotiL --> RecommendE
+  NotiL --> DeviceE
 ```
 - 부수효과는 EDA 구조로 분리합니다.
 - 이벤트는 발행 패키지에, 리스너는 구독 패키지에 위치합니다.
