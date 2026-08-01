@@ -1,112 +1,68 @@
-import {
-  AttachmentType,
-  getGetFeedsMockHandler,
-  ProfileRole,
-  Role,
-  TaskStatus,
-  TaskType,
-  Trade,
-} from '@bconnect/api-client'
-import type { Attachment, CursorPageFeed, Feed, Region, Task } from '@bconnect/api-client'
+import { AttachmentType, getGetFeedsMockHandler, TaskStatus, TaskType } from '@bconnect/api-client'
+import type { Attachment, CursorPageFeed, Feed, Task, Trade } from '@bconnect/api-client'
 import { addressOf } from './_address'
+import { SEEDS as PROFILE_SEEDS, type ProfileSeed } from './profiles'
 
 interface FeedSeed {
-  name: string
-  trade: Trade
-  experience: number
-  headline: string
+  /** 작성자 — profiles.ts SEEDS 의 id. 목록·프로필 패널과 같은 회원이어야 작업물이 매칭된다 */
+  memberId: number
   content: string
   daysAgo: number
   imageCount: number
   /** 글에 연결된 시공사례 — 건축주명 + 시공일수. 없으면 카드 메타행에서 생략되는 경로 검증용 */
   task?: { company: string; days: number }
-  role: ProfileRole
-  /** 시/도 명칭(공용 Region 값) — regionOfState 정확 일치 매핑 검증용. BE Address 가 state 를 필수로 요구한다. */
-  state: Region
-  /** 시군구 — plan 기술자 카드의 지역 표시에 쓰인다. */
-  city: string
 }
 
 const FEED_SEEDS: FeedSeed[] = [
+  // 이송목(타일) — 사진 4장 + 12일 소요
   {
-    name: '서정건축',
-    trade: Trade.WALLPAPER,
-    experience: 7,
-    headline: '도배 7년차, 합지·실크 꼼꼼 시공',
+    memberId: 1,
     content:
-      '골프장 전원주택 도배 시공을 진행했습니다. 합지와 실크를 혼합해 결 방향까지 맞춰 마감했고, 모서리 들뜸 없이 깔끔하게 마무리했습니다.',
+      '20평 카페 바닥과 아트월 타일을 시공했습니다. 패턴 이음을 맞추느라 재단에 시간을 들였고, 줄눈은 무광 그레이로 통일했습니다.',
     daysAgo: 3,
-    imageCount: 3,
-    task: { company: '한울 종합건설', days: 4 },
-    role: ProfileRole.FOREMAN,
-    state: '경기',
-    city: '성남시 분당구',
-  },
-  {
-    name: '김철수',
-    trade: Trade.TILING,
-    experience: 12,
-    headline: '욕실·주방 타일 전문',
-    content:
-      '신축 아파트 32평 욕실 2개소 타일 시공을 마쳤습니다. 줄눈 간격을 균일하게 잡아 마감 평탄도를 살렸습니다.',
-    daysAgo: 6,
-    imageCount: 1,
-    task: { company: '미소 인테리어', days: 2 },
-    role: ProfileRole.SKILLED,
-    state: '서울',
-    city: '마포구',
-  },
-  {
-    name: '박영희',
-    trade: Trade.ELECTRICAL,
-    experience: 17,
-    headline: '전기 17년 경력',
-    content: '상가 전기 배선 작업 마무리했습니다.',
-    daysAgo: 10,
-    imageCount: 2,
-    role: ProfileRole.SKILLED,
-    state: '전북특별자치도',
-    city: '전주시 완산구',
-  },
-  {
-    name: '이준호',
-    trade: Trade.DESIGN,
-    experience: 9,
-    headline: '카페·상업공간 인테리어 설계',
-    content:
-      '20평 카페 인테리어를 설계부터 시공 감리까지 한 번에 진행했습니다. 좁은 동선을 풀고 간접 조명 배치에 특히 신경 썼습니다.',
-    daysAgo: 14,
     imageCount: 4,
     task: { company: '카페온 F&B', days: 12 },
-    role: ProfileRole.SEMI_SKILLED,
-    state: '전남광주통합특별시',
-    city: '북구',
   },
+  // 이송목(타일) — 사진 1장 + 작업 미연결(메타행 생략 경로)
   {
-    name: '최민수',
-    trade: Trade.PAINTING,
-    experience: 5,
-    headline: '도장 5년',
-    content: '외벽 도장 작업 완료.',
+    memberId: 1,
+    content: '상가 화장실 바닥 타일을 부분 보수했습니다.',
     daysAgo: 21,
     imageCount: 1,
-    role: ProfileRole.HELPER,
-    state: '서울',
-    city: '관악구',
   },
+  // 이송목(도배) — 사진 3장 + 4일 소요
   {
-    name: '정해성',
-    trade: Trade.CARPENTRY,
-    experience: 15,
-    headline: '목공 15년, 원목 가구 제작',
+    memberId: 101,
     content:
-      '원목 붙박이장을 제작해 설치했습니다. 무늬결을 맞춰 이어 붙여 한 판처럼 보이도록 작업했습니다.',
+      '골프장 전원주택 도배 시공을 진행했습니다. 합지와 실크를 혼합해 결 방향까지 맞춰 마감했고, 모서리 들뜸 없이 깔끔하게 마무리했습니다.',
+    daysAgo: 6,
+    imageCount: 3,
+    task: { company: '한울 종합건설', days: 4 },
+  },
+  // 이송목(도배) — 사진 2장 + 1일 소요(당일 작업 경계값)
+  {
+    memberId: 101,
+    content:
+      '원룸 전체 도배를 하루 만에 마감했습니다. 이사 일정에 맞춰 오전에 걷어내고 오후에 새로 붙였습니다.',
     daysAgo: 30,
     imageCount: 2,
     task: { company: '두손 건축사사무소', days: 1 },
-    role: ProfileRole.FOREMAN,
-    state: '충북',
-    city: '청주시 흥덕구',
+  },
+  // 박전기(전기) — 사진 2장 + 작업 미연결
+  {
+    memberId: 102,
+    content: '상가 전기 배선 작업 마무리했습니다.',
+    daysAgo: 10,
+    imageCount: 2,
+  },
+  // 최타일(타일) — 사진 1장 + 2일 소요
+  {
+    memberId: 103,
+    content:
+      '신축 아파트 32평 욕실 2개소 타일 시공을 마쳤습니다. 줄눈 간격을 균일하게 잡아 마감 평탄도를 살렸습니다.',
+    daysAgo: 14,
+    imageCount: 1,
+    task: { company: '미소 인테리어', days: 2 },
   },
 ]
 
@@ -115,7 +71,13 @@ function daysAgoIso(days: number): string {
   return date.toISOString().slice(0, 19) + 'Z'
 }
 
-function taskOf(id: number, seed: FeedSeed): Task | null {
+function authorOf(memberId: number): ProfileSeed {
+  const seed = PROFILE_SEEDS.find((p) => p.id === memberId)
+  if (!seed) throw new Error(`feeds mock: profiles.ts 에 없는 memberId ${memberId}`)
+  return seed
+}
+
+function taskOf(id: number, seed: FeedSeed, trade: Trade): Task | null {
   if (!seed.task) return null
   const end = daysAgoIso(seed.daysAgo).slice(0, 10)
   const start = daysAgoIso(seed.daysAgo + seed.task.days - 1).slice(0, 10)
@@ -124,7 +86,7 @@ function taskOf(id: number, seed: FeedSeed): Task | null {
     id,
     type: TaskType.WORKER,
     status: TaskStatus.COMPLETED,
-    trades: [seed.trade],
+    trades: [trade],
     start,
     end,
     workerId: null,
@@ -169,28 +131,29 @@ export const feedsOverrides = [
       // Feed = { member: MemberSummary, profile: ProfileSummary, post: Post, task: Task | null }.
       // ProfileSummary 엔 id/memberId/trades 없음(대표분야 primaryTrade 만) — mapper 도 대표분야 기준.
       content: FEED_SEEDS.map((seed, i): Feed => {
+        const author = authorOf(seed.memberId)
         const createdAt = daysAgoIso(seed.daysAgo)
-        const task = taskOf(600 + i, seed)
+        const task = taskOf(600 + i, seed, author.trade)
         return {
           member: {
-            id: 200 + i,
-            username: `feed_user_${200 + i}`,
-            name: seed.name,
+            id: author.id,
+            username: author.username,
+            name: author.name,
             picture: null,
           },
           profile: {
-            role: seed.role,
-            primaryTrade: seed.trade,
-            experience: seed.experience,
-            headline: seed.headline,
-            address: addressOf(seed.state, seed.city),
+            role: author.role,
+            primaryTrade: author.trade,
+            experience: author.experience,
+            headline: author.headline,
+            address: addressOf(author.state, author.city),
           },
           task,
           post: {
             id: 400 + i,
-            memberId: 200 + i,
+            memberId: author.id,
             taskId: task?.id ?? null,
-            attachments: buildAttachments(seed.imageCount, 400 + i, 200 + i, createdAt),
+            attachments: buildAttachments(seed.imageCount, 400 + i, author.id, createdAt),
             content: seed.content,
             createdAt,
             modifiedAt: createdAt,

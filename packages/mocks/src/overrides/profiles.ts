@@ -41,13 +41,15 @@ const memberOf = (id: number, username: string, name: string): MemberSummary => 
   picture: null,
 })
 
-interface ProfileSeed {
+export interface ProfileSeed {
   id: number
   username: string
   name: string
   role: ProfileRole
   trade: Trade
   experience: number
+  /** feeds.ts FEED_SEEDS 에서 이 회원이 쓴 글 수 — 헤더 통계와 작업물 탭이 어긋나지 않게 맞춘다 */
+  postCount: number
   headline: string
   about: string
   // 카카오 우편번호 결과 그대로 — state = 공용 Region 값, city = sigungu
@@ -55,9 +57,11 @@ interface ProfileSeed {
   city: string
 }
 
-const SEEDS: ProfileSeed[] = [
+// feeds.ts 가 작업물 작성자로 재사용 — 회원 정보 중복 정의를 막는 단일 출처
+export const SEEDS: ProfileSeed[] = [
   {
     id: 1,
+    postCount: 2,
     username: 'leesongmok',
     name: '이송목',
     role: ProfileRole.SEMI_SKILLED,
@@ -70,6 +74,7 @@ const SEEDS: ProfileSeed[] = [
   },
   {
     id: 101,
+    postCount: 2,
     username: 'worker_101',
     name: '이송목',
     role: ProfileRole.SEMI_SKILLED,
@@ -82,6 +87,7 @@ const SEEDS: ProfileSeed[] = [
   },
   {
     id: 102,
+    postCount: 1,
     username: 'worker_102',
     name: '박전기',
     role: ProfileRole.SKILLED,
@@ -94,6 +100,7 @@ const SEEDS: ProfileSeed[] = [
   },
   {
     id: 103,
+    postCount: 1,
     username: 'worker_103',
     name: '최타일',
     role: ProfileRole.FOREMAN,
@@ -123,7 +130,7 @@ const profileOf = (seed: ProfileSeed): Profile => ({
     latitude: 37.5,
     longitude: 127.0,
   },
-  postCount: 0,
+  postCount: seed.postCount,
   recommendationCount: 0,
   coworkerCount: 0,
   createdAt: EPOCH,
