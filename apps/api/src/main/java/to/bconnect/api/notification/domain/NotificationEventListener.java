@@ -151,31 +151,6 @@ public class NotificationEventListener {
         notificationService.notify(notifications);
     }
 
-    private PushNotification toWorker(NotificationType type, OfferEvent event) {
-        val company = companyService.getOrWithdrawn(event.companyId());
-        return new PushNotification(
-                event.workerId(),
-                type,
-                NotificationSenderType.COMPANY,
-                company.id(),
-                company.name(),
-                NotificationReferenceType.OFFER,
-                event.offerId(),
-                null);
-    }
-
-    private PushNotification toCompanyOwner(NotificationType type, OfferEvent event) {
-        return new PushNotification(
-                event.companyOwnerId(),
-                type,
-                NotificationSenderType.MEMBER,
-                event.workerId(),
-                memberResolver.getOrWithdrawn(event.workerId()).name(),
-                NotificationReferenceType.OFFER,
-                event.offerId(),
-                null);
-    }
-
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleProfileCreated(ProfileCreatedEvent event) {
         notificationService.notify(List.of(new PushNotification(
@@ -233,5 +208,30 @@ public class NotificationEventListener {
                 null,
                 null,
                 null)));
+    }
+
+    private PushNotification toWorker(NotificationType type, OfferEvent event) {
+        val company = companyService.getOrWithdrawn(event.companyId());
+        return new PushNotification(
+                event.workerId(),
+                type,
+                NotificationSenderType.COMPANY,
+                company.id(),
+                company.name(),
+                NotificationReferenceType.OFFER,
+                event.offerId(),
+                null);
+    }
+
+    private PushNotification toCompanyOwner(NotificationType type, OfferEvent event) {
+        return new PushNotification(
+                event.companyOwnerId(),
+                type,
+                NotificationSenderType.MEMBER,
+                event.workerId(),
+                memberResolver.getOrWithdrawn(event.workerId()).name(),
+                NotificationReferenceType.OFFER,
+                event.offerId(),
+                null);
     }
 }
