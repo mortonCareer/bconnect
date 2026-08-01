@@ -2,22 +2,28 @@
 
 import { createDb, insertBatched, notifySlack, runSync, sleep } from './lib'
 
-const API_KEY = process.env.FEIA_API_SERVICE_KEY
+const API_KEY = process.env.DATA_GO_SERVICE_KEY
 // 소방청_소방시설업 현황(15052730). uddi는 연간 갱신 — 최신(2024-12-31) 사용
 const FEIA_URL = 'https://api.odcloud.kr/api/15052730/v1/uddi:c98ecfc6-4d3f-4a26-b981-d57e749fa5ae'
 const PER_PAGE = 1000
 const REQUEST_DELAY_MS = 100
 const MAX_PAGES = 100
 
-if (!API_KEY) throw new Error('FEIA_API_SERVICE_KEY is required')
+if (!API_KEY) throw new Error('DATA_GO_SERVICE_KEY is required')
 
 const sql = createDb()
 
 interface FeiaItem {
+  seqNo: number | null
   companyName: string
   ceoName: string | null
   address: string | null
+  businessType: string | null
   licenseDiv: string | null
+  postalCode: string | null
+  phone: string | null
+  region: string | null
+  regionDetail: string | null
 }
 
 async function fetchPage(page: number): Promise<FeiaItem[]> {
@@ -31,16 +37,26 @@ async function fetchPage(page: number): Promise<FeiaItem[]> {
   if (!response.ok) {
     throw new Error(`HTTP ${response.status} from FEIA odcloud`)
   }
-  const body = (await response.json()) as { data?: Array<Record<string, string>> }
+  const body = (await response.json()) as { data?: Array<Record<string, string | number>> }
   if (!body.data) {
     throw new Error('FEIA odcloud: no data field')
   }
   return body.data.map((it) => ({
-    companyName: it['상호'],
-    ceoName: it['대표자'] ?? null,
-    address: it['본사주소'] ?? null,
-    licenseDiv: it['분야'] ?? null, // 전문/일반 (등록번호는 소방청 데이터에 없음)
+    seqNo: it['순번'] != null ? Number(it['순번']) : null,
+    companyName: String(it['상호']),
+    ceoName: text(it['대표자']),
+    address: text(it['본사주소']),
+    businessType: text(it['업종']),
+    licenseDiv: text(it['분야']),
+    postalCode: text(it['우편번호']),
+    phone: text(it['전화번호']),
+    region: text(it['지역']),
+    regionDetail: text(it['조회지역']),
   }))
+}
+
+function text(value: string | number | null | undefined): string | null {
+  return value != null ? String(value) : null
 }
 
 async function fetchAll(): Promise<FeiaItem[]> {
@@ -67,10 +83,16 @@ async function main() {
       tx,
       'feia_fire_licenses',
       items.map((item) => ({
+        seq_no: item.seqNo,
         company_name: item.companyName,
         ceo_name: item.ceoName,
         address: item.address,
+        business_type: item.businessType,
         license_div: item.licenseDiv,
+        postal_code: item.postalCode,
+        phone: item.phone,
+        region: item.region,
+        region_detail: item.regionDetail,
       }))
     )
     console.log(`[feia-sync] feia_fire_licenses: ${items.length}건 저장`)

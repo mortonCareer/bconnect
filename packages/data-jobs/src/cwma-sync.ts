@@ -9,6 +9,7 @@ const CSV_URL =
 const sql = createDb()
 
 interface CwmaItem {
+  seqNo: number | null
   projectName: string
   totalAmount: number | null
   startDate: string | null
@@ -82,7 +83,9 @@ function parseCsv(text: string): CwmaItem[] {
     if (!fields[5] || !fields[1]) continue // 업체명·공사명 필수
 
     const amount = parseFloat(fields[2])
+    const seq = parseInt(fields[0], 10)
     items.push({
+      seqNo: Number.isFinite(seq) ? seq : null,
       projectName: fields[1],
       totalAmount: Number.isFinite(amount) ? amount : null,
       startDate: fields[3] || null,
@@ -97,31 +100,42 @@ function parseCsv(text: string): CwmaItem[] {
   return items
 }
 
+// 원본 CSV 에 업체명·공사명·착공일이 같은 행이 섞여 있어 조회 응답이 중복된다. 마지막 것만 유지
+function dedupe(items: CwmaItem[]): Record<string, unknown>[] {
+  const rows = items.map((item) => ({
+    seq_no: item.seqNo,
+    project_name: item.projectName,
+    total_amount: item.totalAmount,
+    start_date: item.startDate,
+    end_date: item.endDate,
+    company_name: item.companyName,
+    normalized_company_name: normalizeCompanyName(item.companyName),
+    client_org: item.clientOrg,
+    address: item.address,
+  }))
+
+  return [
+    ...new Map(
+      rows.map((r) => [`${r.company_name}|${r.project_name}|${r.start_date}`, r])
+    ).values(),
+  ]
+}
+
 async function main() {
   console.log('[cwma-sync] 퇴직공제 가입사업장 CSV 크롤링...')
   const items = parseCsv(await downloadCsv())
   console.log(`[cwma-sync] 총 ${items.length}건 수집`)
 
+  const rows = dedupe(items)
+  console.log(`[cwma-sync] 중복 제거 후 ${rows.length}건`)
+
   await sql.begin(async (tx) => {
     await tx`DELETE FROM cwma_retirement_fund`
-    await insertBatched(
-      tx,
-      'cwma_retirement_fund',
-      items.map((item) => ({
-        project_name: item.projectName,
-        total_amount: item.totalAmount,
-        start_date: item.startDate,
-        end_date: item.endDate,
-        company_name: item.companyName,
-        normalized_company_name: normalizeCompanyName(item.companyName),
-        client_org: item.clientOrg,
-        address: item.address,
-      }))
-    )
-    console.log(`[cwma-sync] cwma_retirement_fund: ${items.length}건 저장`)
+    await insertBatched(tx, 'cwma_retirement_fund', rows)
+    console.log(`[cwma-sync] cwma_retirement_fund: ${rows.length}건 저장`)
   })
 
-  const summary = `✅ *CWMA 동기화 완료*\n퇴직공제 가입사업장: ${items.length}건`
+  const summary = `✅ *CWMA 동기화 완료*\n퇴직공제 가입사업장: ${rows.length}건`
   console.log(`[cwma-sync] ${summary}`)
   await notifySlack(summary)
 }

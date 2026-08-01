@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
+import java.time.Instant;
+
 @Entity
 @Immutable
 @Table(name = "kiscon_registration")
@@ -17,19 +19,35 @@ import org.hibernate.annotations.Immutable;
 public class KisconRegistrationEntity {
 
     @Id
-    private Long ncrGsSeq;
+    private Long ncrGsSeq;          // 공시 일련번호 (ncr_gs_seq)
 
-    private String bizRegNo;
+    private String bizRegNo;        // 사업자등록번호 (biz_reg_no)
 
-    private String companyName;
+    private String companyName;     // 업체명 (company_name)
 
-    private String representative;
+    private String representative;  // 대표자 (representative)
 
-    private String tradeName;
+    private String tradeName;       // 업종명 (trade_name)
 
-    private Integer regDate;
+    private String tradeRegNo;      // 업종 등록번호 (trade_reg_no)
 
-    private String address;
+    private String address;         // 소재지 (address)
 
-    private String flag;   // 공시내용구분: 신규·정정·변경·철회 (flag)
+    private String region;          // 지역 (region)
+
+    private String regionDetail;    // 지역 상세 (region_detail)
+
+    private Integer regDate;        // 등록일자 (reg_date)
+
+    private Integer announceDate;   // 공시일자 (announce_date)
+
+    private String flag;            // 공시내용구분: 신규·정정·변경·철회 (flag)
+
+    private String phone;           // 전화번호 (phone)
+
+    private String announceNumber;  // 공고번호 (announce_number)
+
+    private String announceReason;  // 공시사유 (announce_reason)
+
+    private Instant syncedAt;       // 적재 시각 (synced_at)
 }

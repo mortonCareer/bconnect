@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
+import java.time.Instant;
+
 // 한국전기공사협회 전기공사업체
 @Entity
 @Immutable
@@ -26,4 +28,6 @@ public class EcicElectricalLicenseEntity {
     private String representative;   // 대표자 (representative)
 
     private String address;          // 소재지 (address)
+
+    private Instant syncedAt;        // 적재 시각 (synced_at)
 }

@@ -90,19 +90,19 @@ public record OneClickResponse(
         }
     }
 
-    // 소방시설업 면허 (한국소방시설협회)
+    // 소방시설업 면허 (소방청)
     public record FireLicenseResponse(
             @Schema(requiredMode = REQUIRED) Verdict verdict,
             @Schema(requiredMode = REQUIRED) int count,
             @Schema(requiredMode = REQUIRED, nullable = true) String companyName,
             @Schema(requiredMode = REQUIRED, nullable = true) String ceoName,
-            @Schema(requiredMode = REQUIRED, nullable = true) String licenseName,
+            @Schema(requiredMode = REQUIRED, nullable = true) String businessType,
             @Schema(requiredMode = REQUIRED, nullable = true) String licenseDiv
     ) {
         public static FireLicenseResponse of(FireLicenseResult result) {
             return new FireLicenseResponse(
                     result.verdict(), result.count(), result.companyName(),
-                    result.ceoName(), result.licenseName(), result.licenseDiv()
+                    result.ceoName(), result.businessType(), result.licenseDiv()
             );
         }
     }

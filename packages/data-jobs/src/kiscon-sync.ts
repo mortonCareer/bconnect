@@ -79,10 +79,14 @@ async function main() {
       tx,
       'kiscon_arrears',
       arrearsItems.map((item) => ({
+        seq_no: item.seqNo,
         company_name: item.companyName,
         address: item.address,
         representative: item.representative,
+        representative_age: item.representativeAge,
+        representative_address: item.representativeAddress,
         penalty_history: item.penaltyHistory,
+        penalty_dates: item.penaltyDates,
         arrears_amount: item.arrearsAmount,
         publication_period: item.publicationPeriod,
       }))
@@ -94,6 +98,7 @@ async function main() {
       tx,
       'kiscon_subcon_limits',
       subconItems.map((item) => ({
+        seq_no: item.seqNo,
         violation_type: item.violationType,
         company_name: item.companyName,
         corp_no: item.corpNo,
@@ -103,6 +108,8 @@ async function main() {
         restriction_end: item.restrictionEnd,
         category: item.category,
         announcement_date: item.announcementDate,
+        certificate_url: item.certificateUrl,
+        note: item.note,
       }))
     )
     console.log(`[kiscon-sync] kiscon_subcon_limits: ${subconItems.length}건 저장`)

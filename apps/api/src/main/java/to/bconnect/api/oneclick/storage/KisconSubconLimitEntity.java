@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
+import java.time.Instant;
+
 // 키스콘 하도급 참여제한
 @Entity
 @Immutable
@@ -19,15 +21,29 @@ public class KisconSubconLimitEntity {
     @Id
     private Long id;
 
-    private String bizRegNo;          // 사업자등록번호 (biz_reg_no)
+    private String seqNo;             // 연번 (seq_no)
 
-    private String companyName;       // 상호명 (company_name)
+    private String violationType;     // 위반법령 (violation_type)
+
+    private String companyName;       // 상호 (company_name)
+
+    private String corpNo;            // 법인번호 (corp_no)
+
+    private String bizRegNo;          // 사업자번호 (biz_reg_no)
 
     private String representative;    // 대표자 (representative)
 
-    private String violationType;     // 위반유형 (violation_type)
+    private String restrictionStart;  // 하도급참여제한 시작일 (restriction_start)
 
-    private String restrictionStart;  // 제한 시작 (restriction_start)
+    private String restrictionEnd;    // 하도급참여제한 종료일 (restriction_end)
 
-    private String restrictionEnd;    // 제한 종료 (restriction_end)
+    private String category;          // 구분 (category)
+
+    private String announcementDate;  // 게재일 (announcement_date)
+
+    private String certificateUrl;    // 참여제한 확인서 다운로드 (certificate_url)
+
+    private String note;              // 비고 (note)
+
+    private Instant syncedAt;         // 적재 시각 (synced_at)
 }

@@ -3,12 +3,12 @@
 
 import { createDb, notifySlack, runSync, sleep } from './lib'
 
-const API_KEY = process.env.KISCON_API_SERVICE_KEY
+const API_KEY = process.env.DATA_GO_SERVICE_KEY
 const BASE_URL = 'https://apis.data.go.kr/1613000/ConAdminInfoSvc1'
 const PAGE_SIZE = 1000
 const REQUEST_DELAY_MS = 100
 
-if (!API_KEY) throw new Error('KISCON_API_SERVICE_KEY is required')
+if (!API_KEY) throw new Error('DATA_GO_SERVICE_KEY is required')
 
 const sql = createDb()
 
@@ -91,6 +91,8 @@ interface RawRegItem {
   ncrGsRegdate: number
   ncrGsFlag: string
   ncrOffTel: string
+  ncrGsNumber: string
+  ncrGsReason: string
 }
 
 async function syncRegistration(sDate: string, eDate: string): Promise<number> {
@@ -125,6 +127,8 @@ async function syncRegistration(sDate: string, eDate: string): Promise<number> {
       announce_date: r.ncrGsRegdate ?? null,
       flag: r.ncrGsFlag ?? null,
       phone: r.ncrOffTel ?? null,
+      announce_number: r.ncrGsNumber ?? null,
+      announce_reason: r.ncrGsReason ?? null,
     }))
 
     const result = await sql`
@@ -142,6 +146,8 @@ async function syncRegistration(sDate: string, eDate: string): Promise<number> {
         announce_date = EXCLUDED.announce_date,
         flag = EXCLUDED.flag,
         phone = EXCLUDED.phone,
+        announce_number = EXCLUDED.announce_number,
+        announce_reason = EXCLUDED.announce_reason,
         synced_at = NOW()
     `
     upserted += result.count
@@ -186,6 +192,8 @@ interface RawAdmiItem {
   ncrGsFlag: string
   ncrOffTel: string
   ncrPdStatus: string
+  ncrGsNumber: string
+  ncrGsReason: string
 }
 
 async function syncAdminPenalty(sDate: string, eDate: string): Promise<number> {
@@ -230,6 +238,8 @@ async function syncAdminPenalty(sDate: string, eDate: string): Promise<number> {
       flag: r.ncrGsFlag ?? null,
       phone: r.ncrOffTel ?? null,
       has_injunction: r.ncrPdStatus ?? null,
+      announce_number: r.ncrGsNumber ?? null,
+      announce_reason: r.ncrGsReason ?? null,
     }))
 
     const result = await sql`
@@ -258,6 +268,8 @@ async function syncAdminPenalty(sDate: string, eDate: string): Promise<number> {
         flag = EXCLUDED.flag,
         phone = EXCLUDED.phone,
         has_injunction = EXCLUDED.has_injunction,
+        announce_number = EXCLUDED.announce_number,
+        announce_reason = EXCLUDED.announce_reason,
         synced_at = NOW()
     `
     upserted += result.count

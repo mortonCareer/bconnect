@@ -8,10 +8,10 @@ import java.util.List;
 public record FireLicenseResult(
         Verdict verdict,
         int count,
-        String companyName,   // 업체명 (entprsNameHangul)
+        String companyName,   // 상호 (companyName)
         String ceoName,       // 대표자 (ceoName)
-        String licenseName,   // 등록번호 (licenseName)
-        String licenseDiv     // 구분 (licenseDiv)
+        String businessType,  // 업종 (businessType)
+        String licenseDiv     // 분야 (licenseDiv)
 ) {
     public static FireLicenseResult of(List<FireLicense> licenses) {
         if (licenses.isEmpty())
@@ -23,7 +23,7 @@ public record FireLicenseResult(
                 licenses.size(),
                 first.companyName(),
                 first.ceoName(),
-                first.licenseName(),
+                first.businessType(),
                 first.licenseDiv()
         );
     }

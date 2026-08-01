@@ -8,10 +8,14 @@ export function parseTotalCount(html: string): number {
 }
 
 export interface KisconArrearsItem {
-  companyName: string // 법인/명칭
-  address: string // 주소
-  representative: string // 대표자
+  seqNo: string // 연번
+  companyName: string // 법인 명칭
+  address: string // 법인 주소
+  representative: string // 대표자 성명
+  representativeAge: string // 대표자 나이
+  representativeAddress: string // 대표자 주소
   penaltyHistory: string // 처분이력
+  penaltyDates: string // 처분일자
   arrearsAmount: string // 체불금액(천원)
   publicationPeriod: string // 공표기간
 }
@@ -41,10 +45,14 @@ export function parseArrearsHtml(html: string): KisconArrearsItem[] {
     if (cells.length < 10) return
 
     items.push({
+      seqNo: $(cells[0]).text().trim(),
       companyName: $(cells[1]).text().trim(),
       address: $(cells[2]).text().trim(),
       representative: $(cells[3]).text().trim(),
+      representativeAge: $(cells[4]).text().trim(),
+      representativeAddress: $(cells[5]).text().trim(),
       penaltyHistory: $(cells[6]).text().trim(),
+      penaltyDates: $(cells[7]).text().trim(),
       arrearsAmount: $(cells[8]).text().trim(),
       publicationPeriod: $(cells[9]).text().trim(),
     })
@@ -62,15 +70,18 @@ export function isArrearsActive(item: KisconArrearsItem): boolean {
 }
 
 export interface KisconSubconLimitItem {
-  violationType: string // 위반법령코드
-  companyName: string // 상호명
+  seqNo: string // 연번
+  violationType: string // 위반법령
+  companyName: string // 상호
   corpNo: string // 법인번호
   bizRegNo: string // 사업자번호
   representative: string // 대표자
-  restrictionStart: string // 제한시작일
-  restrictionEnd: string // 제한종료일
-  category: string // 분류
-  announcementDate: string // 공시일
+  restrictionStart: string // 하도급참여제한 시작일
+  restrictionEnd: string // 하도급참여제한 종료일
+  category: string // 구분
+  announcementDate: string // 게재일
+  certificateUrl: string // 참여제한 확인서 다운로드
+  note: string // 비고
 }
 
 // 하도급참여제한 HTML 파싱 (구조 변경 시 throw)
@@ -98,6 +109,7 @@ export function parseSubconLimitHtml(html: string): KisconSubconLimitItem[] {
     if (cells.length < 10) return
 
     items.push({
+      seqNo: $(cells[0]).text().trim(),
       violationType: $(cells[1]).text().trim(),
       companyName: $(cells[2]).text().trim(),
       corpNo: $(cells[3]).text().trim(),
@@ -107,6 +119,8 @@ export function parseSubconLimitHtml(html: string): KisconSubconLimitItem[] {
       restrictionEnd: $(cells[7]).text().trim(),
       category: $(cells[8]).text().trim(),
       announcementDate: $(cells[9]).text().trim(),
+      certificateUrl: $(cells[10]).find('a').attr('href')?.trim() ?? '',
+      note: $(cells[11]).text().trim(),
     })
   })
 
