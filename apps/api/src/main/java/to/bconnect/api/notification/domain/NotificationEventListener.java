@@ -6,6 +6,8 @@ import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import to.bconnect.api.core.domain.coworker.CoworkerAcceptedEvent;
+import to.bconnect.api.core.domain.coworker.CoworkerRequestedEvent;
 import to.bconnect.api.core.domain.credential.CredentialReviewedEvent;
 import to.bconnect.api.core.domain.member.MemberRegisteredEvent;
 import to.bconnect.api.core.domain.member.MemberResolver;
@@ -85,6 +87,36 @@ public class NotificationEventListener {
         }
 
         notificationService.notify(notifications);
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleCoworkerRequested(CoworkerRequestedEvent event) {
+        val senderName = memberResolver.getOrWithdrawn(event.fromId()).name();
+
+        notificationService.notify(List.of(new PushNotification(
+                event.toId(),
+                NotificationType.COWORKER_REQUESTED,
+                NotificationSenderType.MEMBER,
+                event.fromId(),
+                senderName,
+                NotificationReferenceType.COWORKER_REQUEST,
+                event.requestId(),
+                null)));
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleCoworkerAccepted(CoworkerAcceptedEvent event) {
+        val senderName = memberResolver.getOrWithdrawn(event.accepterId()).name();
+
+        notificationService.notify(List.of(new PushNotification(
+                event.requesterId(),
+                NotificationType.COWORKER_ACCEPTED,
+                NotificationSenderType.MEMBER,
+                event.accepterId(),
+                senderName,
+                null,
+                null,
+                null)));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)

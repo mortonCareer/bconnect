@@ -4,6 +4,8 @@ import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import to.bconnect.api.core.domain.coworker.CoworkerAcceptedEvent;
+import to.bconnect.api.core.domain.coworker.CoworkerRequestedEvent;
 import to.bconnect.api.core.domain.credential.CredentialReviewedEvent;
 import to.bconnect.api.core.domain.offer.OfferEvent;
 import to.bconnect.api.core.domain.profile.ProfileCreatedEvent;
@@ -144,6 +146,41 @@ class NotificationEventListenerTest {
                 .filter(it -> it.getType() == type)
                 .filter(it -> referenceId.equals(it.getReferenceId()))
                 .toList();
+    }
+
+    @Test
+    @DisplayName("handleCoworkerRequested - 동료 요청 이벤트를 받으면 대상자에게 알림이 저장된다")
+    void handleCoworkerRequested_success() {
+        // given
+        val requestId = 601L;
+
+        // when
+        notificationEventListener.handleCoworkerRequested(
+                new CoworkerRequestedEvent(requestId, 103L, 105L));
+
+        // then
+        val found = findByTypeAndReference(105L, NotificationType.COWORKER_REQUESTED, requestId);
+        assertThat(found).hasSize(1);
+        assertThat(found.getFirst().getSenderType()).isEqualTo(NotificationSenderType.MEMBER);
+        assertThat(found.getFirst().getSenderId()).isEqualTo(103L);
+        assertThat(found.getFirst().getReferenceType()).isEqualTo(NotificationReferenceType.COWORKER_REQUEST);
+    }
+
+    @Test
+    @DisplayName("handleCoworkerAccepted - 동료 수락 이벤트를 받으면 요청자에게 알림이 저장된다")
+    void handleCoworkerAccepted_success() {
+        // when
+        notificationEventListener.handleCoworkerAccepted(new CoworkerAcceptedEvent(105L, 103L));
+
+        // then
+        val found = notificationRepository.findAllByMemberId(105L).stream()
+                .filter(it -> it.getType() == NotificationType.COWORKER_ACCEPTED)
+                .toList();
+        assertThat(found).hasSize(1);
+        assertThat(found.getFirst().getSenderType()).isEqualTo(NotificationSenderType.MEMBER);
+        assertThat(found.getFirst().getSenderId()).isEqualTo(103L);
+        assertThat(found.getFirst().getReferenceType()).isNull();
+        assertThat(found.getFirst().getReferenceId()).isNull();
     }
 
     @Test
