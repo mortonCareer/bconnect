@@ -9,6 +9,7 @@ import to.bconnect.api.core.domain.coworker.CoworkerRequestedEvent;
 import to.bconnect.api.core.domain.credential.CredentialReviewedEvent;
 import to.bconnect.api.core.domain.offer.OfferEvent;
 import to.bconnect.api.core.domain.profile.ProfileCreatedEvent;
+import to.bconnect.api.core.domain.recommendation.RecommendationWrittenEvent;
 import to.bconnect.api.security.session.NewDeviceLoginEvent;
 import to.bconnect.api.storage.credential.CredentialStatus;
 import to.bconnect.api.storage.notification.NotificationEntity;
@@ -181,6 +182,24 @@ class NotificationEventListenerTest {
         assertThat(found.getFirst().getSenderId()).isEqualTo(103L);
         assertThat(found.getFirst().getReferenceType()).isNull();
         assertThat(found.getFirst().getReferenceId()).isNull();
+    }
+
+    @Test
+    @DisplayName("handleRecommendationWritten - 추천서 작성 이벤트를 받으면 수신자에게 알림이 저장된다")
+    void handleRecommendationWritten_success() {
+        // given
+        val recommendationId = 701L;
+
+        // when
+        notificationEventListener.handleRecommendationWritten(
+                new RecommendationWrittenEvent(recommendationId, 103L, 105L));
+
+        // then
+        val found = findByTypeAndReference(105L, NotificationType.RECOMMENDATION_WRITTEN, recommendationId);
+        assertThat(found).hasSize(1);
+        assertThat(found.getFirst().getSenderType()).isEqualTo(NotificationSenderType.MEMBER);
+        assertThat(found.getFirst().getSenderId()).isEqualTo(103L);
+        assertThat(found.getFirst().getReferenceType()).isEqualTo(NotificationReferenceType.RECOMMENDATION);
     }
 
     @Test

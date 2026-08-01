@@ -13,6 +13,7 @@ import to.bconnect.api.core.domain.member.MemberRegisteredEvent;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.offer.OfferEvent;
 import to.bconnect.api.core.domain.profile.ProfileCreatedEvent;
+import to.bconnect.api.core.domain.recommendation.RecommendationWrittenEvent;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.credential.CredentialStatus;
@@ -87,6 +88,21 @@ public class NotificationEventListener {
         }
 
         notificationService.notify(notifications);
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleRecommendationWritten(RecommendationWrittenEvent event) {
+        val senderName = memberResolver.getOrWithdrawn(event.fromId()).name();
+
+        notificationService.notify(List.of(new PushNotification(
+                event.toId(),
+                NotificationType.RECOMMENDATION_WRITTEN,
+                NotificationSenderType.MEMBER,
+                event.fromId(),
+                senderName,
+                NotificationReferenceType.RECOMMENDATION,
+                event.recommendationId(),
+                null)));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)

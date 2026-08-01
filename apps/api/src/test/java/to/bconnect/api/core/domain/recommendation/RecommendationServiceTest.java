@@ -4,6 +4,8 @@ import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.member.MemberRepository;
@@ -19,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 
 @IntegrationTest
+@RecordApplicationEvents
 class RecommendationServiceTest {
 
     private static final Long MISSING_ID = 999_999L;
@@ -27,6 +30,7 @@ class RecommendationServiceTest {
     @Autowired private RecommendationRepository recommendationRepository;
     @Autowired private CoworkerRepository coworkerRepository;
     @Autowired private MemberRepository memberRepository;
+    @Autowired private ApplicationEvents applicationEvents;
 
     @Test
     @DisplayName("create - 동료 관계일 때 추천서를 작성하면 비공개 추천서가 저장된다")
@@ -46,6 +50,8 @@ class RecommendationServiceTest {
         assertThat(found.getFromId()).isEqualTo(from.getId());
         assertThat(found.getToId()).isEqualTo(to.getId());
         assertThat(found.isVisible()).isFalse();
+        assertThat(applicationEvents.stream(RecommendationWrittenEvent.class))
+                .containsExactly(new RecommendationWrittenEvent(created, from.getId(), to.getId()));
     }
 
     @Test
