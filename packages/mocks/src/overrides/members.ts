@@ -11,12 +11,15 @@ import { setMyMockPicture } from './profiles'
 // 랜덤 available 로 signup 이 무작위로 막히던 문제 해소 + taken 에러 흐름 시연.
 const TAKEN_USERNAMES = new Set(['admin', 'test', 'taken'])
 // register(POST /members) 실패 시나리오 — username 으로 트리거. 가입 경로 계약상
-// 토큰 문제는 400(A006·A007), 중복은 409(M001·M002) 다. taken-later 는 check-username
-// 은 통과했는데 가입 시점에 선점된 경우 — 앞 단계로 되돌리는 흐름 시연용.
+// 토큰 문제는 400(A006·A007), 중복은 409(M001·M002) 다. 복구 목적지가 셋으로 갈리므로
+// (OTP 재인증 / 사용자명 단계 / OTP 재인증 후 로그인) 각각을 재현할 수 있게 둔다.
 const REGISTER_ERROR_BY_USERNAME = new Map([
   ['invalid-token', { code: 'A006', status: 400, message: '유효하지 않은 가입 토큰입니다.' }],
   ['expired-token', { code: 'A007', status: 400, message: '만료된 가입 토큰입니다.' }],
+  // check-username 은 통과했는데 가입 시점에 선점된 경우
   ['taken-later', { code: 'M001', status: 409, message: '이미 사용 중인 사용자명입니다.' }],
+  // 이미 그 번호로 회원이 있는 경우 — 가입이 아니라 로그인으로 이어져야 한다
+  ['taken-phone', { code: 'M002', status: 409, message: '이미 사용 중인 전화번호입니다.' }],
 ])
 
 export const membersOverrides = [

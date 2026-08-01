@@ -19,15 +19,38 @@ export function isRegisterMemberSignupSessionError(error: unknown): error is Api
 }
 
 /**
- * `POST /members`(회원 가입) 실패가 중복 입력 문제인지 판별한다.
+ * 회원 가입 중복(409) 코드 — 복구 경로가 갈리는 둘만 둔다.
  *
- * 가입 경로의 409 는 M001(사용자명 중복)·M002(전화번호 중복) 뿐이다 — 위와 같은 근거.
- * 사용자명은 가입 마지막 화면이 아니라 앞 단계에서만 고칠 수 있으므로, 호출부는 이
- * 판별로 그 단계로 되돌리고 BE message 를 함께 넘긴다.
+ * 위 400 판별과 달리 status 로는 나눌 수 없다. 사용자명 중복은 앞 단계로 되돌려 고치면
+ * 되지만, 전화번호 중복은 그 번호에 이미 회원이 있다는 뜻이라 가입이 아니라 로그인으로
+ * 이어져야 한다 — 목적지가 다르므로 code 를 본다 (ADR-0015 의 "특수 분기 시 narrowing").
+ */
+const REGISTER_DUPLICATE_CODE = {
+  USERNAME: 'M001',
+  PHONE: 'M002',
+} as const
+
+/**
+ * `POST /members`(회원 가입) 실패가 사용자명 중복(M001)인지 판별한다.
+ *
+ * 사용자명 입력칸은 가입 마지막 화면이 아니라 앞 단계에 있다. 호출부는 이 판별로 그
+ * 단계로 되돌리고 BE message 를 함께 넘긴다.
  *
  * 사용 범위 제약은 {@link isRegisterMemberSignupSessionError} 와 같다 — register 호출을
  * 감싼 catch 전용.
  */
-export function isRegisterMemberDuplicateError(error: unknown): error is ApiError {
-  return isApiError(error) && error.status === 409
+export function isRegisterMemberDuplicateUsernameError(error: unknown): error is ApiError {
+  return isApiError(error) && error.code === REGISTER_DUPLICATE_CODE.USERNAME
+}
+
+/**
+ * `POST /members`(회원 가입) 실패가 전화번호 중복(M002)인지 판별한다.
+ *
+ * 그 번호로는 새로 가입할 수 없고 기존 계정으로 로그인해야 한다. 호출부는 OTP 진입점으로
+ * 되돌려 인증을 다시 태우고, 그 결과가 로그인으로 이어지게 한다.
+ *
+ * 사용 범위 제약은 {@link isRegisterMemberSignupSessionError} 와 같다.
+ */
+export function isRegisterMemberDuplicatePhoneError(error: unknown): error is ApiError {
+  return isApiError(error) && error.code === REGISTER_DUPLICATE_CODE.PHONE
 }

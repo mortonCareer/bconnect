@@ -10,7 +10,8 @@ import { useSignupStore } from '@/stores/signup-store'
 import {
   Trade,
   TRADE_LABELS,
-  isRegisterMemberDuplicateError,
+  isRegisterMemberDuplicatePhoneError,
+  isRegisterMemberDuplicateUsernameError,
   isRegisterMemberSignupSessionError,
   refreshAccessToken,
   useCreateMember,
@@ -124,14 +125,16 @@ export default function SignupProfilePage() {
               })
             )
         } catch (err) {
-          if (isRegisterMemberSignupSessionError(err)) {
+          // 토큰 소진·만료, 그리고 이미 가입된 번호 — 모두 가입 화면에서는 풀 수 없다.
+          // 인증부터 다시 하면 토큰 재발급 또는 기존 계정 로그인으로 이어진다.
+          if (isRegisterMemberSignupSessionError(err) || isRegisterMemberDuplicatePhoneError(err)) {
             toast({ description: err.message, variant: 'error' })
             resetSignup()
             router.replace('/signup/auth')
             return
           }
           // 사용자명 중복은 이 화면에 입력칸이 없다 — 안내와 함께 입력 단계로 되돌린다.
-          if (isRegisterMemberDuplicateError(err)) {
+          if (isRegisterMemberDuplicateUsernameError(err)) {
             setRegisterError(err.message)
             router.replace('/signup/username')
             return

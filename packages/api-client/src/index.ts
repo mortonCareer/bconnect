@@ -11,7 +11,8 @@ export { AUTH_HINT_COOKIE, setAuthHint, clearAuthHint, hasAuthHint } from './aut
 
 export {
   isApiError,
-  isRegisterMemberDuplicateError,
+  isRegisterMemberDuplicatePhoneError,
+  isRegisterMemberDuplicateUsernameError,
   isRegisterMemberSignupSessionError,
 } from './errors'
 
