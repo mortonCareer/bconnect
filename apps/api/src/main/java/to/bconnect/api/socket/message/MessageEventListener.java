@@ -14,6 +14,7 @@ import to.bconnect.api.core.domain.chat.DirectChatService;
 import to.bconnect.api.core.domain.chat.MessageTemplate;
 import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.core.domain.offer.OfferEvent;
+import to.bconnect.api.core.domain.task.TaskEvent;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.socket.WebSocketSecurityConfig;
 import to.bconnect.api.storage.chat.ChatType;
@@ -44,6 +45,18 @@ public class MessageEventListener {
 
         val chatId = directChatService.getOrCreate(event.companyOwnerId(), event.workerId());
         val created = messageService.create(chatId, ChatType.DIRECT, senderId, command);
+
+        messagingTemplate.convertAndSend(
+                WebSocketSecurityConfig.DIRECT_CHAT_TOPIC_PREFIX + chatId,
+                MessageResponse.of(created));
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleTaskEvent(TaskEvent event) {
+        val chatId = directChatService.getOrCreate(event.companyOwnerId(), event.workerId());
+        val created = messageService.create(chatId, ChatType.DIRECT, MemberEntity.SYSTEM_ID,
+                new SendMessage(MessageType.SYSTEM, MessageTemplate.TASK_UPDATED, List.of()));
 
         messagingTemplate.convertAndSend(
                 WebSocketSecurityConfig.DIRECT_CHAT_TOPIC_PREFIX + chatId,

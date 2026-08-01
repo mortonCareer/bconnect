@@ -70,8 +70,8 @@ class OfferServiceTest {
     }
 
     @Test
-    @DisplayName("deny - 마지막 후보가 거절하면 작업이 DRAFT로 돌아간다")
-    void deny_draft() {
+    @DisplayName("deny - 마지막 후보가 거절하면 작업이 NONE으로 돌아간다")
+    void deny_none() {
         // given
         val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
         val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
@@ -86,12 +86,12 @@ class OfferServiceTest {
 
         // then
         assertThat(offerRepository.findById(created).orElseThrow().getStatus()).isEqualTo(OfferStatus.DENIED);
-        assertThat(taskRepository.findById(task.getId()).orElseThrow().getStatus()).isEqualTo(TaskStatus.DRAFT);
+        assertThat(taskRepository.findById(task.getId()).orElseThrow().getStatus()).isEqualTo(TaskStatus.NONE);
     }
 
     @Test
-    @DisplayName("cancel - 마지막 후보를 취소하면 작업이 DRAFT로 돌아간다")
-    void cancel_draft() {
+    @DisplayName("cancel - 마지막 후보를 취소하면 작업이 NONE으로 돌아간다")
+    void cancel_none() {
         // given
         val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
         val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
@@ -106,12 +106,12 @@ class OfferServiceTest {
 
         // then
         assertThat(offerRepository.findById(created).orElseThrow().getStatus()).isEqualTo(OfferStatus.CANCELED);
-        assertThat(taskRepository.findById(task.getId()).orElseThrow().getStatus()).isEqualTo(TaskStatus.DRAFT);
+        assertThat(taskRepository.findById(task.getId()).orElseThrow().getStatus()).isEqualTo(TaskStatus.NONE);
     }
 
     @Test
-    @DisplayName("expire - 마지막 후보가 만료되면 작업이 DRAFT로 돌아간다")
-    void expire_draft() {
+    @DisplayName("expire - 마지막 후보가 만료되면 작업이 NONE으로 돌아간다")
+    void expire_none() {
         // given
         val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
         val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
@@ -126,12 +126,12 @@ class OfferServiceTest {
 
         // then
         assertThat(offerRepository.findById(created).orElseThrow().getStatus()).isEqualTo(OfferStatus.EXPIRED);
-        assertThat(taskRepository.findById(task.getId()).orElseThrow().getStatus()).isEqualTo(TaskStatus.DRAFT);
+        assertThat(taskRepository.findById(task.getId()).orElseThrow().getStatus()).isEqualTo(TaskStatus.NONE);
     }
 
     @Test
     @DisplayName("create - 이미 배정된 작업일 때 섭외하면 INVALID_TASK_STATUS로 실패한다")
-    void create_scheduledTask() {
+    void create_assignedTask() {
         // given
         val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
         val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
@@ -149,8 +149,8 @@ class OfferServiceTest {
     }
 
     @Test
-    @DisplayName("accept - 섭외를 수락하면 작업이 SCHEDULED가 된다")
-    void accept_scheduled() {
+    @DisplayName("accept - 섭외를 수락하면 작업이 ASSIGNED가 된다")
+    void accept_assigned() {
         // given
         val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
         val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
@@ -165,7 +165,7 @@ class OfferServiceTest {
 
         // then
         val found = taskRepository.findById(task.getId()).orElseThrow();
-        assertThat(found.getStatus()).isEqualTo(TaskStatus.SCHEDULED);
+        assertThat(found.getStatus()).isEqualTo(TaskStatus.ASSIGNED);
         assertThat(found.getWorkerId()).isEqualTo(worker.getId());
     }
 }

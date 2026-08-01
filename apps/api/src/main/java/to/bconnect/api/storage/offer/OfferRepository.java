@@ -11,7 +11,7 @@ public interface OfferRepository extends JpaRepository<OfferEntity, Long> {
 
     void deleteByTaskIdIn(Collection<Long> taskIds);
 
-    void deleteByTaskId(Long taskId);
+    void deleteAllByTaskId(Long taskId);
 
     boolean existsByTaskIdAndStatus(Long taskId, OfferStatus status);
 

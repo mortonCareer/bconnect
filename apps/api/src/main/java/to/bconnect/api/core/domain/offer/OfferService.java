@@ -17,22 +17,19 @@ import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.offer.OfferStatus;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskRepository;
-import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
 
 import java.time.LocalDate;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
+
+import static to.bconnect.api.storage.task.TaskStatus.OFFERABLE;
 
 @Service
 @RequiredArgsConstructor
 public class OfferService {
 
     private static final int DUE_EXTENSION_DAYS = 3;
-    private static final Set<TaskStatus> OFFERABLE_STATUSES =
-            EnumSet.of(TaskStatus.DRAFT, TaskStatus.OPEN, TaskStatus.OFFERED);
 
     private final OfferRepository offerRepository;
     private final CompanyRepository companyRepository;
@@ -58,7 +55,7 @@ public class OfferService {
         if (!project.getCompanyId().equals(company.getId()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        if (!OFFERABLE_STATUSES.contains(task.getStatus()))
+        if (!OFFERABLE.contains(task.getStatus()))
             throw new CodeException(OfferExceptionCode.INVALID_TASK_STATUS);
 
         if (!memberRepository.existsById(command.workerId()))
@@ -211,7 +208,7 @@ public class OfferService {
         val optional = offerRepository.findFirstByTaskIdAndStatusAndSeqGreaterThanOrderBySeqAsc(taskId, OfferStatus.PENDING, currSeq);
         if (optional.isEmpty()) {
             if (!offerRepository.existsByTaskIdAndStatus(taskId, OfferStatus.PENDING))
-                task.draft();
+                task.release();
             return;
         }
 
