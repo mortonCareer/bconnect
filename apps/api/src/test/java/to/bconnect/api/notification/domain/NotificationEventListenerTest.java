@@ -5,18 +5,29 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.core.domain.credential.CredentialReviewedEvent;
+import to.bconnect.api.core.domain.offer.OfferEvent;
 import to.bconnect.api.core.domain.profile.ProfileCreatedEvent;
 import to.bconnect.api.security.session.NewDeviceLoginEvent;
 import to.bconnect.api.storage.credential.CredentialStatus;
+import to.bconnect.api.storage.notification.NotificationEntity;
 import to.bconnect.api.storage.notification.NotificationReferenceType;
 import to.bconnect.api.storage.notification.NotificationRepository;
+import to.bconnect.api.storage.notification.NotificationSenderType;
 import to.bconnect.api.storage.notification.NotificationType;
+import to.bconnect.api.storage.offer.OfferStatus;
 import to.bconnect.api.support.IntegrationTest;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @IntegrationTest
 class NotificationEventListenerTest {
+
+    private static final Long SEED_WORKER_ID = 101L;
+    private static final Long SEED_COMPANY_OWNER_ID = 200L;
+    private static final Long SEED_COMPANY_ID = 200L;
+    private static final Long OWNERLESS_MEMBER_ID = 104L;
 
     @Autowired private NotificationEventListener notificationEventListener;
     @Autowired private NotificationRepository notificationRepository;
@@ -39,6 +50,100 @@ class NotificationEventListenerTest {
         assertThat(found.getFirst().getSenderId()).isNull();
         assertThat(found.getFirst().getReferenceType()).isNull();
         assertThat(found.getFirst().getReferenceId()).isNull();
+    }
+
+    @Test
+    @DisplayName("handleOfferEvent - ACTIVE 이벤트를 받으면 기술자와 업체 대표에게 알림이 저장된다")
+    void handleOfferEvent_active() {
+        // given
+        val offerId = 501L;
+
+        // when
+        notificationEventListener.handleOfferEvent(
+                new OfferEvent(offerId, SEED_WORKER_ID, SEED_COMPANY_OWNER_ID, OfferStatus.ACTIVE));
+
+        // then
+        val received = findByTypeAndReference(SEED_WORKER_ID, NotificationType.OFFER_RECEIVED, offerId);
+        assertThat(received).hasSize(1);
+        assertThat(received.getFirst().getSenderType()).isEqualTo(NotificationSenderType.COMPANY);
+        assertThat(received.getFirst().getSenderId()).isEqualTo(SEED_COMPANY_ID);
+
+        val sent = findByTypeAndReference(SEED_COMPANY_OWNER_ID, NotificationType.OFFER_SENT, offerId);
+        assertThat(sent).hasSize(1);
+        assertThat(sent.getFirst().getSenderType()).isEqualTo(NotificationSenderType.MEMBER);
+        assertThat(sent.getFirst().getSenderId()).isEqualTo(SEED_WORKER_ID);
+    }
+
+    @Test
+    @DisplayName("handleOfferEvent - ACCEPTED 이벤트를 받으면 업체 대표와 기술자에게 알림이 저장된다")
+    void handleOfferEvent_accepted() {
+        // given
+        val offerId = 502L;
+
+        // when
+        notificationEventListener.handleOfferEvent(
+                new OfferEvent(offerId, SEED_WORKER_ID, SEED_COMPANY_OWNER_ID, OfferStatus.ACCEPTED));
+
+        // then
+        assertThat(findByTypeAndReference(SEED_COMPANY_OWNER_ID, NotificationType.OFFER_ACCEPTED, offerId)).hasSize(1);
+        assertThat(findByTypeAndReference(SEED_WORKER_ID, NotificationType.OFFER_ACCEPT_COMPLETED, offerId)).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("handleOfferEvent - DENIED 이벤트를 받으면 업체 대표에게만 알림이 저장된다")
+    void handleOfferEvent_denied() {
+        // given
+        val offerId = 503L;
+
+        // when
+        notificationEventListener.handleOfferEvent(
+                new OfferEvent(offerId, SEED_WORKER_ID, SEED_COMPANY_OWNER_ID, OfferStatus.DENIED));
+
+        // then
+        assertThat(findByTypeAndReference(SEED_COMPANY_OWNER_ID, NotificationType.OFFER_DENIED, offerId)).hasSize(1);
+        val workerNotifications = notificationRepository.findAllByMemberId(SEED_WORKER_ID).stream()
+                .filter(it -> it.getReferenceId() != null && it.getReferenceId().equals(offerId))
+                .toList();
+        assertThat(workerNotifications).isEmpty();
+    }
+
+    @Test
+    @DisplayName("handleOfferEvent - EXPIRED 이벤트를 받으면 알림이 저장되지 않는다")
+    void handleOfferEvent_expired() {
+        // given
+        val offerId = 504L;
+
+        // when
+        notificationEventListener.handleOfferEvent(
+                new OfferEvent(offerId, SEED_WORKER_ID, SEED_COMPANY_OWNER_ID, OfferStatus.EXPIRED));
+
+        // then
+        val all = notificationRepository.findAll().stream()
+                .filter(it -> it.getReferenceId() != null && it.getReferenceId().equals(offerId))
+                .toList();
+        assertThat(all).isEmpty();
+    }
+
+    @Test
+    @DisplayName("handleOfferEvent - 업체가 없는 대표일 때 ACTIVE 이벤트를 받으면 기술자 알림은 스킵된다")
+    void handleOfferEvent_active_companyNotFound() {
+        // given
+        val offerId = 505L;
+
+        // when
+        notificationEventListener.handleOfferEvent(
+                new OfferEvent(offerId, SEED_WORKER_ID, OWNERLESS_MEMBER_ID, OfferStatus.ACTIVE));
+
+        // then
+        assertThat(findByTypeAndReference(SEED_WORKER_ID, NotificationType.OFFER_RECEIVED, offerId)).isEmpty();
+        assertThat(findByTypeAndReference(OWNERLESS_MEMBER_ID, NotificationType.OFFER_SENT, offerId)).hasSize(1);
+    }
+
+    private List<NotificationEntity> findByTypeAndReference(Long memberId, NotificationType type, Long referenceId) {
+        return notificationRepository.findAllByMemberId(memberId).stream()
+                .filter(it -> it.getType() == type)
+                .filter(it -> referenceId.equals(it.getReferenceId()))
+                .toList();
     }
 
     @Test
