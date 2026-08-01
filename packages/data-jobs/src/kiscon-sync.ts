@@ -14,42 +14,6 @@ const KISCON_SUBCON_URL = 'https://kiscon.net/cis/coad_subcon_limit_list.asp'
 
 const sql = createDb()
 
-async function ensureTables(): Promise<void> {
-  await sql`
-    CREATE TABLE IF NOT EXISTS kiscon_arrears (
-      id                 SERIAL PRIMARY KEY,
-      company_name       TEXT NOT NULL,
-      address            TEXT,
-      representative     TEXT,
-      penalty_history    TEXT,
-      arrears_amount     TEXT,
-      publication_period TEXT,
-      synced_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    )
-  `
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS kiscon_subcon_limits (
-      id                 SERIAL PRIMARY KEY,
-      violation_type     TEXT,
-      company_name       TEXT NOT NULL,
-      corp_no            TEXT,
-      biz_reg_no         TEXT NOT NULL,
-      representative     TEXT,
-      restriction_start  TEXT,
-      restriction_end    TEXT,
-      category           TEXT,
-      announcement_date  TEXT,
-      synced_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    )
-  `
-
-  await sql`
-    CREATE INDEX IF NOT EXISTS idx_kiscon_subcon_biz_no
-    ON kiscon_subcon_limits (biz_reg_no)
-  `
-}
-
 async function fetchHtml(url: string, body: Record<string, string>): Promise<string> {
   const response = await fetch(url, {
     method: 'POST',
@@ -95,8 +59,6 @@ async function fetchAllPages<T>(
 }
 
 async function main() {
-  await ensureTables()
-
   console.log('[kiscon-sync] 상습체불 크롤링...')
   const arrearsAll = await fetchAllPages(KISCON_ARREARS_URL, {}, parseArrearsHtml)
   const arrearsItems = arrearsAll.filter(isArrearsActive)

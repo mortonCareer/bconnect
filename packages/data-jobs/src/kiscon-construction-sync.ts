@@ -12,65 +12,6 @@ if (!API_KEY) throw new Error('KISCON_API_SERVICE_KEY is required')
 
 const sql = createDb()
 
-async function ensureTables(): Promise<void> {
-  await sql`
-    CREATE TABLE IF NOT EXISTS kiscon_registration (
-      ncr_gs_seq      BIGINT PRIMARY KEY,
-      biz_reg_no      TEXT NOT NULL,
-      company_name    TEXT,
-      representative  TEXT,
-      trade_name      TEXT,
-      trade_reg_no    TEXT,
-      address         TEXT,
-      region          TEXT,
-      region_detail   TEXT,
-      reg_date        INTEGER,
-      announce_date   INTEGER,
-      flag            TEXT,
-      phone           TEXT,
-      synced_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    )
-  `
-  await sql`
-    CREATE INDEX IF NOT EXISTS idx_kiscon_reg_biz_no
-    ON kiscon_registration (biz_reg_no)
-  `
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS kiscon_admin_penalty (
-      ncr_gs_seq        BIGINT PRIMARY KEY,
-      biz_reg_no        TEXT NOT NULL,
-      company_name      TEXT,
-      representative    TEXT,
-      trade_name        TEXT,
-      trade_reg_no      TEXT,
-      address           TEXT,
-      region            TEXT,
-      region_detail     TEXT,
-      penalty_type      TEXT,
-      violation_content TEXT,
-      violation_detail  TEXT,
-      penalty_ground    TEXT,
-      fine_amount       BIGINT DEFAULT 0,
-      penalty_amount    BIGINT DEFAULT 0,
-      stop_start_date   TEXT,
-      stop_end_date     TEXT,
-      cancel_date       TEXT,
-      correction        TEXT,
-      penalty_date      INTEGER,
-      announce_date     INTEGER,
-      flag              TEXT,
-      phone             TEXT,
-      has_injunction    TEXT,
-      synced_at         TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    )
-  `
-  await sql`
-    CREATE INDEX IF NOT EXISTS idx_kiscon_admi_biz_no
-    ON kiscon_admin_penalty (biz_reg_no)
-  `
-}
-
 interface ApiResponse<T> {
   response: {
     header: { resultCode: string; resultMsg: string }
@@ -354,8 +295,6 @@ async function main(): Promise<void> {
     sDate = formatDateParam(weekAgo)
     console.log(`[sync] 증분 모드: ${sDate} ~ ${eDate}`)
   }
-
-  await ensureTables()
 
   const regCount = await syncRegistration(sDate, eDate)
   console.log(`[GongsiReg] 완료: ${regCount}건 upserted`)
