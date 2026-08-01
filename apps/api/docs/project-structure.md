@@ -22,7 +22,7 @@ to.bconnect.api
 
 ## 패키지 구조
 > notification → socket → core → attachment → security → storage → common
-> sms → security
+> sms → security, common
 - `PackageDependencyTest.java` 참고
 
 ## 레이어 구조
