@@ -11,7 +11,9 @@ spring:
     init:
       schema-locations:
         - classpath:schema-h2.sql
-        - classpath:schema-crawler-h2.sql
+      data-locations:
+        - classpath:data.sql
+        - classpath:data-crawler.sql
 
 app:
   jwt:

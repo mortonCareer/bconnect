@@ -6,9 +6,9 @@ spring:
 
   sql:
     init:
-      data-locations: classpath:data-prod.sql
+      data-locations: []
       schema-locations:
-        - classpath:schema-postgresql.sql
+        - classpath:schema-prod.sql
 
 sentry:
   dsn: ${SENTRY_DSN}
