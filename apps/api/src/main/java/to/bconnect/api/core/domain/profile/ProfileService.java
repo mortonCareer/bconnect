@@ -3,6 +3,7 @@ package to.bconnect.api.core.domain.profile;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
@@ -20,6 +21,7 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
     private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Long create(AuthUser user, CreateProfile command) {
@@ -45,6 +47,8 @@ public class ProfileService {
 
         val profileId = profileRepository.save(created).getId();
         member.grantRole(Role.CAREER);
+
+        eventPublisher.publishEvent(new ProfileCreatedEvent(user.id(), profileId));
 
         return profileId;
     }

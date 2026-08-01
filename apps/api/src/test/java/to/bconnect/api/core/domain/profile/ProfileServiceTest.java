@@ -4,6 +4,8 @@ import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
@@ -21,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 
 @IntegrationTest
+@RecordApplicationEvents
 class ProfileServiceTest {
 
     private static final Long MISSING_ID = 999_999L;
@@ -28,6 +31,7 @@ class ProfileServiceTest {
     @Autowired private ProfileService profileService;
     @Autowired private ProfileRepository profileRepository;
     @Autowired private MemberRepository memberRepository;
+    @Autowired private ApplicationEvents applicationEvents;
 
     @Test
     @DisplayName("create - 회원이 존재할 때 프로필을 생성하면 프로필이 저장되고 CAREER 권한이 부여된다")
@@ -45,6 +49,8 @@ class ProfileServiceTest {
         assertThat(found.getMemberId()).isEqualTo(member.getId());
         val granted = memberRepository.findById(member.getId()).orElseThrow();
         assertThat(granted.getRoles()).contains(Role.CAREER).doesNotContain(Role.GUEST);
+        assertThat(applicationEvents.stream(ProfileCreatedEvent.class))
+                .containsExactly(new ProfileCreatedEvent(member.getId(), created));
     }
 
     @Test

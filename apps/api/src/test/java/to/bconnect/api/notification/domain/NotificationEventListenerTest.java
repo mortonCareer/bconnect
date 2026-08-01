@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.core.domain.credential.CredentialReviewedEvent;
+import to.bconnect.api.core.domain.profile.ProfileCreatedEvent;
 import to.bconnect.api.security.session.NewDeviceLoginEvent;
 import to.bconnect.api.storage.credential.CredentialStatus;
 import to.bconnect.api.storage.notification.NotificationReferenceType;
@@ -37,6 +38,25 @@ class NotificationEventListenerTest {
         assertThat(found.getFirst().getSenderType()).isNull();
         assertThat(found.getFirst().getSenderId()).isNull();
         assertThat(found.getFirst().getReferenceType()).isNull();
+        assertThat(found.getFirst().getReferenceId()).isNull();
+    }
+
+    @Test
+    @DisplayName("handleProfileCreated - 프로필 생성 이벤트를 받으면 프로필 완성 알림이 저장된다")
+    void handleProfileCreated_success() {
+        // given
+        val memberId = 103L;
+
+        // when
+        notificationEventListener.handleProfileCreated(new ProfileCreatedEvent(memberId, 100L));
+
+        // then
+        val found = notificationRepository.findAllByMemberId(memberId).stream()
+                .filter(it -> it.getType() == NotificationType.PROFILE_COMPLETED)
+                .toList();
+        assertThat(found).hasSize(1);
+        assertThat(found.getFirst().getSenderType()).isNull();
+        assertThat(found.getFirst().getReferenceType()).isEqualTo(NotificationReferenceType.PROFILE);
         assertThat(found.getFirst().getReferenceId()).isNull();
     }
 
