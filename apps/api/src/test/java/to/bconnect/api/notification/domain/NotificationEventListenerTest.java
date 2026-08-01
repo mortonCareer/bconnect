@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @IntegrationTest
 class NotificationEventListenerTest {
 
-    private static final Long SEED_WORKER_ID = 101L;
+    private static final Long SEED_WORKER_ID = 102L;
     private static final Long SEED_COMPANY_OWNER_ID = 200L;
     private static final Long SEED_COMPANY_ID = 200L;
     private static final Long OWNERLESS_MEMBER_ID = 104L;
@@ -39,10 +39,10 @@ class NotificationEventListenerTest {
     @DisplayName("handleNewDeviceLogin - 새 기기 로그인 이벤트를 받으면 시스템 알림이 저장된다")
     void handleNewDeviceLogin_success() {
         // given
-        val memberId = 101L;
+        val memberId = 103L;
 
         // when
-        notificationEventListener.handleNewDeviceLogin(new NewDeviceLoginEvent(memberId, "01000000003"));
+        notificationEventListener.handleNewDeviceLogin(new NewDeviceLoginEvent(memberId, "01000000004"));
 
         // then
         val found = notificationRepository.findAllByMemberId(memberId).stream()
