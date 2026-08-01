@@ -928,7 +928,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseRegisterDeviceResponse"
+                $ref: "#/components/schemas/ApiResponseVoid"
     delete:
       tags:
       - device-controller
@@ -2515,22 +2515,6 @@ components:
       required:
       - platform
       - token
-    ApiResponseRegisterDeviceResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        error:
-          $ref: "#/components/schemas/ExceptionCode"
-        data:
-          $ref: "#/components/schemas/RegisterDeviceResponse"
-    RegisterDeviceResponse:
-      type: object
-      properties:
-        registered:
-          type: boolean
-      required:
-      - registered
     CreateCredentialRequest:
       type: object
       properties:
@@ -3304,45 +3288,124 @@ components:
         nextCursor:
           type: integer
           format: int64
+    NotificationReferenceType:
+      type: string
+      enum:
+      - CHAT_ROOM
+      - PROFILE
+      - COWORKER_REQUEST
+      - OFFER
+      - CONTRACT
     NotificationResponse:
       type: object
       properties:
         id:
           type: integer
           format: int64
+        memberId:
+          type: integer
+          format: int64
         type:
           type: string
+        senderType:
+          $ref: "#/components/schemas/NotificationSenderType"
+        senderMember:
+          type: "null"
+          $ref: "#/components/schemas/WithdrawableMemberResponse"
+        senderCompany:
+          type: "null"
+          $ref: "#/components/schemas/WithdrawableCompanyResponse"
         message:
           type: string
-        content:
-          type:
-          - string
-          - "null"
         referenceType:
-          type: string
+          type: "null"
+          $ref: "#/components/schemas/NotificationReferenceType"
         referenceId:
           type:
           - integer
           - "null"
           format: int64
-        sender:
-          type: "null"
-          $ref: "#/components/schemas/MemberSummaryResponse"
         read:
           type: boolean
         createdAt:
           type: string
           format: date-time
       required:
-      - content
       - createdAt
       - id
+      - memberId
       - message
       - read
       - referenceId
       - referenceType
-      - sender
+      - senderCompany
+      - senderMember
+      - senderType
       - type
+    NotificationSenderType:
+      type: string
+      enum:
+      - MEMBER
+      - COMPANY
+    WithdrawableCompanyResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        memberId:
+          type:
+          - integer
+          - "null"
+          format: int64
+        name:
+          type:
+          - string
+          - "null"
+        brn:
+          type:
+          - string
+          - "null"
+        createdAt:
+          type:
+          - string
+          - "null"
+          format: date-time
+        modifiedAt:
+          type:
+          - string
+          - "null"
+          format: date-time
+      required:
+      - brn
+      - createdAt
+      - id
+      - memberId
+      - modifiedAt
+      - name
+    WithdrawableMemberResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type:
+          - string
+          - "null"
+        name:
+          type:
+          - string
+          - "null"
+        picture:
+          type:
+          - string
+          - "null"
+      required:
+      - id
+      - name
+      - picture
+      - username
     ApiResponseCursorPageMemberResponse:
       type: object
       properties:
@@ -3527,29 +3590,6 @@ components:
       - FILE
       - SYSTEM
       - OFFER
-    WithdrawableMemberResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        username:
-          type:
-          - string
-          - "null"
-        name:
-          type:
-          - string
-          - "null"
-        picture:
-          type:
-          - string
-          - "null"
-      required:
-      - id
-      - name
-      - picture
-      - username
     ApiResponseGroupChatResponse:
       type: object
       properties:
