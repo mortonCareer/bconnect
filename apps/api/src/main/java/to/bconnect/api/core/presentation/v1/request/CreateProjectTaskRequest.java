@@ -1,5 +1,7 @@
 package to.bconnect.api.core.presentation.v1.request;
 
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -19,6 +21,9 @@ public record CreateProjectTaskRequest(
         String memo
 ) {
     public CreateProjectTask toCommand() {
+        if (end.isBefore(start))
+            throw new CodeException(CommonExceptionCode.NOT_VALID);
+
         return new CreateProjectTask(trades, start, end, projectId, title, requirement, memo);
     }
 }
