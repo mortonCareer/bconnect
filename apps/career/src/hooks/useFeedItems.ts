@@ -9,8 +9,7 @@ import {
   useGetMyMember,
 } from '@bconnect/api-client'
 import type { Trade, ProfileRole } from '@bconnect/api-client'
-import { daysBetween } from '@bconnect/config/date'
-import { formatRelativeTime } from '@bconnect/config/format'
+import { formatDurationDays, formatRelativeTime } from '@bconnect/config/format'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { ROLE_LABELS } from '@/lib/role-labels'
 import { REGION_LABELS, type Region } from '@/lib/region'
@@ -49,13 +48,6 @@ interface UseFeedItemsOptions {
   maxExperience?: number
   authorId?: number
   limit?: number
-}
-
-/** task.start~end(YYYY-MM-DD, 양끝 포함) → '4일 소요'. 파싱 불가/역순이면 생략. */
-function formatDurationDays(start: string, end: string): string | undefined {
-  const days = daysBetween(start, end) + 1
-  if (!Number.isFinite(days) || days < 1) return undefined
-  return `${days}일 소요`
 }
 
 export function useFeedItems({

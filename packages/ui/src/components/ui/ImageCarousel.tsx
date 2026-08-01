@@ -11,6 +11,8 @@ export interface ImageCarouselProps {
   images: string[]
   alt?: string
   className?: string
+  /** 이미지 프레임(높이·모서리·배경) 오버라이드 — 전체폭 카드는 'rounded-none' 등 */
+  imageClassName?: string
   /** 외부 CDN 핫링크 차단 회피용 (예: 네이버 크롤 이미지는 'no-referrer' 필요) */
   referrerPolicy?: React.HTMLAttributeReferrerPolicy
 }
@@ -20,7 +22,13 @@ export interface ImageCarouselProps {
  * 인덱스 점은 이미지 내부 하단(아래에서 10px) 중앙에 오버레이.
  * 이미지 1장이면 캐러셀/점 없이 단일 이미지로 렌더.
  */
-export function ImageCarousel({ images, alt, className, referrerPolicy }: ImageCarouselProps) {
+export function ImageCarousel({
+  images,
+  alt,
+  className,
+  imageClassName,
+  referrerPolicy,
+}: ImageCarouselProps) {
   const [api, setApi] = React.useState<CarouselApi>()
   const [selected, setSelected] = React.useState(0)
   const [count, setCount] = React.useState(0)
@@ -42,7 +50,9 @@ export function ImageCarousel({ images, alt, className, referrerPolicy }: ImageC
 
   if (images.length <= 1) {
     return (
-      <div className={cn('relative h-55 w-full overflow-hidden rounded-sm', className)}>
+      <div
+        className={cn('relative h-55 w-full overflow-hidden rounded-sm', className, imageClassName)}
+      >
         <img
           src={images[0]}
           alt={alt}
@@ -58,7 +68,7 @@ export function ImageCarousel({ images, alt, className, referrerPolicy }: ImageC
       <CarouselContent className="ml-0">
         {images.map((src, i) => (
           <CarouselItem key={i} className="pl-0">
-            <div className="relative h-55 w-full overflow-hidden rounded-sm">
+            <div className={cn('relative h-55 w-full overflow-hidden rounded-sm', imageClassName)}>
               <img
                 src={src}
                 alt={alt}

@@ -229,7 +229,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
           />
         </div>
 
-        {/* 작업물(Post) 썸네일 3개 — 소요일은 Feed 에 task 정보가 없어 미표시 */}
+        {/* 작업물(Post) 썸네일 3개 — 소요일은 게시물에 연결된 작업(task) 기간, 미연결이면 공백 */}
         <div className="flex flex-1 gap-[9px]">
           {portfolios.map((p, i) => (
             <PortfolioThumb

@@ -1,4 +1,4 @@
-import { daysBetween } from '../date'
+import { daysBetween, durationDays } from '../date'
 
 const MINUTE = 60 * 1000
 const HOUR = 60 * MINUTE
@@ -17,11 +17,10 @@ export function formatRelativeTime(dateStr: string): string {
   return `${Math.floor(diff / MONTH)}개월 전`
 }
 
-export function formatDuration(start: string, end: string): string {
-  const startDate = new Date(start)
-  const endDate = new Date(end)
-  const days = Math.ceil((endDate.getTime() - startDate.getTime()) / DAY)
-  return `${days}일 소요`
+/** task.start~end(YYYY-MM-DD, 양끝 포함) → '4일 소요'. 파싱 불가·역순이면 undefined. */
+export function formatDurationDays(start: string, end: string): string | undefined {
+  const days = durationDays(start, end)
+  return days == null ? undefined : `${days}일 소요`
 }
 
 /** "12.25 - 12.26 (총 2일 소요)" — 작업기간 표시(시작·종료일 포함). */
