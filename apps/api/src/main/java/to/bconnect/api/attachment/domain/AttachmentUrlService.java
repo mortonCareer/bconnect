@@ -5,8 +5,8 @@ import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.infrastructure.cloudfront.CloudFrontUrlResolver;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.attachment.AttachmentType;
-import to.bconnect.api.storage.attachment.ReferenceType;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,7 +21,7 @@ public class AttachmentUrlService {
     private final CloudFrontUrlResolver urlResolver;
 
     @Transactional(readOnly = true)
-    public String get(ReferenceType referenceType, Long referenceId, ImageSize size) {
+    public String get(AttachmentReferenceType referenceType, Long referenceId, ImageSize size) {
         return attachmentFinder.list(referenceType, referenceId, AttachmentType.IMAGE).stream()
                 .findFirst()
                 .map(it -> parseUrl(it, size))
@@ -29,7 +29,7 @@ public class AttachmentUrlService {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, String> map(ReferenceType referenceType, Collection<Long> referenceIds, ImageSize size) {
+    public Map<Long, String> map(AttachmentReferenceType referenceType, Collection<Long> referenceIds, ImageSize size) {
         return attachmentFinder.map(referenceType, referenceIds, AttachmentType.IMAGE).values().stream()
                 .collect(Collectors.toMap(Attachment::referenceId, it -> parseUrl(it, size)));
     }

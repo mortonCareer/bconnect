@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.support.fixture.CursorFactory;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
@@ -101,7 +101,7 @@ class CompanyServiceTest {
         val created = companyRepository.findById(companyId).orElseThrow();
         assertThat(created.getBrn()).isEqualTo("0000001000");
         val linked = attachmentRepository.findById(attachment.getId()).orElseThrow();
-        assertThat(linked.getReferenceType()).isEqualTo(ReferenceType.COMPANY);
+        assertThat(linked.getReferenceType()).isEqualTo(AttachmentReferenceType.COMPANY);
         assertThat(linked.getReferenceId()).isEqualTo(companyId);
         val granted = memberRepository.findById(member.getId()).orElseThrow();
         assertThat(granted.getRoles()).contains(Role.PLAN);
@@ -122,7 +122,7 @@ class CompanyServiceTest {
 
         // then
         val found = attachmentRepository.findById(attachment.getId()).orElseThrow();
-        assertThat(found.getReferenceType()).isEqualTo(ReferenceType.COMPANY);
+        assertThat(found.getReferenceType()).isEqualTo(AttachmentReferenceType.COMPANY);
         assertThat(found.getReferenceId()).isEqualTo(company.getId());
     }
 
@@ -134,7 +134,7 @@ class CompanyServiceTest {
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val first = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         first.complete();
-        first.link(ReferenceType.COMPANY, company.getId());
+        first.link(AttachmentReferenceType.COMPANY, company.getId());
         val second = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         second.complete();
         val user = UserFactory.domain(member.getId(), Role.PLAN);
@@ -147,7 +147,7 @@ class CompanyServiceTest {
         assertThat(replaced.getReferenceType()).isNull();
         assertThat(replaced.getReferenceId()).isNull();
         val linked = attachmentRepository.findById(second.getId()).orElseThrow();
-        assertThat(linked.getReferenceType()).isEqualTo(ReferenceType.COMPANY);
+        assertThat(linked.getReferenceType()).isEqualTo(AttachmentReferenceType.COMPANY);
         assertThat(linked.getReferenceId()).isEqualTo(company.getId());
     }
 
@@ -159,7 +159,7 @@ class CompanyServiceTest {
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.COMPANY, company.getId());
+        attachment.link(AttachmentReferenceType.COMPANY, company.getId());
         val user = UserFactory.domain(member.getId(), Role.PLAN);
 
         // when
@@ -179,7 +179,7 @@ class CompanyServiceTest {
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.COMPANY, company.getId());
+        attachment.link(AttachmentReferenceType.COMPANY, company.getId());
         val user = UserFactory.domain(member.getId(), Role.PLAN);
 
         // when

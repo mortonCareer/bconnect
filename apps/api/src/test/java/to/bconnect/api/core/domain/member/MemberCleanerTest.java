@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
@@ -91,16 +91,16 @@ class MemberCleanerTest {
 
         val memberAttachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         memberAttachment.complete();
-        memberAttachment.link(ReferenceType.MEMBER, member.getId());
+        memberAttachment.link(AttachmentReferenceType.MEMBER, member.getId());
         val credentialAttachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         credentialAttachment.complete();
-        credentialAttachment.link(ReferenceType.CREDENTIAL, credential.getId());
+        credentialAttachment.link(AttachmentReferenceType.CREDENTIAL, credential.getId());
         val postAttachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         postAttachment.complete();
-        postAttachment.link(ReferenceType.POST, post.getId());
+        postAttachment.link(AttachmentReferenceType.POST, post.getId());
         val driveAttachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         driveAttachment.complete();
-        driveAttachment.link(ReferenceType.DRIVE, drive.getId());
+        driveAttachment.link(AttachmentReferenceType.DRIVE, drive.getId());
 
         val user = UserFactory.domain(member.getId(), Role.CAREER);
 

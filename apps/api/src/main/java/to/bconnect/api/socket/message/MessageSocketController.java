@@ -12,9 +12,9 @@ import org.springframework.stereotype.Controller;
 import to.bconnect.api.attachment.domain.AttachmentFinder;
 import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.chat.ChatType;
 
 
@@ -36,7 +36,7 @@ public class MessageSocketController {
             @AuthenticationPrincipal AuthUser user,
             @Payload @Valid SendMessageRequest request) {
         val message = messageSocketService.broadcast(user, chatId, ChatType.GROUP, request.toCommand());
-        val attachments = attachmentFinder.list(ReferenceType.MESSAGE, message.id());
+        val attachments = attachmentFinder.list(AttachmentReferenceType.MESSAGE, message.id());
         val urlMap = attachmentUrlService.parseUrlMap(attachments, ImageSize.SMALL);
         return MessageResponse.of(message, attachments, urlMap);
     }
@@ -48,7 +48,7 @@ public class MessageSocketController {
             @AuthenticationPrincipal AuthUser user,
             @Payload @Valid SendMessageRequest request) {
         val message = messageSocketService.broadcast(user, chatId, ChatType.DIRECT, request.toCommand());
-        val attachments = attachmentFinder.list(ReferenceType.MESSAGE, message.id());
+        val attachments = attachmentFinder.list(AttachmentReferenceType.MESSAGE, message.id());
         val urlMap = attachmentUrlService.parseUrlMap(attachments, ImageSize.SMALL);
         return MessageResponse.of(message, attachments, urlMap);
     }

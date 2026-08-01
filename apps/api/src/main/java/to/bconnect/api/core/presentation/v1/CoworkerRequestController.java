@@ -21,7 +21,7 @@ import to.bconnect.api.core.presentation.v1.request.CreateCoworkerRequest;
 import to.bconnect.api.core.presentation.v1.response.CoworkerRequestResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 
 import java.util.List;
 
@@ -99,7 +99,7 @@ public class CoworkerRequestController {
         val memberIds = requests.stream().map(CoworkerRequest::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
         val profileMap = profileResolver.resolveMap(memberIds);
-        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(AttachmentReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         return requests.stream()
                 .map(it -> {

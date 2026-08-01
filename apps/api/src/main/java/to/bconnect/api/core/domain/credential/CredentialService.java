@@ -10,7 +10,7 @@ import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.credential.CredentialEntity;
 import to.bconnect.api.storage.credential.CredentialRepository;
 import to.bconnect.api.storage.credential.CredentialStatus;
@@ -68,7 +68,7 @@ public class CredentialService {
 
         credentialRepository.save(created);
         if (command.attachmentId() != null)
-            attachmentLinker.link(ReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
+            attachmentLinker.link(AttachmentReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
 
         return created.getId();
     }
@@ -83,7 +83,7 @@ public class CredentialService {
         if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        attachmentLinker.unlink(ReferenceType.CREDENTIAL, found.getId());
+        attachmentLinker.unlink(AttachmentReferenceType.CREDENTIAL, found.getId());
         credentialRepository.delete(found);
     }
 

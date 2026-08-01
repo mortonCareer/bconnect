@@ -15,8 +15,10 @@ public record Member(
     Instant createdAt,
     Instant modifiedAt
 ) {
+    public static final String WITHDRAW_NAME = "탈퇴한 사용자";
+
     public static Member withdrawn(Long id) {
-        return new Member(id, null, null, null, null, null, null);
+        return new Member(id, null, WITHDRAW_NAME, null, null, null, null);
     }
 
     public static Member of(MemberEntity entity) {

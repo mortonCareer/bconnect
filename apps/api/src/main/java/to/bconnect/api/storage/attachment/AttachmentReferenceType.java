@@ -1,6 +1,6 @@
 package to.bconnect.api.storage.attachment;
 
-public enum ReferenceType {
+public enum AttachmentReferenceType {
     POST,
     MESSAGE,
     COMPANY,

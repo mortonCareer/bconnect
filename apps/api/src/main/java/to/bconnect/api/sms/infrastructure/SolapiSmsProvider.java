@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.sms.SmsProvider;
 
+import static to.bconnect.api.common.CommonUtils.maskPhone;
+
 /**
  * @see <a href="https://github.com/solapi/solapi-kotlin/blob/main/LLM_GUIDE.md">SOLAPI : LLM Guide</a>
  */
@@ -64,10 +66,5 @@ public class SolapiSmsProvider implements SmsProvider {
             e.addSuppressed(original);
             throw new RuntimeException("SMS 발송 실패: " + maskPhone(sms.getTo()), e);
         }
-    }
-
-    private static String maskPhone(String phone) {
-        if (phone == null || phone.length() < 7) return "***";
-        return phone.substring(0, 3) + "****" + phone.substring(phone.length() - 4);
     }
 }

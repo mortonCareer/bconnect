@@ -10,8 +10,8 @@ import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.attachment.AttachmentType;
-import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.drive.DriveEntity;
 import to.bconnect.api.storage.drive.DriveRepository;
@@ -37,7 +37,7 @@ public class DriveFileService {
     public List<Attachment> list(AuthUser user, Long driveId, AttachmentType type) {
         if (!driveFinder.isOwner(user.id(), driveId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
-        return attachmentFinder.list(ReferenceType.DRIVE, driveId, type);
+        return attachmentFinder.list(AttachmentReferenceType.DRIVE, driveId, type);
     }
 
     @Transactional
@@ -62,7 +62,7 @@ public class DriveFileService {
             if (member.getDriveUsedBytes() + size > member.getDriveLimitBytes())
                 throw new CodeException(DriveExceptionCode.LIMIT_EXCEEDED);
 
-            attachmentLinker.link(ReferenceType.DRIVE, driveId, attachmentIds);
+            attachmentLinker.link(AttachmentReferenceType.DRIVE, driveId, attachmentIds);
             member.increaseDriveUsed(size);
             return;
         }
@@ -75,7 +75,7 @@ public class DriveFileService {
         if (company.getDriveUsedBytes() + size > company.getDriveLimitBytes())
             throw new CodeException(DriveExceptionCode.LIMIT_EXCEEDED);
 
-        attachmentLinker.link(ReferenceType.DRIVE, driveId, attachmentIds);
+        attachmentLinker.link(AttachmentReferenceType.DRIVE, driveId, attachmentIds);
         company.increaseDriveUsed(size);
     }
 
@@ -86,8 +86,8 @@ public class DriveFileService {
         val found = driveRepository.findById(driveId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        val attachment = attachmentFinder.get(ReferenceType.DRIVE, driveId, attachmentId);
-        attachmentLinker.unlink(ReferenceType.DRIVE, driveId, attachmentId);
+        val attachment = attachmentFinder.get(AttachmentReferenceType.DRIVE, driveId, attachmentId);
+        attachmentLinker.unlink(AttachmentReferenceType.DRIVE, driveId, attachmentId);
 
         // decrease usage
         if (found.getType() == DriveType.PERSONAL) {
@@ -107,8 +107,8 @@ public class DriveFileService {
 
     @Transactional
     public void detachAll(DriveEntity drive) {
-        val unlinked = attachmentFinder.list(ReferenceType.DRIVE, drive.getId());
-        attachmentLinker.unlink(ReferenceType.DRIVE, drive.getId());
+        val unlinked = attachmentFinder.list(AttachmentReferenceType.DRIVE, drive.getId());
+        attachmentLinker.unlink(AttachmentReferenceType.DRIVE, drive.getId());
         val delta = unlinked.stream().mapToLong(Attachment::size).sum();
 
         // decrease usage

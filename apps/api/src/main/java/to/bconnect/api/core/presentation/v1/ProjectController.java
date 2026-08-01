@@ -24,7 +24,7 @@ import to.bconnect.api.core.presentation.v1.response.ProjectResponse;
 import to.bconnect.api.core.presentation.v1.response.TaskResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 
 import java.util.List;
 import java.util.Objects;
@@ -73,7 +73,7 @@ public class ProjectController {
             HttpServletResponse response) {
         val assigneeIds = taskQueryService.listAssigneeIdsByProject(user, id);
         val memberMap = memberResolver.resolveMap(assigneeIds);
-        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, assigneeIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(AttachmentReferenceType.MEMBER, assigneeIds, ImageSize.SMALL);
 
         val body = assigneeIds.stream()
                 .map(memberMap::get)

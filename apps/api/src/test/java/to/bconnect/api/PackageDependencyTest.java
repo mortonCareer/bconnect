@@ -47,7 +47,7 @@ public class PackageDependencyTest {
 
     @ArchTest
     ArchRule commonPackageRule = classes().that().resideInAPackage(COMMON)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, SECURITY, STORAGE, COMMON, CRAWLER, NOTIFICATION)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, SECURITY, STORAGE, COMMON, SMS, CRAWLER, NOTIFICATION)
             .andShould().onlyDependOnClassesThat(
                     resideInAnyPackage(COMMON).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
             );

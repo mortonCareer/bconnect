@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
@@ -61,10 +61,10 @@ public class MemberCleaner {
 
         sessionRepository.findByMemberId(memberId).ifPresent(sessionRepository::delete);
         profileRepository.findByMemberId(memberId).ifPresent(profileRepository::delete);
-        attachmentLinker.unlink(ReferenceType.MEMBER, memberId);
+        attachmentLinker.unlink(AttachmentReferenceType.MEMBER, memberId);
 
         val credentials = credentialRepository.findAllByMemberId(memberId);
-        attachmentLinker.unlink(ReferenceType.CREDENTIAL, credentials.stream().map(CredentialEntity::getId).toList());
+        attachmentLinker.unlink(AttachmentReferenceType.CREDENTIAL, credentials.stream().map(CredentialEntity::getId).toList());
         credentialRepository.deleteAll(credentials);
 
         coworkerRepository.deleteAll(coworkerRepository.findAllByMemberId(memberId));
@@ -74,14 +74,14 @@ public class MemberCleaner {
         recommendationRepository.deleteAll(recommendationRepository.findAllByToId(memberId));
 
         val posts = postRepository.findAllByMemberId(memberId);
-        attachmentLinker.unlink(ReferenceType.POST, posts.stream().map(PostEntity::getId).toList());
+        attachmentLinker.unlink(AttachmentReferenceType.POST, posts.stream().map(PostEntity::getId).toList());
         postRepository.deleteAll(posts);
 
         offerRepository.deleteAll(offerRepository.findAllByWorkerId(memberId));
         taskRepository.deleteAll(taskRepository.findAllByWorkerIdAndType(memberId, TaskType.WORKER));
 
         deviceTokenRepository.deleteAll(deviceTokenRepository.findAllByMemberId(memberId));
-        notificationRepository.deleteAll(notificationRepository.findAllByReceiverId(memberId));
+        notificationRepository.deleteAll(notificationRepository.findAllByMemberId(memberId));
         notificationRepository.deleteAll(notificationRepository.findAllBySenderId(memberId));
 
         driveMemberRepository.deleteAll(driveMemberRepository.findAllByMemberId(memberId));
@@ -91,7 +91,7 @@ public class MemberCleaner {
             noteRepository.deleteAllByBoardId(board.getId());
             boardRepository.delete(board);
         }));
-        attachmentLinker.unlink(ReferenceType.DRIVE, drives.stream().map(DriveEntity::getId).toList());
+        attachmentLinker.unlink(AttachmentReferenceType.DRIVE, drives.stream().map(DriveEntity::getId).toList());
         drives.forEach(it -> driveMemberRepository.deleteByDriveId(it.getId()));
         driveRepository.deleteAll(drives);
     }

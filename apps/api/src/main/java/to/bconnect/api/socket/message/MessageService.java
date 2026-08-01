@@ -8,7 +8,7 @@ import to.bconnect.api.attachment.domain.AttachmentFinder;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.chat.SendMessage;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.chat.DirectChatRepository;
 import to.bconnect.api.storage.chat.MessageEntity;
@@ -33,7 +33,7 @@ public class MessageService {
                 chatId, type, senderId, command.type(), command.content()));
 
         attachmentFinder.validateOwnership(senderId, command.attachmentIds());
-        attachmentLinker.link(ReferenceType.MESSAGE, created.getId(), command.attachmentIds());
+        attachmentLinker.link(AttachmentReferenceType.MESSAGE, created.getId(), command.attachmentIds());
         return Message.of(created);
     }
 
