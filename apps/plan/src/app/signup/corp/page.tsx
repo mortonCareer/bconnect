@@ -3,7 +3,7 @@
  */
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -50,16 +50,6 @@ export default function SignupCorpPage() {
   })
   const createCompanyMutation = useCreateCompany()
   const [issuedAccessToken, setIssuedAccessToken] = useState<string | null>(null)
-
-  // signupToken 없으면 로그인으로 리다이렉트
-  useEffect(() => {
-    if (isAuthenticated) return
-    if (!formData.signupToken) {
-      router.replace('/login')
-    } else if (!formData.username || !formData.name) {
-      router.replace('/signup/member')
-    }
-  }, [isAuthenticated, formData.signupToken, formData.username, formData.name, router])
 
   const form = useForm<CorpFormData>({
     resolver: zodResolver(corpSchema),
@@ -124,9 +114,6 @@ export default function SignupCorpPage() {
       server.capture(err, form.getValues())
     }
   }
-
-  if (!isAuthenticated && (!formData.signupToken || !formData.username || !formData.name))
-    return null
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">

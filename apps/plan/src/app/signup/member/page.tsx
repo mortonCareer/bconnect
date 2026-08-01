@@ -4,7 +4,6 @@
  */
 'use client'
 
-import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -24,13 +23,6 @@ import { memberSchema, type MemberFormData } from './schema'
 export default function SignupMemberPage() {
   const router = useRouter()
   const { formData, setMember } = useSignupStore()
-
-  // signupToken 없으면 로그인으로 리다이렉트
-  useEffect(() => {
-    if (!formData.signupToken) {
-      router.replace('/login')
-    }
-  }, [formData.signupToken, router])
 
   const form = useForm<MemberFormData>({
     resolver: zodResolver(memberSchema),
@@ -57,8 +49,6 @@ export default function SignupMemberPage() {
       server.capture(err, data)
     }
   }
-
-  if (!formData.signupToken) return null
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
