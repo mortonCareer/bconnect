@@ -4,6 +4,8 @@ import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import to.bconnect.api.storage.device.DevicePlatform;
 import to.bconnect.api.storage.device.DeviceTokenEntity;
 import to.bconnect.api.storage.device.DeviceTokenRepository;
@@ -17,11 +19,13 @@ import to.bconnect.api.support.fixture.UserFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @IntegrationTest
+@RecordApplicationEvents
 class DeviceServiceTest {
 
     @Autowired private DeviceService deviceService;
     @Autowired private DeviceTokenRepository deviceTokenRepository;
     @Autowired private MemberRepository memberRepository;
+    @Autowired private ApplicationEvents applicationEvents;
 
     @Test
     @DisplayName("list - 활성·비활성 device가 있을 때 조회하면 활성 device만 반환한다")
@@ -56,6 +60,8 @@ class DeviceServiceTest {
         val created = deviceTokenRepository.findByToken(token).orElseThrow();
         assertThat(created.getMemberId()).isEqualTo(member.getId());
         assertThat(created.getToken()).isEqualTo(token);
+        assertThat(applicationEvents.stream(DeviceRegisteredEvent.class))
+                .containsExactly(new DeviceRegisteredEvent(member.getId()));
     }
 
     @Test
@@ -75,6 +81,7 @@ class DeviceServiceTest {
         val found = deviceTokenRepository.findById(created.getId()).orElseThrow();
         assertThat(found.getMemberId()).isEqualTo(member.getId());
         assertThat(found.isEnabled()).isTrue();
+        assertThat(applicationEvents.stream(DeviceRegisteredEvent.class)).isEmpty();
     }
 
     @Test

@@ -221,6 +221,19 @@ public class NotificationEventListener {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleDeviceRegistered(DeviceRegisteredEvent event) {
+        notificationService.notify(List.of(new PushNotification(
+                event.memberId(),
+                NotificationType.DEVICE_REGISTERED,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null)));
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleNewDeviceLogin(NewDeviceLoginEvent event) {
         notificationService.notify(List.of(new PushNotification(
                 event.memberId(),

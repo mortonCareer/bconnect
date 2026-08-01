@@ -222,6 +222,24 @@ class NotificationEventListenerTest {
     }
 
     @Test
+    @DisplayName("handleDeviceRegistered - 디바이스 등록 이벤트를 받으면 확인 알림이 저장된다")
+    void handleDeviceRegistered_success() {
+        // given
+        val memberId = 100L;
+
+        // when
+        notificationEventListener.handleDeviceRegistered(new DeviceRegisteredEvent(memberId));
+
+        // then
+        val found = notificationRepository.findAllByMemberId(memberId).stream()
+                .filter(it -> it.getType() == NotificationType.DEVICE_REGISTERED)
+                .toList();
+        assertThat(found).hasSize(1);
+        assertThat(found.getFirst().getSenderType()).isNull();
+        assertThat(found.getFirst().getReferenceType()).isNull();
+    }
+
+    @Test
     @DisplayName("handleCredentialReviewed - 승인 이벤트를 받으면 승인 알림이 저장된다")
     void handleCredentialReviewed_accepted() {
         // given

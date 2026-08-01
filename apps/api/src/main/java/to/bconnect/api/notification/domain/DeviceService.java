@@ -3,6 +3,7 @@ package to.bconnect.api.notification.domain;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.notification.domain.push.PushEndpointRegistry;
@@ -20,6 +21,7 @@ public class DeviceService {
 
     private final DeviceTokenRepository deviceTokenRepository;
     private final PushEndpointRegistry pushEndpointRegistry;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<DeviceTokenEntity> list(Long memberId) {
@@ -37,6 +39,7 @@ public class DeviceService {
         } else {
             val created = new DeviceTokenEntity(user.id(), token, platform, endpoint);
             deviceTokenRepository.save(created);
+            eventPublisher.publishEvent(new DeviceRegisteredEvent(user.id()));
         }
     }
 
