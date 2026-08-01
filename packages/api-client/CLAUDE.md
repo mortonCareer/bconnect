@@ -38,7 +38,7 @@ springdoc의 Java 파생 spec을 FE가 기대하는 모양으로 compile-time �
 
 1. **info.title** → `Bconnect API` (mock aggregator 이름 `getBconnectAPIMock` 이 title 에서 파생)
 2. **auth 보충 병합** — 필터 기반이라 springdoc 이 못 보는 `POST /auth/otp/verify`·`POST /auth/refresh` 의 path + schema 를 `auth-supplement.ts` 에서 추가. 없는 것만 추가하므로 BE 가 향후 컨트롤러화하면 자동으로 우선
-3. **schema rename** — 엔티티 `*Response` suffix strip (`MemberResponse` → `Member`). op-response DTO(엔티티 아님)는 `SCHEMA_KEEP_RESPONSE` 목록으로 유지 (CheckUsername/SendOtp/RefreshToken/RegisterMember/RegisterDevice/VerifyOtpLogin/VerifyOtpSignup Response)
+3. **schema rename** — 엔티티 `*Response` suffix strip (`MemberResponse` → `Member`). op-response DTO(엔티티 아님)는 `SCHEMA_KEEP_RESPONSE` 목록으로 유지 (CheckUsername/SendOtp/RefreshToken/RegisterMember/VerifyOtpLogin/VerifyOtpSignup Response)
 4. **operationId 규칙** — springdoc opId(Java 메서드명) 무시, (method + path) 규칙으로 파생 (아래)
 5. **객체 쿼리 파라미터 flatten** — springdoc 이 record 파라미터(`CursorLimit` 등)를 객체 쿼리 파라미터 하나로 emit 하지만 Spring 바인딩·orval URL 빌더 둘 다 flat(`?cursor=&limit=`) 전제 → 프로퍼티 단위 파라미터로 펼침. 안 펼치면 `cursorLimit=[object Object]` 로 전송돼 값이 BE 에 닿지 않는다
 6. **envelope unwrap** — `{success, data}` 에서 `data` 만 노출 (compile-time; 런타임 unwrap 은 customFetch)

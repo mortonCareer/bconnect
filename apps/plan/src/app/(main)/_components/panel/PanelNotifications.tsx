@@ -1,6 +1,7 @@
 'use client'
 
 import { NotificationsView, PanelAside } from '@bconnect/features'
+import { NotificationReferenceType } from '@bconnect/api-client'
 import type { Notification } from '@bconnect/api-client'
 import { usePanelNav } from '@/hooks/usePanelNav'
 
@@ -10,10 +11,9 @@ export function PanelNotifications() {
   /**
    * 알림 유형(BE `referenceType`)별 plan 이동 목적지 — 채팅방 패널만 존재.
    * 나머지(프로필 완성 넛지·섭외·동료요청·계약)는 기술자(career) 대상이라 plan 목적지 없음 → 읽음 처리만.
-   * BE 는 referenceType 을 소문자로 내려준다(`chat_room`) — 방어적으로 정규화.
    */
   const resolveHref = (n: Notification): string | undefined => {
-    if (n.referenceType?.toLowerCase() === 'chat_room' && n.referenceId != null) {
+    if (n.referenceType === NotificationReferenceType.CHAT_ROOM && n.referenceId != null) {
       return panelHref(`messages/${n.referenceId}`)
     }
     return undefined
