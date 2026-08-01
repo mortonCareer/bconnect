@@ -2,20 +2,20 @@
 
 import { useRouter } from 'next/navigation'
 import { NotificationsView } from '@bconnect/features'
+import { NotificationReferenceType } from '@bconnect/api-client'
 import type { Notification } from '@bconnect/api-client'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
 
 /**
  * 알림 유형(BE `referenceType`)별 career 이동 목적지.
- * chat_room → 채팅방, profile → 본인 프로필 편집(완성 넛지).
- * 나머지(offer·coworker_request·contract·none)는 아직 수신 화면 미구현(#842/#843) → 읽음 처리만.
- * BE 는 referenceType 을 소문자로 내려준다(NotificationResponse.of: `.name().toLowerCase()`) — 방어적으로 정규화.
+ * CHAT_ROOM → 채팅방, PROFILE → 본인 프로필 편집(완성 넛지).
+ * 나머지(OFFER·COWORKER_REQUEST·CONTRACT·null)는 아직 수신 화면 미구현(#842/#843) → 읽음 처리만.
  */
 function resolveHref(n: Notification): string | undefined {
-  switch (n.referenceType?.toLowerCase()) {
-    case 'chat_room':
+  switch (n.referenceType) {
+    case NotificationReferenceType.CHAT_ROOM:
       return n.referenceId != null ? `/messages/${n.referenceId}` : undefined
-    case 'profile':
+    case NotificationReferenceType.PROFILE:
       return '/profile/edit'
     default:
       return undefined
