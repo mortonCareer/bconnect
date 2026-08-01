@@ -2,24 +2,12 @@ import { AUTH_HINT_COOKIE } from '@bconnect/api-client/auth-hint'
 import { isApiMockingEnabled } from '@bconnect/config/env'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-
-// PUBLIC route — middleware 는 실행되지만 인증 가드만 우회. matcher 의 제외 대상과 위계가 다름.
-const PUBLIC_EXACT = ['/']
-const PUBLIC_PREFIX = ['/login', '/signup', '/privacy', '/terms', '/monitoring']
-const PROTECTED_PANELS = ['messages', 'notifications', 'task']
+import { isPublicPath } from '@/lib/routes'
 
 export function proxy(request: NextRequest) {
   const { pathname, search, searchParams } = request.nextUrl
 
-  const panelRoot = searchParams.get('panel')?.split('/')[0]
-  const hasProtectedPanel =
-    PUBLIC_EXACT.includes(pathname) &&
-    panelRoot !== undefined &&
-    PROTECTED_PANELS.includes(panelRoot)
-  const isPublic =
-    PUBLIC_EXACT.includes(pathname) || PUBLIC_PREFIX.some((path) => pathname.startsWith(path))
-
-  if (isPublic && !hasProtectedPanel) {
+  if (isPublicPath(pathname, searchParams)) {
     return NextResponse.next()
   }
 

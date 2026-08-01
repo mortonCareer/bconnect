@@ -2,22 +2,12 @@ import { AUTH_HINT_COOKIE } from '@bconnect/api-client/auth-hint'
 import { isApiMockingEnabled } from '@bconnect/config/env'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-
-// PUBLIC route — middleware 는 실행되지만 인증 가드만 우회. matcher 의 제외 대상과 위계가 다름.
-const PUBLIC_EXACT = ['/']
-const PUBLIC_PREFIX = ['/signup', '/privacy', '/terms', '/monitoring', '/instagram']
-
-/** /profile/123 및 그 하위(/coworkers·/recommendations 등) 타인 프로필은 public, /profile (내 프로필)과 /profile/edit는 보호 */
-const PUBLIC_PROFILE_PATTERN = /^\/profile\/\d+(\/.*)?$/
+import { isPublicPath } from '@/lib/routes'
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  if (
-    PUBLIC_EXACT.includes(pathname) ||
-    PUBLIC_PREFIX.some((path) => pathname.startsWith(path)) ||
-    PUBLIC_PROFILE_PATTERN.test(pathname)
-  ) {
+  if (isPublicPath(pathname)) {
     return NextResponse.next()
   }
 
