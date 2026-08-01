@@ -67,6 +67,7 @@ graph LR
 
 - 커맨드와 페이로드 분리로 저장 전 객체가 발송에 넘어가는 경로를 타입으로 차단한다.
 - 문구 조립은 `NotificationType.render(senderName)` 이 단독 소유한다.
+- 목록 응답의 발신자 이미지는 `AttachmentUrlService` 로 `MEMBER` · `COMPANY` referenceType 별 조회해 senderMember · senderCompany 의 picture 에 주입하고, 두 scope 의 signed cookie 를 함께 발급한다.
 
 ## 타입 정의
 

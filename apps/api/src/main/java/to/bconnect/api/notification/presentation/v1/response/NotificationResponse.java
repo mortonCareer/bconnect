@@ -33,7 +33,7 @@ public record NotificationResponse(
                 notification.type().name(),
                 notification.senderType(),
                 sender == null ? null : WithdrawableMemberResponse.of(sender, picture),
-                company == null ? null : WithdrawableCompanyResponse.of(company),
+                company == null ? null : WithdrawableCompanyResponse.of(company, picture),
                 notification.type().render(senderName),
                 notification.referenceType(),
                 notification.referenceId(),
