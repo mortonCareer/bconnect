@@ -1993,11 +1993,11 @@ components:
     ExceptionCode:
       type: object
       properties:
-        code:
+        message:
           type: string
         status:
           $ref: "#/components/schemas/HttpStatus"
-        message:
+        code:
           type: string
     HttpStatus:
       type: string
