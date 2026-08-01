@@ -17,8 +17,11 @@ import type { ActionDrawerItem } from '@bconnect/ui'
 export interface CoworkerManageDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** 대상과 나의 동료 관계 상태 — 표시할 액션을 결정한다 */
-  status: CoworkerStatusValue
+  /**
+   * 대상과 나의 동료 관계 상태 — 표시할 액션을 결정한다.
+   * 대상 미선택(드로어 닫힘) 상태를 허용하기 위해 optional. 없으면 메시지 보내기만 노출.
+   */
+  status?: CoworkerStatusValue
   /** 확인 다이얼로그 카피에 쓸 대상 이름 */
   memberName?: string
   /** 동료 요청 보내기 (status=NONE) */
