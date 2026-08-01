@@ -27,7 +27,7 @@ public class DomainDependencyTest {
     @ArchTest ArchRule credentialDomainRule = domainRule("credential");
     @ArchTest ArchRule driveDomainRule = domainRule("drive", "project");
     @ArchTest ArchRule memberDomainRule = domainRule("member");
-    @ArchTest ArchRule offerDomainRule = domainRule("offer");
+    @ArchTest ArchRule offerDomainRule = domainRule("offer", "company");
     @ArchTest ArchRule postDomainRule = domainRule("post");
     @ArchTest ArchRule profileDomainRule = domainRule("profile");
     @ArchTest ArchRule projectDomainRule = domainRule("project", "company");

@@ -80,9 +80,16 @@ graph TD
   subgraph project
     ProjectF[ProjectFinder]
   end
+  subgraph offer
+    OfferS[OfferService]
+  end
+  subgraph company
+    CompanyF[CompanyFinder]
+  end
   NoteS --> DriveV
   NoteS --> ProjectF
   DriveS --> ProjectF
+  OfferS --> CompanyF
 ```
 - `DomainDependencyTest.java` 참고
 
