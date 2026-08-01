@@ -24,7 +24,7 @@ jobs:
       - name: Sync FEIA fire-license data to Postgres
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          FEIA_API_SERVICE_KEY: ${{ secrets.FEIA_API_SERVICE_KEY }}
+          DATA_GO_SERVICE_KEY: ${{ secrets.DATA_GO_SERVICE_KEY }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: pnpm --filter @bconnect/data-jobs feia-sync
 

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import to.bconnect.api.oneclick.infrastructure.DataGoProperties;
 import to.bconnect.api.oneclick.domain.nts.BusinessValidation;
 
 import java.time.LocalDate;
@@ -20,7 +21,7 @@ public class BusinessValidator {
     private static final DateTimeFormatter OPENED_AT = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     private final RestClient ntsRestClient;
-    private final NtsProperties properties;
+    private final DataGoProperties properties;
 
     public BusinessValidation check(String brn, String ownerName, LocalDate openedAt) {
         val body = Map.of("businesses", List.of(Map.of(

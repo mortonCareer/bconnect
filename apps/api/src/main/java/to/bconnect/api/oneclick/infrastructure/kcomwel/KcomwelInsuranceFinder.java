@@ -5,6 +5,7 @@ import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import to.bconnect.api.oneclick.domain.kcomwel.Insurance;
+import to.bconnect.api.oneclick.infrastructure.DataGoProperties;
 
 import java.util.List;
 
@@ -16,9 +17,9 @@ public class KcomwelInsuranceFinder {
     private static final XmlMapper XML = new XmlMapper();
 
     private final RestClient kcomwelRestClient;
-    private final KcomwelProperties properties;
+    private final DataGoProperties properties;
 
-    public KcomwelInsuranceFinder(RestClient kcomwelRestClient, KcomwelProperties properties) {
+    public KcomwelInsuranceFinder(RestClient kcomwelRestClient, DataGoProperties properties) {
         this.kcomwelRestClient = kcomwelRestClient;
         this.properties = properties;
     }
@@ -57,7 +58,6 @@ public class KcomwelInsuranceFinder {
         if (xml == null || xml.length == 0)
             return null;
         try {
-            // 바이트로 파싱 — data.go.kr 응답에 charset 미표기(ISO-8859-1 기본) 시 한글 깨짐 방지, XML prolog(UTF-8) 준수
             return XML.readValue(xml, KcomwelResponse.Response.class);
         } catch (Exception e) {
             throw new IllegalStateException("kcomwel xml parse failed", e);

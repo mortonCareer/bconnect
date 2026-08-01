@@ -52,11 +52,8 @@ app:
     refresh-token-expiration: 7d
     cookie-domain: ${COOKIE_DOMAIN}
 
-  nts:
-    service-key: ${NTS_API_SERVICE_KEY}
-
-  kcomwel:
-    service-key: ${KCOMWEL_API_SERVICE_KEY}
+  data-go:
+    service-key: ${DATA_GO_SERVICE_KEY}
 
   s3:
     region: ${AWS_REGION:ap-northeast-2}

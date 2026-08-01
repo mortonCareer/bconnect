@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import to.bconnect.api.oneclick.infrastructure.DataGoProperties;
 import to.bconnect.api.oneclick.domain.nts.BusinessStatus;
 import to.bconnect.api.oneclick.domain.nts.TaxpayerStatus;
 
@@ -20,7 +21,7 @@ public class BusinessStatusFinder {
     private static final DateTimeFormatter CLOSED_AT = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     private final RestClient ntsRestClient;
-    private final NtsProperties properties;
+    private final DataGoProperties properties;
 
     public BusinessStatus resolve(String brn) {
         val response = ntsRestClient.post()

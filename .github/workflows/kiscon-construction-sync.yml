@@ -29,7 +29,7 @@ jobs:
 
       - name: Sync KISCON construction data to Postgres
         env:
-          KISCON_API_SERVICE_KEY: ${{ secrets.KISCON_API_SERVICE_KEY }}
+          DATA_GO_SERVICE_KEY: ${{ secrets.DATA_GO_SERVICE_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
