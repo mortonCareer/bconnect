@@ -19,6 +19,7 @@ import {
   useServerError,
 } from '@bconnect/ui'
 import {
+  isRegisterMemberDuplicateError,
   isRegisterMemberSignupSessionError,
   refreshAccessToken,
   useCreateMember,
@@ -43,7 +44,7 @@ function requireRegisterAccessToken(result: RegisterMemberResponse) {
 
 export default function SignupCorpPage() {
   const router = useRouter()
-  const { formData, setCorp, reset: resetSignup } = useSignupStore()
+  const { formData, setCorp, reset: resetSignup, setRegisterError } = useSignupStore()
   const { login, isAuthenticated } = useAuthStore()
   const registerMemberMutation = useCreateMember({
     request: { headers: { 'X-Signup-Token': formData.signupToken } },
@@ -90,6 +91,12 @@ export default function SignupCorpPage() {
             toast({ description: err.message, variant: 'error' })
             resetSignup()
             router.replace('/login')
+            return
+          }
+          // 사용자명 중복은 이 화면에 입력칸이 없다 — 안내와 함께 입력 단계로 되돌린다.
+          if (isRegisterMemberDuplicateError(err)) {
+            setRegisterError(err.message)
+            router.replace('/signup/member')
             return
           }
           throw err

@@ -14,10 +14,16 @@ interface SignupFormData {
 interface SignupState {
   formData: SignupFormData
   step: SignupStep
+  /**
+   * register(POST /members) 중복 실패를 앞 단계(/signup/member)로 넘기는 1회성 안내.
+   * 그 화면에서만 사용자명을 고칠 수 있어 메시지를 함께 되돌린다. persist 대상 아님.
+   */
+  registerError: string | null
   setSignupToken: (token: string) => void
   setMember: (data: { username: string; name: string }) => void
   setCorp: (data: { companyName: string; bizNumber: string }) => void
   setStep: (step: SignupStep) => void
+  setRegisterError: (message: string | null) => void
   reset: () => void
 }
 
@@ -34,6 +40,7 @@ export const useSignupStore = create<SignupState>()(
     (set) => ({
       formData: initialFormData,
       step: 'member' as SignupStep,
+      registerError: null,
 
       setSignupToken: (signupToken) =>
         set((state) => ({
@@ -52,7 +59,9 @@ export const useSignupStore = create<SignupState>()(
 
       setStep: (step) => set({ step }),
 
-      reset: () => set({ formData: initialFormData, step: 'member' }),
+      setRegisterError: (registerError) => set({ registerError }),
+
+      reset: () => set({ formData: initialFormData, step: 'member', registerError: null }),
     }),
     {
       name: 'plan-signup-storage',

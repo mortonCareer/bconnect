@@ -12,10 +12,16 @@ interface SignupFormData {
 
 interface SignupState {
   formData: SignupFormData
+  /**
+   * register(POST /members) 중복 실패를 앞 단계(/signup/username)로 넘기는 1회성 안내.
+   * 그 화면에서만 사용자명을 고칠 수 있어 메시지를 함께 되돌린다. persist 대상 아님.
+   */
+  registerError: string | null
   setUsername: (username: string) => void
   setName: (name: string) => void
   setSignupToken: (token: string) => void
   setProfile: (profile: Partial<Omit<SignupFormData, 'username' | 'signupToken'>>) => void
+  setRegisterError: (message: string | null) => void
   reset: () => void
 }
 
@@ -32,6 +38,7 @@ export const useSignupStore = create<SignupState>()(
   persist(
     (set) => ({
       formData: initialFormData,
+      registerError: null,
 
       setUsername: (username) =>
         set((state) => ({
@@ -53,7 +60,9 @@ export const useSignupStore = create<SignupState>()(
           formData: { ...state.formData, ...profile },
         })),
 
-      reset: () => set({ formData: initialFormData }),
+      setRegisterError: (registerError) => set({ registerError }),
+
+      reset: () => set({ formData: initialFormData, registerError: null }),
     }),
     {
       name: 'career-signup-storage',

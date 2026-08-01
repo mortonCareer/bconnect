@@ -10,6 +10,7 @@ import { useSignupStore } from '@/stores/signup-store'
 import {
   Trade,
   TRADE_LABELS,
+  isRegisterMemberDuplicateError,
   isRegisterMemberSignupSessionError,
   refreshAccessToken,
   useCreateMember,
@@ -58,7 +59,7 @@ function requireRegisterAccessToken(result: RegisterMemberResponse) {
 export default function SignupProfilePage() {
   const router = useRouter()
   const { login, isAuthenticated } = useAuthStore()
-  const { formData, reset: resetSignup } = useSignupStore()
+  const { formData, reset: resetSignup, setRegisterError } = useSignupStore()
   // register(POST /members)는 X-Signup-Token 헤더로 인증한다 (Bearer 아님).
   const registerMemberMutation = useCreateMember({
     request: { headers: { 'X-Signup-Token': formData.signupToken } },
@@ -127,6 +128,12 @@ export default function SignupProfilePage() {
             toast({ description: err.message, variant: 'error' })
             resetSignup()
             router.replace('/signup/auth')
+            return
+          }
+          // 사용자명 중복은 이 화면에 입력칸이 없다 — 안내와 함께 입력 단계로 되돌린다.
+          if (isRegisterMemberDuplicateError(err)) {
+            setRegisterError(err.message)
+            router.replace('/signup/username')
             return
           }
           throw err

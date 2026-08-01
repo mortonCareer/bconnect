@@ -9,7 +9,11 @@ export {
 
 export { AUTH_HINT_COOKIE, setAuthHint, clearAuthHint, hasAuthHint } from './auth-hint'
 
-export { isApiError, isRegisterMemberSignupSessionError } from './errors'
+export {
+  isApiError,
+  isRegisterMemberDuplicateError,
+  isRegisterMemberSignupSessionError,
+} from './errors'
 
 export { getQueryClient, queryClientConfig } from './query-client'
 

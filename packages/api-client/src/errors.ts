@@ -17,3 +17,17 @@ export function isApiError(error: unknown): error is ApiError {
 export function isRegisterMemberSignupSessionError(error: unknown): error is ApiError {
   return isApiError(error) && error.status === 400
 }
+
+/**
+ * `POST /members`(회원 가입) 실패가 중복 입력 문제인지 판별한다.
+ *
+ * 가입 경로의 409 는 M001(사용자명 중복)·M002(전화번호 중복) 뿐이다 — 위와 같은 근거.
+ * 사용자명은 가입 마지막 화면이 아니라 앞 단계에서만 고칠 수 있으므로, 호출부는 이
+ * 판별로 그 단계로 되돌리고 BE message 를 함께 넘긴다.
+ *
+ * 사용 범위 제약은 {@link isRegisterMemberSignupSessionError} 와 같다 — register 호출을
+ * 감싼 catch 전용.
+ */
+export function isRegisterMemberDuplicateError(error: unknown): error is ApiError {
+  return isApiError(error) && error.status === 409
+}
