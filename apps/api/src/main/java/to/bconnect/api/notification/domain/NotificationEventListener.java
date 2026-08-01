@@ -117,13 +117,13 @@ public class NotificationEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCoworkerAccepted(CoworkerAcceptedEvent event) {
-        val senderName = memberResolver.getOrWithdrawn(event.accepterId()).name();
+        val senderName = memberResolver.getOrWithdrawn(event.toId()).name();
 
         notificationService.notify(List.of(new PushNotification(
-                event.requesterId(),
+                event.fromId(),
                 NotificationType.COWORKER_ACCEPTED,
                 NotificationSenderType.MEMBER,
-                event.accepterId(),
+                event.toId(),
                 senderName,
                 null,
                 null,
