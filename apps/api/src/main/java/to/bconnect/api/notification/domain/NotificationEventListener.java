@@ -7,6 +7,7 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import to.bconnect.api.core.domain.member.MemberRegisteredEvent;
 import to.bconnect.api.core.domain.member.MemberResolver;
+import to.bconnect.api.security.session.NewDeviceLoginEvent;
 import to.bconnect.api.socket.message.SocketMessageSentEvent;
 import to.bconnect.api.storage.notification.NotificationReferenceType;
 import to.bconnect.api.storage.notification.NotificationSenderType;
@@ -14,6 +15,7 @@ import to.bconnect.api.storage.notification.NotificationType;
 import to.bconnect.api.storage.profile.ProfileRepository;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -73,5 +75,18 @@ public class NotificationEventListener {
         }
 
         notificationService.notify(notifications);
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleNewDeviceLogin(NewDeviceLoginEvent event) {
+        notificationService.notify(List.of(new PushNotification(
+                event.memberId(),
+                NotificationType.NEW_DEVICE_LOGIN,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null)));
     }
 }
