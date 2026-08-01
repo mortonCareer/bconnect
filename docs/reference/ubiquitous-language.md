@@ -81,7 +81,7 @@ graph TD
 | Chat           | DirectChat      | 1:1 채팅방    | 채팅방 제목 없음                       |
 | Chat           | Message         | 메시지        |                                        |
 | Chat           | Participant     | 참여자        | 그룹 채팅방 참여자 정보                |
-| Credential     | Credential      | 자격 증빙     | 면허 · 자격 · 보험 등                  |
+| Credential     | Credential      | 인증뱃지      | 면허 · 자격 · 보험 등                  |
 | Attachment     | Attachment      | 첨부          | 업로드 파일 메타데이터                 |
 | Attachment     | Signed cookie   |               | CloudFront 접근 권한                   |
 | Company        | Company         | 인테리어 업체 |                                        |
@@ -192,7 +192,7 @@ graph TD
 | SYSTEM | 시스템 |
 | OFFER  | 섭외   |
 
-### 자격 증빙 유형(CredentialType)
+### 인증뱃지 유형(CredentialType)
 
 | 유형                             | 설명           |
 | -------------------------------- | -------------- |

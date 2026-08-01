@@ -9,19 +9,27 @@ spring:
 
   sql:
     init:
-      schema-locations:
-        - classpath:schema-h2.sql
+      platform: h2
       data-locations:
         - classpath:data.sql
         - classpath:data-crawler.sql
 
 app:
+  cors:
+    allowed-origin-patterns:
+      - "http://localhost:[*]"
+      - "http://127.0.0.1:[*]"
+
   jwt:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
-    cookie-domain: localhost
 
   data-go:
     service-key: ${DATA_GO_SERVICE_KEY:local-service-key}
+
+  sms:
+    api-key: local-api-key
+    api-secret: local-api-secret
+    sender-number: "01000000000"
 
   s3:
     bucket: local-bucket
@@ -31,4 +39,9 @@ app:
     private-key: local-private-key
 
   sns:
-    platform-application-arn: local-sns-arn
+    platform-application-arn: local-platform-application-arn
+
+logging:
+  level:
+    org.springframework.web.socket: TRACE
+    org.springframework.messaging.simp.stomp: TRACE

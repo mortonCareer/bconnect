@@ -32,6 +32,8 @@
 ^https://static\.bconnect\.to
 # - 미배포 production health endpoint (deployment.md 운영 가이드 안)
 ^https://bconnect\.to/_health
+# - apex 는 career 서브도메인 이전(#779)으로 의도적 404 — landing 컷오버(#896) 완료 시 이 라인 제거
+^https://bconnect\.to/?$
 # - .claude/agents 안의 placeholder URL (예시 figma URL, github owner/repo 등)
 ^https://(www\.)?figma\.com/design/xxx
 ^https://github\.com/(owner|org)/repo

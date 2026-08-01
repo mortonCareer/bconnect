@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentType;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.support.IntegrationTest;
@@ -36,10 +36,10 @@ class AttachmentFinderTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.POST, member.getId());
+        attachment.link(AttachmentReferenceType.POST, member.getId());
 
         // when
-        val found = attachmentFinder.get(ReferenceType.POST, member.getId(), attachment.getId());
+        val found = attachmentFinder.get(AttachmentReferenceType.POST, member.getId(), attachment.getId());
 
         // then
         assertThat(found.id()).isEqualTo(attachment.getId());
@@ -69,10 +69,10 @@ class AttachmentFinderTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.POST, member.getId());
+        attachment.link(AttachmentReferenceType.POST, member.getId());
 
         // when
-        val response = attachmentFinder.list(ReferenceType.POST, member.getId());
+        val response = attachmentFinder.list(AttachmentReferenceType.POST, member.getId());
 
         // then
         assertThat(response).extracting(Attachment::id).containsExactly(attachment.getId());
@@ -85,13 +85,13 @@ class AttachmentFinderTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val first = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         first.complete();
-        first.link(ReferenceType.POST, 1L);
+        first.link(AttachmentReferenceType.POST, 1L);
         val second = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         second.complete();
-        second.link(ReferenceType.POST, 2L);
+        second.link(AttachmentReferenceType.POST, 2L);
 
         // when
-        val response = attachmentFinder.map(ReferenceType.POST, List.of(1L, 2L, MISSING_ID), AttachmentType.IMAGE);
+        val response = attachmentFinder.map(AttachmentReferenceType.POST, List.of(1L, 2L, MISSING_ID), AttachmentType.IMAGE);
 
         // then
         assertThat(response).containsOnlyKeys(1L, 2L);
@@ -105,13 +105,13 @@ class AttachmentFinderTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val first = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         first.complete();
-        first.link(ReferenceType.POST, 1L);
+        first.link(AttachmentReferenceType.POST, 1L);
         val second = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         second.complete();
-        second.link(ReferenceType.POST, 1L);
+        second.link(AttachmentReferenceType.POST, 1L);
 
         // when
-        val response = attachmentFinder.listMap(ReferenceType.POST, List.of(1L));
+        val response = attachmentFinder.listMap(AttachmentReferenceType.POST, List.of(1L));
 
         // then
         assertThat(response.get(1L)).extracting(Attachment::id)
@@ -125,13 +125,13 @@ class AttachmentFinderTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val image = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         image.complete();
-        image.link(ReferenceType.POST, 1L);
+        image.link(AttachmentReferenceType.POST, 1L);
         val file = attachmentRepository.save(AttachmentFactory.fileEntity(member.getId(), member.getId()));
         file.complete();
-        file.link(ReferenceType.POST, 1L);
+        file.link(AttachmentReferenceType.POST, 1L);
 
         // when
-        val response = attachmentFinder.listMap(ReferenceType.POST, List.of(1L), AttachmentType.IMAGE);
+        val response = attachmentFinder.listMap(AttachmentReferenceType.POST, List.of(1L), AttachmentType.IMAGE);
 
         // then
         assertThat(response.get(1L)).extracting(Attachment::id).containsExactly(image.getId());
@@ -169,10 +169,10 @@ class AttachmentFinderTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.POST, 1L);
+        attachment.link(AttachmentReferenceType.POST, 1L);
 
         // when & then
-        assertCodeException(() -> attachmentFinder.get(ReferenceType.MEMBER, 1L, attachment.getId()))
+        assertCodeException(() -> attachmentFinder.get(AttachmentReferenceType.MEMBER, 1L, attachment.getId()))
                 .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
     }
 
@@ -183,10 +183,10 @@ class AttachmentFinderTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.POST, 1L);
+        attachment.link(AttachmentReferenceType.POST, 1L);
 
         // when & then
-        assertCodeException(() -> attachmentFinder.get(ReferenceType.POST, 2L, attachment.getId()))
+        assertCodeException(() -> attachmentFinder.get(AttachmentReferenceType.POST, 2L, attachment.getId()))
                 .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
     }
 
@@ -194,7 +194,7 @@ class AttachmentFinderTest {
     @DisplayName("get - 첨부가 존재하지 않을 때 조회하면 NOT_FOUND로 실패한다")
     void get_fail_AT006() {
         // when & then
-        assertCodeException(() -> attachmentFinder.get(ReferenceType.POST, 1L, MISSING_ID))
+        assertCodeException(() -> attachmentFinder.get(AttachmentReferenceType.POST, 1L, MISSING_ID))
                 .hasExceptionCode(AttachmentExceptionCode.NOT_FOUND);
     }
 

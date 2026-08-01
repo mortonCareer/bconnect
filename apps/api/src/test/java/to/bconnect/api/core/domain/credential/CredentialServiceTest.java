@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.credential.CredentialRepository;
 import to.bconnect.api.storage.credential.CredentialStatus;
 import to.bconnect.api.storage.credential.CredentialType;
@@ -91,7 +91,7 @@ class CredentialServiceTest {
         assertThat(created.getMemberId()).isEqualTo(member.getId());
         assertThat(created.getStatus()).isEqualTo(CredentialStatus.PENDING);
         val linked = attachmentRepository.findById(attachment.getId()).orElseThrow();
-        assertThat(linked.getReferenceType()).isEqualTo(ReferenceType.CREDENTIAL);
+        assertThat(linked.getReferenceType()).isEqualTo(AttachmentReferenceType.CREDENTIAL);
         assertThat(linked.getReferenceId()).isEqualTo(credentialId);
     }
 
@@ -103,7 +103,7 @@ class CredentialServiceTest {
         val credential = credentialRepository.save(CredentialFactory.entity(member.getId()));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.CREDENTIAL, credential.getId());
+        attachment.link(AttachmentReferenceType.CREDENTIAL, credential.getId());
         val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when

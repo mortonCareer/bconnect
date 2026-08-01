@@ -3,6 +3,7 @@ package to.bconnect.api.core.domain.member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentFinder;
@@ -12,7 +13,7 @@ import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
 
@@ -25,6 +26,7 @@ public class MemberService {
     private final AttachmentFinder attachmentFinder;
     private final AttachmentLinker attachmentLinker;
     private final MemberCleaner memberCleaner;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public Member get(AuthUser user) {
@@ -67,6 +69,7 @@ public class MemberService {
         );
 
         memberRepository.save(created);
+        eventPublisher.publishEvent(new MemberRegisteredEvent(created.getId()));
         return Member.of(created);
     }
 
@@ -81,13 +84,13 @@ public class MemberService {
     @Transactional
     public void updatePicture(AuthUser user, Long pictureId) {
         if (pictureId == null) {
-            attachmentLinker.unlink(ReferenceType.MEMBER, user.id());
+            attachmentLinker.unlink(AttachmentReferenceType.MEMBER, user.id());
             return;
         }
 
         attachmentFinder.validateOwnership(user.id(), pictureId);
-        attachmentLinker.unlink(ReferenceType.MEMBER, user.id());
-        attachmentLinker.link(ReferenceType.MEMBER, user.id(), pictureId);
+        attachmentLinker.unlink(AttachmentReferenceType.MEMBER, user.id());
+        attachmentLinker.link(AttachmentReferenceType.MEMBER, user.id(), pictureId);
     }
 
     @Transactional

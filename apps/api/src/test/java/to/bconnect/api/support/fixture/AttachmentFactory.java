@@ -9,7 +9,7 @@ import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.AttachmentEntity;
 import to.bconnect.api.storage.attachment.AttachmentStatus;
 import to.bconnect.api.storage.attachment.AttachmentType;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 
 import java.util.UUID;
 
@@ -23,7 +23,7 @@ public class AttachmentFactory {
 
     public static Attachment domain(Long id, Long memberId, Long contextId, Long referenceId) {
         return new Attachment(id, memberId, AttachmentType.IMAGE, AttachmentStatus.COMPLETED,
-                AttachmentContext.POST, contextId, ReferenceType.POST, referenceId,
+                AttachmentContext.POST, contextId, AttachmentReferenceType.POST, referenceId,
                 DEFAULT_UUID, "stem", "png", CONTENT_TYPE, SIZE,
                 MIN_DATE_TIME, MIN_DATE_TIME);
     }

@@ -9,20 +9,19 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.Instant;
 import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Long> {
 
-    Window<NotificationEntity> findByReceiverId(Long receiverId, ScrollPosition position, Limit limit, Sort sort);
+    Window<NotificationEntity> findByMemberId(Long memberId, ScrollPosition position, Limit limit, Sort sort);
 
-    long countByReceiverIdAndReadAtIsNull(Long receiverId);
+    long countByMemberIdAndReadIsFalse(Long memberId);
 
-    List<NotificationEntity> findAllByReceiverId(Long receiverId);
+    List<NotificationEntity> findAllByMemberId(Long memberId);
 
     List<NotificationEntity> findAllBySenderId(Long senderId);
 
     @Modifying
-    @Query("UPDATE NotificationEntity n SET n.readAt = :now WHERE n.receiverId = :receiverId AND n.readAt IS NULL")
-    int markAllReadByReceiverId(@Param("receiverId") Long receiverId, @Param("now") Instant now);
+    @Query("UPDATE NotificationEntity n SET n.read = true WHERE n.memberId = :memberId AND n.read = false")
+    void markAllReadByMemberId(@Param("memberId") Long memberId);
 }

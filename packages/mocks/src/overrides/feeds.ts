@@ -7,7 +7,8 @@ import {
   TaskType,
   Trade,
 } from '@bconnect/api-client'
-import type { Attachment, Feed, Task } from '@bconnect/api-client'
+import type { Attachment, CursorPageFeed, Feed, Region, Task } from '@bconnect/api-client'
+import { addressOf } from './_address'
 
 interface FeedSeed {
   name: string
@@ -20,8 +21,10 @@ interface FeedSeed {
   /** 글에 연결된 시공사례 — 건축주명 + 시공일수. 없으면 카드 메타행에서 생략되는 경로 검증용 */
   task?: { company: string; days: number }
   role: ProfileRole
-  /** 시/도 명칭 — regionOfState 매핑 검증용. 생략 시 주소 없는 프로필 경로 */
-  state?: string
+  /** 시/도 명칭(공용 Region 값) — regionOfState 정확 일치 매핑 검증용. BE Address 가 state 를 필수로 요구한다. */
+  state: Region
+  /** 시군구 — plan 기술자 카드의 지역 표시에 쓰인다. */
+  city: string
 }
 
 const FEED_SEEDS: FeedSeed[] = [
@@ -36,7 +39,8 @@ const FEED_SEEDS: FeedSeed[] = [
     imageCount: 3,
     task: { company: '한울 종합건설', days: 4 },
     role: ProfileRole.FOREMAN,
-    state: '경기도',
+    state: '경기',
+    city: '성남시 분당구',
   },
   {
     name: '김철수',
@@ -49,7 +53,8 @@ const FEED_SEEDS: FeedSeed[] = [
     imageCount: 1,
     task: { company: '미소 인테리어', days: 2 },
     role: ProfileRole.SKILLED,
-    state: '서울특별시',
+    state: '서울',
+    city: '마포구',
   },
   {
     name: '박영희',
@@ -61,6 +66,7 @@ const FEED_SEEDS: FeedSeed[] = [
     imageCount: 2,
     role: ProfileRole.SKILLED,
     state: '전북특별자치도',
+    city: '전주시 완산구',
   },
   {
     name: '이준호',
@@ -73,7 +79,8 @@ const FEED_SEEDS: FeedSeed[] = [
     imageCount: 4,
     task: { company: '카페온 F&B', days: 12 },
     role: ProfileRole.SEMI_SKILLED,
-    state: '인천광역시',
+    state: '전남광주통합특별시',
+    city: '북구',
   },
   {
     name: '최민수',
@@ -84,6 +91,8 @@ const FEED_SEEDS: FeedSeed[] = [
     daysAgo: 21,
     imageCount: 1,
     role: ProfileRole.HELPER,
+    state: '서울',
+    city: '관악구',
   },
   {
     name: '정해성',
@@ -96,7 +105,8 @@ const FEED_SEEDS: FeedSeed[] = [
     imageCount: 2,
     task: { company: '두손 건축사사무소', days: 1 },
     role: ProfileRole.FOREMAN,
-    state: '충청북도',
+    state: '충북',
+    city: '청주시 흥덕구',
   },
 ]
 
@@ -126,6 +136,8 @@ function taskOf(id: number, seed: FeedSeed): Task | null {
     projectTitle: null,
     projectRequirement: null,
     projectMemo: null,
+    projectCompanyId: null,
+    projectCompanyName: null,
     offer: null,
     createdAt: stamp,
     modifiedAt: stamp,
@@ -152,40 +164,41 @@ function buildAttachments(
 }
 
 export const feedsOverrides = [
-  getGetFeedsMockHandler((): Feed[] =>
-    // Feed = { member: MemberSummary, profile: ProfileSummary, post: Post, task: Task | null }.
-    // ProfileSummary 엔 id/memberId/trades 없음(대표분야 primaryTrade 만) — mapper 도 대표분야 기준.
-    FEED_SEEDS.map((seed, i): Feed => {
-      const createdAt = daysAgoIso(seed.daysAgo)
-      const task = taskOf(600 + i, seed)
-      return {
-        member: {
-          id: 200 + i,
-          username: `feed_user_${200 + i}`,
-          name: seed.name,
-          picture: null,
-          role: Role.USER,
-          createdAt,
-          modifiedAt: createdAt,
-        },
-        profile: {
-          role: seed.role,
-          primaryTrade: seed.trade,
-          experience: seed.experience,
-          headline: seed.headline,
-          address: seed.state ? { state: seed.state } : {},
-        },
-        task,
-        post: {
-          id: 400 + i,
-          memberId: 200 + i,
-          taskId: task?.id ?? null,
-          attachments: buildAttachments(seed.imageCount, 400 + i, 200 + i, createdAt),
-          content: seed.content,
-          createdAt,
-          modifiedAt: createdAt,
-        },
-      }
+  getGetFeedsMockHandler(
+    (): CursorPageFeed => ({
+      // Feed = { member: MemberSummary, profile: ProfileSummary, post: Post, task: Task | null }.
+      // ProfileSummary 엔 id/memberId/trades 없음(대표분야 primaryTrade 만) — mapper 도 대표분야 기준.
+      content: FEED_SEEDS.map((seed, i): Feed => {
+        const createdAt = daysAgoIso(seed.daysAgo)
+        const task = taskOf(600 + i, seed)
+        return {
+          member: {
+            id: 200 + i,
+            username: `feed_user_${200 + i}`,
+            name: seed.name,
+            picture: null,
+          },
+          profile: {
+            role: seed.role,
+            primaryTrade: seed.trade,
+            experience: seed.experience,
+            headline: seed.headline,
+            address: addressOf(seed.state, seed.city),
+          },
+          task,
+          post: {
+            id: 400 + i,
+            memberId: 200 + i,
+            taskId: task?.id ?? null,
+            attachments: buildAttachments(seed.imageCount, 400 + i, 200 + i, createdAt),
+            content: seed.content,
+            createdAt,
+            modifiedAt: createdAt,
+          },
+        }
+      }),
+      hasNext: false,
+      nextCursor: undefined,
     })
   ),
 ]

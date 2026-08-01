@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.support.fixture.CursorFactory;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.support.IntegrationTest;
@@ -125,7 +125,7 @@ class MemberServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val linked = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         linked.complete();
-        linked.link(ReferenceType.MEMBER, member.getId());
+        linked.link(AttachmentReferenceType.MEMBER, member.getId());
         val picture = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         picture.complete();
         val user = UserFactory.domain(member.getId(), Role.CAREER);
@@ -138,7 +138,7 @@ class MemberServiceTest {
         assertThat(replaced.getReferenceType()).isNull();
         assertThat(replaced.getReferenceId()).isNull();
         val found = attachmentRepository.findById(picture.getId()).orElseThrow();
-        assertThat(found.getReferenceType()).isEqualTo(ReferenceType.MEMBER);
+        assertThat(found.getReferenceType()).isEqualTo(AttachmentReferenceType.MEMBER);
         assertThat(found.getReferenceId()).isEqualTo(member.getId());
     }
 
@@ -149,7 +149,7 @@ class MemberServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val linked = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         linked.complete();
-        linked.link(ReferenceType.MEMBER, member.getId());
+        linked.link(AttachmentReferenceType.MEMBER, member.getId());
         val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when

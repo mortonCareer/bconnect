@@ -20,7 +20,7 @@ import to.bconnect.api.core.presentation.v1.response.DirectChatResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class DirectChatController {
         val directChats = directChatService.list(user.id());
         val memberIds = directChats.stream().map(DirectChat::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMapOrWithdrawn(memberIds);
-        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(AttachmentReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         val body = directChats.stream()
                 .map(it -> {
@@ -65,7 +65,7 @@ public class DirectChatController {
             HttpServletResponse response) {
         val chat = directChatService.get(user.id(), id);
         val member = memberResolver.getOrWithdrawn(chat.memberId());
-        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(AttachmentReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
@@ -90,7 +90,7 @@ public class DirectChatController {
             HttpServletResponse response) {
         val page = directChatService.listMessages(user, id, cursorLimit);
         val messageIds = page.content().stream().map(Message::id).toList();
-        val attachmentMap = attachmentFinder.listMap(ReferenceType.MESSAGE, messageIds);
+        val attachmentMap = attachmentFinder.listMap(AttachmentReferenceType.MESSAGE, messageIds);
 
         val content = page.content().stream()
                 .map(it -> {

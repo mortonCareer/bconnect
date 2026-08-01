@@ -189,7 +189,8 @@ packages/ui/
 ### DO
 
 - zod = 검증 SSOT. `useForm({ resolver: zodResolver(schema), mode: 'onTouched' })` — blur 후 첫 검증·이후 onChange 갱신. `isValid` 게이팅 버튼은 유지하면서 첫 타이핑 중 naggy 회피
-- 폼 안 제출 버튼은 예외 없이 `FormSubmitButton`. 필수 필드가 없거나 단계별 커스텀 게이팅(OTP 등)이면 `requireAllFilled={false}` + `disabled` 직접 지정
+- 폼 안 제출 버튼은 예외 없이 `FormSubmitButton`. 기본 게이트는 `formState.isValid` — 스키마를 통과해야 활성이므로 호출부에서 `disabled={!isValid}` 를 따로 쓰지 않는다 (#993). 한 폼을 여러 단계로 나눠 제출하는 화면(OTP phone → code 등)만 `requireValid={false}` + `disabled` 직접 지정
+- 비활성 상태 회색은 `Button` 의 `disabled:bg-gray-100` 이 담당 — `variant={isValid ? 'primary' : 'secondary'}` 같은 토글 금지
 - `coerce`/`transform` 스키마는 `useForm<input, ctx, output>` 3-제네릭
 - 필수 필드는 `<TextField required>` — 라벨 옆 빨간 별표 자동 (HTML native required 는 발동 안 함, zod 가 검증)
 - FormProvider 의존 컴포넌트는 런타임 가드 `if (!formContext) throw` (TS 강제 불가)

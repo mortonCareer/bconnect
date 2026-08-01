@@ -90,10 +90,10 @@ git checkout -b feat/123-add-profile-upload
 
 ```bash
 # dev에서 main으로 PR 생성
-gh pr create --base main --head dev --title "release: v1.x.x"
+gh pr create --base main --head dev --title "chore(release): vX.Y.Z — dev → main 통합"
 ```
 
-통합검증 CI(`ci-integration.yml`)가 통과해야 머지 가능합니다. 실패 시 dev에서 수정 후 재시도합니다.
+통합검증 CI(`ci-integration.yml`)가 통과해야 머지 가능합니다. 실패 시 dev에서 수정 후 재시도합니다. 머지는 반드시 **merge commit**으로 합니다 (squash 시 히스토리 분기 — 아래 "PR 머지 방법" 표 참조). 태그·릴리스 노트·APK 첨부까지 포함한 전체 릴리스 절차는 [release.md](./release.md) 참조.
 
 dev 브랜치는 BE-first 개발 사이클이라 BE 구현 → 스펙 → FE 순서로 자연스럽게 정합됩니다 ([ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md)). 통합은 일반적으로 스프린트 단위로 진행하되, 필요 시 CTO가 임의로 트리거할 수 있습니다. BE 변경 후 스펙 또는 FE 갱신 누락으로 드물게 drift가 발생할 수 있으며, 발견 시 dev에서 직접 수정합니다.
 

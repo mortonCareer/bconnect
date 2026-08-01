@@ -23,8 +23,8 @@ public class PackageDependencyTest {
     private static final String SMS = "..sms..";
     private static final String ATTACHMENT = "..attachment..";
     private static final String CRAWLER = "..crawler..";
-    private static final String ONECLICK = "to.bconnect.api.oneclick..";
     private static final String NOTIFICATION = "to.bconnect.api.notification..";
+    private static final String ONECLICK = "to.bconnect.api.oneclick..";
 
 	@ArchTest
 	ArchRule socketPackageRule = classes().that().resideInAPackage(SOCKET)
@@ -48,7 +48,7 @@ public class PackageDependencyTest {
 
     @ArchTest
     ArchRule commonPackageRule = classes().that().resideInAPackage(COMMON)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, SECURITY, STORAGE, COMMON, CRAWLER, NOTIFICATION, ONECLICK)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, CORE, ATTACHMENT, SECURITY, STORAGE, COMMON, SMS, CRAWLER, NOTIFICATION, ONECLICK)
             .andShould().onlyDependOnClassesThat(
                     resideInAnyPackage(COMMON).or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api")))
             );

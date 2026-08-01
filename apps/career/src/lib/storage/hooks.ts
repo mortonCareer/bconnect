@@ -95,7 +95,7 @@ export function useFolderMutations() {
   const { mutate: mutateDelete } = useDeleteDrive({ mutation: { onSuccess: invalidate } })
 
   return {
-    createFolder: (title: string) => mutateCreate({ data: { type: DriveType.MEMBER, title } }),
+    createFolder: (title: string) => mutateCreate({ data: { type: DriveType.PERSONAL, title } }),
     updateFolder: (id: string, title: string) => mutateRename({ id: Number(id), data: { title } }),
     deleteFolder: (id: string) => mutateDelete({ id: Number(id) }),
   }

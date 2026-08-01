@@ -4,8 +4,7 @@ spring:
 
   sql:
     init:
-      schema-locations:
-        - classpath:schema-postgresql.sql
+      mode: always
       data-locations:
         - classpath:data.sql
         - classpath:data-crawler.sql
@@ -13,10 +12,14 @@ spring:
 app:
   jwt:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
-    cookie-domain: localhost
 
   data-go:
     service-key: test-service-key
+
+  sms:
+    api-key: test-api-key
+    api-secret: test-api-secret
+    sender-number: "01000000000"
 
   s3:
     bucket: test-bucket
@@ -26,4 +29,4 @@ app:
     private-key: test-private-key
 
   sns:
-    platform-application-arn: test-sns-arn
+    platform-application-arn: test-platform-application-arn

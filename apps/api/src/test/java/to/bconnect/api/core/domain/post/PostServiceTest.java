@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.post.PostRepository;
@@ -88,7 +88,7 @@ class PostServiceTest {
         assertThat(created.getMemberId()).isEqualTo(member.getId());
         assertThat(created.getTaskId()).isEqualTo(task.getId());
         val linked = attachmentRepository.findById(attachment.getId()).orElseThrow();
-        assertThat(linked.getReferenceType()).isEqualTo(ReferenceType.POST);
+        assertThat(linked.getReferenceType()).isEqualTo(AttachmentReferenceType.POST);
         assertThat(linked.getReferenceId()).isEqualTo(postId);
     }
 
@@ -101,7 +101,7 @@ class PostServiceTest {
         val post = postRepository.save(PostFactory.entity(member.getId(), null));
         val first = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         first.complete();
-        first.link(ReferenceType.POST, post.getId());
+        first.link(AttachmentReferenceType.POST, post.getId());
         val second = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         second.complete();
         val user = UserFactory.domain(member.getId(), Role.CAREER);
@@ -118,7 +118,7 @@ class PostServiceTest {
         assertThat(unlinked.getReferenceType()).isNull();
         assertThat(unlinked.getReferenceId()).isNull();
         val linked = attachmentRepository.findById(second.getId()).orElseThrow();
-        assertThat(linked.getReferenceType()).isEqualTo(ReferenceType.POST);
+        assertThat(linked.getReferenceType()).isEqualTo(AttachmentReferenceType.POST);
         assertThat(linked.getReferenceId()).isEqualTo(post.getId());
     }
 
@@ -149,7 +149,7 @@ class PostServiceTest {
         val post = postRepository.save(PostFactory.entity(member.getId(), null));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.POST, post.getId());
+        attachment.link(AttachmentReferenceType.POST, post.getId());
         val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when

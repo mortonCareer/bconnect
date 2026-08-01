@@ -1,28 +1,5 @@
--- 기술자 · 원클릭 크롤링 시드
+-- 원클릭 크롤링 시드
 
--- 기술자 크롤링. id 100번대
-INSERT INTO crawled_members (id, company, name, phone, picture, role, brn, email, created_at, modified_at) VALUES
-(100, '업체1', '기술자1', '01000000012', NULL, '반장', '123-45-67890', 'crawled1@test.com', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
-
-INSERT INTO crawled_profiles (id, member_id, primary_trade, experience, headline, address, state, url, platform, created_at, modified_at) VALUES
-(100, 100, '방수', 10, '한줄소개1', '주소1', '서울', 'https://blog.naver.com/crawled1', 'NAVER', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
-
-INSERT INTO crawled_profile_trades (profile_id, trade) VALUES
-(100, '방수');
-
-INSERT INTO crawled_tasks (id, company, address, trade, start_date, end_date, duration, created_at, modified_at) VALUES
-(100, '업체1', '주소1', '방수', DATE '2026-06-01', DATE '2026-06-03', '3일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
-
-INSERT INTO crawled_posts (id, member_id, task_id, title, content, created_at, modified_at) VALUES
-(100, 100, 100, '제목1', '내용1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
-
-INSERT INTO crawled_post_images (post_id, seq, url) VALUES
-(100, 0, 'https://example.com/image1.jpg');
-
-INSERT INTO crawled_credentials (id, member_id, type, name, created_at, modified_at) VALUES
-(100, 100, 'LICENSE', '면허1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
-
--- 원클릭 크롤링
 INSERT INTO kiscon_registration (ncr_gs_seq, biz_reg_no, company_name, representative, trade_name, trade_reg_no, address, region, region_detail, reg_date, announce_date, flag, phone, announce_number, announce_reason) VALUES
 (200, '2001234567', '샘플건설', '김샘플', '실내건축공사업', '서울-실내-200', '서울 강남구 테헤란로 100', '서울', '강남구', 20200101, 20200110, 'Y', '025550200', '서울 강남구공고-제2020-1호', '-'),
 (201, '2001234567', '샘플건설', '김샘플', '철근콘크리트공사업', '서울-철콘-201', '서울 강남구 테헤란로 100', '서울', '강남구', 20210301, 20210310, 'Y', '025550200', '서울 강남구공고-제2021-2호', '-');

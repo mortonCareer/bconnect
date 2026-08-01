@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.support.IntegrationTest;
@@ -38,7 +38,7 @@ class AttachmentLinkerTest {
         second.complete();
 
         // when
-        attachmentLinker.link(ReferenceType.MEMBER, member.getId(), List.of(first.getId(), second.getId()));
+        attachmentLinker.link(AttachmentReferenceType.MEMBER, member.getId(), List.of(first.getId(), second.getId()));
 
         // then
         assertThat(attachmentRepository.findById(first.getId()).orElseThrow().getReferenceId())
@@ -56,11 +56,11 @@ class AttachmentLinkerTest {
         attachment.complete();
 
         // when
-        attachmentLinker.link(ReferenceType.MEMBER, member.getId(), attachment.getId());
+        attachmentLinker.link(AttachmentReferenceType.MEMBER, member.getId(), attachment.getId());
 
         // then
         val found = attachmentRepository.findById(attachment.getId()).orElseThrow();
-        assertThat(found.getReferenceType()).isEqualTo(ReferenceType.MEMBER);
+        assertThat(found.getReferenceType()).isEqualTo(AttachmentReferenceType.MEMBER);
         assertThat(found.getReferenceId()).isEqualTo(member.getId());
     }
 
@@ -71,13 +71,13 @@ class AttachmentLinkerTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val first = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         first.complete();
-        first.link(ReferenceType.POST, 1L);
+        first.link(AttachmentReferenceType.POST, 1L);
         val second = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         second.complete();
-        second.link(ReferenceType.POST, 2L);
+        second.link(AttachmentReferenceType.POST, 2L);
 
         // when
-        attachmentLinker.unlink(ReferenceType.POST, List.of(1L, 2L));
+        attachmentLinker.unlink(AttachmentReferenceType.POST, List.of(1L, 2L));
 
         // then
         assertThat(attachmentRepository.findById(first.getId()).orElseThrow().getReferenceId()).isNull();
@@ -91,13 +91,13 @@ class AttachmentLinkerTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val first = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         first.complete();
-        first.link(ReferenceType.MEMBER, member.getId());
+        first.link(AttachmentReferenceType.MEMBER, member.getId());
         val second = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         second.complete();
-        second.link(ReferenceType.MEMBER, member.getId());
+        second.link(AttachmentReferenceType.MEMBER, member.getId());
 
         // when
-        attachmentLinker.unlink(ReferenceType.MEMBER, member.getId());
+        attachmentLinker.unlink(AttachmentReferenceType.MEMBER, member.getId());
 
         // then
         assertThat(attachmentRepository.findById(first.getId()).orElseThrow().getReferenceType()).isNull();
@@ -111,10 +111,10 @@ class AttachmentLinkerTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.MEMBER, member.getId());
+        attachment.link(AttachmentReferenceType.MEMBER, member.getId());
 
         // when
-        attachmentLinker.unlink(ReferenceType.MEMBER, member.getId(), attachment.getId());
+        attachmentLinker.unlink(AttachmentReferenceType.MEMBER, member.getId(), attachment.getId());
 
         // then
         val found = attachmentRepository.findById(attachment.getId()).orElseThrow();
@@ -131,7 +131,7 @@ class AttachmentLinkerTest {
         attachment.complete();
 
         // when & then
-        assertCodeException(() -> attachmentLinker.link(ReferenceType.MEMBER, member.getId(),
+        assertCodeException(() -> attachmentLinker.link(AttachmentReferenceType.MEMBER, member.getId(),
                 List.of(attachment.getId(), MISSING_ID)))
                 .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
@@ -144,7 +144,7 @@ class AttachmentLinkerTest {
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
 
         // when & then
-        assertCodeException(() -> attachmentLinker.link(ReferenceType.MEMBER, member.getId(),
+        assertCodeException(() -> attachmentLinker.link(AttachmentReferenceType.MEMBER, member.getId(),
                 List.of(attachment.getId())))
                 .hasExceptionCode(AttachmentExceptionCode.NOT_COMPLETED);
     }
@@ -156,10 +156,10 @@ class AttachmentLinkerTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.POST, 1L);
+        attachment.link(AttachmentReferenceType.POST, 1L);
 
         // when & then
-        assertCodeException(() -> attachmentLinker.link(ReferenceType.MEMBER, 1L,
+        assertCodeException(() -> attachmentLinker.link(AttachmentReferenceType.MEMBER, 1L,
                 List.of(attachment.getId())))
                 .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
     }
@@ -171,10 +171,10 @@ class AttachmentLinkerTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.POST, 1L);
+        attachment.link(AttachmentReferenceType.POST, 1L);
 
         // when & then
-        assertCodeException(() -> attachmentLinker.link(ReferenceType.POST, 2L,
+        assertCodeException(() -> attachmentLinker.link(AttachmentReferenceType.POST, 2L,
                 List.of(attachment.getId())))
                 .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
     }
@@ -186,7 +186,7 @@ class AttachmentLinkerTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
 
         // when & then
-        assertCodeException(() -> attachmentLinker.link(ReferenceType.MEMBER, member.getId(), MISSING_ID))
+        assertCodeException(() -> attachmentLinker.link(AttachmentReferenceType.MEMBER, member.getId(), MISSING_ID))
                 .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
 
@@ -198,7 +198,7 @@ class AttachmentLinkerTest {
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
 
         // when & then
-        assertCodeException(() -> attachmentLinker.link(ReferenceType.MEMBER, member.getId(), attachment.getId()))
+        assertCodeException(() -> attachmentLinker.link(AttachmentReferenceType.MEMBER, member.getId(), attachment.getId()))
                 .hasExceptionCode(AttachmentExceptionCode.NOT_COMPLETED);
     }
 
@@ -209,10 +209,10 @@ class AttachmentLinkerTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.POST, 1L);
+        attachment.link(AttachmentReferenceType.POST, 1L);
 
         // when & then
-        assertCodeException(() -> attachmentLinker.link(ReferenceType.MEMBER, 1L, attachment.getId()))
+        assertCodeException(() -> attachmentLinker.link(AttachmentReferenceType.MEMBER, 1L, attachment.getId()))
                 .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
     }
 
@@ -223,10 +223,10 @@ class AttachmentLinkerTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.POST, 1L);
+        attachment.link(AttachmentReferenceType.POST, 1L);
 
         // when & then
-        assertCodeException(() -> attachmentLinker.link(ReferenceType.POST, 2L, attachment.getId()))
+        assertCodeException(() -> attachmentLinker.link(AttachmentReferenceType.POST, 2L, attachment.getId()))
                 .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
     }
 
@@ -237,7 +237,7 @@ class AttachmentLinkerTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
 
         // when & then
-        assertCodeException(() -> attachmentLinker.unlink(ReferenceType.MEMBER, member.getId(), MISSING_ID))
+        assertCodeException(() -> attachmentLinker.unlink(AttachmentReferenceType.MEMBER, member.getId(), MISSING_ID))
                 .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
     }
 
@@ -248,10 +248,10 @@ class AttachmentLinkerTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.POST, 1L);
+        attachment.link(AttachmentReferenceType.POST, 1L);
 
         // when & then
-        assertCodeException(() -> attachmentLinker.unlink(ReferenceType.MEMBER, 1L, attachment.getId()))
+        assertCodeException(() -> attachmentLinker.unlink(AttachmentReferenceType.MEMBER, 1L, attachment.getId()))
                 .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
     }
 
@@ -262,10 +262,10 @@ class AttachmentLinkerTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
-        attachment.link(ReferenceType.POST, 1L);
+        attachment.link(AttachmentReferenceType.POST, 1L);
 
         // when & then
-        assertCodeException(() -> attachmentLinker.unlink(ReferenceType.POST, 2L, attachment.getId()))
+        assertCodeException(() -> attachmentLinker.unlink(AttachmentReferenceType.POST, 2L, attachment.getId()))
                 .hasExceptionCode(AttachmentExceptionCode.INVALID_LINKED);
     }
 }

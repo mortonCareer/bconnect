@@ -16,8 +16,8 @@ import to.bconnect.api.core.presentation.v1.response.CredentialResponse;
 import to.bconnect.api.core.presentation.v1.response.CredentialSummaryResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.attachment.AttachmentType;
-import to.bconnect.api.storage.attachment.ReferenceType;
 
 import java.util.List;
 
@@ -48,7 +48,7 @@ public class CredentialController {
         val credentialIds = credentials.stream()
                 .map(Credential::id)
                 .toList();
-        val attachmentMap = attachmentFinder.map(ReferenceType.CREDENTIAL, credentialIds, AttachmentType.FILE);
+        val attachmentMap = attachmentFinder.map(AttachmentReferenceType.CREDENTIAL, credentialIds, AttachmentType.FILE);
 
         val body = credentials.stream()
                 .map(it -> {

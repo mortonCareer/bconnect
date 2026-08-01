@@ -27,6 +27,7 @@
     "package:fix": "syncpack fix",
     "figma:connect": "figma connect publish",
     "figma:connect:dry": "figma connect publish --dry-run",
+    "otp": "node scripts/dev-otp.mjs",
     "figma:check": "node scripts/figma-checks/index.mjs",
     "figma:check:dry": "node scripts/figma-checks/index.mjs --dry-run"
   },
@@ -42,6 +43,7 @@
     "lint-staged": "^16.2.7",
     "markdownlint-cli2": "^0.22.1",
     "playwright": "^1.58.0",
+    "postgres": "^3.4.9",
     "prettier": "^3.7.4",
     "syncpack": "^15.0.0",
     "tailwindcss": "catalog:",
