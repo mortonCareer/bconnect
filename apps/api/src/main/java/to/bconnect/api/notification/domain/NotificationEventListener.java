@@ -1,11 +1,11 @@
 package to.bconnect.api.notification.domain;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import to.bconnect.api.core.domain.company.CompanyService;
 import to.bconnect.api.core.domain.coworker.CoworkerAcceptedEvent;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestedEvent;
 import to.bconnect.api.core.domain.credential.CredentialReviewedEvent;
@@ -14,9 +14,6 @@ import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.offer.OfferEvent;
 import to.bconnect.api.core.domain.profile.ProfileCreatedEvent;
 import to.bconnect.api.core.domain.recommendation.RecommendationWrittenEvent;
-import to.bconnect.api.storage.company.CompanyEntity;
-import to.bconnect.api.storage.company.CompanyRepository;
-import to.bconnect.api.storage.credential.CredentialStatus;
 import to.bconnect.api.security.session.NewDeviceLoginEvent;
 import to.bconnect.api.socket.message.SocketMessageSentEvent;
 import to.bconnect.api.storage.notification.NotificationReferenceType;
@@ -26,16 +23,14 @@ import to.bconnect.api.storage.profile.ProfileRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class NotificationEventListener {
 
     private final MemberResolver memberResolver;
     private final ProfileRepository profileRepository;
-    private final CompanyRepository companyRepository;
+    private final CompanyService companyService;
     private final NotificationService notificationService;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -141,14 +136,12 @@ public class NotificationEventListener {
 
         switch (event.status()) {
             case ACTIVE -> {
-                resolveCompany(event).ifPresent(company ->
-                        notifications.add(toWorker(NotificationType.OFFER_RECEIVED, company, event)));
+                notifications.add(toWorker(NotificationType.OFFER_RECEIVED, event));
                 notifications.add(toCompanyOwner(NotificationType.OFFER_SENT, event));
             }
             case ACCEPTED -> {
                 notifications.add(toCompanyOwner(NotificationType.OFFER_ACCEPTED, event));
-                resolveCompany(event).ifPresent(company ->
-                        notifications.add(toWorker(NotificationType.OFFER_ACCEPT_COMPLETED, company, event)));
+                notifications.add(toWorker(NotificationType.OFFER_ACCEPT_COMPLETED, event));
             }
             case DENIED -> notifications.add(toCompanyOwner(NotificationType.OFFER_DENIED, event));
             default -> { }
@@ -158,21 +151,14 @@ public class NotificationEventListener {
         notificationService.notify(notifications);
     }
 
-    private Optional<CompanyEntity> resolveCompany(OfferEvent event) {
-        val company = companyRepository.findByMemberId(event.companyOwnerId());
-        if (company.isEmpty())
-            log.warn("[NotificationEventListener] company not found. companyOwnerId={} offerId={}",
-                    event.companyOwnerId(), event.offerId());
-        return company;
-    }
-
-    private PushNotification toWorker(NotificationType type, CompanyEntity company, OfferEvent event) {
+    private PushNotification toWorker(NotificationType type, OfferEvent event) {
+        val company = companyService.getOrWithdrawn(event.companyId());
         return new PushNotification(
                 event.workerId(),
                 type,
                 NotificationSenderType.COMPANY,
-                company.getId(),
-                company.getName(),
+                company.id(),
+                company.name(),
                 NotificationReferenceType.OFFER,
                 event.offerId(),
                 null);
@@ -205,9 +191,12 @@ public class NotificationEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCredentialReviewed(CredentialReviewedEvent event) {
-        val type = event.status() == CredentialStatus.ACCEPTED
-                ? NotificationType.CREDENTIAL_ACCEPTED
-                : NotificationType.CREDENTIAL_DENIED;
+        val type = switch (event.status()) {
+            case ACCEPTED -> NotificationType.CREDENTIAL_ACCEPTED;
+            case DENIED -> NotificationType.CREDENTIAL_DENIED;
+            default -> null;
+        };
+        if (type == null) return;
 
         notificationService.notify(List.of(new PushNotification(
                 event.memberId(),

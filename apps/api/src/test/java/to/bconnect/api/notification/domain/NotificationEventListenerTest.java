@@ -30,7 +30,7 @@ class NotificationEventListenerTest {
     private static final Long SEED_WORKER_ID = 102L;
     private static final Long SEED_COMPANY_OWNER_ID = 200L;
     private static final Long SEED_COMPANY_ID = 200L;
-    private static final Long OWNERLESS_MEMBER_ID = 104L;
+    private static final Long MISSING_COMPANY_ID = 999_999L;
 
     @Autowired private NotificationEventListener notificationEventListener;
     @Autowired private NotificationRepository notificationRepository;
@@ -62,8 +62,8 @@ class NotificationEventListenerTest {
         val offerId = 501L;
 
         // when
-        notificationEventListener.handleOfferEvent(
-                new OfferEvent(offerId, SEED_WORKER_ID, SEED_COMPANY_OWNER_ID, OfferStatus.ACTIVE));
+        notificationEventListener.handleOfferEvent(new OfferEvent(
+                offerId, SEED_WORKER_ID, SEED_COMPANY_ID, SEED_COMPANY_OWNER_ID, OfferStatus.ACTIVE));
 
         // then
         val received = findByTypeAndReference(SEED_WORKER_ID, NotificationType.OFFER_RECEIVED, offerId);
@@ -84,8 +84,8 @@ class NotificationEventListenerTest {
         val offerId = 502L;
 
         // when
-        notificationEventListener.handleOfferEvent(
-                new OfferEvent(offerId, SEED_WORKER_ID, SEED_COMPANY_OWNER_ID, OfferStatus.ACCEPTED));
+        notificationEventListener.handleOfferEvent(new OfferEvent(
+                offerId, SEED_WORKER_ID, SEED_COMPANY_ID, SEED_COMPANY_OWNER_ID, OfferStatus.ACCEPTED));
 
         // then
         assertThat(findByTypeAndReference(SEED_COMPANY_OWNER_ID, NotificationType.OFFER_ACCEPTED, offerId)).hasSize(1);
@@ -99,8 +99,8 @@ class NotificationEventListenerTest {
         val offerId = 503L;
 
         // when
-        notificationEventListener.handleOfferEvent(
-                new OfferEvent(offerId, SEED_WORKER_ID, SEED_COMPANY_OWNER_ID, OfferStatus.DENIED));
+        notificationEventListener.handleOfferEvent(new OfferEvent(
+                offerId, SEED_WORKER_ID, SEED_COMPANY_ID, SEED_COMPANY_OWNER_ID, OfferStatus.DENIED));
 
         // then
         assertThat(findByTypeAndReference(SEED_COMPANY_OWNER_ID, NotificationType.OFFER_DENIED, offerId)).hasSize(1);
@@ -117,8 +117,8 @@ class NotificationEventListenerTest {
         val offerId = 504L;
 
         // when
-        notificationEventListener.handleOfferEvent(
-                new OfferEvent(offerId, SEED_WORKER_ID, SEED_COMPANY_OWNER_ID, OfferStatus.EXPIRED));
+        notificationEventListener.handleOfferEvent(new OfferEvent(
+                offerId, SEED_WORKER_ID, SEED_COMPANY_ID, SEED_COMPANY_OWNER_ID, OfferStatus.EXPIRED));
 
         // then
         val all = notificationRepository.findAll().stream()
@@ -128,18 +128,20 @@ class NotificationEventListenerTest {
     }
 
     @Test
-    @DisplayName("handleOfferEvent - 업체가 없는 대표일 때 ACTIVE 이벤트를 받으면 기술자 알림은 스킵된다")
-    void handleOfferEvent_active_companyNotFound() {
+    @DisplayName("handleOfferEvent - 업체가 삭제되었을 때 ACTIVE 이벤트를 받으면 기술자 알림이 삭제된 업체 발신으로 저장된다")
+    void handleOfferEvent_active_companyWithdrawn() {
         // given
         val offerId = 505L;
 
         // when
-        notificationEventListener.handleOfferEvent(
-                new OfferEvent(offerId, SEED_WORKER_ID, OWNERLESS_MEMBER_ID, OfferStatus.ACTIVE));
+        notificationEventListener.handleOfferEvent(new OfferEvent(
+                offerId, SEED_WORKER_ID, MISSING_COMPANY_ID, SEED_COMPANY_OWNER_ID, OfferStatus.ACTIVE));
 
         // then
-        assertThat(findByTypeAndReference(SEED_WORKER_ID, NotificationType.OFFER_RECEIVED, offerId)).isEmpty();
-        assertThat(findByTypeAndReference(OWNERLESS_MEMBER_ID, NotificationType.OFFER_SENT, offerId)).hasSize(1);
+        val received = findByTypeAndReference(SEED_WORKER_ID, NotificationType.OFFER_RECEIVED, offerId);
+        assertThat(received).hasSize(1);
+        assertThat(received.getFirst().getSenderType()).isEqualTo(NotificationSenderType.COMPANY);
+        assertThat(received.getFirst().getSenderId()).isEqualTo(MISSING_COMPANY_ID);
     }
 
     private List<NotificationEntity> findByTypeAndReference(Long memberId, NotificationType type, Long referenceId) {
@@ -219,6 +221,24 @@ class NotificationEventListenerTest {
         assertThat(found.getFirst().getSenderType()).isNull();
         assertThat(found.getFirst().getReferenceType()).isEqualTo(NotificationReferenceType.PROFILE);
         assertThat(found.getFirst().getReferenceId()).isNull();
+    }
+
+    @Test
+    @DisplayName("handleCredentialReviewed - 심사 결과가 아닌 상태일 때 알림이 저장되지 않는다")
+    void handleCredentialReviewed_pending() {
+        // given
+        val credentialId = Long.valueOf(102L);
+
+        // when
+        notificationEventListener.handleCredentialReviewed(
+                new CredentialReviewedEvent(credentialId, 102L, CredentialStatus.PENDING));
+
+        // then
+        val all = notificationRepository.findAll().stream()
+                .filter(it -> credentialId.equals(it.getReferenceId()))
+                .filter(it -> it.getReferenceType() == NotificationReferenceType.CREDENTIAL)
+                .toList();
+        assertThat(all).isEmpty();
     }
 
     @Test
