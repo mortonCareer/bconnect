@@ -12,18 +12,7 @@ interface RequireRoleProps {
   fallback: string
   /** 공개 경로 여부. 앱이 자기 규칙으로 계산해 넘긴다. */
   exempt?: boolean
-  pendingFallback?: ReactNode
   children: ReactNode
-}
-
-function GateSkeleton() {
-  return (
-    <div className="flex min-h-full w-full flex-col gap-4 p-4">
-      <div className="h-6 w-1/3 animate-pulse rounded bg-gray-100" />
-      <div className="h-40 w-full animate-pulse rounded bg-gray-100" />
-      <div className="h-40 w-full animate-pulse rounded bg-gray-100" />
-    </div>
-  )
 }
 
 /**
@@ -33,18 +22,12 @@ function GateSkeleton() {
  * - 조회 실패는 통과. 네트워크 장애를 "권한 없음" 으로 오판하면 안 된다
  * - 이동은 effect 가 아니라 렌더 도중 — 보호 화면이 한 프레임도 그려지지 않는다
  */
-export function RequireRole({
-  allowed,
-  fallback,
-  exempt = false,
-  pendingFallback,
-  children,
-}: RequireRoleProps) {
+export function RequireRole({ allowed, fallback, exempt = false, children }: RequireRoleProps) {
   const enabled = !exempt && !isApiMockingEnabled()
   const { data, isPending, isError } = useGetMyMember({ query: { enabled } })
 
   if (!enabled) return <>{children}</>
-  if (isPending) return <>{pendingFallback ?? <GateSkeleton />}</>
+  if (isPending) return null
   if (isError) return <>{children}</>
   if (!data.roles.some((role) => allowed.includes(role))) redirect(fallback)
 

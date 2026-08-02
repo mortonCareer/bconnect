@@ -9,7 +9,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     <div className="mx-auto min-h-screen max-w-screen-sm bg-white">
       <Suspense>
         <MainContent>
-          <CareerRoleGate>{children}</CareerRoleGate>
+          <Suspense>
+            <CareerRoleGate>{children}</CareerRoleGate>
+          </Suspense>
         </MainContent>
       </Suspense>
       <BottomNavigation />
