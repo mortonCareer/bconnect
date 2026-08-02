@@ -31,15 +31,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         )}
       </aside>
       <LoginGateProvider>
-        <main className="flex h-full min-w-0 flex-1 justify-start overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <Suspense>
-            <PlanRoleGate>
-              <div className="flex min-h-full w-full flex-col">{children}</div>
-            </PlanRoleGate>
-          </Suspense>
-        </main>
         <Suspense>
-          <PanelHost />
+          <PlanRoleGate>
+            <main className="flex h-full min-w-0 flex-1 justify-start overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex min-h-full w-full flex-col">{children}</div>
+            </main>
+            <Suspense>
+              <PanelHost />
+            </Suspense>
+          </PlanRoleGate>
         </Suspense>
       </LoginGateProvider>
       <NotificationPromptToast />
