@@ -47,9 +47,6 @@ main 머지 → 프로덕션 배포
   - BE 코드를 API 기준(SSOT)으로 하는 BE-first 개발 사이클 ([ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md)). 일반적으로 **BE 구현 → 스펙 갱신 → FE 작업** 순서로 진행
   - FE는 로컬에서 MSW mock으로 BE 미구현 상태에서도 작업 가능 (dev 배포는 dev BE(Railway)에 연동)
   - 모든 feature/fix PR의 타겟
-  - CI: lint, format, BE 빌드/테스트, **FE typecheck 포함** (강제 green 정책)
-  - 스펙만 갱신하는 PR(BE 구현 후 따라가는 갱신)은 paths-filter로 ci-career/ci-plan skip — BE-first에선 일반적으로 BE 변경과 스펙 갱신이 같은 PR에 묶이거나, 스펙 갱신이 FE 호출부 영향 없는 형태로 들어옴
-  - dev 환경 always-green — 스프린트 단위 QA 사이클 보장
 
 ### 작업 브랜치
 
@@ -62,40 +59,9 @@ feat/#-short-description  # 새 기능
 fix/#-short-description      # 버그 수정
 ```
 
-**예시:**
-
-```bash
-# 이슈 #123: Add user profile upload
-feat/123-add-profile-upload
-
-# 이슈 #456: Fix login redirect loop
-fix/456-login-redirect-loop
-```
-
-### 브랜치 생성 방법
-
-```bash
-# 1. 이슈 번호 확인 (예: #123)
-# 2. dev에서 최신 코드 가져오기
-git checkout dev
-git pull origin dev
-
-# 3. 브랜치 생성 및 체크아웃
-git checkout -b feat/123-add-profile-upload
-
-# 4. 작업 진행...
-```
-
 ### dev → main 머지 (릴리스)
 
-```bash
-# dev에서 main으로 PR 생성
-gh pr create --base main --head dev --title "chore(release): vX.Y.Z — dev → main 통합"
-```
-
-통합검증 CI(`ci-integration.yml`)가 통과해야 머지 가능합니다. 실패 시 dev에서 수정 후 재시도합니다. 머지는 반드시 **merge commit**으로 합니다 (squash 시 히스토리 분기 — 아래 "PR 머지 방법" 표 참조). 태그·릴리스 노트·APK 첨부까지 포함한 전체 릴리스 절차는 [release.md](./release.md) 참조.
-
-dev 브랜치는 BE-first 개발 사이클이라 BE 구현 → 스펙 → FE 순서로 자연스럽게 정합됩니다 ([ADR-0015](../explanation/adr/0015-be-code-as-api-ssot.md)). 통합은 일반적으로 스프린트 단위로 진행하되, 필요 시 CTO가 임의로 트리거할 수 있습니다. BE 변경 후 스펙 또는 FE 갱신 누락으로 드물게 drift가 발생할 수 있으며, 발견 시 dev에서 직접 수정합니다.
+릴리스 절차(릴리스 PR 생성 → merge commit 머지 → 태그·릴리스 노트·APK 첨부)는 [release.md](./release.md) 참조.
 
 ---
 
