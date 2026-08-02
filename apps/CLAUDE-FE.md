@@ -51,6 +51,16 @@ RHF `<Form>` 안 제출 버튼은 raw `<Button type="submit">` 대신 `FormSubmi
 
 날짜 계산(일수 차·더하기·월 경계 등)은 `@bconnect/config/date`(`daysBetween`·`addDays`·`todayIso` 등), 포맷·전화·주소·동의 항목도 `@bconnect/config/*`가 SSOT. **앱 로컬에 `Date.parse` 직접 계산 헬퍼를 재작성하기 전에 공용 패키지에 이미 있는지 먼저 확인** — 로컬 중복 헬퍼는 반올림·경계 처리 드리프트를 만든다 (#985 리뷰에서 실측).
 
+## Env vars — `@bconnect/config/env`
+
+Zod 검증된 `env` 객체를 사용한다. `process.env.X` 직접 접근 금지 — 주입 누락이 런타임까지 숨는다.
+
+## Local dev 서버 · dev OTP
+
+dev 서버 포트는 워크트리별 자동 할당 (`scripts/dev-port.sh`, dev·main=3000/3001, 그 외 4000대). 서버를 직접 띄우거나 내릴 때는 [local-servers 스킬](../.claude/skills/local-servers/SKILL.md)의 기동·식별·중지 규칙을 따를 것 — 임의 포트 사용·`pgrep -f` 기반 kill 금지.
+
+dev OTP는 `pnpm otp <전화번호>` 로 조회 ([dev-api-qa.md](../docs/how-to/dev-api-qa.md)). 사용자에게 코드 묻지 말 것.
+
 ## Figma 매핑 — `@figma` JSDoc
 
 모든 `page.tsx` 상단 `@figma <url>` JSDoc 필수(ESLint 강제). 디자인 없으면 `@figma-scaffold <reason>`. 형식·마커: [packages/ui/CLAUDE.md](../packages/ui/CLAUDE.md). 코드 `@figma` 태그 ↔ Figma 노드 drift는 주간 CI가 감지(상세: [scripts/figma-checks/CLAUDE.md](../scripts/figma-checks/CLAUDE.md)).
