@@ -36,8 +36,6 @@ GitHub Issue 생성을 자동화하고 적절한 레이블을 적용합니다.
 | 일반 feature | 300-800 bytes (한글 100-250자) |
 | 복잡한 bug   | 800-1,500 bytes                |
 
-상한 초과 시 self-check: "이 단락은 Why? Detail? 링크로 보낼 수 있는가?"
-
 ## 생성 방법
 
 본문은 파일로 저장 후 `gh issue create --body-file <파일>` 로 전달한다 (inline `--body` 금지 — HEREDOC backtick escape 함정).
@@ -61,9 +59,9 @@ GitHub Issue 생성을 자동화하고 적절한 레이블을 적용합니다.
 
 이슈 생성 후:
 
-1. **worktree-manager** 스킬로 워크트리+브랜치 생성
+1. dev 에서 브랜치 생성 (`feat/<이슈번호>-<설명>`, [git-workflow.md](../../../docs/how-to/git-workflow.md))
 2. 작업 진행
-3. **commit** 스킬로 커밋
+3. 커밋 ([git-workflow.md](../../../docs/how-to/git-workflow.md) 커밋 컨벤션)
 4. **pr-from-issue** 스킬로 PR 생성
 
 ## 참고 문서
