@@ -5,13 +5,13 @@
 
 ---
 
-## Phase 1 — CTO 사전 작업 (합류 전, CTO만)
+## Phase 1 — 사전 작업 (합류 전)
 
 신규 합류자에게 발급:
 
-- **GitHub** [mortonCareer org](https://github.com/mortonCareer) invite (push/PR 권한)
-- **Figma** file access 추가 (Pro seat 추가 비용 사전 확인)
-- **Notion** workspace invite ([홈](https://www.notion.so/morton-so/27a965d2888b80b4961bcc07957776f8))
+- **GitHub** [mortonCareer org 초대](https://github.com/orgs/mortonCareer/people)
+- **Figma** file access 추가
+- **Notion** 워크스페이스 초대 ([홈](https://www.notion.so/morton-so/27a965d2888b80b4961bcc07957776f8))
 - **Slack** 워크스페이스 초대
 
 각 도구의 정확한 식별자/링크: [`reference/tools.md`](../reference/tools.md).
@@ -22,16 +22,15 @@
 
 ### Step 1. 도구 설치
 
-기본 셋: Node.js 20+, pnpm 9+, gh, direnv, JDK 21 (로컬 BE 실행용).
+기본 셋: Node.js 24+, pnpm 10, direnv, JDK 21
 
 ```bash
-node --version  # >= 20
-corepack enable && pnpm --version  # >= 9
-brew install direnv gh
-gh auth login
+node --version   # >= 24
+corepack enable  # package.json 의 packageManager(pnpm@10.x) 자동 적용
+brew install direnv  # Ubuntu/WSL 은 apt install direnv
 ```
 
-**Claude Code** — VSCode Extension 또는 CLI 둘 중 하나로 설치 ([공식 가이드](https://claude.com/code)).
+**Claude Code** — VSCode Extension 또는 CLI 둘 중 하나로 설치
 
 ---
 
@@ -69,38 +68,29 @@ pnpm dev:plan    # http://localhost:3001 — 업체 웹
 
 워크플로 1회 경험을 위해 **본인 정보를 추가하는 작은 PR** 을 만든다.
 
-### Step 1. 이슈 생성
+1. **이슈 생성** — [새 이슈](https://github.com/mortonCareer/bconnect/issues/new) → 제목: `chore: team.md 본인 정보 추가`. issue 번호 확인.
 
-[새 이슈](https://github.com/mortonCareer/bconnect/issues/new) → 제목: `chore: team.md 본인 정보 추가`. issue 번호 확인.
+2. **브랜치** — [`how-to/git-workflow.md`](../how-to/git-workflow.md) 의 브랜치 네이밍 룰:
 
-### Step 2. 브랜치
+   ```bash
+   git checkout dev && git pull origin dev
+   git checkout -b chore/<issue-num>-onboarding
+   ```
 
-[`how-to/git-workflow.md`](../how-to/git-workflow.md) 의 브랜치 네이밍 룰:
+3. **team.md 편집 + 커밋 + PR** — [`docs/reference/team.md`](../reference/team.md) 에 본인 행 추가:
 
-```bash
-git checkout dev && git pull origin dev
-git checkout -b chore/<issue-num>-onboarding
-```
+   ```bash
+   git add docs/reference/team.md
+   git commit -m "chore(docs): <your-name> 본인 정보 추가 (#<issue>)"
+   git push
+   ```
 
-> 여러 작업을 동시에 하고 싶으면 git worktree 를 써도 된다 (옵션).
+   push 후 PR 은 GitHub 웹에서 생성
 
-### Step 3. team.md 편집 + 커밋 + PR
-
-[`docs/reference/team.md`](../reference/team.md) 에 본인 행 추가:
-
-```bash
-git add docs/reference/team.md
-git commit -m "chore(docs): <your-name> 본인 정보 추가 (#<issue>)"
-git push
-```
-
-push 후 PR 은 GitHub 웹에서 생성
-
-### Step 4. 머지
-
-- CI 통과 확인 (lint, format, BE 빌드/테스트)
-- 리뷰어 approve 후 본인이 머지
-- main 직접 머지 X — PR 타겟은 항상 `dev`
+4. **머지**
+   - CI 통과 확인 (lint, format, BE 빌드/테스트)
+   - 리뷰어 approve 후 본인이 머지
+   - main 직접 머지 X — PR 타겟은 항상 `dev`
 
 ---
 
