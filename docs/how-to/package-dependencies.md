@@ -1,6 +1,6 @@
 # Package Dependency Versioning
 
-> **For**: JS workspace(apps/career·plan·company, packages/*)에 dep 을 추가·변경하는 사람 또는 AI. `apps/api`(Gradle)·`apps/crawler`(uv)는 해당 없음.
+> **For**: JS workspace(apps/career·plan·company, packages/\*)에 dep 을 추가·변경하는 사람 또는 AI. `apps/api`(Gradle)·`apps/crawler`(uv)는 해당 없음.
 > **You'll be able to**: pnpm catalog 결정 트리에 따라 dep 을 추가하고 syncpack 검증을 통과한다.
 
 같은 외부 dep 가 여러 package.json 에 분산되면 spec range·lockfile resolution 이 갈라져 디버깅 비용이 커진다. dep 버전에도 SSoT 원칙을 적용한다.
