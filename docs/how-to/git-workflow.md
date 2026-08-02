@@ -103,7 +103,7 @@ fix/#-short-description      # 버그 수정
 
 ### 커밋 타입
 
-허용 타입의 SSoT는 [commitlint.config.js](../../commitlint.config.js)의 `type-enum`입니다. husky commit-msg 훅이 강제하며 위반 시 commit이 차단됩니다.
+[commitlint.config.js](../../commitlint.config.js)가 상속하는 [@commitlint/config-conventional](https://github.com/conventional-changelog/commitlint/tree/master/%40commitlint/config-conventional) 기본 타입(feat, fix, docs, refactor, chore, test, style, build, ci, perf, revert)을 그대로 씁니다. husky commit-msg 훅이 강제하며 위반 시 commit이 차단됩니다.
 
 ### Scope
 
