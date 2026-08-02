@@ -78,25 +78,10 @@ fix/#-short-description      # 버그 수정
 
 ### 이슈 레이블
 
-레이블 목록 + 자동 적용 규칙은 [labels.md](../reference/labels.md) 참조.
+레이블 목록의 SSoT는 GitHub 레이블 자체 — `gh label list` 로 실측합니다 (이름·설명 전부 실물에 있음). 규칙 두 가지만 기억하면 됩니다:
 
-### 이슈 처리 흐름
-
-```
-문제 발견
-    ↓
-GitHub Issue 생성
-    ↓
-담당자 할당
-    ↓
-feat/# 또는 fix/# 브랜치 생성
-    ↓
-작업 진행 및 커밋
-    ↓
-PR 생성 (Closes #123)
-    ↓
-머지 후 이슈 자동 닫힘
-```
+- 버그는 `🐛 bug` + 범위 레이블 조합 (예: `🐛 bug` + `💻 fe`)
+- `🚨 sync-failure`, `🤖 figma-drift` 는 봇 전용 — 직접 붙이지 않기
 
 이슈 템플릿/레이블: [.github/ISSUE_TEMPLATE/](../../.github/ISSUE_TEMPLATE/), 담당자 자동 할당은 [docs/reference/team.md](../reference/team.md) 참조.
 
@@ -118,15 +103,7 @@ PR 생성 (Closes #123)
 
 ### 커밋 타입
 
-| 타입       | 설명                           |
-| ---------- | ------------------------------ |
-| `feat`     | 새로운 기능 추가               |
-| `fix`      | 버그 수정                      |
-| `docs`     | 문서 수정                      |
-| `refactor` | 코드 리팩토링 (기능 변경 없음) |
-| `chore`    | 빌드, 설정 파일 수정           |
-| `test`     | 테스트 코드 추가/수정          |
-| `style`    | 코드 포맷팅 (기능 변경 없음)   |
+허용 타입의 SSoT는 [commitlint.config.js](../../commitlint.config.js)의 `type-enum`입니다. husky commit-msg 훅이 강제하며 위반 시 commit이 차단됩니다.
 
 ### Scope
 
@@ -146,122 +123,11 @@ PR 생성 (Closes #123)
 feat(career): add profile upload form (#123)
 ```
 
-### 예시
-
-```bash
-# 기능 추가
-feat(career): add user profile upload (#123)
-
-# 버그 수정
-fix(plan): resolve login redirect loop (#456)
-
-# 문서 업데이트
-docs: update API client usage guide
-
-# 리팩토링
-refactor(api): extract auth service logic
-
-# 설정 변경
-chore: update ESLint rules
-
-# 테스트 추가
-test(api): add user service unit tests
-```
-
-### 커밋 메시지 작성 가이드
-
-**좋은 예:**
-
-```
-feat(career): add profile image upload
-
-- Add file input component
-- Implement S3 upload logic
-- Add image preview
-- Handle upload errors
-
-Closes #123
-```
-
-**나쁜 예:**
-
-```
-update code
-fix bug
-WIP
-```
-
-커밋 형식은 commitlint(husky)가 자동 검증합니다. 위반 시 commit 차단.
-
----
-
 ## PR (Pull Request) 프로세스
 
-### PR 생성
+### PR 형식
 
-작업이 완료되면 PR을 생성합니다.
-
-**PR 제목:**
-
-커밋 메시지와 동일한 형식:
-
-```
-feat(career): 프로필 이미지 업로드 추가
-```
-
-**PR 본문:**
-
-[템플릿](../../.github/pull_request_template.md) 구조(왜 → 무엇 → 검증 → 스크린샷)를 따릅니다. 본문은 diff가 말해주지 않는 것(왜, 검증, 링크)만 담습니다 — 변경 파일 나열·diff 재서술 금지.
-
-```markdown
-## 왜
-
-프로필에 사진이 없어 업체가 기술자를 식별하기 어렵다는 피드백이 있었습니다.
-
-## 무엇
-
-- 업로드는 presigned URL 방식 — BE 경유 업로드는 파일 크기 제한과 서버 부하 때문에 제외했습니다
-
-## 검증
-
-- [x] 로컬에서 이미지 업로드 확인
-- [x] 에러 케이스 (파일 크기, 형식) 확인
-
-Closes #123
-```
-
-### PR 생성 명령어
-
-```bash
-# 1. 변경사항 푸시
-git push origin feat/123-add-profile-upload
-
-# 2. GitHub에서 PR 생성
-# 또는 gh CLI 사용:
-gh pr create --title "feat(career): Add user profile upload" --body "..."
-```
-
-PR 본문 템플릿: [.github/pull_request_template.md](../../.github/pull_request_template.md). 리뷰어 자동 할당은 [docs/reference/team.md](../reference/team.md) 참조.
-
-### PR 리뷰 프로세스
-
-```
-PR 생성
-    ↓
-CI 체크 통과 (lint/format/BE·FE typecheck)
-    ↓
-CTO: 코드 리뷰 + 기능 테스트
-    ↓
-CEO: 최종 QA (실사용자 관점)
-    ↓
-수정 필요 시: 피드백 반영 → 재검수
-    ↓
-Approve
-    ↓
-dev 브랜치로 머지
-```
-
-> 디자이너 UI 검수·실사용자 QA 는 스프린트 단위 dev 환경에서 수행합니다.
+PR 본문 템플릿: [.github/pull_request_template.md](../../.github/pull_request_template.md)
 
 ### PR 머지 방법
 
@@ -271,58 +137,3 @@ dev 브랜치로 머지
 | ------------------- | ---------------- | ----------------------------------------------------------- |
 | `feature/fix → dev` | **Squash**       | 작업 단위 압축, 임시 commit 정리                            |
 | `dev → main` 통합   | **Merge commit** | dev의 PR 단위 보존, main에서 어떤 PR이 들어갔는지 추적 가능 |
-| `main → dev` sync   | **Merge commit** | main의 commit 히스토리 그대로 흡수                          |
-
-공통:
-
-- 머지 커밋 메시지는 PR 제목 사용
-- 프로덕션 자동 배포 (`main` 머지 시)
-
-## QA
-
-QA 는 dev 환경에서 **스프린트 단위**로 수행합니다 — 디자이너 UI 검수, CTO 기능 테스트, CEO 실사용자 관점 검증. production 배포는 main 머지 시 career(`bconnect.to`)·plan(`plan.bconnect.to`)으로 자동 진행됩니다.
-
----
-
-## 모범 사례
-
-### DO ✅
-
-- 작업 시작 전 반드시 이슈 생성
-- 이슈 번호 기반 브랜치 생성
-- 의미 있는 커밋 메시지 작성
-- PR에 테스트 결과 명시
-- 스프린트 단위로 dev 환경에서 충분히 테스트
-- 리뷰어 피드백 적극 반영
-
-### DON'T ❌
-
-- main 브랜치에 직접 푸시
-- 이슈 없이 브랜치 생성
-- "WIP", "fix" 같은 애매한 커밋 메시지
-- 여러 기능을 한 PR에 포함
-- 테스트 없이 PR 생성
-- 리뷰 없이 셀프 머지
-
----
-
-## 문제 해결
-
-### 브랜치가 dev와 충돌할 때
-
-```bash
-# 1. dev 최신화
-git checkout dev
-git pull origin dev
-
-# 2. 작업 브랜치로 돌아가기
-git checkout feat/123-add-profile-upload
-
-# 3. dev 변경사항 가져오기
-git rebase dev
-# 또는
-git merge dev
-
-# 4. 충돌 해결 후 푸시
-git push origin feat/123-add-profile-upload --force-with-lease
-```
