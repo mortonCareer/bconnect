@@ -12,15 +12,14 @@
 | 도메인                   | 서비스                  | 환경          | 프로바이더 | 비고                                                                                                                                   |
 | ------------------------ | ----------------------- | ------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `career.bconnect.to`     | career (기술자 PWA)     | production    | Vercel     | career apex 이전(#779)                                                                                                                 |
-| `bconnect.to`            | landing (허브)          | production    | Vercel     | 랜딩 허브(#896), #935 컷오버. `/`=업체 랜딩·`/career`=기술자 랜딩·`/one-click`. `/.well-known/assetlinks.json` 200 유지(구 TWA 설치분) |
+| `bconnect.to`            | company (허브)          | production    | Vercel     | 랜딩 허브(#896), #935 컷오버. `/`=업체 랜딩·`/career`=기술자 랜딩·`/one-click`. `/.well-known/assetlinks.json` 200 유지(구 TWA 설치분) |
 | `plan.bconnect.to`       | plan (업체/건축주)      | production    | Vercel     |                                                                                                                                        |
 | `api.bconnect.to`        | api (Spring Boot BE)    | production    | Railway    | `SPRING_PROFILES_ACTIVE=prod`                                                                                                          |
-| `dev.bconnect.to`        | landing                 | dev (staging) | Vercel     | apex 미러 — `dev` 브랜치 자동배포 (Vercel custom env)                                                                                  |
+| `dev.bconnect.to`        | company                 | dev (staging) | Vercel     | apex 미러 — `dev` 브랜치 자동배포 (Vercel custom env)                                                                                  |
 | `career.dev.bconnect.to` | career                  | dev (staging) | Vercel     | `dev` 브랜치 자동배포 (Vercel custom env). apex 이전(#779) 대칭으로 dev도 이전(#902)                                                   |
 | `plan.dev.bconnect.to`   | plan                    | dev (staging) | Vercel     | `dev` 브랜치 자동배포. 2-레벨 서브도메인                                                                                               |
 | `api.dev.bconnect.to`    | api                     | dev (staging) | Railway    | Railway `dev` 환경. Sentry env 태그 `dev`                                                                                              |
-| `*.vercel.app`           | career / plan           | PR 프리뷰     | Vercel     | `<project>-git-<branch>-<team>.vercel.app`                                                                                             |
-| `localhost:3000~3002`    | career / plan / landing | 로컬          | —          | `pnpm dev:career` / `pnpm dev:plan` / landing은 `pnpm --filter landing dev`                                                            |
+| `localhost:3000~3002`    | career / plan / company | 로컬          | —          | `pnpm dev:career` / `pnpm dev:plan` / `pnpm dev:company`                                                                               |
 | `localhost:8080`         | api                     | 로컬          | —          | `./gradlew bootRun`                                                                                                                    |
 
 규칙: **`{service}.{env}.bconnect.to`** — production 은 `{env}` 생략 ([ADR-0016](../explanation/adr/0016-environment-service-domain-naming.md)). career 는 원래 apex(`{service}` 생략)였으나 #779로 `career.bconnect.to`로 이전, apex(`bconnect.to`)는 랜딩 허브가 서빙(#896 신설, #935 컷오버). 새 환경·서비스는 같은 규칙으로 확장.
@@ -33,7 +32,7 @@
 
 | 서비스       | production           | dev (staging)            | 로컬             |
 | ------------ | -------------------- | ------------------------ | ---------------- |
-| landing (FE) | `bconnect.to`        | `dev.bconnect.to`        | `localhost:3002` |
+| company (FE) | `bconnect.to`        | `dev.bconnect.to`        | `localhost:3002` |
 | career (FE)  | `career.bconnect.to` | `career.dev.bconnect.to` | `localhost:3000` |
 | plan (FE)    | `plan.bconnect.to`   | `plan.dev.bconnect.to`   | `localhost:3001` |
 | api (BE)     | `api.bconnect.to`    | `api.dev.bconnect.to`    | `localhost:8080` |
