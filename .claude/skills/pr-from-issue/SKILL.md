@@ -1,12 +1,12 @@
 ---
 name: pr-from-issue
-description: 이슈 기반 PR 자동 생성. 현재 브랜치에서 이슈 번호 추출, PR 제목/본문 생성, Closes #123 자동 추가
+description: 이슈 기반 PR 생성. 현재 브랜치에서 이슈 번호 추출, PR 제목/본문 생성, Closes #123 자동 추가. 본문은 quality 룰 준수 + 훅(pr-issue-body-lint)이 기계 검증
 allowed-tools: Bash, Read, Grep
 ---
 
 # PR from Issue
 
-GitHub Issue 정보를 기반으로 Pull Request를 자동 생성합니다.
+GitHub Issue 정보를 기반으로 Pull Request를 생성합니다.
 
 ## 사용 시점
 
@@ -25,27 +25,18 @@ GitHub Issue 정보를 기반으로 Pull Request를 자동 생성합니다.
 3. 변경 파일 분석
    └─ git diff origin/dev...HEAD
 
-4. 리뷰어 자동 결정
-   └─ apps/api/ 변경 포함 → CEO 추가
-   └─ 프론트엔드만 변경 → 리뷰어 없음
-
-5. PR 제목 생성
+4. PR 제목 생성
    └─ 이슈 제목 기반 (feat, fix 접두사 추가)
 
-6. PR 본문 생성
-   └─ Summary + Changes + Test + Closes #123
+5. PR 본문 작성 → 파일로 저장
+   └─ 아래 quality 룰 준수. 반드시 --body-file 로 전달 (inline --body 금지)
 
-7. PR 생성
-   └─ gh pr create (--reviewer 옵션 포함)
-
-8. Vercel 프리뷰 배포 대기
-   └─ 1-2분 소요
-
-9. QA 진행
-   └─ 프리뷰 URL에서 테스트
+6. PR 생성
+   └─ gh pr create --base dev --title "..." --body-file <파일>
+   └─ 리뷰어 지정 금지 — --reviewer 옵션을 쓰지 않는다. 리뷰어는 사용자가 정한다
 ```
 
----
+PR 생성 후 리뷰 프로세스와 QA(dev 환경 스프린트 단위)는 [git-workflow.md](../../../docs/how-to/git-workflow.md) 참조.
 
 ## PR 제목 형식
 
@@ -55,17 +46,10 @@ GitHub Issue 정보를 기반으로 Pull Request를 자동 생성합니다.
 <type>(<scope>): <description>
 ```
 
-### 예시
+예: `feat(career): 프로필 이미지 업로드 추가`
 
-```bash
-# 이슈: "Add user profile image upload"
-# PR 제목: "feat(career): Add user profile image upload"
-
-# 이슈: "Fix login redirect loop"
-# PR 제목: "fix(plan): Fix login redirect loop"
-```
-
----
+- description 은 대문자 약어(BE, API 등)나 PascalCase 로 시작하지 않는다 — commitlint 가 차단함. 한글 시작은 통과
+- squash 머지 시 PR 제목이 곧 dev 히스토리의 커밋 메시지가 된다. 제목 품질 = 히스토리 품질
 
 ## PR 본문 템플릿
 
@@ -76,15 +60,26 @@ GitHub Issue 정보를 기반으로 Pull Request를 자동 생성합니다.
 
 ## 본문 quality 룰
 
-PR 본문은 위 4-section 구조 + `Closes #N` 을 유지한다. 다음은 본문에 박지 말 것 — 결정 history, supersede 사유, 코드리뷰 반영 내역, ADR 번호 재할당, 정정 이력. ADR/이슈/git history 가 SoT.
+PR 본문은 위 4-section 구조 + `Closes #N` 을 유지한다. 원칙: **diff 가 이미 말하는 것은 쓰지 않는다. 본문은 diff 가 못 담는 것(왜, 검증, 링크)만 담는다.**
 
 ### Section 별 룰
 
 - **Summary** (1-3문장) — 첫 줄은 stand-alone 으로 의도 전달, 나머지는 Why
-- **Changes** — 무엇 + 왜 그렇게 했나. 컴포넌트 구조표 X (코드가 SoT)
-- **Test** — 검증 절차 + 결과
+- **Changes** — 무엇 + 왜 그렇게 했나. 변경 파일 나열·diff 재서술 금지. 컴포넌트 구조표 X (코드가 SoT)
+- **Test** — **실제 수행한 검증만** 체크. 수행하지 않은 항목은 쓰지 않거나 "미수행" 명시. 허위 체크 금지
 - **Screenshots** — UI 변경 시
 - **Closes #N** — 이슈에 모든 깊이를 link out
+
+### 박지 말 것
+
+결정 history, supersede 사유, 코드리뷰 반영 내역, ADR 번호 재할당, 정정 이력 — ADR/이슈/git history 가 SoT.
+
+### 문체
+
+- 합니다체 (해요체는 제품 UI 카피 전용)
+- 과장 형용사 금지 — comprehensive, robust, seamless, enhanced 류. "This PR introduces..." 류 filler 오프너 금지
+- 장식 이모지 금지
+- 레포 파일 참조는 절대 blob URL (상대링크는 GitHub 본문에서 깨짐)
 
 ### 권장 길이
 
@@ -96,248 +91,20 @@ PR 본문은 위 4-section 구조 + `Closes #N` 을 유지한다. 다음은 본�
 
 상한 초과 시 self-check: "이 단락은 무엇/왜? Detail? ADR/이슈로 보낼 수 있는가?"
 
----
+## 기계 검증 (훅)
 
-## 리뷰어 자동 할당
-
-> **SSoT**: 리뷰어 할당 규칙과 GitHub 사용자명 매핑은 [docs/reference/team.md](../../../docs/reference/team.md)의 "PR 리뷰어 자동 할당" 섹션을 참조하세요.
-
-### 감지 방법
-
-```bash
-# 변경 파일 확인
-git diff origin/dev...HEAD --name-only
-
-# apps/api/ 포함 여부 체크
-if git diff origin/dev...HEAD --name-only | grep -q "^apps/api/"; then
-  REVIEWER="<CEO_GITHUB>"
-fi
-
-# openapi.yaml 변경 시
-if git diff origin/dev...HEAD --name-only | grep -q "openapi.yaml"; then
-  REVIEWER="<CEO_GITHUB>,<CTO_GITHUB>"  # 둘 다
-fi
-```
-
----
-
-## 자동화 스크립트 예시
-
-```bash
-#!/bin/bash
-# pr-from-issue.sh
-
-# 현재 브랜치에서 이슈 번호 추출
-BRANCH=$(git rev-parse --abbrev-ref HEAD)
-
-if [[ $BRANCH =~ ^(feat|fix)/([0-9]+)-(.+)$ ]]; then
-  TYPE=${BASH_REMATCH[1]}
-  ISSUE=${BASH_REMATCH[2]}
-  DESC=${BASH_REMATCH[3]}
-else
-  echo "Cannot extract issue number from branch: $BRANCH"
-  exit 1
-fi
-
-COMMIT_TYPE="$TYPE"
-
-# 이슈 정보 가져오기
-ISSUE_TITLE=$(gh issue view $ISSUE --json title -q .title)
-ISSUE_BODY=$(gh issue view $ISSUE --json body -q .body)
-
-# scope 추론 (레이블에서)
-LABELS=$(gh issue view $ISSUE --json labels -q '.labels[].name')
-if echo "$LABELS" | grep -q "career\|💻 fe"; then
-  SCOPE="career"
-elif echo "$LABELS" | grep -q "plan"; then
-  SCOPE="plan"
-elif echo "$LABELS" | grep -q "⚙️ be\|api"; then
-  SCOPE="api"
-else
-  SCOPE=""
-fi
-
-# PR 제목 생성
-if [ -n "$SCOPE" ]; then
-  PR_TITLE="${COMMIT_TYPE}(${SCOPE}): ${ISSUE_TITLE}"
-else
-  PR_TITLE="${COMMIT_TYPE}: ${ISSUE_TITLE}"
-fi
-
-# PR 본문 생성
-PR_BODY=$(cat <<EOF
-## Summary
-
-${ISSUE_TITLE}
-
-## Changes
-
-- TODO: List your changes here
-
-## Test
-
-- [ ] 로컬에서 테스트 완료
-- [ ] 에러 케이스 확인
-- [ ] 반응형 동작 확인
-
-Closes #${ISSUE}
-EOF
-)
-
-# PR 생성
-echo "Creating PR: $PR_TITLE"
-gh pr create \
-  --title "$PR_TITLE" \
-  --body "$PR_BODY" \
-  --base dev
-
-echo "✓ PR created successfully"
-echo "Vercel preview will be available in 1-2 minutes"
-```
-
-**사용법**:
-
-```bash
-chmod +x pr-from-issue.sh
-./pr-from-issue.sh
-```
-
----
-
-## PR 생성 후 프로세스
-
-```
-PR 생성
-    ↓
-Vercel 프리뷰 자동 배포 (1-2분)
-    ↓
-GitHub PR 댓글에 프리뷰 URL 추가
-    ↓
-디자이너: UI 검수
-    ↓
-CTO: 코드 리뷰 + 기능 테스트
-    ↓
-CEO: 최종 QA
-    ↓
-수정 필요 시: 피드백 반영 → 재검수
-    ↓
-Approve
-    ↓
-Squash and Merge
-    ↓
-이슈 자동 닫힘 + 프로덕션 배포
-```
-
----
-
-## PR 체크리스트
-
-PR 생성 전 확인 사항:
-
-### 코드
-
-- [ ] 린트 에러 없음 (`pnpm lint`)
-- [ ] 빌드 성공 (`pnpm build`)
-- [ ] 타입 에러 없음 (TypeScript)
-- [ ] 불필요한 콘솔 로그 제거
-- [ ] 주석 처리된 코드 제거
-
-### 테스트
-
-- [ ] 로컬에서 기능 테스트 완료
-- [ ] Happy Path 동작 확인
-- [ ] 에러 케이스 처리 확인
-- [ ] 로딩 상태 구현
-- [ ] Empty State 처리
-
-### UI/UX
-
-- [ ] Figma 시안 대비 확인
-- [ ] 반응형 동작 (모바일/태블릿/데스크톱)
-- [ ] 버튼/링크 호버 상태
-- [ ] 포커스 스타일
-
-### 문서
-
-- [ ] PR 본문에 변경사항 명시
-- [ ] 테스트 항목 체크
-- [ ] 관련 이슈 링크 (`Closes #123`)
-- [ ] 스크린샷 첨부 (UI 변경 시)
-
----
+`gh pr create` 실행 시 [pr-issue-body-lint.sh](../../hooks/pr-issue-body-lint.sh) PreToolUse 훅이 위 룰 중 기계 검증 가능한 것(길이 상한, 이모지, --body-file 강제, --reviewer 차단, 제목 형식)을 자동 검사한다. 차단되면 훅 메시지의 사유를 고쳐서 재시도한다. 강제 룰·상한 수치의 SSoT 는 스크립트 본문 (위 길이표는 권장 범위, 훅 상한은 표의 최대값과 동기).
 
 ## 문제 해결
 
-### Vercel 프리뷰가 안 뜰 때
-
-```bash
-# 1. Vercel 빌드 로그 확인
-# GitHub PR 댓글의 "Details" 클릭
-
-# 2. 로컬에서 빌드 테스트
-pnpm build
-
-# 3. 에러 수정 후 재푸시
-git add .
-git commit -m "fix: resolve build error"
-git push
-```
-
-### PR이 이슈를 자동으로 닫지 않을 때
-
-PR 본문이나 커밋 메시지에 다음 중 하나를 포함해야 합니다:
-
-```bash
-Closes #123
-Fixes #123
-Resolves #123
-```
-
-**주의**: `Closes #123`은 PR이 **머지**될 때 이슈가 닫힙니다.
-
-### Conflict 발생 시
-
-```bash
-# dev 최신화 (워크트리 작업 중이면 checkout 없이 fetch 만)
-git fetch origin dev
-
-# dev 변경사항 가져오기
-git rebase origin/dev
-# 또는
-git merge origin/dev
-
-# 충돌 해결 후
-git add .
-git rebase --continue  # rebase 사용 시
-# 또는
-git commit  # merge 사용 시
-
-# 푸시
-git push --force-with-lease
-```
-
----
-
-## 주의사항
-
-- **Draft PR**: 아직 리뷰가 필요 없으면 `--draft` 옵션 사용
-- **작은 PR**: 한 PR에는 하나의 기능만 (300줄 이하 권장)
-- **리뷰 요청**: 적절한 리뷰어 지정
-- **테스트 완료**: PR 생성 전 충분히 테스트
-- **Closes 키워드**: 이슈 자동 닫기를 위해 반드시 포함
-
----
+- **PR이 이슈를 자동으로 안 닫음**: 본문에 `Closes #123` / `Fixes #123` / `Resolves #123` 필요. 머지 시점에 닫힌다
+- **dev 와 conflict**: [git-workflow.md](../../../docs/how-to/git-workflow.md) "문제 해결" 참조
 
 ## 다음 단계
 
-PR 생성 후:
-
-1. Vercel 프리뷰 URL에서 QA
-2. 리뷰어 피드백 반영
-3. Approve 후 Squash and Merge
-4. 이슈 자동 닫힘 + 프로덕션 배포
-
----
+1. 리뷰어 피드백 반영
+2. Approve 후 Squash and Merge → 이슈 자동 닫힘
+3. 배포는 dev → main 통합 시 ([deployment.md](../../../docs/how-to/deployment.md))
 
 ## 참고 문서
 

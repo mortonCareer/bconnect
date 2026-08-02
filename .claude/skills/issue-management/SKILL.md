@@ -28,6 +28,12 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 4. **관련 링크** — Figma 디자인 파일 / ADR / 인접 이슈, 모두 마크다운 링크
 5. **Figma 노드 매핑** (UI 작업 시) — 구현 대상 Ready for Dev 노드 ID (단일 링크 또는 표)
 
+### 문체
+
+- 합니다체 (해요체는 제품 UI 카피 전용)
+- 과장 형용사·장식 이모지 금지
+- 레포 파일 참조는 절대 blob URL (상대링크는 GitHub 본문에서 깨짐)
+
 ### 권장 길이
 
 | 종류         | 본문 길이                      |
@@ -38,9 +44,19 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 
 상한 초과 시 self-check: "이 단락은 Why? Detail? 링크로 보낼 수 있는가?"
 
+## 생성 방법
+
+본문은 파일로 저장 후 `gh issue create --body-file <파일>` 로 전달한다 (inline `--body` 금지 — HEREDOC backtick escape 함정).
+
+`gh issue create` 실행 시 [pr-issue-body-lint.sh](../../hooks/pr-issue-body-lint.sh) PreToolUse 훅이 길이 상한·이모지·--body-file 강제를 자동 검사한다. 차단되면 사유를 고쳐서 재시도.
+
 ## 레이블
 
-레이블 목록 + 자동 적용 규칙은 [labels.md](../../../docs/reference/labels.md) 참조.
+레이블 목록 + 자동 적용 규칙은 [labels.md](../../../docs/reference/labels.md) 참조. 단 **문서가 실제와 어긋난 이력 있음** — 붙이기 전 `gh label list` 로 실측 먼저.
+
+## 마일스톤
+
+`gh api repos/{owner}/{repo}/milestones` 로 실측 후 적합한 마일스톤을 **추천**한다. 결정은 사용자.
 
 ## 담당자 할당 규칙
 

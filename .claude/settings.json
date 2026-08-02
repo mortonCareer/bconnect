@@ -13,6 +13,11 @@
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/vercel-monorepo-guard.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/pr-issue-body-lint.sh",
+            "timeout": 5
           }
         ]
       }
