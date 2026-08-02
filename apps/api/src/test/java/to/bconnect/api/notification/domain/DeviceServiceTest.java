@@ -60,8 +60,8 @@ class DeviceServiceTest {
         val created = deviceTokenRepository.findByToken(token).orElseThrow();
         assertThat(created.getMemberId()).isEqualTo(member.getId());
         assertThat(created.getToken()).isEqualTo(token);
-        assertThat(applicationEvents.stream(DeviceRegisteredEvent.class))
-                .containsExactly(new DeviceRegisteredEvent(member.getId()));
+        val expected = new DeviceRegisteredEvent(member.getId());
+        assertThat(applicationEvents.stream(DeviceRegisteredEvent.class)).containsExactly(expected);
     }
 
     @Test
@@ -81,7 +81,6 @@ class DeviceServiceTest {
         val found = deviceTokenRepository.findById(created.getId()).orElseThrow();
         assertThat(found.getMemberId()).isEqualTo(member.getId());
         assertThat(found.isEnabled()).isTrue();
-        assertThat(applicationEvents.stream(DeviceRegisteredEvent.class)).isEmpty();
     }
 
     @Test

@@ -133,8 +133,8 @@ class CredentialServiceTest {
         // then
         val found = credentialRepository.findById(credential.getId()).orElseThrow();
         assertThat(found.getStatus()).isEqualTo(CredentialStatus.ACCEPTED);
-        assertThat(applicationEvents.stream(CredentialReviewedEvent.class))
-                .containsExactly(new CredentialReviewedEvent(credential.getId(), member.getId(), CredentialStatus.ACCEPTED));
+        val expected = new CredentialReviewedEvent(credential.getId(), member.getId(), CredentialStatus.ACCEPTED);
+        assertThat(applicationEvents.stream(CredentialReviewedEvent.class)).containsExactly(expected);
     }
 
     @Test
@@ -150,8 +150,8 @@ class CredentialServiceTest {
         // then
         val found = credentialRepository.findById(credential.getId()).orElseThrow();
         assertThat(found.getStatus()).isEqualTo(CredentialStatus.DENIED);
-        assertThat(applicationEvents.stream(CredentialReviewedEvent.class))
-                .containsExactly(new CredentialReviewedEvent(credential.getId(), member.getId(), CredentialStatus.DENIED));
+        val expected = new CredentialReviewedEvent(credential.getId(), member.getId(), CredentialStatus.DENIED);
+        assertThat(applicationEvents.stream(CredentialReviewedEvent.class)).containsExactly(expected);
     }
 
     @Test

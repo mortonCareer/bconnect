@@ -49,8 +49,8 @@ class ProfileServiceTest {
         assertThat(found.getMemberId()).isEqualTo(member.getId());
         val granted = memberRepository.findById(member.getId()).orElseThrow();
         assertThat(granted.getRoles()).contains(Role.CAREER).doesNotContain(Role.GUEST);
-        assertThat(applicationEvents.stream(ProfileCreatedEvent.class))
-                .containsExactly(new ProfileCreatedEvent(member.getId(), created));
+        val expected = new ProfileCreatedEvent(member.getId(), created);
+        assertThat(applicationEvents.stream(ProfileCreatedEvent.class)).containsExactly(expected);
     }
 
     @Test

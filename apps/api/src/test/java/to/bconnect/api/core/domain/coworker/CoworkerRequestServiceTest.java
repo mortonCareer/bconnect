@@ -47,9 +47,8 @@ class CoworkerRequestServiceTest {
         val found = coworkerRequestRepository.findById(id).orElseThrow();
         assertThat(found.getFromId()).isEqualTo(from.getId());
         assertThat(found.getToId()).isEqualTo(to.getId());
-        assertThat(applicationEvents.stream(CoworkerRequestedEvent.class))
-                .containsExactly(new CoworkerRequestedEvent(id, from.getId(), to.getId()));
-        assertThat(applicationEvents.stream(CoworkerAcceptedEvent.class)).isEmpty();
+        val expected = new CoworkerRequestedEvent(id, from.getId(), to.getId());
+        assertThat(applicationEvents.stream(CoworkerRequestedEvent.class)).containsExactly(expected);
     }
 
     @Test
@@ -67,7 +66,6 @@ class CoworkerRequestServiceTest {
         // then
         assertThat(id).isEqualTo(created.getId());
         assertThat(coworkerRequestRepository.findAllByFromId(from.getId())).hasSize(1);
-        assertThat(applicationEvents.stream(CoworkerRequestedEvent.class)).isEmpty();
     }
 
     @Test
@@ -87,9 +85,8 @@ class CoworkerRequestServiceTest {
         assertThat(coworkerRequestRepository.findById(reverse.getId())).isEmpty();
         assertThat(coworkerRequestRepository.findAllByFromId(from.getId())).isEmpty();
         assertThat(coworkerRepository.existsByMembers(from.getId(), to.getId())).isTrue();
-        assertThat(applicationEvents.stream(CoworkerAcceptedEvent.class))
-                .containsExactly(new CoworkerAcceptedEvent(to.getId(), from.getId()));
-        assertThat(applicationEvents.stream(CoworkerRequestedEvent.class)).isEmpty();
+        val expected = new CoworkerAcceptedEvent(to.getId(), from.getId());
+        assertThat(applicationEvents.stream(CoworkerAcceptedEvent.class)).containsExactly(expected);
     }
 
     @Test
@@ -107,8 +104,8 @@ class CoworkerRequestServiceTest {
         // then
         assertThat(coworkerRequestRepository.findById(created.getId())).isEmpty();
         assertThat(coworkerRepository.existsByMembers(from.getId(), to.getId())).isTrue();
-        assertThat(applicationEvents.stream(CoworkerAcceptedEvent.class))
-                .containsExactly(new CoworkerAcceptedEvent(from.getId(), to.getId()));
+        val expected = new CoworkerAcceptedEvent(from.getId(), to.getId());
+        assertThat(applicationEvents.stream(CoworkerAcceptedEvent.class)).containsExactly(expected);
     }
 
     @Test

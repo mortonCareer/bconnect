@@ -50,8 +50,8 @@ class RecommendationServiceTest {
         assertThat(found.getFromId()).isEqualTo(from.getId());
         assertThat(found.getToId()).isEqualTo(to.getId());
         assertThat(found.isVisible()).isFalse();
-        assertThat(applicationEvents.stream(RecommendationWrittenEvent.class))
-                .containsExactly(new RecommendationWrittenEvent(created, from.getId(), to.getId()));
+        val expected = new RecommendationWrittenEvent(created, from.getId(), to.getId());
+        assertThat(applicationEvents.stream(RecommendationWrittenEvent.class)).containsExactly(expected);
     }
 
     @Test
