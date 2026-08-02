@@ -15,11 +15,11 @@ public class BoardFactory {
                 MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
-    public static CreateNote projectCommand(Long projectId) {
+    public static CreateNote createProjectCommand(Long projectId) {
         return new CreateNote(BoardType.PROJECT, projectId, null, "content");
     }
 
-    public static CreateNote driveCommand(Long driveId) {
+    public static CreateNote createDriveCommand(Long driveId) {
         return new CreateNote(BoardType.DRIVE, null, driveId, "content");
     }
 

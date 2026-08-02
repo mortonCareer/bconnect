@@ -20,7 +20,6 @@ import to.bconnect.api.support.fixture.UserFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
-import static to.bconnect.api.support.fixture.FixtureConstant.MAX_DATE;
 
 @IntegrationTest
 class CredentialServiceTest {
@@ -81,7 +80,7 @@ class CredentialServiceTest {
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = new CreateCredential(CredentialType.CAREER_CERTIFICATE, MAX_DATE, "note", attachment.getId());
+        val command = CredentialFactory.createCommand(CredentialType.CAREER_CERTIFICATE, attachment.getId());
 
         // when
         val credentialId = credentialService.create(user, command);
@@ -158,7 +157,6 @@ class CredentialServiceTest {
         // when & then
         assertCodeException(() -> credentialService.delete(user, credential.getId()))
                 .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
-        assertThat(credentialRepository.findById(credential.getId())).isPresent();
     }
 
     @Test

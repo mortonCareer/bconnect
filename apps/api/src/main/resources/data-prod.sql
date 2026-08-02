@@ -3,7 +3,7 @@
 -- 운영 데이터 (0 ~ 99)
 -- 실제 데이터 (1000 ~)
 
--- 운영 데이터 (0 ~ 99)
+-- 운영 (0 ~ 99)
 INSERT INTO members (id, username, name, phone, created_at, modified_at) VALUES
 (0, 'system', '시스템', '01000000000', now(), now()),
 (1, 'admin', '관리자', '01083358632', now(), now());
@@ -12,7 +12,7 @@ INSERT INTO member_roles (member_id, role) VALUES
 (0, 'ADMIN'),
 (1, 'ADMIN');
 
--- 실제 데이터 (1000 ~)
+-- 실데이터 (1000 ~)
 ALTER TABLE otps ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE signup_tokens ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE members ALTER COLUMN id RESTART WITH 1000;
@@ -32,6 +32,8 @@ ALTER TABLE attachments ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE coworkers ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE coworker_requests ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE recommendations ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE notifications ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE device_tokens ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE drives ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE drive_members ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE boards ALTER COLUMN id RESTART WITH 1000;
@@ -41,3 +43,9 @@ ALTER TABLE crawled_profiles ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE crawled_tasks ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE crawled_posts ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE crawled_credentials ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE kiscon_arrears ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE kiscon_subcon_limits ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE moel_wage_defaults ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE ecic_electrical_licenses ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE feia_fire_licenses ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE cwma_retirement_fund ALTER COLUMN id RESTART WITH 1000;

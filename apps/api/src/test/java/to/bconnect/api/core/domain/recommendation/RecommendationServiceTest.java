@@ -35,7 +35,7 @@ class RecommendationServiceTest {
         val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         coworkerRepository.save(CoworkerFactory.entity(from.getId(), to.getId()));
-        val command = RecommendationFactory.command(to.getId());
+        val command = RecommendationFactory.createCommand(to.getId());
         val user = UserFactory.domain(from.getId(), Role.CAREER);
 
         // when
@@ -125,7 +125,7 @@ class RecommendationServiceTest {
         // given
         val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val user = UserFactory.domain(from.getId(), Role.CAREER);
-        val command = RecommendationFactory.command(MISSING_ID);
+        val command = RecommendationFactory.createCommand(MISSING_ID);
 
         // when & then
         assertCodeException(() -> recommendationService.create(user, command))
@@ -137,7 +137,7 @@ class RecommendationServiceTest {
     void create_fail_RC001() {
         // given
         val user = UserFactory.domain(MISSING_ID, Role.CAREER);
-        val command = RecommendationFactory.command(MISSING_ID);
+        val command = RecommendationFactory.createCommand(MISSING_ID);
 
         // when & then
         assertCodeException(() -> recommendationService.create(user, command))
@@ -151,7 +151,7 @@ class RecommendationServiceTest {
         val from = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val to = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         val user = UserFactory.domain(from.getId(), Role.CAREER);
-        val command = RecommendationFactory.command(to.getId());
+        val command = RecommendationFactory.createCommand(to.getId());
 
         // when & then
         assertCodeException(() -> recommendationService.create(user, command))
@@ -167,7 +167,7 @@ class RecommendationServiceTest {
         coworkerRepository.save(CoworkerFactory.entity(from.getId(), to.getId()));
         recommendationRepository.save(RecommendationFactory.entity(from.getId(), to.getId()));
         val user = UserFactory.domain(from.getId(), Role.CAREER);
-        val command = RecommendationFactory.command(to.getId());
+        val command = RecommendationFactory.createCommand(to.getId());
 
         // when & then
         assertCodeException(() -> recommendationService.create(user, command))

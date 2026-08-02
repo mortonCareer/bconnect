@@ -32,9 +32,11 @@
 | 동료        | 13-coworker-requests · 14-coworkers · 15-recommendations                                          |
 | 채팅        | 16-group-chats · 17-direct-chats                                                                  |
 | 드라이브     | 18-member-drives                                                                                  |
+| 알림        | 19-devices · 20-notifications                                                                     |
 | 크롤링       | 90-crawling                                                                                       |
+| 원클릭       | 91-one-click                                                                                      |
 | 정리        | 99-cleanup                                                                                        |
-- 그룹 간 `@chain` 의존을 금지합니다
+- 그룹 간 `@chain` 의존을 금지합니다 (인증 · 회원, 정리 예외)
 
 ## 통합 테스트
 - `ReflectionTestUtils`을 사용하지 않습니다

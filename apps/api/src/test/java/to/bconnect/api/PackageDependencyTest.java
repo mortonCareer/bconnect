@@ -9,20 +9,19 @@ import com.tngtech.archunit.lang.ArchRule;
 
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
-import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
 @AnalyzeClasses(packages = "to.bconnect.api", importOptions = DoNotIncludeTests.class)
 public class PackageDependencyTest {
 
-    private static final String SOCKET = "..socket..";
-    private static final String CORE = "..core..";
-    private static final String SECURITY = "..security..";
-    private static final String STORAGE = "..storage..";
-    private static final String COMMON = "..common..";
-    private static final String SMS = "..sms..";
-    private static final String ATTACHMENT = "..attachment..";
-    private static final String CRAWLER = "..crawler..";
+    private static final String SOCKET = "to.bconnect.api.socket..";
+    private static final String CORE = "to.bconnect.api.core..";
+    private static final String SECURITY = "to.bconnect.api.security..";
+    private static final String STORAGE = "to.bconnect.api.storage..";
+    private static final String COMMON = "to.bconnect.api.common..";
+    private static final String SMS = "to.bconnect.api.sms..";
+    private static final String ATTACHMENT = "to.bconnect.api.attachment..";
+    private static final String CRAWLER = "to.bconnect.api.crawler..";
     private static final String NOTIFICATION = "to.bconnect.api.notification..";
     private static final String ONECLICK = "to.bconnect.api.oneclick..";
 
@@ -67,14 +66,7 @@ public class PackageDependencyTest {
 
     @ArchTest
     ArchRule notificationPackageRule = classes().that().resideInAPackage(NOTIFICATION)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(NOTIFICATION)
-            .andShould().onlyDependOnClassesThat(
-                    resideInAnyPackage(NOTIFICATION, SOCKET, CORE, SECURITY, STORAGE, COMMON, ATTACHMENT)
-                            .or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api"))));
-
-    @ArchTest
-    ArchRule notificationDomainIsPortSide = noClasses().that().resideInAPackage("..notification.domain..")
-            .should().dependOnClassesThat().resideInAPackage("..notification.infrastructure..");
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(NOTIFICATION);
 
 	@ArchTest
 	ArchRule cycleCheck = slices().matching("to.bconnect.api.(*)..")

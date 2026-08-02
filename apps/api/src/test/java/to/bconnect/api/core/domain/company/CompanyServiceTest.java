@@ -5,17 +5,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.common.CommonExceptionCode;
-import to.bconnect.api.support.fixture.CursorFactory;
-import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.support.IntegrationTest;
-import to.bconnect.api.support.fixture.AttachmentFactory;
-import to.bconnect.api.support.fixture.CompanyFactory;
-import to.bconnect.api.support.fixture.MemberFactory;
-import to.bconnect.api.support.fixture.UserFactory;
+import to.bconnect.api.support.fixture.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
@@ -92,7 +88,7 @@ class CompanyServiceTest {
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = new CreateCompany("company", "0000001000", attachment.getId());
+        val command = CompanyFactory.command("0000001000", attachment.getId());
 
         // when
         val companyId = companyService.create(user, command);
@@ -218,7 +214,7 @@ class CompanyServiceTest {
     void create_fail_C005() {
         // given
         val user = UserFactory.domain(MISSING_ID, Role.CAREER);
-        val command = new CreateCompany("company", "0000001000", null);
+        val command = CompanyFactory.command("0000001000");
 
         // when & then
         assertCodeException(() -> companyService.create(user, command))
@@ -232,7 +228,7 @@ class CompanyServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.PLAN));
         companyRepository.save(CompanyFactory.entity(member.getId()));
         val user = UserFactory.domain(member.getId(), Role.PLAN);
-        val command = new CreateCompany("company", "0000001001", null);
+        val command = CompanyFactory.command("0000001001");
 
         // when & then
         assertCodeException(() -> companyService.create(user, command))
@@ -247,7 +243,7 @@ class CompanyServiceTest {
         val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val user = UserFactory.domain(other.getId(), Role.CAREER);
-        val command = new CreateCompany("company", company.getBrn(), null);
+        val command = CompanyFactory.command(company.getBrn());
 
         // when & then
         assertCodeException(() -> companyService.create(user, command))

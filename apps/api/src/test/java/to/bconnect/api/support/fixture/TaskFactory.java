@@ -11,9 +11,10 @@ import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Set;
+
+import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
 public class TaskFactory {
 
@@ -24,7 +25,7 @@ public class TaskFactory {
         return new Task(id, TaskType.WORKER, Set.of(Trade.ELECTRICAL), START_DATE, END_DATE, TaskStatus.DRAFT,
                 memberId, "task", "memo", "company", ProfileFactory.DEFAULT_ADDRESS,
                 null, null, null, null,
-                Instant.now(), Instant.now());
+                MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
     public static TaskEntity entity(Long memberId) {

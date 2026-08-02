@@ -11,6 +11,8 @@ import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
 public class CredentialFactory {
 
+    private static final String NOTE = "note";
+
     public static Credential domain(Long id, Long memberId) {
         return new Credential(id, memberId, CredentialType.SOLE_PROPRIETOR,
                 CredentialStatus.PENDING, MAX_DATE, null,
@@ -25,7 +27,11 @@ public class CredentialFactory {
         return new CredentialEntity(memberId, type, MAX_DATE, null);
     }
 
-    public static CreateCredential command() {
+    public static CreateCredential createCommand() {
         return new CreateCredential(CredentialType.SOLE_PROPRIETOR, MAX_DATE, null, null);
+    }
+
+    public static CreateCredential createCommand(CredentialType type, Long attachmentId) {
+        return new CreateCredential(type, MAX_DATE, NOTE, attachmentId);
     }
 }
