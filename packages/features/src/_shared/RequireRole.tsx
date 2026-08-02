@@ -2,34 +2,34 @@
 
 import type { ReactNode } from 'react'
 import { redirect } from 'next/navigation'
-import { useGetMyMember, type Role } from '@bconnect/api-client'
-import { isApiMockingEnabled } from '@bconnect/config/env'
+import { hasAuthHint, useGetMyMember, type Role } from '@bconnect/api-client'
 
 interface RequireRoleProps {
   /** 이 중 하나라도 가지고 있으면 통과. */
   allowed: Role[]
   /** 역할이 없을 때 보낼 경로 (생성 페이지). */
   fallback: string
-  /** 공개 경로 여부. 앱이 자기 규칙으로 계산해 넘긴다. */
-  exempt?: boolean
   children: ReactNode
 }
 
 /**
  * 역할 기반 진입 차단 (ADR-0027). UX 게이트이지 보안 경계가 아니다 — 실제 차단은 BE 가 한다.
  *
- * - 공개 경로·mock 은 조회 자체를 걸어 게스트 401 을 만들지 않는다 (#802)
- * - 조회 실패는 통과. 네트워크 장애를 "권한 없음" 으로 오판하면 안 된다
- * - 이동은 effect 가 아니라 렌더 도중 — 보호 화면이 한 프레임도 그려지지 않는다
+ * 앱 단위로 적용한다. `(main)` 안에서는 경로 예외가 없고, 생성 페이지·약관 같은 목적지는
+ * 애초에 `(main)` 밖이라 게이트를 거치지 않는다.
+ *
+ * 역할이 없다고 **확실히 아는 경우에만** 이동시킨다. 비로그인·조회 중·조회 실패는 모두 통과다.
+ * - 비로그인: 조회 자체를 걸어 게스트 401 을 만들지 않는다 (#802)
+ * - 조회 중: 통과. 여기서 막으면 서버 렌더와 결과가 갈려 hydration 이 깨진다
+ *   (`hasAuthHint` 는 쿠키를 읽어 서버에서 항상 false)
+ * - 조회 실패: 통과. 네트워크 장애를 "권한 없음" 으로 오판하면 안 된다
+ *
+ * 판정 전 화면이 잠깐 보일 수 있으나 데이터는 BE 가 막는다.
  */
-export function RequireRole({ allowed, fallback, exempt = false, children }: RequireRoleProps) {
-  const enabled = !exempt && !isApiMockingEnabled()
-  const { data, isPending, isError } = useGetMyMember({ query: { enabled } })
+export function RequireRole({ allowed, fallback, children }: RequireRoleProps) {
+  const { data } = useGetMyMember({ query: { enabled: hasAuthHint() } })
 
-  if (!enabled) return <>{children}</>
-  if (isPending) return null
-  if (isError) return <>{children}</>
-  if (!data.roles.some((role) => allowed.includes(role))) redirect(fallback)
+  if (data && !data.roles.some((role) => allowed.includes(role))) redirect(fallback)
 
   return <>{children}</>
 }
