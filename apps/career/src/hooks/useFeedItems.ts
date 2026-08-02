@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { regionOfState, TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
 import type { Trade, ProfileRole } from '@bconnect/api-client'
-import { feedWork } from '@bconnect/features'
+import { toWork } from '@bconnect/features'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { ROLE_LABELS } from '@/lib/role-labels'
@@ -81,7 +81,7 @@ export function useFeedItems({
       if (maxExperience != null && (profile.experience ?? 0) > maxExperience) return []
       if (authorId != null && memberId !== authorId) return []
 
-      const work = feedWork(feed)
+      const work = toWork(feed)
 
       // TODO: BE required 처리 후 type narrowing 필요. 이름/분야/작성일/본문은 카드 표시 필수값인데 optional emit이라 fallback 중.
       return [

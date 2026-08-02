@@ -58,7 +58,7 @@ export interface ProfileSeed {
 }
 
 // feeds.ts 가 작업물 작성자로 재사용 — 회원 정보 중복 정의를 막는 단일 출처
-export const SEEDS: ProfileSeed[] = [
+export const PROFILE_SEEDS: ProfileSeed[] = [
   {
     id: 1,
     postCount: 2,
@@ -144,7 +144,7 @@ const detailOf = (seed: ProfileSeed): ProfileDetail => ({
 })
 
 const PROFILES_BY_ID: Record<number, ProfileDetail> = Object.fromEntries(
-  SEEDS.map((seed) => [seed.id, detailOf(seed)])
+  PROFILE_SEEDS.map((seed) => [seed.id, detailOf(seed)])
 )
 
 // #966 프로필 이미지 업로드 QA — mock-s3 는 바이트를 버리므로 pictureId 시드 이미지로 교체 표시.
@@ -169,12 +169,12 @@ const paramId = (value: string | readonly string[] | undefined): number =>
 export const profilesOverrides = [
   getGetProfilesMockHandler(
     (): CursorPageProfile => ({
-      content: SEEDS.map((seed) => profileOf(seed)),
+      content: PROFILE_SEEDS.map((seed) => profileOf(seed)),
       hasNext: false,
       nextCursor: undefined,
     })
   ),
   // /profiles/me 는 status 없는 평문 Profile — 타인 조회(ProfileDetail)와 응답형이 다르다
-  getGetMyProfileMockHandler(() => withMyPicture(profileOf(SEEDS[0]))),
+  getGetMyProfileMockHandler(() => withMyPicture(profileOf(PROFILE_SEEDS[0]))),
   getGetProfileMockHandler(({ params }) => PROFILES_BY_ID[paramId(params.id)] ?? PROFILES_BY_ID[1]),
 ]

@@ -1,10 +1,10 @@
 import { AttachmentType, getGetFeedsMockHandler, TaskStatus, TaskType } from '@bconnect/api-client'
 import type { Attachment, CursorPageFeed, Feed, Task, Trade } from '@bconnect/api-client'
 import { addressOf } from './_address'
-import { SEEDS as PROFILE_SEEDS, type ProfileSeed } from './profiles'
+import { PROFILE_SEEDS, type ProfileSeed } from './profiles'
 
 interface FeedSeed {
-  /** 작성자 — profiles.ts SEEDS 의 id. 목록·프로필 패널과 같은 회원이어야 작업물이 매칭된다 */
+  /** 작성자 — profiles.ts PROFILE_SEEDS 의 id. 목록·프로필 패널과 같은 회원이어야 작업물이 매칭된다 */
   memberId: number
   content: string
   daysAgo: number

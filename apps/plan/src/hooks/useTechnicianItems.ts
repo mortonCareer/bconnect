@@ -8,7 +8,7 @@ import {
   useGetProfiles,
 } from '@bconnect/api-client'
 import type { CrawledMemberSummary, Feed, Profile, Region, Trade } from '@bconnect/api-client'
-import { feedWork } from '@bconnect/features'
+import { toWork } from '@bconnect/features'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { toCrawledDisplay } from '@/lib/crawled'
 import type { ExperienceLevel } from '@/lib/experience'
@@ -37,7 +37,7 @@ interface TechnicianItemBase {
   reviewCount: number
   contractCount: number
   certifications: string[]
-  // 작업물(Post) 유래 — 소요일은 게시물에 연결된 작업(task) 기간. 작업 미연결이면 undefined
+  // 작업물(Post + Task) 유래 — 소요일은 연결된 작업 기간. 작업 미연결이면 undefined
   portfolios: { imageUrl: string; daysRequired?: number }[]
 }
 
@@ -93,7 +93,7 @@ function toTechnicianItem(profile: Profile, feeds: Feed[]): MemberTechnicianItem
     contractCount: 777,
     certifications: [],
     portfolios: feeds.slice(0, 3).map((feed) => {
-      const { images, days } = feedWork(feed)
+      const { images, days } = toWork(feed)
       return { imageUrl: images[0] ?? '', daysRequired: days }
     }),
   }
@@ -158,9 +158,9 @@ export function useTechnicianItems({
     for (const feed of feeds?.content ?? []) {
       const memberId = feed.member?.id
       if (memberId == null || !feed.post) continue
-      const authored = map.get(memberId) ?? []
-      authored.push(feed)
-      map.set(memberId, authored)
+      const authoredFeeds = map.get(memberId) ?? []
+      authoredFeeds.push(feed)
+      map.set(memberId, authoredFeeds)
     }
     return map
   }, [feeds])

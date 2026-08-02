@@ -93,7 +93,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
     item.experienceYears > 0 ? `${item.experienceYears}년` : '신입',
   ].filter(Boolean)
 
-  // 작업물(Post) 유래 썸네일 — 없으면 3개 회색 placeholder
+  // 작업물(Post + Task) 유래 썸네일 — 없으면 3개 회색 placeholder
   const portfolios =
     item.portfolios.length > 0
       ? item.portfolios.slice(0, 3)
@@ -229,7 +229,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
           />
         </div>
 
-        {/* 작업물(Post) 썸네일 3개 — 소요일은 게시물에 연결된 작업(task) 기간, 미연결이면 공백 */}
+        {/* 작업물(Post + Task) 썸네일 3개 — 소요일은 연결된 작업 기간, 미연결이면 공백 */}
         <div className="flex flex-1 gap-[9px]">
           {portfolios.map((p, i) => (
             <PortfolioThumb

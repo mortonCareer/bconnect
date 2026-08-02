@@ -5,7 +5,7 @@ import type { Feed } from '@bconnect/api-client'
 import { Skeleton } from '@bconnect/ui'
 import { WorkCard } from './WorkCard'
 import { formatRelativeTime } from '@bconnect/config/format'
-import { feedWork } from '../../_shared/feed'
+import { toWork } from '../../_shared/work'
 
 interface WorksTabProps {
   /** 표시 대상 회원의 memberId (GET /feeds 가 전역이라 클라이언트에서 이 값으로 필터) */
@@ -36,11 +36,11 @@ export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProp
   }
 
   // TODO: BE required 처리 후 type narrowing 필요. Feed.post/Post.memberId가 optional emit이라 없는 항목은 임시로 렌더 제외.
-  const works: Feed[] = (feeds?.content ?? []).filter(
+  const authoredFeeds: Feed[] = (feeds?.content ?? []).filter(
     (feed) => feed.post && feed.post.memberId === profileId
   )
 
-  if (works.length === 0) {
+  if (authoredFeeds.length === 0) {
     return (
       <div className="flex items-center justify-center py-20">
         <p className="text-r-14 text-gray-500">작업물이 없습니다</p>
@@ -50,12 +50,12 @@ export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProp
 
   return (
     <div className="flex flex-col gap-6 py-6">
-      {works.map((feed) => {
+      {authoredFeeds.map((feed) => {
         // TODO: BE required 처리 후 type narrowing 필요. Post.id/createdAt/content는 카드 표시 필수값인데 optional emit이라 fallback 중.
         const post = feed.post
         const postId = post?.id
         if (post == null || postId == null) return null
-        const { images, company, duration } = feedWork(feed)
+        const { images, company, duration } = toWork(feed)
         return (
           <WorkCard
             key={postId}
