@@ -26,6 +26,7 @@ BConnect(품앗이)는 업체-기술자 연결 구인구직 플랫폼. pnpm 모�
 - **Generated API client**: `packages/api-client/src/generated/`는 orval 자동 생성, 직접 수정 금지. spec은 BE springdoc 산출(`src/openapi.yaml`, ci-api-spec이 재생성) → `pnpm api:generate`로 클라이언트 재생성 ([ADR-0024](docs/explanation/adr/0024-orval-consumes-be-springdoc-spec.md))
 - **Authentication**: Phone OTP → tokens (access in memory, refresh in httpOnly cookie)
 - **Env vars**: 새 env var 추가 시 해당 앱의 `.env.example`에도 추가 필수 — 비밀은 placeholder(실값 금지).
+- **Deps**: 새 패키지 추가는 pnpm catalog 결정 트리 따름 — [package-dependencies.md](docs/how-to/package-dependencies.md) (2+ 곳 공유 dep 은 `catalog:` 강제, syncpack 이 CI 검증)
 
 ## Workflow & Processes
 

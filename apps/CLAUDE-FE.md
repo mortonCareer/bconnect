@@ -51,6 +51,12 @@ RHF `<Form>` 안 제출 버튼은 raw `<Button type="submit">` 대신 `FormSubmi
 
 날짜 계산(일수 차·더하기·월 경계 등)은 `@bconnect/config/date`(`daysBetween`·`addDays`·`todayIso` 등), 포맷·전화·주소·동의 항목도 `@bconnect/config/*`가 SSOT. **앱 로컬에 `Date.parse` 직접 계산 헬퍼를 재작성하기 전에 공용 패키지에 이미 있는지 먼저 확인** — 로컬 중복 헬퍼는 반올림·경계 처리 드리프트를 만든다 (#985 리뷰에서 실측).
 
+## 네이밍 · 상태 관리
+
+- 파일: 컴포넌트 `UpperCamelCase.tsx`, 유틸 `lowerCamelCase.ts`. boolean prop 은 `is/has/can/should` 접두
+- 상태 3분법: 서버 = React Query(generated hooks) · 클라이언트 = Zustand · 폼 = react-hook-form + zod ([frontend-forms.md](../docs/how-to/frontend-forms.md))
+- `'use client'` 는 필요할 때만 (hooks·이벤트·브라우저 API)
+
 ## Env vars — `@bconnect/config/env`
 
 Zod 검증된 `env` 객체를 사용한다. `process.env.X` 직접 접근 금지 — 주입 누락이 런타임까지 숨는다.
