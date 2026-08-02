@@ -1,12 +1,12 @@
 ---
 name: issue-management
-description: GitHub Issue 생성 및 관리 자동화. 이슈 템플릿 선택, 레이블 자동 적용, 담당자 할당
+description: GitHub Issue 생성 및 관리. 이슈 템플릿 선택, 레이블 자동 적용
 allowed-tools: Bash, Read, Write, Grep
 ---
 
 # Issue Management
 
-GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할당합니다.
+GitHub Issue 생성을 자동화하고 적절한 레이블을 적용합니다.
 
 ## 사용 시점
 
@@ -52,15 +52,11 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 
 ## 레이블
 
-레이블 목록 + 자동 적용 규칙은 [labels.md](../../../docs/reference/labels.md) 참조. 단 **문서가 실제와 어긋난 이력 있음** — 붙이기 전 `gh label list` 로 실측 먼저.
+레이블 목록의 SSoT는 GitHub 레이블 자체 — 붙이기 전 `gh label list` 로 실측한다. 규칙: 버그는 `🐛 bug` + 범위 레이블 조합, `🚨 sync-failure`·`🤖 figma-drift` 는 봇 전용(직접 사용 금지).
 
 ## 마일스톤
 
 `gh api repos/{owner}/{repo}/milestones` 로 실측 후 적합한 마일스톤을 **추천**한다. 결정은 사용자.
-
-## 담당자 할당 규칙
-
-> **SSoT**: 담당자 할당 규칙과 GitHub 사용자명 매핑은 [docs/reference/team.md](../../../docs/reference/team.md)의 "GitHub 작업 매핑" 섹션을 참조
 
 ## 주의사항
 

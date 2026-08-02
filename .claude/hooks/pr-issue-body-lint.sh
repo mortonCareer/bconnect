@@ -51,6 +51,15 @@ if [ "$kind" = "pr" ] && echo "$cmd" | grep -qE -- '--(add-)?reviewer'; then
   add "리뷰어 지정 금지: --reviewer/--add-reviewer 제거. 리뷰어는 사용자가 정합니다"
 fi
 
+# 타 팀원에게 알림이 가는 담당자 할당 금지 (셀프 할당만 허용)
+asg=$(echo "$cmd" | sed -nE 's/.*--(add-)?assignee[= ]"?([^" ]+)"?.*/\2/p')
+if [ -n "$asg" ]; then
+  others=$(echo "$asg" | tr ',' '\n' | grep -vE '^@me$')
+  if [ -n "$others" ]; then
+    add "타 팀원 담당자 지정 금지($others): 알림이 가는 할당·리뷰어 지정은 자동화하지 않습니다. 셀프 할당(--assignee @me)만 허용"
+  fi
+fi
+
 # --body-file 을 제거한 뒤에도 --body 가 남으면 inline body
 stripped=$(echo "$cmd" | sed 's/--body-file//g')
 if echo "$stripped" | grep -qE -- '--body[= ]'; then
