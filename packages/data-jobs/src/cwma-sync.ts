@@ -100,9 +100,8 @@ function parseCsv(text: string): CwmaItem[] {
   return items
 }
 
-// 원본 CSV 에 업체명·공사명·착공일이 같은 행이 섞여 있어 조회 응답이 중복된다. 마지막 것만 유지
-function dedupe(items: CwmaItem[]): Record<string, unknown>[] {
-  const rows = items.map((item) => ({
+function toRows(items: CwmaItem[]): Record<string, unknown>[] {
+  return items.map((item) => ({
     seq_no: item.seqNo,
     project_name: item.projectName,
     total_amount: item.totalAmount,
@@ -113,12 +112,6 @@ function dedupe(items: CwmaItem[]): Record<string, unknown>[] {
     client_org: item.clientOrg,
     address: item.address,
   }))
-
-  return [
-    ...new Map(
-      rows.map((r) => [`${r.company_name}|${r.project_name}|${r.start_date}`, r])
-    ).values(),
-  ]
 }
 
 async function main() {
@@ -126,8 +119,7 @@ async function main() {
   const items = parseCsv(await downloadCsv())
   console.log(`[cwma-sync] 총 ${items.length}건 수집`)
 
-  const rows = dedupe(items)
-  console.log(`[cwma-sync] 중복 제거 후 ${rows.length}건`)
+  const rows = toRows(items)
 
   await sql.begin(async (tx) => {
     await tx`DELETE FROM cwma_retirement_fund`
