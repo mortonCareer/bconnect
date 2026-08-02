@@ -25,18 +25,26 @@ if [ -z "$command" ]; then
 fi
 
 # git write 동사 미포함이면 통과 (read-only는 OK)
-if ! echo "$command" | grep -qE 'git[[:space:]]+(commit|push|add|rm|reset|checkout[[:space:]]+--|merge|cherry-pick|stash[[:space:]]+(pop|drop|clear)|branch[[:space:]]+-[Dd])'; then
+if ! echo "$command" | grep -qE 'git[[:space:]]+(-C[[:space:]]+[^[:space:]]+[[:space:]]+)?(commit|push|add|rm|reset|checkout[[:space:]]+--|merge|cherry-pick|stash[[:space:]]+(pop|drop|clear)|branch[[:space:]]+-[Dd])'; then
   exit 0
 fi
 
-# 실행 디렉토리 결정: cd prefix > cwd field > $PWD
-if echo "$command" | grep -qE '^[[:space:]]*cd[[:space:]]+'; then
-  target=$(echo "$command" | sed -n 's/^[[:space:]]*cd[[:space:]]\{1,\}\([^[:space:]]*\).*/\1/p' | head -1)
+# 실행 디렉토리 결정: git -C > cd(체인 중간 포함) > cwd field > $PWD
+# 한계: 변수 경로(cd $W)는 확장 못 해 fallthrough — 리터럴 경로만 정확.
+if echo "$command" | grep -qE 'git[[:space:]]+-C[[:space:]]+'; then
+  target=$(echo "$command" | sed -n 's/.*git[[:space:]]\{1,\}-C[[:space:]]\{1,\}\([^[:space:]]*\).*/\1/p' | head -1)
+elif echo "$command" | grep -qE '(^|;|&)[[:space:]]*cd[[:space:]]+'; then
+  target=$(echo "$command" | tr ';&' '\n\n' | grep -E '^[[:space:]]*cd[[:space:]]' | head -1 | sed 's/^[[:space:]]*cd[[:space:]]*//;s/[[:space:]].*//')
 elif [ -n "$cwd" ]; then
   target="$cwd"
 else
   target="$PWD"
 fi
+
+# 변수 경로($V)면 판정 불가 — cwd field 로 폴백
+case "$target" in
+  \$*) target="${cwd:-$PWD}" ;;
+esac
 
 target=$(realpath "$target" 2>/dev/null || echo "$target")
 
