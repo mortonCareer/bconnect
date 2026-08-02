@@ -31,10 +31,12 @@ GitHub Issue 정보를 기반으로 Pull Request를 생성합니다.
 5. PR 본문 작성 → 파일로 저장
    └─ 아래 quality 룰 준수. 반드시 --body-file 로 전달 (inline --body 금지)
 
-6. PR 생성
-   └─ gh pr create --base dev --title "..." --body-file <파일>
+6. PR 생성 — 반드시 draft 로
+   └─ gh pr create --draft --base dev --title "..." --body-file <파일>
    └─ 리뷰어 지정 금지 — --reviewer 옵션을 쓰지 않는다. 리뷰어는 사용자가 정한다
 ```
+
+AI 가 만드는 PR 은 **draft 로 생성한다** — 사람이 셀프리뷰를 마친 뒤 직접 draft 를 해제(Ready for review)한다. AI 는 draft 를 해제하지 않는다.
 
 PR 생성 후 리뷰 프로세스와 QA(dev 환경 스프린트 단위)는 [git-workflow.md](../../../docs/how-to/git-workflow.md) 참조.
 
@@ -45,11 +47,6 @@ PR 생성 후 리뷰 프로세스와 QA(dev 환경 스프린트 단위)는 [git-
 ```
 <type>(<scope>): <description>
 ```
-
-예: `feat(career): 프로필 이미지 업로드 추가`
-
-- description 은 대문자 약어(BE, API 등)나 PascalCase 로 시작하지 않는다 — commitlint 가 차단함. 한글 시작은 통과
-- squash 머지 시 PR 제목이 곧 dev 히스토리의 커밋 메시지가 된다. 제목 품질 = 히스토리 품질
 
 ## PR 본문 템플릿
 
@@ -76,7 +73,6 @@ PR 본문은 위 4-section 구조 + `Closes #N` 을 유지한다 (해당 없는 
 
 ### 문체
 
-- 합니다체 (해요체는 제품 UI 카피 전용)
 - 과장 형용사 금지 — comprehensive, robust, seamless, enhanced 류. "This PR introduces..." 류 filler 오프너 금지
 - 장식 이모지 금지
 - 레포 파일 참조는 절대 blob URL (상대링크는 GitHub 본문에서 깨짐)
@@ -88,19 +84,6 @@ PR 본문은 위 4-section 구조 + `Closes #N` 을 유지한다 (해당 없는 
 | 단순 fix/refactor | 200-500 bytes     |
 | 일반 feature      | 600-1,200 bytes   |
 | 복잡한 change     | 1,200-2,000 bytes |
-
-상한 초과 시 self-check: "이 단락은 무엇/왜? Detail? ADR/이슈로 보낼 수 있는가?"
-
-## 문제 해결
-
-- **PR이 이슈를 자동으로 안 닫음**: 본문에 `Closes #123` / `Fixes #123` / `Resolves #123` 필요. 머지 시점에 닫힌다
-- **dev 와 conflict**: [git-workflow.md](../../../docs/how-to/git-workflow.md) "문제 해결" 참조
-
-## 다음 단계
-
-1. 리뷰어 피드백 반영
-2. Approve 후 Squash and Merge → 이슈 자동 닫힘
-3. 배포는 dev → main 통합 시 ([deployment.md](../../../docs/how-to/deployment.md))
 
 ## 참고 문서
 
