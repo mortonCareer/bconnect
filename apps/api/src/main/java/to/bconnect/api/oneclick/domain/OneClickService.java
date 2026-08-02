@@ -54,7 +54,7 @@ public class OneClickService {
         val result = resolve(command);
 
         if (user != null) {
-            // TODO(#892): 로그인 사용자 자격 증빙 발급 연동 (CredentialIssuer)
+            // TODO(#892): 로그인 사용자 인증뱃지 발급 연동 (CredentialIssuer)
             log.info("one-click credential issuance pending. memberId={}", user.id());
         }
 

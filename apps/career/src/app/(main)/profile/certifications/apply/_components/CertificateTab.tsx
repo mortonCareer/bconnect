@@ -135,7 +135,7 @@ export function CertificateTab({
         </Form>
       </div>
 
-      {/* 하단 자격 증빙 목록 */}
+      {/* 하단 인증 목록 */}
       <CredentialList
         credentials={filteredCredentials}
         isLoading={isLoading}
