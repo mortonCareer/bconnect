@@ -1,6 +1,6 @@
 ---
 name: pr-from-issue
-description: 이슈 기반 PR 생성. 현재 브랜치에서 이슈 번호 추출, PR 제목/본문 생성, Closes #123 자동 추가. 본문은 quality 룰 준수 + 훅(pr-issue-body-lint)이 기계 검증
+description: 이슈 기반 PR 생성. 현재 브랜치에서 이슈 번호 추출, PR 제목/본문 생성, Closes #123 자동 추가. 본문은 quality 룰 준수
 allowed-tools: Bash, Read, Grep
 ---
 
@@ -56,7 +56,7 @@ PR 생성 후 리뷰 프로세스와 QA(dev 환경 스프린트 단위)는 [git-
 > **SSoT**: PR 본문 템플릿의 원본은 [.github/pull_request_template.md](../../../.github/pull_request_template.md)에 있습니다.
 > PR 생성 시 해당 템플릿을 읽어서 본문을 채워 넣으세요.
 
-템플릿 구조: 왜 → 무엇 → 검증 → 스크린샷 → `Closes #이슈번호`
+템플릿 구조: Summary → Changes → Test → Screenshots → `Closes #이슈번호`
 
 ## 본문 quality 룰
 
@@ -64,10 +64,10 @@ PR 본문은 위 4-section 구조 + `Closes #N` 을 유지한다 (해당 없는 
 
 ### Section 별 룰
 
-- **왜** (1-3문장) — 이 변경이 왜 필요한가. 문제/배경. 첫 줄은 stand-alone 으로 의도 전달
-- **무엇** — 핵심 변경 + 왜 그렇게 했나(접근 선택 이유, 버린 대안). 변경 파일 나열·diff 재서술 금지. 컴포넌트 구조표 X (코드가 SoT)
-- **검증** — **실제 수행한 검증만** 체크. 수행하지 않은 항목은 쓰지 않거나 "미수행" 명시. 허위 체크 금지
-- **스크린샷** — UI 변경 시. 해당 없으면 삭제
+- **Summary** (1-3문장) — 이 변경이 왜 필요한가. 문제/배경. 첫 줄은 stand-alone 으로 의도 전달
+- **Changes** — 핵심 변경 + 왜 그렇게 했나(접근 선택 이유, 버린 대안). 변경 파일 나열·diff 재서술 금지. 컴포넌트 구조표 X (코드가 SoT)
+- **Test** — **실제 수행한 검증만** 체크. 수행하지 않은 항목은 쓰지 않거나 "미수행" 명시. 허위 체크 금지
+- **Screenshots** — UI 변경 시. 해당 없으면 삭제
 - **Closes #N** — 이슈에 모든 깊이를 link out
 
 ### 박지 말 것
@@ -90,10 +90,6 @@ PR 본문은 위 4-section 구조 + `Closes #N` 을 유지한다 (해당 없는 
 | 복잡한 change     | 1,200-2,000 bytes |
 
 상한 초과 시 self-check: "이 단락은 무엇/왜? Detail? ADR/이슈로 보낼 수 있는가?"
-
-## 기계 검증 (훅)
-
-`gh pr create` 실행 시 [pr-issue-body-lint.sh](../../hooks/pr-issue-body-lint.sh) PreToolUse 훅이 위 룰 중 기계 검증 가능한 것(길이 상한, 이모지, --body-file 강제, --reviewer 차단, 제목 형식)을 자동 검사한다. 차단되면 훅 메시지의 사유를 고쳐서 재시도한다. 강제 룰·상한 수치의 SSoT 는 스크립트 본문 (위 길이표는 권장 범위, 훅 상한은 표의 최대값과 동기).
 
 ## 문제 해결
 
