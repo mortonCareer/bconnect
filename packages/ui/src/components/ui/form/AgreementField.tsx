@@ -75,7 +75,7 @@ export function AgreementField<T extends FieldValues>({
 
         return (
           <FormItem className="gap-4 rounded-xl border border-gray-200 p-4">
-            <label className="flex cursor-pointer select-none items-center gap-2">
+            <label className="relative flex cursor-pointer select-none items-center gap-2">
               <input
                 type="checkbox"
                 checked={allChecked}
@@ -95,7 +95,7 @@ export function AgreementField<T extends FieldValues>({
                 return (
                   <div key={item.key} className="flex flex-col gap-1">
                     <div className="flex items-center justify-between">
-                      <label className="flex cursor-pointer select-none items-center gap-2">
+                      <label className="relative flex cursor-pointer select-none items-center gap-2">
                         <input
                           type="checkbox"
                           checked={checked}
