@@ -138,6 +138,9 @@ public class TaskService {
 
         found.update(command.progress(), command.title(), command.memo());
 
+        if (found.getProjectId() == null)
+            return;
+
         val ownerId = projectRepository.findById(found.getProjectId())
                 .map(ProjectEntity::getCompanyId)
                 .flatMap(companyRepository::findById)
