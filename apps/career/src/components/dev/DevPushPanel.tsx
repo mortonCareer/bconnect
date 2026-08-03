@@ -3,28 +3,31 @@
 import { Button, Input } from '@bconnect/ui'
 import { useState } from 'react'
 import { usePushStore } from '@bconnect/push'
+import { NotificationReferenceType } from '@bconnect/api-client'
 
-interface Preset {
-  label: string
+interface PushRequest {
   title: string
   body: string
   referenceType: string
   referenceId: string
 }
 
+/** referenceType 은 BE enum 으로 좁혀 오타를 컴파일 타임에 잡는다. */
+type Preset = PushRequest & { label: string; referenceType: NotificationReferenceType | '' }
+
 const PRESETS: Preset[] = [
   {
     label: '채팅',
     title: '김철수님',
     body: '안녕하세요, 견적 문의드립니다',
-    referenceType: 'CHAT_ROOM',
+    referenceType: NotificationReferenceType.CHAT_ROOM,
     referenceId: '123',
   },
   {
     label: '프로필',
     title: '프로필 완성',
     body: '프로필을 완성하고 업체로부터 일감을 받아보세요',
-    referenceType: 'PROFILE',
+    referenceType: NotificationReferenceType.PROFILE,
     referenceId: '',
   },
   {
@@ -48,7 +51,7 @@ export function DevPushPanel() {
     referenceId: '123',
   })
 
-  async function send(payload: Omit<Preset, 'label'>) {
+  async function send(payload: PushRequest) {
     if (!token) {
       setStatus('토큰 없음 — 알림 권한을 먼저 허용하세요')
       return

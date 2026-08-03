@@ -13,6 +13,7 @@ import {
 import { getFcmMessaging } from './firebase'
 import { useNotificationStore } from './notification-store'
 import { usePushStore } from './push-store'
+import type { PushData } from './push-data'
 import { resolveReferenceHref, type ReferencePathMap } from './reference-paths'
 import { mapPermission, syncDeviceToken } from './request-push-permission'
 
@@ -63,13 +64,11 @@ export function usePushNotificationListener(referencePaths: ReferencePathMap): v
       // 포그라운드 수신 리스너
       // data-only 페이로드(title/body 가 data 안)도 대응
       unsubscribe = onMessage(messaging, (payload) => {
+        // Firebase 의 data 는 인덱스 시그니처 — 키 오타를 못 잡으므로 계약 타입으로 좁힌다.
+        const data = payload.data as Partial<PushData> | undefined
         const title = payload.notification?.title ?? payload.data?.title ?? '새 알림'
         const body = payload.notification?.body ?? payload.data?.body ?? ''
-        const href = resolveReferenceHref(
-          referencePaths,
-          payload.data?.reference_type,
-          payload.data?.reference_id
-        )
+        const href = resolveReferenceHref(referencePaths, data?.reference_type, data?.reference_id)
         showNotification({ title, body, href })
         for (const queryKey of [
           getGetNotificationsUnreadCountQueryKey(),
