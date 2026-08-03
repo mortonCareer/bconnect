@@ -17,9 +17,9 @@ public enum NotificationType {
 
     DEVICE_REGISTERED("알림 수신 설정이 완료되었습니다"),
 
-    CREDENTIAL_ACCEPTED("인증뱃지가 승인되었습니다"),
+    CREDENTIAL_ACCEPTED("자격 증명이 승인되었습니다"),
 
-    CREDENTIAL_DENIED("인증뱃지가 반려되었습니다"),
+    CREDENTIAL_DENIED("자격 증명이 반려되었습니다"),
 
     COWORKER_REQUESTED("%s 님으로부터 동료 요청을 제안받았습니다"),
 
