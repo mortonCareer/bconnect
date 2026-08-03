@@ -1,15 +1,9 @@
 'use client'
 
 import { useMemo } from 'react'
-import {
-  postImageUrls,
-  regionOfState,
-  TRADE_LABELS,
-  useGetFeeds,
-  useGetMyMember,
-} from '@bconnect/api-client'
+import { regionOfState, TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
 import type { Trade, ProfileRole } from '@bconnect/api-client'
-import { daysBetween } from '@bconnect/config/date'
+import { toWork } from '@bconnect/features'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { ROLE_LABELS } from '@/lib/role-labels'
@@ -51,13 +45,6 @@ interface UseFeedItemsOptions {
   limit?: number
 }
 
-/** task.start~end(YYYY-MM-DD, 양끝 포함) → '4일 소요'. 파싱 불가/역순이면 생략. */
-function formatDurationDays(start: string, end: string): string | undefined {
-  const days = daysBetween(start, end) + 1
-  if (!Number.isFinite(days) || days < 1) return undefined
-  return `${days}일 소요`
-}
-
 export function useFeedItems({
   trades,
   roles,
@@ -75,7 +62,7 @@ export function useFeedItems({
     if (!feeds?.content) return []
 
     return feeds.content.flatMap((feed): FeedItem[] => {
-      const { member, profile, post, task } = feed
+      const { member, profile, post } = feed
 
       // TODO: BE required 처리 후 type narrowing 필요. Feed.member/profile/post와 id가 optional emit이라 없는 행은 임시로 렌더 제외.
       const memberId = member?.id
@@ -94,7 +81,7 @@ export function useFeedItems({
       if (maxExperience != null && (profile.experience ?? 0) > maxExperience) return []
       if (authorId != null && memberId !== authorId) return []
 
-      const postImages = postImageUrls(post)
+      const work = toWork(feed)
 
       // TODO: BE required 처리 후 type narrowing 필요. 이름/분야/작성일/본문은 카드 표시 필수값인데 optional emit이라 fallback 중.
       return [
@@ -113,9 +100,9 @@ export function useFeedItems({
             bio: profile.headline ?? '',
           },
           content: {
-            images: postImages.length ? postImages : ['/placeholder-post.svg'],
-            company: task?.workerCompany ?? undefined,
-            duration: task ? formatDurationDays(task.start, task.end) : undefined,
+            images: work.images.length ? work.images : ['/placeholder-post.svg'],
+            company: work.company,
+            duration: work.duration,
             timestamp: post.createdAt ? formatRelativeTime(post.createdAt) : '',
             description: post.content ?? '',
           },

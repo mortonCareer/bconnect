@@ -17,10 +17,8 @@ export function formatRelativeTime(dateStr: string): string {
   return `${Math.floor(diff / MONTH)}개월 전`
 }
 
-export function formatDuration(start: string, end: string): string {
-  const startDate = new Date(start)
-  const endDate = new Date(end)
-  const days = Math.ceil((endDate.getTime() - startDate.getTime()) / DAY)
+/** 소요 일수 → '4일 소요'. 일수 계산은 date 의 durationDays 담당. */
+export function formatDays(days: number): string {
   return `${days}일 소요`
 }
 
