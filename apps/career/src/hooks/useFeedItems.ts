@@ -1,12 +1,17 @@
 'use client'
 
 import { useMemo } from 'react'
-import { regionOfState, TRADE_LABELS, useGetFeeds, useGetMyMember } from '@bconnect/api-client'
+import {
+  regionOfState,
+  ROLE_LABELS,
+  TRADE_LABELS,
+  useGetFeeds,
+  useGetMyMember,
+} from '@bconnect/api-client'
 import type { Trade, ProfileRole } from '@bconnect/api-client'
 import { toWork } from '@bconnect/features'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
-import { ROLE_LABELS } from '@/lib/role-labels'
 import { REGION_LABELS, type Region } from '@/lib/region'
 import { useAuthStore } from '@/stores/auth-store'
 

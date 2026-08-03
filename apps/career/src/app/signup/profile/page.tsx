@@ -4,10 +4,11 @@
 'use client'
 
 import { AddressField } from '@/components/AddressField'
-import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
+import { SIGNUP_ROLES } from '@/lib/role-labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import {
+  ROLE_LABELS,
   Trade,
   TRADE_LABELS,
   refreshAccessToken,
