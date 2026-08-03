@@ -167,6 +167,7 @@ const notifications: Notification[] = SEEDS.map((seed, i) => {
           memberId: senderId,
           name: seed.senderName,
           brn: '000-00-00000',
+          picture: `https://picsum.photos/seed/bconnect-company-${senderId}/200/200`,
           createdAt,
           modifiedAt: createdAt,
         }
