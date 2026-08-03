@@ -8,8 +8,8 @@ interface Preset {
   label: string
   title: string
   body: string
-  url: string
-  icon?: string
+  referenceType: string
+  referenceId: string
 }
 
 const PRESETS: Preset[] = [
@@ -17,11 +17,23 @@ const PRESETS: Preset[] = [
     label: '채팅',
     title: '김철수님',
     body: '안녕하세요, 견적 문의드립니다',
-    url: '/messages/123',
-    icon: 'https://i.pravatar.cc/192?img=12',
+    referenceType: 'CHAT_ROOM',
+    referenceId: '123',
   },
-  { label: '추천', title: '새 매칭 제안', body: '회원님께 맞는 공고가 있어요', url: '/feed/1' },
-  { label: '시스템', title: '공지', body: '서비스 점검 안내드립니다', url: '/notifications' },
+  {
+    label: '프로필',
+    title: '프로필 완성',
+    body: '프로필을 완성하고 업체로부터 일감을 받아보세요',
+    referenceType: 'PROFILE',
+    referenceId: '',
+  },
+  {
+    label: '목적지없음',
+    title: '공지',
+    body: '서비스 점검 안내드립니다',
+    referenceType: '',
+    referenceId: '',
+  },
 ]
 
 /** 개발 전용 — 현재 디바이스 토큰으로 FCM 푸시를 즉시 발송하는 트리거 패널. prod 빌드에선 마운트 안 됨. */
@@ -32,10 +44,11 @@ export function DevPushPanel() {
   const [custom, setCustom] = useState({
     title: '테스트 알림',
     body: '로컬 발송',
-    url: '/messages/123',
+    referenceType: 'CHAT_ROOM',
+    referenceId: '123',
   })
 
-  async function send(payload: { title: string; body: string; url: string; icon?: string }) {
+  async function send(payload: Omit<Preset, 'label'>) {
     if (!token) {
       setStatus('토큰 없음 — 알림 권한을 먼저 허용하세요')
       return
@@ -111,9 +124,15 @@ export function DevPushPanel() {
         />
         <Input
           size="small"
-          value={custom.url}
-          onChange={(e) => setCustom({ ...custom, url: e.target.value })}
-          placeholder="딥링크 (예: /messages/123)"
+          value={custom.referenceType}
+          onChange={(e) => setCustom({ ...custom, referenceType: e.target.value })}
+          placeholder="referenceType (예: CHAT_ROOM)"
+        />
+        <Input
+          size="small"
+          value={custom.referenceId}
+          onChange={(e) => setCustom({ ...custom, referenceId: e.target.value })}
+          placeholder="referenceId (예: 123)"
         />
         <Button variant="primary" size="small" onClick={() => send(custom)}>
           커스텀 발송

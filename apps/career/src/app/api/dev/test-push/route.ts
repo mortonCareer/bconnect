@@ -11,8 +11,8 @@ interface DevPushBody {
   token: string
   title: string
   body: string
-  url?: string
-  icon?: string
+  referenceType?: string
+  referenceId?: string
 }
 
 function ensureAdminApp() {
@@ -28,20 +28,21 @@ export async function POST(request: Request) {
     return new NextResponse(null, { status: 404 })
   }
 
-  const { token, title, body, url, icon } = (await request.json()) as DevPushBody
+  const { token, title, body, referenceType, referenceId } = (await request.json()) as DevPushBody
   if (!token) {
     return NextResponse.json({ error: 'token 이 필요합니다' }, { status: 400 })
   }
 
   try {
     ensureAdminApp()
+    // BE(SnsPushSender)와 같은 data 계약 — reference_type 은 소문자.
     const id = await getMessaging().send({
       token,
       data: {
         title,
         body,
-        ...(url ? { url } : {}),
-        ...(icon ? { icon } : {}),
+        reference_type: referenceType?.toLowerCase() ?? '',
+        reference_id: referenceId ?? '',
       },
     })
     return NextResponse.json({ id })

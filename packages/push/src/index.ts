@@ -14,6 +14,9 @@ export { registerDeviceToken, unregisterDeviceToken } from './register-device-to
 export { usePushStore, type PushPermissionStatus } from './push-store'
 export { useNotificationStore, type InAppNotificationItem } from './notification-store'
 
+// 알림 딥링크 목적지 표 — 앱이 소유하고 SW·인앱 토스트·알림 목록이 공유
+export { resolveReferenceHref, type ReferencePathMap } from './reference-paths'
+
 // UI — soft-ask 시트(career·모바일) / sonner 토스트(plan·데스크톱), 게이트 로직 공유
 export { NotificationPrompt } from './NotificationPrompt'
 export { NotificationPromptToast } from './NotificationPromptToast'
