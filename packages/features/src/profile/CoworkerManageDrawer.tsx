@@ -84,6 +84,7 @@ export function CoworkerManageDrawer({
           {
             label: '동료 추가',
             icon: <PlusIcon size={18} />,
+            primary: true,
             disabled: pending,
             onSelect: () => onAdd?.(),
           },
@@ -94,6 +95,7 @@ export function CoworkerManageDrawer({
           {
             label: '동료 요청 취소',
             icon: <XIcon size={18} />,
+            destructive: true,
             disabled: pending,
             onSelect: () => onCancelRequest?.(),
           },
