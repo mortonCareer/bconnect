@@ -18,6 +18,7 @@
     "./address": "./address/index.ts",
     "./phone": "./phone/index.ts",
     "./search": "./search/index.ts",
+    "./seo": "./seo/index.ts",
     "./sentry": "./sentry/index.ts",
     "./site": "./site/index.ts",
     "./username": "./username/index.ts"
