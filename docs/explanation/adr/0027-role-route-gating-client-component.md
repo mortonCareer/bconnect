@@ -3,7 +3,7 @@
 - **Status**: Accepted
 - **Date**: 2026-07-29
 - **Deciders**: @manamana32321
-- **Related**: [#1099](https://github.com/mortonCareer/bconnect/issues/1099), [#1066](https://github.com/mortonCareer/bconnect/issues/1066), [PR#1083](https://github.com/mortonCareer/bconnect/pull/1083), [스펙](../../reference/specs/2026-07-29-fe-role-route-gating.md)
+- **Related**: [#1099](https://github.com/mortonCareer/bconnect/issues/1099), [#1066](https://github.com/mortonCareer/bconnect/issues/1066), [PR#1083](https://github.com/mortonCareer/bconnect/pull/1083)
 
 ## Context
 
@@ -87,6 +87,8 @@ Option 1 이 얻는 것은 "보호 화면이 한 프레임도 안 보이는 것"
 - **중립적 결과**: 화면 요소 하나를 숨기는 용도로는 쓸 수 없습니다. 그 경우 참/거짓을 답하는 훅이 따로 필요하며, 쓰이는 곳이 생기면 그때 만듭니다
 
 ## Notes
+
+새 화면을 만들 때 할 일은 없습니다. `(main)` 아래에 두면 자동으로 보호되고, 역할 없이 열려야 하는 화면이면 `(main)` 밖에 둡니다. 가입 · 약관 화면이 그렇게 되어 있습니다.
 
 다시 볼 시점:
 
