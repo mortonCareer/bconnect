@@ -3366,6 +3366,10 @@ components:
           type:
           - string
           - "null"
+        picture:
+          type:
+          - string
+          - "null"
         createdAt:
           type:
           - string
@@ -3383,6 +3387,7 @@ components:
       - memberId
       - modifiedAt
       - name
+      - picture
     WithdrawableMemberResponse:
       type: object
       properties:
