@@ -72,8 +72,9 @@ graph TD
 | Auth           | Refresh Token   | 리프레시 토큰 | 액세스 토큰 재발급용 토큰              |
 | Profile        | Profile         | 프로필        | 사용자 프로필                          |
 | Task           | Task            | 작업          | 프로젝트 공종별 작업 단위              |
-| Post           | Post            | 게시글        |                                        |
-| Post           | Feed            | 피드          | 게시글 + 작성자 + 프로필 View          |
+| Post           | Post            | 게시글        | 사진 · 본문 단위                       |
+| Post           |                 | 작업물        | 게시글 + 작업 View                     |
+| Post           | Feed            | 피드          | 게시글 + 작업 + 프로필 + 회원 View     |
 | Coworker       | Coworker        | 동료          | 동료 기술자                            |
 | Coworker       | CoworkerRequest | 동료 요청     |                                        |
 | Recommendation | Recommendation  | 추천서        | 동료 기술자가 작성한 추천서            |
