@@ -1,4 +1,4 @@
-export const IS_PRODUCTION_DEPLOY = process.env.VERCEL_ENV === 'production'
+import { IS_PRODUCTION_DEPLOY } from '../deploy-env'
 
 export function noindexHeaders() {
   if (IS_PRODUCTION_DEPLOY) return []

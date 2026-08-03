@@ -12,6 +12,7 @@
     "./biz-number": "./biz-number/index.ts",
     "./consent": "./consent/index.ts",
     "./date": "./date/index.ts",
+    "./deploy-env": "./deploy-env/index.ts",
     "./env": "./env/validate.ts",
     "./errors": "./errors/index.ts",
     "./format": "./format/index.ts",
