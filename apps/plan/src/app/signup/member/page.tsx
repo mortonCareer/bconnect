@@ -4,13 +4,13 @@
  */
 'use client'
 
-import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { checkUsername } from '@bconnect/api-client'
 import {
   Form,
+  FormError,
   FormSubmitButton,
   Logo,
   TextField,
@@ -23,14 +23,7 @@ import { memberSchema, type MemberFormData } from './schema'
 
 export default function SignupMemberPage() {
   const router = useRouter()
-  const { formData, setMember } = useSignupStore()
-
-  // signupToken 없으면 로그인으로 리다이렉트
-  useEffect(() => {
-    if (!formData.signupToken) {
-      router.replace('/login')
-    }
-  }, [formData.signupToken, router])
+  const { formData, setMember, registerError, setRegisterError } = useSignupStore()
 
   const form = useForm<MemberFormData>({
     resolver: zodResolver(memberSchema),
@@ -45,6 +38,8 @@ export default function SignupMemberPage() {
   const server = useServerError(control, passthroughError<MemberFormData>('username'))
 
   const onSubmit = async (data: MemberFormData) => {
+    // 가입 단계에서 되돌아오며 받은 안내는 재제출 시점에 무효해진다.
+    setRegisterError(null)
     try {
       const { available } = await checkUsername({ username: data.username })
       if (!available) {
@@ -57,8 +52,6 @@ export default function SignupMemberPage() {
       server.capture(err, data)
     }
   }
-
-  if (!formData.signupToken) return null
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
@@ -93,6 +86,8 @@ export default function SignupMemberPage() {
               label="이름"
               placeholder="홍길동"
             />
+
+            <FormError error={registerError ?? undefined} />
 
             {/* CTA */}
             <FormSubmitButton size="full">다음으로</FormSubmitButton>

@@ -3,7 +3,7 @@
  */
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,9 +15,17 @@ import {
   Logo,
   TextField,
   passthroughError,
+  toast,
   useServerError,
 } from '@bconnect/ui'
-import { refreshAccessToken, useCreateMember, useCreateCompany } from '@bconnect/api-client'
+import {
+  isRegisterMemberDuplicatePhoneError,
+  isRegisterMemberDuplicateUsernameError,
+  isRegisterMemberSignupSessionError,
+  refreshAccessToken,
+  useCreateMember,
+  useCreateCompany,
+} from '@bconnect/api-client'
 import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
@@ -37,23 +45,13 @@ function requireRegisterAccessToken(result: RegisterMemberResponse) {
 
 export default function SignupCorpPage() {
   const router = useRouter()
-  const { formData, setCorp, reset: resetSignup } = useSignupStore()
+  const { formData, setCorp, reset: resetSignup, setRegisterError } = useSignupStore()
   const { login, isAuthenticated } = useAuthStore()
   const registerMemberMutation = useCreateMember({
     request: { headers: { 'X-Signup-Token': formData.signupToken } },
   })
   const createCompanyMutation = useCreateCompany()
   const [issuedAccessToken, setIssuedAccessToken] = useState<string | null>(null)
-
-  // signupToken 없으면 로그인으로 리다이렉트
-  useEffect(() => {
-    if (isAuthenticated) return
-    if (!formData.signupToken) {
-      router.replace('/login')
-    } else if (!formData.username || !formData.name) {
-      router.replace('/signup/member')
-    }
-  }, [isAuthenticated, formData.signupToken, formData.username, formData.name, router])
 
   const form = useForm<CorpFormData>({
     resolver: zodResolver(corpSchema),
@@ -76,22 +74,43 @@ export default function SignupCorpPage() {
     try {
       // register 는 signupToken(X-Signup-Token 헤더)을 소비 — 회사 생성 실패 후 재시도 시
       // 재호출하지 않도록 발급된 accessToken을 보관한다.
-      const accessToken =
-        issuedAccessToken ??
-        requireRegisterAccessToken(
-          await registerMemberMutation.mutateAsync({
-            data: {
-              username: formData.username,
-              name: formData.name,
-            },
-          })
-        )
+      if (!isAuthenticated) {
+        let accessToken: string
+        try {
+          accessToken =
+            issuedAccessToken ??
+            requireRegisterAccessToken(
+              await registerMemberMutation.mutateAsync({
+                data: {
+                  username: formData.username,
+                  name: formData.name,
+                },
+              })
+            )
+        } catch (err) {
+          // 토큰 소진·만료, 그리고 이미 가입된 번호 — 모두 가입 화면에서는 풀 수 없다.
+          // 인증부터 다시 하면 토큰 재발급 또는 기존 계정 로그인으로 이어진다.
+          if (isRegisterMemberSignupSessionError(err) || isRegisterMemberDuplicatePhoneError(err)) {
+            toast({ description: err.message, variant: 'error' })
+            resetSignup()
+            router.replace('/login')
+            return
+          }
+          // 사용자명 중복은 이 화면에 입력칸이 없다 — 안내와 함께 입력 단계로 되돌린다.
+          if (isRegisterMemberDuplicateUsernameError(err)) {
+            setRegisterError(err.message)
+            router.replace('/signup/member')
+            return
+          }
+          throw err
+        }
 
-      if (!issuedAccessToken) {
-        setIssuedAccessToken(accessToken)
+        if (!issuedAccessToken) {
+          setIssuedAccessToken(accessToken)
+        }
+
+        login(accessToken)
       }
-
-      login(accessToken)
       await createCompanyMutation.mutateAsync({
         data: { name: data.companyName, brn: data.bizNumber },
       })
@@ -105,8 +124,6 @@ export default function SignupCorpPage() {
       server.capture(err, form.getValues())
     }
   }
-
-  if (!formData.signupToken || !formData.username || !formData.name) return null
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">

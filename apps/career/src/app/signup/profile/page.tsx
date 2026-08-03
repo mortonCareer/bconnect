@@ -11,6 +11,9 @@ import {
   ROLE_LABELS,
   Trade,
   TRADE_LABELS,
+  isRegisterMemberDuplicatePhoneError,
+  isRegisterMemberDuplicateUsernameError,
+  isRegisterMemberSignupSessionError,
   refreshAccessToken,
   useCreateMember,
   useCreateProfile,
@@ -33,6 +36,7 @@ import {
   SelectField,
   Tag,
   TextField,
+  toast,
   useScrollToError,
   useServerError,
 } from '@bconnect/ui'
@@ -56,8 +60,8 @@ function requireRegisterAccessToken(result: RegisterMemberResponse) {
 
 export default function SignupProfilePage() {
   const router = useRouter()
-  const { login } = useAuthStore()
-  const { formData } = useSignupStore()
+  const { login, isAuthenticated } = useAuthStore()
+  const { formData, reset: resetSignup, setRegisterError } = useSignupStore()
   // register(POST /members)는 X-Signup-Token 헤더로 인증한다 (Bearer 아님).
   const registerMemberMutation = useCreateMember({
     request: { headers: { 'X-Signup-Token': formData.signupToken } },
@@ -108,22 +112,43 @@ export default function SignupProfilePage() {
     try {
       // register 는 signupToken(X-Signup-Token 헤더)을 소비 — 실패 후 재시도 시
       // 재호출하지 않도록 발급된 accessToken을 보관한다.
-      const accessToken =
-        issuedAccessToken ??
-        requireRegisterAccessToken(
-          await registerMemberMutation.mutateAsync({
-            data: {
-              username: formData.username,
-              name: formData.name,
-            },
-          })
-        )
+      if (!isAuthenticated) {
+        let accessToken: string
+        try {
+          accessToken =
+            issuedAccessToken ??
+            requireRegisterAccessToken(
+              await registerMemberMutation.mutateAsync({
+                data: {
+                  username: formData.username,
+                  name: formData.name,
+                },
+              })
+            )
+        } catch (err) {
+          // 토큰 소진·만료, 그리고 이미 가입된 번호 — 모두 가입 화면에서는 풀 수 없다.
+          // 인증부터 다시 하면 토큰 재발급 또는 기존 계정 로그인으로 이어진다.
+          if (isRegisterMemberSignupSessionError(err) || isRegisterMemberDuplicatePhoneError(err)) {
+            toast({ description: err.message, variant: 'error' })
+            resetSignup()
+            router.replace('/signup/auth')
+            return
+          }
+          // 사용자명 중복은 이 화면에 입력칸이 없다 — 안내와 함께 입력 단계로 되돌린다.
+          if (isRegisterMemberDuplicateUsernameError(err)) {
+            setRegisterError(err.message)
+            router.replace('/signup/username')
+            return
+          }
+          throw err
+        }
 
-      if (!issuedAccessToken) {
-        setIssuedAccessToken(accessToken)
+        if (!issuedAccessToken) {
+          setIssuedAccessToken(accessToken)
+        }
+
+        login(accessToken)
       }
-
-      login(accessToken)
       await createProfileMutation.mutateAsync({
         data: {
           role: data.role,

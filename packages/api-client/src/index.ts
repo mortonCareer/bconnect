@@ -9,6 +9,13 @@ export {
 
 export { AUTH_HINT_COOKIE, setAuthHint, clearAuthHint, hasAuthHint } from './auth-hint'
 
+export {
+  isApiError,
+  isRegisterMemberDuplicatePhoneError,
+  isRegisterMemberDuplicateUsernameError,
+  isRegisterMemberSignupSessionError,
+} from './errors'
+
 export { getQueryClient, queryClientConfig } from './query-client'
 
 // Re-export react-query for app usage
