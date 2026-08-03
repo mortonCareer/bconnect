@@ -1,4 +1,4 @@
-import { Region, Trade, type CredentialType } from './generated/schemas'
+import { ProfileRole, Region, Trade, type CredentialType } from './generated/schemas'
 
 export const TRADE_LABELS: Record<Trade, string> = {
   [Trade.DESIGN]: '설계',
@@ -74,6 +74,21 @@ export const TRADE_GROUPS: { label: string; trades: Trade[] }[] = [
 
 export function getTradeLabel(trade: Trade): string {
   return TRADE_LABELS[trade] ?? trade
+}
+
+// 등급(역할) 한글 라벨 SSOT — career(회원가입·홈 피드 필터)·features(추천서·메시지) 공유. 자체 하드코딩 금지.
+export const ROLE_LABELS: Record<ProfileRole, string> = {
+  [ProfileRole.CLIENT]: '소비자',
+  [ProfileRole.ARCHITECT]: '건축사',
+  [ProfileRole.CONTRACTOR]: '건설업자',
+  [ProfileRole.FOREMAN]: '반장',
+  [ProfileRole.SKILLED]: '기공',
+  [ProfileRole.SEMI_SKILLED]: '준기공',
+  [ProfileRole.HELPER]: '조공',
+}
+
+export function getRoleLabel(role: ProfileRole): string {
+  return ROLE_LABELS[role] ?? role
 }
 
 export const CREDENTIAL_TYPE_LABELS: Record<CredentialType, string> = {

@@ -1,7 +1,7 @@
 'use client'
 
 import { parseAsStringLiteral, useQueryState } from 'nuqs'
-import { getTradeLabel } from '@bconnect/api-client'
+import { getRoleLabel, getTradeLabel } from '@bconnect/api-client'
 import type { CoworkerRequest } from '@bconnect/api-client'
 import { Button, ProfileCard, ProfileCardSkeleton, cn } from '@bconnect/ui'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
@@ -134,7 +134,7 @@ function CoworkerRequestRow({
         // TODO: BE required 처리 후 type narrowing 필요. region/trade는 표시 필수값인데 optional emit이라 빈값으로 silent fallback 중.
         region: profile?.address?.city ?? '',
         trade: profile?.primaryTrade ? getTradeLabel(profile.primaryTrade) : '',
-        // 등급(role)은 MemberSummary/ProfileSummary 미제공(#473) — 추가되면 연결
+        role: profile?.role ? getRoleLabel(profile.role) : undefined,
       }}
       rightSlot={
         // TODO: BE required 처리 후 type narrowing 필요. CoworkerRequest.id는 액션 키인데 optional emit이라 없으면 버튼 비활성.
