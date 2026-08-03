@@ -1,4 +1,8 @@
 import {
+  getGetMyReceivedRecommendationsMockHandler,
+  getGetMyReceivedRecommendationsResponseMock,
+  getGetMySentRecommendationsMockHandler,
+  getGetMySentRecommendationsResponseMock,
   getGetReceivedRecommendationsMockHandler,
   getGetReceivedRecommendationsResponseMock,
   getGetSentRecommendationsMockHandler,
@@ -28,6 +32,12 @@ function withFixedContent(list: Recommendation[]): Recommendation[] {
 }
 
 export const recommendationsOverrides = [
+  getGetMyReceivedRecommendationsMockHandler(() =>
+    withFixedContent(getGetMyReceivedRecommendationsResponseMock())
+  ),
+  getGetMySentRecommendationsMockHandler(() =>
+    withFixedContent(getGetMySentRecommendationsResponseMock())
+  ),
   getGetReceivedRecommendationsMockHandler(() =>
     withFixedContent(getGetReceivedRecommendationsResponseMock())
   ),
