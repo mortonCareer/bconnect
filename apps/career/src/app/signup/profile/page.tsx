@@ -234,7 +234,7 @@ export default function SignupProfilePage() {
 
             <FormError error={server.formError} />
           </div>
-          <div className="bg-white p-4">
+          <div className="bg-white px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
             <FormSubmitButton size="full">완료</FormSubmitButton>
           </div>
         </form>
