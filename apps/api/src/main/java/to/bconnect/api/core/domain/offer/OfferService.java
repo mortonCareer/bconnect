@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.ApiConfigProps;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.core.domain.company.CompanyFinder;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.member.MemberRepository;
@@ -33,6 +34,7 @@ public class OfferService {
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
     private final MemberRepository memberRepository;
+    private final CompanyFinder companyFinder;
     private final ApplicationEventPublisher eventPublisher;
     private final ApiConfigProps apiConfigProps;
 
@@ -83,9 +85,9 @@ public class OfferService {
         offerRepository.findAllByTaskIdAndStatus(found.getTaskId(), OfferStatus.PENDING)
                 .forEach(OfferEntity::cancel);
 
-        val ownerId = getCompanyOwnerId(found.getTaskId());
-        eventPublisher.publishEvent(
-                new OfferEvent(found.getId(), found.getWorkerId(), ownerId, OfferStatus.ACCEPTED));
+        val company = companyFinder.getByTaskId(found.getTaskId());
+        eventPublisher.publishEvent(new OfferEvent(
+                found.getId(), found.getWorkerId(), company.id(), company.memberId(), OfferStatus.ACCEPTED));
     }
 
     @Transactional
@@ -100,9 +102,9 @@ public class OfferService {
 
         found.deny();
 
-        val ownerId = getCompanyOwnerId(found.getTaskId());
-        eventPublisher.publishEvent(
-                new OfferEvent(found.getId(), found.getWorkerId(), ownerId, OfferStatus.DENIED));
+        val company = companyFinder.getByTaskId(found.getTaskId());
+        eventPublisher.publishEvent(new OfferEvent(
+                found.getId(), found.getWorkerId(), company.id(), company.memberId(), OfferStatus.DENIED));
 
         promoteNext(found.getTaskId(), found.getSeq());
     }
@@ -112,7 +114,7 @@ public class OfferService {
         val found = offerRepository.findById(offerId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        val ownerId = getCompanyOwnerId(found.getTaskId());
+        val ownerId = companyFinder.getByTaskId(found.getTaskId()).memberId();
         if (!user.id().equals(ownerId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
@@ -143,7 +145,7 @@ public class OfferService {
             throw new CodeException(OfferExceptionCode.INVALID_REORDER);
 
         // check ownership
-        val ownerId = getCompanyOwnerId(taskId);
+        val ownerId = companyFinder.getByTaskId(taskId).memberId();
         if (!user.id().equals(ownerId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
@@ -159,7 +161,7 @@ public class OfferService {
 
     @Transactional(readOnly = true)
     public List<Offer> listByTask(AuthUser user, Long taskId) {
-        val ownerId = getCompanyOwnerId(taskId);
+        val ownerId = companyFinder.getByTaskId(taskId).memberId();
         if (!user.id().equals(ownerId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
@@ -184,9 +186,9 @@ public class OfferService {
 
         found.expire();
 
-        val ownerId = getCompanyOwnerId(found.getTaskId());
-        eventPublisher.publishEvent(
-                new OfferEvent(found.getId(), found.getWorkerId(), ownerId, OfferStatus.EXPIRED));
+        val company = companyFinder.getByTaskId(found.getTaskId());
+        eventPublisher.publishEvent(new OfferEvent(
+                found.getId(), found.getWorkerId(), company.id(), company.memberId(), OfferStatus.EXPIRED));
 
         promoteNext(found.getTaskId(), found.getSeq());
     }
@@ -202,18 +204,9 @@ public class OfferService {
         val found = optional.get();
         found.offered();
         found.updateDue(LocalDate.now(apiConfigProps.zoneId()).plusDays(DUE_EXTENSION_DAYS));
-        val ownerId = getCompanyOwnerId(taskId);
-        eventPublisher.publishEvent(
-                new OfferEvent(found.getId(), found.getWorkerId(), ownerId, OfferStatus.ACTIVE));
+        val company = companyFinder.getByTaskId(taskId);
+        eventPublisher.publishEvent(new OfferEvent(
+                found.getId(), found.getWorkerId(), company.id(), company.memberId(), OfferStatus.ACTIVE));
     }
 
-    private Long getCompanyOwnerId(Long taskId) {
-        val task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        val project = projectRepository.findById(task.getProjectId())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        val company = companyRepository.findById(project.getCompanyId())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        return company.getMemberId();
-    }
 }

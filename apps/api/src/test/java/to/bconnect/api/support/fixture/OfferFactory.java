@@ -30,7 +30,7 @@ public class OfferFactory {
         return new CreateOffer(taskId, workerId);
     }
 
-    public static OfferEvent event(Long offerId, Long workerId, Long companyOwnerId, OfferStatus status) {
-        return new OfferEvent(offerId, workerId, companyOwnerId, status);
+    public static OfferEvent event(Long offerId, Long workerId, Long companyId, Long companyOwnerId, OfferStatus status) {
+        return new OfferEvent(offerId, workerId, companyId, companyOwnerId, status);
     }
 }
