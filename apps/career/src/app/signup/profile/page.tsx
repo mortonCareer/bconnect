@@ -216,6 +216,7 @@ export default function SignupProfilePage() {
               control={control}
               name="address"
               label="주소"
+              required
               description="정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요"
             />
 
