@@ -5,12 +5,13 @@ import { Toaster } from '@bconnect/ui'
 import type { ReactNode } from 'react'
 import { MSWProvider, DevToolbar } from '@bconnect/devtools'
 import { usePushNotificationListener, InAppNotification, PushToaster } from '@bconnect/push'
+import { REFERENCE_PATHS } from '@/lib/notification-routes'
 import '../env'
 
 // FCM 부수효과(SW·onMessage·토큰 등록)는 MSWProvider ready 후 실행되어야 함 —
 // 그렇지 않으면 dev 첫 로드 시 SW 등록 전 fetch 가 MSW 를 우회한다.
 function PushBootstrap() {
-  usePushNotificationListener()
+  usePushNotificationListener(REFERENCE_PATHS)
   return <InAppNotification />
 }
 
