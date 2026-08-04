@@ -6,7 +6,8 @@ import type { ReferencePathMap } from '@bconnect/push'
  */
 export const REFERENCE_PANEL_SEGMENTS: ReferencePathMap = {
   CHAT_ROOM: 'messages/{id}',
-  // OFFER: 업체 오너도 수신하지만 plan 에 섭외 화면 없음 — 구현되면 추가
+  // OFFER: 목적지는 작업 패널의 섭외 대기열(PanelTask)이지만, referenceId 가 offerId 라
+  //        어느 작업인지 지목하려면 조회가 한 번 더 필요하다.
 }
 
 /**

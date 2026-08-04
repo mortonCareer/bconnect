@@ -12,5 +12,7 @@ export const REFERENCE_PATHS: ReferencePathMap = {
   COWORKER_REQUEST: '/profile/coworkers',
   CREDENTIAL: '/profile/certifications',
   RECOMMENDATION: '/profile/recommendations',
-  // OFFER: 섭외 수신 화면 미구현(#842/#843) — 구현되면 '/offers/{id}' 추가
+  // OFFER: 목적지는 채팅방 안 섭외 제안 카드(#972)지만, referenceId 가 offerId 라
+  //        어느 채팅방인지 지목할 수 없다 (OfferResponse 에 chatId 없음).
+  // CONTRACT: BE 에 발행처 없음 — enum 에만 존재.
 }
