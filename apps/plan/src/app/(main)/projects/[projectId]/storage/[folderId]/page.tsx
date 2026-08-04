@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { StorageFolder } from '../_components/StorageFolder'
 
-export const metadata: Metadata = { title: '자료함' }
+export const metadata: Metadata = { title: '저장소' }
 
 export default async function StorageFolderPage({
   params,
