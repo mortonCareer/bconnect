@@ -15,6 +15,8 @@ import to.bconnect.api.support.fixture.AttachmentFactory;
 import to.bconnect.api.support.fixture.MemberFactory;
 import to.bconnect.api.support.fixture.UserFactory;
 
+import java.time.LocalDate;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 
@@ -208,6 +210,18 @@ class MemberServiceTest {
         // when & then
         assertCodeException(() -> memberService.register("01000001001", command))
                 .hasExceptionCode(MemberExceptionCode.DUPLICATE_PHONE);
+    }
+
+    @Test
+    @DisplayName("register - 만 15세 미만일 때 등록하면 UNDERAGE로 실패한다")
+    void register_fail_M004() {
+        // given
+        val birth = LocalDate.now().minusYears(15).plusDays(1);
+        val command = MemberFactory.registerCommand(birth);
+
+        // when & then
+        assertCodeException(() -> memberService.register("01000001001", command))
+                .hasExceptionCode(MemberExceptionCode.UNDERAGE);
     }
 
     @Test

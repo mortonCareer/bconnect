@@ -60,6 +60,7 @@
 | M001 | DUPLICATE_USERNAME | 409 | INFO | 이미 사용 중인 사용자명입니다. |
 | M002 | DUPLICATE_PHONE | 409 | INFO | 이미 사용 중인 전화번호입니다. |
 | M003 | WITHDRAW_COMPANY_EXISTS | 409 | INFO | 소유한 업체가 있어 탈퇴할 수 없습니다. 업체를 먼저 삭제해주세요. |
+| M004 | UNDERAGE | 409 | INFO | 만 15세 미만은 가입할 수 없습니다. |
 
 ## ProfileExceptionCode
 
