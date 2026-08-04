@@ -32,13 +32,12 @@ import { formatRegistrationNumber } from '@bconnect/config/biz-number'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
 import { BIRTH_PLACEHOLDER } from '@bconnect/config/signup'
 import { useSignupStore } from '@/stores/signup-store'
-import { useAuthStore } from '@/stores/auth-store'
+import { login } from '@/lib/auth'
 import { corpSchema, type CorpFormData } from './schema'
 
 export default function SignupCorpPage() {
   const router = useRouter()
   const { formData, setCorp, reset: resetSignup, setRegisterError } = useSignupStore()
-  const { login } = useAuthStore()
   const registerMemberMutation = useCreateMember({
     request: { headers: { 'X-Signup-Token': formData.signupToken } },
   })

@@ -15,14 +15,30 @@ const cookieAttributes = () => {
   return `Path=/; SameSite=Lax; Secure${domain}`
 }
 
+// 쿠키는 관찰할 수 없으므로 쓰기 통로(set/clear)가 직접 알린다. useAuthHint 구독원.
+const listeners = new Set<() => void>()
+
+export function subscribeAuthHint(listener: () => void) {
+  listeners.add(listener)
+  return () => {
+    listeners.delete(listener)
+  }
+}
+
+const notify = () => {
+  for (const listener of listeners) listener()
+}
+
 export function setAuthHint() {
   if (typeof document === 'undefined') return
   document.cookie = `${AUTH_HINT_COOKIE}=${Date.now()}; Max-Age=${AUTH_HINT_MAX_AGE_SECONDS}; ${cookieAttributes()}`
+  notify()
 }
 
 export function clearAuthHint() {
   if (typeof document === 'undefined') return
   document.cookie = `${AUTH_HINT_COOKIE}=; Max-Age=0; ${cookieAttributes()}`
+  notify()
 }
 
 // 클라이언트에서도 proxy 가드와 같은 낙관 판정 재사용 — 인증 필요한 부수효과(FCM 기기 등록 등)의

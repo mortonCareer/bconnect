@@ -5,7 +5,7 @@
 
 import { AddressField } from '@/components/AddressField'
 import { SIGNUP_ROLES } from '@/lib/role-labels'
-import { useAuthStore } from '@/stores/auth-store'
+import { login } from '@/lib/auth'
 import { useSignupStore } from '@/stores/signup-store'
 import {
   ROLE_LABELS,
@@ -52,7 +52,6 @@ import { MAX_TRADES, profileSchema, type ProfileFormData } from './schema'
 
 export default function SignupProfilePage() {
   const router = useRouter()
-  const { login } = useAuthStore()
   const { formData, reset: resetSignup, setRegisterError } = useSignupStore()
   // register(POST /members)는 X-Signup-Token 헤더로 인증한다 (Bearer 아님).
   const registerMemberMutation = useCreateMember({

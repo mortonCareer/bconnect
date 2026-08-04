@@ -5,6 +5,7 @@ import {
   regionOfState,
   ROLE_LABELS,
   TRADE_LABELS,
+  useAuthHint,
   useGetFeeds,
   useGetMyMember,
 } from '@bconnect/api-client'
@@ -13,7 +14,6 @@ import { toWork } from '@bconnect/features'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { REGION_LABELS, type Region } from '@/lib/region'
-import { useAuthStore } from '@/stores/auth-store'
 
 export interface FeedItem {
   postId: number
@@ -60,7 +60,7 @@ export function useFeedItems({
 }: UseFeedItemsOptions = {}) {
   const { data: feeds, isLoading, error } = useGetFeeds()
   // 홈 피드는 public — members/me 는 인증 필요라 로그아웃 상태면 정지, isMine 전부 false (#802)
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const isAuthenticated = useAuthHint()
   const currentUserId = useGetMyMember({ query: { enabled: isAuthenticated } }).data?.id
 
   const feedItems: FeedItem[] = useMemo(() => {
