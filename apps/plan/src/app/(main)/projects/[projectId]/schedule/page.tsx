@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 
 import { ScheduleContent } from './_components'
 
-export const metadata: Metadata = { title: '일정' }
+export const metadata: Metadata = { title: '공정표' }
 
 export default async function SchedulePage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params
