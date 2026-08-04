@@ -13,4 +13,7 @@ public enum TaskStatus {
 
     public static final Set<TaskStatus> OFFERABLE =
             Collections.unmodifiableSet(EnumSet.of(NONE, OPEN, OFFERED));
+
+    public static final Set<TaskStatus> ENGAGED =
+            Collections.unmodifiableSet(EnumSet.of(OFFERED, ASSIGNED));
 }
