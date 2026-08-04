@@ -651,6 +651,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/one-click:
+    post:
+      tags:
+      - one-click-controller
+      operationId: lookup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OneClickRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseOneClickResponse"
   /api/v1/offers:
     post:
       tags:
@@ -2401,6 +2419,343 @@ components:
       required:
       - attachmentIds
       - content
+    OneClickRequest:
+      type: object
+      properties:
+        brn:
+          type: string
+          minLength: 1
+          pattern: "\\d{10}"
+        ownerName:
+          type: string
+          minLength: 1
+        openedAt:
+          type: string
+          format: date
+      required:
+      - brn
+      - openedAt
+      - ownerName
+    ApiResponseOneClickResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/OneClickResponse"
+    BusinessStatusResponse:
+      type: object
+      properties:
+        verdict:
+          $ref: "#/components/schemas/Verdict"
+        taxpayerStatus:
+          $ref: "#/components/schemas/TaxpayerStatus"
+        closedAt:
+          type:
+          - string
+          - "null"
+          format: date
+      required:
+      - closedAt
+      - taxpayerStatus
+      - verdict
+    ElectricalLicenseResponse:
+      type: object
+      properties:
+        verdict:
+          $ref: "#/components/schemas/Verdict"
+        count:
+          type: integer
+          format: int32
+        registrationNo:
+          type:
+          - string
+          - "null"
+        companyName:
+          type:
+          - string
+          - "null"
+        representative:
+          type:
+          - string
+          - "null"
+      required:
+      - companyName
+      - count
+      - registrationNo
+      - representative
+      - verdict
+    FireLicenseResponse:
+      type: object
+      properties:
+        verdict:
+          $ref: "#/components/schemas/Verdict"
+        count:
+          type: integer
+          format: int32
+        companyName:
+          type:
+          - string
+          - "null"
+        ceoName:
+          type:
+          - string
+          - "null"
+        businessType:
+          type:
+          - string
+          - "null"
+        licenseDiv:
+          type:
+          - string
+          - "null"
+      required:
+      - businessType
+      - ceoName
+      - companyName
+      - count
+      - licenseDiv
+      - verdict
+    HabitualArrearsResponse:
+      type: object
+      properties:
+        verdict:
+          $ref: "#/components/schemas/Verdict"
+        count:
+          type: integer
+          format: int32
+        companyName:
+          type:
+          - string
+          - "null"
+        representative:
+          type:
+          - string
+          - "null"
+        arrearsAmount:
+          type:
+          - integer
+          - "null"
+          format: int64
+        publicationPeriod:
+          type:
+          - string
+          - "null"
+      required:
+      - arrearsAmount
+      - companyName
+      - count
+      - publicationPeriod
+      - representative
+      - verdict
+    InsuranceResponse:
+      type: object
+      properties:
+        verdict:
+          $ref: "#/components/schemas/Verdict"
+        companyName:
+          type:
+          - string
+          - "null"
+        industry:
+          type:
+          - string
+          - "null"
+        workerCount:
+          type:
+          - string
+          - "null"
+        establishedAt:
+          type:
+          - string
+          - "null"
+          format: date
+      required:
+      - companyName
+      - establishedAt
+      - industry
+      - verdict
+      - workerCount
+    LicenseResponse:
+      type: object
+      properties:
+        verdict:
+          $ref: "#/components/schemas/Verdict"
+        count:
+          type: integer
+          format: int32
+        tradeNames:
+          type: array
+          items:
+            type: string
+        registeredAt:
+          type:
+          - string
+          - "null"
+          format: date
+        dispositionCount:
+          type: integer
+          format: int32
+      required:
+      - count
+      - dispositionCount
+      - registeredAt
+      - tradeNames
+      - verdict
+    OneClickResponse:
+      type: object
+      properties:
+        businessStatus:
+          $ref: "#/components/schemas/BusinessStatusResponse"
+        generalLicense:
+          $ref: "#/components/schemas/LicenseResponse"
+        specialtyLicense:
+          $ref: "#/components/schemas/LicenseResponse"
+        insurance:
+          $ref: "#/components/schemas/InsuranceResponse"
+        fireLicense:
+          $ref: "#/components/schemas/FireLicenseResponse"
+        electricalLicense:
+          $ref: "#/components/schemas/ElectricalLicenseResponse"
+        wageDefault:
+          $ref: "#/components/schemas/WageDefaultResponse"
+        habitualArrears:
+          $ref: "#/components/schemas/HabitualArrearsResponse"
+        subcontractRestriction:
+          $ref: "#/components/schemas/SubcontractRestrictionResponse"
+        retirementFund:
+          $ref: "#/components/schemas/RetirementFundResponse"
+      required:
+      - businessStatus
+      - electricalLicense
+      - fireLicense
+      - generalLicense
+      - habitualArrears
+      - insurance
+      - retirementFund
+      - specialtyLicense
+      - subcontractRestriction
+      - wageDefault
+    RetirementFundResponse:
+      type: object
+      properties:
+        verdict:
+          $ref: "#/components/schemas/Verdict"
+        count:
+          type: integer
+          format: int32
+        projectName:
+          type:
+          - string
+          - "null"
+        totalAmount:
+          type:
+          - integer
+          - "null"
+          format: int64
+        startDate:
+          type:
+          - string
+          - "null"
+          format: date
+        endDate:
+          type:
+          - string
+          - "null"
+          format: date
+        clientOrg:
+          type:
+          - string
+          - "null"
+      required:
+      - clientOrg
+      - count
+      - endDate
+      - projectName
+      - startDate
+      - totalAmount
+      - verdict
+    SubcontractRestrictionResponse:
+      type: object
+      properties:
+        verdict:
+          $ref: "#/components/schemas/Verdict"
+        count:
+          type: integer
+          format: int32
+        companyName:
+          type:
+          - string
+          - "null"
+        representative:
+          type:
+          - string
+          - "null"
+        violationType:
+          type:
+          - string
+          - "null"
+        restrictionStart:
+          type:
+          - string
+          - "null"
+          format: date
+        restrictionEnd:
+          type:
+          - string
+          - "null"
+          format: date
+      required:
+      - companyName
+      - count
+      - representative
+      - restrictionEnd
+      - restrictionStart
+      - verdict
+      - violationType
+    TaxpayerStatus:
+      type: string
+      enum:
+      - CONTINUING
+      - SUSPENDED
+      - CLOSED
+      - UNKNOWN
+    Verdict:
+      type: string
+      enum:
+      - CONFIRMED
+      - UNKNOWN
+      - WARNING
+      - ERROR
+    WageDefaultResponse:
+      type: object
+      properties:
+        verdict:
+          $ref: "#/components/schemas/Verdict"
+        count:
+          type: integer
+          format: int32
+        name:
+          type:
+          - string
+          - "null"
+        companyName:
+          type:
+          - string
+          - "null"
+        arrearsAmount:
+          type:
+          - integer
+          - "null"
+          format: int64
+      required:
+      - arrearsAmount
+      - companyName
+      - count
+      - name
+      - verdict
     CreateOfferRequest:
       type: object
       properties:
