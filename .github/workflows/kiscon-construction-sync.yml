@@ -26,16 +26,28 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Sync KISCON construction data to Postgres
+      - name: Sync KISCON registration to Postgres
         env:
           DATA_GO_SERVICE_KEY: ${{ secrets.DATA_GO_SERVICE_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}
         run: |
           if [ "${{ inputs.full }}" = "true" ]; then
-            pnpm --filter @bconnect/data-jobs kiscon-construction-sync -- --full
+            pnpm --filter @bconnect/data-jobs kiscon-registration-sync -- --full
           else
-            pnpm --filter @bconnect/data-jobs kiscon-construction-sync
+            pnpm --filter @bconnect/data-jobs kiscon-registration-sync
+          fi
+
+      - name: Sync KISCON admin penalty to Postgres
+        env:
+          DATA_GO_SERVICE_KEY: ${{ secrets.DATA_GO_SERVICE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}
+        run: |
+          if [ "${{ inputs.full }}" = "true" ]; then
+            pnpm --filter @bconnect/data-jobs kiscon-penalty-sync -- --full
+          else
+            pnpm --filter @bconnect/data-jobs kiscon-penalty-sync
           fi
 
       - name: Notify Slack on failure

@@ -20,11 +20,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Sync KISCON data to Postgres
+      - name: Sync KISCON arrears to Postgres
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}
-        run: pnpm --filter @bconnect/data-jobs kiscon-sync
+        run: pnpm --filter @bconnect/data-jobs kiscon-arrears-sync
+
+      - name: Sync KISCON subcon limits to Postgres
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}
+        run: pnpm --filter @bconnect/data-jobs kiscon-subcon-sync
 
       - name: Notify Slack on failure or cancellation
         if: failure() || cancelled()
