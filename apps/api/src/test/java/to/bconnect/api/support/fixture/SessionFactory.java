@@ -18,7 +18,7 @@ public class SessionFactory {
         return new SessionEntity(memberId, agent, ip, refreshToken);
     }
 
-    public static NewDeviceLoginEvent newDeviceLoginEvent(String phone) {
-        return new NewDeviceLoginEvent(phone);
+    public static NewDeviceLoginEvent newDeviceLoginEvent(Long memberId, String phone) {
+        return new NewDeviceLoginEvent(memberId, phone);
     }
 }

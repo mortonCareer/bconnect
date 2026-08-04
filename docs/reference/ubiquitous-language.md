@@ -72,8 +72,9 @@ graph TD
 | Auth           | Refresh Token   | 리프레시 토큰 | 액세스 토큰 재발급용 토큰              |
 | Profile        | Profile         | 프로필        | 사용자 프로필                          |
 | Task           | Task            | 작업          | 프로젝트 공종별 작업 단위              |
-| Post           | Post            | 게시글        |                                        |
-| Post           | Feed            | 피드          | 게시글 + 작성자 + 프로필 View          |
+| Post           | Post            | 게시글        | 사진 · 본문 단위                       |
+| Post           |                 | 작업물        | 게시글 + 작업 View                     |
+| Post           | Feed            | 피드          | 게시글 + 작업 + 프로필 + 회원 View     |
 | Coworker       | Coworker        | 동료          | 동료 기술자                            |
 | Coworker       | CoworkerRequest | 동료 요청     |                                        |
 | Recommendation | Recommendation  | 추천서        | 동료 기술자가 작성한 추천서            |
@@ -81,7 +82,7 @@ graph TD
 | Chat           | DirectChat      | 1:1 채팅방    | 채팅방 제목 없음                       |
 | Chat           | Message         | 메시지        |                                        |
 | Chat           | Participant     | 참여자        | 그룹 채팅방 참여자 정보                |
-| Credential     | Credential      | 인증뱃지      | 면허 · 자격 · 보험 등                  |
+| Credential     | Credential      | 자격 증명     | 면허 · 자격 · 보험 등                  |
 | Attachment     | Attachment      | 첨부          | 업로드 파일 메타데이터                 |
 | Attachment     | Signed cookie   |               | CloudFront 접근 권한                   |
 | Company        | Company         | 인테리어 업체 |                                        |
@@ -155,14 +156,24 @@ graph TD
 | WORKER  | 기술자 작업   |
 | PROJECT | 프로젝트 작업 |
 
-### 작업 상태(TaskStatus)
+### 섭외 상태(TaskStatus)
+
+시스템 전용. 사용자가 직접 변경할 수 없다.
+
+| 유형     | 프로젝트(업체) | 기술자    | 전환 시점                           |
+| -------- | -------------- | --------- | ----------------------------------- |
+| NONE     | 섭외 전        | 해당 없음 | 생성 시 · 대기열 소진 · 할당 취소   |
+| OPEN     | 모집 중        | 지원 완료 | 미사용                              |
+| OFFERED  | 섭외 중        | 섭외 받음 | 섭외 생성 · 대기열의 다음 후보 승격 |
+| ASSIGNED | 섭외 됨        | 시공 예정 | 기술자가 섭외 수락                  |
+
+### 진행 상태(TaskProgress)
+
+작업 기간(start/end)과 무관하며 자동 전환되지 않는다 (사용자 직접 변경).
 
 | 유형        | 프로젝트(업체) | 기술자    |
 | ----------- | -------------- | --------- |
-| DRAFT       | 시작 전        | 시작 전   |
-| OPEN        | 모집 중        | 지원 완료 |
-| OFFERED     | 섭외 중        | 섭외 받음 |
-| SCHEDULED   | 섭외 됨        | 시공 전   |
+| TODO        | 시작 전        | 시작 전   |
 | IN_PROGRESS | 진행 중        | 진행 중   |
 | COMPLETED   | 시공 완료      | 시공 완료 |
 
@@ -192,7 +203,7 @@ graph TD
 | SYSTEM | 시스템 |
 | OFFER  | 섭외   |
 
-### 인증뱃지 유형(CredentialType)
+### 자격 증명 유형(CredentialType)
 
 | 유형                             | 설명           |
 | -------------------------------- | -------------- |

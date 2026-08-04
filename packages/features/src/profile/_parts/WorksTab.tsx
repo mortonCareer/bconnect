@@ -1,10 +1,11 @@
 'use client'
 
-import { postImageUrls, useGetFeeds } from '@bconnect/api-client'
-import type { Post } from '@bconnect/api-client'
+import { useGetFeeds } from '@bconnect/api-client'
+import type { Feed } from '@bconnect/api-client'
 import { Skeleton } from '@bconnect/ui'
 import { WorkCard } from './WorkCard'
 import { formatRelativeTime } from '@bconnect/config/format'
+import { toWork } from '../../_shared/work'
 
 interface WorksTabProps {
   /** 표시 대상 회원의 memberId (GET /feeds 가 전역이라 클라이언트에서 이 값으로 필터) */
@@ -35,11 +36,11 @@ export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProp
   }
 
   // TODO: BE required 처리 후 type narrowing 필요. Feed.post/Post.memberId가 optional emit이라 없는 항목은 임시로 렌더 제외.
-  const posts: Post[] = (feeds?.content ?? []).flatMap((feed) =>
-    feed.post && feed.post.memberId === profileId ? [feed.post] : []
+  const authoredFeeds: Feed[] = (feeds?.content ?? []).filter(
+    (feed) => feed.post && feed.post.memberId === profileId
   )
 
-  if (posts.length === 0) {
+  if (authoredFeeds.length === 0) {
     return (
       <div className="flex items-center justify-center py-20">
         <p className="text-r-14 text-gray-500">작업물이 없습니다</p>
@@ -49,14 +50,18 @@ export function WorksTab({ profileId, workEditHref, onDeleteWork }: WorksTabProp
 
   return (
     <div className="flex flex-col gap-6 py-6">
-      {posts.map((post) => {
+      {authoredFeeds.map((feed) => {
         // TODO: BE required 처리 후 type narrowing 필요. Post.id/createdAt/content는 카드 표시 필수값인데 optional emit이라 fallback 중.
-        const postId = post.id
-        if (postId == null) return null
+        const post = feed.post
+        const postId = post?.id
+        if (post == null || postId == null) return null
+        const { images, company, duration } = toWork(feed)
         return (
           <WorkCard
             key={postId}
-            image={postImageUrls(post)[0] ?? ''}
+            images={images}
+            company={company}
+            duration={duration}
             timestamp={post.createdAt ? formatRelativeTime(post.createdAt) : ''}
             description={post.content ?? ''}
             editHref={workEditHref?.(postId)}

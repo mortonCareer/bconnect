@@ -52,7 +52,7 @@ public class SessionService {
             sessionRepository.save(
                     new SessionEntity(id, agent, ip, encrypted)
             );
-            eventPublisher.publishEvent(new NewDeviceLoginEvent(member.getPhone()));
+            eventPublisher.publishEvent(new NewDeviceLoginEvent(member.getId(), member.getPhone()));
         }
     }
 

@@ -26,7 +26,7 @@ const ME: Member = {
   name: '김대표',
   phone: '+821012341234',
   picture: null,
-  roles: [Role.CAREER],
+  roles: [Role.CAREER, Role.PLAN],
   createdAt: EPOCH,
   modifiedAt: EPOCH,
 }

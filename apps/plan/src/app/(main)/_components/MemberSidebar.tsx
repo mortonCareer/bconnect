@@ -97,11 +97,7 @@ function ProjectSection({
     },
     // TODO: 페이지 구현 시 href 연결 (#375 follow-up — 모집 관리)
     { slug: 'recruit', label: '모집 관리', href: null },
-    {
-      slug: 'storage',
-      label: '문서 저장소',
-      href: selectedProject ? `/projects/${selectedProject}/storage` : null,
-    },
+    { slug: 'storage', label: '문서 저장소', href: null },
   ]
   // active 표시는 현재 path 의 프로젝트를 보고 있을 때만
   const onSelectedProject = pathProjectId === selectedProject

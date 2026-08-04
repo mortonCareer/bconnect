@@ -13,7 +13,7 @@
 | `CO` | 업체 | `core/domain/company` |
 | `T` | 작업 | `core/domain/task` |
 | `CW` | 동료 | `core/domain/coworker` |
-| `CD` | 인증뱃지 | `core/domain/credential` |
+| `CD` | 자격 증명 | `core/domain/credential` |
 | `RC` | 추천서 | `core/domain/recommendation` |
 | `CH` | 채팅 | `core/domain/chat` |
 | `OF` | 섭외 | `core/domain/offer` |
@@ -90,12 +90,13 @@
 | OF001 | NOT_PROJECT_TASK | 400 | INFO | 프로젝트 작업에만 섭외할 수 있습니다. |
 | OF002 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 섭외 상태입니다. |
 | OF003 | INVALID_REORDER | 400 | INFO | 재정렬 대상이 올바르지 않습니다. |
+| OF004 | INVALID_TASK_STATUS | 409 | INFO | 섭외할 수 없는 작업 상태입니다. |
 
 ## CredentialExceptionCode
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
-| CD001 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 인증뱃지 상태입니다. |
+| CD001 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 자격 증명 상태입니다. |
 
 ## CoworkerExceptionCode
 

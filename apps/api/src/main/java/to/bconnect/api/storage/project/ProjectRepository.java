@@ -8,5 +8,7 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
 
     List<ProjectEntity> findAllByCompanyId(Long companyId);
 
+    List<ProjectEntity> findAllByCompanyIdOrderByIdAsc(Long companyId);
+
     long countByCompanyId(Long companyId);
 }

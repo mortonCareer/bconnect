@@ -38,12 +38,12 @@ INSERT INTO member_roles (member_id, role) VALUES
 (105, 'CAREER'),
 (106, 'GUEST');
 
-INSERT INTO profiles (id, member_id, role, primary_trade, experience, headline, about, zipcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
-(100, 101, 'FOREMAN', 'TILING', 5, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(101, 102, 'FOREMAN', 'WATERPROOFING', 6, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(102, 103, 'FOREMAN', 'PAINTING', 7, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(103, 104, 'FOREMAN', 'CARPENTRY', 8, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(104, 105, 'FOREMAN', 'ELECTRICAL', 9, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO profiles (id, member_id, role, primary_trade, experience, headline, about, zipcode, bcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
+(100, 101, 'FOREMAN', 'TILING', 5, '한줄소개2', '소개글2', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(101, 102, 'FOREMAN', 'WATERPROOFING', 6, '한줄소개3', '소개글3', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(102, 103, 'FOREMAN', 'PAINTING', 7, '한줄소개4', '소개글4', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(103, 104, 'FOREMAN', 'CARPENTRY', 8, '한줄소개5', '소개글5', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(104, 105, 'FOREMAN', 'ELECTRICAL', 9, '한줄소개6', '소개글6', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO profile_trades (profile_id, trade) VALUES
 (100, 'TILING'),
@@ -73,22 +73,22 @@ INSERT INTO credentials (id, member_id, type, status, expired_at, created_at, mo
 (101, 100, 'SKILL_GRADE_CERTIFICATE', 'PENDING', DATE '2026-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
-(100, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'test-att-100', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(101, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'test-att-101', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(102, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, 'CREDENTIAL', 100, 'test-att-102', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(103, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, 'CREDENTIAL', 101, 'test-att-103', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(104, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'test-att-104', 'company', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(105, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'test-att-105', 'company-update', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(106, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'test-att-106', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(107, 106, 'IMAGE', 'COMPLETED', 'MEMBER', 106, 'MEMBER', 106, 'test-att-107', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+(100, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'seed-attachment-100', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(101, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'seed-attachment-101', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(102, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, 'CREDENTIAL', 100, 'seed-attachment-102', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(103, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, 'CREDENTIAL', 101, 'seed-attachment-103', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(104, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'seed-attachment-104', 'company', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(105, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'seed-attachment-105', 'company-update', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(106, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'seed-attachment-106', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(107, 106, 'IMAGE', 'COMPLETED', 'MEMBER', 106, 'MEMBER', 106, 'seed-attachment-107', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO tasks (id, dtype, status, start_date, end_date, worker_id, project_id, project_title, project_requirement, project_memo, created_at, modified_at) VALUES
-(100, 'PROJECT', 'SCHEDULED', DATE '2026-06-01', DATE '2026-06-03', 101, null, '작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO tasks (id, dtype, start_date, end_date, status, progress, worker_id, project_id, project_title, project_requirement, project_memo, version, created_at, modified_at) VALUES
+(100, 'PROJECT', DATE '2026-06-01', DATE '2026-06-03', 'ASSIGNED', 'TODO', 101, null, '작업', '요구사항', '메모', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO tasks (id, dtype, status, start_date, end_date, worker_id, worker_title, worker_memo, worker_company, zipcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
-(101, 'WORKER', 'SCHEDULED', DATE '2026-06-01', DATE '2026-06-02', 103, '작업1', '메모', '기술자 업체', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(102, 'WORKER', 'SCHEDULED', DATE '2026-06-03', DATE '2026-06-04', 103, '작업2', '메모', '기술자 업체', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(103, 'WORKER', 'SCHEDULED', DATE '2026-06-05', DATE '2026-06-06', 103, '작업3', '메모', '기술자 업체', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO tasks (id, dtype, status, progress, start_date, end_date, worker_id, worker_title, worker_memo, worker_company, zipcode, bcode, city, state, street, detail, latitude, longitude, version, created_at, modified_at) VALUES
+(101, 'WORKER', 'NONE', 'TODO', DATE '2026-06-01', DATE '2026-06-02', 103, '동료 작업1', '메모', '샘플건설', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(102, 'WORKER', 'NONE', 'TODO', DATE '2026-06-03', DATE '2026-06-04', 103, '동료 작업2', '메모', '샘플건설', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(103, 'WORKER', 'NONE', 'TODO', DATE '2026-06-05', DATE '2026-06-06', 103, '동료 작업3', '메모', '샘플건설', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO task_trades (task_id, trade) VALUES
 (101, 'TILING'), (102, 'TILING'), (103, 'TILING');
@@ -137,17 +137,17 @@ INSERT INTO member_roles (member_id, role) VALUES
 (208, 'CAREER'),
 (209, 'CAREER');
 
-INSERT INTO profiles (id, member_id, role, primary_trade, experience, headline, about, zipcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
-(200, 200, 'CONTRACTOR', 'TILING', 15, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 201, 'FOREMAN', 'TILING', 5, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(202, 202, 'FOREMAN', 'PAINTING', 7, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(203, 203, 'FOREMAN', 'ELECTRICAL', 9, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(204, 204, 'CONTRACTOR', 'PLUMBING', 12, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(205, 205, 'CONTRACTOR', 'CARPENTRY', 10, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(206, 206, 'CONTRACTOR', 'WATERPROOFING', 20, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(207, 207, 'CONTRACTOR', 'MASONRY', 8, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(208, 208, 'FOREMAN', 'PLUMBING', 4, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(209, 209, 'FOREMAN', 'CARPENTRY', 11, '한줄소개', '상세소개', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO profiles (id, member_id, role, primary_trade, experience, headline, about, zipcode, bcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
+(200, 200, 'CONTRACTOR', 'TILING', 15, '샘플업체 소개', '샘플업체 상세소개', '06000', '1168010100', '강남구', '서울', '테헤란로', '상세', 37.500, 127.030, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(201, 201, 'FOREMAN', 'TILING', 5, '샘플반장1 소개', '샘플반장1 상세소개', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(202, 202, 'FOREMAN', 'PAINTING', 7, '샘플반장2 소개', '샘플반장2 상세소개', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(203, 203, 'FOREMAN', 'ELECTRICAL', 9, '샘플반장3 소개', '샘플반장3 상세소개', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(204, 204, 'CONTRACTOR', 'PLUMBING', 12, '샘플업체2 소개', '샘플업체2 상세소개', '06000', '1168010100', '강남구', '서울', '테헤란로', '상세', 37.500, 127.030, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(205, 205, 'CONTRACTOR', 'CARPENTRY', 10, '샘플업체3 소개', '샘플업체3 상세소개', '06000', '1165010800', '서초구', '서울', '서초대로', '상세', 37.494, 127.014, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(206, 206, 'CONTRACTOR', 'WATERPROOFING', 20, '샘플업체4 소개', '샘플업체4 상세소개', '04000', '1117013300', '용산구', '서울', '한강대로', '상세', 37.529, 126.964, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(207, 207, 'CONTRACTOR', 'MASONRY', 8, '샘플업체5 소개', '샘플업체5 상세소개', '13000', '4113511000', '성남시 분당구', '경기', '판교로', '상세', 37.395, 127.111, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(208, 208, 'FOREMAN', 'PLUMBING', 4, '샘플반장4 소개', '샘플반장4 상세소개', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(209, 209, 'FOREMAN', 'CARPENTRY', 11, '샘플반장5 소개', '샘플반장5 상세소개', '16000', '4111513500', '수원시 팔달구', '경기', '도로명주소', '상세', 37.283, 127.014, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO profile_trades (profile_id, trade) VALUES
 (200, 'TILING'),
@@ -186,19 +186,19 @@ INSERT INTO attachments (id, member_id, type, status, context, context_id, refer
 (241, 206, 'IMAGE', 'COMPLETED', 'COMPANY', 203, 'COMPANY', 203, 'sample-att-241', 'company', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (242, 207, 'IMAGE', 'COMPLETED', 'COMPANY', 204, 'COMPANY', 204, 'sample-att-242', 'company', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO projects (id, company_id, title, zipcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
-(200, 200, '프로젝트1', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 201, '프로젝트2', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(202, 202, '프로젝트3', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(203, 203, '프로젝트4', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(204, 204, '프로젝트5', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO projects (id, company_id, title, zipcode, bcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
+(200, 200, '샘플 프로젝트', '06000', '1168010100', '강남구', '서울', '테헤란로 100', '상세', 37.500, 127.030, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(201, 201, '샘플 프로젝트2', '06000', '1168010100', '강남구', '서울', '테헤란로 200', '상세', 37.501, 127.031, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(202, 202, '샘플 프로젝트3', '06000', '1165010800', '서초구', '서울', '서초대로 300', '상세', 37.494, 127.014, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(203, 203, '샘플 프로젝트4', '04000', '1117013300', '용산구', '서울', '한강대로 400', '상세', 37.529, 126.964, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(204, 204, '샘플 프로젝트5', '13000', '4113511000', '성남시 분당구', '경기', '판교로 500', '상세', 37.395, 127.111, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO tasks (id, dtype, status, start_date, end_date, worker_id, project_id, project_title, project_requirement, project_memo, created_at, modified_at) VALUES
-(200, 'PROJECT', 'DRAFT', DATE '2026-08-01', DATE '2026-08-03', null, 200, '초안 작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 'PROJECT', 'OFFERED', DATE '2026-08-04', DATE '2026-08-06', null, 200, '섭외중 작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(202, 'PROJECT', 'SCHEDULED', DATE '2026-08-07', DATE '2026-08-09', 201, 200, '예정 작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(203, 'PROJECT', 'IN_PROGRESS', DATE '2026-08-10', DATE '2026-08-12', 202, 200, '진행중 작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(204, 'PROJECT', 'COMPLETED', DATE '2026-08-13', DATE '2026-08-15', 203, 200, '완료 작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO tasks (id, dtype, status, progress, start_date, end_date, worker_id, project_id, project_title, project_requirement, project_memo, version, created_at, modified_at) VALUES
+(200, 'PROJECT', 'NONE', 'TODO', DATE '2026-08-01', DATE '2026-08-03', null, 200, '초안 작업', '요구사항', '메모', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(201, 'PROJECT', 'OFFERED', 'TODO', DATE '2026-08-04', DATE '2026-08-06', null, 200, '섭외중 작업', '요구사항', '메모', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(202, 'PROJECT', 'ASSIGNED', 'TODO', DATE '2026-08-07', DATE '2026-08-09', 201, 200, '예정 작업', '요구사항', '메모', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(203, 'PROJECT', 'ASSIGNED', 'IN_PROGRESS', DATE '2026-08-10', DATE '2026-08-12', 202, 200, '진행중 작업', '요구사항', '메모', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(204, 'PROJECT', 'ASSIGNED', 'COMPLETED', DATE '2026-08-13', DATE '2026-08-15', 203, 200, '완료 작업', '요구사항', '메모', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO task_trades (task_id, trade) VALUES
 (200, 'TILING'),
@@ -214,16 +214,16 @@ INSERT INTO offers (id, task_id, worker_id, seq, due, status, version, created_a
 (203, 201, 208, 4, DATE '2026-08-31', 'PENDING', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (204, 201, 209, 5, DATE '2026-08-31', 'PENDING', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO tasks (id, dtype, status, start_date, end_date, worker_id, worker_title, worker_memo, worker_company, zipcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
-(205, 'WORKER', 'SCHEDULED', DATE '2026-09-01', DATE '2026-09-02', 201, '작업1', '메모', '기술자 업체', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(206, 'WORKER', 'SCHEDULED', DATE '2026-09-03', DATE '2026-09-04', 201, '작업2', '메모', '기술자 업체', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(207, 'WORKER', 'SCHEDULED', DATE '2026-09-05', DATE '2026-09-06', 201, '작업3', '메모', '기술자 업체', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(208, 'WORKER', 'SCHEDULED', DATE '2026-09-01', DATE '2026-09-02', 202, '작업1', '메모', '기술자 업체', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(209, 'WORKER', 'SCHEDULED', DATE '2026-09-03', DATE '2026-09-04', 202, '작업2', '메모', '기술자 업체', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(210, 'WORKER', 'SCHEDULED', DATE '2026-09-05', DATE '2026-09-06', 202, '작업3', '메모', '기술자 업체', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(211, 'WORKER', 'SCHEDULED', DATE '2026-09-01', DATE '2026-09-02', 203, '작업1', '메모', '기술자 업체', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(212, 'WORKER', 'SCHEDULED', DATE '2026-09-03', DATE '2026-09-04', 203, '작업2', '메모', '기술자 업체', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(213, 'WORKER', 'SCHEDULED', DATE '2026-09-05', DATE '2026-09-06', 203, '작업3', '메모', '기술자 업체', '16419', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO tasks (id, dtype, status, progress, start_date, end_date, worker_id, worker_title, worker_memo, worker_company, zipcode, bcode, city, state, street, detail, latitude, longitude, version, created_at, modified_at) VALUES
+(205, 'WORKER', 'NONE', 'TODO', DATE '2026-09-01', DATE '2026-09-02', 201, '반장1 작업1', '메모', '샘플건설', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(206, 'WORKER', 'NONE', 'TODO', DATE '2026-09-03', DATE '2026-09-04', 201, '반장1 작업2', '메모', '샘플건설', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(207, 'WORKER', 'NONE', 'TODO', DATE '2026-09-05', DATE '2026-09-06', 201, '반장1 작업3', '메모', '샘플건설', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(208, 'WORKER', 'NONE', 'TODO', DATE '2026-09-01', DATE '2026-09-02', 202, '반장2 작업1', '메모', '샘플건설', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(209, 'WORKER', 'NONE', 'TODO', DATE '2026-09-03', DATE '2026-09-04', 202, '반장2 작업2', '메모', '샘플건설', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(210, 'WORKER', 'NONE', 'TODO', DATE '2026-09-05', DATE '2026-09-06', 202, '반장2 작업3', '메모', '샘플건설', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(211, 'WORKER', 'NONE', 'TODO', DATE '2026-09-01', DATE '2026-09-02', 203, '반장3 작업1', '메모', '샘플건설', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(212, 'WORKER', 'NONE', 'TODO', DATE '2026-09-03', DATE '2026-09-04', 203, '반장3 작업2', '메모', '샘플건설', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(213, 'WORKER', 'NONE', 'TODO', DATE '2026-09-05', DATE '2026-09-06', 203, '반장3 작업3', '메모', '샘플건설', '16419', '4111110300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO task_trades (task_id, trade) VALUES
 (205, 'TILING'), (206, 'TILING'), (207, 'TILING'),

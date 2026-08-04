@@ -3,6 +3,7 @@ package to.bconnect.api.core.domain.credential;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentFinder;
@@ -28,10 +29,11 @@ public class CredentialService {
     private final CredentialRepository credentialRepository;
     private final AttachmentFinder attachmentFinder;
     private final AttachmentLinker attachmentLinker;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<Credential> list(Long memberId) {
-        return credentialRepository.findAllByMemberId(memberId)
+        return credentialRepository.findAllByMemberIdOrderByIdDesc(memberId)
                 .stream()
                 .map(Credential::of)
                 .toList();
@@ -40,7 +42,7 @@ public class CredentialService {
     @Transactional(readOnly = true)
     public List<Credential> listLatestAccepted(Long memberId) {
         // latest one per type
-        return credentialRepository.findAllByMemberId(memberId)
+        return credentialRepository.findAllByMemberIdOrderByIdDesc(memberId)
                 .stream()
                 .filter(it -> it.getStatus() == CredentialStatus.ACCEPTED)
                 .collect(Collectors.groupingBy(
@@ -96,6 +98,9 @@ public class CredentialService {
             throw new CodeException(CredentialExceptionCode.INVALID_STATUS);
 
         found.accept();
+
+        eventPublisher.publishEvent(
+                new CredentialReviewedEvent(found.getId(), found.getMemberId(), CredentialStatus.ACCEPTED));
     }
 
     @Transactional
@@ -107,5 +112,8 @@ public class CredentialService {
             throw new CodeException(CredentialExceptionCode.INVALID_STATUS);
 
         found.deny();
+
+        eventPublisher.publishEvent(
+                new CredentialReviewedEvent(found.getId(), found.getMemberId(), CredentialStatus.DENIED));
     }
 }

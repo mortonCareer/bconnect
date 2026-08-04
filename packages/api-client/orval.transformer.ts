@@ -16,7 +16,6 @@ const SCHEMA_KEEP_RESPONSE = new Set([
   'SendOtpResponse',
   'RefreshTokenResponse',
   'RegisterMemberResponse',
-  'RegisterDeviceResponse',
   'VerifyOtpLoginResponse',
   'VerifyOtpSignupResponse',
 ])
