@@ -19,8 +19,8 @@ import {
   useServerError,
 } from '@bconnect/ui'
 import {
-  isRegisterMemberDuplicatePhoneError,
-  isRegisterMemberDuplicateUsernameError,
+  ERROR_CODE,
+  hasErrorCode,
   isRegisterMemberSignupSessionError,
   hasAuthHint,
   refreshAccessToken,
@@ -93,14 +93,17 @@ export default function SignupCorpPage() {
         } catch (err) {
           // 토큰 소진·만료, 그리고 이미 가입된 번호 — 모두 가입 화면에서는 풀 수 없다.
           // 인증부터 다시 하면 토큰 재발급 또는 기존 계정 로그인으로 이어진다.
-          if (isRegisterMemberSignupSessionError(err) || isRegisterMemberDuplicatePhoneError(err)) {
+          if (
+            isRegisterMemberSignupSessionError(err) ||
+            hasErrorCode(err, ERROR_CODE.MEMBER.DUPLICATE_PHONE)
+          ) {
             toast({ description: err.message, variant: 'error' })
             resetSignup()
             router.replace('/login')
             return
           }
           // 사용자명 중복은 이 화면에 입력칸이 없다 — 안내와 함께 입력 단계로 되돌린다.
-          if (isRegisterMemberDuplicateUsernameError(err)) {
+          if (hasErrorCode(err, ERROR_CODE.MEMBER.DUPLICATE_USERNAME)) {
             setRegisterError(err.message)
             router.replace('/signup/member')
             return
