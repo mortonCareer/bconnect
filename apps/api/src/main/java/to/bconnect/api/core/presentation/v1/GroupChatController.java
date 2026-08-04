@@ -92,6 +92,14 @@ public class GroupChatController {
         return ApiResponse.success(id);
     }
 
+    @DeleteMapping("/{id}/me")
+    public ApiResponse<Void> leave(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id) {
+        groupChatService.leave(user.id(), id);
+        return ApiResponse.success(null);
+    }
+
     @GetMapping("/{id}/messages")
     public ApiResponse<CursorPage<MessageResponse>> listMessages(
             @AuthenticationPrincipal AuthUser user,

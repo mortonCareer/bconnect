@@ -54,8 +54,8 @@ public class FeedController {
         val posts = page.content();
 
         val memberIds = posts.stream().map(Post::memberId).distinct().toList();
-        val memberMap = memberResolver.resolveMap(memberIds);
-        val profileMap = profileResolver.resolveMap(memberIds);
+        val memberMap = memberResolver.resolveMapOrWithdrawn(memberIds);
+        val profileMap = profileResolver.resolveMapOrWithdrawn(memberIds);
         val pictureMap = attachmentUrlService.map(
                 AttachmentReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
@@ -103,8 +103,8 @@ public class FeedController {
             @PathVariable Long id,
             HttpServletResponse response) {
         val post = postService.get(id);
-        val member = memberResolver.get(post.memberId());
-        val profile = profileResolver.resolveMap(List.of(post.memberId())).get(post.memberId());
+        val member = memberResolver.getOrWithdrawn(post.memberId());
+        val profile = profileResolver.getOrWithdrawn(post.memberId());
         val attachments = attachmentFinder.list(AttachmentReferenceType.POST, post.id(), AttachmentType.IMAGE);
         val urlMap = attachmentUrlService.parseUrlMap(attachments, ImageSize.MEDIUM);
         val picture = attachmentUrlService.get(AttachmentReferenceType.MEMBER, member.id(), ImageSize.SMALL);

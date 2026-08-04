@@ -19,6 +19,8 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
     Optional<MessageEntity> findFirstByChatIdAndChatTypeOrderByIdDesc(Long chatId, ChatType chatType);
 
+    void deleteAllByChatIdAndChatType(Long chatId, ChatType chatType);
+
     @Query("SELECT m FROM MessageEntity m WHERE m.id IN " +
            "(SELECT MAX(m2.id) FROM MessageEntity m2 WHERE m2.chatId IN :chatIds AND m2.chatType = :chatType GROUP BY m2.chatId)")
     List<MessageEntity> findLatestMessagesByChatIdInAndChatType(Collection<Long> chatIds, ChatType chatType);

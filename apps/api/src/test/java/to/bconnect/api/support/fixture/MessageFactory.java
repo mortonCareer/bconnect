@@ -21,7 +21,7 @@ public class MessageFactory {
     @Autowired private MessageRepository messageRepository;
 
     public MessageEntity entity(Long chatId, Long memberId) {
-        return messageRepository.save(new MessageEntity(chatId, ChatType.GROUP, memberId, null, "content"));
+        return messageRepository.save(new MessageEntity(chatId, ChatType.GROUP, memberId, MessageType.TEXT, "content"));
     }
 
     public static Message domain(Long id, Long chatId, Long memberId, MessageType type) {
