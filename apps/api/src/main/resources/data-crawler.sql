@@ -53,27 +53,27 @@ INSERT INTO crawled_credentials (id, member_id, type, name, created_at, modified
 
 -- 샘플 (200 ~ 299)
 -- 원클릭 크롤링
-INSERT INTO kiscon_registration (ncr_gs_seq, biz_reg_no, company_name, representative, trade_name, trade_reg_no, address, region, region_detail, reg_date, announce_date, flag, phone, announce_number, announce_reason, synced_at) VALUES
-(200, '0000000001', '정상 업체1', '대표자', '실내건축공사업', '경기-실내-00001', '경기 수원시 장안구 서부로 2066', '경기', '수원시 장안구', 20260101, 20260101, '신규', '000000001', '공고번호', '-', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, '0000000001', '정상 업체1', '대표자', '철근콘크리트공사업', '경기-철콘-00002', '경기 수원시 장안구 서부로 2066', '경기', '수원시 장안구', 20260101, 20260101, '신규', '000000001', '공고번호', '-', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO kiscon_registration (ncr_gs_seq, ncr_master_num, ncr_gs_kname, normalized_company_name, ncr_gs_master, ncr_item_name, ncr_itemregno, ncr_gs_addr, ncr_area_name, ncr_area_detail_name, ncr_gs_date, ncr_gs_regdate, ncr_gs_flag, ncr_off_tel, ncr_gs_number, ncr_gs_reason, synced_at) VALUES
+(200, '0000000001', '정상 업체1', '정상 업체1', '대표자', '실내건축공사업', '경기-실내-00001', '경기 수원시 장안구 서부로 2066', '경기', '수원시 장안구', 20260101, 20260101, '신규', '000000001', '공고번호', '-', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(201, '0000000001', '정상 업체1', '정상 업체1', '대표자', '철근콘크리트공사업', '경기-철콘-00002', '경기 수원시 장안구 서부로 2066', '경기', '수원시 장안구', 20260101, 20260101, '신규', '000000001', '공고번호', '-', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO kiscon_admin_penalty (ncr_gs_seq, biz_reg_no, company_name, representative, trade_name, trade_reg_no, address, region, region_detail, penalty_type, violation_content, violation_detail, penalty_ground, fine_amount, penalty_amount, stop_start_date, stop_end_date, cancel_date, correction, penalty_date, announce_date, flag, phone, has_injunction, announce_number, announce_reason, synced_at) VALUES
-(200, '0000000001', '정상 업체1', '대표자', '실내건축공사업', '경기-실내-00001', '경기 수원시 장안구 서부로 2066', '경기', '수원시 장안구', '영업정지', '건설업 등록기준 미달', '자본금 미달', '건설산업기본법 제83조', 0, 0, '20260101', '20261231', NULL, NULL, 20260101, 20260101, '신규', '000000001', 'N', '공고번호', '-', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO kiscon_admin_penalty (ncr_gs_seq, ncr_master_num, ncr_admi_kname, normalized_company_name, ncr_admi_master, ncr_item_name, ncr_itemregno, ncr_admi_addr, ncr_area_name, ncr_area_detail_name, ncr_admi_dename, ecode_admi_con, ncr_admi_reason, ecode_admi_ground, ncr_admi_fine, ncr_admi_penalty, ncr_admi_stop_sdate, ncr_admi_stop_edate, ncr_admi_canceldate, ncr_admi_correct, ncr_gs_date, ncr_gs_regdate, ncr_gs_flag, ncr_off_tel, ncr_pd_status, ncr_gs_number, ncr_gs_reason, synced_at) VALUES
+(200, '0000000001', '정상 업체1', '정상 업체1', '대표자', '실내건축공사업', '경기-실내-00001', '경기 수원시 장안구 서부로 2066', '경기', '수원시 장안구', '영업정지', '건설업 등록기준 미달', '자본금 미달', '건설산업기본법 제83조', 0, 0, '20260101', '20261231', '-', '-', 20260101, 20260101, '신규', '000000001', 'N', '공고번호', '-', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO kiscon_arrears (id, seq_no, company_name, address, representative, representative_age, representative_address, penalty_history, penalty_dates, arrears_amount, publication_period, synced_at) VALUES
-(200, '1', '체불 업체1', '경기 수원시 장안구 서부로 2066', '대표자', '52', '경기 수원시 장안구', '시정명령', '(26.01.01)', '120,000', '2026-01-01 ~ 2026-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO kiscon_arrears (id, seq_no, company_name, normalized_company_name, address, representative, representative_age, representative_address, penalty_history, penalty_dates, arrears_amount, publication_period, synced_at) VALUES
+(200, '1', '체불 업체1', '체불 업체1', '경기 수원시 장안구 서부로 2066', '대표자', '52', '경기 수원시 장안구', '시정명령', '(26.01.01)', '120,000', '2026-01-01 ~ 2026-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO kiscon_subcon_limits (id, seq_no, violation_type, company_name, corp_no, biz_reg_no, representative, restriction_start, restriction_end, category, announcement_date, certificate_url, note, synced_at) VALUES
-(200, '1', '건설산업기본법 제82조', '체불 업체1', '0000000000001', '0000000002', '대표자', '20260101', '20261231', '건축', '20260101', NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO kiscon_subcon_limits (id, seq_no, violation_type, company_name, normalized_company_name, corp_no, biz_reg_no, representative, restriction_start, restriction_end, category, announcement_date, certificate_url, note, synced_at) VALUES
+(200, '1', '건설산업기본법 제82조', '체불 업체1', '체불 업체1', '0000000000001', '0000000002', '대표자', '20260101', '20261231', '건축', '20260101', '', NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO moel_wage_defaults (id, period, name, age, company_name, industry, personal_address, company_address, arrears_amount, synced_at) VALUES
-(200, '2026.01 ~ 2026.12', '대표자', '52', '체불 업체1', '건설업', '경기 수원시 장안구', '경기 수원시 장안구 서부로 2066', '85,000,000', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO moel_wage_defaults (id, period, name, age, company_name, normalized_company_name, industry, personal_address, company_address, arrears_amount, synced_at) VALUES
+(200, '2026.01 ~ 2026.12', '대표자', '52', '체불 업체1', '체불 업체1', '건설업', '경기 수원시 장안구', '경기 수원시 장안구 서부로 2066', '85,000,000', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO ecic_electrical_licenses (id, registration_no, company_name, representative, address, synced_at) VALUES
-(200, '경기-2026-00001', '정상 업체1', '대표자', '경기 수원시 장안구 서부로 2066', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO ecic_electrical_licenses (id, registration_no, company_name, normalized_company_name, representative, address, synced_at) VALUES
+(200, '경기-2026-00001', '정상 업체1', '정상 업체1', '대표자', '경기 수원시 장안구 서부로 2066', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO feia_fire_licenses (id, seq_no, company_name, ceo_name, address, business_type, license_div, postal_code, phone, region, region_detail, synced_at) VALUES
-(200, 1, '정상 업체1', '대표자', '경기 수원시 장안구 서부로 2066', '공사업', '전문', '16419', '00-000-0001', '경기', '수원시 장안구', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO feia_fire_licenses (id, seq_no, company_name, normalized_company_name, ceo_name, address, business_type, license_div, postal_code, phone, region, region_detail, synced_at) VALUES
+(200, 1, '정상 업체1', '정상 업체1', '대표자', '경기 수원시 장안구 서부로 2066', '공사업', '전문', '16419', '00-000-0001', '경기', '수원시 장안구', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO cwma_retirement_fund (id, seq_no, project_name, total_amount, start_date, end_date, company_name, normalized_company_name, client_org, address, synced_at) VALUES
 (200, 1, '프로젝트', 15, DATE '2026-01-01', DATE '2026-12-31', '정상 업체1', '정상 업체1', '기관명', '경기 수원시 장안구 서부로 2066', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
