@@ -11,6 +11,7 @@ import to.bconnect.api.core.domain.credential.CredentialReviewedEvent;
 import to.bconnect.api.core.domain.offer.OfferEvent;
 import to.bconnect.api.core.domain.profile.ProfileCreatedEvent;
 import to.bconnect.api.core.domain.recommendation.RecommendationWrittenEvent;
+import to.bconnect.api.core.domain.task.TaskEvent;
 import to.bconnect.api.security.session.NewDeviceLoginEvent;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.credential.CredentialStatus;
@@ -21,9 +22,13 @@ import to.bconnect.api.storage.notification.NotificationEntity;
 import to.bconnect.api.storage.notification.NotificationRepository;
 import to.bconnect.api.storage.notification.NotificationType;
 import to.bconnect.api.storage.offer.OfferStatus;
+import to.bconnect.api.storage.project.ProjectRepository;
+import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.support.IntegrationTest;
 import to.bconnect.api.support.fixture.CompanyFactory;
 import to.bconnect.api.support.fixture.MemberFactory;
+import to.bconnect.api.support.fixture.ProjectFactory;
+import to.bconnect.api.support.fixture.TaskFactory;
 
 import java.util.List;
 
@@ -38,6 +43,8 @@ class NotificationEventListenerTest {
     @Autowired private NotificationRepository notificationRepository;
     @Autowired private MemberRepository memberRepository;
     @Autowired private CompanyRepository companyRepository;
+    @Autowired private ProjectRepository projectRepository;
+    @Autowired private TaskRepository taskRepository;
 
     @Test
     @DisplayName("handleNewDeviceLogin - 새 기기 로그인 이벤트를 받으면 시스템 알림이 저장된다")
@@ -183,6 +190,28 @@ class NotificationEventListenerTest {
         val received = findByType(worker.getId(), NotificationType.OFFER_RECEIVED);
         assertThat(received).hasSize(1);
         assertThat(received.getFirst().getSenderId()).isEqualTo(MISSING_COMPANY_ID);
+    }
+
+    @Test
+    @DisplayName("handleTaskEvent - 작업 변경 이벤트를 받으면 기술자에게 알림이 저장된다")
+    void handleTaskEvent_success() {
+        // given
+        val worker = saveMember("noti-task1a", "01000009801");
+        val owner = saveMember("noti-task1b", "01000009802");
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId(), "9000009801"));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), worker.getId()));
+        commitGiven();
+        val event = new TaskEvent(task.getId(), worker.getId(), owner.getId());
+
+        // when
+        notificationEventListener.handleTaskEvent(event);
+
+        // then
+        val found = findByType(worker.getId(), NotificationType.TASK_UPDATED);
+        assertThat(found).hasSize(1);
+        assertThat(found.getFirst().getSenderId()).isEqualTo(company.getId());
+        assertThat(found.getFirst().getReferenceId()).isEqualTo(task.getId());
     }
 
     @Test

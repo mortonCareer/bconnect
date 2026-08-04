@@ -41,6 +41,8 @@ public enum NotificationType {
 
     TASK_COMPLETED("작업이 완료되었습니다"),
 
+    TASK_UPDATED("작업 내용이 변경되었습니다"),
+
     DRIVE_SHARED("%s 님이 드라이브를 공유했습니다"),
 
     DRIVE_NOTE_CREATED("%s 님이 노트를 작성했습니다");

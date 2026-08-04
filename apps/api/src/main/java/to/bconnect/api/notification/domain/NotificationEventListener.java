@@ -5,6 +5,7 @@ import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import to.bconnect.api.core.domain.company.CompanyFinder;
 import to.bconnect.api.core.domain.company.CompanyService;
 import to.bconnect.api.core.domain.coworker.CoworkerAcceptedEvent;
 import to.bconnect.api.core.domain.coworker.CoworkerRequestedEvent;
@@ -14,6 +15,7 @@ import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.offer.OfferEvent;
 import to.bconnect.api.core.domain.profile.ProfileCreatedEvent;
 import to.bconnect.api.core.domain.recommendation.RecommendationWrittenEvent;
+import to.bconnect.api.core.domain.task.TaskEvent;
 import to.bconnect.api.security.session.NewDeviceLoginEvent;
 import to.bconnect.api.socket.message.SocketMessageSentEvent;
 import to.bconnect.api.storage.notification.NotificationReferenceType;
@@ -31,6 +33,7 @@ public class NotificationEventListener {
     private final MemberResolver memberResolver;
     private final ProfileRepository profileRepository;
     private final CompanyService companyService;
+    private final CompanyFinder companyFinder;
     private final NotificationService notificationService;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -149,6 +152,21 @@ public class NotificationEventListener {
 
         if (notifications.isEmpty()) return;
         notificationService.notify(notifications);
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleTaskEvent(TaskEvent event) {
+        val company = companyFinder.getByTaskId(event.taskId());
+
+        notificationService.notify(List.of(new PushNotification(
+                event.workerId(),
+                NotificationType.TASK_UPDATED,
+                NotificationSenderType.COMPANY,
+                company.id(),
+                company.name(),
+                NotificationReferenceType.TASK,
+                event.taskId(),
+                null)));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
