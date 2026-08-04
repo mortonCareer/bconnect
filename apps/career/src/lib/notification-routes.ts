@@ -8,7 +8,7 @@ import type { ReferencePathMap } from '@bconnect/push'
  */
 export const REFERENCE_PATHS: ReferencePathMap = {
   CHAT_ROOM: '/messages/{id}',
-  PROFILE: '/profile/edit',
+  PROFILE: '/profile',
   COWORKER_REQUEST: '/profile/coworkers',
   CREDENTIAL: '/profile/certifications',
   RECOMMENDATION: '/profile/recommendations',
