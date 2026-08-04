@@ -1,7 +1,7 @@
 'use client'
 
 import { revokeDeviceToken } from '@bconnect/push'
-import { logout } from '@/lib/auth'
+import { logout } from '@bconnect/features'
 
 interface SessionExitOptions {
   /** 서버 호출이 실패해도 로컬 인증을 정리한다. 로그아웃처럼 사용자가 이탈 의사를 밝힌 경우. */

@@ -5,7 +5,7 @@
 
 import { AddressField } from '@/components/AddressField'
 import { SIGNUP_ROLES } from '@/lib/role-labels'
-import { login } from '@/lib/auth'
+import { login } from '@bconnect/features'
 import { useSignupStore } from '@/stores/signup-store'
 import {
   ROLE_LABELS,

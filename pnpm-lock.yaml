@@ -550,6 +550,9 @@ importers:
       '@bconnect/config':
         specifier: workspace:*
         version: link:../config
+      '@bconnect/push':
+        specifier: workspace:*
+        version: link:../push
       '@bconnect/ui':
         specifier: workspace:*
         version: link:../ui

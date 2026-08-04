@@ -10,7 +10,7 @@ export function login(accessToken: string) {
   void syncDeviceToken()
 }
 
-// 호출부 없음 — plan 은 로그아웃 진입점(설정·마이페이지)이 아직 없다 (#1098).
+// plan 은 아직 호출부가 없다 — 로그아웃 진입점(설정·마이페이지)이 없다 (#1098).
 export function logout() {
   setAccessToken(null)
   clearAuthHint()

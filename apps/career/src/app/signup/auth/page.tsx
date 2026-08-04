@@ -5,7 +5,7 @@
  */
 'use client'
 
-import { login } from '@/lib/auth'
+import { login } from '@bconnect/features'
 import { useSignupStore } from '@/stores/signup-store'
 import { useSendOtp, useVerifyOtp } from '@bconnect/api-client'
 import { formatPhoneNumber, isValidPhoneNumber, toNationalNumber } from '@bconnect/config/phone'

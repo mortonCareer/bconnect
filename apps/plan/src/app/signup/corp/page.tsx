@@ -31,8 +31,8 @@ import {
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
 import { BIRTH_PLACEHOLDER } from '@bconnect/config/signup'
+import { login } from '@bconnect/features'
 import { useSignupStore } from '@/stores/signup-store'
-import { login } from '@/lib/auth'
 import { corpSchema, type CorpFormData } from './schema'
 
 export default function SignupCorpPage() {
