@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuthStore } from '@/stores/auth-store'
+import { hasAuthHint } from '@bconnect/api-client'
 import { useSignupStore } from '@/stores/signup-store'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, type ReactNode } from 'react'
@@ -16,11 +16,12 @@ export function SignupGuard({ children }: { children: ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const { formData } = useSignupStore()
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const isLoggedIn = hasAuthHint()
 
   const redirectTo = (() => {
-    // 로그인했는데 PLAN 이 없어 RoleGate 가 보낸 경우 — 가입 토큰 없이 들어오는 게 정상이다.
-    if (isAuthenticated && pathname === '/signup/corp') return null
+    // 로그인했는데 PLAN 이 없어 RequireRole 이 보낸 경우 — 가입 토큰 없이 들어오는 게 정상이다.
+    // 판정 소스를 그 게이트와 맞춘다 (표시 쿠키). 갈리면 게이트가 보낸 사람을 여기서 되돌린다.
+    if (isLoggedIn && pathname === '/signup/corp') return null
     // 가입 토큰이 없으면 어느 단계든 성립하지 않는다 — 인증부터.
     if (!formData.signupToken) return '/login'
     // 업체 생성은 이름·사용자명을 함께 보내므로 그 값이 비면 앞 단계로.

@@ -14,6 +14,7 @@ import {
   isRegisterMemberDuplicatePhoneError,
   isRegisterMemberDuplicateUsernameError,
   isRegisterMemberSignupSessionError,
+  hasAuthHint,
   refreshAccessToken,
   useCreateMember,
   useCreateProfile,
@@ -60,7 +61,7 @@ function requireRegisterAccessToken(result: RegisterMemberResponse) {
 
 export default function SignupProfilePage() {
   const router = useRouter()
-  const { login, isAuthenticated } = useAuthStore()
+  const { login } = useAuthStore()
   const { formData, reset: resetSignup, setRegisterError } = useSignupStore()
   // register(POST /members)는 X-Signup-Token 헤더로 인증한다 (Bearer 아님).
   const registerMemberMutation = useCreateMember({
@@ -112,7 +113,9 @@ export default function SignupProfilePage() {
     try {
       // register 는 signupToken(X-Signup-Token 헤더)을 소비 — 실패 후 재시도 시
       // 재호출하지 않도록 발급된 accessToken을 보관한다.
-      if (!isAuthenticated) {
+      // 로그인 상태로 이 화면에 온 경우(RequireRole 이 보냄)는 회원이 이미 있으므로 register 를 건너뛴다.
+      // 판정 소스는 게이트와 같은 표시 쿠키 — 동기 읽기라 제출 시점에 판정이 밀리지 않는다.
+      if (!hasAuthHint()) {
         let accessToken: string
         try {
           accessToken =

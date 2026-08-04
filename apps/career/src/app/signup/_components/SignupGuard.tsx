@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuthStore } from '@/stores/auth-store'
+import { hasAuthHint } from '@bconnect/api-client'
 import { useSignupStore } from '@/stores/signup-store'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, type ReactNode } from 'react'
@@ -15,7 +15,7 @@ export function SignupGuard({ children }: { children: ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const { formData } = useSignupStore()
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const isLoggedIn = hasAuthHint()
 
   // 인증 화면은 가입 토큰을 받는 곳이라 검사 대상이 아니고, 완료 화면은 이미 토큰을
   // 비운 뒤 도착하는 곳이라 검사하면 자기 자신을 튕겨낸다.
@@ -25,8 +25,9 @@ export function SignupGuard({ children }: { children: ReactNode }) {
 
   const redirectTo = (() => {
     if (isEntryRoute || isCompleteRoute) return null
-    // 로그인했는데 CAREER 가 없어 RoleGate 가 보낸 경우 — 가입 토큰 없이 들어오는 게 정상이다.
-    if (isAuthenticated && pathname === '/signup/profile') return null
+    // 로그인했는데 CAREER 가 없어 RequireRole 이 보낸 경우 — 가입 토큰 없이 들어오는 게 정상이다.
+    // 판정 소스를 그 게이트와 맞춘다 (표시 쿠키). 갈리면 게이트가 보낸 사람을 여기서 되돌린다.
+    if (isLoggedIn && pathname === '/signup/profile') return null
     // 가입 토큰이 없으면 어느 단계든 성립하지 않는다 — 인증부터.
     if (!formData.signupToken) return '/signup/auth'
     // 프로필 제출은 이름·사용자명을 함께 보내므로 그 값이 비면 앞 단계로.
