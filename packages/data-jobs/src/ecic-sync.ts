@@ -1,13 +1,12 @@
 // 한국전기공사협회 전기공사업체 크롤링 → ecic_electrical_licenses (이름 기반, 전체 교체)
 
-import * as cheerio from 'cheerio'
-import { createDb, insertBatched, notifySlack, runSync, sleep } from './lib'
+import { createDb, replaceAll } from './db'
+import { fetchHtml, withPage, withRetry } from './http'
+import { normalizeCompanyName, notifySlack, parseTable, requireText, runSync } from './lib'
 
 const ECIC_URL = 'https://www.keca.or.kr/ecic/ad/ad0101.do'
 const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
-const MAX_PAGES = 4000
-const REQUEST_DELAY_MS = 150
 
 const sql = createDb()
 
@@ -18,84 +17,46 @@ interface EcicItem {
   address: string
 }
 
-async function fetchPage(page: number): Promise<string> {
-  const url = new URL(ECIC_URL)
-  url.searchParams.set('menuCd', '6047')
-  url.searchParams.set('currentPageNo', String(page)) // js_linkPage 페이징 파라미터 (총 2217페이지)
-
-  const response = await fetch(url.toString(), {
-    headers: { 'User-Agent': USER_AGENT },
-    signal: AbortSignal.timeout(15_000),
-  })
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status} from ECIC page`)
-  }
-  return response.text()
-}
-
-function parseHtml(html: string): EcicItem[] {
-  const $ = cheerio.load(html)
-
-  const headers = $('table thead th')
-    .map((_i, th) => $(th).text().trim())
-    .get()
-  if (!headers.some((h) => h.includes('등록번호'))) {
-    throw new Error(`ECIC table schema changed: ${headers.join(', ')}`)
-  }
-
-  const items: EcicItem[] = []
-  $('table tbody tr').each((_i, row) => {
-    const cells = $(row).find('td')
-    if (cells.length < 4) return
-    const registrationNo = $(cells[0]).text().trim()
-    const companyName = $(cells[1]).text().trim()
-    if (!registrationNo || !companyName) return
-    items.push({
-      registrationNo,
-      companyName,
-      representative: $(cells[2]).text().trim(),
-      address: $(cells[3]).text().trim(),
-    })
-  })
-  return items
-}
-
-async function fetchAll(): Promise<EcicItem[]> {
-  const all: EcicItem[] = []
-  let pageSize = 0
-  for (let page = 1; page <= MAX_PAGES; page++) {
-    const items = parseHtml(await fetchPage(page))
-    if (items.length === 0) break
-    if (page === 1) pageSize = items.length
-    all.push(...items)
-    console.log(`[ecic-sync]   page ${page}: ${items.length}건 (누적 ${all.length})`)
-    if (page > 1 && items.length < pageSize) break
-    await sleep(REQUEST_DELAY_MS)
-  }
-  return all
-}
-
 async function main() {
   console.log('[ecic-sync] 전기공사업체 전체목록 크롤링...')
-  const items = await fetchAll()
+  const items = await withPage('ecic-sync', async (page) => {
+    const html = await withRetry(() =>
+      fetchHtml(ECIC_URL, {
+        query: { menuCd: 6047, currentPageNo: page },
+        headers: { 'User-Agent': USER_AGENT },
+      })
+    )
+
+    return {
+      items: parseTable<EcicItem>(html, {
+        source: 'ECIC',
+        requiredHeaders: ['등록번호'],
+        minCells: 4,
+        map: ({ texts }) => {
+          const [registrationNo, companyName, representative, address] = texts
+          return { registrationNo, companyName, representative, address }
+        },
+      }),
+    }
+  })
   console.log(`[ecic-sync] 총 ${items.length}건 수집`)
 
   await sql.begin(async (tx) => {
-    await tx`DELETE FROM ecic_electrical_licenses`
-    await insertBatched(
+    await replaceAll(
       tx,
       'ecic_electrical_licenses',
       items.map((item) => ({
-        registration_no: item.registrationNo,
-        company_name: item.companyName,
-        representative: item.representative,
-        address: item.address,
+        registration_no: requireText(item.registrationNo, 'registration_no', 'ecic-sync'),
+        company_name: requireText(item.companyName, 'company_name', 'ecic-sync'),
+        normalized_company_name: normalizeCompanyName(item.companyName),
+        representative: requireText(item.representative, 'representative', 'ecic-sync'),
+        address: requireText(item.address, 'address', 'ecic-sync'),
       }))
     )
     console.log(`[ecic-sync] ecic_electrical_licenses: ${items.length}건 저장`)
   })
 
-  const summary = `✅ *ECIC 동기화 완료*\n전기공사업체: ${items.length}건`
+  const summary = [`✅ *ECIC 동기화 완료*`, `전기공사업체: ${items.length}건`].join('\n')
   console.log(`[ecic-sync] ${summary}`)
   await notifySlack(summary)
 }

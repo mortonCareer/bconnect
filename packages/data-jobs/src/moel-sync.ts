@@ -1,11 +1,11 @@
 // 고용노동부 체불사업주 명단 크롤링 → moel_wage_defaults (전체 교체)
 
-import * as cheerio from 'cheerio'
-import { createDb, insertBatched, notifySlack, runSync } from './lib'
+import { createDb, replaceAll } from './db'
+import { fetchHtml, withPage, withRetry } from './http'
+import { normalizeCompanyName, notifySlack, parseTable, requireText, runSync } from './lib'
 
 const MOEL_DEFAULTER_URL = 'https://moel.go.kr/info/defaulter/defaulterList.do'
 const PAGE_UNIT = 100
-const EXPECTED_HEADERS = ['구분', '성명', '나이', '사업장명', '업종']
 
 const sql = createDb()
 
@@ -20,89 +20,53 @@ interface MoelDefaulterItem {
   arrearsAmount: string
 }
 
-async function fetchPage(pageIndex: number): Promise<string> {
-  const response = await fetch(MOEL_DEFAULTER_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      pageIndex: String(pageIndex),
-      pageUnit: String(PAGE_UNIT),
-    }).toString(),
-    signal: AbortSignal.timeout(15_000),
-  })
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status} from MOEL defaulter page`)
-  }
-
-  return response.text()
-}
-
-function parseHtml(html: string): MoelDefaulterItem[] {
-  const $ = cheerio.load(html)
-
-  // 헤더 검증 — 사이트 구조 변경 감지
-  const headers = $('table thead th')
-    .map((_i, th) => $(th).text().trim())
-    .get()
-  if (!EXPECTED_HEADERS.every((h) => headers.some((actual) => actual.includes(h)))) {
-    throw new Error(`MOEL defaulter table schema changed: ${headers.join(', ')}`)
-  }
-
-  const items: MoelDefaulterItem[] = []
-  $('table tbody tr').each((_i, row) => {
-    const cells = $(row).find('td')
-    if (cells.length < 8) return
-    items.push({
-      period: $(cells[0]).text().trim(),
-      name: $(cells[1]).text().trim(),
-      age: $(cells[2]).text().trim(),
-      companyName: $(cells[3]).text().trim(),
-      industry: $(cells[4]).text().trim(),
-      personalAddress: $(cells[5]).text().trim(),
-      companyAddress: $(cells[6]).text().trim(),
-      arrearsAmount: $(cells[7]).text().trim(),
-    })
-  })
-  return items
-}
-
-async function fetchAll(): Promise<MoelDefaulterItem[]> {
-  const all: MoelDefaulterItem[] = []
-  for (let page = 1; ; page++) {
-    const items = parseHtml(await fetchPage(page))
-    all.push(...items)
-    console.log(`[moel-sync]   page ${page}: ${items.length}건 (누적 ${all.length})`)
-    if (items.length < PAGE_UNIT) break // 마지막 페이지
-  }
-  return all
-}
-
 async function main() {
   console.log('[moel-sync] 체불사업주 명단 크롤링...')
-  const items = await fetchAll()
+  const items = await withPage('moel-sync', async (page) => {
+    const html = await withRetry(() =>
+      fetchHtml(MOEL_DEFAULTER_URL, { form: { pageIndex: page, pageUnit: PAGE_UNIT } })
+    )
+
+    return {
+      items: parseTable<MoelDefaulterItem>(html, {
+        source: 'MOEL defaulter',
+        requiredHeaders: ['구분', '성명', '나이', '사업장명', '업종'],
+        minCells: 8,
+        map: ({ texts }) => ({
+          period: texts[0],
+          name: texts[1],
+          age: texts[2],
+          companyName: texts[3],
+          industry: texts[4],
+          personalAddress: texts[5],
+          companyAddress: texts[6],
+          arrearsAmount: texts[7],
+        }),
+      }),
+    }
+  })
   console.log(`[moel-sync] 총 ${items.length}건 수집`)
 
   await sql.begin(async (tx) => {
-    await tx`DELETE FROM moel_wage_defaults`
-    await insertBatched(
+    await replaceAll(
       tx,
       'moel_wage_defaults',
       items.map((item) => ({
-        period: item.period,
-        name: item.name,
-        age: item.age,
-        company_name: item.companyName,
-        industry: item.industry,
-        personal_address: item.personalAddress,
-        company_address: item.companyAddress,
-        arrears_amount: item.arrearsAmount,
+        period: requireText(item.period, 'period', 'moel-sync'),
+        name: requireText(item.name, 'name', 'moel-sync'),
+        age: requireText(item.age, 'age', 'moel-sync'),
+        company_name: requireText(item.companyName, 'company_name', 'moel-sync'),
+        normalized_company_name: normalizeCompanyName(item.companyName),
+        industry: requireText(item.industry, 'industry', 'moel-sync'),
+        personal_address: requireText(item.personalAddress, 'personal_address', 'moel-sync'),
+        company_address: requireText(item.companyAddress, 'company_address', 'moel-sync'),
+        arrears_amount: requireText(item.arrearsAmount, 'arrears_amount', 'moel-sync'),
       }))
     )
     console.log(`[moel-sync] moel_wage_defaults: ${items.length}건 저장`)
   })
 
-  const summary = `✅ *MOEL 동기화 완료*\n체불사업주: ${items.length}건`
+  const summary = [`✅ *MOEL 동기화 완료*`, `체불사업주: ${items.length}건`].join('\n')
   console.log(`[moel-sync] ${summary}`)
   await notifySlack(summary)
 }
