@@ -22,7 +22,7 @@ to.bconnect.api
 
 ## 패키지 구조
 > notification → socket → core → attachment → security → storage → common
-> sms → security
+> sms → security, common
 - `PackageDependencyTest.java` 참고
 
 ## 레이어 구조
@@ -46,11 +46,11 @@ graph TD
   Service --> Repository
 ```
 
-| 레이어         | 패키지          | 행위 클래스     | 데이터 객체 | 변환 책임    | 도메인 교차                             |
-|-------------|--------------|------------|--------|----------|------------------------------------|
-| Presentation | `presentation` | Controller | DTO | DTO      | 허용 (Controller → Service)          |
-| Domain      | `domain`    | Service    | Domain | Service  | 허용 (Service → Service, Repository) |
-| Storage     | `storage`   | Repository | Entity |          | 비허용                                |
+| 레이어         | 패키지          | 행위 클래스     | 데이터 객체                | 변환 책임    | 도메인 교차                             |
+|-------------|--------------|------------|-----------------------|----------|------------------------------------|
+| Presentation | `presentation` | Controller | DTO                   | DTO      | 허용 (Controller → Service)          |
+| Domain      | `domain`    | Service    | Domain · Command · Event | Service  | 허용 (Service → Service, Repository) |
+| Storage     | `storage`   | Repository | Entity                |          | 비허용                                |
 
 - `LayerDependencyTest.java` 참고
 
@@ -80,9 +80,16 @@ graph TD
   subgraph project
     ProjectF[ProjectFinder]
   end
+  subgraph offer
+    OfferS[OfferService]
+  end
+  subgraph company
+    CompanyF[CompanyFinder]
+  end
   NoteS --> DriveV
   NoteS --> ProjectF
   DriveS --> ProjectF
+  OfferS --> CompanyF
 ```
 - `DomainDependencyTest.java` 참고
 
@@ -90,11 +97,26 @@ graph TD
 ```mermaid
 graph TD
   subgraph chat
-    ChatL[ChatEventListener]
+    ChatCreatedE[ChatCreatedEvent]
   end
   subgraph offer
-    OfferAE[OfferAcceptedEvent]
-    OfferVE[OfferActivatedEvent]
+    OfferE[OfferEvent]
+  end
+  subgraph member
+    MemberE[MemberRegisteredEvent]
+  end
+  subgraph profile
+    ProfileE[ProfileCreatedEvent]
+  end
+  subgraph credential
+    CredentialE[CredentialReviewedEvent]
+  end
+  subgraph coworker
+    CoworkerReqE[CoworkerRequestedEvent]
+    CoworkerAccE[CoworkerAcceptedEvent]
+  end
+  subgraph recommendation
+    RecommendE[RecommendationWrittenEvent]
   end
   subgraph sms
     SmsL[SmsEventListener]
@@ -106,16 +128,27 @@ graph TD
     LoginE[NewDeviceLoginEvent]
   end
   subgraph socket.message
-    ChatMsgE[ChatMessageSentEvent]
+    ChatMsgE[SocketMessageSentEvent]
+    MsgL[MessageEventListener]
   end
   subgraph notification
     NotiL[NotificationEventListener]
+    DeviceE[DeviceRegisteredEvent]
   end
-  ChatL --> OfferAE
-  ChatL --> OfferVE
+  MsgL --> OfferE
+  MsgL --> ChatCreatedE
   SmsL --> OtpE
   SmsL --> LoginE
   NotiL --> ChatMsgE
+  NotiL --> MemberE
+  NotiL --> LoginE
+  NotiL --> OfferE
+  NotiL --> ProfileE
+  NotiL --> CredentialE
+  NotiL --> CoworkerReqE
+  NotiL --> CoworkerAccE
+  NotiL --> RecommendE
+  NotiL --> DeviceE
 ```
 - 부수효과는 EDA 구조로 분리합니다.
 - 이벤트는 발행 패키지에, 리스너는 구독 패키지에 위치합니다.
@@ -129,3 +162,4 @@ graph TD
 ## 래퍼런스
 - [Spring Framework : Java Bean Validation](https://docs.spring.io/spring-framework/reference/core/validation/beanvalidation.html)
 - [Spring Framework : Standard and Custom Events](https://docs.spring.io/spring-framework/reference/core/beans/context-introduction.html#context-functionality-events)
+- [Spring Framework : Transaction-bound Events](https://docs.spring.io/spring-framework/reference/data-access/transaction/event.html)

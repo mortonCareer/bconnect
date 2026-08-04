@@ -20,7 +20,7 @@ import to.bconnect.api.core.presentation.v1.response.CoworkerResponse;
 import to.bconnect.api.core.presentation.v1.response.CoworkerTaskResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 
 import java.util.List;
 
@@ -46,7 +46,7 @@ public class CoworkerController {
         val memberMap = memberResolver.resolveMap(memberIds);
         val profileMap = profileResolver.resolveMap(memberIds);
         val statusMap = coworkerService.resolveStatusMap(user.id(), memberIds);
-        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(AttachmentReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         val body = coworkers.stream()
                 .map(it -> {

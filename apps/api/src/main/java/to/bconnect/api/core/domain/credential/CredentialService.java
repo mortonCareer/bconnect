@@ -3,6 +3,7 @@ package to.bconnect.api.core.domain.credential;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentFinder;
@@ -10,7 +11,7 @@ import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.credential.CredentialEntity;
 import to.bconnect.api.storage.credential.CredentialRepository;
 import to.bconnect.api.storage.credential.CredentialStatus;
@@ -28,10 +29,11 @@ public class CredentialService {
     private final CredentialRepository credentialRepository;
     private final AttachmentFinder attachmentFinder;
     private final AttachmentLinker attachmentLinker;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<Credential> list(Long memberId) {
-        return credentialRepository.findAllByMemberId(memberId)
+        return credentialRepository.findAllByMemberIdOrderByIdDesc(memberId)
                 .stream()
                 .map(Credential::of)
                 .toList();
@@ -40,12 +42,13 @@ public class CredentialService {
     @Transactional(readOnly = true)
     public List<Credential> listLatestAccepted(Long memberId) {
         // latest one per type
-        return credentialRepository.findAllByMemberId(memberId)
+        return credentialRepository.findAllByMemberIdOrderByIdDesc(memberId)
                 .stream()
                 .filter(it -> it.getStatus() == CredentialStatus.ACCEPTED)
                 .collect(Collectors.groupingBy(
                         CredentialEntity::getType,
-                        Collectors.maxBy(Comparator.comparing(CredentialEntity::getCreatedAt))
+                        Collectors.maxBy(Comparator.comparing(CredentialEntity::getCreatedAt)
+                                .thenComparing(CredentialEntity::getId))
                 ))
                 .values().stream()
                 .flatMap(Optional::stream)
@@ -55,6 +58,9 @@ public class CredentialService {
 
     @Transactional
     public Long create(AuthUser user, CreateCredential command) {
+        if (command.attachmentId() != null)
+            attachmentFinder.validateOwnership(user.id(), command.attachmentId());
+
         val created = new CredentialEntity(
                 user.id(),
                 command.type(),
@@ -63,8 +69,9 @@ public class CredentialService {
         );
 
         credentialRepository.save(created);
-        attachmentFinder.validateOwnership(user.id(), command.attachmentId());
-        attachmentLinker.link(ReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
+        if (command.attachmentId() != null)
+            attachmentLinker.link(AttachmentReferenceType.CREDENTIAL, created.getId(), command.attachmentId());
+
         return created.getId();
     }
 
@@ -78,7 +85,7 @@ public class CredentialService {
         if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        attachmentLinker.unlink(ReferenceType.CREDENTIAL, found.getId());
+        attachmentLinker.unlink(AttachmentReferenceType.CREDENTIAL, found.getId());
         credentialRepository.delete(found);
     }
 
@@ -87,7 +94,13 @@ public class CredentialService {
         val found = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
+        if (found.getStatus() != CredentialStatus.PENDING)
+            throw new CodeException(CredentialExceptionCode.INVALID_STATUS);
+
         found.accept();
+
+        eventPublisher.publishEvent(
+                new CredentialReviewedEvent(found.getId(), found.getMemberId(), CredentialStatus.ACCEPTED));
     }
 
     @Transactional
@@ -95,6 +108,12 @@ public class CredentialService {
         val found = credentialRepository.findById(id)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
+        if (found.getStatus() != CredentialStatus.PENDING)
+            throw new CodeException(CredentialExceptionCode.INVALID_STATUS);
+
         found.deny();
+
+        eventPublisher.publishEvent(
+                new CredentialReviewedEvent(found.getId(), found.getMemberId(), CredentialStatus.DENIED));
     }
 }

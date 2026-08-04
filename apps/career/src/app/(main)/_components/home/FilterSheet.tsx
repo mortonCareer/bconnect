@@ -5,8 +5,8 @@
 
 import { useState, useEffect } from 'react'
 import { Slider, Tag, TopBar } from '@bconnect/ui'
-import { TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
-import { FILTER_ROLES, ROLE_LABELS } from '@/lib/role-labels'
+import { ROLE_LABELS, TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
+import { FILTER_ROLES } from '@/lib/role-labels'
 import { REGIONS, REGION_LABELS } from '@/lib/region'
 import {
   EXPERIENCE_FILTER_MAX,

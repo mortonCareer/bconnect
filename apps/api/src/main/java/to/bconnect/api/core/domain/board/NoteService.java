@@ -24,11 +24,12 @@ public class NoteService {
 
     @Transactional(readOnly = true)
     public List<Note> listByProject(AuthUser user, Long projectId) {
-        projectFinder.validateOwnership(user.id(), projectId);
-
         val board = boardRepository.findByProjectId(projectId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        return noteRepository.findAllByBoardId(board.getId()).stream()
+
+        projectFinder.validateOwnership(user.id(), projectId);
+
+        return noteRepository.findAllByBoardIdOrderByIdDesc(board.getId()).stream()
                 .map(Note::of)
                 .toList();
     }
@@ -37,10 +38,11 @@ public class NoteService {
     public List<Note> listByDrive(AuthUser user, Long driveId) {
         val board = boardRepository.findByDriveId(driveId)
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        if (!driveFinder.isOwner(user.id(), driveId))
+
+        if (!driveFinder.isMember(user.id(), driveId) && !driveFinder.isOwner(user.id(), driveId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        return noteRepository.findAllByBoardId(board.getId()).stream()
+        return noteRepository.findAllByBoardIdOrderByIdDesc(board.getId()).stream()
                 .map(Note::of)
                 .toList();
     }
@@ -50,14 +52,18 @@ public class NoteService {
         BoardEntity board;
 
         if (command.type() == BoardType.PROJECT) {
-            projectFinder.validateOwnership(user.id(), command.projectId());
             board = boardRepository.findByProjectId(command.projectId())
                     .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-        } else {
-            if (!driveFinder.isOwner(user.id(), command.driveId()))
-                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+            projectFinder.validateOwnership(user.id(), command.projectId());
+        } else if (command.type() == BoardType.DRIVE) {
             board = boardRepository.findByDriveId(command.driveId())
                     .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+            if (!driveFinder.isMember(user.id(), command.driveId()) && !driveFinder.isOwner(user.id(), command.driveId()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        } else {
+            throw new CodeException(CommonExceptionCode.NOT_VALID);
         }
 
         return noteRepository.save(new NoteEntity(board.getId(), user.id(), command.content())).getId();

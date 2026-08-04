@@ -47,10 +47,11 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public List<Project> list(AuthUser user) {
-        val company = companyRepository.findByMemberId(user.id())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        val optional = companyRepository.findByMemberId(user.id());
+        if (optional.isEmpty())
+            return List.of();
 
-        return projectRepository.findAllByCompanyId(company.getId())
+        return projectRepository.findAllByCompanyIdOrderByIdAsc(optional.get().getId())
                 .stream()
                 .map(Project::of)
                 .toList();
@@ -89,10 +90,8 @@ public class ProjectService {
 
     @Transactional
     public void delete(AuthUser user, Long projectId) {
-        val optional = projectRepository.findById(projectId);
-        if (optional.isEmpty())
-            return;
-        val found = optional.get();
+        val found = projectRepository.findById(projectId)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         val company = companyRepository.findByMemberId(user.id())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));

@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { getTradeLabel } from '@bconnect/api-client'
+import { getRoleLabel, getTradeLabel } from '@bconnect/api-client'
 import type { Coworker } from '@bconnect/api-client'
 import { ProfileCard, ProfileCardSkeleton } from '@bconnect/ui'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
@@ -82,7 +82,7 @@ function CoworkerRow({
         // TODO: BE required 처리 후 type narrowing 필요. region/trade는 표시 필수값인데 optional emit이라 빈값으로 silent fallback 중.
         region: profile?.address?.city ?? '',
         trade: profile?.primaryTrade ? getTradeLabel(profile.primaryTrade) : '',
-        // 등급(role)은 MemberSummary 미제공(#473). 시안(1234-2262)은 2번째 줄 = 소개(description).
+        role: profile?.role ? getRoleLabel(profile.role) : undefined,
       }}
       description={profile?.headline ?? undefined}
       // ⋮ 메뉴가 있으면 아바타+이름만 링크(profileHref)로 두어 rightSlot 케밥과 탭 충돌 방지.

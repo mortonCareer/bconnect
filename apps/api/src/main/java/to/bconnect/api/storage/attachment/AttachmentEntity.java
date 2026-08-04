@@ -26,7 +26,7 @@ public class AttachmentEntity extends BaseEntity {
     private Long contextId;
 
     @Enumerated(EnumType.STRING)
-    private ReferenceType referenceType;
+    private AttachmentReferenceType referenceType;
 
     private Long referenceId;
 
@@ -57,7 +57,7 @@ public class AttachmentEntity extends BaseEntity {
         this.status = AttachmentStatus.COMPLETED;
     }
 
-    public void link(ReferenceType referenceType, Long referenceId) {
+    public void link(AttachmentReferenceType referenceType, Long referenceId) {
         this.referenceType = referenceType;
         this.referenceId = referenceId;
     }

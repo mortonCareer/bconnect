@@ -7,7 +7,7 @@ import {
   useDeleteTask,
   useUpdateTaskWorker,
 } from '@bconnect/api-client'
-import type { Address } from '@bconnect/api-client'
+import { addressField, isCompleteAddress } from '@bconnect/config/address'
 import {
   ConfirmDialog,
   DateRangeField,
@@ -21,39 +21,26 @@ import {
   isApiErrorShape,
   toast,
 } from '@bconnect/ui'
+import { formatPeriod } from '@bconnect/config/format'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { AddressField } from '@/components/AddressField'
 import { useShareCurrentUrl } from '@/hooks/useShareCurrentUrl'
-import { formatPeriod } from '../calendar/date-helpers'
 import type { CalendarTask } from '../calendar/types'
 import { TaskActionDrawer } from './TaskActionDrawer'
-
-const REQUIRED_ADDRESS_MESSAGE = '현장주소를 입력해주세요.'
 
 const editSchema = z
   .object({
     company: z.string().min(1, '업체명을 입력해주세요.'),
     start: z.string().min(1, '시작일을 선택해주세요.'),
     end: z.string().min(1, '종료일을 선택해주세요.'),
-    address: z.custom<Address | undefined>(
-      (v) => v === undefined || (v !== null && typeof v === 'object'),
-      REQUIRED_ADDRESS_MESSAGE
-    ),
+    address: addressField('현장주소'),
     trades: z.array(z.nativeEnum(Trade)).min(1, '공종을 1개 이상 선택해주세요.'),
     memo: z.string(),
   })
   .superRefine((v, ctx) => {
-    if (!v.address) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: REQUIRED_ADDRESS_MESSAGE,
-        path: ['address'],
-      })
-    }
-
     if (v.start > v.end) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -136,12 +123,7 @@ export function TaskDetailCard({ task, selectedDay, selectedMonth }: TaskDetailC
 
   const onSubmit = form.handleSubmit((vals) => {
     const address = vals.address
-
-    // BE 계약상 address는 optional이므로 UI required 처리 후 전송 직전에 type narrowing 한다.
-    if (!address) {
-      form.setError('address', { message: REQUIRED_ADDRESS_MESSAGE })
-      return
-    }
+    if (!isCompleteAddress(address)) return
 
     update({
       id: task.id,

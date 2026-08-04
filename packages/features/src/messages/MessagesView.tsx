@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { TRADE_LABELS } from '@bconnect/api-client'
+import { ROLE_LABELS, TRADE_LABELS } from '@bconnect/api-client'
 import type { Profile } from '@bconnect/api-client'
 import { ChatListItem, Skeleton } from '@bconnect/ui'
 import { formatRelativeTime } from '@bconnect/config/format'
@@ -10,7 +10,7 @@ import { PanelShell } from '../_shared/PanelShell'
 import { PanelScroll } from '../_shared/PanelScroll'
 import { PanelMessage } from '../_shared/PanelMessage'
 import type { ChatSummary } from './_parts/types'
-import { chatMemberName } from './_parts/types'
+import { chatMemberName, chatPreviewText } from './_parts/types'
 
 /** 앱이 resolve 해 내려주는 데이터. 어댑터가 useGetDirectChats·useGetGroupChats·useGetMyMember + 병렬 Profile 보강으로 채운다. */
 export interface MessagesViewData {
@@ -67,8 +67,7 @@ export function MessagesView(props: MessagesViewProps) {
             const trade = otherProfile?.primaryTrade
               ? TRADE_LABELS[otherProfile.primaryTrade]
               : undefined
-            // TODO(#473): 등급=member role 을 BE 가 미제공 — mock 표시
-            const grade = '준기공(Mocked)'
+            const grade = otherProfile?.role ? ROLE_LABELS[otherProfile.role] : undefined
             return (
               <Link key={chat.id} href={chatHref(chat.id)} scroll={false} className="block px-4">
                 <ChatListItem
@@ -77,7 +76,7 @@ export function MessagesView(props: MessagesViewProps) {
                   name={chatMemberName(otherMember) ?? chat.title ?? '채팅'}
                   jobType={trade}
                   specialty={grade}
-                  lastMessage={chat.lastMessage?.content}
+                  lastMessage={chatPreviewText(chat.lastMessage)}
                   timestamp={chat.modifiedAt ? formatRelativeTime(chat.modifiedAt) : undefined}
                   unreadCount={chat.unreadCount}
                 />

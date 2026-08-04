@@ -26,7 +26,7 @@ import to.bconnect.api.core.presentation.v1.response.ProfileDetailResponse;
 import to.bconnect.api.core.presentation.v1.response.ProfileResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.coworker.CoworkerStatus;
 
 @RestController
@@ -50,7 +50,7 @@ public class ProfileController {
 
         val memberIds = profiles.stream().map(Profile::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
-        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(AttachmentReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         val content = profiles.stream()
                 .map(it -> {
@@ -72,7 +72,7 @@ public class ProfileController {
             HttpServletResponse response) {
         val profile = profileQueryService.get(user.id());
         val member = memberResolver.get(profile.memberId());
-        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(AttachmentReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
@@ -88,7 +88,7 @@ public class ProfileController {
             HttpServletResponse response) {
         val profile = profileQueryService.get(id);
         val member = memberResolver.get(profile.memberId());
-        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(AttachmentReferenceType.MEMBER, member.id(), ImageSize.SMALL);
         val status = user == null
                 ? CoworkerStatus.NONE
                 : coworkerService.resolveStatus(user.id(), profile.memberId());

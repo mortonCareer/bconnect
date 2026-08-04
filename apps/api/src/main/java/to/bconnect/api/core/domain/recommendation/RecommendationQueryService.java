@@ -19,22 +19,22 @@ public class RecommendationQueryService {
 
     @Transactional(readOnly = true)
     public List<Recommendation> listReceived(Long memberId) {
-        return toDomain(recommendationRepository.findAllByToIdAndVisibleTrue(memberId), Side.FROM);
+        return toDomain(recommendationRepository.findAllByToIdAndVisibleTrueOrderByIdDesc(memberId), Side.FROM);
     }
 
     @Transactional(readOnly = true)
     public List<Recommendation> listSent(Long memberId) {
-        return toDomain(recommendationRepository.findAllByFromIdAndVisibleTrue(memberId), Side.TO);
+        return toDomain(recommendationRepository.findAllByFromIdAndVisibleTrueOrderByIdDesc(memberId), Side.TO);
     }
 
     @Transactional(readOnly = true)
     public List<Recommendation> listMyReceived(AuthUser user) {
-        return toDomain(recommendationRepository.findAllByToId(user.id()), Side.FROM);
+        return toDomain(recommendationRepository.findAllByToIdOrderByIdDesc(user.id()), Side.FROM);
     }
 
     @Transactional(readOnly = true)
     public List<Recommendation> listMySent(AuthUser user) {
-        return toDomain(recommendationRepository.findAllByFromId(user.id()), Side.TO);
+        return toDomain(recommendationRepository.findAllByFromIdOrderByIdDesc(user.id()), Side.TO);
     }
 
     private List<Recommendation> toDomain(List<RecommendationEntity> entities, Side side) {

@@ -21,3 +21,6 @@ app:
   cloudfront:
     key-pair-id: test-key-pair-id
     private-key: test-private-key
+
+  sns:
+    platform-application-arn: test-platform-application-arn

@@ -21,18 +21,18 @@ public class DomainDependencyTest {
 
     // dep: chat → allowed
     @ArchTest ArchRule boardDomainRule = domainRule("board", "drive", "project");
-    @ArchTest ArchRule chatDomainRule = domainRule("chat", "offer");
+    @ArchTest ArchRule chatDomainRule = domainRule("chat");
     @ArchTest ArchRule companyDomainRule = domainRule("company");
     @ArchTest ArchRule coworkerDomainRule = domainRule("coworker");
     @ArchTest ArchRule credentialDomainRule = domainRule("credential");
     @ArchTest ArchRule driveDomainRule = domainRule("drive", "project");
     @ArchTest ArchRule memberDomainRule = domainRule("member");
-    @ArchTest ArchRule offerDomainRule = domainRule("offer");
+    @ArchTest ArchRule offerDomainRule = domainRule("offer", "company");
     @ArchTest ArchRule postDomainRule = domainRule("post");
     @ArchTest ArchRule profileDomainRule = domainRule("profile");
     @ArchTest ArchRule projectDomainRule = domainRule("project", "company");
     @ArchTest ArchRule recommendationDomainRule = domainRule("recommendation");
-    @ArchTest ArchRule taskDomainRule = domainRule("task");
+    @ArchTest ArchRule taskDomainRule = domainRule("task", "project");
 
     private static ArchRule domainRule(String domain, String... allowed) {
         val accessible = Stream.concat(Stream.of(domain, SHARED), Arrays.stream(allowed))
