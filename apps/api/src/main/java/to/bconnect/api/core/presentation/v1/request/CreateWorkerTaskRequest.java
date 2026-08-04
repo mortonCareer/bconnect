@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.task.CreateWorkerTask;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.profile.Trade;
@@ -16,11 +18,14 @@ public record CreateWorkerTaskRequest(
         @NotNull LocalDate start,
         @NotNull LocalDate end,
         @NotBlank String title,
-        @NotBlank String memo,
+        String memo,
         String company,
         @Valid Address address
 ) {
     public CreateWorkerTask toCommand() {
+        if (end.isBefore(start))
+            throw new CodeException(CommonExceptionCode.NOT_VALID);
+
         return new CreateWorkerTask(trades, start, end, title, memo, company, address);
     }
 }

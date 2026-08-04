@@ -23,6 +23,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static to.bconnect.api.storage.task.TaskStatus.OFFERABLE;
+
 @Service
 @RequiredArgsConstructor
 public class OfferService {
@@ -52,6 +54,9 @@ public class OfferService {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
         if (!project.getCompanyId().equals(company.getId()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        if (!OFFERABLE.contains(task.getStatus()))
+            throw new CodeException(OfferExceptionCode.INVALID_TASK_STATUS);
 
         if (!memberRepository.existsById(command.workerId()))
             throw new CodeException(CommonExceptionCode.NOT_FOUND);
@@ -197,13 +202,21 @@ public class OfferService {
         if (offerRepository.existsByTaskIdAndStatus(taskId, OfferStatus.ACTIVE))
             return;
 
+        val task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
         val optional = offerRepository.findFirstByTaskIdAndStatusAndSeqGreaterThanOrderBySeqAsc(taskId, OfferStatus.PENDING, currSeq);
-        if (optional.isEmpty())
+        if (optional.isEmpty()) {
+            if (!offerRepository.existsByTaskIdAndStatus(taskId, OfferStatus.PENDING))
+                task.release();
             return;
+        }
 
         val found = optional.get();
         found.offered();
         found.updateDue(LocalDate.now(apiConfigProps.zoneId()).plusDays(DUE_EXTENSION_DAYS));
+        task.offered();
+
         val company = companyFinder.getByTaskId(taskId);
         eventPublisher.publishEvent(new OfferEvent(
                 found.getId(), found.getWorkerId(), company.id(), company.memberId(), OfferStatus.ACTIVE));

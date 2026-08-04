@@ -147,6 +147,14 @@ public class TaskController {
         return ApiResponse.success(null);
     }
 
+    @DeleteMapping("/{id}/assignee")
+    public ApiResponse<Void> unassign(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id) {
+        taskService.unassign(user, id);
+        return ApiResponse.success(null);
+    }
+
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
             @AuthenticationPrincipal AuthUser user,
