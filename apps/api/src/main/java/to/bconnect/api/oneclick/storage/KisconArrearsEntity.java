@@ -25,6 +25,8 @@ public class KisconArrearsEntity {
 
     private String companyName;            // 법인 명칭 (company_name)
 
+    private String normalizedCompanyName;  // 정규화 법인 명칭 (normalized_company_name)
+
     private String address;                // 법인 주소 (address)
 
     private String representative;         // 대표자 성명 (representative)

@@ -25,6 +25,8 @@ public class EcicElectricalLicenseEntity {
 
     private String companyName;      // 상호 (company_name)
 
+    private String normalizedCompanyName;  // 정규화 상호 (normalized_company_name)
+
     private String representative;   // 대표자 (representative)
 
     private String address;          // 소재지 (address)

@@ -9,7 +9,6 @@ import org.springframework.web.client.RestClient;
 import java.time.Duration;
 
 @Configuration
-// 공공데이터포털 RestClient 설정. 국세청 · 근로복지공단 공용
 public class DataGoConfig {
 
     private static final String NTS_BASE_URL = "https://api.odcloud.kr/api/nts-businessman/v1";
@@ -19,21 +18,24 @@ public class DataGoConfig {
 
     @Bean
     public RestClient ntsRestClient() {
-        return restClient(NTS_BASE_URL);
-    }
-
-    @Bean
-    public RestClient kcomwelRestClient() {
-        return restClient(KCOMWEL_BASE_URL);
-    }
-
-    private static RestClient restClient(String baseUrl) {
         val factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(CONNECT_TIMEOUT);
         factory.setReadTimeout(READ_TIMEOUT);
 
         return RestClient.builder()
-                .baseUrl(baseUrl)
+                .baseUrl(NTS_BASE_URL)
+                .requestFactory(factory)
+                .build();
+    }
+
+    @Bean
+    public RestClient kcomwelRestClient() {
+        val factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(CONNECT_TIMEOUT);
+        factory.setReadTimeout(READ_TIMEOUT);
+
+        return RestClient.builder()
+                .baseUrl(KCOMWEL_BASE_URL)
                 .requestFactory(factory)
                 .build();
     }

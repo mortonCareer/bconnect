@@ -1,9 +1,11 @@
 package to.bconnect.api.oneclick.infrastructure.kcomwel;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import to.bconnect.api.oneclick.OneClickUtils;
 import to.bconnect.api.oneclick.domain.kcomwel.Insurance;
 import to.bconnect.api.oneclick.infrastructure.DataGoProperties;
 
@@ -11,18 +13,14 @@ import java.util.List;
 
 // 고용·산재보험 조회 (근로복지공단)
 @Component
-public class KcomwelInsuranceFinder {
+@RequiredArgsConstructor
+public class KcomwelInsuranceResolver {
 
     private static final String SUCCESS = "00";
     private static final XmlMapper XML = new XmlMapper();
 
     private final RestClient kcomwelRestClient;
     private final DataGoProperties properties;
-
-    public KcomwelInsuranceFinder(RestClient kcomwelRestClient, DataGoProperties properties) {
-        this.kcomwelRestClient = kcomwelRestClient;
-        this.properties = properties;
-    }
 
     public Insurance resolve(String brn) {
         val xml = kcomwelRestClient.get()
@@ -44,13 +42,19 @@ public class KcomwelInsuranceFinder {
             return Insurance.empty();
 
         val item = items.getFirst();
-        val industry = item.sjEopjongNm() != null ? item.sjEopjongNm() : item.gyEopjongNm();
         return new Insurance(
                 item.saeopjangNm(),
                 item.addr(),
-                industry,
+                item.post(),
+                item.saeopjaDrno(),
                 item.sangsiInwonCnt(),
-                item.seongripDt()
+                OneClickUtils.parseDate(item.seongripDt()),
+                item.opaBoheomFg(),
+                item.saeopFg(),
+                item.sjEopjongCd(),
+                item.sjEopjongNm(),
+                item.gyEopjongCd(),
+                item.gyEopjongNm()
         );
     }
 

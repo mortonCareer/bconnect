@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
-// 건설근로자공제회 퇴직공제 가입사업장
+// 건설근로자공제회 퇴직공제 가입 공사
 @Entity
 @Immutable
 @Table(name = "cwma_retirement_fund")

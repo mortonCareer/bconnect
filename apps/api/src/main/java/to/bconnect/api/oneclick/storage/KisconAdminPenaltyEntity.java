@@ -19,57 +19,59 @@ import java.time.Instant;
 public class KisconAdminPenaltyEntity {
 
     @Id
-    private Long ncrGsSeq;             // 공시 일련번호 (ncr_gs_seq)
+    private Long ncrGsSeq;              // 공시 일련번호 (ncr_gs_seq)
 
-    private String bizRegNo;           // 사업자등록번호 (biz_reg_no)
+    private String ncrMasterNum;        // 사업자등록번호 (ncr_master_num)
 
-    private String companyName;        // 업체명 (company_name)
+    private String ncrAdmiKname;        // 업체명 (ncr_admi_kname)
 
-    private String representative;     // 대표자 (representative)
+    private String normalizedCompanyName; // 정규화 업체명 (normalized_company_name)
 
-    private String tradeName;          // 업종명 (trade_name)
+    private String ncrAdmiMaster;       // 대표자 (ncr_admi_master)
 
-    private String tradeRegNo;         // 업종 등록번호 (trade_reg_no)
+    private String ncrItemName;         // 업종명 (ncr_item_name)
 
-    private String address;            // 소재지 (address)
+    private String ncrItemregno;        // 업종 등록번호 (ncr_itemregno)
 
-    private String region;             // 지역 (region)
+    private String ncrAdmiAddr;         // 소재지 (ncr_admi_addr)
 
-    private String regionDetail;       // 지역 상세 (region_detail)
+    private String ncrAreaName;         // 지역 (ncr_area_name)
 
-    private String penaltyType;        // 처분내용: 등록말소·영업정지·시정명령·과태료·과징금 (penalty_type)
+    private String ncrAreaDetailName;   // 지역 상세 (ncr_area_detail_name)
 
-    private String violationContent;   // 위반내용 (violation_content)
+    private String ncrAdmiDename;       // 처분내용: 등록말소·영업정지·시정명령·과태료·과징금 (ncr_admi_dename)
 
-    private String violationDetail;    // 위반 상세사유 (violation_detail)
+    private String ecodeAdmiCon;        // 위반내용 (ecode_admi_con)
 
-    private String penaltyGround;      // 처분근거 법조항 (penalty_ground)
+    private String ncrAdmiReason;       // 위반 상세사유 (ncr_admi_reason)
 
-    private Long fineAmount;           // 과징금 (fine_amount)
+    private String ecodeAdmiGround;     // 처분근거 법조항 (ecode_admi_ground)
 
-    private Long penaltyAmount;        // 과태료 (penalty_amount)
+    private Long ncrAdmiFine;           // 과징금 (ncr_admi_fine)
 
-    private String stopStartDate;      // 영업정지 시작일 (stop_start_date)
+    private Long ncrAdmiPenalty;        // 과태료 (ncr_admi_penalty)
 
-    private String stopEndDate;        // 영업정지 종료일 (stop_end_date)
+    private String ncrAdmiStopSdate;    // 영업정지 시작일 (ncr_admi_stop_sdate)
 
-    private String cancelDate;         // 등록말소일자 (cancel_date)
+    private String ncrAdmiStopEdate;    // 영업정지 종료일 (ncr_admi_stop_edate)
 
-    private String correction;         // 시정명령 내용 (correction)
+    private String ncrAdmiCanceldate;   // 등록말소일자 (ncr_admi_canceldate)
 
-    private Integer penaltyDate;       // 처분일자 (penalty_date)
+    private String ncrAdmiCorrect;      // 시정명령 내용 (ncr_admi_correct)
 
-    private Integer announceDate;      // 공시일자 (announce_date)
+    private Integer ncrGsDate;          // 처분일자 (ncr_gs_date)
 
-    private String flag;               // 공시내용구분: 신규·정정·변경·철회 (flag)
+    private Integer ncrGsRegdate;       // 공시일자 (ncr_gs_regdate)
 
-    private String phone;              // 전화번호 (phone)
+    private String ncrGsFlag;           // 공시내용구분: 신규·정정·변경·철회 (ncr_gs_flag)
 
-    private String hasInjunction;      // 집행정지 여부: Y·N (has_injunction)
+    private String ncrOffTel;           // 전화번호 (ncr_off_tel)
 
-    private String announceNumber;     // 공고번호 (announce_number)
+    private String ncrPdStatus;         // 집행정지 여부: Y·N (ncr_pd_status)
 
-    private String announceReason;     // 공시사유 (announce_reason)
+    private String ncrGsNumber;         // 공고번호 (ncr_gs_number)
 
-    private Instant syncedAt;          // 적재 시각 (synced_at)
+    private String ncrGsReason;         // 공시사유 (ncr_gs_reason)
+
+    private Instant syncedAt;           // 적재 시각 (synced_at)
 }

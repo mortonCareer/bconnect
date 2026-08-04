@@ -8,9 +8,9 @@ import java.util.List;
 public record WageDefaultResult(
         Verdict verdict,
         int count,
-        String name,           // 성명 (성명)
-        String companyName,    // 사업장명 (사업장명)
-        String arrearsAmount   // 체불액 (체불액)
+        String name,           // 성명 (name)
+        String companyName,    // 사업장명 (company_name)
+        Long arrearsAmount     // 체불액, 단위 원 (arrears_amount)
 ) {
     public static WageDefaultResult of(List<WageDefault> defaults) {
         if (defaults.isEmpty())
@@ -24,6 +24,11 @@ public record WageDefaultResult(
                 first.companyName(),
                 first.arrearsAmount()
         );
+    }
+
+    // 조회 키인 상호를 확보하지 못해 조회 자체가 불가한 경우
+    public static WageDefaultResult unknown() {
+        return new WageDefaultResult(Verdict.UNKNOWN, 0, null, null, null);
     }
 
     public static WageDefaultResult error() {

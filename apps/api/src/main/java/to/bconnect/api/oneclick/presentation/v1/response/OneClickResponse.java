@@ -80,7 +80,7 @@ public record OneClickResponse(
             @Schema(requiredMode = REQUIRED, nullable = true) String companyName,
             @Schema(requiredMode = REQUIRED, nullable = true) String industry,
             @Schema(requiredMode = REQUIRED, nullable = true) String workerCount,
-            @Schema(requiredMode = REQUIRED, nullable = true) String establishedAt
+            @Schema(requiredMode = REQUIRED, nullable = true) LocalDate establishedAt
     ) {
         public static InsuranceResponse of(InsuranceResult result) {
             return new InsuranceResponse(
@@ -129,7 +129,7 @@ public record OneClickResponse(
             @Schema(requiredMode = REQUIRED) int count,
             @Schema(requiredMode = REQUIRED, nullable = true) String name,
             @Schema(requiredMode = REQUIRED, nullable = true) String companyName,
-            @Schema(requiredMode = REQUIRED, nullable = true) String arrearsAmount
+            @Schema(requiredMode = REQUIRED, nullable = true) Long arrearsAmount
     ) {
         public static WageDefaultResponse of(WageDefaultResult result) {
             return new WageDefaultResponse(
@@ -145,7 +145,7 @@ public record OneClickResponse(
             @Schema(requiredMode = REQUIRED) int count,
             @Schema(requiredMode = REQUIRED, nullable = true) String companyName,
             @Schema(requiredMode = REQUIRED, nullable = true) String representative,
-            @Schema(requiredMode = REQUIRED, nullable = true) String arrearsAmount,
+            @Schema(requiredMode = REQUIRED, nullable = true) Long arrearsAmount,
             @Schema(requiredMode = REQUIRED, nullable = true) String publicationPeriod
     ) {
         public static HabitualArrearsResponse of(HabitualArrearsResult result) {
@@ -163,8 +163,8 @@ public record OneClickResponse(
             @Schema(requiredMode = REQUIRED, nullable = true) String companyName,
             @Schema(requiredMode = REQUIRED, nullable = true) String representative,
             @Schema(requiredMode = REQUIRED, nullable = true) String violationType,
-            @Schema(requiredMode = REQUIRED, nullable = true) String restrictionStart,
-            @Schema(requiredMode = REQUIRED, nullable = true) String restrictionEnd
+            @Schema(requiredMode = REQUIRED, nullable = true) LocalDate restrictionStart,
+            @Schema(requiredMode = REQUIRED, nullable = true) LocalDate restrictionEnd
     ) {
         public static SubcontractRestrictionResponse of(SubcontractRestrictionResult result) {
             return new SubcontractRestrictionResponse(
@@ -181,8 +181,8 @@ public record OneClickResponse(
             @Schema(requiredMode = REQUIRED) int count,
             @Schema(requiredMode = REQUIRED, nullable = true) String projectName,
             @Schema(requiredMode = REQUIRED, nullable = true) Long totalAmount,
-            @Schema(requiredMode = REQUIRED, nullable = true) String startDate,
-            @Schema(requiredMode = REQUIRED, nullable = true) String endDate,
+            @Schema(requiredMode = REQUIRED, nullable = true) LocalDate startDate,
+            @Schema(requiredMode = REQUIRED, nullable = true) LocalDate endDate,
             @Schema(requiredMode = REQUIRED, nullable = true) String clientOrg
     ) {
         public static RetirementFundResponse of(RetirementFundResult result) {

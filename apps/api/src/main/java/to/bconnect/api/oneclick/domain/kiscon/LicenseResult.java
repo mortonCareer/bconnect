@@ -13,9 +13,9 @@ import java.util.Objects;
 public record LicenseResult(
         Verdict verdict,
         int count,
-        List<String> tradeNames,
-        LocalDate registeredAt,
-        int dispositionCount
+        List<String> tradeNames,     // 업종명 목록 (ncr_item_name)
+        LocalDate registeredAt,      // 등록일자 (ncr_gs_date)
+        int dispositionCount         // 행정처분 건수 (kiscon_admin_penalty)
 ) {
     public static LicenseResult of(ConstructionBusinessType type,
                                    List<License> licenses,
@@ -25,13 +25,13 @@ public record LicenseResult(
                 .toList();
 
         val tradeNames = filtered.stream()
-                .map(License::tradeName)
+                .map(License::ncrItemName)
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
 
         val registeredAt = filtered.stream()
-                .map(License::registeredAt)
+                .map(License::ncrGsDate)
                 .filter(Objects::nonNull)
                 .max(Comparator.naturalOrder())
                 .orElse(null);

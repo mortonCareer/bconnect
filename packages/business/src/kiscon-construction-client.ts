@@ -13,8 +13,8 @@ export async function fetchConstructionLicense(
   const sql = getDb()
   const rows = await sql<KisconRegistrationItem[]>`
     SELECT * FROM kiscon_registration
-    WHERE biz_reg_no = ${bizRegNo}
-    ORDER BY reg_date DESC
+    WHERE ncr_master_num = ${bizRegNo}
+    ORDER BY ncr_gs_date DESC
   `
   return rows
 }
@@ -29,8 +29,8 @@ export async function fetchConstructionAdminPenalty(
   const sql = getDb()
   const rows = await sql<KisconAdminPenaltyItem[]>`
     SELECT * FROM kiscon_admin_penalty
-    WHERE biz_reg_no = ${bizRegNo}
-    ORDER BY penalty_date DESC
+    WHERE ncr_master_num = ${bizRegNo}
+    ORDER BY ncr_gs_date DESC
   `
   return rows
 }

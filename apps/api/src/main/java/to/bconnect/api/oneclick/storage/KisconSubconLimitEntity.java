@@ -27,6 +27,8 @@ public class KisconSubconLimitEntity {
 
     private String companyName;       // 상호 (company_name)
 
+    private String normalizedCompanyName; // 정규화 상호 (normalized_company_name)
+
     private String corpNo;            // 법인번호 (corp_no)
 
     private String bizRegNo;          // 사업자번호 (biz_reg_no)

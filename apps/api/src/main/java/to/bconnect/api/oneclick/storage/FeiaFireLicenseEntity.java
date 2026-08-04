@@ -25,6 +25,8 @@ public class FeiaFireLicenseEntity {
 
     private String companyName;   // 상호 (company_name)
 
+    private String normalizedCompanyName;  // 정규화 상호 (normalized_company_name)
+
     private String ceoName;       // 대표자 (ceo_name)
 
     private String address;       // 본사주소 (address)

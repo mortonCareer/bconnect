@@ -7,5 +7,7 @@ import java.util.List;
 // 키스콘 건설업 등록 저장소
 public interface KisconRegistrationRepository extends JpaRepository<KisconRegistrationEntity, Long> {
 
-    List<KisconRegistrationEntity> findAllByBizRegNo(String bizRegNo);
+    List<KisconRegistrationEntity> findAllByNcrMasterNum(String ncrMasterNum);
+
+    List<KisconRegistrationEntity> findAllByNormalizedCompanyName(String normalizedCompanyName);
 }

@@ -3,7 +3,9 @@ package to.bconnect.api.oneclick.infrastructure.feia;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.oneclick.OneClickUtils;
 import to.bconnect.api.oneclick.domain.feia.FireLicense;
+import to.bconnect.api.oneclick.storage.FeiaFireLicenseEntity;
 import to.bconnect.api.oneclick.storage.FeiaFireLicenseRepository;
 
 import java.util.List;
@@ -16,24 +18,23 @@ public class FeiaFireLicenseFinder {
     private final FeiaFireLicenseRepository feiaFireLicenseRepository;
 
     @Transactional(readOnly = true)
-    public List<FireLicense> list(String companyName) {
-        if (companyName == null || companyName.isBlank())
-            return List.of();
-
-        return feiaFireLicenseRepository.findAllByCompanyNameContaining(strip(companyName))
+    public List<FireLicense> list(String companyName, String ownerName) {
+        return OneClickUtils.lookup(
+                        companyName, feiaFireLicenseRepository::findAllByNormalizedCompanyName,
+                        FeiaFireLicenseEntity::getCeoName, ownerName)
                 .stream()
                 .map(it -> new FireLicense(
+                        it.getSeqNo(),
                         it.getCompanyName(),
                         it.getCeoName(),
                         it.getAddress(),
                         it.getBusinessType(),
-                        it.getLicenseDiv()
+                        it.getLicenseDiv(),
+                        it.getPostalCode(),
+                        it.getPhone(),
+                        it.getRegion(),
+                        it.getRegionDetail()
                 ))
                 .toList();
-    }
-
-    // 법인격 표기 제거 후 상호 일치
-    private static String strip(String name) {
-        return name.replaceAll("\\(주\\)|（주）|주식회사", "").trim();
     }
 }

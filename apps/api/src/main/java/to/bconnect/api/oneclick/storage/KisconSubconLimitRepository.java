@@ -8,4 +8,6 @@ import java.util.List;
 public interface KisconSubconLimitRepository extends JpaRepository<KisconSubconLimitEntity, Long> {
 
     List<KisconSubconLimitEntity> findAllByBizRegNo(String bizRegNo);
+
+    List<KisconSubconLimitEntity> findAllByNormalizedCompanyName(String normalizedCompanyName);
 }

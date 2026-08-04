@@ -29,6 +29,8 @@ public class MoelWageDefaultEntity {
 
     private String companyName;     // 사업장명 (company_name)
 
+    private String normalizedCompanyName;  // 정규화 사업장명 (normalized_company_name)
+
     private String industry;        // 업종 (industry)
 
     private String personalAddress; // 사업주 주소지 (personal_address)

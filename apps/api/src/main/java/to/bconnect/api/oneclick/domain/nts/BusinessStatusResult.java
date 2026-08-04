@@ -7,14 +7,14 @@ import java.time.LocalDate;
 // 사업자 상태 결과
 public record BusinessStatusResult(
         Verdict verdict,
-        TaxpayerStatus taxpayerStatus,
-        LocalDate closedAt
+        TaxpayerStatus taxpayerStatus,   // 납세자 상태코드 (b_stt_cd)
+        LocalDate closedAt               // 폐업일자 (end_dt)
 ) {
     public static BusinessStatusResult of(BusinessStatus status) {
         return new BusinessStatusResult(
-                verdictOf(status.taxpayerStatus()),
-                status.taxpayerStatus(),
-                status.closedAt()
+                verdictOf(status.bSttCd()),
+                status.bSttCd(),
+                status.endDt()
         );
     }
 

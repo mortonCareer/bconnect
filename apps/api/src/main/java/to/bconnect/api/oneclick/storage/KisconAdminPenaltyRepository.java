@@ -7,5 +7,7 @@ import java.util.List;
 // 키스콘 행정처분 저장소
 public interface KisconAdminPenaltyRepository extends JpaRepository<KisconAdminPenaltyEntity, Long> {
 
-    List<KisconAdminPenaltyEntity> findAllByBizRegNo(String bizRegNo);
+    List<KisconAdminPenaltyEntity> findAllByNcrMasterNum(String ncrMasterNum);
+
+    List<KisconAdminPenaltyEntity> findAllByNormalizedCompanyName(String normalizedCompanyName);
 }

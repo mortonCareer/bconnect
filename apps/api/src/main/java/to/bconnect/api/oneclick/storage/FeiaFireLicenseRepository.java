@@ -7,5 +7,5 @@ import java.util.List;
 // 소방시설업체 저장소
 public interface FeiaFireLicenseRepository extends JpaRepository<FeiaFireLicenseEntity, Long> {
 
-    List<FeiaFireLicenseEntity> findAllByCompanyNameContaining(String companyName);
+    List<FeiaFireLicenseEntity> findAllByNormalizedCompanyName(String normalizedCompanyName);
 }

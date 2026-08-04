@@ -8,9 +8,9 @@ import java.util.List;
 public record HabitualArrearsResult(
         Verdict verdict,
         int count,
-        String companyName,        // 업체명 (company_name)
-        String representative,     // 대표자 (representative)
-        String arrearsAmount,      // 체불금액 (arrears_amount)
+        String companyName,        // 법인 명칭 (company_name)
+        String representative,     // 대표자 성명 (representative)
+        Long arrearsAmount,        // 체불금액, 단위 원 (arrears_amount)
         String publicationPeriod   // 공표기간 (publication_period)
 ) {
     public static HabitualArrearsResult of(List<HabitualArrears> arrears) {
@@ -26,6 +26,11 @@ public record HabitualArrearsResult(
                 first.arrearsAmount(),
                 first.publicationPeriod()
         );
+    }
+
+    // 조회 키인 상호를 확보하지 못해 조회 자체가 불가한 경우
+    public static HabitualArrearsResult unknown() {
+        return new HabitualArrearsResult(Verdict.UNKNOWN, 0, null, null, null, null);
     }
 
     public static HabitualArrearsResult error() {

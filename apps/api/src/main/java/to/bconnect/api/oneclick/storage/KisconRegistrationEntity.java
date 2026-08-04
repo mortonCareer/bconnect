@@ -19,35 +19,37 @@ import java.time.Instant;
 public class KisconRegistrationEntity {
 
     @Id
-    private Long ncrGsSeq;          // 공시 일련번호 (ncr_gs_seq)
+    private Long ncrGsSeq;              // 공시 일련번호 (ncr_gs_seq)
 
-    private String bizRegNo;        // 사업자등록번호 (biz_reg_no)
+    private String ncrMasterNum;        // 사업자등록번호 (ncr_master_num)
 
-    private String companyName;     // 업체명 (company_name)
+    private String ncrGsKname;          // 업체명 (ncr_gs_kname)
 
-    private String representative;  // 대표자 (representative)
+    private String normalizedCompanyName; // 정규화 업체명 (normalized_company_name)
 
-    private String tradeName;       // 업종명 (trade_name)
+    private String ncrGsMaster;         // 대표자 (ncr_gs_master)
 
-    private String tradeRegNo;      // 업종 등록번호 (trade_reg_no)
+    private String ncrItemName;         // 업종명 (ncr_item_name)
 
-    private String address;         // 소재지 (address)
+    private String ncrItemregno;        // 업종 등록번호 (ncr_itemregno)
 
-    private String region;          // 지역 (region)
+    private String ncrGsAddr;           // 소재지 (ncr_gs_addr)
 
-    private String regionDetail;    // 지역 상세 (region_detail)
+    private String ncrAreaName;         // 지역 (ncr_area_name)
 
-    private Integer regDate;        // 등록일자 (reg_date)
+    private String ncrAreaDetailName;   // 지역 상세 (ncr_area_detail_name)
 
-    private Integer announceDate;   // 공시일자 (announce_date)
+    private Integer ncrGsDate;          // 등록일자 (ncr_gs_date)
 
-    private String flag;            // 공시내용구분: 신규·정정·변경·철회 (flag)
+    private Integer ncrGsRegdate;       // 공시일자 (ncr_gs_regdate)
 
-    private String phone;           // 전화번호 (phone)
+    private String ncrGsFlag;           // 공시내용구분: 신규·정정·변경·철회 (ncr_gs_flag)
 
-    private String announceNumber;  // 공고번호 (announce_number)
+    private String ncrOffTel;           // 전화번호 (ncr_off_tel)
 
-    private String announceReason;  // 공시사유 (announce_reason)
+    private String ncrGsNumber;         // 공고번호 (ncr_gs_number)
 
-    private Instant syncedAt;       // 적재 시각 (synced_at)
+    private String ncrGsReason;         // 공시사유 (ncr_gs_reason)
+
+    private Instant syncedAt;           // 적재 시각 (synced_at)
 }

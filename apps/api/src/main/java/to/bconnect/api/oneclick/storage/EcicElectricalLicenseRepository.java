@@ -7,5 +7,5 @@ import java.util.List;
 // 전기공사업체 저장소
 public interface EcicElectricalLicenseRepository extends JpaRepository<EcicElectricalLicenseEntity, Long> {
 
-    List<EcicElectricalLicenseEntity> findAllByCompanyNameContaining(String companyName);
+    List<EcicElectricalLicenseEntity> findAllByNormalizedCompanyName(String normalizedCompanyName);
 }
