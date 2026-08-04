@@ -6,6 +6,7 @@ import { LoginGateProvider } from './_components/LoginGateProvider'
 import { MemberSidebar } from './_components/MemberSidebar'
 import { PanelHost } from './_components/panel/PanelHost'
 import { NotificationPromptToast } from '@bconnect/push'
+import { UnreadTitlePrefix } from '@bconnect/features'
 import { useTechnicianItems } from '@/hooks/useTechnicianItems'
 import { useAuthStore } from '@/stores/auth-store'
 
@@ -20,6 +21,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="flex h-screen overflow-hidden bg-white">
+      <UnreadTitlePrefix />
       <aside className="flex h-full w-[270px] shrink-0 flex-col border-r border-gray-300">
         {isAuthenticated ? (
           <MemberSidebar />
