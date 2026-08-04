@@ -276,7 +276,7 @@ export function PanelTask({ taskId }: { taskId?: string }) {
         onOpenChange={setCancelOpen}
         title="작업 생성을 취소할까요?"
         description="작성 중인 작업이 사라져요."
-        confirmLabel="취소하기"
+        confirmLabel="생성 취소"
         destructive
         onConfirm={() => {
           if (isDraft) clearDraft()
