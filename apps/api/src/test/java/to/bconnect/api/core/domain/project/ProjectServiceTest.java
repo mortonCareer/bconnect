@@ -121,9 +121,9 @@ class ProjectServiceTest {
 
         // then
         assertThat(projectRepository.findById(project.getId())).isEmpty();
-        assertThat(taskRepository.findAllByProjectId(project.getId())).isEmpty();
+        assertThat(taskRepository.findAllByProjectIdOrderByIdAsc(project.getId())).isEmpty();
         assertThat(boardRepository.findByProjectId(project.getId())).isEmpty();
-        assertThat(noteRepository.findAllByBoardId(board.getId())).isEmpty();
+        assertThat(noteRepository.findAllByBoardIdOrderByIdDesc(board.getId())).isEmpty();
     }
 
     @Test

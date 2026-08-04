@@ -51,7 +51,7 @@ public class ProjectService {
         if (optional.isEmpty())
             return List.of();
 
-        return projectRepository.findAllByCompanyId(optional.get().getId())
+        return projectRepository.findAllByCompanyIdOrderByIdAsc(optional.get().getId())
                 .stream()
                 .map(Project::of)
                 .toList();

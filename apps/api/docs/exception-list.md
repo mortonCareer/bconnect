@@ -13,7 +13,7 @@
 | `CO` | 업체 | `core/domain/company` |
 | `T` | 작업 | `core/domain/task` |
 | `CW` | 동료 | `core/domain/coworker` |
-| `CD` | 인증뱃지 | `core/domain/credential` |
+| `CD` | 자격 증명 | `core/domain/credential` |
 | `RC` | 추천서 | `core/domain/recommendation` |
 | `CH` | 채팅 | `core/domain/chat` |
 | `OF` | 섭외 | `core/domain/offer` |
@@ -95,7 +95,7 @@
 
 | 코드 | 이름 | HTTP | LogLevel | 메시지 |
 | --- | --- | --- | --- | --- |
-| CD001 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 인증뱃지 상태입니다. |
+| CD001 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 자격 증명 상태입니다. |
 
 ## CoworkerExceptionCode
 

@@ -29,7 +29,7 @@ public class CoworkerService {
 
     @Transactional(readOnly = true)
     public List<Coworker> list(Long targetId) {
-        return coworkerRepository.findAllByMemberId(targetId).stream()
+        return coworkerRepository.findAllByMemberIdOrderByIdDesc(targetId).stream()
                 .map(it -> Coworker.of(it, it.coworkerIdOf(targetId)))
                 .toList();
     }

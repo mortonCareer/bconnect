@@ -72,8 +72,9 @@ graph TD
 | Auth           | Refresh Token   | 리프레시 토큰 | 액세스 토큰 재발급용 토큰              |
 | Profile        | Profile         | 프로필        | 사용자 프로필                          |
 | Task           | Task            | 작업          | 프로젝트 공종별 작업 단위              |
-| Post           | Post            | 게시글        |                                        |
-| Post           | Feed            | 피드          | 게시글 + 작성자 + 프로필 View          |
+| Post           | Post            | 게시글        | 사진 · 본문 단위                       |
+| Post           |                 | 작업물        | 게시글 + 작업 View                     |
+| Post           | Feed            | 피드          | 게시글 + 작업 + 프로필 + 회원 View     |
 | Coworker       | Coworker        | 동료          | 동료 기술자                            |
 | Coworker       | CoworkerRequest | 동료 요청     |                                        |
 | Recommendation | Recommendation  | 추천서        | 동료 기술자가 작성한 추천서            |
@@ -81,7 +82,7 @@ graph TD
 | Chat           | DirectChat      | 1:1 채팅방    | 채팅방 제목 없음                       |
 | Chat           | Message         | 메시지        |                                        |
 | Chat           | Participant     | 참여자        | 그룹 채팅방 참여자 정보                |
-| Credential     | Credential      | 인증뱃지      | 면허 · 자격 · 보험 등                  |
+| Credential     | Credential      | 자격 증명     | 면허 · 자격 · 보험 등                  |
 | Attachment     | Attachment      | 첨부          | 업로드 파일 메타데이터                 |
 | Attachment     | Signed cookie   |               | CloudFront 접근 권한                   |
 | Company        | Company         | 인테리어 업체 |                                        |
@@ -192,7 +193,7 @@ graph TD
 | SYSTEM | 시스템 |
 | OFFER  | 섭외   |
 
-### 인증뱃지 유형(CredentialType)
+### 자격 증명 유형(CredentialType)
 
 | 유형                             | 설명           |
 | -------------------------------- | -------------- |

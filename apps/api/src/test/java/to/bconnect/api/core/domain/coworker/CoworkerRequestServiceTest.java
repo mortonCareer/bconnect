@@ -65,7 +65,7 @@ class CoworkerRequestServiceTest {
 
         // then
         assertThat(id).isEqualTo(created.getId());
-        assertThat(coworkerRequestRepository.findAllByFromId(from.getId())).hasSize(1);
+        assertThat(coworkerRequestRepository.findAllByFromIdOrderByIdDesc(from.getId())).hasSize(1);
     }
 
     @Test
@@ -83,7 +83,7 @@ class CoworkerRequestServiceTest {
         // then
         assertThat(id).isEqualTo(reverse.getId());
         assertThat(coworkerRequestRepository.findById(reverse.getId())).isEmpty();
-        assertThat(coworkerRequestRepository.findAllByFromId(from.getId())).isEmpty();
+        assertThat(coworkerRequestRepository.findAllByFromIdOrderByIdDesc(from.getId())).isEmpty();
         assertThat(coworkerRepository.existsByMembers(from.getId(), to.getId())).isTrue();
         val expected = new CoworkerAcceptedEvent(to.getId(), from.getId());
         assertThat(applicationEvents.stream(CoworkerAcceptedEvent.class)).containsExactly(expected);

@@ -14,6 +14,7 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.storage.member.MemberRepository;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,7 +60,12 @@ public class GroupChatService {
                         participantMap.getOrDefault(it.getId(), List.of()),
                         lastMessageMap.get(it.getId()),
                         unreadCountMap.getOrDefault(it.getId(), 0L)
-                )).toList();
+                ))
+                .sorted(Comparator.comparing(
+                        (GroupChat it) -> it.lastMessage() == null
+                                ? it.createdAt()
+                                : it.lastMessage().createdAt()).reversed())
+                .toList();
     }
 
     @Transactional(readOnly = true)
