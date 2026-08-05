@@ -20,6 +20,7 @@ import to.bconnect.api.core.domain.project.ProjectFinder;
 import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.core.domain.task.TaskQueryService;
+import to.bconnect.api.core.presentation.v1.request.FeedFilter;
 import to.bconnect.api.core.presentation.v1.response.FeedResponse;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
@@ -48,9 +49,10 @@ public class FeedController {
 
     @GetMapping
     public ApiResponse<CursorPage<FeedResponse>> list(
+            FeedFilter filter,
             CursorLimit cursorLimit,
             HttpServletResponse response) {
-        val page = postService.list(cursorLimit);
+        val page = postService.list(filter.toCommand(), cursorLimit);
         val posts = page.content();
 
         val memberIds = posts.stream().map(Post::memberId).distinct().toList();

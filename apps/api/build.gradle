@@ -38,6 +38,12 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     // implementation 'org.flywaydb:flyway-database-postgresql'
 
+    // querydsl
+    implementation 'io.github.openfeign.querydsl:querydsl-jpa:7.5'
+    annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:7.5:jpa'
+    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+
     implementation platform('software.amazon.awssdk:bom:2.46.11')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:cloudfront'
