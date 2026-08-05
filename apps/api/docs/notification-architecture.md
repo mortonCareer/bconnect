@@ -6,7 +6,7 @@
 
 ```mermaid
 sequenceDiagram
-    participant Pub as 발행 도메인 서비스 (MessageSocketService · MemberService · SessionService · CredentialService · ProfileService · OfferService · CoworkerRequestService · RecommendationService · DeviceService)
+    participant Pub as 발행 도메인 서비스 (MessageSocketService · MemberService · SessionService · CredentialService · ProfileService · OfferService · TaskService · CoworkerRequestService · RecommendationService · DeviceService)
     participant Listener as NotificationEventListener
     participant Svc as NotificationService
     participant Repo as NotificationRepository
@@ -91,6 +91,7 @@ graph LR
 | RECOMMENDATION_WRITTEN | MEMBER | RECOMMENDATION | `%s 님으로부터 추천서를 작성받았습니다` | ✅ RecommendationWrittenEvent |
 | CONTRACT_WRITTEN | MEMBER | CONTRACT | `%s 님으로부터 계약서를 작성받았습니다` | ⬜ 미배선 |
 | TASK_COMPLETED | — | 미정 | `작업이 완료되었습니다` | ⬜ 타입만 정의 (작업 완료 기능 미구현) |
+| TASK_UPDATED | COMPANY | TASK | `작업 내용이 변경되었습니다` | ✅ TaskEvent → 기술자 (업체가 공종 · 일정 · 요구사항 변경 시) |
 | DRIVE_SHARED | MEMBER | 미정 | `%s 님이 드라이브를 공유했습니다` | ⬜ 타입만 정의 (드라이브 공유 기능 미구현) |
 | DRIVE_NOTE_CREATED | MEMBER | 미정 | `%s 님이 노트를 작성했습니다` | ⬜ 타입만 정의 (드라이브 공유 기능 미구현) |
 
