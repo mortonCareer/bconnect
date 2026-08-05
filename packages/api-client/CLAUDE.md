@@ -38,7 +38,7 @@ springdoc의 Java 파생 spec을 FE가 기대하는 모양으로 compile-time �
 
 1. **info.title** → `Bconnect API` (mock aggregator 이름 `getBconnectAPIMock` 이 title 에서 파생)
 2. **auth 보충 병합** — 필터 기반이라 springdoc 이 못 보는 `POST /auth/otp/verify`·`POST /auth/refresh` 의 path + schema 를 `auth-supplement.ts` 에서 추가. 없는 것만 추가하므로 BE 가 향후 컨트롤러화하면 자동으로 우선
-3. **schema rename** — 엔티티 `*Response` suffix strip (`MemberResponse` → `Member`). op-response DTO(엔티티 아님)는 `SCHEMA_KEEP_RESPONSE` 목록으로 유지 (CheckUsername/SendOtp/RefreshToken/RegisterMember/RegisterDevice/VerifyOtpLogin/VerifyOtpSignup Response)
+3. **schema rename** — 엔티티 `*Response` suffix strip (`MemberResponse` → `Member`). op-response DTO(엔티티 아님)는 `SCHEMA_KEEP_RESPONSE` 목록으로 유지 (CheckUsername/SendOtp/RefreshToken/RegisterMember/VerifyOtpLogin/VerifyOtpSignup Response)
 4. **operationId 규칙** — springdoc opId(Java 메서드명) 무시, (method + path) 규칙으로 파생 (아래)
 5. **객체 쿼리 파라미터 flatten** — springdoc 이 record 파라미터(`CursorLimit` 등)를 객체 쿼리 파라미터 하나로 emit 하지만 Spring 바인딩·orval URL 빌더 둘 다 flat(`?cursor=&limit=`) 전제 → 프로퍼티 단위 파라미터로 펼침. 안 펼치면 `cursorLimit=[object Object]` 로 전송돼 값이 BE 에 닿지 않는다
 6. **envelope unwrap** — `{success, data}` 에서 `data` 만 노출 (compile-time; 런타임 unwrap 은 customFetch)
@@ -64,14 +64,15 @@ springdoc의 Java 파생 spec을 FE가 기대하는 모양으로 compile-time �
 
 규칙이 구조적으로 못 잡는 **소수 라우트만** 하드코딩 (전 엔드포인트 테이블 아님):
 
-| path                          | opId                      | 이유                                                                                                                                           |
-| ----------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /members/check-username` | `checkUsername`           | 규칙은 `getMembersCheckUsername` (끔찍)                                                                                                        |
-| `POST /auth/otp/send`         | `sendOtp`                 | springdoc opId(컨트롤러 메서드명) 불안정                                                                                                       |
-| `POST /auth/logout`           | `logout`                  | 동일                                                                                                                                           |
-| `GET /credentials/me`         | `getMyCredentials`        | 응답이 목록인데 `me` 는 단수 규칙                                                                                                              |
-| `PUT /offers/reorder`         | `reorderOffers`           | verb-path 가 명사-접미(updateOfferReorder)로 어색                                                                                              |
-| `PATCH /notifications/read`   | `updateNotificationsRead` | 단건 읽음(`/{id}/read`)과 전체 읽음이 규칙으로는 둘 다 `updateNotificationRead` 가 되어 뒤엣것이 앞엣것을 덮어씀 → 전체 읽음을 복수형으로 분리 |
+| path                            | opId                      | 이유                                                                                                                                           |
+| ------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /members/check-username`   | `checkUsername`           | 규칙은 `getMembersCheckUsername` (끔찍)                                                                                                        |
+| `POST /auth/otp/send`           | `sendOtp`                 | springdoc opId(컨트롤러 메서드명) 불안정                                                                                                       |
+| `POST /auth/logout`             | `logout`                  | 동일                                                                                                                                           |
+| `GET /credentials/me`           | `getMyCredentials`        | 응답이 목록인데 `me` 는 단수 규칙                                                                                                              |
+| `PUT /offers/reorder`           | `reorderOffers`           | verb-path 가 명사-접미(updateOfferReorder)로 어색                                                                                              |
+| `POST /notifications/{id}/read` | `updateNotificationRead`  | POST 액션 엔드포인트지만 의미는 읽음 상태 갱신 → 규칙 출력(createNotificationRead) 대신 update 동사 유지                                       |
+| `POST /notifications/read`      | `updateNotificationsRead` | 단건 읽음(`/{id}/read`)과 전체 읽음이 규칙으로는 둘 다 `createNotificationRead` 가 되어 뒤엣것이 앞엣것을 덮어씀 → 전체 읽음을 복수형으로 분리 |
 
 `/auth/*` opId는 OPID_SPECIAL(sendOtp·logout)과 auth-supplement(verifyOtp·refreshToken)가 지정. deriveOperationId의 auth 분기(springdoc opId 유지)는 그 외 /auth 경로 fallback — 현재 해당 경로 없음.
 

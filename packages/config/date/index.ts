@@ -24,6 +24,12 @@ export function daysBetween(a: string, b: string): number {
   return Math.round((new Date(b).getTime() - new Date(a).getTime()) / ISO_DAY_MS)
 }
 
+/** task.start~end(양끝 포함) 소요 일수. 파싱 불가·역순이면 undefined. */
+export function durationDays(start: string, end: string): number | undefined {
+  const days = daysBetween(start, end) + 1
+  return Number.isFinite(days) && days >= 1 ? days : undefined
+}
+
 export function addDays(iso: string, n: number): string {
   return toIsoDate(new Date(new Date(iso).getTime() + n * ISO_DAY_MS))
 }

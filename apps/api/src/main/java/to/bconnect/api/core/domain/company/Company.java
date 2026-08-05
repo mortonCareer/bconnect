@@ -12,6 +12,12 @@ public record Company(
         Instant createdAt,
         Instant modifiedAt
 ) {
+    public static final String WITHDRAW_NAME = "삭제된 업체";
+
+    public static Company withdrawn(Long id) {
+        return new Company(id, null, WITHDRAW_NAME, null, null, null);
+    }
+
     public static Company of(CompanyEntity entity) {
         return new Company(
                 entity.getId(),

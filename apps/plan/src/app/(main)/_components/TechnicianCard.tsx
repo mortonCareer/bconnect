@@ -93,7 +93,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
     item.experienceYears > 0 ? `${item.experienceYears}년` : '신입',
   ].filter(Boolean)
 
-  // 작업물(Post) 유래 썸네일 — 없으면 3개 회색 placeholder
+  // 작업물(Post + Task) 유래 썸네일 — 없으면 3개 회색 placeholder
   const portfolios =
     item.portfolios.length > 0
       ? item.portfolios.slice(0, 3)
@@ -128,7 +128,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
           {/* 한 줄 소개 */}
           {item.headline && <p className="line-clamp-2 text-r-16 text-gray-900">{item.headline}</p>}
 
-          {/* 공종 + 인증 태그 — Figma 1470:6779 그룹 (내부 gap 7.85 ≈ gap-2) */}
+          {/* 공종 + 자격 증명 태그 — Figma 1470:6779 그룹 (내부 gap 7.85 ≈ gap-2) */}
           {(item.trades.length > 0 || item.certifications.length > 0) && (
             <div className="flex flex-col gap-2">
               {/* 공종 태그 (primaryTrade = selected, 파란색) */}
@@ -144,7 +144,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
                 </div>
               )}
 
-              {/* 인증 태그 */}
+              {/* 자격 증명 태그 */}
               {/* TODO: 타인 프로필 credentials 조회 API 미구현 — 연동 전까진 빈 목록 */}
               {item.certifications.length > 0 && (
                 <div className="flex flex-wrap gap-1">
@@ -229,7 +229,7 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
           />
         </div>
 
-        {/* 작업물(Post) 썸네일 3개 — 소요일은 Feed 에 task 정보가 없어 미표시 */}
+        {/* 작업물(Post + Task) 썸네일 3개 — 소요일은 연결된 작업 기간, 미연결이면 공백 */}
         <div className="flex flex-1 gap-[9px]">
           {portfolios.map((p, i) => (
             <PortfolioThumb

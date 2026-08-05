@@ -42,6 +42,12 @@ export default defineConfig({
               ],
               invalidates: ['getTasks'],
             },
+            // 섭외 수락/거절(#972) → 기술자 작업 목록(제안 반영) + 그 작업의 섭외 대기열.
+            // getTaskOffers 는 taskId 로 작업별 구분 → config 가 그 값을 몰라 관련 목록을 한꺼번에 무효화(넓게).
+            {
+              onMutations: ['acceptOffer', 'denyOffer'],
+              invalidates: ['getTasks', 'getTaskOffers'],
+            },
             // 추천서: 받은 목록(hide/show), 보낸 목록(create/update/delete)
             {
               onMutations: ['hideRecommendation', 'showRecommendation'],
@@ -51,7 +57,7 @@ export default defineConfig({
               onMutations: ['createRecommendation', 'updateRecommendation', 'deleteRecommendation'],
               invalidates: ['getMySentRecommendations', 'getReceivedRecommendations'],
             },
-            // 자격/인증 변경 → 자격 목록. getMyCredentials(내 목록, 조건 없음)는 그 목록만 정확히 무효화.
+            // 자격 증명 변경 → 자격 증명 목록. getMyCredentials(내 목록, 조건 없음)는 그 목록만 정확히 무효화.
             // getCredentials 는 memberId 로 회원별 구분 → config 가 그 값을 몰라 관련 목록을 한꺼번에 무효화(넓게).
             // TODO(#728): getCredentials 를 특정 회원만 무효화하려면 화면 쪽 수동 배선 필요(ADR-0025 line 61). 넓게 둘지 좁힐지 추후 결정.
             {
@@ -63,17 +69,19 @@ export default defineConfig({
               ],
               invalidates: ['getCredentials', 'getMyCredentials'],
             },
-            // 동료요청: 수락 → 받은 목록 + 동료 목록(관계 성립으로 +1), 거절 → 받은 목록,
-            // 생성/취소 → 보낸 목록(보낸 쪽 "요청됨" 상태 새로고침 후에도 유지, #843).
+            // 동료요청: 수락 → 받은 목록, 거절 → 받은 목록, 생성/취소 → 보낸 목록
+            // ("요청됨" 상태를 새로고침 후에도 유지, #843).
+            // 넷 다 getCoworkers 도 무효화한다 — 동료 목록 응답의 Coworker.status 는 "로그인한 나와
+            // 그 사람의 관계"라 관계가 바뀌면 목록의 status 도 stale 이 된다. 행 ⋮ 드로어가 이 값으로
+            // 액션을 파생하므로 무효화 없이는 요청 직후에도 "동료 추가"가 남는다 (#870).
             // getCoworkers 는 memberId 로 회원별 구분 → config 가 값을 몰라 관련 목록을 한꺼번에 무효화(넓게).
             {
-              onMutations: ['acceptCoworkerRequest'],
+              onMutations: ['acceptCoworkerRequest', 'denyCoworkerRequest'],
               invalidates: ['getReceivedCoworkerRequests', 'getCoworkers'],
             },
-            { onMutations: ['denyCoworkerRequest'], invalidates: ['getReceivedCoworkerRequests'] },
             {
               onMutations: ['createCoworkerRequest', 'deleteCoworkerRequest'],
-              invalidates: ['getSentCoworkerRequests'],
+              invalidates: ['getSentCoworkerRequests', 'getCoworkers'],
             },
             // 성립된 동료 취소 → 동료 목록 + 프로필 동료 카운트(본인·상대)
             {
@@ -82,6 +90,8 @@ export default defineConfig({
             },
             // 내 회원정보 변경 → 내 회원정보
             { onMutations: ['updateMyMember'], invalidates: ['getMyMember'] },
+            // 프로필·업체 생성 → 내 회원정보. BE 가 생성 시 역할(CAREER/PLAN)을 부여하므로 roles 가 바뀐다 (#1100).
+            { onMutations: ['createProfile', 'createCompany'], invalidates: ['getMyMember'] },
             // 알림 읽음 처리(단건/전체) → 알림 목록 + 안읽음 개수
             {
               onMutations: ['updateNotificationRead', 'updateNotificationsRead'],

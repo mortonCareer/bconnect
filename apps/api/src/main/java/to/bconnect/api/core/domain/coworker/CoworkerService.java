@@ -3,6 +3,8 @@ package to.bconnect.api.core.domain.coworker;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import to.bconnect.api.common.CodeException;
+import to.bconnect.api.common.CommonExceptionCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
@@ -27,7 +29,7 @@ public class CoworkerService {
 
     @Transactional(readOnly = true)
     public List<Coworker> list(Long targetId) {
-        return coworkerRepository.findAllByMemberId(targetId).stream()
+        return coworkerRepository.findAllByMemberIdOrderByIdDesc(targetId).stream()
                 .map(it -> Coworker.of(it, it.coworkerIdOf(targetId)))
                 .toList();
     }
@@ -68,10 +70,9 @@ public class CoworkerService {
 
     @Transactional
     public void delete(AuthUser user, Long memberId) {
-        val optional = coworkerRepository.findByMembers(user.id(), memberId);
-        if (optional.isEmpty())
-            return;
+        val found = coworkerRepository.findByMembers(user.id(), memberId)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
-        coworkerRepository.delete(optional.get());
+        coworkerRepository.delete(found);
     }
 }

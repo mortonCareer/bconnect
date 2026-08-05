@@ -41,7 +41,11 @@ export TWA_KEYSTORE_PASSWORD=... TWA_KEY_PASSWORD=...
 
 앱↔도메인 관계는 각 도메인의 `/.well-known/assetlinks.json`이 증명한다 (career FE public에 서빙: [`apps/career/public/.well-known/assetlinks.json`](../public/.well-known/assetlinks.json)). 여기 든 SHA-256 지문이 맞아야 주소창 없이 풀스크린으로 뜬다.
 
-- **사이드로드 dev**: 로컬 `android.keystore`의 서명 지문. 같은 키로 재빌드하면 지문 불변 → assetlinks 무수정.
-- **Play 배포**: Play App Signing이 AAB를 재서명하므로 지문은 **Play 콘솔의 App Signing 인증서 SHA-256** (로컬 키 지문 아님). Play 배포 전환 시 assetlinks를 그 지문으로 갱신.
+`sha256_cert_fingerprints`는 배열이고 앱은 **자기 지문이 그 배열에 있는지**만 본다. 그래서 두 배포 경로의 지문을 함께 싣는다 (#1112).
+
+- **Play 배포** (`career.bconnect.to`, 내부 테스트 포함): Play App Signing이 AAB를 재서명하므로 지문은 **Play 콘솔 › 앱 무결성 › 앱 서명 키 인증서 SHA-256**. 로컬 키 지문이 아니다.
+- **사이드로드 dev** (`career.dev.bconnect.to`): 로컬 `android.keystore`의 서명 지문 (`keytool -printcert -jarfile app-release-signed.apk`로 확인). 같은 키로 재빌드하면 지문 불변.
+
+`packageId`가 dev·prod 공통이고 `public/`은 두 환경에 같은 파일이 배포되므로 statement는 하나면 된다. 지문만 갱신할 때는 **웹 배포만** 하면 되고 앱 재빌드·재업로드는 필요 없다 — TWA가 실행 시점에 도메인에서 읽는다. 단 prod 도메인 반영은 dev 머지가 아니라 **main 통합까지** 되어야 한다.
 
 host를 바꾸면(예: #902 `dev.bconnect.to`→`career.dev.bconnect.to`) **새 host에도 같은 assetlinks가 서빙되는지** 확인하고 재빌드한다.

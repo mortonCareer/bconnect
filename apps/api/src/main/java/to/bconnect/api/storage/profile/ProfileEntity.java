@@ -2,6 +2,7 @@ package to.bconnect.api.storage.profile;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.Address;
@@ -13,6 +14,7 @@ import java.util.Set;
 @Entity
 @Table(name = "profiles")
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProfileEntity extends BaseEntity {
 
@@ -38,18 +40,6 @@ public class ProfileEntity extends BaseEntity {
 
     @Embedded
     private Address address;
-
-    public ProfileEntity(Long memberId, ProfileRole role, Trade primaryTrade, Set<Trade> trades, int experience,
-                         String headline, String about, Address address) {
-        this.memberId = memberId;
-        this.role = role;
-        this.primaryTrade = primaryTrade;
-        this.trades = trades != null ? trades : new HashSet<>();
-        this.experience = experience;
-        this.headline = headline;
-        this.about = about;
-        this.address = address;
-    }
 
     public void update(ProfileRole role, Trade primaryTrade, Set<Trade> trades, int experience,
                        String headline, Address address) {

@@ -1,5 +1,6 @@
 package to.bconnect.api.core.presentation.v1.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -17,7 +18,7 @@ public record CreateProfileRequest(
         @PositiveOrZero int experience,
         String headline,
         String about,
-        @NotNull Address address
+        @Valid @NotNull Address address
 ) {
     public CreateProfile toCommand() {
         return new CreateProfile(role, primaryTrade, trades, experience, headline, about, address);

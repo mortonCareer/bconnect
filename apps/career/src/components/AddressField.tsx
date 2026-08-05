@@ -3,7 +3,8 @@
  */
 'use client'
 
-import { mapKakaoAddress } from '@bconnect/config/address'
+import { emptyAddressDraft, mapKakaoAddress } from '@bconnect/config/address'
+import type { AddressDraft } from '@bconnect/config/address'
 import { UnknownSidoError, UNKNOWN_SIDO_MESSAGE } from '@bconnect/config/errors'
 import {
   AddressSearchDrawer,
@@ -22,7 +23,6 @@ import {
   type AddressSearchResult,
   type FieldLayout,
 } from '@bconnect/ui'
-import type { Address } from '@bconnect/api-client'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
@@ -32,16 +32,19 @@ interface AddressFieldProps<T extends FieldValues> {
   name: FieldPath<T>
   label?: string
   description?: string
+  /** 라벨에 필수 표시(*). 상세주소는 BE 제약이 없어 대상 아님 — 도로명 주소만 필수. */
+  required?: boolean
   /** 레이아웃 변형. row 는 다른 *Field 와 동일 — 현장주소·상세주소 각각 라벨 좌측 고정폭 row. */
   layout?: FieldLayout
 }
 
-/** 주소 검색 트리거 + 선택 도로명 표시 + 상세주소 입력. 폼 값은 Address(위경도 0). */
+/** 주소 검색 트리거 + 선택 도로명 표시 + 상세주소 입력. 폼 값은 AddressDraft(위경도 0). */
 export function AddressField<T extends FieldValues>({
   control,
   name,
   label,
   description,
+  required,
   layout = 'stacked',
 }: AddressFieldProps<T>) {
   const [open, setOpen] = useState(false)
@@ -52,9 +55,9 @@ export function AddressField<T extends FieldValues>({
       control={control}
       name={name}
       render={({ field }) => {
-        const value = field.value as Address | null
+        const value = field.value as AddressDraft | null
         const setDetail = (detail: string) =>
-          field.onChange({ ...(value ?? mapKakaoAddress(null)), detail })
+          field.onChange({ ...(value ?? emptyAddressDraft()), detail })
         const handleComplete = (result: AddressSearchResult) => {
           try {
             const mapped = mapKakaoAddress(result)
@@ -70,7 +73,9 @@ export function AddressField<T extends FieldValues>({
           return (
             <>
               <FormItem className={cn('grid', fieldItem({ layout }))}>
-                <FormLabel className={fieldLabel({ layout })}>{label ?? '현장주소'}</FormLabel>
+                <FormLabel className={fieldLabel({ layout })} required={required}>
+                  {label ?? '현장주소'}
+                </FormLabel>
                 <FormControl className={fieldSlot({ layout })}>
                   <button
                     type="button"
@@ -103,7 +108,11 @@ export function AddressField<T extends FieldValues>({
 
         return (
           <FormItem className="gap-3">
-            {label && <FormLabel className="text-m-16 text-gray-900">{label}</FormLabel>}
+            {label && (
+              <FormLabel className="text-m-16 text-gray-900" required={required}>
+                {label}
+              </FormLabel>
+            )}
             {description && (
               <FormDescription className="text-r-14 text-gray-500">{description}</FormDescription>
             )}

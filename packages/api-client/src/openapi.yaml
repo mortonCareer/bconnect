@@ -81,6 +81,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
+    delete:
+      tags:
+      - task-controller
+      operationId: unassign
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/recommendations/{id}:
     put:
       tags:
@@ -708,6 +726,37 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/notifications/{id}/read:
+    post:
+      tags:
+      - notification-controller
+      operationId: markRead
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/notifications/read:
+    post:
+      tags:
+      - notification-controller
+      operationId: markAllRead
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/notes:
     post:
       tags:
@@ -897,7 +946,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseRegisterDeviceResponse"
+                $ref: "#/components/schemas/ApiResponseVoid"
     delete:
       tags:
       - device-controller
@@ -1146,37 +1195,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseListAttachmentResponse"
-  /api/v1/notifications/{id}/read:
-    patch:
-      tags:
-      - notification-controller
-      operationId: markRead
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ApiResponseVoid"
-  /api/v1/notifications/read:
-    patch:
-      tags:
-      - notification-controller
-      operationId: markAllRead
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/tasks:
     get:
       tags:
@@ -1881,18 +1899,34 @@ components:
       properties:
         zipcode:
           type: string
+          minLength: 1
+          pattern: "\\d{5}"
+        bcode:
+          type: string
+          minLength: 1
+          pattern: "\\d{10}"
         state:
           $ref: "#/components/schemas/Region"
         city:
           type: string
+          minLength: 1
         street:
           type: string
+          minLength: 1
         detail:
           type: string
         latitude:
           type: number
         longitude:
           type: number
+      required:
+      - bcode
+      - city
+      - latitude
+      - longitude
+      - state
+      - street
+      - zipcode
     Region:
       type: string
       enum:
@@ -1912,6 +1946,12 @@ components:
       - 경북
       - 경남
       - 제주특별자치도
+    TaskProgress:
+      type: string
+      enum:
+      - TODO
+      - IN_PROGRESS
+      - COMPLETED
     Trade:
       type: string
       enum:
@@ -1955,19 +1995,20 @@ components:
         end:
           type: string
           format: date
+        progress:
+          $ref: "#/components/schemas/TaskProgress"
         title:
           type: string
           minLength: 1
         memo:
           type: string
-          minLength: 1
         company:
           type: string
         address:
           $ref: "#/components/schemas/Address"
       required:
       - end
-      - memo
+      - progress
       - start
       - title
       - trades
@@ -2070,33 +2111,33 @@ components:
         end:
           type: string
           format: date
+        progress:
+          $ref: "#/components/schemas/TaskProgress"
         title:
           type: string
           minLength: 1
         requirement:
           type: string
-          minLength: 1
         memo:
           type: string
-          minLength: 1
       required:
       - end
-      - memo
-      - requirement
+      - progress
       - start
       - title
       - trades
     UpdateAssigneeTaskRequest:
       type: object
       properties:
+        progress:
+          $ref: "#/components/schemas/TaskProgress"
         title:
           type: string
           minLength: 1
         memo:
           type: string
-          minLength: 1
       required:
-      - memo
+      - progress
       - title
     UpdateRecommendationRequest:
       type: object
@@ -2242,14 +2283,12 @@ components:
           minLength: 1
         memo:
           type: string
-          minLength: 1
         company:
           type: string
         address:
           $ref: "#/components/schemas/Address"
       required:
       - end
-      - memo
       - start
       - title
       - trades
@@ -2286,15 +2325,11 @@ components:
           minLength: 1
         requirement:
           type: string
-          minLength: 1
         memo:
           type: string
-          minLength: 1
       required:
       - end
-      - memo
       - projectId
-      - requirement
       - start
       - title
       - trades
@@ -2504,22 +2539,6 @@ components:
       required:
       - platform
       - token
-    ApiResponseRegisterDeviceResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        error:
-          $ref: "#/components/schemas/ExceptionCode"
-        data:
-          $ref: "#/components/schemas/RegisterDeviceResponse"
-    RegisterDeviceResponse:
-      type: object
-      properties:
-        registered:
-          type: boolean
-      required:
-      - registered
     CreateCredentialRequest:
       type: object
       properties:
@@ -2787,6 +2806,8 @@ components:
           format: date
         status:
           $ref: "#/components/schemas/TaskStatus"
+        progress:
+          $ref: "#/components/schemas/TaskProgress"
         workerId:
           type:
           - integer
@@ -2824,6 +2845,15 @@ components:
           type:
           - string
           - "null"
+        projectCompanyId:
+          type:
+          - integer
+          - "null"
+          format: int64
+        projectCompanyName:
+          type:
+          - string
+          - "null"
         offer:
           type: "null"
           $ref: "#/components/schemas/OfferSummaryResponse"
@@ -2840,6 +2870,9 @@ components:
       - id
       - modifiedAt
       - offer
+      - progress
+      - projectCompanyId
+      - projectCompanyName
       - projectId
       - projectMemo
       - projectRequirement
@@ -2855,12 +2888,10 @@ components:
     TaskStatus:
       type: string
       enum:
-      - DRAFT
+      - NONE
       - OPEN
       - OFFERED
-      - SCHEDULED
-      - IN_PROGRESS
-      - COMPLETED
+      - ASSIGNED
     TaskType:
       type: string
       enum:
@@ -2891,21 +2922,10 @@ components:
           type:
           - string
           - "null"
-        role:
-          $ref: "#/components/schemas/Role"
-        createdAt:
-          type: string
-          format: date-time
-        modifiedAt:
-          type: string
-          format: date-time
       required:
-      - createdAt
       - id
-      - modifiedAt
       - name
       - picture
-      - role
       - username
     OfferResponse:
       type: object
@@ -2962,12 +2982,6 @@ components:
       - headline
       - primaryTrade
       - role
-    Role:
-      type: string
-      enum:
-      - GUEST
-      - USER
-      - ADMIN
     ApiResponseListRecommendationResponse:
       type: object
       properties:
@@ -3299,45 +3313,131 @@ components:
         nextCursor:
           type: integer
           format: int64
+    NotificationReferenceType:
+      type: string
+      enum:
+      - CHAT_ROOM
+      - PROFILE
+      - COWORKER_REQUEST
+      - OFFER
+      - CONTRACT
+      - CREDENTIAL
+      - RECOMMENDATION
     NotificationResponse:
       type: object
       properties:
         id:
           type: integer
           format: int64
+        memberId:
+          type: integer
+          format: int64
         type:
           type: string
+        senderType:
+          $ref: "#/components/schemas/NotificationSenderType"
+        senderMember:
+          type: "null"
+          $ref: "#/components/schemas/WithdrawableMemberResponse"
+        senderCompany:
+          type: "null"
+          $ref: "#/components/schemas/WithdrawableCompanyResponse"
         message:
           type: string
-        content:
-          type:
-          - string
-          - "null"
         referenceType:
-          type: string
+          type: "null"
+          $ref: "#/components/schemas/NotificationReferenceType"
         referenceId:
           type:
           - integer
           - "null"
           format: int64
-        sender:
-          type: "null"
-          $ref: "#/components/schemas/MemberSummaryResponse"
         read:
           type: boolean
         createdAt:
           type: string
           format: date-time
       required:
-      - content
       - createdAt
       - id
+      - memberId
       - message
       - read
       - referenceId
       - referenceType
-      - sender
+      - senderCompany
+      - senderMember
+      - senderType
       - type
+    NotificationSenderType:
+      type: string
+      enum:
+      - MEMBER
+      - COMPANY
+    WithdrawableCompanyResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        memberId:
+          type:
+          - integer
+          - "null"
+          format: int64
+        name:
+          type:
+          - string
+          - "null"
+        brn:
+          type:
+          - string
+          - "null"
+        picture:
+          type:
+          - string
+          - "null"
+        createdAt:
+          type:
+          - string
+          - "null"
+          format: date-time
+        modifiedAt:
+          type:
+          - string
+          - "null"
+          format: date-time
+      required:
+      - brn
+      - createdAt
+      - id
+      - memberId
+      - modifiedAt
+      - name
+      - picture
+    WithdrawableMemberResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type:
+          - string
+          - "null"
+        name:
+          type:
+          - string
+          - "null"
+        picture:
+          type:
+          - string
+          - "null"
+      required:
+      - id
+      - name
+      - picture
+      - username
     ApiResponseCursorPageMemberResponse:
       type: object
       properties:
@@ -3375,8 +3475,11 @@ components:
           type:
           - string
           - "null"
-        role:
-          $ref: "#/components/schemas/Role"
+        roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Role"
+          uniqueItems: true
         createdAt:
           type: string
           format: date-time
@@ -3390,8 +3493,16 @@ components:
       - name
       - phone
       - picture
-      - role
+      - roles
       - username
+    Role:
+      type: string
+      enum:
+      - SIGNUP
+      - GUEST
+      - CAREER
+      - PLAN
+      - ADMIN
     ApiResponseMemberResponse:
       type: object
       properties:
@@ -3428,6 +3539,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/GroupChatResponse"
+    ChatType:
+      type: string
+      enum:
+      - GROUP
+      - DIRECT
     GroupChatResponse:
       type: object
       properties:
@@ -3469,6 +3585,8 @@ components:
         chatId:
           type: integer
           format: int64
+        chatType:
+          $ref: "#/components/schemas/ChatType"
         memberId:
           type: integer
           format: int64
@@ -3489,6 +3607,7 @@ components:
       required:
       - attachments
       - chatId
+      - chatType
       - content
       - createdAt
       - id
@@ -3503,45 +3622,6 @@ components:
       - FILE
       - SYSTEM
       - OFFER
-    WithdrawableMemberResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        username:
-          type:
-          - string
-          - "null"
-        name:
-          type:
-          - string
-          - "null"
-        picture:
-          type:
-          - string
-          - "null"
-        role:
-          type: "null"
-          $ref: "#/components/schemas/Role"
-        createdAt:
-          type:
-          - string
-          - "null"
-          format: date-time
-        modifiedAt:
-          type:
-          - string
-          - "null"
-          format: date-time
-      required:
-      - createdAt
-      - id
-      - modifiedAt
-      - name
-      - picture
-      - role
-      - username
     ApiResponseGroupChatResponse:
       type: object
       properties:

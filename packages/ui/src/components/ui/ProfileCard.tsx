@@ -15,7 +15,7 @@ export interface ProfileCardMeta {
   region: string
   /** 공종 — primaryTrade 라벨 */
   trade: string
-  /** 등급 — member role 라벨. BE 미제공(#473) 시 생략 */
+  /** 등급 — profile role 라벨. 프로필 미보강 시 생략 */
   role?: string
 }
 

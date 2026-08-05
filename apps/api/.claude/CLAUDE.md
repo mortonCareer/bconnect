@@ -11,14 +11,14 @@
 | 문서 | 설명                              |
 | --- |---------------------------------|
 | [project-structure](../docs/project-structure.md) | 도메인 · 레이어 · 의존성 구조              |
-| [ubiquitous-language](../docs/ubiquitous-language.md) | 도메인 용어 · Enum 값                 |
+| [ubiquitous-language](../../../docs/reference/ubiquitous-language.md) | 도메인 용어 · Enum 값 (루트 docs)     |
 | [attachment-architecture](../docs/attachment-architecture.md) | 첨부파일(Attachment) 생명주기           |
 | [notification-architecture](../docs/notification-architecture.md) | 알림 저장 · 조회 · 푸시(Push)           |
 | [stomp-architecture](../docs/stomp-architecture.md) | 채팅(Chat) · 메시지(Message) STOMP   |
 | [security-architecture](../docs/security-architecture.md) | 인증 · 인가 처리 구조                   |
 | [exception-list](../docs/exception-list.md) | 예외 코드(ExceptionCode) · Prefix 체계 |
 | [test-structure](../docs/test-structure.md) | 테스트 구조                          |
-- `/api/docs` 문서를 SSOT로 간주합니다.
+- 위 표의 문서를 SSOT로 간주합니다. (보편언어는 루트 `/docs/reference`, 나머지는 `/api/docs`)
 - 코드 변경사항에 따른 문서 업데이트 방안을 제안하세요.
 
 ## 탐색
@@ -38,14 +38,15 @@
 - 코드 변경사항 제안시 프로젝트 내부 코드 또는 Best Practice를 기반으로 제안하세요.
 - 코드 변경사항에 따른 레거시 코드와 미사용 import를 제거하세요.
 - 커밋 메시지는 Git 명령어를 사용하지 않고 대화 내역을 바탕으로 제안하세요.
+- 커밋시 단일 파일 내에 서로 다른 변경사항이 혼재하는 경우 제거 → 커밋 → 복원 순서로 진행합니다.
 - 커밋 메시지는 단순한 국문으로 본문 없이 작성합니다.
 - 명시적인 지시가 없다면 주석을 작성하지 마세요.
+- 승인되지 않은 않은 헬퍼 메서드를 작성하지 마세요.
 
 ## 테스트
 - 도메인 객체와 엔티티의 제약을 확인하고 케이스를 도출하세요.
 - 서비스에서 발생하는 에러코드를 확인하고 케이스를 도출하세요.
 - 행위 검증 대신 상태 검증을 수행하세요.
-- 테스트 커버리지 80%를 충족해야 합니다.
 
 ## 디버깅
 - 버그 발생시 최소 재현 케이스를 작성하며 구체적인 원인을 파악합니다.

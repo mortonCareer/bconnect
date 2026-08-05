@@ -3,6 +3,9 @@ package to.bconnect.api.storage;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,18 +18,29 @@ import java.math.BigDecimal;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Address {
+    @NotBlank
+    @Pattern(regexp = "\\d{5}")
     private String zipcode;
 
+    @NotBlank
+    @Pattern(regexp = "\\d{10}")
+    private String bcode;
+
+    @NotNull
     @Enumerated(EnumType.STRING)
     private Region state;
 
+    @NotBlank
     private String city;
 
+    @NotBlank
     private String street;
 
     private String detail;
 
+    @NotNull
     private BigDecimal latitude;
 
+    @NotNull
     private BigDecimal longitude;
 }

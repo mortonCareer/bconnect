@@ -1,4 +1,4 @@
-import { addDays, daysBetween, monthEndOf, monthStartOf, toIsoDate } from '@bconnect/config/date'
+import { addDays, monthEndOf, monthStartOf, toIsoDate } from '@bconnect/config/date'
 
 export const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'] as const
 
@@ -67,13 +67,6 @@ export function clampSegmentToWeek(
 /** 특정 일(iso)이 작업 기간에 포함되는지. */
 export function dayInTask(iso: string, taskStart: string, taskEnd: string): boolean {
   return taskStart <= iso && iso <= taskEnd
-}
-
-/** "12.25 - 12.26 (총 2일 소요)" — 작업기간 표시. */
-export function formatPeriod(start: string, end: string): string {
-  const md = (iso: string) => `${Number(iso.slice(5, 7))}.${Number(iso.slice(8, 10))}`
-  const days = daysBetween(start, end) + 1
-  return `${md(start)} - ${md(end)} (총 ${days}일 소요)`
 }
 
 /** 헤더 표기 — { month: '1월', year: '2025' }. */

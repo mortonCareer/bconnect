@@ -16,7 +16,6 @@ const SCHEMA_KEEP_RESPONSE = new Set([
   'SendOtpResponse',
   'RefreshTokenResponse',
   'RegisterMemberResponse',
-  'RegisterDeviceResponse',
   'VerifyOtpLoginResponse',
   'VerifyOtpSignupResponse',
 ])
@@ -28,8 +27,10 @@ const OPID_SPECIAL: Record<string, string> = {
   'POST /api/v1/auth/logout': 'logout',
   'GET /api/v1/credentials/me': 'getMyCredentials',
   'PUT /api/v1/offers/reorder': 'reorderOffers',
-  // 규칙 파생이 PATCH /notifications/{id}/read(단건) 와 동일한 updateNotificationRead 로 충돌 → 복수형으로 분리
-  'PATCH /api/v1/notifications/read': 'updateNotificationsRead',
+  // 읽음 처리는 POST 액션 엔드포인트지만 의미는 읽음 상태 갱신 → update 동사 유지.
+  // 규칙 파생은 단건(/{id}/read)·전체(/read) 둘 다 createNotificationRead 로 충돌하기도 함
+  'POST /api/v1/notifications/{id}/read': 'updateNotificationRead',
+  'POST /api/v1/notifications/read': 'updateNotificationsRead',
 }
 
 const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'patch', 'options', 'head', 'trace'] as const

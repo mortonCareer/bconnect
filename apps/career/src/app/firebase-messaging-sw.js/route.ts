@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { buildFcmServiceWorker } from '@bconnect/push/server'
+import { REFERENCE_PATHS } from '@/lib/notification-routes'
 
 /**
  * Firebase Cloud Messaging Service Worker 를 동적으로 서빙.
@@ -13,14 +14,17 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   // NOTE: 이 값들은 NEXT_PUBLIC_* 와 동일한 공개 정보 (Firebase Web SDK config).
-  const script = buildFcmServiceWorker({
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? '',
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? '',
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? '',
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? '',
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? '',
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? '',
-  })
+  const script = buildFcmServiceWorker(
+    {
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? '',
+      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? '',
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? '',
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? '',
+      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? '',
+      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? '',
+    },
+    REFERENCE_PATHS
+  )
 
   return new NextResponse(script, {
     headers: {
