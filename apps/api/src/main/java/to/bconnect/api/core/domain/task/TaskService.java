@@ -183,6 +183,9 @@ public class TaskService {
             projectFinder.validateOwnership(user.id(), found.getProjectId());
         }
 
+        if (TaskStatus.ENGAGED.contains(found.getStatus()))
+            throw new CodeException(TaskExceptionCode.OFFERED_EXISTS);
+
         offerRepository.deleteAllByTaskId(found.getId());
         postRepository.findAllByTaskId(found.getId())
                 .forEach(PostEntity::detachTask);

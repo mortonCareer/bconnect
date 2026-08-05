@@ -1791,6 +1791,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/group-chats/{id}/me:
+    delete:
+      tags:
+      - group-chat-controller
+      operationId: leave
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/drives/{id}:
     delete:
       tags:
@@ -2445,7 +2464,13 @@ components:
         name:
           type: string
           minLength: 1
+        birth:
+          type: string
+          format: date
+        marketingConsent:
+          type: boolean
       required:
+      - birth
       - name
       - username
     ApiResponseRegisterMemberResponse:
@@ -3471,6 +3496,11 @@ components:
           type: string
         phone:
           type: string
+        birth:
+          type: string
+          format: date
+        marketingConsent:
+          type: boolean
         picture:
           type:
           - string
@@ -3487,8 +3517,10 @@ components:
           type: string
           format: date-time
       required:
+      - birth
       - createdAt
       - id
+      - marketingConsent
       - modifiedAt
       - name
       - phone
@@ -3677,7 +3709,7 @@ components:
       type: object
       properties:
         member:
-          $ref: "#/components/schemas/MemberSummaryResponse"
+          $ref: "#/components/schemas/WithdrawableMemberResponse"
         profile:
           $ref: "#/components/schemas/ProfileSummaryResponse"
         post:

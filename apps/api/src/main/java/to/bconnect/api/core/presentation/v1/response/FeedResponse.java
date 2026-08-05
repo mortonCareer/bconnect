@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public record FeedResponse(
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) MemberSummaryResponse member,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) WithdrawableMemberResponse member,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ProfileSummaryResponse profile,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) PostResponse post,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) TaskResponse task
@@ -20,7 +20,7 @@ public record FeedResponse(
     public static FeedResponse of(Post post, Member member, Profile profile, Task task, Address address,
                                   List<Attachment> attachments, Map<Long, String> urls, String picture) {
         return new FeedResponse(
-                MemberSummaryResponse.of(member, picture),
+                WithdrawableMemberResponse.of(member, picture),
                 ProfileSummaryResponse.of(profile),
                 PostResponse.of(post, attachments, urls),
                 task == null ? null : TaskResponse.of(task, address)

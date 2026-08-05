@@ -469,4 +469,38 @@ class TaskServiceTest {
                 .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
     }
 
+    @Test
+    @DisplayName("delete - 섭외 중인 작업일 때 삭제하면 OFFERED_EXISTS로 실패한다")
+    void delete_fail_T003_offered() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.PLAN));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        task.offered();
+        val user = UserFactory.domain(member.getId(), Role.PLAN);
+
+        // when & then
+        assertCodeException(() -> taskService.delete(user, task.getId()))
+                .hasExceptionCode(TaskExceptionCode.OFFERED_EXISTS);
+    }
+
+    @Test
+    @DisplayName("delete - 배정된 작업일 때 삭제하면 OFFERED_EXISTS로 실패한다")
+    void delete_fail_T003_assigned() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.PLAN));
+        val worker = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        task.offered();
+        task.assign(worker.getId());
+        val user = UserFactory.domain(owner.getId(), Role.PLAN);
+
+        // when & then
+        assertCodeException(() -> taskService.delete(user, task.getId()))
+                .hasExceptionCode(TaskExceptionCode.OFFERED_EXISTS);
+    }
+
 }

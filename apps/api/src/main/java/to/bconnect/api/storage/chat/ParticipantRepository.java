@@ -22,4 +22,6 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
     Optional<ParticipantEntity> findByChatIdAndMemberId(Long chatId, Long memberId);
 
     boolean existsByChatIdAndMemberId(Long chatId, Long memberId);
+
+    long countByChatId(Long chatId);
 }

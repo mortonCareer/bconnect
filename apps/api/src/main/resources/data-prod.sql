@@ -2,9 +2,9 @@
 -- 실제 데이터 (1000 ~)
 
 -- 운영 데이터 (0 ~ 99)
-INSERT INTO members (id, username, name, phone, created_at, modified_at) VALUES
-(0, 'system', '시스템', '01000000000', now(), now()),
-(1, 'admin', '관리자', '01083358632', now(), now());
+INSERT INTO members (id, username, name, phone, birth, marketing_consent, created_at, modified_at) VALUES
+(0, 'system', '시스템', '01000000000', DATE '1970-01-01', false, now(), now()),
+(1, 'admin', '관리자', '01083358632', DATE '1990-03-15', true, now(), now());
 
 INSERT INTO member_roles (member_id, role) VALUES
 (0, 'ADMIN'),
