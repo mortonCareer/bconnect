@@ -31,6 +31,8 @@ export interface ChatViewData {
   isOfferDetailsLoading?: boolean
   /** 섭외 상세 조회 실패 — 채팅 자체는 유지하고 OFFER 카드 안에서 상태 표시 */
   isOfferDetailsError?: boolean
+  /** OFFER 카드에 표시할 업체명 — 앱이 offer 소속 task 의 projectCompanyName 으로 resolve */
+  companyName?: string
   isLoading: boolean
   isError: boolean
 }
@@ -87,6 +89,7 @@ export function ChatView(props: ChatViewProps) {
     offerDetails,
     isOfferDetailsLoading,
     isOfferDetailsError,
+    companyName,
     isLoading,
     isError,
   } = data
@@ -179,9 +182,7 @@ export function ChatView(props: ChatViewProps) {
         isOfferDetailsLoading={isOfferDetailsLoading}
         isOfferDetailsError={isOfferDetailsError}
         offerActions={offerActions}
-        // TODO(BE): 섭외/작업 응답에 업체명 필드가 없어 companyName 을 주입하지 못한다.
-        // 채팅 상대 이름은 업체가 아니라 담당자 개인명이라 대체 불가 — 카드가 placeholder 로 렌더된다.
-        // BE 에 필드가 추가되면 여기서 companyName 을 넘길 것.
+        companyName={companyName}
       />
       <ChatInput
         value={message}

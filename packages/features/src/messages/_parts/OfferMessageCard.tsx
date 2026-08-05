@@ -23,10 +23,7 @@ export interface OfferMessageDetail {
 export interface OfferMessageCardProps {
   /** 미주입 시 상세 행 없이 안내만 — offerId 원문(숫자)은 절대 노출하지 않는다. */
   detail?: OfferMessageDetail
-  /**
-   * 제안한 업체명. 지금은 앱이 넘기지 않아 항상 placeholder 로 렌더된다.
-   * BE 가 업체명을 내려주면 이 prop 만 채우면 된다 — COMPANY_NAME_PLACEHOLDER 주석 참고.
-   */
+  /** 제안한 업체명. 앱이 offer 소속 task 의 projectCompanyName 으로 resolve 해 내려준다. */
   companyName?: string
   /** 수락 핸들러. 미주입이면 버튼 없음 (plan = 읽기전용). */
   onAccept?: () => void
@@ -40,13 +37,6 @@ export interface OfferMessageCardProps {
   /** 현재 카드에서 처리 중인 액션 — 해당 버튼에 spinner 표시 */
   pendingAction?: OfferActionKind | null
 }
-
-/**
- * TODO(BE): 섭외/작업 응답에 업체명 필드가 없다. 채팅 상대 이름으로 대체하면 업체가 아니라
- * 담당자 개인명이 "업체명"으로 찍히므로, 필드가 생길 때까지 시안의 placeholder 를 그대로 쓴다.
- * BE 에 업체명이 추가되면 이 상수를 지우고 ChatView 에서 companyName 을 주입할 것.
- */
-const COMPANY_NAME_PLACEHOLDER = 'OOO업체'
 
 /** ACTIVE(응답 대기) 외 상태는 버튼 대신 결과 텍스트로 표시. */
 const STATUS_LABELS: Partial<Record<OfferStatus, string>> = {
@@ -105,7 +95,6 @@ export function OfferMessageCard({
   isActionDisabled,
   pendingAction,
 }: OfferMessageCardProps) {
-  const company = companyName || COMPANY_NAME_PLACEHOLDER
   const address = detail?.address
   const trades = detail?.trades ?? []
   const canAct = detail?.status === OfferStatus.ACTIVE && (onAccept != null || onDeny != null)
@@ -120,13 +109,15 @@ export function OfferMessageCard({
     <div className="max-w-75 rounded-tr-xl rounded-br-xl rounded-bl-xl bg-gray-100 px-4 py-3 break-keep">
       {/* 시안 타이틀은 Bold(700). 토큰 text-sb-14 는 600 이라 weight 만 덮는다 */}
       <p className="text-sb-14 font-bold! text-gray-900">
-        {withParticle(company, '으로부터', '로부터', true)} 섭외가 제안되었습니다
+        {companyName
+          ? `${withParticle(companyName, '으로부터', '로부터', true)} 섭외가 제안되었습니다`
+          : '섭외가 제안되었습니다'}
       </p>
 
       {detail ? (
         // 시안(1572:13097)은 타이틀 바로 아래에 행이 붙는다 — 사이 여백 없음
         <div>
-          <Row label="업체명">{company}</Row>
+          {companyName && <Row label="업체명">{companyName}</Row>}
           {detail.start && detail.end && (
             <Row label="작업기간">{formatPeriod(detail.start, detail.end)}</Row>
           )}
