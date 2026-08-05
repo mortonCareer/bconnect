@@ -1,7 +1,13 @@
 'use client'
 
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@bconnect/ui'
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+  useDocumentTitle,
+} from '@bconnect/ui'
 import { FolderImagesView } from '@bconnect/features'
+import { useGetProject } from '@bconnect/api-client'
 import { StorageHeader } from './StorageHeader'
 import { StorageMemoPanel } from './StorageMemoPanel'
 import { StorageFileDetail } from './StorageFileDetail'
@@ -12,7 +18,11 @@ import { useStorageParams } from '../_hooks/useStorageParams'
 export function StorageFolder({ projectId, folderId }: { projectId: string; folderId: string }) {
   const [{ file }] = useStorageParams()
   const { data: images, isLoading, isError } = useFolderImages(folderId)
+  const { data: project } = useGetProject(Number(projectId))
   const basePath = `/projects/${projectId}/storage/${folderId}`
+
+  // 탭 title 에 프로젝트명 반영 (리뷰 반영, #785). 로딩 전엔 static fallback('저장소') 유지.
+  useDocumentTitle(project ? `${project.title} - 저장소` : undefined)
 
   return (
     <div className="flex h-full flex-col">

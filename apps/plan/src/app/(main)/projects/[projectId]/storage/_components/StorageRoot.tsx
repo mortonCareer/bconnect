@@ -10,9 +10,11 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
   TrashIcon,
+  useDocumentTitle,
 } from '@bconnect/ui'
 import { StorageExplorerView } from '@bconnect/features'
 import type { Folder } from '@bconnect/features'
+import { useGetProject } from '@bconnect/api-client'
 import { StorageHeader } from './StorageHeader'
 import { useFolderMutations, useFolders } from '@/lib/storage/hooks'
 
@@ -23,6 +25,10 @@ export function StorageRoot({ projectId }: { projectId: string }) {
   const [creating, setCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [pendingDelete, setPendingDelete] = useState<Folder | null>(null)
+  const { data: project } = useGetProject(Number(projectId))
+
+  // 탭 title 에 프로젝트명 반영 (리뷰 반영, #785). 로딩 전엔 static fallback('저장소') 유지.
+  useDocumentTitle(project ? `${project.title} - 저장소` : undefined)
 
   return (
     <div className="flex h-full flex-col">
