@@ -3353,6 +3353,7 @@ components:
       - CONTRACT
       - CREDENTIAL
       - RECOMMENDATION
+      - TASK
     NotificationResponse:
       type: object
       properties:
