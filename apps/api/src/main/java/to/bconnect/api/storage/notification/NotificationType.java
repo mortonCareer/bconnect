@@ -9,8 +9,6 @@ public enum NotificationType {
 
     SIGNUP_WELCOME("회원가입을 축하드립니다"),
 
-    PROFILE_COMPLETION("프로필을 완성하고 업체로부터 일감을 받아보세요"),
-
     PROFILE_COMPLETED("프로필이 완성되었습니다"),
 
     NEW_DEVICE_LOGIN("새로운 기기에서 로그인되었습니다"),

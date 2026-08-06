@@ -74,7 +74,6 @@ graph LR
 |---|---|---|---|---|
 | CHAT_MESSAGE | MEMBER | CHAT_ROOM | `%s님이 메시지를 보냈습니다` | ✅ SocketMessageSentEvent |
 | SIGNUP_WELCOME | — | — | `회원가입을 축하드립니다` | ✅ MemberRegisteredEvent, 항상 |
-| PROFILE_COMPLETION | — | PROFILE | `프로필을 완성하고 업체로부터 일감을 받아보세요` | ✅ MemberRegisteredEvent, 프로필 미완성 시 |
 | PROFILE_COMPLETED | — | PROFILE | `프로필이 완성되었습니다` | ✅ ProfileCreatedEvent |
 | NEW_DEVICE_LOGIN | — | — | `새로운 기기에서 로그인되었습니다` | ✅ NewDeviceLoginEvent |
 | DEVICE_REGISTERED | — | — | `알림 수신 설정이 완료되었습니다` | ✅ DeviceRegisteredEvent, 신규 토큰 등록 시 (refresh 제외) |
@@ -96,7 +95,6 @@ graph LR
 
 - 이동 정보는 `referenceType` 과 `referenceId` 로만 표현한다. BE 는 딥링크 URL 을 조립하지 않는다.
 - 발신자명은 저장하지 않고 `senderType` 기준으로 resolve 한다.
-- PROFILE_COMPLETION 은 가입 시 미완성 프로필 **유도**, PROFILE_COMPLETED 는 프로필 생성 시점 **완성 확인** 용도로 구분된다.
 - DEVICE_REGISTERED 는 수신자의 모든 활성 device 로 발송된다 (신규 device 한정 발송은 `notify` 인프라 확장이 필요해 수용하지 않음).
 - NewDeviceLoginEvent 는 SMS(SmsEventListener)와 푸시(NotificationEventListener)가 함께 구독한다.
 
@@ -106,7 +104,6 @@ graph LR
 |---|-----------|--------------------|--------|---|---|
 | CHAT_MESSAGE | 실시간 채팅    | `memberId`         | 사용자 발신 | ✅ | ❌ |
 | SIGNUP_WELCOME | 회원가입      | —                  | —      | ✅ | ✅ |
-| PROFILE_COMPLETION | 회원가입      | —                  | —      | ✅ | ✅ |
 | PROFILE_COMPLETED | 프로필 생성    | —                  | —      | ✅ | ✅ |
 | NEW_DEVICE_LOGIN | 새로운 기기 로그인 | —                  | —      | ✅ | ✅ |
 | DEVICE_REGISTERED | 디바이스 등록   | —                  | —      | ✅ | ✅ |

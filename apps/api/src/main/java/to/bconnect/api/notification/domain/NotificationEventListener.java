@@ -21,7 +21,6 @@ import to.bconnect.api.socket.message.SocketMessageSentEvent;
 import to.bconnect.api.storage.notification.NotificationReferenceType;
 import to.bconnect.api.storage.notification.NotificationSenderType;
 import to.bconnect.api.storage.notification.NotificationType;
-import to.bconnect.api.storage.profile.ProfileRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,6 @@ import java.util.List;
 public class NotificationEventListener {
 
     private final MemberResolver memberResolver;
-    private final ProfileRepository profileRepository;
     private final CompanyService companyService;
     private final CompanyFinder companyFinder;
     private final NotificationService notificationService;
@@ -59,8 +57,6 @@ public class NotificationEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleMemberRegistered(MemberRegisteredEvent event) {
-        val notifications = new ArrayList<PushNotification>();
-
         val welcome = new PushNotification(
                 event.memberId(),
                 NotificationType.SIGNUP_WELCOME,
@@ -70,22 +66,8 @@ public class NotificationEventListener {
                 null,
                 null,
                 null);
-        notifications.add(welcome);
 
-        if (!profileRepository.existsByMemberId(event.memberId())) {
-            val profile = new PushNotification(
-                    event.memberId(),
-                    NotificationType.PROFILE_COMPLETION,
-                    null,
-                    null,
-                    null,
-                    NotificationReferenceType.PROFILE,
-                    null,
-                    null);
-            notifications.add(profile);
-        }
-
-        notificationService.notify(notifications);
+        notificationService.notify(List.of(welcome));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
