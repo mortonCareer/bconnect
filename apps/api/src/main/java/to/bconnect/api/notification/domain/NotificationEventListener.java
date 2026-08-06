@@ -33,6 +33,7 @@ public class NotificationEventListener {
     private final CompanyService companyService;
     private final CompanyFinder companyFinder;
     private final NotificationService notificationService;
+    private final NotificationPushService notificationPushService;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleSocketMessageSent(SocketMessageSentEvent event) {
@@ -42,8 +43,9 @@ public class NotificationEventListener {
         val message = event.message();
         val senderName = memberResolver.getOrWithdrawn(message.memberId()).name();
 
-        notificationService.notify(receivers.stream()
+        val commands = receivers.stream()
                 .map(receiverId -> new PushNotification(
+                        null,
                         receiverId,
                         NotificationType.CHAT_MESSAGE,
                         NotificationSenderType.MEMBER,
@@ -52,12 +54,16 @@ public class NotificationEventListener {
                         NotificationReferenceType.CHAT_ROOM,
                         message.chatId(),
                         message.content()))
-                .toList());
+                .toList();
+
+        val created = notificationService.create(commands);
+        notificationPushService.push(PushNotification.of(created, commands));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleMemberRegistered(MemberRegisteredEvent event) {
         val welcome = new PushNotification(
+                null,
                 event.memberId(),
                 NotificationType.SIGNUP_WELCOME,
                 null,
@@ -67,14 +73,17 @@ public class NotificationEventListener {
                 null,
                 null);
 
-        notificationService.notify(List.of(welcome));
+        val commands = List.of(welcome);
+        val created = notificationService.create(commands);
+        notificationPushService.push(PushNotification.of(created, commands));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleRecommendationWritten(RecommendationWrittenEvent event) {
         val senderName = memberResolver.getOrWithdrawn(event.fromId()).name();
 
-        notificationService.notify(List.of(new PushNotification(
+        val commands = List.of(new PushNotification(
+                null,
                 event.toId(),
                 NotificationType.RECOMMENDATION_WRITTEN,
                 NotificationSenderType.MEMBER,
@@ -82,14 +91,18 @@ public class NotificationEventListener {
                 senderName,
                 NotificationReferenceType.RECOMMENDATION,
                 event.recommendationId(),
-                null)));
+                null));
+
+        val created = notificationService.create(commands);
+        notificationPushService.push(PushNotification.of(created, commands));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCoworkerRequested(CoworkerRequestedEvent event) {
         val senderName = memberResolver.getOrWithdrawn(event.fromId()).name();
 
-        notificationService.notify(List.of(new PushNotification(
+        val commands = List.of(new PushNotification(
+                null,
                 event.toId(),
                 NotificationType.COWORKER_REQUESTED,
                 NotificationSenderType.MEMBER,
@@ -97,14 +110,18 @@ public class NotificationEventListener {
                 senderName,
                 NotificationReferenceType.COWORKER_REQUEST,
                 event.requestId(),
-                null)));
+                null));
+
+        val created = notificationService.create(commands);
+        notificationPushService.push(PushNotification.of(created, commands));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCoworkerAccepted(CoworkerAcceptedEvent event) {
         val senderName = memberResolver.getOrWithdrawn(event.toId()).name();
 
-        notificationService.notify(List.of(new PushNotification(
+        val commands = List.of(new PushNotification(
+                null,
                 event.fromId(),
                 NotificationType.COWORKER_ACCEPTED,
                 NotificationSenderType.MEMBER,
@@ -112,35 +129,41 @@ public class NotificationEventListener {
                 senderName,
                 null,
                 null,
-                null)));
+                null));
+
+        val created = notificationService.create(commands);
+        notificationPushService.push(PushNotification.of(created, commands));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleOfferEvent(OfferEvent event) {
-        val notifications = new ArrayList<PushNotification>();
+        val commands = new ArrayList<PushNotification>();
 
         switch (event.status()) {
             case ACTIVE -> {
-                notifications.add(toWorker(NotificationType.OFFER_RECEIVED, event));
-                notifications.add(toCompanyOwner(NotificationType.OFFER_SENT, event));
+                commands.add(toWorker(NotificationType.OFFER_RECEIVED, event));
+                commands.add(toCompanyOwner(NotificationType.OFFER_SENT, event));
             }
             case ACCEPTED -> {
-                notifications.add(toCompanyOwner(NotificationType.OFFER_ACCEPTED, event));
-                notifications.add(toWorker(NotificationType.OFFER_ACCEPT_COMPLETED, event));
+                commands.add(toCompanyOwner(NotificationType.OFFER_ACCEPTED, event));
+                commands.add(toWorker(NotificationType.OFFER_ACCEPT_COMPLETED, event));
             }
-            case DENIED -> notifications.add(toCompanyOwner(NotificationType.OFFER_DENIED, event));
+            case DENIED -> commands.add(toCompanyOwner(NotificationType.OFFER_DENIED, event));
             default -> { }
         }
 
-        if (notifications.isEmpty()) return;
-        notificationService.notify(notifications);
+        if (commands.isEmpty()) return;
+
+        val created = notificationService.create(commands);
+        notificationPushService.push(PushNotification.of(created, commands));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTaskEvent(TaskEvent event) {
         val company = companyFinder.getByTaskId(event.taskId());
 
-        notificationService.notify(List.of(new PushNotification(
+        val commands = List.of(new PushNotification(
+                null,
                 event.workerId(),
                 NotificationType.TASK_UPDATED,
                 NotificationSenderType.COMPANY,
@@ -148,12 +171,16 @@ public class NotificationEventListener {
                 company.name(),
                 NotificationReferenceType.TASK,
                 event.taskId(),
-                null)));
+                null));
+
+        val created = notificationService.create(commands);
+        notificationPushService.push(PushNotification.of(created, commands));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleProfileCreated(ProfileCreatedEvent event) {
-        notificationService.notify(List.of(new PushNotification(
+        val commands = List.of(new PushNotification(
+                null,
                 event.memberId(),
                 NotificationType.PROFILE_COMPLETED,
                 null,
@@ -161,7 +188,10 @@ public class NotificationEventListener {
                 null,
                 NotificationReferenceType.PROFILE,
                 null,
-                null)));
+                null));
+
+        val created = notificationService.create(commands);
+        notificationPushService.push(PushNotification.of(created, commands));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -173,7 +203,8 @@ public class NotificationEventListener {
         };
         if (type == null) return;
 
-        notificationService.notify(List.of(new PushNotification(
+        val commands = List.of(new PushNotification(
+                null,
                 event.memberId(),
                 type,
                 null,
@@ -181,12 +212,16 @@ public class NotificationEventListener {
                 null,
                 NotificationReferenceType.CREDENTIAL,
                 event.credentialId(),
-                null)));
+                null));
+
+        val created = notificationService.create(commands);
+        notificationPushService.push(PushNotification.of(created, commands));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDeviceRegistered(DeviceRegisteredEvent event) {
-        notificationService.notify(List.of(new PushNotification(
+        val commands = List.of(new PushNotification(
+                null,
                 event.memberId(),
                 NotificationType.DEVICE_REGISTERED,
                 null,
@@ -194,12 +229,16 @@ public class NotificationEventListener {
                 null,
                 null,
                 null,
-                null)));
+                null));
+
+        val created = notificationService.create(commands);
+        notificationPushService.push(PushNotification.of(created, commands));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleNewDeviceLogin(NewDeviceLoginEvent event) {
-        notificationService.notify(List.of(new PushNotification(
+        val commands = List.of(new PushNotification(
+                null,
                 event.memberId(),
                 NotificationType.NEW_DEVICE_LOGIN,
                 null,
@@ -207,12 +246,16 @@ public class NotificationEventListener {
                 null,
                 null,
                 null,
-                null)));
+                null));
+
+        val created = notificationService.create(commands);
+        notificationPushService.push(PushNotification.of(created, commands));
     }
 
     private PushNotification toWorker(NotificationType type, OfferEvent event) {
         val company = companyService.getOrWithdrawn(event.companyId());
         return new PushNotification(
+                null,
                 event.workerId(),
                 type,
                 NotificationSenderType.COMPANY,
@@ -225,6 +268,7 @@ public class NotificationEventListener {
 
     private PushNotification toCompanyOwner(NotificationType type, OfferEvent event) {
         return new PushNotification(
+                null,
                 event.companyOwnerId(),
                 type,
                 NotificationSenderType.MEMBER,

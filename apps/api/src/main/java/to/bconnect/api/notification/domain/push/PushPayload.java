@@ -14,9 +14,9 @@ public record PushPayload(
 ) {
     private static final int PREVIEW_MAX = 100;
 
-    public static PushPayload of(Long id, PushNotification command) {
+    public static PushPayload of(PushNotification command) {
         return new PushPayload(
-                id,
+                command.id(),
                 command.type().render(command.senderName()),
                 truncate(command.body(), PREVIEW_MAX),
                 command.referenceType(),
