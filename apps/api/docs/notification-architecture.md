@@ -6,28 +6,28 @@
 
 ```mermaid
 sequenceDiagram
-    participant Pub as 발행 도메인 서비스 (MessageSocketService · MemberService · SessionService · CredentialService · ProfileService · OfferService · TaskService · CoworkerRequestService · RecommendationService · DeviceService)
+    participant Pub as Domain Services
     participant Listener as NotificationEventListener
     participant Svc as NotificationService
     participant Repo as NotificationRepository
     participant Device as DeviceService
     participant Sender as PushSender
 
-    Pub->>Listener: 도메인 이벤트 (아래 타입 정의 테이블의 트리거)
+    Pub->>Listener: 도메인 이벤트
     Listener->>Listener: 발신자명 resolve
-    Listener->>Svc: notify (PushNotification 목록)
+    Listener->>Svc: notify (command)
     Svc->>Repo: saveAll
-    Repo-->>Svc: 저장본 id
+    Repo-->>Svc: 엔티티 id
     Svc->>Svc: PushPayload 조립
     Svc->>Device: 활성 device 조회
     Svc->>Sender: send (endpoint · payload)
     Sender-->>Svc: PushSendResult
-    Svc->>Svc: EXPIRED · INVALID 시 device.disable
+    Svc->>Svc: 예외 발생시 device.disable
 ```
 
 | 단계 | 처리 | DB | Push |
 |---|---|---|---|
-| trigger | 도메인 상태 변경 커밋 후 이벤트 발행 (예: 채팅 저장 → `SocketMessageSentEvent`, 회원가입 → `MemberRegisteredEvent`) | 발행 도메인 테이블 | - |
+| trigger | 도메인 상태 변경 커밋 후 이벤트 발행 (예: 채팅 저장 → `SocketMessageSentEvent`) | 발행 도메인 테이블 | - |
 | listen | `AFTER_COMMIT` 리스너가 이벤트별로 `PushNotification` 커맨드 조립 | - | - |
 | save | 커맨드 → 엔티티 변환 후 `saveAll` | notifications | - |
 | render | 저장본 id 와 커맨드로 `PushPayload` 조립. 미리보기 100자 절단 | - | - |
@@ -67,7 +67,6 @@ graph LR
 
 - 커맨드와 페이로드 분리로 저장 전 객체가 발송에 넘어가는 경로를 타입으로 차단한다.
 - 문구 조립은 `NotificationType.render(senderName)` 이 단독 소유한다.
-- 목록 응답의 발신자 이미지는 `AttachmentUrlService` 로 `MEMBER` · `COMPANY` referenceType 별 조회해 senderMember · senderCompany 의 picture 에 주입하고, 두 scope 의 signed cookie 를 함께 발급한다.
 
 ## 타입 정의
 
@@ -86,7 +85,7 @@ graph LR
 | OFFER_RECEIVED | COMPANY | OFFER | `%s으로부터 섭외 요청을 제안받았습니다` | ✅ OfferEvent ACTIVE → 기술자 |
 | OFFER_SENT | MEMBER | OFFER | `%s님에게 섭외 요청이 전달되었습니다` | ✅ OfferEvent ACTIVE → 업체 대표 |
 | OFFER_ACCEPTED | MEMBER | OFFER | `%s님이 섭외 요청을 수락했습니다` | ✅ OfferEvent ACCEPTED → 업체 대표 |
-| OFFER_ACCEPT_COMPLETED | COMPANY | OFFER | `%s의 섭외 요청을 수락했습니다` | ✅ OfferEvent ACCEPTED → 기술자 |
+| OFFER_ACCEPT_COMPLETED | COMPANY | OFFER | `%s로부터의 섭외 요청이 수락되었습니다.` | ✅ OfferEvent ACCEPTED → 기술자 |
 | OFFER_DENIED | MEMBER | OFFER | `%s님이 섭외 요청을 거절했습니다` | ✅ OfferEvent DENIED → 업체 대표 (PENDING·EXPIRED·CANCELED 는 무음) |
 | RECOMMENDATION_WRITTEN | MEMBER | RECOMMENDATION | `%s 님으로부터 추천서를 작성받았습니다` | ✅ RecommendationWrittenEvent |
 | CONTRACT_WRITTEN | MEMBER | CONTRACT | `%s 님으로부터 계약서를 작성받았습니다` | ⬜ 미배선 |
@@ -100,6 +99,33 @@ graph LR
 - PROFILE_COMPLETION 은 가입 시 미완성 프로필 **유도**, PROFILE_COMPLETED 는 프로필 생성 시점 **완성 확인** 용도로 구분된다.
 - DEVICE_REGISTERED 는 수신자의 모든 활성 device 로 발송된다 (신규 device 한정 발송은 `notify` 인프라 확장이 필요해 수용하지 않음).
 - NewDeviceLoginEvent 는 SMS(SmsEventListener)와 푸시(NotificationEventListener)가 함께 구독한다.
+
+## 발행 이벤트 유형
+
+| 이벤트 타입 | 트리거       | senderId           | 메시지 유형 | 알림 | 영속화 |
+|---|-----------|--------------------|--------|---|---|
+| CHAT_MESSAGE | 실시간 채팅    | `memberId`         | 사용자 발신 | ✅ | ❌ |
+| SIGNUP_WELCOME | 회원가입      | —                  | —      | ✅ | ✅ |
+| PROFILE_COMPLETION | 회원가입      | —                  | —      | ✅ | ✅ |
+| PROFILE_COMPLETED | 프로필 생성    | —                  | —      | ✅ | ✅ |
+| NEW_DEVICE_LOGIN | 새로운 기기 로그인 | —                  | —      | ✅ | ✅ |
+| DEVICE_REGISTERED | 디바이스 등록   | —                  | —      | ✅ | ✅ |
+| CREDENTIAL_ACCEPTED | 자격 증명 승인  | —                  | —      | ✅ | ✅ |
+| CREDENTIAL_DENIED | 자격 증명 반려  | —                  | —      | ✅ | ✅ |
+| COWORKER_REQUESTED | 동료 요청 생성  | `fromId`           | —      | ✅ | ✅ |
+| COWORKER_ACCEPTED | 동료 요청 승낙  | `toId`             | —      | ✅ | ✅ |
+| OFFER_RECEIVED | 섭외 생성     | `companyId`        | OFFER  | ✅ | ✅ |
+| OFFER_SENT | 섭외 생성     | `workerId`         | OFFER  | ✅ | ✅ |
+| OFFER_ACCEPTED | 섭외 승낙     | `workerId`         | SYSTEM | ✅ | ✅ |
+| OFFER_ACCEPT_COMPLETED | 섭외 승낙     | `companyId`        | SYSTEM | ✅ | ✅ |
+| OFFER_DENIED | 섭외 거절     | `workerId`         | —      | ✅ | ✅ |
+| OFFER_EXPIRED | 섭외 만료 배치  | —                  | SYSTEM | ❌ | ❌ |
+| RECOMMENDATION_WRITTEN | 추천서 생성    | `fromId`           | —      | ✅ | ✅ |
+| TASK_UPDATED | 업체 작업 수정  | `companyId`        | SYSTEM | ✅ | ✅ |
+| CONTRACT_WRITTEN | 미배선       | —                  | —      | — | — |
+| TASK_COMPLETED | 미배선       | —                  | —      | — | — |
+| DRIVE_SHARED | 미배선       | —                  | —      | — | — |
+| DRIVE_NOTE_CREATED | 미배선       | —                  | —      | — | — |
 
 ## Push Payload (FCM v1)
 `MessageStructure=json` 으로 최상위 `default` · `GCM` 키를 발송한다. `GCM` 값은 FCM v1 `fcmV1Message` 래퍼다.
@@ -132,7 +158,6 @@ graph LR
 2. 필요 시 `NotificationReferenceType` 에 이동 화면 추가
 3. 발행 패키지에 이벤트 record 정의 · 발행
 4. `NotificationEventListener` 에 `@TransactionalEventListener(AFTER_COMMIT)` 메서드 추가 · `notify` 호출
-5. 시스템 알림은 `senderType` · `senderId` · `senderName` · `referenceType` = null
 
 ## 래퍼런스
 - [Spring Framework : Transaction-bound Events](https://docs.spring.io/spring-framework/reference/data-access/transaction/event.html)

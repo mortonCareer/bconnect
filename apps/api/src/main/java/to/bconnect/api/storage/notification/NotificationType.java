@@ -31,7 +31,7 @@ public enum NotificationType {
 
     OFFER_ACCEPTED("%s님이 섭외 요청을 수락했습니다"),
 
-    OFFER_ACCEPT_COMPLETED("%s의 섭외 요청을 수락했습니다"),
+    OFFER_ACCEPT_COMPLETED("%s로부터의 섭외 요청이 수락되었습니다."),
 
     OFFER_DENIED("%s님이 섭외 요청을 거절했습니다"),
 

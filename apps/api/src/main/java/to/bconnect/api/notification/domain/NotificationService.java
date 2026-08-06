@@ -27,6 +27,7 @@ public class NotificationService {
     public void notify(List<PushNotification> commands) {
         if (commands.isEmpty()) return;
 
+        // persist
         val saved = notificationRepository.saveAll(commands.stream()
                 .map(it -> new NotificationEntity(
                         it.memberId(),
@@ -38,6 +39,7 @@ public class NotificationService {
                         false))
                 .toList());
 
+        // push notification
         for (int i = 0; i < saved.size(); i++) {
             val command = commands.get(i);
             val entity = saved.get(i);
