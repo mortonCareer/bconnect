@@ -53,11 +53,10 @@ public class NotificationEventListener {
                 .map(it -> new PushNotification(
                         it.id(),
                         it.memberId(),
-                        it.type(),
+                        it.type().render(null),
                         null,
                         it.referenceType(),
-                        it.referenceId(),
-                        null))
+                        it.referenceId()))
                 .toList();
         notificationPushService.push(pushCommands);
     }
@@ -78,11 +77,10 @@ public class NotificationEventListener {
                 .map(it -> new PushNotification(
                         it.id(),
                         it.memberId(),
-                        it.type(),
-                        senderName,
+                        it.type().render(senderName),
+                        null,
                         it.referenceType(),
-                        it.referenceId(),
-                        null))
+                        it.referenceId()))
                 .toList();
         notificationPushService.push(pushCommands);
     }
@@ -103,11 +101,10 @@ public class NotificationEventListener {
                 .map(it -> new PushNotification(
                         it.id(),
                         it.memberId(),
-                        it.type(),
-                        senderName,
+                        it.type().render(senderName),
+                        null,
                         it.referenceType(),
-                        it.referenceId(),
-                        null))
+                        it.referenceId()))
                 .toList();
         notificationPushService.push(pushCommands);
     }
@@ -128,11 +125,10 @@ public class NotificationEventListener {
                 .map(it -> new PushNotification(
                         it.id(),
                         it.memberId(),
-                        it.type(),
-                        senderName,
+                        it.type().render(senderName),
+                        null,
                         it.referenceType(),
-                        it.referenceId(),
-                        null))
+                        it.referenceId()))
                 .toList();
         notificationPushService.push(pushCommands);
     }
@@ -172,11 +168,11 @@ public class NotificationEventListener {
                 .map(it -> new PushNotification(
                         it.id(),
                         it.memberId(),
-                        it.type(),
-                        it.senderType() == NotificationSenderType.COMPANY ? company.name() : workerName,
+                        it.type().render(
+                                it.senderType() == NotificationSenderType.COMPANY ? company.name() : workerName),
+                        null,
                         it.referenceType(),
-                        it.referenceId(),
-                        null))
+                        it.referenceId()))
                 .toList();
         notificationPushService.push(pushCommands);
     }
@@ -197,11 +193,10 @@ public class NotificationEventListener {
                 .map(it -> new PushNotification(
                         it.id(),
                         it.memberId(),
-                        it.type(),
-                        company.name(),
+                        it.type().render(company.name()),
+                        null,
                         it.referenceType(),
-                        it.referenceId(),
-                        null))
+                        it.referenceId()))
                 .toList();
         notificationPushService.push(pushCommands);
     }
@@ -221,11 +216,10 @@ public class NotificationEventListener {
                 .map(it -> new PushNotification(
                         it.id(),
                         it.memberId(),
-                        it.type(),
+                        it.type().render(null),
                         null,
                         it.referenceType(),
-                        it.referenceId(),
-                        null))
+                        it.referenceId()))
                 .toList();
         notificationPushService.push(pushCommands);
     }
@@ -252,11 +246,10 @@ public class NotificationEventListener {
                 .map(it -> new PushNotification(
                         it.id(),
                         it.memberId(),
-                        it.type(),
+                        it.type().render(null),
                         null,
                         it.referenceType(),
-                        it.referenceId(),
-                        null))
+                        it.referenceId()))
                 .toList();
         notificationPushService.push(pushCommands);
     }
@@ -276,11 +269,10 @@ public class NotificationEventListener {
                 .map(it -> new PushNotification(
                         it.id(),
                         it.memberId(),
-                        it.type(),
+                        it.type().render(null),
                         null,
                         it.referenceType(),
-                        it.referenceId(),
-                        null))
+                        it.referenceId()))
                 .toList();
         notificationPushService.push(pushCommands);
     }
@@ -300,11 +292,10 @@ public class NotificationEventListener {
                 .map(it -> new PushNotification(
                         it.id(),
                         it.memberId(),
-                        it.type(),
+                        it.type().render(null),
                         null,
                         it.referenceType(),
-                        it.referenceId(),
-                        null))
+                        it.referenceId()))
                 .toList();
         notificationPushService.push(pushCommands);
     }
