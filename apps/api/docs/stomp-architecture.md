@@ -30,11 +30,10 @@ sequenceDiagram
     Ctrl->>Service: broadcast
     Service->>Msg: create (메시지 영속화 · 첨부 연결)
     Service->>Manager: resolveActiveIds (구독자 조회)
-    Service->>Service: 첨부 URL 조립
-    Service->>Msg: markRead (구독자 읽음 처리)
     Service->>Manager: send (MessageResponse)
     Manager->>Broker: convertAndSend
     Broker-->>Client: 메시지 전송
+    Service->>Msg: markRead (구독자 읽음 처리)
     Service->>Push: 푸시 알림 (미구독자)
 ```
 

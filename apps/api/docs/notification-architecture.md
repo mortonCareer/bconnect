@@ -17,7 +17,7 @@ sequenceDiagram
     Pub->>Listener: 도메인 이벤트
     Listener->>Svc: create (CreateNotification)
     Svc->>Repo: saveAll
-    Listener->>Listener: 발신자명 resolve
+    Listener->>Listener: 발신자명 resolve · 제목 render
     Listener->>Push: push (PushNotification)
     Push->>Device: 활성 device 조회
     Push->>Sender: send (endpoint · command)
@@ -58,16 +58,15 @@ graph LR
     Dom --> Res[NotificationResponse]
 ```
 
-| 객체 | 레이어 | 구성 | 용도 |
-|---|---|---|---|
-| CreateNotification | Domain | memberId · type · senderType · senderId · referenceType · referenceId | 영속화 커맨드. id 없음 |
-| PushNotification | Domain.push | id · receiverId · title · body · referenceType · referenceId | 발송 커맨드. 조립 생성자가 제목 렌더링 · 본문 절단 수행 |
-| Notification | Domain | id · memberId · type · senderType · senderId · referenceType · referenceId · read · createdAt | 조회 도메인 |
-| NotificationResponse | Presentation | senderType · senderMember · senderCompany · message · reference* | 목록 응답 |
+| 객체 | 레이어  | 용도                                 |
+|---|---|------------------------------------|
+| CreateNotification | Domain | 영속화 커맨드. id 없음                     |
+| PushNotification | Domain.push | 발송 커맨드. 제목은 호출부 주입, 생성자는 본문 절단만 수행 |
+| Notification | Domain | 조회 도메인                             |
+| NotificationResponse | Presentation | 목록 응답                              |
 
 - 커맨드 분리로 저장 전 객체가 발송에 넘어가는 경로를 타입으로 차단한다.
 - 미저장 발송은 `id` 가 `null` 인 `PushNotification` 을 직접 조립해 `push` 로 전달한다.
-- 문구 조립은 `NotificationType.render(senderName)` 이 단독 소유하며 `PushNotification` 생성자에서만 호출한다.
 
 ## 알림 유형
 

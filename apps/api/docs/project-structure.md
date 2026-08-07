@@ -104,21 +104,8 @@ graph TD
   subgraph offer
     OfferE[OfferEvent]
   end
-  subgraph member
-    MemberE[MemberRegisteredEvent]
-  end
-  subgraph profile
-    ProfileE[ProfileCreatedEvent]
-  end
-  subgraph credential
-    CredentialE[CredentialReviewedEvent]
-  end
-  subgraph coworker
-    CoworkerReqE[CoworkerRequestedEvent]
-    CoworkerAccE[CoworkerAcceptedEvent]
-  end
-  subgraph recommendation
-    RecommendE[RecommendationWrittenEvent]
+  subgraph task
+    TaskE[TaskEvent]
   end
   subgraph sms
     SmsL[SmsEventListener]
@@ -132,26 +119,15 @@ graph TD
   subgraph socket.message
     MsgL[MessageEventListener]
   end
-  subgraph notification
-    NotiL[NotificationEventListener]
-    DeviceE[DeviceRegisteredEvent]
-  end
   MsgL --> OfferE
+  MsgL --> TaskE
   MsgL --> ChatCreatedE
   SmsL --> OtpE
   SmsL --> LoginE
-  NotiL --> MemberE
-  NotiL --> LoginE
-  NotiL --> OfferE
-  NotiL --> ProfileE
-  NotiL --> CredentialE
-  NotiL --> CoworkerReqE
-  NotiL --> CoworkerAccE
-  NotiL --> RecommendE
-  NotiL --> DeviceE
 ```
 - 부수효과는 EDA 구조로 분리합니다.
 - 이벤트는 발행 패키지에, 리스너는 구독 패키지에 위치합니다.
+- 알림 이벤트 처리는 문서에서 생략합니다.
 
 ### 유효성 검사
 - 유효성 검사 위치는 다음과 같습니다
