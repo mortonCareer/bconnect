@@ -10,14 +10,14 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
-import to.bconnect.api.socket.message.MessageService;
+import to.bconnect.api.socket.message.MessageManager;
 import to.bconnect.api.storage.chat.ChatType;
 
 @Component
 @RequiredArgsConstructor
 public class ChatReadInterceptor implements ChannelInterceptor {
 
-    private final MessageService messageService;
+    private final MessageManager messageManager;
 
     @Override
     public Message<?> preSend(@NotNull Message<?> message, @NotNull MessageChannel channel) {
@@ -44,7 +44,7 @@ public class ChatReadInterceptor implements ChannelInterceptor {
 
     private void markRead(String memberId, String chatId, ChatType chatType) {
         try {
-            messageService.markReadLatest(Long.valueOf(chatId), chatType, Long.valueOf(memberId));
+            messageManager.markReadLatest(Long.valueOf(chatId), chatType, Long.valueOf(memberId));
         } catch (NumberFormatException ignored) {
         }
     }

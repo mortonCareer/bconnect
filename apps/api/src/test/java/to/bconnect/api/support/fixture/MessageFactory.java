@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.chat.MessageTemplate;
-import to.bconnect.api.core.domain.chat.SendMessage;
+import to.bconnect.api.socket.message.SendMessage;
 import to.bconnect.api.socket.message.SocketMessageSentEvent;
 import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.chat.MessageEntity;
