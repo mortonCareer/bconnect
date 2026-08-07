@@ -27,7 +27,7 @@ public class PackageDependencyTest {
 
 	@ArchTest
 	ArchRule socketPackageRule = classes().that().resideInAPackage(SOCKET)
-			.should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET, NOTIFICATION);
+			.should().onlyHaveDependentClassesThat().resideInAnyPackage(SOCKET);
 
 	@ArchTest
 	ArchRule corePackageRule = classes().that().resideInAPackage(CORE)
@@ -62,9 +62,9 @@ public class PackageDependencyTest {
 
     @ArchTest
     ArchRule notificationPackageRule = classes().that().resideInAPackage(NOTIFICATION)
-            .should().onlyHaveDependentClassesThat().resideInAnyPackage(NOTIFICATION)
+            .should().onlyHaveDependentClassesThat().resideInAnyPackage(NOTIFICATION, SOCKET)
             .andShould().onlyDependOnClassesThat(
-                    resideInAnyPackage(NOTIFICATION, SOCKET, CORE, SECURITY, STORAGE, COMMON, ATTACHMENT)
+                    resideInAnyPackage(NOTIFICATION, CORE, SECURITY, STORAGE, COMMON, ATTACHMENT)
                             .or(DescribedPredicate.not(resideInAnyPackage("to.bconnect.api"))));
 
     @ArchTest

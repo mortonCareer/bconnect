@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.sns.model.EndpointDisabledException;
 import software.amazon.awssdk.services.sns.model.InvalidParameterException;
 import software.amazon.awssdk.services.sns.model.NotFoundException;
 import software.amazon.awssdk.services.sns.model.PublishRequest;
-import to.bconnect.api.notification.domain.push.PushPayload;
+import to.bconnect.api.notification.domain.push.PushNotification;
 import to.bconnect.api.notification.domain.push.PushSendResult;
 import to.bconnect.api.notification.domain.push.PushSender;
 import tools.jackson.databind.ObjectMapper;
@@ -39,12 +39,12 @@ public class SnsPushSender implements PushSender {
     private final ObjectMapper objectMapper;
 
     @Override
-    public PushSendResult send(String endpoint, PushPayload payload) {
+    public PushSendResult send(String endpoint, PushNotification command) {
         try {
             snsClient.publish(PublishRequest.builder()
                     .targetArn(endpoint)
                     .messageStructure("json")
-                    .message(message(payload))
+                    .message(message(command))
                     .build());
             return PushSendResult.SUCCESS;
         } catch (EndpointDisabledException | NotFoundException e) {
@@ -63,20 +63,20 @@ public class SnsPushSender implements PushSender {
     }
 
     // FCM v1 message.data 는 값이 모두 String 이어야 한다
-    private String message(PushPayload payload) {
-        val title = payload.title();
-        val referenceType = payload.referenceType();
-        val referenceId = payload.referenceId();
+    private String message(PushNotification command) {
+        val title = command.title();
+        val referenceType = command.referenceType();
+        val referenceId = command.referenceId();
 
         val data = new HashMap<String, String>();
-        data.put("notification_id", String.valueOf(payload.id()));
+        data.put("notification_id", String.valueOf(command.id()));
         data.put("reference_type", referenceType == null ? "" : referenceType.name().toLowerCase());
         data.put("reference_id", referenceId == null ? "" : String.valueOf(referenceId));
 
         val fcmV1 = Map.of("fcmV1Message", Map.of("message", Map.of(
                 "notification", Map.of(
                         "title", title,
-                        "body", payload.body()),
+                        "body", command.body()),
                 "data", data,
                 "webpush", Map.of(
                         "notification", Map.of("icon", ICON, "badge", ICON),

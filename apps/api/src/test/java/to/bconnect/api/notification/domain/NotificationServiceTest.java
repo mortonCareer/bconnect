@@ -23,8 +23,8 @@ class NotificationServiceTest {
     @Autowired private NotificationRepository notificationRepository;
 
     @Test
-    @DisplayName("notify - 커맨드가 있을 때 발송하면 알림이 저장된다")
-    void notify_success() {
+    @DisplayName("create - 커맨드가 있을 때 생성하면 알림이 저장되고 엔티티가 반환된다")
+    void create_success() {
         // given
         val chatId = 100L;
         val senderId = 100L;
@@ -32,10 +32,22 @@ class NotificationServiceTest {
                 NotificationType.CHAT_MESSAGE, NotificationReferenceType.CHAT_ROOM, chatId);
 
         // when
-        notificationService.notify(List.of(command));
+        val created = notificationService.create(List.of(command));
 
         // then
         val response = notificationRepository.findAllByMemberId(SEED_MEMBER_ID);
         assertThat(response).hasSize(1);
+        assertThat(created).hasSize(1);
+        assertThat(created.getFirst().id()).isEqualTo(response.getFirst().getId());
+    }
+
+    @Test
+    @DisplayName("create - 커맨드가 비었을 때 생성하면 빈 목록이 반환된다")
+    void create_empty() {
+        // when
+        val created = notificationService.create(List.of());
+
+        // then
+        assertThat(created).isEmpty();
     }
 }

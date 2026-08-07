@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentFinder;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.core.domain.chat.Message;
-import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.chat.DirectChatRepository;
@@ -19,7 +18,7 @@ import java.util.Collection;
 
 @Service
 @RequiredArgsConstructor
-public class MessageService {
+public class MessageManager {
 
     private final MessageRepository messageRepository;
     private final ParticipantRepository participantRepository;

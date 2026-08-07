@@ -13,12 +13,14 @@ import to.bconnect.api.core.domain.profile.ProfileCreatedEvent;
 import to.bconnect.api.core.domain.recommendation.RecommendationWrittenEvent;
 import to.bconnect.api.core.domain.task.TaskEvent;
 import to.bconnect.api.security.session.NewDeviceLoginEvent;
+import to.bconnect.api.storage.chat.DirectChatRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.credential.CredentialStatus;
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.notification.NotificationEntity;
+import to.bconnect.api.storage.notification.NotificationReferenceType;
 import to.bconnect.api.storage.notification.NotificationRepository;
 import to.bconnect.api.storage.notification.NotificationType;
 import to.bconnect.api.storage.offer.OfferStatus;
@@ -45,6 +47,7 @@ class NotificationEventListenerTest {
     @Autowired private CompanyRepository companyRepository;
     @Autowired private ProjectRepository projectRepository;
     @Autowired private TaskRepository taskRepository;
+    @Autowired private DirectChatRepository directChatRepository;
 
     @Test
     @DisplayName("handleNewDeviceLogin - 새 기기 로그인 이벤트를 받으면 시스템 알림이 저장된다")
@@ -120,17 +123,18 @@ class NotificationEventListenerTest {
         val owner = saveMember("noti-offer1b", "01000009402");
         val company = companyRepository.save(CompanyFactory.entity(owner.getId(), "9000009401"));
         commitGiven();
-        val offerId = 100L;
-        val event = new OfferEvent(offerId, worker.getId(), company.getId(), owner.getId(), OfferStatus.ACTIVE);
+        val event = new OfferEvent(100L, worker.getId(), company.getId(), owner.getId(), OfferStatus.ACTIVE);
 
         // when
         notificationEventListener.handleOfferEvent(event);
 
         // then
+        val chat = directChatRepository.findByMembers(owner.getId(), worker.getId()).orElseThrow();
         val received = findByType(worker.getId(), NotificationType.OFFER_RECEIVED);
         assertThat(received).hasSize(1);
         assertThat(received.getFirst().getSenderId()).isEqualTo(company.getId());
-        assertThat(received.getFirst().getReferenceId()).isEqualTo(offerId);
+        assertThat(received.getFirst().getReferenceType()).isEqualTo(NotificationReferenceType.CHAT_ROOM);
+        assertThat(received.getFirst().getReferenceId()).isEqualTo(chat.getId());
 
         val sent = findByType(owner.getId(), NotificationType.OFFER_SENT);
         assertThat(sent).hasSize(1);

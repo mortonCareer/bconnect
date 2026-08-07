@@ -6,7 +6,6 @@ import org.springframework.util.StringUtils;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.chat.ChatExceptionCode;
-import to.bconnect.api.core.domain.chat.SendMessage;
 import to.bconnect.api.storage.chat.MessageType;
 
 import java.util.List;
