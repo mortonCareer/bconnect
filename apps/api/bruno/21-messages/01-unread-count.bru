@@ -1,0 +1,22 @@
+meta {
+  name: 안읽은 메시지 수 조회
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/messages/unread/count
+  auth: inherit
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.a('number');
+  });
+}
+
+docs {
+  로그인한 사용자의 DM · 그룹 채팅방이 안읽은 메시지 총합을 조회한다.
+}
