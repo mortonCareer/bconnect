@@ -36,6 +36,8 @@ public class CoworkerService {
 
     @Transactional(readOnly = true)
     public CoworkerStatus resolveStatus(Long memberId, Long targetId) {
+        if (memberId.equals(targetId))
+            return CoworkerStatus.SELF;
         if (coworkerRepository.existsByMembers(memberId, targetId))
             return CoworkerStatus.COWORKER;
         if (coworkerRequestRepository.existsByFromIdAndToId(memberId, targetId))
@@ -61,6 +63,7 @@ public class CoworkerService {
                 .distinct()
                 .collect(Collectors.toMap(Function.identity(),
                         it -> {
+                            if (memberId.equals(it)) return CoworkerStatus.SELF;
                             if (coworkerIds.contains(it)) return CoworkerStatus.COWORKER;
                             if (sentIds.contains(it)) return CoworkerStatus.SENT;
                             if (receivedIds.contains(it)) return CoworkerStatus.RECEIVED;

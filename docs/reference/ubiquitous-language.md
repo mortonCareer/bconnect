@@ -185,6 +185,7 @@ graph TD
 | 유형     | 설명      |
 | -------- | --------- |
 | NONE     | 관계없음  |
+| SELF     | 나 자신   |
 | SENT     | 보낸 요청 |
 | RECEIVED | 받은 요청 |
 | COWORKER | 동료      |
