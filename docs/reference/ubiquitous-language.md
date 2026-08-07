@@ -148,6 +148,9 @@ graph TD
 | 현장지원  | TRANSPORT        | 운송      |
 | 현장지원  | CLEANING         | 청소      |
 | 현장지원  | GENERAL_LABOR    | 보통인부  |
+| 생활      | HOME_REPAIR      | 집수리    |
+| 생활      | BATHROOM         | 욕실      |
+| 생활      | DISINFECTION     | 방역      |
 
 ### 작업 유형(TaskType)
 
