@@ -96,10 +96,13 @@ graph LR
 - 이동 정보는 `referenceType` 과 `referenceId` 로만 표현한다. BE 는 딥링크 URL 을 조립하지 않는다.
 - 섭외 알림은 업체 대표와 기술자의 DirectChat 으로 이동한다.
 - 발신자명은 저장하지 않고 `senderType` 기준으로 resolve 한다.
-- 채팅 메시지는 이벤트 없이 `MessageSocketService` 가 `push` 를 직접 호출한다.
 - DEVICE_REGISTERED 는 수신자의 모든 활성 device 로 발송된다.
 - 신규 device 한정 발송은 `push` 인프라 확장이 필요해 수용하지 않는다.
 - 이벤트는 여러 EventListener에서 함께 구독할 수 있다.
+
+### 채팅 메시지
+- 채팅 메시지는 이벤트 없이 `MessageSocketService` 가 `push` 를 직접 호출한다.
+- 채팅 메시지에 대한 알림 미리보기는 `SendMessage.preview` 가 결정한다.
 
 ## Push Payload (FCM v1)
 | 위치 | 필드 | 값                               | 비고            |

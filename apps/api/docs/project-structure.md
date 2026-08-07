@@ -82,6 +82,7 @@ graph TD
   end
   subgraph offer
     OfferS[OfferService]
+    OfferQS[OfferQueryService]
   end
   subgraph company
     CompanyF[CompanyFinder]
@@ -90,6 +91,7 @@ graph TD
   NoteS --> ProjectF
   DriveS --> ProjectF
   OfferS --> CompanyF
+  OfferQS --> CompanyF
 ```
 - `DomainDependencyTest.java` 참고
 
