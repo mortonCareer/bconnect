@@ -9,6 +9,7 @@ import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.core.domain.chat.GroupChatService;
 import to.bconnect.api.core.domain.chat.Message;
+import to.bconnect.api.core.domain.chat.MessageTemplate;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.notification.domain.NotificationPushService;
 import to.bconnect.api.notification.domain.push.PushNotification;
@@ -49,6 +50,7 @@ public class MessageSocketService {
         if (inactiveIds.isEmpty()) return message;
 
         val senderName = memberResolver.getOrWithdrawn(message.memberId()).name();
+        val preview = MessageTemplate.preview(message.type(), message.content());
         val notifications = inactiveIds.stream()
                 .map(it -> new PushNotification(
                         null,
@@ -57,7 +59,7 @@ public class MessageSocketService {
                         senderName,
                         NotificationReferenceType.CHAT_ROOM,
                         message.chatId(),
-                        message.content()))
+                        preview))
                 .toList();
 
         notificationPushService.push(notifications);

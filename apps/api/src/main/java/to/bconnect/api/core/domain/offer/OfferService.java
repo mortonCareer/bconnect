@@ -164,24 +164,6 @@ public class OfferService {
             offerMap.get(offerId).reorder(seq++);
     }
 
-    @Transactional(readOnly = true)
-    public List<Offer> listByTask(AuthUser user, Long taskId) {
-        val ownerId = companyFinder.getByTaskId(taskId).memberId();
-        if (!user.id().equals(ownerId))
-            throw new CodeException(CommonExceptionCode.FORBIDDEN);
-
-        return offerRepository.findAllByTaskIdAndStatusInOrderBySeqAsc(taskId, List.of(OfferStatus.ACTIVE, OfferStatus.PENDING)).stream()
-                .map(Offer::of)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Offer> listByWorker(AuthUser user) {
-        return offerRepository.findAllByWorkerIdAndStatusOrderByIdDesc(user.id(), OfferStatus.ACTIVE).stream()
-                .map(Offer::of)
-                .toList();
-    }
-
     @Transactional
     public void expire(Long offerId) {
         val found = offerRepository.findById(offerId)
