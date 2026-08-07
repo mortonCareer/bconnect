@@ -16,12 +16,12 @@ import to.bconnect.api.core.domain.offer.OfferEvent;
 import to.bconnect.api.core.domain.profile.ProfileCreatedEvent;
 import to.bconnect.api.core.domain.recommendation.RecommendationWrittenEvent;
 import to.bconnect.api.core.domain.task.TaskEvent;
+import to.bconnect.api.notification.domain.push.PushNotification;
 import to.bconnect.api.security.session.NewDeviceLoginEvent;
 import to.bconnect.api.storage.notification.NotificationReferenceType;
 import to.bconnect.api.storage.notification.NotificationSenderType;
 import to.bconnect.api.storage.notification.NotificationType;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -36,136 +36,192 @@ public class NotificationEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleMemberRegistered(MemberRegisteredEvent event) {
-        val welcome = new PushNotification(
-                null,
+        val createCommands = List.of(new CreateNotification(
                 event.memberId(),
                 NotificationType.SIGNUP_WELCOME,
                 null,
                 null,
                 null,
-                null,
-                null,
-                null);
+                null));
+        val domains = notificationService.create(createCommands);
 
-        val commands = List.of(welcome);
-        val created = notificationService.create(commands);
-        notificationPushService.push(PushNotification.of(created, commands));
+        val pushCommands = domains.stream()
+                .map(it -> new PushNotification(
+                        it.id(),
+                        it.memberId(),
+                        it.type(),
+                        null,
+                        it.referenceType(),
+                        it.referenceId(),
+                        null))
+                .toList();
+        notificationPushService.push(pushCommands);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleRecommendationWritten(RecommendationWrittenEvent event) {
-        val senderName = memberResolver.getOrWithdrawn(event.fromId()).name();
-
-        val commands = List.of(new PushNotification(
-                null,
+        val createCommands = List.of(new CreateNotification(
                 event.toId(),
                 NotificationType.RECOMMENDATION_WRITTEN,
                 NotificationSenderType.MEMBER,
                 event.fromId(),
-                senderName,
                 NotificationReferenceType.RECOMMENDATION,
-                event.recommendationId(),
-                null));
+                event.recommendationId()));
+        val domains = notificationService.create(createCommands);
 
-        val created = notificationService.create(commands);
-        notificationPushService.push(PushNotification.of(created, commands));
+        val senderName = memberResolver.getOrWithdrawn(event.fromId()).name();
+        val pushCommands = domains.stream()
+                .map(it -> new PushNotification(
+                        it.id(),
+                        it.memberId(),
+                        it.type(),
+                        senderName,
+                        it.referenceType(),
+                        it.referenceId(),
+                        null))
+                .toList();
+        notificationPushService.push(pushCommands);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCoworkerRequested(CoworkerRequestedEvent event) {
-        val senderName = memberResolver.getOrWithdrawn(event.fromId()).name();
-
-        val commands = List.of(new PushNotification(
-                null,
+        val createCommands = List.of(new CreateNotification(
                 event.toId(),
                 NotificationType.COWORKER_REQUESTED,
                 NotificationSenderType.MEMBER,
                 event.fromId(),
-                senderName,
                 NotificationReferenceType.COWORKER_REQUEST,
-                event.requestId(),
-                null));
+                event.requestId()));
+        val domains = notificationService.create(createCommands);
 
-        val created = notificationService.create(commands);
-        notificationPushService.push(PushNotification.of(created, commands));
+        val senderName = memberResolver.getOrWithdrawn(event.fromId()).name();
+        val pushCommands = domains.stream()
+                .map(it -> new PushNotification(
+                        it.id(),
+                        it.memberId(),
+                        it.type(),
+                        senderName,
+                        it.referenceType(),
+                        it.referenceId(),
+                        null))
+                .toList();
+        notificationPushService.push(pushCommands);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCoworkerAccepted(CoworkerAcceptedEvent event) {
-        val senderName = memberResolver.getOrWithdrawn(event.toId()).name();
-
-        val commands = List.of(new PushNotification(
-                null,
+        val createCommands = List.of(new CreateNotification(
                 event.fromId(),
                 NotificationType.COWORKER_ACCEPTED,
                 NotificationSenderType.MEMBER,
                 event.toId(),
-                senderName,
-                null,
                 null,
                 null));
+        val domains = notificationService.create(createCommands);
 
-        val created = notificationService.create(commands);
-        notificationPushService.push(PushNotification.of(created, commands));
+        val senderName = memberResolver.getOrWithdrawn(event.toId()).name();
+        val pushCommands = domains.stream()
+                .map(it -> new PushNotification(
+                        it.id(),
+                        it.memberId(),
+                        it.type(),
+                        senderName,
+                        it.referenceType(),
+                        it.referenceId(),
+                        null))
+                .toList();
+        notificationPushService.push(pushCommands);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleOfferEvent(OfferEvent event) {
-        val commands = new ArrayList<PushNotification>();
+        val createCommands = switch (event.status()) {
+            case ACTIVE -> List.of(
+                    new CreateNotification(event.workerId(), NotificationType.OFFER_RECEIVED,
+                            NotificationSenderType.COMPANY, event.companyId(),
+                            NotificationReferenceType.OFFER, event.offerId()),
+                    new CreateNotification(event.companyOwnerId(), NotificationType.OFFER_SENT,
+                            NotificationSenderType.MEMBER, event.workerId(),
+                            NotificationReferenceType.OFFER, event.offerId()));
+            case ACCEPTED -> List.of(
+                    new CreateNotification(event.companyOwnerId(), NotificationType.OFFER_ACCEPTED,
+                            NotificationSenderType.MEMBER, event.workerId(),
+                            NotificationReferenceType.OFFER, event.offerId()),
+                    new CreateNotification(event.workerId(), NotificationType.OFFER_ACCEPT_COMPLETED,
+                            NotificationSenderType.COMPANY, event.companyId(),
+                            NotificationReferenceType.OFFER, event.offerId()));
+            case DENIED -> List.of(
+                    new CreateNotification(event.companyOwnerId(), NotificationType.OFFER_DENIED,
+                            NotificationSenderType.MEMBER, event.workerId(),
+                            NotificationReferenceType.OFFER, event.offerId()));
+            default -> List.<CreateNotification>of();
+        };
+        val domains = notificationService.create(createCommands);
+        if (domains.isEmpty()) return;
 
-        switch (event.status()) {
-            case ACTIVE -> {
-                commands.add(toWorker(NotificationType.OFFER_RECEIVED, event));
-                commands.add(toCompanyOwner(NotificationType.OFFER_SENT, event));
-            }
-            case ACCEPTED -> {
-                commands.add(toCompanyOwner(NotificationType.OFFER_ACCEPTED, event));
-                commands.add(toWorker(NotificationType.OFFER_ACCEPT_COMPLETED, event));
-            }
-            case DENIED -> commands.add(toCompanyOwner(NotificationType.OFFER_DENIED, event));
-            default -> { }
-        }
+        val company = companyService.getOrWithdrawn(event.companyId());
+        val workerName = memberResolver.getOrWithdrawn(event.workerId()).name();
 
-        if (commands.isEmpty()) return;
-
-        val created = notificationService.create(commands);
-        notificationPushService.push(PushNotification.of(created, commands));
+        val pushCommands = domains.stream()
+                .map(it -> new PushNotification(
+                        it.id(),
+                        it.memberId(),
+                        it.type(),
+                        it.senderType() == NotificationSenderType.COMPANY ? company.name() : workerName,
+                        it.referenceType(),
+                        it.referenceId(),
+                        null))
+                .toList();
+        notificationPushService.push(pushCommands);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTaskEvent(TaskEvent event) {
         val company = companyFinder.getByTaskId(event.taskId());
-
-        val commands = List.of(new PushNotification(
-                null,
+        val createCommands = List.of(new CreateNotification(
                 event.workerId(),
                 NotificationType.TASK_UPDATED,
                 NotificationSenderType.COMPANY,
                 company.id(),
-                company.name(),
                 NotificationReferenceType.TASK,
-                event.taskId(),
-                null));
+                event.taskId()));
+        val domains = notificationService.create(createCommands);
 
-        val created = notificationService.create(commands);
-        notificationPushService.push(PushNotification.of(created, commands));
+        val pushCommands = domains.stream()
+                .map(it -> new PushNotification(
+                        it.id(),
+                        it.memberId(),
+                        it.type(),
+                        company.name(),
+                        it.referenceType(),
+                        it.referenceId(),
+                        null))
+                .toList();
+        notificationPushService.push(pushCommands);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleProfileCreated(ProfileCreatedEvent event) {
-        val commands = List.of(new PushNotification(
-                null,
+        val createCommands = List.of(new CreateNotification(
                 event.memberId(),
                 NotificationType.PROFILE_COMPLETED,
                 null,
                 null,
-                null,
                 NotificationReferenceType.PROFILE,
-                null,
                 null));
+        val domains = notificationService.create(createCommands);
 
-        val created = notificationService.create(commands);
-        notificationPushService.push(PushNotification.of(created, commands));
+        val pushCommands = domains.stream()
+                .map(it -> new PushNotification(
+                        it.id(),
+                        it.memberId(),
+                        it.type(),
+                        null,
+                        it.referenceType(),
+                        it.referenceId(),
+                        null))
+                .toList();
+        notificationPushService.push(pushCommands);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -177,79 +233,73 @@ public class NotificationEventListener {
         };
         if (type == null) return;
 
-        val commands = List.of(new PushNotification(
-                null,
+        val createCommands = List.of(new CreateNotification(
                 event.memberId(),
                 type,
                 null,
                 null,
-                null,
                 NotificationReferenceType.CREDENTIAL,
-                event.credentialId(),
-                null));
+                event.credentialId()));
+        val domains = notificationService.create(createCommands);
 
-        val created = notificationService.create(commands);
-        notificationPushService.push(PushNotification.of(created, commands));
+        val pushCommands = domains.stream()
+                .map(it -> new PushNotification(
+                        it.id(),
+                        it.memberId(),
+                        it.type(),
+                        null,
+                        it.referenceType(),
+                        it.referenceId(),
+                        null))
+                .toList();
+        notificationPushService.push(pushCommands);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDeviceRegistered(DeviceRegisteredEvent event) {
-        val commands = List.of(new PushNotification(
-                null,
+        val createCommands = List.of(new CreateNotification(
                 event.memberId(),
                 NotificationType.DEVICE_REGISTERED,
                 null,
                 null,
                 null,
-                null,
-                null,
                 null));
+        val domains = notificationService.create(createCommands);
 
-        val created = notificationService.create(commands);
-        notificationPushService.push(PushNotification.of(created, commands));
+        val pushCommands = domains.stream()
+                .map(it -> new PushNotification(
+                        it.id(),
+                        it.memberId(),
+                        it.type(),
+                        null,
+                        it.referenceType(),
+                        it.referenceId(),
+                        null))
+                .toList();
+        notificationPushService.push(pushCommands);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleNewDeviceLogin(NewDeviceLoginEvent event) {
-        val commands = List.of(new PushNotification(
-                null,
+        val createCommands = List.of(new CreateNotification(
                 event.memberId(),
                 NotificationType.NEW_DEVICE_LOGIN,
                 null,
                 null,
                 null,
-                null,
-                null,
                 null));
+        val domains = notificationService.create(createCommands);
 
-        val created = notificationService.create(commands);
-        notificationPushService.push(PushNotification.of(created, commands));
-    }
-
-    private PushNotification toWorker(NotificationType type, OfferEvent event) {
-        val company = companyService.getOrWithdrawn(event.companyId());
-        return new PushNotification(
-                null,
-                event.workerId(),
-                type,
-                NotificationSenderType.COMPANY,
-                company.id(),
-                company.name(),
-                NotificationReferenceType.OFFER,
-                event.offerId(),
-                null);
-    }
-
-    private PushNotification toCompanyOwner(NotificationType type, OfferEvent event) {
-        return new PushNotification(
-                null,
-                event.companyOwnerId(),
-                type,
-                NotificationSenderType.MEMBER,
-                event.workerId(),
-                memberResolver.getOrWithdrawn(event.workerId()).name(),
-                NotificationReferenceType.OFFER,
-                event.offerId(),
-                null);
+        val pushCommands = domains.stream()
+                .map(it -> new PushNotification(
+                        it.id(),
+                        it.memberId(),
+                        it.type(),
+                        null,
+                        it.referenceType(),
+                        it.referenceId(),
+                        null))
+                .toList();
+        notificationPushService.push(pushCommands);
     }
 }

@@ -38,7 +38,7 @@ class NotificationServiceTest {
         val response = notificationRepository.findAllByMemberId(SEED_MEMBER_ID);
         assertThat(response).hasSize(1);
         assertThat(created).hasSize(1);
-        assertThat(created.getFirst().getId()).isEqualTo(response.getFirst().getId());
+        assertThat(created.getFirst().id()).isEqualTo(response.getFirst().getId());
     }
 
     @Test

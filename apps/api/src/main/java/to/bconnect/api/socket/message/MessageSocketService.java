@@ -11,11 +11,10 @@ import to.bconnect.api.core.domain.chat.GroupChatService;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.notification.domain.NotificationPushService;
-import to.bconnect.api.notification.domain.PushNotification;
+import to.bconnect.api.notification.domain.push.PushNotification;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.notification.NotificationReferenceType;
-import to.bconnect.api.storage.notification.NotificationSenderType;
 import to.bconnect.api.storage.notification.NotificationType;
 
 import java.util.HashSet;
@@ -55,8 +54,6 @@ public class MessageSocketService {
                         null,
                         it,
                         NotificationType.CHAT_MESSAGE,
-                        NotificationSenderType.MEMBER,
-                        message.memberId(),
                         senderName,
                         NotificationReferenceType.CHAT_ROOM,
                         message.chatId(),

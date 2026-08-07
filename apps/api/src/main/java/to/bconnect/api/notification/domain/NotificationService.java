@@ -1,6 +1,7 @@
 package to.bconnect.api.notification.domain;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,10 +17,10 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public List<NotificationEntity> create(List<PushNotification> commands) {
+    public List<Notification> create(List<CreateNotification> commands) {
         if (commands.isEmpty()) return List.of();
 
-        return notificationRepository.saveAll(commands.stream()
+        val created = notificationRepository.saveAll(commands.stream()
                 .map(it -> new NotificationEntity(
                         it.memberId(),
                         it.type(),
@@ -29,5 +30,9 @@ public class NotificationService {
                         it.referenceId(),
                         false))
                 .toList());
+
+        return created.stream()
+                .map(Notification::of)
+                .toList();
     }
 }
