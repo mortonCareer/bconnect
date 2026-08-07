@@ -5,13 +5,10 @@ import org.springframework.stereotype.Component;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.chat.MessageTemplate;
 import to.bconnect.api.socket.message.SendMessage;
-import to.bconnect.api.socket.message.SocketMessageSentEvent;
 import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.chat.MessageEntity;
 import to.bconnect.api.storage.chat.MessageRepository;
 import to.bconnect.api.storage.chat.MessageType;
-
-import java.util.Set;
 
 import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
@@ -40,10 +37,5 @@ public class MessageFactory {
 
     public static SendMessage command(MessageType type, String content) {
         return new SendMessage(type, content, null);
-    }
-
-    public static SocketMessageSentEvent sentEvent(Long chatId, Long senderId, Set<Long> activeIds, Set<Long> inactiveIds) {
-        return new SocketMessageSentEvent(activeIds, inactiveIds,
-                domain(1L, chatId, senderId, MessageType.TEXT));
     }
 }

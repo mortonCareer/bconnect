@@ -17,7 +17,6 @@ import to.bconnect.api.core.domain.profile.ProfileCreatedEvent;
 import to.bconnect.api.core.domain.recommendation.RecommendationWrittenEvent;
 import to.bconnect.api.core.domain.task.TaskEvent;
 import to.bconnect.api.security.session.NewDeviceLoginEvent;
-import to.bconnect.api.socket.message.SocketMessageSentEvent;
 import to.bconnect.api.storage.notification.NotificationReferenceType;
 import to.bconnect.api.storage.notification.NotificationSenderType;
 import to.bconnect.api.storage.notification.NotificationType;
@@ -34,31 +33,6 @@ public class NotificationEventListener {
     private final CompanyFinder companyFinder;
     private final NotificationService notificationService;
     private final NotificationPushService notificationPushService;
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleSocketMessageSent(SocketMessageSentEvent event) {
-        val receivers = event.inactiveIds();
-        if (receivers.isEmpty()) return;
-
-        val message = event.message();
-        val senderName = memberResolver.getOrWithdrawn(message.memberId()).name();
-
-        val commands = receivers.stream()
-                .map(receiverId -> new PushNotification(
-                        null,
-                        receiverId,
-                        NotificationType.CHAT_MESSAGE,
-                        NotificationSenderType.MEMBER,
-                        message.memberId(),
-                        senderName,
-                        NotificationReferenceType.CHAT_ROOM,
-                        message.chatId(),
-                        message.content()))
-                .toList();
-
-        val created = notificationService.create(commands);
-        notificationPushService.push(PushNotification.of(created, commands));
-    }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleMemberRegistered(MemberRegisteredEvent event) {

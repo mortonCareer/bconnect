@@ -2,7 +2,6 @@ package to.bconnect.api.socket.message;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentFinder;
@@ -10,8 +9,14 @@ import to.bconnect.api.attachment.domain.AttachmentUrlService;
 import to.bconnect.api.attachment.domain.ImageSize;
 import to.bconnect.api.core.domain.chat.GroupChatService;
 import to.bconnect.api.core.domain.chat.Message;
+import to.bconnect.api.core.domain.member.MemberResolver;
+import to.bconnect.api.notification.domain.NotificationPushService;
+import to.bconnect.api.notification.domain.PushNotification;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.chat.ChatType;
+import to.bconnect.api.storage.notification.NotificationReferenceType;
+import to.bconnect.api.storage.notification.NotificationSenderType;
+import to.bconnect.api.storage.notification.NotificationType;
 
 import java.util.HashSet;
 
@@ -24,7 +29,8 @@ public class MessageSocketService {
     private final GroupChatService groupChatService;
     private final AttachmentFinder attachmentFinder;
     private final AttachmentUrlService attachmentUrlService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final MemberResolver memberResolver;
+    private final NotificationPushService notificationPushService;
 
     @Transactional
     public Message broadcast(Long chatId, ChatType chatType, Long senderId, SendMessage command) {
@@ -40,8 +46,24 @@ public class MessageSocketService {
 
         messageSocketManager.send(chatId, chatType, message, attachments, urlMap);
         messageManager.markRead(chatId, chatType, activeIds, message.id());
-        eventPublisher.publishEvent(new SocketMessageSentEvent(
-                activeIds, inactiveIds, message));
+
+        if (inactiveIds.isEmpty()) return message;
+
+        val senderName = memberResolver.getOrWithdrawn(message.memberId()).name();
+        val notifications = inactiveIds.stream()
+                .map(it -> new PushNotification(
+                        null,
+                        it,
+                        NotificationType.CHAT_MESSAGE,
+                        NotificationSenderType.MEMBER,
+                        message.memberId(),
+                        senderName,
+                        NotificationReferenceType.CHAT_ROOM,
+                        message.chatId(),
+                        message.content()))
+                .toList();
+
+        notificationPushService.push(notifications);
         return message;
     }
 }
