@@ -11,6 +11,9 @@ sequenceDiagram
     participant Authz as AuthorizationManager
     participant Ctrl as MessageSocketController
     participant Service as MessageSocketService
+    participant Msg as MessageManager
+    participant Manager as MessageSocketManager
+    participant Push as NotificationPushService
     participant Broker as SimpleBroker
 
     Client->>Interceptor: CONNECT /ws (Authorization: Bearer)
@@ -25,11 +28,16 @@ sequenceDiagram
     Authz->>Authz: 참여자 인가 (Group · DirectChatAuthorizationManager)
     Authz->>Ctrl: 라우팅
     Ctrl->>Service: broadcast
-    Service->>Service: 메시지 저장 · 첨부 연결 (MessageService)
-    Service->>Service: 구독자 읽음 처리 (SimpUserRegistry)
-    Ctrl->>Broker: MessageResponse (@SendTo · 첨부 URL 조립)
+    Service->>Msg: create (메시지 영속화 · 첨부 연결)
+    Service->>Manager: resolveActiveIds (구독자 조회)
+    Service->>Service: 첨부 URL 조립
+    Service->>Msg: markRead (구독자 읽음 처리)
+    Service->>Manager: send (MessageResponse)
+    Manager->>Broker: convertAndSend
     Broker-->>Client: /topic/{group|direct}-chats/{chatId} 브로드캐스트
+    Service->>Push: push (미구독 참여자)
 ```
+
 
 ## 컴포넌트 구성
 - WebSocketConfig : WebSocket 설정
@@ -38,10 +46,10 @@ sequenceDiagram
 - WebSocketAuthorizationConfig : 인가 규칙 등록
   - GroupChatAuthorizationManager : 그룹 채팅방 인가 처리
   - DirectChatAuthorizationManager : 1:1 채팅방 인가 처리
-- MessageSocketController : 메시지 송신 STOMP 엔드포인트 (group · direct)
-- MessageSocketService : 메시지 브로드캐스트 · 첨부 연결
-- MessageService : 메시지 영속화 — 조회는 core 의 MessageFinder
-- MessageEventListener : 이벤트 처리 (구독 · 메시지 생성 · 전송)
+- MessageSocketController : 실시간 송신 STOMP 엔드포인트 (group · direct)
+- MessageSocketService : 메시지 퍼사드 서비스
+- MessageSocketManager : 실시간 메시지 전송 · 구독자 조회
+- MessageManager : 메시지 영속화 · 읽음 처리
 
 ## 래퍼런스
 - [Spring WebSocket : STOMP](https://docs.spring.io/spring-framework/reference/web/websocket/stomp.html)
