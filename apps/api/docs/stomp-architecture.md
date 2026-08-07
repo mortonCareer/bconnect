@@ -50,6 +50,7 @@ sequenceDiagram
 - MessageSocketService : 메시지 퍼사드 서비스
 - MessageSocketManager : 실시간 메시지 전송 · 구독자 조회
 - MessageManager : 메시지 영속화 · 읽음 처리
+- MessageFinder : 메시지 목록 · 미읽음 카운트 조회
 
 ## 래퍼런스
 - [Spring WebSocket : STOMP](https://docs.spring.io/spring-framework/reference/web/websocket/stomp.html)
