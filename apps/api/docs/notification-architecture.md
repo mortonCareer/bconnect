@@ -81,11 +81,11 @@ graph LR
 | CREDENTIAL_DENIED | — | CREDENTIAL | CredentialReviewedEvent | ✕ | ○ | ○ |
 | COWORKER_REQUESTED | MEMBER | COWORKER_REQUEST | CoworkerRequestedEvent | ✕ | ○ | ○ |
 | COWORKER_ACCEPTED | MEMBER | — | CoworkerAcceptedEvent | ✕ | ○ | ○ |
-| OFFER_RECEIVED | COMPANY | OFFER | OfferEvent | ○ | ○ | ○ |
-| OFFER_SENT | MEMBER | OFFER | OfferEvent | ○ | ○ | ○ |
-| OFFER_ACCEPTED | MEMBER | OFFER | OfferEvent | ○ | ○ | ○ |
-| OFFER_ACCEPT_COMPLETED | COMPANY | OFFER | OfferEvent | ○ | ○ | ○ |
-| OFFER_DENIED | MEMBER | OFFER | OfferEvent | ✕ | ○ | ○ |
+| OFFER_RECEIVED | COMPANY | CHAT_ROOM | OfferEvent | ○ | ○ | ○ |
+| OFFER_SENT | MEMBER | CHAT_ROOM | OfferEvent | ○ | ○ | ○ |
+| OFFER_ACCEPTED | MEMBER | CHAT_ROOM | OfferEvent | ○ | ○ | ○ |
+| OFFER_ACCEPT_COMPLETED | COMPANY | CHAT_ROOM | OfferEvent | ○ | ○ | ○ |
+| OFFER_DENIED | MEMBER | CHAT_ROOM | OfferEvent | ✕ | ○ | ○ |
 | RECOMMENDATION_WRITTEN | MEMBER | RECOMMENDATION | RecommendationWrittenEvent | ✕ | ○ | ○ |
 | TASK_UPDATED | COMPANY | TASK | TaskEvent | ○ | ○ | ○ |
 | CONTRACT_WRITTEN | MEMBER | CONTRACT | — | — | — | — |
@@ -94,6 +94,7 @@ graph LR
 | DRIVE_NOTE_CREATED | MEMBER | 미정 | — | — | — | — |
 
 - 이동 정보는 `referenceType` 과 `referenceId` 로만 표현한다. BE 는 딥링크 URL 을 조립하지 않는다.
+- 섭외 알림은 업체 대표와 기술자의 DirectChat 으로 이동한다.
 - 발신자명은 저장하지 않고 `senderType` 기준으로 resolve 한다.
 - 채팅 메시지는 이벤트 없이 `MessageSocketService` 가 `push` 를 직접 호출한다.
 - DEVICE_REGISTERED 는 수신자의 모든 활성 device 로 발송된다.

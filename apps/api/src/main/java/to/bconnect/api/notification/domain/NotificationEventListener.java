@@ -5,6 +5,7 @@ import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import to.bconnect.api.core.domain.chat.DirectChatService;
 import to.bconnect.api.core.domain.company.CompanyFinder;
 import to.bconnect.api.core.domain.company.CompanyService;
 import to.bconnect.api.core.domain.coworker.CoworkerAcceptedEvent;
@@ -31,6 +32,7 @@ public class NotificationEventListener {
     private final MemberResolver memberResolver;
     private final CompanyService companyService;
     private final CompanyFinder companyFinder;
+    private final DirectChatService directChatService;
     private final NotificationService notificationService;
     private final NotificationPushService notificationPushService;
 
@@ -135,25 +137,26 @@ public class NotificationEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleOfferEvent(OfferEvent event) {
+        val chatId = directChatService.getOrCreate(event.companyOwnerId(), event.workerId());
         val createCommands = switch (event.status()) {
             case ACTIVE -> List.of(
                     new CreateNotification(event.workerId(), NotificationType.OFFER_RECEIVED,
                             NotificationSenderType.COMPANY, event.companyId(),
-                            NotificationReferenceType.OFFER, event.offerId()),
+                            NotificationReferenceType.CHAT_ROOM, chatId),
                     new CreateNotification(event.companyOwnerId(), NotificationType.OFFER_SENT,
                             NotificationSenderType.MEMBER, event.workerId(),
-                            NotificationReferenceType.OFFER, event.offerId()));
+                            NotificationReferenceType.CHAT_ROOM, chatId));
             case ACCEPTED -> List.of(
                     new CreateNotification(event.companyOwnerId(), NotificationType.OFFER_ACCEPTED,
                             NotificationSenderType.MEMBER, event.workerId(),
-                            NotificationReferenceType.OFFER, event.offerId()),
+                            NotificationReferenceType.CHAT_ROOM, chatId),
                     new CreateNotification(event.workerId(), NotificationType.OFFER_ACCEPT_COMPLETED,
                             NotificationSenderType.COMPANY, event.companyId(),
-                            NotificationReferenceType.OFFER, event.offerId()));
+                            NotificationReferenceType.CHAT_ROOM, chatId));
             case DENIED -> List.of(
                     new CreateNotification(event.companyOwnerId(), NotificationType.OFFER_DENIED,
                             NotificationSenderType.MEMBER, event.workerId(),
-                            NotificationReferenceType.OFFER, event.offerId()));
+                            NotificationReferenceType.CHAT_ROOM, chatId));
             default -> List.<CreateNotification>of();
         };
         val domains = notificationService.create(createCommands);
