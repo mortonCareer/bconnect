@@ -35,4 +35,9 @@ public enum Trade {
     TRANSPORT,
     CLEANING,
     GENERAL_LABOR,
+
+    // 생활
+    HOME_REPAIR,
+    BATHROOM,
+    DISINFECTION,
 }

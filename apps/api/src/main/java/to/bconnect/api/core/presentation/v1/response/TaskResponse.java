@@ -45,6 +45,10 @@ public record TaskResponse(
         return of(task, address, company, null);
     }
 
+    public static TaskResponse of(Task task, Address address, Offer offer) {
+        return of(task, address, null, offer);
+    }
+
     public static TaskResponse of(Task task, Address address, Company company, Offer offer) {
         return new TaskResponse(
                 task.id(),

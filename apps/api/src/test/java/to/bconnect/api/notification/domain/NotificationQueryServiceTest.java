@@ -35,13 +35,13 @@ class NotificationQueryServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val sender = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         notificationRepository.save(NotificationFactory.entity(member.getId(), sender.getId(),
-                NotificationType.CHAT_MESSAGE, NotificationReferenceType.CHAT_ROOM, 100L));
+                NotificationType.OFFER_ACCEPTED, NotificationReferenceType.CHAT_ROOM, 100L));
         val second = notificationRepository.save(NotificationFactory.entity(member.getId(), sender.getId(),
-                NotificationType.CHAT_MESSAGE, NotificationReferenceType.CHAT_ROOM, 101L));
+                NotificationType.OFFER_ACCEPTED, NotificationReferenceType.CHAT_ROOM, 101L));
         val third = notificationRepository.save(NotificationFactory.entity(member.getId(), sender.getId(),
                 NotificationType.COWORKER_REQUESTED, NotificationReferenceType.COWORKER_REQUEST, 102L));
         notificationRepository.save(NotificationFactory.entity(sender.getId(), member.getId(),
-                NotificationType.CHAT_MESSAGE, NotificationReferenceType.CHAT_ROOM, 103L));
+                NotificationType.OFFER_ACCEPTED, NotificationReferenceType.CHAT_ROOM, 103L));
         val cursor = CursorFactory.request(null, 2);
 
         // when
@@ -62,12 +62,12 @@ class NotificationQueryServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val sender = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         notificationRepository.save(NotificationFactory.entity(member.getId(), sender.getId(),
-                NotificationType.CHAT_MESSAGE, NotificationReferenceType.CHAT_ROOM, 100L));
+                NotificationType.OFFER_ACCEPTED, NotificationReferenceType.CHAT_ROOM, 100L));
         val read = notificationRepository.save(NotificationFactory.entity(member.getId(), sender.getId(),
-                NotificationType.CHAT_MESSAGE, NotificationReferenceType.CHAT_ROOM, 102L));
+                NotificationType.OFFER_ACCEPTED, NotificationReferenceType.CHAT_ROOM, 102L));
         read.markRead();
         notificationRepository.save(NotificationFactory.entity(sender.getId(), member.getId(),
-                NotificationType.CHAT_MESSAGE, NotificationReferenceType.CHAT_ROOM, 103L));
+                NotificationType.OFFER_ACCEPTED, NotificationReferenceType.CHAT_ROOM, 103L));
 
         // when
         val count = notificationQueryService.unreadCount(UserFactory.domain(member.getId(), Role.CAREER));
@@ -83,7 +83,7 @@ class NotificationQueryServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val sender = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         val notification = notificationRepository.save(NotificationFactory.entity(member.getId(), sender.getId(),
-                NotificationType.CHAT_MESSAGE, NotificationReferenceType.CHAT_ROOM, 100L));
+                NotificationType.OFFER_ACCEPTED, NotificationReferenceType.CHAT_ROOM, 100L));
 
         // when
         notificationQueryService.markRead(UserFactory.domain(member.getId(), Role.CAREER), notification.getId());
@@ -112,7 +112,7 @@ class NotificationQueryServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         val notification = notificationRepository.save(NotificationFactory.entity(other.getId(), member.getId(),
-                NotificationType.CHAT_MESSAGE, NotificationReferenceType.CHAT_ROOM, 100L));
+                NotificationType.OFFER_ACCEPTED, NotificationReferenceType.CHAT_ROOM, 100L));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when & then
@@ -127,9 +127,9 @@ class NotificationQueryServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val sender = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         notificationRepository.save(NotificationFactory.entity(member.getId(), sender.getId(),
-                NotificationType.CHAT_MESSAGE, NotificationReferenceType.CHAT_ROOM, 100L));
+                NotificationType.OFFER_ACCEPTED, NotificationReferenceType.CHAT_ROOM, 100L));
         notificationRepository.save(NotificationFactory.entity(member.getId(), sender.getId(),
-                NotificationType.CHAT_MESSAGE, NotificationReferenceType.CHAT_ROOM, 101L));
+                NotificationType.OFFER_ACCEPTED, NotificationReferenceType.CHAT_ROOM, 101L));
 
         // when
         notificationQueryService.markAllRead(UserFactory.domain(member.getId(), Role.CAREER));

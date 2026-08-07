@@ -2016,6 +2016,9 @@ components:
       - TRANSPORT
       - CLEANING
       - GENERAL_LABOR
+      - HOME_REPAIR
+      - BATHROOM
+      - DISINFECTION
     UpdateWorkerTaskRequest:
       type: object
       properties:
@@ -3259,6 +3262,7 @@ components:
       type: string
       enum:
       - NONE
+      - SELF
       - SENT
       - RECEIVED
       - COWORKER

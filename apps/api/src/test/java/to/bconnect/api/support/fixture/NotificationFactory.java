@@ -34,7 +34,7 @@ public class NotificationFactory {
 
     public static PushNotification pushCommand(Long id, Long memberId, NotificationType type,
                                                NotificationReferenceType referenceType, Long referenceId) {
-        return new PushNotification(id, memberId, type, SENDER_NAME, referenceType, referenceId, CONTENT);
+        return new PushNotification(id, memberId, type.render(SENDER_NAME), CONTENT, referenceType, referenceId);
     }
 
     public static NotificationEntity entity(Long memberId, Long senderId, NotificationType type,

@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public enum NotificationType {
 
-    CHAT_MESSAGE("%s님이 메시지를 보냈습니다"),
-
     SIGNUP_WELCOME("회원가입을 축하드립니다"),
 
     PROFILE_COMPLETED("프로필이 완성되었습니다"),

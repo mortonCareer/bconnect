@@ -32,9 +32,6 @@ import static to.bconnect.api.common.CommonUtils.nullToEmpty;
 @RequiredArgsConstructor
 public class SnsPushSender implements PushSender {
 
-    private static final String FALLBACK_LINK = "https://career.bconnect.to";
-    private static final String ICON = "/icon-192.png";
-
     private final SnsClient snsClient;
     private final ObjectMapper objectMapper;
 
@@ -77,10 +74,7 @@ public class SnsPushSender implements PushSender {
                 "notification", Map.of(
                         "title", title,
                         "body", command.body()),
-                "data", data,
-                "webpush", Map.of(
-                        "notification", Map.of("icon", ICON, "badge", ICON),
-                        "fcm_options", Map.of("link", FALLBACK_LINK)))));
+                "data", data)));
         val message = Map.of(
                 "default", title,
                 "GCM", objectMapper.writeValueAsString(fcmV1)

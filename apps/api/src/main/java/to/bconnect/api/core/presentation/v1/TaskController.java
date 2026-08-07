@@ -14,7 +14,7 @@ import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.offer.Offer;
-import to.bconnect.api.core.domain.offer.OfferService;
+import to.bconnect.api.core.domain.offer.OfferQueryService;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.core.domain.project.ProjectFinder;
 import to.bconnect.api.core.domain.project.ProjectService;
@@ -42,7 +42,7 @@ public class TaskController {
     private final TaskService taskService;
     private final ProjectFinder projectFinder;
     private final ProjectService projectService;
-    private final OfferService offerService;
+    private final OfferQueryService offerQueryService;
     private final MemberResolver memberResolver;
     private final ProfileResolver profileResolver;
     private final AttachmentUrlService attachmentUrlService;
@@ -53,7 +53,7 @@ public class TaskController {
         val workerTasks = taskQueryService.listByWorker(user);
         val projectTasks = taskQueryService.listAssigned(user);
         
-        val offers = offerService.listByWorker(user);
+        val offers = offerQueryService.listByWorker(user);
         val offerByTaskId = offers.stream().collect(Collectors.toMap(Offer::taskId, Function.identity()));
         val offerTasks = taskQueryService.listByIds(offerByTaskId.keySet());
 
@@ -80,7 +80,7 @@ public class TaskController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
             HttpServletResponse response) {
-        val offers = offerService.listByTask(user, id);
+        val offers = offerQueryService.listByTask(user, id);
         val workerIds = offers.stream().map(Offer::workerId).distinct().toList();
         val memberMap = memberResolver.resolveMap(workerIds);
         val profileMap = profileResolver.resolveMap(workerIds);
