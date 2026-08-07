@@ -32,10 +32,10 @@ public class MessageFactory {
     }
 
     public static SendMessage command() {
-        return new SendMessage(MessageType.TEXT, "content", null);
+        return new SendMessage(MessageType.TEXT, "content", "preview", null);
     }
 
     public static SendMessage command(MessageType type, String content) {
-        return new SendMessage(type, content, null);
+        return new SendMessage(type, content, content, null);
     }
 }

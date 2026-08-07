@@ -28,7 +28,15 @@ public class MessageEventListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleOfferEvent(OfferEvent event) {
-        val command = SendMessage.of(event);
+        val command = switch (event.status()) {
+            case ACTIVE -> new SendMessage(
+                    MessageType.OFFER, String.valueOf(event.offerId()), MessageTemplate.OFFER_RECEIVED, List.of());
+            case ACCEPTED -> new SendMessage(
+                    MessageType.SYSTEM, MessageTemplate.OFFER_ACCEPTED, MessageTemplate.OFFER_ACCEPTED, List.of());
+            case EXPIRED -> new SendMessage(
+                    MessageType.SYSTEM, MessageTemplate.OFFER_EXPIRED, MessageTemplate.OFFER_EXPIRED, List.of());
+            default -> null;
+        };
         if (command == null)
             return;
 
@@ -45,7 +53,8 @@ public class MessageEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTaskEvent(TaskEvent event) {
         val chatId = directChatService.getOrCreate(event.companyOwnerId(), event.workerId());
-        val command = new SendMessage(MessageType.SYSTEM, MessageTemplate.TASK_UPDATED, List.of());
+        val command = new SendMessage(
+                MessageType.SYSTEM, MessageTemplate.TASK_UPDATED, MessageTemplate.TASK_UPDATED, List.of());
 
         messageSocketService.broadcast(chatId, ChatType.DIRECT, MemberEntity.SYSTEM_ID, command);
     }
@@ -53,7 +62,8 @@ public class MessageEventListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleChatCreatedEvent(ChatCreatedEvent event) {
-        val command = new SendMessage(MessageType.SYSTEM, MessageTemplate.CHAT_CREATED, List.of());
+        val command = new SendMessage(
+                MessageType.SYSTEM, MessageTemplate.CHAT_CREATED, MessageTemplate.CHAT_CREATED, List.of());
 
         messageSocketService.broadcast(event.chatId(), event.chatType(), MemberEntity.SYSTEM_ID, command);
     }
