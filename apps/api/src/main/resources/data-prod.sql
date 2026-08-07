@@ -3,10 +3,10 @@
 -- 운영 데이터 (0 ~ 99)
 -- 실제 데이터 (1000 ~)
 
--- 운영 (0 ~ 99)
-INSERT INTO members (id, username, name, phone, created_at, modified_at) VALUES
-(0, 'system', '시스템', '01000000000', now(), now()),
-(1, 'admin', '관리자', '01083358632', now(), now());
+-- 운영 데이터 (0 ~ 99)
+INSERT INTO members (id, username, name, phone, birth, marketing_consent, created_at, modified_at) VALUES
+(0, 'system', '시스템', '01000000000', DATE '2000-01-01', false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(1, 'admin', '관리자', '01083358632', DATE '2000-04-30', false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO member_roles (member_id, role) VALUES
 (0, 'ADMIN'),

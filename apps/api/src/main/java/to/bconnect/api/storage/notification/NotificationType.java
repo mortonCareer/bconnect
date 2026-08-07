@@ -9,8 +9,6 @@ public enum NotificationType {
 
     SIGNUP_WELCOME("회원가입을 축하드립니다"),
 
-    PROFILE_COMPLETION("프로필을 완성하고 업체로부터 일감을 받아보세요"),
-
     PROFILE_COMPLETED("프로필이 완성되었습니다"),
 
     NEW_DEVICE_LOGIN("새로운 기기에서 로그인되었습니다"),
@@ -31,7 +29,7 @@ public enum NotificationType {
 
     OFFER_ACCEPTED("%s님이 섭외 요청을 수락했습니다"),
 
-    OFFER_ACCEPT_COMPLETED("%s의 섭외 요청을 수락했습니다"),
+    OFFER_ACCEPT_COMPLETED("%s로부터의 섭외 요청이 수락되었습니다."),
 
     OFFER_DENIED("%s님이 섭외 요청을 거절했습니다"),
 
@@ -40,6 +38,8 @@ public enum NotificationType {
     CONTRACT_WRITTEN("%s 님으로부터 계약서를 작성받았습니다"),
 
     TASK_COMPLETED("작업이 완료되었습니다"),
+
+    TASK_UPDATED("작업 내용이 변경되었습니다"),
 
     DRIVE_SHARED("%s 님이 드라이브를 공유했습니다"),
 

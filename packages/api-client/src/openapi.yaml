@@ -1412,6 +1412,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/messages/unread/count:
+    get:
+      tags:
+      - message-controller
+      operationId: unreadCount_1
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
   /api/v1/members/check-username:
     get:
       tags:
@@ -1479,6 +1491,11 @@ paths:
       - feed-controller
       operationId: list_10
       parameters:
+      - name: filter
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/FeedFilter"
       - name: cursorLimit
         in: query
         required: true
@@ -1795,6 +1812,25 @@ paths:
       tags:
       - task-controller
       operationId: delete_5
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/group-chats/{id}/me:
+    delete:
+      tags:
+      - group-chat-controller
+      operationId: leave
       parameters:
       - name: id
         in: path
@@ -2800,7 +2836,13 @@ components:
         name:
           type: string
           minLength: 1
+        birth:
+          type: string
+          format: date
+        marketingConsent:
+          type: boolean
       required:
+      - birth
       - name
       - username
     ApiResponseRegisterMemberResponse:
@@ -3678,6 +3720,7 @@ components:
       - CONTRACT
       - CREDENTIAL
       - RECOMMENDATION
+      - TASK
     NotificationResponse:
       type: object
       properties:
@@ -3826,6 +3869,11 @@ components:
           type: string
         phone:
           type: string
+        birth:
+          type: string
+          format: date
+        marketingConsent:
+          type: boolean
         picture:
           type:
           - string
@@ -3842,8 +3890,10 @@ components:
           type: string
           format: date-time
       required:
+      - birth
       - createdAt
       - id
+      - marketingConsent
       - modifiedAt
       - name
       - phone
@@ -4007,6 +4057,36 @@ components:
         nextCursor:
           type: integer
           format: int64
+    FeedFilter:
+      type: object
+      properties:
+        role:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileRole"
+          uniqueItems: true
+        trades:
+          type: array
+          items:
+            $ref: "#/components/schemas/Trade"
+          uniqueItems: true
+        minExperience:
+          type: integer
+          format: int32
+        maxExperience:
+          type: integer
+          format: int32
+        states:
+          type: array
+          items:
+            $ref: "#/components/schemas/Region"
+          uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
     ApiResponseCursorPageFeedResponse:
       type: object
       properties:
@@ -4032,7 +4112,7 @@ components:
       type: object
       properties:
         member:
-          $ref: "#/components/schemas/MemberSummaryResponse"
+          $ref: "#/components/schemas/WithdrawableMemberResponse"
         profile:
           $ref: "#/components/schemas/ProfileSummaryResponse"
         post:

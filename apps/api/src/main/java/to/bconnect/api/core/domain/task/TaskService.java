@@ -9,20 +9,17 @@ import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.project.ProjectFinder;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.company.CompanyEntity;
-import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.offer.OfferEntity;
 import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.offer.OfferStatus;
 import to.bconnect.api.storage.post.PostEntity;
 import to.bconnect.api.storage.post.PostRepository;
-import to.bconnect.api.storage.project.ProjectEntity;
-import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
 
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +29,6 @@ public class TaskService {
     private final ProjectFinder projectFinder;
     private final OfferRepository offerRepository;
     private final PostRepository postRepository;
-    private final ProjectRepository projectRepository;
-    private final CompanyRepository companyRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -105,8 +100,16 @@ public class TaskService {
 
         projectFinder.validateOwnership(user.id(), found.getProjectId());
 
+        val noticeable = !Objects.equals(found.getTrades(), command.trades())
+                || !Objects.equals(found.getStart(), command.start())
+                || !Objects.equals(found.getEnd(), command.end())
+                || !Objects.equals(found.getProjectRequirement(), command.requirement());
+
         found.update(command.trades(), command.start(), command.end(), command.progress(),
                 command.title(), command.requirement(), command.memo());
+
+        if (!noticeable)
+            return;
 
         val workerId = switch (found.getStatus()) {
             case ASSIGNED -> found.getWorkerId();
@@ -137,17 +140,6 @@ public class TaskService {
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
         found.update(command.progress(), command.title(), command.memo());
-
-        if (found.getProjectId() == null)
-            return;
-
-        val ownerId = projectRepository.findById(found.getProjectId())
-                .map(ProjectEntity::getCompanyId)
-                .flatMap(companyRepository::findById)
-                .map(CompanyEntity::getMemberId)
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-
-        eventPublisher.publishEvent(new TaskEvent(taskId, user.id(), ownerId));
     }
 
     @Transactional
@@ -182,6 +174,9 @@ public class TaskService {
         } else {
             projectFinder.validateOwnership(user.id(), found.getProjectId());
         }
+
+        if (TaskStatus.ENGAGED.contains(found.getStatus()))
+            throw new CodeException(TaskExceptionCode.OFFERED_EXISTS);
 
         offerRepository.deleteAllByTaskId(found.getId());
         postRepository.findAllByTaskId(found.getId())

@@ -30,4 +30,11 @@ public class MessageFinder {
                 Message::id
         );
     }
+
+    @Transactional(readOnly = true)
+    public Long unreadCount(Long memberId) {
+        val direct = messageRepository.findDirectUnreadCountByMemberId(memberId);
+        val group = messageRepository.findGroupUnreadCountByMemberId(memberId);
+        return direct + group;
+    }
 }

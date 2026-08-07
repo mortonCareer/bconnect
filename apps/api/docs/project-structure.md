@@ -21,7 +21,7 @@ to.bconnect.api
 - 패키지 · 레이어 의존성 규칙은 ArchUnit로 강제합니다.
 
 ## 패키지 구조
-> notification → socket → core → attachment → security → storage → common
+> socket → notification → core → attachment → security → storage → common
 > sms → security, common
 - `PackageDependencyTest.java` 참고
 
@@ -128,7 +128,6 @@ graph TD
     LoginE[NewDeviceLoginEvent]
   end
   subgraph socket.message
-    ChatMsgE[SocketMessageSentEvent]
     MsgL[MessageEventListener]
   end
   subgraph notification
@@ -139,7 +138,6 @@ graph TD
   MsgL --> ChatCreatedE
   SmsL --> OtpE
   SmsL --> LoginE
-  NotiL --> ChatMsgE
   NotiL --> MemberE
   NotiL --> LoginE
   NotiL --> OfferE

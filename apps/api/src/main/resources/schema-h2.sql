@@ -78,6 +78,8 @@ create table members (
     username varchar(255) not null,
     name varchar(255) not null,
     phone varchar(255) not null,
+    birth date not null,
+    marketing_consent boolean not null,
     drive_used_bytes bigint not null default 0,
     drive_limit_bytes bigint not null default 1073741824,
     created_at timestamp(6) with time zone not null,

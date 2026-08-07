@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.company.CompanyExceptionCode;
+import to.bconnect.api.core.domain.task.TaskExceptionCode;
 import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.BoardType;
 import to.bconnect.api.storage.board.NoteRepository;
@@ -287,5 +288,21 @@ class ProjectServiceTest {
         // when & then
         assertCodeException(() -> projectService.delete(user, project.getId()))
                 .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("delete - 섭외 중인 작업이 있을 때 삭제하면 OFFERED_EXISTS로 실패한다")
+    void delete_fail_T003() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        task.offered();
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
+
+        // when & then
+        assertCodeException(() -> projectService.delete(user, project.getId()))
+                .hasExceptionCode(TaskExceptionCode.OFFERED_EXISTS);
     }
 }

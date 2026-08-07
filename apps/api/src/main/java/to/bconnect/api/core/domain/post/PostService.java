@@ -30,12 +30,11 @@ public class PostService {
     private final AttachmentLinker attachmentLinker;
 
     @Transactional(readOnly = true)
-    public CursorPage<Post> list(CursorLimit cursor) {
-        val posts = postRepository.findAllBy(
-                cursor.toScrollPosition(),
-                cursor.toLimit(),
-                cursor.toSort()
-        );
+    public CursorPage<Post> list(SearchFeed command, CursorLimit cursor) {
+        val posts = postRepository.findBy(command.toPredicate(), it -> it
+                .sortBy(cursor.toSort())
+                .limit(cursor.toLimit().max())
+                .scroll(cursor.toScrollPosition()));
 
         return CursorPage.from(
                 posts.map(Post::of),

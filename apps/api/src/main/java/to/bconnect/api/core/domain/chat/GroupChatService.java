@@ -104,6 +104,19 @@ public class GroupChatService {
         return created.getId();
     }
 
+    @Transactional
+    public void leave(Long memberId, Long chatId) {
+        val found = participantRepository.findByChatIdAndMemberId(chatId, memberId)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.FORBIDDEN));
+
+        participantRepository.delete(found);
+
+        if (participantRepository.countByChatId(chatId) > 0) return;
+
+        messageRepository.deleteAllByChatIdAndChatType(chatId, ChatType.GROUP);
+        groupChatRepository.deleteById(chatId);
+    }
+
     @Transactional(readOnly = true)
     public Set<Long> findParticipantIds(Long chatId, ChatType type) {
         if (type == ChatType.DIRECT) {

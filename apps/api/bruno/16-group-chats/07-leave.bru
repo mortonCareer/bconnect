@@ -1,0 +1,26 @@
+meta {
+  name: 채팅방 나가기
+  type: http
+  seq: 7
+  tags: [
+    chain
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/group-chats/{{chatId}}/me
+  auth: inherit
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  로그인 유저가 채팅방에서 나간다. 마지막 참여자가 나가면 채팅방과 메시지가 함께 삭제된다.
+  @chain
+  - 16-group-chats/01-create
+}

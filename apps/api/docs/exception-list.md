@@ -60,6 +60,7 @@
 | M001 | DUPLICATE_USERNAME | 409 | INFO | 이미 사용 중인 사용자명입니다. |
 | M002 | DUPLICATE_PHONE | 409 | INFO | 이미 사용 중인 전화번호입니다. |
 | M003 | WITHDRAW_COMPANY_EXISTS | 409 | INFO | 소유한 업체가 있어 탈퇴할 수 없습니다. 업체를 먼저 삭제해주세요. |
+| M004 | UNDERAGE | 409 | INFO | 만 15세 미만은 가입할 수 없습니다. |
 
 ## ProfileExceptionCode
 
@@ -75,6 +76,7 @@
 | CO001 | ALREADY_EXISTS | 409 | INFO | 이미 업체가 존재합니다. |
 | CO002 | DUPLICATE_BRN | 409 | INFO | 이미 등록된 사업자등록번호입니다. |
 | CO003 | PROJECT_LIMIT_EXCEEDED | 409 | INFO | 생성 가능한 프로젝트 수를 초과했습니다. |
+| CO004 | DELETE_TASK_EXISTS | 409 | INFO | 진행 중인 작업이 있어 업체를 삭제할 수 없습니다. 작업을 먼저 완료해주세요. |
 
 ## TaskExceptionCode
 
@@ -82,6 +84,7 @@
 | --- | --- | --- | --- | --- |
 | T001 | NOT_ASSIGNED | 409 | INFO | 기술자에게 할당되지 않은 작업입니다. |
 | T002 | INVALID_TYPE | 409 | INFO | 처리할 수 없는 작업 유형입니다. |
+| T003 | OFFERED_EXISTS | 409 | INFO | 섭외 중이거나 배정된 작업이 있어 삭제할 수 없습니다. |
 
 ## OfferExceptionCode
 
