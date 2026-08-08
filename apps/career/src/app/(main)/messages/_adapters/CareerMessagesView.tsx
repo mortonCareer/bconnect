@@ -128,6 +128,8 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
       map.set(offer.id, {
         offerId: offer.id,
         status: offerStatusOverrides.get(offer.id) ?? offer.status,
+        // 이 offer 가 속한 task 그대로 — 추정 없이 정확히 매칭된 업체명.
+        companyName: task.projectCompanyName ?? undefined,
         start: task.start,
         end: task.end,
         address: task.address ?? undefined,
@@ -137,14 +139,6 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
     }
     return map
   }, [tasks, offerStatusOverrides])
-
-  // OFFER 카드 업체명 — 현재 응답 대기(ACTIVE) 중인 섭외를 우선하고, 없으면 최근 섭외로 대체.
-  // BE 응답에 offer-task 를 특정 채팅방에 묶는 필드가 없어 chat 별로 정확히 구분하지 못한다(#1159).
-  const companyName = useMemo(() => {
-    const offerTasks = (tasks ?? []).filter((task) => task.offer != null)
-    const active = offerTasks.find((task) => task.offer?.status === OfferStatus.ACTIVE)
-    return (active ?? offerTasks[0])?.projectCompanyName ?? undefined
-  }, [tasks])
 
   // 무효화(수락/거절 → getTasks·getTaskOffers)는 orval mutationInvalidates 가 자동 처리 (ADR-0025)
   const accept = useAcceptOffer({
@@ -199,7 +193,6 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
     offerDetails,
     isOfferDetailsLoading,
     isOfferDetailsError,
-    companyName,
     isLoading,
     isError,
   }

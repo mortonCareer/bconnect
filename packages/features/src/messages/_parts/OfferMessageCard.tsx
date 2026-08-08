@@ -8,11 +8,14 @@ import type { OfferActionKind } from './types'
 
 /**
  * OFFER 메시지 카드에 필요한 섭외 상세. 앱이 offerId 로 resolve 해 내려준다
- * (career: useGetTasks 의 task.offer). BE 메시지 자체는 offerId 만 담는다.
+ * (career: useGetTasks, plan: useGetProjects+getProjectTasks 의 task.offer).
+ * BE 메시지 자체는 offerId 만 담는다 — companyName 도 이 offer 가 속한 task 그대로라 정확하다.
  */
 export interface OfferMessageDetail {
   offerId: number
   status: OfferStatus
+  /** 제안한 업체명 (수신 방향, career). 이 offer 가 속한 task 의 projectCompanyName 그대로 — 추정 아님. */
+  companyName?: string
   start?: string
   end?: string
   address?: Address
@@ -25,8 +28,6 @@ export interface OfferMessageCardProps {
   detail?: OfferMessageDetail
   /** 발신 방향 — career(수신) false / plan(발신, 본인이 보낸 제안) true. 문구·정렬·색을 가른다. */
   isMine?: boolean
-  /** 제안한 업체명 (수신 방향, career). 앱이 offer 소속 task 의 projectCompanyName 으로 resolve 해 내려준다. */
-  companyName?: string
   /** 제안받은 기술자 이름 (발신 방향, plan). 채팅 상대에서 도출 — 앱 주입 불필요. */
   recipientName?: string
   /** 수락 핸들러. 미주입이면 버튼 없음 (plan = 읽기전용). */
@@ -96,7 +97,6 @@ const OFFER_BUTTON_CLASS = 'border-gray-200 bg-white font-normal'
 export function OfferMessageCard({
   detail,
   isMine,
-  companyName,
   recipientName,
   onAccept,
   onDeny,
@@ -105,6 +105,7 @@ export function OfferMessageCard({
   isActionDisabled,
   pendingAction,
 }: OfferMessageCardProps) {
+  const companyName = detail?.companyName
   const address = detail?.address
   const trades = detail?.trades ?? []
   const canAct = detail?.status === OfferStatus.ACTIVE && (onAccept != null || onDeny != null)

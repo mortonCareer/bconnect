@@ -33,8 +33,6 @@ interface MessageThreadProps {
   isOfferDetailsError?: boolean
   /** 수락/거절 액션 슬롯. 미주입이면 읽기전용 카드. */
   offerActions?: OfferActions
-  /** 카드에 표시할 업체명 — 채팅 상대 이름 */
-  companyName?: string
 }
 
 function formatDateLabel(dateStr: string): string {
@@ -59,7 +57,6 @@ function Bubble({
   isOfferDetailsLoading,
   isOfferDetailsError,
   offerActions,
-  companyName,
 }: {
   message: Message
   currentUserId: number | undefined
@@ -68,7 +65,6 @@ function Bubble({
   isOfferDetailsLoading?: boolean
   isOfferDetailsError?: boolean
   offerActions?: OfferActions
-  companyName?: string
 }) {
   const isMine = message.memberId === currentUserId
 
@@ -86,7 +82,6 @@ function Bubble({
         <OfferMessageCard
           detail={detail}
           isMine={isMine}
-          companyName={companyName}
           recipientName={recipientName}
           isDetailLoading={isOfferDetailsLoading}
           isDetailError={isOfferDetailsError}
@@ -135,7 +130,6 @@ export function MessageThread({
   isOfferDetailsLoading,
   isOfferDetailsError,
   offerActions,
-  companyName,
 }: MessageThreadProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const topObserverRef = useRef<HTMLDivElement>(null)
@@ -264,7 +258,6 @@ export function MessageThread({
                 isOfferDetailsLoading={isOfferDetailsLoading}
                 isOfferDetailsError={isOfferDetailsError}
                 offerActions={offerActions}
-                companyName={companyName}
               />
             </div>
           )

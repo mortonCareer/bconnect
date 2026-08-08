@@ -31,8 +31,6 @@ export interface ChatViewData {
   isOfferDetailsLoading?: boolean
   /** 섭외 상세 조회 실패 — 채팅 자체는 유지하고 OFFER 카드 안에서 상태 표시 */
   isOfferDetailsError?: boolean
-  /** OFFER 카드에 표시할 업체명 — 앱이 offer 소속 task 의 projectCompanyName 으로 resolve */
-  companyName?: string
   isLoading: boolean
   isError: boolean
 }
@@ -95,7 +93,6 @@ export function ChatView(props: ChatViewProps) {
     offerDetails,
     isOfferDetailsLoading,
     isOfferDetailsError,
-    companyName,
     isLoading,
     isError,
   } = data
@@ -191,7 +188,6 @@ export function ChatView(props: ChatViewProps) {
         isOfferDetailsLoading={isOfferDetailsLoading}
         isOfferDetailsError={isOfferDetailsError}
         offerActions={offerActions}
-        companyName={companyName}
       />
       <ChatInput
         value={message}
