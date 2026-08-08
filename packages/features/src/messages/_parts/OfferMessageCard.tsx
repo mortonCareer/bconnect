@@ -2,7 +2,7 @@
 
 import { OfferStatus, TRADE_LABELS } from '@bconnect/api-client'
 import type { Address, Trade } from '@bconnect/api-client'
-import { Button } from '@bconnect/ui'
+import { Button, cn } from '@bconnect/ui'
 import { formatPeriod, withParticle } from '@bconnect/config/format'
 import type { OfferActionKind } from './types'
 
@@ -23,8 +23,12 @@ export interface OfferMessageDetail {
 export interface OfferMessageCardProps {
   /** 미주입 시 상세 행 없이 안내만 — offerId 원문(숫자)은 절대 노출하지 않는다. */
   detail?: OfferMessageDetail
-  /** 제안한 업체명. 앱이 offer 소속 task 의 projectCompanyName 으로 resolve 해 내려준다. */
+  /** 발신 방향 — career(수신) false / plan(발신, 본인이 보낸 제안) true. 문구·정렬·색을 가른다. */
+  isMine?: boolean
+  /** 제안한 업체명 (수신 방향, career). 앱이 offer 소속 task 의 projectCompanyName 으로 resolve 해 내려준다. */
   companyName?: string
+  /** 제안받은 기술자 이름 (발신 방향, plan). 채팅 상대에서 도출 — 앱 주입 불필요. */
+  recipientName?: string
   /** 수락 핸들러. 미주입이면 버튼 없음 (plan = 읽기전용). */
   onAccept?: () => void
   onDeny?: () => void
@@ -91,7 +95,9 @@ const OFFER_BUTTON_CLASS = 'border-gray-200 bg-white font-normal'
  */
 export function OfferMessageCard({
   detail,
+  isMine,
   companyName,
+  recipientName,
   onAccept,
   onDeny,
   isDetailLoading,
@@ -107,21 +113,34 @@ export function OfferMessageCard({
   const isDenyPending = pendingAction === 'deny'
   const actionsDisabled = isActionDisabled || isAcceptPending || isDenyPending
 
+  // 문구는 BE NotificationType(OFFER_RECEIVED/OFFER_SENT) 워딩에 맞춘다 — 수신·발신 방향이 반대라 주어도 다르다.
+  const title = isMine
+    ? recipientName
+      ? `${recipientName}님에게 섭외 요청이 전달되었습니다`
+      : '섭외 요청이 전달되었습니다'
+    : companyName
+      ? `${withParticle(companyName, '으로부터', '로부터', true)} 섭외 요청을 제안받았습니다`
+      : '섭외 요청을 제안받았습니다'
+
   return (
-    // 수신 버블 규칙(ChatMessage variant="theirs")과 동일하게 좌상단만 각지게 둔다.
+    // 방향별 말풍선 규칙 — 수신(ChatMessage variant="theirs")은 좌상단만, 발신("mine")은 우상단만 각지게.
     // break-keep: 한글이 어절 중간("제안되었습니/다")에서 끊기지 않도록 — word-break 는 상속된다.
-    <div className="max-w-75 rounded-tr-xl rounded-br-xl rounded-bl-xl bg-gray-100 px-4 py-3 break-keep">
+    <div
+      className={cn(
+        'max-w-75 px-4 py-3 break-keep',
+        isMine
+          ? 'rounded-tl-xl rounded-bl-xl rounded-br-xl bg-secondary'
+          : 'rounded-tr-xl rounded-br-xl rounded-bl-xl bg-gray-100'
+      )}
+    >
       {/* 시안 타이틀은 Bold(700). 토큰 text-sb-14 는 600 이라 weight 만 덮는다 */}
-      <p className="text-sb-14 font-bold! text-gray-900">
-        {companyName
-          ? `${withParticle(companyName, '으로부터', '로부터', true)} 섭외가 제안되었습니다`
-          : '섭외가 제안되었습니다'}
-      </p>
+      <p className="text-sb-14 font-bold! text-gray-900">{title}</p>
 
       {detail ? (
         // 시안(1572:13097)은 타이틀 바로 아래에 행이 붙는다 — 사이 여백 없음
         <div>
-          {companyName && <Row label="업체명">{companyName}</Row>}
+          {/* 업체명 행은 수신(career) 전용 — 발신(plan) 은 본인 업체라 자기참조라 생략 */}
+          {!isMine && companyName && <Row label="업체명">{companyName}</Row>}
           {detail.start && detail.end && (
             <Row label="작업기간">{formatPeriod(detail.start, detail.end)}</Row>
           )}

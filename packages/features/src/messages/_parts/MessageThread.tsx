@@ -73,18 +73,21 @@ function Bubble({
   const isMine = message.memberId === currentUserId
 
   // BE 는 섭외 제안·수락 시 content 에 offerId 만 담아 OFFER 메시지를 남긴다(ChatEventListener).
-  // 숫자를 그대로 버블에 찍지 않도록 카드로 렌더한다 — 발신자와 무관하게 좌측 정렬(시스템성 카드).
+  // 숫자를 그대로 버블에 찍지 않도록 카드로 렌더 — 발신자(isMine)에 따라 일반 말풍선처럼 좌우가 갈린다.
   if (message.type === MessageType.OFFER) {
     const offerId = Number(message.content)
     const detail = Number.isFinite(offerId) ? offerDetails?.get(offerId) : undefined
     const isThisOfferPending = offerActions?.pendingOfferId === offerId
     const isAnyOfferPending = offerActions?.pendingOfferId != null
-    // 아바타(size-10) + gap-2 만큼 들여써 다른 수신 버블과 좌측을 맞춘다.
+    const recipientName = chatMemberName(participants.find((p) => p.id !== currentUserId))
     return (
-      <div className="pl-12">
+      // 수신(theirs)은 아바타(size-10)+gap-2 만큼 들여써 좌측을 맞추고, 발신(mine)은 우측 정렬한다.
+      <div className={isMine ? 'flex justify-end' : 'pl-12'}>
         <OfferMessageCard
           detail={detail}
+          isMine={isMine}
           companyName={companyName}
+          recipientName={recipientName}
           isDetailLoading={isOfferDetailsLoading}
           isDetailError={isOfferDetailsError}
           isActionDisabled={isAnyOfferPending}

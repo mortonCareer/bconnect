@@ -3,7 +3,6 @@
 import { useMemo } from 'react'
 import {
   useGetDirectChats,
-  useGetMyCompany,
   useGetMyMember,
   useGetProfile,
   useGetProjects,
@@ -65,9 +64,8 @@ export function PanelChat({ chatId }: { chatId: number }) {
     return map
   }, [taskQueries])
 
-  // 업체명 — plan 은 로그인 주체가 곧 그 업체라 project 별 계산 없이 내 업체명 고정값으로 넘긴다.
-  const companyName = useGetMyCompany().data?.name
-
+  // companyName 은 주입하지 않는다 — plan(발신)은 카드 제목에 상대 기술자명을 쓰고,
+  // 자기 업체명은 자기참조라 표시 대상이 아니다(OfferMessageCard 의 isMine 분기).
   const data: ChatViewData = {
     chat,
     currentUserId,
@@ -75,7 +73,6 @@ export function PanelChat({ chatId }: { chatId: number }) {
     offerDetails,
     isOfferDetailsLoading,
     isOfferDetailsError,
-    companyName,
     isLoading,
     isError,
   }
