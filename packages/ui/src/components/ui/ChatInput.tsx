@@ -53,6 +53,8 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
     ref
   ) => {
     const [inputValue, setInputValue] = React.useState(value)
+    // 전송 후 재포커스용 — forwardRef 는 래퍼 div 를 가리켜 input 핸들이 따로 필요하다 (#1147)
+    const inputRef = React.useRef<HTMLInputElement>(null)
 
     React.useEffect(() => {
       setInputValue(value)
@@ -67,6 +69,8 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
     const handleSendClick = () => {
       if (!disabled && inputValue.trim()) {
         onSend?.()
+        // 모바일은 user gesture 안의 동기 호출만 포커스를 허용한다 — setTimeout·await 뒤로 미루면 무시됨
+        inputRef.current?.focus()
       }
     }
 
@@ -86,7 +90,8 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           // 하단 고정 입력바 — viewport-fit=cover 라 홈 인디케이터/제스처바 높이를 직접 확보한다.
           // 채팅 상세는 하단 네비(safe-area 패딩 보유)가 숨겨져 이 컴포넌트가 화면 최하단이다 (#1017).
           // 고정 h-20 이면 그 패딩이 안쪽을 먹으므로 min-h-20.
-          'flex min-h-20 items-center gap-2 bg-white px-6 py-4',
+          // w-full/max-w-full — 부모가 flex row 등일 때도 화면 폭을 넘겨 전송 버튼이 잘리지 않게 (#1147)
+          'flex w-full max-w-full min-h-20 items-center gap-2 bg-white px-6 py-4',
           'pb-[calc(env(safe-area-inset-bottom)+1rem)]',
           className
         )}
@@ -97,9 +102,11 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           <ImageIcon size={24} className="text-gray-500" />
         </button>
 
-        {/* 입력 영역 */}
-        <div className="flex flex-1 items-center rounded-xl bg-gray-100 px-4 py-[9px]">
+        {/* 입력 영역 — min-w-0 없으면 input 의 intrinsic 최소폭(기본 size=20, 약 180px)이
+            flex min-width:auto 로 잠겨 좁은 기기에서 전송 버튼을 화면 밖으로 밀어낸다 (#1147) */}
+        <div className="flex min-w-0 flex-1 items-center rounded-xl bg-gray-100 px-4 py-[9px]">
           <input
+            ref={inputRef}
             type="text"
             value={inputValue}
             placeholder={placeholder}
@@ -107,7 +114,7 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
             onKeyDown={handleKeyDown}
             disabled={disabled}
             className={cn(
-              'flex-1 bg-transparent text-r-14 outline-none',
+              'w-full min-w-0 flex-1 bg-transparent text-r-14 outline-none',
               disabled ? 'text-gray-500' : 'text-gray-900',
               'placeholder:text-gray-500'
             )}
@@ -117,6 +124,8 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
         {/* 전송 버튼 */}
         <button
           type="button"
+          // mousedown 단계에서 input 이 blur 되며 모바일 키보드가 닫힌다 (click 은 그 이후) — 기본동작 차단으로 포커스 유지 (#1147)
+          onMouseDown={(e) => e.preventDefault()}
           onClick={handleSendClick}
           disabled={!isActive}
           className={cn(
