@@ -38,8 +38,12 @@ export interface OfferMessageCardProps {
   pendingAction?: OfferActionKind | null
 }
 
-/** ACTIVE(응답 대기) 외 상태는 버튼 대신 결과 텍스트로 표시. */
+/**
+ * 액션 미주입(plan, 읽기전용) 시 버튼 대신 상태 텍스트로 표시.
+ * ACTIVE 는 career(액션 주입)에선 canAct 가 먼저 걸려 버튼으로 렌더되고, plan 에서만 이 라벨을 탄다.
+ */
 const STATUS_LABELS: Partial<Record<OfferStatus, string>> = {
+  [OfferStatus.ACTIVE]: '대기중',
   [OfferStatus.ACCEPTED]: '수락함',
   [OfferStatus.DENIED]: '거절함',
   [OfferStatus.CANCELED]: '취소됨',
