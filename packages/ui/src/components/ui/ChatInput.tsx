@@ -108,6 +108,12 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           <input
             ref={inputRef}
             type="text"
+            // name 이 없으면 브라우저가 placeholder 등 약한 신호로 필드 종류를 오분류해
+            // 주소·비밀번호 제안을 띄운다. 무의미한 name 으로 고정 + autoComplete off 로 차단 (#1147)
+            name="chat-message"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
             value={inputValue}
             placeholder={placeholder}
             onChange={handleInputChange}
