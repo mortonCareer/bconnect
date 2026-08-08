@@ -1,13 +1,15 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import {
   useGetDirectChats,
   useGetMyMember,
   useGetProfile,
   useGetProjects,
   useQueries,
+  useQueryClient,
   getGetProjectTasksQueryOptions,
+  getGetProjectTasksQueryKey,
 } from '@bconnect/api-client'
 import {
   ChatView,
@@ -64,6 +66,13 @@ export function PanelChat({ chatId }: { chatId: number }) {
     return map
   }, [taskQueries])
 
+  const queryClient = useQueryClient()
+  // 기술자가 채팅방에서 수락/거절해도 내(plan) 캐시엔 안 잡히는 상태 변경 — 소켓 수신을 계기로 잡는다.
+  const handleOfferMessage = useCallback(() => {
+    for (const id of projectIds)
+      void queryClient.invalidateQueries({ queryKey: getGetProjectTasksQueryKey(id) })
+  }, [queryClient, projectIds])
+
   // companyName 은 주입하지 않는다 — plan(발신)은 카드 제목에 상대 기술자명을 쓰고,
   // 자기 업체명은 자기참조라 표시 대상이 아니다(OfferMessageCard 의 isMine 분기).
   const data: ChatViewData = {
@@ -94,6 +103,7 @@ export function PanelChat({ chatId }: { chatId: number }) {
           progress: imageUpload.progress,
           onSendError: imageUpload.notifySendError,
         }}
+        onOfferMessage={handleOfferMessage}
       />
     </PanelAside>
   )

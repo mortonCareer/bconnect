@@ -5,8 +5,8 @@ import {
   getGetDirectChatMessagesQueryKey,
   getGetDirectChatsQueryKey,
   getTradeLabel,
-  MessageType,
   useQueryClient,
+  MessageType,
 } from '@bconnect/api-client'
 import type { CursorPageMessage, InfiniteData, Message, Profile } from '@bconnect/api-client'
 import { ChatInput, ProfileCard, Skeleton } from '@bconnect/ui'
@@ -60,6 +60,12 @@ type ChatViewBaseProps = {
   offerActions?: OfferActions
   /** 사진 첨부 — 미주입이면 갤러리 버튼 비활성 */
   imageActions?: ChatImageActions
+  /**
+   * 섭외 상태 변경(SYSTEM·OFFER 타입) 메시지 수신 시 호출 — 앱이 자신의 offer/task 쿼리를 무효화한다.
+   * 상대방 액션(수락 등)은 내 세션의 React Query 캐시를 못 건드리므로, 소켓 수신을 계기로 삼는다.
+   * content 문자열은 안 보고 타입만 본다 — BE 카피 문구에 의존하지 않기 위함.
+   */
+  onOfferMessage?: () => void
 }
 
 type ChatViewShellProps =
@@ -81,7 +87,7 @@ type ChatViewShellProps =
 export type ChatViewProps = ChatViewBaseProps & ChatViewShellProps
 
 export function ChatView(props: ChatViewProps) {
-  const { chatId, data, profileHref, offerActions, imageActions } = props
+  const { chatId, data, profileHref, offerActions, imageActions, onOfferMessage } = props
   const {
     chat,
     currentUserId,
@@ -123,8 +129,11 @@ export function ChatView(props: ChatViewProps) {
         }
       )
       queryClient.invalidateQueries({ queryKey: getGetDirectChatsQueryKey() })
+      // 상대방의 섭외 액션(수락 등)은 내 캐시에 잡히지 않는 이벤트라 소켓 수신으로 갈음한다.
+      if (incoming.type === MessageType.SYSTEM || incoming.type === MessageType.OFFER)
+        onOfferMessage?.()
     },
-    [chatId, queryClient]
+    [chatId, queryClient, onOfferMessage]
   )
   const sendMessage = useDirectChatSocket(chatId, appendMessage)
 

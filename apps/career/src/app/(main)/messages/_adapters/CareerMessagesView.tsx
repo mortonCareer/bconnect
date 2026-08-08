@@ -7,12 +7,14 @@ import {
   useAcceptOffer,
   useDenyOffer,
   useQueries,
+  useQueryClient,
   useGetDirectChats,
   useGetGroupChats,
   useGetMyMember,
   useGetProfile,
   useGetTasks,
   getGetProfileQueryOptions,
+  getGetTasksQueryKey,
 } from '@bconnect/api-client'
 import type { Profile } from '@bconnect/api-client'
 import {
@@ -184,6 +186,12 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
   const pendingAction = accept.isPending ? 'accept' : deny.isPending ? 'deny' : null
   const isOfferActionPending = pendingAction != null
 
+  const queryClient = useQueryClient()
+  // 상대(업체)가 채팅방에서 섭외를 취소하는 등 내가 액션하지 않은 상태 변경은 소켓 수신을 계기로 잡는다.
+  const handleOfferMessage = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: getGetTasksQueryKey() })
+  }, [queryClient])
+
   const data: ChatViewData = {
     chat,
     currentUserId,
@@ -209,6 +217,7 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
         progress: imageUpload.progress,
         onSendError: imageUpload.notifySendError,
       }}
+      onOfferMessage={handleOfferMessage}
       offerActions={{
         onAccept: (offerId) => {
           if (isOfferActionPending) return
