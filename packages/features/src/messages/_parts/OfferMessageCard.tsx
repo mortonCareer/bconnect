@@ -127,10 +127,10 @@ export function OfferMessageCard({
     // break-keep: 한글이 어절 중간("제안되었습니/다")에서 끊기지 않도록 — word-break 는 상속된다.
     <div
       className={cn(
-        'max-w-75 px-4 py-3 break-keep',
+        'max-w-75 px-4 py-3 break-keep bg-gray-100',
         isMine
-          ? 'rounded-tl-xl rounded-bl-xl rounded-br-xl bg-secondary'
-          : 'rounded-tr-xl rounded-br-xl rounded-bl-xl bg-gray-100'
+          ? 'rounded-tl-xl rounded-bl-xl rounded-br-xl'
+          : 'rounded-tr-xl rounded-br-xl rounded-bl-xl'
       )}
     >
       {/* 시안 타이틀은 Bold(700). 토큰 text-sb-14 는 600 이라 weight 만 덮는다 */}
