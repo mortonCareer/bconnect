@@ -47,6 +47,7 @@ export interface CoworkerManageDrawerProps {
  * - SENT     → 동료 요청 취소 · 메시지
  * - RECEIVED → 수락 · 거절 · 메시지
  * - COWORKER → 동료 삭제(destructive → ConfirmDialog) · 메시지
+ * - SELF     → 없음(빈 드로어)
  *
  * 삭제만 확인 다이얼로그로 가드(동료 관계 해제). 수락/거절/취소/추가는
  * 기존 CoworkerRequestList 와 동일하게 즉시 실행한다.
@@ -129,6 +130,11 @@ export function CoworkerManageDrawer({
           },
           messageItem,
         ]
+      // 나 자신에게 할 수 있는 액션은 없다 (동료 요청·메시지 모두 무의미).
+      // 호출부가 자기 행 자체를 미리 걸러내(#870) 드로어까지 안 오는 게 정상 경로지만,
+      // status=SELF(#1157) 를 직접 받는 새 호출부가 생겨도 안전하도록 방어적으로 빈 목록을 낸다.
+      case CoworkerStatus.SELF:
+        return []
       default:
         return [messageItem]
     }
