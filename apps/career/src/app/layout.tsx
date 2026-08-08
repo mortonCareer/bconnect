@@ -21,6 +21,9 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
+  // 기본값 resizes-visual 은 키보드가 떠도 layout viewport 를 줄이지 않아
+  // 채팅방의 h-dvh 컨테이너가 키보드 뒤로 밀리고 하단에 빈 공간이 남는다 (#1147).
+  interactiveWidget: 'resizes-content',
   themeColor: BRAND_COLOR,
 }
 

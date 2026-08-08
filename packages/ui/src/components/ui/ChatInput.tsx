@@ -55,6 +55,8 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
     const [inputValue, setInputValue] = React.useState(value)
     // 전송 후 재포커스용 — forwardRef 는 래퍼 div 를 가리켜 input 핸들이 따로 필요하다 (#1147)
     const inputRef = React.useRef<HTMLInputElement>(null)
+    // 키보드가 열리면 제스처바가 키보드에 가리는데 safe-area 패딩은 그대로 남아 하단이 빈다 (#1147)
+    const [isFocused, setIsFocused] = React.useState(false)
 
     React.useEffect(() => {
       setInputValue(value)
@@ -92,7 +94,7 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           // 고정 h-20 이면 그 패딩이 안쪽을 먹으므로 min-h-20.
           // w-full/max-w-full — 부모가 flex row 등일 때도 화면 폭을 넘겨 전송 버튼이 잘리지 않게 (#1147)
           'flex w-full max-w-full min-h-20 items-center gap-2 bg-white px-6 py-4',
-          'pb-[calc(env(safe-area-inset-bottom)+1rem)]',
+          isFocused ? 'pb-4' : 'pb-[calc(env(safe-area-inset-bottom)+1rem)]',
           className
         )}
         {...props}
@@ -118,6 +120,8 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
             placeholder={placeholder}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             disabled={disabled}
             className={cn(
               'w-full min-w-0 flex-1 bg-transparent text-r-14 outline-none',
