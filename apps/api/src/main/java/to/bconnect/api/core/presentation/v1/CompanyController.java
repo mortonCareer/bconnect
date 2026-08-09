@@ -107,6 +107,18 @@ public class CompanyController {
         return ApiResponse.success(id);
     }
 
+    @PostMapping("/{id}/accept")
+    public ApiResponse<Void> accept(@PathVariable Long id) {
+        companyService.accept(id);
+        return ApiResponse.success(null);
+    }
+
+    @PostMapping("/{id}/deny")
+    public ApiResponse<Void> deny(@PathVariable Long id) {
+        companyService.deny(id);
+        return ApiResponse.success(null);
+    }
+
     @PutMapping("/me")
     public ApiResponse<Void> update(
             @AuthenticationPrincipal AuthUser user,

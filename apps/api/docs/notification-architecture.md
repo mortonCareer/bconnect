@@ -78,6 +78,8 @@ graph LR
 | DEVICE_REGISTERED | — | — | DeviceRegisteredEvent | ✕ | ○ | ○ |
 | CREDENTIAL_ACCEPTED | — | CREDENTIAL | CredentialReviewedEvent | ✕ | ○ | ○ |
 | CREDENTIAL_DENIED | — | CREDENTIAL | CredentialReviewedEvent | ✕ | ○ | ○ |
+| COMPANY_ACCEPTED | — | COMPANY | CompanyReviewedEvent | ✕ | ○ | ○ |
+| COMPANY_DENIED | — | COMPANY | CompanyReviewedEvent | ✕ | ○ | ○ |
 | COWORKER_REQUESTED | MEMBER | COWORKER_REQUEST | CoworkerRequestedEvent | ✕ | ○ | ○ |
 | COWORKER_ACCEPTED | MEMBER | — | CoworkerAcceptedEvent | ✕ | ○ | ○ |
 | OFFER_RECEIVED | COMPANY | CHAT_ROOM | OfferEvent | ○ | ○ | ○ |

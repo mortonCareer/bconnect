@@ -17,6 +17,10 @@ public enum NotificationType {
 
     CREDENTIAL_DENIED("자격 증명이 반려되었습니다"),
 
+    COMPANY_ACCEPTED("업체 등록이 승인되었습니다"),
+
+    COMPANY_DENIED("업체 등록이 반려되었습니다"),
+
     COWORKER_REQUESTED("%s 님으로부터 동료 요청을 제안받았습니다"),
 
     COWORKER_ACCEPTED("%s 님이 동료 요청을 수락했습니다"),

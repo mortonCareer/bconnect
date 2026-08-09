@@ -4,6 +4,8 @@ import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.task.TaskExceptionCode;
 import to.bconnect.api.support.fixture.CursorFactory;
@@ -28,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 
 @IntegrationTest
+@RecordApplicationEvents
 class CompanyServiceTest {
 
     private static final Long MISSING_ID = 999_999L;
@@ -38,6 +41,7 @@ class CompanyServiceTest {
     @Autowired private AttachmentRepository attachmentRepository;
     @Autowired private ProjectRepository projectRepository;
     @Autowired private TaskRepository taskRepository;
+    @Autowired private ApplicationEvents applicationEvents;
 
     @Test
     @DisplayName("list - 업체 목록을 커서 페이지네이션 조회하면 페이지를 반환한다")
@@ -119,6 +123,44 @@ class CompanyServiceTest {
         assertThat(linkedPicture.getReferenceId()).isEqualTo(companyId);
         val found = memberRepository.findById(member.getId()).orElseThrow();
         assertThat(found.getRoles()).doesNotContain(Role.PLAN);
+    }
+
+    @Test
+    @DisplayName("accept - 대기 중인 업체일 때 승인하면 상태가 ACCEPTED로 변경되고 PLAN 권한이 부여된다")
+    void accept_success() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+
+        // when
+        companyService.accept(company.getId());
+
+        // then
+        val found = companyRepository.findById(company.getId()).orElseThrow();
+        assertThat(found.getStatus()).isEqualTo(CompanyStatus.ACCEPTED);
+        val granted = memberRepository.findById(member.getId()).orElseThrow();
+        assertThat(granted.getRoles()).contains(Role.PLAN);
+        val expected = new CompanyReviewedEvent(company.getId(), member.getId(), CompanyStatus.ACCEPTED);
+        assertThat(applicationEvents.stream(CompanyReviewedEvent.class)).containsExactly(expected);
+    }
+
+    @Test
+    @DisplayName("deny - 대기 중인 업체일 때 반려하면 상태가 DENIED로 변경되고 PLAN 권한은 부여되지 않는다")
+    void deny_success() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+
+        // when
+        companyService.deny(company.getId());
+
+        // then
+        val found = companyRepository.findById(company.getId()).orElseThrow();
+        assertThat(found.getStatus()).isEqualTo(CompanyStatus.DENIED);
+        val denied = memberRepository.findById(member.getId()).orElseThrow();
+        assertThat(denied.getRoles()).doesNotContain(Role.PLAN);
+        val expected = new CompanyReviewedEvent(company.getId(), member.getId(), CompanyStatus.DENIED);
+        assertThat(applicationEvents.stream(CompanyReviewedEvent.class)).containsExactly(expected);
     }
 
     @Test
@@ -266,6 +308,48 @@ class CompanyServiceTest {
         // when & then
         assertCodeException(() -> companyService.create(user, command))
                 .hasExceptionCode(CompanyExceptionCode.DUPLICATE_BRN);
+    }
+
+    @Test
+    @DisplayName("accept - 업체가 존재하지 않을 때 승인하면 NOT_FOUND로 실패한다")
+    void accept_fail_C005() {
+        // when & then
+        assertCodeException(() -> companyService.accept(MISSING_ID))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("accept - 이미 처리된 업체일 때 승인하면 INVALID_STATUS로 실패한다")
+    void accept_fail_CO005() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        company.accept();
+
+        // when & then
+        assertCodeException(() -> companyService.accept(company.getId()))
+                .hasExceptionCode(CompanyExceptionCode.INVALID_STATUS);
+    }
+
+    @Test
+    @DisplayName("deny - 업체가 존재하지 않을 때 반려하면 NOT_FOUND로 실패한다")
+    void deny_fail_C005() {
+        // when & then
+        assertCodeException(() -> companyService.deny(MISSING_ID))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("deny - 이미 처리된 업체일 때 반려하면 INVALID_STATUS로 실패한다")
+    void deny_fail_CO005() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        company.deny();
+
+        // when & then
+        assertCodeException(() -> companyService.deny(company.getId()))
+                .hasExceptionCode(CompanyExceptionCode.INVALID_STATUS);
     }
 
     @Test

@@ -77,6 +77,7 @@
 | CO002 | DUPLICATE_BRN | 409 | INFO | 이미 등록된 사업자등록번호입니다. |
 | CO003 | PROJECT_LIMIT_EXCEEDED | 409 | INFO | 생성 가능한 프로젝트 수를 초과했습니다. |
 | CO004 | DELETE_TASK_EXISTS | 409 | INFO | 진행 중인 작업이 있어 업체를 삭제할 수 없습니다. 작업을 먼저 완료해주세요. |
+| CO005 | INVALID_STATUS | 409 | INFO | 처리할 수 없는 업체 상태입니다. |
 
 ## TaskExceptionCode
 

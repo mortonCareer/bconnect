@@ -7,6 +7,7 @@ public enum NotificationReferenceType {
     OFFER,
     CONTRACT,
     CREDENTIAL,
+    COMPANY,
     RECOMMENDATION,
     TASK
 }
