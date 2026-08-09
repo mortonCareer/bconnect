@@ -25,6 +25,18 @@ public class OfferQueryService {
     private final CompanyFinder companyFinder;
 
     @Transactional(readOnly = true)
+    public Offer get(AuthUser user, Long id) {
+        val found = offerRepository.findById(id)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        val ownerId = companyFinder.getByTaskId(found.getTaskId()).memberId();
+        if (!user.id().equals(found.getWorkerId()) && !user.id().equals(ownerId))
+            throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        return Offer.of(found);
+    }
+
+    @Transactional(readOnly = true)
     public List<Offer> listByTask(AuthUser user, Long taskId) {
         val ownerId = companyFinder.getByTaskId(taskId).memberId();
         if (!user.id().equals(ownerId))
