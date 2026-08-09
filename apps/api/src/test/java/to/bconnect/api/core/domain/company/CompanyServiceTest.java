@@ -10,6 +10,7 @@ import to.bconnect.api.support.fixture.CursorFactory;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.company.CompanyRepository;
+import to.bconnect.api.storage.company.CompanyStatus;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.project.ProjectRepository;
@@ -93,26 +94,31 @@ class CompanyServiceTest {
     }
 
     @Test
-    @DisplayName("create - 사진을 지정해 등록하면 업체가 저장되고 사진이 연결되며 PLAN 권한이 부여된다")
+    @DisplayName("create - 사업자등록증을 첨부해 등록하면 업체가 PENDING으로 저장되고 첨부가 연결되며 PLAN 권한은 부여되지 않는다")
     void create_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
-        attachment.complete();
+        val certificate = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        certificate.complete();
+        val picture = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        picture.complete();
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = new CreateCompany("company", "0000001000", attachment.getId());
+        val command = new CreateCompany("company", "0000001000", picture.getId(), certificate.getId());
 
         // when
         val companyId = companyService.create(user, command);
 
         // then
         val created = companyRepository.findById(companyId).orElseThrow();
-        assertThat(created.getBrn()).isEqualTo("0000001000");
-        val linked = attachmentRepository.findById(attachment.getId()).orElseThrow();
-        assertThat(linked.getReferenceType()).isEqualTo(AttachmentReferenceType.COMPANY);
-        assertThat(linked.getReferenceId()).isEqualTo(companyId);
-        val granted = memberRepository.findById(member.getId()).orElseThrow();
-        assertThat(granted.getRoles()).contains(Role.PLAN);
+        assertThat(created.getStatus()).isEqualTo(CompanyStatus.PENDING);
+        val linkedCertificate = attachmentRepository.findById(certificate.getId()).orElseThrow();
+        assertThat(linkedCertificate.getReferenceType()).isEqualTo(AttachmentReferenceType.COMPANY_CERTIFICATE);
+        assertThat(linkedCertificate.getReferenceId()).isEqualTo(companyId);
+        val linkedPicture = attachmentRepository.findById(picture.getId()).orElseThrow();
+        assertThat(linkedPicture.getReferenceType()).isEqualTo(AttachmentReferenceType.COMPANY);
+        assertThat(linkedPicture.getReferenceId()).isEqualTo(companyId);
+        val found = memberRepository.findById(member.getId()).orElseThrow();
+        assertThat(found.getRoles()).doesNotContain(Role.PLAN);
     }
 
     @Test
@@ -226,7 +232,7 @@ class CompanyServiceTest {
     void create_fail_C005() {
         // given
         val user = UserFactory.domain(MISSING_ID, Role.CAREER);
-        val command = new CreateCompany("company", "0000001000", null);
+        val command = new CreateCompany("company", "0000001000", null, null);
 
         // when & then
         assertCodeException(() -> companyService.create(user, command))
@@ -240,7 +246,7 @@ class CompanyServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.PLAN));
         companyRepository.save(CompanyFactory.entity(member.getId()));
         val user = UserFactory.domain(member.getId(), Role.PLAN);
-        val command = new CreateCompany("company", "0000001001", null);
+        val command = new CreateCompany("company", "0000001001", null, null);
 
         // when & then
         assertCodeException(() -> companyService.create(user, command))
@@ -255,7 +261,7 @@ class CompanyServiceTest {
         val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val user = UserFactory.domain(other.getId(), Role.CAREER);
-        val command = new CreateCompany("company", company.getBrn(), null);
+        val command = new CreateCompany("company", company.getBrn(), null, null);
 
         // when & then
         assertCodeException(() -> companyService.create(user, command))

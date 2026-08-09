@@ -4,6 +4,7 @@ public enum AttachmentReferenceType {
     POST,
     MESSAGE,
     COMPANY,
+    COMPANY_CERTIFICATE,
     MEMBER,
     CREDENTIAL,
     DRIVE

@@ -101,22 +101,24 @@ public class CompanyService {
         if (companyRepository.existsByBrn(command.brn()))
             throw new CodeException(CompanyExceptionCode.DUPLICATE_BRN);
 
+        memberRepository.findById(user.id())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        attachmentFinder.validateOwnership(user.id(), command.attachmentId());
+
         val created = new CompanyEntity(
                 user.id(),
                 command.name(),
                 command.brn()
         );
 
-        val member = memberRepository.findById(user.id())
-                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
-
         val companyId = companyRepository.save(created).getId();
+        attachmentLinker.link(AttachmentReferenceType.COMPANY_CERTIFICATE, companyId, command.attachmentId());
         if (command.pictureId() != null) {
             attachmentFinder.validateOwnership(user.id(), command.pictureId());
             attachmentLinker.link(AttachmentReferenceType.COMPANY, companyId, command.pictureId());
         }
 
-        member.grantRole(Role.PLAN);
         return companyId;
     }
 
@@ -160,6 +162,7 @@ public class CompanyService {
         projectRepository.deleteAll(projects);
 
         attachmentLinker.unlink(AttachmentReferenceType.COMPANY, found.getId());
+        attachmentLinker.unlink(AttachmentReferenceType.COMPANY_CERTIFICATE, found.getId());
         companyRepository.delete(found);
 
         memberRepository.findById(user.id())
