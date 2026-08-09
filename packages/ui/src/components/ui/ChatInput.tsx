@@ -4,7 +4,7 @@
 import * as React from 'react'
 import { cn } from '../../lib/utils'
 import { ImageIcon } from '../../icons/ImageIcon'
-import { SendIcon } from '../../icons/SendIcon'
+import { SendFilledIcon } from '../../icons/SendFilledIcon'
 
 /**
  * ChatInput variants:
@@ -91,10 +91,12 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
         className={cn(
           // 하단 고정 입력바 — viewport-fit=cover 라 홈 인디케이터/제스처바 높이를 직접 확보한다.
           // 채팅 상세는 하단 네비(safe-area 패딩 보유)가 숨겨져 이 컴포넌트가 화면 최하단이다 (#1017).
-          // 고정 h-20 이면 그 패딩이 안쪽을 먹으므로 min-h-20.
+          // 고정 h-16 이면 그 패딩이 안쪽을 먹으므로 min-h-16.
           // w-full/max-w-full — 부모가 flex row 등일 때도 화면 폭을 넘겨 전송 버튼이 잘리지 않게 (#1147)
-          'flex w-full max-w-full min-h-20 items-center gap-2 bg-white px-6 py-4',
-          isFocused ? 'pb-4' : 'pb-[calc(env(safe-area-inset-bottom)+1rem)]',
+          // 상·하 패딩은 입력바가 메시지를 가려 Figma(py-4 / h-20) 대비 절반으로 줄였다. min-h 도 같이
+          // 줄이지 않으면 floor 에 걸려 높이가 안 변하므로 80 → 64 (#1146)
+          'flex w-full max-w-full min-h-16 items-center gap-2 bg-white px-6 py-2',
+          isFocused ? 'pb-2' : 'pb-[calc(env(safe-area-inset-bottom)+0.5rem)]',
           className
         )}
         {...props}
@@ -124,7 +126,7 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
             onBlur={() => setIsFocused(false)}
             disabled={disabled}
             className={cn(
-              'w-full min-w-0 flex-1 bg-transparent text-r-14 outline-none',
+              'w-full min-w-0 flex-1 bg-transparent text-r-14 caret-primary outline-none',
               disabled ? 'text-gray-500' : 'text-gray-900',
               'placeholder:text-gray-500'
             )}
@@ -144,7 +146,7 @@ const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           )}
           aria-label="전송"
         >
-          <SendIcon size={24} className="text-white" />
+          <SendFilledIcon size={24} className="text-gray-100" />
         </button>
       </div>
     )

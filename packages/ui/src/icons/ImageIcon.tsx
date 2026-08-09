@@ -17,9 +17,10 @@ export function ImageIcon({ size = 24, ...props }: ImageIconProps) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      {/* Figma 기준 좌표 — 이전에 x/y 가 각각 +0.75 밀려 24 박스 안에서 우하단으로 치우쳐 있었다 (#1146) */}
       <rect
-        x="3.75"
-        y="3.75"
+        x="3"
+        y="3"
         width="18"
         height="18"
         rx="2"
@@ -29,8 +30,8 @@ export function ImageIcon({ size = 24, ...props }: ImageIconProps) {
         strokeLinejoin="round"
       />
       <circle
-        cx="9.75"
-        cy="9.75"
+        cx="9"
+        cy="9"
         r="2"
         stroke="currentColor"
         strokeWidth="1.5"
@@ -38,7 +39,7 @@ export function ImageIcon({ size = 24, ...props }: ImageIconProps) {
         strokeLinejoin="round"
       />
       <path
-        d="M21.75 15.75L18.664 12.664C18.2889 12.2891 17.7803 12.0784 17.25 12.0784C16.7197 12.0784 16.2111 12.2891 15.836 12.664L6.75 21.75"
+        d="M21 15L17.914 11.914C17.5389 11.5391 17.0303 11.3284 16.5 11.3284C15.9697 11.3284 15.4611 11.5391 15.086 11.914L6 21"
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"
