@@ -157,8 +157,8 @@ INSERT INTO profile_trades (profile_id, trade) VALUES
 (202, 'PAINTING'),
 (203, 'ELECTRICAL');
 
-INSERT INTO companies (id, member_id, name, brn, created_at, modified_at) VALUES
-(200, 200, '업체1', '2001234567', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO companies (id, member_id, name, brn, status, created_at, modified_at) VALUES
+(200, 200, '업체1', '2001234567', 'ACCEPTED', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 -- picture attachments
 INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
