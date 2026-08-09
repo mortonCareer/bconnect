@@ -79,7 +79,8 @@ INSERT INTO attachments (id, member_id, type, status, context, context_id, refer
 (104, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'attachment-104', 'company', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (105, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'attachment-105', 'company-update', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
 (106, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'attachment-106', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(107, 106, 'IMAGE', 'COMPLETED', 'MEMBER', 106, 'MEMBER', 106, 'attachment-107', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+(107, 106, 'IMAGE', 'COMPLETED', 'MEMBER', 106, 'MEMBER', 106, 'attachment-107', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(114, 100, 'FILE', 'COMPLETED', 'COMPANY', 100, NULL, NULL, 'attachment-114', 'certificate', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO tasks (id, dtype, status, progress, version, start_date, end_date, worker_id, project_id, project_title, project_requirement, project_memo, created_at, modified_at) VALUES
 (100, 'PROJECT', 'ASSIGNED', 'TODO', 0, DATE '2026-06-01', DATE '2026-06-03', 101, NULL, '작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
