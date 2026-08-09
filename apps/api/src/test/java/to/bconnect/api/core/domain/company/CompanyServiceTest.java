@@ -126,11 +126,14 @@ class CompanyServiceTest {
     }
 
     @Test
-    @DisplayName("accept - 대기 중인 업체일 때 승인하면 상태가 ACCEPTED로 변경되고 PLAN 권한이 부여된다")
+    @DisplayName("accept - 대기 중인 업체일 때 승인하면 상태가 ACCEPTED로 변경되고 PLAN 권한이 부여되며 등록증 참조가 해제된다")
     void accept_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val certificate = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        certificate.complete();
+        certificate.link(AttachmentReferenceType.COMPANY_CERTIFICATE, company.getId());
 
         // when
         companyService.accept(company.getId());
@@ -140,16 +143,22 @@ class CompanyServiceTest {
         assertThat(found.getStatus()).isEqualTo(CompanyStatus.ACCEPTED);
         val granted = memberRepository.findById(member.getId()).orElseThrow();
         assertThat(granted.getRoles()).contains(Role.PLAN);
+        val unlinked = attachmentRepository.findById(certificate.getId()).orElseThrow();
+        assertThat(unlinked.getReferenceType()).isNull();
+        assertThat(unlinked.getReferenceId()).isNull();
         val expected = new CompanyReviewedEvent(company.getId(), member.getId(), CompanyStatus.ACCEPTED);
         assertThat(applicationEvents.stream(CompanyReviewedEvent.class)).containsExactly(expected);
     }
 
     @Test
-    @DisplayName("deny - 대기 중인 업체일 때 반려하면 상태가 DENIED로 변경되고 PLAN 권한은 부여되지 않는다")
+    @DisplayName("deny - 대기 중인 업체일 때 반려하면 상태가 DENIED로 변경되고 등록증 참조가 해제되며 PLAN 권한은 부여되지 않는다")
     void deny_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val certificate = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        certificate.complete();
+        certificate.link(AttachmentReferenceType.COMPANY_CERTIFICATE, company.getId());
 
         // when
         companyService.deny(company.getId());
@@ -159,6 +168,9 @@ class CompanyServiceTest {
         assertThat(found.getStatus()).isEqualTo(CompanyStatus.DENIED);
         val denied = memberRepository.findById(member.getId()).orElseThrow();
         assertThat(denied.getRoles()).doesNotContain(Role.PLAN);
+        val unlinked = attachmentRepository.findById(certificate.getId()).orElseThrow();
+        assertThat(unlinked.getReferenceType()).isNull();
+        assertThat(unlinked.getReferenceId()).isNull();
         val expected = new CompanyReviewedEvent(company.getId(), member.getId(), CompanyStatus.DENIED);
         assertThat(applicationEvents.stream(CompanyReviewedEvent.class)).containsExactly(expected);
     }

@@ -154,6 +154,8 @@ public class CompanyService {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND))
                 .grantRole(Role.PLAN);
 
+        attachmentLinker.unlink(AttachmentReferenceType.COMPANY_CERTIFICATE, found.getId());
+
         eventPublisher.publishEvent(
                 new CompanyReviewedEvent(found.getId(), found.getMemberId(), CompanyStatus.ACCEPTED));
     }
@@ -167,6 +169,8 @@ public class CompanyService {
             throw new CodeException(CompanyExceptionCode.INVALID_STATUS);
 
         found.deny();
+
+        attachmentLinker.unlink(AttachmentReferenceType.COMPANY_CERTIFICATE, found.getId());
 
         eventPublisher.publishEvent(
                 new CompanyReviewedEvent(found.getId(), found.getMemberId(), CompanyStatus.DENIED));
