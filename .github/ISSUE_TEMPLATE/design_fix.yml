@@ -1,0 +1,51 @@
+name: 디자인 수정
+description: 디자인과 다르게 구현된 화면을 알려주세요
+title: 'design: '
+labels: ['🎨 publishing', '💻 fe']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Figma에서 고쳐야 할 프레임/컴포넌트를 선택하고
+        마우스 오른쪽 클릭 → **Copy link to selection** 으로 링크를 복사해 아래에 붙여넣어 주세요.
+        (링크 안에 노드 번호가 함께 들어 있어서 따로 적을 필요 없습니다)
+
+  - type: dropdown
+    id: app
+    attributes:
+      label: 어느 화면인가요
+      options:
+        - 기술자 앱 (career)
+        - 업체·건축주 웹 (plan)
+        - 랜딩 (bconnect.to)
+        - 잘 모르겠음
+    validations:
+      required: true
+
+  - type: input
+    id: figma-node
+    attributes:
+      label: Figma 노드
+      description: Figma 링크를 붙여넣거나, 노드 번호만 적어도 됩니다 (예 1234:5678)
+      placeholder: https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS/...?node-id=1234-5678
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 요약
+      description: 무엇이 지금 어떻게 되어 있고, 어떻게 바뀌어야 하는지 한두 문장으로 적어주세요
+      placeholder: |
+        지금: 버튼 아래 여백이 좁습니다
+        기대: 24px로 맞춰주세요
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: 스크린샷
+      description: 이미지를 드래그 앤 드롭 해주세요
+    validations:
+      required: true
