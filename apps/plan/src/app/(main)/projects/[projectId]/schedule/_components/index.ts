@@ -6,7 +6,6 @@ export type {
   ScheduleGridProps,
   ScheduleTask,
   TaskAssignee,
-  TaskStatus,
 } from './schedule-grid'
 export { ScheduleHeader } from './schedule-header'
 export { ScheduleFooter } from './schedule-footer'

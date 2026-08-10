@@ -6,6 +6,8 @@ import { UnknownSidoError } from '../errors/index'
 /** 카카오 우편번호 oncomplete 결과 중 우리가 읽는 부분집합 (react-daum-postcode 결과와 구조 호환) */
 export interface KakaoAddressResult {
   zonecode: string
+  /** 법정동코드 10자리 — BE Address 필수값(#1013). */
+  bcode: string
   roadAddress: string
   jibunAddress: string
   userSelectedType: 'R' | 'J'
@@ -23,6 +25,7 @@ export type AddressDraft = Omit<Address, 'state'> & { state?: Region }
 export function emptyAddressDraft(): AddressDraft {
   return {
     zipcode: '',
+    bcode: '',
     street: '',
     state: undefined,
     city: '',
@@ -64,6 +67,7 @@ export function mapKakaoAddress(r: KakaoAddressResult): Address {
   }
   return {
     zipcode: r.zonecode,
+    bcode: r.bcode,
     street: r.userSelectedType === 'R' ? r.roadAddress : r.jibunAddress,
     state,
     city: r.sigungu,
