@@ -128,6 +128,9 @@ public class TaskEntity extends BaseEntity {
             throw new IllegalStateException("허용되지 않은 섭외 상태 전이입니다: %s → NONE".formatted(status));
 
         this.workerId = null;
+        this.workerTitle = null;
+        this.workerMemo = null;
+        this.progress = TaskProgress.TODO;
         this.status = TaskStatus.NONE;
     }
 
@@ -135,6 +138,7 @@ public class TaskEntity extends BaseEntity {
         if (!TaskStatus.OFFERABLE.contains(status))
             throw new IllegalStateException("허용되지 않은 섭외 상태 전이입니다: %s → OFFERED".formatted(status));
 
+        this.workerTitle = projectTitle;
         this.status = TaskStatus.OFFERED;
     }
 

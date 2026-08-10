@@ -11,11 +11,7 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.offer.OfferStatus;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,22 +38,16 @@ public class OfferQueryService {
         if (!user.id().equals(ownerId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        return offerRepository.findAllByTaskIdAndStatusInOrderBySeqAsc(taskId, List.of(OfferStatus.ACTIVE, OfferStatus.PENDING)).stream()
+        return offerRepository.findAllByTaskIdOrderBySeqAsc(taskId).stream()
                 .map(Offer::of)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<Offer> listByWorker(AuthUser user) {
-        return offerRepository.findAllByWorkerIdAndStatusOrderByIdDesc(user.id(), OfferStatus.ACTIVE).stream()
+        val statuses = List.of(OfferStatus.ACTIVE, OfferStatus.ACCEPTED);
+        return offerRepository.findAllByWorkerIdAndStatusInOrderByIdDesc(user.id(), statuses).stream()
                 .map(Offer::of)
                 .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public Map<Long, Offer> activeMap(Collection<Long> taskIds) {
-        return offerRepository.findAllByTaskIdInAndStatus(taskIds, OfferStatus.ACTIVE).stream()
-                .map(Offer::of)
-                .collect(Collectors.toMap(Offer::taskId, Function.identity()));
     }
 }
