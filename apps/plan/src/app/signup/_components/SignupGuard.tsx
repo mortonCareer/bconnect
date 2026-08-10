@@ -1,6 +1,6 @@
 'use client'
 
-import { hasAuthHint } from '@bconnect/api-client'
+import { readAuthHint } from '@bconnect/api-client'
 import { useSignupStore } from '@/stores/signup-store'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useSyncExternalStore, type ReactNode } from 'react'
@@ -19,7 +19,7 @@ export function SignupGuard({ children }: { children: ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const { formData } = useSignupStore()
-  const isLoggedIn = hasAuthHint()
+  const isLoggedIn = readAuthHint()
   const hydrated = useSyncExternalStore(
     (onChange) => useSignupStore.persist.onFinishHydration(onChange),
     () => useSignupStore.persist.hasHydrated(),
