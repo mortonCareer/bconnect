@@ -7,7 +7,7 @@ import {
   getGetGroupChatsQueryKey,
   getGetNotificationsQueryKey,
   getGetNotificationsUnreadCountQueryKey,
-  hasAuthHint,
+  readAuthHint,
   useQueryClient,
 } from '@bconnect/api-client'
 import { getFcmMessaging } from './firebase'
@@ -59,7 +59,7 @@ export function usePushNotificationListener(referencePaths: ReferencePathMap): v
       // 로그인 게이트 필수(#800) — 기기 등록 API 는 인증 필요라 로그아웃 상태면 401.
       // 이 effect 는 마운트 때 1회만 실행된다 — 로그아웃으로 진입했다가 새로고침 없이
       // 로그인하는 경우는 여기서 못 잡으므로 auth-store login() 이 직접 호출한다.
-      if (Notification.permission === 'granted' && hasAuthHint()) await syncDeviceToken()
+      if (Notification.permission === 'granted' && readAuthHint()) await syncDeviceToken()
 
       // 포그라운드 수신 리스너
       // data-only 페이로드(title/body 가 data 안)도 대응

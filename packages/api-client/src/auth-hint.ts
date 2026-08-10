@@ -41,9 +41,10 @@ export function clearAuthHint() {
   notify()
 }
 
-// 클라이언트에서도 proxy 가드와 같은 낙관 판정 재사용 — 인증 필요한 부수효과(FCM 기기 등록 등)의
-// 게이트 용도. getAccessToken() 은 앱 진입 직후엔 로그인 유저도 null(refresh 전)이라 게이트로 못 씀.
-export function hasAuthHint(): boolean {
+// 지금 시점 쿠키를 한 번 읽는다 — effect·이벤트 핸들러처럼 훅을 부를 수 없는 자리 전용.
+// 렌더에서는 useAuthHint 를 쓴다 (서버에서 항상 false 라 hydration 이 깨지고, 값이 변해도 안 따라감).
+// getAccessToken() 은 앱 진입 직후엔 로그인 유저도 null(refresh 전)이라 게이트로 못 씀.
+export function readAuthHint(): boolean {
   if (typeof document === 'undefined') return false
   return document.cookie.split('; ').some((c) => c.startsWith(`${AUTH_HINT_COOKIE}=`))
 }
