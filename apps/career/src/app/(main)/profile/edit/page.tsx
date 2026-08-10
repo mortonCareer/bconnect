@@ -174,14 +174,14 @@ export default function ProfileEditPage() {
 
       <Form {...form}>
         <form className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-24 pt-3">
-          {/* 시공분야 */}
+          {/* 공종 */}
           <FormField
             control={control}
             name="trades"
             render={({ field }) => (
               <FormItem className="gap-3">
                 <FormLabel required className="text-m-16 text-gray-900">
-                  시공분야
+                  공종
                 </FormLabel>
                 <FormDescription>
                   최대 {MAX_TRADES}개까지 선택 가능해요 ({(watchedTrades ?? []).length}/{MAX_TRADES}

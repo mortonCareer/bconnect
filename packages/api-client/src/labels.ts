@@ -43,7 +43,7 @@ export const TRADE_LIST = Object.entries(TRADE_LABELS).map(([value, label]) => (
   label,
 }))
 
-/** 시공분야 카테고리별 그룹 (Figma 디자인 기준) */
+/** 공종 카테고리별 그룹 (Figma 디자인 기준) */
 export const TRADE_GROUPS: { label: string; trades: Trade[] }[] = [
   {
     label: '기반공정',
