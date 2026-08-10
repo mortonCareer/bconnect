@@ -9,6 +9,11 @@ export {
 
 export { AUTH_HINT_COOKIE, setAuthHint, clearAuthHint, hasAuthHint } from './auth-hint'
 
+export { ERROR_CODE, isApiError, hasErrorCode, isRegisterMemberSignupSessionError } from './errors'
+export type { ErrorCode } from './errors'
+
+export { requireRegisterAccessToken } from './register'
+
 export { getQueryClient, queryClientConfig } from './query-client'
 
 // Re-export react-query for app usage

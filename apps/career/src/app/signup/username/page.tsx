@@ -7,7 +7,14 @@
 import { useSignupStore } from '@/stores/signup-store'
 import { checkUsername } from '@bconnect/api-client'
 import { formatUsername } from '@bconnect/config/username'
-import { Form, FormSubmitButton, TextField, passthroughError, useServerError } from '@bconnect/ui'
+import {
+  Form,
+  FormError,
+  FormSubmitButton,
+  TextField,
+  passthroughError,
+  useServerError,
+} from '@bconnect/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -16,7 +23,7 @@ import { usernameSchema, type UsernameFormData } from './schema'
 
 export default function SignupUsernamePage() {
   const router = useRouter()
-  const { formData, setUsername, setName } = useSignupStore()
+  const { formData, setUsername, setName, registerError, setRegisterError } = useSignupStore()
 
   const form = useForm<UsernameFormData>({
     resolver: zodResolver(usernameSchema),
@@ -31,6 +38,8 @@ export default function SignupUsernamePage() {
   const server = useServerError(control, passthroughError<UsernameFormData>('username'))
 
   const onSubmit = async (data: UsernameFormData) => {
+    // 가입 단계에서 되돌아오며 받은 안내는 재제출 시점에 무효해진다.
+    setRegisterError(null)
     try {
       const { available } = await checkUsername({ username: data.username })
       if (!available) {
@@ -84,6 +93,8 @@ export default function SignupUsernamePage() {
               serverError={server.fieldError('username')}
             />
           </div>
+
+          <FormError error={registerError ?? undefined} />
 
           {/* Submit Button */}
           <FormSubmitButton size="full">다음으로</FormSubmitButton>

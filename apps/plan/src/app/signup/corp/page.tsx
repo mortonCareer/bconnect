@@ -3,7 +3,7 @@
  */
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,10 +15,19 @@ import {
   Logo,
   TextField,
   passthroughError,
+  toast,
   useServerError,
 } from '@bconnect/ui'
-import { refreshAccessToken, useCreateMember, useCreateCompany } from '@bconnect/api-client'
-import type { RegisterMemberResponse } from '@bconnect/api-client'
+import {
+  ERROR_CODE,
+  hasErrorCode,
+  isRegisterMemberSignupSessionError,
+  hasAuthHint,
+  refreshAccessToken,
+  useCreateMember,
+  useCreateCompany,
+  requireRegisterAccessToken,
+} from '@bconnect/api-client'
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
 import { BIRTH_PLACEHOLDER } from '@bconnect/config/signup'
@@ -26,35 +35,15 @@ import { useSignupStore } from '@/stores/signup-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { corpSchema, type CorpFormData } from './schema'
 
-function requireRegisterAccessToken(result: RegisterMemberResponse) {
-  // TODO: BE required 처리 후 type narrowing 필요.
-  // RegisterMemberResponse.accessToken은 세션 필수값인데 optional emit이다.
-  if (!result.accessToken) {
-    throw new Error('회원가입 세션 토큰이 응답에 없습니다.')
-  }
-
-  return result.accessToken
-}
-
 export default function SignupCorpPage() {
   const router = useRouter()
-  const { formData, setCorp, reset: resetSignup } = useSignupStore()
-  const { login, isAuthenticated } = useAuthStore()
+  const { formData, setCorp, reset: resetSignup, setRegisterError } = useSignupStore()
+  const { login } = useAuthStore()
   const registerMemberMutation = useCreateMember({
     request: { headers: { 'X-Signup-Token': formData.signupToken } },
   })
   const createCompanyMutation = useCreateCompany()
   const [issuedAccessToken, setIssuedAccessToken] = useState<string | null>(null)
-
-  // signupToken 없으면 로그인으로 리다이렉트
-  useEffect(() => {
-    if (isAuthenticated) return
-    if (!formData.signupToken) {
-      router.replace('/login')
-    } else if (!formData.username || !formData.name) {
-      router.replace('/signup/member')
-    }
-  }, [isAuthenticated, formData.signupToken, formData.username, formData.name, router])
 
   const form = useForm<CorpFormData>({
     resolver: zodResolver(corpSchema),
@@ -77,24 +66,50 @@ export default function SignupCorpPage() {
     try {
       // register 는 signupToken(X-Signup-Token 헤더)을 소비 — 회사 생성 실패 후 재시도 시
       // 재호출하지 않도록 발급된 accessToken을 보관한다.
-      const accessToken =
-        issuedAccessToken ??
-        requireRegisterAccessToken(
-          await registerMemberMutation.mutateAsync({
-            data: {
-              // TODO(#1177): 생년월일 입력 화면이 생기면 폼 입력으로 교체
-              birth: BIRTH_PLACEHOLDER,
-              username: formData.username,
-              name: formData.name,
-            },
-          })
-        )
+      // 로그인 상태로 이 화면에 온 경우(RequireRole 이 보냄)는 회원이 이미 있으므로 register 를 건너뛴다.
+      // 판정 소스는 게이트와 같은 표시 쿠키 — 동기 읽기라 제출 시점에 판정이 밀리지 않는다.
+      if (!hasAuthHint()) {
+        let accessToken: string
+        try {
+          accessToken =
+            issuedAccessToken ??
+            requireRegisterAccessToken(
+              await registerMemberMutation.mutateAsync({
+                data: {
+                  // TODO(#1177): 생년월일 입력 화면이 생기면 폼 입력으로 교체
+                  birth: BIRTH_PLACEHOLDER,
+                  username: formData.username,
+                  name: formData.name,
+                },
+              })
+            )
+        } catch (err) {
+          // 토큰 소진·만료, 그리고 이미 가입된 번호 — 모두 가입 화면에서는 풀 수 없다.
+          // 인증부터 다시 하면 토큰 재발급 또는 기존 계정 로그인으로 이어진다.
+          if (
+            isRegisterMemberSignupSessionError(err) ||
+            hasErrorCode(err, ERROR_CODE.MEMBER.DUPLICATE_PHONE)
+          ) {
+            toast({ description: err.message, variant: 'error' })
+            resetSignup()
+            router.replace('/login')
+            return
+          }
+          // 사용자명 중복은 이 화면에 입력칸이 없다 — 안내와 함께 입력 단계로 되돌린다.
+          if (hasErrorCode(err, ERROR_CODE.MEMBER.DUPLICATE_USERNAME)) {
+            setRegisterError(err.message)
+            router.replace('/signup/member')
+            return
+          }
+          throw err
+        }
 
-      if (!issuedAccessToken) {
-        setIssuedAccessToken(accessToken)
+        if (!issuedAccessToken) {
+          setIssuedAccessToken(accessToken)
+        }
+
+        login(accessToken)
       }
-
-      login(accessToken)
       await createCompanyMutation.mutateAsync({
         data: { name: data.companyName, brn: data.bizNumber },
       })
@@ -108,8 +123,6 @@ export default function SignupCorpPage() {
       server.capture(err, form.getValues())
     }
   }
-
-  if (!formData.signupToken || !formData.username || !formData.name) return null
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
