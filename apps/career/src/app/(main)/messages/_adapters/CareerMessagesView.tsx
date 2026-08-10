@@ -19,6 +19,7 @@ import {
   MessagesView,
   ChatView,
   toChatSummaries,
+  useChatImageUpload,
   type MessagesViewData,
   type ChatViewData,
   type OfferMessageDetail,
@@ -186,11 +187,18 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
     isError,
   }
 
+  const imageUpload = useChatImageUpload(chatId)
+
   return (
     <ChatView
       chatId={chatId}
       data={data}
       profileHref={(id) => `/profile/${id}`}
+      imageActions={{
+        upload: imageUpload.upload,
+        isUploading: imageUpload.isUploading,
+        onSendError: imageUpload.notifySendError,
+      }}
       offerActions={{
         onAccept: (offerId) => {
           if (isOfferActionPending) return

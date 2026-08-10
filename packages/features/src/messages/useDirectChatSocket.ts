@@ -2,8 +2,15 @@
 
 import { useCallback, useEffect, useRef } from 'react'
 import { Client } from '@stomp/stompjs'
-import { getAccessToken, refreshAccessToken, MessageType } from '@bconnect/api-client'
-import type { Message } from '@bconnect/api-client'
+import { getAccessToken, refreshAccessToken } from '@bconnect/api-client'
+import type { Message, MessageType } from '@bconnect/api-client'
+
+/** BE SendMessageRequest 계약 — TEXT 는 content, IMAGE 는 attachmentIds 가 필수 */
+export interface SendMessagePayload {
+  type: MessageType
+  content?: string
+  attachmentIds?: number[]
+}
 
 const getWsUrl = () => {
   const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
@@ -47,12 +54,12 @@ export function useDirectChatSocket(chatId: number, onMessage: (message: Message
   }, [chatId])
 
   return useCallback(
-    (content: string): boolean => {
+    (payload: SendMessagePayload): boolean => {
       const client = clientRef.current
       if (!client?.connected) return false
       client.publish({
         destination: `/app/direct-chats/${chatId}/messages`,
-        body: JSON.stringify({ type: MessageType.TEXT, content }),
+        body: JSON.stringify(payload),
       })
       return true
     },

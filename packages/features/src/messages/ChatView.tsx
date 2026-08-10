@@ -5,6 +5,7 @@ import {
   getGetDirectChatMessagesQueryKey,
   getGetDirectChatsQueryKey,
   getTradeLabel,
+  MessageType,
   useQueryClient,
 } from '@bconnect/api-client'
 import type { CursorPageMessage, InfiniteData, Message, Profile } from '@bconnect/api-client'
@@ -34,6 +35,18 @@ export interface ChatViewData {
   isError: boolean
 }
 
+/**
+ * 사진 첨부 슬롯 — 앱이 useChatImageUpload 를 배선해 주입한다 (ADR-0020: features 는 mutation 을
+ * 갖지 않는다). 미주입이면 갤러리 버튼이 비활성.
+ */
+export interface ChatImageActions {
+  /** 고른 파일 업로드 → 첨부 id. 실패 시 자체 피드백 후 빈 배열 */
+  upload: (files: File[]) => Promise<number[]>
+  isUploading?: boolean
+  /** 업로드는 됐지만 소켓 전송이 실패했을 때 */
+  onSendError?: () => void
+}
+
 type ChatViewBaseProps = {
   chatId: number
   data: ChatViewData
@@ -41,6 +54,8 @@ type ChatViewBaseProps = {
   profileHref?: (memberId: number) => string
   /** 섭외 제안 수락/거절 — career(기술자)만 주입. 미주입이면 카드가 읽기전용 */
   offerActions?: OfferActions
+  /** 사진 첨부 — 미주입이면 갤러리 버튼 비활성 */
+  imageActions?: ChatImageActions
 }
 
 type ChatViewShellProps =
@@ -62,7 +77,7 @@ type ChatViewShellProps =
 export type ChatViewProps = ChatViewBaseProps & ChatViewShellProps
 
 export function ChatView(props: ChatViewProps) {
-  const { chatId, data, profileHref, offerActions } = props
+  const { chatId, data, profileHref, offerActions, imageActions } = props
   const {
     chat,
     currentUserId,
@@ -111,8 +126,19 @@ export function ChatView(props: ChatViewProps) {
   const handleSend = useCallback(() => {
     const content = message.trim()
     if (!content) return
-    if (sendMessage(content)) setMessage('')
+    if (sendMessage({ type: MessageType.TEXT, content })) setMessage('')
   }, [message, sendMessage])
+
+  // 선택 즉시 업로드 → 첨부 id 를 한 메시지로 전송. 업로드 실패는 imageActions 가 자체 안내한다.
+  const handlePickImages = useCallback(
+    async (files: File[]) => {
+      if (!imageActions) return
+      const attachmentIds = await imageActions.upload(files)
+      if (attachmentIds.length === 0) return
+      if (!sendMessage({ type: MessageType.IMAGE, attachmentIds })) imageActions.onSendError?.()
+    },
+    [imageActions, sendMessage]
+  )
 
   const profilePanelHref = profileHref && otherId != null ? profileHref(otherId) : undefined
   const headerItem = (
@@ -155,7 +181,13 @@ export function ChatView(props: ChatViewProps) {
         // 채팅 상대 이름은 업체가 아니라 담당자 개인명이라 대체 불가 — 카드가 placeholder 로 렌더된다.
         // BE 에 필드가 추가되면 여기서 companyName 을 넘길 것.
       />
-      <ChatInput value={message} onChange={setMessage} onSend={handleSend} />
+      <ChatInput
+        value={message}
+        onChange={setMessage}
+        onSend={handleSend}
+        onPickImages={imageActions ? (files) => void handlePickImages(files) : undefined}
+        isUploading={imageActions?.isUploading}
+      />
     </>
   )
 
