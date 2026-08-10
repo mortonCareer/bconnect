@@ -1,4 +1,4 @@
-import { OfferStatus, TaskStatus as BeTaskStatus, TRADE_LABELS } from '@bconnect/api-client'
+import { OfferStatus, TaskProgress, TaskStatus, TRADE_LABELS } from '@bconnect/api-client'
 import type {
   Offer,
   Profile,
@@ -6,11 +6,11 @@ import type {
   UpdateProjectTaskRequest,
   CreateProjectTaskRequest,
 } from '@bconnect/api-client'
-import type { OfferQueueItem, ScheduleTask, TaskAssignee, TaskStatus } from './types'
+import type { OfferQueueItem, ScheduleTask, TaskAssignee } from './types'
 
 /**
- * BE Task/Offer ↔ FE ScheduleTask 타입 경계. 그리드/패널/셀렉트가 쓰는 FE 모양(string id,
- * 5-status)은 유지하고 변환을 이 파일 한 곳에 모은다.
+ * BE Task/Offer ↔ FE ScheduleTask 타입 경계. 그리드/패널/셀렉트가 쓰는 FE 모양(string id)은
+ * 유지하고 변환을 이 파일 한 곳에 모은다. 섭외(status)·진행(progress) 두 축은 BE 값 그대로 쓴다.
  */
 
 /** 드래그-생성 직후 미확정 작업의 로컬 센티널 id — 서버엔 존재하지 않음 (draft-task-store). */
@@ -20,23 +20,6 @@ export function toNumericTaskId(id: string | null | undefined): number | null {
   if (!id || id === DRAFT_TASK_ID) return null
   const n = Number(id)
   return Number.isFinite(n) ? n : null
-}
-
-/** BE 6-status → FE 5-status. BE 상태를 그대로 표시 — 화면에서 재해석하지 않는다. */
-export function toFeTaskStatus(status: Task['status']): TaskStatus {
-  switch (status) {
-    case BeTaskStatus.COMPLETED:
-      return 'completed'
-    case BeTaskStatus.IN_PROGRESS:
-      return 'in_progress'
-    case BeTaskStatus.SCHEDULED:
-      return 'recruited'
-    case BeTaskStatus.OFFERED:
-      return 'recruiting'
-    default:
-      // DRAFT | OPEN | undefined
-      return 'not_started'
-  }
 }
 
 /** FE OfferQueueItem.profileId 는 실제 memberId 축 (PanelProfile 후보 구성과 동일). */
@@ -53,7 +36,7 @@ export function toOfferQueueItem(offer: Offer): OfferQueueItem {
   }
 }
 
-/** 섭외 확정(SCHEDULED+) 작업의 대표 기술자 — task.workerId 로 조회한 Profile 에서 파생. */
+/** 섭외 확정(ASSIGNED) 작업의 대표 기술자 — task.workerId 로 조회한 Profile 에서 파생. */
 export function toAssigneeFromProfile(profile: Profile): TaskAssignee {
   const trade = profile.primaryTrade
   return {
@@ -93,7 +76,8 @@ export function toScheduleTask(
     ganttName: task.projectTitle ?? '',
     startDate: task.start ?? '',
     endDate: task.end ?? '',
-    status: toFeTaskStatus(task.status),
+    status: task.status,
+    progress: task.progress,
     request: task.projectRequirement ?? '',
     memo: task.projectMemo ?? '',
     // 작업 주소 = 소속 프로젝트 주소 (BE 가 주입) — 폼에선 읽기전용
@@ -125,6 +109,7 @@ export function toUpdateRequest(task: Task): UpdateProjectTaskRequest {
     trades: task.trades ?? [],
     start: task.start ?? '',
     end: task.end ?? '',
+    progress: task.progress ?? TaskProgress.TODO,
     title: task.projectTitle ?? '',
     requirement: task.projectRequirement ?? '',
     memo: task.projectMemo ?? '',
