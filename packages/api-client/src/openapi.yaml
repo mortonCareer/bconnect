@@ -1244,7 +1244,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseListTaskResponse"
+                $ref: "#/components/schemas/ApiResponseTaskListResponse"
   /api/v1/tasks/{id}/offers:
     get:
       tags:
@@ -1344,7 +1344,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseListTaskResponse"
+                $ref: "#/components/schemas/ApiResponseListCompanyTaskResponse"
   /api/v1/projects/{id}/notes:
     get:
       tags:
@@ -1402,6 +1402,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseProfileDetailResponse"
+  /api/v1/offers/{id}:
+    get:
+      tags:
+      - offer-controller
+      operationId: get_3
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfferResponse"
   /api/v1/notifications:
     get:
       tags:
@@ -1466,7 +1485,7 @@ paths:
     get:
       tags:
       - group-chat-controller
-      operationId: get_3
+      operationId: get_4
       parameters:
       - name: id
         in: path
@@ -1532,7 +1551,7 @@ paths:
     get:
       tags:
       - feed-controller
-      operationId: get_4
+      operationId: get_5
       parameters:
       - name: id
         in: path
@@ -1639,7 +1658,7 @@ paths:
     get:
       tags:
       - direct-chat-controller
-      operationId: get_5
+      operationId: get_6
       parameters:
       - name: id
         in: path
@@ -1712,7 +1731,7 @@ paths:
     get:
       tags:
       - crawled-member-controller
-      operationId: get_6
+      operationId: get_7
       parameters:
       - name: id
         in: path
@@ -1793,7 +1812,7 @@ paths:
     get:
       tags:
       - company-controller
-      operationId: get_7
+      operationId: get_8
       parameters:
       - name: id
         in: path
@@ -2833,7 +2852,7 @@ components:
       - size
       - type
       - url
-    ApiResponseListTaskResponse:
+    ApiResponseTaskListResponse:
       type: object
       properties:
         success:
@@ -2841,9 +2860,74 @@ components:
         error:
           $ref: "#/components/schemas/ExceptionCode"
         data:
+          $ref: "#/components/schemas/TaskListResponse"
+    AssigneeTaskResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        trades:
           type: array
           items:
-            $ref: "#/components/schemas/TaskResponse"
+            $ref: "#/components/schemas/Trade"
+          uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        progress:
+          $ref: "#/components/schemas/TaskProgress"
+        workerId:
+          type:
+          - integer
+          - "null"
+          format: int64
+        title:
+          type: string
+        memo:
+          type:
+          - string
+          - "null"
+        projectId:
+          type: integer
+          format: int64
+        requirement:
+          type:
+          - string
+          - "null"
+        address:
+          type: "null"
+          $ref: "#/components/schemas/Address"
+        offer:
+          type: "null"
+          $ref: "#/components/schemas/OfferSummaryResponse"
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+      required:
+      - address
+      - createdAt
+      - end
+      - id
+      - memo
+      - modifiedAt
+      - offer
+      - progress
+      - projectId
+      - requirement
+      - start
+      - status
+      - title
+      - trades
+      - workerId
     OfferStatus:
       type: string
       enum:
@@ -2872,14 +2956,33 @@ components:
       - seq
       - status
       - taskId
-    TaskResponse:
+    TaskListResponse:
+      type: object
+      properties:
+        workerTasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkerTaskResponse"
+        assigneeTasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssigneeTaskResponse"
+      required:
+      - assigneeTasks
+      - workerTasks
+    TaskStatus:
+      type: string
+      enum:
+      - NONE
+      - OPEN
+      - OFFERED
+      - ASSIGNED
+    WorkerTaskResponse:
       type: object
       properties:
         id:
           type: integer
           format: int64
-        type:
-          $ref: "#/components/schemas/TaskType"
         trades:
           type: array
           items:
@@ -2891,59 +2994,24 @@ components:
         end:
           type: string
           format: date
-        status:
-          $ref: "#/components/schemas/TaskStatus"
         progress:
           $ref: "#/components/schemas/TaskProgress"
         workerId:
-          type:
-          - integer
-          - "null"
+          type: integer
           format: int64
-        workerTitle:
+        title:
+          type: string
+        memo:
           type:
           - string
           - "null"
-        workerMemo:
-          type:
-          - string
-          - "null"
-        workerCompany:
+        company:
           type:
           - string
           - "null"
         address:
           type: "null"
           $ref: "#/components/schemas/Address"
-        projectId:
-          type:
-          - integer
-          - "null"
-          format: int64
-        projectTitle:
-          type:
-          - string
-          - "null"
-        projectRequirement:
-          type:
-          - string
-          - "null"
-        projectMemo:
-          type:
-          - string
-          - "null"
-        projectCompanyId:
-          type:
-          - integer
-          - "null"
-          format: int64
-        projectCompanyName:
-          type:
-          - string
-          - "null"
-        offer:
-          type: "null"
-          $ref: "#/components/schemas/OfferSummaryResponse"
         createdAt:
           type: string
           format: date-time
@@ -2952,38 +3020,17 @@ components:
           format: date-time
       required:
       - address
+      - company
       - createdAt
       - end
       - id
+      - memo
       - modifiedAt
-      - offer
       - progress
-      - projectCompanyId
-      - projectCompanyName
-      - projectId
-      - projectMemo
-      - projectRequirement
-      - projectTitle
       - start
-      - status
+      - title
       - trades
-      - type
-      - workerCompany
       - workerId
-      - workerMemo
-      - workerTitle
-    TaskStatus:
-      type: string
-      enum:
-      - NONE
-      - OPEN
-      - OFFERED
-      - ASSIGNED
-    TaskType:
-      type: string
-      enum:
-      - WORKER
-      - PROJECT
     ApiResponseListOfferResponse:
       type: object
       properties:
@@ -3154,6 +3201,80 @@ components:
           $ref: "#/components/schemas/ExceptionCode"
         data:
           $ref: "#/components/schemas/ProjectResponse"
+    ApiResponseListCompanyTaskResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/CompanyTaskResponse"
+    CompanyTaskResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        trades:
+          type: array
+          items:
+            $ref: "#/components/schemas/Trade"
+          uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        progress:
+          $ref: "#/components/schemas/TaskProgress"
+        workerId:
+          type:
+          - integer
+          - "null"
+          format: int64
+        projectId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        requirement:
+          type:
+          - string
+          - "null"
+        memo:
+          type:
+          - string
+          - "null"
+        address:
+          type: "null"
+          $ref: "#/components/schemas/Address"
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+      required:
+      - address
+      - createdAt
+      - end
+      - id
+      - memo
+      - modifiedAt
+      - progress
+      - projectId
+      - requirement
+      - start
+      - status
+      - title
+      - trades
+      - workerId
     ApiResponseListNoteResponse:
       type: object
       properties:
@@ -3380,6 +3501,15 @@ components:
           $ref: "#/components/schemas/ExceptionCode"
         data:
           $ref: "#/components/schemas/ProfileResponse"
+    ApiResponseOfferResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          $ref: "#/components/schemas/OfferResponse"
     ApiResponseCursorPageNotificationResponse:
       type: object
       properties:
@@ -3811,7 +3941,7 @@ components:
           $ref: "#/components/schemas/PostResponse"
         task:
           type: "null"
-          $ref: "#/components/schemas/TaskResponse"
+          $ref: "#/components/schemas/TaskSummaryResponse"
       required:
       - member
       - post
@@ -3851,6 +3981,45 @@ components:
       - memberId
       - modifiedAt
       - taskId
+    TaskSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        trades:
+          type: array
+          items:
+            $ref: "#/components/schemas/Trade"
+          uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        company:
+          type:
+          - string
+          - "null"
+        address:
+          type: "null"
+          $ref: "#/components/schemas/Address"
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+      required:
+      - address
+      - company
+      - createdAt
+      - end
+      - id
+      - modifiedAt
+      - start
+      - trades
     ApiResponseFeedResponse:
       type: object
       properties:
