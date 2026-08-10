@@ -12,9 +12,9 @@ const xmlParser = new XMLParser({
 })
 
 function getServiceKey(): string {
-  const key = process.env.KCOMWEL_API_SERVICE_KEY
+  const key = process.env.DATA_GO_SERVICE_KEY
   if (!key) {
-    throw new Error('KCOMWEL_API_SERVICE_KEY is not configured')
+    throw new Error('DATA_GO_SERVICE_KEY is not configured')
   }
   return key
 }

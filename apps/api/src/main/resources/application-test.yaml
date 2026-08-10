@@ -5,10 +5,16 @@ spring:
   sql:
     init:
       mode: always
+      data-locations:
+        - classpath:data.sql
+        - classpath:data-crawler.sql
 
 app:
   jwt:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
+
+  data-go:
+    service-key: test-service-key
 
   sms:
     api-key: test-api-key

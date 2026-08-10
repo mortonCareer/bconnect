@@ -117,7 +117,7 @@ export interface NtsValidateResponse {
 
 // ─── 근로복지공단 API Types ──────────────────────
 
-/** 고용/산재보험 가입 사업장 조회 응답 항목 (XML 파싱, parseTagValue=false → 모두 string) */
+/** 고용/산재보험 가입 사업장 조회 응답 항목 */
 export interface KcomwelInsuranceItem {
   saeopjangNm: string // 사업장명
   addr: string // 주소
@@ -138,46 +138,46 @@ export interface KcomwelInsuranceItem {
 /** 건설업체등록 레코드 (kiscon_registration 테이블) */
 export interface KisconRegistrationItem {
   ncr_gs_seq: number
-  biz_reg_no: string
-  company_name: string | null
-  representative: string | null
-  trade_name: string | null
-  trade_reg_no: string | null
-  address: string | null
-  region: string | null
-  region_detail: string | null
-  reg_date: number | null
-  announce_date: number | null
-  flag: string | null
-  phone: string | null
+  ncr_master_num: string
+  ncr_gs_kname: string | null
+  ncr_gs_master: string | null
+  ncr_item_name: string | null
+  ncr_itemregno: string | null
+  ncr_gs_addr: string | null
+  ncr_area_name: string | null
+  ncr_area_detail_name: string | null
+  ncr_gs_date: number | null
+  ncr_gs_regdate: number | null
+  ncr_gs_flag: string | null
+  ncr_off_tel: string | null
   synced_at: string
 }
 
 /** 행정처분 레코드 (kiscon_admin_penalty 테이블) */
 export interface KisconAdminPenaltyItem {
   ncr_gs_seq: number
-  biz_reg_no: string
-  company_name: string | null
-  representative: string | null
-  trade_name: string | null
-  trade_reg_no: string | null
-  address: string | null
-  region: string | null
-  region_detail: string | null
-  penalty_type: string | null
-  violation_content: string | null
-  violation_detail: string | null
-  penalty_ground: string | null
-  fine_amount: number
-  penalty_amount: number
-  stop_start_date: string | null
-  stop_end_date: string | null
-  cancel_date: string | null
-  correction: string | null
-  penalty_date: number | null
-  announce_date: number | null
-  flag: string | null
-  phone: string | null
-  has_injunction: string | null
+  ncr_master_num: string
+  ncr_admi_kname: string | null
+  ncr_admi_master: string | null
+  ncr_item_name: string | null
+  ncr_itemregno: string | null
+  ncr_admi_addr: string | null
+  ncr_area_name: string | null
+  ncr_area_detail_name: string | null
+  ncr_admi_dename: string | null
+  ecode_admi_con: string | null
+  ncr_admi_reason: string | null
+  ecode_admi_ground: string | null
+  ncr_admi_fine: number
+  ncr_admi_penalty: number
+  ncr_admi_stop_sdate: string | null
+  ncr_admi_stop_edate: string | null
+  ncr_admi_canceldate: string | null
+  ncr_admi_correct: string | null
+  ncr_gs_date: number | null
+  ncr_gs_regdate: number | null
+  ncr_gs_flag: string | null
+  ncr_off_tel: string | null
+  ncr_pd_status: string | null
   synced_at: string
 }

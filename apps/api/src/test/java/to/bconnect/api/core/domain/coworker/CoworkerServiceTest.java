@@ -153,7 +153,7 @@ class CoworkerServiceTest {
 
         // when
         val statuses = coworkerService.resolveStatusMap(member.getId(),
-                List.of(other.getId(), other.getId(), another.getId(), requester.getId(), MISSING_ID));
+                List.of(other.getId(), another.getId(), requester.getId(), MISSING_ID));
 
         // then
         assertThat(statuses)

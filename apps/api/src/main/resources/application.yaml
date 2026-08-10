@@ -40,7 +40,7 @@ app:
 
   cors:
     allowed-origins:
-      - ${CORS_ALLOWED_ORIGIN:http://localhost:3000}
+      - ${CORS_ALLOWED_ORIGIN}
     allowed-origin-patterns:
       - https://bconnect-career*.vercel.app
       - https://bconnect-plan*.vercel.app
@@ -51,12 +51,10 @@ app:
     secret: ${JWT_SECRET}
     access-token-expiration: 1h
     refresh-token-expiration: 7d
-    cookie-domain: ${COOKIE_DOMAIN:}
+    cookie-domain: ${COOKIE_DOMAIN}
 
-  sms:
-    api-key: ${SOLAPI_API_KEY}
-    api-secret: ${SOLAPI_API_SECRET}
-    sender-number: ${SOLAPI_SENDER_NUMBER}
+  data-go:
+    service-key: ${DATA_GO_SERVICE_KEY}
 
   s3:
     region: ${AWS_REGION:ap-northeast-2}

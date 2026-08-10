@@ -4,11 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "kiscon-sync": "tsx src/kiscon-sync.ts",
-    "kiscon-construction-sync": "tsx src/kiscon-construction-sync.ts"
+    "kiscon-registration-sync": "tsx src/kiscon-registration-sync.ts",
+    "kiscon-penalty-sync": "tsx src/kiscon-penalty-sync.ts",
+    "kiscon-arrears-sync": "tsx src/kiscon-arrears-sync.ts",
+    "kiscon-subcon-sync": "tsx src/kiscon-subcon-sync.ts",
+    "moel-sync": "tsx src/moel-sync.ts",
+    "ecic-sync": "tsx src/ecic-sync.ts",
+    "cwma-sync": "tsx src/cwma-sync.ts",
+    "feia-sync": "tsx src/feia-sync.ts"
   },
   "dependencies": {
-    "@bconnect/business": "workspace:*",
+    "cheerio": "^1.0.0",
     "postgres": "^3.4.9"
   },
   "devDependencies": {

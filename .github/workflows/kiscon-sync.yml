@@ -2,8 +2,7 @@ name: KISCON Sync
 
 on:
   schedule:
-    # 매주 월요일 00:00 UTC (09:00 KST)
-    - cron: '0 0 * * 1'
+    - cron: '0 21 * * 2'
   workflow_dispatch:
 
 jobs:
@@ -21,11 +20,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Sync KISCON data to Postgres
+      - name: Sync KISCON arrears to Postgres
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}
-        run: pnpm --filter @bconnect/data-jobs kiscon-sync
+        run: pnpm --filter @bconnect/data-jobs kiscon-arrears-sync
+
+      - name: Sync KISCON subcon limits to Postgres
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}
+        run: pnpm --filter @bconnect/data-jobs kiscon-subcon-sync
 
       - name: Notify Slack on failure or cancellation
         if: failure() || cancelled()

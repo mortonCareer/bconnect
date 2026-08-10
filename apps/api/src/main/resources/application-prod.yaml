@@ -6,15 +6,18 @@ spring:
 
   sql:
     init:
-      mode: always
-      data-locations: classpath:data-prod.sql
+      data-locations: []
+      schema-locations:
+        - classpath:schema-prod.sql
 
 sentry:
-  dsn: ${SENTRY_DSN:}
+  dsn: ${SENTRY_DSN}
   send-default-pii: true
   traces-sample-rate: 1.0
-  environment: ${SENTRY_ENVIRONMENT:prod}
+  environment: prod
 
 app:
-  jwt:
-    cookie-domain: ${COOKIE_DOMAIN:.bconnect.to}
+  sms:
+    api-key: ${SOLAPI_API_KEY}
+    api-secret: ${SOLAPI_API_SECRET}
+    sender-number: ${SOLAPI_SENDER_NUMBER}
