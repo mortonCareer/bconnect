@@ -18,6 +18,7 @@ import {
 import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { isCompleteAddress } from '@bconnect/config/address'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
+import { BIRTH_PLACEHOLDER } from '@bconnect/config/signup'
 import {
   AgreementField,
   Form,
@@ -113,6 +114,8 @@ export default function SignupProfilePage() {
         requireRegisterAccessToken(
           await registerMemberMutation.mutateAsync({
             data: {
+              // TODO(#1177): 생년월일 입력 화면이 생기면 폼 입력으로 교체
+              birth: BIRTH_PLACEHOLDER,
               username: formData.username,
               name: formData.name,
             },

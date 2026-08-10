@@ -25,6 +25,8 @@ const ME: Member = {
   username: 'morton_boss',
   name: '김대표',
   phone: '+821012341234',
+  birth: '1988-03-17',
+  marketingConsent: true,
   picture: null,
   roles: [Role.CAREER, Role.PLAN],
   createdAt: EPOCH,

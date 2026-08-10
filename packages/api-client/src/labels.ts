@@ -33,6 +33,9 @@ export const TRADE_LABELS: Record<Trade, string> = {
   [Trade.TRANSPORT]: '운송',
   [Trade.CLEANING]: '청소',
   [Trade.GENERAL_LABOR]: '보통인부',
+  [Trade.HOME_REPAIR]: '집수리',
+  [Trade.BATHROOM]: '욕실',
+  [Trade.DISINFECTION]: '방역',
 }
 
 export const TRADE_LIST = Object.entries(TRADE_LABELS).map(([value, label]) => ({
@@ -76,6 +79,10 @@ export const TRADE_GROUPS: { label: string; trades: Trade[] }[] = [
   {
     label: '현장지원',
     trades: [Trade.HOISTING, Trade.TRANSPORT, Trade.CLEANING, Trade.GENERAL_LABOR],
+  },
+  {
+    label: '생활',
+    trades: [Trade.HOME_REPAIR, Trade.BATHROOM, Trade.DISINFECTION],
   },
 ]
 
