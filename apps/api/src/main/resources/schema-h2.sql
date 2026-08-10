@@ -234,6 +234,7 @@ create table companies (
     member_id bigint not null references members(id),
     name varchar(255) not null,
     brn varchar(255) not null,
+    status varchar(255) not null,
     drive_used_bytes bigint not null default 0,
     drive_limit_bytes bigint not null default 1073741824,
     created_at timestamp(6) with time zone not null,

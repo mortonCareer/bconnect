@@ -1,14 +1,14 @@
 meta {
-  name: 업체 단건 조회
+  name: 업체 소속 멤버 목록 조회
   type: http
-  seq: 3
+  seq: 7
   tags: [
     chain
   ]
 }
 
 get {
-  url: {{baseUrl}}/api/v1/companies/{{companyId}}
+  url: {{baseUrl}}/api/v1/companies/{{companyId}}/members
   auth: inherit
 }
 
@@ -16,11 +16,12 @@ tests {
   test("성공", function() {
     expect(res.status).to.equal(200);
     expect(res.body.success).to.equal(true);
-    expect(res.body.data.id).to.be.a('number');
+    expect(res.body.data).to.be.an('array');
   });
 }
 
 docs {
+  업체에 소속된 멤버 목록 조회 (현재 소유자 1인)
   @chain
   - 05-companies/01-create
 }

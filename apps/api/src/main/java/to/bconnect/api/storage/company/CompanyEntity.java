@@ -1,6 +1,8 @@
 package to.bconnect.api.storage.company;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,6 +23,9 @@ public class CompanyEntity extends BaseEntity {
 
     private String brn;
 
+    @Enumerated(EnumType.STRING)
+    private CompanyStatus status = CompanyStatus.PENDING;
+
     private Long driveUsedBytes = 0L;
 
     private Long driveLimitBytes = DEFAULT_DRIVE_LIMIT_BYTES;
@@ -29,6 +34,14 @@ public class CompanyEntity extends BaseEntity {
         this.memberId = memberId;
         this.name = name;
         this.brn = brn;
+    }
+
+    public void accept() {
+        this.status = CompanyStatus.ACCEPTED;
+    }
+
+    public void deny() {
+        this.status = CompanyStatus.DENIED;
     }
 
     public void increaseDriveUsed(long delta) {

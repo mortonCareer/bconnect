@@ -1129,6 +1129,44 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/companies/{id}/deny:
+    post:
+      tags:
+      - company-controller
+      operationId: deny_3
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/companies/{id}/accept:
+    post:
+      tags:
+      - company-controller
+      operationId: accept_3
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/auth/otp/send:
     post:
       tags:
@@ -2632,7 +2670,11 @@ components:
         pictureId:
           type: integer
           format: int64
+        attachmentId:
+          type: integer
+          format: int64
       required:
+      - attachmentId
       - brn
       - name
     SendCodeRequest:
@@ -3368,6 +3410,7 @@ components:
       - OFFER
       - CONTRACT
       - CREDENTIAL
+      - COMPANY
       - RECOMMENDATION
       - TASK
     NotificationResponse:
@@ -4456,6 +4499,8 @@ components:
           type: string
         brn:
           type: string
+        status:
+          $ref: "#/components/schemas/CompanyStatus"
         picture:
           type:
           - string
@@ -4474,6 +4519,13 @@ components:
       - modifiedAt
       - name
       - picture
+      - status
+    CompanyStatus:
+      type: string
+      enum:
+      - PENDING
+      - ACCEPTED
+      - DENIED
     CursorPageCompanyResponse:
       type: object
       properties:

@@ -4,12 +4,15 @@ import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.task.TaskExceptionCode;
 import to.bconnect.api.support.fixture.CursorFactory;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.company.CompanyRepository;
+import to.bconnect.api.storage.company.CompanyStatus;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.project.ProjectRepository;
@@ -27,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 
 @IntegrationTest
+@RecordApplicationEvents
 class CompanyServiceTest {
 
     private static final Long MISSING_ID = 999_999L;
@@ -37,6 +41,7 @@ class CompanyServiceTest {
     @Autowired private AttachmentRepository attachmentRepository;
     @Autowired private ProjectRepository projectRepository;
     @Autowired private TaskRepository taskRepository;
+    @Autowired private ApplicationEvents applicationEvents;
 
     @Test
     @DisplayName("list - 업체 목록을 커서 페이지네이션 조회하면 페이지를 반환한다")
@@ -93,26 +98,81 @@ class CompanyServiceTest {
     }
 
     @Test
-    @DisplayName("create - 사진을 지정해 등록하면 업체가 저장되고 사진이 연결되며 PLAN 권한이 부여된다")
+    @DisplayName("create - 사업자등록증을 첨부해 등록하면 업체가 PENDING으로 저장되고 첨부가 연결되며 PLAN 권한은 부여되지 않는다")
     void create_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
-        val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
-        attachment.complete();
+        val certificate = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        certificate.complete();
+        val picture = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        picture.complete();
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = new CreateCompany("company", "0000001000", attachment.getId());
+        val command = new CreateCompany("company", "0000001000", picture.getId(), certificate.getId());
 
         // when
         val companyId = companyService.create(user, command);
 
         // then
         val created = companyRepository.findById(companyId).orElseThrow();
-        assertThat(created.getBrn()).isEqualTo("0000001000");
-        val linked = attachmentRepository.findById(attachment.getId()).orElseThrow();
-        assertThat(linked.getReferenceType()).isEqualTo(AttachmentReferenceType.COMPANY);
-        assertThat(linked.getReferenceId()).isEqualTo(companyId);
+        assertThat(created.getStatus()).isEqualTo(CompanyStatus.PENDING);
+        val linkedCertificate = attachmentRepository.findById(certificate.getId()).orElseThrow();
+        assertThat(linkedCertificate.getReferenceType()).isEqualTo(AttachmentReferenceType.COMPANY_CERTIFICATE);
+        assertThat(linkedCertificate.getReferenceId()).isEqualTo(companyId);
+        val linkedPicture = attachmentRepository.findById(picture.getId()).orElseThrow();
+        assertThat(linkedPicture.getReferenceType()).isEqualTo(AttachmentReferenceType.COMPANY);
+        assertThat(linkedPicture.getReferenceId()).isEqualTo(companyId);
+        val found = memberRepository.findById(member.getId()).orElseThrow();
+        assertThat(found.getRoles()).doesNotContain(Role.PLAN);
+    }
+
+    @Test
+    @DisplayName("accept - 대기 중인 업체일 때 승인하면 상태가 ACCEPTED로 변경되고 PLAN 권한이 부여되며 등록증 참조가 해제된다")
+    void accept_success() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val certificate = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        certificate.complete();
+        certificate.link(AttachmentReferenceType.COMPANY_CERTIFICATE, company.getId());
+
+        // when
+        companyService.accept(company.getId());
+
+        // then
+        val found = companyRepository.findById(company.getId()).orElseThrow();
+        assertThat(found.getStatus()).isEqualTo(CompanyStatus.ACCEPTED);
         val granted = memberRepository.findById(member.getId()).orElseThrow();
         assertThat(granted.getRoles()).contains(Role.PLAN);
+        val unlinked = attachmentRepository.findById(certificate.getId()).orElseThrow();
+        assertThat(unlinked.getReferenceType()).isNull();
+        assertThat(unlinked.getReferenceId()).isNull();
+        val expected = new CompanyReviewedEvent(company.getId(), member.getId(), CompanyStatus.ACCEPTED);
+        assertThat(applicationEvents.stream(CompanyReviewedEvent.class)).containsExactly(expected);
+    }
+
+    @Test
+    @DisplayName("deny - 대기 중인 업체일 때 반려하면 상태가 DENIED로 변경되고 등록증 참조가 해제되며 PLAN 권한은 부여되지 않는다")
+    void deny_success() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val certificate = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        certificate.complete();
+        certificate.link(AttachmentReferenceType.COMPANY_CERTIFICATE, company.getId());
+
+        // when
+        companyService.deny(company.getId());
+
+        // then
+        val found = companyRepository.findById(company.getId()).orElseThrow();
+        assertThat(found.getStatus()).isEqualTo(CompanyStatus.DENIED);
+        val denied = memberRepository.findById(member.getId()).orElseThrow();
+        assertThat(denied.getRoles()).doesNotContain(Role.PLAN);
+        val unlinked = attachmentRepository.findById(certificate.getId()).orElseThrow();
+        assertThat(unlinked.getReferenceType()).isNull();
+        assertThat(unlinked.getReferenceId()).isNull();
+        val expected = new CompanyReviewedEvent(company.getId(), member.getId(), CompanyStatus.DENIED);
+        assertThat(applicationEvents.stream(CompanyReviewedEvent.class)).containsExactly(expected);
     }
 
     @Test
@@ -226,7 +286,7 @@ class CompanyServiceTest {
     void create_fail_C005() {
         // given
         val user = UserFactory.domain(MISSING_ID, Role.CAREER);
-        val command = new CreateCompany("company", "0000001000", null);
+        val command = new CreateCompany("company", "0000001000", null, null);
 
         // when & then
         assertCodeException(() -> companyService.create(user, command))
@@ -240,7 +300,7 @@ class CompanyServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.PLAN));
         companyRepository.save(CompanyFactory.entity(member.getId()));
         val user = UserFactory.domain(member.getId(), Role.PLAN);
-        val command = new CreateCompany("company", "0000001001", null);
+        val command = new CreateCompany("company", "0000001001", null, null);
 
         // when & then
         assertCodeException(() -> companyService.create(user, command))
@@ -255,11 +315,53 @@ class CompanyServiceTest {
         val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val user = UserFactory.domain(other.getId(), Role.CAREER);
-        val command = new CreateCompany("company", company.getBrn(), null);
+        val command = new CreateCompany("company", company.getBrn(), null, null);
 
         // when & then
         assertCodeException(() -> companyService.create(user, command))
                 .hasExceptionCode(CompanyExceptionCode.DUPLICATE_BRN);
+    }
+
+    @Test
+    @DisplayName("accept - 업체가 존재하지 않을 때 승인하면 NOT_FOUND로 실패한다")
+    void accept_fail_C005() {
+        // when & then
+        assertCodeException(() -> companyService.accept(MISSING_ID))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("accept - 이미 처리된 업체일 때 승인하면 INVALID_STATUS로 실패한다")
+    void accept_fail_CO005() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        company.accept();
+
+        // when & then
+        assertCodeException(() -> companyService.accept(company.getId()))
+                .hasExceptionCode(CompanyExceptionCode.INVALID_STATUS);
+    }
+
+    @Test
+    @DisplayName("deny - 업체가 존재하지 않을 때 반려하면 NOT_FOUND로 실패한다")
+    void deny_fail_C005() {
+        // when & then
+        assertCodeException(() -> companyService.deny(MISSING_ID))
+                .hasExceptionCode(CommonExceptionCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("deny - 이미 처리된 업체일 때 반려하면 INVALID_STATUS로 실패한다")
+    void deny_fail_CO005() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        company.deny();
+
+        // when & then
+        assertCodeException(() -> companyService.deny(company.getId()))
+                .hasExceptionCode(CompanyExceptionCode.INVALID_STATUS);
     }
 
     @Test

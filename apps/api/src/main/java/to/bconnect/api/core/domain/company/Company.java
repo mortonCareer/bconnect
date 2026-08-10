@@ -1,6 +1,7 @@
 package to.bconnect.api.core.domain.company;
 
 import to.bconnect.api.storage.company.CompanyEntity;
+import to.bconnect.api.storage.company.CompanyStatus;
 
 import java.time.Instant;
 
@@ -9,13 +10,14 @@ public record Company(
         Long memberId,
         String name,
         String brn,
+        CompanyStatus status,
         Instant createdAt,
         Instant modifiedAt
 ) {
     public static final String WITHDRAW_NAME = "삭제된 업체";
 
     public static Company withdrawn(Long id) {
-        return new Company(id, null, WITHDRAW_NAME, null, null, null);
+        return new Company(id, null, WITHDRAW_NAME, null, null, null, null);
     }
 
     public static Company of(CompanyEntity entity) {
@@ -24,6 +26,7 @@ public record Company(
                 entity.getMemberId(),
                 entity.getName(),
                 entity.getBrn(),
+                entity.getStatus(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt()
         );
