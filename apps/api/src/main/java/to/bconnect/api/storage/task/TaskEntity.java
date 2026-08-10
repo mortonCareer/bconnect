@@ -130,7 +130,6 @@ public class TaskEntity extends BaseEntity {
         this.workerId = null;
         this.workerTitle = null;
         this.workerMemo = null;
-        this.progress = TaskProgress.TODO;
         this.status = TaskStatus.NONE;
     }
 
