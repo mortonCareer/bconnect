@@ -1,4 +1,10 @@
-import { AttachmentType, getGetFeedsMockHandler, TaskStatus, TaskType } from '@bconnect/api-client'
+import {
+  AttachmentType,
+  getGetFeedsMockHandler,
+  TaskProgress,
+  TaskStatus,
+  TaskType,
+} from '@bconnect/api-client'
 import type { Attachment, CursorPageFeed, Feed, Task, Trade } from '@bconnect/api-client'
 import { addressOf } from './_address'
 import { PROFILE_SEEDS, type ProfileSeed } from './profiles'
@@ -85,7 +91,8 @@ function taskOf(id: number, seed: FeedSeed, trade: Trade): Task | null {
   return {
     id,
     type: TaskType.WORKER,
-    status: TaskStatus.COMPLETED,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.COMPLETED,
     trades: [trade],
     start,
     end,

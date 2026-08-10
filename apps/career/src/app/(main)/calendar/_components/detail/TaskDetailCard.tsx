@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  TASK_PROGRESS_LABELS,
   Trade,
   TRADE_LABELS,
   TRADE_LIST,
@@ -129,6 +130,8 @@ export function TaskDetailCard({ task, selectedDay, selectedMonth }: TaskDetailC
       id: task.id,
       data: {
         title: task.title,
+        // 진행 상태는 아직 화면에서 바꿀 수 없다 — 현재값을 되돌려 보내 덮어쓰기를 막는다 (#1160).
+        progress: task.progress,
         // TODO: BE required 처리 후 type narrowing 필요. workerMemo가 optional emit이라 빈 입력 시 기존 메모/제목으로 silent fallback 중.
         memo: vals.memo.trim() || task.memo || task.title,
         company: vals.company,
@@ -145,6 +148,9 @@ export function TaskDetailCard({ task, selectedDay, selectedMonth }: TaskDetailC
       <div className="flex items-start justify-between gap-2">
         <h2 className="text-sb-16 text-gray-900">{task.title}</h2>
         <div className="flex shrink-0 items-center gap-2">
+          <span className="rounded-full border border-gray-200 px-2 py-0.5 text-r-12 text-gray-500">
+            {TASK_PROGRESS_LABELS[task.progress]}
+          </span>
           {task.isProposed && (
             <span className="rounded-full bg-gray-100 px-2 py-0.5 text-r-12 text-gray-500">
               제안됨

@@ -1,4 +1,11 @@
-import { ProfileRole, Region, Trade, type CredentialType } from './generated/schemas'
+import {
+  ProfileRole,
+  Region,
+  TaskProgress,
+  TaskStatus,
+  Trade,
+  type CredentialType,
+} from './generated/schemas'
 
 export const TRADE_LABELS: Record<Trade, string> = {
   [Trade.DESIGN]: '설계',
@@ -26,6 +33,9 @@ export const TRADE_LABELS: Record<Trade, string> = {
   [Trade.TRANSPORT]: '운송',
   [Trade.CLEANING]: '청소',
   [Trade.GENERAL_LABOR]: '보통인부',
+  [Trade.HOME_REPAIR]: '집수리',
+  [Trade.BATHROOM]: '욕실',
+  [Trade.DISINFECTION]: '방역',
 }
 
 export const TRADE_LIST = Object.entries(TRADE_LABELS).map(([value, label]) => ({
@@ -70,6 +80,10 @@ export const TRADE_GROUPS: { label: string; trades: Trade[] }[] = [
     label: '현장지원',
     trades: [Trade.HOISTING, Trade.TRANSPORT, Trade.CLEANING, Trade.GENERAL_LABOR],
   },
+  {
+    label: '생활',
+    trades: [Trade.HOME_REPAIR, Trade.BATHROOM, Trade.DISINFECTION],
+  },
 ]
 
 export function getTradeLabel(trade: Trade): string {
@@ -89,6 +103,21 @@ export const ROLE_LABELS: Record<ProfileRole, string> = {
 
 export function getRoleLabel(role: ProfileRole): string {
   return ROLE_LABELS[role] ?? role
+}
+
+// 작업 상태 한글 라벨 SSOT — 섭외 축(TaskStatus)·진행 축(TaskProgress)은 별개 값이다.
+// plan(공정표 상태 컬럼)·career(캘린더 상세) 공유. 자체 하드코딩 금지.
+export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  [TaskStatus.NONE]: '모집 전',
+  [TaskStatus.OPEN]: '모집 중',
+  [TaskStatus.OFFERED]: '섭외 중',
+  [TaskStatus.ASSIGNED]: '섭외됨',
+}
+
+export const TASK_PROGRESS_LABELS: Record<TaskProgress, string> = {
+  [TaskProgress.TODO]: '시작 전',
+  [TaskProgress.IN_PROGRESS]: '진행 중',
+  [TaskProgress.COMPLETED]: '완료됨',
 }
 
 export const CREDENTIAL_TYPE_LABELS: Record<CredentialType, string> = {

@@ -21,6 +21,7 @@
     "./search": "./search/index.ts",
     "./seo": "./seo/index.ts",
     "./sentry": "./sentry/index.ts",
+    "./signup": "./signup/index.ts",
     "./site": "./site/index.ts",
     "./username": "./username/index.ts"
   },

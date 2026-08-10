@@ -10,6 +10,7 @@ import {
   OfferStatus,
   ProfileRole,
   Role,
+  TaskProgress,
   TaskStatus,
   TaskType,
   Trade,
@@ -120,7 +121,8 @@ interface TaskSeed {
   startOffset: number
   endOffset: number
   status: Task['status']
-  /** SCHEDULED 이상(섭외 확정)의 대표 기술자 */
+  progress: Task['progress']
+  /** ASSIGNED(섭외 확정) 작업의 대표 기술자 */
   workerId?: number
   requirement?: string
   memo?: string
@@ -137,7 +139,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '철거작업',
     startOffset: -6,
     endOffset: -4,
-    status: TaskStatus.COMPLETED,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.COMPLETED,
     workerId: 1,
   },
   {
@@ -147,7 +150,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '전기 시공',
     startOffset: -3,
     endOffset: -1,
-    status: TaskStatus.IN_PROGRESS,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.IN_PROGRESS,
     workerId: 2,
   },
   {
@@ -157,7 +161,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '목재/창호 설치',
     startOffset: -1,
     endOffset: 0,
-    status: TaskStatus.IN_PROGRESS,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.IN_PROGRESS,
     workerId: 3,
   },
   {
@@ -167,7 +172,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '타일',
     startOffset: 0,
     endOffset: 1,
-    status: TaskStatus.SCHEDULED,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.TODO,
     workerId: 4,
     requirement: '타일 시공 및 단일 벽면 일부 도배',
     memo: '세밀한 작업이 필요함',
@@ -180,7 +186,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '필름',
     startOffset: 2,
     endOffset: 3,
-    status: TaskStatus.SCHEDULED,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.TODO,
     workerId: 5,
   },
   {
@@ -190,7 +197,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '도배',
     startOffset: 4,
     endOffset: 5,
-    status: TaskStatus.SCHEDULED,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.TODO,
     workerId: 6,
   },
   {
@@ -201,6 +209,7 @@ const TASK_SEEDS: TaskSeed[] = [
     startOffset: 6,
     endOffset: 7,
     status: TaskStatus.OFFERED,
+    progress: TaskProgress.TODO,
     activeOffer: 7,
   },
   {
@@ -210,7 +219,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '가구 설치',
     startOffset: 8,
     endOffset: 9,
-    status: TaskStatus.DRAFT,
+    status: TaskStatus.NONE,
+    progress: TaskProgress.TODO,
   },
   {
     id: 8009,
@@ -219,7 +229,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '조명 설치',
     startOffset: 8,
     endOffset: 10,
-    status: TaskStatus.DRAFT,
+    status: TaskStatus.NONE,
+    progress: TaskProgress.TODO,
   },
   {
     id: 8010,
@@ -228,7 +239,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '철거',
     startOffset: -2,
     endOffset: 0,
-    status: TaskStatus.IN_PROGRESS,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.IN_PROGRESS,
     workerId: 21,
   },
   {
@@ -239,6 +251,7 @@ const TASK_SEEDS: TaskSeed[] = [
     startOffset: 1,
     endOffset: 4,
     status: TaskStatus.OFFERED,
+    progress: TaskProgress.TODO,
     activeOffer: 22,
   },
   {
@@ -248,7 +261,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '전기 배선',
     startOffset: 2,
     endOffset: 5,
-    status: TaskStatus.DRAFT,
+    status: TaskStatus.NONE,
+    progress: TaskProgress.TODO,
   },
   {
     id: 8013,
@@ -257,7 +271,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '도배',
     startOffset: 6,
     endOffset: 8,
-    status: TaskStatus.SCHEDULED,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.TODO,
     workerId: 23,
   },
 ]
@@ -270,6 +285,7 @@ function buildSeedTasks(): Task[] {
       id: seed.id,
       type: TaskType.PROJECT,
       status: seed.status,
+      progress: seed.progress,
       trades: seed.trades,
       start: isoDaysFromToday(seed.startOffset),
       end: isoDaysFromToday(seed.endOffset),
@@ -388,8 +404,9 @@ export const scheduleOverrides = [
     tasks.push({
       id,
       type: TaskType.PROJECT,
-      // BE createByCompany 실동작: DRAFT 고정 생성 (상태 전이는 assign→SCHEDULED 뿐)
-      status: TaskStatus.DRAFT,
+      // BE createByCompany 실동작: 섭외 전(NONE)·시작 전(TODO) 고정 생성
+      status: TaskStatus.NONE,
+      progress: TaskProgress.TODO,
       trades: body.trades,
       start: body.start,
       end: body.end,
@@ -399,8 +416,8 @@ export const scheduleOverrides = [
       workerCompany: null,
       projectId: body.projectId,
       projectTitle: body.title,
-      projectRequirement: body.requirement,
-      projectMemo: body.memo,
+      projectRequirement: body.requirement ?? null,
+      projectMemo: body.memo ?? null,
       projectCompanyId: projects.find((p) => p.id === body.projectId)?.companyId ?? null,
       projectCompanyName: null,
       address: projects.find((p) => p.id === body.projectId)?.address ?? null,
@@ -422,8 +439,9 @@ export const scheduleOverrides = [
             start: body.start,
             end: body.end,
             projectTitle: body.title,
-            projectRequirement: body.requirement,
-            projectMemo: body.memo,
+            progress: body.progress,
+            projectRequirement: body.requirement ?? null,
+            projectMemo: body.memo ?? null,
             modifiedAt: nowStamp(),
           }
         : t
