@@ -208,6 +208,13 @@ packages/ui/
 
 ---
 
+## CVA 컴포넌트 패턴
+
+variants 있는 컴포넌트는 [cva](https://cva.style/) 로 정의한다. 색·타이포는 위 디자인 토큰만 (hex 금지), 인터랙션 스타일은 [apps/CLAUDE-FE.md](../../apps/CLAUDE-FE.md) §인터랙션 참조.
+
+- Props 는 HTML attributes + `VariantProps<typeof xVariants>` 확장
+- input 류만 `React.forwardRef`
+
 ## 관련 도구
 
 - ESLint plugin: [packages/config/eslint/plugin-figma.js](../../packages/config/eslint/plugin-figma.js)

@@ -1,12 +1,12 @@
 ---
 name: issue-management
-description: GitHub Issue 생성 및 관리 자동화. 이슈 템플릿 선택, 레이블 자동 적용, 담당자 할당
+description: GitHub Issue 생성 및 관리. 이슈 템플릿 선택, 레이블 자동 적용
 allowed-tools: Bash, Read, Write, Grep
 ---
 
 # Issue Management
 
-GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할당합니다.
+GitHub Issue 생성을 자동화하고 적절한 레이블을 적용합니다.
 
 ## 사용 시점
 
@@ -36,15 +36,17 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 | 일반 feature | 300-800 bytes (한글 100-250자) |
 | 복잡한 bug   | 800-1,500 bytes                |
 
-상한 초과 시 self-check: "이 단락은 Why? Detail? 링크로 보낼 수 있는가?"
+## 생성 방법
+
+본문은 파일로 저장 후 `gh issue create --body-file <파일>` 로 전달한다 (inline `--body` 금지 — HEREDOC backtick escape 함정).
 
 ## 레이블
 
-레이블 목록 + 자동 적용 규칙은 [labels.md](../../../docs/reference/labels.md) 참조.
+레이블 목록의 SSoT는 GitHub 레이블 자체 — 붙이기 전 `gh label list` 로 실측한다. 규칙: 버그는 `🐛 bug` + 범위 레이블 조합, `🚨 sync-failure`·`🤖 figma-drift` 는 봇 전용(직접 사용 금지).
 
-## 담당자 할당 규칙
+## 마일스톤
 
-> **SSoT**: 담당자 할당 규칙과 GitHub 사용자명 매핑은 [docs/reference/team.md](../../../docs/reference/team.md)의 "GitHub 작업 매핑" 섹션을 참조
+`gh api repos/{owner}/{repo}/milestones` 로 실측 후 적합한 마일스톤을 **추천**한다. 결정은 사용자.
 
 ## 주의사항
 
@@ -57,9 +59,9 @@ GitHub Issue 생성을 자동화하고 적절한 레이블과 담당자를 할�
 
 이슈 생성 후:
 
-1. **worktree-manager** 스킬로 워크트리+브랜치 생성
+1. dev 에서 브랜치 생성 (`feat/<이슈번호>-<설명>`, [git-workflow.md](../../../docs/how-to/git-workflow.md))
 2. 작업 진행
-3. **commit** 스킬로 커밋
+3. 커밋 ([git-workflow.md](../../../docs/how-to/git-workflow.md) 커밋 컨벤션)
 4. **pr-from-issue** 스킬로 PR 생성
 
 ## 참고 문서
