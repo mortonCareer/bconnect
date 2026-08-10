@@ -13,12 +13,19 @@ import {
   Form,
   FormSubmitButton,
   SearchIcon,
+  SelectField,
   TagSelectField,
   TextField,
   TextareaField,
 } from '@bconnect/ui'
 import { PanelAside, PanelScroll, PanelShell } from '@bconnect/features'
-import { Trade, TRADE_LABELS, TRADE_LIST } from '@bconnect/api-client'
+import {
+  TASK_PROGRESS_LABELS,
+  TaskProgress,
+  Trade,
+  TRADE_LABELS,
+  TRADE_LIST,
+} from '@bconnect/api-client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
@@ -38,6 +45,7 @@ const taskSchema = z
     address: z.string(),
     addressDetail: z.string(),
     trades: z.array(z.nativeEnum(Trade)).min(1, '공종을 1개 이상 선택해주세요.'),
+    progress: z.nativeEnum(TaskProgress),
     // BE CreateProjectTaskRequest 가 requirement/memo minLength 1 필수 — 폼도 필수
     request: z.string().min(1, '요청사항을 입력해주세요.'),
     memo: z.string().min(1, '메모를 입력해주세요.'),
@@ -49,6 +57,11 @@ const taskSchema = z
 
 type TaskFormValues = z.infer<typeof taskSchema>
 
+const PROGRESS_OPTIONS = Object.entries(TASK_PROGRESS_LABELS).map(([value, label]) => ({
+  value,
+  label,
+}))
+
 const EMPTY_FORM: TaskFormValues = {
   ganttName: '',
   corpName: '',
@@ -57,6 +70,7 @@ const EMPTY_FORM: TaskFormValues = {
   address: '',
   addressDetail: '',
   trades: [],
+  progress: TaskProgress.TODO,
   request: '',
   memo: '',
 }
@@ -70,6 +84,7 @@ function toFormValues(task: ScheduleTask): TaskFormValues {
     address: task.address ?? '',
     addressDetail: task.addressDetail ?? '',
     trades: task.trades ?? [],
+    progress: task.progress,
     request: task.request ?? '',
     memo: task.memo ?? '',
   }
@@ -238,6 +253,13 @@ export function PanelTask({ taskId }: { taskId?: string }) {
                   options={TRADE_LIST}
                   label="공종"
                   layout="row"
+                />
+                <SelectField
+                  control={form.control}
+                  name="progress"
+                  label="진행 상태"
+                  layout="row"
+                  options={PROGRESS_OPTIONS}
                 />
                 <TextField control={form.control} name="request" label="요청사항" layout="row" />
                 <TextareaField control={form.control} name="memo" label="메모" layout="row" />

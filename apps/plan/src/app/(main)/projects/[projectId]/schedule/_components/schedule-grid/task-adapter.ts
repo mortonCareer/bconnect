@@ -1,4 +1,10 @@
-import { OfferStatus, TaskProgress, TaskStatus, TRADE_LABELS } from '@bconnect/api-client'
+import {
+  OfferStatus,
+  ROLE_LABELS,
+  TaskProgress,
+  TaskStatus,
+  TRADE_LABELS,
+} from '@bconnect/api-client'
 import type {
   Offer,
   Profile,
@@ -30,7 +36,7 @@ export function toOfferQueueItem(offer: Offer): OfferQueueItem {
     name: offer.member?.name ?? '',
     picture: offer.member?.picture ?? undefined,
     region: offer.profile?.address?.state ?? '',
-    level: '',
+    level: offer.profile ? ROLE_LABELS[offer.profile.role] : '',
     specialty: trade ? (TRADE_LABELS[trade] ?? '') : '',
     status: offer.status === OfferStatus.ACTIVE ? 'offered' : 'waiting',
   }
@@ -43,7 +49,7 @@ export function toAssigneeFromProfile(profile: Profile): TaskAssignee {
     profileId: profile.member?.id ?? 0,
     name: profile.member?.name ?? '',
     region: profile.address?.state ?? '',
-    level: '',
+    level: ROLE_LABELS[profile.role],
     specialty: trade ? (TRADE_LABELS[trade] ?? '') : '',
   }
 }
@@ -98,6 +104,7 @@ export function applyFePatch(task: Task, patch: Partial<Omit<ScheduleTask, 'id'>
     ...(patch.ganttName !== undefined && { projectTitle: patch.ganttName }),
     ...(patch.startDate !== undefined && { start: patch.startDate }),
     ...(patch.endDate !== undefined && { end: patch.endDate }),
+    ...(patch.progress !== undefined && { progress: patch.progress }),
     ...(patch.request !== undefined && { projectRequirement: patch.request }),
     ...(patch.memo !== undefined && { projectMemo: patch.memo }),
   }

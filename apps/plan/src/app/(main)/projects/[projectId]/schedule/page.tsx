@@ -1,5 +1,5 @@
 /**
- * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=1573-14926
+ * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=3765-8699
  */
 import type { Metadata } from 'next'
 

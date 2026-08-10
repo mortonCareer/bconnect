@@ -6,8 +6,9 @@ import {
   TASK_STATUS_LABELS,
   TaskProgress,
   TaskStatus,
+  TRADE_LABELS,
 } from '@bconnect/api-client'
-import { Button, ConfirmDialog } from '@bconnect/ui'
+import { Button, ConfirmDialog, SkillTag } from '@bconnect/ui'
 import Link from 'next/link'
 import type { PointerEvent, WheelEvent } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -28,7 +29,6 @@ import {
   STATUS_PILL_STYLES,
   STICKY_LEFT,
   taskAssignee,
-  tradesLabel,
 } from './constants'
 import {
   addDays,
@@ -272,10 +272,14 @@ export function ScheduleGrid({ projectId, today: todayProp }: ScheduleGridProps)
             return (
               <tr key={task.id} style={{ height: ROW_HEIGHT }}>
                 <td
-                  className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle text-r-14 text-[#3d3d3d]`}
+                  className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] align-middle`}
                   style={{ left: STICKY_LEFT[0] }}
                 >
-                  {tradesLabel(task.trades)}
+                  <span className="flex items-center gap-1 overflow-hidden px-3">
+                    {task.trades.map((trade) => (
+                      <SkillTag key={trade} label={TRADE_LABELS[trade]} className="shrink-0" />
+                    ))}
+                  </span>
                 </td>
                 <td
                   className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle`}
@@ -352,7 +356,7 @@ export function ScheduleGrid({ projectId, today: todayProp }: ScheduleGridProps)
                 variant="outline"
                 type="button"
                 onClick={handleCreateTask}
-                className="text-m-14 h-[33.5px] w-[103px] rounded-[6px] border-dashed border-[#c0d0ff] px-0 font-medium hover:bg-primary-50"
+                className="text-m-14 h-[33.5px] w-full rounded-[6px] border-dashed border-[#c0d0ff] px-0 font-medium hover:bg-primary-50"
               >
                 + 작업 생성
               </Button>

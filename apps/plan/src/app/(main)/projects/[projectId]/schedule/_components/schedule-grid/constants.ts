@@ -18,7 +18,7 @@ export function taskAssignee(task: ScheduleTask): TaskAssignee | undefined {
   return task.assignee
 }
 
-export const COL_CATEGORY = 120
+export const COL_CATEGORY = 140
 export const COL_STATUS = 100
 export const COL_PROGRESS = 100
 export const COL_ASSIGNEE = 220
