@@ -145,6 +145,27 @@ const chatOf = (w: Worker, index: number): DirectChat => {
 
 const CHATS: DirectChat[] = WORKERS.map(chatOf)
 
+/** mock 소켓이 보낸 메시지를 목록·페이지 응답에도 반영한다 (재조회해도 남아 있게). */
+export function appendMockMessage(chatId: number, message: Message): void {
+  const messages = MESSAGES_BY_CHAT[chatId]
+  if (!messages) return
+  messages.push(message)
+  const chat = CHATS.find((c) => c.id === chatId)
+  if (chat) {
+    chat.lastMessage = message
+    chat.modifiedAt = message.createdAt
+  }
+}
+
+/** mock 소켓이 부여할 다음 메시지 id — 시드와 안 겹치게 뒤에서 시작. */
+export const nextMockMessageId = (() => {
+  let id = 9000
+  return () => ++id
+})()
+
+/** isMine 판정 기준이 되는 mock 본인 id */
+export const MOCK_MY_ID = MY_ID
+
 const paramId = (value: string | readonly string[] | undefined): number =>
   Number(typeof value === 'string' ? value : (value?.[0] ?? ''))
 
