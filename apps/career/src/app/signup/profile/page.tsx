@@ -85,7 +85,7 @@ export default function SignupProfilePage() {
 
   const selectedFields = watchedFields || []
 
-  // 시공분야 선택 시 대표분야 자동 설정
+  // 공종 선택 시 대표분야 자동 설정
   useEffect(() => {
     if (
       watchedFields &&
@@ -177,12 +177,12 @@ export default function SignupProfilePage() {
         >
           <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-6 pt-3">
             <h1 className="text-sb-24 text-black">
-              기술자님의 시공분야와
+              기술자님의 공종과
               <br />
               역할을 선택해주세요
             </h1>
 
-            {/* 시공분야 */}
+            {/* 공종 */}
             <TradeSelector control={control} name="fields" max={MAX_TRADES} />
 
             {/* 대표분야 */}

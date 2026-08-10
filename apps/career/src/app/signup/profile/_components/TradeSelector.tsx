@@ -39,7 +39,7 @@ export function TradeSelector<T extends FieldValues>({
         }
         return (
           <FormItem className="gap-3">
-            <FormLabel required>시공분야</FormLabel>
+            <FormLabel required>공종</FormLabel>
             <FormDescription>
               최대 {max}개까지 선택 가능해요 ({selected.length}/{max})
             </FormDescription>
