@@ -1,8 +1,13 @@
 'use client'
 
 import { useCallback, useState, type ReactNode } from 'react'
-import { getGetDirectChatsQueryKey, getTradeLabel, useQueryClient } from '@bconnect/api-client'
-import type { Message, Profile } from '@bconnect/api-client'
+import {
+  getGetDirectChatMessagesQueryKey,
+  getGetDirectChatsQueryKey,
+  getTradeLabel,
+  useQueryClient,
+} from '@bconnect/api-client'
+import type { CursorPageMessage, InfiniteData, Message, Profile } from '@bconnect/api-client'
 import { ChatInput, ProfileCard, Skeleton } from '@bconnect/ui'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { PanelShell } from '../_shared/PanelShell'
@@ -83,9 +88,23 @@ export function ChatView(props: ChatViewProps) {
       setLocalMessages((prev) =>
         prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]
       )
+      queryClient.setQueryData<InfiniteData<CursorPageMessage>>(
+        getGetDirectChatMessagesQueryKey(chatId),
+        (prev) => {
+          if (!prev) return prev
+          const [newest, ...older] = prev.pages
+          if (!newest) return prev
+          if (prev.pages.some((page) => page.content?.some((m) => m.id === incoming.id)))
+            return prev
+          return {
+            ...prev,
+            pages: [{ ...newest, content: [incoming, ...(newest.content ?? [])] }, ...older],
+          }
+        }
+      )
       queryClient.invalidateQueries({ queryKey: getGetDirectChatsQueryKey() })
     },
-    [queryClient]
+    [chatId, queryClient]
   )
   const sendMessage = useDirectChatSocket(chatId, appendMessage)
 
