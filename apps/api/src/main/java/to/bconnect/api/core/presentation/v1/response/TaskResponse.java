@@ -6,11 +6,12 @@ import to.bconnect.api.core.domain.offer.Offer;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.profile.Trade;
+import to.bconnect.api.storage.task.TaskProgress;
 import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
 
-import java.time.LocalDate;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Set;
 
 public record TaskResponse(
@@ -20,6 +21,7 @@ public record TaskResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate start,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate end,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) TaskStatus status,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) TaskProgress progress,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Long workerId,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String workerTitle,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String workerMemo,
@@ -43,6 +45,10 @@ public record TaskResponse(
         return of(task, address, company, null);
     }
 
+    public static TaskResponse of(Task task, Address address, Offer offer) {
+        return of(task, address, null, offer);
+    }
+
     public static TaskResponse of(Task task, Address address, Company company, Offer offer) {
         return new TaskResponse(
                 task.id(),
@@ -51,6 +57,7 @@ public record TaskResponse(
                 task.start(),
                 task.end(),
                 task.status(),
+                task.progress(),
                 task.workerId(),
                 task.workerTitle(),
                 task.workerMemo(),

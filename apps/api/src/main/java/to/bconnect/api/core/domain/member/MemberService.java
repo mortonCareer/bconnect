@@ -17,10 +17,15 @@ import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.member.MemberRepository;
 
+import java.time.LocalDate;
+import java.time.Period;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberService {
+
+    private static final int MIN_AGE = 15;
 
     private final MemberRepository memberRepository;
     private final AttachmentFinder attachmentFinder;
@@ -61,10 +66,15 @@ public class MemberService {
         memberRepository.findByPhone(phone)
                 .ifPresent(it -> { throw new CodeException(MemberExceptionCode.DUPLICATE_PHONE); });
 
+        if (Period.between(command.birth(), LocalDate.now()).getYears() < MIN_AGE)
+            throw new CodeException(MemberExceptionCode.UNDERAGE);
+
         val created = new MemberEntity(
                 command.username(),
                 command.name(),
                 phone,
+                command.birth(),
+                command.marketingConsent(),
                 command.roles()
         );
 

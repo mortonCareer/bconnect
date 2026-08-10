@@ -22,6 +22,7 @@ import {
 import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { isCompleteAddress } from '@bconnect/config/address'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
+import { BIRTH_PLACEHOLDER } from '@bconnect/config/signup'
 import {
   AgreementField,
   Form,
@@ -123,6 +124,8 @@ export default function SignupProfilePage() {
             requireRegisterAccessToken(
               await registerMemberMutation.mutateAsync({
                 data: {
+                  // TODO(#1177): 생년월일 입력 화면이 생기면 폼 입력으로 교체
+                  birth: BIRTH_PLACEHOLDER,
                   username: formData.username,
                   name: formData.name,
                 },
@@ -248,6 +251,7 @@ export default function SignupProfilePage() {
               control={control}
               name="address"
               label="주소"
+              required
               description="정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요"
             />
 
@@ -266,7 +270,7 @@ export default function SignupProfilePage() {
 
             <FormError error={server.formError} />
           </div>
-          <div className="bg-white p-4">
+          <div className="bg-white px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
             <FormSubmitButton size="full">완료</FormSubmitButton>
           </div>
         </form>

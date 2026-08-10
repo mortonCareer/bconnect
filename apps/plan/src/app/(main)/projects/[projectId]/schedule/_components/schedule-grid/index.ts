@@ -5,5 +5,4 @@ export type {
   ScheduleGridProps,
   ScheduleTask,
   TaskAssignee,
-  TaskStatus,
 } from './types'

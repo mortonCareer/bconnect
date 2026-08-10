@@ -4,14 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import to.bconnect.api.core.domain.chat.Message;
 import to.bconnect.api.core.domain.chat.MessageTemplate;
-import to.bconnect.api.core.domain.chat.SendMessage;
-import to.bconnect.api.socket.message.SocketMessageSentEvent;
+import to.bconnect.api.socket.message.SendMessage;
 import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.chat.MessageEntity;
 import to.bconnect.api.storage.chat.MessageRepository;
 import to.bconnect.api.storage.chat.MessageType;
-
-import java.util.Set;
 
 import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
@@ -21,7 +18,7 @@ public class MessageFactory {
     @Autowired private MessageRepository messageRepository;
 
     public MessageEntity entity(Long chatId, Long memberId) {
-        return messageRepository.save(new MessageEntity(chatId, ChatType.GROUP, memberId, null, "content"));
+        return messageRepository.save(new MessageEntity(chatId, ChatType.GROUP, memberId, MessageType.TEXT, "content"));
     }
 
     public static Message domain(Long id, Long chatId, Long memberId, MessageType type) {
@@ -35,15 +32,10 @@ public class MessageFactory {
     }
 
     public static SendMessage command() {
-        return new SendMessage(MessageType.TEXT, "content", null);
+        return new SendMessage(MessageType.TEXT, "content", "preview", null);
     }
 
     public static SendMessage command(MessageType type, String content) {
-        return new SendMessage(type, content, null);
-    }
-
-    public static SocketMessageSentEvent sentEvent(Long chatId, Long senderId, Set<Long> activeIds, Set<Long> inactiveIds) {
-        return new SocketMessageSentEvent(activeIds, inactiveIds,
-                domain(1L, chatId, senderId, MessageType.TEXT));
+        return new SendMessage(type, content, content, null);
     }
 }

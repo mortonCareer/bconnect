@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface NoteRepository extends JpaRepository<NoteEntity, Long> {
 
-    List<NoteEntity> findAllByBoardId(Long boardId);
+    List<NoteEntity> findAllByBoardIdOrderByIdDesc(Long boardId);
 
     void deleteAllByBoardId(Long boardId);
 }

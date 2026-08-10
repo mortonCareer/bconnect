@@ -6,6 +6,7 @@ import {
   getGetTasksMockHandler,
   getUpdateTaskWorkerMockHandler,
   OfferStatus,
+  TaskProgress,
   TaskStatus,
   TaskType,
   Trade,
@@ -34,6 +35,7 @@ function isoOfDay(year: number, month1: number, day: number): string {
 
 const SAMPLE_ADDRESS: Address = {
   zipcode: '16677',
+  bcode: '4111100000',
   state: '경기',
   city: '수원시 장안구',
   street: '경기도 수원시 율전로 00번길 00-00',
@@ -129,6 +131,7 @@ function buildSeedTasks(): Task[] {
       projectCompanyId: null,
       projectCompanyName: null,
       offer: null,
+      progress: TaskProgress.TODO,
       createdAt: stamp,
       modifiedAt: stamp,
     }
@@ -150,7 +153,7 @@ function buildSeedTasks(): Task[] {
     return {
       ...base,
       type: TaskType.WORKER,
-      status: TaskStatus.SCHEDULED,
+      status: TaskStatus.ASSIGNED,
       workerTitle: seed.title,
       workerCompany: seed.company,
     }
@@ -171,7 +174,8 @@ export const tasksOverrides = [
     tasks.push({
       id,
       type: TaskType.WORKER,
-      status: TaskStatus.SCHEDULED,
+      status: TaskStatus.ASSIGNED,
+      progress: TaskProgress.TODO,
       trades: body.trades,
       start: body.start,
       end: body.end,
@@ -204,6 +208,7 @@ export const tasksOverrides = [
             trades: body.trades,
             start: body.start,
             end: body.end,
+            progress: body.progress,
             workerTitle: body.title,
             workerMemo: body.memo ?? null,
             workerCompany: body.company ?? null,
@@ -224,8 +229,8 @@ export const tasksOverrides = [
   // 기술자의 섭외 수락/거절(#972) — 채팅 OFFER 카드가 재조회 시 결과 상태를 읽는다.
   // 업체측 섭외 대기열(schedule.ts)은 별도 상태라 여기선 career 쪽 task.offer 만 갱신.
   ...[
-    [getAcceptOfferMockHandler, OfferStatus.ACCEPTED, TaskStatus.SCHEDULED] as const,
-    [getDenyOfferMockHandler, OfferStatus.DENIED, TaskStatus.OPEN] as const,
+    [getAcceptOfferMockHandler, OfferStatus.ACCEPTED, TaskStatus.ASSIGNED] as const,
+    [getDenyOfferMockHandler, OfferStatus.DENIED, TaskStatus.NONE] as const,
   ].map(([handler, offerStatus, taskStatus]) =>
     handler((info) => {
       const offerId = Number(info.params.id)

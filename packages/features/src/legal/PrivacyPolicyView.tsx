@@ -71,7 +71,7 @@ const SECTIONS: { id: string; title: string; body: React.ReactNode }[] = [
             ],
             [
               '프로필 (선택)',
-              '이름, 닉네임, 시공분야·대표분야, 경력, 소속, 활동지역, 회원유형, 한줄소개, 프로필 사진, 증빙 서류 (기술자) · 상호·사업자등록번호 (업체)',
+              '이름, 닉네임, 시공분야·대표분야, 경력, 소속, 활동지역, 회원유형, 한줄소개, 프로필 사진, 자격 증명 서류 (기술자) · 상호·사업자등록번호 (업체)',
               '이용자 직접 입력·업로드',
             ],
             [
@@ -138,7 +138,7 @@ const SECTIONS: { id: string; title: string; body: React.ReactNode }[] = [
           head={['수탁자', '위탁 업무']}
           rows={[
             ['Railway Corporation', '서버·데이터베이스 운영(호스팅)'],
-            ['Amazon Web Services, Inc.', '업로드 파일(사진·증빙 서류) 저장'],
+            ['Amazon Web Services, Inc.', '업로드 파일(사진·자격 증명 서류) 저장'],
             ['Vercel Inc.', '웹 애플리케이션 호스팅'],
             ['Solapi(솔라피)', '본인인증 문자(SMS)·알림톡 발송'],
             [

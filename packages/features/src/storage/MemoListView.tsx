@@ -135,7 +135,7 @@ export function MemoListView({
         onOpenChange={guard.setConfirmOpen}
         title="편집을 취소할까요?"
         description="저장하지 않은 변경 내용이 사라져요."
-        confirmLabel="나가기"
+        confirmLabel="편집 취소"
         destructive
         onConfirm={guard.confirmProceed}
       />

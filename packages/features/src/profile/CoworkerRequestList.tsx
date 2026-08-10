@@ -52,9 +52,9 @@ export function CoworkerRequestList({
 
   return (
     <section className="flex flex-col">
-      {/* 받은/보낸 요청 세그먼트 토글 (디자인: 좌측 정렬 pill) */}
+      {/* 보낸/받은 요청 세그먼트 토글 (디자인 1759-11905: 좌측 정렬 pill, 보낸 요청이 앞) */}
       <div className="flex gap-2 px-4 py-2">
-        {(['received', 'sent'] as const).map((key) => (
+        {(['sent', 'received'] as const).map((key) => (
           <button
             key={key}
             type="button"

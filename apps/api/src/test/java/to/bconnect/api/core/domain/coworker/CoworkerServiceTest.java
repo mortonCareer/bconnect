@@ -109,6 +109,37 @@ class CoworkerServiceTest {
     }
 
     @Test
+    @DisplayName("resolveStatus - 대상이 본인일 때 상태를 조회하면 SELF를 반환한다")
+    void resolveStatus_success_self() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+
+        // when
+        val status = coworkerService.resolveStatus(member.getId(), member.getId());
+
+        // then
+        assertThat(status).isEqualTo(CoworkerStatus.SELF);
+    }
+
+    @Test
+    @DisplayName("resolveStatusMap - 대상에 본인이 포함될 때 상태 맵을 조회하면 SELF를 반환한다")
+    void resolveStatusMap_success_self() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        coworkerRepository.save(CoworkerFactory.entity(other.getId(), member.getId()));
+
+        // when
+        val statuses = coworkerService.resolveStatusMap(member.getId(),
+                List.of(member.getId(), other.getId()));
+
+        // then
+        assertThat(statuses)
+                .containsEntry(member.getId(), CoworkerStatus.SELF)
+                .containsEntry(other.getId(), CoworkerStatus.COWORKER);
+    }
+
+    @Test
     @DisplayName("resolveStatusMap - 동료와 요청이 있을 때 상태 맵을 조회하면 대상별 상태를 반환한다")
     void resolveStatusMap_success() {
         // given

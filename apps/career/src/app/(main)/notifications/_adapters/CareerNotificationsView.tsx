@@ -2,24 +2,14 @@
 
 import { useRouter } from 'next/navigation'
 import { NotificationsView } from '@bconnect/features'
-import { NotificationReferenceType } from '@bconnect/api-client'
+import { resolveReferenceHref } from '@bconnect/push'
 import type { Notification } from '@bconnect/api-client'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
+import { REFERENCE_PATHS } from '@/lib/notification-routes'
 
-/**
- * 알림 유형(BE `referenceType`)별 career 이동 목적지.
- * CHAT_ROOM → 채팅방, PROFILE → 본인 프로필 편집(완성 넛지).
- * 나머지(OFFER·COWORKER_REQUEST·CONTRACT·null)는 아직 수신 화면 미구현(#842/#843) → 읽음 처리만.
- */
+/** 목적지 표는 notification-routes.ts — Service Worker·인앱 토스트와 같은 표를 쓴다. */
 function resolveHref(n: Notification): string | undefined {
-  switch (n.referenceType) {
-    case NotificationReferenceType.CHAT_ROOM:
-      return n.referenceId != null ? `/messages/${n.referenceId}` : undefined
-    case NotificationReferenceType.PROFILE:
-      return '/profile/edit'
-    default:
-      return undefined
-  }
+  return resolveReferenceHref(REFERENCE_PATHS, n.referenceType, n.referenceId)
 }
 
 /** 알림 (/notifications) — 공용 NotificationsView 가 자체 fetch. career 풀페이지 셸(back→홈) 주입. */

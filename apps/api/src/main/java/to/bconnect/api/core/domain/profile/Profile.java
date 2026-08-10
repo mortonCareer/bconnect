@@ -24,6 +24,10 @@ public record Profile(
     Long recommendationCount,
     Long coworkerCount
 ) {
+    public static Profile withdrawn(Long memberId) {
+        return new Profile(null, memberId, null, null, null, 0, null, null, null, null, null, 0L, 0L, 0L);
+    }
+
     public static Profile of(ProfileEntity entity) {
         return of(entity, 0L, 0L, 0L);
     }

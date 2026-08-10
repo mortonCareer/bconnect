@@ -8,6 +8,8 @@ import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.NoteRepository;
+import to.bconnect.api.storage.chat.GroupChatRepository;
+import to.bconnect.api.storage.chat.ParticipantRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.coworker.CoworkerRequestRepository;
@@ -31,7 +33,9 @@ import to.bconnect.api.support.fixture.CoworkerFactory;
 import to.bconnect.api.support.fixture.CoworkerRequestFactory;
 import to.bconnect.api.support.fixture.CredentialFactory;
 import to.bconnect.api.support.fixture.DriveFactory;
+import to.bconnect.api.support.fixture.GroupChatFactory;
 import to.bconnect.api.support.fixture.MemberFactory;
+import to.bconnect.api.support.fixture.ParticipantFactory;
 import to.bconnect.api.support.fixture.OfferFactory;
 import to.bconnect.api.support.fixture.PostFactory;
 import to.bconnect.api.support.fixture.ProfileFactory;
@@ -64,6 +68,10 @@ class MemberCleanerTest {
     @Autowired private BoardRepository boardRepository;
     @Autowired private NoteRepository noteRepository;
     @Autowired private AttachmentRepository attachmentRepository;
+    @Autowired private GroupChatRepository groupChatRepository;
+    @Autowired private ParticipantRepository participantRepository;
+    @Autowired private GroupChatFactory groupChatFactory;
+    @Autowired private ParticipantFactory participantFactory;
 
     @Test
     @DisplayName("clean - 연관 데이터가 있을 때 정리하면 연관 데이터가 삭제된다")
@@ -83,6 +91,11 @@ class MemberCleanerTest {
         val task = taskRepository.save(TaskFactory.entity(member.getId()));
         val post = postRepository.save(PostFactory.entity(member.getId(), task.getId()));
         offerRepository.save(OfferFactory.entity(task.getId(), member.getId()));
+        val chat = groupChatFactory.entity();
+        participantFactory.entity(chat.getId(), member.getId());
+        participantFactory.entity(chat.getId(), other.getId());
+        val soloChat = groupChatFactory.entity();
+        participantFactory.entity(soloChat.getId(), member.getId());
         val projectTask = taskRepository.save(TaskFactory.projectEntity(null, member.getId()));
         val drive = driveRepository.save(DriveFactory.entity(null, member.getId()));
         val board = boardRepository.save(BoardFactory.driveEntity(drive.getId()));
@@ -116,7 +129,10 @@ class MemberCleanerTest {
         assertThat(coworkerRequestRepository.findAllByToId(member.getId())).isEmpty();
         assertThat(recommendationRepository.findAllByFromId(member.getId())).isEmpty();
         assertThat(recommendationRepository.findAllByToId(member.getId())).isEmpty();
-        assertThat(postRepository.findAllByMemberId(member.getId())).isEmpty();
+        assertThat(postRepository.findById(post.getId())).isPresent();
+        assertThat(participantRepository.findByChatIdAndMemberId(chat.getId(), member.getId())).isEmpty();
+        assertThat(groupChatRepository.findById(chat.getId())).isPresent();
+        assertThat(groupChatRepository.findById(soloChat.getId())).isEmpty();
         assertThat(offerRepository.findAllByWorkerId(member.getId())).isEmpty();
         assertThat(taskRepository.findAllByWorkerIdAndType(member.getId(), TaskType.WORKER)).isEmpty();
         assertThat(taskRepository.findById(projectTask.getId())).isPresent();
@@ -127,7 +143,7 @@ class MemberCleanerTest {
 
         assertThat(attachmentRepository.findById(memberAttachment.getId()).orElseThrow().getReferenceId()).isNull();
         assertThat(attachmentRepository.findById(credentialAttachment.getId()).orElseThrow().getReferenceId()).isNull();
-        assertThat(attachmentRepository.findById(postAttachment.getId()).orElseThrow().getReferenceId()).isNull();
+        assertThat(attachmentRepository.findById(postAttachment.getId()).orElseThrow().getReferenceId()).isEqualTo(post.getId());
         assertThat(attachmentRepository.findById(driveAttachment.getId()).orElseThrow().getReferenceId()).isNull();
     }
 

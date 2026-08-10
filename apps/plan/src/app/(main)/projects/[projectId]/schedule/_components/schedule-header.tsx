@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import { z } from 'zod'
-import { mapKakaoAddress } from '@bconnect/config/address'
+import { emptyAddressDraft, mapKakaoAddress } from '@bconnect/config/address'
 import type { AddressDraft } from '@bconnect/config/address'
 import { UnknownSidoError, UNKNOWN_SIDO_MESSAGE } from '@bconnect/config/errors'
 import {
@@ -19,6 +19,7 @@ import {
   Input,
   ROW_INPUT_CLASSES,
   TextField,
+  useDocumentTitle,
 } from '@bconnect/ui'
 import { useGetProject } from '@bconnect/api-client'
 import type { Address } from '@bconnect/api-client'
@@ -103,13 +104,8 @@ function ProjectNameRow({ initialName }: { initialName: string }) {
 
 function seedAddress(street: string): AddressDraft {
   return {
-    zipcode: '',
+    ...emptyAddressDraft(),
     street,
-    state: undefined,
-    city: '',
-    detail: undefined,
-    latitude: 0,
-    longitude: 0,
   }
 }
 
@@ -208,6 +204,8 @@ function AddressRow({ initialAddress }: { initialAddress: string }) {
 
 export function ScheduleHeader({ projectId }: ScheduleHeaderProps) {
   const { data: project } = useGetProject(Number(projectId))
+  // 탭 title 에 프로젝트명 반영 (리뷰 반영, #785). 로딩 전엔 static fallback('공정표') 유지.
+  useDocumentTitle(project ? `${project.title} - 공정표` : undefined)
 
   return (
     <header className="flex min-h-[110px] flex-col gap-[10px] border-b border-solid border-[#f0f0f0] px-10 pt-7 pb-[22px]">

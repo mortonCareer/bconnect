@@ -4,14 +4,12 @@ import to.bconnect.api.storage.notification.NotificationReferenceType;
 import to.bconnect.api.storage.notification.NotificationSenderType;
 import to.bconnect.api.storage.notification.NotificationType;
 
-public record PushNotification(
+public record CreateNotification(
         Long memberId,
         NotificationType type,
         NotificationSenderType senderType,
         Long senderId,
-        String senderName,
         NotificationReferenceType referenceType,
-        Long referenceId,
-        String body
+        Long referenceId
 ) {
 }

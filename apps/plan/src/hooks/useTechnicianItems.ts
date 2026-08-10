@@ -32,7 +32,7 @@ interface TechnicianItemBase {
   postCount: number
   coworkerCount: number
   recommendCount: number
-  // ⚠️ 모킹값 — 리뷰(별점)·계약·인증 BE 도메인 미구현. 0/빈값은 실제 발생 가능해 sentinel 로 모킹 명시
+  // ⚠️ 모킹값 — 리뷰(별점)·계약·자격 증명 BE 도메인 미구현. 0/빈값은 실제 발생 가능해 sentinel 로 모킹 명시
   rating: number
   reviewCount: number
   contractCount: number

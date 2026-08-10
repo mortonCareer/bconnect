@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,6 +26,10 @@ public class MemberEntity extends BaseEntity {
 
     private String phone;
 
+    private LocalDate birth;
+
+    private boolean marketingConsent;
+
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "member_roles", joinColumns = @JoinColumn(name = "member_id"))
     @Enumerated(EnumType.STRING)
@@ -35,10 +40,12 @@ public class MemberEntity extends BaseEntity {
 
     private Long driveLimitBytes = DEFAULT_DRIVE_LIMIT_BYTES;
 
-    public MemberEntity(String username, String name, String phone, Set<Role> roles) {
+    public MemberEntity(String username, String name, String phone, LocalDate birth, boolean marketingConsent, Set<Role> roles) {
         this.username = username;
         this.name = name;
         this.phone = phone;
+        this.birth = birth;
+        this.marketingConsent = marketingConsent;
         this.roles = roles != null ? new HashSet<>(roles) : new HashSet<>();
     }
 

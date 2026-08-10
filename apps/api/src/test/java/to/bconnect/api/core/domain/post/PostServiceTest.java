@@ -5,16 +5,27 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.common.CommonExceptionCode;
+import to.bconnect.api.storage.Address;
+import to.bconnect.api.storage.Region;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.post.PostRepository;
+import to.bconnect.api.storage.profile.ProfileEntity;
+import to.bconnect.api.storage.profile.ProfileRepository;
+import to.bconnect.api.storage.profile.ProfileRole;
+import to.bconnect.api.storage.profile.Trade;
+import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskRepository;
+import to.bconnect.api.storage.task.TaskType;
 import to.bconnect.api.support.IntegrationTest;
 import to.bconnect.api.support.fixture.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
@@ -23,11 +34,19 @@ import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 class PostServiceTest {
 
     private static final Long MISSING_ID = 999_999L;
+    private static final SearchFeed EMPTY_FILTER =
+            new SearchFeed(null, null, null, null, null, null, null);
+    private static final Address BUSAN_ADDRESS = new Address(
+            "00000", "0000000000", Region.부산, "city", "street", "detail",
+            BigDecimal.ZERO, BigDecimal.ZERO);
+    private static final LocalDate FILTER_START = LocalDate.of(2026, 6, 1);
+    private static final LocalDate FILTER_END = LocalDate.of(2026, 6, 30);
 
     @Autowired private PostService postService;
     @Autowired private PostRepository postRepository;
     @Autowired private TaskRepository taskRepository;
     @Autowired private MemberRepository memberRepository;
+    @Autowired private ProfileRepository profileRepository;
     @Autowired private AttachmentRepository attachmentRepository;
 
     @Test
@@ -42,7 +61,7 @@ class PostServiceTest {
         val cursor = CursorFactory.request(null, 2);
 
         // when
-        val firstPage = postService.list(cursor);
+        val firstPage = postService.list(EMPTY_FILTER, cursor);
 
         // then
         assertThat(firstPage.content()).hasSize(2);
@@ -50,6 +69,122 @@ class PostServiceTest {
         assertThat(firstPage.content().get(1).id()).isEqualTo(second.getId());
         assertThat(firstPage.hasNext()).isTrue();
         assertThat(firstPage.nextCursor()).isEqualTo(second.getId());
+    }
+
+    @Test
+    @DisplayName("list - 직종 필터로 조회하면 해당 직종 프로필을 가진 회원의 게시글만 반환한다")
+    void list_success_trades() {
+        // given
+        val electrical = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        profileRepository.save(ProfileFactory.entity(electrical.getId()));
+        postRepository.save(PostFactory.entity(electrical.getId(), null));
+
+        val plumbing = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        profileRepository.save(new ProfileEntity(
+                plumbing.getId(), ProfileRole.FOREMAN, Trade.PLUMBING, Set.of(Trade.PLUMBING), 5,
+                "headline", "about", ProfileFactory.DEFAULT_ADDRESS));
+        val post = postRepository.save(PostFactory.entity(plumbing.getId(), null));
+
+        val command = new SearchFeed(null, Set.of(Trade.PLUMBING), null, null, null, null, null);
+
+        // when
+        val page = postService.list(command, CursorFactory.request(null, 10));
+
+        // then
+        assertThat(page.content()).hasSize(1);
+        assertThat(page.content().getFirst().id()).isEqualTo(post.getId());
+    }
+
+    @Test
+    @DisplayName("list - 경력 범위 필터로 조회하면 범위에 속한 회원의 게시글만 반환한다")
+    void list_success_experience() {
+        // given
+        val junior = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        profileRepository.save(new ProfileEntity(
+                junior.getId(), ProfileRole.FOREMAN, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL), 11,
+                "headline", "about", ProfileFactory.DEFAULT_ADDRESS));
+        postRepository.save(PostFactory.entity(junior.getId(), null));
+
+        val middle = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        profileRepository.save(new ProfileEntity(
+                middle.getId(), ProfileRole.FOREMAN, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL), 15,
+                "headline", "about", ProfileFactory.DEFAULT_ADDRESS));
+        val post = postRepository.save(PostFactory.entity(middle.getId(), null));
+
+        val senior = memberRepository.save(MemberFactory.entity("member3", "01000001003", Role.CAREER));
+        profileRepository.save(new ProfileEntity(
+                senior.getId(), ProfileRole.FOREMAN, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL), 21,
+                "headline", "about", ProfileFactory.DEFAULT_ADDRESS));
+        postRepository.save(PostFactory.entity(senior.getId(), null));
+
+        val command = new SearchFeed(null, null, 12, 20, null, null, null);
+
+        // when
+        val page = postService.list(command, CursorFactory.request(null, 10));
+
+        // then
+        assertThat(page.content()).hasSize(1);
+        assertThat(page.content().getFirst().id()).isEqualTo(post.getId());
+    }
+
+    @Test
+    @DisplayName("list - 지역 필터로 조회하면 해당 지역 회원의 게시글만 반환한다")
+    void list_success_states() {
+        // given
+        val seoul = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        profileRepository.save(ProfileFactory.entity(seoul.getId()));
+        postRepository.save(PostFactory.entity(seoul.getId(), null));
+
+        val busan = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        profileRepository.save(new ProfileEntity(
+                busan.getId(), ProfileRole.FOREMAN, Trade.ELECTRICAL, Set.of(Trade.ELECTRICAL), 5,
+                "headline", "about", BUSAN_ADDRESS));
+        val post = postRepository.save(PostFactory.entity(busan.getId(), null));
+
+        val command = new SearchFeed(null, null, null, null, Set.of(Region.부산), null, null);
+
+        // when
+        val page = postService.list(command, CursorFactory.request(null, 10));
+
+        // then
+        assertThat(page.content()).hasSize(1);
+        assertThat(page.content().getFirst().id()).isEqualTo(post.getId());
+    }
+
+    @Test
+    @DisplayName("list - 기간 필터로 조회하면 기간에 완전히 포함된 작업의 게시글만 반환한다")
+    void list_success_period() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+
+        val inside = taskRepository.save(new TaskEntity(
+                TaskType.WORKER, Set.of(Trade.ELECTRICAL), FILTER_START, FILTER_END,
+                member.getId(), "task", "memo", "company", ProfileFactory.DEFAULT_ADDRESS,
+                null, null, null, null));
+        val post = postRepository.save(PostFactory.entity(member.getId(), inside.getId()));
+
+        val early = taskRepository.save(new TaskEntity(
+                TaskType.WORKER, Set.of(Trade.ELECTRICAL), FILTER_START.minusDays(1), FILTER_END,
+                member.getId(), "task", "memo", "company", ProfileFactory.DEFAULT_ADDRESS,
+                null, null, null, null));
+        postRepository.save(PostFactory.entity(member.getId(), early.getId()));
+
+        val late = taskRepository.save(new TaskEntity(
+                TaskType.WORKER, Set.of(Trade.ELECTRICAL), FILTER_START, FILTER_END.plusDays(1),
+                member.getId(), "task", "memo", "company", ProfileFactory.DEFAULT_ADDRESS,
+                null, null, null, null));
+        postRepository.save(PostFactory.entity(member.getId(), late.getId()));
+
+        postRepository.save(PostFactory.entity(member.getId(), null));
+
+        val command = new SearchFeed(null, null, null, null, null, FILTER_START, FILTER_END);
+
+        // when
+        val page = postService.list(command, CursorFactory.request(null, 10));
+
+        // then
+        assertThat(page.content()).hasSize(1);
+        assertThat(page.content().getFirst().id()).isEqualTo(post.getId());
     }
 
     @Test

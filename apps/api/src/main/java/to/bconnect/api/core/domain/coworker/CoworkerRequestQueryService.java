@@ -18,14 +18,14 @@ public class CoworkerRequestQueryService {
 
     @Transactional(readOnly = true)
     public List<CoworkerRequest> listReceived(AuthUser user) {
-        return coworkerRequestRepository.findAllByToId(user.id()).stream()
+        return coworkerRequestRepository.findAllByToIdOrderByIdDesc(user.id()).stream()
                 .map(it -> CoworkerRequest.of(it, it.getFromId()))
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<CoworkerRequest> listSent(AuthUser user) {
-        return coworkerRequestRepository.findAllByFromId(user.id()).stream()
+        return coworkerRequestRepository.findAllByFromIdOrderByIdDesc(user.id()).stream()
                 .map(it -> CoworkerRequest.of(it, it.getToId()))
                 .toList();
     }

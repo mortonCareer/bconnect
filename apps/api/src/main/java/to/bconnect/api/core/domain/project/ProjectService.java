@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.company.CompanyExceptionCode;
+import to.bconnect.api.core.domain.task.TaskExceptionCode;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.board.BoardEntity;
 import to.bconnect.api.storage.board.BoardRepository;
@@ -17,6 +18,7 @@ import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.project.ProjectEntity;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskRepository;
+import to.bconnect.api.storage.task.TaskStatus;
 
 import java.util.List;
 
@@ -51,7 +53,7 @@ public class ProjectService {
         if (optional.isEmpty())
             return List.of();
 
-        return projectRepository.findAllByCompanyId(optional.get().getId())
+        return projectRepository.findAllByCompanyIdOrderByIdAsc(optional.get().getId())
                 .stream()
                 .map(Project::of)
                 .toList();
@@ -97,6 +99,9 @@ public class ProjectService {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
         if (!found.getCompanyId().equals(company.getId()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
+
+        if (taskRepository.existsByProjectIdInAndStatusIn(List.of(found.getId()), TaskStatus.ENGAGED))
+            throw new CodeException(TaskExceptionCode.OFFERED_EXISTS);
 
         taskRepository.deleteAllByProjectId(found.getId());
         boardRepository.findByProjectId(found.getId()).ifPresent(board -> {
