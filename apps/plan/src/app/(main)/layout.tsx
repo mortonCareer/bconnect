@@ -5,10 +5,10 @@ import { GuestSidebar } from './_components/GuestSidebar'
 import { LoginGateProvider } from './_components/LoginGateProvider'
 import { MemberSidebar } from './_components/MemberSidebar'
 import { PanelHost } from './_components/panel/PanelHost'
+import { useAuthHint } from '@bconnect/api-client'
 import { RequireRole, UnreadTitlePrefix } from '@bconnect/features'
 import { NotificationPromptToast } from '@bconnect/push'
 import { useTechnicianItems } from '@/hooks/useTechnicianItems'
-import { useAuthStore } from '@/stores/auth-store'
 
 function GuestSidebarWithCount() {
   // '검증된 프로필' 카피라 가입 회원 수만 — 크롤링(미검증) 프로필은 제외
@@ -17,7 +17,7 @@ function GuestSidebarWithCount() {
 }
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const isAuthenticated = useAuthHint()
 
   return (
     <div className="flex h-screen overflow-hidden bg-white">

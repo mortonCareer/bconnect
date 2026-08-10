@@ -22,7 +22,7 @@ import {
   ERROR_CODE,
   hasErrorCode,
   isRegisterMemberSignupSessionError,
-  hasAuthHint,
+  readAuthHint,
   refreshAccessToken,
   useCreateMember,
   useCreateCompany,
@@ -31,14 +31,13 @@ import {
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
 import { BIRTH_PLACEHOLDER } from '@bconnect/config/signup'
+import { login } from '@bconnect/features'
 import { useSignupStore } from '@/stores/signup-store'
-import { useAuthStore } from '@/stores/auth-store'
 import { corpSchema, type CorpFormData } from './schema'
 
 export default function SignupCorpPage() {
   const router = useRouter()
   const { formData, setCorp, reset: resetSignup, setRegisterError } = useSignupStore()
-  const { login } = useAuthStore()
   const registerMemberMutation = useCreateMember({
     request: { headers: { 'X-Signup-Token': formData.signupToken } },
   })
@@ -68,7 +67,7 @@ export default function SignupCorpPage() {
       // 재호출하지 않도록 발급된 accessToken을 보관한다.
       // 로그인 상태로 이 화면에 온 경우(RequireRole 이 보냄)는 회원이 이미 있으므로 register 를 건너뛴다.
       // 판정 소스는 게이트와 같은 표시 쿠키 — 동기 읽기라 제출 시점에 판정이 밀리지 않는다.
-      if (!hasAuthHint()) {
+      if (!readAuthHint()) {
         let accessToken: string
         try {
           accessToken =

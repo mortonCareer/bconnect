@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { useAuthHint } from '@bconnect/api-client'
 import { Select, cn } from '@bconnect/ui'
-import { useAuthStore } from '@/stores/auth-store'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import { useSelectedTask } from '@/hooks/useSelectedTask'
 import { useOfferQueue } from '@/hooks/useOfferQueue'
@@ -14,7 +14,7 @@ import { useAllProjectTasks } from '@/hooks/useAllProjectTasks'
  * 선택은 useSelectedTask(URL `?project=&task=`), 큐 수는 useOfferQueue facade. 인증 사용자 전용.
  */
 export function TaskSelectBar() {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const isAuthenticated = useAuthHint()
   const { tasks, projectTitleById } = useAllProjectTasks()
   const { taskId, select } = useSelectedTask()
   const { panelHref, closeHref } = usePanelNav()

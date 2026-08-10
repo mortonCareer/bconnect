@@ -3,9 +3,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button, CertTag, SkillTag, StarIcon, toast, isApiErrorShape } from '@bconnect/ui'
-import { TRADE_LABELS, useCreateDirectChat } from '@bconnect/api-client'
+import { TRADE_LABELS, useAuthHint, useCreateDirectChat } from '@bconnect/api-client'
 import { usePanelNav } from '@/hooks/usePanelNav'
-import { useAuthStore } from '@/stores/auth-store'
 import type { MemberTechnicianItem } from '@/hooks/useTechnicianItems'
 import type { Trade } from '@bconnect/api-client'
 import { useLoginGate } from './LoginGateProvider'
@@ -80,7 +79,7 @@ interface TechnicianCardProps {
 
 export function TechnicianCard({ item }: TechnicianCardProps) {
   const { requireLogin } = useLoginGate()
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const isAuthenticated = useAuthHint()
   const { panelHref, openPanel } = usePanelNav()
   // 프로필 패널 세그먼트는 profile.id 가 아니라 memberId (GET /profiles/{id} 가 memberId 조회)
   const profileHref = panelHref(`profile/${item.memberId}`)

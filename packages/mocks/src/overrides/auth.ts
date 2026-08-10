@@ -1,9 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import {
-  getSendOtpMockHandler,
-  getRefreshTokenMockHandler,
-  getLogoutMockHandler,
-} from '@bconnect/api-client'
+import { getSendOtpMockHandler, getLogoutMockHandler } from '@bconnect/api-client'
 
 // dev 편의용 고정값.
 const MOCK_OTP_CODE = '123456'
@@ -93,10 +89,17 @@ export const authOverrides = [
   }),
 
   // refresh: 매번 새 access token 발급. mock 에선 쿠키 검증을 생략 (실제 BE 는 검증).
-  getRefreshTokenMockHandler(() => ({
-    accessToken: generateToken('access'),
-    refreshToken: generateToken('refresh'),
-  })),
+  // 다른 endpoint 와 달리 envelope 을 씌운다 — 이 응답만 customFetch 가 아니라 client.ts 의
+  // doRefresh 가 raw 로 읽고, 거기서는 `success` 없는 응답을 갱신 실패로 판정해 표시 쿠키를 지운다.
+  http.post('*/api/v1/auth/refresh', () =>
+    HttpResponse.json({
+      success: true,
+      data: {
+        accessToken: generateToken('access'),
+        refreshToken: generateToken('refresh'),
+      },
+    })
+  ),
 
   // logout: void 응답 (orval 기본 시그니처 그대로).
   getLogoutMockHandler(),
