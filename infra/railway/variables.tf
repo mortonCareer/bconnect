@@ -133,6 +133,12 @@ variable "sentry_dsn" {
   sensitive   = true
 }
 
+variable "data_go_service_key" {
+  description = "공공데이터포털(data.go.kr) 서비스키 — 디코딩 키. 국세청·근로복지공단·KISCON·소방청 공통"
+  type        = string
+  sensitive   = true
+}
+
 # =============================================================================
 # Solapi (SMS)
 # =============================================================================

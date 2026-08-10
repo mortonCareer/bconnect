@@ -10,8 +10,13 @@ spring:
         - classpath:data-crawler.sql
 
 app:
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+
   jwt:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
+    cookie-domain: localhost
 
   data-go:
     service-key: test-service-key
@@ -25,6 +30,8 @@ app:
     bucket: test-bucket
 
   cloudfront:
+    domain: test-cloudfront-domain
+    cookie-domain: localhost
     key-pair-id: test-key-pair-id
     private-key: test-private-key
 

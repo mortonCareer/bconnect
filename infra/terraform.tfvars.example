@@ -48,7 +48,11 @@ vercel_api_token = "your-vercel-token"
 # External API Keys
 # =============================================================================
 
-nts_api_service_key    = "your-data-go-kr-service-key"
+# BE(원클릭 조회)가 공통으로 쓰는 디코딩 키. 인코딩 키를 넣으면 이중 인코딩으로 401
+data_go_service_key = "your-data-go-kr-service-key"
+
+# FE(packages/business) 전용 — 원클릭 BE 이관 완료 후 제거 예정
+nts_api_service_key     = "your-data-go-kr-service-key"
 kcomwel_api_service_key = "your-data-go-kr-service-key"
 
 # =============================================================================
