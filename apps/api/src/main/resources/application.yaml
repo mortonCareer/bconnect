@@ -61,10 +61,10 @@ app:
     bucket: ${AWS_S3_BUCKET}
 
   cloudfront:
-    domain: ${CLOUDFRONT_DOMAIN:static.bconnect.to}
+    domain: ${CLOUDFRONT_DOMAIN}
     key-pair-id: ${CLOUDFRONT_KEY_PAIR_ID}
     private-key: ${CLOUDFRONT_PRIVATE_KEY}
-    cookie-domain: ${CLOUDFRONT_COOKIE_DOMAIN:.bconnect.to}
+    cookie-domain: ${CLOUDFRONT_COOKIE_DOMAIN}
     cookie-ttl: 1h
 
   attachment:

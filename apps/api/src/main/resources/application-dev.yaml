@@ -17,7 +17,7 @@ sentry:
 
 app:
   jwt:
-    cookie-domain: ${COOKIE_DOMAIN:.bconnect.to}
+    cookie-domain: ${COOKIE_DOMAIN}
 
   cors:
     allowed-origin-patterns:

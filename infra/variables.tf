@@ -131,6 +131,12 @@ variable "nts_api_service_key" {
   sensitive   = true
 }
 
+variable "data_go_service_key" {
+  description = "공공데이터포털(data.go.kr) 서비스키 — 디코딩 키. BE 원클릭 조회가 국세청·근로복지공단·KISCON·소방청에 공통 사용"
+  type        = string
+  sensitive   = true
+}
+
 variable "kcomwel_api_service_key" {
   description = "근로복지공단 고용/산재보험 API 서비스키 (data.go.kr)"
   type        = string

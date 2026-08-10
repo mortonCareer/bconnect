@@ -61,6 +61,8 @@ module "railway" {
 
   sentry_dsn = var.sentry_dsn
 
+  data_go_service_key = var.data_go_service_key
+
   solapi_api_key       = var.solapi_api_key
   solapi_api_secret    = var.solapi_api_secret
   solapi_sender_number = var.solapi_sender_number

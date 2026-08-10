@@ -16,12 +16,15 @@ spring:
 
 app:
   cors:
+    allowed-origins:
+      - http://localhost:3000
     allowed-origin-patterns:
       - "http://localhost:[*]"
       - "http://127.0.0.1:[*]"
 
   jwt:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
+    cookie-domain: localhost
 
   data-go:
     service-key: ${DATA_GO_SERVICE_KEY:local-service-key}
@@ -35,6 +38,8 @@ app:
     bucket: local-bucket
 
   cloudfront:
+    domain: local-cloudfront-domain
+    cookie-domain: localhost
     key-pair-id: local-key-pair-id
     private-key: local-private-key
 
