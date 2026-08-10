@@ -26,24 +26,14 @@ import {
   refreshAccessToken,
   useCreateMember,
   useCreateCompany,
+  requireRegisterAccessToken,
 } from '@bconnect/api-client'
-import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { formatRegistrationNumber } from '@bconnect/config/biz-number'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
 import { BIRTH_PLACEHOLDER } from '@bconnect/config/signup'
 import { useSignupStore } from '@/stores/signup-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { corpSchema, type CorpFormData } from './schema'
-
-function requireRegisterAccessToken(result: RegisterMemberResponse) {
-  // TODO: BE required 처리 후 type narrowing 필요.
-  // RegisterMemberResponse.accessToken은 세션 필수값인데 optional emit이다.
-  if (!result.accessToken) {
-    throw new Error('회원가입 세션 토큰이 응답에 없습니다.')
-  }
-
-  return result.accessToken
-}
 
 export default function SignupCorpPage() {
   const router = useRouter()

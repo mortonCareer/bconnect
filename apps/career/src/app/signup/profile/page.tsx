@@ -18,8 +18,8 @@ import {
   refreshAccessToken,
   useCreateMember,
   useCreateProfile,
+  requireRegisterAccessToken,
 } from '@bconnect/api-client'
-import type { RegisterMemberResponse } from '@bconnect/api-client'
 import { isCompleteAddress } from '@bconnect/config/address'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
 import { BIRTH_PLACEHOLDER } from '@bconnect/config/signup'
@@ -49,16 +49,6 @@ import { useForm, useWatch } from 'react-hook-form'
 import { SignupHeader } from '../_components/SignupHeader'
 import { TradeSelector } from './_components/TradeSelector'
 import { MAX_TRADES, profileSchema, type ProfileFormData } from './schema'
-
-function requireRegisterAccessToken(result: RegisterMemberResponse) {
-  // TODO: BE required 처리 후 type narrowing 필요.
-  // RegisterMemberResponse.accessToken은 세션 필수값인데 optional emit이다.
-  if (!result.accessToken) {
-    throw new Error('회원가입 세션 토큰이 응답에 없습니다.')
-  }
-
-  return result.accessToken
-}
 
 export default function SignupProfilePage() {
   const router = useRouter()
