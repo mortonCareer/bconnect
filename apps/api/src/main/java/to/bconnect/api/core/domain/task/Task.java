@@ -3,6 +3,7 @@ package to.bconnect.api.core.domain.task;
 import to.bconnect.api.storage.Address;
 import to.bconnect.api.storage.profile.Trade;
 import to.bconnect.api.storage.task.TaskEntity;
+import to.bconnect.api.storage.task.TaskProgress;
 import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
 
@@ -17,6 +18,7 @@ public record Task(
         LocalDate start,
         LocalDate end,
         TaskStatus status,
+        TaskProgress progress,
         Long workerId,
         String workerTitle,
         String workerMemo,
@@ -37,6 +39,7 @@ public record Task(
                 entity.getStart(),
                 entity.getEnd(),
                 entity.getStatus(),
+                entity.getProgress(),
                 entity.getWorkerId(),
                 entity.getWorkerTitle(),
                 entity.getWorkerMemo(),

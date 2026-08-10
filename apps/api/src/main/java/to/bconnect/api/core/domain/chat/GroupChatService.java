@@ -14,6 +14,7 @@ import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.chat.*;
 import to.bconnect.api.storage.member.MemberRepository;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,7 +60,12 @@ public class GroupChatService {
                         participantMap.getOrDefault(it.getId(), List.of()),
                         lastMessageMap.get(it.getId()),
                         unreadCountMap.getOrDefault(it.getId(), 0L)
-                )).toList();
+                ))
+                .sorted(Comparator.comparing(
+                        (GroupChat it) -> it.lastMessage() == null
+                                ? it.createdAt()
+                                : it.lastMessage().createdAt()).reversed())
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -96,6 +102,19 @@ public class GroupChatService {
         eventPublisher.publishEvent(new ChatCreatedEvent(created.getId(), ChatType.GROUP));
 
         return created.getId();
+    }
+
+    @Transactional
+    public void leave(Long memberId, Long chatId) {
+        val found = participantRepository.findByChatIdAndMemberId(chatId, memberId)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.FORBIDDEN));
+
+        participantRepository.delete(found);
+
+        if (participantRepository.countByChatId(chatId) > 0) return;
+
+        messageRepository.deleteAllByChatIdAndChatType(chatId, ChatType.GROUP);
+        groupChatRepository.deleteById(chatId);
     }
 
     @Transactional(readOnly = true)

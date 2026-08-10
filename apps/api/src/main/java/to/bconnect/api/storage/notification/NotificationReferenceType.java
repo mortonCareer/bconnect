@@ -5,5 +5,8 @@ public enum NotificationReferenceType {
     PROFILE,
     COWORKER_REQUEST,
     OFFER,
-    CONTRACT
+    CONTRACT,
+    CREDENTIAL,
+    RECOMMENDATION,
+    TASK
 }

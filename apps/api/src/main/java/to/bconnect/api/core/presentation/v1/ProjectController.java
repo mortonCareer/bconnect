@@ -14,7 +14,9 @@ import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.board.NoteService;
 import to.bconnect.api.core.domain.member.MemberResolver;
+import to.bconnect.api.core.domain.offer.OfferQueryService;
 import to.bconnect.api.core.domain.project.ProjectService;
+import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.core.domain.task.TaskQueryService;
 import to.bconnect.api.core.presentation.v1.request.CreateProjectRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProjectRequest;
@@ -36,6 +38,7 @@ public class ProjectController {
 
     private final ProjectService projectService;
     private final TaskQueryService taskQueryService;
+    private final OfferQueryService offerQueryService;
     private final NoteService noteService;
     private final MemberResolver memberResolver;
     private final AttachmentUrlService attachmentUrlService;
@@ -60,8 +63,11 @@ public class ProjectController {
             @PathVariable Long id) {
         val tasks = taskQueryService.listByProject(user, id);
         val address = projectService.get(user, id).address();
+        val taskIds = tasks.stream().map(Task::id).toList();
+        val offerMap = offerQueryService.activeMap(taskIds);
+
         val body = tasks.stream()
-                .map(it -> TaskResponse.of(it, address))
+                .map(it -> TaskResponse.of(it, address, offerMap.get(it.id())))
                 .toList();
         return ApiResponse.success(body);
     }

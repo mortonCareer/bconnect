@@ -4,6 +4,8 @@ import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
@@ -23,6 +25,7 @@ import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 import static to.bconnect.api.support.fixture.FixtureConstant.MAX_DATE;
 
 @IntegrationTest
+@RecordApplicationEvents
 class CredentialServiceTest {
 
     private static final Long MISSING_ID = 999_999L;
@@ -31,9 +34,10 @@ class CredentialServiceTest {
     @Autowired private CredentialRepository credentialRepository;
     @Autowired private MemberRepository memberRepository;
     @Autowired private AttachmentRepository attachmentRepository;
+    @Autowired private ApplicationEvents applicationEvents;
 
     @Test
-    @DisplayName("list - 회원의 자격 증빙이 존재할 때 목록을 조회하면 본인 증빙만 반환한다")
+    @DisplayName("list - 회원의 자격 증명이 존재할 때 목록을 조회하면 본인 증명만 반환한다")
     void list_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -51,7 +55,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    @DisplayName("listLatestAccepted - 승인된 증빙이 여러 건일 때 조회하면 유형별 최신 승인 증빙만 반환한다")
+    @DisplayName("listLatestAccepted - 승인된 증명이 여러 건일 때 조회하면 유형별 최신 승인 증명만 반환한다")
     void listLatestAccepted_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -74,7 +78,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    @DisplayName("create - 첨부를 지정해 등록하면 증빙이 PENDING으로 저장되고 첨부가 연결된다")
+    @DisplayName("create - 첨부를 지정해 등록하면 증명이 PENDING으로 저장되고 첨부가 연결된다")
     void create_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -96,7 +100,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    @DisplayName("delete - 본인 증빙일 때 삭제하면 증빙이 삭제되고 첨부 참조가 해제된다")
+    @DisplayName("delete - 본인 증명일 때 삭제하면 증명이 삭제되고 첨부 참조가 해제된다")
     void delete_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -117,7 +121,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    @DisplayName("accept - 대기 중인 증빙일 때 승인하면 상태가 ACCEPTED로 변경된다")
+    @DisplayName("accept - 대기 중인 증명일 때 승인하면 상태가 ACCEPTED로 변경된다")
     void accept_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -129,10 +133,12 @@ class CredentialServiceTest {
         // then
         val found = credentialRepository.findById(credential.getId()).orElseThrow();
         assertThat(found.getStatus()).isEqualTo(CredentialStatus.ACCEPTED);
+        val expected = new CredentialReviewedEvent(credential.getId(), member.getId(), CredentialStatus.ACCEPTED);
+        assertThat(applicationEvents.stream(CredentialReviewedEvent.class)).containsExactly(expected);
     }
 
     @Test
-    @DisplayName("deny - 대기 중인 증빙일 때 반려하면 상태가 DENIED로 변경된다")
+    @DisplayName("deny - 대기 중인 증명일 때 반려하면 상태가 DENIED로 변경된다")
     void deny_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -144,10 +150,12 @@ class CredentialServiceTest {
         // then
         val found = credentialRepository.findById(credential.getId()).orElseThrow();
         assertThat(found.getStatus()).isEqualTo(CredentialStatus.DENIED);
+        val expected = new CredentialReviewedEvent(credential.getId(), member.getId(), CredentialStatus.DENIED);
+        assertThat(applicationEvents.stream(CredentialReviewedEvent.class)).containsExactly(expected);
     }
 
     @Test
-    @DisplayName("delete - 다른 회원의 증빙일 때 삭제하면 FORBIDDEN으로 실패한다")
+    @DisplayName("delete - 다른 회원의 증명일 때 삭제하면 FORBIDDEN으로 실패한다")
     void delete_fail_C004() {
         // given
         val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -162,7 +170,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    @DisplayName("accept - 증빙이 존재하지 않을 때 승인하면 NOT_FOUND로 실패한다")
+    @DisplayName("accept - 증명이 존재하지 않을 때 승인하면 NOT_FOUND로 실패한다")
     void accept_fail_C005() {
         // when & then
         assertCodeException(() -> credentialService.accept(MISSING_ID))
@@ -170,7 +178,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    @DisplayName("accept - 이미 처리된 증빙일 때 승인하면 INVALID_STATUS로 실패한다")
+    @DisplayName("accept - 이미 처리된 증명일 때 승인하면 INVALID_STATUS로 실패한다")
     void accept_fail_CD001() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
@@ -183,7 +191,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    @DisplayName("deny - 증빙이 존재하지 않을 때 반려하면 NOT_FOUND로 실패한다")
+    @DisplayName("deny - 증명이 존재하지 않을 때 반려하면 NOT_FOUND로 실패한다")
     void deny_fail_C005() {
         // when & then
         assertCodeException(() -> credentialService.deny(MISSING_ID))
@@ -191,7 +199,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    @DisplayName("deny - 이미 처리된 증빙일 때 반려하면 INVALID_STATUS로 실패한다")
+    @DisplayName("deny - 이미 처리된 증명일 때 반려하면 INVALID_STATUS로 실패한다")
     void deny_fail_CD001() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));

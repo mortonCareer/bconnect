@@ -4,10 +4,11 @@
 'use client'
 
 import { AddressField } from '@/components/AddressField'
-import { ROLE_LABELS, SIGNUP_ROLES } from '@/lib/role-labels'
+import { SIGNUP_ROLES } from '@/lib/role-labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useSignupStore } from '@/stores/signup-store'
 import {
+  ROLE_LABELS,
   Trade,
   TRADE_LABELS,
   refreshAccessToken,
@@ -216,6 +217,7 @@ export default function SignupProfilePage() {
               control={control}
               name="address"
               label="주소"
+              required
               description="정확한 매칭을 위해 일하는 곳을 기준으로 입력해주세요"
             />
 
@@ -234,7 +236,7 @@ export default function SignupProfilePage() {
 
             <FormError error={server.formError} />
           </div>
-          <div className="bg-white p-4">
+          <div className="bg-white px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
             <FormSubmitButton size="full">완료</FormSubmitButton>
           </div>
         </form>

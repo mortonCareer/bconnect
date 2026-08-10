@@ -30,6 +30,12 @@ public interface CoworkerRepository extends JpaRepository<CoworkerEntity, Long> 
 
     List<CoworkerEntity> findAllByMinIdOrMaxId(Long minId, Long maxId);
 
+    default List<CoworkerEntity> findAllByMemberIdOrderByIdDesc(Long memberId) {
+        return findAllByMinIdOrMaxIdOrderByIdDesc(memberId, memberId);
+    }
+
+    List<CoworkerEntity> findAllByMinIdOrMaxIdOrderByIdDesc(Long minId, Long maxId);
+
     default long countByMemberId(Long memberId) {
         return countByMinIdOrMaxId(memberId, memberId);
     }

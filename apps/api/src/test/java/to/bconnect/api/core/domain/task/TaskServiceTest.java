@@ -4,23 +4,31 @@ import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.offer.OfferRepository;
+import to.bconnect.api.storage.offer.OfferStatus;
 import to.bconnect.api.storage.post.PostRepository;
+import to.bconnect.api.storage.profile.Trade;
 import to.bconnect.api.storage.project.ProjectRepository;
+import to.bconnect.api.storage.task.TaskProgress;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
 import to.bconnect.api.support.IntegrationTest;
 import to.bconnect.api.support.fixture.*;
 
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 
 @IntegrationTest
+@RecordApplicationEvents
 class TaskServiceTest {
 
     private static final Long MISSING_ID = 999_999L;
@@ -32,6 +40,7 @@ class TaskServiceTest {
     @Autowired private MemberRepository memberRepository;
     @Autowired private OfferRepository offerRepository;
     @Autowired private PostRepository postRepository;
+    @Autowired private ApplicationEvents applicationEvents;
 
     @Test
     @DisplayName("createByWorker - 회원이 존재할 때 생성하면 기술자 작업이 저장된다")
@@ -47,7 +56,8 @@ class TaskServiceTest {
         // then
         val found = taskRepository.findById(created).orElseThrow();
         assertThat(found.getType()).isEqualTo(TaskType.WORKER);
-        assertThat(found.getStatus()).isEqualTo(TaskStatus.DRAFT);
+        assertThat(found.getStatus()).isEqualTo(TaskStatus.NONE);
+        assertThat(found.getProgress()).isEqualTo(TaskProgress.TODO);
         assertThat(found.getWorkerId()).isEqualTo(member.getId());
         assertThat(found.getProjectId()).isNull();
     }
@@ -68,7 +78,8 @@ class TaskServiceTest {
         // then
         val found = taskRepository.findById(created).orElseThrow();
         assertThat(found.getType()).isEqualTo(TaskType.PROJECT);
-        assertThat(found.getStatus()).isEqualTo(TaskStatus.DRAFT);
+        assertThat(found.getStatus()).isEqualTo(TaskStatus.NONE);
+        assertThat(found.getProgress()).isEqualTo(TaskProgress.TODO);
         assertThat(found.getProjectId()).isEqualTo(project.getId());
         assertThat(found.getWorkerId()).isNull();
     }
@@ -80,7 +91,7 @@ class TaskServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val task = taskRepository.save(TaskFactory.entity(member.getId()));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = TaskFactory.updateCommand();
+        val command = TaskFactory.updateCommand(TaskProgress.IN_PROGRESS);
 
         // when
         taskService.updateByWorker(user, task.getId(), command);
@@ -90,6 +101,7 @@ class TaskServiceTest {
         assertThat(found.getWorkerTitle()).isEqualTo(command.title());
         assertThat(found.getWorkerMemo()).isEqualTo(command.memo());
         assertThat(found.getTrades()).isEqualTo(command.trades());
+        assertThat(found.getProgress()).isEqualTo(TaskProgress.IN_PROGRESS);
     }
 
     @Test
@@ -101,7 +113,7 @@ class TaskServiceTest {
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
         val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = TaskFactory.updateProjectCommand();
+        val command = TaskFactory.updateProjectCommand(TaskProgress.COMPLETED);
 
         // when
         taskService.updateByCompany(user, task.getId(), command);
@@ -112,6 +124,101 @@ class TaskServiceTest {
         assertThat(found.getProjectRequirement()).isEqualTo(command.requirement());
         assertThat(found.getProjectMemo()).isEqualTo(command.memo());
         assertThat(found.getTrades()).isEqualTo(command.trades());
+        assertThat(found.getProgress()).isEqualTo(TaskProgress.COMPLETED);
+    }
+
+    @Test
+    @DisplayName("updateByCompany - 배정된 작업의 요구사항이 바뀌면 작업 변경 이벤트가 발행된다")
+    void updateByCompany_notice_requirement() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
+        val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        task.offered();
+        task.assign(worker.getId());
+        val user = UserFactory.domain(owner.getId(), Role.PLAN);
+        val command = new UpdateProjectTask(task.getTrades(), task.getStart(), task.getEnd(),
+                task.getProgress(), task.getProjectTitle(), "update", task.getProjectMemo());
+
+        // when
+        taskService.updateByCompany(user, task.getId(), command);
+
+        // then
+        val expected = new TaskEvent(task.getId(), worker.getId(), owner.getId());
+        assertThat(applicationEvents.stream(TaskEvent.class)).containsExactly(expected);
+    }
+
+    @Test
+    @DisplayName("updateByCompany - 배정된 작업의 일정이 바뀌면 작업 변경 이벤트가 발행된다")
+    void updateByCompany_notice_schedule() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
+        val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        task.offered();
+        task.assign(worker.getId());
+        val user = UserFactory.domain(owner.getId(), Role.PLAN);
+        val command = new UpdateProjectTask(task.getTrades(), task.getStart().plusDays(1), task.getEnd().plusDays(1),
+                task.getProgress(), task.getProjectTitle(), task.getProjectRequirement(), task.getProjectMemo());
+
+        // when
+        taskService.updateByCompany(user, task.getId(), command);
+
+        // then
+        val expected = new TaskEvent(task.getId(), worker.getId(), owner.getId());
+        assertThat(applicationEvents.stream(TaskEvent.class)).containsExactly(expected);
+    }
+
+    @Test
+    @DisplayName("updateByCompany - 배정된 작업의 공종이 바뀌면 작업 변경 이벤트가 발행된다")
+    void updateByCompany_notice_trades() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
+        val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        task.offered();
+        task.assign(worker.getId());
+        val user = UserFactory.domain(owner.getId(), Role.PLAN);
+        val command = new UpdateProjectTask(Set.of(Trade.DEMOLITION), task.getStart(), task.getEnd(),
+                task.getProgress(), task.getProjectTitle(), task.getProjectRequirement(), task.getProjectMemo());
+
+        // when
+        taskService.updateByCompany(user, task.getId(), command);
+
+        // then
+        val expected = new TaskEvent(task.getId(), worker.getId(), owner.getId());
+        assertThat(applicationEvents.stream(TaskEvent.class)).containsExactly(expected);
+    }
+
+    @Test
+    @DisplayName("updateByCompany - 배정된 작업의 제목·메모·진행 상태만 바뀌면 작업 변경 이벤트가 발행되지 않는다")
+    void updateByCompany_notice_skipped() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
+        val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        task.offered();
+        task.assign(worker.getId());
+        val user = UserFactory.domain(owner.getId(), Role.PLAN);
+        val command = new UpdateProjectTask(task.getTrades(), task.getStart(), task.getEnd(),
+                TaskProgress.IN_PROGRESS, "update", task.getProjectRequirement(), "update");
+
+        // when
+        taskService.updateByCompany(user, task.getId(), command);
+
+        // then
+        val found = taskRepository.findById(task.getId()).orElseThrow();
+        assertThat(found.getProjectTitle()).isEqualTo("update");
+        assertThat(found.getProgress()).isEqualTo(TaskProgress.IN_PROGRESS);
+        assertThat(applicationEvents.stream(TaskEvent.class)).isEmpty();
     }
 
     @Test
@@ -132,6 +239,123 @@ class TaskServiceTest {
         val found = taskRepository.findById(task.getId()).orElseThrow();
         assertThat(found.getWorkerTitle()).isEqualTo(command.title());
         assertThat(found.getWorkerMemo()).isEqualTo(command.memo());
+        assertThat(found.getProgress()).isEqualTo(command.progress());
+    }
+
+    @Test
+    @DisplayName("updateByAssignee - 할당된 기술자가 작업을 수정하면 작업 변경 이벤트가 발행되지 않는다")
+    void updateByAssignee_notice_skipped() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
+        val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), worker.getId()));
+        val user = UserFactory.domain(worker.getId(), Role.CAREER);
+        val command = TaskFactory.updateAssigneeCommand();
+
+        // when
+        taskService.updateByAssignee(user, task.getId(), command);
+
+        // then
+        val found = taskRepository.findById(task.getId()).orElseThrow();
+        assertThat(found.getWorkerTitle()).isEqualTo(command.title());
+        assertThat(applicationEvents.stream(TaskEvent.class)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("unassign - 업체가 할당을 취소하면 섭외 상태가 NONE이 되고 수락된 섭외가 취소된다")
+    void unassign_byOwner() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
+        val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        val offer = offerRepository.save(OfferFactory.entity(task.getId(), worker.getId()));
+        task.offered();
+        task.assign(worker.getId());
+        offer.accept();
+        val user = UserFactory.domain(owner.getId(), Role.PLAN);
+
+        // when
+        taskService.unassign(user, task.getId());
+
+        // then
+        val found = taskRepository.findById(task.getId()).orElseThrow();
+        assertThat(found.getStatus()).isEqualTo(TaskStatus.NONE);
+        assertThat(found.getWorkerId()).isNull();
+        assertThat(offerRepository.findById(offer.getId()).orElseThrow().getStatus())
+                .isEqualTo(OfferStatus.CANCELED);
+    }
+
+    @Test
+    @DisplayName("unassign - 할당된 기술자가 할당을 취소하면 섭외 상태가 NONE이 된다")
+    void unassign_byAssignee() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
+        val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        task.offered();
+        task.assign(worker.getId());
+        val user = UserFactory.domain(worker.getId(), Role.CAREER);
+
+        // when
+        taskService.unassign(user, task.getId());
+
+        // then
+        val found = taskRepository.findById(task.getId()).orElseThrow();
+        assertThat(found.getStatus()).isEqualTo(TaskStatus.NONE);
+        assertThat(found.getWorkerId()).isNull();
+    }
+
+    @Test
+    @DisplayName("unassign - 할당되지 않은 작업일 때 취소하면 NOT_ASSIGNED로 실패한다")
+    void unassign_fail_T001() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
+
+        // when & then
+        assertCodeException(() -> taskService.unassign(user, task.getId()))
+                .hasExceptionCode(TaskExceptionCode.NOT_ASSIGNED);
+    }
+
+    @Test
+    @DisplayName("unassign - 기술자 작업일 때 취소하면 INVALID_TYPE으로 실패한다")
+    void unassign_fail_T002() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val task = taskRepository.save(TaskFactory.entity(member.getId()));
+        val user = UserFactory.domain(member.getId(), Role.CAREER);
+
+        // when & then
+        assertCodeException(() -> taskService.unassign(user, task.getId()))
+                .hasExceptionCode(TaskExceptionCode.INVALID_TYPE);
+    }
+
+    @Test
+    @DisplayName("unassign - 업체도 할당 기술자도 아닐 때 취소하면 FORBIDDEN으로 실패한다")
+    void unassign_fail_C004() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
+        val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
+        val other = memberRepository.save(MemberFactory.entity("other", "01000001003", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        task.offered();
+        task.assign(worker.getId());
+        val user = UserFactory.domain(other.getId(), Role.CAREER);
+
+        // when & then
+        assertCodeException(() -> taskService.unassign(user, task.getId()))
+                .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
     }
 
     @Test
@@ -365,6 +589,40 @@ class TaskServiceTest {
         // when & then
         assertCodeException(() -> taskService.delete(user, task.getId()))
                 .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
+    }
+
+    @Test
+    @DisplayName("delete - 섭외 중인 작업일 때 삭제하면 OFFERED_EXISTS로 실패한다")
+    void delete_fail_T003_offered() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.PLAN));
+        val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        task.offered();
+        val user = UserFactory.domain(member.getId(), Role.PLAN);
+
+        // when & then
+        assertCodeException(() -> taskService.delete(user, task.getId()))
+                .hasExceptionCode(TaskExceptionCode.OFFERED_EXISTS);
+    }
+
+    @Test
+    @DisplayName("delete - 배정된 작업일 때 삭제하면 OFFERED_EXISTS로 실패한다")
+    void delete_fail_T003_assigned() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.PLAN));
+        val worker = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        task.offered();
+        task.assign(worker.getId());
+        val user = UserFactory.domain(owner.getId(), Role.PLAN);
+
+        // when & then
+        assertCodeException(() -> taskService.delete(user, task.getId()))
+                .hasExceptionCode(TaskExceptionCode.OFFERED_EXISTS);
     }
 
 }

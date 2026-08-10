@@ -82,7 +82,7 @@ graph TD
         DS[Domain Services]
     end
     subgraph socket.message
-        MsgS[MessageService]
+        MsgS[MessageManager]
     end
     subgraph attachment
         Linker[AttachmentLinker]
@@ -122,8 +122,8 @@ graph TD
     Res --> Fin
     Fin --> AttR
 ```
-- AttachmentFinder : Attachment 조회 (id · reference 기준)
-- AttachmentResolver : CloudFront Url 조립 (getUrl · resolveUrlMap 은 Finder 위임)
+- AttachmentFinder : Attachment 조회 · path 조립
+- AttachmentResolver : CloudFront Url 조립
 
 ### 삭제 (Cleanup)
 
@@ -161,12 +161,12 @@ Cleanup 규칙
 
 Enum 구성
 
-| Enum | 레이어    | 값 (path/ext)                                                                 | 의미                   |
-|---|--------|------------------------------------------------------------------------------|----------------------|
-| AttachmentContext | Storage | `CHAT`(chats), `COMPANY`(companies), `CREDENTIAL`(credentials), `DRIVE`(drives), `MEMBER`(members), `POST`(posts) | 권한 scope 종류 + path   |
-| AttachmentReferenceType | Storage | `POST`, `MESSAGE`, `COMPANY`, `MEMBER`, `CREDENTIAL`, `DRIVE`                  | 엔티티 소유(참조)           |
-| AttachmentType | Storage | `IMAGE`(images), `FILE`(files)                                               | 파일 종류 + path         |
-| AttachmentStatus | Storage | `PENDING`, `COMPLETED`                                                       | 파일 업로드 상태            |
-| ImageSize | Attachment | `ORIGINAL`(o), `MEDIUM`(m/webp), `SMALL`(s/webp)                             | 이미지 사이즈 + path + ext |
+| Enum | 레이어    | 값 (path/ext)                                                            | 의미                   |
+|---|--------|-------------------------------------------------------------------------|----------------------|
+| AttachmentContext | Storage | `CHAT`, `COMPANY`, `CREDENTIAL`, `DRIVE`, `MEMBER`, `POST` | 권한 scope 종류 + path   |
+| AttachmentReferenceType | Storage | `POST`, `MESSAGE`, `COMPANY`, `MEMBER`, `CREDENTIAL`, `DRIVE`             | 엔티티 소유(참조)           |
+| AttachmentType | Storage | `IMAGE`, `FILE`                                            | 파일 종류 + path         |
+| AttachmentStatus | Storage | `PENDING`, `COMPLETED`                                                  | 파일 업로드 상태            |
+| ImageSize | Attachment | `ORIGINAL`(o), `MEDIUM`(m/webp), `SMALL`(s/webp)                        | 이미지 사이즈 + path + ext |
 - Context : S3 저장 경로 · Signed Cookie 권한 범위를 나타냄
 - Reference : DB 참조 · 도메인 소유를 나타냄

@@ -4,6 +4,8 @@ import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.coworker.CoworkerRequestRepository;
@@ -19,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 
 @IntegrationTest
+@RecordApplicationEvents
 class CoworkerRequestServiceTest {
 
     private static final Long MISSING_ID = 999_999L;
@@ -27,6 +30,7 @@ class CoworkerRequestServiceTest {
     @Autowired private CoworkerRequestRepository coworkerRequestRepository;
     @Autowired private CoworkerRepository coworkerRepository;
     @Autowired private MemberRepository memberRepository;
+    @Autowired private ApplicationEvents applicationEvents;
 
     @Test
     @DisplayName("create - 요청이 유효할 때 생성하면 요청이 저장된다")
@@ -43,6 +47,8 @@ class CoworkerRequestServiceTest {
         val found = coworkerRequestRepository.findById(id).orElseThrow();
         assertThat(found.getFromId()).isEqualTo(from.getId());
         assertThat(found.getToId()).isEqualTo(to.getId());
+        val expected = new CoworkerRequestedEvent(id, from.getId(), to.getId());
+        assertThat(applicationEvents.stream(CoworkerRequestedEvent.class)).containsExactly(expected);
     }
 
     @Test
@@ -59,7 +65,7 @@ class CoworkerRequestServiceTest {
 
         // then
         assertThat(id).isEqualTo(created.getId());
-        assertThat(coworkerRequestRepository.findAllByFromId(from.getId())).hasSize(1);
+        assertThat(coworkerRequestRepository.findAllByFromIdOrderByIdDesc(from.getId())).hasSize(1);
     }
 
     @Test
@@ -77,8 +83,10 @@ class CoworkerRequestServiceTest {
         // then
         assertThat(id).isEqualTo(reverse.getId());
         assertThat(coworkerRequestRepository.findById(reverse.getId())).isEmpty();
-        assertThat(coworkerRequestRepository.findAllByFromId(from.getId())).isEmpty();
+        assertThat(coworkerRequestRepository.findAllByFromIdOrderByIdDesc(from.getId())).isEmpty();
         assertThat(coworkerRepository.existsByMembers(from.getId(), to.getId())).isTrue();
+        val expected = new CoworkerAcceptedEvent(to.getId(), from.getId());
+        assertThat(applicationEvents.stream(CoworkerAcceptedEvent.class)).containsExactly(expected);
     }
 
     @Test
@@ -96,6 +104,8 @@ class CoworkerRequestServiceTest {
         // then
         assertThat(coworkerRequestRepository.findById(created.getId())).isEmpty();
         assertThat(coworkerRepository.existsByMembers(from.getId(), to.getId())).isTrue();
+        val expected = new CoworkerAcceptedEvent(from.getId(), to.getId());
+        assertThat(applicationEvents.stream(CoworkerAcceptedEvent.class)).containsExactly(expected);
     }
 
     @Test

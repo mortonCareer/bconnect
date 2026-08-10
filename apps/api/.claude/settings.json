@@ -12,12 +12,14 @@
       "WebSearch",
       "WebFetch",
       "Bash(./gradlew compileJava)",
+      "Bash(./gradlew compileTestJava *)",
       "Bash(./gradlew build:*)",
       "Bash(./gradlew test:*)",
       "Bash(pnpm lint:*)",
       "Bash(pnpm format:*)",
       "Bash(git log:*)",
-      "Bash(git show:*)"
+      "Bash(git show:*)",
+      "Bash(bru run *)"
     ],
     "deny": [],
     "ask": []

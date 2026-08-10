@@ -29,7 +29,7 @@ public class NoteService {
 
         projectFinder.validateOwnership(user.id(), projectId);
 
-        return noteRepository.findAllByBoardId(board.getId()).stream()
+        return noteRepository.findAllByBoardIdOrderByIdDesc(board.getId()).stream()
                 .map(Note::of)
                 .toList();
     }
@@ -42,7 +42,7 @@ public class NoteService {
         if (!driveFinder.isMember(user.id(), driveId) && !driveFinder.isOwner(user.id(), driveId))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        return noteRepository.findAllByBoardId(board.getId()).stream()
+        return noteRepository.findAllByBoardIdOrderByIdDesc(board.getId()).stream()
                 .map(Note::of)
                 .toList();
     }

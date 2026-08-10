@@ -1,7 +1,10 @@
 meta {
-  name: 인증뱃지 생성
+  name: 자격 증명 생성
   type: http
   seq: 1
+  tags: [
+    seed
+  ]
 }
 
 post {
@@ -14,7 +17,6 @@ body:json {
   {
     "type": "IDENTITY_VERIFICATION",
     "expiredAt": "2026-12-31",
-    "note": "발급기관 : 행정안전부",
     "attachmentId": 101
   }
 }

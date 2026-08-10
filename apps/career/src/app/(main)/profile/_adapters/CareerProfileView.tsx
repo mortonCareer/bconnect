@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 import {
+  useGetMyMember,
   useGetMyProfile,
   useGetMyReceivedRecommendations,
   useGetMySentRecommendations,
@@ -137,9 +138,11 @@ export function ViewerProfileView({ memberId }: { memberId: number }) {
   const received = useGetReceivedRecommendations({ memberId }, { query: { enabled } })
   const sent = useGetSentRecommendations({ memberId }, { query: { enabled } })
 
-  // ProfileResponse 에 관계 필드가 없어, 내 동료 목록에 타겟이 있는지로 성립된 동료 여부 파생
-  const myProfile = useGetMyProfile()
-  const myId = myProfile.data?.member?.id ?? 0
+  // ProfileResponse 에 관계 필드가 없어, 내 동료 목록에 타겟이 있는지로 성립된 동료 여부 파생.
+  // myId 는 useGetMyMember(/members/me) 로 파생 — useGetMyProfile(/profiles/me) 은 Profile row 가
+  // 없는 계정에서 404 라 isCoworker 가 항상 false 로 오판됐다 (#870 검증 중 발견)
+  const { data: myMember } = useGetMyMember()
+  const myId = myMember?.id ?? 0
   const myCoworkers = useGetCoworkers({ memberId: myId }, { query: { enabled: myId > 0 } })
   const isCoworker = myCoworkers.data?.some((coworker) => coworker.member?.id === memberId) ?? false
 

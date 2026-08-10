@@ -20,6 +20,7 @@ import to.bconnect.api.core.domain.project.ProjectFinder;
 import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.core.domain.task.TaskQueryService;
+import to.bconnect.api.core.presentation.v1.request.FeedFilter;
 import to.bconnect.api.core.presentation.v1.response.FeedResponse;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
@@ -48,14 +49,15 @@ public class FeedController {
 
     @GetMapping
     public ApiResponse<CursorPage<FeedResponse>> list(
+            FeedFilter filter,
             CursorLimit cursorLimit,
             HttpServletResponse response) {
-        val page = postService.list(cursorLimit);
+        val page = postService.list(filter.toCommand(), cursorLimit);
         val posts = page.content();
 
         val memberIds = posts.stream().map(Post::memberId).distinct().toList();
-        val memberMap = memberResolver.resolveMap(memberIds);
-        val profileMap = profileResolver.resolveMap(memberIds);
+        val memberMap = memberResolver.resolveMapOrWithdrawn(memberIds);
+        val profileMap = profileResolver.resolveMapOrWithdrawn(memberIds);
         val pictureMap = attachmentUrlService.map(
                 AttachmentReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
@@ -103,8 +105,8 @@ public class FeedController {
             @PathVariable Long id,
             HttpServletResponse response) {
         val post = postService.get(id);
-        val member = memberResolver.get(post.memberId());
-        val profile = profileResolver.resolveMap(List.of(post.memberId())).get(post.memberId());
+        val member = memberResolver.getOrWithdrawn(post.memberId());
+        val profile = profileResolver.getOrWithdrawn(post.memberId());
         val attachments = attachmentFinder.list(AttachmentReferenceType.POST, post.id(), AttachmentType.IMAGE);
         val urlMap = attachmentUrlService.parseUrlMap(attachments, ImageSize.MEDIUM);
         val picture = attachmentUrlService.get(AttachmentReferenceType.MEMBER, member.id(), ImageSize.SMALL);

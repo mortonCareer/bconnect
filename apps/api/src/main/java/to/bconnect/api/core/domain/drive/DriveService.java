@@ -14,6 +14,7 @@ import to.bconnect.api.storage.board.BoardType;
 import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.drive.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,13 +41,13 @@ public class DriveService {
         return Stream.concat(
                 owned.stream().map(it -> Drive.of(it, it.getTitle())),
                 joined.stream().map(it -> Drive.of(it, titles.get(it.getId())))
-        ).toList();
+        ).sorted(Comparator.comparing(Drive::id)).toList();
     }
 
     @Transactional(readOnly = true)
     public List<Drive> listByProject(AuthUser user, Long projectId) {
         projectFinder.validateOwnership(user.id(), projectId);
-        return driveRepository.findAllByProjectId(projectId).stream()
+        return driveRepository.findAllByProjectIdOrderByIdAsc(projectId).stream()
                 .map(it -> Drive.of(it, it.getTitle()))
                 .toList();
     }

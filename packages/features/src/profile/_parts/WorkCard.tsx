@@ -1,20 +1,24 @@
 'use client'
 
-import Image from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ActionDrawer,
   cn,
   EditIcon,
+  ImageCarousel,
   MoreVerticalIcon,
   TrashIcon,
   useExpandableText,
 } from '@bconnect/ui'
 
 interface WorkCardProps {
-  image: string
+  images: string[]
   imageAlt?: string
+  /** 작업물이 붙은 작업(task)의 업체명. 작업 미연결 게시물이면 생략 */
+  company?: string
+  /** 시공기간 (예: '4일 소요'). 작업 미연결 게시물이면 생략 */
+  duration?: string
   timestamp: string
   description: string
   /** owner 전용 수정 페이지 경로. 없으면 케밥에 수정 메뉴 안 그림 (viewer/plan) */
@@ -23,13 +27,11 @@ interface WorkCardProps {
   onDelete?: () => void
 }
 
-// TODO(#556): 업체명·기간은 Task 소속인데 Feed 에 미노출 — BE Feed 확장 시 실데이터 연결.
-// 업체명·소요일 둘 다 mock 이라 각각 (Mocked) 명시.
-const MOCK_HEADER = '업체명(Mocked) · N일 소요(Mocked)'
-
 export function WorkCard({
-  image,
+  images,
   imageAlt,
+  company,
+  duration,
   timestamp,
   description,
   editHref,
@@ -44,7 +46,11 @@ export function WorkCard({
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between gap-2 px-4 py-2">
-        <span className="text-r-12 text-gray-500">{MOCK_HEADER}</span>
+        <div className="flex min-w-0 items-center gap-2.5">
+          {company && <span className="truncate text-r-12 text-gray-500">{company}</span>}
+          {company && duration && <div className="h-[13px] w-px shrink-0 bg-gray-300" />}
+          {duration && <span className="shrink-0 text-r-12 text-gray-500">{duration}</span>}
+        </div>
         <div className="flex items-center gap-2">
           {timestamp && <span className="text-r-12 text-gray-500">{timestamp}</span>}
           {canManage && (
@@ -60,18 +66,12 @@ export function WorkCard({
         </div>
       </div>
 
-      {image && (
-        <div className="relative h-[220px] w-full overflow-hidden bg-gray-100">
-          {/* TODO: 출시 전 unoptimized 제거 + next/image remotePatterns/loader 구성 (외부 업로드 대응) */}
-          <Image
-            src={image}
-            alt={imageAlt || description}
-            fill
-            sizes="393px"
-            unoptimized
-            className="object-cover"
-          />
-        </div>
+      {images.length > 0 && (
+        <ImageCarousel
+          images={images}
+          alt={imageAlt || description}
+          imageClassName="rounded-none bg-gray-100"
+        />
       )}
 
       <div className="flex flex-col gap-2 px-4 pt-3 pb-4">

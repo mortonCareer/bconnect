@@ -35,7 +35,10 @@ public class TaskEntity extends BaseEntity {
     private LocalDate end;
 
     @Enumerated(EnumType.STRING)
-    private TaskStatus status = TaskStatus.DRAFT;
+    private TaskStatus status = TaskStatus.NONE;
+
+    @Enumerated(EnumType.STRING)
+    private TaskProgress progress = TaskProgress.TODO;
 
     private Long workerId;
 
@@ -62,6 +65,9 @@ public class TaskEntity extends BaseEntity {
     @Column(name = "project_memo")
     private String projectMemo;
 
+    @Version
+    private Long version;
+
     public TaskEntity(TaskType type, Set<Trade> trades, LocalDate start, LocalDate end,
                       Long workerId, String workerTitle, String workerMemo, String workerCompany, Address workerAddress,
                       Long projectId, String projectTitle, String projectRequirement, String projectMemo) {
@@ -80,34 +86,62 @@ public class TaskEntity extends BaseEntity {
         this.projectMemo = projectMemo;
     }
 
-    public void update(Set<Trade> trades, LocalDate start, LocalDate end,
+    public void update(Set<Trade> trades, LocalDate start, LocalDate end, TaskProgress progress,
                        String title, String memo, String company, Address address) {
         this.trades = trades != null ? trades : new HashSet<>();
         this.start = start;
         this.end = end;
+        this.progress = progress;
         this.workerTitle = title;
         this.workerMemo = memo;
         this.workerCompany = company;
         this.workerAddress = address;
     }
 
-    public void update(Set<Trade> trades, LocalDate start, LocalDate end,
+    public void update(Set<Trade> trades, LocalDate start, LocalDate end, TaskProgress progress,
                        String title, String requirement, String memo) {
         this.trades = trades != null ? trades : new HashSet<>();
         this.start = start;
         this.end = end;
+        this.progress = progress;
         this.projectTitle = title;
         this.projectRequirement = requirement;
         this.projectMemo = memo;
     }
 
-    public void update(String title, String memo) {
+    public void update(TaskProgress progress, String title, String memo) {
+        this.progress = progress;
         this.workerTitle = title;
         this.workerMemo = memo;
     }
 
     public void assign(Long workerId) {
+        if (status != TaskStatus.OFFERED)
+            throw new IllegalStateException("허용되지 않은 섭외 상태 전이입니다: %s → ASSIGNED".formatted(status));
+
         this.workerId = workerId;
-        this.status = TaskStatus.SCHEDULED;
+        this.status = TaskStatus.ASSIGNED;
+    }
+
+    public void unassign() {
+        if (status != TaskStatus.ASSIGNED)
+            throw new IllegalStateException("허용되지 않은 섭외 상태 전이입니다: %s → NONE".formatted(status));
+
+        this.workerId = null;
+        this.status = TaskStatus.NONE;
+    }
+
+    public void offered() {
+        if (!TaskStatus.OFFERABLE.contains(status))
+            throw new IllegalStateException("허용되지 않은 섭외 상태 전이입니다: %s → OFFERED".formatted(status));
+
+        this.status = TaskStatus.OFFERED;
+    }
+
+    public void release() {
+        if (status == TaskStatus.ASSIGNED)
+            throw new IllegalStateException("허용되지 않은 섭외 상태 전이입니다: ASSIGNED → NONE");
+
+        this.status = TaskStatus.NONE;
     }
 }

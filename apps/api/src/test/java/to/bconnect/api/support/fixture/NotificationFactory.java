@@ -1,8 +1,8 @@
 package to.bconnect.api.support.fixture;
 
+import to.bconnect.api.notification.domain.CreateNotification;
 import to.bconnect.api.notification.domain.Notification;
-import to.bconnect.api.notification.domain.PushNotification;
-import to.bconnect.api.notification.domain.push.PushPayload;
+import to.bconnect.api.notification.domain.push.PushNotification;
 import to.bconnect.api.storage.notification.NotificationEntity;
 import to.bconnect.api.storage.notification.NotificationReferenceType;
 import to.bconnect.api.storage.notification.NotificationSenderType;
@@ -21,20 +21,20 @@ public class NotificationFactory {
                 referenceType, referenceId, false, MIN_DATE_TIME);
     }
 
-    public static PushNotification command(Long memberId, Long senderId, NotificationType type,
-                                           NotificationReferenceType referenceType, Long referenceId) {
-        return new PushNotification(memberId, type, NotificationSenderType.MEMBER, senderId, SENDER_NAME,
-                referenceType, referenceId, CONTENT);
+    public static CreateNotification command(Long memberId, Long senderId, NotificationType type,
+                                             NotificationReferenceType referenceType, Long referenceId) {
+        return new CreateNotification(memberId, type, NotificationSenderType.MEMBER, senderId,
+                referenceType, referenceId);
     }
 
-    public static PushNotification systemCommand(Long memberId, NotificationType type,
-                                                 NotificationReferenceType referenceType) {
-        return new PushNotification(memberId, type, null, null, null, referenceType, null, null);
+    public static CreateNotification systemCommand(Long memberId, NotificationType type,
+                                                   NotificationReferenceType referenceType) {
+        return new CreateNotification(memberId, type, null, null, referenceType, null);
     }
 
-    public static PushPayload payload(Long id, Long memberId, Long senderId, NotificationType type,
-                                      NotificationReferenceType referenceType, Long referenceId) {
-        return PushPayload.of(id, command(memberId, senderId, type, referenceType, referenceId));
+    public static PushNotification pushCommand(Long id, Long memberId, NotificationType type,
+                                               NotificationReferenceType referenceType, Long referenceId) {
+        return new PushNotification(id, memberId, type.render(SENDER_NAME), CONTENT, referenceType, referenceId);
     }
 
     public static NotificationEntity entity(Long memberId, Long senderId, NotificationType type,

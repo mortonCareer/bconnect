@@ -5,7 +5,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,8 +19,12 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class Address {
     @NotBlank
-    @Size(max = 5)
+    @Pattern(regexp = "\\d{5}")
     private String zipcode;
+
+    @NotBlank
+    @Pattern(regexp = "\\d{10}")
+    private String bcode;
 
     @NotNull
     @Enumerated(EnumType.STRING)

@@ -13,6 +13,8 @@ import {
 import { getFcmMessaging } from './firebase'
 import { useNotificationStore } from './notification-store'
 import { usePushStore } from './push-store'
+import type { PushData } from './push-data'
+import { resolveReferenceHref, type ReferencePathMap } from './reference-paths'
 import { mapPermission, syncDeviceToken } from './request-push-permission'
 
 /**
@@ -26,8 +28,10 @@ import { mapPermission, syncDeviceToken } from './request-push-permission'
  *
  * 권한 요청 UI 는 분리됨: request-push-permission.ts + use-notification-soft-ask.ts.
  * 이 훅은 상태를 반환하지 않는다 — 소비자는 push-store 를 구독한다.
+ *
+ * `referencePaths` 는 알림 딥링크 목적지 표 — SW·알림 목록과 같은 표를 공유한다.
  */
-export function usePushNotificationListener(): void {
+export function usePushNotificationListener(referencePaths: ReferencePathMap): void {
   const initialized = useRef(false)
   const showNotification = useNotificationStore((s) => s.show)
   const queryClient = useQueryClient()
@@ -58,11 +62,14 @@ export function usePushNotificationListener(): void {
       if (Notification.permission === 'granted' && hasAuthHint()) await syncDeviceToken()
 
       // 포그라운드 수신 리스너
-      // data-only 페이로드(title/body 가 data 안)도 대응, 딥링크는 BE 가 data.url 에 직접 넣음
+      // data-only 페이로드(title/body 가 data 안)도 대응
       unsubscribe = onMessage(messaging, (payload) => {
+        // Firebase 의 data 는 인덱스 시그니처 — 키 오타를 못 잡으므로 계약 타입으로 좁힌다.
+        const data = payload.data as Partial<PushData> | undefined
         const title = payload.notification?.title ?? payload.data?.title ?? '새 알림'
         const body = payload.notification?.body ?? payload.data?.body ?? ''
-        showNotification({ title, body, href: payload.data?.url })
+        const href = resolveReferenceHref(referencePaths, data?.reference_type, data?.reference_id)
+        showNotification({ title, body, href })
         for (const queryKey of [
           getGetNotificationsUnreadCountQueryKey(),
           getGetNotificationsQueryKey(),
@@ -76,5 +83,5 @@ export function usePushNotificationListener(): void {
 
     setup()
     return () => unsubscribe?.()
-  }, [showNotification, queryClient])
+  }, [showNotification, queryClient, referencePaths])
 }

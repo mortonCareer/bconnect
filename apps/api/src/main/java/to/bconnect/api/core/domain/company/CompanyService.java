@@ -11,6 +11,7 @@ import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
+import to.bconnect.api.core.domain.task.TaskExceptionCode;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.board.BoardRepository;
@@ -19,8 +20,11 @@ import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
+import to.bconnect.api.storage.project.ProjectEntity;
 import to.bconnect.api.storage.project.ProjectRepository;
+import to.bconnect.api.storage.task.TaskProgress;
 import to.bconnect.api.storage.task.TaskRepository;
+import to.bconnect.api.storage.task.TaskStatus;
 
 import java.util.Collection;
 import java.util.Map;
@@ -137,6 +141,15 @@ public class CompanyService {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         val projects = projectRepository.findAllByCompanyId(found.getId());
+        val projectIds = projects.stream().map(ProjectEntity::getId).toList();
+        if (!projectIds.isEmpty()) {
+            if (taskRepository.existsByProjectIdInAndProgress(projectIds, TaskProgress.IN_PROGRESS))
+                throw new CodeException(CompanyExceptionCode.DELETE_TASK_EXISTS);
+
+            if (taskRepository.existsByProjectIdInAndStatusIn(projectIds, TaskStatus.ENGAGED))
+                throw new CodeException(TaskExceptionCode.OFFERED_EXISTS);
+        }
+
         projects.forEach(it -> {
             taskRepository.deleteAllByProjectId(it.getId());
             boardRepository.findByProjectId(it.getId()).ifPresent(board -> {

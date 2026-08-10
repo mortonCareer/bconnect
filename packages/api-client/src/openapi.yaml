@@ -81,6 +81,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
+    delete:
+      tags:
+      - task-controller
+      operationId: unassign
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/recommendations/{id}:
     put:
       tags:
@@ -1376,6 +1394,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/messages/unread/count:
+    get:
+      tags:
+      - message-controller
+      operationId: unreadCount_1
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
   /api/v1/members/check-username:
     get:
       tags:
@@ -1443,6 +1473,11 @@ paths:
       - feed-controller
       operationId: list_10
       parameters:
+      - name: filter
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/FeedFilter"
       - name: cursorLimit
         in: query
         required: true
@@ -1773,6 +1808,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/group-chats/{id}/me:
+    delete:
+      tags:
+      - group-chat-controller
+      operationId: leave
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/drives/{id}:
     delete:
       tags:
@@ -1881,8 +1935,12 @@ components:
       properties:
         zipcode:
           type: string
-          maxLength: 5
-          minLength: 0
+          minLength: 1
+          pattern: "\\d{5}"
+        bcode:
+          type: string
+          minLength: 1
+          pattern: "\\d{10}"
         state:
           $ref: "#/components/schemas/Region"
         city:
@@ -1898,6 +1956,7 @@ components:
         longitude:
           type: number
       required:
+      - bcode
       - city
       - latitude
       - longitude
@@ -1923,6 +1982,12 @@ components:
       - 경북
       - 경남
       - 제주특별자치도
+    TaskProgress:
+      type: string
+      enum:
+      - TODO
+      - IN_PROGRESS
+      - COMPLETED
     Trade:
       type: string
       enum:
@@ -1951,6 +2016,9 @@ components:
       - TRANSPORT
       - CLEANING
       - GENERAL_LABOR
+      - HOME_REPAIR
+      - BATHROOM
+      - DISINFECTION
     UpdateWorkerTaskRequest:
       type: object
       properties:
@@ -1966,19 +2034,20 @@ components:
         end:
           type: string
           format: date
+        progress:
+          $ref: "#/components/schemas/TaskProgress"
         title:
           type: string
           minLength: 1
         memo:
           type: string
-          minLength: 1
         company:
           type: string
         address:
           $ref: "#/components/schemas/Address"
       required:
       - end
-      - memo
+      - progress
       - start
       - title
       - trades
@@ -2081,33 +2150,33 @@ components:
         end:
           type: string
           format: date
+        progress:
+          $ref: "#/components/schemas/TaskProgress"
         title:
           type: string
           minLength: 1
         requirement:
           type: string
-          minLength: 1
         memo:
           type: string
-          minLength: 1
       required:
       - end
-      - memo
-      - requirement
+      - progress
       - start
       - title
       - trades
     UpdateAssigneeTaskRequest:
       type: object
       properties:
+        progress:
+          $ref: "#/components/schemas/TaskProgress"
         title:
           type: string
           minLength: 1
         memo:
           type: string
-          minLength: 1
       required:
-      - memo
+      - progress
       - title
     UpdateRecommendationRequest:
       type: object
@@ -2253,14 +2322,12 @@ components:
           minLength: 1
         memo:
           type: string
-          minLength: 1
         company:
           type: string
         address:
           $ref: "#/components/schemas/Address"
       required:
       - end
-      - memo
       - start
       - title
       - trades
@@ -2297,15 +2364,11 @@ components:
           minLength: 1
         requirement:
           type: string
-          minLength: 1
         memo:
           type: string
-          minLength: 1
       required:
       - end
-      - memo
       - projectId
-      - requirement
       - start
       - title
       - trades
@@ -2421,7 +2484,13 @@ components:
         name:
           type: string
           minLength: 1
+        birth:
+          type: string
+          format: date
+        marketingConsent:
+          type: boolean
       required:
+      - birth
       - name
       - username
     ApiResponseRegisterMemberResponse:
@@ -2782,6 +2851,8 @@ components:
           format: date
         status:
           $ref: "#/components/schemas/TaskStatus"
+        progress:
+          $ref: "#/components/schemas/TaskProgress"
         workerId:
           type:
           - integer
@@ -2844,6 +2915,7 @@ components:
       - id
       - modifiedAt
       - offer
+      - progress
       - projectCompanyId
       - projectCompanyName
       - projectId
@@ -2861,12 +2933,10 @@ components:
     TaskStatus:
       type: string
       enum:
-      - DRAFT
+      - NONE
       - OPEN
       - OFFERED
-      - SCHEDULED
-      - IN_PROGRESS
-      - COMPLETED
+      - ASSIGNED
     TaskType:
       type: string
       enum:
@@ -3192,6 +3262,7 @@ components:
       type: string
       enum:
       - NONE
+      - SELF
       - SENT
       - RECEIVED
       - COWORKER
@@ -3296,6 +3367,9 @@ components:
       - COWORKER_REQUEST
       - OFFER
       - CONTRACT
+      - CREDENTIAL
+      - RECOMMENDATION
+      - TASK
     NotificationResponse:
       type: object
       properties:
@@ -3366,6 +3440,10 @@ components:
           type:
           - string
           - "null"
+        picture:
+          type:
+          - string
+          - "null"
         createdAt:
           type:
           - string
@@ -3383,6 +3461,7 @@ components:
       - memberId
       - modifiedAt
       - name
+      - picture
     WithdrawableMemberResponse:
       type: object
       properties:
@@ -3439,6 +3518,11 @@ components:
           type: string
         phone:
           type: string
+        birth:
+          type: string
+          format: date
+        marketingConsent:
+          type: boolean
         picture:
           type:
           - string
@@ -3455,8 +3539,10 @@ components:
           type: string
           format: date-time
       required:
+      - birth
       - createdAt
       - id
+      - marketingConsent
       - modifiedAt
       - name
       - phone
@@ -3620,6 +3706,36 @@ components:
         nextCursor:
           type: integer
           format: int64
+    FeedFilter:
+      type: object
+      properties:
+        role:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileRole"
+          uniqueItems: true
+        trades:
+          type: array
+          items:
+            $ref: "#/components/schemas/Trade"
+          uniqueItems: true
+        minExperience:
+          type: integer
+          format: int32
+        maxExperience:
+          type: integer
+          format: int32
+        states:
+          type: array
+          items:
+            $ref: "#/components/schemas/Region"
+          uniqueItems: true
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
     ApiResponseCursorPageFeedResponse:
       type: object
       properties:
@@ -3645,7 +3761,7 @@ components:
       type: object
       properties:
         member:
-          $ref: "#/components/schemas/MemberSummaryResponse"
+          $ref: "#/components/schemas/WithdrawableMemberResponse"
         profile:
           $ref: "#/components/schemas/ProfileSummaryResponse"
         post:
