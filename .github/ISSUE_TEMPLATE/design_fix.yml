@@ -46,6 +46,6 @@ body:
     id: screenshot
     attributes:
       label: 스크린샷
-      description: 이미지를 이 칸에 끌어다 놓으면 자동으로 올라갑니다. 디자인 화면과 실제 화면을 같이 올려주면 가장 빠릅니다
+      description: 이미지를 드래그 앤 드롭 해주세요
     validations:
       required: true
