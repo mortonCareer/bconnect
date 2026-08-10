@@ -1,7 +1,7 @@
 name: 디자인 수정
 description: 디자인과 다르게 구현된 화면을 알려주세요
 title: 'design: '
-labels: ['🎨 publishing']
+labels: ['🎨 publishing', '💻 fe']
 body:
   - type: markdown
     attributes:
