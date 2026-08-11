@@ -14,6 +14,7 @@ public record CrawledPostResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> images,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String title,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String content,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String sourceUrl,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant modifiedAt,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) CrawledTaskResponse task
@@ -26,6 +27,7 @@ public record CrawledPostResponse(
                 post.getImages(),
                 post.getTitle(),
                 post.getContent(),
+                post.getSourceUrl(),
                 post.getCreatedAt(),
                 post.getModifiedAt(),
                 task == null ? null : CrawledTaskResponse.of(task)

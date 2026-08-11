@@ -124,8 +124,8 @@ INSERT INTO crawled_profile_trades (profile_id, trade) VALUES
 INSERT INTO crawled_tasks (id, company, address, trade, start_date, end_date, duration, created_at, modified_at) VALUES
 (100, '업체1', '성균관대학교', '방수', DATE '2026-06-01', DATE '2026-06-03', '3일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO crawled_posts (id, member_id, task_id, title, content, created_at, modified_at) VALUES
-(100, 100, 100, '게시글1', '내용', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO crawled_posts (id, member_id, task_id, title, content, source_url, created_at, modified_at) VALUES
+(100, 100, 100, '게시글1', '내용', 'https://blog.naver.com/sample1/100', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO crawled_post_images (post_id, seq, url) VALUES
 (100, 0, 'https://example.com/image1.jpg');
