@@ -14,16 +14,17 @@ import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.core.domain.member.MemberResolver;
 import to.bconnect.api.core.domain.offer.Offer;
-import to.bconnect.api.core.domain.offer.OfferService;
+import to.bconnect.api.core.domain.offer.OfferQueryService;
 import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.core.domain.project.ProjectFinder;
-import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.core.domain.task.TaskQueryService;
 import to.bconnect.api.core.domain.task.TaskService;
 import to.bconnect.api.core.presentation.v1.request.*;
+import to.bconnect.api.core.presentation.v1.response.AssigneeTaskResponse;
 import to.bconnect.api.core.presentation.v1.response.OfferResponse;
-import to.bconnect.api.core.presentation.v1.response.TaskResponse;
+import to.bconnect.api.core.presentation.v1.response.TaskListResponse;
+import to.bconnect.api.core.presentation.v1.response.WorkerTaskResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
@@ -41,37 +42,41 @@ public class TaskController {
     private final TaskQueryService taskQueryService;
     private final TaskService taskService;
     private final ProjectFinder projectFinder;
-    private final ProjectService projectService;
-    private final OfferService offerService;
+    private final OfferQueryService offerQueryService;
     private final MemberResolver memberResolver;
     private final ProfileResolver profileResolver;
     private final AttachmentUrlService attachmentUrlService;
     private final SignedCookieIssuer signedCookieIssuer;
 
     @GetMapping
-    public ApiResponse<List<TaskResponse>> list(@AuthenticationPrincipal AuthUser user) {
+    public ApiResponse<TaskListResponse> list(@AuthenticationPrincipal AuthUser user) {
         val workerTasks = taskQueryService.listByWorker(user);
-        val projectTasks = taskQueryService.listAssigned(user);
-        
-        val offers = offerService.listByWorker(user);
-        val offerByTaskId = offers.stream().collect(Collectors.toMap(Offer::taskId, Function.identity()));
-        val offerTasks = taskQueryService.listByIds(offerByTaskId.keySet());
+        val assignedTasks = taskQueryService.listAssigned(user);
+        val assignedTaskIds = assignedTasks.stream().map(Task::id).collect(Collectors.toSet());
 
-        val projectIds = Stream.concat(projectTasks.stream(), offerTasks.stream())
+        // 섭외는 받았으나 할당되지 않은 작업
+        val offers = offerQueryService.listByWorker(user);
+        val offerMap = offers.stream()
+                .collect(Collectors.toMap(Offer::taskId, Function.identity(), (latest, previous) -> latest));
+        val offerTaskIds = offers.stream()
+                .map(Offer::taskId)
+                .filter(it -> !assignedTaskIds.contains(it))
+                .distinct()
+                .toList();
+        val offerTasks = taskQueryService.listByIds(offerTaskIds);
+
+        // address
+        val projectIds = Stream.concat(assignedTasks.stream(), offerTasks.stream())
                 .map(Task::projectId).distinct().toList();
         val addressMap = projectFinder.addressMap(projectIds);
-        val companyMap = projectFinder.companyMap(projectIds);
 
-        val worker = workerTasks.stream().map(it -> TaskResponse.of(it, it.workerAddress())).toList();
-        val assigned = projectTasks.stream()
-                .map(it -> TaskResponse.of(it, addressMap.get(it.projectId()), companyMap.get(it.projectId()))).toList();
-        val offered = offerTasks.stream()
-                .map(it -> TaskResponse.of(it, addressMap.get(it.projectId()), companyMap.get(it.projectId()),
-                        offerByTaskId.get(it.id()))).toList();
-
-        val body = Stream.of(worker, assigned, offered)
-                .flatMap(List::stream)
+        // result
+        val worker = workerTasks.stream().map(WorkerTaskResponse::of).toList();
+        val assignee = Stream.concat(assignedTasks.stream(), offerTasks.stream())
+                .map(it -> AssigneeTaskResponse.of(it, addressMap.get(it.projectId()), offerMap.get(it.id())))
                 .toList();
+
+        val body = new TaskListResponse(worker, assignee);
         return ApiResponse.success(body);
     }
 
@@ -80,7 +85,7 @@ public class TaskController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id,
             HttpServletResponse response) {
-        val offers = offerService.listByTask(user, id);
+        val offers = offerQueryService.listByTask(user, id);
         val workerIds = offers.stream().map(Offer::workerId).distinct().toList();
         val memberMap = memberResolver.resolveMap(workerIds);
         val profileMap = profileResolver.resolveMap(workerIds);

@@ -1,7 +1,14 @@
 'use client'
 
 import { usePanelNav } from '@/hooks/usePanelNav'
-import { Button, ConfirmDialog } from '@bconnect/ui'
+import {
+  TASK_PROGRESS_LABELS,
+  TASK_STATUS_LABELS,
+  TaskProgress,
+  TaskStatus,
+  TRADE_LABELS,
+} from '@bconnect/api-client'
+import { Button, ConfirmDialog, SkillTag } from '@bconnect/ui'
 import Link from 'next/link'
 import type { PointerEvent, WheelEvent } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -10,17 +17,18 @@ import {
   BAR_TOP,
   COL_ASSIGNEE,
   COL_CATEGORY,
+  COL_LEFT_TOTAL,
+  COL_PROGRESS,
   COL_STATUS,
   DAY_WIDTH,
   HEADER_HEIGHT,
   PAST_CONTEXT_DAYS,
-  PILL_STYLES,
+  PROGRESS_PILL_STYLES,
   RIGHT_PAD_WIDTH,
   ROW_HEIGHT,
-  STATUS_LABELS,
+  STATUS_PILL_STYLES,
   STICKY_LEFT,
   taskAssignee,
-  tradesLabel,
 } from './constants'
 import {
   addDays,
@@ -32,15 +40,24 @@ import {
   toIsoDate,
 } from './date-utils'
 import { GanttBars } from './gantt-bars'
-import type { ScheduleGridProps, TaskStatus } from './types'
+import type { ScheduleGridProps, ScheduleTask } from './types'
 import { useScheduleTasks } from './use-schedule-tasks'
 
-function StatusPill({ status }: { status: TaskStatus }) {
+const PILL_CLASSES =
+  'text-m-12 inline-flex h-[26px] items-center justify-center whitespace-nowrap rounded-[4px] px-[9px]'
+
+function StatusPill({ status }: { status: ScheduleTask['status'] }) {
   return (
-    <span
-      className={`text-m-12 inline-flex h-[26px] items-center justify-center whitespace-nowrap rounded-[4px] px-[9px] ${PILL_STYLES[status]}`}
-    >
-      {STATUS_LABELS[status]}
+    <span className={`${PILL_CLASSES} ${STATUS_PILL_STYLES[status]}`}>
+      {TASK_STATUS_LABELS[status]}
+    </span>
+  )
+}
+
+function ProgressPill({ progress }: { progress: ScheduleTask['progress'] }) {
+  return (
+    <span className={`${PILL_CLASSES} ${PROGRESS_PILL_STYLES[progress]}`}>
+      {TASK_PROGRESS_LABELS[progress]}
     </span>
   )
 }
@@ -83,10 +100,7 @@ export function ScheduleGrid({ projectId, today: todayProp }: ScheduleGridProps)
   // 간트 영역이 컨테이너 잔여 폭을 항상 채우도록 우측 패드를 늘린다 (#3).
   // 콘텐츠(일자 셀)가 더 길면 기존대로 가로 스크롤.
   const daysWidth = dates.length * DAY_WIDTH
-  const padWidth = Math.max(
-    RIGHT_PAD_WIDTH,
-    containerWidth - (COL_CATEGORY + COL_STATUS + COL_ASSIGNEE) - daysWidth
-  )
+  const padWidth = Math.max(RIGHT_PAD_WIDTH, containerWidth - COL_LEFT_TOTAL - daysWidth)
   const ganttWidth = daysWidth + padWidth
 
   const didInitScroll = useRef(false)
@@ -131,7 +145,8 @@ export function ScheduleGrid({ projectId, today: todayProp }: ScheduleGridProps)
       ganttName: '',
       startDate: addDays(startDate, a),
       endDate: addDays(startDate, b),
-      status: 'not_started',
+      status: TaskStatus.NONE,
+      progress: TaskProgress.TODO,
       draft: true,
     })
     openPanel(`task/${id}`)
@@ -169,12 +184,13 @@ export function ScheduleGrid({ projectId, today: todayProp }: ScheduleGridProps)
           borderCollapse: 'separate',
           borderSpacing: 0,
           tableLayout: 'fixed',
-          width: COL_CATEGORY + COL_STATUS + COL_ASSIGNEE + ganttWidth,
+          width: COL_LEFT_TOTAL + ganttWidth,
         }}
       >
         <colgroup>
           <col style={{ width: COL_CATEGORY }} />
           <col style={{ width: COL_STATUS }} />
+          <col style={{ width: COL_PROGRESS }} />
           <col style={{ width: COL_ASSIGNEE }} />
           <col style={{ width: ganttWidth }} />
         </colgroup>
@@ -183,7 +199,7 @@ export function ScheduleGrid({ projectId, today: todayProp }: ScheduleGridProps)
           {/* 월 헤더 */}
           <tr style={{ height: HEADER_HEIGHT }}>
             <th
-              colSpan={3}
+              colSpan={4}
               className={`${stickyCell} border-b border-r border-solid border-[#e5e5e5]`}
               style={{ left: 0 }}
             />
@@ -205,9 +221,9 @@ export function ScheduleGrid({ projectId, today: todayProp }: ScheduleGridProps)
             </th>
           </tr>
 
-          {/* 공종 / 상태 / 기술자 + 일자 헤더 */}
+          {/* 공종 / 섭외 상태 / 진행 상태 / 기술자 + 일자 헤더 */}
           <tr style={{ height: HEADER_HEIGHT }}>
-            {['공종', '상태', '기술자'].map((label, i) => (
+            {['공종', '섭외 상태', '진행 상태', '기술자'].map((label, i) => (
               <th
                 key={label}
                 scope="col"
@@ -256,10 +272,14 @@ export function ScheduleGrid({ projectId, today: todayProp }: ScheduleGridProps)
             return (
               <tr key={task.id} style={{ height: ROW_HEIGHT }}>
                 <td
-                  className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle text-r-14 text-[#3d3d3d]`}
+                  className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] align-middle`}
                   style={{ left: STICKY_LEFT[0] }}
                 >
-                  {tradesLabel(task.trades)}
+                  <span className="flex items-center gap-1 overflow-hidden px-3">
+                    {task.trades.map((trade) => (
+                      <SkillTag key={trade} label={TRADE_LABELS[trade]} className="shrink-0" />
+                    ))}
+                  </span>
                 </td>
                 <td
                   className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle`}
@@ -268,8 +288,14 @@ export function ScheduleGrid({ projectId, today: todayProp }: ScheduleGridProps)
                   <StatusPill status={task.status} />
                 </td>
                 <td
-                  className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] align-middle ${assignee ? 'px-1 py-2' : 'p-2'}`}
+                  className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] text-center align-middle`}
                   style={{ left: STICKY_LEFT[2] }}
+                >
+                  <ProgressPill progress={task.progress} />
+                </td>
+                <td
+                  className={`${stickyCell} border-b border-r border-solid border-b-[#f5f5f5] border-r-[#e5e5e5] align-middle ${assignee ? 'px-1 py-2' : 'p-2'}`}
+                  style={{ left: STICKY_LEFT[3] }}
                 >
                   {assignee ? (
                     <Link
@@ -330,7 +356,7 @@ export function ScheduleGrid({ projectId, today: todayProp }: ScheduleGridProps)
                 variant="outline"
                 type="button"
                 onClick={handleCreateTask}
-                className="text-m-14 h-[33.5px] w-[103px] rounded-[6px] border-dashed border-[#c0d0ff] px-0 font-medium hover:bg-primary-50"
+                className="text-m-14 h-[33.5px] w-full rounded-[6px] border-dashed border-[#c0d0ff] px-0 font-medium hover:bg-primary-50"
               >
                 + 작업 생성
               </Button>
@@ -342,6 +368,10 @@ export function ScheduleGrid({ projectId, today: todayProp }: ScheduleGridProps)
             <td
               className={`${stickyCell} border-r border-solid border-[#e5e5e5]`}
               style={{ left: STICKY_LEFT[2] }}
+            />
+            <td
+              className={`${stickyCell} border-r border-solid border-[#e5e5e5]`}
+              style={{ left: STICKY_LEFT[3] }}
             />
             <td
               ref={createCellRef}

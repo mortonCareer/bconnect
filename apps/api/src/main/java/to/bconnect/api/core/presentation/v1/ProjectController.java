@@ -18,10 +18,10 @@ import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.TaskQueryService;
 import to.bconnect.api.core.presentation.v1.request.CreateProjectRequest;
 import to.bconnect.api.core.presentation.v1.request.UpdateProjectRequest;
+import to.bconnect.api.core.presentation.v1.response.CompanyTaskResponse;
 import to.bconnect.api.core.presentation.v1.response.MemberSummaryResponse;
 import to.bconnect.api.core.presentation.v1.response.NoteResponse;
 import to.bconnect.api.core.presentation.v1.response.ProjectResponse;
-import to.bconnect.api.core.presentation.v1.response.TaskResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
@@ -55,13 +55,14 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}/tasks")
-    public ApiResponse<List<TaskResponse>> listTasks(
+    public ApiResponse<List<CompanyTaskResponse>> listTasks(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long id) {
         val tasks = taskQueryService.listByProject(user, id);
         val address = projectService.get(user, id).address();
+
         val body = tasks.stream()
-                .map(it -> TaskResponse.of(it, address))
+                .map(it -> CompanyTaskResponse.of(it, address))
                 .toList();
         return ApiResponse.success(body);
     }

@@ -34,6 +34,6 @@ public record SendMessageRequest(
             default -> throw new CodeException(CommonExceptionCode.NOT_VALID);
         }
 
-        return new SendMessage(type, content, ids);
+        return new SendMessage(type, content, content, ids);
     }
 }

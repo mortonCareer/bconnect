@@ -1,0 +1,27 @@
+meta {
+  name: 할당 해제
+  type: http
+  seq: 11
+  tags: [
+    chain
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/tasks/{{projectTaskId}}/assignee
+  auth: inherit
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  업체가 섭외 승낙으로 배정된 기술자를 해제한다. 작업은 섭외 전(NONE)으로 돌아간다.
+  @chain
+  - 07-company-tasks/01-create-company-task
+  - 08-offers/10-accept
+}

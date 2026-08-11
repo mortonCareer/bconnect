@@ -1,0 +1,28 @@
+meta {
+  name: 섭외 단건 조회
+  type: http
+  seq: 5
+  tags: [
+    chain
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/offers/{{offerId}}
+  auth: inherit
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.id).to.be.a('number');
+    expect(res.body.data.member.id).to.be.a('number');
+    expect(res.body.data.profile.role).to.be.a('string');
+  });
+}
+
+docs {
+  @chain
+  - 08-offers/01-create
+}

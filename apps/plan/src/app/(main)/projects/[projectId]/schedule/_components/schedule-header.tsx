@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import { z } from 'zod'
-import { mapKakaoAddress } from '@bconnect/config/address'
+import { emptyAddressDraft, mapKakaoAddress } from '@bconnect/config/address'
 import type { AddressDraft } from '@bconnect/config/address'
 import { UnknownSidoError, UNKNOWN_SIDO_MESSAGE } from '@bconnect/config/errors'
 import {
@@ -104,13 +104,8 @@ function ProjectNameRow({ initialName }: { initialName: string }) {
 
 function seedAddress(street: string): AddressDraft {
   return {
-    zipcode: '',
+    ...emptyAddressDraft(),
     street,
-    state: undefined,
-    city: '',
-    detail: undefined,
-    latitude: 0,
-    longitude: 0,
   }
 }
 

@@ -9,9 +9,11 @@
     "dev": "pnpm --filter @bconnect/career --filter @bconnect/plan dev",
     "dev:career": "pnpm --filter @bconnect/career dev",
     "dev:plan": "pnpm --filter @bconnect/plan dev",
+    "dev:company": "pnpm --filter @bconnect/company dev",
     "build": "pnpm --filter @bconnect/career --filter @bconnect/plan build",
     "build:career": "pnpm --filter @bconnect/career build",
     "build:plan": "pnpm --filter @bconnect/plan build",
+    "build:company": "pnpm --filter @bconnect/company build",
     "lint": "pnpm --filter @bconnect/career --filter @bconnect/plan --filter @bconnect/ui --filter @bconnect/push lint",
     "lint:career": "pnpm --filter @bconnect/career lint",
     "lint:plan": "pnpm --filter @bconnect/plan lint",
@@ -54,6 +56,7 @@
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{json,md,css}": "prettier --write"
+    "*.{json,md,css}": "prettier --write",
+    "*.tf": "terraform fmt"
   }
 }

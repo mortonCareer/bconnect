@@ -15,7 +15,6 @@ import to.bconnect.api.notification.domain.push.PushNotification;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.chat.ChatType;
 import to.bconnect.api.storage.notification.NotificationReferenceType;
-import to.bconnect.api.storage.notification.NotificationType;
 
 import java.util.HashSet;
 
@@ -53,11 +52,10 @@ public class MessageSocketService {
                 .map(it -> new PushNotification(
                         null,
                         it,
-                        NotificationType.CHAT_MESSAGE,
                         senderName,
+                        command.preview(),
                         NotificationReferenceType.CHAT_ROOM,
-                        message.chatId(),
-                        message.content()))
+                        message.chatId()))
                 .toList();
 
         notificationPushService.push(notifications);

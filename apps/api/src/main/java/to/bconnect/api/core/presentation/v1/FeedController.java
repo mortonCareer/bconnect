@@ -71,14 +71,21 @@ public class FeedController {
                 .filter(it -> it.type() == TaskType.PROJECT)
                 .map(Task::projectId).distinct().toList();
         val addressMap = projectFinder.addressMap(projectIds);
+        val companyMap = projectFinder.companyMap(projectIds);
 
         val content = posts.stream()
                 .map(it -> {
                     val member = memberMap.get(it.memberId());
                     val task = it.taskId() == null ? null : taskMap.get(it.taskId());
-                    val address = task == null ? null : task.type() == TaskType.WORKER
+                    val isWorkerTask = task != null && task.type() == TaskType.WORKER;
+                    val address = task == null ? null : isWorkerTask
                             ? task.workerAddress()
                             : addressMap.get(task.projectId());
+                    val company = task == null ? null : isWorkerTask
+                            ? task.workerCompany()
+                            : companyMap.containsKey(task.projectId())
+                            ? companyMap.get(task.projectId()).name()
+                            : null;
                     val attachments = attachmentMap.getOrDefault(it.id(), List.of());
                     val urlMap = attachmentUrlService.parseUrlMap(attachments, ImageSize.MEDIUM);
                     return FeedResponse.of(
@@ -86,6 +93,7 @@ public class FeedController {
                             member,
                             profileMap.get(it.memberId()),
                             task,
+                            company,
                             address,
                             attachments,
                             urlMap,
@@ -117,14 +125,22 @@ public class FeedController {
                 ? List.of(task.projectId())
                 : List.<Long>of();
         val addressMap = projectFinder.addressMap(projectIds);
-        val address = task == null ? null : task.type() == TaskType.WORKER
+        val companyMap = projectFinder.companyMap(projectIds);
+        val isWorkerTask = task != null && task.type() == TaskType.WORKER;
+        val address = task == null ? null : isWorkerTask
                 ? task.workerAddress()
                 : addressMap.get(task.projectId());
+        val company = task == null ? null : isWorkerTask
+                ? task.workerCompany()
+                : companyMap.containsKey(task.projectId())
+                ? companyMap.get(task.projectId()).name()
+                : null;
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
                 .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
 
-        return ApiResponse.success(FeedResponse.of(post, member, profile, task, address, attachments, urlMap, picture));
+        return ApiResponse.success(
+                FeedResponse.of(post, member, profile, task, company, address, attachments, urlMap, picture));
     }
 }

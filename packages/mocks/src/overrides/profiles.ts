@@ -124,6 +124,7 @@ const profileOf = (seed: ProfileSeed): Profile => ({
   about: seed.about,
   address: {
     zipcode: '00000',
+    bcode: '0000000000',
     city: seed.city,
     state: seed.state,
     street: '○○로 12',

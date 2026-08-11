@@ -209,4 +209,3 @@ const [keyword, setKeyword] = useQueryState('q')
 ## 참고
 
 - [ADR 0013 — 프론트엔드 폼 처리 표준](../explanation/adr/0013-form-handling-standard.md) — 왜 이렇게 정했나
-- [.claude/rules/frontend.md](../../.claude/rules/frontend.md) — 강제되는 폼 룰 요약

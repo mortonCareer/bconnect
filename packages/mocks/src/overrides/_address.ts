@@ -6,10 +6,12 @@ export function addressOf(
   city: string,
   street = '',
   detail?: string,
-  zipcode = '00000'
+  zipcode = '00000',
+  bcode = '0000000000'
 ): Address {
   return {
     zipcode,
+    bcode,
     state,
     city,
     street,

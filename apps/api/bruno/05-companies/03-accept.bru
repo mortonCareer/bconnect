@@ -1,0 +1,28 @@
+meta {
+  name: 업체 승인 (ADMIN)
+  type: http
+  seq: 3
+  tags: [
+    admin
+    seed
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/companies/{{companyId}}/accept
+  auth: inherit
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}
+
+docs {
+  어드민이 업체가 제출한 사업자등록증을 검토한 다음 승인한다. 승인 시 PLAN 권한이 부여된다.
+
+  @chain
+  - 05-companies/01-create
+}

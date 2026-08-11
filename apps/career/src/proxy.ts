@@ -1,5 +1,4 @@
 import { AUTH_HINT_COOKIE } from '@bconnect/api-client/auth-hint'
-import { isApiMockingEnabled } from '@bconnect/config/env'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -21,13 +20,11 @@ export function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  if (!isApiMockingEnabled()) {
-    const authHint = request.cookies.get(AUTH_HINT_COOKIE)
-    if (!authHint) {
-      const loginUrl = new URL('/signup/auth', request.url)
-      loginUrl.searchParams.set('redirect', pathname)
-      return NextResponse.redirect(loginUrl)
-    }
+  const authHint = request.cookies.get(AUTH_HINT_COOKIE)
+  if (!authHint) {
+    const loginUrl = new URL('/signup/auth', request.url)
+    loginUrl.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
   return NextResponse.next()

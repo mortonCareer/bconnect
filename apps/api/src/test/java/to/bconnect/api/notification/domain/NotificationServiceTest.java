@@ -29,7 +29,7 @@ class NotificationServiceTest {
         val chatId = 100L;
         val senderId = 100L;
         val command = NotificationFactory.command(SEED_MEMBER_ID, senderId,
-                NotificationType.CHAT_MESSAGE, NotificationReferenceType.CHAT_ROOM, chatId);
+                NotificationType.OFFER_ACCEPTED, NotificationReferenceType.CHAT_ROOM, chatId);
 
         // when
         val created = notificationService.create(List.of(command));
