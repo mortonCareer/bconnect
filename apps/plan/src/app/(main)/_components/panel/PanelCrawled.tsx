@@ -133,6 +133,14 @@ export function PanelCrawled({ crawledId }: { crawledId: number }) {
                   posts.map((post, i) => {
                     // 회원 WorkCard 레이아웃 준용 — 시공 사진 캐러셀(no-referrer) + 제목/본문
                     const images = (post.images ?? []).slice(0, 10)
+                    const body = (
+                      <>
+                        {post.title && <p className="text-m-16 text-gray-900">{post.title}</p>}
+                        {post.content && (
+                          <p className="line-clamp-2 text-r-14 text-gray-500">{post.content}</p>
+                        )}
+                      </>
+                    )
                     return (
                       <div key={post.id ?? i} className="flex flex-col">
                         {images.length > 0 && (
@@ -144,12 +152,18 @@ export function PanelCrawled({ crawledId }: { crawledId: number }) {
                             />
                           </div>
                         )}
-                        <div className="flex flex-col gap-1 px-4 pt-3 pb-4">
-                          {post.title && <p className="text-m-16 text-gray-900">{post.title}</p>}
-                          {post.content && (
-                            <p className="line-clamp-2 text-r-14 text-gray-500">{post.content}</p>
-                          )}
-                        </div>
+                        {post.sourceUrl ? (
+                          <a
+                            href={post.sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex cursor-pointer flex-col gap-1 px-4 pt-3 pb-4 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary active:bg-gray-100"
+                          >
+                            {body}
+                          </a>
+                        ) : (
+                          <div className="flex flex-col gap-1 px-4 pt-3 pb-4">{body}</div>
+                        )}
                       </div>
                     )
                   })
