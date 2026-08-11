@@ -1,15 +1,27 @@
 package to.bconnect.api.core.presentation.v1;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
+import to.bconnect.api.attachment.domain.AttachmentUrlService;
+import to.bconnect.api.attachment.domain.ImageSize;
+import to.bconnect.api.attachment.domain.SignedCookieIssuer;
 import to.bconnect.api.common.response.ApiResponse;
+import to.bconnect.api.core.domain.member.MemberResolver;
+import to.bconnect.api.core.domain.offer.OfferQueryService;
 import to.bconnect.api.core.domain.offer.OfferService;
+import to.bconnect.api.core.domain.profile.ProfileResolver;
 import to.bconnect.api.core.presentation.v1.request.CreateOfferRequest;
 import to.bconnect.api.core.presentation.v1.request.ReorderOfferRequest;
+import to.bconnect.api.core.presentation.v1.response.OfferResponse;
 import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.storage.attachment.AttachmentContext;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 
 @RestController
 @RequestMapping("/api/v1/offers")
@@ -17,6 +29,28 @@ import to.bconnect.api.security.AuthUser;
 public class OfferController {
 
     private final OfferService offerService;
+    private final OfferQueryService offerQueryService;
+    private final MemberResolver memberResolver;
+    private final ProfileResolver profileResolver;
+    private final AttachmentUrlService attachmentUrlService;
+    private final SignedCookieIssuer signedCookieIssuer;
+
+    @GetMapping("/{id}")
+    public ApiResponse<OfferResponse> get(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id,
+            HttpServletResponse response) {
+        val offer = offerQueryService.get(user, id);
+        val member = memberResolver.get(offer.workerId());
+        val profile = profileResolver.get(offer.workerId());
+        val picture = attachmentUrlService.get(AttachmentReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+
+        val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
+        signedCookieIssuer.issue(scope)
+                .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
+
+        return ApiResponse.success(OfferResponse.of(offer, member, profile, picture));
+    }
 
     @PostMapping
     public ApiResponse<Long> create(

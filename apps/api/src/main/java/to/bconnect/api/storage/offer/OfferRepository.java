@@ -19,16 +19,14 @@ public interface OfferRepository extends JpaRepository<OfferEntity, Long> {
 
     List<OfferEntity> findAllByTaskIdAndStatus(Long taskId, OfferStatus status);
 
-    List<OfferEntity> findAllByTaskIdInAndStatus(Collection<Long> taskIds, OfferStatus status);
-
     Optional<OfferEntity> findFirstByTaskIdAndStatusAndSeqGreaterThanOrderBySeqAsc(
             Long taskId, OfferStatus status, int seq);
 
     Optional<OfferEntity> findFirstByTaskIdAndStatusOrderBySeqDesc(Long taskId, OfferStatus status);
 
-    List<OfferEntity> findAllByTaskIdAndStatusInOrderBySeqAsc(Long taskId, Collection<OfferStatus> statuses);
+    List<OfferEntity> findAllByTaskIdOrderBySeqAsc(Long taskId);
 
-    List<OfferEntity> findAllByWorkerIdAndStatusOrderByIdDesc(Long workerId, OfferStatus status);
+    List<OfferEntity> findAllByWorkerIdAndStatusInOrderByIdDesc(Long workerId, Collection<OfferStatus> statuses);
 
     List<OfferEntity> findAllByWorkerId(Long workerId);
 
