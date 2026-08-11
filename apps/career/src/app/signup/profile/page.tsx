@@ -22,7 +22,6 @@ import {
 } from '@bconnect/api-client'
 import { isCompleteAddress } from '@bconnect/config/address'
 import { CONSENT_DEFAULT, CONSENT_ITEMS } from '@bconnect/config/consent'
-import { BIRTH_PLACEHOLDER } from '@bconnect/config/signup'
 import {
   AgreementField,
   Form,
@@ -113,10 +112,10 @@ export default function SignupProfilePage() {
             requireRegisterAccessToken(
               await registerMemberMutation.mutateAsync({
                 data: {
-                  // TODO(#1177): 생년월일 입력 화면이 생기면 폼 입력으로 교체
-                  birth: BIRTH_PLACEHOLDER,
+                  birth: formData.birth,
                   username: formData.username,
                   name: formData.name,
+                  marketingConsent: data.agreements.marketing,
                 },
               })
             )
@@ -132,8 +131,8 @@ export default function SignupProfilePage() {
             router.replace('/signup/auth')
             return
           }
-          // 사용자명 중복은 이 화면에 입력칸이 없다 — 안내와 함께 입력 단계로 되돌린다.
-          if (hasErrorCode(err, ERROR_CODE.MEMBER.DUPLICATE_USERNAME)) {
+          // 사용자명 중복과 최소 연령 미달은 이 화면에 입력칸이 없다 — 안내와 함께 입력 단계로 되돌린다.
+          if (hasErrorCode(err, ERROR_CODE.MEMBER.DUPLICATE_USERNAME, ERROR_CODE.MEMBER.UNDERAGE)) {
             setRegisterError(err.message)
             router.replace('/signup/username')
             return

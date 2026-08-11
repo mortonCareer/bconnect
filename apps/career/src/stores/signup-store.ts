@@ -5,6 +5,7 @@ interface SignupFormData {
   username: string
   signupToken: string
   name: string
+  birth: string
   fields: string[]
   primaryField: string | null
   experience: number | null
@@ -19,6 +20,7 @@ interface SignupState {
   registerError: string | null
   setUsername: (username: string) => void
   setName: (name: string) => void
+  setBirth: (birth: string) => void
   setSignupToken: (token: string) => void
   setProfile: (profile: Partial<Omit<SignupFormData, 'username' | 'signupToken'>>) => void
   setRegisterError: (message: string | null) => void
@@ -29,6 +31,7 @@ const initialFormData: SignupFormData = {
   username: '',
   signupToken: '',
   name: '',
+  birth: '',
   fields: [],
   primaryField: null,
   experience: null,
@@ -48,6 +51,11 @@ export const useSignupStore = create<SignupState>()(
       setName: (name) =>
         set((state) => ({
           formData: { ...state.formData, name },
+        })),
+
+      setBirth: (birth) =>
+        set((state) => ({
+          formData: { ...state.formData, birth },
         })),
 
       setSignupToken: (signupToken) =>

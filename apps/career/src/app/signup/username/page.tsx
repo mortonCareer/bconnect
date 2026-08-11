@@ -6,6 +6,7 @@
 
 import { useSignupStore } from '@/stores/signup-store'
 import { checkUsername } from '@bconnect/api-client'
+import { formatIsoDateInput } from '@bconnect/config/date'
 import { formatUsername } from '@bconnect/config/username'
 import {
   Form,
@@ -23,13 +24,15 @@ import { usernameSchema, type UsernameFormData } from './schema'
 
 export default function SignupUsernamePage() {
   const router = useRouter()
-  const { formData, setUsername, setName, registerError, setRegisterError } = useSignupStore()
+  const { formData, setUsername, setName, setBirth, registerError, setRegisterError } =
+    useSignupStore()
 
   const form = useForm<UsernameFormData>({
     resolver: zodResolver(usernameSchema),
     mode: 'onTouched',
     defaultValues: {
       name: formData.name,
+      birth: formData.birth,
       username: formData.username,
     },
   })
@@ -47,6 +50,7 @@ export default function SignupUsernamePage() {
         return
       }
       setName(data.name)
+      setBirth(data.birth)
       setUsername(data.username)
       router.push('/signup/profile')
     } catch (err) {
@@ -78,6 +82,19 @@ export default function SignupUsernamePage() {
               label="이름"
               required
               placeholder="이름을 입력해주세요"
+            />
+
+            {/* Birth Input */}
+            <TextField
+              control={control}
+              name="birth"
+              type="text"
+              autoComplete="bday"
+              inputMode="numeric"
+              label="생년월일"
+              required
+              placeholder="0000-00-00"
+              transform={formatIsoDateInput}
             />
 
             {/* Username Input */}

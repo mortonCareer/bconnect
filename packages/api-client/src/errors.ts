@@ -15,6 +15,7 @@ export const ERROR_CODE = {
   MEMBER: {
     DUPLICATE_USERNAME: 'M001',
     DUPLICATE_PHONE: 'M002',
+    UNDERAGE: 'M004',
   },
 } as const
 

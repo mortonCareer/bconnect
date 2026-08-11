@@ -7,6 +7,7 @@ interface SignupFormData {
   signupToken: string
   username: string
   name: string
+  birth: string
   companyName: string
   bizNumber: string
 }
@@ -20,7 +21,7 @@ interface SignupState {
    */
   registerError: string | null
   setSignupToken: (token: string) => void
-  setMember: (data: { username: string; name: string }) => void
+  setMember: (data: { username: string; name: string; birth: string }) => void
   setCorp: (data: { companyName: string; bizNumber: string }) => void
   setStep: (step: SignupStep) => void
   setRegisterError: (message: string | null) => void
@@ -31,6 +32,7 @@ const initialFormData: SignupFormData = {
   signupToken: '',
   username: '',
   name: '',
+  birth: '',
   companyName: '',
   bizNumber: '',
 }
@@ -47,9 +49,9 @@ export const useSignupStore = create<SignupState>()(
           formData: { ...state.formData, signupToken },
         })),
 
-      setMember: ({ username, name }) =>
+      setMember: ({ username, name, birth }) =>
         set((state) => ({
-          formData: { ...state.formData, username, name },
+          formData: { ...state.formData, username, name, birth },
         })),
 
       setCorp: ({ companyName, bizNumber }) =>
