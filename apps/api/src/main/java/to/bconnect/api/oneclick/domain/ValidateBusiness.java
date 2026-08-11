@@ -2,8 +2,8 @@ package to.bconnect.api.oneclick.domain;
 
 import java.time.LocalDate;
 
-// 원클릭 조회 커맨드
-public record LookupOneClick(
+// 사업자 진위확인 커맨드
+public record ValidateBusiness(
         String brn,
         String ownerName,
         LocalDate openedAt

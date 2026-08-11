@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.oneclick.OneClickUtils;
 import to.bconnect.api.oneclick.domain.kiscon.Disposition;
 import to.bconnect.api.oneclick.domain.kiscon.License;
-import to.bconnect.api.oneclick.storage.KisconAdminPenaltyEntity;
 import to.bconnect.api.oneclick.storage.KisconAdminPenaltyRepository;
 import to.bconnect.api.oneclick.storage.KisconRegistrationEntity;
 import to.bconnect.api.oneclick.storage.KisconRegistrationRepository;
@@ -27,11 +26,8 @@ public class KisconLicenseFinder {
     private final KisconAdminPenaltyRepository kisconAdminPenaltyRepository;
 
     @Transactional(readOnly = true)
-    public List<License> listLicenses(String brn, String companyName, String ownerName) {
-        return OneClickUtils.lookup(
-                        brn, kisconRegistrationRepository::findAllByNcrMasterNum,
-                        companyName, kisconRegistrationRepository::findAllByNormalizedCompanyName,
-                        KisconRegistrationEntity::getNcrGsMaster, ownerName)
+    public List<License> listLicenses(String brn) {
+        return kisconRegistrationRepository.findAllByNcrMasterNum(brn)
                 .stream()
                 .filter(it -> it.getNcrItemName() != null)
                 .collect(Collectors.groupingBy(
@@ -61,11 +57,8 @@ public class KisconLicenseFinder {
     }
 
     @Transactional(readOnly = true)
-    public List<Disposition> listDispositions(String brn, String companyName, String ownerName) {
-        return OneClickUtils.lookup(
-                        brn, kisconAdminPenaltyRepository::findAllByNcrMasterNum,
-                        companyName, kisconAdminPenaltyRepository::findAllByNormalizedCompanyName,
-                        KisconAdminPenaltyEntity::getNcrAdmiMaster, ownerName)
+    public List<Disposition> listDispositions(String brn) {
+        return kisconAdminPenaltyRepository.findAllByNcrMasterNum(brn)
                 .stream()
                 .filter(it -> !WITHDRAWN.equals(it.getNcrGsFlag()))
                 .map(it -> new Disposition(

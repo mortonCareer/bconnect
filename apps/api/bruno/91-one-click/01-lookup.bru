@@ -12,9 +12,7 @@ post {
 
 body:json {
   {
-    "brn": "3017907601",
-    "ownerName": "이송목",
-    "openedAt": "2026-05-31"
+    "brn": "3017907601"
   }
 }
 
@@ -26,4 +24,3 @@ tests {
     expect(res.body.data.electricalLicense.verdict).to.be.a('string');
   });
 }
-

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.oneclick.OneClickUtils;
 import to.bconnect.api.oneclick.domain.kiscon.SubcontractRestriction;
-import to.bconnect.api.oneclick.storage.KisconSubconLimitEntity;
 import to.bconnect.api.oneclick.storage.KisconSubconLimitRepository;
 
 import java.util.List;
@@ -18,11 +17,8 @@ public class KisconSubconFinder {
     private final KisconSubconLimitRepository kisconSubconLimitRepository;
 
     @Transactional(readOnly = true)
-    public List<SubcontractRestriction> list(String brn, String companyName, String ownerName) {
-        return OneClickUtils.lookup(
-                        brn, kisconSubconLimitRepository::findAllByBizRegNo,
-                        companyName, kisconSubconLimitRepository::findAllByNormalizedCompanyName,
-                        KisconSubconLimitEntity::getRepresentative, ownerName)
+    public List<SubcontractRestriction> list(String brn) {
+        return kisconSubconLimitRepository.findAllByBizRegNo(brn)
                 .stream()
                 .map(it -> new SubcontractRestriction(
                         it.getSeqNo(),

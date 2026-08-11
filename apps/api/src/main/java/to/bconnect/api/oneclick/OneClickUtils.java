@@ -36,17 +36,18 @@ public final class OneClickUtils {
     // 상호 오른쪽 끝 괄호 (등기예규 제5조 제1항)
     private static final Pattern TRAILING_PAREN = Pattern.compile("\\s*[(（][^(（)）]*[)）]\\s*$");
 
+    private static final Pattern ALPHANUMERIC = Pattern.compile("[\\p{L}\\p{N}]");
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
     private static final BigDecimal HUNDRED_MILLION = BigDecimal.valueOf(100_000_000L);
     private static final BigDecimal THOUSAND = BigDecimal.valueOf(1_000L);
 
     // 원클릭 조회 입력값(사업자등록번호·상호·대표자명) 단계 skip 판단
     public static boolean isBlank(String value) {
-        return value == null || value.isBlank();
+        return value == null || !ALPHANUMERIC.matcher(value).find();
     }
 
     // 법인격 표기와 로마자 등 병기를 제거하고 공백을 없앤다 (등기예규 제6조 제1항)
-    // packages/data-jobs 의 normalizeCompanyName 과 동일 규칙이어야 적재 키와 조회 키가 맞는다
+    // packages/data-jobs 의 normalizeCompanyName 과 동일 규칙
     public static String normalize(String name) {
         var result = LEGAL_FORM_ABBR.matcher(name).replaceAll("");
 
@@ -99,19 +100,6 @@ public final class OneClickUtils {
                 .filter(it -> !isBlank(it))
                 .findFirst()
                 .orElse(null);
-    }
-
-    // 조회 순서 4단계. 사업자등록번호 필드가 있는 소스
-    public static <T> List<T> lookup(
-            String brn, Function<String, List<T>> byBizRegNo,
-            String companyName, Function<String, List<T>> byCompanyName,
-            Function<T, String> representativeOf, String ownerName) {
-        if (!isBlank(brn)) {
-            val matched = byBizRegNo.apply(brn);
-            if (!matched.isEmpty())
-                return matched;
-        }
-        return lookup(companyName, byCompanyName, representativeOf, ownerName);
     }
 
     // 조회 순서 4단계. 사업자등록번호 필드가 없는 소스

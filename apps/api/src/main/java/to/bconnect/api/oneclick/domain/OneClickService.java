@@ -11,13 +11,7 @@ import to.bconnect.api.oneclick.domain.ecic.ElectricalLicenseResult;
 import to.bconnect.api.oneclick.domain.feia.FireLicenseResult;
 import to.bconnect.api.oneclick.domain.kcomwel.Insurance;
 import to.bconnect.api.oneclick.domain.kcomwel.InsuranceResult;
-import to.bconnect.api.oneclick.domain.kiscon.ConstructionBusinessType;
-import to.bconnect.api.oneclick.domain.kiscon.Disposition;
-import to.bconnect.api.oneclick.domain.kiscon.HabitualArrearsResult;
-import to.bconnect.api.oneclick.domain.kiscon.License;
-import to.bconnect.api.oneclick.domain.kiscon.LicenseResult;
-import to.bconnect.api.oneclick.domain.kiscon.SubcontractRestriction;
-import to.bconnect.api.oneclick.domain.kiscon.SubcontractRestrictionResult;
+import to.bconnect.api.oneclick.domain.kiscon.*;
 import to.bconnect.api.oneclick.domain.moel.WageDefaultResult;
 import to.bconnect.api.oneclick.domain.nts.BusinessStatusResult;
 import to.bconnect.api.oneclick.domain.nts.BusinessValidation;
@@ -53,34 +47,23 @@ public class OneClickService {
     private final EcicElectricalLicenseFinder ecicElectricalLicenseFinder;
     private final MoelWageDefaultFinder wageDefaultFinder;
 
-    public OneClickResult lookup(AuthUser user, LookupOneClick command) {
-        val validation = validate(command);
-        if (!validation.valid())
-            throw new CodeException(OneClickExceptionCode.VALIDATION_FAILED);
-
-        val result = resolve(command);
-
-        if (user != null) {
-            // TODO(#892): 로그인 사용자 인증뱃지 발급 연동 (CredentialIssuer)
-            log.info("one-click credential issuance pending. memberId={}", user.id());
-        }
-
-        return result;
-    }
-
-    private BusinessValidation validate(LookupOneClick command) {
+    public void validate(AuthUser user, ValidateBusiness command) {
+        BusinessValidation validation;
         try {
-            return businessValidationResolver.resolve(command.brn(), command.ownerName(), command.openedAt());
+            validation = businessValidationResolver.resolve(command.brn(), command.ownerName(), command.openedAt());
         } catch (RuntimeException e) {
             log.warn("business validation call failed. brn={}", command.brn(), e);
             throw new CodeException(OneClickExceptionCode.SERVICE_UNAVAILABLE);
         }
+
+        if (!validation.valid())
+            throw new CodeException(OneClickExceptionCode.VALIDATION_FAILED);
+
+        // TODO(#892): 인증뱃지 발급 연동 (CredentialIssuer)
+        log.info("one-click credential issuance pending. memberId={}", user.id());
     }
 
-    private OneClickResult resolve(LookupOneClick command) {
-        val brn = command.brn();
-        val ownerName = command.ownerName();
-
+    public OneClickResult lookup(String brn) {
         BusinessStatusResult status;
         try {
             status = BusinessStatusResult.of(businessStatusResolver.resolve(brn));
@@ -96,15 +79,13 @@ public class OneClickService {
             log.warn("insurance lookup failed. brn={}", brn, e);
             insurance = Insurance.empty();
         }
-        val insuredName = insurance.saeopjangNm();
-
-        var licenses = List.<License>of();
-        var dispositions = List.<Disposition>of();
+        List<License> licenses = List.of();
+        List<Disposition> dispositions = List.of();
         LicenseResult general;
         LicenseResult specialty;
         try {
-            licenses = licenseFinder.listLicenses(brn, insuredName, ownerName);
-            dispositions = licenseFinder.listDispositions(brn, insuredName, ownerName);
+            licenses = licenseFinder.listLicenses(brn);
+            dispositions = licenseFinder.listDispositions(brn);
             general = LicenseResult.of(ConstructionBusinessType.GENERAL, licenses, dispositions);
             specialty = LicenseResult.of(ConstructionBusinessType.SPECIALTY, licenses, dispositions);
         } catch (RuntimeException e) {
@@ -113,17 +94,26 @@ public class OneClickService {
             specialty = LicenseResult.error();
         }
 
-        var restrictions = List.<SubcontractRestriction>of();
+        List<SubcontractRestriction> restrictions = List.of();
         SubcontractRestrictionResult subcontractRestriction;
         try {
-            restrictions = kisconSubconFinder.list(brn, insuredName, ownerName);
+            restrictions = kisconSubconFinder.list(brn);
             subcontractRestriction = SubcontractRestrictionResult.of(restrictions);
         } catch (RuntimeException e) {
             log.warn("subcontract restriction lookup failed. brn={}", brn, e);
             subcontractRestriction = SubcontractRestrictionResult.error();
         }
 
-        val companyName = companyName(insuredName, licenses, dispositions, restrictions);
+        val companyName = firstNonBlank(
+                OneClickUtils.firstName(licenses, License::ncrGsKname),
+                insurance.saeopjangNm(),
+                OneClickUtils.firstName(dispositions, Disposition::ncrAdmiKname),
+                OneClickUtils.firstName(restrictions, SubcontractRestriction::companyName));
+        val ownerName = firstNonBlank(
+                OneClickUtils.firstName(licenses, License::ncrGsMaster),
+                OneClickUtils.firstName(dispositions, Disposition::ncrAdmiMaster),
+                OneClickUtils.firstName(restrictions, SubcontractRestriction::representative));
+
         if (OneClickUtils.isBlank(companyName)) {
             log.info("company name unresolved. name based lookup skipped. brn={}", brn);
             return new OneClickResult(
@@ -186,16 +176,9 @@ public class OneClickService {
         );
     }
 
-    // 사업자등록번호 필드를 함께 가지는 소스에서 이름 기반 조회에 쓸 상호 추출
-    private static String companyName(String insuredName,
-                                      List<License> licenses,
-                                      List<Disposition> dispositions,
-                                      List<SubcontractRestriction> restrictions) {
-        return Stream.of(
-                        insuredName,
-                        OneClickUtils.firstName(licenses, License::ncrGsKname),
-                        OneClickUtils.firstName(dispositions, Disposition::ncrAdmiKname),
-                        OneClickUtils.firstName(restrictions, SubcontractRestriction::companyName))
+    // 사업자등록번호 필드를 함께 가지는 소스에서 이름 기반 조회에 쓸 상호·대표자명 추출
+    private static String firstNonBlank(String... names) {
+        return Stream.of(names)
                 .filter(it -> !OneClickUtils.isBlank(it))
                 .findFirst()
                 .orElse(null);

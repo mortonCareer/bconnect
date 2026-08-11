@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import to.bconnect.api.common.response.ApiResponse;
 import to.bconnect.api.oneclick.domain.OneClickService;
 import to.bconnect.api.oneclick.presentation.v1.request.OneClickRequest;
+import to.bconnect.api.oneclick.presentation.v1.request.ValidateBusinessRequest;
 import to.bconnect.api.oneclick.presentation.v1.response.OneClickResponse;
 import to.bconnect.api.security.AuthUser;
 
@@ -23,10 +24,16 @@ public class OneClickController {
     private final OneClickService oneClickService;
 
     @PostMapping
-    public ApiResponse<OneClickResponse> lookup(
-            @AuthenticationPrincipal AuthUser user,
-            @RequestBody @Valid OneClickRequest request) {
-        val result = oneClickService.lookup(user, request.toCommand());
+    public ApiResponse<OneClickResponse> lookup(@RequestBody @Valid OneClickRequest request) {
+        val result = oneClickService.lookup(request.brn());
         return ApiResponse.success(OneClickResponse.of(result));
+    }
+
+    @PostMapping("/validation")
+    public ApiResponse<Void> validate(
+            @AuthenticationPrincipal AuthUser user,
+            @RequestBody @Valid ValidateBusinessRequest request) {
+        oneClickService.validate(user, request.toCommand());
+        return ApiResponse.success(null);
     }
 }
