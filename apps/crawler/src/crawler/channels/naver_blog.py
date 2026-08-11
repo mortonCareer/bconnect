@@ -160,6 +160,22 @@ def _extract_post_content_url(blog_url: str) -> str | None:
     return None
 
 
+def _post_log_no(url: str) -> str | None:
+    """블로그 글 URL에서 글 번호(logNo)를 뽑는다.
+
+    ``?fromRss=true`` 같은 꾸밈이나 URL 형식 차이를 무시하고 같은 글인지 판별하는 키.
+    ``blog.naver.com/<id>/<logNo>`` 와 ``PostView.naver?logNo=<logNo>`` 두 형태를 모두 처리한다.
+    """
+    parsed = urlparse(url)
+    log_no = parse_qs(parsed.query).get("logNo")
+    if log_no:
+        return log_no[0]
+    parts = parsed.path.strip("/").split("/")
+    if len(parts) >= 2 and parts[1].isdigit():
+        return parts[1]
+    return None
+
+
 # 글당 본문 이미지 수집 상한
 IMAGES_PER_POST = 5
 # 블로거당 시공 사례 글 수집 상한 (검색 글 1 + RSS 최근 글)
@@ -603,7 +619,15 @@ async def explore_blogger(blog_url: str) -> dict:
 
     # 4. 최근 글 수집 — 시공 사례(posts) + 연락처 폴백 겸용
     recent_urls = await fetch_blogger_posts(blog_id, count=20)
-    recent_urls = [u for u in recent_urls if u != blog_url]
+    seen_log_nos = {_post_log_no(blog_url)}
+    deduped_urls = []
+    for u in recent_urls:
+        log_no = _post_log_no(u)
+        if log_no is not None and log_no in seen_log_nos:
+            continue
+        seen_log_nos.add(log_no)
+        deduped_urls.append(u)
+    recent_urls = deduped_urls
     fetched = await asyncio.gather(*(_safe_fetch(u) for u in recent_urls[: POSTS_PER_MEMBER - 1]))
     collected = [(blog_url, main_post)] + [(u, p) for u, p in fetched if p is not None]
 
