@@ -1,4 +1,4 @@
-import { TaskStatus, TaskType } from '@bconnect/api-client'
+import { TaskType } from '@bconnect/api-client'
 import type { Task } from '@bconnect/api-client'
 import type { CalendarTask } from './types'
 
@@ -24,12 +24,13 @@ export function toCalendarTask(task: Task): CalendarTask | null {
     start,
     end,
     colorIndex: id,
-    isProposed: task.offer != null || task.status === TaskStatus.OFFERED,
+    status: task.status,
     progress: task.progress,
     canManage: isWorkerTask,
     company: task.workerCompany ?? undefined,
     address: task.address ?? undefined,
     trades: task.trades ?? [],
+    requirement: task.projectRequirement ?? '',
     memo,
     raw: task,
   }

@@ -1,7 +1,7 @@
 'use client'
 
 import {
-  TASK_PROGRESS_LABELS,
+  TASK_STATUS_LABELS,
   Trade,
   TRADE_LABELS,
   TRADE_LIST,
@@ -12,9 +12,10 @@ import { addressField, isCompleteAddress } from '@bconnect/config/address'
 import {
   ConfirmDialog,
   DateRangeField,
-  FilterChip,
   Form,
+  InfoPopover,
   MoreVerticalIcon,
+  SkillTag,
   TagSelectField,
   TextField,
   TextareaField,
@@ -147,13 +148,14 @@ export function TaskDetailCard({ task, selectedDay, selectedMonth }: TaskDetailC
     <div className="px-4 pb-6 pt-5">
       <div className="flex items-start justify-between gap-2">
         <h2 className="text-sb-16 text-gray-900">{task.title}</h2>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="rounded-full border border-gray-200 px-2 py-0.5 text-r-12 text-gray-500">
-            {TASK_PROGRESS_LABELS[task.progress]}
-          </span>
-          {task.isProposed && (
-            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-r-12 text-gray-500">
-              제안됨
+        <div className="flex shrink-0 items-center gap-1">
+          {!task.canManage && (
+            <span className="flex items-center gap-0.5 rounded bg-gray-100 px-2 py-1 text-r-12 text-gray-500">
+              {TASK_STATUS_LABELS[task.status]}
+              <InfoPopover label="섭외 상태 설명">
+                업체가 이 작업에 함께할 기술자를 구하는 단계예요. 모집 전 → 모집 중 → 섭외 중 →
+                섭외됨 순으로 바뀌어요.
+              </InfoPopover>
             </span>
           )}
           {mode === 'view' ? (
@@ -200,10 +202,11 @@ export function TaskDetailCard({ task, selectedDay, selectedMonth }: TaskDetailC
           <Row label="공종">
             <span className="flex flex-wrap gap-1.5">
               {task.trades.map((t) => (
-                <FilterChip key={t} label={TRADE_LABELS[t]} />
+                <SkillTag key={t} label={TRADE_LABELS[t]} />
               ))}
             </span>
           </Row>
+          {task.requirement && <Row label="요청사항">{task.requirement}</Row>}
         </div>
       ) : (
         <Form {...form}>

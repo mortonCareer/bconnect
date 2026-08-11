@@ -1,4 +1,4 @@
-import type { Address, Task, TaskProgress, Trade } from '@bconnect/api-client'
+import type { Address, Task, TaskProgress, TaskStatus, Trade } from '@bconnect/api-client'
 
 /** API Task → 캘린더 뷰모델. */
 export interface CalendarTask {
@@ -9,15 +9,17 @@ export interface CalendarTask {
   end: string
   /** 색 팔레트 인덱스 (id 기반 안정적). */
   colorIndex: number
-  /** 업체 제안작업. offer/status 기반으로 파생. */
-  isProposed: boolean
-  /** 진행 상태 — 상세/수정 헤더에 표시. 값 변경은 아직 화면에 없다(#1160). */
+  /** 섭외 상태 — 업체 작업 상세 헤더 칩. 개인 작업에는 의미가 없다(#1156). */
+  status: TaskStatus
+  /** 진행 상태 — 수정 저장 시 현재값 되돌리기용. 화면 표시·변경은 없다(#1160). */
   progress: TaskProgress
   /** career worker 화면에서 직접 수정/삭제 가능한 개인 작업 여부. */
   canManage: boolean
   company?: string
   address?: Address
   trades: Trade[]
+  /** 업체가 남긴 요청사항 — 업체 작업에만 있다. */
+  requirement: string
   memo: string
   raw: Task
 }
