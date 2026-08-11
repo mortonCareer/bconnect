@@ -105,6 +105,8 @@ export interface TopBarProps
   titleCount?: number
   /** 우측 영역 커스텀 노드 (예: 알림 '모두 읽음'). utility/actionIcon/showAction 보다 우선. */
   rightSlot?: React.ReactNode
+  /** 좌측 영역 커스텀 노드 (예: 캘린더 '내 일정' 버튼). back/leftIcon 보다 우선. */
+  leftSlot?: React.ReactNode
   actionLabel?: string
   onAction?: () => void
   showAction?: boolean
@@ -142,6 +144,7 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       title,
       titleCount,
       rightSlot,
+      leftSlot,
       actionLabel = '완료',
       onAction,
       showAction = true,
@@ -180,7 +183,9 @@ const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       </button>
     )
 
-    const LeftSlot = !leftIcon ? (
+    const LeftSlot = leftSlot ? (
+      leftSlot
+    ) : !leftIcon ? (
       BackButton
     ) : leftHref ? (
       <Link
