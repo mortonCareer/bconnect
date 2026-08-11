@@ -16,8 +16,18 @@ export const CHAT_IMAGE_MAX_SIZE_MB = 20
 
 const MAX_BYTES = CHAT_IMAGE_MAX_SIZE_MB * 1024 * 1024
 
+/** 업로드 끝난 장수 / 전체 장수 — 입력창이 "3/5" 로 노출한다 */
+export interface ChatImageUploadProgress {
+  done: number
+  total: number
+}
+
 // presign → S3 PUT → confirm 2-phase 업로드 (#340 계약). CHAT 컨텍스트의 contextId 는 chatId.
-async function uploadChatImages(files: File[], chatId: number): Promise<number[]> {
+async function uploadChatImages(
+  files: File[],
+  chatId: number,
+  onUploaded: () => void
+): Promise<number[]> {
   const presigned = await createAttachmentPresign({
     context: AttachmentContext.CHAT,
     type: AttachmentType.IMAGE,
@@ -35,6 +45,7 @@ async function uploadChatImages(files: File[], chatId: number): Promise<number[]
         headers: { 'Content-Type': file.type },
       })
       if (!res.ok) throw new Error(`이미지 업로드 실패 (${res.status})`)
+      onUploaded()
     })
   )
   const attachmentIds = presigned.map((p) => p.id).filter((id): id is number => id != null)
@@ -50,7 +61,8 @@ async function uploadChatImages(files: File[], chatId: number): Promise<number[]
  * 실패는 여기서 toast 로 알리고 빈 배열을 돌려줘 전송 단계로 넘어가지 않게 한다.
  */
 export function useChatImageUpload(chatId: number) {
-  const [isUploading, setIsUploading] = useState(false)
+  const [progress, setProgress] = useState<ChatImageUploadProgress | null>(null)
+  const isUploading = progress != null
 
   const upload = useCallback(
     async (files: File[]): Promise<number[]> => {
@@ -73,9 +85,11 @@ export function useChatImageUpload(chatId: number) {
         })
       }
 
-      setIsUploading(true)
+      setProgress({ done: 0, total: targets.length })
       try {
-        return await uploadChatImages(targets, chatId)
+        return await uploadChatImages(targets, chatId, () =>
+          setProgress((prev) => (prev ? { ...prev, done: prev.done + 1 } : prev))
+        )
       } catch (error) {
         toast({
           description: isApiErrorShape(error)
@@ -85,7 +99,7 @@ export function useChatImageUpload(chatId: number) {
         })
         return []
       } finally {
-        setIsUploading(false)
+        setProgress(null)
       }
     },
     [chatId, isUploading]
@@ -95,5 +109,5 @@ export function useChatImageUpload(chatId: number) {
     toast({ description: '사진을 보내지 못했어요. 다시 시도해주세요', variant: 'error' })
   }, [])
 
-  return { upload, isUploading, notifySendError }
+  return { upload, isUploading, progress, notifySendError }
 }

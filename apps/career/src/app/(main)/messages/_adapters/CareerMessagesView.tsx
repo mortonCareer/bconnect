@@ -197,6 +197,7 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
       imageActions={{
         upload: imageUpload.upload,
         isUploading: imageUpload.isUploading,
+        progress: imageUpload.progress,
         onSendError: imageUpload.notifySendError,
       }}
       offerActions={{

@@ -48,6 +48,7 @@ export function PanelChat({ chatId }: { chatId: number }) {
         imageActions={{
           upload: imageUpload.upload,
           isUploading: imageUpload.isUploading,
+          progress: imageUpload.progress,
           onSendError: imageUpload.notifySendError,
         }}
       />

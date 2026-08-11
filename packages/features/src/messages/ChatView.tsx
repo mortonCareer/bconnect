@@ -43,6 +43,8 @@ export interface ChatImageActions {
   /** 고른 파일 업로드 → 첨부 id. 실패 시 자체 피드백 후 빈 배열 */
   upload: (files: File[]) => Promise<number[]>
   isUploading?: boolean
+  /** 업로드 진행 상황 — 입력창이 "3/5" 로 노출 */
+  progress?: { done: number; total: number } | null
   /** 업로드는 됐지만 소켓 전송이 실패했을 때 */
   onSendError?: () => void
 }
@@ -187,6 +189,7 @@ export function ChatView(props: ChatViewProps) {
         onSend={handleSend}
         onPickImages={imageActions ? (files) => void handlePickImages(files) : undefined}
         isUploading={imageActions?.isUploading}
+        uploadProgress={imageActions?.progress}
       />
     </>
   )
