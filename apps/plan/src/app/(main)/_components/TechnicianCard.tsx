@@ -2,29 +2,12 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Button, CertTag, SkillTag, StarIcon, toast, isApiErrorShape } from '@bconnect/ui'
+import { Button, CertTag, SkillTag, toast, isApiErrorShape } from '@bconnect/ui'
 import { TRADE_LABELS, useAuthHint, useCreateDirectChat } from '@bconnect/api-client'
 import { usePanelNav } from '@/hooks/usePanelNav'
 import type { MemberTechnicianItem } from '@/hooks/useTechnicianItems'
 import type { Trade } from '@bconnect/api-client'
 import { useLoginGate } from './LoginGateProvider'
-
-function StarRating({ rating, reviewCount }: { rating: number; reviewCount: number }) {
-  const full = Math.floor(rating)
-  const half = rating - full >= 0.5
-  return (
-    <div className="flex items-center gap-1">
-      <div className="flex gap-0.5">
-        {Array.from({ length: 5 }).map((_, i) => {
-          const filled = i < full || (i === full && half)
-          return <StarIcon key={i} size={14} filled={filled} />
-        })}
-      </div>
-      <span className="text-m-14 text-gray-900">{rating.toFixed(1)}</span>
-      <span className="text-r-14 text-gray-500">({reviewCount})</span>
-    </div>
-  )
-}
 
 function Stat({
   value,
@@ -107,21 +90,10 @@ export function TechnicianCard({ item }: TechnicianCardProps) {
         </div>
 
         <div className="flex flex-1 flex-col gap-4">
-          {/* 이름 + 메타 + 별점/계약·게시글 */}
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-baseline gap-2.5">
-              <p className="text-sb-20 text-gray-900">{item.name}</p>
-              <p className="text-r-14 text-gray-500">{metaParts.join(' · ')}</p>
-            </div>
-            <div className="flex items-center gap-[11px]">
-              {/* ⚠️ 모킹값 — 리뷰(별점)·계약수 BE 도메인 미구현 (rating 2.5·count 777 sentinel) */}
-              <StarRating rating={item.rating} reviewCount={item.reviewCount} />
-              {/* Figma node 1470:6775 — 행 높이(20px) 세로 divider, gray-100 */}
-              <span className="h-5 w-px bg-gray-100" />
-              <span className="text-r-14 text-gray-500">
-                계약 {item.contractCount} · 게시글 {item.postCount}
-              </span>
-            </div>
+          {/* 이름 + 메타. 별점·리뷰·계약 행은 BE 도메인 미구현으로 미표시 (#832) */}
+          <div className="flex items-baseline gap-2.5">
+            <p className="text-sb-20 text-gray-900">{item.name}</p>
+            <p className="text-r-14 text-gray-500">{metaParts.join(' · ')}</p>
           </div>
 
           {/* 한 줄 소개 */}
