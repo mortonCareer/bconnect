@@ -9,9 +9,9 @@ import {
 } from '@bconnect/api-client'
 import { toast, isApiErrorShape } from '@bconnect/ui'
 
-/** 한 메시지에 담을 수 있는 장수 (BE max-batch-size 50 보다 보수적) */
-export const CHAT_IMAGE_MAX_FILES = 10
-/** BE app.attachment.max-file-size 와 동일 */
+// BE app.attachment 설정의 복제본 — 계약으로 노출되지 않아 프런트가 값을 들고 있을 수밖에 없다.
+// BE 쪽 값이 바뀌면 여기도 같이 바꿔야 한다 (application.yaml 의 max-batch-size · max-file-size).
+export const CHAT_IMAGE_MAX_FILES = 50
 export const CHAT_IMAGE_MAX_SIZE_MB = 20
 
 const MAX_BYTES = CHAT_IMAGE_MAX_SIZE_MB * 1024 * 1024
