@@ -47,6 +47,10 @@ jobs:
             career:
               - 'apps/career/**'
               - 'packages/ui/**'
+              - 'packages/features/**'
+              - 'packages/push/**'
+              - 'packages/business/**'
+              - 'packages/devtools/**'
               - 'packages/config/**'
               - 'packages/mocks/**'
               - 'packages/api-client/src/*.ts'
@@ -59,6 +63,9 @@ jobs:
             plan:
               - 'apps/plan/**'
               - 'packages/ui/**'
+              - 'packages/features/**'
+              - 'packages/push/**'
+              - 'packages/devtools/**'
               - 'packages/config/**'
               - 'packages/mocks/**'
               - 'packages/api-client/src/*.ts'
