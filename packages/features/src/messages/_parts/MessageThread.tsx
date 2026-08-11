@@ -97,14 +97,25 @@ function Bubble({
   }
 
   const timestamp = message.createdAt ? formatChatTime(message.createdAt) : undefined
+  // IMAGE 는 content 가 비어 있고 첨부에 서명 URL 이 담겨 온다 (MessageSocketService).
+  const images =
+    message.type === MessageType.IMAGE
+      ? (message.attachments ?? [])
+          .filter((a) => a.url)
+          .map((a) => ({ id: a.id, url: a.url, alt: a.filename }))
+      : undefined
+
   if (isMine) {
-    return <ChatMessage variant="mine" message={message.content} timestamp={timestamp} />
+    return (
+      <ChatMessage variant="mine" message={message.content} images={images} timestamp={timestamp} />
+    )
   }
   const sender = participants.find((p) => p.id === message.memberId)
   return (
     <ChatMessage
       variant="theirs"
       message={message.content}
+      images={images}
       timestamp={timestamp}
       nickname={chatMemberName(sender) ?? '상대방'}
       profileImage={sender?.picture ?? undefined}

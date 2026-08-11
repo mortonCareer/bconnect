@@ -3,6 +3,7 @@ import {
   getGetDirectChatsMockHandler,
   getGetGroupChatsMockHandler,
   getGetMyMemberMockHandler,
+  AttachmentType,
   ChatType,
   MessageType,
   Role,
@@ -71,6 +72,36 @@ const msg = (
   attachments: [],
 })
 
+const placeholderImage = (label: string): string =>
+  `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="100%" height="100%" fill="#e5e5e5"/><text x="50%" y="50%" font-size="28" fill="#a5a5a5" text-anchor="middle" dominant-baseline="middle">${label}</text></svg>`
+  )}`
+
+/**
+ * 사진 메시지 (#1150) — BE 는 content 를 비우고 attachments 에 서명 URL 을 담아 보낸다.
+ * mock 은 실 S3 대신 placeholder data URI 를 쓴다.
+ */
+const imageMsg = (
+  id: number,
+  chatId: number,
+  memberId: number,
+  labels: string[],
+  hhmm: string
+): Message => ({
+  ...msg(id, chatId, memberId, '', hhmm, MessageType.IMAGE),
+  attachments: labels.map((label, i) => ({
+    id: id * 10 + i,
+    memberId,
+    type: AttachmentType.IMAGE,
+    filename: `${label}.jpg`,
+    contentType: 'image/jpeg',
+    size: 1_000_000,
+    createdAt: at(hhmm),
+    modifiedAt: at(hhmm),
+    url: placeholderImage(label),
+  })),
+})
+
 /** 섭외 제안 메시지 — BE 계약대로 content 는 offerId 문자열 (#972). tasks.ts 시드의 offerId 와 맞춘다. */
 const offerMsg = (id: number, chatId: number, memberId: number, offerId: number, hhmm: string) =>
   msg(id, chatId, memberId, String(offerId), hhmm, MessageType.OFFER)
@@ -86,7 +117,9 @@ const MESSAGES_BY_CHAT: Record<number, Message[]> = {
   ],
   2: [
     msg(2001, 2, 102, '전기 배선 견적 문의드립니다.', '03:00'),
-    msg(2002, 2, MY_ID, '도면 보내주시면 확인하겠습니다.', '03:10'),
+    imageMsg(2002, 2, 102, ['현장 1'], '03:04'),
+    msg(2003, 2, MY_ID, '도면 보내주시면 확인하겠습니다.', '03:10'),
+    imageMsg(2004, 2, MY_ID, ['도면 1', '도면 2', '도면 3'], '03:12'),
   ],
   3: [
     msg(3001, 3, MY_ID, '타일 시공 가능하신가요?', '01:00'),
@@ -111,6 +144,27 @@ const chatOf = (w: Worker, index: number): DirectChat => {
 }
 
 const CHATS: DirectChat[] = WORKERS.map(chatOf)
+
+/** mock 소켓이 보낸 메시지를 목록·페이지 응답에도 반영한다 (재조회해도 남아 있게). */
+export function appendMockMessage(chatId: number, message: Message): void {
+  const messages = MESSAGES_BY_CHAT[chatId]
+  if (!messages) return
+  messages.push(message)
+  const chat = CHATS.find((c) => c.id === chatId)
+  if (chat) {
+    chat.lastMessage = message
+    chat.modifiedAt = message.createdAt
+  }
+}
+
+/** mock 소켓이 부여할 다음 메시지 id — 시드와 안 겹치게 뒤에서 시작. */
+export const nextMockMessageId = (() => {
+  let id = 9000
+  return () => ++id
+})()
+
+/** isMine 판정 기준이 되는 mock 본인 id */
+export const MOCK_MY_ID = MY_ID
 
 const paramId = (value: string | readonly string[] | undefined): number =>
   Number(typeof value === 'string' ? value : (value?.[0] ?? ''))

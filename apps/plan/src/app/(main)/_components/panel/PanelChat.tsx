@@ -2,7 +2,13 @@
 
 import { useMemo } from 'react'
 import { useGetDirectChats, useGetMyMember, useGetProfile } from '@bconnect/api-client'
-import { ChatView, PanelAside, toChatSummaries, type ChatViewData } from '@bconnect/features'
+import {
+  ChatView,
+  PanelAside,
+  toChatSummaries,
+  useChatImageUpload,
+  type ChatViewData,
+} from '@bconnect/features'
 import { usePanelNav } from '@/hooks/usePanelNav'
 
 export function PanelChat({ chatId }: { chatId: number }) {
@@ -28,6 +34,8 @@ export function PanelChat({ chatId }: { chatId: number }) {
     isError,
   }
 
+  const imageUpload = useChatImageUpload(chatId)
+
   return (
     <PanelAside label="채팅방">
       <ChatView
@@ -37,6 +45,12 @@ export function PanelChat({ chatId }: { chatId: number }) {
         onClose={close}
         backHref={panelHref('messages')}
         profileHref={(id) => panelHref(`profile/${id}`)}
+        imageActions={{
+          upload: imageUpload.upload,
+          isUploading: imageUpload.isUploading,
+          progress: imageUpload.progress,
+          onSendError: imageUpload.notifySendError,
+        }}
       />
     </PanelAside>
   )
