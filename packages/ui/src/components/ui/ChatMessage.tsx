@@ -76,7 +76,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
         <div ref={ref} className={cn('flex items-end justify-end gap-2', className)} {...props}>
           {timestamp && <span className="shrink-0 text-r-12 text-gray-700">{timestamp}</span>}
           {hasImages ? (
-            <ImageGrid images={images ?? []} className="max-w-[55vw]" />
+            <ImageGrid images={images ?? []} />
           ) : (
             <div className={cn(chatBubbleVariants({ variant }), 'max-w-[55vw]')}>
               <span className="break-words">{message}</span>
@@ -129,7 +129,14 @@ ChatMessage.displayName = 'ChatMessage'
 function ImageGrid({ images, className }: { images: ChatMessageImage[]; className?: string }) {
   const isSingle = images.length === 1
   return (
-    <div className={cn('grid w-max gap-1', isSingle ? 'grid-cols-1' : 'grid-cols-2', className)}>
+    <div
+      className={cn(
+        // 폭을 내용에 맡긴다 — 뷰포트 기준(vw)으로 잡으면 plan 패널처럼 좁은 컨테이너에서 넘친다.
+        'grid w-max gap-1',
+        isSingle ? 'grid-cols-1' : 'grid-cols-2',
+        className
+      )}
+    >
       {images.map((image) => (
         <img
           key={image.id}
@@ -137,7 +144,7 @@ function ImageGrid({ images, className }: { images: ChatMessageImage[]; classNam
           alt={image.alt ?? '사진'}
           className={cn(
             'rounded-xl bg-gray-100 object-cover',
-            isSingle ? 'max-h-60 max-w-full' : 'size-28'
+            isSingle ? 'max-h-60 min-w-28 max-w-full' : 'size-28'
           )}
         />
       ))}
