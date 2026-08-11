@@ -1,22 +1,18 @@
 'use client'
 
 import { NotificationsView, PanelAside } from '@bconnect/features'
+import { resolveReferenceHref } from '@bconnect/push'
 import type { Notification } from '@bconnect/api-client'
-import { usePanelNav } from '@/hooks/usePanelNav'
+import { usePanelNav, type PanelSegment } from '@/hooks/usePanelNav'
+import { REFERENCE_PANEL_SEGMENTS } from '@/lib/notification-routes'
 
 export function PanelNotifications() {
   const { closeHref, close, panelHref } = usePanelNav()
 
-  /**
-   * 알림 유형(BE `referenceType`)별 plan 이동 목적지 — 채팅방 패널만 존재.
-   * 나머지(프로필 완성 넛지·섭외·동료요청·계약)는 기술자(career) 대상이라 plan 목적지 없음 → 읽음 처리만.
-   * BE 는 referenceType 을 소문자로 내려준다(`chat_room`) — 방어적으로 정규화.
-   */
+  /** 목적지 표는 notification-routes.ts — Service Worker·인앱 토스트와 같은 표를 쓴다. */
   const resolveHref = (n: Notification): string | undefined => {
-    if (n.referenceType?.toLowerCase() === 'chat_room' && n.referenceId != null) {
-      return panelHref(`messages/${n.referenceId}`)
-    }
-    return undefined
+    const segment = resolveReferenceHref(REFERENCE_PANEL_SEGMENTS, n.referenceType, n.referenceId)
+    return segment ? panelHref(segment as PanelSegment) : undefined
   }
 
   return (

@@ -25,6 +25,7 @@ export function toCalendarTask(task: Task): CalendarTask | null {
     end,
     colorIndex: id,
     isProposed: task.offer != null || task.status === TaskStatus.OFFERED,
+    progress: task.progress,
     canManage: isWorkerTask,
     company: task.workerCompany ?? undefined,
     address: task.address ?? undefined,

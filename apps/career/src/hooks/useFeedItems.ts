@@ -2,19 +2,18 @@
 
 import { useMemo } from 'react'
 import {
-  postImageUrls,
   regionOfState,
+  ROLE_LABELS,
   TRADE_LABELS,
+  useAuthHint,
   useGetFeeds,
   useGetMyMember,
 } from '@bconnect/api-client'
 import type { Trade, ProfileRole } from '@bconnect/api-client'
-import { daysBetween } from '@bconnect/config/date'
+import { toWork } from '@bconnect/features'
 import { formatRelativeTime } from '@bconnect/config/format'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
-import { ROLE_LABELS } from '@/lib/role-labels'
 import { REGION_LABELS, type Region } from '@/lib/region'
-import { useAuthStore } from '@/stores/auth-store'
 
 export interface FeedItem {
   postId: number
@@ -51,13 +50,6 @@ interface UseFeedItemsOptions {
   limit?: number
 }
 
-/** task.start~end(YYYY-MM-DD, 양끝 포함) → '4일 소요'. 파싱 불가/역순이면 생략. */
-function formatDurationDays(start: string, end: string): string | undefined {
-  const days = daysBetween(start, end) + 1
-  if (!Number.isFinite(days) || days < 1) return undefined
-  return `${days}일 소요`
-}
-
 export function useFeedItems({
   trades,
   roles,
@@ -68,14 +60,14 @@ export function useFeedItems({
 }: UseFeedItemsOptions = {}) {
   const { data: feeds, isLoading, error } = useGetFeeds()
   // 홈 피드는 public — members/me 는 인증 필요라 로그아웃 상태면 정지, isMine 전부 false (#802)
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const isAuthenticated = useAuthHint()
   const currentUserId = useGetMyMember({ query: { enabled: isAuthenticated } }).data?.id
 
   const feedItems: FeedItem[] = useMemo(() => {
     if (!feeds?.content) return []
 
     return feeds.content.flatMap((feed): FeedItem[] => {
-      const { member, profile, post, task } = feed
+      const { member, profile, post } = feed
 
       // TODO: BE required 처리 후 type narrowing 필요. Feed.member/profile/post와 id가 optional emit이라 없는 행은 임시로 렌더 제외.
       const memberId = member?.id
@@ -94,7 +86,7 @@ export function useFeedItems({
       if (maxExperience != null && (profile.experience ?? 0) > maxExperience) return []
       if (authorId != null && memberId !== authorId) return []
 
-      const postImages = postImageUrls(post)
+      const work = toWork(feed)
 
       // TODO: BE required 처리 후 type narrowing 필요. 이름/분야/작성일/본문은 카드 표시 필수값인데 optional emit이라 fallback 중.
       return [
@@ -113,9 +105,9 @@ export function useFeedItems({
             bio: profile.headline ?? '',
           },
           content: {
-            images: postImages.length ? postImages : ['/placeholder-post.svg'],
-            company: task?.workerCompany ?? undefined,
-            duration: task ? formatDurationDays(task.start, task.end) : undefined,
+            images: work.images.length ? work.images : ['/placeholder-post.svg'],
+            company: work.company,
+            duration: work.duration,
             timestamp: post.createdAt ? formatRelativeTime(post.createdAt) : '',
             description: post.content ?? '',
           },

@@ -4,7 +4,7 @@
  */
 'use client'
 
-import { useAuthStore } from '@/stores/auth-store'
+import { login } from '@bconnect/features'
 import { useSignupStore } from '@/stores/signup-store'
 import { useSendOtp, useVerifyOtp } from '@bconnect/api-client'
 import { formatPhoneNumber, isValidPhoneNumber, toNationalNumber } from '@bconnect/config/phone'
@@ -27,7 +27,6 @@ type Step = 'phone' | 'otp'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login } = useAuthStore()
   const { setSignupToken } = useSignupStore()
 
   const [step, setStep] = useState<Step>('phone')

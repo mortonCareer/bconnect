@@ -12,9 +12,10 @@ import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.post.PostEntity;
 import to.bconnect.api.storage.post.PostRepository;
+import to.bconnect.api.storage.task.TaskRepository;
 
 import java.util.List;
 
@@ -24,16 +25,16 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final TaskRepository taskRepository;
     private final AttachmentFinder attachmentFinder;
     private final AttachmentLinker attachmentLinker;
 
     @Transactional(readOnly = true)
-    public CursorPage<Post> list(CursorLimit cursor) {
-        val posts = postRepository.findAllBy(
-                cursor.toScrollPosition(),
-                cursor.toLimit(),
-                cursor.toSort()
-        );
+    public CursorPage<Post> list(SearchFeed command, CursorLimit cursor) {
+        val posts = postRepository.findBy(command.toPredicate(), it -> it
+                .sortBy(cursor.toSort())
+                .limit(cursor.toLimit().max())
+                .scroll(cursor.toScrollPosition()));
 
         return CursorPage.from(
                 posts.map(Post::of),
@@ -50,14 +51,22 @@ public class PostService {
 
     @Transactional
     public Long create(AuthUser user, CreatePost command) {
+        if (command.taskId() != null) {
+            val task = taskRepository.findById(command.taskId())
+                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+            if (!user.id().equals(task.getWorkerId()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        }
+
+        attachmentFinder.validateOwnership(user.id(), command.attachmentIds());
+
         val created = postRepository.save(new PostEntity(
                 user.id(),
                 command.taskId(),
                 command.content()
         ));
 
-        attachmentFinder.validateOwnership(user.id(), command.attachmentIds());
-        attachmentLinker.link(ReferenceType.POST, created.getId(), command.attachmentIds());
+        attachmentLinker.link(AttachmentReferenceType.POST, created.getId(), command.attachmentIds());
 
         return created.getId();
     }
@@ -70,11 +79,18 @@ public class PostService {
         if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
+        if (command.taskId() != null) {
+            val task = taskRepository.findById(command.taskId())
+                    .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+            if (!user.id().equals(task.getWorkerId()))
+                throw new CodeException(CommonExceptionCode.FORBIDDEN);
+        }
+
         found.update(command.taskId(), command.content());
 
         attachmentFinder.validateOwnership(user.id(), command.attachmentIds());
-        attachmentLinker.unlink(ReferenceType.POST, List.of(found.getId()));
-        attachmentLinker.link(ReferenceType.POST, found.getId(), command.attachmentIds());
+        attachmentLinker.unlink(AttachmentReferenceType.POST, List.of(found.getId()));
+        attachmentLinker.link(AttachmentReferenceType.POST, found.getId(), command.attachmentIds());
     }
 
     @Transactional
@@ -87,7 +103,7 @@ public class PostService {
         if (!found.getMemberId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        attachmentLinker.unlink(ReferenceType.POST, found.getId());
+        attachmentLinker.unlink(AttachmentReferenceType.POST, found.getId());
         postRepository.delete(found);
     }
 }

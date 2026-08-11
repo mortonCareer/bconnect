@@ -10,12 +10,12 @@ import {
   OfferStatus,
   ProfileRole,
   Role,
+  TaskProgress,
   TaskStatus,
   TaskType,
   Trade,
 } from '@bconnect/api-client'
 import type {
-  Address,
   CreateOfferRequest,
   CreateProjectTaskRequest,
   Offer,
@@ -25,6 +25,7 @@ import type {
   Task,
   UpdateProjectTaskRequest,
 } from '@bconnect/api-client'
+import { addressOf } from './_address'
 import { http, HttpResponse } from 'msw'
 
 /**
@@ -56,22 +57,12 @@ function nowStamp(): string {
 
 const seedStamp = nowStamp()
 
-const addressOf = (city: string, state: Region, street: string, detail: string): Address => ({
-  zipcode: '00000',
-  city,
-  state,
-  street,
-  detail,
-  latitude: 0,
-  longitude: 0,
-})
-
 const PROJECT_SEEDS: Project[] = [
   {
     id: 1,
     companyId: 1,
     title: '모튼아파트 리모델링 01 (Mocked)',
-    address: addressOf('수원시 장안구', '경기', '경기도 수원시 율전로 00번길 00-00', '000호'),
+    address: addressOf('경기', '수원시 장안구', '경기도 수원시 율전로 00번길 00-00', '000호'),
     createdAt: seedStamp,
     modifiedAt: seedStamp,
   },
@@ -79,7 +70,7 @@ const PROJECT_SEEDS: Project[] = [
     id: 2,
     companyId: 1,
     title: '래미안 리모델링 02 (Mocked)',
-    address: addressOf('강남구', '서울', '서울 강남구 테헤란로 00길 00', '0000호'),
+    address: addressOf('서울', '강남구', '서울 강남구 테헤란로 00길 00', '0000호'),
     createdAt: seedStamp,
     modifiedAt: seedStamp,
   },
@@ -87,7 +78,7 @@ const PROJECT_SEEDS: Project[] = [
     id: 3,
     companyId: 1,
     title: '자담 사옥 인테리어 (Mocked)',
-    address: addressOf('연수구', '인천', '인천 연수구 송도과학로 00', '000호'),
+    address: addressOf('인천', '연수구', '인천 연수구 송도과학로 00', '000호'),
     createdAt: seedStamp,
     modifiedAt: seedStamp,
   },
@@ -98,6 +89,12 @@ interface PersonSeed {
   name: string
   region: Region
   trade: Trade
+}
+
+const CITY_OF_REGION: Partial<Record<Region, string>> = {
+  경기: '성남시 분당구',
+  서울: '중구',
+  인천: '연수구',
 }
 
 const PEOPLE: Record<number, PersonSeed> = {
@@ -124,7 +121,8 @@ interface TaskSeed {
   startOffset: number
   endOffset: number
   status: Task['status']
-  /** SCHEDULED 이상(섭외 확정)의 대표 기술자 */
+  progress: Task['progress']
+  /** ASSIGNED(섭외 확정) 작업의 대표 기술자 */
   workerId?: number
   requirement?: string
   memo?: string
@@ -141,7 +139,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '철거작업',
     startOffset: -6,
     endOffset: -4,
-    status: TaskStatus.COMPLETED,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.COMPLETED,
     workerId: 1,
   },
   {
@@ -151,7 +150,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '전기 시공',
     startOffset: -3,
     endOffset: -1,
-    status: TaskStatus.IN_PROGRESS,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.IN_PROGRESS,
     workerId: 2,
   },
   {
@@ -161,7 +161,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '목재/창호 설치',
     startOffset: -1,
     endOffset: 0,
-    status: TaskStatus.IN_PROGRESS,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.IN_PROGRESS,
     workerId: 3,
   },
   {
@@ -171,7 +172,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '타일',
     startOffset: 0,
     endOffset: 1,
-    status: TaskStatus.SCHEDULED,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.TODO,
     workerId: 4,
     requirement: '타일 시공 및 단일 벽면 일부 도배',
     memo: '세밀한 작업이 필요함',
@@ -184,7 +186,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '필름',
     startOffset: 2,
     endOffset: 3,
-    status: TaskStatus.SCHEDULED,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.TODO,
     workerId: 5,
   },
   {
@@ -194,7 +197,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '도배',
     startOffset: 4,
     endOffset: 5,
-    status: TaskStatus.SCHEDULED,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.TODO,
     workerId: 6,
   },
   {
@@ -205,6 +209,7 @@ const TASK_SEEDS: TaskSeed[] = [
     startOffset: 6,
     endOffset: 7,
     status: TaskStatus.OFFERED,
+    progress: TaskProgress.TODO,
     activeOffer: 7,
   },
   {
@@ -214,7 +219,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '가구 설치',
     startOffset: 8,
     endOffset: 9,
-    status: TaskStatus.DRAFT,
+    status: TaskStatus.NONE,
+    progress: TaskProgress.TODO,
   },
   {
     id: 8009,
@@ -223,7 +229,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '조명 설치',
     startOffset: 8,
     endOffset: 10,
-    status: TaskStatus.DRAFT,
+    status: TaskStatus.NONE,
+    progress: TaskProgress.TODO,
   },
   {
     id: 8010,
@@ -232,7 +239,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '철거',
     startOffset: -2,
     endOffset: 0,
-    status: TaskStatus.IN_PROGRESS,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.IN_PROGRESS,
     workerId: 21,
   },
   {
@@ -243,6 +251,7 @@ const TASK_SEEDS: TaskSeed[] = [
     startOffset: 1,
     endOffset: 4,
     status: TaskStatus.OFFERED,
+    progress: TaskProgress.TODO,
     activeOffer: 22,
   },
   {
@@ -252,7 +261,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '전기 배선',
     startOffset: 2,
     endOffset: 5,
-    status: TaskStatus.DRAFT,
+    status: TaskStatus.NONE,
+    progress: TaskProgress.TODO,
   },
   {
     id: 8013,
@@ -261,7 +271,8 @@ const TASK_SEEDS: TaskSeed[] = [
     title: '도배',
     startOffset: 6,
     endOffset: 8,
-    status: TaskStatus.SCHEDULED,
+    status: TaskStatus.ASSIGNED,
+    progress: TaskProgress.TODO,
     workerId: 23,
   },
 ]
@@ -274,6 +285,7 @@ function buildSeedTasks(): Task[] {
       id: seed.id,
       type: TaskType.PROJECT,
       status: seed.status,
+      progress: seed.progress,
       trades: seed.trades,
       start: isoDaysFromToday(seed.startOffset),
       end: isoDaysFromToday(seed.endOffset),
@@ -285,6 +297,8 @@ function buildSeedTasks(): Task[] {
       projectTitle: seed.title,
       projectRequirement: seed.requirement ?? '요청사항 (Mocked)',
       projectMemo: seed.memo ?? '메모 (Mocked)',
+      projectCompanyId: project?.companyId ?? null,
+      projectCompanyName: project ? `${project.title} 시공사 (Mocked)` : null,
       address: project?.address ?? null,
       offer: null,
       createdAt: stamp,
@@ -312,16 +326,16 @@ function offerOf(
       username: `worker_${memberId}`,
       name: person?.name ?? `기술자 ${memberId} (Mocked)`,
       picture: null,
-      role: Role.USER,
-      createdAt: stamp,
-      modifiedAt: stamp,
     },
     profile: {
       role: ProfileRole.SKILLED,
       primaryTrade: person?.trade ?? Trade.TILING,
       experience: 3,
       headline: null,
-      address: { state: person?.region ?? '서울' },
+      address: addressOf(
+        person?.region ?? '서울',
+        CITY_OF_REGION[person?.region ?? '서울'] ?? '중구'
+      ),
     },
     createdAt: stamp,
     modifiedAt: stamp,
@@ -390,8 +404,9 @@ export const scheduleOverrides = [
     tasks.push({
       id,
       type: TaskType.PROJECT,
-      // BE createByCompany 실동작: DRAFT 고정 생성 (상태 전이는 assign→SCHEDULED 뿐)
-      status: TaskStatus.DRAFT,
+      // BE createByCompany 실동작: 섭외 전(NONE)·시작 전(TODO) 고정 생성
+      status: TaskStatus.NONE,
+      progress: TaskProgress.TODO,
       trades: body.trades,
       start: body.start,
       end: body.end,
@@ -401,8 +416,10 @@ export const scheduleOverrides = [
       workerCompany: null,
       projectId: body.projectId,
       projectTitle: body.title,
-      projectRequirement: body.requirement,
-      projectMemo: body.memo,
+      projectRequirement: body.requirement ?? null,
+      projectMemo: body.memo ?? null,
+      projectCompanyId: projects.find((p) => p.id === body.projectId)?.companyId ?? null,
+      projectCompanyName: null,
       address: projects.find((p) => p.id === body.projectId)?.address ?? null,
       offer: null,
       createdAt: stamp,
@@ -422,8 +439,9 @@ export const scheduleOverrides = [
             start: body.start,
             end: body.end,
             projectTitle: body.title,
-            projectRequirement: body.requirement,
-            projectMemo: body.memo,
+            progress: body.progress,
+            projectRequirement: body.requirement ?? null,
+            projectMemo: body.memo ?? null,
             modifiedAt: nowStamp(),
           }
         : t

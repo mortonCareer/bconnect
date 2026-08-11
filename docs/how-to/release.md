@@ -59,4 +59,4 @@ gh release upload vX.Y.Z apps/career/android-twa/app-release-signed.apk
 
 ### 6. 배포 확인
 
-main 푸시로 Vercel(career·plan·landing)과 Railway(api)가 자동 배포된다. 배포 성공 여부는 Vercel·Railway 대시보드 로그로 확인한다 (실패 시 슬랙 알림). 주요 기능 스모크와 롤백은 [deployment.md](./deployment.md) 참조.
+main 푸시로 Vercel(career·plan·company)과 Railway(api)가 자동 배포된다. 배포 성공 여부는 Vercel·Railway 대시보드 로그로 확인한다 (실패 시 슬랙 알림). 주요 기능 스모크와 롤백은 [deployment.md](./deployment.md) 참조.

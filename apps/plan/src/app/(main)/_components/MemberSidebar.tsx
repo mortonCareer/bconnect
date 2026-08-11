@@ -96,12 +96,9 @@ function ProjectSection({
       href: selectedProject ? `/projects/${selectedProject}/schedule` : null,
     },
     // TODO: 페이지 구현 시 href 연결 (#375 follow-up — 모집 관리)
+    //   탭 title 은 프로젝트 스코프 공통 포맷 `{프로젝트명} - 모집관리` (#785, 공정표·저장소와 동일)
     { slug: 'recruit', label: '모집 관리', href: null },
-    {
-      slug: 'storage',
-      label: '문서 저장소',
-      href: selectedProject ? `/projects/${selectedProject}/storage` : null,
-    },
+    { slug: 'storage', label: '문서 저장소', href: null },
   ]
   // active 표시는 현재 path 의 프로젝트를 보고 있을 때만
   const onSelectedProject = pathProjectId === selectedProject

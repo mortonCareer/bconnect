@@ -19,7 +19,7 @@ import to.bconnect.api.core.presentation.v1.response.GroupChatResponse;
 import to.bconnect.api.core.presentation.v1.response.MessageResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class GroupChatController {
                 .toList();
         val memberMap = memberResolver.resolveMapOrWithdrawn(memberIds);
         val urlMap = attachmentUrlService.map(
-                ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
+                AttachmentReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         val body = chats.stream()
                 .map(it -> GroupChatResponse.of(
@@ -72,7 +72,7 @@ public class GroupChatController {
         val chat = groupChatService.get(user.id(), id);
         val memberMap = memberResolver.resolveMapOrWithdrawn(chat.participantIds());
         val urlMap = attachmentUrlService.map(
-                ReferenceType.MEMBER, chat.participantIds(), ImageSize.SMALL);
+                AttachmentReferenceType.MEMBER, chat.participantIds(), ImageSize.SMALL);
         val members = chat.participantIds().stream()
                 .map(memberMap::get)
                 .toList();
@@ -92,6 +92,14 @@ public class GroupChatController {
         return ApiResponse.success(id);
     }
 
+    @DeleteMapping("/{id}/me")
+    public ApiResponse<Void> leave(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id) {
+        groupChatService.leave(user.id(), id);
+        return ApiResponse.success(null);
+    }
+
     @GetMapping("/{id}/messages")
     public ApiResponse<CursorPage<MessageResponse>> listMessages(
             @AuthenticationPrincipal AuthUser user,
@@ -100,7 +108,7 @@ public class GroupChatController {
             HttpServletResponse response) {
         val page = groupChatService.listMessages(user, id, cursorLimit);
         val messageIds = page.content().stream().map(Message::id).toList();
-        val attachmentMap = attachmentFinder.listMap(ReferenceType.MESSAGE, messageIds);
+        val attachmentMap = attachmentFinder.listMap(AttachmentReferenceType.MESSAGE, messageIds);
 
         val content = page.content().stream()
                 .map(it -> {

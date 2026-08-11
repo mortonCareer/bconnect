@@ -102,6 +102,7 @@ public class SecurityConfig {
                         .requestMatchers(GET, "/api/v1/companies/me").hasRole("PLAN")
                         .requestMatchers(PUT, "/api/v1/companies/me").hasRole("PLAN")
                         .requestMatchers(DELETE, "/api/v1/companies/me").hasRole("PLAN")
+                        .requestMatchers(POST, "/api/v1/companies/*/accept", "/api/v1/companies/*/deny").hasRole("ADMIN")
                         .requestMatchers(POST, "/api/v1/projects").hasRole("PLAN")
                         .requestMatchers(PUT, "/api/v1/projects/*").hasRole("PLAN")
                         .requestMatchers(DELETE, "/api/v1/projects/*").hasRole("PLAN")

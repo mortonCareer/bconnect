@@ -32,7 +32,7 @@ import {
 } from '@bconnect/ui'
 import { TRADE_LABELS, TRADE_GROUPS } from '@bconnect/api-client'
 import { AddressField } from '@/components/AddressField'
-import { mapKakaoAddress } from '@bconnect/config/address'
+import { isCompleteAddress } from '@bconnect/config/address'
 import { MAX_TRADES, profileEditSchema, type ProfileEditFormData } from './schema'
 
 export default function ProfileEditPage() {
@@ -89,6 +89,7 @@ export default function ProfileEditPage() {
   const scrollToError = useScrollToError()
 
   const onSubmit = async (data: ProfileEditFormData) => {
+    if (!isCompleteAddress(data.address)) return
     try {
       const promises: Promise<unknown>[] = []
 
@@ -102,7 +103,7 @@ export default function ProfileEditPage() {
             trades: data.trades as Trade[],
             experience: data.experience,
             headline: data.headline || undefined,
-            address: data.address ?? mapKakaoAddress(null),
+            address: data.address,
           },
         })
       )
@@ -173,14 +174,14 @@ export default function ProfileEditPage() {
 
       <Form {...form}>
         <form className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pb-24 pt-3">
-          {/* 시공분야 */}
+          {/* 공종 */}
           <FormField
             control={control}
             name="trades"
             render={({ field }) => (
               <FormItem className="gap-3">
                 <FormLabel required className="text-m-16 text-gray-900">
-                  시공분야
+                  공종
                 </FormLabel>
                 <FormDescription>
                   최대 {MAX_TRADES}개까지 선택 가능해요 ({(watchedTrades ?? []).length}/{MAX_TRADES}

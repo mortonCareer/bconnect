@@ -12,7 +12,9 @@ import to.bconnect.api.common.ExceptionCode;
 public enum CompanyExceptionCode implements ExceptionCode {
     ALREADY_EXISTS ("CO001", HttpStatus.CONFLICT, "이미 업체가 존재합니다.", LogLevel.INFO),
     DUPLICATE_BRN ("CO002", HttpStatus.CONFLICT, "이미 등록된 사업자등록번호입니다.", LogLevel.INFO),
-    PROJECT_LIMIT_EXCEEDED ("CO003", HttpStatus.CONFLICT, "생성 가능한 프로젝트 수를 초과했습니다.", LogLevel.INFO);
+    PROJECT_LIMIT_EXCEEDED ("CO003", HttpStatus.CONFLICT, "생성 가능한 프로젝트 수를 초과했습니다.", LogLevel.INFO),
+    DELETE_TASK_EXISTS ("CO004", HttpStatus.CONFLICT, "진행 중인 작업이 있어 업체를 삭제할 수 없습니다. 작업을 먼저 완료해주세요.", LogLevel.INFO),
+    INVALID_STATUS ("CO005", HttpStatus.CONFLICT, "처리할 수 없는 업체 상태입니다.", LogLevel.INFO);
 
     private final String code;
     private final HttpStatus status;

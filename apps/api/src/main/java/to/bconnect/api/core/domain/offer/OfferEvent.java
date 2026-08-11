@@ -5,6 +5,7 @@ import to.bconnect.api.storage.offer.OfferStatus;
 public record OfferEvent(
         Long offerId,
         Long workerId,
+        Long companyId,
         Long companyOwnerId,
         OfferStatus status
 ) {

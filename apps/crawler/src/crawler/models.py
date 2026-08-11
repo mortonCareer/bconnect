@@ -106,7 +106,7 @@ class CrawledPost(_CamelModel):
 
 
 class CrawledCredential(_CamelModel):
-    """인증 1건 — BE crawled_credentials 행에 대응."""
+    """자격 증명 1건 — BE crawled_credentials 행에 대응."""
 
     type: str = "CERTIFICATE"  # CREDENTIAL_TYPES 중 하나
     name: str = ""

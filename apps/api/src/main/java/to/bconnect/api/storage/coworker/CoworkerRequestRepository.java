@@ -14,4 +14,8 @@ public interface CoworkerRequestRepository extends JpaRepository<CoworkerRequest
     List<CoworkerRequestEntity> findAllByToId(Long toId);
 
     List<CoworkerRequestEntity> findAllByFromId(Long fromId);
+
+    List<CoworkerRequestEntity> findAllByToIdOrderByIdDesc(Long toId);
+
+    List<CoworkerRequestEntity> findAllByFromIdOrderByIdDesc(Long fromId);
 }

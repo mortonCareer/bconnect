@@ -5,8 +5,8 @@
 
 import { useState, useEffect } from 'react'
 import { Slider, Tag, TopBar } from '@bconnect/ui'
-import { TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
-import { FILTER_ROLES, ROLE_LABELS } from '@/lib/role-labels'
+import { ROLE_LABELS, TRADE_GROUPS, TRADE_LABELS } from '@bconnect/api-client'
+import { FILTER_ROLES } from '@/lib/role-labels'
 import { REGIONS, REGION_LABELS } from '@/lib/region'
 import {
   EXPERIENCE_FILTER_MAX,
@@ -85,9 +85,9 @@ export function FilterSheet({ isOpen, onClose }: FilterSheetProps) {
 
         {/* Scrollable content */}
         <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4 pb-4 pt-4">
-          {/* 시공분야 */}
+          {/* 공종 */}
           <div className="flex flex-col gap-3">
-            <p className="text-sb-16 text-gray-900">시공분야</p>
+            <p className="text-sb-16 text-gray-900">공종</p>
             {TRADE_GROUPS.map((group) => (
               <div key={group.label} className="flex flex-col gap-3">
                 <p className="text-m-14 text-gray-700">{group.label}</p>

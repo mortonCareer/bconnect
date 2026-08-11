@@ -22,7 +22,7 @@ import to.bconnect.api.core.presentation.v1.request.UpdateRecommendationRequest;
 import to.bconnect.api.core.presentation.v1.response.RecommendationResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 
 import java.util.List;
 
@@ -135,7 +135,7 @@ public class RecommendationController {
         val memberIds = recommendations.stream().map(Recommendation::memberId).distinct().toList();
         val memberMap = memberResolver.resolveMap(memberIds);
         val profileMap = profileResolver.resolveMap(memberIds);
-        val urlMap = attachmentUrlService.map(ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(AttachmentReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         return recommendations.stream()
                 .map(it -> {

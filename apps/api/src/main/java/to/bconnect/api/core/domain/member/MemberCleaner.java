@@ -7,27 +7,29 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.security.AuthUser;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.NoteRepository;
+import to.bconnect.api.storage.chat.ChatType;
+import to.bconnect.api.storage.chat.GroupChatRepository;
+import to.bconnect.api.storage.chat.MessageRepository;
+import to.bconnect.api.storage.chat.ParticipantRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.coworker.CoworkerRequestRepository;
 import to.bconnect.api.storage.credential.CredentialEntity;
 import to.bconnect.api.storage.credential.CredentialRepository;
+import to.bconnect.api.storage.device.DeviceTokenRepository;
 import to.bconnect.api.storage.drive.DriveEntity;
 import to.bconnect.api.storage.drive.DriveMemberRepository;
 import to.bconnect.api.storage.drive.DriveRepository;
+import to.bconnect.api.storage.notification.NotificationRepository;
 import to.bconnect.api.storage.offer.OfferRepository;
-import to.bconnect.api.storage.post.PostEntity;
-import to.bconnect.api.storage.post.PostRepository;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.storage.recommendation.RecommendationRepository;
 import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -40,13 +42,17 @@ public class MemberCleaner {
     private final CoworkerRepository coworkerRepository;
     private final CoworkerRequestRepository coworkerRequestRepository;
     private final RecommendationRepository recommendationRepository;
-    private final PostRepository postRepository;
     private final OfferRepository offerRepository;
     private final TaskRepository taskRepository;
     private final DriveRepository driveRepository;
     private final DriveMemberRepository driveMemberRepository;
     private final BoardRepository boardRepository;
     private final NoteRepository noteRepository;
+    private final DeviceTokenRepository deviceTokenRepository;
+    private final NotificationRepository notificationRepository;
+    private final ParticipantRepository participantRepository;
+    private final GroupChatRepository groupChatRepository;
+    private final MessageRepository messageRepository;
     private final AttachmentLinker attachmentLinker;
 
     // TODO: 이벤트 구조로 변경 가능
@@ -59,10 +65,10 @@ public class MemberCleaner {
 
         sessionRepository.findByMemberId(memberId).ifPresent(sessionRepository::delete);
         profileRepository.findByMemberId(memberId).ifPresent(profileRepository::delete);
-        attachmentLinker.unlink(ReferenceType.MEMBER, memberId);
+        attachmentLinker.unlink(AttachmentReferenceType.MEMBER, memberId);
 
         val credentials = credentialRepository.findAllByMemberId(memberId);
-        attachmentLinker.unlink(ReferenceType.CREDENTIAL, credentials.stream().map(CredentialEntity::getId).toList());
+        attachmentLinker.unlink(AttachmentReferenceType.CREDENTIAL, credentials.stream().map(CredentialEntity::getId).toList());
         credentialRepository.deleteAll(credentials);
 
         coworkerRepository.deleteAll(coworkerRepository.findAllByMemberId(memberId));
@@ -71,12 +77,20 @@ public class MemberCleaner {
         recommendationRepository.deleteAll(recommendationRepository.findAllByFromId(memberId));
         recommendationRepository.deleteAll(recommendationRepository.findAllByToId(memberId));
 
-        val posts = postRepository.findAllByMemberId(memberId);
-        attachmentLinker.unlink(ReferenceType.POST, posts.stream().map(PostEntity::getId).toList());
-        postRepository.deleteAll(posts);
+        participantRepository.findAllByMemberId(memberId).forEach(it -> {
+            participantRepository.delete(it);
+            if (participantRepository.countByChatId(it.getChatId()) == 0) {
+                messageRepository.deleteAllByChatIdAndChatType(it.getChatId(), ChatType.GROUP);
+                groupChatRepository.deleteById(it.getChatId());
+            }
+        });
 
         offerRepository.deleteAll(offerRepository.findAllByWorkerId(memberId));
         taskRepository.deleteAll(taskRepository.findAllByWorkerIdAndType(memberId, TaskType.WORKER));
+
+        deviceTokenRepository.deleteAll(deviceTokenRepository.findAllByMemberId(memberId));
+        notificationRepository.deleteAll(notificationRepository.findAllByMemberId(memberId));
+        notificationRepository.deleteAll(notificationRepository.findAllBySenderId(memberId));
 
         driveMemberRepository.deleteAll(driveMemberRepository.findAllByMemberId(memberId));
 
@@ -85,7 +99,7 @@ public class MemberCleaner {
             noteRepository.deleteAllByBoardId(board.getId());
             boardRepository.delete(board);
         }));
-        attachmentLinker.unlink(ReferenceType.DRIVE, drives.stream().map(DriveEntity::getId).toList());
+        attachmentLinker.unlink(AttachmentReferenceType.DRIVE, drives.stream().map(DriveEntity::getId).toList());
         drives.forEach(it -> driveMemberRepository.deleteByDriveId(it.getId()));
         driveRepository.deleteAll(drives);
     }

@@ -21,8 +21,8 @@ to.bconnect.api
 - 패키지 · 레이어 의존성 규칙은 ArchUnit로 강제합니다.
 
 ## 패키지 구조
-> notification → socket → core → attachment → security → storage → common
-> sms → security
+> socket → notification → core → attachment → security → storage → common
+> sms → security, common
 - `PackageDependencyTest.java` 참고
 
 ## 레이어 구조
@@ -56,6 +56,7 @@ graph TD
 
 ### 레이어 컨벤션
 - 컨트롤러는 도메인 객체를 조회하고, 응답 DTO를 조립합니다.
+- 컨트롤러의 API · 엔드포인트의 국문명은 bruno 테스트 name에 작성합니다. 
 - 응답 DTO의 `of` 메서드는 도메인 객체만 주입받고, DTO 변환은 내부에서 처리합니다.
 - 비즈니스 로직은 서비스에서 처리합니다.
 - 비즈니스 로직이 복잡한 경우 하위 컴포넌트를 생성해 로직을 분리할 수 있습니다.
@@ -80,9 +81,18 @@ graph TD
   subgraph project
     ProjectF[ProjectFinder]
   end
+  subgraph offer
+    OfferS[OfferService]
+    OfferQS[OfferQueryService]
+  end
+  subgraph company
+    CompanyF[CompanyFinder]
+  end
   NoteS --> DriveV
   NoteS --> ProjectF
   DriveS --> ProjectF
+  OfferS --> CompanyF
+  OfferQS --> CompanyF
 ```
 - `DomainDependencyTest.java` 참고
 
@@ -95,6 +105,9 @@ graph TD
   subgraph offer
     OfferE[OfferEvent]
   end
+  subgraph task
+    TaskE[TaskEvent]
+  end
   subgraph sms
     SmsL[SmsEventListener]
   end
@@ -105,20 +118,17 @@ graph TD
     LoginE[NewDeviceLoginEvent]
   end
   subgraph socket.message
-    ChatMsgE[SocketMessageSentEvent]
     MsgL[MessageEventListener]
   end
-  subgraph notification
-    NotiL[NotificationEventListener]
-  end
   MsgL --> OfferE
+  MsgL --> TaskE
   MsgL --> ChatCreatedE
   SmsL --> OtpE
   SmsL --> LoginE
-  NotiL --> ChatMsgE
 ```
 - 부수효과는 EDA 구조로 분리합니다.
 - 이벤트는 발행 패키지에, 리스너는 구독 패키지에 위치합니다.
+- 알림 이벤트 처리는 문서에서 생략합니다.
 
 ### 유효성 검사
 - 유효성 검사 위치는 다음과 같습니다

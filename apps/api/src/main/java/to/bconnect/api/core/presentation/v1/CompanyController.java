@@ -23,7 +23,7 @@ import to.bconnect.api.core.presentation.v1.response.CompanyResponse;
 import to.bconnect.api.core.presentation.v1.response.MemberSummaryResponse;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentContext;
-import to.bconnect.api.storage.attachment.ReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class CompanyController {
         val page = companyService.list(cursorLimit);
         val companies = page.content();
         val companyIds = companies.stream().map(Company::id).toList();
-        val urlMap = attachmentUrlService.map(ReferenceType.COMPANY, companyIds, ImageSize.SMALL);
+        val urlMap = attachmentUrlService.map(AttachmentReferenceType.COMPANY, companyIds, ImageSize.SMALL);
         val content = companies.stream()
                 .map(it -> CompanyResponse.of(it, urlMap.get(it.id())))
                 .toList();
@@ -61,7 +61,7 @@ public class CompanyController {
             @AuthenticationPrincipal AuthUser user,
             HttpServletResponse response) {
         val company = companyService.get(user);
-        val picture = attachmentUrlService.get(ReferenceType.COMPANY, company.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(AttachmentReferenceType.COMPANY, company.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.COMPANY);
         signedCookieIssuer.issue(scope)
@@ -75,7 +75,7 @@ public class CompanyController {
             @PathVariable Long id,
             HttpServletResponse response) {
         val company = companyService.get(id);
-        val picture = attachmentUrlService.get(ReferenceType.COMPANY, company.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(AttachmentReferenceType.COMPANY, company.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.COMPANY);
         signedCookieIssuer.issue(scope)
@@ -90,7 +90,7 @@ public class CompanyController {
             HttpServletResponse response) {
         val company = companyService.get(id);
         val member = memberResolver.get(company.memberId());
-        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(AttachmentReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
@@ -105,6 +105,18 @@ public class CompanyController {
             @RequestBody @Valid CreateCompanyRequest request) {
         val id = companyService.create(user, request.toCommand());
         return ApiResponse.success(id);
+    }
+
+    @PostMapping("/{id}/accept")
+    public ApiResponse<Void> accept(@PathVariable Long id) {
+        companyService.accept(id);
+        return ApiResponse.success(null);
+    }
+
+    @PostMapping("/{id}/deny")
+    public ApiResponse<Void> deny(@PathVariable Long id) {
+        companyService.deny(id);
+        return ApiResponse.success(null);
     }
 
     @PutMapping("/me")

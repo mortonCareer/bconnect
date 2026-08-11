@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react'
 import { parseAsStringLiteral, useQueryState } from 'nuqs'
-import { getTradeLabel } from '@bconnect/api-client'
+import { getRoleLabel, getTradeLabel } from '@bconnect/api-client'
 import type { Recommendation } from '@bconnect/api-client'
 import {
   ActionDrawer,
@@ -203,8 +203,7 @@ function RecommendationItem({
       meta={{
         region: profile?.address?.city ?? '',
         trade: profile?.primaryTrade ? getTradeLabel(profile.primaryTrade) : '',
-        // TODO(#473): 등급(ProfileRole)은 요약(ProfileSummary)에 미포함 — 추가되면 실제 등급 연결
-        role: '반장(Mocked)',
+        role: profile?.role ? getRoleLabel(profile.role) : undefined,
       }}
       description={content}
       rightSlot={

@@ -32,6 +32,9 @@ app:
     key-pair-id: local-key-pair-id
     private-key: local-private-key
 
+  sns:
+    platform-application-arn: local-platform-application-arn
+
 logging:
   level:
     org.springframework.web.socket: TRACE

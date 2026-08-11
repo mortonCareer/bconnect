@@ -1,13 +1,14 @@
 'use client'
 
 import {
+  TASK_PROGRESS_LABELS,
   Trade,
   TRADE_LABELS,
   TRADE_LIST,
   useDeleteTask,
   useUpdateTaskWorker,
 } from '@bconnect/api-client'
-import type { Address } from '@bconnect/api-client'
+import { addressField, isCompleteAddress } from '@bconnect/config/address'
 import {
   ConfirmDialog,
   DateRangeField,
@@ -21,39 +22,26 @@ import {
   isApiErrorShape,
   toast,
 } from '@bconnect/ui'
+import { formatPeriod } from '@bconnect/config/format'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { AddressField } from '@/components/AddressField'
 import { useShareCurrentUrl } from '@/hooks/useShareCurrentUrl'
-import { formatPeriod } from '../calendar/date-helpers'
 import type { CalendarTask } from '../calendar/types'
 import { TaskActionDrawer } from './TaskActionDrawer'
-
-const REQUIRED_ADDRESS_MESSAGE = '현장주소를 입력해주세요.'
 
 const editSchema = z
   .object({
     company: z.string().min(1, '업체명을 입력해주세요.'),
     start: z.string().min(1, '시작일을 선택해주세요.'),
     end: z.string().min(1, '종료일을 선택해주세요.'),
-    address: z.custom<Address | undefined>(
-      (v) => v === undefined || (v !== null && typeof v === 'object'),
-      REQUIRED_ADDRESS_MESSAGE
-    ),
+    address: addressField('현장주소'),
     trades: z.array(z.nativeEnum(Trade)).min(1, '공종을 1개 이상 선택해주세요.'),
     memo: z.string(),
   })
   .superRefine((v, ctx) => {
-    if (!v.address) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: REQUIRED_ADDRESS_MESSAGE,
-        path: ['address'],
-      })
-    }
-
     if (v.start > v.end) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -136,17 +124,14 @@ export function TaskDetailCard({ task, selectedDay, selectedMonth }: TaskDetailC
 
   const onSubmit = form.handleSubmit((vals) => {
     const address = vals.address
-
-    // BE 계약상 address는 optional이므로 UI required 처리 후 전송 직전에 type narrowing 한다.
-    if (!address) {
-      form.setError('address', { message: REQUIRED_ADDRESS_MESSAGE })
-      return
-    }
+    if (!isCompleteAddress(address)) return
 
     update({
       id: task.id,
       data: {
         title: task.title,
+        // 진행 상태는 아직 화면에서 바꿀 수 없다 — 현재값을 되돌려 보내 덮어쓰기를 막는다 (#1160).
+        progress: task.progress,
         // TODO: BE required 처리 후 type narrowing 필요. workerMemo가 optional emit이라 빈 입력 시 기존 메모/제목으로 silent fallback 중.
         memo: vals.memo.trim() || task.memo || task.title,
         company: vals.company,
@@ -163,6 +148,9 @@ export function TaskDetailCard({ task, selectedDay, selectedMonth }: TaskDetailC
       <div className="flex items-start justify-between gap-2">
         <h2 className="text-sb-16 text-gray-900">{task.title}</h2>
         <div className="flex shrink-0 items-center gap-2">
+          <span className="rounded-full border border-gray-200 px-2 py-0.5 text-r-12 text-gray-500">
+            {TASK_PROGRESS_LABELS[task.progress]}
+          </span>
           {task.isProposed && (
             <span className="rounded-full bg-gray-100 px-2 py-0.5 text-r-12 text-gray-500">
               제안됨

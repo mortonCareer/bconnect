@@ -1,18 +1,20 @@
 package to.bconnect.api.notification.domain.push;
 
-import to.bconnect.api.notification.domain.NotificationType;
+import to.bconnect.api.storage.notification.NotificationReferenceType;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import static to.bconnect.api.common.CommonUtils.truncate;
 
-public record PushNotification(NotificationType type, Long referenceId, String title, String body, String link) {
+public record PushNotification(
+        Long id,
+        Long receiverId,
+        String title,
+        String body,
+        NotificationReferenceType referenceType,
+        Long referenceId
+) {
+    private static final int PREVIEW_MAX = 100;
 
-    public PushPayload toPayload(Long notificationId) {
-        Map<String, String> data = new LinkedHashMap<>();
-        data.put("notification_id", String.valueOf(notificationId));
-        data.put("type_code", type.code());
-        data.put("reference_type", type.referenceType().name().toLowerCase());
-        data.put("reference_id", referenceId == null ? "" : String.valueOf(referenceId));
-        return new PushPayload(title, body, link, data);
+    public PushNotification {
+        body = truncate(body, PREVIEW_MAX);
     }
 }

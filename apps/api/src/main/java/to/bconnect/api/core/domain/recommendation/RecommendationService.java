@@ -3,6 +3,7 @@ package to.bconnect.api.core.domain.recommendation;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
@@ -21,6 +22,7 @@ public class RecommendationService {
     private final RecommendationRepository recommendationRepository;
     private final CoworkerRepository coworkerRepository;
     private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Long create(AuthUser user, CreateRecommendation command) {
@@ -39,7 +41,7 @@ public class RecommendationService {
         val created = new RecommendationEntity(fromId, toId, command.content());
         recommendationRepository.save(created);
 
-        // TODO: 알림 전송 (toId 회원에게)
+        eventPublisher.publishEvent(new RecommendationWrittenEvent(created.getId(), fromId, toId));
 
         return created.getId();
     }
@@ -57,10 +59,8 @@ public class RecommendationService {
 
     @Transactional
     public void delete(AuthUser user, Long id) {
-        val optional = recommendationRepository.findById(id);
-        if (optional.isEmpty())
-            return;
-        val found = optional.get();
+        val found = recommendationRepository.findById(id)
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
 
         if (!found.getFromId().equals(user.id()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);

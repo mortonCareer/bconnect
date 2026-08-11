@@ -20,7 +20,7 @@ export default function SignupCompletePage() {
   const userName = member?.name || '회원'
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex h-dvh flex-col bg-white">
       {/* Content */}
       <main className="flex flex-1 flex-col items-center justify-center px-4">
         {/* Title */}
@@ -36,8 +36,8 @@ export default function SignupCompletePage() {
         </div>
       </main>
 
-      {/* Fixed Start Button */}
-      <div className="fixed inset-x-0 bottom-0 bg-white px-4 pb-8 pt-4">
+      {/* Start Button */}
+      <div className="bg-white px-4 pb-8 pt-4">
         <Button asChild variant="primary" size="full">
           <Link href="/">시작하기</Link>
         </Button>

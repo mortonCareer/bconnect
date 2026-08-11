@@ -20,10 +20,11 @@ import to.bconnect.api.core.domain.project.ProjectFinder;
 import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.Task;
 import to.bconnect.api.core.domain.task.TaskQueryService;
+import to.bconnect.api.core.presentation.v1.request.FeedFilter;
 import to.bconnect.api.core.presentation.v1.response.FeedResponse;
 import to.bconnect.api.storage.attachment.AttachmentContext;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.attachment.AttachmentType;
-import to.bconnect.api.storage.attachment.ReferenceType;
 import to.bconnect.api.storage.task.TaskType;
 
 import java.util.List;
@@ -48,19 +49,20 @@ public class FeedController {
 
     @GetMapping
     public ApiResponse<CursorPage<FeedResponse>> list(
+            FeedFilter filter,
             CursorLimit cursorLimit,
             HttpServletResponse response) {
-        val page = postService.list(cursorLimit);
+        val page = postService.list(filter.toCommand(), cursorLimit);
         val posts = page.content();
 
         val memberIds = posts.stream().map(Post::memberId).distinct().toList();
-        val memberMap = memberResolver.resolveMap(memberIds);
-        val profileMap = profileResolver.resolveMap(memberIds);
+        val memberMap = memberResolver.resolveMapOrWithdrawn(memberIds);
+        val profileMap = profileResolver.resolveMapOrWithdrawn(memberIds);
         val pictureMap = attachmentUrlService.map(
-                ReferenceType.MEMBER, memberIds, ImageSize.SMALL);
+                AttachmentReferenceType.MEMBER, memberIds, ImageSize.SMALL);
 
         val postIds = posts.stream().map(Post::id).toList();
-        val attachmentMap = attachmentFinder.listMap(ReferenceType.POST, postIds, AttachmentType.IMAGE);
+        val attachmentMap = attachmentFinder.listMap(AttachmentReferenceType.POST, postIds, AttachmentType.IMAGE);
 
         val taskIds = posts.stream().map(Post::taskId).filter(Objects::nonNull).distinct().toList();
         val taskMap = taskQueryService.listByIds(taskIds).stream()
@@ -69,14 +71,21 @@ public class FeedController {
                 .filter(it -> it.type() == TaskType.PROJECT)
                 .map(Task::projectId).distinct().toList();
         val addressMap = projectFinder.addressMap(projectIds);
+        val companyMap = projectFinder.companyMap(projectIds);
 
         val content = posts.stream()
                 .map(it -> {
                     val member = memberMap.get(it.memberId());
                     val task = it.taskId() == null ? null : taskMap.get(it.taskId());
-                    val address = task == null ? null : task.type() == TaskType.WORKER
+                    val isWorkerTask = task != null && task.type() == TaskType.WORKER;
+                    val address = task == null ? null : isWorkerTask
                             ? task.workerAddress()
                             : addressMap.get(task.projectId());
+                    val company = task == null ? null : isWorkerTask
+                            ? task.workerCompany()
+                            : companyMap.containsKey(task.projectId())
+                            ? companyMap.get(task.projectId()).name()
+                            : null;
                     val attachments = attachmentMap.getOrDefault(it.id(), List.of());
                     val urlMap = attachmentUrlService.parseUrlMap(attachments, ImageSize.MEDIUM);
                     return FeedResponse.of(
@@ -84,6 +93,7 @@ public class FeedController {
                             member,
                             profileMap.get(it.memberId()),
                             task,
+                            company,
                             address,
                             attachments,
                             urlMap,
@@ -103,11 +113,11 @@ public class FeedController {
             @PathVariable Long id,
             HttpServletResponse response) {
         val post = postService.get(id);
-        val member = memberResolver.get(post.memberId());
-        val profile = profileResolver.resolveMap(List.of(post.memberId())).get(post.memberId());
-        val attachments = attachmentFinder.list(ReferenceType.POST, post.id(), AttachmentType.IMAGE);
+        val member = memberResolver.getOrWithdrawn(post.memberId());
+        val profile = profileResolver.getOrWithdrawn(post.memberId());
+        val attachments = attachmentFinder.list(AttachmentReferenceType.POST, post.id(), AttachmentType.IMAGE);
         val urlMap = attachmentUrlService.parseUrlMap(attachments, ImageSize.MEDIUM);
-        val picture = attachmentUrlService.get(ReferenceType.MEMBER, member.id(), ImageSize.SMALL);
+        val picture = attachmentUrlService.get(AttachmentReferenceType.MEMBER, member.id(), ImageSize.SMALL);
 
         val task = post.taskId() == null ? null
                 : taskQueryService.listByIds(List.of(post.taskId())).stream().findFirst().orElse(null);
@@ -115,14 +125,22 @@ public class FeedController {
                 ? List.of(task.projectId())
                 : List.<Long>of();
         val addressMap = projectFinder.addressMap(projectIds);
-        val address = task == null ? null : task.type() == TaskType.WORKER
+        val companyMap = projectFinder.companyMap(projectIds);
+        val isWorkerTask = task != null && task.type() == TaskType.WORKER;
+        val address = task == null ? null : isWorkerTask
                 ? task.workerAddress()
                 : addressMap.get(task.projectId());
+        val company = task == null ? null : isWorkerTask
+                ? task.workerCompany()
+                : companyMap.containsKey(task.projectId())
+                ? companyMap.get(task.projectId()).name()
+                : null;
 
         val scope = AttachmentKeyUtils.scope(AttachmentContext.MEMBER);
         signedCookieIssuer.issue(scope)
                 .forEach(it -> response.addHeader(HttpHeaders.SET_COOKIE, it.toString()));
 
-        return ApiResponse.success(FeedResponse.of(post, member, profile, task, address, attachments, urlMap, picture));
+        return ApiResponse.success(
+                FeedResponse.of(post, member, profile, task, company, address, attachments, urlMap, picture));
     }
 }

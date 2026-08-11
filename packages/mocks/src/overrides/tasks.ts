@@ -1,8 +1,12 @@
 import {
+  getAcceptOfferMockHandler,
   getCreateTaskWorkerMockHandler,
   getDeleteTaskMockHandler,
+  getDenyOfferMockHandler,
   getGetTasksMockHandler,
   getUpdateTaskWorkerMockHandler,
+  OfferStatus,
+  TaskProgress,
   TaskStatus,
   TaskType,
   Trade,
@@ -31,6 +35,7 @@ function isoOfDay(year: number, month1: number, day: number): string {
 
 const SAMPLE_ADDRESS: Address = {
   zipcode: '16677',
+  bcode: '4111100000',
   state: '경기',
   city: '수원시 장안구',
   street: '경기도 수원시 율전로 00번길 00-00',
@@ -47,6 +52,10 @@ interface TaskSeed {
   trades: Trade[]
   startDay: number
   endDay: number
+  /** 제안작업의 섭외 id — 채팅 OFFER 메시지(chats.ts)의 content 와 맞춘다 (#972) */
+  offerId?: number
+  /** 제안작업 요청사항 — 채팅 OFFER 카드 표시용 */
+  requirement?: string
 }
 
 const SEEDS: TaskSeed[] = [
@@ -82,6 +91,8 @@ const SEEDS: TaskSeed[] = [
     trades: [Trade.WALLPAPER, Trade.PAINTING],
     startDay: 18,
     endDay: 22,
+    offerId: 8004,
+    requirement: '전체적인 타일 시공과 단일 벽면 일부 도배를 요청드립니다.',
   },
   {
     id: 9005,
@@ -117,24 +128,32 @@ function buildSeedTasks(): Task[] {
       projectTitle: null,
       projectRequirement: null,
       projectMemo: null,
+      projectCompanyId: null,
+      projectCompanyName: null,
       offer: null,
+      progress: TaskProgress.TODO,
       createdAt: stamp,
       modifiedAt: stamp,
     }
     if (seed.proposed) {
-      // 업체 제안작업(미수락) — PROJECT 타입 + OFFERED
+      // 업체 제안작업(미수락) — PROJECT 타입 + OFFERED. offer 가 붙으면 채팅 OFFER 카드가 상세를 읽는다(#972).
       return {
         ...base,
         type: TaskType.PROJECT,
         status: TaskStatus.OFFERED,
         projectTitle: seed.title,
+        projectRequirement: seed.requirement ?? null,
         workerCompany: seed.company,
+        offer:
+          seed.offerId == null
+            ? null
+            : { id: seed.offerId, taskId: seed.id, seq: 1, status: OfferStatus.ACTIVE },
       }
     }
     return {
       ...base,
       type: TaskType.WORKER,
-      status: TaskStatus.SCHEDULED,
+      status: TaskStatus.ASSIGNED,
       workerTitle: seed.title,
       workerCompany: seed.company,
     }
@@ -155,7 +174,8 @@ export const tasksOverrides = [
     tasks.push({
       id,
       type: TaskType.WORKER,
-      status: TaskStatus.SCHEDULED,
+      status: TaskStatus.ASSIGNED,
+      progress: TaskProgress.TODO,
       trades: body.trades,
       start: body.start,
       end: body.end,
@@ -168,6 +188,8 @@ export const tasksOverrides = [
       projectTitle: null,
       projectRequirement: null,
       projectMemo: null,
+      projectCompanyId: null,
+      projectCompanyName: null,
       offer: null,
       createdAt: stamp,
       modifiedAt: stamp,
@@ -186,6 +208,7 @@ export const tasksOverrides = [
             trades: body.trades,
             start: body.start,
             end: body.end,
+            progress: body.progress,
             workerTitle: body.title,
             workerMemo: body.memo ?? null,
             workerCompany: body.company ?? null,
@@ -202,4 +225,21 @@ export const tasksOverrides = [
     tasks = tasks.filter((t) => t.id !== id)
     return { success: true }
   }),
+
+  // 기술자의 섭외 수락/거절(#972) — 채팅 OFFER 카드가 재조회 시 결과 상태를 읽는다.
+  // 업체측 섭외 대기열(schedule.ts)은 별도 상태라 여기선 career 쪽 task.offer 만 갱신.
+  ...[
+    [getAcceptOfferMockHandler, OfferStatus.ACCEPTED, TaskStatus.ASSIGNED] as const,
+    [getDenyOfferMockHandler, OfferStatus.DENIED, TaskStatus.NONE] as const,
+  ].map(([handler, offerStatus, taskStatus]) =>
+    handler((info) => {
+      const offerId = Number(info.params.id)
+      tasks = tasks.map((t) =>
+        t.offer?.id === offerId
+          ? { ...t, status: taskStatus, offer: { ...t.offer, status: offerStatus } }
+          : t
+      )
+      return { success: true }
+    })
+  ),
 ]

@@ -1,3 +1,4 @@
+import { NotificationReferenceType } from '@bconnect/api-client'
 import type { Notification } from '@bconnect/api-client'
 
 export interface NotificationGroup {
@@ -9,12 +10,10 @@ export interface NotificationGroup {
   count: number
 }
 
-// BE 는 referenceType 을 소문자로 내려준다(`chat_room`) — 비교 전 정규화한다.
-const CHAT_ROOM = 'chat_room'
-const isChatRoom = (n: Notification) => n.referenceType?.toLowerCase() === CHAT_ROOM
+const isChatRoom = (n: Notification) => n.referenceType === NotificationReferenceType.CHAT_ROOM
 
 /**
- * 같은 채팅방(chat_room + referenceId) 연속 알림을 한 그룹으로 접는다.
+ * 같은 채팅방(CHAT_ROOM + referenceId) 연속 알림을 한 그룹으로 접는다.
  * 알림은 createdAt 내림차순이라 방당 메시지 폭탄은 연속으로 도착 → 연속 병합으로 충분.
  * 채팅 외 타입은 병합하지 않는다(각 단건). 표시 전용 — 원본 알림 row 는 개별 유지.
  */

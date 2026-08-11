@@ -1,15 +1,21 @@
 'use client'
 
 import { useCallback, useState, type ReactNode } from 'react'
-import { getGetDirectChatsQueryKey, getTradeLabel, useQueryClient } from '@bconnect/api-client'
-import type { Message, Profile } from '@bconnect/api-client'
+import {
+  getGetDirectChatMessagesQueryKey,
+  getGetDirectChatsQueryKey,
+  getTradeLabel,
+  useQueryClient,
+} from '@bconnect/api-client'
+import type { CursorPageMessage, InfiniteData, Message, Profile } from '@bconnect/api-client'
 import { ChatInput, ProfileCard, Skeleton } from '@bconnect/ui'
 import { DEFAULT_PROFILE_IMAGE } from '@bconnect/config/avatar'
 import { PanelShell } from '../_shared/PanelShell'
 import { MessageThread } from './_parts/MessageThread'
 import { chatMemberName } from './_parts/types'
 import { useDirectChatSocket } from './useDirectChatSocket'
-import type { ChatSummary } from './_parts/types'
+import type { OfferMessageDetail } from './_parts/OfferMessageCard'
+import type { ChatSummary, OfferActions } from './_parts/types'
 
 /** 앱이 resolve 해 내려주는 데이터. career/plan 어댑터가 useGetDirectChats·useGetProfile·useGetMyMember 로 채운다. */
 export interface ChatViewData {
@@ -18,6 +24,12 @@ export interface ChatViewData {
   currentUserId?: number
   /** 상대 프로필 보강 — chat 응답에 없는 풍부 정보(address.city, primaryTrade). 발산 없는 by-id 보강 */
   otherProfile?: Profile
+  /** 섭외 제안(OFFER) 메시지 상세 — key = offerId. 미주입이면 카드가 상세 없이 렌더 (plan) */
+  offerDetails?: Map<number, OfferMessageDetail>
+  /** 섭외 상세 조회 중 — 채팅 자체는 유지하고 OFFER 카드 안에서 상태 표시 */
+  isOfferDetailsLoading?: boolean
+  /** 섭외 상세 조회 실패 — 채팅 자체는 유지하고 OFFER 카드 안에서 상태 표시 */
+  isOfferDetailsError?: boolean
   isLoading: boolean
   isError: boolean
 }
@@ -27,6 +39,8 @@ type ChatViewBaseProps = {
   data: ChatViewData
   /** 상대 프로필 패널/페이지 href 빌더 — 앱이 주입 (plan: panelHref, career: '/profile/'+id) */
   profileHref?: (memberId: number) => string
+  /** 섭외 제안 수락/거절 — career(기술자)만 주입. 미주입이면 카드가 읽기전용 */
+  offerActions?: OfferActions
 }
 
 type ChatViewShellProps =
@@ -48,8 +62,17 @@ type ChatViewShellProps =
 export type ChatViewProps = ChatViewBaseProps & ChatViewShellProps
 
 export function ChatView(props: ChatViewProps) {
-  const { chatId, data, profileHref } = props
-  const { chat, currentUserId, otherProfile, isLoading, isError } = data
+  const { chatId, data, profileHref, offerActions } = props
+  const {
+    chat,
+    currentUserId,
+    otherProfile,
+    offerDetails,
+    isOfferDetailsLoading,
+    isOfferDetailsError,
+    isLoading,
+    isError,
+  } = data
   const other = chat?.members.find((p) => p.id !== currentUserId)
   const otherId = other?.id
   const title = chatMemberName(other) ?? chat?.title ?? '채팅'
@@ -65,9 +88,23 @@ export function ChatView(props: ChatViewProps) {
       setLocalMessages((prev) =>
         prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]
       )
+      queryClient.setQueryData<InfiniteData<CursorPageMessage>>(
+        getGetDirectChatMessagesQueryKey(chatId),
+        (prev) => {
+          if (!prev) return prev
+          const [newest, ...older] = prev.pages
+          if (!newest) return prev
+          if (prev.pages.some((page) => page.content?.some((m) => m.id === incoming.id)))
+            return prev
+          return {
+            ...prev,
+            pages: [{ ...newest, content: [incoming, ...(newest.content ?? [])] }, ...older],
+          }
+        }
+      )
       queryClient.invalidateQueries({ queryKey: getGetDirectChatsQueryKey() })
     },
-    [queryClient]
+    [chatId, queryClient]
   )
   const sendMessage = useDirectChatSocket(chatId, appendMessage)
 
@@ -110,6 +147,13 @@ export function ChatView(props: ChatViewProps) {
         currentUserId={currentUserId}
         participants={chat.members}
         localMessages={localMessages}
+        offerDetails={offerDetails}
+        isOfferDetailsLoading={isOfferDetailsLoading}
+        isOfferDetailsError={isOfferDetailsError}
+        offerActions={offerActions}
+        // TODO(BE): 섭외/작업 응답에 업체명 필드가 없어 companyName 을 주입하지 못한다.
+        // 채팅 상대 이름은 업체가 아니라 담당자 개인명이라 대체 불가 — 카드가 placeholder 로 렌더된다.
+        // BE 에 필드가 추가되면 여기서 companyName 을 넘길 것.
       />
       <ChatInput value={message} onChange={setMessage} onSend={handleSend} />
     </>

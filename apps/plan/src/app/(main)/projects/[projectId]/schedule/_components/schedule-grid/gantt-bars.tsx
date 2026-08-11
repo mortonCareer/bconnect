@@ -1,7 +1,7 @@
 'use client'
 
 import { ContextMenu } from '@bconnect/ui'
-import { BAR_HEIGHT, BAR_STYLES, BAR_TOP, DAY_WIDTH, STATUS_LABELS } from './constants'
+import { BAR_HEIGHT, BAR_STYLES, BAR_TONE_LABELS, BAR_TOP, DAY_WIDTH, barTone } from './constants'
 import { addDays, daysBetween, toIsoDate } from './date-utils'
 import type { ScheduleTask } from './types'
 import type { DragMode } from './use-bar-drag'
@@ -57,8 +57,9 @@ export function GanttBars({
   const spanDays = daysBetween(preview.startDate, preview.endDate) + 1
   const left = offsetDays * DAY_WIDTH + 2
   const width = spanDays * DAY_WIDTH - 4
-  const style = BAR_STYLES[task.status]
-  const label = STATUS_LABELS[task.status]
+  const tone = barTone(task)
+  const style = BAR_STYLES[tone]
+  const label = BAR_TONE_LABELS[tone]
 
   return (
     <>

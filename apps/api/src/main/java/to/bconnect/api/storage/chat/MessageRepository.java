@@ -19,6 +19,8 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
     Optional<MessageEntity> findFirstByChatIdAndChatTypeOrderByIdDesc(Long chatId, ChatType chatType);
 
+    void deleteAllByChatIdAndChatType(Long chatId, ChatType chatType);
+
     @Query("SELECT m FROM MessageEntity m WHERE m.id IN " +
            "(SELECT MAX(m2.id) FROM MessageEntity m2 WHERE m2.chatId IN :chatIds AND m2.chatType = :chatType GROUP BY m2.chatId)")
     List<MessageEntity> findLatestMessagesByChatIdInAndChatType(Collection<Long> chatIds, ChatType chatType);
@@ -42,6 +44,11 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
            "WHERE p.memberId = :memberId AND p.chatId = :chatId")
     Long findGroupUnreadCountByChatIdAndMemberId(Long chatId, Long memberId);
 
+    @Query("SELECT COUNT(m) FROM ParticipantEntity p " +
+           "LEFT JOIN MessageEntity m ON m.chatId = p.chatId AND m.chatType = 'GROUP' AND m.id > p.lastIdx " +
+           "WHERE p.memberId = :memberId")
+    Long findGroupUnreadCountByMemberId(Long memberId);
+
     default Map<Long, Long> findDirectUnreadCountByChatIdsAndMemberId(Collection<Long> chatIds, Long memberId) {
         return findDirectUnreadCountByChatIdsAndMemberIdRows(chatIds, memberId).stream()
                 .collect(Collectors.toMap(
@@ -62,4 +69,10 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
            "AND m.id > (CASE WHEN d.minId = :memberId THEN d.minLastIdx ELSE d.maxLastIdx END) " +
            "WHERE d.id = :chatId")
     Long findDirectUnreadCountByChatIdAndMemberId(Long chatId, Long memberId);
+
+    @Query("SELECT COUNT(m) FROM DirectChatEntity d " +
+           "LEFT JOIN MessageEntity m ON m.chatId = d.id AND m.chatType = 'DIRECT' " +
+           "AND m.id > (CASE WHEN d.minId = :memberId THEN d.minLastIdx ELSE d.maxLastIdx END) " +
+           "WHERE d.minId = :memberId OR d.maxId = :memberId")
+    Long findDirectUnreadCountByMemberId(Long memberId);
 }
