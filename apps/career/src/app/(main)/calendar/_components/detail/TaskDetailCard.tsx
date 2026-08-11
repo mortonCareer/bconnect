@@ -153,8 +153,8 @@ export function TaskDetailCard({ task, selectedDay, selectedMonth }: TaskDetailC
             <span className="flex items-center gap-0.5 rounded bg-gray-100 px-2 py-1 text-r-12 text-gray-500">
               {TASK_STATUS_LABELS[task.status]}
               <InfoPopover label="섭외 상태 설명">
-                업체가 이 작업에 함께할 기술자를 구하는 단계예요. 모집 전 → 모집 중 → 섭외 중 →
-                섭외됨 순으로 바뀌어요.
+                업체가 이 작업에 함께할 기술자를 구하는 상태예요. 섭외가 진행되면 자동으로 바뀌고,
+                직접 바꿀 수는 없어요.
               </InfoPopover>
             </span>
           )}
