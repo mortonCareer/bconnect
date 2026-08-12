@@ -17,6 +17,7 @@ import to.bconnect.api.support.fixture.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
+import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE;
 
 @IntegrationTest
 class OfferServiceTest {
@@ -56,16 +57,17 @@ class OfferServiceTest {
         val next = memberRepository.save(MemberFactory.entity("next", "01000001003", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
-        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
-        val ownerUser = UserFactory.domain(owner.getId(), Role.PLAN);
-        val first = offerService.create(ownerUser, OfferFactory.command(task.getId(), worker.getId()));
-        val second = offerService.create(ownerUser, OfferFactory.command(task.getId(), next.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null, TaskStatus.OFFERED));
+        val first = offerRepository.save(
+                OfferFactory.entity(task.getId(), worker.getId(), 1, OfferStatus.ACTIVE));
+        val second = offerRepository.save(
+                OfferFactory.entity(task.getId(), next.getId(), 2, OfferStatus.PENDING));
 
         // when
-        offerService.deny(UserFactory.domain(worker.getId(), Role.CAREER), first);
+        offerService.deny(UserFactory.domain(worker.getId(), Role.CAREER), first.getId());
 
         // then
-        assertThat(offerRepository.findById(second).orElseThrow().getStatus()).isEqualTo(OfferStatus.ACTIVE);
+        assertThat(offerRepository.findById(second.getId()).orElseThrow().getStatus()).isEqualTo(OfferStatus.ACTIVE);
         assertThat(taskRepository.findById(task.getId()).orElseThrow().getStatus()).isEqualTo(TaskStatus.OFFERED);
     }
 
@@ -77,15 +79,15 @@ class OfferServiceTest {
         val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
-        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
-        val ownerUser = UserFactory.domain(owner.getId(), Role.PLAN);
-        val created = offerService.create(ownerUser, OfferFactory.command(task.getId(), worker.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null, TaskStatus.OFFERED));
+        val created = offerRepository.save(
+                OfferFactory.entity(task.getId(), worker.getId(), 1, OfferStatus.ACTIVE));
 
         // when
-        offerService.deny(UserFactory.domain(worker.getId(), Role.CAREER), created);
+        offerService.deny(UserFactory.domain(worker.getId(), Role.CAREER), created.getId());
 
         // then
-        assertThat(offerRepository.findById(created).orElseThrow().getStatus()).isEqualTo(OfferStatus.DENIED);
+        assertThat(offerRepository.findById(created.getId()).orElseThrow().getStatus()).isEqualTo(OfferStatus.DENIED);
         assertThat(taskRepository.findById(task.getId()).orElseThrow().getStatus()).isEqualTo(TaskStatus.NONE);
     }
 
@@ -97,15 +99,16 @@ class OfferServiceTest {
         val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
-        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null, TaskStatus.OFFERED));
         val ownerUser = UserFactory.domain(owner.getId(), Role.PLAN);
-        val created = offerService.create(ownerUser, OfferFactory.command(task.getId(), worker.getId()));
+        val created = offerRepository.save(
+                OfferFactory.entity(task.getId(), worker.getId(), 1, OfferStatus.ACTIVE));
 
         // when
-        offerService.cancel(ownerUser, created);
+        offerService.cancel(ownerUser, created.getId());
 
         // then
-        assertThat(offerRepository.findById(created).orElseThrow().getStatus()).isEqualTo(OfferStatus.CANCELED);
+        assertThat(offerRepository.findById(created.getId()).orElseThrow().getStatus()).isEqualTo(OfferStatus.CANCELED);
         assertThat(taskRepository.findById(task.getId()).orElseThrow().getStatus()).isEqualTo(TaskStatus.NONE);
     }
 
@@ -117,15 +120,15 @@ class OfferServiceTest {
         val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
-        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
-        val ownerUser = UserFactory.domain(owner.getId(), Role.PLAN);
-        val created = offerService.create(ownerUser, OfferFactory.command(task.getId(), worker.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null, TaskStatus.OFFERED));
+        val created = offerRepository.save(
+                OfferFactory.entity(task.getId(), worker.getId(), 1, OfferStatus.ACTIVE, MIN_DATE));
 
         // when
-        offerService.expire(created);
+        offerService.expire(created.getId());
 
         // then
-        assertThat(offerRepository.findById(created).orElseThrow().getStatus()).isEqualTo(OfferStatus.EXPIRED);
+        assertThat(offerRepository.findById(created.getId()).orElseThrow().getStatus()).isEqualTo(OfferStatus.EXPIRED);
         assertThat(taskRepository.findById(task.getId()).orElseThrow().getStatus()).isEqualTo(TaskStatus.NONE);
     }
 
@@ -138,10 +141,10 @@ class OfferServiceTest {
         val next = memberRepository.save(MemberFactory.entity("next", "01000001003", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
-        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        val task = taskRepository.save(
+                TaskFactory.projectEntity(project.getId(), worker.getId(), TaskStatus.ASSIGNED));
         val ownerUser = UserFactory.domain(owner.getId(), Role.PLAN);
-        val created = offerService.create(ownerUser, OfferFactory.command(task.getId(), worker.getId()));
-        offerService.accept(UserFactory.domain(worker.getId(), Role.CAREER), created);
+        offerRepository.save(OfferFactory.entity(task.getId(), worker.getId(), 1, OfferStatus.ACCEPTED));
 
         // when & then
         assertCodeException(() -> offerService.create(ownerUser, OfferFactory.command(task.getId(), next.getId())))
@@ -156,16 +159,38 @@ class OfferServiceTest {
         val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
-        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
-        val ownerUser = UserFactory.domain(owner.getId(), Role.PLAN);
-        val created = offerService.create(ownerUser, OfferFactory.command(task.getId(), worker.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null, TaskStatus.OFFERED));
+        val created = offerRepository.save(
+                OfferFactory.entity(task.getId(), worker.getId(), 1, OfferStatus.ACTIVE));
 
         // when
-        offerService.accept(UserFactory.domain(worker.getId(), Role.CAREER), created);
+        offerService.accept(UserFactory.domain(worker.getId(), Role.CAREER), created.getId());
 
         // then
         val found = taskRepository.findById(task.getId()).orElseThrow();
         assertThat(found.getStatus()).isEqualTo(TaskStatus.ASSIGNED);
         assertThat(found.getWorkerId()).isEqualTo(worker.getId());
+    }
+
+    @Test
+    @DisplayName("accept - 이미 배정된 작업의 다른 섭외를 수락하면 INVALID_TASK_STATUS로 실패한다")
+    void accept_assignedTask() {
+        // given
+        val owner = memberRepository.save(MemberFactory.entity("owner", "01000001001", Role.PLAN));
+        val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
+        val next = memberRepository.save(MemberFactory.entity("next", "01000001003", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(owner.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(
+                TaskFactory.projectEntity(project.getId(), worker.getId(), TaskStatus.ASSIGNED));
+        offerRepository.save(OfferFactory.entity(task.getId(), worker.getId(), 1, OfferStatus.ACCEPTED));
+        val active = offerRepository.save(
+                OfferFactory.entity(task.getId(), next.getId(), 2, OfferStatus.ACTIVE));
+
+        // when & then
+        assertCodeException(() -> offerService.accept(UserFactory.domain(next.getId(), Role.CAREER), active.getId()))
+                .hasExceptionCode(OfferExceptionCode.INVALID_TASK_STATUS);
+        assertThat(offerRepository.findById(active.getId()).orElseThrow().getStatus()).isEqualTo(OfferStatus.ACTIVE);
+        assertThat(taskRepository.findById(task.getId()).orElseThrow().getWorkerId()).isEqualTo(worker.getId());
     }
 }

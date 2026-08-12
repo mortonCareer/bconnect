@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static to.bconnect.api.storage.task.TaskStatus.OFFERABLE;
+import static to.bconnect.api.storage.task.TaskStatus.OFFERED;
 
 @Service
 @RequiredArgsConstructor
@@ -80,10 +81,12 @@ public class OfferService {
         if (found.getStatus() != OfferStatus.ACTIVE)
             throw new CodeException(OfferExceptionCode.INVALID_STATUS);
 
-        found.accept();
-
         val task = taskRepository.findById(found.getTaskId())
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+        if (task.getStatus() != OFFERED)
+            throw new CodeException(OfferExceptionCode.INVALID_TASK_STATUS);
+
+        found.accept();
         task.assign(found.getWorkerId());
 
         // cancel other offers

@@ -1,5 +1,7 @@
 package to.bconnect.api.support.fixture;
 
+import lombok.val;
+import org.springframework.test.util.ReflectionTestUtils;
 import to.bconnect.api.core.domain.task.*;
 import to.bconnect.api.storage.profile.Trade;
 import to.bconnect.api.storage.task.TaskEntity;
@@ -59,6 +61,20 @@ public class TaskFactory {
                 "requirement",
                 "memo"
         );
+    }
+
+    public static TaskEntity projectEntity(Long projectId, Long workerId, TaskStatus status) {
+        val created = projectEntity(projectId, workerId);
+        switch (status) {
+            case NONE -> {}
+            case OPEN -> ReflectionTestUtils.setField(created, "status", TaskStatus.OPEN);
+            case OFFERED -> created.offered();
+            case ASSIGNED -> {
+                created.offered();
+                created.assign(workerId);
+            }
+        }
+        return created;
     }
 
     public static CreateWorkerTask createCommand() {
