@@ -17,6 +17,7 @@ import type {
   PresignedFile,
 } from '@bconnect/api-client'
 import { http, HttpResponse } from 'msw'
+import { rememberUpload } from './_uploads'
 
 let nextId = 1
 const cred = (
@@ -95,8 +96,11 @@ export const credentialsOverrides = [
       return { id, uploadUrl: `/mock-s3/${id}` }
     })
   }),
-  // presigned PUT 수신부 — 실 S3 대역. 바이트는 버린다.
-  http.put('*/mock-s3/:id', () => new HttpResponse(null, { status: 200 })),
+  // presigned PUT 수신부 — 실 S3 대역. 바이트는 소켓 mock 이 되돌려줄 수 있게 붙잡아 둔다.
+  http.put('*/mock-s3/:id', async ({ params, request }) => {
+    await rememberUpload(Number(params.id), request)
+    return new HttpResponse(null, { status: 200 })
+  }),
   getCreateAttachmentConfirmMockHandler(async ({ request }): Promise<Attachment[]> => {
     const body = (await request.json()) as ConfirmRequest
     return body.attachmentIds

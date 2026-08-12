@@ -24,10 +24,18 @@ const chatBubbleVariants = cva('inline-flex items-center px-4 text-r-14', {
   },
 })
 
+export interface ChatMessageImage {
+  id: number
+  url: string
+  alt?: string
+}
+
 export interface ChatMessageProps
   extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof chatBubbleVariants> {
   /** 메시지 내용 (typing variant에서는 무시됨) */
   message?: string
+  /** 사진 메시지 — 주입 시 말풍선 대신 이미지가 렌더된다 */
+  images?: ChatMessageImage[]
   /** 타임스탬프 (예: "오후 2:09") */
   timestamp?: string
   /** 프로필 이미지 URL (theirs, typing variant) */
@@ -60,14 +68,20 @@ export interface ChatMessageProps
  * ```
  */
 const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
-  ({ className, variant, message, timestamp, profileImage, nickname, ...props }, ref) => {
+  ({ className, variant, message, images, timestamp, profileImage, nickname, ...props }, ref) => {
+    const hasImages = (images?.length ?? 0) > 0
+
     if (variant === 'mine') {
       return (
         <div ref={ref} className={cn('flex items-end justify-end gap-2', className)} {...props}>
           {timestamp && <span className="shrink-0 text-r-12 text-gray-700">{timestamp}</span>}
-          <div className={cn(chatBubbleVariants({ variant }), 'max-w-[55vw]')}>
-            <span className="break-words">{message}</span>
-          </div>
+          {hasImages ? (
+            <ImageGrid images={images ?? []} />
+          ) : (
+            <div className={cn(chatBubbleVariants({ variant }), 'max-w-[55vw]')}>
+              <span className="break-words">{message}</span>
+            </div>
+          )}
         </div>
       )
     }
@@ -86,13 +100,17 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
         <div className="flex items-end gap-2">
           <div className="flex max-w-[55vw] flex-col gap-1">
             {nickname && <span className="text-m-12 text-gray-900">{nickname}</span>}
-            <div className={chatBubbleVariants({ variant })}>
-              {variant === 'typing' ? (
-                <TypingDots />
-              ) : (
-                <span className="break-words">{message}</span>
-              )}
-            </div>
+            {hasImages && variant !== 'typing' ? (
+              <ImageGrid images={images ?? []} />
+            ) : (
+              <div className={chatBubbleVariants({ variant })}>
+                {variant === 'typing' ? (
+                  <TypingDots />
+                ) : (
+                  <span className="break-words">{message}</span>
+                )}
+              </div>
+            )}
           </div>
           {variant === 'theirs' && timestamp && (
             <span className="shrink-0 text-r-12 text-gray-700">{timestamp}</span>
@@ -103,6 +121,36 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
   }
 )
 ChatMessage.displayName = 'ChatMessage'
+
+/**
+ * 사진 메시지 격자. private CloudFront 이미지라 next/image 가 아닌 plain img 를 쓴다
+ * (Optimizer 는 서버 fetch 라 브라우저 signed cookie 를 싣지 못해 403).
+ */
+function ImageGrid({ images, className }: { images: ChatMessageImage[]; className?: string }) {
+  const isSingle = images.length === 1
+  return (
+    <div
+      className={cn(
+        // 폭을 내용에 맡긴다 — 뷰포트 기준(vw)으로 잡으면 plan 패널처럼 좁은 컨테이너에서 넘친다.
+        'grid w-max gap-1',
+        isSingle ? 'grid-cols-1' : 'grid-cols-2',
+        className
+      )}
+    >
+      {images.map((image) => (
+        <img
+          key={image.id}
+          src={image.url}
+          alt={image.alt ?? '사진'}
+          className={cn(
+            'rounded-xl bg-gray-100 object-cover',
+            isSingle ? 'max-h-60 min-w-28 max-w-full' : 'size-28'
+          )}
+        />
+      ))}
+    </div>
+  )
+}
 
 /** 타이핑 인디케이터 (3개의 점 애니메이션) */
 function TypingDots() {

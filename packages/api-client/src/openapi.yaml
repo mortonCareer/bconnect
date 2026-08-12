@@ -4850,6 +4850,8 @@ components:
           type:
           - string
           - "null"
+        sourceUrl:
+          type: string
         createdAt:
           type: string
           format: date-time
@@ -4866,6 +4868,7 @@ components:
       - images
       - memberId
       - modifiedAt
+      - sourceUrl
       - task
       - taskId
       - title

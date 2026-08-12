@@ -39,6 +39,14 @@ public class CrawledProfileEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private CrawledPlatform platform;
 
+    private String blogTitle;
+
+    private String profileImageUrl;
+
+    private String coverImageUrl;
+
+    private String externalUrl;
+
     public CrawledProfileEntity(Long memberId, String primaryTrade, Set<String> trades, Integer experience,
                                 String headline, String address, Region state,
                                 String url, CrawledPlatform platform) {

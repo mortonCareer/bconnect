@@ -32,7 +32,7 @@ interface TechnicianItemBase {
   postCount: number
   coworkerCount: number
   recommendCount: number
-  // ⚠️ 모킹값 — 리뷰(별점)·계약·자격 증명 BE 도메인 미구현. 0/빈값은 실제 발생 가능해 sentinel 로 모킹 명시
+  // 리뷰(별점)·계약·자격 증명 BE 도메인 미구현 — 표시하지 않으며 0/빈값 고정 (#832)
   rating: number
   reviewCount: number
   contractCount: number
@@ -86,11 +86,9 @@ function toTechnicianItem(profile: Profile, feeds: Feed[]): MemberTechnicianItem
     postCount: profile.postCount ?? 0,
     coworkerCount: profile.coworkerCount ?? 0,
     recommendCount: profile.recommendationCount ?? 0,
-    // ⚠️ 모킹값 (BE 도메인 미구현) — 0은 실제 발생 가능한 값이라 sentinel 로 모킹임을 명시.
-    // rating 은 5점 초과 불가 → 2.5 고정.
-    rating: 2.5,
-    reviewCount: 777,
-    contractCount: 777,
+    rating: 0,
+    reviewCount: 0,
+    contractCount: 0,
     certifications: [],
     portfolios: feeds.slice(0, 3).map((feed) => {
       const { images, days } = toWork(feed)

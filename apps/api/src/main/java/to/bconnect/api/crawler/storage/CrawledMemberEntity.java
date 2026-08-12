@@ -29,6 +29,10 @@ public class CrawledMemberEntity extends BaseEntity {
 
     private String email;
 
+    private String instagram;
+
+    private String youtube;
+
     public CrawledMemberEntity(String company, String name, String phone, String picture,
                                String brn, String email) {
         this.company = company;

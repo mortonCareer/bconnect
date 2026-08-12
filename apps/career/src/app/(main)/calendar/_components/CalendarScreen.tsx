@@ -23,6 +23,11 @@ export function CalendarScreen() {
       <TopBar
         variant="default"
         showBack={false}
+        leftSlot={
+          <Button variant="outline" size="sm" className="w-auto px-5" disabled>
+            내 일정
+          </Button>
+        }
         actionIcon={<PlusIcon />}
         actionLabel="작업 생성"
         actionHref="/calendar/new"

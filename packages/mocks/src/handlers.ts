@@ -1,6 +1,7 @@
 import { getBconnectAPIMock } from '@bconnect/api-client'
 import { delay, http } from 'msw'
 import { authOverrides } from './overrides/auth'
+import { chatSocketOverrides } from './overrides/chatSocket'
 import { chatsOverrides } from './overrides/chats'
 import { coworkersOverrides } from './overrides/coworkers'
 import { crawledOverrides } from './overrides/crawled'
@@ -35,6 +36,8 @@ const globalDelay = http.all('*', async ({ request }) => {
 export const handlers = [
   globalDelay,
   ...authOverrides,
+  // STOMP 소켓 mock — HTTP 핸들러와 매칭 경로가 겹치지 않는다
+  ...chatSocketOverrides,
   ...chatsOverrides,
   ...coworkersOverrides,
   ...crawledOverrides,

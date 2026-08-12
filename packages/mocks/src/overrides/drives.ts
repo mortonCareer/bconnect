@@ -30,6 +30,7 @@ import type {
   UploadDriveRequest,
 } from '@bconnect/api-client'
 import { http, HttpResponse } from 'msw'
+import { rememberUpload } from './_uploads'
 
 /**
  * 저장소(drives/notes/attachments) **stateful** mock (#767).
@@ -262,8 +263,11 @@ export const drivesOverrides = [
     })
   }),
 
-  // presigned PUT 수신부 — 실 S3 대역. 바이트는 버린다.
-  http.put('*/mock-s3/:id', () => new HttpResponse(null, { status: 200 })),
+  // presigned PUT 수신부 — 실 S3 대역. 바이트는 소켓 mock 이 되돌려줄 수 있게 붙잡아 둔다.
+  http.put('*/mock-s3/:id', async ({ params, request }) => {
+    await rememberUpload(Number(params.id), request)
+    return new HttpResponse(null, { status: 200 })
+  }),
 
   getCreateAttachmentConfirmMockHandler(async (info): Promise<Attachment[]> => {
     const body = (await info.request.json()) as ConfirmRequest

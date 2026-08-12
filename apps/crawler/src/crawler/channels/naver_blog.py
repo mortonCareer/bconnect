@@ -446,6 +446,40 @@ async def fetch_business_info(blog_id: str, html_fallback: dict | None = None) -
     return {}
 
 
+async def fetch_external_channels(blog_id: str) -> dict:
+    """블로그 프로필에 연결된 외부 채널을 조회한다 (#1019).
+
+    프로필 화면의 링크 영역은 JS 렌더라 HTML 파싱으로 안 잡히고, 전용 API 로만 얻는다.
+    반환: {"youtube": url, "instagram": url, "external": url} — 없는 키는 생략.
+    external 은 유튜브·인스타 외 첫 채널(카카오 채널·홈페이지 등).
+    """
+    url = f"https://m.blog.naver.com/api/blogs/{blog_id}/external-channel"
+    headers = {
+        "Referer": f"https://m.blog.naver.com/{blog_id}",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)",
+    }
+    try:
+        resp = await _naver_get(url, headers=headers)
+        data = resp.json()
+    except Exception:
+        log.debug("외부 채널 조회 실패: %s", blog_id)
+        return {}
+
+    if not data.get("isSuccess"):
+        return {}
+
+    channels: dict = {}
+    for item in data.get("result", {}).get("externalChannelViewList", []):
+        if not item.get("enable") or not item.get("url"):
+            continue
+        kind = item.get("type")
+        if kind in ("youtube", "instagram"):
+            channels.setdefault(kind, item["url"])
+        else:
+            channels.setdefault("external", item["url"])
+    return channels
+
+
 def extract_blog_id(blog_url: str) -> str | None:
     """블로그 URL에서 블로거 ID를 추출한다."""
     parsed = urlparse(blog_url)
@@ -536,7 +570,7 @@ async def explore_blogger(blog_url: str) -> dict:
             "profile_image_url": "",
             "posts": [{
                 "title": post["title"],
-                "content": post["about"][:1000],
+                "content": post["about"],
                 "images": post["images"],
                 "source_url": blog_url,
             }] if (post["about"] or post["images"]) else [],
@@ -546,10 +580,11 @@ async def explore_blogger(blog_url: str) -> dict:
     blog_home_url = f"https://blog.naver.com/{blog_id}"
 
     # 1-3. 프로필·스킨 이미지·게시글을 병렬 수집 (독립적 요청)
-    profile, skin_images, main_post = await asyncio.gather(
+    profile, skin_images, main_post, external_channels = await asyncio.gather(
         fetch_blog_profile(blog_id),
         fetch_blog_skin_images(blog_id),
         fetch_blog_post(blog_url),
+        fetch_external_channels(blog_id),
     )
     banner_image_url = skin_images["banner"]
     footer_image_url = skin_images["footer"]
@@ -575,7 +610,7 @@ async def explore_blogger(blog_url: str) -> dict:
     posts = [
         {
             "title": post["title"],
-            "content": post["about"][:1000],
+            "content": post["about"],
             "images": post["images"],
             "source_url": url,
         }
@@ -628,6 +663,9 @@ async def explore_blogger(blog_url: str) -> dict:
         "footer_image_url": footer_image_url,
         "profile_image_url": profile["profile_image_url"],
         "cover_image_url": main_post["cover_image_url"],
+        "youtube_url": external_channels.get("youtube", ""),
+        "instagram_url": external_channels.get("instagram", ""),
+        "external_url": external_channels.get("external", ""),
         "posts": posts,  # 시공 사례 글 (제목·본문·사진·출처)
         "source_urls": source_urls,
         "phone_source": phone_source,  # "profile" | "post" | ""
