@@ -14,7 +14,7 @@
     "feia-sync": "tsx src/feia-sync.ts"
   },
   "dependencies": {
-    "cheerio": "^1.0.0",
+    "cheerio": "catalog:",
     "postgres": "^3.4.9"
   },
   "devDependencies": {
