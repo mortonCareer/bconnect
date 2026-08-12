@@ -6,27 +6,15 @@ spring:
 
   sql:
     init:
-      schema-locations:
-        - classpath:schema-postgresql.sql
+      mode: always
 
 sentry:
   dsn: ${SENTRY_DSN}
   send-default-pii: true
   traces-sample-rate: 1.0
-  environment: dev
+  environment: ${SENTRY_ENVIRONMENT}
 
 app:
-  jwt:
-    cookie-domain: ${COOKIE_DOMAIN:.bconnect.to}
-
-  cors:
-    allowed-origin-patterns:
-      - https://bconnect-career*.vercel.app
-      - https://bconnect-plan*.vercel.app
-      - https://*.bconnect.to
-      - https://*.dev.bconnect.to
-      - "http://localhost:[*]"
-
   sms:
     api-key: ${SOLAPI_API_KEY}
     api-secret: ${SOLAPI_API_SECRET}

@@ -10,23 +10,23 @@ spring:
         - classpath:data-crawler.sql
 
 app:
+  cors:
+    allowed-origins: "http://localhost:3000"
+    allowed-origin-patterns:
+    - "http://localhost:[*]"
+    - "http://127.0.0.1:[*]"
+
   jwt:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
+    cookie-domain: localhost
 
   data-go:
     service-key: test-service-key
 
-  sms:
-    api-key: test-api-key
-    api-secret: test-api-secret
-    sender-number: "01000000000"
-
   s3:
+    region: test-region
     bucket: test-bucket
 
   cloudfront:
     key-pair-id: test-key-pair-id
     private-key: test-private-key
-
-  sns:
-    platform-application-arn: test-platform-application-arn

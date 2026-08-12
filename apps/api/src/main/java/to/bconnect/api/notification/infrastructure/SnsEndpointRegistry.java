@@ -35,7 +35,7 @@ public class SnsEndpointRegistry implements PushEndpointRegistry {
         try {
             endpoint = snsClient.createPlatformEndpoint(
                     CreatePlatformEndpointRequest.builder()
-                            .platformApplicationArn(properties.platformApplicationArn())
+                            .platformApplicationArn(properties.platformArn())
                             .token(token)
                             .build())
                     .endpointArn();

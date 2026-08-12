@@ -9,6 +9,7 @@ spring:
 
   sql:
     init:
+      mode: always
       platform: h2
       data-locations:
         - classpath:data.sql
@@ -16,30 +17,25 @@ spring:
 
 app:
   cors:
+    allowed-origins: "http://localhost:3000"
     allowed-origin-patterns:
-      - "http://localhost:[*]"
-      - "http://127.0.0.1:[*]"
+    - "http://localhost:[*]"
+    - "http://127.0.0.1:[*]"
 
   jwt:
-    secret: test-secret-key-for-jwt-authentication-minimum-256-bits
+    secret: local-secret-key-for-jwt-authentication-minimum-256-bits
+    cookie-domain: localhost
 
   data-go:
-    service-key: ${DATA_GO_SERVICE_KEY:local-service-key}
-
-  sms:
-    api-key: local-api-key
-    api-secret: local-api-secret
-    sender-number: "01000000000"
+    service-key: local-service-key
 
   s3:
+    region: local-region
     bucket: local-bucket
 
   cloudfront:
     key-pair-id: local-key-pair-id
     private-key: local-private-key
-
-  sns:
-    platform-application-arn: local-platform-application-arn
 
 logging:
   level:

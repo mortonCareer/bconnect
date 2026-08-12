@@ -21,7 +21,9 @@ public class CookieProvider {
     }
 
     public ResponseCookie create(String refreshToken) {
-        return base(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
+        return ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
+                .path(COOKIE_PATH)
+                .domain(cookieDomain)
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Strict")
@@ -30,16 +32,10 @@ public class CookieProvider {
     }
 
     public ResponseCookie delete() {
-        return base(REFRESH_TOKEN_COOKIE_NAME, "")
+        return ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
+                .path(COOKIE_PATH)
+                .domain(cookieDomain)
                 .maxAge(0)
                 .build();
-    }
-
-    private ResponseCookie.ResponseCookieBuilder base(String name, String value) {
-        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(name, value)
-                .path(COOKIE_PATH);
-        if (cookieDomain != null && !cookieDomain.isBlank())
-            builder.domain(cookieDomain);
-        return builder;
     }
 }
