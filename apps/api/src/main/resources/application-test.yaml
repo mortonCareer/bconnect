@@ -1,6 +1,11 @@
 spring:
   datasource:
     url: jdbc:tc:postgresql:latest:///test
+  jpa:
+    properties:
+      show-sql: true
+      hibernate:
+        format_sql: true
 
   sql:
     init:
@@ -19,14 +24,3 @@ app:
   jwt:
     secret: test-secret-key-for-jwt-authentication-minimum-256-bits
     cookie-domain: localhost
-
-  data-go:
-    service-key: test-service-key
-
-  s3:
-    region: test-region
-    bucket: test-bucket
-
-  cloudfront:
-    key-pair-id: test-key-pair-id
-    private-key: test-private-key

@@ -1,6 +1,11 @@
 spring:
   datasource:
     url: jdbc:h2:mem:db;mode=postgresql;DB_CLOSE_ON_EXIT=FALSE
+  jpa:
+    properties:
+      show-sql: true
+      hibernate:
+        format_sql: true
 
   h2:
     console:
@@ -25,17 +30,6 @@ app:
   jwt:
     secret: local-secret-key-for-jwt-authentication-minimum-256-bits
     cookie-domain: localhost
-
-  data-go:
-    service-key: local-service-key
-
-  s3:
-    region: local-region
-    bucket: local-bucket
-
-  cloudfront:
-    key-pair-id: local-key-pair-id
-    private-key: local-private-key
 
 logging:
   level:

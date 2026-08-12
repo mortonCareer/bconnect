@@ -45,12 +45,13 @@ sequenceDiagram
 ## 컴포넌트 구성
 - AttachmentKeyUtils : S3 object key · Signed Cookie scope 조립
 - AttachmentFinder : Attachment 조회
-- AttachmentResolver : CloudFront URL 조립 (조회는 Finder 위임)
+- AttachmentUrlService : 첨부 URL 조립 (조회는 Finder, URL 은 Resolver 위임)
 - AttachmentLinker : 도메인 ↔ Attachment 참조 연결 · 해제
 - AttachmentService : presign · confirm 처리
 - AttachmentCleanupService : PENDING·고아 첨부 정리 (크론)
-- S3FileStorage : S3 로직 처리
-- SignedCookieIssuer : signed cookie 발급
+- FileStorage : 파일 저장소 인터페이스
+- UrlResolver : 첨부 URL 조립 인터페이스
+- SignedCookieIssuer : signed cookie 발급 인터페이스
 - S3Presigner : AWS SDK presign (외부)
 - S3Client : AWS SDK head·delete (외부)
 
@@ -104,26 +105,29 @@ graph TD
         DC[Domain Controllers]
     end
     subgraph socket.message
-        MsgC[MessageSocketController]
+        MsgS[MessageSocketService]
     end
     subgraph attachment
         AttC[AttachmentController]
         Fin[AttachmentFinder]
-        Res[AttachmentResolver]
+        Url[AttachmentUrlService]
+        Res{{UrlResolver}}
     end
     subgraph storage
         AttR[("AttachmentRepository")]
     end
     DC --> Fin
-    DC --> Res
-    MsgC --> Fin
-    MsgC --> Res
-    AttC --> Res
-    Res --> Fin
+    DC --> Url
+    MsgS --> Fin
+    MsgS --> Url
+    AttC --> Url
+    Url --> Fin
+    Url --> Res
     Fin --> AttR
 ```
 - AttachmentFinder : Attachment 조회 · path 조립
-- AttachmentResolver : CloudFront Url 조립
+- AttachmentUrlService : 첨부 URL 조립
+- UrlResolver : 첨부 URL 조립 인터페이스
 
 ### 삭제 (Cleanup)
 

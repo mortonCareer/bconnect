@@ -19,3 +19,18 @@ app:
     api-key: ${SOLAPI_API_KEY}
     api-secret: ${SOLAPI_API_SECRET}
     sender-number: ${SOLAPI_SENDER_NUMBER}
+
+  s3:
+    region: ${AWS_REGION}
+    bucket: ${AWS_S3_BUCKET}
+
+  cloudfront:
+    domain: ${CLOUDFRONT_DOMAIN}
+    key-pair-id: ${CLOUDFRONT_KEY_PAIR_ID}
+    private-key: ${CLOUDFRONT_PRIVATE_KEY}
+    cookie-domain: ${CLOUDFRONT_COOKIE_DOMAIN}
+    cookie-ttl: 1h
+
+  sns:
+    region: ${AWS_REGION}
+    platform-arn: ${AWS_SNS_PLATFORM_ARN}

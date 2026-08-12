@@ -2,6 +2,7 @@ package to.bconnect.api.attachment.infrastructure.s3;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
@@ -20,6 +21,7 @@ import java.util.Optional;
  * - <a href="https://docs.aws.amazon.com/AmazonS3/latest/API/API_Operations_Amazon_Simple_Storage_Service.html">API Reference</a>
  */
 @Component
+@Profile({"prod", "dev"})
 @RequiredArgsConstructor
 public class S3FileStorage implements FileStorage {
 
