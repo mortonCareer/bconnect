@@ -4,30 +4,30 @@
 -- 실제 데이터 (1000 ~)
 
 -- 운영 (0 ~ 99)
-INSERT INTO members (id, username, name, phone, birth, marketing_consent, created_at, modified_at) VALUES
-(0, 'system', '시스템', '01000000000', DATE '1970-01-01', false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO members (id, username, name, phone, birth, marketing_consent, drive_used_bytes, drive_limit_bytes, created_at, modified_at, deleted_at) VALUES
+(0, 'system', '시스템', '01000000000', DATE '1970-01-01', false, 0, 1073741824, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
 INSERT INTO member_roles (member_id, role) VALUES
 (0, 'ADMIN');
 
 -- 테스트 (100 ~ 199)
-INSERT INTO otps (id, phone, code, expired_at, attempts, revoked, daily_count, last_sent_at, created_at, modified_at) VALUES
-(100, '01000000001', '000001', TIMESTAMP WITH TIME ZONE '2026-12-31 00:00:00+00', 0, false, 1, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(101, '01000000002', '000002', TIMESTAMP WITH TIME ZONE '2026-12-31 00:00:00+00', 0, false, 1, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(102, '01000000003', '000003', TIMESTAMP WITH TIME ZONE '2026-12-31 00:00:00+00', 0, false, 1, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(103, '01000000004', '000004', TIMESTAMP WITH TIME ZONE '2026-12-31 00:00:00+00', 0, false, 1, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO otps (id, phone, code, expired_at, attempts, revoked, daily_count, last_sent_at, created_at, modified_at, deleted_at) VALUES
+(100, '01000000001', '000001', TIMESTAMP WITH TIME ZONE '2026-12-31 00:00:00+00', 0, false, 1, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(101, '01000000002', '000002', TIMESTAMP WITH TIME ZONE '2026-12-31 00:00:00+00', 0, false, 1, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(102, '01000000003', '000003', TIMESTAMP WITH TIME ZONE '2026-12-31 00:00:00+00', 0, false, 1, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(103, '01000000004', '000004', TIMESTAMP WITH TIME ZONE '2026-12-31 00:00:00+00', 0, false, 1, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO signup_tokens (id, phone, token, expired_at, revoked, created_at, modified_at) VALUES
-(100, '01000000004', '932739eece2b7d31922b6d13a4a5f9caa895139a7d8bc549472a5682b624f9b5', TIMESTAMP WITH TIME ZONE '2026-12-31 00:00:00+00', false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO signup_tokens (id, phone, token, expired_at, revoked, created_at, modified_at, deleted_at) VALUES
+(100, '01000000004', '932739eece2b7d31922b6d13a4a5f9caa895139a7d8bc549472a5682b624f9b5', TIMESTAMP WITH TIME ZONE '2026-12-31 00:00:00+00', false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO members (id, username, name, phone, birth, marketing_consent, created_at, modified_at) VALUES
-(100, 'test', '테스트', '01000000002', DATE '1995-05-10', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(101, 'foreman1', '반장1', '01000000003', DATE '1980-02-21', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(102, 'foreman2', '반장2', '01000000006', DATE '1982-07-03', false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(103, 'foreman3', '반장3', '01000000007', DATE '1984-11-18', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(104, 'foreman4', '반장4', '01000000008', DATE '1986-09-27', false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(105, 'foreman5', '반장5', '01000000009', DATE '1988-04-06', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(106, 'foreman6', '반장6', '01000000011', DATE '1991-12-30', false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO members (id, username, name, phone, birth, marketing_consent, drive_used_bytes, drive_limit_bytes, created_at, modified_at, deleted_at) VALUES
+(100, 'test', '테스트', '01000000002', DATE '2000-01-01', false, 3072, 1073741824, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(101, 'foreman1', '반장1', '01000000003', DATE '2000-01-01', false, 0, 1073741824, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(102, 'foreman2', '반장2', '01000000005', DATE '2000-01-01', false, 0, 1073741824, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(103, 'foreman3', '반장3', '01000000006', DATE '2000-01-01', false, 0, 1073741824, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(104, 'foreman4', '반장4', '01000000007', DATE '2000-01-01', false, 0, 1073741824, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(105, 'foreman5', '반장5', '01000000008', DATE '2000-01-01', false, 0, 1073741824, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(106, 'foreman6', '반장6', '01000000009', DATE '2000-01-01', false, 0, 1073741824, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
 INSERT INTO member_roles (member_id, role) VALUES
 (100, 'ADMIN'),
@@ -38,12 +38,16 @@ INSERT INTO member_roles (member_id, role) VALUES
 (105, 'CAREER'),
 (106, 'GUEST');
 
-INSERT INTO profiles (id, member_id, role, primary_trade, experience, headline, about, zipcode, bcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
-(100, 101, 'FOREMAN', 'TILING', 5, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(101, 102, 'FOREMAN', 'WATERPROOFING', 6, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(102, 103, 'FOREMAN', 'PAINTING', 7, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(103, 104, 'FOREMAN', 'CARPENTRY', 8, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(104, 105, 'FOREMAN', 'ELECTRICAL', 9, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+-- member attachments
+INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at, deleted_at) VALUES
+(100, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, '0000-0001', '파일1', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+
+INSERT INTO profiles (id, member_id, role, primary_trade, experience, headline, about, zipcode, bcode, city, state, street, detail, latitude, longitude, created_at, modified_at, deleted_at) VALUES
+(100, 101, 'FOREMAN', 'TILING', 5, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(101, 102, 'FOREMAN', 'WATERPROOFING', 5, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(102, 103, 'FOREMAN', 'PAINTING', 5, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(103, 104, 'FOREMAN', 'CARPENTRY', 5, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(104, 105, 'FOREMAN', 'ELECTRICAL', 5, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
 INSERT INTO profile_trades (profile_id, trade) VALUES
 (100, 'TILING'),
@@ -52,84 +56,91 @@ INSERT INTO profile_trades (profile_id, trade) VALUES
 (103, 'CARPENTRY'),
 (104, 'ELECTRICAL');
 
-INSERT INTO coworker_requests (id, from_id, to_id, created_at, modified_at) VALUES
-(100, 103, 100, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(101, 104, 100, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO credentials (id, member_id, type, status, expired_at, note, created_at, modified_at, deleted_at) VALUES
+(100, 100, 'IDENTITY_VERIFICATION', 'PENDING', DATE '2026-12-31', NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(101, 100, 'SKILL_GRADE_CERTIFICATE', 'PENDING', DATE '2026-12-31', NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO coworkers (id, min_id, max_id, created_at, modified_at) VALUES
-(100, 100, 105, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+-- credential attachments
+INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at, deleted_at) VALUES
+(101, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, '0000-0002', '파일2', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(102, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, 'CREDENTIAL', 100, '0000-0003', '파일3', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(103, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, 'CREDENTIAL', 101, '0000-0004', '파일4', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO recommendations (id, from_id, to_id, content, visible, created_at, modified_at) VALUES
-(100, 105, 100, '추천서1', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+-- company attachments
+INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at, deleted_at) VALUES
+(104, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, '0000-0005', '파일5', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(105, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, '0000-0006', '파일6', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(106, 100, 'FILE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, '0000-0007', '파일7', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO notifications (id, member_id, type, sender_type, sender_id, reference_type, reference_id, read, created_at, modified_at) VALUES
-(100, 100, 'SIGNUP_WELCOME', NULL, NULL, NULL, NULL, true, TIMESTAMP WITH TIME ZONE '2026-01-01 09:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 12:00:00+00'),
-(102, 100, 'COWORKER_REQUESTED', 'MEMBER', 103, 'COWORKER_REQUEST', 100, false, TIMESTAMP WITH TIME ZONE '2026-01-03 09:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-03 09:00:00+00'),
-(103, 100, 'COWORKER_REQUESTED', 'MEMBER', 104, 'COWORKER_REQUEST', 101, false, TIMESTAMP WITH TIME ZONE '2026-01-04 09:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-04 09:00:00+00');
-
-INSERT INTO credentials (id, member_id, type, status, expired_at, created_at, modified_at) VALUES
-(100, 100, 'IDENTITY_VERIFICATION', 'PENDING', DATE '2026-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(101, 100, 'SKILL_GRADE_CERTIFICATE', 'PENDING', DATE '2026-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
-
-INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
-(100, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'attachment-100', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(101, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'attachment-101', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(102, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, 'CREDENTIAL', 100, 'attachment-102', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(103, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, 'CREDENTIAL', 101, 'attachment-103', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(104, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'attachment-104', 'company', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(105, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'attachment-105', 'company-update', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(106, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, 'attachment-106', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(107, 106, 'IMAGE', 'COMPLETED', 'MEMBER', 106, 'MEMBER', 106, 'attachment-107', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(114, 100, 'FILE', 'COMPLETED', 'COMPANY', 100, NULL, NULL, 'attachment-114', 'certificate', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
-
-INSERT INTO tasks (id, dtype, status, progress, version, start_date, end_date, worker_id, project_id, project_title, project_requirement, project_memo, created_at, modified_at) VALUES
-(100, 'PROJECT', 'ASSIGNED', 'TODO', 0, DATE '2026-06-01', DATE '2026-06-03', 101, NULL, '작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
-
-INSERT INTO tasks (id, dtype, status, progress, version, start_date, end_date, worker_id, worker_title, worker_memo, worker_company, zipcode, bcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
-(101, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-06-01', DATE '2026-06-02', 103, '기술자 작업1', '메모', '모튼 인테리어', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(102, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-06-03', DATE '2026-06-04', 103, '기술자 작업2', '메모', '모튼 인테리어', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(103, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-06-05', DATE '2026-06-06', 103, '기술자 작업3', '메모', '모튼 인테리어', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO tasks (id, dtype, status, progress, version, start_date, end_date, worker_id, worker_title, worker_memo, worker_company, zipcode, bcode, city, state, street, detail, latitude, longitude, project_id, project_title, project_requirement, project_memo, created_at, modified_at, deleted_at) VALUES
+(100, 'PROJECT', 'ASSIGNED', 'TODO', 0, DATE '2026-06-01', DATE '2026-06-03', 101, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '프로젝트 작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(101, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-06-01', DATE '2026-06-03', 103, '기술자 작업1', '메모', '기술자 작성 업체명1', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
 INSERT INTO task_trades (task_id, trade) VALUES
-(101, 'TILING'), (102, 'TILING'), (103, 'TILING');
+(100, 'TILING'),
+(101, 'TILING');
 
-INSERT INTO drives (id, dtype, project_id, member_id, title, created_at, modified_at) VALUES
-(100, 'PERSONAL', NULL, 100, '드라이브1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+-- post attachments
+INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at, deleted_at) VALUES
+(107, 100, 'IMAGE', 'COMPLETED', 'MEMBER', 100, NULL, NULL, '0000-0008', '파일8', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO boards (id, dtype, project_id, drive_id, created_at, modified_at) VALUES
-(100, 'DRIVE', NULL, 100, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO drives (id, dtype, project_id, member_id, title, created_at, modified_at, deleted_at) VALUES
+(100, 'PERSONAL', NULL, 100, '드라이브1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
 -- drive attachments
-INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
-(108, 100, 'IMAGE', 'COMPLETED', 'DRIVE', 100, 'DRIVE', 100, '0000-0001', 'image1', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(109, 100, 'IMAGE', 'COMPLETED', 'DRIVE', 100, 'DRIVE', 100, '0000-0002', 'image2', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(110, 100, 'FILE', 'COMPLETED', 'DRIVE', 100, 'DRIVE', 100, '0000-0003', 'file1', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(111, 100, 'FILE', 'COMPLETED', 'DRIVE', 100, 'DRIVE', 100, '0000-0004', 'file2', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(112, 100, 'IMAGE', 'COMPLETED', 'DRIVE', 100, NULL, NULL, '0000-0005', 'attach', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(113, 100, 'FILE', 'COMPLETED', 'DRIVE', 100, NULL, NULL, '0000-0006', 'upload', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at, deleted_at) VALUES
+(108, 100, 'IMAGE', 'COMPLETED', 'DRIVE', 100, 'DRIVE', 100, '0000-0009', '파일9', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(109, 100, 'FILE', 'COMPLETED', 'DRIVE', 100, 'DRIVE', 100, '0000-0010', '파일10', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(110, 100, 'IMAGE', 'COMPLETED', 'DRIVE', 100, NULL, NULL, '0000-0011', '파일11', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO notes (id, board_id, member_id, content, created_at, modified_at) VALUES
-(100, 100, 100, '노트1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(101, 100, 100, '노트2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO boards (id, dtype, project_id, drive_id, created_at, modified_at, deleted_at) VALUES
+(100, 'DRIVE', NULL, 100, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
--- 샘플 (200 ~ 299) : 업체 1 · 반장 3 · 프로젝트 1 · 작업 5(상태별)
-INSERT INTO members (id, username, name, phone, birth, marketing_consent, created_at, modified_at) VALUES
-(200, 'sample-company', '샘플 업체', '01000000200', DATE '1975-01-12', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 'sample-foreman1', '샘플 반장1', '01000000201', DATE '1979-06-24', false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(202, 'sample-foreman2', '샘플 반장2', '01000000202', DATE '1983-08-09', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(203, 'sample-foreman3', '샘플 반장3', '01000000203', DATE '1987-10-02', false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO notes (id, board_id, member_id, content, created_at, modified_at, deleted_at) VALUES
+(100, 100, 100, '노트1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+
+INSERT INTO coworker_requests (id, from_id, to_id, created_at, modified_at, deleted_at) VALUES
+(100, 103, 100, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(101, 104, 100, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+
+INSERT INTO coworkers (id, min_id, max_id, created_at, modified_at, deleted_at) VALUES
+(100, 100, 105, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+
+INSERT INTO recommendations (id, from_id, to_id, content, visible, created_at, modified_at, deleted_at) VALUES
+(100, 105, 100, '추천서1', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+
+INSERT INTO notifications (id, member_id, type, sender_type, sender_id, reference_type, reference_id, read, created_at, modified_at, deleted_at) VALUES
+(100, 100, 'SIGNUP_WELCOME', NULL, NULL, NULL, NULL, true, TIMESTAMP WITH TIME ZONE '2026-01-01 09:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 12:00:00+00', NULL),
+(101, 100, 'CREDENTIAL_ACCEPTED', NULL, NULL, 'CREDENTIAL', 100, false, TIMESTAMP WITH TIME ZONE '2026-01-02 09:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-02 09:00:00+00', NULL),
+(102, 100, 'COWORKER_REQUESTED', 'MEMBER', 103, 'COWORKER_REQUEST', 100, false, TIMESTAMP WITH TIME ZONE '2026-01-03 09:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-03 09:00:00+00', NULL),
+(103, 100, 'COWORKER_REQUESTED', 'MEMBER', 104, 'COWORKER_REQUEST', 101, false, TIMESTAMP WITH TIME ZONE '2026-01-04 09:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-04 09:00:00+00', NULL);
+
+-- 샘플 (200 ~ 299) : 업체 1 · 반장 3 · 프로젝트 1 · 작업 5
+INSERT INTO members (id, username, name, phone, birth, marketing_consent, drive_used_bytes, drive_limit_bytes, created_at, modified_at, deleted_at) VALUES
+(200, 'sample-company', '샘플 업체', '01000000200', DATE '2000-01-01', true, 0, 1073741824, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 'sample-foreman1', '샘플 반장1', '01000000201', DATE '2000-01-01', true, 0, 1073741824, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(202, 'sample-foreman2', '샘플 반장2', '01000000202', DATE '2000-01-01', true, 0, 1073741824, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(203, 'sample-foreman3', '샘플 반장3', '01000000203', DATE '2000-01-01', true, 0, 1073741824, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
 INSERT INTO member_roles (member_id, role) VALUES
-(200, 'CAREER'), (200, 'PLAN'),
+(200, 'CAREER'),
+(200, 'PLAN'),
 (201, 'CAREER'),
 (202, 'CAREER'),
 (203, 'CAREER');
 
-INSERT INTO profiles (id, member_id, role, primary_trade, experience, headline, about, zipcode, bcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
-(200, 200, 'CONTRACTOR', 'TILING', 15, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 201, 'FOREMAN', 'TILING', 5, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(202, 202, 'FOREMAN', 'PAINTING', 7, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(203, 203, 'FOREMAN', 'ELECTRICAL', 9, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+-- member attachments
+INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at, deleted_at) VALUES
+(200, 200, 'IMAGE', 'COMPLETED', 'MEMBER', 200, 'MEMBER', 200, '0000-0012', '파일12', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 201, 'IMAGE', 'COMPLETED', 'MEMBER', 201, 'MEMBER', 201, '0000-0013', '파일13', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(202, 202, 'IMAGE', 'COMPLETED', 'MEMBER', 202, 'MEMBER', 202, '0000-0014', '파일14', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(203, 203, 'IMAGE', 'COMPLETED', 'MEMBER', 203, 'MEMBER', 203, '0000-0015', '파일15', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+
+INSERT INTO profiles (id, member_id, role, primary_trade, experience, headline, about, zipcode, bcode, city, state, street, detail, latitude, longitude, created_at, modified_at, deleted_at) VALUES
+(200, 200, 'CONTRACTOR', 'TILING', 10, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 201, 'FOREMAN', 'TILING', 1, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(202, 202, 'FOREMAN', 'PAINTING', 5, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(203, 203, 'FOREMAN', 'ELECTRICAL', 10, '한줄소개', '소개글', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
 INSERT INTO profile_trades (profile_id, trade) VALUES
 (200, 'TILING'),
@@ -137,197 +148,192 @@ INSERT INTO profile_trades (profile_id, trade) VALUES
 (202, 'PAINTING'),
 (203, 'ELECTRICAL');
 
-INSERT INTO companies (id, member_id, name, brn, status, created_at, modified_at) VALUES
-(200, 200, '업체1', '2001234567', 'ACCEPTED', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO credentials (id, member_id, type, status, expired_at, note, created_at, modified_at, deleted_at) VALUES
+(200, 200, 'IDENTITY_VERIFICATION', 'ACCEPTED', DATE '2026-12-31', NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 201, 'IDENTITY_VERIFICATION', 'ACCEPTED', DATE '2026-12-31', NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(202, 202, 'IDENTITY_VERIFICATION', 'ACCEPTED', DATE '2026-12-31', NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(203, 203, 'IDENTITY_VERIFICATION', 'ACCEPTED', DATE '2026-12-31', NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
--- picture attachments
-INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
-(222, 200, 'IMAGE', 'COMPLETED', 'MEMBER', 200, 'MEMBER', 200, 'sample-att-222', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(223, 201, 'IMAGE', 'COMPLETED', 'MEMBER', 201, 'MEMBER', 201, 'sample-att-223', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(224, 202, 'IMAGE', 'COMPLETED', 'MEMBER', 202, 'MEMBER', 202, 'sample-att-224', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(225, 203, 'IMAGE', 'COMPLETED', 'MEMBER', 203, 'MEMBER', 203, 'sample-att-225', 'avatar', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(226, 200, 'IMAGE', 'COMPLETED', 'COMPANY', 200, 'COMPANY', 200, 'sample-att-226', 'company', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+-- credential attachments
+INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at, deleted_at) VALUES
+(204, 200, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 200, 'CREDENTIAL', 200, '0000-0016', '파일16', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(205, 201, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 201, 'CREDENTIAL', 201, '0000-0017', '파일17', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(206, 202, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 202, 'CREDENTIAL', 202, '0000-0018', '파일18', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(207, 203, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 203, 'CREDENTIAL', 203, '0000-0019', '파일19', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO projects (id, company_id, title, zipcode, bcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
-(200, 200, '프로젝트1', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO companies (id, member_id, name, brn, status, drive_used_bytes, drive_limit_bytes, created_at, modified_at, deleted_at) VALUES
+(200, 200, '업체1', '0000000001', 'ACCEPTED', 0, 1073741824, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO tasks (id, dtype, status, progress, version, start_date, end_date, worker_id, project_id, project_title, project_requirement, project_memo, created_at, modified_at) VALUES
-(200, 'PROJECT', 'NONE', 'TODO', 0, DATE '2026-08-01', DATE '2026-08-03', NULL, 200, '작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 'PROJECT', 'OFFERED', 'TODO', 0, DATE '2026-08-04', DATE '2026-08-06', NULL, 200, '작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(202, 'PROJECT', 'ASSIGNED', 'TODO', 0, DATE '2026-08-07', DATE '2026-08-09', 201, 200, '작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(203, 'PROJECT', 'ASSIGNED', 'IN_PROGRESS', 0, DATE '2026-08-10', DATE '2026-08-12', 202, 200, '작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(204, 'PROJECT', 'ASSIGNED', 'COMPLETED', 0, DATE '2026-08-13', DATE '2026-08-15', 203, 200, '작업', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+-- company attachments
+INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at, deleted_at) VALUES
+(208, 200, 'IMAGE', 'COMPLETED', 'COMPANY', 200, 'COMPANY', 200, '0000-0020', '파일20', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+
+INSERT INTO projects (id, company_id, title, zipcode, bcode, city, state, street, detail, latitude, longitude, created_at, modified_at, deleted_at) VALUES
+(200, 200, '프로젝트1', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+
+INSERT INTO tasks (id, dtype, status, progress, version, start_date, end_date, worker_id, worker_title, worker_memo, worker_company, zipcode, bcode, city, state, street, detail, latitude, longitude, project_id, project_title, project_requirement, project_memo, created_at, modified_at, deleted_at) VALUES
+(200, 'PROJECT', 'NONE', 'TODO', 0, DATE '2026-08-01', DATE '2026-08-03', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 200, '프로젝트 작업1', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 'PROJECT', 'OFFERED', 'TODO', 0, DATE '2026-08-04', DATE '2026-08-06', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 200, '프로젝트 작업2', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(202, 'PROJECT', 'ASSIGNED', 'TODO', 0, DATE '2026-08-07', DATE '2026-08-09', 201, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 200, '프로젝트 작업3', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(203, 'PROJECT', 'ASSIGNED', 'IN_PROGRESS', 0, DATE '2026-08-10', DATE '2026-08-12', 202, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 200, '프로젝트 작업4', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(204, 'PROJECT', 'ASSIGNED', 'COMPLETED', 0, DATE '2026-08-13', DATE '2026-08-15', 203, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 200, '프로젝트 작업5', '요구사항', '메모', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(205, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-01', DATE '2026-09-02', 201, '기술자 작업1', '메모', '기술자 작성 업체명1', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(206, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-03', DATE '2026-09-04', 201, '기술자 작업2', '메모', '기술자 작성 업체명2', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(207, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-05', DATE '2026-09-06', 201, '기술자 작업3', '메모', '기술자 작성 업체명3', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(208, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-01', DATE '2026-09-02', 202, '기술자 작업4', '메모', '기술자 작성 업체명4', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(209, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-03', DATE '2026-09-04', 202, '기술자 작업5', '메모', '기술자 작성 업체명5', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(210, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-05', DATE '2026-09-06', 202, '기술자 작업6', '메모', '기술자 작성 업체명6', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(211, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-01', DATE '2026-09-02', 203, '기술자 작업7', '메모', '기술자 작성 업체명7', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(212, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-03', DATE '2026-09-04', 203, '기술자 작업8', '메모', '기술자 작성 업체명8', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(213, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-05', DATE '2026-09-06', 203, '기술자 작업9', '메모', '기술자 작성 업체명9', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
 INSERT INTO task_trades (task_id, trade) VALUES
 (200, 'TILING'),
 (201, 'TILING'),
 (202, 'TILING'),
-(203, 'ELECTRICAL'),
-(204, 'PAINTING');
+(203, 'PAINTING'),
+(204, 'ELECTRICAL'),
+(205, 'TILING'),
+(206, 'TILING'),
+(207, 'TILING'),
+(208, 'PAINTING'),
+(209, 'PAINTING'),
+(210, 'PAINTING'),
+(211, 'ELECTRICAL'),
+(212, 'ELECTRICAL'),
+(213, 'ELECTRICAL');
 
-INSERT INTO offers (id, task_id, worker_id, seq, due, status, version, created_at, modified_at) VALUES
-(200, 201, 201, 1, DATE '2026-08-31', 'ACTIVE', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 201, 202, 2, DATE '2026-08-31', 'PENDING', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(202, 201, 203, 3, DATE '2026-08-31', 'PENDING', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO offers (id, task_id, worker_id, seq, due, status, version, created_at, modified_at, deleted_at) VALUES
+(200, 201, 201, 1, DATE '2026-08-31', 'ACTIVE', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 201, 202, 2, DATE '2026-08-31', 'PENDING', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(202, 201, 203, 3, DATE '2026-08-31', 'PENDING', 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO tasks (id, dtype, status, progress, version, start_date, end_date, worker_id, worker_title, worker_memo, worker_company, zipcode, bcode, city, state, street, detail, latitude, longitude, created_at, modified_at) VALUES
-(205, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-01', DATE '2026-09-02', 201, '작업1', '메모', '업체', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(206, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-03', DATE '2026-09-04', 201, '작업2', '메모', '업체', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(207, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-05', DATE '2026-09-06', 201, '작업3', '메모', '업체', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(208, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-01', DATE '2026-09-02', 202, '작업4', '메모', '업체', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(209, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-03', DATE '2026-09-04', 202, '작업5', '메모', '업체', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(210, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-05', DATE '2026-09-06', 202, '작업6', '메모', '업체', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(211, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-01', DATE '2026-09-02', 203, '작업7', '메모', '업체', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(212, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-03', DATE '2026-09-04', 203, '작업8', '메모', '업체', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(213, 'WORKER', 'NONE', 'TODO', 0, DATE '2026-09-05', DATE '2026-09-06', 203, '작업9', '메모', '업체', '16419', '4111113300', '수원시 장안구', '경기', '서부로 2066', '성균관대학교', 37.294, 126.974, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO drives (id, dtype, project_id, member_id, title, created_at, modified_at, deleted_at) VALUES
+(200, 'PERSONAL', NULL, 200, '드라이브1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 'PROJECT', 200, NULL, '드라이브2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO task_trades (task_id, trade) VALUES
-(205, 'TILING'), (206, 'TILING'), (207, 'TILING'),
-(208, 'PAINTING'), (209, 'PAINTING'), (210, 'PAINTING'),
-(211, 'ELECTRICAL'), (212, 'ELECTRICAL'), (213, 'ELECTRICAL');
+INSERT INTO drive_members (id, drive_id, member_id, title, created_at, modified_at, deleted_at) VALUES
+(200, 200, 201, '개인 드라이브 제목1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 200, 202, '개인 드라이브 제목2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(202, 200, 203, '개인 드라이브 제목3', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(203, 201, 201, '개인 드라이브 제목4', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(204, 201, 202, '개인 드라이브 제목5', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(205, 201, 203, '개인 드라이브 제목6', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO credentials (id, member_id, type, status, expired_at, created_at, modified_at) VALUES
-(200, 201, 'IDENTITY_VERIFICATION', 'ACCEPTED', DATE '2026-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 201, 'SKILL_GRADE_CERTIFICATE', 'ACCEPTED', DATE '2026-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(202, 202, 'IDENTITY_VERIFICATION', 'ACCEPTED', DATE '2026-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(203, 202, 'CAREER_CERTIFICATE', 'ACCEPTED', DATE '2026-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(204, 203, 'IDENTITY_VERIFICATION', 'ACCEPTED', DATE '2026-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(205, 203, 'NATIONAL_TECHNICAL_QUALIFICATION', 'ACCEPTED', DATE '2026-12-31', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO boards (id, dtype, project_id, drive_id, created_at, modified_at, deleted_at) VALUES
+(200, 'DRIVE', NULL, 200, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 'DRIVE', NULL, 201, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
--- credential attachments
-INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
-(227, 201, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 200, 'CREDENTIAL', 200, 'sample-att-227', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(228, 201, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 201, 'CREDENTIAL', 201, 'sample-att-228', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(229, 202, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 202, 'CREDENTIAL', 202, 'sample-att-229', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(230, 202, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 203, 'CREDENTIAL', 203, 'sample-att-230', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(231, 203, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 204, 'CREDENTIAL', 204, 'sample-att-231', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(232, 203, 'IMAGE', 'COMPLETED', 'CREDENTIAL', 205, 'CREDENTIAL', 205, 'sample-att-232', 'credential', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO notes (id, board_id, member_id, content, created_at, modified_at, deleted_at) VALUES
+(200, 200, 200, '노트1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 200, 201, '노트2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(202, 201, 200, '노트3', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(203, 201, 201, '노트4', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO posts (id, member_id, task_id, content, created_at, modified_at) VALUES
-(200, 201, 205, '게시글1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 201, 206, '게시글2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(202, 201, NULL, '게시글3', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(203, 202, 208, '게시글4', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(204, 202, 209, '게시글5', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(205, 202, NULL, '게시글6', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(206, 203, 211, '게시글7', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(207, 203, 212, '게시글8', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(208, 203, NULL, '게시글9', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO posts (id, member_id, task_id, content, created_at, modified_at, deleted_at) VALUES
+(200, 201, 205, '게시글1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 201, 206, '게시글2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(202, 201, NULL, '게시글3', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(203, 202, 208, '게시글4', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(204, 202, 209, '게시글5', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(205, 202, NULL, '게시글6', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(206, 203, 211, '게시글7', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(207, 203, 212, '게시글8', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(208, 203, NULL, '게시글9', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
 -- post attachments
-INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
-(200, 201, 'IMAGE', 'COMPLETED', 'POST', 200, 'POST', 200, 'sample-att-200', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 201, 'IMAGE', 'COMPLETED', 'POST', 200, 'POST', 200, 'sample-att-201', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(202, 201, 'IMAGE', 'COMPLETED', 'POST', 201, 'POST', 201, 'sample-att-202', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(203, 201, 'IMAGE', 'COMPLETED', 'POST', 201, 'POST', 201, 'sample-att-203', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(204, 201, 'IMAGE', 'COMPLETED', 'POST', 202, 'POST', 202, 'sample-att-204', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(205, 201, 'IMAGE', 'COMPLETED', 'POST', 202, 'POST', 202, 'sample-att-205', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(206, 202, 'IMAGE', 'COMPLETED', 'POST', 203, 'POST', 203, 'sample-att-206', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(207, 202, 'IMAGE', 'COMPLETED', 'POST', 203, 'POST', 203, 'sample-att-207', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(208, 202, 'IMAGE', 'COMPLETED', 'POST', 204, 'POST', 204, 'sample-att-208', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(209, 202, 'IMAGE', 'COMPLETED', 'POST', 204, 'POST', 204, 'sample-att-209', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(210, 202, 'IMAGE', 'COMPLETED', 'POST', 205, 'POST', 205, 'sample-att-210', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(211, 202, 'IMAGE', 'COMPLETED', 'POST', 205, 'POST', 205, 'sample-att-211', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(212, 203, 'IMAGE', 'COMPLETED', 'POST', 206, 'POST', 206, 'sample-att-212', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(213, 203, 'IMAGE', 'COMPLETED', 'POST', 206, 'POST', 206, 'sample-att-213', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(214, 203, 'IMAGE', 'COMPLETED', 'POST', 207, 'POST', 207, 'sample-att-214', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(215, 203, 'IMAGE', 'COMPLETED', 'POST', 207, 'POST', 207, 'sample-att-215', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(216, 203, 'IMAGE', 'COMPLETED', 'POST', 208, 'POST', 208, 'sample-att-216', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(217, 203, 'IMAGE', 'COMPLETED', 'POST', 208, 'POST', 208, 'sample-att-217', 'post', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at, deleted_at) VALUES
+(209, 201, 'IMAGE', 'COMPLETED', 'POST', 200, 'POST', 200, '0000-0021', '파일21', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(210, 201, 'IMAGE', 'COMPLETED', 'POST', 200, 'POST', 200, '0000-0022', '파일22', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(211, 201, 'IMAGE', 'COMPLETED', 'POST', 201, 'POST', 201, '0000-0023', '파일23', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(212, 201, 'IMAGE', 'COMPLETED', 'POST', 201, 'POST', 201, '0000-0024', '파일24', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(213, 201, 'IMAGE', 'COMPLETED', 'POST', 202, 'POST', 202, '0000-0025', '파일25', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(214, 201, 'IMAGE', 'COMPLETED', 'POST', 202, 'POST', 202, '0000-0026', '파일26', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(215, 202, 'IMAGE', 'COMPLETED', 'POST', 203, 'POST', 203, '0000-0027', '파일27', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(216, 202, 'IMAGE', 'COMPLETED', 'POST', 203, 'POST', 203, '0000-0028', '파일28', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(217, 202, 'IMAGE', 'COMPLETED', 'POST', 204, 'POST', 204, '0000-0029', '파일29', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(218, 202, 'IMAGE', 'COMPLETED', 'POST', 204, 'POST', 204, '0000-0030', '파일30', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(219, 202, 'IMAGE', 'COMPLETED', 'POST', 205, 'POST', 205, '0000-0031', '파일31', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(220, 202, 'IMAGE', 'COMPLETED', 'POST', 205, 'POST', 205, '0000-0032', '파일32', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(221, 203, 'IMAGE', 'COMPLETED', 'POST', 206, 'POST', 206, '0000-0033', '파일33', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(222, 203, 'IMAGE', 'COMPLETED', 'POST', 206, 'POST', 206, '0000-0034', '파일34', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(223, 203, 'IMAGE', 'COMPLETED', 'POST', 207, 'POST', 207, '0000-0035', '파일35', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(224, 203, 'IMAGE', 'COMPLETED', 'POST', 207, 'POST', 207, '0000-0036', '파일36', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(225, 203, 'IMAGE', 'COMPLETED', 'POST', 208, 'POST', 208, '0000-0037', '파일37', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(226, 203, 'IMAGE', 'COMPLETED', 'POST', 208, 'POST', 208, '0000-0038', '파일38', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO coworkers (id, min_id, max_id, created_at, modified_at) VALUES
-(200, 200, 201, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO coworker_requests (id, from_id, to_id, created_at, modified_at, deleted_at) VALUES
+(200, 200, 202, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 203, 200, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO coworker_requests (id, from_id, to_id, created_at, modified_at) VALUES
-(200, 200, 202, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 203, 200, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO coworkers (id, min_id, max_id, created_at, modified_at, deleted_at) VALUES
+(200, 200, 201, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO recommendations (id, from_id, to_id, content, visible, created_at, modified_at) VALUES
-(200, 200, 201, '추천서1', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 201, 200, '추천서2', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO recommendations (id, from_id, to_id, content, visible, created_at, modified_at, deleted_at) VALUES
+(200, 200, 201, '추천서1', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 201, 200, '추천서2', true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO group_chats (id, title, created_at, modified_at) VALUES
-(200, '채팅방1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO group_chats (id, title, created_at, modified_at, deleted_at) VALUES
+(200, '채팅방1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO participants (id, chat_id, member_id, last_idx, created_at, modified_at) VALUES
-(200, 200, 200, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 200, 201, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO participants (id, chat_id, member_id, last_idx, created_at, modified_at, deleted_at) VALUES
+(200, 200, 200, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 200, 201, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO direct_chats (id, min_id, max_id, min_last_idx, max_last_idx, created_at, modified_at) VALUES
-(200, 200, 201, 0, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO direct_chats (id, min_id, max_id, min_last_idx, max_last_idx, created_at, modified_at, deleted_at) VALUES
+(200, 200, 201, 0, 0, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
-INSERT INTO messages (id, chat_id, chat_type, member_id, type, content, created_at, modified_at) VALUES
-(200, 200, 'GROUP', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 200, 'GROUP', 200, 'TEXT', '메시지1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(202, 200, 'GROUP', 201, 'IMAGE', '메시지2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(203, 200, 'GROUP', 200, 'FILE', '메시지3', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(204, 200, 'GROUP', 200, 'TEXT', '메시지4', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(210, 200, 'DIRECT', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(211, 200, 'DIRECT', 200, 'TEXT', '메시지5', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(212, 200, 'DIRECT', 201, 'IMAGE', '메시지6', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(213, 200, 'DIRECT', 200, 'FILE', '메시지7', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(214, 200, 'DIRECT', 200, 'OFFER', '200', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
+INSERT INTO notifications (id, member_id, type, sender_type, sender_id, reference_type, reference_id, read, created_at, modified_at, deleted_at) VALUES
+(200, 201, 'SIGNUP_WELCOME', NULL, NULL, NULL, NULL, true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 201, 'CREDENTIAL_ACCEPTED', NULL, NULL, 'CREDENTIAL', 201, true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(202, 202, 'COWORKER_REQUESTED', 'MEMBER', 200, 'COWORKER_REQUEST', 200, true, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(203, 201, 'OFFER_RECEIVED', 'COMPANY', 200, 'CHAT_ROOM', 200, false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(204, 201, 'OFFER_ACCEPTED', 'MEMBER', 200, 'CHAT_ROOM', 200, false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(205, 200, 'COWORKER_REQUESTED', 'MEMBER', 203, 'COWORKER_REQUEST', 201, false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(206, 200, 'OFFER_ACCEPTED', 'MEMBER', 201, 'CHAT_ROOM', 200, false, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+
+INSERT INTO messages (id, chat_id, chat_type, member_id, type, content, created_at, modified_at, deleted_at) VALUES
+(200, 200, 'GROUP', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(201, 200, 'GROUP', 200, 'TEXT', '메시지1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(202, 200, 'GROUP', 201, 'IMAGE', '메시지2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(203, 200, 'GROUP', 200, 'FILE', '메시지3', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(204, 200, 'GROUP', 200, 'TEXT', '메시지4', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(205, 200, 'DIRECT', 0, 'SYSTEM', '채팅방이 생성되었습니다.', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(206, 200, 'DIRECT', 200, 'TEXT', '메시지5', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(207, 200, 'DIRECT', 201, 'IMAGE', '메시지6', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(208, 200, 'DIRECT', 200, 'FILE', '메시지7', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(209, 200, 'DIRECT', 200, 'OFFER', '200', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
 -- message attachments
-INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at) VALUES
-(218, 201, 'IMAGE', 'COMPLETED', 'CHAT', 200, 'MESSAGE', 202, 'sample-att-218', 'chat', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(219, 200, 'FILE', 'COMPLETED', 'CHAT', 200, 'MESSAGE', 203, 'sample-att-219', 'estimate', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(220, 201, 'IMAGE', 'COMPLETED', 'CHAT', 200, 'MESSAGE', 212, 'sample-att-220', 'chat', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(221, 200, 'FILE', 'COMPLETED', 'CHAT', 200, 'MESSAGE', 213, 'sample-att-221', 'contract', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
-
-INSERT INTO drives (id, dtype, project_id, member_id, title, created_at, modified_at) VALUES
-(200, 'PERSONAL', NULL, 200, '드라이브1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 'PROJECT', 200, NULL, '드라이브2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
-
-INSERT INTO boards (id, dtype, project_id, drive_id, created_at, modified_at) VALUES
-(200, 'DRIVE', NULL, 200, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 'DRIVE', NULL, 201, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
-
-INSERT INTO drive_members (id, drive_id, member_id, title, created_at, modified_at) VALUES
-(200, 200, 201, '드라이브1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 200, 202, '드라이브1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(202, 200, 203, '드라이브1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(203, 201, 201, '드라이브2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(204, 201, 202, '드라이브2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(205, 201, 203, '드라이브2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
-
-INSERT INTO notes (id, board_id, member_id, content, created_at, modified_at) VALUES
-(200, 200, 200, '노트1', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(201, 200, 201, '노트2', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(202, 201, 200, '노트3', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
-(203, 201, 201, '노트4', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
-
-INSERT INTO notifications (id, member_id, type, sender_type, sender_id, reference_type, reference_id, read, created_at, modified_at) VALUES
-(200, 201, 'SIGNUP_WELCOME', NULL, NULL, NULL, NULL, true, TIMESTAMP WITH TIME ZONE '2026-01-01 09:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 12:00:00+00'),
-(202, 201, 'COWORKER_REQUESTED', 'MEMBER', 205, 'COWORKER_REQUEST', 203, true, TIMESTAMP WITH TIME ZONE '2026-01-03 09:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-03 12:00:00+00'),
-(203, 201, 'OFFER_RECEIVED', 'COMPANY', 200, 'CHAT_ROOM', 200, false, TIMESTAMP WITH TIME ZONE '2026-01-04 15:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-04 15:00:00+00'),
-(204, 201, 'OFFER_ACCEPTED', 'MEMBER', 200, 'CHAT_ROOM', 200, false, TIMESTAMP WITH TIME ZONE '2026-01-05 10:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-05 10:00:00+00'),
-(205, 200, 'COWORKER_REQUESTED', 'MEMBER', 203, 'COWORKER_REQUEST', 201, false, TIMESTAMP WITH TIME ZONE '2026-01-04 11:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-04 11:00:00+00'),
-(206, 200, 'OFFER_ACCEPTED', 'MEMBER', 201, 'CHAT_ROOM', 200, false, TIMESTAMP WITH TIME ZONE '2026-01-05 09:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-05 09:00:00+00');
+INSERT INTO attachments (id, member_id, type, status, context, context_id, reference_type, reference_id, uuid, stem, ext, content_type, size, created_at, modified_at, deleted_at) VALUES
+(227, 201, 'IMAGE', 'COMPLETED', 'CHAT', 200, 'MESSAGE', 202, '0000-0039', '파일39', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(228, 200, 'FILE', 'COMPLETED', 'CHAT', 200, 'MESSAGE', 203, '0000-0040', '파일40', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(229, 201, 'IMAGE', 'COMPLETED', 'CHAT', 200, 'MESSAGE', 207, '0000-0041', '파일41', 'jpg', 'image/jpeg', 1024, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
+(230, 200, 'FILE', 'COMPLETED', 'CHAT', 200, 'MESSAGE', 208, '0000-0042', '파일42', 'pdf', 'application/pdf', 2048, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
 
 -- 실데이터 (1000 ~)
 ALTER TABLE otps ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE signup_tokens ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE members ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE sessions ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE group_chats ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE direct_chats ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE participants ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE messages ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE attachments ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE profiles ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE tasks ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE offers ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE credentials ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE companies ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE projects ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE posts ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE credentials ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE attachments ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE coworkers ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE coworker_requests ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE recommendations ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE notifications ALTER COLUMN id RESTART WITH 1000;
-ALTER TABLE device_tokens ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE tasks ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE offers ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE drives ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE drive_members ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE boards ALTER COLUMN id RESTART WITH 1000;
 ALTER TABLE notes ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE posts ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE coworker_requests ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE coworkers ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE recommendations ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE group_chats ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE participants ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE direct_chats ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE device_tokens ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE notifications ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE messages ALTER COLUMN id RESTART WITH 1000;

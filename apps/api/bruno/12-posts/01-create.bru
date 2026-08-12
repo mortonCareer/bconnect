@@ -17,7 +17,7 @@ post {
 body:json {
   {
     "taskId": {{workerTaskId}},
-    "attachmentIds": [106],
+    "attachmentIds": [107],
     "content": "게시글"
   }
 }
@@ -35,7 +35,7 @@ tests {
 }
 
 docs {
-  @seed attachments : 106
+  @seed attachments : 107
   @chain
   - 11-worker-tasks/01-create-worker-task
 }
