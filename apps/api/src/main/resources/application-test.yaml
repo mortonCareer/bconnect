@@ -2,8 +2,8 @@ spring:
   datasource:
     url: jdbc:tc:postgresql:latest:///test
   jpa:
+    show-sql: true
     properties:
-      show-sql: true
       hibernate:
         format_sql: true
 

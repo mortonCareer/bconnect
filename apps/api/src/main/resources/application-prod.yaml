@@ -34,3 +34,7 @@ app:
   sns:
     region: ${AWS_REGION}
     platform-arn: ${AWS_SNS_PLATFORM_ARN}
+
+springdoc:
+  api-docs:
+    enabled: false
