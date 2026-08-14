@@ -27,6 +27,7 @@ public record ApiConfigProps(
     public record Cors(
         @NotEmpty(message = "app.cors.allowed-origins must not be empty")
         List<String> allowedOrigins,
+        @NotEmpty(message = "app.cors.allowed-origin-patterns must not be empty")
         List<String> allowedOriginPatterns
     ) {}
 
@@ -38,6 +39,7 @@ public record ApiConfigProps(
         Duration accessTokenExpiration,
         @NotNull(message = "app.jwt.refresh-token-expiration must not be null")
         Duration refreshTokenExpiration,
+        @NotBlank(message = "app.jwt.cookie-domain must not be blank")
         String cookieDomain
     ) {}
 }

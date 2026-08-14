@@ -151,7 +151,7 @@ function makeNoNameItem(
  * 매칭 실패 시 원본 반환 (과도한 필터링 방지)
  */
 function filterByAddress<T>(items: T[], referenceAddr: string, addrKey: keyof T): T[] {
-  // 시/도 + 시/군/구 추출 (예: "서울특별시 강남구 ..." → ["서울특별시", "강남구"])
+  // 시/도 + 시/군/구 추출
   const tokens = referenceAddr.split(/\s+/).slice(0, 2)
   if (tokens.length === 0) return items
 
@@ -372,21 +372,21 @@ function mapConstructionLicenseCheckItem(
 
   if (hasLicense) {
     details.push(
-      { key: '업체명', value: first.company_name || '-' },
-      { key: '대표자', value: first.representative || '-' },
-      { key: '등록업종', value: first.trade_name || '-' },
+      { key: '업체명', value: first.ncr_gs_kname || '-' },
+      { key: '대표자', value: first.ncr_gs_master || '-' },
+      { key: '등록업종', value: first.ncr_item_name || '-' },
       {
         key: '등록일',
-        value: first.reg_date ? formatDate(String(first.reg_date)) : '-',
+        value: first.ncr_gs_date ? formatDate(String(first.ncr_gs_date)) : '-',
       },
-      { key: '소재지', value: first.address || '-' }
+      { key: '소재지', value: first.ncr_gs_addr || '-' }
     )
 
     // 2건 이상이면 추가 업종 표시
     if (regItems.length > 1) {
       const others = regItems
         .slice(1)
-        .map((r) => r.trade_name)
+        .map((r) => r.ncr_item_name)
         .filter(Boolean)
       if (others.length > 0) {
         details.push({ key: '추가 업종', value: others.join(', ') })
@@ -397,16 +397,16 @@ function mapConstructionLicenseCheckItem(
   if (hasPenalty) {
     const p = penaltyItems[0]
     details.push(
-      { key: '행정처분', value: p.penalty_type || '-' },
+      { key: '행정처분', value: p.ncr_admi_dename || '-' },
       {
         key: '과징금',
-        value: p.fine_amount ? `${p.fine_amount.toLocaleString()}원` : '-',
+        value: p.ncr_admi_fine ? `${p.ncr_admi_fine.toLocaleString()}원` : '-',
       },
       {
         key: '과태료',
-        value: p.penalty_amount ? `${p.penalty_amount.toLocaleString()}원` : '-',
+        value: p.ncr_admi_penalty ? `${p.ncr_admi_penalty.toLocaleString()}원` : '-',
       },
-      { key: '위반내용', value: p.violation_content || '-' }
+      { key: '위반내용', value: p.ecode_admi_con || '-' }
     )
   }
 
@@ -628,8 +628,8 @@ async function fetchConstructionLicenseItem(regNo: string): Promise<CheckItem> {
       cachedConstructionLicense(regNo),
       cachedConstructionPenalty(regNo),
     ])
-    const generalReg = regItems.filter((r) => isGeneralConstructionTrade(r.trade_name))
-    const generalPenalty = penaltyItems.filter((r) => isGeneralConstructionTrade(r.trade_name))
+    const generalReg = regItems.filter((r) => isGeneralConstructionTrade(r.ncr_item_name))
+    const generalPenalty = penaltyItems.filter((r) => isGeneralConstructionTrade(r.ncr_item_name))
     return mapConstructionLicenseCheckItem(
       'CONSTRUCTION_LICENSE',
       '종합건설업 면허',
@@ -687,8 +687,10 @@ async function fetchSpecialtyLicenseItem(regNo: string): Promise<CheckItem> {
       cachedConstructionLicense(regNo),
       cachedConstructionPenalty(regNo),
     ])
-    const specialtyReg = regItems.filter((r) => !isGeneralConstructionTrade(r.trade_name))
-    const specialtyPenalty = penaltyItems.filter((r) => !isGeneralConstructionTrade(r.trade_name))
+    const specialtyReg = regItems.filter((r) => !isGeneralConstructionTrade(r.ncr_item_name))
+    const specialtyPenalty = penaltyItems.filter(
+      (r) => !isGeneralConstructionTrade(r.ncr_item_name)
+    )
     return mapConstructionLicenseCheckItem(
       'SPECIALTY_LICENSE',
       '전문건설업 면허',

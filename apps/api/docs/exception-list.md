@@ -19,6 +19,7 @@
 | `OF` | 섭외 | `core/domain/offer` |
 | `DR` | 드라이브 | `core/domain/drive` |
 | `AT` | 첨부 | `attachment/domain` |
+| `OC` | 원클릭 | `oneclick/domain` |
 
 ---
 
@@ -140,3 +141,10 @@
 | AT004 | NOT_COMPLETED | 400 | INFO | 업로드가 완료되지 않은 첨부파일입니다. |
 | AT005 | INVALID_LINKED | 404 | INFO | 연결되지 않은 첨부파일입니다. |
 | AT006 | NOT_FOUND | 404 | INFO | 존재하지 않는 첨부파일입니다. |
+
+## OneClickExceptionCode
+
+| 코드 | 이름 | HTTP | LogLevel | 메시지 |
+| --- | --- | --- | --- | --- |
+| OC001 | VALIDATION_FAILED | 400 | INFO | 사업자 정보가 일치하지 않습니다. |
+| OC002 | SERVICE_UNAVAILABLE | 503 | WARN | 사업자 조회 서비스가 일시적으로 원활하지 않습니다. |

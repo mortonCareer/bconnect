@@ -12,13 +12,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# setup-node 의 cache: 'pnpm' 을 쓰지 않는다. 자체 호스팅 러너는 GitHub 캐시와
-# 같은 데이터센터에 있지 않아 291MB 를 매번 집 회선으로 받아야 했고, 그 회선이
-# 하드 상한이다 — 동시 6잡의 합산 전송률이 12.9 MB/s 에서 멈추고 100Mbps 의
-# 이론 상한 12.5 MB/s 와 일치했다. 러너를 늘려도 같은 회선을 잘게 나눌 뿐이다.
-# 대신 pnpm store 와 러너 툴 캐시를 노드 로컬 볼륨에 둔다.
-#   homelab#269 (볼륨 도입) / homelab#270 (store 재배치 대응)
-# 노드별로 첫 잡만 느리고 그 뒤로는 네트워크를 타지 않는다.
+# setup-node 의 cache: 'pnpm' 을 쓰지 않는다
+# pnpm store 와 러너 툴 캐시를 노드 로컬 볼륨에 둔다
+# homelab#269 (볼륨 도입) / homelab#270 (재배치 대응)
 permissions:
   contents: read
   pull-requests: read
@@ -39,10 +35,6 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
-          # spec 만 변경된 PR 은 ci-career/ci-plan skip — BE-first 사이클(ADR-0015)이라
-          # 스펙 단독 변경은 BE 구현에 따라가는 갱신 또는 description 수정 등
-          # FE 영향 없는 형태가 일반적임.
-          # api-spec 은 BE springdoc 재생성·커밋(ci-api-spec) — orval 이 직접 소비.
           filters: |
             career:
               - 'apps/career/**'
@@ -185,22 +177,38 @@ jobs:
       - name: Build with Gradle
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          DATA_GO_SERVICE_KEY: ${{ secrets.DATA_GO_SERVICE_KEY }}
         working-directory: apps/api
         run: ./gradlew build
 
       - name: Start API server
+        env:
+          DATA_GO_SERVICE_KEY: ${{ secrets.DATA_GO_SERVICE_KEY }}
         working-directory: apps/api
-        run: ./gradlew bootRun > /dev/null 2>&1 &
+        run: ./gradlew bootRun > bootrun.log 2>&1 &
 
       - name: Wait for health
         run: |
           for i in $(seq 1 60); do
-            curl -sf http://localhost:8080/actuator/health && break || sleep 1
+            if curl -sf http://localhost:8080/actuator/health; then
+              exit 0
+            fi
+            sleep 1
           done
+          echo "API 서버 기동 실패"
+          exit 1
 
       - name: Run Bruno demo collection
         working-directory: apps/api/bruno
         run: bru run --env local --exclude-tags=ws --reporter-html bruno-report.html
+
+      - name: Upload API server log
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: api-bootrun-log
+          path: apps/api/bootrun.log
+          if-no-files-found: warn
 
       - name: Upload Bruno report
         if: ${{ !cancelled() }}
@@ -233,6 +241,7 @@ jobs:
       - name: Generate Open API Docs
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          DATA_GO_SERVICE_KEY: ${{ secrets.DATA_GO_SERVICE_KEY }}
         working-directory: apps/api
         run: |
           ./gradlew build

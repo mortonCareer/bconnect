@@ -1,10 +1,13 @@
 package to.bconnect.api.support.fixture;
 
+import lombok.val;
 import to.bconnect.api.core.domain.offer.CreateOffer;
 import to.bconnect.api.core.domain.offer.Offer;
 import to.bconnect.api.core.domain.offer.OfferEvent;
 import to.bconnect.api.storage.offer.OfferEntity;
 import to.bconnect.api.storage.offer.OfferStatus;
+
+import java.time.LocalDate;
 
 import static to.bconnect.api.support.fixture.FixtureConstant.MAX_DATE;
 import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
@@ -19,11 +22,33 @@ public class OfferFactory {
     }
 
     public static OfferEntity entity(Long taskId, Long workerId) {
+        return entity(taskId, workerId, DEFAULT_SEQ);
+    }
+
+    public static OfferEntity entity(Long taskId, Long workerId, int seq) {
         return new OfferEntity(
                 taskId,
                 workerId,
-                DEFAULT_SEQ
+                seq
         );
+    }
+
+    public static OfferEntity entity(Long taskId, Long workerId, int seq, OfferStatus status) {
+        return entity(taskId, workerId, seq, status, MAX_DATE);
+    }
+
+    public static OfferEntity entity(Long taskId, Long workerId, int seq, OfferStatus status, LocalDate due) {
+        val created = entity(taskId, workerId, seq);
+        created.updateDue(due);
+        switch (status) {
+            case PENDING -> {}
+            case ACTIVE -> created.offered();
+            case ACCEPTED -> created.accept();
+            case DENIED -> created.deny();
+            case CANCELED -> created.cancel();
+            case EXPIRED -> created.expire();
+        }
+        return created;
     }
 
     public static CreateOffer command(Long taskId, Long workerId) {

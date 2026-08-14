@@ -1,0 +1,26 @@
+meta {
+  name: 사업자 진위확인
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/one-click/validation
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "brn": "3017907601",
+    "ownerName": "이송목",
+    "openedAt": "2026-05-31"
+  }
+}
+
+tests {
+  test("성공", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+  });
+}

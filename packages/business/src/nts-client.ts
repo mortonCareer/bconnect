@@ -6,9 +6,9 @@ const NTS_STATUS_URL = 'https://api.odcloud.kr/api/nts-businessman/v1/status'
 const NTS_VALIDATE_URL = 'https://api.odcloud.kr/api/nts-businessman/v1/validate'
 
 function getServiceKey(): string {
-  const key = process.env.NTS_API_SERVICE_KEY
+  const key = process.env.DATA_GO_SERVICE_KEY
   if (!key) {
-    throw new Error('NTS_API_SERVICE_KEY is not configured')
+    throw new Error('DATA_GO_SERVICE_KEY is not configured')
   }
   return key
 }

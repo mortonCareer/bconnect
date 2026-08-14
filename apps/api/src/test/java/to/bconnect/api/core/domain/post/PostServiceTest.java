@@ -265,7 +265,7 @@ class PostServiceTest {
         val task = taskRepository.save(TaskFactory.entity(member.getId()));
         val post = postRepository.save(PostFactory.entity(member.getId(), task.getId()));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = new UpdatePost(null, List.of(), "updated content");
+        val command = PostFactory.updateCommand(null);
 
         // when
         postService.update(user, post.getId(), command);
@@ -313,7 +313,7 @@ class PostServiceTest {
         val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         val task = taskRepository.save(TaskFactory.entity(other.getId()));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = new CreatePost(task.getId(), List.of(), "content");
+        val command = PostFactory.createCommand(task.getId());
 
         // when & then
         assertCodeException(() -> postService.create(user, command))
@@ -326,7 +326,7 @@ class PostServiceTest {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = new CreatePost(MISSING_ID, List.of(), "content");
+        val command = PostFactory.createCommand(MISSING_ID);
 
         // when & then
         assertCodeException(() -> postService.create(user, command))
@@ -341,7 +341,7 @@ class PostServiceTest {
         val post = postRepository.save(PostFactory.entity(owner.getId(), null));
         val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         val user = UserFactory.domain(other.getId(), Role.CAREER);
-        val command = new UpdatePost(null, List.of(), "updated content");
+        val command = PostFactory.updateCommand(null);
 
         // when & then
         assertCodeException(() -> postService.update(user, post.getId(), command))
@@ -357,7 +357,7 @@ class PostServiceTest {
         val post = postRepository.save(PostFactory.entity(member.getId(), null));
         val task = taskRepository.save(TaskFactory.entity(other.getId()));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = new UpdatePost(task.getId(), List.of(), "updated content");
+        val command = PostFactory.updateCommand(task.getId());
 
         // when & then
         assertCodeException(() -> postService.update(user, post.getId(), command))
@@ -370,7 +370,7 @@ class PostServiceTest {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = new UpdatePost(null, List.of(), "updated content");
+        val command = PostFactory.updateCommand(null);
 
         // when & then
         assertCodeException(() -> postService.update(user, MISSING_ID, command))
@@ -384,7 +384,7 @@ class PostServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val post = postRepository.save(PostFactory.entity(member.getId(), null));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = new UpdatePost(MISSING_ID, List.of(), "updated content");
+        val command = PostFactory.updateCommand(MISSING_ID);
 
         // when & then
         assertCodeException(() -> postService.update(user, post.getId(), command))

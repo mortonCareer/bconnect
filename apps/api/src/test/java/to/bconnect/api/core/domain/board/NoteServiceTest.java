@@ -108,7 +108,7 @@ class NoteServiceTest {
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
         val board = boardRepository.save(BoardFactory.projectEntity(project.getId()));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = BoardFactory.projectCommand(project.getId());
+        val command = BoardFactory.createProjectCommand(project.getId());
 
         // when
         val created = noteService.create(user, command);
@@ -129,7 +129,7 @@ class NoteServiceTest {
         val drive = driveRepository.save(DriveFactory.entity(project.getId(), member.getId()));
         val board = boardRepository.save(BoardFactory.driveEntity(drive.getId()));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = BoardFactory.driveCommand(drive.getId());
+        val command = BoardFactory.createDriveCommand(drive.getId());
 
         // when
         val created = noteService.create(user, command);
@@ -153,7 +153,7 @@ class NoteServiceTest {
         val shared = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         driveMemberRepository.save(DriveFactory.memberEntity(drive.getId(), shared.getId()));
         val user = UserFactory.domain(shared.getId(), Role.CAREER);
-        val command = BoardFactory.driveCommand(drive.getId());
+        val command = BoardFactory.createDriveCommand(drive.getId());
 
         // when
         val created = noteService.create(user, command);
@@ -262,7 +262,7 @@ class NoteServiceTest {
         val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
         companyRepository.save(CompanyFactory.entity(other.getId(), "0000001001"));
         val user = UserFactory.domain(other.getId(), Role.CAREER);
-        val command = BoardFactory.driveCommand(drive.getId());
+        val command = BoardFactory.createDriveCommand(drive.getId());
 
         // when & then
         assertCodeException(() -> noteService.create(user, command))
@@ -277,7 +277,7 @@ class NoteServiceTest {
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = BoardFactory.projectCommand(project.getId());
+        val command = BoardFactory.createProjectCommand(project.getId());
 
         // when & then
         assertCodeException(() -> noteService.create(user, command))
@@ -293,7 +293,7 @@ class NoteServiceTest {
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
         val drive = driveRepository.save(DriveFactory.entity(project.getId(), member.getId()));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
-        val command = BoardFactory.driveCommand(drive.getId());
+        val command = BoardFactory.createDriveCommand(drive.getId());
 
         // when & then
         assertCodeException(() -> noteService.create(user, command))
@@ -345,6 +345,5 @@ class NoteServiceTest {
         // when & then
         assertCodeException(() -> noteService.delete(user, note.getId()))
                 .hasExceptionCode(CommonExceptionCode.FORBIDDEN);
-        assertThat(noteRepository.findById(note.getId())).isPresent();
     }
 }

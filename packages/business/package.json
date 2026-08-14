@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@sentry/nextjs": "catalog:",
-    "cheerio": "^1.2.0",
+    "cheerio": "catalog:",
     "fast-xml-parser": "^5.3.7",
     "postgres": "^3.4.9",
     "server-only": "^0.0.1"
@@ -31,7 +31,6 @@
     "react": "catalog:"
   },
   "devDependencies": {
-    "@types/cheerio": "^1.0.0",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "typescript": "catalog:"

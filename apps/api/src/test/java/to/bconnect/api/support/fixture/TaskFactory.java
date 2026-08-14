@@ -1,5 +1,7 @@
 package to.bconnect.api.support.fixture;
 
+import lombok.val;
+import org.springframework.test.util.ReflectionTestUtils;
 import to.bconnect.api.core.domain.task.*;
 import to.bconnect.api.storage.profile.Trade;
 import to.bconnect.api.storage.task.TaskEntity;
@@ -7,9 +9,10 @@ import to.bconnect.api.storage.task.TaskProgress;
 import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.storage.task.TaskType;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Set;
+
+import static to.bconnect.api.support.fixture.FixtureConstant.MIN_DATE_TIME;
 
 public class TaskFactory {
 
@@ -21,7 +24,7 @@ public class TaskFactory {
                 TaskStatus.NONE, TaskProgress.TODO,
                 memberId, "task", "memo", "company", ProfileFactory.DEFAULT_ADDRESS,
                 null, null, null, null,
-                Instant.now(), Instant.now());
+                MIN_DATE_TIME, MIN_DATE_TIME);
     }
 
     public static TaskEntity entity(Long memberId) {
@@ -58,6 +61,20 @@ public class TaskFactory {
                 "requirement",
                 "memo"
         );
+    }
+
+    public static TaskEntity projectEntity(Long projectId, Long workerId, TaskStatus status) {
+        val created = projectEntity(projectId, workerId);
+        switch (status) {
+            case NONE -> {}
+            case OPEN -> ReflectionTestUtils.setField(created, "status", TaskStatus.OPEN);
+            case OFFERED -> created.offered();
+            case ASSIGNED -> {
+                created.offered();
+                created.assign(workerId);
+            }
+        }
+        return created;
     }
 
     public static CreateWorkerTask createCommand() {

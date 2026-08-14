@@ -4,20 +4,33 @@ spring:
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
 
+  sql:
+    init:
+      mode: always
+
 sentry:
-  dsn: ${SENTRY_DSN:}
+  dsn: ${SENTRY_DSN}
   send-default-pii: true
   traces-sample-rate: 1.0
-  environment: ${SENTRY_ENVIRONMENT:dev}
+  environment: ${SENTRY_ENVIRONMENT}
 
 app:
-  jwt:
-    cookie-domain: ${COOKIE_DOMAIN:.bconnect.to}
+  sms:
+    api-key: ${SOLAPI_API_KEY}
+    api-secret: ${SOLAPI_API_SECRET}
+    sender-number: ${SOLAPI_SENDER_NUMBER}
 
-  cors:
-    allowed-origin-patterns:
-      - https://bconnect-career*.vercel.app
-      - https://bconnect-plan*.vercel.app
-      - https://*.bconnect.to
-      - https://*.dev.bconnect.to
-      - "http://localhost:[*]"
+  s3:
+    region: ${AWS_REGION}
+    bucket: ${AWS_S3_BUCKET}
+
+  cloudfront:
+    domain: ${CLOUDFRONT_DOMAIN}
+    key-pair-id: ${CLOUDFRONT_KEY_PAIR_ID}
+    private-key: ${CLOUDFRONT_PRIVATE_KEY}
+    cookie-domain: ${CLOUDFRONT_COOKIE_DOMAIN}
+    cookie-ttl: 1h
+
+  sns:
+    region: ${AWS_REGION}
+    platform-arn: ${AWS_SNS_PLATFORM_ARN}

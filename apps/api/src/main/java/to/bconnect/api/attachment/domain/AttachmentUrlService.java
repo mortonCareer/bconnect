@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.attachment.infrastructure.cloudfront.CloudFrontUrlResolver;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.attachment.AttachmentType;
 
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 public class AttachmentUrlService {
 
     private final AttachmentFinder attachmentFinder;
-    private final CloudFrontUrlResolver urlResolver;
+    private final UrlResolver urlResolver;
 
     @Transactional(readOnly = true)
     public String get(AttachmentReferenceType referenceType, Long referenceId, ImageSize size) {

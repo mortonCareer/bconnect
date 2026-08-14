@@ -1,0 +1,103 @@
+name: One-click Sync
+
+on:
+  schedule:
+    - cron: '0 21 * * 2'
+  workflow_dispatch:
+    inputs:
+      full:
+        description: 'KISCON Construction full sync'
+        required: false
+        default: 'false'
+        type: boolean
+
+concurrency:
+  group: one-click-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: morton-runner
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Sync CWMA retirement-fund
+        id: cwma
+        if: ${{ !cancelled() }}
+        env:
+          CWMA_CSV_URL: ${{ vars.CWMA_CSV_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: pnpm --filter @bconnect/data-jobs cwma-sync
+
+      - name: Sync ECIC electrical-license
+        id: ecic
+        if: ${{ !cancelled() }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: pnpm --filter @bconnect/data-jobs ecic-sync
+
+      - name: Sync FEIA fire-license
+        id: feia
+        if: ${{ !cancelled() }}
+        env:
+          DATA_GO_SERVICE_KEY: ${{ secrets.DATA_GO_SERVICE_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: pnpm --filter @bconnect/data-jobs feia-sync
+
+      - name: Sync KISCON arrears
+        id: kiscon_arrears
+        if: ${{ !cancelled() }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}
+        run: pnpm --filter @bconnect/data-jobs kiscon-arrears-sync
+
+      - name: Sync KISCON subcon limits
+        id: kiscon_subcon
+        if: ${{ !cancelled() }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}
+        run: pnpm --filter @bconnect/data-jobs kiscon-subcon-sync
+
+      - name: Sync KISCON registration
+        id: kiscon_registration
+        if: ${{ !cancelled() }}
+        env:
+          DATA_GO_SERVICE_KEY: ${{ secrets.DATA_GO_SERVICE_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}
+        run: |
+          if [ "${{ inputs.full }}" = "true" ]; then
+            pnpm --filter @bconnect/data-jobs kiscon-registration-sync -- --full
+          else
+            pnpm --filter @bconnect/data-jobs kiscon-registration-sync
+          fi
+
+      - name: Sync KISCON admin penalty
+        id: kiscon_penalty
+        if: ${{ !cancelled() }}
+        env:
+          DATA_GO_SERVICE_KEY: ${{ secrets.DATA_GO_SERVICE_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MONITORING_WEBHOOK_URL }}
+        run: |
+          if [ "${{ inputs.full }}" = "true" ]; then
+            pnpm --filter @bconnect/data-jobs kiscon-penalty-sync -- --full
+          else
+            pnpm --filter @bconnect/data-jobs kiscon-penalty-sync
+          fi
+
+      - name: Sync MOEL wage-defaulter
+        id: moel
+        if: ${{ !cancelled() }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: pnpm --filter @bconnect/data-jobs moel-sync

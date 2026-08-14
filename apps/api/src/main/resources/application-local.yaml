@@ -1,6 +1,11 @@
 spring:
   datasource:
     url: jdbc:h2:mem:db;mode=postgresql;DB_CLOSE_ON_EXIT=FALSE
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 
   h2:
     console:
@@ -9,31 +14,22 @@ spring:
 
   sql:
     init:
+      mode: always
       platform: h2
+      data-locations:
+        - classpath:data.sql
+        - classpath:data-crawler.sql
 
 app:
   cors:
+    allowed-origins: "http://localhost:3000"
     allowed-origin-patterns:
-      - "http://localhost:[*]"
-      - "http://127.0.0.1:[*]"
+    - "http://localhost:[*]"
+    - "http://127.0.0.1:[*]"
 
   jwt:
-    secret: test-secret-key-for-jwt-authentication-minimum-256-bits
-
-  sms:
-    api-key: local-api-key
-    api-secret: local-api-secret
-    sender-number: "01000000000"
-
-  s3:
-    bucket: local-bucket
-
-  cloudfront:
-    key-pair-id: local-key-pair-id
-    private-key: local-private-key
-
-  sns:
-    platform-application-arn: local-platform-application-arn
+    secret: local-secret-key-for-jwt-authentication-minimum-256-bits
+    cookie-domain: localhost
 
 logging:
   level:

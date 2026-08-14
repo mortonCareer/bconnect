@@ -4,6 +4,8 @@ import to.bconnect.api.security.session.IssuedSession;
 import to.bconnect.api.security.session.NewDeviceLoginEvent;
 import to.bconnect.api.storage.session.SessionEntity;
 
+import java.util.UUID;
+
 public class SessionFactory {
 
     public static IssuedSession domain() {
@@ -11,7 +13,7 @@ public class SessionFactory {
     }
 
     public static SessionEntity entity(Long memberId) {
-        return new SessionEntity(memberId, "agent", "ip", "refresh-token");
+        return new SessionEntity(memberId, "agent", "ip", UUID.randomUUID().toString());
     }
 
     public static SessionEntity entity(Long memberId, String agent, String ip, String refreshToken) {

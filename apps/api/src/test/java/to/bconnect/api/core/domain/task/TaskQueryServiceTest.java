@@ -39,12 +39,12 @@ class TaskQueryServiceTest {
         val task = taskRepository.save(TaskFactory.entity(member.getId()));
 
         // when
-        val found = taskQueryService.get(task.getId());
+        val optional = taskQueryService.get(task.getId());
 
         // then
-        assertThat(found).isPresent();
-        assertThat(found.orElseThrow().id()).isEqualTo(task.getId());
-        assertThat(found.orElseThrow().workerId()).isEqualTo(member.getId());
+        assertThat(optional).isPresent();
+        assertThat(optional.orElseThrow().id()).isEqualTo(task.getId());
+        assertThat(optional.orElseThrow().workerId()).isEqualTo(member.getId());
     }
 
     @Test
