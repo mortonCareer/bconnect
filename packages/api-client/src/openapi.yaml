@@ -669,6 +669,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseOneClickResponse"
+  /api/v1/one-click/validation:
+    post:
+      tags:
+      - one-click-controller
+      operationId: validate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidateBusinessRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
   /api/v1/offers:
     post:
       tags:
@@ -2522,16 +2540,8 @@ components:
           type: string
           minLength: 1
           pattern: "\\d{10}"
-        ownerName:
-          type: string
-          minLength: 1
-        openedAt:
-          type: string
-          format: date
       required:
       - brn
-      - openedAt
-      - ownerName
     ApiResponseOneClickResponse:
       type: object
       properties:
@@ -2852,6 +2862,23 @@ components:
       - count
       - name
       - verdict
+    ValidateBusinessRequest:
+      type: object
+      properties:
+        brn:
+          type: string
+          minLength: 1
+          pattern: "\\d{10}"
+        ownerName:
+          type: string
+          minLength: 1
+        openedAt:
+          type: string
+          format: date
+      required:
+      - brn
+      - openedAt
+      - ownerName
     CreateOfferRequest:
       type: object
       properties:
