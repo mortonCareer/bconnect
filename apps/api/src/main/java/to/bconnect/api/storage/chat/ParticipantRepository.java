@@ -1,6 +1,7 @@
 package to.bconnect.api.storage.chat;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -24,4 +25,8 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
     boolean existsByChatIdAndMemberId(Long chatId, Long memberId);
 
     long countByChatId(Long chatId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "DELETE FROM participants WHERE member_id = :memberId", nativeQuery = true)
+    int purgeByMemberId(@Param("memberId") Long memberId);
 }

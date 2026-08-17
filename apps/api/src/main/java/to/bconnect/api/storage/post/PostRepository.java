@@ -1,6 +1,7 @@
 package to.bconnect.api.storage.post;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
@@ -28,4 +29,8 @@ public interface PostRepository extends JpaRepository<PostEntity, Long>, Queryds
 
     @Query("SELECT p.memberId, COUNT(p) FROM PostEntity p WHERE p.memberId IN :memberIds GROUP BY p.memberId")
     List<Object[]> countByMemberIdInRows(@Param("memberIds") Collection<Long> memberIds);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "UPDATE posts SET task_id = NULL WHERE task_id IN (SELECT id FROM tasks WHERE worker_id = :memberId AND dtype = 'WORKER')", nativeQuery = true)
+    int detachWorkerTasksByWorkerId(@Param("memberId") Long memberId);
 }

@@ -46,6 +46,10 @@ app:
     refresh-token-expiration: 7d
     cookie-domain: ${COOKIE_DOMAIN}
 
+  retention:
+    abuse: 365d
+    transaction-party: 365d
+
   data-go:
     service-key: ${DATA_GO_SERVICE_KEY}
 

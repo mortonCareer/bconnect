@@ -1,6 +1,9 @@
 package to.bconnect.api.storage.offer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -33,4 +36,8 @@ public interface OfferRepository extends JpaRepository<OfferEntity, Long> {
     Optional<OfferEntity> findFirstByTaskIdOrderBySeqDesc(Long taskId);
 
     List<OfferEntity> findAllByStatusAndDueBefore(OfferStatus status, LocalDate due);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "DELETE FROM offers WHERE worker_id = :memberId", nativeQuery = true)
+    int purgeByWorkerId(@Param("memberId") Long memberId);
 }

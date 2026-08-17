@@ -1,6 +1,7 @@
 package to.bconnect.api.storage.recommendation;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -37,4 +38,8 @@ public interface RecommendationRepository extends JpaRepository<RecommendationEn
 
     @Query("SELECT r.toId, COUNT(r) FROM RecommendationEntity r WHERE r.visible = true AND r.toId IN :memberIds GROUP BY r.toId")
     List<Object[]> countByToIdInAndVisibleTrueRows(@Param("memberIds") Collection<Long> memberIds);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "DELETE FROM recommendations WHERE from_id = :memberId OR to_id = :memberId", nativeQuery = true)
+    int purgeByMemberId(@Param("memberId") Long memberId);
 }

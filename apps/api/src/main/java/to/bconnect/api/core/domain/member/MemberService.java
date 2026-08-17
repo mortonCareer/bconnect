@@ -106,6 +106,12 @@ public class MemberService {
     @Transactional
     public void withdraw(AuthUser user) {
         memberCleaner.clean(user);
+
+        val found = memberRepository.findById(user.id())
+                .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
+
+        found.anonymize();
+        memberRepository.flush();
         memberRepository.deleteById(user.id());
     }
 }

@@ -132,19 +132,19 @@ class MemberCleanerTest {
         assertThat(postRepository.findById(post.getId())).isPresent();
         assertThat(participantRepository.findByChatIdAndMemberId(chat.getId(), member.getId())).isEmpty();
         assertThat(groupChatRepository.findById(chat.getId())).isPresent();
-        assertThat(groupChatRepository.findById(soloChat.getId())).isEmpty();
+        assertThat(groupChatRepository.findById(soloChat.getId())).isPresent();
         assertThat(offerRepository.findAllByWorkerId(member.getId())).isEmpty();
         assertThat(taskRepository.findAllByWorkerIdAndType(member.getId(), TaskType.WORKER)).isEmpty();
         assertThat(taskRepository.findById(projectTask.getId())).isPresent();
-        assertThat(driveRepository.findAllByMemberId(member.getId())).isEmpty();
-        assertThat(boardRepository.findByDriveId(drive.getId())).isEmpty();
-        assertThat(noteRepository.findById(note.getId())).isEmpty();
-        assertThat(driveMemberRepository.findAllByMemberId(member.getId())).isEmpty();
+        assertThat(driveRepository.findAllByMemberId(member.getId())).isNotEmpty();
+        assertThat(boardRepository.findByDriveId(drive.getId())).isPresent();
+        assertThat(noteRepository.findById(note.getId())).isPresent();
+        assertThat(driveMemberRepository.findAllByMemberId(member.getId())).isNotEmpty();
 
         assertThat(attachmentRepository.findById(memberAttachment.getId()).orElseThrow().getReferenceId()).isNull();
         assertThat(attachmentRepository.findById(credentialAttachment.getId()).orElseThrow().getReferenceId()).isNull();
         assertThat(attachmentRepository.findById(postAttachment.getId()).orElseThrow().getReferenceId()).isEqualTo(post.getId());
-        assertThat(attachmentRepository.findById(driveAttachment.getId()).orElseThrow().getReferenceId()).isNull();
+        assertThat(attachmentRepository.findById(driveAttachment.getId()).orElseThrow().getReferenceId()).isEqualTo(drive.getId());
     }
 
     @Test

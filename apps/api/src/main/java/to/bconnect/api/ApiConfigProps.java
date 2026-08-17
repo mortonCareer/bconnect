@@ -17,6 +17,7 @@ import java.util.List;
 public record ApiConfigProps(
     @Valid @NotNull Cors cors,
     @Valid @NotNull Jwt jwt,
+    @Valid @NotNull Retention retention,
     @NotBlank(message = "app.timezone must not be blank") String timezone
 ) {
 
@@ -41,5 +42,12 @@ public record ApiConfigProps(
         Duration refreshTokenExpiration,
         @NotBlank(message = "app.jwt.cookie-domain must not be blank")
         String cookieDomain
+    ) {}
+
+    public record Retention(
+        @NotNull(message = "app.retention.abuse must not be null")
+        Duration abuse,
+        @NotNull(message = "app.retention.transaction-party must not be null")
+        Duration transactionParty
     ) {}
 }

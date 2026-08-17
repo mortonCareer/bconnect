@@ -1,6 +1,7 @@
 package to.bconnect.api.storage.coworker;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -54,4 +55,8 @@ public interface CoworkerRepository extends JpaRepository<CoworkerEntity, Long> 
 
     @Query("SELECT c.maxId, COUNT(c) FROM CoworkerEntity c WHERE c.maxId IN :memberIds GROUP BY c.maxId")
     List<Object[]> countByMaxIdIn(@Param("memberIds") Collection<Long> memberIds);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "DELETE FROM coworkers WHERE min_id = :memberId OR max_id = :memberId", nativeQuery = true)
+    int purgeByMemberId(@Param("memberId") Long memberId);
 }

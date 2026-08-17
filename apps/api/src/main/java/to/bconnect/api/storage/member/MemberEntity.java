@@ -53,6 +53,15 @@ public class MemberEntity extends BaseEntity {
         this.name = name;
     }
 
+    public void anonymize() {
+        this.username = null;
+        this.name = null;
+        this.phone = null;
+        this.birth = null;
+        this.marketingConsent = false;
+        this.roles.clear();
+    }
+
     public void grantRole(Role role) {
         this.roles.remove(Role.GUEST);
         this.roles.add(role);
