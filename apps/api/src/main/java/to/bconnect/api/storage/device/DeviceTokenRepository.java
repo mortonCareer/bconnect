@@ -16,6 +16,8 @@ public interface DeviceTokenRepository extends JpaRepository<DeviceTokenEntity, 
 
     List<DeviceTokenEntity> findByMemberIdAndEnabledTrue(Long memberId);
 
+    List<DeviceTokenEntity> findAllByMemberId(Long memberId);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = "DELETE FROM device_tokens WHERE member_id = :memberId", nativeQuery = true)
     int purgeByMemberId(@Param("memberId") Long memberId);

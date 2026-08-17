@@ -19,6 +19,8 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
 
     List<NotificationEntity> findAllByMemberId(Long memberId);
 
+    List<NotificationEntity> findAllBySenderId(Long senderId);
+
     @Modifying
     @Query("UPDATE NotificationEntity n SET n.read = true WHERE n.memberId = :memberId AND n.read = false")
     void markAllReadByMemberId(@Param("memberId") Long memberId);
