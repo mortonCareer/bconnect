@@ -13,6 +13,9 @@ public interface CredentialRepository extends JpaRepository<CredentialEntity, Lo
 
     List<CredentialEntity> findAllByMemberIdOrderByIdDesc(Long memberId);
 
+    @Query(value = "SELECT id FROM credentials WHERE member_id = :memberId", nativeQuery = true)
+    List<Long> findAllIdsByMemberId(@Param("memberId") Long memberId);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = "DELETE FROM credentials WHERE member_id = :memberId", nativeQuery = true)
     int purgeByMemberId(@Param("memberId") Long memberId);

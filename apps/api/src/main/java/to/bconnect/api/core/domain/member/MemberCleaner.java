@@ -12,7 +12,6 @@ import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
 import to.bconnect.api.storage.coworker.CoworkerRequestRepository;
-import to.bconnect.api.storage.credential.CredentialEntity;
 import to.bconnect.api.storage.credential.CredentialRepository;
 import to.bconnect.api.storage.device.DeviceTokenRepository;
 import to.bconnect.api.storage.notification.NotificationRepository;
@@ -58,8 +57,7 @@ public class MemberCleaner {
 
         attachmentLinker.unlink(AttachmentReferenceType.MEMBER, memberId);
 
-        val credentials = credentialRepository.findAllByMemberId(memberId);
-        attachmentLinker.unlink(AttachmentReferenceType.CREDENTIAL, credentials.stream().map(CredentialEntity::getId).toList());
+        attachmentLinker.unlink(AttachmentReferenceType.CREDENTIAL, credentialRepository.findAllIdsByMemberId(memberId));
 
         val archivedAt = Instant.now();
         val expireAt = archivedAt.plus(apiConfigProps.retention().transactionParty());

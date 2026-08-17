@@ -44,6 +44,10 @@ create table if not exists members (
 );
 create unique index if not exists udx_members_username on members(username) where deleted_at is null;
 create unique index if not exists udx_members_phone on members(phone) where deleted_at is null;
+alter table members alter column username drop not null;
+alter table members alter column name drop not null;
+alter table members alter column phone drop not null;
+alter table members alter column birth drop not null;
 
 create table if not exists member_roles (
     member_id bigint not null references members(id),
