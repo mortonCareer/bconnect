@@ -19,15 +19,30 @@ public class TransactionPartyEntity {
 
     private Long memberId;
 
+    private String memberName;
+
+    private String memberPhone;
+
     private Long counterpartyId;
+
+    private String counterpartyName;
+
+    private String counterpartyBrn;
+
+    private Instant matchedAt;
 
     private Instant archivedAt;
 
     private Instant expireAt;
 
-    public TransactionPartyEntity(Long memberId, Long counterpartyId, Instant archivedAt, Instant expireAt) {
+    public TransactionPartyEntity(Long memberId, String memberName, String memberPhone, Long counterpartyId, String counterpartyName, String counterpartyBrn, Instant matchedAt, Instant archivedAt, Instant expireAt) {
         this.memberId = memberId;
+        this.memberName = memberName;
+        this.memberPhone = memberPhone;
         this.counterpartyId = counterpartyId;
+        this.counterpartyName = counterpartyName;
+        this.counterpartyBrn = counterpartyBrn;
+        this.matchedAt = matchedAt;
         this.archivedAt = archivedAt;
         this.expireAt = expireAt;
     }

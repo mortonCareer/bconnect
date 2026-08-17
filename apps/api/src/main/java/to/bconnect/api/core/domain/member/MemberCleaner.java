@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.ApiConfigProps;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.security.AuthUser;
@@ -19,9 +20,12 @@ import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.post.PostRepository;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.storage.recommendation.RecommendationRepository;
+import to.bconnect.api.storage.retention.TransactionPartyRepository;
 import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.chat.ParticipantRepository;
+
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -40,7 +44,9 @@ public class MemberCleaner {
     private final DeviceTokenRepository deviceTokenRepository;
     private final NotificationRepository notificationRepository;
     private final ParticipantRepository participantRepository;
+    private final TransactionPartyRepository transactionPartyRepository;
     private final AttachmentLinker attachmentLinker;
+    private final ApiConfigProps apiConfigProps;
 
     // TODO: 이벤트 구조로 변경 가능
     @Transactional
@@ -54,6 +60,10 @@ public class MemberCleaner {
 
         val credentials = credentialRepository.findAllByMemberId(memberId);
         attachmentLinker.unlink(AttachmentReferenceType.CREDENTIAL, credentials.stream().map(CredentialEntity::getId).toList());
+
+        val archivedAt = Instant.now();
+        val expireAt = archivedAt.plus(apiConfigProps.retention().transactionParty());
+        transactionPartyRepository.archiveByWorkerId(memberId, archivedAt, expireAt);
 
         sessionRepository.purgeByMemberId(memberId);
         profileRepository.purgeTradesByMemberId(memberId);
