@@ -68,12 +68,11 @@ graph TD
 - 도메인 교차 로직의 위치는 도메인 간 응집도를 고려해서 선정해야 합니다.
 
 ### 회원 탈퇴
-- 탈퇴 데이터는 즉시파기 · 기간보관 · 별도보관 3분류로 처리한다.
-- 즉시파기: 개인정보 컬럼을 익명화하고 회원행을 soft delete한다. 개인 소유 데이터는 native DELETE로 물리 삭제한다.
-- 기간보관: 게시글 · 노트 · 저장소 · DM · 그룹채팅 메시지는 삭제 대상에서 제외한다.
-- 별도보관: `abuse_records` · `transaction_parties`에 1년 보관한다. 탈퇴 시 수락된 섭외의 거래당사자 정보를 `transaction_parties`에 스냅샷으로 저장한다. `RetentionExpirationScheduler`가 만료 행을 물리 삭제한다.
-- 탈퇴 회원은 제외하지 않고 도메인 객체의 `WITHDRAWN` 상수로 표현한다.
-- 소유한 업체가 있으면 탈퇴할 수 없다(M003).
+- 탈퇴 데이터는 즉시파기 · 기간보관 · 별도보관 3분류로 처리합니다.
+- 즉시파기 대상은 익명화 후 soft delete하고, 개인 소유 데이터는 native DELETE로 물리 삭제합니다.
+- 기간보관 대상(게시글 · 노트 · 저장소 · DM · 그룹채팅 메시지)은 삭제하지 않습니다.
+- 별도보관 대상(`abuse_records` · `transaction_parties`)은 1년간 보관 후 `RetentionExpirationScheduler`가 물리 삭제합니다.
+- 소유한 업체가 있으면 탈퇴할 수 없습니다(M003).
 
 ### 서비스 도메인 교차
 ```mermaid
