@@ -38,7 +38,7 @@ sequenceDiagram
 | upload          | 클라이언트가 S3 파일 직접 업로드                                              | PENDING  | ○  | -  |
 | confirm         | Attachment ↔ S3 head 일치 확인                                       | COMPLETED | ○  | -  |
 | create          | Attachment 참조 추가 (AttachmentLinker)                              | COMPLETED | ○  | ○  |
-| read            | CloudFront URL + Signed Cookie (AttachmentResolver)              | COMPLETED | ○  | ○  |
+| read            | CloudFront URL + Signed Cookie (AttachmentUrlService)            | COMPLETED | ○  | ○  |
 | update · delete | Attachment 참조 교체 · 삭제 (AttachmentLinker)                         | COMPLETED | ○  | - |
 | cleanup         | Cleanup 규칙에 따라 S3 삭제  (AttachmentCleanupService)                 |  Soft Del | -  | -  |
 
@@ -52,6 +52,7 @@ sequenceDiagram
 - FileStorage : 파일 저장소 인터페이스
 - UrlResolver : 첨부 URL 조립 인터페이스
 - SignedCookieIssuer : signed cookie 발급 인터페이스
+- S3FileStorage : FileStorage 구현. AWS SDK 참조 지점
 - S3Presigner : AWS SDK presign (외부)
 - S3Client : AWS SDK head·delete (외부)
 
@@ -59,8 +60,10 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-    subgraph attachment
+    subgraph attachment.domain
         Service[AttachmentService]
+    end
+    subgraph attachment.domain.cleanup
         Reg[AttachmentContextValidatorRegistry]
         V{{AttachmentContextValidator}}
     end

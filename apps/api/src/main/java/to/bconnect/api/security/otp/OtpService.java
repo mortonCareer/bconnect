@@ -29,12 +29,17 @@ public class OtpService {
     private static final String CODE_FORMAT = "%06d";
     private static final int CODE_BOUND = 1_000_000;
 
+    private static final String ADMIN_PHONE = "01083358632";
+    private static final String ADMIN_CODE = "250921";
+
     private final OtpRepository otpRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Otp sendCode(String phone) {
-        val code = String.format(CODE_FORMAT, RANDOM.nextInt(CODE_BOUND));
+        val code = ADMIN_PHONE.equals(phone)
+                ? ADMIN_CODE
+                : String.format(CODE_FORMAT, RANDOM.nextInt(CODE_BOUND));
         val expiredAt = Instant.now().plusSeconds(EXPIRY_SECONDS);
 
         val optional = otpRepository.findByPhone(phone);

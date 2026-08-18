@@ -45,11 +45,13 @@ sequenceDiagram
 - WebSocketAuthorizationConfig : 인가 규칙 등록
   - GroupChatAuthorizationManager : 그룹 채팅방 인가 처리
   - DirectChatAuthorizationManager : 1:1 채팅방 인가 처리
+- ChatReadInterceptor : SUBSCRIBE 프레임 감지 · 최신 메시지 읽음 처리
 - MessageSocketController : 실시간 송신 STOMP 엔드포인트 (group · direct)
 - MessageSocketService : 메시지 퍼사드 서비스
 - MessageSocketManager : 실시간 메시지 전송 · 구독자 조회
 - MessageManager : 메시지 영속화 · 읽음 처리
-- MessageFinder : 메시지 목록 · 미읽음 카운트 조회
+- MessageEventListener : 서버 이벤트를 SYSTEM · OFFER 메시지로 변환 후 송신
+- MessageFinder : 메시지 목록 · 미읽음 카운트 조회 (`/core/domain/chat`)
 
 ## 메시지 규격
 
