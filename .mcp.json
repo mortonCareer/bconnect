@@ -5,15 +5,6 @@
       "command": "npx",
       "args": ["-y", "@playwright/mcp@latest"]
     },
-    "aws": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@anthropic/mcp-server-aws"],
-      "env": {
-        "AWS_PROFILE": "morton",
-        "AWS_REGION": "ap-northeast-2"
-      }
-    },
     "next-devtools": {
       "type": "stdio",
       "command": "npx",
