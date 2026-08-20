@@ -123,7 +123,7 @@ BE 와 DB 분리 이전 (small batch) 검토했으나 폐기:
 ### 근거
 
 1. **App Runner 사망 → 표준 Fargate 가 stable AWS 컨테이너 호스팅**. ECS Express Mode 는 후계자로 지정됐지만 2026-05 시점 production maturity 부족 (사례 0건, Graviton/Spot/Exec/blue-green 4종 봉쇄) → 거부.
-2. **Morton 스택 정합성**: 기존 [`infra/`](../../../infra) terraform 자산 + S3/IAM/CloudFront 와 단일 프로파일 (`AWS_PROFILE=morton`). Seoul region 한국 latency 최적.
+2. **Morton 스택 정합성**: 기존 [`infra/`](../../../infra) terraform 자산 + S3/IAM/CloudFront 와 단일 AWS 계정(`morton`). Seoul region 한국 latency 최적.
 3. **비용 단계별** — 표준 Fargate + Graviton + Spot 으로 베타부터 1년차까지 Railway 대비 우위. Express Mode 의 비용 봉쇄 없음.
 4. **출시 즉시 이전 X** — 마이그레이션 1–2일 CTO 시간. ["ship first, migrate when revenue justifies"](https://solodevstack.com/blog/railway-vs-aws-solo-developers).
 5. **Spring Boot cold start**: [AWS SOCI](https://aws.amazon.com/blogs/containers/start-spring-boot-applications-faster-on-aws-fargate-using-soci/) 50% 가속 + ECS Exec 으로 디버깅 + tunable health check grace period.
