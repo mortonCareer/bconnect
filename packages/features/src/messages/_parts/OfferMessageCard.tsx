@@ -87,6 +87,11 @@ export function OfferMessageCard({
 }: OfferMessageCardProps) {
   const address = detail?.address
   const trades = detail?.trades ?? []
+  // 상세를 상태만 채워 내려주는 경로가 있다(작업 목록에 없는 섭외 = 종료됐거나 내 배정이 아닌 건).
+  // detail 유무로 분기하면 행이 하나도 없는 빈 카드가 되므로 실제 행 유무로 가른다.
+  const hasRows = Boolean(
+    (detail?.start && detail?.end) || address || trades.length > 0 || detail?.requirement
+  )
   const canAct = detail?.status === OfferStatus.ACTIVE && (onAccept != null || onDeny != null)
   const statusLabel = detail ? STATUS_LABELS[detail.status] : undefined
   const isAcceptPending = pendingAction === 'accept'
@@ -112,7 +117,7 @@ export function OfferMessageCard({
     >
       <p className="text-sb-14 font-bold! text-gray-900">{title}</p>
 
-      {detail ? (
+      {detail && hasRows ? (
         <div>
           {detail.start && detail.end && (
             <Row label="작업기간">{formatPeriod(detail.start, detail.end)}</Row>
@@ -140,6 +145,10 @@ export function OfferMessageCard({
         <p className="mt-2 text-r-12 text-destructive">
           제안 상세를 불러오지 못했습니다. 잠시 후 다시 시도해주세요
         </p>
+      ) : detail ? (
+        // 섭외는 찾았지만 작업 상세가 없는 경우 — 종료된 섭외처럼 작업 목록에서 빠진 건은
+        // 단건 조회(GET /offers/{id})가 상태만 주고 작업 필드를 주지 않는다.
+        <p className="mt-2 text-r-12 text-gray-500">작업 상세를 불러올 수 없습니다</p>
       ) : (
         <p className="mt-2 text-r-12 text-gray-500">제안 상세를 찾을 수 없습니다</p>
       )}
