@@ -4,6 +4,8 @@
 @source "../../apps/plan/src/**/*.{ts,tsx}";
 @source "../components/**/*.{ts,tsx}";
 @source "../../../features/src/**/*.{ts,tsx}";
+/* push 패키지 전용 유틸리티도 CSS 생성 대상에 포함한다. */
+@source "../../../push/src/**/*.{ts,tsx}";
 
 /**
  * Morton Design System — Design Tokens (Color), Typography, Font
