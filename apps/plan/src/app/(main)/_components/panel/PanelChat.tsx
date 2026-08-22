@@ -2,28 +2,23 @@
 
 import { useCallback, useMemo } from 'react'
 import {
-  MessageType,
   useGetDirectChats,
   useGetMyMember,
   useGetProfile,
   useGetProjects,
-  useInfiniteQuery,
   useQueries,
   useQueryClient,
-  getDirectChatMessages,
-  getGetDirectChatMessagesQueryKey,
   getGetOfferQueryKey,
   getGetOfferQueryOptions,
   getGetProjectTasksQueryKey,
   getGetProjectTasksQueryOptions,
-  type CursorPageMessage,
-  type InfiniteData,
 } from '@bconnect/api-client'
 import {
   ChatView,
   PanelAside,
   toChatSummaries,
   useChatImageUpload,
+  useChatOfferIds,
   type ChatViewData,
   type OfferMessageDetail,
 } from '@bconnect/features'
@@ -45,34 +40,12 @@ export function PanelChat({ chatId }: { chatId: number }) {
   })
 
   // OFFER 메시지의 offerId로 taskId와 상태를 조회한 뒤 프로젝트 작업 상세를 연결한다.
-  // 메시지 쿼리는 MessageThread와 캐시를 공유한다.
-  const { data: messagePages } = useInfiniteQuery<
-    CursorPageMessage,
-    Error,
-    InfiniteData<CursorPageMessage>,
-    readonly unknown[],
-    number | undefined
-  >({
-    queryKey: getGetDirectChatMessagesQueryKey(chatId),
-    queryFn: ({ pageParam }) => getDirectChatMessages(chatId, { cursor: pageParam }),
-    initialPageParam: undefined,
-    getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.nextCursor : undefined),
-  })
-  const offerIds = useMemo(() => {
-    const ids = new Set<number>()
-    for (const page of messagePages?.pages ?? [])
-      for (const message of page.content ?? []) {
-        if (message.type !== MessageType.OFFER) continue
-        const offerId = Number(message.content)
-        if (Number.isFinite(offerId)) ids.add(offerId)
-      }
-    return [...ids]
-  }, [messagePages])
+  const offerIds = useChatOfferIds(chatId)
   const offerQueries = useQueries({
     queries: offerIds.map((id) => getGetOfferQueryOptions(id)),
   })
 
-  const { data: projects } = useGetProjects()
+  const { data: projects, isError: isProjectsError } = useGetProjects()
   const projectIds = useMemo(() => (projects ?? []).map((p) => p.id), [projects])
   const taskQueries = useQueries({
     queries: projectIds.map((id) => getGetProjectTasksQueryOptions(id)),
@@ -80,8 +53,10 @@ export function PanelChat({ chatId }: { chatId: number }) {
 
   const isOfferDetailsLoading =
     offerQueries.some((q) => q.isLoading) || taskQueries.some((q) => q.isLoading)
-  const isOfferDetailsError =
-    offerQueries.some((q) => q.isError) || taskQueries.some((q) => q.isError)
+  // 건별 조회(섭외 단건·프로젝트별 작업) 실패는 전체 오류로 취급하지 않는다 — career 와 같은 기준.
+  // 무관한 프로젝트 하나가 실패해도 모든 카드가 "불러오지 못했습니다"로 뒤집히던 문제.
+  // 모든 상세가 걸려 있는 프로젝트 목록 실패만 전체 오류다.
+  const isOfferDetailsError = isProjectsError
   const offerDetails = useMemo(() => {
     const taskById = new Map(taskQueries.flatMap((q) => (q.data ?? []).map((t) => [t.id, t])))
     const map = new Map<number, OfferMessageDetail>()

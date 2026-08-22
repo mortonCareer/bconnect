@@ -1,18 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useRef } from 'react'
-import {
-  MessageType,
-  useInfiniteQuery,
-  getDirectChatMessages,
-  getGetDirectChatMessagesQueryKey,
-} from '@bconnect/api-client'
-import type {
-  Message,
-  CursorPageMessage,
-  WithdrawableMember,
-  InfiniteData,
-} from '@bconnect/api-client'
+import { MessageType } from '@bconnect/api-client'
+import type { Message, WithdrawableMember } from '@bconnect/api-client'
+import { useDirectChatMessages } from '../useDirectChatMessages'
 import { chatMemberName } from './types'
 import { ChatMessage } from '@bconnect/ui'
 import { formatChatTime } from '@bconnect/config/format'
@@ -137,20 +128,8 @@ export function MessageThread({
   const isInitialLoadRef = useRef(true)
   const isNearBottomRef = useRef(true)
 
-  // TODO(#759): 지금은 direct(1:1) 메시지 고정. 그룹 지원 시 chatKind 로 direct/group 분기.
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
-    useInfiniteQuery<
-      CursorPageMessage,
-      Error,
-      InfiniteData<CursorPageMessage>,
-      readonly unknown[],
-      number | undefined
-    >({
-      queryKey: getGetDirectChatMessagesQueryKey(chatId),
-      queryFn: ({ pageParam }) => getDirectChatMessages(chatId, { cursor: pageParam }),
-      initialPageParam: undefined,
-      getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.nextCursor : undefined),
-    })
+    useDirectChatMessages(chatId)
 
   // 서버 페이지는 최신순(페이지·페이지내 모두) → 시간순으로 이중 reverse
   const serverMessages =

@@ -3,11 +3,9 @@
 import { useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  MessageType,
   OfferStatus,
   useAcceptOffer,
   useDenyOffer,
-  useInfiniteQuery,
   useQueries,
   useQueryClient,
   useGetDirectChats,
@@ -15,25 +13,18 @@ import {
   useGetMyMember,
   useGetProfile,
   useGetTasks,
-  getDirectChatMessages,
-  getGetDirectChatMessagesQueryKey,
   getGetOfferQueryKey,
   getGetOfferQueryOptions,
   getGetProfileQueryOptions,
   getGetTasksQueryKey,
 } from '@bconnect/api-client'
-import type {
-  CursorPageMessage,
-  InfiniteData,
-  Offer,
-  Profile,
-  TaskList,
-} from '@bconnect/api-client'
+import type { Offer, Profile, TaskList } from '@bconnect/api-client'
 import {
   MessagesView,
   ChatView,
   toChatSummaries,
   useChatImageUpload,
+  useChatOfferIds,
   type MessagesViewData,
   type ChatViewData,
   type OfferMessageDetail,
@@ -156,29 +147,7 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
   }, [tasks])
 
   // 작업 목록에서 빠진 종료 섭외는 단건 조회로 상태만 보완한다.
-  // 메시지 쿼리는 MessageThread와 캐시를 공유한다.
-  const { data: messagePages } = useInfiniteQuery<
-    CursorPageMessage,
-    Error,
-    InfiniteData<CursorPageMessage>,
-    readonly unknown[],
-    number | undefined
-  >({
-    queryKey: getGetDirectChatMessagesQueryKey(chatId),
-    queryFn: ({ pageParam }) => getDirectChatMessages(chatId, { cursor: pageParam }),
-    initialPageParam: undefined,
-    getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.nextCursor : undefined),
-  })
-  const offerIds = useMemo(() => {
-    const ids = new Set<number>()
-    for (const page of messagePages?.pages ?? [])
-      for (const message of page.content ?? []) {
-        if (message.type !== MessageType.OFFER) continue
-        const offerId = Number(message.content)
-        if (Number.isFinite(offerId)) ids.add(offerId)
-      }
-    return [...ids]
-  }, [messagePages])
+  const offerIds = useChatOfferIds(chatId)
   const missingOfferIds = useMemo(
     () => (tasks == null ? [] : offerIds.filter((id) => !taskOfferDetails.has(id))),
     [tasks, offerIds, taskOfferDetails]
