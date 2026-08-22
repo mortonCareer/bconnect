@@ -7,9 +7,9 @@ import { formatPeriod, withParticle } from '@bconnect/config/format'
 import type { OfferActionKind } from './types'
 
 /**
- * OFFER 메시지 카드에 필요한 섭외 상세. 앱이 offerId 로 resolve 해 내려준다
- * (career: useGetTasks 의 assigneeTasks[].offer). BE 메시지 자체는 offerId 만 담는다.
- * plan 은 #1176 이후 상세 소스가 없어 미주입 — PanelChat 의 TODO(BE) 참고.
+ * OFFER 메시지 카드에 필요한 섭외 상세. 앱이 offerId 로 resolve 해 내려준다 — BE 메시지 자체는
+ * offerId 만 담는다. career 는 useGetTasks 의 assigneeTasks[].offer 로, plan 은 섭외 단건
+ * 조회(GET /offers/{id})의 taskId 를 프로젝트 작업 목록과 맞춰 각각 상세를 만든다.
  */
 export interface OfferMessageDetail {
   offerId: number

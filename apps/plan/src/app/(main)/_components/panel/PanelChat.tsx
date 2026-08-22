@@ -2,12 +2,22 @@
 
 import { useCallback, useMemo } from 'react'
 import {
+  MessageType,
   useGetDirectChats,
   useGetMyMember,
   useGetProfile,
   useGetProjects,
+  useInfiniteQuery,
+  useQueries,
   useQueryClient,
+  getDirectChatMessages,
+  getGetDirectChatMessagesQueryKey,
+  getGetOfferQueryKey,
+  getGetOfferQueryOptions,
   getGetProjectTasksQueryKey,
+  getGetProjectTasksQueryOptions,
+  type CursorPageMessage,
+  type InfiniteData,
 } from '@bconnect/api-client'
 import {
   ChatView,
@@ -15,6 +25,7 @@ import {
   toChatSummaries,
   useChatImageUpload,
   type ChatViewData,
+  type OfferMessageDetail,
 } from '@bconnect/features'
 import { usePanelNav } from '@/hooks/usePanelNav'
 
@@ -33,25 +44,88 @@ export function PanelChat({ chatId }: { chatId: number }) {
     query: { enabled: otherId != null },
   })
 
-  // TODO(BE): plan 쪽 섭외 카드 상세 소스가 없다.
-  // #1176 에서 CompanyTaskResponse 의 offer·projectRequirement 가 제거돼 기존 수집 경로(프로젝트별
-  // getProjectTasks → task.offer)가 끊겼고, 대체 후보인 GET /offers/{id}(OfferResponse)는
-  // status·member·profile 만 주고 작업기간·주소·공종·요청사항이 없다. GET /tasks/{id} 도 DELETE 뿐이라
-  // taskId 로 되짚을 수도 없다. BE 가 상세를 실어줄 때까지 카드는 안내 문구만 보여준다.
+  // 섭외 제안(OFFER) 메시지는 content 에 offerId 만 담겨 온다 → 상세를 따로 붙여야 한다.
+  // #1176 에서 CompanyTaskResponse 의 offer 가 제거돼 offerId → task 연결이 끊겼는데, 끊긴 건
+  // 그 연결 하나뿐이라 섭외 단건 조회의 taskId 로 되잇는다:
+  //   메시지 content(offerId) → GET /offers/{id}.taskId → 프로젝트 작업 목록에서 매칭 → 상세.
+  // 상태도 task 가 아니라 offer 응답에서 직접 읽어 수락·거절·취소·만료가 그대로 반영된다.
+  //
+  // 메시지는 MessageThread 와 같은 쿼리키로 읽어 캐시를 공유한다(추가 요청 없음).
+  const { data: messagePages } = useInfiniteQuery<
+    CursorPageMessage,
+    Error,
+    InfiniteData<CursorPageMessage>,
+    readonly unknown[],
+    number | undefined
+  >({
+    queryKey: getGetDirectChatMessagesQueryKey(chatId),
+    queryFn: ({ pageParam }) => getDirectChatMessages(chatId, { cursor: pageParam }),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.nextCursor : undefined),
+  })
+  const offerIds = useMemo(() => {
+    const ids = new Set<number>()
+    for (const page of messagePages?.pages ?? [])
+      for (const message of page.content ?? []) {
+        if (message.type !== MessageType.OFFER) continue
+        const offerId = Number(message.content)
+        if (Number.isFinite(offerId)) ids.add(offerId)
+      }
+    return [...ids]
+  }, [messagePages])
+  const offerQueries = useQueries({
+    queries: offerIds.map((id) => getGetOfferQueryOptions(id)),
+  })
+
   const { data: projects } = useGetProjects()
   const projectIds = useMemo(() => (projects ?? []).map((p) => p.id), [projects])
+  const taskQueries = useQueries({
+    queries: projectIds.map((id) => getGetProjectTasksQueryOptions(id)),
+  })
+
+  const isOfferDetailsLoading =
+    offerQueries.some((q) => q.isLoading) || taskQueries.some((q) => q.isLoading)
+  const isOfferDetailsError =
+    offerQueries.some((q) => q.isError) || taskQueries.some((q) => q.isError)
+  const offerDetails = useMemo(() => {
+    const taskById = new Map(taskQueries.flatMap((q) => (q.data ?? []).map((t) => [t.id, t])))
+    const map = new Map<number, OfferMessageDetail>()
+    for (const query of offerQueries) {
+      const offer = query.data
+      if (offer == null) continue
+      const task = taskById.get(offer.taskId)
+      map.set(offer.id, {
+        offerId: offer.id,
+        status: offer.status,
+        start: task?.start,
+        end: task?.end,
+        address: task?.address ?? undefined,
+        trades: task?.trades,
+        requirement: task?.requirement ?? undefined,
+      })
+    }
+    return map
+  }, [offerQueries, taskQueries])
 
   const queryClient = useQueryClient()
   // 기술자가 채팅방에서 수락/거절해도 내(plan) 캐시엔 안 잡히는 상태 변경 — 소켓 수신을 계기로 잡는다.
+  // 상태는 offer 단건이 들고 있으므로 작업 목록과 함께 무효화한다.
   const handleOfferMessage = useCallback(() => {
     for (const id of projectIds)
       void queryClient.invalidateQueries({ queryKey: getGetProjectTasksQueryKey(id) })
-  }, [queryClient, projectIds])
+    for (const id of offerIds)
+      void queryClient.invalidateQueries({ queryKey: getGetOfferQueryKey(id) })
+  }, [queryClient, projectIds, offerIds])
 
+  // companyName 은 주입하지 않는다 — plan(발신)은 카드 제목에 상대 기술자명을 쓰고,
+  // 자기 업체명은 자기참조라 표시 대상이 아니다(OfferMessageCard 의 isMine 분기).
   const data: ChatViewData = {
     chat,
     currentUserId,
     otherProfile,
+    offerDetails,
+    isOfferDetailsLoading,
+    isOfferDetailsError,
     isLoading,
     isError,
   }
