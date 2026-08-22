@@ -77,7 +77,7 @@ function authorOf(memberId: number): ProfileSeed {
   return seed
 }
 
-// #1176 이후 Feed.task 는 TaskSummary — 피드 카드가 쓰는 기간·건축주명만 담는다.
+// 피드 카드에 필요한 TaskSummary 필드만 구성한다.
 function taskOf(id: number, seed: FeedSeed, trade: Trade): TaskSummary | null {
   if (!seed.task) return null
   const end = daysAgoIso(seed.daysAgo).slice(0, 10)

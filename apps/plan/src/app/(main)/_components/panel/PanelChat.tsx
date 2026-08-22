@@ -44,13 +44,8 @@ export function PanelChat({ chatId }: { chatId: number }) {
     query: { enabled: otherId != null },
   })
 
-  // 섭외 제안(OFFER) 메시지는 content 에 offerId 만 담겨 온다 → 상세를 따로 붙여야 한다.
-  // #1176 에서 CompanyTaskResponse 의 offer 가 제거돼 offerId → task 연결이 끊겼는데, 끊긴 건
-  // 그 연결 하나뿐이라 섭외 단건 조회의 taskId 로 되잇는다:
-  //   메시지 content(offerId) → GET /offers/{id}.taskId → 프로젝트 작업 목록에서 매칭 → 상세.
-  // 상태도 task 가 아니라 offer 응답에서 직접 읽어 수락·거절·취소·만료가 그대로 반영된다.
-  //
-  // 메시지는 MessageThread 와 같은 쿼리키로 읽어 캐시를 공유한다(추가 요청 없음).
+  // OFFER 메시지의 offerId로 taskId와 상태를 조회한 뒤 프로젝트 작업 상세를 연결한다.
+  // 메시지 쿼리는 MessageThread와 캐시를 공유한다.
   const { data: messagePages } = useInfiniteQuery<
     CursorPageMessage,
     Error,
@@ -93,9 +88,7 @@ export function PanelChat({ chatId }: { chatId: number }) {
     for (const query of offerQueries) {
       const offer = query.data
       if (offer == null) continue
-      // 작업을 못 찾으면 엔트리를 만들지 않는다 — 만들면 카드의 detail 분기가 먼저 걸려
-      // 제목만 있고 행이 하나도 없는 빈 카드가 되고, 로딩·에러·못찾음 안내가 전부 죽는다.
-      // 작업 목록은 useGetProjects 를 기다리므로 offer 만 먼저 도착하는 구간이 항상 있다.
+      // 작업 조회 전에는 빈 상세 대신 카드의 로딩·미존재 상태를 유지한다.
       const task = taskById.get(offer.taskId)
       if (task == null) continue
       map.set(offer.id, {
@@ -112,8 +105,7 @@ export function PanelChat({ chatId }: { chatId: number }) {
   }, [offerQueries, taskQueries])
 
   const queryClient = useQueryClient()
-  // 기술자가 채팅방에서 수락/거절해도 내(plan) 캐시엔 안 잡히는 상태 변경 — 소켓 수신을 계기로 잡는다.
-  // 상태는 offer 단건이 들고 있으므로 작업 목록과 함께 무효화한다.
+  // 상대방이 변경한 섭외 상태는 소켓 수신 시 다시 조회한다.
   const handleOfferMessage = useCallback(() => {
     for (const id of projectIds)
       void queryClient.invalidateQueries({ queryKey: getGetProjectTasksQueryKey(id) })
@@ -121,8 +113,6 @@ export function PanelChat({ chatId }: { chatId: number }) {
       void queryClient.invalidateQueries({ queryKey: getGetOfferQueryKey(id) })
   }, [queryClient, projectIds, offerIds])
 
-  // companyName 은 주입하지 않는다 — plan(발신)은 카드 제목에 상대 기술자명을 쓰고,
-  // 자기 업체명은 자기참조라 표시 대상이 아니다(OfferMessageCard 의 isMine 분기).
   const data: ChatViewData = {
     chat,
     currentUserId,

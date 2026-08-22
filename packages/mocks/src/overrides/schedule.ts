@@ -276,7 +276,7 @@ const TASK_SEEDS: TaskSeed[] = [
   },
 ]
 
-// #1176 이후 프로젝트 작업 응답은 CompanyTaskResponse — offer 와 업체명(projectCompanyName)이 빠졌다.
+// 프로젝트 작업 응답은 CompanyTask 형태로 구성한다.
 function buildSeedTasks(): CompanyTask[] {
   const stamp = nowStamp()
   return TASK_SEEDS.map((seed) => {

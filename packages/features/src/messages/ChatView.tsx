@@ -126,7 +126,7 @@ export function ChatView(props: ChatViewProps) {
         }
       )
       queryClient.invalidateQueries({ queryKey: getGetDirectChatsQueryKey() })
-      // 상대방의 섭외 액션(수락 등)은 내 캐시에 잡히지 않는 이벤트라 소켓 수신으로 갈음한다.
+      // 섭외 이벤트 수신 시 앱별 상세 쿼리를 갱신한다.
       if (incoming.type === MessageType.SYSTEM || incoming.type === MessageType.OFFER)
         onOfferMessage?.()
     },

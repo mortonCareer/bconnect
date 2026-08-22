@@ -6,18 +6,11 @@ import { Button, cn } from '@bconnect/ui'
 import { formatPeriod, withParticle } from '@bconnect/config/format'
 import type { OfferActionKind } from './types'
 
-/**
- * OFFER 메시지 카드에 필요한 섭외 상세. 앱이 offerId 로 resolve 해 내려준다 — BE 메시지 자체는
- * offerId 만 담는다. career 는 useGetTasks 의 assigneeTasks[].offer 로, plan 은 섭외 단건
- * 조회(GET /offers/{id})의 taskId 를 프로젝트 작업 목록과 맞춰 각각 상세를 만든다.
- */
+/** 앱에서 offerId로 조회해 주입하는 섭외 카드 상세. */
 export interface OfferMessageDetail {
   offerId: number
   status: OfferStatus
-  /**
-   * 제안한 업체명 (수신 방향, career). 없으면 업체명 행과 문구의 주어를 생략한다.
-   * TODO(BE): #1176 에서 projectCompanyName 이 사라져 현재 주입 소스가 없다.
-   */
+  /** 제안한 업체명. 없으면 업체명 행과 문구의 주어를 생략한다. */
   companyName?: string
   start?: string
   end?: string
@@ -29,9 +22,9 @@ export interface OfferMessageDetail {
 export interface OfferMessageCardProps {
   /** 미주입 시 상세 행 없이 안내만 — offerId 원문(숫자)은 절대 노출하지 않는다. */
   detail?: OfferMessageDetail
-  /** 발신 방향 — career(수신) false / plan(발신, 본인이 보낸 제안) true. 문구·정렬·색을 가른다. */
+  /** 본인이 보낸 제안인지 여부. */
   isMine?: boolean
-  /** 제안받은 기술자 이름 (발신 방향, plan). 채팅 상대에서 도출 — 앱 주입 불필요. */
+  /** 제안받은 기술자 이름. */
   recipientName?: string
   /** 수락 핸들러. 미주입이면 버튼 없음 (plan = 읽기전용). */
   onAccept?: () => void
@@ -46,10 +39,7 @@ export interface OfferMessageCardProps {
   pendingAction?: OfferActionKind | null
 }
 
-/**
- * 액션 미주입(plan, 읽기전용) 시 버튼 대신 상태 텍스트로 표시.
- * ACTIVE 는 career(액션 주입)에선 canAct 가 먼저 걸려 버튼으로 렌더되고, plan 에서만 이 라벨을 탄다.
- */
+/** 읽기 전용 카드와 종료된 섭외에 표시할 상태. */
 const STATUS_LABELS: Partial<Record<OfferStatus, string>> = {
   [OfferStatus.ACTIVE]: '대기중',
   [OfferStatus.ACCEPTED]: '수락함',
@@ -58,12 +48,7 @@ const STATUS_LABELS: Partial<Record<OfferStatus, string>> = {
   [OfferStatus.EXPIRED]: '만료됨',
 }
 
-/**
- * 시안(1572:13100 등): gap 8 · py 4 · 라벨 45px · 12px.
- * 토큰 기본 line-height(1.6)면 행 높이가 시안(23px)보다 4px 커져 leading-tight(=15px)로 맞춘다.
- * 라벨 폭은 시안(45px, Inter 기준)이 아니라 12px 한글 4자(=48px) 기준 — 45px 로 두면
- * "작업기간"·"현장주소"·"요청사항"이 두 줄로 접힌다. nowrap 으로 한 번 더 막는다.
- */
+/** 네 글자 라벨이 줄바꿈되지 않도록 고정 폭을 사용한다. */
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-2 py-1 leading-tight">
@@ -75,10 +60,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   )
 }
 
-/**
- * 시안 공종 칩(1572:13112) — 배경 채우기 없이(카드 회색이 비침) 테두리만 + 각진 모서리(2px).
- * FilterChip(알약형 파란 칩)과 다른 형태라 카드 로컬로 둔다.
- */
+/** 섭외 카드 전용 공종 칩. */
 function TradeChip({ label }: { label: string }) {
   return (
     <span className="inline-flex shrink-0 items-center rounded-xs border border-gray-200 px-2 py-1 text-r-12 leading-tight text-gray-900">
@@ -87,10 +69,7 @@ function TradeChip({ label }: { label: string }) {
   )
 }
 
-/**
- * 시안 버튼(3394:9360·9363) — 흰 배경 + 회색 테두리에 글자만 brand/red.
- * 디자인시스템 outline/destructive 는 테두리까지 색이 들어가 카드 안에서 과하게 튄다.
- */
+/** 카드 안에서는 variant의 색상 테두리를 중립색으로 덮는다. */
 const OFFER_BUTTON_CLASS = 'border-gray-200 bg-white font-normal'
 
 /**
@@ -117,7 +96,7 @@ export function OfferMessageCard({
   const isDenyPending = pendingAction === 'deny'
   const actionsDisabled = isActionDisabled || isAcceptPending || isDenyPending
 
-  // 문구는 BE NotificationType(OFFER_RECEIVED/OFFER_SENT) 워딩에 맞춘다 — 수신·발신 방향이 반대라 주어도 다르다.
+  // 발신 카드에는 기술자명, 수신 카드에는 업체명을 주어로 사용한다.
   const title = isMine
     ? recipientName
       ? `${recipientName}님에게 섭외 요청이 전달되었습니다`
@@ -127,8 +106,7 @@ export function OfferMessageCard({
       : '섭외 요청을 제안받았습니다'
 
   return (
-    // 방향별 말풍선 규칙 — 수신(ChatMessage variant="theirs")은 좌상단만, 발신("mine")은 우상단만 각지게.
-    // break-keep: 한글이 어절 중간("제안되었습니/다")에서 끊기지 않도록 — word-break 는 상속된다.
+    // 일반 채팅 말풍선과 같은 방향별 모서리를 사용한다.
     <div
       className={cn(
         'max-w-75 px-4 py-3 break-keep bg-gray-100',
@@ -137,13 +115,11 @@ export function OfferMessageCard({
           : 'rounded-tr-xl rounded-br-xl rounded-bl-xl'
       )}
     >
-      {/* 시안 타이틀은 Bold(700). 토큰 text-sb-14 는 600 이라 weight 만 덮는다 */}
       <p className="text-sb-14 font-bold! text-gray-900">{title}</p>
 
       {detail ? (
-        // 시안(1572:13097)은 타이틀 바로 아래에 행이 붙는다 — 사이 여백 없음
         <div>
-          {/* 업체명 행은 수신(career) 전용 — 발신(plan) 은 본인 업체라 자기참조라 생략 */}
+          {/* 발신 카드에서는 본인 업체명을 표시하지 않는다. */}
           {!isMine && companyName && <Row label="업체명">{companyName}</Row>}
           {detail.start && detail.end && (
             <Row label="작업기간">{formatPeriod(detail.start, detail.end)}</Row>

@@ -206,9 +206,7 @@ let nextId = 9100
 export const tasksOverrides = [
   getGetTasksMockHandler((): TaskList => tasks),
 
-  // 섭외 단건 조회 — generated 래퍼는 404 를 못 만들어 raw 핸들러.
-  // (raw 라 openapi drift 컴파일 가드는 없음 — 경로 변경 시 수동 정합 필요)
-  // PUT /offers/reorder 는 메서드가 달라 :id 로 잡히지 않는다.
+  // 404 응답을 위해 단건 조회만 raw 핸들러로 구현한다.
   http.get('*/api/v1/offers/:id', ({ params }) => {
     const offer = offersById.get(Number(params.id))
     if (!offer) {
@@ -285,12 +283,7 @@ export const tasksOverrides = [
     return { success: true }
   }),
 
-  // 기술자의 섭외 수락/거절(#972) — 채팅 OFFER 카드가 재조회 시 결과 상태를 읽는다.
-  // 업체측 섭외 대기열(schedule.ts)은 별도 상태라 여기선 career 쪽 상태만 갱신.
-  //
-  // BE 를 그대로 따른다: 수락은 작업 목록에 남지만(#1176 이후 ACTIVE·ACCEPTED 반환),
-  // 거절은 목록에서 빠진다(listByWorker 필터 + listAssigned 미포함). 어느 쪽이든 단건
-  // 조회에는 남으므로 offersById 는 상태만 바꾼다 — 카드는 그쪽에서 '거절함' 을 읽는다.
+  // 수락은 작업 목록에 남고 거절은 빠지지만, 단건 조회에는 최종 상태를 유지한다.
   getAcceptOfferMockHandler((info) => {
     const offerId = Number(info.params.id)
     const offer = offersById.get(offerId)

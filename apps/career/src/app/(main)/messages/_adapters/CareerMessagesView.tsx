@@ -118,13 +118,8 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
     })
   }, [])
 
-  // 섭외 제안(OFFER) 메시지는 content 에 offerId 만 담겨 온다 → 기술자 작업 목록에서 상세를 붙인다.
-  // #1176 에서 작업 응답이 용도별로 갈리며 offer 를 물고 오는 건 assigneeTasks 뿐이다
-  // (AssigneeTaskResponse.offer — workerTasks 는 본인이 등록한 작업이라 offer 가 없다).
-  //
-  // TODO(BE): projectCompanyName 이 사라져 업체명 소스가 없다. AssigneeTaskResponse 는 projectId 만
-  // 주고, 회사명은 project → company 2-hop 이라야 닿는다. 카드는 companyName 없으면 업체명 행과
-  // 문구 주어를 생략한다(OfferMessageCard).
+  // OFFER 메시지의 offerId를 배정 작업과 연결해 카드 상세를 만든다.
+  // TODO(BE): AssigneeTaskResponse에 업체명이 없어 현재는 업체명 표시를 생략한다.
   const { data: tasks, isLoading: isTasksLoading, isError: isTasksError } = useGetTasks()
   const taskOfferDetails = useMemo(() => {
     const map = new Map<number, OfferMessageDetail>()
@@ -144,12 +139,8 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
     return map
   }, [tasks])
 
-  // 거절·취소·만료된 섭외는 작업 목록에서 빠진다 (BE OfferQueryService.listByWorker 가 ACTIVE·ACCEPTED
-  // 만 반환하고, 거절된 작업은 배정 목록에도 없다) → 그대로 두면 카드가 '거절함' 대신 "찾을 수 없습니다"
-  // 로 뒤집힌다. 목록에 없는 offerId 는 단건 조회(#1176)로 상태만 채운다 — 작업 상세는 BE 가 주지
-  // 않으므로 상태 라벨만 남는다.
-  //
-  // 메시지는 MessageThread 와 같은 쿼리키로 읽어 캐시를 공유한다(추가 요청 없음).
+  // 작업 목록에서 빠진 종료 섭외는 단건 조회로 상태만 보완한다.
+  // 메시지 쿼리는 MessageThread와 캐시를 공유한다.
   const { data: messagePages } = useInfiniteQuery<
     CursorPageMessage,
     Error,
@@ -177,8 +168,7 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
     queries: missingOfferIds.map((id) => getGetOfferQueryOptions(id)),
   })
 
-  // 단건 조회 실패는 해당 카드만 "찾을 수 없습니다" 로 두고 전체 에러로 올리지 않는다 —
-  // 플래그가 카드 전체에 걸려 상세가 멀쩡한 카드까지 에러 문구로 덮이기 때문.
+  // 단건 조회 실패는 다른 카드에 영향을 주지 않도록 전체 오류로 취급하지 않는다.
   const isOfferDetailsLoading = isTasksLoading || closedOfferQueries.some((q) => q.isLoading)
   const isOfferDetailsError = isTasksError
   const offerDetails = useMemo(() => {
@@ -237,7 +227,7 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
   const isOfferActionPending = pendingAction != null
 
   const queryClient = useQueryClient()
-  // 상대(업체)가 채팅방에서 섭외를 취소하는 등 내가 액션하지 않은 상태 변경은 소켓 수신을 계기로 잡는다.
+  // 상대방이 변경한 섭외 상태는 소켓 수신 시 다시 조회한다.
   const handleOfferMessage = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: getGetTasksQueryKey() })
   }, [queryClient])
