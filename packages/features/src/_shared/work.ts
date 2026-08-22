@@ -25,7 +25,7 @@ export function toWork(feed: Pick<Feed, 'post' | 'task'>): Work {
   const days = task ? durationDays(task.start, task.end) : undefined
   return {
     images: post ? postImageUrls(post) : [],
-    company: task?.workerCompany ?? undefined,
+    company: task?.company ?? undefined,
     days,
     duration: days == null ? undefined : formatDays(days),
   }

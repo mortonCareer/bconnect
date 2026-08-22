@@ -8,14 +8,15 @@ import {
   OfferStatus,
   TaskProgress,
   TaskStatus,
-  TaskType,
   Trade,
 } from '@bconnect/api-client'
 import type {
   Address,
+  AssigneeTask,
   CreateWorkerTaskRequest,
-  Task,
+  TaskList,
   UpdateWorkerTaskRequest,
+  WorkerTask,
 } from '@bconnect/api-client'
 
 /**
@@ -23,8 +24,8 @@ import type {
  * getTasks 재조회 시 캘린더에 즉시 보인다 (실 BE 동작 모사). 하드 리로드 시 SEED 로 리셋.
  *
  * 현재 월에 앵커. 커버: 멀티데이 + 주(週) 경계 교차, 한 날 3중첩(레인/오버플로), 제안작업, 단기.
- * 제안작업(업체 제안, 미수락) = type PROJECT + status OFFERED (mapper 가 offer/status 로 isProposed 파생).
- * 본인 작업 = type WORKER (canManage true). getTasks 는 파라미터 없이 전량 반환, FE 가 월 필터.
+ * #1176 에서 응답이 용도별로 갈렸다 — 제안작업(업체 제안)은 offer 를 물고 오는 assigneeTasks,
+ * 본인 작업(canManage true)은 workerTasks. getTasks 는 파라미터 없이 전량 반환, FE 가 월 필터.
  */
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -108,92 +109,83 @@ function nowStamp(): string {
   return new Date().toISOString().slice(0, 19) + 'Z'
 }
 
-function buildSeedTasks(): Task[] {
+/** WorkerTaskResponse.workerId 는 non-null — mock 기술자 본인 id. */
+const MOCK_WORKER_ID = 100
+/** AssigneeTaskResponse.projectId 도 non-null — 제안작업이 속한 mock 프로젝트. */
+const MOCK_PROJECT_ID = 9500
+
+function buildSeedTasks(): TaskList {
   const now = new Date()
   const year = now.getFullYear()
   const month1 = now.getMonth() + 1
   const stamp = nowStamp()
-  return SEEDS.map((seed): Task => {
+  const workerTasks: WorkerTask[] = []
+  const assigneeTasks: AssigneeTask[] = []
+  for (const seed of SEEDS) {
     const base = {
       id: seed.id,
       trades: seed.trades,
       address: SAMPLE_ADDRESS,
       start: isoOfDay(year, month1, seed.startDay),
       end: isoOfDay(year, month1, seed.endDay),
-      workerId: null,
-      workerTitle: null,
-      workerMemo: null,
-      workerCompany: null,
-      projectId: null,
-      projectTitle: null,
-      projectRequirement: null,
-      projectMemo: null,
-      projectCompanyId: null,
-      projectCompanyName: null,
-      offer: null,
       progress: TaskProgress.TODO,
+      title: seed.title,
+      memo: null,
       createdAt: stamp,
       modifiedAt: stamp,
     }
     if (seed.proposed) {
-      // 업체 제안작업(미수락) — PROJECT 타입 + OFFERED. offer 가 붙으면 채팅 OFFER 카드가 상세를 읽는다(#972).
-      return {
+      // 업체 제안작업(미수락). offer 가 붙으면 채팅 OFFER 카드가 상세를 읽는다(#972).
+      assigneeTasks.push({
         ...base,
-        type: TaskType.PROJECT,
         status: TaskStatus.OFFERED,
-        projectTitle: seed.title,
-        projectRequirement: seed.requirement ?? null,
-        workerCompany: seed.company,
+        workerId: null,
+        projectId: MOCK_PROJECT_ID,
+        requirement: seed.requirement ?? null,
         offer:
           seed.offerId == null
             ? null
             : { id: seed.offerId, taskId: seed.id, seq: 1, status: OfferStatus.ACTIVE },
-      }
+      })
+      continue
     }
-    return {
-      ...base,
-      type: TaskType.WORKER,
-      status: TaskStatus.ASSIGNED,
-      workerTitle: seed.title,
-      workerCompany: seed.company,
-    }
-  })
+    // 본인 작업 — WorkerTaskResponse 에는 status·offer 가 없다.
+    workerTasks.push({ ...base, workerId: MOCK_WORKER_ID, company: seed.company })
+  }
+  return { workerTasks, assigneeTasks }
 }
 
 // 모듈 메모리 상태 — 핸들러들이 공유(closure가 변수 바인딩 캡처). 하드 리로드 시 재초기화.
-let tasks: Task[] = buildSeedTasks()
+let tasks: TaskList = buildSeedTasks()
 let nextId = 9100
 
 export const tasksOverrides = [
-  getGetTasksMockHandler((): Task[] => tasks),
+  getGetTasksMockHandler((): TaskList => tasks),
 
   getCreateTaskWorkerMockHandler(async (info): Promise<number> => {
     const body = (await info.request.json()) as CreateWorkerTaskRequest
     const id = nextId++
     const stamp = nowStamp()
-    tasks.push({
-      id,
-      type: TaskType.WORKER,
-      status: TaskStatus.ASSIGNED,
-      progress: TaskProgress.TODO,
-      trades: body.trades,
-      start: body.start,
-      end: body.end,
-      workerId: null,
-      workerTitle: body.title,
-      workerMemo: body.memo ?? null,
-      workerCompany: body.company ?? null,
-      address: body.address ?? null,
-      projectId: null,
-      projectTitle: null,
-      projectRequirement: null,
-      projectMemo: null,
-      projectCompanyId: null,
-      projectCompanyName: null,
-      offer: null,
-      createdAt: stamp,
-      modifiedAt: stamp,
-    })
+    tasks = {
+      ...tasks,
+      workerTasks: [
+        ...tasks.workerTasks,
+        {
+          id,
+          progress: TaskProgress.TODO,
+          trades: body.trades,
+          start: body.start,
+          end: body.end,
+          workerId: MOCK_WORKER_ID,
+          title: body.title,
+          memo: body.memo ?? null,
+          company: body.company ?? null,
+          address: body.address ?? null,
+          createdAt: stamp,
+          modifiedAt: stamp,
+        },
+      ],
+    }
     return id
   }),
 
@@ -201,44 +193,54 @@ export const tasksOverrides = [
     const id = Number(info.params.id)
     const body = (await info.request.json()) as UpdateWorkerTaskRequest
     const stamp = nowStamp()
-    tasks = tasks.map((t) =>
-      t.id === id
-        ? {
-            ...t,
-            trades: body.trades,
-            start: body.start,
-            end: body.end,
-            progress: body.progress,
-            workerTitle: body.title,
-            workerMemo: body.memo ?? null,
-            workerCompany: body.company ?? null,
-            address: body.address ?? null,
-            modifiedAt: stamp,
-          }
-        : t
-    )
+    tasks = {
+      ...tasks,
+      workerTasks: tasks.workerTasks.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              trades: body.trades,
+              start: body.start,
+              end: body.end,
+              progress: body.progress,
+              title: body.title,
+              memo: body.memo ?? null,
+              company: body.company ?? null,
+              address: body.address ?? null,
+              modifiedAt: stamp,
+            }
+          : t
+      ),
+    }
     return { success: true }
   }),
 
   getDeleteTaskMockHandler((info) => {
     const id = Number(info.params.id)
-    tasks = tasks.filter((t) => t.id !== id)
+    tasks = {
+      workerTasks: tasks.workerTasks.filter((t) => t.id !== id),
+      assigneeTasks: tasks.assigneeTasks.filter((t) => t.id !== id),
+    }
     return { success: true }
   }),
 
   // 기술자의 섭외 수락/거절(#972) — 채팅 OFFER 카드가 재조회 시 결과 상태를 읽는다.
-  // 업체측 섭외 대기열(schedule.ts)은 별도 상태라 여기선 career 쪽 task.offer 만 갱신.
+  // 업체측 섭외 대기열(schedule.ts)은 별도 상태라 여기선 career 쪽 assigneeTasks 만 갱신.
+  // 수락해도 목록에서 빼지 않는다 — #1176 이후 GET /tasks 는 ACTIVE 뿐 아니라 ACCEPTED 도 내려준다.
   ...[
     [getAcceptOfferMockHandler, OfferStatus.ACCEPTED, TaskStatus.ASSIGNED] as const,
     [getDenyOfferMockHandler, OfferStatus.DENIED, TaskStatus.NONE] as const,
   ].map(([handler, offerStatus, taskStatus]) =>
     handler((info) => {
       const offerId = Number(info.params.id)
-      tasks = tasks.map((t) =>
-        t.offer?.id === offerId
-          ? { ...t, status: taskStatus, offer: { ...t.offer, status: offerStatus } }
-          : t
-      )
+      tasks = {
+        ...tasks,
+        assigneeTasks: tasks.assigneeTasks.map((t) =>
+          t.offer?.id === offerId
+            ? { ...t, status: taskStatus, offer: { ...t.offer, status: offerStatus } }
+            : t
+        ),
+      }
       return { success: true }
     })
   ),
