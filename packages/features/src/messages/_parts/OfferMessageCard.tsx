@@ -3,15 +3,13 @@
 import { OfferStatus, TRADE_LABELS } from '@bconnect/api-client'
 import type { Address, Trade } from '@bconnect/api-client'
 import { Button, cn } from '@bconnect/ui'
-import { formatPeriod, withParticle } from '@bconnect/config/format'
+import { formatPeriod } from '@bconnect/config/format'
 import type { OfferActionKind } from './types'
 
 /** 앱에서 offerId로 조회해 주입하는 섭외 카드 상세. */
 export interface OfferMessageDetail {
   offerId: number
   status: OfferStatus
-  /** 제안한 업체명. 없으면 업체명 행과 문구의 주어를 생략한다. */
-  companyName?: string
   start?: string
   end?: string
   address?: Address
@@ -87,7 +85,6 @@ export function OfferMessageCard({
   isActionDisabled,
   pendingAction,
 }: OfferMessageCardProps) {
-  const companyName = detail?.companyName
   const address = detail?.address
   const trades = detail?.trades ?? []
   const canAct = detail?.status === OfferStatus.ACTIVE && (onAccept != null || onDeny != null)
@@ -96,14 +93,12 @@ export function OfferMessageCard({
   const isDenyPending = pendingAction === 'deny'
   const actionsDisabled = isActionDisabled || isAcceptPending || isDenyPending
 
-  // 발신 카드에는 기술자명, 수신 카드에는 업체명을 주어로 사용한다.
+  // 발신 카드에만 기술자명을 주어로 쓴다. 수신 카드의 주어(업체명)는 표시하지 않기로 했다(#1159).
   const title = isMine
     ? recipientName
       ? `${recipientName}님에게 섭외 요청이 전달되었습니다`
       : '섭외 요청이 전달되었습니다'
-    : companyName
-      ? `${withParticle(companyName, '으로부터', '로부터', true)} 섭외 요청을 제안받았습니다`
-      : '섭외 요청을 제안받았습니다'
+    : '섭외 요청을 제안받았습니다'
 
   return (
     // 일반 채팅 말풍선과 같은 방향별 모서리를 사용한다.
@@ -119,8 +114,6 @@ export function OfferMessageCard({
 
       {detail ? (
         <div>
-          {/* 발신 카드에서는 본인 업체명을 표시하지 않는다. */}
-          {!isMine && companyName && <Row label="업체명">{companyName}</Row>}
           {detail.start && detail.end && (
             <Row label="작업기간">{formatPeriod(detail.start, detail.end)}</Row>
           )}

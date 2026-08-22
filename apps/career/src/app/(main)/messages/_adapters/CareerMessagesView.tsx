@@ -119,7 +119,6 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
   }, [])
 
   // OFFER 메시지의 offerId를 배정 작업과 연결해 카드 상세를 만든다.
-  // TODO(BE): AssigneeTaskResponse에 업체명이 없어 현재는 업체명 표시를 생략한다.
   const { data: tasks, isLoading: isTasksLoading, isError: isTasksError } = useGetTasks()
   const taskOfferDetails = useMemo(() => {
     const map = new Map<number, OfferMessageDetail>()
