@@ -49,6 +49,8 @@ export function usePanelNav() {
   const closeHref = hrefWithPanel(null)
 
   return {
+    /** 현재 열린 패널 세그먼트 (`?panel=` 값 그대로, 없으면 null). 사이드바 active 표시 등 읽기용. */
+    panel: searchParams.get('panel'),
     panelHref: (segment: PanelSegment, extra?: Record<string, string | null>) =>
       hrefWithPanel(segment, extra),
     openPanel: (segment: PanelSegment, extra?: Record<string, string | null>) =>
