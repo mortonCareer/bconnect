@@ -8,7 +8,7 @@ import { chatMemberName } from './types'
 import { ChatMessage } from '@bconnect/ui'
 import { formatChatTime } from '@bconnect/config/format'
 import { OfferMessageCard } from './OfferMessageCard'
-import type { OfferMessageDetail } from './OfferMessageCard'
+import type { OfferMessageEntry } from './OfferMessageCard'
 import type { OfferActions } from './types'
 
 interface MessageThreadProps {
@@ -16,12 +16,8 @@ interface MessageThreadProps {
   currentUserId: number | undefined
   participants: WithdrawableMember[]
   localMessages: Message[]
-  /** 섭외 제안(OFFER) 메시지 상세 — key = offerId. 앱이 resolve (ADR-0020). */
-  offerDetails?: Map<number, OfferMessageDetail>
-  /** 섭외 상세 조회 중 — OFFER 숫자 노출 없이 카드 내부 loading 안내 */
-  isOfferDetailsLoading?: boolean
-  /** 섭외 상세 조회 실패 — 카드 내부 error 안내 */
-  isOfferDetailsError?: boolean
+  /** 섭외 제안(OFFER) 메시지의 조회 결과 — key = offerId. 앱이 resolve (ADR-0020). */
+  offers?: Map<number, OfferMessageEntry>
   /** 수락/거절 액션 슬롯. 미주입이면 읽기전용 카드. */
   offerActions?: OfferActions
 }
@@ -44,17 +40,13 @@ function Bubble({
   message,
   currentUserId,
   participants,
-  offerDetails,
-  isOfferDetailsLoading,
-  isOfferDetailsError,
+  offers,
   offerActions,
 }: {
   message: Message
   currentUserId: number | undefined
   participants: WithdrawableMember[]
-  offerDetails?: Map<number, OfferMessageDetail>
-  isOfferDetailsLoading?: boolean
-  isOfferDetailsError?: boolean
+  offers?: Map<number, OfferMessageEntry>
   offerActions?: OfferActions
 }) {
   const isMine = message.memberId === currentUserId
@@ -62,7 +54,8 @@ function Bubble({
   // OFFER 메시지의 content는 화면에 노출하지 않고 카드 조회 키로 사용한다.
   if (message.type === MessageType.OFFER) {
     const offerId = Number(message.content)
-    const detail = Number.isFinite(offerId) ? offerDetails?.get(offerId) : undefined
+    const entry = Number.isFinite(offerId) ? offers?.get(offerId) : undefined
+    const detail = entry?.detail
     const isThisOfferPending = offerActions?.pendingOfferId === offerId
     const isAnyOfferPending = offerActions?.pendingOfferId != null
     const recipientName = chatMemberName(participants.find((p) => p.id !== currentUserId))
@@ -73,8 +66,8 @@ function Bubble({
           detail={detail}
           isMine={isMine}
           recipientName={recipientName}
-          isDetailLoading={isOfferDetailsLoading}
-          isDetailError={isOfferDetailsError}
+          isDetailLoading={entry?.isLoading}
+          isDetailError={entry?.isError}
           isActionDisabled={isAnyOfferPending}
           pendingAction={isThisOfferPending ? offerActions?.pendingAction : null}
           onAccept={offerActions && detail ? () => offerActions.onAccept(offerId) : undefined}
@@ -116,9 +109,7 @@ export function MessageThread({
   currentUserId,
   participants,
   localMessages,
-  offerDetails,
-  isOfferDetailsLoading,
-  isOfferDetailsError,
+  offers,
   offerActions,
 }: MessageThreadProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -232,9 +223,7 @@ export function MessageThread({
                 message={message}
                 currentUserId={currentUserId}
                 participants={participants}
-                offerDetails={offerDetails}
-                isOfferDetailsLoading={isOfferDetailsLoading}
-                isOfferDetailsError={isOfferDetailsError}
+                offers={offers}
                 offerActions={offerActions}
               />
             </div>

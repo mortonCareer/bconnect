@@ -15,7 +15,7 @@ import { PanelShell } from '../_shared/PanelShell'
 import { MessageThread } from './_parts/MessageThread'
 import { chatMemberName } from './_parts/types'
 import { useDirectChatSocket } from './useDirectChatSocket'
-import type { OfferMessageDetail } from './_parts/OfferMessageCard'
+import type { OfferMessageEntry } from './_parts/OfferMessageCard'
 import type { ChatSummary, OfferActions } from './_parts/types'
 
 /** 앱이 resolve 해 내려주는 데이터. career/plan 어댑터가 useGetDirectChats·useGetProfile·useGetMyMember 로 채운다. */
@@ -25,12 +25,11 @@ export interface ChatViewData {
   currentUserId?: number
   /** 상대 프로필 보강 — chat 응답에 없는 풍부 정보(address.city, primaryTrade). 발산 없는 by-id 보강 */
   otherProfile?: Profile
-  /** 섭외 제안(OFFER) 메시지 상세 — key = offerId. 미주입이면 카드가 상세 없이 렌더 (plan) */
-  offerDetails?: Map<number, OfferMessageDetail>
-  /** 섭외 상세 조회 중 — 채팅 자체는 유지하고 OFFER 카드 안에서 상태 표시 */
-  isOfferDetailsLoading?: boolean
-  /** 섭외 상세 조회 실패 — 채팅 자체는 유지하고 OFFER 카드 안에서 상태 표시 */
-  isOfferDetailsError?: boolean
+  /**
+   * 섭외 제안(OFFER) 메시지의 조회 결과 — key = offerId. 로딩·실패도 offerId 별로 담는다.
+   * 채팅 자체는 유지하고 OFFER 카드 안에서만 상태를 표시한다. 미주입이면 카드가 상세 없이 렌더.
+   */
+  offers?: Map<number, OfferMessageEntry>
   isLoading: boolean
   isError: boolean
 }
@@ -86,16 +85,7 @@ export type ChatViewProps = ChatViewBaseProps & ChatViewShellProps
 
 export function ChatView(props: ChatViewProps) {
   const { chatId, data, profileHref, offerActions, imageActions, onOfferMessage } = props
-  const {
-    chat,
-    currentUserId,
-    otherProfile,
-    offerDetails,
-    isOfferDetailsLoading,
-    isOfferDetailsError,
-    isLoading,
-    isError,
-  } = data
+  const { chat, currentUserId, otherProfile, offers, isLoading, isError } = data
   const other = chat?.members.find((p) => p.id !== currentUserId)
   const otherId = other?.id
   const title = chatMemberName(other) ?? chat?.title ?? '채팅'
@@ -184,9 +174,7 @@ export function ChatView(props: ChatViewProps) {
         currentUserId={currentUserId}
         participants={chat.members}
         localMessages={localMessages}
-        offerDetails={offerDetails}
-        isOfferDetailsLoading={isOfferDetailsLoading}
-        isOfferDetailsError={isOfferDetailsError}
+        offers={offers}
         offerActions={offerActions}
       />
       <ChatInput

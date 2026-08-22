@@ -17,6 +17,15 @@ export interface OfferMessageDetail {
   requirement?: string
 }
 
+export interface OfferMessageEntry {
+  /** 조회로 채운 상세. 종료 섭외처럼 작업 정보가 없으면 status 만 담긴다. */
+  detail?: OfferMessageDetail
+  /** 이 섭외의 상세를 아직 조회 중 */
+  isLoading?: boolean
+  /** 이 섭외의 상세 조회가 실패 — 상세 없음(정상)과 구분해 안내한다. */
+  isError?: boolean
+}
+
 export interface OfferMessageCardProps {
   /** 미주입 시 상세 행 없이 안내만 — offerId 원문(숫자)은 절대 노출하지 않는다. */
   detail?: OfferMessageDetail

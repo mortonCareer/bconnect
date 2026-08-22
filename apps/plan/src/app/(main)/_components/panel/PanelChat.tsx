@@ -20,7 +20,7 @@ import {
   useChatImageUpload,
   useChatOfferIds,
   type ChatViewData,
-  type OfferMessageDetail,
+  type OfferMessageEntry,
 } from '@bconnect/features'
 import { usePanelNav } from '@/hooks/usePanelNav'
 
@@ -45,39 +45,52 @@ export function PanelChat({ chatId }: { chatId: number }) {
     queries: offerIds.map((id) => getGetOfferQueryOptions(id)),
   })
 
-  const { data: projects, isError: isProjectsError } = useGetProjects()
+  const {
+    data: projects,
+    isLoading: isProjectsLoading,
+    isError: isProjectsError,
+  } = useGetProjects()
   const projectIds = useMemo(() => (projects ?? []).map((p) => p.id), [projects])
   const taskQueries = useQueries({
     queries: projectIds.map((id) => getGetProjectTasksQueryOptions(id)),
   })
 
-  const isOfferDetailsLoading =
-    offerQueries.some((q) => q.isLoading) || taskQueries.some((q) => q.isLoading)
-  // 건별 조회(섭외 단건·프로젝트별 작업) 실패는 전체 오류로 취급하지 않는다 — career 와 같은 기준.
-  // 무관한 프로젝트 하나가 실패해도 모든 카드가 "불러오지 못했습니다"로 뒤집히던 문제.
-  // 모든 상세가 걸려 있는 프로젝트 목록 실패만 전체 오류다.
-  const isOfferDetailsError = isProjectsError
-  const offerDetails = useMemo(() => {
+  // 조회 결과를 섭외별로 담는다 — 로딩·실패가 방 전체 공용이면 무관한 프로젝트의 작업 조회
+  // 실패가 모든 카드를 오류로 뒤집고, 반대로 실패를 빼면 상세가 원래 없는 종료 섭외와 구분되지 않는다.
+  const offers = useMemo(() => {
     const taskById = new Map(taskQueries.flatMap((q) => (q.data ?? []).map((t) => [t.id, t])))
-    const map = new Map<number, OfferMessageDetail>()
-    for (const query of offerQueries) {
-      const offer = query.data
-      if (offer == null) continue
-      // 작업 조회 전에는 빈 상세 대신 카드의 로딩·미존재 상태를 유지한다.
+    const isTasksLoading = isProjectsLoading || taskQueries.some((q) => q.isLoading)
+    // 어느 프로젝트에서 못 찾았는지는 그 목록이 실패하면 알 수 없다 — 작업 미발견을 단정하지 않는다.
+    const isTasksIncomplete = isProjectsError || taskQueries.some((q) => q.isError)
+    const map = new Map<number, OfferMessageEntry>()
+    offerIds.forEach((id, index) => {
+      const query = offerQueries[index]
+      if (query?.isLoading) return void map.set(id, { isLoading: true })
+      if (query?.isError) return void map.set(id, { isError: true })
+      const offer = query?.data
+      if (offer == null) return void map.set(id, {})
+
       const task = taskById.get(offer.taskId)
-      if (task == null) continue
-      map.set(offer.id, {
-        offerId: offer.id,
-        status: offer.status,
-        start: task.start,
-        end: task.end,
-        address: task.address ?? undefined,
-        trades: task.trades,
-        requirement: task.requirement ?? undefined,
+      if (task == null) {
+        if (isTasksLoading) return void map.set(id, { isLoading: true })
+        if (isTasksIncomplete) return void map.set(id, { isError: true })
+        // 작업 목록을 모두 정상 조회했는데 없는 건 — 상태만 채워 종료 섭외처럼 표시한다.
+        return void map.set(id, { detail: { offerId: offer.id, status: offer.status } })
+      }
+      map.set(id, {
+        detail: {
+          offerId: offer.id,
+          status: offer.status,
+          start: task.start,
+          end: task.end,
+          address: task.address ?? undefined,
+          trades: task.trades,
+          requirement: task.requirement ?? undefined,
+        },
       })
-    }
+    })
     return map
-  }, [offerQueries, taskQueries])
+  }, [offerIds, offerQueries, taskQueries, isProjectsLoading, isProjectsError])
 
   const queryClient = useQueryClient()
   // 상대방이 변경한 섭외 상태는 소켓 수신 시 다시 조회한다.
@@ -92,9 +105,7 @@ export function PanelChat({ chatId }: { chatId: number }) {
     chat,
     currentUserId,
     otherProfile,
-    offerDetails,
-    isOfferDetailsLoading,
-    isOfferDetailsError,
+    offers,
     isLoading,
     isError,
   }

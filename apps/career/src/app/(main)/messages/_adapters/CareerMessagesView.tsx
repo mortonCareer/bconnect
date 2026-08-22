@@ -28,6 +28,7 @@ import {
   type MessagesViewData,
   type ChatViewData,
   type OfferMessageDetail,
+  type OfferMessageEntry,
 } from '@bconnect/features'
 import { isApiErrorShape, toast } from '@bconnect/ui'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
@@ -156,18 +157,40 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
     queries: missingOfferIds.map((id) => getGetOfferQueryOptions(id)),
   })
 
-  // 단건 조회 실패는 다른 카드에 영향을 주지 않도록 전체 오류로 취급하지 않는다.
-  const isOfferDetailsLoading = isTasksLoading || closedOfferQueries.some((q) => q.isLoading)
-  const isOfferDetailsError = isTasksError
-  const offerDetails = useMemo(() => {
-    const map = new Map<number, OfferMessageDetail>(taskOfferDetails)
-    for (const query of closedOfferQueries) {
-      const offer = query.data
-      if (offer == null || map.has(offer.id)) continue
-      map.set(offer.id, { offerId: offer.id, status: offer.status })
+  // 조회 결과를 섭외별로 담는다 — 로딩·실패가 방 전체 공용이면 무관한 조회 실패가 모든 카드를
+  // 오류로 뒤집고, 반대로 실패를 빼면 상세가 원래 없는 종료 섭외와 구분되지 않는다.
+  const offers = useMemo(() => {
+    const map = new Map<number, OfferMessageEntry>()
+    for (const id of offerIds) {
+      const detail = taskOfferDetails.get(id)
+      if (detail) {
+        map.set(id, { detail })
+        continue
+      }
+      if (isTasksLoading) {
+        map.set(id, { isLoading: true })
+        continue
+      }
+      if (isTasksError) {
+        map.set(id, { isError: true })
+        continue
+      }
+      // 작업 목록에서 빠진 섭외(종료됐거나 내 배정이 아닌 건)는 단건 조회가 상태만 채운다.
+      const query = closedOfferQueries[missingOfferIds.indexOf(id)]
+      if (query?.isLoading) map.set(id, { isLoading: true })
+      else if (query?.isError) map.set(id, { isError: true })
+      else if (query?.data) map.set(id, { detail: { offerId: id, status: query.data.status } })
+      else map.set(id, {})
     }
     return map
-  }, [taskOfferDetails, closedOfferQueries])
+  }, [
+    offerIds,
+    taskOfferDetails,
+    isTasksLoading,
+    isTasksError,
+    missingOfferIds,
+    closedOfferQueries,
+  ])
 
   // 무효화(수락/거절 → getTasks·getTaskOffers)는 orval mutationInvalidates 가 자동 처리 (ADR-0025)
   const accept = useAcceptOffer({
@@ -222,9 +245,7 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
     chat,
     currentUserId,
     otherProfile,
-    offerDetails,
-    isOfferDetailsLoading,
-    isOfferDetailsError,
+    offers,
     isLoading,
     isError,
   }
