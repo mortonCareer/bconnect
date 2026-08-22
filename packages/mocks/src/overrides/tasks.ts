@@ -143,7 +143,6 @@ function buildSeedTasks(): Task[] {
         status: TaskStatus.OFFERED,
         projectTitle: seed.title,
         projectRequirement: seed.requirement ?? null,
-        projectCompanyName: seed.company,
         workerCompany: seed.company,
         offer:
           seed.offerId == null

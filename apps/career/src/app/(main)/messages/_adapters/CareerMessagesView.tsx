@@ -114,7 +114,8 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
   }, [])
 
   // 섭외 제안(OFFER) 메시지는 content 에 offerId 만 담겨 온다 → 기술자 작업 목록에서 상세를 붙인다.
-  // getTasks 는 본인에게 온 offer 작업(task.offer)까지 함께 내려준다 (TaskController.list).
+  // #1176 에서 작업 응답이 용도별로 갈리며 offer 를 물고 오는 건 assigneeTasks 뿐이다
+  // (AssigneeTaskResponse.offer — workerTasks 는 본인이 등록한 작업이라 offer 가 없다).
   const {
     data: tasks,
     isLoading: isOfferDetailsLoading,
@@ -122,19 +123,20 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
   } = useGetTasks()
   const offerDetails = useMemo(() => {
     const map = new Map<number, OfferMessageDetail>()
-    for (const task of tasks ?? []) {
+    for (const task of tasks?.assigneeTasks ?? []) {
       const offer = task.offer
       if (offer?.id == null) continue
       map.set(offer.id, {
         offerId: offer.id,
         status: offerStatusOverrides.get(offer.id) ?? offer.status,
-        // 이 offer 가 속한 task 그대로 — 추정 없이 정확히 매칭된 업체명.
-        companyName: task.projectCompanyName ?? undefined,
+        // TODO(BE): #1176 응답 DTO 분리로 projectCompanyName 이 사라져 업체명 소스가 없다.
+        // AssigneeTaskResponse 는 projectId 만 주고, 회사명은 project → company 2-hop 이라야 닿는다.
+        // 카드는 companyName 없으면 업체명 행·주어를 생략한다(OfferMessageCard).
         start: task.start,
         end: task.end,
         address: task.address ?? undefined,
         trades: task.trades,
-        requirement: task.projectRequirement ?? undefined,
+        requirement: task.requirement ?? undefined,
       })
     }
     return map

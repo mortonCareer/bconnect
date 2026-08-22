@@ -8,13 +8,16 @@ import type { OfferActionKind } from './types'
 
 /**
  * OFFER 메시지 카드에 필요한 섭외 상세. 앱이 offerId 로 resolve 해 내려준다
- * (career: useGetTasks, plan: useGetProjects+getProjectTasks 의 task.offer).
- * BE 메시지 자체는 offerId 만 담는다 — companyName 도 이 offer 가 속한 task 그대로라 정확하다.
+ * (career: useGetTasks 의 assigneeTasks[].offer). BE 메시지 자체는 offerId 만 담는다.
+ * plan 은 #1176 이후 상세 소스가 없어 미주입 — PanelChat 의 TODO(BE) 참고.
  */
 export interface OfferMessageDetail {
   offerId: number
   status: OfferStatus
-  /** 제안한 업체명 (수신 방향, career). 이 offer 가 속한 task 의 projectCompanyName 그대로 — 추정 아님. */
+  /**
+   * 제안한 업체명 (수신 방향, career). 없으면 업체명 행과 문구의 주어를 생략한다.
+   * TODO(BE): #1176 에서 projectCompanyName 이 사라져 현재 주입 소스가 없다.
+   */
   companyName?: string
   start?: string
   end?: string

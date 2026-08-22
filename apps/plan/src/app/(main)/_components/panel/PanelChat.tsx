@@ -6,9 +6,7 @@ import {
   useGetMyMember,
   useGetProfile,
   useGetProjects,
-  useQueries,
   useQueryClient,
-  getGetProjectTasksQueryOptions,
   getGetProjectTasksQueryKey,
 } from '@bconnect/api-client'
 import {
@@ -17,7 +15,6 @@ import {
   toChatSummaries,
   useChatImageUpload,
   type ChatViewData,
-  type OfferMessageDetail,
 } from '@bconnect/features'
 import { usePanelNav } from '@/hooks/usePanelNav'
 
@@ -36,35 +33,13 @@ export function PanelChat({ chatId }: { chatId: number }) {
     query: { enabled: otherId != null },
   })
 
-  // 섭외 제안(OFFER) 메시지는 content 에 offerId 만 담겨 온다 → 프로젝트별 작업 목록에서 상세를 붙인다.
-  // plan 은 career 의 getTasks(내 작업 전체) 같은 미scope 엔드포인트가 없어, 프로젝트 목록을 먼저 받고
-  // 프로젝트별 getProjectTasks 를 병렬 조회해 offer 를 모은다.
-  const { data: projects, isLoading: isProjectsLoading } = useGetProjects()
+  // TODO(BE): plan 쪽 섭외 카드 상세 소스가 없다.
+  // #1176 에서 CompanyTaskResponse 의 offer·projectRequirement 가 제거돼 기존 수집 경로(프로젝트별
+  // getProjectTasks → task.offer)가 끊겼고, 대체 후보인 GET /offers/{id}(OfferResponse)는
+  // status·member·profile 만 주고 작업기간·주소·공종·요청사항이 없다. GET /tasks/{id} 도 DELETE 뿐이라
+  // taskId 로 되짚을 수도 없다. BE 가 상세를 실어줄 때까지 카드는 안내 문구만 보여준다.
+  const { data: projects } = useGetProjects()
   const projectIds = useMemo(() => (projects ?? []).map((p) => p.id), [projects])
-  const taskQueries = useQueries({
-    queries: projectIds.map((id) => getGetProjectTasksQueryOptions(id)),
-  })
-  const isOfferDetailsLoading = isProjectsLoading || taskQueries.some((q) => q.isLoading)
-  const isOfferDetailsError = taskQueries.some((q) => q.isError)
-  const offerDetails = useMemo(() => {
-    const map = new Map<number, OfferMessageDetail>()
-    for (const query of taskQueries) {
-      for (const task of query.data ?? []) {
-        const offer = task.offer
-        if (offer?.id == null) continue
-        map.set(offer.id, {
-          offerId: offer.id,
-          status: offer.status,
-          start: task.start,
-          end: task.end,
-          address: task.address ?? undefined,
-          trades: task.trades,
-          requirement: task.projectRequirement ?? undefined,
-        })
-      }
-    }
-    return map
-  }, [taskQueries])
 
   const queryClient = useQueryClient()
   // 기술자가 채팅방에서 수락/거절해도 내(plan) 캐시엔 안 잡히는 상태 변경 — 소켓 수신을 계기로 잡는다.
@@ -73,15 +48,10 @@ export function PanelChat({ chatId }: { chatId: number }) {
       void queryClient.invalidateQueries({ queryKey: getGetProjectTasksQueryKey(id) })
   }, [queryClient, projectIds])
 
-  // companyName 은 주입하지 않는다 — plan(발신)은 카드 제목에 상대 기술자명을 쓰고,
-  // 자기 업체명은 자기참조라 표시 대상이 아니다(OfferMessageCard 의 isMine 분기).
   const data: ChatViewData = {
     chat,
     currentUserId,
     otherProfile,
-    offerDetails,
-    isOfferDetailsLoading,
-    isOfferDetailsError,
     isLoading,
     isError,
   }
