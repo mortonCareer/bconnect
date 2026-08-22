@@ -93,15 +93,19 @@ export function PanelChat({ chatId }: { chatId: number }) {
     for (const query of offerQueries) {
       const offer = query.data
       if (offer == null) continue
+      // 작업을 못 찾으면 엔트리를 만들지 않는다 — 만들면 카드의 detail 분기가 먼저 걸려
+      // 제목만 있고 행이 하나도 없는 빈 카드가 되고, 로딩·에러·못찾음 안내가 전부 죽는다.
+      // 작업 목록은 useGetProjects 를 기다리므로 offer 만 먼저 도착하는 구간이 항상 있다.
       const task = taskById.get(offer.taskId)
+      if (task == null) continue
       map.set(offer.id, {
         offerId: offer.id,
         status: offer.status,
-        start: task?.start,
-        end: task?.end,
-        address: task?.address ?? undefined,
-        trades: task?.trades,
-        requirement: task?.requirement ?? undefined,
+        start: task.start,
+        end: task.end,
+        address: task.address ?? undefined,
+        trades: task.trades,
+        requirement: task.requirement ?? undefined,
       })
     }
     return map

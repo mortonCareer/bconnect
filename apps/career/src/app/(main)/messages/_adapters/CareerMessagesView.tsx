@@ -3,9 +3,11 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  MessageType,
   OfferStatus,
   useAcceptOffer,
   useDenyOffer,
+  useInfiniteQuery,
   useQueries,
   useQueryClient,
   useGetDirectChats,
@@ -13,10 +15,13 @@ import {
   useGetMyMember,
   useGetProfile,
   useGetTasks,
+  getDirectChatMessages,
+  getGetDirectChatMessagesQueryKey,
+  getGetOfferQueryOptions,
   getGetProfileQueryOptions,
   getGetTasksQueryKey,
 } from '@bconnect/api-client'
-import type { Profile } from '@bconnect/api-client'
+import type { CursorPageMessage, InfiniteData, Profile } from '@bconnect/api-client'
 import {
   MessagesView,
   ChatView,
@@ -116,22 +121,19 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
   // 섭외 제안(OFFER) 메시지는 content 에 offerId 만 담겨 온다 → 기술자 작업 목록에서 상세를 붙인다.
   // #1176 에서 작업 응답이 용도별로 갈리며 offer 를 물고 오는 건 assigneeTasks 뿐이다
   // (AssigneeTaskResponse.offer — workerTasks 는 본인이 등록한 작업이라 offer 가 없다).
-  const {
-    data: tasks,
-    isLoading: isOfferDetailsLoading,
-    isError: isOfferDetailsError,
-  } = useGetTasks()
-  const offerDetails = useMemo(() => {
+  //
+  // TODO(BE): projectCompanyName 이 사라져 업체명 소스가 없다. AssigneeTaskResponse 는 projectId 만
+  // 주고, 회사명은 project → company 2-hop 이라야 닿는다. 카드는 companyName 없으면 업체명 행과
+  // 문구 주어를 생략한다(OfferMessageCard).
+  const { data: tasks, isLoading: isTasksLoading, isError: isTasksError } = useGetTasks()
+  const taskOfferDetails = useMemo(() => {
     const map = new Map<number, OfferMessageDetail>()
     for (const task of tasks?.assigneeTasks ?? []) {
       const offer = task.offer
       if (offer?.id == null) continue
       map.set(offer.id, {
         offerId: offer.id,
-        status: offerStatusOverrides.get(offer.id) ?? offer.status,
-        // TODO(BE): #1176 응답 DTO 분리로 projectCompanyName 이 사라져 업체명 소스가 없다.
-        // AssigneeTaskResponse 는 projectId 만 주고, 회사명은 project → company 2-hop 이라야 닿는다.
-        // 카드는 companyName 없으면 업체명 행·주어를 생략한다(OfferMessageCard).
+        status: offer.status,
         start: task.start,
         end: task.end,
         address: task.address ?? undefined,
@@ -140,7 +142,59 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
       })
     }
     return map
-  }, [tasks, offerStatusOverrides])
+  }, [tasks])
+
+  // 거절·취소·만료된 섭외는 작업 목록에서 빠진다 (BE OfferQueryService.listByWorker 가 ACTIVE·ACCEPTED
+  // 만 반환하고, 거절된 작업은 배정 목록에도 없다) → 그대로 두면 카드가 '거절함' 대신 "찾을 수 없습니다"
+  // 로 뒤집힌다. 목록에 없는 offerId 는 단건 조회(#1176)로 상태만 채운다 — 작업 상세는 BE 가 주지
+  // 않으므로 상태 라벨만 남는다.
+  //
+  // 메시지는 MessageThread 와 같은 쿼리키로 읽어 캐시를 공유한다(추가 요청 없음).
+  const { data: messagePages } = useInfiniteQuery<
+    CursorPageMessage,
+    Error,
+    InfiniteData<CursorPageMessage>,
+    readonly unknown[],
+    number | undefined
+  >({
+    queryKey: getGetDirectChatMessagesQueryKey(chatId),
+    queryFn: ({ pageParam }) => getDirectChatMessages(chatId, { cursor: pageParam }),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.nextCursor : undefined),
+  })
+  const missingOfferIds = useMemo(() => {
+    if (tasks == null) return []
+    const ids = new Set<number>()
+    for (const page of messagePages?.pages ?? [])
+      for (const message of page.content ?? []) {
+        if (message.type !== MessageType.OFFER) continue
+        const offerId = Number(message.content)
+        if (Number.isFinite(offerId) && !taskOfferDetails.has(offerId)) ids.add(offerId)
+      }
+    return [...ids]
+  }, [tasks, messagePages, taskOfferDetails])
+  const closedOfferQueries = useQueries({
+    queries: missingOfferIds.map((id) => getGetOfferQueryOptions(id)),
+  })
+
+  // 단건 조회 실패는 해당 카드만 "찾을 수 없습니다" 로 두고 전체 에러로 올리지 않는다 —
+  // 플래그가 카드 전체에 걸려 상세가 멀쩡한 카드까지 에러 문구로 덮이기 때문.
+  const isOfferDetailsLoading = isTasksLoading || closedOfferQueries.some((q) => q.isLoading)
+  const isOfferDetailsError = isTasksError
+  const offerDetails = useMemo(() => {
+    const map = new Map<number, OfferMessageDetail>()
+    for (const [offerId, detail] of taskOfferDetails)
+      map.set(offerId, { ...detail, status: offerStatusOverrides.get(offerId) ?? detail.status })
+    for (const query of closedOfferQueries) {
+      const offer = query.data
+      if (offer == null || map.has(offer.id)) continue
+      map.set(offer.id, {
+        offerId: offer.id,
+        status: offerStatusOverrides.get(offer.id) ?? offer.status,
+      })
+    }
+    return map
+  }, [taskOfferDetails, closedOfferQueries, offerStatusOverrides])
 
   // 무효화(수락/거절 → getTasks·getTaskOffers)는 orval mutationInvalidates 가 자동 처리 (ADR-0025)
   const accept = useAcceptOffer({

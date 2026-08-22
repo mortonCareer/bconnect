@@ -1,3 +1,4 @@
+import { http, HttpResponse } from 'msw'
 import {
   getAcceptOfferMockHandler,
   getCreateTaskWorkerMockHandler,
@@ -6,6 +7,7 @@ import {
   getGetTasksMockHandler,
   getUpdateTaskWorkerMockHandler,
   OfferStatus,
+  ProfileRole,
   TaskProgress,
   TaskStatus,
   Trade,
@@ -14,6 +16,9 @@ import type {
   Address,
   AssigneeTask,
   CreateWorkerTaskRequest,
+  MemberSummary,
+  Offer,
+  ProfileSummary,
   TaskList,
   UpdateWorkerTaskRequest,
   WorkerTask,
@@ -155,12 +160,68 @@ function buildSeedTasks(): TaskList {
   return { workerTasks, assigneeTasks }
 }
 
+/**
+ * 섭외 단건 조회(#1176) 용 상태. BE 는 OfferQueryService.get 으로 상태와 무관하게 조회되지만
+ * 작업 목록(listByWorker)은 ACTIVE·ACCEPTED 만 내려준다 — 거절·취소·만료된 섭외는 목록에서
+ * 사라지고 단건 조회로만 남는다. 채팅 카드가 그 차이에 의존하므로 mock 도 똑같이 갈라둔다.
+ */
+const OFFER_MEMBER: MemberSummary = {
+  id: MOCK_WORKER_ID,
+  username: 'worker_me',
+  name: '나',
+  picture: null,
+}
+const OFFER_PROFILE: ProfileSummary = {
+  role: ProfileRole.FOREMAN,
+  primaryTrade: Trade.WALLPAPER,
+  experience: 5,
+  headline: null,
+  address: SAMPLE_ADDRESS,
+}
+
+function buildSeedOffers(): Map<number, Offer> {
+  const stamp = nowStamp()
+  const map = new Map<number, Offer>()
+  for (const seed of SEEDS) {
+    if (!seed.proposed || seed.offerId == null) continue
+    map.set(seed.offerId, {
+      id: seed.offerId,
+      taskId: seed.id,
+      seq: 1,
+      status: OfferStatus.ACTIVE,
+      member: OFFER_MEMBER,
+      profile: OFFER_PROFILE,
+      createdAt: stamp,
+      modifiedAt: stamp,
+    })
+  }
+  return map
+}
+
 // 모듈 메모리 상태 — 핸들러들이 공유(closure가 변수 바인딩 캡처). 하드 리로드 시 재초기화.
 let tasks: TaskList = buildSeedTasks()
+const offersById = buildSeedOffers()
 let nextId = 9100
 
 export const tasksOverrides = [
   getGetTasksMockHandler((): TaskList => tasks),
+
+  // 섭외 단건 조회 — generated 래퍼는 404 를 못 만들어 raw 핸들러.
+  // (raw 라 openapi drift 컴파일 가드는 없음 — 경로 변경 시 수동 정합 필요)
+  // PUT /offers/reorder 는 메서드가 달라 :id 로 잡히지 않는다.
+  http.get('*/api/v1/offers/:id', ({ params }) => {
+    const offer = offersById.get(Number(params.id))
+    if (!offer) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: { code: 'C005', message: '요청한 리소스를 찾을 수 없습니다.' },
+        },
+        { status: 404 }
+      )
+    }
+    return HttpResponse.json(offer)
+  }),
 
   getCreateTaskWorkerMockHandler(async (info): Promise<number> => {
     const body = (await info.request.json()) as CreateWorkerTaskRequest
@@ -225,23 +286,38 @@ export const tasksOverrides = [
   }),
 
   // 기술자의 섭외 수락/거절(#972) — 채팅 OFFER 카드가 재조회 시 결과 상태를 읽는다.
-  // 업체측 섭외 대기열(schedule.ts)은 별도 상태라 여기선 career 쪽 assigneeTasks 만 갱신.
-  // 수락해도 목록에서 빼지 않는다 — #1176 이후 GET /tasks 는 ACTIVE 뿐 아니라 ACCEPTED 도 내려준다.
-  ...[
-    [getAcceptOfferMockHandler, OfferStatus.ACCEPTED, TaskStatus.ASSIGNED] as const,
-    [getDenyOfferMockHandler, OfferStatus.DENIED, TaskStatus.NONE] as const,
-  ].map(([handler, offerStatus, taskStatus]) =>
-    handler((info) => {
-      const offerId = Number(info.params.id)
-      tasks = {
-        ...tasks,
-        assigneeTasks: tasks.assigneeTasks.map((t) =>
-          t.offer?.id === offerId
-            ? { ...t, status: taskStatus, offer: { ...t.offer, status: offerStatus } }
-            : t
-        ),
-      }
-      return { success: true }
-    })
-  ),
+  // 업체측 섭외 대기열(schedule.ts)은 별도 상태라 여기선 career 쪽 상태만 갱신.
+  //
+  // BE 를 그대로 따른다: 수락은 작업 목록에 남지만(#1176 이후 ACTIVE·ACCEPTED 반환),
+  // 거절은 목록에서 빠진다(listByWorker 필터 + listAssigned 미포함). 어느 쪽이든 단건
+  // 조회에는 남으므로 offersById 는 상태만 바꾼다 — 카드는 그쪽에서 '거절함' 을 읽는다.
+  getAcceptOfferMockHandler((info) => {
+    const offerId = Number(info.params.id)
+    const offer = offersById.get(offerId)
+    if (offer) offersById.set(offerId, { ...offer, status: OfferStatus.ACCEPTED })
+    tasks = {
+      ...tasks,
+      assigneeTasks: tasks.assigneeTasks.map((t) =>
+        t.offer?.id === offerId
+          ? {
+              ...t,
+              status: TaskStatus.ASSIGNED,
+              offer: { ...t.offer, status: OfferStatus.ACCEPTED },
+            }
+          : t
+      ),
+    }
+    return { success: true }
+  }),
+
+  getDenyOfferMockHandler((info) => {
+    const offerId = Number(info.params.id)
+    const offer = offersById.get(offerId)
+    if (offer) offersById.set(offerId, { ...offer, status: OfferStatus.DENIED })
+    tasks = {
+      ...tasks,
+      assigneeTasks: tasks.assigneeTasks.filter((t) => t.offer?.id !== offerId),
+    }
+    return { success: true }
+  }),
 ]
