@@ -27,6 +27,22 @@ function formatDateLabel(dateStr: string): string {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${String(d.getDate()).padStart(2, '0')}일`
 }
 
+/** 분 단위 버킷. 타임존 표기(Z·+09:00) 무관하게 epoch 로 환산 */
+function minuteBucket(dateStr: string | undefined): number | null {
+  if (!dateStr) return null
+  const time = new Date(dateStr).getTime()
+  return Number.isNaN(time) ? null : Math.floor(time / 60000)
+}
+
+/** 그룹 기준: 같은 발신자 + 같은 분. OFFER 는 카드라 제외 */
+function isSameGroup(prev: Message | undefined, current: Message | undefined): boolean {
+  if (!prev || !current) return false
+  if (prev.type === MessageType.OFFER || current.type === MessageType.OFFER) return false
+  if (prev.memberId !== current.memberId) return false
+  const bucket = minuteBucket(prev.createdAt)
+  return bucket != null && bucket === minuteBucket(current.createdAt)
+}
+
 function DateSeparator({ date }: { date: string }) {
   return (
     <div className="flex items-center justify-center py-6">
@@ -42,12 +58,18 @@ function Bubble({
   participants,
   offers,
   offerActions,
+  grouped,
+  showTimestamp,
 }: {
   message: Message
   currentUserId: number | undefined
   participants: WithdrawableMember[]
   offers?: Map<number, OfferMessageEntry>
   offerActions?: OfferActions
+  /** 그룹 후속 메시지 — 프로필·닉네임·꼬리 없음 */
+  grouped: boolean
+  /** 그룹 마지막 메시지만 시각 — 그룹 내 시각 통일 */
+  showTimestamp: boolean
 }) {
   const isMine = message.memberId === currentUserId
 
@@ -78,7 +100,8 @@ function Bubble({
     )
   }
 
-  const timestamp = message.createdAt ? formatChatTime(message.createdAt) : undefined
+  const timestamp =
+    showTimestamp && message.createdAt ? formatChatTime(message.createdAt) : undefined
   // IMAGE 는 content 가 비어 있고 첨부에 서명 URL 이 담겨 온다 (MessageSocketService).
   const images =
     message.type === MessageType.IMAGE
@@ -89,7 +112,13 @@ function Bubble({
 
   if (isMine) {
     return (
-      <ChatMessage variant="mine" message={message.content} images={images} timestamp={timestamp} />
+      <ChatMessage
+        variant="mine"
+        message={message.content}
+        images={images}
+        timestamp={timestamp}
+        grouped={grouped}
+      />
     )
   }
   const sender = participants.find((p) => p.id === message.memberId)
@@ -101,6 +130,7 @@ function Bubble({
       timestamp={timestamp}
       nickname={chatMemberName(sender) ?? '상대방'}
       profileImage={sender?.picture ?? undefined}
+      grouped={grouped}
     />
   )
 }
@@ -211,14 +241,19 @@ export function MessageThread({
           <p className="text-r-12 text-gray-400">이전 메시지 불러오는 중...</p>
         </div>
       )}
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col">
         {allMessages.map((message, index) => {
-          const prev = index > 0 ? allMessages[index - 1] : null
+          const prev = index > 0 ? allMessages[index - 1] : undefined
+          const next = allMessages[index + 1]
           const currentDate = message.createdAt ? formatDateLabel(message.createdAt) : null
           const prevDate = prev?.createdAt ? formatDateLabel(prev.createdAt) : null
           const showSep = currentDate && currentDate !== prevDate
+          // 날짜가 바뀌면 분 버킷도 달라져 그룹은 자동으로 끊긴다
+          const continuesGroup = isSameGroup(prev, message)
+          const endsGroup = !isSameGroup(message, next)
+          const spacing = index === 0 || showSep ? '' : continuesGroup ? 'mt-1' : 'mt-5'
           return (
-            <div key={message.id ?? `local-${message.createdAt}`}>
+            <div key={message.id ?? `local-${message.createdAt}`} className={spacing}>
               {showSep && <DateSeparator date={currentDate} />}
               <Bubble
                 message={message}
@@ -226,6 +261,8 @@ export function MessageThread({
                 participants={participants}
                 offers={offers}
                 offerActions={offerActions}
+                grouped={continuesGroup}
+                showTimestamp={endsGroup}
               />
             </div>
           )

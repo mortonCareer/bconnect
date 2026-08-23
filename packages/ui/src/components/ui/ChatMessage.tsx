@@ -11,16 +11,24 @@ import { cn } from '../../lib/utils'
  * - theirs: 상대 채팅 - 회색 버블, 프로필+닉네임
  * - typing: 입력 중 - 프로필+닉네임+타이핑 인디케이터
  */
-const chatBubbleVariants = cva('inline-flex items-center px-4 text-r-14', {
+const chatBubbleVariants = cva('inline-flex items-center rounded-xl px-4 text-r-14', {
   variants: {
     variant: {
-      mine: 'bg-primary text-white rounded-tl-xl rounded-bl-xl rounded-br-xl py-[9px]',
-      theirs: 'bg-gray-100 text-gray-900 rounded-tr-xl rounded-bl-xl rounded-br-xl py-3',
-      typing: 'bg-gray-100 rounded-tr-xl rounded-bl-xl rounded-br-xl py-[9px] h-10',
+      mine: 'bg-primary text-white py-[9px]',
+      theirs: 'bg-gray-100 text-gray-900 py-3',
+      typing: 'bg-gray-100 py-[9px] h-10',
     },
+    /** 꼬리(각진 모서리) — 그룹 첫 메시지만 갖는다 */
+    hasTail: { true: '', false: '' },
   },
+  compoundVariants: [
+    { variant: 'mine', hasTail: true, class: 'rounded-tr-none' },
+    { variant: 'theirs', hasTail: true, class: 'rounded-tl-none' },
+    { variant: 'typing', hasTail: true, class: 'rounded-tl-none' },
+  ],
   defaultVariants: {
     variant: 'mine',
+    hasTail: true,
   },
 })
 
@@ -31,7 +39,9 @@ export interface ChatMessageImage {
 }
 
 export interface ChatMessageProps
-  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof chatBubbleVariants> {
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
+    Omit<VariantProps<typeof chatBubbleVariants>, 'hasTail'> {
   /** 메시지 내용 (typing variant에서는 무시됨) */
   message?: string
   /** 사진 메시지 — 주입 시 말풍선 대신 이미지가 렌더된다 */
@@ -42,6 +52,11 @@ export interface ChatMessageProps
   profileImage?: string
   /** 닉네임 (theirs, typing variant) */
   nickname?: string
+  /**
+   * 같은 분 그룹의 후속 메시지 — 프로필·닉네임을 숨기고(자리는 유지) 꼬리도 없앤다.
+   * 카톡처럼 두 번째 메시지부터 모서리가 전부 둥글어진다.
+   */
+  grouped?: boolean
 }
 
 /**
@@ -68,8 +83,22 @@ export interface ChatMessageProps
  * ```
  */
 const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
-  ({ className, variant, message, images, timestamp, profileImage, nickname, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      message,
+      images,
+      timestamp,
+      profileImage,
+      nickname,
+      grouped = false,
+      ...props
+    },
+    ref
+  ) => {
     const hasImages = (images?.length ?? 0) > 0
+    const bubbleClass = chatBubbleVariants({ variant, hasTail: !grouped })
 
     if (variant === 'mine') {
       return (
@@ -78,7 +107,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
           {hasImages ? (
             <ImageGrid images={images ?? []} />
           ) : (
-            <div className={cn(chatBubbleVariants({ variant }), 'max-w-[55vw]')}>
+            <div className={cn(bubbleClass, 'max-w-[55vw]')}>
               <span className="break-words">{message}</span>
             </div>
           )}
@@ -89,9 +118,12 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
     // theirs & typing 공통 레이아웃
     return (
       <div ref={ref} className={cn('flex items-start gap-2', className)} {...props}>
-        {/* 프로필 이미지 */}
-        <div className="size-10 shrink-0 overflow-hidden rounded-full bg-gray-100">
-          {profileImage && (
+        {/* 프로필 이미지 — 그룹 후속 메시지는 자리만 */}
+        <div
+          className={cn('size-10 shrink-0 overflow-hidden rounded-full', !grouped && 'bg-gray-100')}
+          aria-hidden={grouped}
+        >
+          {!grouped && profileImage && (
             <img src={profileImage} alt={nickname || ''} className="size-full object-cover" />
           )}
         </div>
@@ -99,11 +131,11 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
         {/* 닉네임 + 버블 + 타임스탬프 */}
         <div className="flex items-end gap-2">
           <div className="flex max-w-[55vw] flex-col gap-1">
-            {nickname && <span className="text-m-12 text-gray-900">{nickname}</span>}
+            {!grouped && nickname && <span className="text-m-12 text-gray-900">{nickname}</span>}
             {hasImages && variant !== 'typing' ? (
               <ImageGrid images={images ?? []} />
             ) : (
-              <div className={chatBubbleVariants({ variant })}>
+              <div className={bubbleClass}>
                 {variant === 'typing' ? (
                   <TypingDots />
                 ) : (
