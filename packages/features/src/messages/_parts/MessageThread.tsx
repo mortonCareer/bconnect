@@ -66,6 +66,7 @@ function Bubble({
           detail={detail}
           isMine={isMine}
           recipientName={recipientName}
+          showClosedOfferFallback={offerActions != null}
           isDetailLoading={entry?.isLoading}
           isDetailError={entry?.isError}
           isActionDisabled={isAnyOfferPending}

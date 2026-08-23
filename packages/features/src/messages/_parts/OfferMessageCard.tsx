@@ -33,6 +33,8 @@ export interface OfferMessageCardProps {
   isMine?: boolean
   /** 제안받은 기술자 이름. */
   recipientName?: string
+  /** 기술자 화면에서 종료된 섭외의 작업 상세가 없을 때 상태별 안내를 표시한다. */
+  showClosedOfferFallback?: boolean
   /** 수락 핸들러. 미주입이면 버튼 없음 (plan = 읽기전용). */
   onAccept?: () => void
   onDeny?: () => void
@@ -53,6 +55,12 @@ const STATUS_LABELS: Partial<Record<OfferStatus, string>> = {
   [OfferStatus.DENIED]: '거절함',
   [OfferStatus.CANCELED]: '취소됨',
   [OfferStatus.EXPIRED]: '만료됨',
+}
+
+const CLOSED_OFFER_FALLBACKS: Partial<Record<OfferStatus, string>> = {
+  [OfferStatus.DENIED]: '거절한 섭외입니다',
+  [OfferStatus.CANCELED]: '업체가 취소한 섭외입니다',
+  [OfferStatus.EXPIRED]: '응답 기간이 만료된 섭외입니다',
 }
 
 /** 네 글자 라벨이 줄바꿈되지 않도록 고정 폭을 사용한다. */
@@ -87,6 +95,7 @@ export function OfferMessageCard({
   detail,
   isMine,
   recipientName,
+  showClosedOfferFallback,
   onAccept,
   onDeny,
   isDetailLoading,
@@ -103,6 +112,10 @@ export function OfferMessageCard({
   )
   const canAct = detail?.status === OfferStatus.ACTIVE && (onAccept != null || onDeny != null)
   const statusLabel = detail ? STATUS_LABELS[detail.status] : undefined
+  const closedOfferFallback =
+    detail && !hasRows && showClosedOfferFallback
+      ? CLOSED_OFFER_FALLBACKS[detail.status]
+      : undefined
   const isAcceptPending = pendingAction === 'accept'
   const isDenyPending = pendingAction === 'deny'
   const actionsDisabled = isActionDisabled || isAcceptPending || isDenyPending
@@ -157,7 +170,9 @@ export function OfferMessageCard({
       ) : detail ? (
         // 섭외는 찾았지만 작업 상세가 없는 경우 — 종료된 섭외처럼 작업 목록에서 빠진 건은
         // 단건 조회(GET /offers/{id})가 상태만 주고 작업 필드를 주지 않는다.
-        <p className="mt-2 text-r-12 text-gray-500">작업 상세를 불러올 수 없습니다</p>
+        <p className="mt-2 text-r-12 text-gray-500">
+          {closedOfferFallback ?? '작업 상세를 불러올 수 없습니다'}
+        </p>
       ) : (
         <p className="mt-2 text-r-12 text-gray-500">제안 상세를 찾을 수 없습니다</p>
       )}
@@ -186,7 +201,10 @@ export function OfferMessageCard({
           </Button>
         </div>
       ) : (
-        statusLabel && <p className="mt-3 text-right text-m-12 text-gray-500">{statusLabel}</p>
+        statusLabel &&
+        !closedOfferFallback && (
+          <p className="mt-3 text-right text-m-12 text-gray-500">{statusLabel}</p>
+        )
       )}
     </div>
   )
