@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, type ReactNode } from 'react'
 import { MessageType } from '@bconnect/api-client'
 import type { Message, WithdrawableMember } from '@bconnect/api-client'
 import { useDirectChatMessages } from '../useDirectChatMessages'
@@ -22,6 +22,8 @@ interface MessageThreadProps {
   offerActions?: OfferActions
   /** 말풍선 아바타 → 프로필 링크 빌더. 앱이 주입 (ChatView 와 동일 슬롯) */
   profileHref?: (memberId: number) => string
+  /** 대화 맨 위에 붙는 상대 프로필 — 스크롤과 함께 밀려 올라간다 (#1148) */
+  header?: ReactNode
 }
 
 function formatDateLabel(dateStr: string): string {
@@ -148,6 +150,7 @@ export function MessageThread({
   offers,
   offerActions,
   profileHref,
+  header,
 }: MessageThreadProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const topObserverRef = useRef<HTMLDivElement>(null)
@@ -220,17 +223,15 @@ export function MessageThread({
     return () => observer.disconnect()
   }, [handleTopObserver])
 
-  if (isLoading) {
+  if (isLoading || isError) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <p className="text-m-14 text-gray-500">메시지를 불러오는 중...</p>
-      </div>
-    )
-  }
-  if (isError) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <p className="text-m-14 text-gray-500">메시지를 불러올 수 없습니다</p>
+      <div className="flex min-h-0 flex-1 flex-col">
+        {header}
+        <div className="flex flex-1 items-center justify-center">
+          <p className="text-m-14 text-gray-500">
+            {isLoading ? '메시지를 불러오는 중...' : '메시지를 불러올 수 없습니다'}
+          </p>
+        </div>
       </div>
     )
   }
@@ -241,6 +242,8 @@ export function MessageThread({
       onScroll={handleScroll}
       className="flex flex-1 flex-col overflow-y-auto px-4 py-3"
     >
+      {/* 상대 프로필은 대화 맨 위에 놓여 함께 스크롤된다 — 컨테이너 패딩만 상쇄 */}
+      {header && <div className="-mx-4 -mt-3 mb-3 shrink-0">{header}</div>}
       <div ref={topObserverRef} className="h-1 shrink-0" />
       {isFetchingNextPage && (
         <div className="flex justify-center py-2">
