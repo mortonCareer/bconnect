@@ -2,14 +2,11 @@
 
 import { OfferStatus, TRADE_LABELS } from '@bconnect/api-client'
 import type { Address, Trade } from '@bconnect/api-client'
-import { Button } from '@bconnect/ui'
-import { formatPeriod, withParticle } from '@bconnect/config/format'
+import { Button, cn } from '@bconnect/ui'
+import { formatPeriod } from '@bconnect/config/format'
 import type { OfferActionKind } from './types'
 
-/**
- * OFFER 메시지 카드에 필요한 섭외 상세. 앱이 offerId 로 resolve 해 내려준다
- * (career: useGetTasks 의 task.offer). BE 메시지 자체는 offerId 만 담는다.
- */
+/** 앱에서 offerId로 조회해 주입하는 섭외 카드 상세. */
 export interface OfferMessageDetail {
   offerId: number
   status: OfferStatus
@@ -20,14 +17,24 @@ export interface OfferMessageDetail {
   requirement?: string
 }
 
+export interface OfferMessageEntry {
+  /** 조회로 채운 상세. 종료 섭외처럼 작업 정보가 없으면 status 만 담긴다. */
+  detail?: OfferMessageDetail
+  /** 이 섭외의 상세를 아직 조회 중 */
+  isLoading?: boolean
+  /** 이 섭외의 상세 조회가 실패 — 상세 없음(정상)과 구분해 안내한다. */
+  isError?: boolean
+}
+
 export interface OfferMessageCardProps {
   /** 미주입 시 상세 행 없이 안내만 — offerId 원문(숫자)은 절대 노출하지 않는다. */
   detail?: OfferMessageDetail
-  /**
-   * 제안한 업체명. 지금은 앱이 넘기지 않아 항상 placeholder 로 렌더된다.
-   * BE 가 업체명을 내려주면 이 prop 만 채우면 된다 — COMPANY_NAME_PLACEHOLDER 주석 참고.
-   */
-  companyName?: string
+  /** 본인이 보낸 제안인지 여부. */
+  isMine?: boolean
+  /** 제안받은 기술자 이름. */
+  recipientName?: string
+  /** 기술자 화면에서 종료된 섭외의 작업 상세가 없을 때 상태별 안내를 표시한다. */
+  showClosedOfferFallback?: boolean
   /** 수락 핸들러. 미주입이면 버튼 없음 (plan = 읽기전용). */
   onAccept?: () => void
   onDeny?: () => void
@@ -41,27 +48,22 @@ export interface OfferMessageCardProps {
   pendingAction?: OfferActionKind | null
 }
 
-/**
- * TODO(BE): 섭외/작업 응답에 업체명 필드가 없다. 채팅 상대 이름으로 대체하면 업체가 아니라
- * 담당자 개인명이 "업체명"으로 찍히므로, 필드가 생길 때까지 시안의 placeholder 를 그대로 쓴다.
- * BE 에 업체명이 추가되면 이 상수를 지우고 ChatView 에서 companyName 을 주입할 것.
- */
-const COMPANY_NAME_PLACEHOLDER = 'OOO업체'
-
-/** ACTIVE(응답 대기) 외 상태는 버튼 대신 결과 텍스트로 표시. */
+/** 읽기 전용 카드와 종료된 섭외에 표시할 상태. */
 const STATUS_LABELS: Partial<Record<OfferStatus, string>> = {
+  [OfferStatus.ACTIVE]: '대기중',
   [OfferStatus.ACCEPTED]: '수락함',
   [OfferStatus.DENIED]: '거절함',
   [OfferStatus.CANCELED]: '취소됨',
   [OfferStatus.EXPIRED]: '만료됨',
 }
 
-/**
- * 시안(1572:13100 등): gap 8 · py 4 · 라벨 45px · 12px.
- * 토큰 기본 line-height(1.6)면 행 높이가 시안(23px)보다 4px 커져 leading-tight(=15px)로 맞춘다.
- * 라벨 폭은 시안(45px, Inter 기준)이 아니라 12px 한글 4자(=48px) 기준 — 45px 로 두면
- * "작업기간"·"현장주소"·"요청사항"이 두 줄로 접힌다. nowrap 으로 한 번 더 막는다.
- */
+const CLOSED_OFFER_FALLBACKS: Partial<Record<OfferStatus, string>> = {
+  [OfferStatus.DENIED]: '거절한 섭외입니다',
+  [OfferStatus.CANCELED]: '업체가 취소한 섭외입니다',
+  [OfferStatus.EXPIRED]: '응답 기간이 만료된 섭외입니다',
+}
+
+/** 네 글자 라벨이 줄바꿈되지 않도록 고정 폭을 사용한다. */
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-2 py-1 leading-tight">
@@ -73,10 +75,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   )
 }
 
-/**
- * 시안 공종 칩(1572:13112) — 배경 채우기 없이(카드 회색이 비침) 테두리만 + 각진 모서리(2px).
- * FilterChip(알약형 파란 칩)과 다른 형태라 카드 로컬로 둔다.
- */
+/** 섭외 카드 전용 공종 칩. */
 function TradeChip({ label }: { label: string }) {
   return (
     <span className="inline-flex shrink-0 items-center rounded-xs border border-gray-200 px-2 py-1 text-r-12 leading-tight text-gray-900">
@@ -85,10 +84,7 @@ function TradeChip({ label }: { label: string }) {
   )
 }
 
-/**
- * 시안 버튼(3394:9360·9363) — 흰 배경 + 회색 테두리에 글자만 brand/red.
- * 디자인시스템 outline/destructive 는 테두리까지 색이 들어가 카드 안에서 과하게 튄다.
- */
+/** 카드 안에서는 variant의 색상 테두리를 중립색으로 덮는다. */
 const OFFER_BUTTON_CLASS = 'border-gray-200 bg-white font-normal'
 
 /**
@@ -97,7 +93,9 @@ const OFFER_BUTTON_CLASS = 'border-gray-200 bg-white font-normal'
  */
 export function OfferMessageCard({
   detail,
-  companyName,
+  isMine,
+  recipientName,
+  showClosedOfferFallback,
   onAccept,
   onDeny,
   isDetailLoading,
@@ -105,28 +103,44 @@ export function OfferMessageCard({
   isActionDisabled,
   pendingAction,
 }: OfferMessageCardProps) {
-  const company = companyName || COMPANY_NAME_PLACEHOLDER
   const address = detail?.address
   const trades = detail?.trades ?? []
+  // 상세를 상태만 채워 내려주는 경로가 있다(작업 목록에 없는 섭외 = 종료됐거나 내 배정이 아닌 건).
+  // detail 유무로 분기하면 행이 하나도 없는 빈 카드가 되므로 실제 행 유무로 가른다.
+  const hasRows = Boolean(
+    (detail?.start && detail?.end) || address || trades.length > 0 || detail?.requirement
+  )
   const canAct = detail?.status === OfferStatus.ACTIVE && (onAccept != null || onDeny != null)
   const statusLabel = detail ? STATUS_LABELS[detail.status] : undefined
+  const closedOfferFallback =
+    detail && !hasRows && showClosedOfferFallback
+      ? CLOSED_OFFER_FALLBACKS[detail.status]
+      : undefined
   const isAcceptPending = pendingAction === 'accept'
   const isDenyPending = pendingAction === 'deny'
   const actionsDisabled = isActionDisabled || isAcceptPending || isDenyPending
 
-  return (
-    // 수신 버블 규칙(ChatMessage variant="theirs")과 동일하게 좌상단만 각지게 둔다.
-    // break-keep: 한글이 어절 중간("제안되었습니/다")에서 끊기지 않도록 — word-break 는 상속된다.
-    <div className="max-w-75 rounded-tr-xl rounded-br-xl rounded-bl-xl bg-gray-100 px-4 py-3 break-keep">
-      {/* 시안 타이틀은 Bold(700). 토큰 text-sb-14 는 600 이라 weight 만 덮는다 */}
-      <p className="text-sb-14 font-bold! text-gray-900">
-        {withParticle(company, '으로부터', '로부터', true)} 섭외가 제안되었습니다
-      </p>
+  // 발신 카드에만 기술자명을 주어로 쓴다. 수신 카드의 주어(업체명)는 표시하지 않기로 했다(#1159).
+  const title = isMine
+    ? recipientName
+      ? `${recipientName}님에게 섭외 요청이 전달되었습니다`
+      : '섭외 요청이 전달되었습니다'
+    : '섭외 요청을 제안받았습니다'
 
-      {detail ? (
-        // 시안(1572:13097)은 타이틀 바로 아래에 행이 붙는다 — 사이 여백 없음
+  return (
+    // 일반 채팅 말풍선과 같은 방향별 모서리를 사용한다.
+    <div
+      className={cn(
+        'max-w-75 px-4 py-3 break-keep bg-gray-100',
+        isMine
+          ? 'rounded-tl-xl rounded-bl-xl rounded-br-xl'
+          : 'rounded-tr-xl rounded-br-xl rounded-bl-xl'
+      )}
+    >
+      <p className="text-sb-14 font-bold! text-gray-900">{title}</p>
+
+      {detail && hasRows ? (
         <div>
-          <Row label="업체명">{company}</Row>
           {detail.start && detail.end && (
             <Row label="작업기간">{formatPeriod(detail.start, detail.end)}</Row>
           )}
@@ -152,6 +166,12 @@ export function OfferMessageCard({
       ) : isDetailError ? (
         <p className="mt-2 text-r-12 text-destructive">
           제안 상세를 불러오지 못했습니다. 잠시 후 다시 시도해주세요
+        </p>
+      ) : detail ? (
+        // 섭외는 찾았지만 작업 상세가 없는 경우 — 종료된 섭외처럼 작업 목록에서 빠진 건은
+        // 단건 조회(GET /offers/{id})가 상태만 주고 작업 필드를 주지 않는다.
+        <p className="mt-2 text-r-12 text-gray-500">
+          {closedOfferFallback ?? '작업 상세를 불러올 수 없습니다'}
         </p>
       ) : (
         <p className="mt-2 text-r-12 text-gray-500">제안 상세를 찾을 수 없습니다</p>
@@ -181,7 +201,10 @@ export function OfferMessageCard({
           </Button>
         </div>
       ) : (
-        statusLabel && <p className="mt-3 text-right text-m-12 text-gray-500">{statusLabel}</p>
+        statusLabel &&
+        !closedOfferFallback && (
+          <p className="mt-3 text-right text-m-12 text-gray-500">{statusLabel}</p>
+        )
       )}
     </div>
   )

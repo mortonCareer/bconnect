@@ -1,28 +1,34 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   OfferStatus,
   useAcceptOffer,
   useDenyOffer,
   useQueries,
+  useQueryClient,
   useGetDirectChats,
   useGetGroupChats,
   useGetMyMember,
   useGetProfile,
   useGetTasks,
+  getGetOfferQueryKey,
+  getGetOfferQueryOptions,
   getGetProfileQueryOptions,
+  getGetTasksQueryKey,
 } from '@bconnect/api-client'
-import type { Profile } from '@bconnect/api-client'
+import type { Offer, Profile, TaskList } from '@bconnect/api-client'
 import {
   MessagesView,
   ChatView,
   toChatSummaries,
   useChatImageUpload,
+  useChatOfferIds,
   type MessagesViewData,
   type ChatViewData,
   type OfferMessageDetail,
+  type OfferMessageEntry,
 } from '@bconnect/features'
 import { isApiErrorShape, toast } from '@bconnect/ui'
 import { careerShell } from '@/app/(main)/_adapters/careerShell'
@@ -99,48 +105,98 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
     query: { enabled: otherId != null },
   })
 
-  const [offerStatusOverrides, setOfferStatusOverrides] = useState<Map<number, OfferStatus>>(
-    () => new Map()
+  const queryClient = useQueryClient()
+  // 수락/거절 직후의 낙관적 갱신 — 로컬 state 대신 캐시에 직접 쓴다. state 로 덮으면 이후
+  // 서버가 내려주는 상태 변경(업체 취소 등)까지 세션 내내 가려진다.
+  const applyOfferStatus = useCallback(
+    (offerId: number, status: OfferStatus) => {
+      queryClient.setQueryData<TaskList>(getGetTasksQueryKey(), (prev) =>
+        prev == null
+          ? prev
+          : {
+              ...prev,
+              assigneeTasks: prev.assigneeTasks.map((task) =>
+                task.offer?.id === offerId ? { ...task, offer: { ...task.offer, status } } : task
+              ),
+            }
+      )
+      queryClient.setQueryData<Offer>(getGetOfferQueryKey(offerId), (prev) =>
+        prev == null ? prev : { ...prev, status }
+      )
+    },
+    [queryClient]
   )
-  const setOfferStatusOverride = useCallback((offerId: number, status: OfferStatus) => {
-    setOfferStatusOverrides((prev) => {
-      if (prev.get(offerId) === status) return prev
-      const next = new Map(prev)
-      next.set(offerId, status)
-      return next
-    })
-  }, [])
 
-  // 섭외 제안(OFFER) 메시지는 content 에 offerId 만 담겨 온다 → 기술자 작업 목록에서 상세를 붙인다.
-  // getTasks 는 본인에게 온 offer 작업(task.offer)까지 함께 내려준다 (TaskController.list).
-  const {
-    data: tasks,
-    isLoading: isOfferDetailsLoading,
-    isError: isOfferDetailsError,
-  } = useGetTasks()
-  const offerDetails = useMemo(() => {
+  // OFFER 메시지의 offerId를 배정 작업과 연결해 카드 상세를 만든다.
+  const { data: tasks, isLoading: isTasksLoading, isError: isTasksError } = useGetTasks()
+  const taskOfferDetails = useMemo(() => {
     const map = new Map<number, OfferMessageDetail>()
-    for (const task of tasks ?? []) {
+    for (const task of tasks?.assigneeTasks ?? []) {
       const offer = task.offer
       if (offer?.id == null) continue
       map.set(offer.id, {
         offerId: offer.id,
-        status: offerStatusOverrides.get(offer.id) ?? offer.status,
+        status: offer.status,
         start: task.start,
         end: task.end,
         address: task.address ?? undefined,
         trades: task.trades,
-        requirement: task.projectRequirement ?? undefined,
+        requirement: task.requirement ?? undefined,
       })
     }
     return map
-  }, [tasks, offerStatusOverrides])
+  }, [tasks])
+
+  // 작업 목록에서 빠진 종료 섭외는 단건 조회로 상태만 보완한다.
+  const offerIds = useChatOfferIds(chatId)
+  const missingOfferIds = useMemo(
+    () => (tasks == null ? [] : offerIds.filter((id) => !taskOfferDetails.has(id))),
+    [tasks, offerIds, taskOfferDetails]
+  )
+  const closedOfferQueries = useQueries({
+    queries: missingOfferIds.map((id) => getGetOfferQueryOptions(id)),
+  })
+
+  // 조회 결과를 섭외별로 담는다 — 로딩·실패가 방 전체 공용이면 무관한 조회 실패가 모든 카드를
+  // 오류로 뒤집고, 반대로 실패를 빼면 상세가 원래 없는 종료 섭외와 구분되지 않는다.
+  const offers = useMemo(() => {
+    const map = new Map<number, OfferMessageEntry>()
+    for (const id of offerIds) {
+      const detail = taskOfferDetails.get(id)
+      if (detail) {
+        map.set(id, { detail })
+        continue
+      }
+      if (isTasksLoading) {
+        map.set(id, { isLoading: true })
+        continue
+      }
+      if (isTasksError) {
+        map.set(id, { isError: true })
+        continue
+      }
+      // 작업 목록에서 빠진 섭외(종료됐거나 내 배정이 아닌 건)는 단건 조회가 상태만 채운다.
+      const query = closedOfferQueries[missingOfferIds.indexOf(id)]
+      if (query?.isLoading) map.set(id, { isLoading: true })
+      else if (query?.isError) map.set(id, { isError: true })
+      else if (query?.data) map.set(id, { detail: { offerId: id, status: query.data.status } })
+      else map.set(id, {})
+    }
+    return map
+  }, [
+    offerIds,
+    taskOfferDetails,
+    isTasksLoading,
+    isTasksError,
+    missingOfferIds,
+    closedOfferQueries,
+  ])
 
   // 무효화(수락/거절 → getTasks·getTaskOffers)는 orval mutationInvalidates 가 자동 처리 (ADR-0025)
   const accept = useAcceptOffer({
     mutation: {
       onSuccess: (_data, variables) => {
-        setOfferStatusOverride(variables.id, OfferStatus.ACCEPTED)
+        applyOfferStatus(variables.id, OfferStatus.ACCEPTED)
         toast({ description: '섭외를 수락했어요', variant: 'success' })
       },
       onError: (error) =>
@@ -156,7 +212,7 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
   const deny = useDenyOffer({
     mutation: {
       onSuccess: (_data, variables) => {
-        setOfferStatusOverride(variables.id, OfferStatus.DENIED)
+        applyOfferStatus(variables.id, OfferStatus.DENIED)
         toast({ description: '섭외를 거절했어요', variant: 'success' })
       },
       onError: (error) =>
@@ -176,13 +232,20 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
   const pendingAction = accept.isPending ? 'accept' : deny.isPending ? 'deny' : null
   const isOfferActionPending = pendingAction != null
 
+  // 상대방이 변경한 섭외 상태는 소켓 수신 시 다시 조회한다.
+  const handleOfferMessage = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: getGetTasksQueryKey() })
+    // 작업 목록에서 빠진 섭외의 상세는 단건 조회 캐시에서 읽는다 — 같이 무효화하지 않으면
+    // 만료·취소 후에도 옛 ACTIVE 가 남아 카드가 수락/거절 버튼을 계속 띄운다.
+    for (const id of offerIds)
+      void queryClient.invalidateQueries({ queryKey: getGetOfferQueryKey(id) })
+  }, [queryClient, offerIds])
+
   const data: ChatViewData = {
     chat,
     currentUserId,
     otherProfile,
-    offerDetails,
-    isOfferDetailsLoading,
-    isOfferDetailsError,
+    offers,
     isLoading,
     isError,
   }
@@ -200,6 +263,7 @@ export function CareerChatRoom({ chatId }: { chatId: number }) {
         progress: imageUpload.progress,
         onSendError: imageUpload.notifySendError,
       }}
+      onOfferMessage={handleOfferMessage}
       offerActions={{
         onAccept: (offerId) => {
           if (isOfferActionPending) return

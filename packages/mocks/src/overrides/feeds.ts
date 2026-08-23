@@ -1,11 +1,5 @@
-import {
-  AttachmentType,
-  getGetFeedsMockHandler,
-  TaskProgress,
-  TaskStatus,
-  TaskType,
-} from '@bconnect/api-client'
-import type { Attachment, CursorPageFeed, Feed, Task, Trade } from '@bconnect/api-client'
+import { AttachmentType, getGetFeedsMockHandler } from '@bconnect/api-client'
+import type { Attachment, CursorPageFeed, Feed, TaskSummary, Trade } from '@bconnect/api-client'
 import { addressOf } from './_address'
 import { PROFILE_SEEDS, type ProfileSeed } from './profiles'
 
@@ -83,31 +77,19 @@ function authorOf(memberId: number): ProfileSeed {
   return seed
 }
 
-function taskOf(id: number, seed: FeedSeed, trade: Trade): Task | null {
+// 피드 카드에 필요한 TaskSummary 필드만 구성한다.
+function taskOf(id: number, seed: FeedSeed, trade: Trade): TaskSummary | null {
   if (!seed.task) return null
   const end = daysAgoIso(seed.daysAgo).slice(0, 10)
   const start = daysAgoIso(seed.daysAgo + seed.task.days - 1).slice(0, 10)
   const stamp = daysAgoIso(seed.daysAgo)
   return {
     id,
-    type: TaskType.WORKER,
-    status: TaskStatus.ASSIGNED,
-    progress: TaskProgress.COMPLETED,
     trades: [trade],
     start,
     end,
-    workerId: null,
-    workerTitle: null,
-    workerMemo: null,
-    workerCompany: seed.task.company,
+    company: seed.task.company,
     address: null,
-    projectId: null,
-    projectTitle: null,
-    projectRequirement: null,
-    projectMemo: null,
-    projectCompanyId: null,
-    projectCompanyName: null,
-    offer: null,
     createdAt: stamp,
     modifiedAt: stamp,
   }
@@ -135,7 +117,7 @@ function buildAttachments(
 export const feedsOverrides = [
   getGetFeedsMockHandler(
     (): CursorPageFeed => ({
-      // Feed = { member: MemberSummary, profile: ProfileSummary, post: Post, task: Task | null }.
+      // Feed = { member: WithdrawableMember, profile: ProfileSummary, post: Post, task: TaskSummary | null }.
       // ProfileSummary 엔 id/memberId/trades 없음(대표분야 primaryTrade 만) — mapper 도 대표분야 기준.
       content: FEED_SEEDS.map((seed, i): Feed => {
         const author = authorOf(seed.memberId)
