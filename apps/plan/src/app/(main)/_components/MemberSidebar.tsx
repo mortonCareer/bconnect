@@ -61,9 +61,11 @@ const PROJECT_ITEM_CLASS =
 function ProjectSection({
   pathProjectId,
   activeSlug,
+  isNavPanelOpen,
 }: {
   pathProjectId: string | undefined
   activeSlug: string
+  isNavPanelOpen: boolean
 }) {
   const router = useRouter()
   const { data: projects } = useGetProjects()
@@ -100,8 +102,8 @@ function ProjectSection({
     { slug: 'recruit', label: '모집 관리', href: null },
     { slug: 'storage', label: '문서 저장소', href: null },
   ]
-  // active 표시는 현재 path 의 프로젝트를 보고 있을 때만
-  const onSelectedProject = pathProjectId === selectedProject
+  // active 표시는 현재 path 의 프로젝트를 보고 있을 때만 (알림·메시지 패널이 열려 있으면 그쪽으로 양보)
+  const onSelectedProject = pathProjectId === selectedProject && !isNavPanelOpen
 
   return (
     <div className="flex flex-col gap-3">
@@ -184,12 +186,18 @@ function ProfileSection() {
 export function MemberSidebar() {
   const notificationCount = useUnreadNotificationCount()
   const messageCount = useUnreadChatCount()
-  const { panelHref } = usePanelNav()
+  const { panelHref, panel } = usePanelNav()
   const pathname = usePathname()
 
   const projectMatch = pathname.match(/^\/projects\/([^/]+)(?:\/([^/]+))?/)
   const projectId = projectMatch?.[1]
   const projectSlug = projectMatch?.[2] ?? ''
+
+  // 사이드바 항목에 대응하는 패널만 active 를 가져간다. profile·crawled·task 패널은 메인 콘텐츠
+  // 위에 얹히는 컨텍스트 오버레이라 아래 메인 라우트(기술자 탐색·공정표)의 active 를 유지.
+  const isNotificationsPanel = panel === 'notifications'
+  const isMessagesPanel = panel === 'messages' || panel?.startsWith('messages/') === true
+  const isNavPanelOpen = isNotificationsPanel || isMessagesPanel
 
   return (
     <div className="flex h-full flex-col justify-between">
@@ -197,11 +205,30 @@ export function MemberSidebar() {
         <ProfileSection />
         <div className="h-px bg-gray-300" />
         <div className="flex flex-col gap-0.5">
-          <NavItem label="알림" count={notificationCount ?? 0} href={panelHref('notifications')} />
-          <NavItem label="메시지" count={messageCount} href={panelHref('messages')} />
-          <NavItem label="기술자 탐색" count={0} href="/" active={pathname === '/'} />
+          <NavItem
+            label="알림"
+            count={notificationCount ?? 0}
+            href={panelHref('notifications')}
+            active={isNotificationsPanel}
+          />
+          <NavItem
+            label="메시지"
+            count={messageCount}
+            href={panelHref('messages')}
+            active={isMessagesPanel}
+          />
+          <NavItem
+            label="기술자 탐색"
+            count={0}
+            href="/"
+            active={pathname === '/' && !isNavPanelOpen}
+          />
         </div>
-        <ProjectSection pathProjectId={projectId} activeSlug={projectSlug} />
+        <ProjectSection
+          pathProjectId={projectId}
+          activeSlug={projectSlug}
+          isNavPanelOpen={isNavPanelOpen}
+        />
       </div>
 
       <SidebarFooter />
