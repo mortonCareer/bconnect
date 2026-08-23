@@ -2,6 +2,7 @@
  * @figma https://www.figma.com/design/EFXofON7gTFbmbE2kB31SS?node-id=364-4504
  */
 import * as React from 'react'
+import Link from 'next/link'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
 
@@ -52,6 +53,8 @@ export interface ChatMessageProps
   profileImage?: string
   /** 닉네임 (theirs, typing variant) */
   nickname?: string
+  /** 주어지면 프로필 이미지가 해당 프로필로 가는 Link (theirs, typing) */
+  profileHref?: string
   /**
    * 같은 분 그룹의 후속 메시지 — 프로필·닉네임을 숨기고(자리는 유지) 꼬리도 없앤다.
    * 카톡처럼 두 번째 메시지부터 모서리가 전부 둥글어진다.
@@ -92,6 +95,7 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
       timestamp,
       profileImage,
       nickname,
+      profileHref,
       grouped = false,
       ...props
     },
@@ -99,6 +103,13 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
   ) => {
     const hasImages = (images?.length ?? 0) > 0
     const bubbleClass = chatBubbleVariants({ variant, hasTail: !grouped })
+    const avatarClass = cn(
+      'size-10 shrink-0 overflow-hidden rounded-full',
+      !grouped && 'bg-gray-100'
+    )
+    const avatarImage = !grouped && profileImage && (
+      <img src={profileImage} alt={nickname || ''} className="size-full object-cover" />
+    )
 
     if (variant === 'mine') {
       return (
@@ -118,15 +129,23 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
     // theirs & typing 공통 레이아웃
     return (
       <div ref={ref} className={cn('flex items-start gap-2', className)} {...props}>
-        {/* 프로필 이미지 — 그룹 후속 메시지는 자리만 */}
-        <div
-          className={cn('size-10 shrink-0 overflow-hidden rounded-full', !grouped && 'bg-gray-100')}
-          aria-hidden={grouped}
-        >
-          {!grouped && profileImage && (
-            <img src={profileImage} alt={nickname || ''} className="size-full object-cover" />
-          )}
-        </div>
+        {/* 프로필 이미지 — 그룹 후속 메시지는 자리만. href 주면 프로필로 이동 */}
+        {profileHref && !grouped ? (
+          <Link
+            href={profileHref}
+            aria-label={nickname ? `${nickname} 프로필 보기` : '프로필 보기'}
+            className={cn(
+              avatarClass,
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary'
+            )}
+          >
+            {avatarImage}
+          </Link>
+        ) : (
+          <div className={avatarClass} aria-hidden={grouped}>
+            {avatarImage}
+          </div>
+        )}
 
         {/* 닉네임 + 버블 + 타임스탬프 */}
         <div className="flex items-end gap-2">

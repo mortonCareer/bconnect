@@ -176,6 +176,7 @@ export function ChatView(props: ChatViewProps) {
         localMessages={localMessages}
         offers={offers}
         offerActions={offerActions}
+        profileHref={profileHref}
       />
       <ChatInput
         value={message}

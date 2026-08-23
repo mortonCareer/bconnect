@@ -20,6 +20,8 @@ interface MessageThreadProps {
   offers?: Map<number, OfferMessageEntry>
   /** 수락/거절 액션 슬롯. 미주입이면 읽기전용 카드. */
   offerActions?: OfferActions
+  /** 말풍선 아바타 → 프로필 링크 빌더. 앱이 주입 (ChatView 와 동일 슬롯) */
+  profileHref?: (memberId: number) => string
 }
 
 function formatDateLabel(dateStr: string): string {
@@ -58,6 +60,7 @@ function Bubble({
   participants,
   offers,
   offerActions,
+  profileHref,
   grouped,
   showTimestamp,
 }: {
@@ -66,6 +69,7 @@ function Bubble({
   participants: WithdrawableMember[]
   offers?: Map<number, OfferMessageEntry>
   offerActions?: OfferActions
+  profileHref?: (memberId: number) => string
   /** 그룹 후속 메시지 — 프로필·닉네임·꼬리 없음 */
   grouped: boolean
   /** 그룹 마지막 메시지만 시각 — 그룹 내 시각 통일 */
@@ -130,6 +134,7 @@ function Bubble({
       timestamp={timestamp}
       nickname={chatMemberName(sender) ?? '상대방'}
       profileImage={sender?.picture ?? undefined}
+      profileHref={sender?.id != null ? profileHref?.(sender.id) : undefined}
       grouped={grouped}
     />
   )
@@ -142,6 +147,7 @@ export function MessageThread({
   localMessages,
   offers,
   offerActions,
+  profileHref,
 }: MessageThreadProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const topObserverRef = useRef<HTMLDivElement>(null)
@@ -261,6 +267,7 @@ export function MessageThread({
                 participants={participants}
                 offers={offers}
                 offerActions={offerActions}
+                profileHref={profileHref}
                 grouped={continuesGroup}
                 showTimestamp={endsGroup}
               />
