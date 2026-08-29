@@ -11,9 +11,6 @@ import to.bconnect.api.storage.retention.TransactionPartyEntity;
 import to.bconnect.api.storage.retention.TransactionPartyRepository;
 import to.bconnect.api.storage.retention.AccessLogEntity;
 import to.bconnect.api.storage.retention.AccessLogRepository;
-import to.bconnect.api.storage.retention.RetentionHoldEntity;
-import to.bconnect.api.storage.retention.RetentionHoldRepository;
-import to.bconnect.api.storage.retention.RetentionHoldType;
 import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.storage.signup.SignupTokenEntity;
 import to.bconnect.api.storage.signup.SignupTokenRepository;
@@ -35,7 +32,6 @@ class RetentionExpirationSchedulerTest {
     @Autowired private SessionRepository sessionRepository;
     @Autowired private SignupTokenRepository signupTokenRepository;
     @Autowired private AccessLogRepository accessLogRepository;
-    @Autowired private RetentionHoldRepository retentionHoldRepository;
     @Autowired private JdbcTemplate jdbcTemplate;
 
     @Test
@@ -64,12 +60,6 @@ class RetentionExpirationSchedulerTest {
                 now.minusSeconds(100L * 24 * 60 * 60).atOffset(ZoneOffset.UTC),
                 expiredAccessLog.getId()
         );
-        val expiredHold = retentionHoldRepository.save(new RetentionHoldEntity(
-                expiredMember.getId(), RetentionHoldType.SANCTION, "제재", now.minusSeconds(1)
-        ));
-        val retainedHold = retentionHoldRepository.save(new RetentionHoldEntity(
-                retainedMember.getId(), RetentionHoldType.DEBT, "채무", now.plusSeconds(60)
-        ));
         val expiredToken = signupTokenRepository.save(
                 new SignupTokenEntity("01099999803", "token-expired", now.minusSeconds(1)));
         val retainedToken = signupTokenRepository.save(
@@ -83,8 +73,6 @@ class RetentionExpirationSchedulerTest {
         assertThat(sessionRepository.findById(retainedSession.getId())).isPresent();
         assertThat(accessLogRepository.findById(expiredAccessLog.getId())).isEmpty();
         assertThat(accessLogRepository.findById(retainedAccessLog.getId())).isPresent();
-        assertThat(retentionHoldRepository.findById(expiredHold.getId())).isEmpty();
-        assertThat(retentionHoldRepository.findById(retainedHold.getId())).isPresent();
         assertThat(signupTokenRepository.findById(expiredToken.getId())).isEmpty();
         assertThat(signupTokenRepository.findById(retainedToken.getId())).isPresent();
     }

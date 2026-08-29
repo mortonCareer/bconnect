@@ -10,7 +10,6 @@ import to.bconnect.api.ApiConfigProps;
 import to.bconnect.api.storage.retention.RetentionPolicy;
 import to.bconnect.api.storage.retention.AccessLogEntity;
 import to.bconnect.api.storage.retention.AccessLogRepository;
-import to.bconnect.api.storage.retention.RetentionHoldRepository;
 import to.bconnect.api.storage.retention.TransactionPartyRepository;
 import to.bconnect.api.storage.session.SessionEntity;
 import to.bconnect.api.storage.session.SessionRepository;
@@ -28,7 +27,6 @@ public class RetentionExpirationScheduler {
     private final SessionRepository sessionRepository;
     private final SignupTokenRepository signupTokenRepository;
     private final AccessLogRepository accessLogRepository;
-    private final RetentionHoldRepository retentionHoldRepository;
     private final ApiConfigProps apiConfigProps;
 
     @Transactional
@@ -46,11 +44,10 @@ public class RetentionExpirationScheduler {
         val session = sessionRepository.deleteExpired(sessionThreshold);
         val accessLog = accessLogRepository.deleteExpired(accessLogThreshold);
         val transactionParty = transactionPartyRepository.deleteExpired(now);
-        val retentionHold = retentionHoldRepository.deleteExpired(now);
         val signupToken = signupTokenRepository.deleteExpired(now);
         log.info(
-                "보관 만료 파기 완료: session={}, accessLog={}, transactionParty={}, retentionHold={}, signupToken={}",
-                session, accessLog, transactionParty, retentionHold, signupToken
+                "보관 만료 파기 완료: session={}, accessLog={}, transactionParty={}, signupToken={}",
+                session, accessLog, transactionParty, signupToken
         );
     }
 }

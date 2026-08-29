@@ -27,7 +27,6 @@ import to.bconnect.api.storage.otp.OtpRepository;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.storage.recommendation.RecommendationRepository;
 import to.bconnect.api.storage.retention.RetentionPolicy;
-import to.bconnect.api.storage.retention.RetentionHoldRepository;
 import to.bconnect.api.storage.retention.TransactionPartyEntity;
 import to.bconnect.api.storage.retention.TransactionPartyRepository;
 import to.bconnect.api.storage.session.SessionRepository;
@@ -55,7 +54,6 @@ public class MemberCleaner {
     private final OfferRepository offerRepository;
     private final TransactionPartyFinder transactionPartyFinder;
     private final TransactionPartyRepository transactionPartyRepository;
-    private final RetentionHoldRepository retentionHoldRepository;
     private final TaskRepository taskRepository;
     private final TaskService taskService;
     private final DriveMemberRepository driveMemberRepository;
@@ -81,9 +79,6 @@ public class MemberCleaner {
                 .toInstant();
         val transactionParties = transactionPartyFinder.findAll(member, archivedAt, expireAt);
         transactionPartyRepository.saveAll(transactionParties);
-        retentionHoldRepository.findAllByMemberIdAndExpireAtAfter(memberId, archivedAt)
-                .forEach(it -> it.archive(member, archivedAt));
-
         sessionRepository.findByMemberId(memberId).ifPresent(it -> it.revoke());
         otpRepository.deleteByPhone(member.getPhone());
         signupTokenRepository.deleteByPhone(member.getPhone());

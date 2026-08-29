@@ -28,9 +28,6 @@ import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.recommendation.RecommendationRepository;
 import to.bconnect.api.storage.retention.TransactionPartyRepository;
-import to.bconnect.api.storage.retention.RetentionHoldEntity;
-import to.bconnect.api.storage.retention.RetentionHoldRepository;
-import to.bconnect.api.storage.retention.RetentionHoldType;
 import to.bconnect.api.storage.session.SessionEntity;
 import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.storage.task.TaskRepository;
@@ -59,7 +56,6 @@ import to.bconnect.api.support.fixture.TaskFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
 
-import java.time.Instant;
 
 @IntegrationTest
 class MemberCleanerTest {
@@ -78,7 +74,6 @@ class MemberCleanerTest {
     @Autowired private TaskRepository taskRepository;
     @Autowired private ProjectRepository projectRepository;
     @Autowired private TransactionPartyRepository transactionPartyRepository;
-    @Autowired private RetentionHoldRepository retentionHoldRepository;
     @Autowired private DriveRepository driveRepository;
     @Autowired private DriveMemberRepository driveMemberRepository;
     @Autowired private BoardRepository boardRepository;
@@ -137,9 +132,6 @@ class MemberCleanerTest {
         val driveAttachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         driveAttachment.complete();
         driveAttachment.link(AttachmentReferenceType.DRIVE, drive.getId());
-        val retentionHold = retentionHoldRepository.save(new RetentionHoldEntity(
-                member.getId(), RetentionHoldType.INVESTIGATION, "수사 진행 중", Instant.now().plusSeconds(3600)
-        ));
 
         // when
         memberCleaner.clean(member);
@@ -171,11 +163,6 @@ class MemberCleanerTest {
         assertThat(boardRepository.findByDriveId(drive.getId())).isEmpty();
         assertThat(noteRepository.findById(note.getId())).isEmpty();
         assertThat(driveMemberRepository.findAllByMemberId(member.getId())).isEmpty();
-        assertThat(retentionHoldRepository.findById(retentionHold.getId())).get().satisfies(hold -> {
-            assertThat(hold.getMemberName()).isEqualTo(member.getName());
-            assertThat(hold.getMemberPhone()).isEqualTo(member.getPhone());
-            assertThat(hold.getWithdrawnAt()).isNotNull();
-        });
 
         assertThat(attachmentRepository.findById(memberAttachment.getId())).isEmpty();
         assertThat(attachmentRepository.findById(credentialAttachment.getId())).isEmpty();
