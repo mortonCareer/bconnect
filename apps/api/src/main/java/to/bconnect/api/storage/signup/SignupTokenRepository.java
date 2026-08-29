@@ -8,6 +8,8 @@ public interface SignupTokenRepository extends JpaRepository<SignupTokenEntity, 
 
     Optional<SignupTokenEntity> findByPhone(String phone);
 
+    void deleteByPhone(String phone);
+
     Optional<SignupTokenEntity> findByToken(String token);
 
 }

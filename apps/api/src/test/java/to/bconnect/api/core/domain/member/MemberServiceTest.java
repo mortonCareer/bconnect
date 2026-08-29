@@ -4,6 +4,7 @@ import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.support.fixture.CursorFactory;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
@@ -28,6 +29,7 @@ class MemberServiceTest {
     @Autowired private MemberService memberService;
     @Autowired private MemberRepository memberRepository;
     @Autowired private AttachmentRepository attachmentRepository;
+    @Autowired private JdbcTemplate jdbcTemplate;
 
     @Test
     @DisplayName("get - 회원이 존재할 때 조회하면 회원 정보를 반환한다")
@@ -172,9 +174,24 @@ class MemberServiceTest {
 
         // when
         memberService.withdraw(user);
+        memberRepository.flush();
 
         // then
         assertThat(memberRepository.findById(member.getId())).isEmpty();
+        val tombstoneCount = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*) FROM members
+                WHERE id = ?
+                  AND username IS NULL
+                  AND name IS NULL
+                  AND phone IS NULL
+                  AND birth IS NULL
+                  AND marketing_consent = false
+                  AND deleted_at IS NOT NULL
+                """, Integer.class, member.getId());
+        assertThat(tombstoneCount).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM member_roles WHERE member_id = ?", Integer.class, member.getId()
+        )).isZero();
     }
 
     @Test
