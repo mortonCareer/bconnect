@@ -7,19 +7,19 @@
 
 -- 테스트 (100 ~ 199)
 -- 기술자 크롤링
-INSERT INTO crawled_members (id, company, name, phone, picture, role, brn, email, instagram, youtube, created_at, modified_at, deleted_at) VALUES
-(100, '업체1', '기술자1', '01000000012', NULL, '반장', '000-00-00001', 'crawled1@test.com', NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(101, '업체2', '기술자2', '01000000013', NULL, '반장', '000-00-00002', 'crawled2@test.com', NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(102, '업체3', '기술자3', '01000000014', NULL, '팀장', '000-00-00003', 'crawled3@test.com', 'crawled3', NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(103, '업체4', '기술자4', '01000000015', NULL, '반장', '000-00-00004', 'crawled4@test.com', NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(104, '업체5', '기술자5', '01000000016', NULL, '대표', '000-00-00005', 'crawled5@test.com', 'crawled5', NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+INSERT INTO crawled_members (id, company, name, phone, picture, role, brn, email, instagram, youtube, created_at, modified_at) VALUES
+(100, '업체1', '기술자1', '01000000012', NULL, '반장', '000-00-00001', 'crawled1@test.com', NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(101, '업체2', '기술자2', '01000000013', NULL, '반장', '000-00-00002', 'crawled2@test.com', NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(102, '업체3', '기술자3', '01000000014', NULL, '팀장', '000-00-00003', 'crawled3@test.com', 'crawled3', NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(103, '업체4', '기술자4', '01000000015', NULL, '반장', '000-00-00004', 'crawled4@test.com', NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(104, '업체5', '기술자5', '01000000016', NULL, '대표', '000-00-00005', 'crawled5@test.com', 'crawled5', NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO crawled_profiles (id, member_id, primary_trade, experience, headline, address, state, url, platform, blog_title, profile_image_url, cover_image_url, external_url, created_at, modified_at, deleted_at) VALUES
-(100, 100, '방수', 10, '한줄소개', '경기 수원시 장안구 서부로 2066', '경기', 'https://blog.naver.com/crawled1', 'NAVER', '블로그1', NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(101, 101, '타일', 8, '한줄소개', '경기 수원시 장안구 서부로 2066', '경기', 'https://blog.naver.com/crawled2', 'NAVER', '블로그2', NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(102, 102, '도장', 12, '한줄소개', '경기 수원시 장안구 서부로 2066', '경기', 'https://www.instagram.com/crawled3', 'INSTAGRAM', NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(103, 103, '전기', 15, '한줄소개', '경기 수원시 장안구 서부로 2066', '경기', 'https://blog.naver.com/crawled4', 'NAVER', '블로그4', NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(104, 104, '목공', 20, '한줄소개', '경기 수원시 장안구 서부로 2066', '경기', 'https://www.instagram.com/crawled5', 'INSTAGRAM', NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+INSERT INTO crawled_profiles (id, member_id, primary_trade, experience, headline, address, state, url, platform, blog_title, profile_image_url, cover_image_url, external_url, created_at, modified_at) VALUES
+(100, 100, '방수', 10, '한줄소개', '경기 수원시 장안구 서부로 2066', '경기', 'https://blog.naver.com/crawled1', 'NAVER', '블로그1', NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(101, 101, '타일', 8, '한줄소개', '경기 수원시 장안구 서부로 2066', '경기', 'https://blog.naver.com/crawled2', 'NAVER', '블로그2', NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(102, 102, '도장', 12, '한줄소개', '경기 수원시 장안구 서부로 2066', '경기', 'https://www.instagram.com/crawled3', 'INSTAGRAM', NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(103, 103, '전기', 15, '한줄소개', '경기 수원시 장안구 서부로 2066', '경기', 'https://blog.naver.com/crawled4', 'NAVER', '블로그4', NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(104, 104, '목공', 20, '한줄소개', '경기 수원시 장안구 서부로 2066', '경기', 'https://www.instagram.com/crawled5', 'INSTAGRAM', NULL, NULL, NULL, NULL, TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO crawled_profile_trades (profile_id, trade) VALUES
 (100, '방수'),
@@ -28,19 +28,19 @@ INSERT INTO crawled_profile_trades (profile_id, trade) VALUES
 (103, '전기'),
 (104, '목공');
 
-INSERT INTO crawled_tasks (id, company, address, trade, start_date, end_date, duration, created_at, modified_at, deleted_at) VALUES
-(100, '업체1', '경기 수원시 장안구 서부로 2066', '방수', DATE '2026-06-01', DATE '2026-06-03', '3일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(101, '업체2', '경기 수원시 장안구 서부로 2066', '타일', DATE '2026-06-04', DATE '2026-06-06', '3일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(102, '업체3', '경기 수원시 장안구 서부로 2066', '도장', DATE '2026-06-07', DATE '2026-06-11', '5일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(103, '업체4', '경기 수원시 장안구 서부로 2066', '전기', DATE '2026-06-12', DATE '2026-06-13', '2일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(104, '업체5', '경기 수원시 장안구 서부로 2066', '목공', DATE '2026-06-14', DATE '2026-06-20', '7일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+INSERT INTO crawled_tasks (id, company, address, trade, start_date, end_date, duration, created_at, modified_at) VALUES
+(100, '업체1', '경기 수원시 장안구 서부로 2066', '방수', DATE '2026-06-01', DATE '2026-06-03', '3일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(101, '업체2', '경기 수원시 장안구 서부로 2066', '타일', DATE '2026-06-04', DATE '2026-06-06', '3일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(102, '업체3', '경기 수원시 장안구 서부로 2066', '도장', DATE '2026-06-07', DATE '2026-06-11', '5일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(103, '업체4', '경기 수원시 장안구 서부로 2066', '전기', DATE '2026-06-12', DATE '2026-06-13', '2일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(104, '업체5', '경기 수원시 장안구 서부로 2066', '목공', DATE '2026-06-14', DATE '2026-06-20', '7일', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
-INSERT INTO crawled_posts (id, member_id, task_id, title, content, source_url, created_at, modified_at, deleted_at) VALUES
-(100, 100, 100, '제목', '내용', 'https://blog.naver.com/crawled1/100', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(101, 101, 101, '제목', '내용', 'https://blog.naver.com/crawled2/101', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(102, 102, 102, '제목', '내용', 'https://www.instagram.com/p/crawled3', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(103, 103, 103, '제목', '내용', 'https://blog.naver.com/crawled4/103', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(104, 104, NULL, '제목', '내용', 'https://www.instagram.com/p/crawled5', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+INSERT INTO crawled_posts (id, member_id, task_id, title, content, source_url, created_at, modified_at) VALUES
+(100, 100, 100, '제목', '내용', 'https://blog.naver.com/crawled1/100', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(101, 101, 101, '제목', '내용', 'https://blog.naver.com/crawled2/101', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(102, 102, 102, '제목', '내용', 'https://www.instagram.com/p/crawled3', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(103, 103, 103, '제목', '내용', 'https://blog.naver.com/crawled4/103', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(104, 104, NULL, '제목', '내용', 'https://www.instagram.com/p/crawled5', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 INSERT INTO crawled_post_images (post_id, seq, url) VALUES
 (100, 0, 'https://example.com/image.jpg'),
@@ -49,12 +49,12 @@ INSERT INTO crawled_post_images (post_id, seq, url) VALUES
 (103, 0, 'https://example.com/image.jpg'),
 (104, 0, 'https://example.com/image.jpg');
 
-INSERT INTO crawled_credentials (id, member_id, type, name, created_at, modified_at, deleted_at) VALUES
-(100, 100, 'LICENSE', '면허', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(101, 101, 'CERTIFICATE', '자격증', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(102, 102, 'AWARD', '수상', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(103, 103, 'EDUCATION', '교육', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL),
-(104, 104, 'LICENSE', '면허', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', NULL);
+INSERT INTO crawled_credentials (id, member_id, type, name, created_at, modified_at) VALUES
+(100, 100, 'LICENSE', '면허', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(101, 101, 'CERTIFICATE', '자격증', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(102, 102, 'AWARD', '수상', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(103, 103, 'EDUCATION', '교육', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00'),
+(104, 104, 'LICENSE', '면허', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00', TIMESTAMP WITH TIME ZONE '2026-01-01 00:00:00+00');
 
 -- 샘플 (200 ~ 299)
 -- 원클릭 조회
