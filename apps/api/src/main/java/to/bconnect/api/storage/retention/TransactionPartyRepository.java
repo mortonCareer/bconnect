@@ -15,9 +15,27 @@ public interface TransactionPartyRepository extends JpaRepository<TransactionPar
 
     List<TransactionPartyEntity> findAllByMemberIdAndWithdrawnAtIsNull(Long memberId);
 
+    List<TransactionPartyEntity> findAllByCounterpartyMemberIdAndCounterpartyWithdrawnAtIsNull(Long memberId);
+
     List<TransactionPartyEntity> findAllByMemberId(Long memberId);
+
+    List<TransactionPartyEntity> findAllByCounterpartyMemberId(Long memberId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM TransactionPartyEntity t WHERE t.expireAt <= :threshold")
     int deleteExpired(@Param("threshold") Instant threshold);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            UPDATE TransactionPartyEntity t
+               SET t.counterpartyId = null,
+                   t.counterpartyMemberId = null,
+                   t.counterpartyName = null,
+                   t.counterpartyPhone = null,
+                   t.counterpartyBrn = null,
+                   t.counterpartyWithdrawnAt = null,
+                   t.counterpartyExpireAt = null
+             WHERE t.counterpartyExpireAt <= :threshold
+            """)
+    int anonymizeExpiredCounterparties(@Param("threshold") Instant threshold);
 }

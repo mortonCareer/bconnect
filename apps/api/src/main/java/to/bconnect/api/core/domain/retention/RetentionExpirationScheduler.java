@@ -44,10 +44,11 @@ public class RetentionExpirationScheduler {
         val session = sessionRepository.deleteExpired(sessionThreshold);
         val accessLog = accessLogRepository.deleteExpired(accessLogThreshold);
         val transactionParty = transactionPartyRepository.deleteExpired(now);
+        val transactionPartyCounterparty = transactionPartyRepository.anonymizeExpiredCounterparties(now);
         val signupToken = signupTokenRepository.deleteExpired(now);
         log.info(
-                "보관 만료 파기 완료: session={}, accessLog={}, transactionParty={}, signupToken={}",
-                session, accessLog, transactionParty, signupToken
+                "보관 만료 파기 완료: session={}, accessLog={}, transactionParty={}, transactionPartyCounterparty={}, signupToken={}",
+                session, accessLog, transactionParty, transactionPartyCounterparty, signupToken
         );
     }
 }

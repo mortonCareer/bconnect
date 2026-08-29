@@ -374,18 +374,23 @@ create table if not exists transaction_parties (
     member_id bigint not null,
     member_name varchar(255) not null,
     member_phone varchar(255) not null,
-    counterparty_id bigint not null,
-    counterparty_name varchar(255) not null,
-    counterparty_phone varchar(255) not null,
+    counterparty_id bigint,
+    counterparty_member_id bigint,
+    counterparty_name varchar(255),
+    counterparty_phone varchar(255),
     counterparty_brn varchar(255),
     counterparty_type varchar(255) not null,
     matched_at timestamptz not null,
     withdrawn_at timestamptz,
     expire_at timestamptz,
+    counterparty_withdrawn_at timestamptz,
+    counterparty_expire_at timestamptz,
     primary key (id)
 );
 create unique index if not exists udx_transaction_parties_offer_member on transaction_parties(offer_id, member_id);
 create index if not exists idx_transaction_parties_expire_at on transaction_parties(expire_at);
+create index if not exists idx_transaction_parties_counterparty_member_id on transaction_parties(counterparty_member_id);
+create index if not exists idx_transaction_parties_counterparty_expire_at on transaction_parties(counterparty_expire_at);
 
 
 -- 기술자 크롤링

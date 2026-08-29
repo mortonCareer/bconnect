@@ -28,6 +28,8 @@ public class TransactionPartyEntity {
 
     private Long counterpartyId;
 
+    private Long counterpartyMemberId;
+
     private String counterpartyName;
 
     private String counterpartyPhone;
@@ -43,12 +45,17 @@ public class TransactionPartyEntity {
 
     private Instant expireAt;
 
+    private Instant counterpartyWithdrawnAt;
+
+    private Instant counterpartyExpireAt;
+
     public TransactionPartyEntity(
             Long offerId,
             Long memberId,
             String memberName,
             String memberPhone,
             Long counterpartyId,
+            Long counterpartyMemberId,
             String counterpartyName,
             String counterpartyPhone,
             String counterpartyBrn,
@@ -60,6 +67,7 @@ public class TransactionPartyEntity {
         this.memberName = memberName;
         this.memberPhone = memberPhone;
         this.counterpartyId = counterpartyId;
+        this.counterpartyMemberId = counterpartyMemberId;
         this.counterpartyName = counterpartyName;
         this.counterpartyPhone = counterpartyPhone;
         this.counterpartyBrn = counterpartyBrn;
@@ -70,5 +78,10 @@ public class TransactionPartyEntity {
     public void withdraw(Instant withdrawnAt, Instant expireAt) {
         this.withdrawnAt = withdrawnAt;
         this.expireAt = expireAt;
+    }
+
+    public void withdrawCounterparty(Instant withdrawnAt, Instant expireAt) {
+        this.counterpartyWithdrawnAt = withdrawnAt;
+        this.counterpartyExpireAt = expireAt;
     }
 }

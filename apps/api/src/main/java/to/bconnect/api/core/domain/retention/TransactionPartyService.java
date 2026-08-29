@@ -72,6 +72,8 @@ public class TransactionPartyService {
                 .toInstant();
         transactionPartyRepository.findAllByMemberIdAndWithdrawnAtIsNull(member.getId())
                 .forEach(it -> it.withdraw(withdrawnAt, expireAt));
+        transactionPartyRepository.findAllByCounterpartyMemberIdAndCounterpartyWithdrawnAtIsNull(member.getId())
+                .forEach(it -> it.withdrawCounterparty(withdrawnAt, expireAt));
     }
 
     private void captureAll(Collection<OfferEntity> offers) {
@@ -124,13 +126,13 @@ public class TransactionPartyService {
             if (existing.add(new TransactionPartyKey(offer.getId(), worker.getId())))
                 created.add(new TransactionPartyEntity(
                         offer.getId(), worker.getId(), worker.getName(), worker.getPhone(),
-                        company.getId(), company.getName(), owner.getPhone(), company.getBrn(),
+                        company.getId(), owner.getId(), company.getName(), owner.getPhone(), company.getBrn(),
                         TransactionPartyType.COMPANY, offer.getAcceptedAt()
                 ));
             if (existing.add(new TransactionPartyKey(offer.getId(), owner.getId())))
                 created.add(new TransactionPartyEntity(
                         offer.getId(), owner.getId(), owner.getName(), owner.getPhone(),
-                        worker.getId(), worker.getName(), worker.getPhone(), null,
+                        worker.getId(), worker.getId(), worker.getName(), worker.getPhone(), null,
                         TransactionPartyType.MEMBER, offer.getAcceptedAt()
                 ));
         }

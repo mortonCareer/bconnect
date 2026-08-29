@@ -159,6 +159,11 @@ class MemberCleanerTest {
         assertThat(archived.get(0).getMemberPhone()).isEqualTo(member.getPhone());
         assertThat(archived.get(0).getCounterpartyId()).isEqualTo(company.getId());
         assertThat(archived.get(0).getExpireAt()).isAfter(archived.get(0).getWithdrawnAt());
+        val counterpartyArchive = transactionPartyRepository.findAllByCounterpartyMemberId(member.getId());
+        assertThat(counterpartyArchive).hasSize(1);
+        assertThat(counterpartyArchive.get(0).getMemberId()).isEqualTo(other.getId());
+        assertThat(counterpartyArchive.get(0).getCounterpartyExpireAt())
+                .isAfter(counterpartyArchive.get(0).getCounterpartyWithdrawnAt());
         assertThat(driveRepository.findAllByMemberId(member.getId())).isEmpty();
         assertThat(boardRepository.findByDriveId(drive.getId())).isEmpty();
         assertThat(noteRepository.findById(note.getId())).isEmpty();

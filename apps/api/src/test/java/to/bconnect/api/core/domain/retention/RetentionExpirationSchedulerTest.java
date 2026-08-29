@@ -40,17 +40,23 @@ class RetentionExpirationSchedulerTest {
     void run_success() {
         val now = Instant.now();
         val expired = new TransactionPartyEntity(
-                1L, 1L, "member", "01000000000", 2L, "company", "01000000001", "0000000000",
+                1L, 1L, "member", "01000000000", 2L, 2L, "company", "01000000001", "0000000000",
                 TransactionPartyType.COMPANY, now
         );
         expired.withdraw(now.minusSeconds(2), now.minusSeconds(1));
         transactionPartyRepository.save(expired);
         val retained = new TransactionPartyEntity(
-                2L, 1L, "member", "01000000000", 2L, "company", "01000000001", "0000000000",
+                2L, 1L, "member", "01000000000", 2L, 2L, "company", "01000000001", "0000000000",
                 TransactionPartyType.COMPANY, now
         );
         retained.withdraw(now, now.plusSeconds(60));
         transactionPartyRepository.save(retained);
+        val expiredCounterparty = new TransactionPartyEntity(
+                3L, 3L, "member2", "01000000002", 4L, 4L, "company2", "01000000003", "0000000000",
+                TransactionPartyType.COMPANY, now
+        );
+        expiredCounterparty.withdrawCounterparty(now.minusSeconds(2), now.minusSeconds(1));
+        transactionPartyRepository.save(expiredCounterparty);
         val expiredMember = memberRepository.save(MemberFactory.entity("retention1", "01099999805", Role.CAREER));
         val retainedMember = memberRepository.save(MemberFactory.entity("retention2", "01099999806", Role.CAREER));
         val expiredSession = sessionRepository.saveAndFlush(SessionFactory.entity(expiredMember.getId()));
@@ -76,6 +82,13 @@ class RetentionExpirationSchedulerTest {
 
         assertThat(transactionPartyRepository.findById(expired.getId())).isEmpty();
         assertThat(transactionPartyRepository.findById(retained.getId())).isPresent();
+        val anonymizedCounterparty = transactionPartyRepository.findById(expiredCounterparty.getId()).orElseThrow();
+        assertThat(anonymizedCounterparty.getMemberName()).isEqualTo("member2");
+        assertThat(anonymizedCounterparty.getCounterpartyId()).isNull();
+        assertThat(anonymizedCounterparty.getCounterpartyMemberId()).isNull();
+        assertThat(anonymizedCounterparty.getCounterpartyName()).isNull();
+        assertThat(anonymizedCounterparty.getCounterpartyPhone()).isNull();
+        assertThat(anonymizedCounterparty.getCounterpartyBrn()).isNull();
         assertThat(sessionRepository.findById(expiredSession.getId())).isEmpty();
         assertThat(sessionRepository.findById(retainedSession.getId())).isPresent();
         assertThat(accessLogRepository.findById(expiredAccessLog.getId())).isEmpty();
