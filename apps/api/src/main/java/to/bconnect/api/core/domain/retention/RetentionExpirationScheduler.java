@@ -29,7 +29,7 @@ public class RetentionExpirationScheduler {
     private final ApiConfigProps apiConfigProps;
 
     @Transactional
-    @Scheduled(cron = "0 * * * * *", zone = "${app.timezone}")
+    @Scheduled(cron = "0 0 3 * * *", zone = "${app.timezone}")
     public void run() {
         val now = Instant.now();
         val retention = SessionEntity.class.getAnnotation(RetentionPolicy.class);
