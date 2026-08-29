@@ -13,8 +13,8 @@ create table if not exists otps (
     primary key (id)
 );
 create unique index if not exists udx_otps_phone on otps(phone);
-create index if not exists idx_otps_last_sent_at on otps(last_sent_at);
 create index if not exists idx_otps_expired_at on otps(expired_at);
+create index if not exists idx_otps_last_sent_at on otps(last_sent_at);
 alter table otps alter column code drop not null;
 
 create table if not exists signup_tokens (

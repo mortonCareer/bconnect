@@ -19,7 +19,10 @@ public interface OtpRepository extends JpaRepository<OtpEntity, Long> {
     int clearExpiredCodes(@Param("threshold") Instant threshold);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM OtpEntity o WHERE o.lastSentAt < :threshold")
-    int deleteBefore(@Param("threshold") Instant threshold);
+    @Query("DELETE FROM OtpEntity o WHERE o.lastSentAt < :lastSentThreshold AND o.expiredAt <= :expiredThreshold")
+    int deleteExpiredBefore(
+            @Param("lastSentThreshold") Instant lastSentThreshold,
+            @Param("expiredThreshold") Instant expiredThreshold
+    );
 
 }

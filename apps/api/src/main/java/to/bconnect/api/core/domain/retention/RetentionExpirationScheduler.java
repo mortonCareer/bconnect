@@ -7,7 +7,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.ApiConfigProps;
-import to.bconnect.api.storage.otp.OtpRepository;
 import to.bconnect.api.storage.retention.RetentionPolicy;
 import to.bconnect.api.storage.retention.TransactionPartyRepository;
 import to.bconnect.api.storage.session.SessionEntity;
@@ -24,7 +23,6 @@ public class RetentionExpirationScheduler {
 
     private final TransactionPartyRepository transactionPartyRepository;
     private final SessionRepository sessionRepository;
-    private final OtpRepository otpRepository;
     private final SignupTokenRepository signupTokenRepository;
     private final ApiConfigProps apiConfigProps;
 
@@ -38,16 +36,10 @@ public class RetentionExpirationScheduler {
                 .toInstant();
         val session = sessionRepository.deleteExpired(sessionThreshold);
         val transactionParty = transactionPartyRepository.deleteExpired(now);
-        val otpCode = otpRepository.clearExpiredCodes(now);
-        val startOfToday = now.atZone(apiConfigProps.zoneId())
-                .toLocalDate()
-                .atStartOfDay(apiConfigProps.zoneId())
-                .toInstant();
-        val otp = otpRepository.deleteBefore(startOfToday);
         val signupToken = signupTokenRepository.deleteExpired(now);
         log.info(
-                "보관 만료 파기 완료: session={}, transactionParty={}, otpCode={}, otp={}, signupToken={}",
-                session, transactionParty, otpCode, otp, signupToken
+                "보관 만료 파기 완료: session={}, transactionParty={}, signupToken={}",
+                session, transactionParty, signupToken
         );
     }
 }
