@@ -178,9 +178,13 @@ public class TaskService {
         if (TaskStatus.ENGAGED.contains(found.getStatus()))
             throw new CodeException(TaskExceptionCode.OFFERED_EXISTS);
 
-        offerRepository.deleteAllByTaskId(found.getId());
-        postRepository.findAllByTaskId(found.getId())
-                .forEach(PostEntity::detachTask);
-        taskRepository.delete(found);
+        taskTeardown(found);
+    }
+
+    @Transactional
+    public void taskTeardown(TaskEntity task) {
+        offerRepository.deleteAllByTaskId(task.getId());
+        postRepository.findAllByTaskId(task.getId()).forEach(PostEntity::detachTask);
+        taskRepository.delete(task);
     }
 }

@@ -20,5 +20,4 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
 
     boolean existsByProjectIdInAndStatusIn(Collection<Long> projectIds, Collection<TaskStatus> statuses);
 
-    void deleteAllByProjectId(Long projectId);
 }

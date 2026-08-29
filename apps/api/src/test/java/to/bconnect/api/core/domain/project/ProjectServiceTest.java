@@ -11,8 +11,11 @@ import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.BoardType;
 import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
+import to.bconnect.api.storage.drive.DriveRepository;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
+import to.bconnect.api.storage.offer.OfferRepository;
+import to.bconnect.api.storage.post.PostRepository;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.support.IntegrationTest;
@@ -33,6 +36,9 @@ class ProjectServiceTest {
     @Autowired private TaskRepository taskRepository;
     @Autowired private BoardRepository boardRepository;
     @Autowired private NoteRepository noteRepository;
+    @Autowired private OfferRepository offerRepository;
+    @Autowired private PostRepository postRepository;
+    @Autowired private DriveRepository driveRepository;
 
     @Test
     @DisplayName("get - 소유한 업체의 프로젝트일 때 조회하면 프로젝트를 반환한다")
@@ -112,9 +118,14 @@ class ProjectServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
-        taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        val offer = offerRepository.save(OfferFactory.entity(task.getId(), member.getId()));
+        val post = postRepository.save(PostFactory.entity(member.getId(), task.getId()));
         val board = boardRepository.save(BoardFactory.projectEntity(project.getId()));
         noteRepository.save(BoardFactory.noteEntity(board.getId(), member.getId()));
+        val drive = driveRepository.save(DriveFactory.entity(project.getId(), null));
+        val driveBoard = boardRepository.save(BoardFactory.driveEntity(drive.getId()));
+        noteRepository.save(BoardFactory.noteEntity(driveBoard.getId(), member.getId()));
         val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when
@@ -123,6 +134,10 @@ class ProjectServiceTest {
         // then
         assertThat(projectRepository.findById(project.getId())).isEmpty();
         assertThat(taskRepository.findAllByProjectIdOrderByIdAsc(project.getId())).isEmpty();
+        assertThat(offerRepository.findById(offer.getId())).isEmpty();
+        assertThat(postRepository.findById(post.getId()).orElseThrow().getTaskId()).isNull();
+        assertThat(driveRepository.findById(drive.getId())).isEmpty();
+        assertThat(boardRepository.findByDriveId(drive.getId())).isEmpty();
         assertThat(boardRepository.findByProjectId(project.getId())).isEmpty();
         assertThat(noteRepository.findAllByBoardIdOrderByIdDesc(board.getId())).isEmpty();
     }

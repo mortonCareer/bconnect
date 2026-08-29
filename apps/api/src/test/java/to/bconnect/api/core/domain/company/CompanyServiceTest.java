@@ -240,11 +240,13 @@ class CompanyServiceTest {
     }
 
     @Test
-    @DisplayName("delete - 업체가 존재할 때 삭제하면 업체가 삭제되고 첨부 참조가 해제되며 PLAN 권한이 회수된다")
+    @DisplayName("delete - 업체가 존재할 때 삭제하면 업체와 첨부가 삭제되고 PLAN 권한이 회수된다")
     void delete_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.PLAN));
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
         attachment.link(AttachmentReferenceType.COMPANY, company.getId());
@@ -255,9 +257,9 @@ class CompanyServiceTest {
 
         // then
         assertThat(companyRepository.findByMemberId(member.getId())).isEmpty();
-        val found = attachmentRepository.findById(attachment.getId()).orElseThrow();
-        assertThat(found.getReferenceType()).isNull();
-        assertThat(found.getReferenceId()).isNull();
+        assertThat(projectRepository.findById(project.getId())).isEmpty();
+        assertThat(taskRepository.findById(task.getId())).isEmpty();
+        assertThat(attachmentRepository.findById(attachment.getId())).isEmpty();
         val revoked = memberRepository.findById(member.getId()).orElseThrow();
         assertThat(revoked.getRoles()).doesNotContain(Role.PLAN);
     }
