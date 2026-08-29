@@ -30,6 +30,8 @@ public interface OfferRepository extends JpaRepository<OfferEntity, Long> {
 
     List<OfferEntity> findAllByWorkerIdAndAcceptedAtIsNotNull(Long workerId);
 
+    List<OfferEntity> findAllByTaskIdInAndAcceptedAtIsNotNull(Collection<Long> taskIds);
+
     Optional<OfferEntity> findFirstByTaskIdOrderBySeqDesc(Long taskId);
 
     List<OfferEntity> findAllByStatusAndDueBefore(OfferStatus status, LocalDate due);

@@ -21,4 +21,8 @@ public class BoardEntity extends BaseEntity {
     private Long projectId;
 
     private Long driveId;
+
+    public void detachProject() {
+        this.projectId = null;
+    }
 }

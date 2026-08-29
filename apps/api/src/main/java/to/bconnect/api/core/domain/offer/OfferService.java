@@ -9,6 +9,7 @@ import to.bconnect.api.ApiConfigProps;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.company.CompanyFinder;
+import to.bconnect.api.core.domain.retention.TransactionPartyService;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.member.MemberRepository;
@@ -38,6 +39,7 @@ public class OfferService {
     private final TaskRepository taskRepository;
     private final MemberRepository memberRepository;
     private final CompanyFinder companyFinder;
+    private final TransactionPartyService transactionPartyService;
     private final ApplicationEventPublisher eventPublisher;
     private final ApiConfigProps apiConfigProps;
 
@@ -88,6 +90,7 @@ public class OfferService {
 
         found.accept();
         task.assign(found.getWorkerId());
+        transactionPartyService.capture(found);
 
         // cancel other offers
         offerRepository.findAllByTaskIdAndStatus(found.getTaskId(), OfferStatus.PENDING)

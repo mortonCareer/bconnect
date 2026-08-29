@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.ApiConfigProps;
 import to.bconnect.api.attachment.domain.cleanup.AttachmentCleanupService;
 import to.bconnect.api.common.CodeException;
-import to.bconnect.api.core.domain.retention.TransactionPartyFinder;
+import to.bconnect.api.core.domain.retention.TransactionPartyService;
 import to.bconnect.api.core.domain.drive.DriveService;
 import to.bconnect.api.core.domain.task.TaskService;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
@@ -26,23 +25,18 @@ import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.otp.OtpRepository;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.storage.recommendation.RecommendationRepository;
-import to.bconnect.api.storage.retention.RetentionPolicy;
-import to.bconnect.api.storage.retention.TransactionPartyEntity;
-import to.bconnect.api.storage.retention.TransactionPartyRepository;
 import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.storage.signup.SignupTokenRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
 
 import java.time.Instant;
-import java.time.Period;
 
 @Component
 @RequiredArgsConstructor
 public class MemberCleaner {
 
     private final CompanyRepository companyRepository;
-    private final ApiConfigProps apiConfigProps;
     private final SessionRepository sessionRepository;
     private final OtpRepository otpRepository;
     private final SignupTokenRepository signupTokenRepository;
@@ -52,8 +46,7 @@ public class MemberCleaner {
     private final CoworkerRequestRepository coworkerRequestRepository;
     private final RecommendationRepository recommendationRepository;
     private final OfferRepository offerRepository;
-    private final TransactionPartyFinder transactionPartyFinder;
-    private final TransactionPartyRepository transactionPartyRepository;
+    private final TransactionPartyService transactionPartyService;
     private final TaskRepository taskRepository;
     private final TaskService taskService;
     private final DriveMemberRepository driveMemberRepository;
@@ -72,13 +65,8 @@ public class MemberCleaner {
         if (companyRepository.existsByMemberId(memberId))
             throw new CodeException(MemberExceptionCode.WITHDRAW_COMPANY_EXISTS);
 
-        val archivedAt = Instant.now();
-        val retention = TransactionPartyEntity.class.getAnnotation(RetentionPolicy.class);
-        val expireAt = archivedAt.atZone(apiConfigProps.zoneId())
-                .plus(Period.parse(retention.value()))
-                .toInstant();
-        val transactionParties = transactionPartyFinder.findAll(member, archivedAt, expireAt);
-        transactionPartyRepository.saveAll(transactionParties);
+        val withdrawnAt = Instant.now();
+        transactionPartyService.withdraw(member, withdrawnAt);
         sessionRepository.findByMemberId(memberId).ifPresent(it -> it.revoke());
         otpRepository.deleteByPhone(member.getPhone());
         signupTokenRepository.deleteByPhone(member.getPhone());

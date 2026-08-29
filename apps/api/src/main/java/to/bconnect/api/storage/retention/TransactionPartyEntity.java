@@ -1,10 +1,6 @@
 package to.bconnect.api.storage.retention;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +18,8 @@ public class TransactionPartyEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long offerId;
+
     private Long memberId;
 
     private String memberName;
@@ -32,33 +30,45 @@ public class TransactionPartyEntity {
 
     private String counterpartyName;
 
+    private String counterpartyPhone;
+
     private String counterpartyBrn;
+
+    @Enumerated(EnumType.STRING)
+    private TransactionPartyType counterpartyType;
 
     private Instant matchedAt;
 
-    private Instant archivedAt;
+    private Instant withdrawnAt;
 
     private Instant expireAt;
 
     public TransactionPartyEntity(
+            Long offerId,
             Long memberId,
             String memberName,
             String memberPhone,
             Long counterpartyId,
             String counterpartyName,
+            String counterpartyPhone,
             String counterpartyBrn,
-            Instant matchedAt,
-            Instant archivedAt,
-            Instant expireAt
+            TransactionPartyType counterpartyType,
+            Instant matchedAt
     ) {
+        this.offerId = offerId;
         this.memberId = memberId;
         this.memberName = memberName;
         this.memberPhone = memberPhone;
         this.counterpartyId = counterpartyId;
         this.counterpartyName = counterpartyName;
+        this.counterpartyPhone = counterpartyPhone;
         this.counterpartyBrn = counterpartyBrn;
+        this.counterpartyType = counterpartyType;
         this.matchedAt = matchedAt;
-        this.archivedAt = archivedAt;
+    }
+
+    public void withdraw(Instant withdrawnAt, Instant expireAt) {
+        this.withdrawnAt = withdrawnAt;
         this.expireAt = expireAt;
     }
 }

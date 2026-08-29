@@ -153,12 +153,12 @@ class MemberCleanerTest {
         assertThat(offerRepository.findAllByWorkerId(member.getId())).isEmpty();
         assertThat(taskRepository.findAllByWorkerIdAndType(member.getId(), TaskType.WORKER)).isEmpty();
         assertThat(taskRepository.findById(projectTask.getId())).isPresent();
-        val archived = transactionPartyRepository.findAll();
+        val archived = transactionPartyRepository.findAllByMemberId(member.getId());
         assertThat(archived).hasSize(1);
         assertThat(archived.get(0).getMemberId()).isEqualTo(member.getId());
         assertThat(archived.get(0).getMemberPhone()).isEqualTo(member.getPhone());
         assertThat(archived.get(0).getCounterpartyId()).isEqualTo(company.getId());
-        assertThat(archived.get(0).getExpireAt()).isAfter(archived.get(0).getArchivedAt());
+        assertThat(archived.get(0).getExpireAt()).isAfter(archived.get(0).getWithdrawnAt());
         assertThat(driveRepository.findAllByMemberId(member.getId())).isEmpty();
         assertThat(boardRepository.findByDriveId(drive.getId())).isEmpty();
         assertThat(noteRepository.findById(note.getId())).isEmpty();
@@ -187,7 +187,7 @@ class MemberCleanerTest {
         memberCleaner.clean(member);
 
         // then
-        val archived = transactionPartyRepository.findAll();
+        val archived = transactionPartyRepository.findAllByMemberId(member.getId());
         assertThat(archived).hasSize(1);
         assertThat(archived.get(0).getMemberId()).isEqualTo(member.getId());
         assertThat(archived.get(0).getCounterpartyId()).isEqualTo(company.getId());

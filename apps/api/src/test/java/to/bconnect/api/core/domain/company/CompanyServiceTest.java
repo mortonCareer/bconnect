@@ -15,13 +15,17 @@ import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.company.CompanyStatus;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
+import to.bconnect.api.storage.offer.OfferRepository;
+import to.bconnect.api.storage.offer.OfferStatus;
 import to.bconnect.api.storage.project.ProjectRepository;
+import to.bconnect.api.storage.retention.TransactionPartyRepository;
 import to.bconnect.api.storage.task.TaskProgress;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.support.IntegrationTest;
 import to.bconnect.api.support.fixture.AttachmentFactory;
 import to.bconnect.api.support.fixture.CompanyFactory;
 import to.bconnect.api.support.fixture.MemberFactory;
+import to.bconnect.api.support.fixture.OfferFactory;
 import to.bconnect.api.support.fixture.ProjectFactory;
 import to.bconnect.api.support.fixture.TaskFactory;
 import to.bconnect.api.support.fixture.UserFactory;
@@ -41,6 +45,8 @@ class CompanyServiceTest {
     @Autowired private AttachmentRepository attachmentRepository;
     @Autowired private ProjectRepository projectRepository;
     @Autowired private TaskRepository taskRepository;
+    @Autowired private OfferRepository offerRepository;
+    @Autowired private TransactionPartyRepository transactionPartyRepository;
     @Autowired private ApplicationEvents applicationEvents;
 
     @Test
@@ -246,7 +252,9 @@ class CompanyServiceTest {
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.PLAN));
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
-        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        val worker = memberRepository.save(MemberFactory.entity("worker", "01000001002", Role.CAREER));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), worker.getId()));
+        val offer = offerRepository.save(OfferFactory.entity(task.getId(), worker.getId(), 1, OfferStatus.ACCEPTED));
         val attachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
         attachment.complete();
         attachment.link(AttachmentReferenceType.COMPANY, company.getId());
@@ -259,6 +267,10 @@ class CompanyServiceTest {
         assertThat(companyRepository.findByMemberId(member.getId())).isEmpty();
         assertThat(projectRepository.findById(project.getId())).isEmpty();
         assertThat(taskRepository.findById(task.getId())).isEmpty();
+        assertThat(transactionPartyRepository.findAll()).hasSize(2).allSatisfy(it -> {
+            assertThat(it.getOfferId()).isEqualTo(offer.getId());
+            assertThat(it.getWithdrawnAt()).isNull();
+        });
         assertThat(attachmentRepository.findById(attachment.getId())).isEmpty();
         val revoked = memberRepository.findById(member.getId()).orElseThrow();
         assertThat(revoked.getRoles()).doesNotContain(Role.PLAN);

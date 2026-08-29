@@ -8,15 +8,15 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.company.CompanyExceptionCode;
-import to.bconnect.api.core.domain.drive.DriveService;
+import to.bconnect.api.core.domain.retention.TransactionPartyService;
 import to.bconnect.api.core.domain.task.TaskService;
 import to.bconnect.api.core.domain.task.TaskExceptionCode;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.board.BoardEntity;
 import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.BoardType;
-import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
+import to.bconnect.api.storage.drive.DriveEntity;
 import to.bconnect.api.storage.drive.DriveRepository;
 import to.bconnect.api.storage.project.ProjectEntity;
 import to.bconnect.api.storage.project.ProjectRepository;
@@ -36,10 +36,9 @@ public class ProjectService {
     private final CompanyRepository companyRepository;
     private final TaskRepository taskRepository;
     private final TaskService taskService;
+    private final TransactionPartyService transactionPartyService;
     private final DriveRepository driveRepository;
-    private final DriveService driveService;
     private final BoardRepository boardRepository;
-    private final NoteRepository noteRepository;
 
     @Transactional(readOnly = true)
     public Project get(AuthUser user, Long projectId) {
@@ -114,12 +113,10 @@ public class ProjectService {
 
     @Transactional
     public void delete(ProjectEntity project) {
+        transactionPartyService.captureProject(project);
         taskRepository.findAllByProjectIdOrderByIdAsc(project.getId()).forEach(taskService::delete);
-        driveRepository.findAllByProjectIdOrderByIdAsc(project.getId()).forEach(driveService::delete);
-        boardRepository.findByProjectId(project.getId()).ifPresent(board -> {
-            noteRepository.deleteAllByBoardId(board.getId());
-            boardRepository.delete(board);
-        });
+        driveRepository.findAllByProjectIdOrderByIdAsc(project.getId()).forEach(DriveEntity::detachProject);
+        boardRepository.findByProjectId(project.getId()).ifPresent(BoardEntity::detachProject);
         projectRepository.delete(project);
     }
 }

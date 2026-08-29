@@ -9,6 +9,7 @@ import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.retention.TransactionPartyEntity;
 import to.bconnect.api.storage.retention.TransactionPartyRepository;
+import to.bconnect.api.storage.retention.TransactionPartyType;
 import to.bconnect.api.storage.retention.AccessLogEntity;
 import to.bconnect.api.storage.retention.AccessLogRepository;
 import to.bconnect.api.storage.session.SessionRepository;
@@ -38,12 +39,18 @@ class RetentionExpirationSchedulerTest {
     @DisplayName("run - 만료된 보관 데이터가 있을 때 실행하면 만료 데이터만 삭제된다")
     void run_success() {
         val now = Instant.now();
-        val expired = transactionPartyRepository.save(new TransactionPartyEntity(
-                1L, "member", "01000000000", 2L, "company", "0000000000", now, now.minusSeconds(2), now.minusSeconds(1)
-        ));
-        val retained = transactionPartyRepository.save(new TransactionPartyEntity(
-                1L, "member", "01000000000", 2L, "company", "0000000000", now, now, now.plusSeconds(60)
-        ));
+        val expired = new TransactionPartyEntity(
+                1L, 1L, "member", "01000000000", 2L, "company", "01000000001", "0000000000",
+                TransactionPartyType.COMPANY, now
+        );
+        expired.withdraw(now.minusSeconds(2), now.minusSeconds(1));
+        transactionPartyRepository.save(expired);
+        val retained = new TransactionPartyEntity(
+                2L, 1L, "member", "01000000000", 2L, "company", "01000000001", "0000000000",
+                TransactionPartyType.COMPANY, now
+        );
+        retained.withdraw(now, now.plusSeconds(60));
+        transactionPartyRepository.save(retained);
         val expiredMember = memberRepository.save(MemberFactory.entity("retention1", "01099999805", Role.CAREER));
         val retainedMember = memberRepository.save(MemberFactory.entity("retention2", "01099999806", Role.CAREER));
         val expiredSession = sessionRepository.saveAndFlush(SessionFactory.entity(expiredMember.getId()));
