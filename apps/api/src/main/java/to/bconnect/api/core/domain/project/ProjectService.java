@@ -109,13 +109,13 @@ public class ProjectService {
         if (taskRepository.existsByProjectIdInAndStatusIn(List.of(found.getId()), TaskStatus.ENGAGED))
             throw new CodeException(TaskExceptionCode.OFFERED_EXISTS);
 
-        projectTeardown(found);
+        delete(found);
     }
 
     @Transactional
-    public void projectTeardown(ProjectEntity project) {
-        taskRepository.findAllByProjectIdOrderByIdAsc(project.getId()).forEach(taskService::taskTeardown);
-        driveRepository.findAllByProjectIdOrderByIdAsc(project.getId()).forEach(driveService::driveTeardown);
+    public void delete(ProjectEntity project) {
+        taskRepository.findAllByProjectIdOrderByIdAsc(project.getId()).forEach(taskService::delete);
+        driveRepository.findAllByProjectIdOrderByIdAsc(project.getId()).forEach(driveService::delete);
         boardRepository.findByProjectId(project.getId()).ifPresent(board -> {
             noteRepository.deleteAllByBoardId(board.getId());
             boardRepository.delete(board);

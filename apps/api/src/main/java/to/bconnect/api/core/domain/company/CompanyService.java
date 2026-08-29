@@ -191,7 +191,7 @@ public class CompanyService {
                 throw new CodeException(TaskExceptionCode.OFFERED_EXISTS);
         }
 
-        projects.forEach(projectService::projectTeardown);
+        projects.forEach(projectService::delete);
 
         attachmentCleanupService.purge(AttachmentReferenceType.COMPANY, found.getId());
         attachmentCleanupService.purge(AttachmentReferenceType.COMPANY_CERTIFICATE, found.getId());

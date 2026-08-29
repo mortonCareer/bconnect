@@ -178,11 +178,11 @@ public class TaskService {
         if (TaskStatus.ENGAGED.contains(found.getStatus()))
             throw new CodeException(TaskExceptionCode.OFFERED_EXISTS);
 
-        taskTeardown(found);
+        delete(found);
     }
 
     @Transactional
-    public void taskTeardown(TaskEntity task) {
+    public void delete(TaskEntity task) {
         offerRepository.deleteAllByTaskId(task.getId());
         postRepository.findAllByTaskId(task.getId()).forEach(PostEntity::detachTask);
         taskRepository.delete(task);

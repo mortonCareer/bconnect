@@ -100,7 +100,7 @@ public class MemberCleaner {
         participantRepository.deleteAll(participantRepository.findAllByMemberId(memberId));
 
         offerRepository.deleteAll(offerRepository.findAllByWorkerId(memberId));
-        taskRepository.findAllByWorkerIdAndType(memberId, TaskType.WORKER).forEach(taskService::taskTeardown);
+        taskRepository.findAllByWorkerIdAndType(memberId, TaskType.WORKER).forEach(taskService::delete);
 
         deviceTokenRepository.deleteAll(deviceTokenRepository.findAllByMemberId(memberId));
         notificationRepository.deleteAll(notificationRepository.findAllByMemberId(memberId));
