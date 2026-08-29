@@ -513,11 +513,47 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseLong"
+  /api/v1/retention-holds:
+    get:
+      tags:
+      - retention-hold-controller
+      operationId: list
+      parameters:
+      - name: memberId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListRetentionHoldResponse"
+    post:
+      tags:
+      - retention-hold-controller
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRetentionHoldRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
   /api/v1/recommendations:
     post:
       tags:
       - recommendation-controller
-      operationId: create
+      operationId: create_1
       requestBody:
         content:
           application/json:
@@ -573,7 +609,7 @@ paths:
     get:
       tags:
       - project-controller
-      operationId: list
+      operationId: list_1
       responses:
         "200":
           description: OK
@@ -584,7 +620,7 @@ paths:
     post:
       tags:
       - project-controller
-      operationId: create_1
+      operationId: create_2
       requestBody:
         content:
           application/json:
@@ -602,7 +638,7 @@ paths:
     get:
       tags:
       - profile-controller
-      operationId: list_1
+      operationId: list_2
       parameters:
       - name: cursorLimit
         in: query
@@ -619,7 +655,7 @@ paths:
     post:
       tags:
       - profile-controller
-      operationId: create_2
+      operationId: create_3
       requestBody:
         content:
           application/json:
@@ -637,7 +673,7 @@ paths:
     post:
       tags:
       - post-controller
-      operationId: create_3
+      operationId: create_4
       requestBody:
         content:
           application/json:
@@ -691,7 +727,7 @@ paths:
     post:
       tags:
       - offer-controller
-      operationId: create_4
+      operationId: create_5
       requestBody:
         content:
           application/json:
@@ -797,7 +833,7 @@ paths:
     post:
       tags:
       - note-controller
-      operationId: create_5
+      operationId: create_6
       requestBody:
         content:
           application/json:
@@ -815,7 +851,7 @@ paths:
     get:
       tags:
       - member-controller
-      operationId: list_2
+      operationId: list_3
       parameters:
       - name: cursorLimit
         in: query
@@ -850,7 +886,7 @@ paths:
     get:
       tags:
       - group-chat-controller
-      operationId: list_3
+      operationId: list_4
       responses:
         "200":
           description: OK
@@ -861,7 +897,7 @@ paths:
     post:
       tags:
       - group-chat-controller
-      operationId: create_6
+      operationId: create_7
       requestBody:
         content:
           application/json:
@@ -879,7 +915,7 @@ paths:
     get:
       tags:
       - drive-controller
-      operationId: list_4
+      operationId: list_5
       parameters:
       - name: projectId
         in: query
@@ -897,7 +933,7 @@ paths:
     post:
       tags:
       - drive-controller
-      operationId: create_7
+      operationId: create_8
       requestBody:
         content:
           application/json:
@@ -940,7 +976,7 @@ paths:
     get:
       tags:
       - direct-chat-controller
-      operationId: list_5
+      operationId: list_6
       responses:
         "200":
           description: OK
@@ -951,7 +987,7 @@ paths:
     post:
       tags:
       - direct-chat-controller
-      operationId: create_8
+      operationId: create_9
       requestBody:
         content:
           application/json:
@@ -1004,7 +1040,7 @@ paths:
     get:
       tags:
       - credential-controller
-      operationId: list_6
+      operationId: list_7
       parameters:
       - name: memberId
         in: query
@@ -1022,7 +1058,7 @@ paths:
     post:
       tags:
       - credential-controller
-      operationId: create_9
+      operationId: create_10
       requestBody:
         content:
           application/json:
@@ -1078,7 +1114,7 @@ paths:
     post:
       tags:
       - coworker-request-controller
-      operationId: create_10
+      operationId: create_11
       requestBody:
         content:
           application/json:
@@ -1134,7 +1170,7 @@ paths:
     get:
       tags:
       - company-controller
-      operationId: list_7
+      operationId: list_8
       parameters:
       - name: cursorLimit
         in: query
@@ -1151,7 +1187,7 @@ paths:
     post:
       tags:
       - company-controller
-      operationId: create_11
+      operationId: create_12
       requestBody:
         content:
           application/json:
@@ -1273,7 +1309,7 @@ paths:
     get:
       tags:
       - task-controller
-      operationId: list_8
+      operationId: list_9
       responses:
         "200":
           description: OK
@@ -1461,7 +1497,7 @@ paths:
     get:
       tags:
       - notification-controller
-      operationId: list_9
+      operationId: list_10
       parameters:
       - name: cursorLimit
         in: query
@@ -1564,7 +1600,7 @@ paths:
     get:
       tags:
       - feed-controller
-      operationId: list_10
+      operationId: list_11
       parameters:
       - name: filter
         in: query
@@ -1749,7 +1785,7 @@ paths:
     get:
       tags:
       - crawled-member-controller
-      operationId: list_11
+      operationId: list_12
       parameters:
       - name: cursorLimit
         in: query
@@ -1786,7 +1822,7 @@ paths:
     get:
       tags:
       - coworker-controller
-      operationId: list_12
+      operationId: list_13
       parameters:
       - name: memberId
         in: query
@@ -1887,6 +1923,25 @@ paths:
       tags:
       - task-controller
       operationId: delete_5
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/retention-holds/{id}:
+    delete:
+      tags:
+      - retention-hold-controller
+      operationId: release
       parameters:
       - name: id
         in: path
@@ -2465,6 +2520,31 @@ components:
       - start
       - title
       - trades
+    CreateRetentionHoldRequest:
+      type: object
+      properties:
+        memberId:
+          type: integer
+          format: int64
+        type:
+          $ref: "#/components/schemas/RetentionHoldType"
+        reason:
+          type: string
+          minLength: 1
+        expireAt:
+          type: string
+          format: date-time
+      required:
+      - expireAt
+      - memberId
+      - reason
+      - type
+    RetentionHoldType:
+      type: string
+      enum:
+      - SANCTION
+      - INVESTIGATION
+      - DEBT
     CreateRecommendationRequest:
       type: object
       properties:
@@ -3498,6 +3578,40 @@ components:
       - headline
       - primaryTrade
       - role
+    ApiResponseListRetentionHoldResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          $ref: "#/components/schemas/ExceptionCode"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RetentionHoldResponse"
+    RetentionHoldResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        memberName:
+          type: string
+        memberPhone:
+          type: string
+        type:
+          $ref: "#/components/schemas/RetentionHoldType"
+        reason:
+          type: string
+        expireAt:
+          type: string
+          format: date-time
+        withdrawnAt:
+          type: string
+          format: date-time
     ApiResponseListRecommendationResponse:
       type: object
       properties:
