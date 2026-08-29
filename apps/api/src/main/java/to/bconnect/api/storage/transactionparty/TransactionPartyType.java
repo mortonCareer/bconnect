@@ -1,4 +1,4 @@
-package to.bconnect.api.storage.retention;
+package to.bconnect.api.storage.transactionparty;
 
 public enum TransactionPartyType {
     MEMBER,

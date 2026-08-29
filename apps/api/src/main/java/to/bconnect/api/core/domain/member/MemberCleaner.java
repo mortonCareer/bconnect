@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.cleanup.AttachmentCleanupService;
 import to.bconnect.api.common.CodeException;
-import to.bconnect.api.core.domain.retention.TransactionPartyService;
+import to.bconnect.api.core.domain.transactionparty.TransactionPartyService;
 import to.bconnect.api.core.domain.drive.DriveService;
 import to.bconnect.api.core.domain.task.TaskService;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;

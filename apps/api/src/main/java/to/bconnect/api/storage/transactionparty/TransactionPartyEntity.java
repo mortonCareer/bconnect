@@ -1,9 +1,10 @@
-package to.bconnect.api.storage.retention;
+package to.bconnect.api.storage.transactionparty;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import to.bconnect.api.storage.RetentionPolicy;
 
 import java.time.Instant;
 

@@ -18,7 +18,7 @@ import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.offer.OfferStatus;
 import to.bconnect.api.storage.project.ProjectRepository;
-import to.bconnect.api.storage.retention.TransactionPartyRepository;
+import to.bconnect.api.storage.transactionparty.TransactionPartyRepository;
 import to.bconnect.api.storage.task.TaskProgress;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.support.IntegrationTest;

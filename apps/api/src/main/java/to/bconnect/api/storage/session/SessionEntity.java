@@ -6,7 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
-import to.bconnect.api.storage.retention.RetentionPolicy;
+import to.bconnect.api.storage.RetentionPolicy;
 
 @Entity
 @Table(name = "sessions")

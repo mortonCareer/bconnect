@@ -27,7 +27,7 @@ import to.bconnect.api.storage.post.PostRepository;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.recommendation.RecommendationRepository;
-import to.bconnect.api.storage.retention.TransactionPartyRepository;
+import to.bconnect.api.storage.transactionparty.TransactionPartyRepository;
 import to.bconnect.api.storage.session.SessionEntity;
 import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.storage.task.TaskRepository;

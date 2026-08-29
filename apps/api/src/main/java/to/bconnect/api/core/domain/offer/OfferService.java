@@ -9,7 +9,7 @@ import to.bconnect.api.ApiConfigProps;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.company.CompanyFinder;
-import to.bconnect.api.core.domain.retention.TransactionPartyService;
+import to.bconnect.api.core.domain.transactionparty.TransactionPartyService;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.member.MemberRepository;

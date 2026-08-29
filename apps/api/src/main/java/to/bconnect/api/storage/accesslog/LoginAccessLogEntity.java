@@ -1,4 +1,4 @@
-package to.bconnect.api.storage.retention;
+package to.bconnect.api.storage.accesslog;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -6,13 +6,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
+import to.bconnect.api.storage.RetentionPolicy;
 
 @Entity
-@Table(name = "access_logs")
+@Table(name = "login_access_logs")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @RetentionPolicy("P3M")
-public class AccessLogEntity extends BaseEntity {
+public class LoginAccessLogEntity extends BaseEntity {
 
     private Long memberId;
 
@@ -20,7 +21,7 @@ public class AccessLogEntity extends BaseEntity {
 
     private String ip;
 
-    public AccessLogEntity(Long memberId, String agent, String ip) {
+    public LoginAccessLogEntity(Long memberId, String agent, String ip) {
         this.memberId = memberId;
         this.agent = agent;
         this.ip = ip;

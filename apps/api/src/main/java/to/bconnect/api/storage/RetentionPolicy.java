@@ -1,4 +1,4 @@
-package to.bconnect.api.storage.retention;
+package to.bconnect.api.storage;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

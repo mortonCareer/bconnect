@@ -1,4 +1,4 @@
-package to.bconnect.api.core.domain.retention;
+package to.bconnect.api.core.domain.transactionparty;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -13,10 +13,10 @@ import to.bconnect.api.storage.offer.OfferEntity;
 import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.project.ProjectEntity;
 import to.bconnect.api.storage.project.ProjectRepository;
-import to.bconnect.api.storage.retention.RetentionPolicy;
-import to.bconnect.api.storage.retention.TransactionPartyEntity;
-import to.bconnect.api.storage.retention.TransactionPartyRepository;
-import to.bconnect.api.storage.retention.TransactionPartyType;
+import to.bconnect.api.storage.RetentionPolicy;
+import to.bconnect.api.storage.transactionparty.TransactionPartyEntity;
+import to.bconnect.api.storage.transactionparty.TransactionPartyRepository;
+import to.bconnect.api.storage.transactionparty.TransactionPartyType;
 import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskRepository;
 

@@ -11,8 +11,8 @@ import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthExceptionCode;
 import to.bconnect.api.security.AuthUtils;
 import to.bconnect.api.storage.member.MemberRepository;
-import to.bconnect.api.storage.retention.AccessLogEntity;
-import to.bconnect.api.storage.retention.AccessLogRepository;
+import to.bconnect.api.storage.accesslog.LoginAccessLogEntity;
+import to.bconnect.api.storage.accesslog.LoginAccessLogRepository;
 import to.bconnect.api.storage.session.SessionEntity;
 import to.bconnect.api.storage.session.SessionRepository;
 
@@ -22,7 +22,7 @@ import to.bconnect.api.storage.session.SessionRepository;
 public class SessionService {
 
     private final SessionRepository sessionRepository;
-    private final AccessLogRepository accessLogRepository;
+    private final LoginAccessLogRepository loginAccessLogRepository;
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -49,7 +49,7 @@ public class SessionService {
         val encrypted = AuthUtils.sha256(refreshToken);
         val optional = sessionRepository.findByMemberId(id);
 
-        accessLogRepository.save(new AccessLogEntity(id, agent, ip));
+        loginAccessLogRepository.save(new LoginAccessLogEntity(id, agent, ip));
 
         if (optional.isPresent()) {
             optional.get().update(agent, ip, encrypted);
