@@ -8,6 +8,7 @@ import to.bconnect.api.ApiConfigProps;
 import to.bconnect.api.attachment.domain.cleanup.AttachmentCleanupService;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.core.domain.retention.TransactionPartyFinder;
+import to.bconnect.api.core.domain.drive.DriveService;
 import to.bconnect.api.core.domain.task.TaskService;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.chat.ParticipantRepository;
@@ -18,6 +19,7 @@ import to.bconnect.api.storage.credential.CredentialEntity;
 import to.bconnect.api.storage.credential.CredentialRepository;
 import to.bconnect.api.storage.device.DeviceTokenRepository;
 import to.bconnect.api.storage.drive.DriveMemberRepository;
+import to.bconnect.api.storage.drive.DriveRepository;
 import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.notification.NotificationRepository;
 import to.bconnect.api.storage.offer.OfferRepository;
@@ -25,6 +27,7 @@ import to.bconnect.api.storage.otp.OtpRepository;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.storage.recommendation.RecommendationRepository;
 import to.bconnect.api.storage.retention.RetentionPolicy;
+import to.bconnect.api.storage.retention.RetentionHoldRepository;
 import to.bconnect.api.storage.retention.TransactionPartyEntity;
 import to.bconnect.api.storage.retention.TransactionPartyRepository;
 import to.bconnect.api.storage.session.SessionRepository;
@@ -52,9 +55,12 @@ public class MemberCleaner {
     private final OfferRepository offerRepository;
     private final TransactionPartyFinder transactionPartyFinder;
     private final TransactionPartyRepository transactionPartyRepository;
+    private final RetentionHoldRepository retentionHoldRepository;
     private final TaskRepository taskRepository;
     private final TaskService taskService;
     private final DriveMemberRepository driveMemberRepository;
+    private final DriveRepository driveRepository;
+    private final DriveService driveService;
     private final DeviceTokenRepository deviceTokenRepository;
     private final NotificationRepository notificationRepository;
     private final ParticipantRepository participantRepository;
@@ -75,6 +81,8 @@ public class MemberCleaner {
                 .toInstant();
         val transactionParties = transactionPartyFinder.findAll(member, archivedAt, expireAt);
         transactionPartyRepository.saveAll(transactionParties);
+        retentionHoldRepository.findAllByMemberIdAndExpireAtAfter(memberId, archivedAt)
+                .forEach(it -> it.archive(member, archivedAt));
 
         sessionRepository.findByMemberId(memberId).ifPresent(it -> it.revoke());
         otpRepository.deleteByPhone(member.getPhone());
@@ -104,6 +112,7 @@ public class MemberCleaner {
         notificationRepository.deleteAll(notificationRepository.findAllByMemberId(memberId));
         notificationRepository.deleteAll(notificationRepository.findAllBySenderId(memberId));
 
+        driveRepository.findAllByMemberId(memberId).forEach(driveService::delete);
         driveMemberRepository.deleteAll(driveMemberRepository.findAllByMemberId(memberId));
     }
 }

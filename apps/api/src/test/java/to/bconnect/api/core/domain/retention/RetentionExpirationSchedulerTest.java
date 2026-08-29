@@ -9,6 +9,11 @@ import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.retention.TransactionPartyEntity;
 import to.bconnect.api.storage.retention.TransactionPartyRepository;
+import to.bconnect.api.storage.retention.AccessLogEntity;
+import to.bconnect.api.storage.retention.AccessLogRepository;
+import to.bconnect.api.storage.retention.RetentionHoldEntity;
+import to.bconnect.api.storage.retention.RetentionHoldRepository;
+import to.bconnect.api.storage.retention.RetentionHoldType;
 import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.storage.signup.SignupTokenEntity;
 import to.bconnect.api.storage.signup.SignupTokenRepository;
@@ -29,6 +34,8 @@ class RetentionExpirationSchedulerTest {
     @Autowired private MemberRepository memberRepository;
     @Autowired private SessionRepository sessionRepository;
     @Autowired private SignupTokenRepository signupTokenRepository;
+    @Autowired private AccessLogRepository accessLogRepository;
+    @Autowired private RetentionHoldRepository retentionHoldRepository;
     @Autowired private JdbcTemplate jdbcTemplate;
 
     @Test
@@ -45,11 +52,24 @@ class RetentionExpirationSchedulerTest {
         val retainedMember = memberRepository.save(MemberFactory.entity("retention2", "01099999806", Role.CAREER));
         val expiredSession = sessionRepository.saveAndFlush(SessionFactory.entity(expiredMember.getId()));
         val retainedSession = sessionRepository.saveAndFlush(SessionFactory.entity(retainedMember.getId()));
+        val expiredAccessLog = accessLogRepository.saveAndFlush(new AccessLogEntity(expiredMember.getId(), "agent", "127.0.0.1"));
+        val retainedAccessLog = accessLogRepository.saveAndFlush(new AccessLogEntity(retainedMember.getId(), "agent", "127.0.0.2"));
         jdbcTemplate.update(
                 "UPDATE sessions SET modified_at = ? WHERE id = ?",
                 now.minusSeconds(100L * 24 * 60 * 60).atOffset(ZoneOffset.UTC),
                 expiredSession.getId()
         );
+        jdbcTemplate.update(
+                "UPDATE access_logs SET created_at = ? WHERE id = ?",
+                now.minusSeconds(100L * 24 * 60 * 60).atOffset(ZoneOffset.UTC),
+                expiredAccessLog.getId()
+        );
+        val expiredHold = retentionHoldRepository.save(new RetentionHoldEntity(
+                expiredMember.getId(), RetentionHoldType.SANCTION, "제재", now.minusSeconds(1)
+        ));
+        val retainedHold = retentionHoldRepository.save(new RetentionHoldEntity(
+                retainedMember.getId(), RetentionHoldType.DEBT, "채무", now.plusSeconds(60)
+        ));
         val expiredToken = signupTokenRepository.save(
                 new SignupTokenEntity("01099999803", "token-expired", now.minusSeconds(1)));
         val retainedToken = signupTokenRepository.save(
@@ -61,6 +81,10 @@ class RetentionExpirationSchedulerTest {
         assertThat(transactionPartyRepository.findById(retained.getId())).isPresent();
         assertThat(sessionRepository.findById(expiredSession.getId())).isEmpty();
         assertThat(sessionRepository.findById(retainedSession.getId())).isPresent();
+        assertThat(accessLogRepository.findById(expiredAccessLog.getId())).isEmpty();
+        assertThat(accessLogRepository.findById(retainedAccessLog.getId())).isPresent();
+        assertThat(retentionHoldRepository.findById(expiredHold.getId())).isEmpty();
+        assertThat(retentionHoldRepository.findById(retainedHold.getId())).isPresent();
         assertThat(signupTokenRepository.findById(expiredToken.getId())).isEmpty();
         assertThat(signupTokenRepository.findById(retainedToken.getId())).isPresent();
     }

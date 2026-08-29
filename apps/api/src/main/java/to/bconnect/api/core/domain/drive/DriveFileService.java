@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.Attachment;
 import to.bconnect.api.attachment.domain.AttachmentFinder;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
+import to.bconnect.api.attachment.domain.cleanup.AttachmentCleanupService;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthUser;
@@ -28,6 +29,7 @@ public class DriveFileService {
     private final DriveRepository driveRepository;
     private final DriveFinder driveFinder;
     private final AttachmentLinker attachmentLinker;
+    private final AttachmentCleanupService attachmentCleanupService;
     private final AttachmentFinder attachmentFinder;
     private final MemberRepository memberRepository;
     private final ProjectRepository projectRepository;
@@ -106,10 +108,10 @@ public class DriveFileService {
     }
 
     @Transactional
-    public void detachAll(DriveEntity drive) {
-        val unlinked = attachmentFinder.list(AttachmentReferenceType.DRIVE, drive.getId());
-        attachmentLinker.unlink(AttachmentReferenceType.DRIVE, drive.getId());
-        val delta = unlinked.stream().mapToLong(Attachment::size).sum();
+    public void deleteAll(DriveEntity drive) {
+        val attachments = attachmentFinder.list(AttachmentReferenceType.DRIVE, drive.getId());
+        val delta = attachments.stream().mapToLong(Attachment::size).sum();
+        attachmentCleanupService.purge(AttachmentReferenceType.DRIVE, drive.getId());
 
         // decrease usage
         if (drive.getType() == DriveType.PERSONAL) {

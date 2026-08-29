@@ -11,6 +11,8 @@ import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.security.AuthExceptionCode;
 import to.bconnect.api.security.AuthUtils;
 import to.bconnect.api.storage.member.MemberRepository;
+import to.bconnect.api.storage.retention.AccessLogEntity;
+import to.bconnect.api.storage.retention.AccessLogRepository;
 import to.bconnect.api.storage.session.SessionEntity;
 import to.bconnect.api.storage.session.SessionRepository;
 
@@ -20,6 +22,7 @@ import to.bconnect.api.storage.session.SessionRepository;
 public class SessionService {
 
     private final SessionRepository sessionRepository;
+    private final AccessLogRepository accessLogRepository;
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -45,6 +48,8 @@ public class SessionService {
                 .orElseThrow(() -> new CodeException(CommonExceptionCode.NOT_FOUND));
         val encrypted = AuthUtils.sha256(refreshToken);
         val optional = sessionRepository.findByMemberId(id);
+
+        accessLogRepository.save(new AccessLogEntity(id, agent, ip));
 
         if (optional.isPresent()) {
             optional.get().update(agent, ip, encrypted);

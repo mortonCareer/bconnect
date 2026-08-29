@@ -99,6 +99,7 @@ public class SecurityConfig {
                         .requestMatchers(GET, "/api/v1/members/check-username").permitAll()
                         .requestMatchers(GET, "/api/v1/members").hasRole("ADMIN")
                         .requestMatchers(GET, "/api/v1/companies").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/retention-holds/**").hasRole("ADMIN")
                         .requestMatchers(GET, "/api/v1/companies/me").hasRole("PLAN")
                         .requestMatchers(PUT, "/api/v1/companies/me").hasRole("PLAN")
                         .requestMatchers(DELETE, "/api/v1/companies/me").hasRole("PLAN")

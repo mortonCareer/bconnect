@@ -104,7 +104,7 @@ public class DriveService {
             noteRepository.deleteAllByBoardId(board.getId());
             boardRepository.delete(board);
         });
-        driveFileService.detachAll(drive);
+        driveFileService.deleteAll(drive);
         driveMemberRepository.deleteByDriveId(drive.getId());
         driveRepository.delete(drive);
     }

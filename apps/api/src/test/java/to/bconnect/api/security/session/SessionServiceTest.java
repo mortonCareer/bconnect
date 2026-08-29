@@ -8,6 +8,7 @@ import org.springframework.test.context.event.ApplicationEvents;
 import org.springframework.test.context.event.RecordApplicationEvents;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
+import to.bconnect.api.storage.retention.AccessLogRepository;
 import to.bconnect.api.support.IntegrationTest;
 import to.bconnect.api.support.fixture.MemberFactory;
 
@@ -19,6 +20,7 @@ class SessionServiceTest {
 
     @Autowired private SessionService sessionService;
     @Autowired private MemberRepository memberRepository;
+    @Autowired private AccessLogRepository accessLogRepository;
     @Autowired private ApplicationEvents applicationEvents;
 
     @Test
@@ -33,5 +35,10 @@ class SessionServiceTest {
 
         // then
         assertThat(applicationEvents.stream(NewDeviceLoginEvent.class)).containsExactly(expected);
+        assertThat(accessLogRepository.findAll()).singleElement().satisfies(accessLog -> {
+            assertThat(accessLog.getMemberId()).isEqualTo(member.getId());
+            assertThat(accessLog.getAgent()).isEqualTo("agent");
+            assertThat(accessLog.getIp()).isEqualTo("127.0.0.1");
+        });
     }
 }
