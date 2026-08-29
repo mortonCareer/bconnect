@@ -1,0 +1,81 @@
+package to.bconnect.api.core.domain.retention;
+
+import lombok.val;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import to.bconnect.api.storage.member.MemberRepository;
+import to.bconnect.api.storage.member.Role;
+import to.bconnect.api.storage.otp.OtpEntity;
+import to.bconnect.api.storage.otp.OtpRepository;
+import to.bconnect.api.storage.retention.TransactionPartyEntity;
+import to.bconnect.api.storage.retention.TransactionPartyRepository;
+import to.bconnect.api.storage.retention.TransactionPartySnapshot;
+import to.bconnect.api.storage.session.SessionRepository;
+import to.bconnect.api.storage.signup.SignupTokenEntity;
+import to.bconnect.api.storage.signup.SignupTokenRepository;
+import to.bconnect.api.support.IntegrationTest;
+import to.bconnect.api.support.fixture.MemberFactory;
+import to.bconnect.api.support.fixture.SessionFactory;
+
+import java.time.Instant;
+import java.time.ZoneOffset;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@IntegrationTest
+class RetentionExpirationSchedulerTest {
+
+    @Autowired private RetentionExpirationScheduler scheduler;
+    @Autowired private TransactionPartyRepository transactionPartyRepository;
+    @Autowired private OtpRepository otpRepository;
+    @Autowired private MemberRepository memberRepository;
+    @Autowired private SessionRepository sessionRepository;
+    @Autowired private SignupTokenRepository signupTokenRepository;
+    @Autowired private JdbcTemplate jdbcTemplate;
+
+    @Test
+    @DisplayName("run - 만료된 보관 데이터가 있을 때 실행하면 만료 데이터만 삭제된다")
+    void run_success() {
+        val now = Instant.now();
+        val snapshot = new TransactionPartySnapshot(1L, "member", "01000000000", 2L, "company", "0000000000", now);
+        val expired = transactionPartyRepository.save(new TransactionPartyEntity(snapshot, now.minusSeconds(2), now.minusSeconds(1)));
+        val retained = transactionPartyRepository.save(new TransactionPartyEntity(snapshot, now, now.plusSeconds(60)));
+        val expiredOtp = new OtpEntity("01099999803", "000000", now.minusSeconds(1));
+        val retainedOtp = new OtpEntity("01099999804", "000000", now.plusSeconds(180));
+        otpRepository.saveAll(java.util.List.of(expiredOtp, retainedOtp));
+        val expiredMember = memberRepository.save(MemberFactory.entity("retention1", "01099999805", Role.CAREER));
+        val retainedMember = memberRepository.save(MemberFactory.entity("retention2", "01099999806", Role.CAREER));
+        val expiredSession = sessionRepository.saveAndFlush(SessionFactory.entity(expiredMember.getId()));
+        val retainedSession = sessionRepository.saveAndFlush(SessionFactory.entity(retainedMember.getId()));
+        jdbcTemplate.update(
+                "UPDATE sessions SET modified_at = ? WHERE id = ?",
+                now.minusSeconds(100L * 24 * 60 * 60).atOffset(ZoneOffset.UTC),
+                expiredSession.getId()
+        );
+        val staleOtp = otpRepository.saveAndFlush(new OtpEntity("01099999807", "000000", now.plusSeconds(180)));
+        jdbcTemplate.update(
+                "UPDATE otps SET last_sent_at = ? WHERE id = ?",
+                now.minusSeconds(2L * 24 * 60 * 60).atOffset(ZoneOffset.UTC),
+                staleOtp.getId()
+        );
+        val expiredToken = signupTokenRepository.save(
+                new SignupTokenEntity("01099999808", "token-expired", now.minusSeconds(1)));
+        val retainedToken = signupTokenRepository.save(
+                new SignupTokenEntity("01099999809", "token-retained", now.plusSeconds(180)));
+
+        scheduler.run();
+
+        assertThat(transactionPartyRepository.findById(expired.getId())).isEmpty();
+        assertThat(transactionPartyRepository.findById(retained.getId())).isPresent();
+        assertThat(otpRepository.findById(expiredOtp.getId())).get().extracting(OtpEntity::getCode).isNull();
+        assertThat(otpRepository.findById(retainedOtp.getId())).get().extracting(OtpEntity::getCode).isEqualTo("000000");
+        assertThat(sessionRepository.findById(expiredSession.getId())).isEmpty();
+        assertThat(sessionRepository.findById(retainedSession.getId())).isPresent();
+        assertThat(otpRepository.findById(staleOtp.getId())).isEmpty();
+        assertThat(otpRepository.findById(retainedOtp.getId())).isPresent();
+        assertThat(signupTokenRepository.findById(expiredToken.getId())).isEmpty();
+        assertThat(signupTokenRepository.findById(retainedToken.getId())).isPresent();
+    }
+}
