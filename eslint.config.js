@@ -1,32 +1,10 @@
-import js from '@eslint/js'
-import tseslint from 'typescript-eslint'
-import globals from 'globals'
-import figma from './packages/config/eslint/plugin-figma.js'
+import base from './packages/config/eslint/base.js'
+import { defineConfig, includeIgnoreFile } from 'eslint/config'
+import { fileURLToPath } from 'node:url'
 
-export default tseslint.config(
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
-  {
-    ignores: ['**/node_modules/', '**/.next/', '**/dist/'],
-  },
-  {
-    files: ['**/*.{js,jsx,ts,tsx}'],
-    languageOptions: {
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-      },
-    },
-    rules: {
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      'prefer-const': 'warn',
-    },
-  },
-  {
-    files: ['packages/ui/src/components/ui/*.tsx'],
-    plugins: { 'bconnect-figma': figma },
-    rules: {
-      'bconnect-figma/require-figma-tag': 'error',
-    },
-  }
-)
+const gitignorePath = fileURLToPath(new URL('.gitignore', import.meta.url))
+
+export default defineConfig([
+  includeIgnoreFile(gitignorePath, { gitignoreResolution: true }),
+  ...base,
+])
