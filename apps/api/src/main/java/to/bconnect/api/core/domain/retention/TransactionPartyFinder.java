@@ -11,10 +11,11 @@ import to.bconnect.api.storage.offer.OfferEntity;
 import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.project.ProjectEntity;
 import to.bconnect.api.storage.project.ProjectRepository;
-import to.bconnect.api.storage.retention.TransactionPartySnapshot;
+import to.bconnect.api.storage.retention.TransactionPartyEntity;
 import to.bconnect.api.storage.task.TaskEntity;
 import to.bconnect.api.storage.task.TaskRepository;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -31,7 +32,7 @@ public class TransactionPartyFinder {
     private final CompanyRepository companyRepository;
 
     @Transactional(readOnly = true)
-    public List<TransactionPartySnapshot> findAll(MemberEntity member) {
+    public List<TransactionPartyEntity> findAll(MemberEntity member, Instant archivedAt, Instant expireAt) {
         val offers = offerRepository.findAllByWorkerIdAndAcceptedAtIsNotNull(member.getId());
         val taskById = taskRepository.findAllById(
                         offers.stream().map(OfferEntity::getTaskId).distinct().toList()
@@ -50,7 +51,7 @@ public class TransactionPartyFinder {
                 ).stream()
                 .collect(Collectors.toMap(CompanyEntity::getId, Function.identity()));
 
-        val snapshots = new ArrayList<TransactionPartySnapshot>();
+        val transactionParties = new ArrayList<TransactionPartyEntity>();
         for (OfferEntity offer : offers) {
             val task = taskById.get(offer.getTaskId());
             if (task == null || task.getProjectId() == null)
@@ -64,16 +65,18 @@ public class TransactionPartyFinder {
             if (company == null)
                 continue;
 
-            snapshots.add(new TransactionPartySnapshot(
+            transactionParties.add(new TransactionPartyEntity(
                     member.getId(),
                     member.getName(),
                     member.getPhone(),
                     company.getId(),
                     company.getName(),
                     company.getBrn(),
-                    offer.getAcceptedAt()
+                    offer.getAcceptedAt(),
+                    archivedAt,
+                    expireAt
             ));
         }
-        return snapshots;
+        return transactionParties;
     }
 }

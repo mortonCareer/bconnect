@@ -11,7 +11,6 @@ import to.bconnect.api.storage.otp.OtpEntity;
 import to.bconnect.api.storage.otp.OtpRepository;
 import to.bconnect.api.storage.retention.TransactionPartyEntity;
 import to.bconnect.api.storage.retention.TransactionPartyRepository;
-import to.bconnect.api.storage.retention.TransactionPartySnapshot;
 import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.storage.signup.SignupTokenEntity;
 import to.bconnect.api.storage.signup.SignupTokenRepository;
@@ -39,9 +38,12 @@ class RetentionExpirationSchedulerTest {
     @DisplayName("run - 만료된 보관 데이터가 있을 때 실행하면 만료 데이터만 삭제된다")
     void run_success() {
         val now = Instant.now();
-        val snapshot = new TransactionPartySnapshot(1L, "member", "01000000000", 2L, "company", "0000000000", now);
-        val expired = transactionPartyRepository.save(new TransactionPartyEntity(snapshot, now.minusSeconds(2), now.minusSeconds(1)));
-        val retained = transactionPartyRepository.save(new TransactionPartyEntity(snapshot, now, now.plusSeconds(60)));
+        val expired = transactionPartyRepository.save(new TransactionPartyEntity(
+                1L, "member", "01000000000", 2L, "company", "0000000000", now, now.minusSeconds(2), now.minusSeconds(1)
+        ));
+        val retained = transactionPartyRepository.save(new TransactionPartyEntity(
+                1L, "member", "01000000000", 2L, "company", "0000000000", now, now, now.plusSeconds(60)
+        ));
         val expiredOtp = new OtpEntity("01099999803", "000000", now.minusSeconds(1));
         val retainedOtp = new OtpEntity("01099999804", "000000", now.plusSeconds(180));
         otpRepository.saveAll(java.util.List.of(expiredOtp, retainedOtp));

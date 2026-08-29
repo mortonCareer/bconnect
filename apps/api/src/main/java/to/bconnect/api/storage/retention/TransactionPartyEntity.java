@@ -40,14 +40,24 @@ public class TransactionPartyEntity {
 
     private Instant expireAt;
 
-    public TransactionPartyEntity(TransactionPartySnapshot snapshot, Instant archivedAt, Instant expireAt) {
-        this.memberId = snapshot.memberId();
-        this.memberName = snapshot.memberName();
-        this.memberPhone = snapshot.memberPhone();
-        this.counterpartyId = snapshot.counterpartyId();
-        this.counterpartyName = snapshot.counterpartyName();
-        this.counterpartyBrn = snapshot.counterpartyBrn();
-        this.matchedAt = snapshot.matchedAt();
+    public TransactionPartyEntity(
+            Long memberId,
+            String memberName,
+            String memberPhone,
+            Long counterpartyId,
+            String counterpartyName,
+            String counterpartyBrn,
+            Instant matchedAt,
+            Instant archivedAt,
+            Instant expireAt
+    ) {
+        this.memberId = memberId;
+        this.memberName = memberName;
+        this.memberPhone = memberPhone;
+        this.counterpartyId = counterpartyId;
+        this.counterpartyName = counterpartyName;
+        this.counterpartyBrn = counterpartyBrn;
+        this.matchedAt = matchedAt;
         this.archivedAt = archivedAt;
         this.expireAt = expireAt;
     }

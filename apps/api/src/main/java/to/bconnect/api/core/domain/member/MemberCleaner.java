@@ -73,9 +73,7 @@ public class MemberCleaner {
         val expireAt = archivedAt.atZone(apiConfigProps.zoneId())
                 .plus(Period.parse(retention.value()))
                 .toInstant();
-        val transactionParties = transactionPartyFinder.findAll(member).stream()
-                .map(it -> new TransactionPartyEntity(it, archivedAt, expireAt))
-                .toList();
+        val transactionParties = transactionPartyFinder.findAll(member, archivedAt, expireAt);
         transactionPartyRepository.saveAll(transactionParties);
 
         sessionRepository.findByMemberId(memberId).ifPresent(it -> it.revoke());
