@@ -4,59 +4,53 @@
   "type": "module",
   "scripts": {
     "prepare": "husky && sh scripts/link-env.sh",
-    "postinstall": "pnpm api:generate && pnpm msw:init",
-    "msw:init": "pnpm --filter @bconnect/career exec msw init public --save && pnpm --filter @bconnect/plan exec msw init public --save",
-    "dev": "pnpm --filter @bconnect/career --filter @bconnect/plan dev",
+    "postinstall": "pnpm api:generate && pnpm -r --parallel msw:init",
+    "dev": "pnpm -r --parallel dev",
     "dev:career": "pnpm --filter @bconnect/career dev",
     "dev:plan": "pnpm --filter @bconnect/plan dev",
     "dev:company": "pnpm --filter @bconnect/company dev",
-    "build": "pnpm --filter @bconnect/career --filter @bconnect/plan build",
+    "build": "pnpm -r --stream build",
     "build:career": "pnpm --filter @bconnect/career build",
     "build:plan": "pnpm --filter @bconnect/plan build",
     "build:company": "pnpm --filter @bconnect/company build",
-    "lint": "pnpm --filter @bconnect/career --filter @bconnect/plan --filter @bconnect/ui --filter @bconnect/push lint",
-    "lint:career": "pnpm --filter @bconnect/career lint",
-    "lint:plan": "pnpm --filter @bconnect/plan lint",
-    "lint:ui": "pnpm --filter @bconnect/ui lint",
-    "lint:push": "pnpm --filter @bconnect/push lint",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "docs:lint": "pnpm docs:lint:md && pnpm docs:lint:links",
-    "docs:lint:md": "markdownlint-cli2 \"**/*.md\" \"!apps/api/**\" \"!**/node_modules/**\" \"!**/.next/**\" \"!**/dist/**\" \"!**/build/**\" \"!packages/api-client/src/generated/**\"",
-    "docs:lint:links": "command -v lychee >/dev/null || { echo 'lychee not installed — see https://lychee.cli.rs/installation/'; exit 1; } && GITHUB_TOKEN=\"$(gh auth token 2>/dev/null)\" lychee --config lychee.toml --cache=false --no-progress --exclude-path apps/api --exclude-path node_modules './**/*.md' './**/*.mdx'",
-    "api:generate": "pnpm --filter @bconnect/api-client generate",
-    "package:check": "syncpack lint",
-    "package:fix": "syncpack fix",
-    "figma:connect": "figma connect publish",
-    "figma:connect:dry": "figma connect publish --dry-run",
-    "otp": "node scripts/dev-otp.mjs",
-    "figma:check": "node scripts/figma-checks/index.mjs",
-    "figma:check:dry": "node scripts/figma-checks/index.mjs --dry-run"
+    "lint": "eslint && prettier --check . && markdownlint-cli2 && lychee '**/*.md' && terraform fmt -check -recursive infra",
+    "lint:fix": "eslint --fix && prettier --write . && markdownlint-cli2 --fix && terraform fmt",
+    "api:generate": "pnpm --filter @bconnect/api-client generate && tsc --noEmit",
+    "figma": "node scripts/figma-mapping/index.js",
+    "figma:dry": "node scripts/figma-mapping/index.js --dry-run"
   },
-  "packageManager": "pnpm@10.23.0",
+  "packageManager": "pnpm@11.22.0",
   "devDependencies": {
-    "@commitlint/cli": "^20.2.0",
-    "@commitlint/config-conventional": "^20.2.0",
-    "@eslint/js": "^9.39.2",
-    "@figma/code-connect": "^1.3.12",
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
+    "@eslint/js": "catalog:",
     "eslint": "catalog:",
-    "globals": "^16.5.0",
+    "globals": "catalog:",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "markdownlint-cli2": "^0.22.1",
-    "playwright": "^1.58.0",
-    "postgres": "^3.4.9",
-    "prettier": "^3.7.4",
-    "syncpack": "^15.0.0",
+    "lint-staged": "^17.4.1",
+    "markdownlint-cli2": "^0.23.2",
+    "playwright": "^1.62.1",
+    "postgres": "catalog:",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "catalog:",
-    "typescript-eslint": "^8.50.1"
+    "typescript-eslint": "catalog:"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
+    "!(*.js|*.jsx|*.ts|*.tsx|*.md|*.mdx|*.tf|*.tfvars|*.tftest.hcl)": [
+      "prettier --write --ignore-unknown"
     ],
-    "*.{json,md,css}": "prettier --write",
-    "*.tf": "terraform fmt"
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{md,mdx}": [
+      "prettier --write",
+      "markdownlint-cli2 --fix --no-globs",
+      "lychee"
+    ],
+    "*.{tf,tfvars,tftest.hcl}": [
+      "terraform fmt -recursive"
+    ]
   }
 }

@@ -1,26 +1,47 @@
 import js from '@eslint/js'
+import { defineConfig } from 'eslint/config'
 import tseslint from 'typescript-eslint'
 import globals from 'globals'
-import tailwind from './tailwind.js'
+import reactHooks from 'eslint-plugin-react-hooks'
+import next from '@next/eslint-plugin-next'
 
-export default tseslint.config(
+export default defineConfig([
   js.configs.recommended,
-  ...tseslint.configs.recommended,
+  tseslint.configs.recommended,
+  reactHooks.configs.flat.recommended,
+  next.configs['core-web-vitals'],
   {
-    ignores: ['**/node_modules/', '**/.next/', '**/dist/', '**/generated/'],
-  },
-  tailwind,
-  {
-    files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       globals: {
         ...globals.browser,
         ...globals.node,
       },
     },
+  },
+  {
     rules: {
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      'prefer-const': 'warn',
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['../../**'],
+              message: 'uses @/ alias instead of relative path',
+            },
+          ],
+        },
+      ],
     },
-  }
-)
+  },
+  {
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'JSXOpeningElement[name.name="svg"]',
+          message: 'Use <Icon> component instead of <svg> directly.',
+        },
+      ],
+    },
+  },
+])

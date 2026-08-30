@@ -1,8 +1,10 @@
 # security-architecture
+
 - 위치 : `/security`
 - 범위 : 인증 주체(AuthUser), JWT, OTP, 가입 토큰(SignupToken), 세션(Session)
 
 ## Spring Security 아키텍처
+
 - SecurityFilterChain : 보안 필터 체인
 - AuthenticationFilter : 인증 요청을 Manager에 위임, 인증 후 처리를 SuccessHandler에 위임 (Presentation 계층)
 - AuthenticationProvider : 실제 인증 로직
@@ -82,6 +84,7 @@ sequenceDiagram
     Handler-->>Client: access token · refresh 쿠키 (Set-Cookie)
 ```
 
-## 래퍼런스
+## 참조
+
 - [Spring Security : Architecture](https://docs.spring.io/spring-security/reference/servlet/architecture.html)
 - [Spring Security : Authentication](https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html)

@@ -2,12 +2,12 @@
   "name": "@bconnect/company",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev -p 3002",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "msw:init": "msw init public --save"
   },
   "dependencies": {
     "@bconnect/business": "workspace:*",

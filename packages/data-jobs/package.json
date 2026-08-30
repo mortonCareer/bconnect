@@ -1,6 +1,5 @@
 {
   "name": "@bconnect/data-jobs",
-  "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,11 +14,11 @@
   },
   "dependencies": {
     "cheerio": "catalog:",
-    "postgres": "^3.4.9"
+    "postgres": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "tsx": "^4.21.0",
+    "tsx": "catalog:",
     "typescript": "catalog:"
   }
 }

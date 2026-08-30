@@ -1,4 +1,5 @@
 # stomp-architecture
+
 - 위치 : `/socket`
 - 범위 : 채팅(Chat), 메시지(Message)
 
@@ -37,8 +38,8 @@ sequenceDiagram
     Service->>Push: 푸시 알림 (미구독자)
 ```
 
-
 ## 컴포넌트 구성
+
 - WebSocketConfig : WebSocket 설정
 - WebSocketAuthInterceptor : STOMP 연결시 인증 처리
 - WebSocketSecurityConfig : WebSocket 보안 설정
@@ -67,5 +68,6 @@ sequenceDiagram
 - `content` 는 브로드캐스트 · 영속화 값이고 `preview` 는 미구독 참여자 푸시알림 본문이다.
 - SYSTEM · OFFER 는 서버 이벤트 전용이며 `SendMessageRequest.toCommand` 에서 거부한다.
 
-## 래퍼런스
+## 참조
+
 - [Spring WebSocket : STOMP](https://docs.spring.io/spring-framework/reference/web/websocket/stomp.html)

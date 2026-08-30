@@ -1,0 +1,15 @@
+{
+  "globs": ["**/*.md"],
+  "gitignore": true,
+  "config": {
+    "default": true,
+    "MD024": { "siblings_only": true }, // no-duplicate-heading
+    "MD033": { "allowed_elements": ["br"] }, // no-inline-html
+    // prettier conflict
+    "MD013": false, // line-length
+    "MD060": false, // table-column-style
+    "MD034": false, // no-bare-urls
+    "MD049": false, // emphasis-style
+    "MD050": false, // strong-style
+  },
+}
