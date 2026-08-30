@@ -21,9 +21,9 @@
   "dependencies": {
     "@sentry/nextjs": "catalog:",
     "cheerio": "catalog:",
-    "fast-xml-parser": "^5.3.7",
-    "postgres": "^3.4.9",
-    "server-only": "^0.0.1"
+    "fast-xml-parser": "catalog:",
+    "postgres": "catalog:",
+    "server-only": "catalog:"
   },
   "peerDependencies": {
     "next": "catalog:",

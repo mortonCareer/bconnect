@@ -27,7 +27,7 @@
     "eslint": "catalog:",
     "globals": "catalog:",
     "husky": "^9.1.7",
-    "lint-staged": "^17.3.0",
+    "lint-staged": "^17.4.1",
     "markdownlint-cli2": "^0.23.2",
     "playwright": "^1.62.1",
     "postgres": "catalog:",
@@ -37,13 +37,15 @@
     "typescript-eslint": "catalog:"
   },
   "lint-staged": {
-    "*": [
+    "!(*.js|*.jsx|*.ts|*.tsx|*.md|*.mdx|*.tf|*.tfvars|*.tftest.hcl)": [
       "prettier --write --ignore-unknown"
     ],
     "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
       "eslint --fix"
     ],
     "*.{md,mdx}": [
+      "prettier --write",
       "markdownlint-cli2 --fix --no-globs",
       "lychee"
     ],

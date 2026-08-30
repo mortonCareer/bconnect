@@ -28,16 +28,16 @@
     "@eslint/js": "catalog:",
     "@next/eslint-plugin-next": "16.3.3",
     "@types/node": "catalog:",
+    "eslint": "catalog:",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "catalog:",
-    "eslint": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:"
   },
   "dependencies": {
     "@bconnect/api-client": "workspace:*",
-    "es-hangul": "^2.3.8",
-    "libphonenumber-js": "^1.12.33",
+    "es-hangul": "^2.4.0",
+    "libphonenumber-js": "^1.13.12",
     "zod": "catalog:"
   }
 }

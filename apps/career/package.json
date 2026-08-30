@@ -10,8 +10,8 @@
     "msw:init": "msw init public --save"
   },
   "dependencies": {
-    "@aws-sdk/client-lambda": "^3.965.0",
-    "@aws-sdk/client-s3": "^3.965.0",
+    "@aws-sdk/client-lambda": "^3.1121.0",
+    "@aws-sdk/client-s3": "^3.1121.0",
     "@bconnect/api-client": "workspace:*",
     "@bconnect/business": "workspace:*",
     "@bconnect/features": "workspace:*",
@@ -42,7 +42,7 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "eslint": "catalog:",
-    "firebase-admin": "^14.0.0",
+    "firebase-admin": "^14.3.0",
     "msw": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:"
