@@ -1,7 +1,8 @@
-# 보편언어 (Ubiquitous Language)
+# 보편언어
 
-- 위치 : 전체
-- 범위 : 도메인 용어, Enum 값
+> 대상: 전체 개발자<br>
+> 학습 목표: 도메인 용어와 Enum 값을 확인한다<br>
+> 위치: 전체
 
 ## 도메인 다이어그램
 
@@ -62,50 +63,53 @@ graph TD
 
 ## 도메인 개념
 
-| 도메인         | 영문            | 국문          | 의미                                   |
-| -------------- | --------------- | ------------- | -------------------------------------- |
-| Member         | Member          | 회원          | 사용자                                 |
-| Auth           | Otp             | 인증코드      | 본인확인용 6자리 코드                  |
-| Auth           | SignupToken     | 가입 토큰     | 미가입자 회원가입용 임시 토큰          |
-| Auth           | Session         | 세션          | 로그인 정보(IP, Agent 등)              |
-| Auth           | Access Token    | 액세스 토큰   |                                        |
-| Auth           | Refresh Token   | 리프레시 토큰 | 액세스 토큰 재발급용 토큰              |
-| Profile        | Profile         | 프로필        | 사용자 프로필                          |
-| Task           | Task            | 작업          | 프로젝트 공종별 작업 단위              |
-| Post           | Post            | 게시글        | 사진 · 본문 단위                       |
-| Post           |                 | 작업물        | 게시글 + 작업 View                     |
-| Post           | Feed            | 피드          | 게시글 + 작업 + 프로필 + 회원 View     |
-| Coworker       | Coworker        | 동료          | 동료 기술자                            |
-| Coworker       | CoworkerRequest | 동료 요청     |                                        |
-| Recommendation | Recommendation  | 추천서        | 동료 기술자가 작성한 추천서            |
-| Chat           | GroupChat       | 그룹 채팅방   | 채팅방 제목 있음                       |
-| Chat           | DirectChat      | 1:1 채팅방    | 채팅방 제목 없음                       |
-| Chat           | Message         | 메시지        |                                        |
-| Chat           | Participant     | 참여자        | 그룹 채팅방 참여자 정보                |
-| Credential     | Credential      | 자격 증명     | 면허 · 자격 · 보험 등                  |
-| Attachment     | Attachment      | 첨부          | 업로드 파일 메타데이터                 |
-| Attachment     | Signed cookie   |               | CloudFront 접근 권한                   |
-| Company        | Company         | 인테리어 업체 |                                        |
-| Project        | Project         | 프로젝트      |                                        |
-| Offer          | Offer           | 섭외          | 기술자 섭외                            |
-| Drive          | Drive           | 공유 저장소   | 원격 파일 · 이미지 저장소              |
-| Drive          | DriveMember     | 저장소 멤버   | 저장소 접근 권한                       |
-| Board          | Board           | 게시판        | 프로젝트 · 저장소별 게시판 (자동 생성) |
-| Board          | Note            | 노트          | 게시판에 작성된 글                     |
+| 도메인         | 영문            | 국문          | 의미                                  |
+| -------------- | --------------- | ------------- | ------------------------------------- |
+| Member         | Member          | 회원          | 사용자                                |
+| Auth           | Otp             | 인증코드      | 본인확인용 6자리 코드                 |
+| Auth           | SignupToken     | 가입 토큰     | 미가입자 회원가입용 임시 토큰         |
+| Auth           | Session         | 세션          | 로그인 정보. IP · Agent 등            |
+| Auth           | Access Token    | 액세스 토큰   |                                       |
+| Auth           | Refresh Token   | 리프레시 토큰 | 액세스 토큰 재발급용 토큰             |
+| Profile        | Profile         | 프로필        | 사용자 프로필                         |
+| Task           | Task            | 작업          | 프로젝트 공종별 작업 단위             |
+| Post           | Post            | 게시글        | 사진 · 본문 단위                      |
+| Post           |                 | 작업물        | 게시글 + 작업 View                    |
+| Post           | Feed            | 피드          | 게시글 + 작업 + 프로필 + 회원 View    |
+| Coworker       | Coworker        | 동료          | 동료 기술자                           |
+| Coworker       | CoworkerRequest | 동료 요청     |                                       |
+| Recommendation | Recommendation  | 추천서        | 동료 기술자가 작성한 추천서           |
+| Chat           | GroupChat       | 그룹 채팅방   | 채팅방 제목 있음                      |
+| Chat           | DirectChat      | 1:1 채팅방    | 채팅방 제목 없음                      |
+| Chat           | Message         | 메시지        |                                       |
+| Chat           | Participant     | 참여자        | 그룹 채팅방 참여자 정보               |
+| Credential     | Credential      | 자격 증명     | 면허 · 자격 · 보험 등                 |
+| Attachment     | Attachment      | 첨부          | 업로드 파일 메타데이터                |
+| Attachment     | Signed cookie   |               | CloudFront 접근 권한                  |
+| Company        | Company         | 인테리어 업체 |                                       |
+| Project        | Project         | 프로젝트      |                                       |
+| Offer          | Offer           | 섭외          | 기술자 섭외                           |
+| Drive          | Drive           | 공유 저장소   | 원격 파일 · 이미지 저장소             |
+| Drive          | DriveMember     | 저장소 멤버   | 저장소 접근 권한                      |
+| Board          | Board           | 게시판        | 프로젝트 · 저장소별 게시판. 자동 생성 |
+| Board          | Note            | 노트          | 게시판에 작성된 글                    |
 
 ## 열거형 (Enum)
 
 ### 회원 역할(Role)
 
-| 유형   | 설명                              |
-| ------ | --------------------------------- |
-| SIGNUP | 회원가입 (본인인증 완료 · 미가입) |
-| GUEST  | 게스트 (가입 완료 · 앱 미확정)    |
-| CAREER | 기술자                            |
-| PLAN   | 업체                              |
-| ADMIN  | 어드민                            |
+| 유형   | 설명                             |
+| ------ | -------------------------------- |
+| SIGNUP | 회원가입. 본인인증 완료 · 미가입 |
+| GUEST  | 게스트. 가입 완료 · 앱 미확정    |
+| CAREER | 기술자                           |
+| PLAN   | 업체                             |
+| ADMIN  | 어드민                           |
 
-회원은 역할을 복수로 보유한다. SIGNUP 는 저장되지 않으며 OTP · 가입 토큰 인증 시에만 부여된다.
+회원은 역할을 복수로 보유한다.
+
+- SIGNUP 는 저장되지 않는다
+- SIGNUP 는 OTP · 가입 토큰 인증 시에만 부여된다
 
 ### 프로필 역할(ProfileRole)
 
@@ -172,7 +176,10 @@ graph TD
 
 ### 진행 상태(TaskProgress)
 
-작업 기간(start/end)과 무관하며 자동 전환되지 않는다 (사용자 직접 변경).
+작업 기간과 무관하다. 기간은 start · end 를 말한다.
+
+- 자동 전환되지 않는다
+- 사용자가 직접 변경한다
 
 | 유형        | 프로젝트(업체) | 기술자    |
 | ----------- | -------------- | --------- |

@@ -1,10 +1,11 @@
 # 프로젝트 구조
+
 - 위치 : 전체
 - 범위 : 도메인, 레이어, 의존성
 
 ## 디렉터리 구조
 
-```
+```text
 to.bconnect.api
 ├── attachment              # 첨부 모듈
 ├── common                  # 공통 모듈
@@ -18,16 +19,20 @@ to.bconnect.api
 ├── sms                     # SMS 모듈
 └── socket                  # 실시간 통신 (STOMP)
 ```
+
 - 레이어드 아키텍처(layer-first) 구조를 따릅니다.
 - 패키지 · 레이어 의존성 규칙은 ArchUnit로 강제합니다.
 
 ## 패키지 구조
+>
 > socket → notification → core → attachment → security → storage → common
 > sms → security, common
 > oneclick → security, common
+
 - `PackageDependencyTest.java` 참고
 
 ## 레이어 구조
+
 ```mermaid
 graph TD
   subgraph Presentation
@@ -57,8 +62,9 @@ graph TD
 - `LayerDependencyTest.java` 참고
 
 ### 레이어 컨벤션
+
 - 컨트롤러는 도메인 객체를 조회하고, 응답 DTO를 조립합니다.
-- 컨트롤러의 API · 엔드포인트의 국문명은 bruno 테스트 name에 작성합니다. 
+- 컨트롤러의 API · 엔드포인트의 국문명은 bruno 테스트 name에 작성합니다.
 - 응답 DTO의 `of` 메서드는 도메인 객체만 주입받고, DTO 변환은 내부에서 처리합니다.
 - 비즈니스 로직은 서비스에서 처리합니다.
 - 비즈니스 로직이 복잡한 경우 하위 컴포넌트를 생성해 로직을 분리할 수 있습니다.
@@ -68,10 +74,12 @@ graph TD
 - 도메인 교차 로직의 위치는 도메인 간 응집도를 고려해서 선정해야 합니다.
 
 ### 회원 탈퇴
+
 - 탈퇴 시 연관 데이터는 정리하되, DM · 그룹채팅의 메시지는 유지한다.
 - 탈퇴 회원은 제외하지 않고 도메인 객체의 `WITHDRAWN` 상수로 표현한다.
 
 ### 서비스 도메인 교차
+
 ```mermaid
 graph TD
   subgraph board
@@ -97,9 +105,11 @@ graph TD
   OfferS --> CompanyF
   OfferQS --> CompanyF
 ```
+
 - `DomainDependencyTest.java` 참고
 
 ### 이벤트 구조
+
 ```mermaid
 graph TD
   subgraph chat
@@ -129,17 +139,20 @@ graph TD
   SmsL --> OtpE
   SmsL --> LoginE
 ```
+
 - 부수효과(메시지 · 알림 발송) 등은 EDA 구조로 분리합니다.
 - 이벤트는 발행 패키지에, 리스너는 구독 패키지에 위치합니다.
 - 알림 이벤트 처리는 다이어그램에서 생략합니다.
 
 ### 유효성 검사
+
 - 유효성 검사 위치는 다음과 같습니다
   - 자바 빈 유효성 : Request DTO 필드 어노테이션
   - 비즈니스 유효성 : Request DTO의 toCommand 메서드
   - DB 제약 : `schema.sql`
 
-## 래퍼런스
+## 참조
+
 - [Spring Framework : Java Bean Validation](https://docs.spring.io/spring-framework/reference/core/validation/beanvalidation.html)
 - [Spring Framework : Standard and Custom Events](https://docs.spring.io/spring-framework/reference/core/beans/context-introduction.html#context-functionality-events)
 - [Spring Framework : Transaction-bound Events](https://docs.spring.io/spring-framework/reference/data-access/transaction/event.html)
