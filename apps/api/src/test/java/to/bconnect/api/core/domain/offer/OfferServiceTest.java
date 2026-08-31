@@ -10,6 +10,8 @@ import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.offer.OfferRepository;
 import to.bconnect.api.storage.offer.OfferStatus;
 import to.bconnect.api.storage.project.ProjectRepository;
+import to.bconnect.api.storage.transactionparty.TransactionPartyRepository;
+import to.bconnect.api.storage.transactionparty.TransactionPartyType;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskStatus;
 import to.bconnect.api.support.IntegrationTest;
@@ -28,6 +30,7 @@ class OfferServiceTest {
     @Autowired private ProjectRepository projectRepository;
     @Autowired private CompanyRepository companyRepository;
     @Autowired private MemberRepository memberRepository;
+    @Autowired private TransactionPartyRepository transactionPartyRepository;
 
     @Test
     @DisplayName("create - 첫 섭외 요청을 생성하면 작업이 OFFERED가 된다")
@@ -170,6 +173,18 @@ class OfferServiceTest {
         val found = taskRepository.findById(task.getId()).orElseThrow();
         assertThat(found.getStatus()).isEqualTo(TaskStatus.ASSIGNED);
         assertThat(found.getWorkerId()).isEqualTo(worker.getId());
+        val transactionParties = transactionPartyRepository.findAll();
+        assertThat(transactionParties).hasSize(2);
+        assertThat(transactionParties).anySatisfy(it -> {
+            assertThat(it.getMemberId()).isEqualTo(worker.getId());
+            assertThat(it.getCounterpartyType()).isEqualTo(TransactionPartyType.COMPANY);
+            assertThat(it.getWithdrawnAt()).isNull();
+        });
+        assertThat(transactionParties).anySatisfy(it -> {
+            assertThat(it.getMemberId()).isEqualTo(owner.getId());
+            assertThat(it.getCounterpartyType()).isEqualTo(TransactionPartyType.MEMBER);
+            assertThat(it.getWithdrawnAt()).isNull();
+        });
     }
 
     @Test

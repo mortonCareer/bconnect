@@ -52,6 +52,7 @@ public class OtpEntity extends BaseEntity {
     }
 
     public void invalidateCode() {
+        this.code = null;
         this.revoked = true;
     }
 

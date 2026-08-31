@@ -4,15 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import to.bconnect.api.attachment.domain.AttachmentLinker;
+import to.bconnect.api.attachment.domain.cleanup.AttachmentCleanupService;
 import to.bconnect.api.common.CodeException;
-import to.bconnect.api.security.AuthUser;
+import to.bconnect.api.core.domain.transactionparty.TransactionPartyService;
+import to.bconnect.api.core.domain.drive.DriveService;
+import to.bconnect.api.core.domain.task.TaskService;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
-import to.bconnect.api.storage.board.BoardRepository;
-import to.bconnect.api.storage.board.NoteRepository;
-import to.bconnect.api.storage.chat.ChatType;
-import to.bconnect.api.storage.chat.GroupChatRepository;
-import to.bconnect.api.storage.chat.MessageRepository;
 import to.bconnect.api.storage.chat.ParticipantRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
@@ -20,16 +17,20 @@ import to.bconnect.api.storage.coworker.CoworkerRequestRepository;
 import to.bconnect.api.storage.credential.CredentialEntity;
 import to.bconnect.api.storage.credential.CredentialRepository;
 import to.bconnect.api.storage.device.DeviceTokenRepository;
-import to.bconnect.api.storage.drive.DriveEntity;
 import to.bconnect.api.storage.drive.DriveMemberRepository;
 import to.bconnect.api.storage.drive.DriveRepository;
+import to.bconnect.api.storage.member.MemberEntity;
 import to.bconnect.api.storage.notification.NotificationRepository;
 import to.bconnect.api.storage.offer.OfferRepository;
+import to.bconnect.api.storage.otp.OtpRepository;
 import to.bconnect.api.storage.profile.ProfileRepository;
 import to.bconnect.api.storage.recommendation.RecommendationRepository;
 import to.bconnect.api.storage.session.SessionRepository;
+import to.bconnect.api.storage.signup.SignupTokenRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
+
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -37,38 +38,46 @@ public class MemberCleaner {
 
     private final CompanyRepository companyRepository;
     private final SessionRepository sessionRepository;
+    private final OtpRepository otpRepository;
+    private final SignupTokenRepository signupTokenRepository;
     private final ProfileRepository profileRepository;
     private final CredentialRepository credentialRepository;
     private final CoworkerRepository coworkerRepository;
     private final CoworkerRequestRepository coworkerRequestRepository;
     private final RecommendationRepository recommendationRepository;
     private final OfferRepository offerRepository;
+    private final TransactionPartyService transactionPartyService;
     private final TaskRepository taskRepository;
-    private final DriveRepository driveRepository;
+    private final TaskService taskService;
     private final DriveMemberRepository driveMemberRepository;
-    private final BoardRepository boardRepository;
-    private final NoteRepository noteRepository;
+    private final DriveRepository driveRepository;
+    private final DriveService driveService;
     private final DeviceTokenRepository deviceTokenRepository;
     private final NotificationRepository notificationRepository;
     private final ParticipantRepository participantRepository;
-    private final GroupChatRepository groupChatRepository;
-    private final MessageRepository messageRepository;
-    private final AttachmentLinker attachmentLinker;
+    private final AttachmentCleanupService attachmentCleanupService;
 
     // TODO: 이벤트 구조로 변경 가능
     @Transactional
-    public void clean(AuthUser user) {
-        val memberId = user.id();
+    public void clean(MemberEntity member) {
+        val memberId = member.getId();
 
         if (companyRepository.existsByMemberId(memberId))
             throw new CodeException(MemberExceptionCode.WITHDRAW_COMPANY_EXISTS);
 
-        sessionRepository.findByMemberId(memberId).ifPresent(sessionRepository::delete);
+        val withdrawnAt = Instant.now();
+        transactionPartyService.withdraw(member, withdrawnAt);
+        sessionRepository.findByMemberId(memberId).ifPresent(it -> it.revoke());
+        otpRepository.deleteByPhone(member.getPhone());
+        signupTokenRepository.deleteByPhone(member.getPhone());
         profileRepository.findByMemberId(memberId).ifPresent(profileRepository::delete);
-        attachmentLinker.unlink(AttachmentReferenceType.MEMBER, memberId);
+        attachmentCleanupService.purge(AttachmentReferenceType.MEMBER, memberId);
 
         val credentials = credentialRepository.findAllByMemberId(memberId);
-        attachmentLinker.unlink(AttachmentReferenceType.CREDENTIAL, credentials.stream().map(CredentialEntity::getId).toList());
+        attachmentCleanupService.purge(
+                AttachmentReferenceType.CREDENTIAL,
+                credentials.stream().map(CredentialEntity::getId).toList()
+        );
         credentialRepository.deleteAll(credentials);
 
         coworkerRepository.deleteAll(coworkerRepository.findAllByMemberId(memberId));
@@ -77,30 +86,16 @@ public class MemberCleaner {
         recommendationRepository.deleteAll(recommendationRepository.findAllByFromId(memberId));
         recommendationRepository.deleteAll(recommendationRepository.findAllByToId(memberId));
 
-        participantRepository.findAllByMemberId(memberId).forEach(it -> {
-            participantRepository.delete(it);
-            if (participantRepository.countByChatId(it.getChatId()) == 0) {
-                messageRepository.deleteAllByChatIdAndChatType(it.getChatId(), ChatType.GROUP);
-                groupChatRepository.deleteById(it.getChatId());
-            }
-        });
+        participantRepository.deleteAll(participantRepository.findAllByMemberId(memberId));
 
         offerRepository.deleteAll(offerRepository.findAllByWorkerId(memberId));
-        taskRepository.deleteAll(taskRepository.findAllByWorkerIdAndType(memberId, TaskType.WORKER));
+        taskRepository.findAllByWorkerIdAndType(memberId, TaskType.WORKER).forEach(taskService::delete);
 
         deviceTokenRepository.deleteAll(deviceTokenRepository.findAllByMemberId(memberId));
         notificationRepository.deleteAll(notificationRepository.findAllByMemberId(memberId));
         notificationRepository.deleteAll(notificationRepository.findAllBySenderId(memberId));
 
+        driveRepository.findAllByMemberId(memberId).forEach(driveService::delete);
         driveMemberRepository.deleteAll(driveMemberRepository.findAllByMemberId(memberId));
-
-        val drives = driveRepository.findAllByMemberId(memberId);
-        drives.forEach(it -> boardRepository.findByDriveId(it.getId()).ifPresent(board -> {
-            noteRepository.deleteAllByBoardId(board.getId());
-            boardRepository.delete(board);
-        }));
-        attachmentLinker.unlink(AttachmentReferenceType.DRIVE, drives.stream().map(DriveEntity::getId).toList());
-        drives.forEach(it -> driveMemberRepository.deleteByDriveId(it.getId()));
-        driveRepository.deleteAll(drives);
     }
 }

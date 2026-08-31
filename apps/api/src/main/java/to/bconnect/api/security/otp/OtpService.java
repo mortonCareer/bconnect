@@ -6,6 +6,7 @@ import lombok.val;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import to.bconnect.api.ApiConfigProps;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.security.AuthExceptionCode;
 import to.bconnect.api.storage.otp.OtpEntity;
@@ -14,7 +15,6 @@ import to.bconnect.api.storage.otp.OtpRepository;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 
 @Slf4j
 @Service
@@ -34,6 +34,7 @@ public class OtpService {
 
     private final OtpRepository otpRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ApiConfigProps apiConfigProps;
 
     @Transactional
     public Otp sendCode(String phone) {
@@ -70,7 +71,10 @@ public class OtpService {
         found.attempt();
 
         if (found.isRevoked()) throw new CodeException(AuthExceptionCode.INVALID_OTP);
-        if (found.getExpiredAt().isBefore(Instant.now())) throw new CodeException(AuthExceptionCode.OTP_EXPIRED);
+        if (!found.getExpiredAt().isAfter(Instant.now())) {
+            found.invalidateCode();
+            throw new CodeException(AuthExceptionCode.OTP_EXPIRED);
+        }
         if (!found.getCode().equals(code)) throw new CodeException(AuthExceptionCode.INVALID_OTP);
 
         found.invalidateCode();
@@ -81,6 +85,6 @@ public class OtpService {
     }
 
     private boolean isToday(Instant date) {
-        return date.atZone(ZoneId.systemDefault()).toLocalDate().equals(LocalDate.now());
+        return date.atZone(apiConfigProps.zoneId()).toLocalDate().equals(LocalDate.now(apiConfigProps.zoneId()));
     }
 }

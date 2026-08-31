@@ -6,11 +6,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
+import to.bconnect.api.storage.RetentionPolicy;
 
 @Entity
 @Table(name = "sessions")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@RetentionPolicy("P3M")
 public class SessionEntity extends BaseEntity {
 
     private Long memberId;

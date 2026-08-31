@@ -8,13 +8,16 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.company.CompanyExceptionCode;
+import to.bconnect.api.core.domain.transactionparty.TransactionPartyService;
+import to.bconnect.api.core.domain.task.TaskService;
 import to.bconnect.api.core.domain.task.TaskExceptionCode;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.board.BoardEntity;
 import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.BoardType;
-import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
+import to.bconnect.api.storage.drive.DriveEntity;
+import to.bconnect.api.storage.drive.DriveRepository;
 import to.bconnect.api.storage.project.ProjectEntity;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskRepository;
@@ -32,8 +35,10 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final CompanyRepository companyRepository;
     private final TaskRepository taskRepository;
+    private final TaskService taskService;
+    private final TransactionPartyService transactionPartyService;
+    private final DriveRepository driveRepository;
     private final BoardRepository boardRepository;
-    private final NoteRepository noteRepository;
 
     @Transactional(readOnly = true)
     public Project get(AuthUser user, Long projectId) {
@@ -103,11 +108,15 @@ public class ProjectService {
         if (taskRepository.existsByProjectIdInAndStatusIn(List.of(found.getId()), TaskStatus.ENGAGED))
             throw new CodeException(TaskExceptionCode.OFFERED_EXISTS);
 
-        taskRepository.deleteAllByProjectId(found.getId());
-        boardRepository.findByProjectId(found.getId()).ifPresent(board -> {
-            noteRepository.deleteAllByBoardId(board.getId());
-            boardRepository.delete(board);
-        });
-        projectRepository.delete(found);
+        delete(found);
+    }
+
+    @Transactional
+    public void delete(ProjectEntity project) {
+        transactionPartyService.captureProject(project);
+        taskRepository.findAllByProjectIdOrderByIdAsc(project.getId()).forEach(taskService::delete);
+        driveRepository.findAllByProjectIdOrderByIdAsc(project.getId()).forEach(DriveEntity::detachProject);
+        boardRepository.findByProjectId(project.getId()).ifPresent(BoardEntity::detachProject);
+        projectRepository.delete(project);
     }
 }

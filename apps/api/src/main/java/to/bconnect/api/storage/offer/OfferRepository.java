@@ -9,8 +9,6 @@ import java.util.Optional;
 
 public interface OfferRepository extends JpaRepository<OfferEntity, Long> {
 
-    void deleteByTaskIdIn(Collection<Long> taskIds);
-
     void deleteAllByTaskId(Long taskId);
 
     boolean existsByTaskIdAndStatus(Long taskId, OfferStatus status);
@@ -29,6 +27,10 @@ public interface OfferRepository extends JpaRepository<OfferEntity, Long> {
     List<OfferEntity> findAllByWorkerIdAndStatusInOrderByIdDesc(Long workerId, Collection<OfferStatus> statuses);
 
     List<OfferEntity> findAllByWorkerId(Long workerId);
+
+    List<OfferEntity> findAllByWorkerIdAndAcceptedAtIsNotNull(Long workerId);
+
+    List<OfferEntity> findAllByTaskIdInAndAcceptedAtIsNotNull(Collection<Long> taskIds);
 
     Optional<OfferEntity> findFirstByTaskIdOrderBySeqDesc(Long taskId);
 

@@ -1,4 +1,4 @@
-package to.bconnect.api.storage.session;
+package to.bconnect.api.storage.accesslog;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -6,14 +6,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
-import java.util.Optional;
 
-public interface SessionRepository extends JpaRepository<SessionEntity, Long> {
-
-    Optional<SessionEntity> findByMemberId(Long memberId);
+public interface LoginAccessLogRepository extends JpaRepository<LoginAccessLogEntity, Long> {
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM SessionEntity s WHERE s.modifiedAt <= :threshold")
+    @Query("DELETE FROM LoginAccessLogEntity a WHERE a.createdAt <= :threshold")
     int deleteExpired(@Param("threshold") Instant threshold);
-
 }

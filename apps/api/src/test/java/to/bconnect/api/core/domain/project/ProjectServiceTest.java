@@ -7,12 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.core.domain.company.CompanyExceptionCode;
 import to.bconnect.api.core.domain.task.TaskExceptionCode;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
+import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.BoardType;
 import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
+import to.bconnect.api.storage.drive.DriveRepository;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
+import to.bconnect.api.storage.offer.OfferRepository;
+import to.bconnect.api.storage.post.PostRepository;
 import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.support.IntegrationTest;
@@ -33,6 +38,10 @@ class ProjectServiceTest {
     @Autowired private TaskRepository taskRepository;
     @Autowired private BoardRepository boardRepository;
     @Autowired private NoteRepository noteRepository;
+    @Autowired private OfferRepository offerRepository;
+    @Autowired private PostRepository postRepository;
+    @Autowired private DriveRepository driveRepository;
+    @Autowired private AttachmentRepository attachmentRepository;
 
     @Test
     @DisplayName("get - 소유한 업체의 프로젝트일 때 조회하면 프로젝트를 반환한다")
@@ -106,15 +115,23 @@ class ProjectServiceTest {
     }
 
     @Test
-    @DisplayName("delete - 소유한 업체의 프로젝트일 때 삭제하면 태스크·보드·노트가 함께 삭제된다")
+    @DisplayName("delete - 소유한 업체의 프로젝트일 때 삭제하면 태스크는 삭제하고 공유 보드와 저장소는 유지한다")
     void delete_success() {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         val company = companyRepository.save(CompanyFactory.entity(member.getId()));
         val project = projectRepository.save(ProjectFactory.entity(company.getId()));
-        taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        val task = taskRepository.save(TaskFactory.projectEntity(project.getId(), null));
+        val offer = offerRepository.save(OfferFactory.entity(task.getId(), member.getId()));
+        val post = postRepository.save(PostFactory.entity(member.getId(), task.getId()));
         val board = boardRepository.save(BoardFactory.projectEntity(project.getId()));
-        noteRepository.save(BoardFactory.noteEntity(board.getId(), member.getId()));
+        val note = noteRepository.save(BoardFactory.noteEntity(board.getId(), member.getId()));
+        val drive = driveRepository.save(DriveFactory.entity(project.getId(), null));
+        val driveBoard = boardRepository.save(BoardFactory.driveEntity(drive.getId()));
+        val driveNote = noteRepository.save(BoardFactory.noteEntity(driveBoard.getId(), member.getId()));
+        val driveAttachment = attachmentRepository.save(AttachmentFactory.entity(member.getId(), member.getId()));
+        driveAttachment.complete();
+        driveAttachment.link(AttachmentReferenceType.DRIVE, drive.getId());
         val user = UserFactory.domain(member.getId(), Role.CAREER);
 
         // when
@@ -123,8 +140,15 @@ class ProjectServiceTest {
         // then
         assertThat(projectRepository.findById(project.getId())).isEmpty();
         assertThat(taskRepository.findAllByProjectIdOrderByIdAsc(project.getId())).isEmpty();
+        assertThat(offerRepository.findById(offer.getId())).isEmpty();
+        assertThat(postRepository.findById(post.getId()).orElseThrow().getTaskId()).isNull();
+        assertThat(driveRepository.findById(drive.getId())).get().extracting(it -> it.getProjectId()).isNull();
+        assertThat(boardRepository.findByDriveId(drive.getId())).contains(driveBoard);
         assertThat(boardRepository.findByProjectId(project.getId())).isEmpty();
-        assertThat(noteRepository.findAllByBoardIdOrderByIdDesc(board.getId())).isEmpty();
+        assertThat(boardRepository.findById(board.getId())).get().extracting(it -> it.getProjectId()).isNull();
+        assertThat(noteRepository.findById(note.getId())).contains(note);
+        assertThat(noteRepository.findById(driveNote.getId())).contains(driveNote);
+        assertThat(attachmentRepository.findById(driveAttachment.getId())).contains(driveAttachment);
     }
 
     @Test

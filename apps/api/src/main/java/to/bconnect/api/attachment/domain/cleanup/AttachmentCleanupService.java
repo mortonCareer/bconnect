@@ -7,11 +7,13 @@ import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentKeyUtils;
 import to.bconnect.api.attachment.domain.FileStorage;
 import to.bconnect.api.storage.attachment.AttachmentEntity;
+import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.attachment.AttachmentRepository;
 import to.bconnect.api.storage.attachment.AttachmentStatus;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -30,6 +32,19 @@ public class AttachmentCleanupService {
                 cleanupPending(),
                 cleanupOrphans()
         );
+    }
+
+    @Transactional
+    public void purge(AttachmentReferenceType referenceType, Long referenceId) {
+        purge(attachmentRepository.findAllByReferenceTypeAndReferenceId(referenceType, referenceId));
+    }
+
+    @Transactional
+    public void purge(AttachmentReferenceType referenceType, Collection<Long> referenceIds) {
+        if (referenceIds.isEmpty())
+            return;
+
+        purge(attachmentRepository.findAllByReferenceTypeAndReferenceIdIn(referenceType, referenceIds));
     }
 
     // presigned but not confirmed

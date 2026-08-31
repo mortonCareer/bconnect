@@ -27,4 +27,8 @@ public class DriveEntity extends BaseEntity {
     public void update(String title) {
         this.title = title;
     }
+
+    public void detachProject() {
+        this.projectId = null;
+    }
 }

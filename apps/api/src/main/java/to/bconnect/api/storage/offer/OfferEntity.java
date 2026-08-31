@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import to.bconnect.api.storage.BaseEntity;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
@@ -26,6 +27,8 @@ public class OfferEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private OfferStatus status = OfferStatus.PENDING;
 
+    private Instant acceptedAt;
+
     @Version
     private Long version;
 
@@ -41,6 +44,7 @@ public class OfferEntity extends BaseEntity {
 
     public void accept() {
         this.status = OfferStatus.ACCEPTED;
+        this.acceptedAt = Instant.now();
     }
 
     public void deny() {

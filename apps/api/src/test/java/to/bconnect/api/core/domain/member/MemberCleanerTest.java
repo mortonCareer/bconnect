@@ -9,6 +9,7 @@ import to.bconnect.api.storage.attachment.AttachmentReferenceType;
 import to.bconnect.api.storage.board.BoardRepository;
 import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.chat.GroupChatRepository;
+import to.bconnect.api.storage.chat.MessageRepository;
 import to.bconnect.api.storage.chat.ParticipantRepository;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.coworker.CoworkerRepository;
@@ -16,12 +17,18 @@ import to.bconnect.api.storage.coworker.CoworkerRequestRepository;
 import to.bconnect.api.storage.credential.CredentialRepository;
 import to.bconnect.api.storage.drive.DriveMemberRepository;
 import to.bconnect.api.storage.drive.DriveRepository;
+import to.bconnect.api.storage.drive.DriveEntity;
+import to.bconnect.api.storage.drive.DriveType;
 import to.bconnect.api.storage.member.MemberRepository;
 import to.bconnect.api.storage.member.Role;
 import to.bconnect.api.storage.offer.OfferRepository;
+import to.bconnect.api.storage.offer.OfferStatus;
 import to.bconnect.api.storage.post.PostRepository;
 import to.bconnect.api.storage.profile.ProfileRepository;
+import to.bconnect.api.storage.project.ProjectRepository;
 import to.bconnect.api.storage.recommendation.RecommendationRepository;
+import to.bconnect.api.storage.transactionparty.TransactionPartyRepository;
+import to.bconnect.api.storage.session.SessionEntity;
 import to.bconnect.api.storage.session.SessionRepository;
 import to.bconnect.api.storage.task.TaskRepository;
 import to.bconnect.api.storage.task.TaskType;
@@ -35,18 +42,20 @@ import to.bconnect.api.support.fixture.CredentialFactory;
 import to.bconnect.api.support.fixture.DriveFactory;
 import to.bconnect.api.support.fixture.GroupChatFactory;
 import to.bconnect.api.support.fixture.MemberFactory;
+import to.bconnect.api.support.fixture.MessageFactory;
 import to.bconnect.api.support.fixture.ParticipantFactory;
 import to.bconnect.api.support.fixture.OfferFactory;
 import to.bconnect.api.support.fixture.PostFactory;
 import to.bconnect.api.support.fixture.ProfileFactory;
+import to.bconnect.api.support.fixture.ProjectFactory;
 import to.bconnect.api.support.fixture.RecommendationFactory;
 import to.bconnect.api.support.fixture.SessionFactory;
 import to.bconnect.api.support.fixture.TaskFactory;
-import to.bconnect.api.support.fixture.UserFactory;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static to.bconnect.api.support.CodeExceptionAssert.assertCodeException;
+
 
 @IntegrationTest
 class MemberCleanerTest {
@@ -63,15 +72,19 @@ class MemberCleanerTest {
     @Autowired private PostRepository postRepository;
     @Autowired private OfferRepository offerRepository;
     @Autowired private TaskRepository taskRepository;
+    @Autowired private ProjectRepository projectRepository;
+    @Autowired private TransactionPartyRepository transactionPartyRepository;
     @Autowired private DriveRepository driveRepository;
     @Autowired private DriveMemberRepository driveMemberRepository;
     @Autowired private BoardRepository boardRepository;
     @Autowired private NoteRepository noteRepository;
     @Autowired private AttachmentRepository attachmentRepository;
     @Autowired private GroupChatRepository groupChatRepository;
+    @Autowired private MessageRepository messageRepository;
     @Autowired private ParticipantRepository participantRepository;
     @Autowired private GroupChatFactory groupChatFactory;
     @Autowired private ParticipantFactory participantFactory;
+    @Autowired private MessageFactory messageFactory;
 
     @Test
     @DisplayName("clean - 연관 데이터가 있을 때 정리하면 연관 데이터가 삭제된다")
@@ -91,13 +104,18 @@ class MemberCleanerTest {
         val task = taskRepository.save(TaskFactory.entity(member.getId()));
         val post = postRepository.save(PostFactory.entity(member.getId(), task.getId()));
         offerRepository.save(OfferFactory.entity(task.getId(), member.getId()));
+        offerRepository.save(OfferFactory.entity(task.getId(), other.getId(), 2));
         val chat = groupChatFactory.entity();
         participantFactory.entity(chat.getId(), member.getId());
         participantFactory.entity(chat.getId(), other.getId());
         val soloChat = groupChatFactory.entity();
         participantFactory.entity(soloChat.getId(), member.getId());
-        val projectTask = taskRepository.save(TaskFactory.projectEntity(null, member.getId()));
-        val drive = driveRepository.save(DriveFactory.entity(null, member.getId()));
+        val message = messageFactory.entity(soloChat.getId(), member.getId());
+        val company = companyRepository.save(CompanyFactory.entity(other.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val projectTask = taskRepository.save(TaskFactory.projectEntity(project.getId(), member.getId()));
+        offerRepository.save(OfferFactory.entity(projectTask.getId(), member.getId(), 1, OfferStatus.ACCEPTED));
+        val drive = driveRepository.save(new DriveEntity(DriveType.PERSONAL, null, member.getId(), "title"));
         val board = boardRepository.save(BoardFactory.driveEntity(drive.getId()));
         val note = noteRepository.save(BoardFactory.noteEntity(board.getId(), member.getId()));
         driveMemberRepository.save(DriveFactory.memberEntity(drive.getId(), member.getId()));
@@ -115,13 +133,11 @@ class MemberCleanerTest {
         driveAttachment.complete();
         driveAttachment.link(AttachmentReferenceType.DRIVE, drive.getId());
 
-        val user = UserFactory.domain(member.getId(), Role.CAREER);
-
         // when
-        memberCleaner.clean(user);
+        memberCleaner.clean(member);
 
         // then
-        assertThat(sessionRepository.findByMemberId(member.getId())).isEmpty();
+        assertThat(sessionRepository.findByMemberId(member.getId())).get().extracting(SessionEntity::isRevoked).isEqualTo(true);
         assertThat(profileRepository.findByMemberId(member.getId())).isEmpty();
         assertThat(credentialRepository.findAllByMemberId(member.getId())).isEmpty();
         assertThat(coworkerRepository.findAllByMemberId(member.getId())).isEmpty();
@@ -132,19 +148,55 @@ class MemberCleanerTest {
         assertThat(postRepository.findById(post.getId())).isPresent();
         assertThat(participantRepository.findByChatIdAndMemberId(chat.getId(), member.getId())).isEmpty();
         assertThat(groupChatRepository.findById(chat.getId())).isPresent();
-        assertThat(groupChatRepository.findById(soloChat.getId())).isEmpty();
+        assertThat(groupChatRepository.findById(soloChat.getId())).isPresent();
+        assertThat(messageRepository.findById(message.getId())).isPresent();
         assertThat(offerRepository.findAllByWorkerId(member.getId())).isEmpty();
         assertThat(taskRepository.findAllByWorkerIdAndType(member.getId(), TaskType.WORKER)).isEmpty();
         assertThat(taskRepository.findById(projectTask.getId())).isPresent();
+        val archived = transactionPartyRepository.findAllByMemberId(member.getId());
+        assertThat(archived).hasSize(1);
+        assertThat(archived.get(0).getMemberId()).isEqualTo(member.getId());
+        assertThat(archived.get(0).getMemberPhone()).isEqualTo(member.getPhone());
+        assertThat(archived.get(0).getCounterpartyId()).isEqualTo(company.getId());
+        assertThat(archived.get(0).getExpireAt()).isAfter(archived.get(0).getWithdrawnAt());
+        val counterpartyArchive = transactionPartyRepository.findAllByCounterpartyMemberId(member.getId());
+        assertThat(counterpartyArchive).hasSize(1);
+        assertThat(counterpartyArchive.get(0).getMemberId()).isEqualTo(other.getId());
+        assertThat(counterpartyArchive.get(0).getCounterpartyExpireAt())
+                .isAfter(counterpartyArchive.get(0).getCounterpartyWithdrawnAt());
         assertThat(driveRepository.findAllByMemberId(member.getId())).isEmpty();
         assertThat(boardRepository.findByDriveId(drive.getId())).isEmpty();
         assertThat(noteRepository.findById(note.getId())).isEmpty();
         assertThat(driveMemberRepository.findAllByMemberId(member.getId())).isEmpty();
 
-        assertThat(attachmentRepository.findById(memberAttachment.getId()).orElseThrow().getReferenceId()).isNull();
-        assertThat(attachmentRepository.findById(credentialAttachment.getId()).orElseThrow().getReferenceId()).isNull();
+        assertThat(attachmentRepository.findById(memberAttachment.getId())).isEmpty();
+        assertThat(attachmentRepository.findById(credentialAttachment.getId())).isEmpty();
         assertThat(attachmentRepository.findById(postAttachment.getId()).orElseThrow().getReferenceId()).isEqualTo(post.getId());
-        assertThat(attachmentRepository.findById(driveAttachment.getId()).orElseThrow().getReferenceId()).isNull();
+        assertThat(attachmentRepository.findById(driveAttachment.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("clean - 수락 후 배정 해제된 섭외가 있을 때 정리하면 거래당사자 정보가 보관된다")
+    void clean_success_unassigned() {
+        // given
+        val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
+        val other = memberRepository.save(MemberFactory.entity("member2", "01000001002", Role.CAREER));
+        val company = companyRepository.save(CompanyFactory.entity(other.getId()));
+        val project = projectRepository.save(ProjectFactory.entity(company.getId()));
+        val projectTask = taskRepository.save(TaskFactory.projectEntity(project.getId(), member.getId()));
+        val offer = OfferFactory.entity(projectTask.getId(), member.getId(), 1, OfferStatus.ACCEPTED);
+        offer.cancel();
+        offerRepository.save(offer);
+
+        // when
+        memberCleaner.clean(member);
+
+        // then
+        val archived = transactionPartyRepository.findAllByMemberId(member.getId());
+        assertThat(archived).hasSize(1);
+        assertThat(archived.get(0).getMemberId()).isEqualTo(member.getId());
+        assertThat(archived.get(0).getCounterpartyId()).isEqualTo(company.getId());
+        assertThat(archived.get(0).getMatchedAt()).isNotNull();
     }
 
     @Test
@@ -153,10 +205,8 @@ class MemberCleanerTest {
         // given
         val member = memberRepository.save(MemberFactory.entity("member1", "01000001001", Role.CAREER));
         companyRepository.save(CompanyFactory.entity(member.getId()));
-        val user = UserFactory.domain(member.getId(), Role.CAREER);
-
         // when & then
-        assertCodeException(() -> memberCleaner.clean(user))
+        assertCodeException(() -> memberCleaner.clean(member))
                 .hasExceptionCode(MemberExceptionCode.WITHDRAW_COMPANY_EXISTS);
     }
 }

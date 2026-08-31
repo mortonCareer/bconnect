@@ -95,12 +95,17 @@ public class DriveService {
         if (!driveFinder.isOwner(user.id(), found.getId()))
             throw new CodeException(CommonExceptionCode.FORBIDDEN);
 
-        boardRepository.findByDriveId(driveId).ifPresent(board -> {
+        delete(found);
+    }
+
+    @Transactional
+    public void delete(DriveEntity drive) {
+        boardRepository.findByDriveId(drive.getId()).ifPresent(board -> {
             noteRepository.deleteAllByBoardId(board.getId());
             boardRepository.delete(board);
         });
-        driveFileService.detachAll(found);
-        driveMemberRepository.deleteByDriveId(driveId);
-        driveRepository.delete(found);
+        driveFileService.deleteAll(drive);
+        driveMemberRepository.deleteByDriveId(drive.getId());
+        driveRepository.delete(drive);
     }
 }

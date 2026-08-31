@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SoftDelete;
+import org.hibernate.annotations.SoftDeleteType;
 import to.bconnect.api.storage.BaseEntity;
 
 import java.time.LocalDate;
@@ -14,6 +16,7 @@ import java.util.Set;
 @Table(name = "members")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SoftDelete(strategy = SoftDeleteType.TIMESTAMP, columnName = "deleted_at")
 public class MemberEntity extends BaseEntity {
 
     public static final Long SYSTEM_ID = 0L;
@@ -51,6 +54,15 @@ public class MemberEntity extends BaseEntity {
 
     public void update(String name) {
         this.name = name;
+    }
+
+    public void anonymize() {
+        this.username = null;
+        this.name = null;
+        this.phone = null;
+        this.birth = null;
+        this.marketingConsent = false;
+        this.roles.clear();
     }
 
     public void grantRole(Role role) {

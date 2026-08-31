@@ -8,15 +8,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import to.bconnect.api.attachment.domain.AttachmentFinder;
 import to.bconnect.api.attachment.domain.AttachmentLinker;
+import to.bconnect.api.attachment.domain.cleanup.AttachmentCleanupService;
 import to.bconnect.api.common.CodeException;
 import to.bconnect.api.common.CommonExceptionCode;
 import to.bconnect.api.common.request.CursorLimit;
 import to.bconnect.api.common.response.CursorPage;
+import to.bconnect.api.core.domain.project.ProjectService;
 import to.bconnect.api.core.domain.task.TaskExceptionCode;
 import to.bconnect.api.security.AuthUser;
 import to.bconnect.api.storage.attachment.AttachmentReferenceType;
-import to.bconnect.api.storage.board.BoardRepository;
-import to.bconnect.api.storage.board.NoteRepository;
 import to.bconnect.api.storage.company.CompanyEntity;
 import to.bconnect.api.storage.company.CompanyRepository;
 import to.bconnect.api.storage.company.CompanyStatus;
@@ -41,11 +41,11 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final MemberRepository memberRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectService projectService;
     private final TaskRepository taskRepository;
-    private final BoardRepository boardRepository;
-    private final NoteRepository noteRepository;
     private final AttachmentFinder attachmentFinder;
     private final AttachmentLinker attachmentLinker;
+    private final AttachmentCleanupService attachmentCleanupService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
@@ -191,17 +191,10 @@ public class CompanyService {
                 throw new CodeException(TaskExceptionCode.OFFERED_EXISTS);
         }
 
-        projects.forEach(it -> {
-            taskRepository.deleteAllByProjectId(it.getId());
-            boardRepository.findByProjectId(it.getId()).ifPresent(board -> {
-                noteRepository.deleteAllByBoardId(board.getId());
-                boardRepository.delete(board);
-            });
-        });
-        projectRepository.deleteAll(projects);
+        projects.forEach(projectService::delete);
 
-        attachmentLinker.unlink(AttachmentReferenceType.COMPANY, found.getId());
-        attachmentLinker.unlink(AttachmentReferenceType.COMPANY_CERTIFICATE, found.getId());
+        attachmentCleanupService.purge(AttachmentReferenceType.COMPANY, found.getId());
+        attachmentCleanupService.purge(AttachmentReferenceType.COMPANY_CERTIFICATE, found.getId());
         companyRepository.delete(found);
 
         memberRepository.findById(user.id())
