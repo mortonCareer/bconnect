@@ -2,12 +2,12 @@
   "name": "@bconnect/plan",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev -p ${PLAN_PORT:-$(../../scripts/dev-port.sh plan)}",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "msw:init": "msw init public --save"
   },
   "dependencies": {
     "@bconnect/api-client": "workspace:*",

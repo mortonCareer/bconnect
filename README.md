@@ -1,87 +1,43 @@
 # Morton
 
-업체-기술자 연결 구인구직 플랫폼
-
-## 기술 스택
-
-| 영역     | 기술                       |
-| -------- | -------------------------- |
-| Frontend | Next.js, React, TypeScript |
-| Styling  | Tailwind CSS               |
-| State    | Zustand                    |
-| Backend  | Spring Boot (별도 관리)    |
-| Infra    | Docker, GitHub Actions     |
+건설 · 인테리어 업체를 위한 기술자 매칭 플랫폼 품앗이
 
 ## 프로젝트 구조
 
-```
-morton/
-├── apps/
-│   ├── career/           # Next.js 웹앱 (PWA): 기술자 작업물 업로드 및 일감 매칭
-│   ├── plan/             # Next.js 웹앱 (PWA): 업체 구인 공고 등록 및 기술자 매칭, 공정표 관리
-│   └── api/              # Spring Boot (별도 빌드)
-├── packages/
-│   └── ui/               # 공통 UI 컴포넌트
-└── .github/workflows/    # CI/CD
-```
+프로젝트는 pnpm 모노레포 구조를 가집니다.
+
+- `apps/career` - 기술자 서비스
+- `apps/plan` - 업체 서비스
+- `apps/company` - 회사 홈페이지
+- `apps/api` - API 서버
+- `apps/crawler` - 기술자 크롤러
+- `packages/ui` - 공유 UI 컴포넌트
+- `packages/api-client` - 자동 생성 API 클라이언트 (Orval)
+- `packages/config` - 공유 설정
+- `packages/features` - 공유 UI
+- `packages/mocks` - MSW 핸들러
+- `packages/devtools` - 개발 도구 (MSW, Agentation)
+- `packages/push` - 푸시 알림 UI · 클라이언트
+- `packages/data-jobs` - 원클릭 조회 데이터 동기화
 
 ## 시작하기
 
-### 요구사항
-
-- Node.js 24+
-- pnpm 10+
-
-### 설치
+자주 사용하는 스크립트는 `package.json` 파일에 등록합니다.
 
 ```bash
-# 의존성 설치
-pnpm install
+direnv allow          # 환경 변수 로드
+pnpm install          # 의존성 설치
+
+cd apps/api && ./gradlew bootRun   # API 서버
+
+pnpm dev:career       # 기술자 서비스
+pnpm dev:plan         # 업체 서비스
+pnpm dev:company      # 회사 홈페이지
 ```
 
-### 스크립트
-
-```bash
-pnpm lint         # ESLint
-pnpm format       # Prettier 포맷팅
-pnpm format:check # 포맷 검사
-```
+상세 절차는 [온보딩](docs/tutorials/ONBOARDING.md) 문서 참고
 
 ## 컨벤션
 
-### 브랜치
-
-- `main` - 프로덕션
-- `feat/*` - 기능 개발
-- `fix/*` - 버그 수정
-- `docs/*` - 문서
-- `chore/*` - 설정/빌드
-- `refactor/*` - 리팩토링
-
-### 커밋 메시지
-
-[Conventional Commits](https://www.conventionalcommits.org/) 사용
-
-```
-feat: 포트폴리오 업로드 기능 추가
-fix: 이미지 리사이징 버그 수정
-docs: README 업데이트
-chore: ESLint 설정 변경
-refactor: 인증 로직 개선
-```
-
-### 코드 스타일
-
-- TypeScript strict 모드
-- ESLint + Prettier 자동 포맷팅
-- import 자동 정렬
-- 컴포넌트: `UpperCamelCase.tsx`
-- 유틸: `lowerCamelCase.ts`
-
-## 팀
-
-| 역할     | 담당               |
-| -------- | ------------------ |
-| CEO      | 백엔드 + 기획      |
-| CTO      | 프론트엔드, 인프라 |
-| 디자이너 | UI/UX              |
+- 커밋 메시지 : [Conventional Commits](https://www.conventionalcommits.org)
+- 브랜치 관리 전략 : [Git-flow](https://nvie.com/posts/a-successful-git-branching-model)

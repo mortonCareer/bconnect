@@ -1,4 +1,5 @@
 # notification-architecture
+
 - 위치 : `/notification`, `/storage/notification`, `/storage/device`
 - 범위 : 알림(Notification) 저장 · 조회 · 푸시(Push)
 
@@ -38,6 +39,7 @@ sequenceDiagram
 - `create` · `push` 는 각각 `REQUIRES_NEW` 진입점이며, device 단위 발송 실패는 try-catch 로 격리된다.
 
 ## 컴포넌트 구성
+
 - NotificationEventListener : 도메인 이벤트 구독 · 오케스트레이션
 - NotificationService : 알림 영속화
 - NotificationPushService : 디바이스 조회 · 알림 발송
@@ -102,10 +104,12 @@ graph LR
 - 이벤트는 여러 EventListener에서 함께 구독할 수 있다.
 
 ### 채팅 메시지
+
 - 채팅 메시지는 이벤트 없이 `MessageSocketService` 가 `push` 를 직접 호출한다.
 - 채팅 메시지에 대한 알림 미리보기는 `SendMessage.preview` 가 결정한다.
 
 ## Push Payload (FCM v1)
+
 | 위치 | 필드 | 값                               | 비고            |
 |---|---|---------------------------------|---------------|
 | notification | title | `PushNotification.title`        |               |
@@ -130,12 +134,14 @@ graph LR
 - delivery 실패는 비동기라 첫 실패는 SUCCESS 로 보이고, 다음 publish 에서 `EndpointDisabled` 로 잡힌다.
 
 ## 알림 타입 확장
+
 1. `NotificationType` 에 상수 · 템플릿 추가
 2. 필요 시 `NotificationReferenceType` 에 이동 화면 추가
 3. 발행 패키지에 이벤트 record 정의 · 발행
 4. `NotificationEventListener`에 핸들링 메서드 추가
 
-## 래퍼런스
+## 참조
+
 - [Spring Framework : Transaction-bound Events](https://docs.spring.io/spring-framework/reference/data-access/transaction/event.html)
 - [AWS SNS : Mobile push (FCM HTTP v1)](https://docs.aws.amazon.com/sns/latest/dg/sns-mobile-application-as-subscriber.html)
 - [AWS SNS : Publish API (MessageStructure=json)](https://docs.aws.amazon.com/sns/latest/api/API_Publish.html)

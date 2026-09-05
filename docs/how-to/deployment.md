@@ -1,279 +1,150 @@
-# 배포
+# 배포 프로세스
 
-> **For**: 모든 개발자.
-> **You'll be able to**: dev 머지 후 production 까지 배포 절차 수행, 헬스체크, 롤백.
+> 대상: 모든 개발자<br>
+> 학습 목표: 서비스를 절차에 따라 배포하고 헬스체크 · 롤백 할 수 있다
 
-배포 환경 및 프로세스
+## 프론트엔드
 
----
+프론트엔드 서버는 GitHub Actions 워크플로우 [vercel-deploy.yml](../../.github/workflows/vercel-deploy.yml)를 통해 배포됩니다.
 
-## 배포 환경
+- PR 프리뷰는 현재 비활성화 (`preview_deployments_disabled = true`)
+- 워크플로우 수동 배포 가능
 
-bconnect은 **2단계 배포 모델**을 사용합니다:
+### 배포 환경
 
-```
-dev (개발 및 QA)  →  prod (프로덕션)
-```
+career
 
-| 환경 | 목적          | 배포 방식         |
-| ---- | ------------- | ----------------- |
-| dev  | PR 프리뷰, QA | PR 생성 시 자동   |
-| prod | 실제 서비스   | main 머지 시 자동 |
+| 환경    | URL                      | 트리거             |
+| ------- | ------------------------ | ------------------ |
+| `local` | `localhost:3000`         | `pnpm dev:career`  |
+| `dev`   | `career.dev.bconnect.to` | `dev` 브랜치 push  |
+| `prod`  | `career.bconnect.to`     | `main` 브랜치 push |
 
-각 환경의 도메인 매핑(career/plan/api × prod/dev/프리뷰/로컬)은 [도메인 현황](../reference/domains.md) 참조.
+plan
 
-### dev 환경 (PR 프리뷰)
+| 환경    | URL                    | 트리거             |
+| ------- | ---------------------- | ------------------ |
+| `local` | `localhost:3001`       | `pnpm dev:plan`    |
+| `dev`   | `plan.dev.bconnect.to` | `dev` 브랜치 push  |
+| `prod`  | `plan.bconnect.to`     | `main` 브랜치 push |
 
-- **목적**: 기능 개발 후 QA 수행
-- **배포 트리거**: PR 생성 또는 업데이트
-- **배포 플랫폼**: Vercel (Frontend), Railway (Backend)
-- **데이터**: 테스트 데이터 또는 Mock API
-- **URL**: 브랜치별 Vercel 프리뷰 도메인 (각 PR Vercel comment에 자동 노출) — [도메인 현황](../reference/domains.md) 참조
+company
 
-### prod 환경 (프로덕션)
+| 환경    | URL               | 트리거             |
+| ------- | ----------------- | ------------------ |
+| `local` | `localhost:3002`  | `pnpm dev:company` |
+| `dev`   | `dev.bconnect.to` | `dev` 브랜치 push  |
+| `prod`  | `bconnect.to`     | `main` 브랜치 push |
 
-- **목적**: 실제 사용자 대상 서비스
-- **배포 트리거**: main 브랜치 머지
-- **배포 플랫폼**: Vercel (Frontend), Railway (Backend)
-- **데이터**: 실제 프로덕션 데이터
-- **URL**: career/plan/api production 도메인 — [도메인 현황](../reference/domains.md) 참조
+### 배포 절차
 
----
+## 백엔드
 
-## 배포 프로세스
+### 배포 환경
 
-### Frontend (Next.js)
+플랫폼: Railway
 
-Vercel 배포는 git push 자동배포가 아니라 **GitHub Actions의 CLI 소스 업로드**로 트리거된다 ([`vercel-deploy.yml`](../../.github/workflows/vercel-deploy.yml)). Vercel Pro 팀은 배포에 첨부된 git 커밋 author가 팀 멤버여야 하는데(시트 과금), `.git` 제거 후 CLI 업로드하면 git 메타가 없어 멤버 승격 없이 배포된다. git push 자동배포는 `git.deploymentEnabled: false`(각 앱 vercel.json)로 꺼져 있다. 운영 상세는 [infra/vercel/README.md](../../infra/vercel/README.md) 참조.
+| 환경    | URL                   | 배포 트리거         | 데이터                         |
+| ------- | --------------------- | ------------------- | ------------------------------ |
+| `local` | `localhost:8080`      | `./gradlew bootRun` | `data.sql`, `data-crawler.sql` |
+| `dev`   | `api.dev.bconnect.to` | `dev` 브랜치 push   | `data.sql`                     |
+| `prod`  | `api.bconnect.to`     | `main` 브랜치 push  | -                              |
 
-#### dev 배포
+### 배포 방법
 
-```
-dev 브랜치 머지 (push)
-    ↓
-GitHub Actions: vercel-deploy.yml → vercel deploy --target=dev
-    ↓
-Vercel 리모트 빌드 (custom environment "dev")
-    ↓
-dev 도메인 업데이트
-    ↓
-스프린트 단위 QA
-```
+- Railway 자동 배포
+- 환경 변수 주입 : [manage-variables.md](./manage-variables.md)
+- 인프라 구성 : [infra-railway.md](../reference/infra-railway.md)
 
-#### 프로덕션 배포
+## 가이드
 
-```
-dev → main 머지 (push)
-    ↓
-GitHub Actions: vercel-deploy.yml → vercel deploy --target=production
-    ↓
-Vercel 리모트 빌드
-    ↓
-bconnect.to / plan.bconnect.to 업데이트
-    ↓
-헬스체크 (자동)
-```
+### 체크리스트
 
-### Backend (Spring Boot)
+배포 전
 
-#### Railway 배포
-
-```
-main 브랜치 머지
-    ↓
-Railway 자동 빌드
-    ↓
-./gradlew build 실행
-    ↓
-Docker 이미지 생성
-    ↓
-컨테이너 배포 (Blue-Green)
-    ↓
-헬스체크 통과
-    ↓
-트래픽 전환
-```
-
-### Android 앱 (career TWA)
-
-career PWA를 [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap)으로 Android TWA(Trusted Web Activity)로 패키징해 Play/사이드로드 배포한다. TWA는 콘텐츠를 라이브 URL에서 로드하므로 **웹 배포만으로 앱 내용이 갱신**되고, 앱 재빌드는 앱 메타(이름·아이콘·host 등)가 바뀔 때만 한다.
-
-빌드 방법(`build.sh dev|prod`)·사전조건·Digital Asset Links는 [`apps/career/android-twa/README.md`](../../apps/career/android-twa/README.md)가 SSOT다. 도구 선택 근거는 [ADR-0023](../explanation/adr/0023-android-twa-packaging-bubblewrap.md).
-
----
-
-## 인프라 구성
-
-도구 식별자(프로젝트명/bucket/services 등)는 [tools.md](../reference/tools.md) 또는 각 Terraform 모듈 참조. 본 섹션은 **운영 관점**만 다룸.
-
-### Vercel ([infra/vercel/](../../infra/vercel/))
-
-- 자동 빌드/배포, PR 프리뷰, CDN/Edge, Analytics
-- **환경 변수 설정**: Vercel Dashboard → Project Settings → Environment Variables (또는 Terraform `vercel_project_environment_variable`)
-
-### Railway ([infra/railway/](../../infra/railway/))
-
-- Docker 기반 배포, 자동 헬스체크, 로그 모니터링
-- PostgreSQL 호스팅 포함
-
-### AWS ([infra/aws/](../../infra/aws/))
-
-- **S3**: 사용자 업로드 파일 (`profiles/`, `documents/`, `temp/`, `kiscon/`)
-- **CloudFront**: S3 앞단 CDN + signed cookie (private content)
-- **(향후) Lambda@Edge**: 이미지 리사이즈
-- **(향후) RDS**: Railway 대체 검토
-
-자세한 파일 인프라 설계: [docs/reference/specs/2026-04-12-file-infrastructure-design.md](../reference/specs/2026-04-12-file-infrastructure-design.md)
-
----
-
-## 환경 변수 관리
-
-새 환경 변수를 어디에 넣고 어떻게 fail-fast로 검증하는지(계층별 저장 위치, `.env.example` 계약, Zod/Spring placeholder)는 [env-variables.md](./env-variables.md)가 SSOT다. 본 문서는 **배포 관점**만 다룬다.
-
-환경 변수 주입은 **Terraform(IaC)으로 관리**한다 — 대시보드 수동 조작은 IaC 위반이므로 긴급/예외 시에만.
-
-- **Frontend(Vercel)**: [`infra/vercel/`](../../infra/vercel/)의 `vercel_project_environment_variable` 리소스로 선언. 환경별(prod/preview/dev)은 `target`으로 스코프 지정.
-- **Backend(Railway)**: [`infra/railway/`](../../infra/railway/)의 `railway_variable` 리소스로 선언. 로컬은 [`application-local.yaml`](../../apps/api/src/main/resources/application-local.yaml) 더미값으로 주입 없이 뜬다.
-- **주입 누락 시**: FE는 Zod 검증 실패, API는 `${VAR}` placeholder 미해결로 **부팅 실패**(fail-fast) — silent-fail 방지.
-
----
-
-## 배포 모니터링
-
-### Vercel Analytics
-
-- 페이지 로드 시간
-- Core Web Vitals
-- 방문자 통계
-
-**접근 방법**: Vercel Dashboard → Analytics
-
-### Railway Logs
-
-- 애플리케이션 로그
-- 빌드 로그
-- 에러 추적
-
-**접근 방법**: Railway Dashboard → Deployments → Logs
-
-### 헬스체크
-
-**Frontend**:
-
-```bash
-curl https://bconnect.to/_health
-```
-
-**Backend**:
-
-```bash
-curl https://api.bconnect.to/actuator/health
-```
-
-**예상 응답**:
-
-```json
-{
-  "status": "UP",
-  "components": {
-    "db": { "status": "UP" },
-    "diskSpace": { "status": "UP" }
-  }
-}
-```
-
----
-
-## 롤백
-
-### Frontend 롤백 (Vercel)
-
-**방법 1: Vercel Dashboard**
-
-1. Vercel Dashboard → Deployments
-2. 이전 배포 선택
-3. "Promote to Production" 클릭
-
-**방법 2: Git Revert**
-
-```bash
-# 1. 문제 커밋 확인
-git log --oneline
-
-# 2. Revert 커밋 생성
-git revert <commit-hash>
-
-# 3. main 브랜치에 푸시
-git push origin main
-```
-
-### Backend 롤백 (Railway)
-
-**Railway Dashboard**:
-
-1. Railway → Deployments
-2. 이전 배포 선택
-3. "Redeploy" 클릭
-
-**Git Revert**: Frontend와 동일
-
----
-
-## 배포 체크리스트
-
-배포 전 다음 항목을 확인합니다:
-
-### 배포 전
-
-- [ ] PR QA 완료 및 승인
-- [ ] 빌드 에러 없음 (`pnpm build` 성공)
-- [ ] 린트 에러 없음 (`pnpm lint` 성공)
+- [ ] CI 성공 · PR 승인
 - [ ] 환경 변수 누락 확인
-- [ ] 데이터베이스 마이그레이션 필요 시 사전 실행
-- [ ] (Critical) 사용자 공지 (다운타임 발생 시)
+- [ ] 데이터베이스 마이그레이션 확인
+- [ ] 사용자 공지 (다운타임 발생 시)
+- [ ] CD 승인
 
-### 배포 후
+배포 후
 
-- [ ] 헬스체크 통과 확인
-- [ ] 프로덕션 URL 접속 확인
+- [ ] 헬스체크 통과 확인 `/_health`
+- [ ] URL 접속 확인
 - [ ] 주요 기능 스모크 테스트
-  - 로그인/로그아웃
-  - 데이터 조회
-  - 데이터 생성
 - [ ] 에러 로그 모니터링 (첫 10분)
-- [ ] 성능 모니터링 (Vercel Analytics)
+- [ ] 성능 모니터링
 
 ### 문제 발생 시
 
-1. **즉시 롤백** (위 롤백 섹션 참조)
+1. 즉시 롤백 (플랫폼 대시보드)
 2. 문제 분석 (로그 확인)
 3. 핫픽스 브랜치 생성
 4. 수정 후 긴급 배포
 
----
+## TWA 앱 배포
 
-## 보안
+Career 앱은 [GoogleChromeLabs/bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap)을 활용해 패키징합니다.
 
-### HTTPS
+TWA는 콘텐츠를 웹 URL을 통해 불러오므로 앱은 메타데이터 변경 시에만 재빌드합니다. 메타 데이터가 변경되지 않았다면 직전 릴리스의 aab, apk 파일을 사용해도 무관합니다.
 
-모든 환경에서 HTTPS를 강제합니다:
+### 명령어
 
-- Vercel: 자동 SSL 인증서 (Let's Encrypt)
-- Railway: 자동 SSL
-- 커스텀 도메인: Vercel/Railway에서 자동 관리
+```bash
+./setup-toolchain.sh    # 초기 세팅 (최초 1회)
+./build.sh dev
+./build.sh prod
+```
 
-### 환경 변수 보안
+### 배포 절차
 
-- ❌ `.env` 파일 커밋 금지 (`.gitignore`에 포함)
-- ✅ Vercel/Railway 대시보드에서만 관리
-- ✅ CI/CD에서 암호화된 시크릿 사용
+1. `twa-manifest.template.json` 메타데이터 변경
+2. `appVersionCode` 값 +1
+3. `build.sh` 스크립트 실행 (`host` 값 결정)
 
-### API 키 관리
+산출물:
 
-민감한 키는 환경 변수로만 관리:
+- `app-release-signed.apk` : 로컬 테스트용 (dev)
+- `app-release-bundle.aab` : 플레이스토어 배포용 (prod)
 
-- AWS Access Key
-- JWT Secret
-- Database Password
-- 외부 API 키
+안드로이드는 키스토어를 통해 동일 앱 여부를 식별하므로 관리에 특별히 주의바랍니다.
+
+### Digital Asset Links
+
+TWA나 WebView 기반 앱에서 주소창을 숨기고 풀스크린 모드를 활성화하려면 Digital Asset Links 검증에 성공해야 합니다.
+
+검증 절차
+
+1. 앱은 `sha256_cert_fingerprints` 배열에 하나 이상의 지문을 포함한다
+2. 앱은 호스트 `/.well-known/assetlinks.json` 지문을 확인하여 적어도 하나의 원소가 일치하면 검증을 통과한다
+
+웹 서비스는 다음 두 배포 경로에 대한 지문을 `./well-known/assetlinks.json`에 포함시켜야 합니다.
+
+| 배포 경로    | Host                     | 서명 키           | 배열에 넣을 지문                        |
+| ------------ | ------------------------ | ----------------- | --------------------------------------- |
+| 로컬         | `career.dev.bconnect.to` | 환경변수 키스토어 | 환경변수 키스토어 서명 지문             |
+| 플레이스토어 | `career.bconnect.to`     | Play App Signing  | Google Play Console SHA-256 인증서 지문 |
+
+- 로컬 서명 지문은 `keytool -printcert -jarfile app-release-signed.apk`로 확인
+- 플레이스토어 업로드시 Play App Signing이 AAB를 재서명하여 기존 키스토어 서명을 대체합니다.
+- 플레이스토어 지문은 'Play 콘솔 | Google Play로 보호됨'에서 확인
+
+## 릴리스
+
+prod 환경으로의 릴리스는 [Semantic Versioning](https://semver.org) 버저닝 전략을 따릅니다.
+
+```bash
+git fetch origin main
+git tag <tag> <commit-sha>
+git push origin <tag>
+gh release create <tag> --title <tag> --generate-notes # 릴리스 노트 자동 생성
+gh release upload <tag> <file> # 에셋(abb, apk 등) 첨부
+```
+
+커밋을 Squash 하지 말고, Merge 커밋을 생성하세요.
+
+## 참조
+
+- TODO 인프라 관리 문서
+- [환경변수 관리](./manage-variables.md)

@@ -1,11 +1,10 @@
 {
   "name": "@bconnect/config",
-  "version": "0.0.0",
   "private": true,
   "type": "module",
   "exports": {
-    "./eslint/next": "./eslint/next.js",
     "./eslint/base": "./eslint/base.js",
+    "./eslint/figma": "./eslint/figma.js",
     "./tsconfig/next": "./tsconfig/next.json",
     "./tsconfig/base": "./tsconfig/base.json",
     "./avatar": "./avatar/index.ts",
@@ -26,20 +25,19 @@
     "./username": "./username/index.ts"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
+    "@eslint/js": "catalog:",
+    "@next/eslint-plugin-next": "16.3.3",
     "@types/node": "catalog:",
     "eslint": "catalog:",
-    "eslint-config-next": "16.2.10",
-    "eslint-plugin-tailwindcss": "3.18.3",
-    "globals": "^16.5.0",
-    "tailwindcss": "catalog:",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "^8.50.1"
+    "typescript-eslint": "catalog:"
   },
   "dependencies": {
     "@bconnect/api-client": "workspace:*",
-    "es-hangul": "^2.3.8",
-    "libphonenumber-js": "^1.12.33",
+    "es-hangul": "^2.4.0",
+    "libphonenumber-js": "^1.13.12",
     "zod": "catalog:"
   }
 }

@@ -1,1 +1,9 @@
+protected="^(main|dev)$"
+branch=$(git branch --show-current)
+
+if echo "$branch" | grep -qE "$protected"; then
+  echo "($branch)에 직접 커밋할 수 없습니다."
+  exit 1
+fi
+
 pnpm exec lint-staged
