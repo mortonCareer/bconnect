@@ -168,7 +168,6 @@ export function ChatView(props: ChatViewProps) {
     </div>
   ) : (
     <>
-      <div className="shrink-0">{headerItem}</div>
       <MessageThread
         chatId={chatId}
         currentUserId={currentUserId}
@@ -176,6 +175,8 @@ export function ChatView(props: ChatViewProps) {
         localMessages={localMessages}
         offers={offers}
         offerActions={offerActions}
+        profileHref={profileHref}
+        header={headerItem}
       />
       <ChatInput
         value={message}
