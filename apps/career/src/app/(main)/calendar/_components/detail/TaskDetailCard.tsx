@@ -133,7 +133,6 @@ export function TaskDetailCard({ task, selectedDay, selectedMonth }: TaskDetailC
         title: task.title,
         // 진행 상태는 아직 화면에서 바꿀 수 없다 — 현재값을 되돌려 보내 덮어쓰기를 막는다 (#1160).
         progress: task.progress,
-        // TODO: BE required 처리 후 type narrowing 필요. workerMemo가 optional emit이라 빈 입력 시 기존 메모/제목으로 silent fallback 중.
         memo: vals.memo.trim() || task.memo || task.title,
         company: vals.company,
         address,
