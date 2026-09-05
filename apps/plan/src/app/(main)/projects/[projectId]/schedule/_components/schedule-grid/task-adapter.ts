@@ -1,14 +1,13 @@
 import {
   OfferStatus,
   ROLE_LABELS,
-  TaskProgress,
   TaskStatus,
   TRADE_LABELS,
 } from '@bconnect/api-client'
 import type {
+  CompanyTask,
   Offer,
   Profile,
-  Task,
   UpdateProjectTaskRequest,
   CreateProjectTaskRequest,
 } from '@bconnect/api-client'
@@ -55,7 +54,7 @@ export function toAssigneeFromProfile(profile: Profile): TaskAssignee {
 }
 
 export function toScheduleTask(
-  task: Task,
+  task: CompanyTask,
   offers?: Offer[],
   workerProfile?: Profile
 ): ScheduleTask {
@@ -76,16 +75,16 @@ export function toScheduleTask(
         }
       : undefined
   return {
-    id: String(task.id ?? ''),
-    projectId: String(task.projectId ?? ''),
-    trades: task.trades ?? [],
-    ganttName: task.projectTitle ?? '',
-    startDate: task.start ?? '',
-    endDate: task.end ?? '',
+    id: String(task.id),
+    projectId: String(task.projectId),
+    trades: task.trades,
+    ganttName: task.title,
+    startDate: task.start,
+    endDate: task.end,
     status: task.status,
     progress: task.progress,
-    request: task.projectRequirement ?? '',
-    memo: task.projectMemo ?? '',
+    request: task.requirement ?? '',
+    memo: task.memo ?? '',
     // 작업 주소 = 소속 프로젝트 주소 (BE 가 주입) — 폼에선 읽기전용
     address: task.address?.street ?? '',
     addressDetail: task.address?.detail ?? '',
@@ -97,29 +96,32 @@ export function toScheduleTask(
 }
 
 /** FE 필드 patch 를 캐시의 BE Task 에 반영 (낙관적 업데이트용). 읽기전용 필드는 무시. */
-export function applyFePatch(task: Task, patch: Partial<Omit<ScheduleTask, 'id'>>): Task {
+export function applyFePatch(
+  task: CompanyTask,
+  patch: Partial<Omit<ScheduleTask, 'id'>>
+): CompanyTask {
   return {
     ...task,
     ...(patch.trades !== undefined && { trades: patch.trades }),
-    ...(patch.ganttName !== undefined && { projectTitle: patch.ganttName }),
+    ...(patch.ganttName !== undefined && { title: patch.ganttName }),
     ...(patch.startDate !== undefined && { start: patch.startDate }),
     ...(patch.endDate !== undefined && { end: patch.endDate }),
     ...(patch.progress !== undefined && { progress: patch.progress }),
-    ...(patch.request !== undefined && { projectRequirement: patch.request }),
-    ...(patch.memo !== undefined && { projectMemo: patch.memo }),
+    ...(patch.request !== undefined && { requirement: patch.request }),
+    ...(patch.memo !== undefined && { memo: patch.memo }),
   }
 }
 
 /** UpdateProjectTaskRequest 는 부분 patch 불가 — 캐시 병합본을 풀바디 직렬화. */
-export function toUpdateRequest(task: Task): UpdateProjectTaskRequest {
+export function toUpdateRequest(task: CompanyTask): UpdateProjectTaskRequest {
   return {
-    trades: task.trades ?? [],
-    start: task.start ?? '',
-    end: task.end ?? '',
-    progress: task.progress ?? TaskProgress.TODO,
-    title: task.projectTitle ?? '',
-    requirement: task.projectRequirement ?? '',
-    memo: task.projectMemo ?? '',
+    trades: task.trades,
+    start: task.start,
+    end: task.end,
+    progress: task.progress,
+    title: task.title,
+    requirement: task.requirement ?? '',
+    memo: task.memo ?? '',
   }
 }
 

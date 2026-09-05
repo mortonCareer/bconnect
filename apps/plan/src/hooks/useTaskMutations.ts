@@ -8,7 +8,7 @@ import {
   useQueryClient,
   useUpdateTaskCompany,
 } from '@bconnect/api-client'
-import type { Task } from '@bconnect/api-client'
+import type { CompanyTask } from '@bconnect/api-client'
 import {
   applyFePatch,
   toCreateRequest,
@@ -44,8 +44,8 @@ export function useTaskMutations(projectId: string) {
   })
   const { mutateAsync: mutateCreate, isPending: isCreating } = useCreateTaskCompany()
 
-  const readTask = (taskId: number): Task | undefined =>
-    queryClient.getQueryData<Task[]>(tasksKey)?.find((t: Task) => t.id === taskId)
+  const readTask = (taskId: number): CompanyTask | undefined =>
+    queryClient.getQueryData<CompanyTask[]>(tasksKey)?.find((t: CompanyTask) => t.id === taskId)
 
   // 직전 debounce 대상과 다른 작업을 편집하면 먼저 flush — 단일 타이머로 인한 저장 유실 방지
   const pendingIdRef = useRef<number | null>(null)
@@ -57,8 +57,8 @@ export function useTaskMutations(projectId: string) {
 
   /** FE patch 를 캐시에 즉시 반영 + debounce 저장. draft 는 호출측(draft store)에서 분기. */
   const updateTask = (taskId: number, patch: Partial<Omit<ScheduleTask, 'id'>>) => {
-    queryClient.setQueryData<Task[]>(tasksKey, (old: Task[] | undefined) =>
-      old?.map((t: Task) => (t.id === taskId ? applyFePatch(t, patch) : t))
+    queryClient.setQueryData<CompanyTask[]>(tasksKey, (old: CompanyTask[] | undefined) =>
+      old?.map((t: CompanyTask) => (t.id === taskId ? applyFePatch(t, patch) : t))
     )
     if (pendingIdRef.current != null && pendingIdRef.current !== taskId) debouncedSave.flush()
     pendingIdRef.current = taskId
@@ -67,8 +67,8 @@ export function useTaskMutations(projectId: string) {
 
   const deleteTask = (taskId: number) => {
     if (pendingIdRef.current === taskId) debouncedSave.cancel()
-    queryClient.setQueryData<Task[]>(tasksKey, (old: Task[] | undefined) =>
-      old?.filter((t: Task) => t.id !== taskId)
+    queryClient.setQueryData<CompanyTask[]>(tasksKey, (old: CompanyTask[] | undefined) =>
+      old?.filter((t: CompanyTask) => t.id !== taskId)
     )
     mutateDelete({ id: taskId })
   }
