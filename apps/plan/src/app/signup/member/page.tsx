@@ -17,6 +17,7 @@ import {
   passthroughError,
   useServerError,
 } from '@bconnect/ui'
+import { formatIsoDateInput } from '@bconnect/config/date'
 import { formatUsername } from '@bconnect/config/username'
 import { useSignupStore } from '@/stores/signup-store'
 import { memberSchema, type MemberFormData } from './schema'
@@ -31,6 +32,7 @@ export default function SignupMemberPage() {
     defaultValues: {
       username: formData.username,
       name: formData.name,
+      birth: formData.birth,
     },
   })
   const { control, handleSubmit } = form
@@ -46,7 +48,7 @@ export default function SignupMemberPage() {
         form.setError('username', { message: '이미 존재하는 사용자 이름입니다.' })
         return
       }
-      setMember({ username: data.username, name: data.name })
+      setMember({ username: data.username, name: data.name, birth: data.birth })
       router.push('/signup/corp')
     } catch (err) {
       server.capture(err, data)
@@ -85,6 +87,17 @@ export default function SignupMemberPage() {
               autoComplete="name"
               label="이름"
               placeholder="홍길동"
+            />
+
+            <TextField
+              control={control}
+              name="birth"
+              type="text"
+              autoComplete="bday"
+              inputMode="numeric"
+              label="생년월일"
+              placeholder="0000-00-00"
+              transform={formatIsoDateInput}
             />
 
             <FormError error={registerError ?? undefined} />

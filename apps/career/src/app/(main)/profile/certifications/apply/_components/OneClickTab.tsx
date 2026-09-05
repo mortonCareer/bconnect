@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { Credential, CreateCredentialRequest, CredentialType } from '@bconnect/api-client'
 import { Form, FormError, FormSubmitButton, TextField, toast, useServerError } from '@bconnect/ui'
 import { formatRegistrationNumber, registrationNumberSchema } from '@bconnect/config/biz-number'
+import { formatIsoDateInput } from '@bconnect/config/date'
 import { CredentialList } from '@/app/(main)/profile/certifications/_components/CredentialList'
 import type { CheckItem } from '@bconnect/business/types'
 import { lookupBusinessForApply } from '../_actions/lookupBusinessForApply'
@@ -25,14 +26,6 @@ const ONE_CLICK_TYPES = [
   'CONSTRUCTION_LICENSE',
   'SPECIALTY_CONSTRUCTION_LICENSE',
 ] as const
-
-/** 개업일자 마스킹 (YYYY-MM-DD). 8자리 초과 입력은 잘림. */
-const formatOpenDate = (value: string): string => {
-  const d = value.replace(/\D/g, '').slice(0, 8)
-  if (d.length <= 4) return d
-  if (d.length <= 6) return `${d.slice(0, 4)}-${d.slice(4)}`
-  return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}`
-}
 
 const oneClickSchema = z.object({
   businessNumber: registrationNumberSchema,
@@ -149,7 +142,7 @@ export function OneClickTab({
               required
               placeholder="0000-00-00"
               inputMode="numeric"
-              transform={formatOpenDate}
+              transform={formatIsoDateInput}
             />
 
             <FormSubmitButton size="full">조회하기</FormSubmitButton>
